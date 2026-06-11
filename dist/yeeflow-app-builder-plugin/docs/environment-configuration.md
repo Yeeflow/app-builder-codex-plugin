@@ -22,13 +22,25 @@ Do not use a tenant URL as the API base. Treat `YEEFLOW_BASE_URL` as a legacy AP
 
 ## Single-Tenant Setup
 
-Minimal `.env.local` for package workspace context and normal API use when OAuth is already authenticated:
+Case A, already authenticated / normal API use:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
 # Optional only if tenant UI/browser links are needed:
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
+
+Case B, OAuth login/refresh when confidential-client fallback is required:
+
+```env
+YEEFLOW_WORKSPACE_ID=<your workspace id>
+# Optional only if tenant UI/browser links are needed:
+YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Needed when confidential-client fallback is required for OAuth login/refresh:
+YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
+```
+
+Case A is enough for package workspace context and normal API use when OAuth is already authenticated. Use Case B when login/refresh needs confidential-client fallback. Do not commit or paste the client secret.
 
 ## OAuth Setup
 
@@ -47,12 +59,13 @@ OAuth login tries PKCE/no-secret exchange first. Refresh also tries no-secret fi
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
-# Optional:
+# Optional only if tenant UI/browser links are needed:
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Needed when confidential-client fallback is required for OAuth login/refresh:
+YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
 ```
 
-The client secret must stay in `.env.local`; the plugin does not bundle secrets. Remove the fallback later only after auth-only testing proves Yeeflow supports no-secret login and refresh for the configured client.
+The client secret must stay in ignored `.env.local`; the plugin does not bundle secrets. Remove the fallback later only after auth-only testing proves Yeeflow supports PKCE login and refresh without a client secret for the configured client.
 
 Commands:
 

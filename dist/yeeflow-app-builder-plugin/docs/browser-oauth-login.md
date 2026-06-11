@@ -17,10 +17,14 @@ YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 Override these only for development/testing. OAuth login builds an Authorization Code + PKCE request and token exchange tries the public-client/no-secret path first. OAuth refresh also tries no-secret refresh first. Current auth-only testing shows refresh may still require confidential-client fallback for this Yeeflow OAuth configuration. If the Yeeflow OAuth client or server does not allow public-client PKCE exchange or refresh, the helpers fall back to a private local client secret when configured:
 
 ```env
+YEEFLOW_WORKSPACE_ID=<your workspace id>
+# Optional only if tenant UI/browser links are needed:
+YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Needed when confidential-client fallback is required for OAuth login/refresh:
 YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
 ```
 
-Keep the client secret local and private. The plugin does not bundle secrets. Remove this fallback later only after auth-only testing proves Yeeflow supports no-secret login and refresh for the configured client.
+Keep the client secret local and private in ignored `.env.local`. The plugin does not bundle secrets. Remove this fallback later only after auth-only testing proves Yeeflow supports PKCE login and refresh without a client secret for the configured client.
 
 Do not commit `.env.local`. Do not paste Yeeflow passwords, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into Codex chat.
 

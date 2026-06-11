@@ -75,13 +75,25 @@ Proof boundaries remain separate:
 
 Use a gitignored `.env.local` for local tenant/workspace settings and, only when needed, private OAuth fallback secrets. Browser OAuth is preferred for user-facing API work. Fixed API/OAuth defaults are bundled by the plugin, and legacy API-key mode remains available only as a deprecated fallback.
 
+Case A, already authenticated / normal API use:
+
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
 # Optional only if tenant UI/browser links are needed:
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-This minimal form is enough for package workspace context and normal API use when OAuth is already authenticated. The plugin provides defaults for `YEEFLOW_API_BASE_URL`, `YEEFLOW_OAUTH_CLIENT_ID`, `YEEFLOW_OAUTH_AUTH_URL`, `YEEFLOW_OAUTH_TOKEN_URL`, and `YEEFLOW_OAUTH_SCOPES`; override them only for development/testing. OAuth login now attempts PKCE/no-secret exchange first. Refresh also attempts no-secret first, but the current Yeeflow OAuth configuration may still require `YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>` in `.env.local` as a private fallback. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only.
+Case B, OAuth login/refresh when confidential-client fallback is required:
+
+```env
+YEEFLOW_WORKSPACE_ID=<your workspace id>
+# Optional only if tenant UI/browser links are needed:
+YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Needed when confidential-client fallback is required for OAuth login/refresh:
+YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
+```
+
+Case A is enough for package workspace context and normal API use when OAuth is already authenticated. Use Case B when running OAuth login/refresh under the current Yeeflow OAuth configuration, where PKCE/no-secret exchange is attempted first but confidential-client fallback may still be required. The plugin provides defaults for `YEEFLOW_API_BASE_URL`, `YEEFLOW_OAUTH_CLIENT_ID`, `YEEFLOW_OAUTH_AUTH_URL`, `YEEFLOW_OAUTH_TOKEN_URL`, and `YEEFLOW_OAUTH_SCOPES`; override them only for development/testing. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only. Do not commit or paste `YEEFLOW_OAUTH_CLIENT_SECRET`; keep it in ignored `.env.local` until Yeeflow OAuth server/client configuration supports PKCE login and refresh without a client secret.
 
 Do not paste secrets, authorization codes, cookies, bearer tokens, or passwords into chat.
 
