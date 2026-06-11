@@ -9,6 +9,9 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import {
   CALLBACK_PORTS,
+  OAUTH_FLOW_CONFIDENTIAL_FALLBACK,
+  OAUTH_FLOW_PKCE,
+  authorizationCodeTokenBody,
   buildAuthorizationUrl,
   buildRedirectUri,
   clearStoredToken,
@@ -22,6 +25,7 @@ import {
   pickAvailableCallbackPort,
   redactSensitive,
   refreshAccessToken,
+  refreshTokenBody,
   resolveOAuthConfig,
   saveStoredToken,
   summarizeStoredToken,
@@ -38,8 +42,11 @@ try {
   testStateGeneration();
   testStateMismatchShape();
   testPkceChallengeGeneration();
+  testPkceTokenBodyHelpers();
   await testTokenExchangeRequestShape();
+  await testTokenExchangeFallbackRequestShape();
   await testRefreshRequestShape();
+  await testRefreshFallbackRequestShape();
   await testMissingClientSecretMessage();
   await testExpiredTokenRefreshBehavior();
   await testRefreshFailureClearsInvalidAuthState();
@@ -109,8 +116,39 @@ function testPkceChallengeGeneration() {
   assert.notEqual(pkce.codeVerifier, pkce.codeChallenge);
 }
 
-async function testTokenExchangeRequestShape() {
+function testPkceTokenBodyHelpers() {
   const config = testConfig();
+  const codeBody = authorizationCodeTokenBody(config, {
+    code: "auth-code-secret",
+    redirectUri: buildRedirectUri(53722),
+    codeVerifier: "verifier-secret",
+  });
+  assert.equal(codeBody.get("grant_type"), "authorization_code");
+  assert.equal(codeBody.get("client_id"), config.clientId);
+  assert.equal(codeBody.get("client_secret"), null);
+  assert.equal(codeBody.get("code"), "auth-code-secret");
+  assert.equal(codeBody.get("code_verifier"), "verifier-secret");
+
+  const refreshBody = refreshTokenBody(config, { refresh_token: "refresh-secret" });
+  assert.equal(refreshBody.get("grant_type"), "refresh_token");
+  assert.equal(refreshBody.get("client_id"), config.clientId);
+  assert.equal(refreshBody.get("client_secret"), null);
+  assert.equal(refreshBody.get("refresh_token"), "refresh-secret");
+
+  assert.equal(authorizationCodeTokenBody(config, {
+    code: "auth-code-secret",
+    redirectUri: buildRedirectUri(53722),
+    codeVerifier: "verifier-secret",
+    includeClientSecret: true,
+  }).get("client_secret"), "test-client-secret");
+  assert.equal(refreshTokenBody(config, { refresh_token: "refresh-secret" }, { includeClientSecret: true }).get("client_secret"), "test-client-secret");
+}
+
+async function testTokenExchangeRequestShape() {
+  const config = resolveOAuthConfig({
+    HOME: os.homedir(),
+    YEEFLOW_OAUTH_TOKEN_FILE: tokenFile,
+  });
   const calls = [];
   const token = await exchangeAuthorizationCode(config, {
     code: "auth-code-secret",
@@ -122,24 +160,63 @@ async function testTokenExchangeRequestShape() {
   assert.equal(calls[0].options.method, "POST");
   assert.equal(calls[0].body.get("grant_type"), "authorization_code");
   assert.equal(calls[0].body.get("client_id"), config.clientId);
-  assert.equal(calls[0].body.get("client_secret"), "test-client-secret");
+  assert.equal(calls[0].body.get("client_secret"), null);
   assert.equal(calls[0].body.get("code"), "auth-code-secret");
   assert.equal(calls[0].body.get("redirect_uri"), "https://127.0.0.1:53722/callback");
   assert.equal(calls[0].body.get("code_verifier"), "verifier-secret");
+  assert.equal(token.oauth_flow, OAUTH_FLOW_PKCE);
+}
+
+async function testTokenExchangeFallbackRequestShape() {
+  const config = testConfig();
+  const calls = [];
+  const token = await exchangeAuthorizationCode(config, {
+    code: "auth-code-secret",
+    redirectUri: buildRedirectUri(53722),
+    codeVerifier: "verifier-secret",
+  }, sequenceFetch(calls, [
+    { payload: { error: "invalid_request" }, response: { ok: false, status: 400 } },
+    { payload: { access_token: "access-secret", refresh_token: "refresh-secret", expires_in: 120, token_type: "Bearer", scope: "basic_api" } },
+  ]));
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].body.get("client_secret"), null);
+  assert.equal(calls[1].body.get("client_secret"), "test-client-secret");
+  assert.equal(calls[1].body.get("code_verifier"), "verifier-secret");
+  assert.equal(token.oauth_flow, OAUTH_FLOW_CONFIDENTIAL_FALLBACK);
 }
 
 async function testRefreshRequestShape() {
-  const config = testConfig();
+  const config = resolveOAuthConfig({
+    HOME: os.homedir(),
+    YEEFLOW_OAUTH_TOKEN_FILE: tokenFile,
+  });
   const calls = [];
-  await refreshAccessToken(config, {
+  const refreshed = await refreshAccessToken(config, {
     refresh_token: "refresh-secret",
     scope: "basic_api openid offline_access",
   }, mockFetch(calls, { access_token: "new-access-secret", expires_in: 120, token_type: "Bearer" }));
   assert.equal(calls[0].body.get("grant_type"), "refresh_token");
   assert.equal(calls[0].body.get("client_id"), config.clientId);
-  assert.equal(calls[0].body.get("client_secret"), "test-client-secret");
+  assert.equal(calls[0].body.get("client_secret"), null);
   assert.equal(calls[0].body.get("refresh_token"), "refresh-secret");
   assert.equal(calls[0].body.get("scope"), "basic_api openid offline_access");
+  assert.equal(refreshed.oauth_refresh_flow, OAUTH_FLOW_PKCE);
+}
+
+async function testRefreshFallbackRequestShape() {
+  const config = testConfig();
+  const calls = [];
+  const refreshed = await refreshAccessToken(config, {
+    refresh_token: "refresh-secret",
+    scope: "basic_api openid offline_access",
+  }, sequenceFetch(calls, [
+    { payload: { error: "invalid_client" }, response: { ok: false, status: 400 } },
+    { payload: { access_token: "new-access-secret", expires_in: 120, token_type: "Bearer" } },
+  ]));
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].body.get("client_secret"), null);
+  assert.equal(calls[1].body.get("client_secret"), "test-client-secret");
+  assert.equal(refreshed.oauth_refresh_flow, OAUTH_FLOW_CONFIDENTIAL_FALLBACK);
 }
 
 async function testMissingClientSecretMessage() {
@@ -149,7 +226,7 @@ async function testMissingClientSecretMessage() {
   });
   await assert.rejects(
     () => refreshAccessToken(config, { refresh_token: "refresh-secret" }, mockFetch([], {})),
-    /client secret is private and must stay in \.env\.local.*plugin does not bundle secrets.*PKCE\/no-secret/,
+    /no-secret refresh failed and no local client secret fallback is configured.*YEEFLOW_OAUTH_CLIENT_SECRET/,
   );
 }
 
@@ -344,6 +421,21 @@ function mockFetch(calls, payload, response = {}) {
       status: response.status ?? 200,
       async text() {
         return JSON.stringify(payload);
+      },
+    };
+  };
+}
+
+function sequenceFetch(calls, results) {
+  let index = 0;
+  return async (url, options) => {
+    calls.push({ url, options, body: options.body });
+    const next = results[index++] || results.at(-1);
+    return {
+      ok: next.response?.ok ?? true,
+      status: next.response?.status ?? 200,
+      async text() {
+        return JSON.stringify(next.payload);
       },
     };
   };

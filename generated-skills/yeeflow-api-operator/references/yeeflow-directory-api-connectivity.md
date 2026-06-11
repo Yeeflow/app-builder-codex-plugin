@@ -14,7 +14,7 @@ The current OAuth/API wrapper uses plugin defaults for the API base and prefers 
 
 - `YEEFLOW_WORKSPACE_ID` when package workspace operations are needed
 - `YEEFLOW_TENANT_URL` only when tenant/app links are needed
-- `YEEFLOW_OAUTH_CLIENT_SECRET` temporarily for OAuth login/refresh until PKCE/no-secret OAuth is implemented
+- `YEEFLOW_OAUTH_CLIENT_SECRET` only if Yeeflow rejects PKCE/no-secret login or refresh and confidential-client fallback is needed locally
 
 This legacy connectivity helper still requires a legacy API key if you choose to run it. The key must only be loaded through `process.env.YEEFLOW_API_KEY` or the active profile key. Scripts report only whether the key is present.
 

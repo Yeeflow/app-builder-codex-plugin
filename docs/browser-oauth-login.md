@@ -14,13 +14,13 @@ YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
 YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 ```
 
-Override these only for development/testing. The current token exchange/refresh implementation still requires a private client secret in local `.env.local` whenever OAuth login or refresh is needed:
+Override these only for development/testing. OAuth login builds an Authorization Code + PKCE request and token exchange tries the public-client/no-secret path first. OAuth refresh also tries no-secret refresh first. Current auth-only testing shows refresh may still require confidential-client fallback for this Yeeflow OAuth configuration. If the Yeeflow OAuth client or server does not allow public-client PKCE exchange or refresh, the helpers fall back to a private local client secret when configured:
 
 ```env
 YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
 ```
 
-Keep the client secret local and private. The plugin does not bundle secrets. Implement PKCE/no-secret native OAuth later if the Yeeflow OAuth client can support public-client token exchange.
+Keep the client secret local and private. The plugin does not bundle secrets. Remove this fallback later only after auth-only testing proves Yeeflow supports no-secret login and refresh for the configured client.
 
 Do not commit `.env.local`. Do not paste Yeeflow passwords, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into Codex chat.
 
@@ -36,7 +36,7 @@ node scripts/yeeflow-api-auth-smoke.mjs
 
 `yeeflow-oauth-status` reports whether local OAuth token storage exists, whether it is expired, and whether a refresh token is present. Use `--refresh` to refresh when possible.
 
-`yeeflow-oauth-login` starts a local HTTPS callback server, opens the Yeeflow authorization URL, validates returned OAuth state, exchanges the code with PKCE, and stores tokens locally. It prints only safe status messages.
+`yeeflow-oauth-login` starts a local HTTPS callback server, opens the Yeeflow authorization URL, validates returned OAuth state, exchanges the code with PKCE, and stores tokens locally. It prints only safe status messages, including whether the PKCE/no-secret path or confidential-client fallback was used.
 
 `yeeflow-oauth-refresh` refreshes an expired or near-expired access token using the stored refresh token.
 
@@ -82,7 +82,7 @@ The file contains access token, refresh token, expiry timestamp, token type, sco
 Live Yeeflow API helpers use this order:
 
 1. Valid stored OAuth access token.
-2. Refresh stored OAuth token if expired, a refresh token exists, and the private local client secret is configured.
+2. Refresh stored OAuth token if expired and a refresh token exists. The helper tries no-secret refresh first and falls back to the private local client secret only if configured.
 3. Legacy/deprecated `YEEFLOW_API_KEY` fallback if OAuth is unavailable.
 
 OAuth requests attach `Authorization: Bearer <access_token>`. Legacy requests attach `apiKey` exactly as the existing package automation did. Scripts must never print Authorization headers, API keys, client secrets, OAuth tokens, auth codes, cookies, raw API responses, tenant IDs, private URLs, raw package payloads, screenshots, or generated runtime packages.

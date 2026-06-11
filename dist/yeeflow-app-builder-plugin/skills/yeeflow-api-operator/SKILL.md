@@ -75,7 +75,7 @@ YEEFLOW_WORKSPACE_ID=<your workspace id>
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-Current OAuth token exchange/refresh still requires a private local client secret whenever OAuth login or refresh is needed:
+OAuth token exchange/refresh tries PKCE/no-secret first. Current Yeeflow OAuth refresh may still require confidential-client fallback. If Yeeflow rejects public-client exchange or refresh, configure a private local client secret as fallback only:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
@@ -89,7 +89,7 @@ Rules:
 - OAuth token storage is local and ignored; use `node scripts/yeeflow-oauth-logout.mjs` to clear it. Local HTTPS callback cert/key files must stay ignored and uncommitted.
 - Live API helpers prefer a valid OAuth access token, refresh it when expired and possible, then fall back to legacy `YEEFLOW_API_KEY` only when OAuth is unavailable.
 - Load the API base from plugin defaults unless `YEEFLOW_API_BASE_URL` is set for development/testing; `YEEFLOW_BASE_URL` is supported only as a legacy API base URL alias.
-- Treat `YEEFLOW_OAUTH_CLIENT_SECRET` as private temporary local config until PKCE/no-secret native OAuth is implemented. The plugin does not bundle secrets.
+- Treat `YEEFLOW_OAUTH_CLIENT_SECRET` as private local fallback config only. The plugin does not bundle secrets.
 - Load the legacy/deprecated key fallback from `YEEFLOW_API_KEY` or, when `YEEFLOW_PROFILE` is set, from `YEEFLOW_<PROFILE>_API_KEY`.
 - Load tenant/app links from `YEEFLOW_TENANT_URL` or, when `YEEFLOW_PROFILE` is set, from `YEEFLOW_<PROFILE>_TENANT_URL`. Load package automation workspace IDs from `YEEFLOW_WORKSPACE_ID`, or from `YEEFLOW_<PROFILE>_WORKSPACE_ID` when a profile is active.
 - Never print the key, OAuth tokens, Authorization header, or client secret or include them in logs, docs, commits, or final answers. Never print workspace IDs either; report only present or missing.
@@ -217,8 +217,8 @@ For assignment-routing coverage, read `docs/studies/yeeflow-api-operator-assignm
 
 ## Failure Handling
 
-- Missing `.env.local`: explain that `YEEFLOW_WORKSPACE_ID` is enough only for package workspace context and normal API use when OAuth is already authenticated and no refresh/token exchange is needed; `YEEFLOW_TENANT_URL` is optional for tenant UI links, and `YEEFLOW_OAUTH_CLIENT_SECRET` is temporarily required for OAuth login/refresh until PKCE/no-secret flow is implemented.
-- Missing OAuth auth and no legacy fallback: ask the user to run `node scripts/yeeflow-oauth-login.mjs` after storing any required private client secret locally; do not ask them to paste secrets.
+- Missing `.env.local`: explain that `YEEFLOW_WORKSPACE_ID` is enough for package workspace context and normal API use when OAuth is already authenticated; `YEEFLOW_TENANT_URL` is optional for tenant UI links, and `YEEFLOW_OAUTH_CLIENT_SECRET` is needed only if Yeeflow rejects PKCE/no-secret login or refresh.
+- Missing OAuth auth and no legacy fallback: ask the user to run `node scripts/yeeflow-oauth-login.mjs`; do not ask them to paste secrets. If login reports that PKCE/no-secret is unsupported, tell them to store the private client secret locally in `.env.local`.
 - Missing `YEEFLOW_WORKSPACE_ID` for package automation: ask the user to store it locally or configure the active profile workspace variable; do not print the value.
 - Authentication/authorization failure: report HTTP/API status and likely causes such as expired key, wrong tenant/account, insufficient permission, or wrong base; do not echo credentials.
 - `404` on the configured API base: verify the plugin default API base or development override is `https://api.yeeflow.com/v1`; do not substitute the tenant URL as the API base.

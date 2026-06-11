@@ -16,6 +16,8 @@ export const CALLBACK_HOST = "127.0.0.1";
 export const CALLBACK_PATH = "/callback";
 export const CALLBACK_PORTS = [53720, 53721, 53722, 53723, 53724];
 export const TOKEN_EXPIRY_SKEW_MS = 60_000;
+export const OAUTH_FLOW_PKCE = "pkce-no-secret";
+export const OAUTH_FLOW_CONFIDENTIAL_FALLBACK = "confidential-client-fallback";
 
 const SENSITIVE_KEY_RE = /(access[_-]?token|refresh[_-]?token|id[_-]?token|client[_-]?secret|authorization|cookie|code_verifier|code|api[_-]?key)/i;
 
@@ -167,32 +169,85 @@ export async function startHttpsCallbackServer(config, { expectedState, timeoutM
 }
 
 export async function exchangeAuthorizationCode(config, { code, redirectUri, codeVerifier }, fetchImpl = fetch) {
-  assertOAuthClientSecretConfigured(config);
+  if (!codeVerifier) throw new Error("OAuth PKCE code verifier is required for token exchange.");
+  try {
+    const token = normalizeTokenResponse(
+      await postTokenRequest(config.tokenUrl, authorizationCodeTokenBody(config, { code, redirectUri, codeVerifier }), fetchImpl),
+      config.scopes,
+    );
+    token.oauth_flow = OAUTH_FLOW_PKCE;
+    return token;
+  } catch (error) {
+    if (!config.clientSecret) {
+      throw new Error(redactSensitive([
+        "OAuth PKCE/no-secret token exchange failed and no local client secret fallback is configured.",
+        "If the Yeeflow OAuth client does not support public-client PKCE exchange yet, store YEEFLOW_OAUTH_CLIENT_SECRET in .env.local only.",
+        error.message,
+      ].join(" ")));
+    }
+    const token = normalizeTokenResponse(
+      await postTokenRequest(
+        config.tokenUrl,
+        authorizationCodeTokenBody(config, { code, redirectUri, codeVerifier, includeClientSecret: true }),
+        fetchImpl,
+      ),
+      config.scopes,
+    );
+    token.oauth_flow = OAUTH_FLOW_CONFIDENTIAL_FALLBACK;
+    return token;
+  }
+}
+
+export async function refreshAccessToken(config, tokenRecord, fetchImpl = fetch) {
+  if (!tokenRecord?.refresh_token) throw new Error("No refresh token is available. Run OAuth login again.");
+  let refreshed;
+  try {
+    refreshed = normalizeTokenResponse(
+      await postTokenRequest(config.tokenUrl, refreshTokenBody(config, tokenRecord), fetchImpl),
+      tokenRecord.scope || config.scopes,
+    );
+    refreshed.oauth_refresh_flow = OAUTH_FLOW_PKCE;
+  } catch (error) {
+    if (!config.clientSecret) {
+      throw new Error(redactSensitive([
+        "OAuth no-secret refresh failed and no local client secret fallback is configured.",
+        "If the Yeeflow OAuth client does not support public-client refresh yet, store YEEFLOW_OAUTH_CLIENT_SECRET in .env.local only.",
+        error.message,
+      ].join(" ")));
+    }
+    refreshed = normalizeTokenResponse(
+      await postTokenRequest(config.tokenUrl, refreshTokenBody(config, tokenRecord, { includeClientSecret: true }), fetchImpl),
+      tokenRecord.scope || config.scopes,
+    );
+    refreshed.oauth_refresh_flow = OAUTH_FLOW_CONFIDENTIAL_FALLBACK;
+  }
+  if (!refreshed.refresh_token) refreshed.refresh_token = tokenRecord.refresh_token;
+  if (!refreshed.id_token && tokenRecord.id_token) refreshed.id_token = tokenRecord.id_token;
+  if (!refreshed.oauth_flow && tokenRecord.oauth_flow) refreshed.oauth_flow = tokenRecord.oauth_flow;
+  return refreshed;
+}
+
+export function authorizationCodeTokenBody(config, { code, redirectUri, codeVerifier, includeClientSecret = false }) {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     client_id: config.clientId,
-    client_secret: config.clientSecret,
     code,
     redirect_uri: redirectUri,
     code_verifier: codeVerifier,
   });
-  return normalizeTokenResponse(await postTokenRequest(config.tokenUrl, body, fetchImpl), config.scopes);
+  if (includeClientSecret) body.set("client_secret", config.clientSecret);
+  return body;
 }
 
-export async function refreshAccessToken(config, tokenRecord, fetchImpl = fetch) {
-  assertOAuthClientSecretConfigured(config);
-  if (!tokenRecord?.refresh_token) throw new Error("No refresh token is available. Run OAuth login again.");
+export function refreshTokenBody(config, tokenRecord, { includeClientSecret = false } = {}) {
   const body = new URLSearchParams({
     grant_type: "refresh_token",
     client_id: config.clientId,
-    client_secret: config.clientSecret,
     refresh_token: tokenRecord.refresh_token,
     scope: config.scopes,
   });
-  const refreshed = normalizeTokenResponse(await postTokenRequest(config.tokenUrl, body, fetchImpl), tokenRecord.scope || config.scopes);
-  if (!refreshed.refresh_token) refreshed.refresh_token = tokenRecord.refresh_token;
-  if (!refreshed.id_token && tokenRecord.id_token) refreshed.id_token = tokenRecord.id_token;
-  return refreshed;
+  if (includeClientSecret) body.set("client_secret", config.clientSecret);
+  return body;
 }
 
 export async function postTokenRequest(tokenUrl, body, fetchImpl = fetch) {
@@ -288,6 +343,8 @@ export function summarizeStoredToken(config, tokenRecord = loadStoredToken(confi
     expired: isTokenExpired(tokenRecord, now, 0),
     refreshTokenPresent: Boolean(tokenRecord.refresh_token),
     idTokenPresent: Boolean(tokenRecord.id_token),
+    oauthFlow: tokenRecord.oauth_flow || null,
+    refreshFlow: tokenRecord.oauth_refresh_flow || null,
   };
 }
 
