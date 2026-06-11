@@ -1,0 +1,31 @@
+{
+  "schema": "yeeflow-yapk-signing-resource-normalized",
+  "case": "resource_base64_opaque",
+  "evidenceLevel": "locally-verified-safe-stats",
+  "summary": ".yapk Resource is base64 text whose decoded bytes are high-entropy opaque data, not normal .yap gzip JSON.",
+  "observedShape": {
+    "outerEncoding": "base64",
+    "decodedPayload": "opaque binary",
+    "usesYapGzipPrefix": false,
+    "normalDecodeAttempts": {
+      "gunzip": "fail",
+      "inflate": "fail",
+      "inflateRaw": "fail",
+      "unzip": "fail",
+      "brotli": "fail"
+    }
+  },
+  "redactedPackageStats": [
+    {
+      "label": "source version package",
+      "decodedResourceBytes": 5719,
+      "resourceEntropy": 7.9684
+    },
+    {
+      "label": "yeeflow-generated follow-up version",
+      "decodedResourceBytes": 8342,
+      "resourceEntropy": 7.9763
+    }
+  ],
+  "conclusion": "The missing content-generation step is inside the opaque validated payload, not the base64 wrapper."
+}

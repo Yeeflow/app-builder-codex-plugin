@@ -1,0 +1,17 @@
+{
+  "audit": "reference-app-template-corpus-audit",
+  "patterns": [
+    {
+      "pattern": "qr_barcode_controls",
+      "sourceExports": ["Company Overview (3).yap"],
+      "observedControls": ["qrcode", "barcode"],
+      "templateCoverage": ["print_page_qr_barcode_section"],
+      "limitation": "Controls are export-proven on a View page, not inside a print page."
+    }
+  ],
+  "missingPatterns": [
+    "print_page_summary",
+    "print_page_document_checklist",
+    "print_page_qr_barcode_section integrated into print layout"
+  ]
+}

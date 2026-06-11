@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "control": "Spacer",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "dashboard"
+  ],
+  "observedSurfaces": [
+    "Additional controls"
+  ],
+  "internalTypes": [
+    "gap"
+  ],
+  "count": 2,
+  "attrKeys": [
+    "common",
+    "space"
+  ],
+  "sourceModes": [
+    "unspecified"
+  ],
+  "styleKeys": [
+    "common",
+    "space"
+  ],
+  "childTypes": [],
+  "nestedChildControlTypes": {},
+  "bindingModes": [],
+  "validation": [
+    "spacer should define spacing size/height/width intentionally"
+  ],
+  "generation": [
+    "use for layout rhythm between controls"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<spacer:1>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "gap",
+      "attrKeys": [
+        "space"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<spacer:2>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "gap",
+      "attrKeys": [
+        "common",
+        "space"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {},
+      "items": {}
+    }
+  ]
+}

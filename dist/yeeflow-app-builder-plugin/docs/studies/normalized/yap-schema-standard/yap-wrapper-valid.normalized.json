@@ -1,0 +1,7 @@
+{
+  "Title": "<app-title>",
+  "Description": "<app-description>",
+  "IconUrl": "<icon-url-or-empty>",
+  "IsListSet": true,
+  "Resource": "[______gizp______]<base64-gzip-json-resource>"
+}

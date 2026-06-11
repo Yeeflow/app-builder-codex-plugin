@@ -1,0 +1,22 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (3).yap",
+  "nodeType": "StartNoneEvent",
+  "pattern": "start-action-condition-operand-wrapper",
+  "normalizedConfig": {
+    "conditionListField": "revoke-conditions",
+    "conditionRowShape": {
+      "pre": "and",
+      "left": {
+        "type": 1,
+        "value": "<VARIABLE_SELECTOR_OPERAND>"
+      },
+      "op": "s.!=",
+      "right": {
+        "type": 2,
+        "value": "<EXPRESSION_TOKEN_ARRAY>"
+      },
+      "group": "string"
+    }
+  }
+}

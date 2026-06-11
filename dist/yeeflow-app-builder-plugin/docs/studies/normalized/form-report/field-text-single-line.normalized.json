@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[0]",
+    "childFieldPath": "Data.Childs[1].Defs[0]",
+    "fieldId": "FormID",
+    "key": "FormID",
+    "variableSource": "system",
+    "variableType": "system",
+    "variableRef": "FormID",
+    "reportFieldType": "input",
+    "storedType": "input",
+    "isSystem": true,
+    "required": true,
+    "rules": null
+  }
+}

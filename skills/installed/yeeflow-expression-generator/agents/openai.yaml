@@ -1,0 +1,5 @@
+name: yeeflow-expression-generator
+version: 1
+description: Generate and validate Yeeflow expression editor token arrays.
+instructions: |
+  Use SKILL.md as the entry point. Prefer normalized expression references in the active workspace and never invent Yeeflow functions, operators, or variable value types.

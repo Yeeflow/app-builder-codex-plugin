@@ -1,0 +1,30 @@
+{
+  "proof": "export-proven from Company Overview (2).yap; identifiers redacted or synthetic",
+  "bindingPattern": {
+    "scope": "inside Collection item template",
+    "attrs.control_action": "<collection-local-action-id>",
+    "target": "CollectionControl.attrs.actions[].id"
+  },
+  "observedBindings": [
+    {
+      "controlType": "container",
+      "role": "absolute item selection click target",
+      "action": "Select Items"
+    },
+    {
+      "controlType": "action_button",
+      "label": "Edit item",
+      "action": "Edit item"
+    },
+    {
+      "controlType": "action_button",
+      "label": "Mark as completed",
+      "action": "Mark current item as Completed"
+    },
+    {
+      "controlType": "action_button",
+      "label": "Delete Item",
+      "action": "Delete item"
+    }
+  ]
+}

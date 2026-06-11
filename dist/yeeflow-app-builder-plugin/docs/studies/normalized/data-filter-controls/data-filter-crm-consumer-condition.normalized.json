@@ -1,0 +1,57 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "<downloads>/CRM - Customer relationship management.yap",
+  "page": "Dashboard",
+  "consumer": {
+    "path": "$.children[1].children[0].children[2]",
+    "controlType": "data-list",
+    "dataSource": {
+      "app": "<app>",
+      "list": "<list:22>",
+      "type": 1
+    },
+    "conditionPath": "$.children[1].children[0].children[2].attrs.data.filter",
+    "conditions": [
+      {
+        "path": "$.children[1].children[0].children[2].attrs.data.filter[0]",
+        "leftField": "<field>",
+        "operator": "0",
+        "pre": "and",
+        "filterVariables": [
+          "filter_Hierarchy4"
+        ],
+        "rightShape": "expression-array"
+      },
+      {
+        "path": "$.children[1].children[0].children[2].attrs.data.filter[1]",
+        "leftField": "<field:Text8>",
+        "operator": "0",
+        "pre": "and",
+        "filterVariables": [
+          "filter_Hierarchy2"
+        ],
+        "rightShape": "expression-array"
+      },
+      {
+        "path": "$.children[1].children[0].children[2].attrs.data.filter[2]",
+        "leftField": "<field:Text8>",
+        "operator": "0",
+        "pre": "and",
+        "filterVariables": [
+          "filter_Hierarchy"
+        ],
+        "rightShape": "expression-array"
+      },
+      {
+        "path": "$.children[1].children[0].children[2].attrs.data.filter[3]",
+        "leftField": "<field:Bigint1>",
+        "operator": "0",
+        "pre": "and",
+        "filterVariables": [
+          "filter_Hierarchy4"
+        ],
+        "rightShape": "expression-array"
+      }
+    ]
+  }
+}

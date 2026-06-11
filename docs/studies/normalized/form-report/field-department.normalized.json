@@ -1,0 +1,20 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[5]",
+    "childFieldPath": "Data.Childs[1].Defs[5]",
+    "fieldId": "Department",
+    "key": "Department",
+    "variableSource": "system",
+    "variableType": "system",
+    "variableRef": "Department",
+    "reportFieldType": "organization-picker",
+    "storedType": "organization-picker",
+    "isSystem": true,
+    "required": false,
+    "rules": {
+      "multiple": true,
+      "metadata-treeselect": true
+    }
+  }
+}

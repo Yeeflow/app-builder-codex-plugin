@@ -1,0 +1,23 @@
+{
+  "exportName": "Online Library.yap",
+  "focusPages": [
+    "Inventory",
+    "Print Inventory",
+    "Barcode Scan",
+    "Detail Page"
+  ],
+  "decodeShape": "YAP gzip ListExportResult with Data = ListExportInfo",
+  "proofBoundary": "export-proven structure only; print runtime and page breaks not claimed",
+  "patterns": [
+    "Inventory page includes print action targeting Print Inventory",
+    "Print Inventory includes padded printable sections, headings, dynamic fields, dynamic image, and repeated table-like output",
+    "multi-item inventory print/list structure",
+    "Barcode Scan and Detail Page prove barcode and list QR Code controls on inventory/detail surfaces"
+  ],
+  "templateImpact": [
+    "print_page_document_checklist",
+    "data_table_section",
+    "print_page_qr_barcode_section"
+  ],
+  "redaction": "raw payloads, Resource, Sign, IDs, tenant data, and sample records omitted"
+}

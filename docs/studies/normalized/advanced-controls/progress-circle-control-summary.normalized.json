@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "control": "Progress circle",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "dashboard"
+  ],
+  "observedSurfaces": [
+    "Additional controls"
+  ],
+  "internalTypes": [
+    "progress-circle"
+  ],
+  "count": 6,
+  "attrKeys": [
+    "common",
+    "per",
+    "sty"
+  ],
+  "sourceModes": [
+    "unspecified",
+    "variable"
+  ],
+  "styleKeys": [
+    "common",
+    "sty"
+  ],
+  "childTypes": [],
+  "nestedChildControlTypes": {},
+  "bindingModes": [
+    "expression",
+    "object",
+    "variable"
+  ],
+  "validation": [
+    "progress circle values must be numeric or value/max-compatible"
+  ],
+  "generation": [
+    "use for KPI completion, capacity, score, and utilization"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<progress-circle:1>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "progress-circle",
+      "attrKeys": [
+        "common",
+        "per"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "per": {
+          "mode": "object",
+          "shape": {
+            "title": {
+              "value": "Title (Short words)",
+              "variable": null
+            }
+          }
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<progress-circle:2>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "progress-circle",
+      "attrKeys": [
+        "common",
+        "per",
+        "sty"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "per": {
+          "mode": "object",
+          "shape": {
+            "title": {
+              "value": "Title (Short words)",
+              "variable": null
+            },
+            "titlepos": "3"
+          }
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<progress-circle:3>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "progress-circle",
+      "attrKeys": [
+        "common",
+        "per",
+        "sty"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "per": {
+          "mode": "expression",
+          "refs": [
+            {
+              "mode": "variable",
+              "variable": "var_PercentTag",
+              "valueType": "string"
+            },
+            {
+              "mode": "variable",
+              "variable": "var_Percentage",
+              "valueType": "string"
+            }
+          ]
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<progress-circle:4>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "progress-circle",
+      "attrKeys": [
+        "common",
+        "per",
+        "sty"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "per": {
+          "mode": "object",
+          "shape": {
+            "title": {
+              "value": "",
+              "variable": null
+            },
+            "titlepos": "1",
+            "perpos": "3"
+          }
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<progress-circle:5>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "progress-circle",
+      "attrKeys": [
+        "common",
+        "per",
+        "sty"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "per": {
+          "mode": "object",
+          "shape": {
+            "title": {
+              "value": "",
+              "variable": null
+            },
+            "titlepos": "1",
+            "perpos": "3",
+            "vtype": "2",
+            "vpos": "3"
+          }
+        }
+      },
+      "items": {}
+    }
+  ]
+}

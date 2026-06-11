@@ -1,0 +1,114 @@
+# Yeeflow App Builder Plugin Partner-Safe Edition
+
+This document defines how to prepare a partner-safe edition of the Yeeflow App Builder Plugin. The current v0 package is an internal edition unless a separate partner-safe review and package are completed.
+
+## Edition Boundary
+
+Internal edition:
+
+- Includes full Yeeflow learning and building skills.
+- May include internal research notes, validator references, experimental workflow guidance, baseline observations, and implementation playbooks.
+- Is intended for Yeeflow internal builders who understand the current proof boundaries.
+
+Partner-safe edition:
+
+- Includes only stable reusable guidance.
+- Includes safe examples that do not expose internal tenant behavior, customer context, raw exports, screenshots, or experimental workflows.
+- Removes or rewrites material that assumes Yeeflow internal access, unpublished research, or runtime evidence not suitable for partners.
+- Keeps the same safe `.yap` and `.yapk` policy: new app creation outputs `.yap`; `.yapk` mutation is not supported.
+
+Do not share the internal edition externally as a partner-safe release.
+
+## Content To Remove
+
+Remove the following from a partner-safe package:
+
+- Internal research notes.
+- Tenant names, tenant IDs, user IDs, employee names, organization IDs, app IDs, list IDs, request IDs, and runtime URLs.
+- Customer data or customer-specific process details.
+- Raw `.yap`, `.yapk`, `.ydl`, or `.ywf` exports.
+- Screenshots, downloaded exports, and screen recordings.
+- Experimental workflows that have not been accepted as stable guidance.
+- Notes about failed internal runtime attempts unless converted into general safe limitations.
+- Any `.env`, secrets, private keys, tokens, credentials, cookies, or session artifacts.
+- Internal-only scripts or references that expose unsupported runtime assumptions.
+
+## Content That Can Remain
+
+A partner-safe edition may include:
+
+- Stable reusable Yeeflow application planning guidance.
+- Publicly safe descriptions of builder vs. learning workflow boundaries.
+- Generic validation checklists.
+- Safe sample prompts.
+- Safe examples with invented data.
+- Stable custom-code guidance for runtime-proven contexts.
+- Clear limitations and unsupported claims.
+
+Before release, review every bundled skill and reference file. Do not rely only on filename scans.
+
+## Partner-Safe Skill Set
+
+Start from the internal plugin only as source material. Create a separate partner-safe package folder and archive when approved. Do not overwrite `dist/yeeflow-app-builder-plugin/` unless the internal package is intentionally being replaced.
+
+The partner-safe skill set should be decided by review. A conservative starting point is:
+
+- Keep stable planning, generation, validation, and custom-code guidance.
+- Remove internal baseline files if they contain research history, tenant-specific observations, or generated-app evidence.
+- Remove feature-learning material that exposes internal experimental workflows.
+- Keep feature-learning only if it is rewritten as a safe methodology without raw export details.
+
+## Partner-Safe Review Checklist
+
+Run this checklist before labeling a package partner-safe:
+
+- `plugin.json` parses.
+- Version and display name clearly identify the partner-safe edition if it is separate.
+- All included skills have `SKILL.md` and `agents/openai.yaml`.
+- Referenced files exist.
+- JavaScript and JSON checks pass.
+- Safety scan passes.
+- Manual content review passes for every skill and reference file.
+- No `.yap`, `.yapk`, `.ydl`, or `.ywf` packages are included.
+- No raw exports are included.
+- No screenshots or downloaded exports are included.
+- No customer data is included.
+- No tenant-specific runtime data is included.
+- No internal employee/user data is included.
+- No unpublished runtime URLs or workspace paths are included.
+- No unsupported public form custom code claim is included.
+- `.yapk` mutation remains explicitly unsupported.
+
+## Versioning
+
+Use semantic versioning for partner-safe packages. The partner-safe version does not have to match the internal version if content diverges.
+
+Recommended naming pattern:
+
+- Internal package: `yeeflow-app-builder-plugin-0.1.0.zip`
+- Partner-safe package: `yeeflow-app-builder-plugin-partner-safe-0.1.0.zip`
+
+Bump the minor version when stable partner-facing guidance is added or a bundled skill changes meaningfully. Bump the patch version for wording corrections, metadata fixes, or packaging cleanup.
+
+## Release Notes
+
+Partner-safe release notes should include:
+
+- Version and date.
+- Commit hash.
+- Included skills and references.
+- Removed internal content categories.
+- Validation checks run.
+- Manual review owner or reviewer.
+- Known limitations.
+
+State clearly that the package is skills-only and does not include OAuth, Yeeflow API integration, MCP servers, or runtime access.
+
+## Known Limitations
+
+- Partner-safe edition is not automatically generated by the internal package.
+- Manual content review is required.
+- Runtime testing still requires Yeeflow access.
+- Public form custom code support is not claimed unless tested.
+- `.yapk` mutation is not supported.
+- Organization-level private marketplace distribution must be confirmed in the target Codex environment before promising it to partners.

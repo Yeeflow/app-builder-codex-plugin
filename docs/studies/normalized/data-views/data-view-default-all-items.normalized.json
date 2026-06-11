@@ -1,0 +1,40 @@
+{
+  "resourceType": "data list",
+  "resourceRef": "<data-list-1>",
+  "resourceName": "<redacted-resource-name-1>",
+  "viewRef": "<view-1-1>",
+  "viewName": "All Items",
+  "defaultOrCustom": "default",
+  "viewType": "list",
+  "typeCode": 0,
+  "urlKey": "default",
+  "visibleFields": [
+    "Title",
+    "Datetime1",
+    "Text2",
+    "Text3",
+    "Text4",
+    "Text5",
+    "Decimal1",
+    "Text7",
+    "Text8",
+    "Text9",
+    "Text10",
+    "Text11"
+  ],
+  "visibleFieldCount": 12,
+  "primarySort": null,
+  "secondarySort": null,
+  "dataFilterSummary": "none",
+  "userFilters": [],
+  "permissionSummary": "inherits or no view-level item permission flag",
+  "extKeys": [
+    "Url"
+  ],
+  "layoutViewKeys": [
+    "layout",
+    "query"
+  ],
+  "specialSettings": [],
+  "proofLevel": "export-proven"
+}

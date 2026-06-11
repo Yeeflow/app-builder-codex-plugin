@@ -1,0 +1,80 @@
+{
+  "summary": {
+    "inputPath": "/Users/Renger/Downloads/AI Agent and Copilot Local Resource Baseline8.yap",
+    "title": "AI Agent and Copilot Local Resource Baseline8",
+    "replaceIds": 23,
+    "largeNumbersPreserved": 6,
+    "scheduledWorkflows": 2,
+    "aiResources": 3,
+    "localLists": 1,
+    "actionCounts": {
+      "StartNoneEvent": 2,
+      "SequenceFlow": 6,
+      "EndNoneEvent": 2,
+      "MailTask": 2,
+      "QueryData": 1,
+      "AI": 1
+    }
+  },
+  "actions": [
+    {
+      "workflow": "Daily information update",
+      "workflowKey": "AS-DIU",
+      "id": "s_91024023318",
+      "resourceid": "s_91024023318",
+      "type": "AI",
+      "name": "AI Generate email",
+      "aiType": "agent",
+      "data": {
+        "AppID": 41,
+        "ListSetID": "2056585547604570113",
+        "AgentID": "2056591356997808129"
+      },
+      "inputVariables": [
+        {
+          "id": "QueryItems",
+          "type": "text",
+          "description": "The items of the data from the query data",
+          "value": {
+            "type": 1,
+            "value": {
+              "exprType": "variable",
+              "valueType": "text",
+              "id": "QueryItems",
+              "type": "expr"
+            }
+          }
+        }
+      ],
+      "outputVariables": [
+        {
+          "id": "Subject",
+          "type": "text",
+          "description": "the proper subject of this email",
+          "value": {
+            "prefix": "__variables_",
+            "value": "EmailSubject"
+          }
+        },
+        {
+          "id": "Body",
+          "type": "richtext",
+          "description": "the body content of this email",
+          "value": {
+            "prefix": "__variables_",
+            "value": "EmailBody"
+          }
+        }
+      ],
+      "context": {
+        "enabled": true,
+        "selected": {
+          "application": true,
+          "workflowInstance": true,
+          "workflowVariables": true,
+          "workflowTasks": true
+        }
+      }
+    }
+  ]
+}

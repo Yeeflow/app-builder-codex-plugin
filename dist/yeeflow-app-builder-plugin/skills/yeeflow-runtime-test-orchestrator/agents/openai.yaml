@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Runtime Test Orchestrator"
+  short_description: "Plan and classify Yeeflow runtime tests"
+  default_prompt: "Use $yeeflow-runtime-test-orchestrator to plan and classify runtime testing for this Yeeflow application."

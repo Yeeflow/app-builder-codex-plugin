@@ -1,0 +1,19 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[45]",
+    "childFieldPath": "Data.Childs[1].Defs[45]",
+    "fieldId": "field_37",
+    "key": "vlist_field_37",
+    "variableSource": "approval-list-variable",
+    "variableType": "list",
+    "variableRef": "field_37",
+    "reportFieldType": "textarea",
+    "storedType": "list",
+    "isSystem": false,
+    "required": false,
+    "rules": {
+      "listref": "listref_1"
+    }
+  }
+}

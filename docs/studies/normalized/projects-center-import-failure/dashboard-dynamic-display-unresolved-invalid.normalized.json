@@ -1,0 +1,21 @@
+{
+  "case": "dashboard-dynamic-display-unresolved-invalid",
+  "proofLevel": "user-confirmed-import-failure-derived",
+  "control": {
+    "id": "__CONTROL_ID__",
+    "type": "collection",
+    "attrs": {
+      "control_display": [
+        {
+          "controlId": "__STALE_CONTROL_ID__",
+          "formulas": []
+        }
+      ]
+    }
+  },
+  "expectedFinding": {
+    "code": "DASHBOARD_COLLECTION_DISPLAY_RULE_CONTROL_MISMATCH",
+    "level": "error",
+    "mode": "generator/final"
+  }
+}

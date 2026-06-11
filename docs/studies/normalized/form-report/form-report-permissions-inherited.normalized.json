@@ -1,0 +1,26 @@
+{
+  "proofLevel": "export-proven",
+  "childResourcePath": "Data.Childs[] where ListModel.Type = 32",
+  "inheritedReports": [
+    {
+      "report": "<form-report-1>",
+      "inheritedFromApplication": true,
+      "listModelPerm": 4
+    },
+    {
+      "report": "<form-report-2>",
+      "inheritedFromApplication": true,
+      "listModelPerm": 4
+    },
+    {
+      "report": "<form-report-3>",
+      "inheritedFromApplication": true,
+      "listModelPerm": 4
+    },
+    {
+      "report": "<form-report-4>",
+      "inheritedFromApplication": true,
+      "listModelPerm": 4
+    }
+  ]
+}

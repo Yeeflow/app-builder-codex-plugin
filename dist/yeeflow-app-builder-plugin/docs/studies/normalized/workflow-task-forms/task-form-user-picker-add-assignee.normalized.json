@@ -1,0 +1,21 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Actions Runtime Baseline (2)_Task forms.yap",
+  "taskForm": "WARTB Task3",
+  "controlShape": {
+    "type": "identity-picker",
+    "label": "Another User",
+    "variable": {
+      "id": "<ANOTHERUSER_VARIABLE_REF>",
+      "type": "user",
+      "editable": true
+    }
+  },
+  "submitFormUsage": {
+    "submitType": "5",
+    "operation": "add-assignee",
+    "forword": "<ANOTHERUSER_VARIABLE_REF>",
+    "assignee": "<ANOTHERUSER_VARIABLE_REF>",
+    "remark": "<TASKCOMMENTS_VARIABLE_REF>"
+  }
+}

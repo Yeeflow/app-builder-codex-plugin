@@ -1,0 +1,15 @@
+{
+  "source": "Sales Quotation.yap",
+  "proof": "export-proven",
+  "dataList": "Quotation",
+  "form": "Print Page",
+  "purpose": "print preview target form",
+  "layoutControls": ["picture", "heading", "dynamic-field", "flex_grid", "list", "text-editor", "container"],
+  "printFriendlyPatterns": [
+    "document-like outer container",
+    "quote header fields",
+    "pricing table header flex_grid",
+    "Dynamic Sub List line item body",
+    "totals and terms sections"
+  ]
+}

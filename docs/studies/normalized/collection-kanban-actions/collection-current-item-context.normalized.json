@@ -1,0 +1,26 @@
+{
+  "proof": "export-proven from Company Overview (2).yap; identifiers redacted or synthetic",
+  "currentItemIdToken": {
+    "exprType": "variable_ctx",
+    "valueType": "input",
+    "id": "ListDataID",
+    "ctx": "__ctx_coll",
+    "type": "expr",
+    "name": "Collection item:Id"
+  },
+  "currentFieldToken": {
+    "exprType": "variable_ctx",
+    "valueType": "radio",
+    "id": "Text1",
+    "ctx": "__ctx_coll",
+    "type": "expr",
+    "name": "Collection item:Status"
+  },
+  "usage": [
+    "edit current item",
+    "delete current item",
+    "update current item",
+    "toggle selected item IDs",
+    "dynamic display rules"
+  ]
+}

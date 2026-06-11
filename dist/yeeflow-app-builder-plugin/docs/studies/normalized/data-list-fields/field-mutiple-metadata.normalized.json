@@ -1,0 +1,32 @@
+{
+  "fieldType": "mutiple-metadata",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Text1",
+    "FieldType": "Text",
+    "FieldIndex": 1,
+    "DisplayName": "__DISPLAY_NAME_5__",
+    "InternalName": "__INTERNAL_NAME_5__",
+    "Type": "mutiple-metadata",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "string",
+    "Rules": {
+      "source": "app",
+      "categoryId": "__ID_REDACTED__",
+      "max-selection": 16,
+      "placeholder": "__PLACEHOLDER_REDACTED__",
+      "metadata-treeselect": true,
+      "required": true
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

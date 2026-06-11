@@ -1,0 +1,343 @@
+{
+  "study": "service-desk-pro-form-workspace-runtime-layout",
+  "sourceExports": [
+    "Service Desk Pro (1).yap",
+    "Service Desk Pro-v1 - Init.yapk"
+  ],
+  "privacy": {
+    "ids": "redacted",
+    "rawPayloads": "excluded",
+    "tenantWorkspaceUploadIds": "excluded",
+    "privateUrls": "excluded"
+  },
+  "workspaceSurface": {
+    "alias": "form_workspace_surface",
+    "formKeyAlias": "SDP-WS",
+    "surfaceType": "approval/form workspace",
+    "pageUrlShape": {
+      "outerType": 1,
+      "outerPagetype": 1,
+      "embeddedFormdefPagetype": 1
+    },
+    "formdefAttrs": {
+      "hideHeader": true,
+      "backgroundColor": "#f2f2f2",
+      "containerContentWidth": "2",
+      "containerPadding": {
+        "top": 0,
+        "right": 0,
+        "bottom": 0,
+        "left": 0
+      },
+      "containerBackgroundColor": "#fff"
+    },
+    "rootChildren": [
+      "hidden_helper_list_control",
+      "form_workspace_shell"
+    ]
+  },
+  "formWorkspaceShell": {
+    "alias": "form_workspace_shell",
+    "controlType": "container",
+    "role": "root visible workspace layout container",
+    "placement": {
+      "common.pos": "absolute",
+      "common.hor": "center",
+      "common.ver": "center"
+    },
+    "layout": {
+      "style.direction": "row",
+      "style.gap": 0
+    },
+    "children": [
+      "left_help_desk_navigation_panel",
+      "ticket_collection_panel",
+      "selected_ticket_workspace_region"
+    ],
+    "generationRule": "Do not use default container layout; the shell must declare row direction and explicit placement before any panel controls are added."
+  },
+  "panels": {
+    "left_help_desk_navigation_panel": {
+      "controlType": "container",
+      "width": {
+        "style.widthtype": "3",
+        "style.width": 400
+      },
+      "height": {
+        "style.height": "2",
+        "style.cushei": 100,
+        "style.cusheiu": "%"
+      },
+      "overflow": "scroll",
+      "gap": 0,
+      "background": "var(--cus-c--bgGrey100)",
+      "headerRow": {
+        "height": "1",
+        "minheight": 52,
+        "direction": "row",
+        "align_items": "center",
+        "justify_content": "flex-start",
+        "padding": {
+          "top": 10,
+          "right": 16,
+          "bottom": 10,
+          "left": 16
+        },
+        "bottomBorder": true
+      },
+      "bodyPadding": {
+        "top": 10,
+        "right": 16,
+        "bottom": 10,
+        "left": 16
+      },
+      "bottomRegion": {
+        "marginTop": "auto",
+        "bottom": "0px",
+        "direction": "row",
+        "topBorder": true,
+        "shadow": "subtle top shadow"
+      }
+    },
+    "ticket_collection_panel": {
+      "controlType": "container",
+      "width": {
+        "style.widthtype": "3",
+        "style.width": 500
+      },
+      "height": {
+        "style.height": "2",
+        "style.cushei": 100,
+        "style.cusheiu": "%"
+      },
+      "gap": 0,
+      "rightBorder": true,
+      "headerRow": {
+        "height": "1",
+        "minheight": 52,
+        "direction": "row",
+        "align_items": "center",
+        "justify_content": "space-between",
+        "gap": 10,
+        "padding": {
+          "top": 10,
+          "right": 10,
+          "bottom": 10,
+          "left": 10
+        },
+        "bottomBorder": true
+      },
+      "filterRow": {
+        "direction": "row",
+        "align_items": "center",
+        "justify_content": "space-between",
+        "padding": {
+          "top": 5,
+          "right": 10,
+          "bottom": 5,
+          "left": 10
+        }
+      },
+      "collectionBody": {
+        "common.container.size": "grow",
+        "customCss": "flex: 1 1 0",
+        "overflow": "scroll",
+        "padding": {
+          "top": 5,
+          "right": 10,
+          "bottom": 10,
+          "left": 10
+        }
+      }
+    },
+    "selected_ticket_workspace_region": {
+      "controlType": "container",
+      "height": {
+        "style.height": "2",
+        "style.cushei": 100,
+        "style.cusheiu": "%"
+      },
+      "direction": "column",
+      "gap": 0,
+      "children": [
+        "selected_ticket_visible_region",
+        "comment_update_bar"
+      ],
+      "visibleRegion": {
+        "height": "2",
+        "direction": "column",
+        "gap": 0,
+        "displayCondition": "shown when a current ticket variable is not empty"
+      },
+      "mainRow": {
+        "common.container.size": "grow",
+        "direction": "row"
+      }
+    },
+    "selected_ticket_conversation_panel": {
+      "controlType": "container",
+      "width": "fills remaining space",
+      "height": {
+        "style.height": "2",
+        "style.cushei": 100,
+        "style.cusheiu": "%"
+      },
+      "overflow": "scroll",
+      "gap": 20,
+      "customCss": "flex: 1 1 0",
+      "padding": {
+        "top": 20,
+        "right": 16,
+        "bottom": 10,
+        "left": 16
+      }
+    },
+    "right_ticket_attributes_panel": {
+      "controlType": "container",
+      "width": {
+        "style.widthtype": "3",
+        "style.width": 420
+      },
+      "height": {
+        "style.height": "2",
+        "style.cushei": 100,
+        "style.cusheiu": "%"
+      },
+      "overflow": "visible outer with scrollable body",
+      "gap": 0,
+      "justify_content": "flex-start",
+      "leftBorder": true,
+      "zIndex": 2,
+      "headerRow": {
+        "height": "1",
+        "minheight": 52,
+        "direction": "row",
+        "align_items": "center",
+        "justify_content": "flex-start",
+        "gap": 10,
+        "padding": {
+          "top": 10,
+          "right": 16,
+          "bottom": 10,
+          "left": 16
+        },
+        "bottomBorder": true
+      },
+      "body": {
+        "customCss": "flex: 1 1 0",
+        "overflow": "scroll",
+        "gap": 10,
+        "padding": {
+          "top": 10,
+          "right": 10,
+          "bottom": 10,
+          "left": 10
+        }
+      }
+    }
+  },
+  "reusableControlPatterns": {
+    "nav_menu_item_container": {
+      "controlType": "container",
+      "direction": "row",
+      "gap": 6,
+      "align_items": "center",
+      "padding": {
+        "top": 8,
+        "right": 10,
+        "bottom": 8,
+        "left": 10
+      },
+      "borderRadius": 6,
+      "hoverBackground": "#ffffff",
+      "children": [
+        "inline_icon_or_user_control",
+        "heading_text_control"
+      ],
+      "action": "form action sets filter variables"
+    },
+    "ticket_collection_item_container": {
+      "controlType": "container",
+      "direction": "row",
+      "padding": {
+        "top": 12,
+        "right": 12,
+        "bottom": 12,
+        "left": 6
+      },
+      "borderRadius": 12,
+      "normalBackground": "rgba(7, 22, 56, 0.05)",
+      "hoverBackground": "rgba(7, 22, 56, 0.06)",
+      "selectedState": "style rule compares current-ticket variable to collection item id",
+      "action": "click action sets current-ticket variable from collection item id"
+    },
+    "detail_field_row_container": {
+      "controlType": "container",
+      "direction": "row",
+      "gap": 5,
+      "align_items": "center",
+      "justify_content": "space-between",
+      "padding": 6,
+      "children": [
+        "label heading",
+        "dynamic-field or dynamic-user"
+      ]
+    },
+    "long_detail_field_container": {
+      "controlType": "container",
+      "direction": "column",
+      "gap": 5,
+      "align_items": "flex-start",
+      "justify_content": "flex-start",
+      "padding": 6
+    },
+    "comment_update_bar": {
+      "controlType": "container",
+      "direction": "row",
+      "marginTop": "auto",
+      "bottom": "0px",
+      "topBorder": true,
+      "shadow": "subtle top shadow",
+      "children": [
+        "dynamic-user",
+        "richtext",
+        "identity-picker",
+        "file-upload-merge",
+        "action_button"
+      ]
+    },
+    "icon_control": {
+      "controlType": "icon",
+      "common.positioning.widthtype": "2",
+      "typicalSizes": [
+        13,
+        14,
+        18
+      ],
+      "generationRule": "Use inline width and bounded size; never allow full-width/block icons inside narrow panels."
+    }
+  },
+  "actionAndStatePatterns": {
+    "filterVariables": [
+      "current view",
+      "current role",
+      "current mobile view",
+      "priority filter",
+      "status filter",
+      "search visibility",
+      "hide navigation panel",
+      "hide details panel",
+      "current ticket item"
+    ],
+    "navAction": "menu container click executes set-variable steps and refresh/display rules",
+    "collectionFilter": "collection data/filter references form variables and current user context",
+    "selectedRecord": "ticket item click stores collection item id into current-ticket variable",
+    "detailBinding": "selected workspace and attributes panel use dynamic-field/dynamic-user controls bound through selected/current-ticket state",
+    "collapseExpand": "icon or icon container actions toggle panel visibility variables"
+  },
+  "brokenSmokeFailurePattern": {
+    "symptom": "visible content squeezed into narrow vertical text columns",
+    "likelyCause": "generic/default containers lacked explicit width, height, row direction, overflow, align-items, justify-content, gap, and bounded icon/text width behavior",
+    "validatorImplication": "a package claiming multi_column_form_workspace_shell must fail before signing/install if these runtime layout properties are absent"
+  }
+}

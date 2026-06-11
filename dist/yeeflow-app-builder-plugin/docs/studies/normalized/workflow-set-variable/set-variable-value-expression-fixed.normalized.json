@@ -1,0 +1,70 @@
+{
+  "proofLevel": "export-proven",
+  "workflowHost": "approval-form-workflow",
+  "workflowType": 2,
+  "internalControlType": "SetVariableTask",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Variable",
+  "formtype": "current",
+  "target": {
+    "kind": "current-workflow",
+    "data": null,
+    "formids": ""
+  },
+  "variablesSetCount": 1,
+  "variableTypes": [
+    "text"
+  ],
+  "valueExpressionKinds": {
+    "hasStaticValue": true,
+    "hasWorkflowVariableValue": true,
+    "hasListFieldValue": false
+  },
+  "variablesetting": [
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "SingleLine1",
+      "name": "Single Line 1",
+      "type": "text",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr",
+          "op",
+          "str"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "functions": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "name": "Workflow Variables:RequestType"
+          }
+        ],
+        "redactedTokens": [
+          {
+            "type": "str",
+            "value": "ABC"
+          },
+          {
+            "type": "op",
+            "op": "&"
+          },
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "id": "RequestType",
+            "type": "expr",
+            "name": "Workflow Variables:RequestType"
+          }
+        ]
+      }
+    }
+  ],
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

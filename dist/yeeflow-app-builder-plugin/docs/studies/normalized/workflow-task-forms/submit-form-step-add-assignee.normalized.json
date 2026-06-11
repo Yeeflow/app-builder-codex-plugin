@@ -1,0 +1,56 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Action Approval Test.ywf",
+  "taskForm": "WARTB Task3",
+  "actionName": "Add assignee button clicked",
+  "submitStep": {
+    "name": "Add assignees",
+    "submitType": "5",
+    "inferredOperation": "add-assignee",
+    "fieldPresence": {
+      "comment": true,
+      "forword": true,
+      "remark": true,
+      "assignee": true
+    },
+    "expressionSources": {
+      "comment": [
+        {
+          "exprType": "variable",
+          "valueType": "text",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Task comments"
+        }
+      ],
+      "forword": [
+        {
+          "exprType": "variable",
+          "valueType": "user",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Another User"
+        }
+      ],
+      "remark": [
+        {
+          "exprType": "variable",
+          "valueType": "text",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Task comments"
+        }
+      ],
+      "assignee": [
+        {
+          "exprType": "variable",
+          "valueType": "user",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Another User"
+        }
+      ]
+    }
+  },
+  "buttonBinding": {
+    "buttonLabel": "Add others to this task",
+    "buttonControlAction": "<REDACTED_ACTION_ID>",
+    "resolvedToThisAction": true
+  }
+}

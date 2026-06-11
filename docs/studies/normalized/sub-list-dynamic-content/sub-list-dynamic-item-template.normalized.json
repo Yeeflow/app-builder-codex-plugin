@@ -1,0 +1,47 @@
+{
+  "name": "sub-list-dynamic-item-template",
+  "proof": "export-proven from Approval Form export; identifiers are synthetic",
+  "template": {
+    "type": "list-body",
+    "children": [
+      {
+        "type": "container",
+        "children": [
+          {
+            "type": "input",
+            "label": "field1",
+            "binding": "__ROW_FIELD_1__",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "__LIST_VARIABLE_ID__",
+              "list_control_id": "__SUB_LIST_CONTROL_ID__"
+            }
+          },
+          {
+            "type": "input_number",
+            "label": "field2",
+            "binding": "__ROW_FIELD_2__",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "__LIST_VARIABLE_ID__",
+              "list_control_id": "__SUB_LIST_CONTROL_ID__"
+            }
+          },
+          {
+            "type": "action_button",
+            "label": "Duplicate",
+            "attrs": {
+              "control_action": "__LOCAL_SUB_LIST_ACTION_ID__"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "bindingRules": [
+    "Row field controls bind to fields from the associated listref row schema.",
+    "attrs.list_field is true for row field controls inside the item template.",
+    "attrs.list_field_binding equals the parent Sub List variable binding.",
+    "attrs.list_control_id points to the parent Sub List control."
+  ]
+}

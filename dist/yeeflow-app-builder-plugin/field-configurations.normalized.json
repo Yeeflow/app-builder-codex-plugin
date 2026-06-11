@@ -1,0 +1,3009 @@
+{
+  "generatedFrom": "field-configurations.json",
+  "generatedAt": "2026-05-14T00:00:00.000Z",
+  "sourceEntryCount": 35,
+  "typeCount": 27,
+  "byFieldType": {
+    "autonumber": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764751361218_gnkuy1j3u"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.prefix.value": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.suffix.value": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.minDigits": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.startNum": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DisplayName",
+        "Rules.minDigits",
+        "Rules.prefix.value",
+        "Rules.startNum",
+        "Rules.suffix.value",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "schema-supported-runtime-unproven",
+      "notes": [
+        "Schema reference exists, but runtime generation should be isolated before promotion."
+      ]
+    },
+    "calculated-column": {
+      "sourceEntryIds": [
+        "config_1765353914110_ukqeyuoz1"
+      ],
+      "properties": {
+        "Rules.calculated": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        },
+        "Rules.calculated_result.type": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "input",
+            "text",
+            "number",
+            "currency",
+            "datetime",
+            "boolean"
+          ]
+        },
+        "Rules.calculated_result.attrs": {
+          "valueTypes": [
+            "object"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "Rules.calculated",
+        "Rules.calculated_result.attrs",
+        "Rules.calculated_result.type"
+      ],
+      "enumPaths": [
+        "Rules.calculated_result.type"
+      ],
+      "generationSupportLevel": "risky-deferred",
+      "notes": [
+        "Do not generate automatically without a focused export/import proof."
+      ]
+    },
+    "checkbox": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764660742371_cmsqz8cm2",
+        "config_1764661354977_w4kv5xyqy"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.displayStyle": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "dropdown",
+            "checkbox"
+          ]
+        },
+        "Rules.choices": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "Rules.choices",
+        "Rules.displayStyle",
+        "Rules.placeholder",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.displayStyle"
+      ],
+      "generationSupportLevel": "schema-supported-runtime-unproven",
+      "notes": [
+        "Schema reference exists, but runtime generation should be isolated before promotion."
+      ]
+    },
+    "cost-center-picker": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764664185918_3wtvspjwb"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.multiple": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.identity-maxselection": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.identity-maxselection",
+        "Rules.multiple",
+        "Rules.placeholder",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "environment-dependent",
+      "notes": [
+        "May depend on tenant users, organization data, files, signatures, or other environment resources."
+      ]
+    },
+    "currency": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764656675330_ap1h5poqp",
+        "config_1764656675330_ap1h5poqy",
+        "config_1764657804952_ruhwf57x8"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.displayThousandths": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        "Rules.rounded-to": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.number_min": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.number_max": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.currencyCode": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.displayFormat": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "code",
+            "symbol"
+          ]
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.currencyCode",
+        "Rules.displayFormat",
+        "Rules.displayThousandths",
+        "Rules.number_max",
+        "Rules.number_min",
+        "Rules.placeholder",
+        "Rules.required",
+        "Rules.rounded-to",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.displayFormat",
+        "Rules.displayThousandths"
+      ],
+      "generationSupportLevel": "proven-safe",
+      "notes": []
+    },
+    "datepicker": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764663099333_19kb2e7r8",
+        "config_1764663736326_ni6dalnu3"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.date_picker": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "default",
+            "date",
+            "month"
+          ]
+        },
+        "Rules.showtime": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.disable_now_button": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.dateformat": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "0",
+            "1",
+            "2"
+          ]
+        },
+        "Rules.minuteStep": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.date_picker",
+        "Rules.dateformat",
+        "Rules.disable_now_button",
+        "Rules.minuteStep",
+        "Rules.placeholder",
+        "Rules.required",
+        "Rules.showtime",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.date_picker",
+        "Rules.dateformat"
+      ],
+      "generationSupportLevel": "proven-safe",
+      "notes": []
+    },
+    "file-upload": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764748210521_umnaxkx90"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.file_multiple": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.maxsize": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.file_maxcount": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.file_typeslimit": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.file_types.value": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        },
+        "Rules.file_types.cusValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "Rules.file_maxcount",
+        "Rules.file_multiple",
+        "Rules.file_types.cusValue",
+        "Rules.file_types.value",
+        "Rules.file_typeslimit",
+        "Rules.maxsize",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "environment-dependent",
+      "notes": [
+        "May depend on tenant users, organization data, files, signatures, or other environment resources."
+      ]
+    },
+    "hyperlink": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764750606979_8yqrjwb41"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.hyperlink_open": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "_self",
+            "_blank"
+          ]
+        },
+        "Rules.hyperlink_buttonname": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "Rules.hyperlink_buttonname",
+        "Rules.hyperlink_open",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.hyperlink_open"
+      ],
+      "generationSupportLevel": "schema-supported-runtime-unproven",
+      "notes": [
+        "Schema reference exists, but runtime generation should be isolated before promotion."
+      ]
+    },
+    "icon-upload": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764748576749_3n1k0d6kb"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.controlmultiple": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.maxselection": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.picture_size_limit": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "Rules.controlmultiple",
+        "Rules.maxselection",
+        "Rules.picture_size_limit",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "environment-dependent",
+      "notes": [
+        "May depend on tenant users, organization data, files, signatures, or other environment resources."
+      ]
+    },
+    "identity-picker": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764664185918_3wtvspjwb"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.multiple": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.identity-maxselection": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.identity-maxselection",
+        "Rules.multiple",
+        "Rules.placeholder",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "environment-dependent",
+      "notes": [
+        "May depend on tenant users, organization data, files, signatures, or other environment resources."
+      ]
+    },
+    "input": {
+      "sourceEntryIds": [
+        "3",
+        "4",
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.input-maxlength": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.allowScan": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.encrypt": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.allowScan",
+        "Rules.encrypt",
+        "Rules.input-maxlength",
+        "Rules.placeholder",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "proven-safe",
+      "notes": []
+    },
+    "input_number": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764656675330_ap1h5poqp",
+        "config_1764656675330_ap1h5poqy",
+        "config_1764657804952_ruhwf57x9"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.displayThousandths": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "0",
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        "Rules.rounded-to": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.number_min": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.number_max": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.number_step": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.displayThousandths",
+        "Rules.number_max",
+        "Rules.number_min",
+        "Rules.number_step",
+        "Rules.placeholder",
+        "Rules.required",
+        "Rules.rounded-to",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.displayThousandths"
+      ],
+      "generationSupportLevel": "proven-safe",
+      "notes": []
+    },
+    "list": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764753733363_yae5oq1v0"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.list-variables": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DisplayName",
+        "Rules.list-variables",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "risky-deferred",
+      "notes": [
+        "Do not generate automatically without a focused export/import proof."
+      ]
+    },
+    "location-picker": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.placeholder",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "environment-dependent",
+      "notes": [
+        "May depend on tenant users, organization data, files, signatures, or other environment resources."
+      ]
+    },
+    "lookup": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1765352997768_tiajg0p8g"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.multiple": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.max-selection": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.displayStyle": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "-1",
+            "dropdown",
+            "datapicker"
+          ]
+        },
+        "Rules.appid": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.listid": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.listsetid": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.listfield": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.list_tooltip_field": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.addition": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        },
+        "Rules.search-scope": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        "Rules.search-fields": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        },
+        "Rules.listfilter": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        },
+        "Rules.sort-first.SortByDesc": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.sort-first.SortName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.sort-second.SortByDesc": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.sort-second.SortName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DisplayName",
+        "IsUnique",
+        "Rules.addition",
+        "Rules.appid",
+        "Rules.displayStyle",
+        "Rules.list_tooltip_field",
+        "Rules.listfield",
+        "Rules.listfilter",
+        "Rules.listid",
+        "Rules.listsetid",
+        "Rules.max-selection",
+        "Rules.multiple",
+        "Rules.placeholder",
+        "Rules.required",
+        "Rules.search-fields",
+        "Rules.search-scope",
+        "Rules.sort-first.SortByDesc",
+        "Rules.sort-first.SortName",
+        "Rules.sort-second.SortByDesc",
+        "Rules.sort-second.SortName",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.displayStyle",
+        "Rules.search-scope"
+      ],
+      "generationSupportLevel": "proven-safe",
+      "notes": []
+    },
+    "metadata": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1765353733366_xr1rjo19v"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.source": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "0",
+            "app"
+          ]
+        },
+        "Rules.categoryId": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.parentId": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.metadata-treeselect": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.categoryId",
+        "Rules.metadata-treeselect",
+        "Rules.parentId",
+        "Rules.placeholder",
+        "Rules.required",
+        "Rules.source",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.source"
+      ],
+      "generationSupportLevel": "risky-deferred",
+      "notes": [
+        "Do not generate automatically without a focused export/import proof."
+      ]
+    },
+    "mutiple-metadata": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1765353733366_xr1rjo19v",
+        "config_1765353914110_ukqeyuozb"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.source": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "0",
+            "app"
+          ]
+        },
+        "Rules.categoryId": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.parentId": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.metadata-treeselect": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.max-selection": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "Rules.categoryId",
+        "Rules.max-selection",
+        "Rules.metadata-treeselect",
+        "Rules.parentId",
+        "Rules.placeholder",
+        "Rules.required",
+        "Rules.source",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.source"
+      ],
+      "generationSupportLevel": "risky-deferred",
+      "notes": [
+        "Do not generate automatically without a focused export/import proof."
+      ]
+    },
+    "organization-picker": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764664185918_3wtvspjwb",
+        "config_1764664665441_l3bxkgnur",
+        "config_1764665278521_s9tr8p320"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.multiple": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.identity-maxselection": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.parentId": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.metadata-treeselect": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.hierarchical-select": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "1",
+            "2",
+            "3"
+          ]
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.hierarchical-select",
+        "Rules.identity-maxselection",
+        "Rules.metadata-treeselect",
+        "Rules.multiple",
+        "Rules.parentId",
+        "Rules.placeholder",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.hierarchical-select"
+      ],
+      "generationSupportLevel": "environment-dependent",
+      "notes": [
+        "May depend on tenant users, organization data, files, signatures, or other environment resources."
+      ]
+    },
+    "percent": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764656675330_ap1h5poqy"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.rounded-to": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.number_min": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.number_max": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.number_max",
+        "Rules.number_min",
+        "Rules.placeholder",
+        "Rules.required",
+        "Rules.rounded-to",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "schema-supported-runtime-unproven",
+      "notes": [
+        "Schema reference exists, but runtime generation should be isolated before promotion."
+      ]
+    },
+    "radio": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764660742371_cmsqz8cm1",
+        "config_1764661354977_w4kv5xyqy",
+        "config_1764661685007_qwtg5fvl1",
+        "config_1764661685007_qwtg5fvlf"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.displayStyle": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "radio",
+            "dropdown"
+          ]
+        },
+        "Rules.choices": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        },
+        "Rules.show_color": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.color_choices": {
+          "valueTypes": [
+            "array"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.choices",
+        "Rules.color_choices",
+        "Rules.displayStyle",
+        "Rules.placeholder",
+        "Rules.required",
+        "Rules.show_color",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.displayStyle"
+      ],
+      "generationSupportLevel": "proven-safe",
+      "notes": []
+    },
+    "rate": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764749295873_tutmijlmj"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.rate-type": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "star",
+            "heart",
+            "number",
+            "custom"
+          ]
+        },
+        "Rules.icon": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.rate-count": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.rate-allowHalf": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "Rules.icon",
+        "Rules.rate-allowHalf",
+        "Rules.rate-count",
+        "Rules.rate-type",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.rate-type"
+      ],
+      "generationSupportLevel": "schema-supported-runtime-unproven",
+      "notes": [
+        "Schema reference exists, but runtime generation should be isolated before promotion."
+      ]
+    },
+    "richtext": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764647068776_zcaervwrv"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.richtext-type": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "all",
+            "simple",
+            "nobar"
+          ]
+        }
+      },
+      "propertyPaths": [
+        "DisplayName",
+        "Rules.required",
+        "Rules.richtext-type",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.richtext-type"
+      ],
+      "generationSupportLevel": "schema-supported-runtime-unproven",
+      "notes": [
+        "Schema reference exists, but runtime generation should be isolated before promotion."
+      ]
+    },
+    "signer": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qc"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DisplayName",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "environment-dependent",
+      "notes": [
+        "May depend on tenant users, organization data, files, signatures, or other environment resources."
+      ]
+    },
+    "switch": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764660742371_cmsqz8cmd"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.displayStyle": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "default",
+            "decision"
+          ]
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.displayStyle",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.displayStyle"
+      ],
+      "generationSupportLevel": "proven-safe",
+      "notes": []
+    },
+    "tag": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764752527440_7u51pl9l6"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.multiple": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.process-field-tag-maxcount": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        },
+        "Rules.customTags": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.source": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "0",
+            "app"
+          ]
+        },
+        "Rules.category": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DisplayName",
+        "Rules.category",
+        "Rules.customTags",
+        "Rules.multiple",
+        "Rules.process-field-tag-maxcount",
+        "Rules.required",
+        "Rules.source",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.source"
+      ],
+      "generationSupportLevel": "schema-supported-runtime-unproven",
+      "notes": [
+        "Schema reference exists, but runtime generation should be isolated before promotion."
+      ]
+    },
+    "textarea": {
+      "sourceEntryIds": [
+        "3",
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.input-maxlength": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "Rules.input-maxlength",
+        "Rules.placeholder",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [],
+      "generationSupportLevel": "proven-safe",
+      "notes": []
+    },
+    "time": {
+      "sourceEntryIds": [
+        "config_1764646652593_j7e0g23qa",
+        "config_1764646652593_j7e0g23qb",
+        "config_1764646652593_j7e0g23qc",
+        "config_1764646652593_j7e0g23qd",
+        "config_1764646652593_j7e0g23qs",
+        "config_1764663736326_ni6dalnu2"
+      ],
+      "properties": {
+        "Type": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DisplayName": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "DefaultValue": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.required": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "IsUnique": {
+          "valueTypes": [
+            "boolean"
+          ],
+          "allowDevice": false
+        },
+        "Rules.placeholder": {
+          "valueTypes": [
+            "string"
+          ],
+          "allowDevice": false
+        },
+        "Rules.dateformat": {
+          "valueTypes": [
+            "enum"
+          ],
+          "allowDevice": false,
+          "enum": [
+            "0",
+            "1",
+            "2"
+          ]
+        },
+        "Rules.minuteStep": {
+          "valueTypes": [
+            "number"
+          ],
+          "allowDevice": false
+        }
+      },
+      "propertyPaths": [
+        "DefaultValue",
+        "DisplayName",
+        "IsUnique",
+        "Rules.dateformat",
+        "Rules.minuteStep",
+        "Rules.placeholder",
+        "Rules.required",
+        "Type"
+      ],
+      "enumPaths": [
+        "Rules.dateformat"
+      ],
+      "generationSupportLevel": "schema-supported-runtime-unproven",
+      "notes": [
+        "Schema reference exists, but runtime generation should be isolated before promotion."
+      ]
+    }
+  },
+  "commonProperties": {
+    "DefaultValue": [
+      "input",
+      "textarea",
+      "input_number",
+      "percent",
+      "currency",
+      "metadata",
+      "mutiple-metadata",
+      "switch",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "icon-upload",
+      "file-upload",
+      "rate",
+      "hyperlink"
+    ],
+    "DisplayName": [
+      "input",
+      "textarea",
+      "richtext",
+      "input_number",
+      "percent",
+      "currency",
+      "metadata",
+      "mutiple-metadata",
+      "switch",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "icon-upload",
+      "file-upload",
+      "rate",
+      "hyperlink",
+      "signer",
+      "list",
+      "tag",
+      "autonumber",
+      "lookup"
+    ],
+    "IsUnique": [
+      "input",
+      "input_number",
+      "percent",
+      "currency",
+      "switch",
+      "radio",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "lookup",
+      "metadata"
+    ],
+    "Rules.placeholder": [
+      "input",
+      "textarea",
+      "input_number",
+      "percent",
+      "currency",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "lookup",
+      "mutiple-metadata",
+      "metadata"
+    ],
+    "Rules.required": [
+      "input",
+      "textarea",
+      "richtext",
+      "input_number",
+      "percent",
+      "currency",
+      "metadata",
+      "mutiple-metadata",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "icon-upload",
+      "file-upload",
+      "rate",
+      "hyperlink",
+      "list",
+      "signer",
+      "tag",
+      "lookup"
+    ],
+    "Type": [
+      "input",
+      "textarea",
+      "richtext",
+      "input_number",
+      "percent",
+      "currency",
+      "metadata",
+      "mutiple-metadata",
+      "switch",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "icon-upload",
+      "file-upload",
+      "rate",
+      "hyperlink",
+      "signer",
+      "list",
+      "tag",
+      "autonumber",
+      "lookup"
+    ]
+  },
+  "enumIndex": {
+    "Rules.calculated_result.type": {
+      "input": "Single line field",
+      "text": "Multiple line field",
+      "number": "Number field",
+      "currency": "Currency field",
+      "datetime": "Datetime field",
+      "boolean": "Boolean field"
+    },
+    "Rules.date_picker": {
+      "default": "Default to date picker",
+      "date": "Date picker",
+      "month": "Month picker"
+    },
+    "Rules.dateformat": {
+      "0": "HH:MM:SS",
+      "1": "HH:MM",
+      "2": "HH"
+    },
+    "Rules.displayFormat": {
+      "code": "Display the currency code, such as USD 100",
+      "symbol": "Display the currency symbol, such as $100"
+    },
+    "Rules.displayStyle": {
+      "default": "Display as Switch",
+      "decision": "Display as Tick box",
+      "radio": "Display as Radio button",
+      "dropdown": "Display as a dropdown box",
+      "checkbox": "Display as Checkbox",
+      "-1": "Default display mode",
+      "datapicker": "Display as a picker"
+    },
+    "Rules.displayThousandths": {
+      "0": "1234567.89",
+      "1": "1,234,567.89",
+      "2": "1.234.567,89",
+      "3": "1 234 567,89"
+    },
+    "Rules.hierarchical-select": {
+      "1": "Default mode (Linked selection).",
+      "2": "Linked selection: When all child nodes of a parent node are selected, only save the parent node ID.",
+      "3": "Independent selection: Parent and child nodes are not linked and can save both the parent node ID and the child node ID simultaneously."
+    },
+    "Rules.hyperlink_open": {
+      "_self": "Open in the same browser tab or window.",
+      "_blank": "Open in a new browser tab or window."
+    },
+    "Rules.rate-type": {
+      "star": "Display star icon as option",
+      "heart": "Display heart icon as option",
+      "number": "Display number icon as option",
+      "custom": "Display a custom icon"
+    },
+    "Rules.richtext-type": {
+      "all": "Full (Show all editing tools)",
+      "simple": "Simple (Show basic formatting tools)",
+      "nobar": "No toobar displayed, a simplified user interface in rich text editing"
+    },
+    "Rules.search-scope": {
+      "1": "Search All fields",
+      "2": "Search display fields only",
+      "3": "Search fields defined in 'Rules.search-fields' property"
+    },
+    "Rules.source": {
+      "0": "Global metadata",
+      "app": "Current app metadata"
+    }
+  },
+  "propertyPathIndex": {
+    "DefaultValue": [
+      "input",
+      "textarea",
+      "input_number",
+      "percent",
+      "currency",
+      "metadata",
+      "mutiple-metadata",
+      "switch",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "icon-upload",
+      "file-upload",
+      "rate",
+      "hyperlink"
+    ],
+    "DisplayName": [
+      "input",
+      "textarea",
+      "richtext",
+      "input_number",
+      "percent",
+      "currency",
+      "metadata",
+      "mutiple-metadata",
+      "switch",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "icon-upload",
+      "file-upload",
+      "rate",
+      "hyperlink",
+      "signer",
+      "list",
+      "tag",
+      "autonumber",
+      "lookup"
+    ],
+    "IsUnique": [
+      "input",
+      "input_number",
+      "percent",
+      "currency",
+      "switch",
+      "radio",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "lookup",
+      "metadata"
+    ],
+    "Rules.addition": [
+      "lookup"
+    ],
+    "Rules.allowScan": [
+      "input"
+    ],
+    "Rules.appid": [
+      "lookup"
+    ],
+    "Rules.calculated": [
+      "calculated-column"
+    ],
+    "Rules.calculated_result.attrs": [
+      "calculated-column"
+    ],
+    "Rules.calculated_result.type": [
+      "calculated-column"
+    ],
+    "Rules.category": [
+      "tag"
+    ],
+    "Rules.categoryId": [
+      "mutiple-metadata",
+      "metadata"
+    ],
+    "Rules.choices": [
+      "radio",
+      "checkbox"
+    ],
+    "Rules.color_choices": [
+      "radio"
+    ],
+    "Rules.controlmultiple": [
+      "icon-upload"
+    ],
+    "Rules.currencyCode": [
+      "currency"
+    ],
+    "Rules.customTags": [
+      "tag"
+    ],
+    "Rules.date_picker": [
+      "datepicker"
+    ],
+    "Rules.dateformat": [
+      "time",
+      "datepicker"
+    ],
+    "Rules.disable_now_button": [
+      "datepicker"
+    ],
+    "Rules.displayFormat": [
+      "currency"
+    ],
+    "Rules.displayStyle": [
+      "switch",
+      "radio",
+      "checkbox",
+      "lookup"
+    ],
+    "Rules.displayThousandths": [
+      "input_number",
+      "currency"
+    ],
+    "Rules.encrypt": [
+      "input"
+    ],
+    "Rules.file_maxcount": [
+      "file-upload"
+    ],
+    "Rules.file_multiple": [
+      "file-upload"
+    ],
+    "Rules.file_types.cusValue": [
+      "file-upload"
+    ],
+    "Rules.file_types.value": [
+      "file-upload"
+    ],
+    "Rules.file_typeslimit": [
+      "file-upload"
+    ],
+    "Rules.hierarchical-select": [
+      "organization-picker"
+    ],
+    "Rules.hyperlink_buttonname": [
+      "hyperlink"
+    ],
+    "Rules.hyperlink_open": [
+      "hyperlink"
+    ],
+    "Rules.icon": [
+      "rate"
+    ],
+    "Rules.identity-maxselection": [
+      "identity-picker",
+      "organization-picker",
+      "cost-center-picker"
+    ],
+    "Rules.input-maxlength": [
+      "input",
+      "textarea"
+    ],
+    "Rules.list_tooltip_field": [
+      "lookup"
+    ],
+    "Rules.list-variables": [
+      "list"
+    ],
+    "Rules.listfield": [
+      "lookup"
+    ],
+    "Rules.listfilter": [
+      "lookup"
+    ],
+    "Rules.listid": [
+      "lookup"
+    ],
+    "Rules.listsetid": [
+      "lookup"
+    ],
+    "Rules.max-selection": [
+      "lookup",
+      "mutiple-metadata"
+    ],
+    "Rules.maxselection": [
+      "icon-upload"
+    ],
+    "Rules.maxsize": [
+      "file-upload"
+    ],
+    "Rules.metadata-treeselect": [
+      "organization-picker",
+      "mutiple-metadata",
+      "metadata"
+    ],
+    "Rules.minDigits": [
+      "autonumber"
+    ],
+    "Rules.minuteStep": [
+      "time",
+      "datepicker"
+    ],
+    "Rules.multiple": [
+      "identity-picker",
+      "organization-picker",
+      "cost-center-picker",
+      "tag",
+      "lookup"
+    ],
+    "Rules.number_max": [
+      "input_number",
+      "percent",
+      "currency"
+    ],
+    "Rules.number_min": [
+      "input_number",
+      "percent",
+      "currency"
+    ],
+    "Rules.number_step": [
+      "input_number"
+    ],
+    "Rules.parentId": [
+      "organization-picker",
+      "mutiple-metadata",
+      "metadata"
+    ],
+    "Rules.picture_size_limit": [
+      "icon-upload"
+    ],
+    "Rules.placeholder": [
+      "input",
+      "textarea",
+      "input_number",
+      "percent",
+      "currency",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "lookup",
+      "mutiple-metadata",
+      "metadata"
+    ],
+    "Rules.prefix.value": [
+      "autonumber"
+    ],
+    "Rules.process-field-tag-maxcount": [
+      "tag"
+    ],
+    "Rules.rate-allowHalf": [
+      "rate"
+    ],
+    "Rules.rate-count": [
+      "rate"
+    ],
+    "Rules.rate-type": [
+      "rate"
+    ],
+    "Rules.required": [
+      "input",
+      "textarea",
+      "richtext",
+      "input_number",
+      "percent",
+      "currency",
+      "metadata",
+      "mutiple-metadata",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "icon-upload",
+      "file-upload",
+      "rate",
+      "hyperlink",
+      "list",
+      "signer",
+      "tag",
+      "lookup"
+    ],
+    "Rules.richtext-type": [
+      "richtext"
+    ],
+    "Rules.rounded-to": [
+      "input_number",
+      "percent",
+      "currency"
+    ],
+    "Rules.search-fields": [
+      "lookup"
+    ],
+    "Rules.search-scope": [
+      "lookup"
+    ],
+    "Rules.show_color": [
+      "radio"
+    ],
+    "Rules.showtime": [
+      "datepicker"
+    ],
+    "Rules.sort-first.SortByDesc": [
+      "lookup"
+    ],
+    "Rules.sort-first.SortName": [
+      "lookup"
+    ],
+    "Rules.sort-second.SortByDesc": [
+      "lookup"
+    ],
+    "Rules.sort-second.SortName": [
+      "lookup"
+    ],
+    "Rules.source": [
+      "tag",
+      "mutiple-metadata",
+      "metadata"
+    ],
+    "Rules.startNum": [
+      "autonumber"
+    ],
+    "Rules.suffix.value": [
+      "autonumber"
+    ],
+    "Type": [
+      "input",
+      "textarea",
+      "richtext",
+      "input_number",
+      "percent",
+      "currency",
+      "metadata",
+      "mutiple-metadata",
+      "switch",
+      "radio",
+      "checkbox",
+      "datepicker",
+      "time",
+      "identity-picker",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "icon-upload",
+      "file-upload",
+      "rate",
+      "hyperlink",
+      "signer",
+      "list",
+      "tag",
+      "autonumber",
+      "lookup"
+    ]
+  },
+  "valueTypeIndex": {
+    "array": [
+      "Rules.choices",
+      "Rules.color_choices",
+      "Rules.file_types.value",
+      "Rules.list-variables",
+      "Rules.addition",
+      "Rules.search-fields",
+      "Rules.listfilter",
+      "Rules.calculated"
+    ],
+    "boolean": [
+      "Rules.required",
+      "IsUnique",
+      "Rules.allowScan",
+      "Rules.encrypt",
+      "Rules.show_color",
+      "Rules.showtime",
+      "Rules.disable_now_button",
+      "Rules.multiple",
+      "Rules.metadata-treeselect",
+      "Rules.file_multiple",
+      "Rules.file_typeslimit",
+      "Rules.controlmultiple",
+      "Rules.rate-allowHalf",
+      "Rules.customTags",
+      "Rules.sort-first.SortByDesc",
+      "Rules.sort-second.SortByDesc"
+    ],
+    "enum": [
+      "Rules.richtext-type",
+      "Rules.displayThousandths",
+      "Rules.displayFormat",
+      "Rules.displayStyle",
+      "Rules.date_picker",
+      "Rules.dateformat",
+      "Rules.hierarchical-select",
+      "Rules.rate-type",
+      "Rules.hyperlink_open",
+      "Rules.source",
+      "Rules.search-scope",
+      "Rules.calculated_result.type"
+    ],
+    "number": [
+      "Rules.input-maxlength",
+      "Rules.rounded-to",
+      "Rules.number_min",
+      "Rules.number_max",
+      "Rules.number_step",
+      "Rules.minuteStep",
+      "Rules.identity-maxselection",
+      "Rules.maxsize",
+      "Rules.file_maxcount",
+      "Rules.maxselection",
+      "Rules.picture_size_limit",
+      "Rules.rate-count",
+      "Rules.minDigits",
+      "Rules.startNum",
+      "Rules.process-field-tag-maxcount",
+      "Rules.max-selection",
+      "Rules.appid"
+    ],
+    "object": [
+      "Rules.calculated_result.attrs"
+    ],
+    "string": [
+      "Type",
+      "DisplayName",
+      "DefaultValue",
+      "Rules.placeholder",
+      "Rules.currencyCode",
+      "Rules.parentId",
+      "Rules.file_types.cusValue",
+      "Rules.icon",
+      "Rules.hyperlink_buttonname",
+      "Rules.prefix.value",
+      "Rules.suffix.value",
+      "Rules.category",
+      "Rules.listid",
+      "Rules.listsetid",
+      "Rules.listfield",
+      "Rules.list_tooltip_field",
+      "Rules.sort-first.SortName",
+      "Rules.sort-second.SortName",
+      "Rules.categoryId"
+    ]
+  },
+  "fieldTypeGroups": {
+    "provenSafe": [
+      "currency",
+      "datepicker",
+      "input",
+      "input_number",
+      "lookup",
+      "radio",
+      "switch",
+      "textarea"
+    ],
+    "schemaSupportedRuntimeUnproven": [
+      "autonumber",
+      "checkbox",
+      "hyperlink",
+      "percent",
+      "rate",
+      "richtext",
+      "tag",
+      "time"
+    ],
+    "environmentDependent": [
+      "cost-center-picker",
+      "file-upload",
+      "icon-upload",
+      "identity-picker",
+      "location-picker",
+      "organization-picker",
+      "signer"
+    ],
+    "riskyDeferred": [
+      "calculated-column",
+      "list",
+      "metadata",
+      "mutiple-metadata"
+    ],
+    "schemaSupportedUnclassified": []
+  },
+  "notes": [
+    "Normalized for generator and validator guidance. This is not a full runtime proof for every schema-supported type.",
+    "Use errors only for unknown type, clearly invalid primitive type, invalid enum, or required metadata known from proven baselines.",
+    "Use warnings for schema-supported but runtime-unproven types."
+  ],
+  "controlToFieldMapping": {
+    "input": {
+      "fieldType": "Text",
+      "fieldControl": "input",
+      "support": "generation-safe",
+      "notes": "Default text mapping."
+    },
+    "textarea": {
+      "fieldType": "Text",
+      "fieldControl": "textarea",
+      "support": "generation-safe",
+      "notes": "Use for multiline text where the list field stores Text."
+    },
+    "richtext": {
+      "fieldType": "Text",
+      "fieldControl": "richtext",
+      "support": "schema-supported-runtime-unproven",
+      "fallback": "textarea"
+    },
+    "input_number": {
+      "fieldType": "Decimal",
+      "fieldControl": "input_number",
+      "support": "generation-safe"
+    },
+    "percent": {
+      "fieldType": "Decimal",
+      "fieldControl": "percent",
+      "support": "schema-supported-runtime-unproven",
+      "fallback": "input_number"
+    },
+    "currency": {
+      "fieldType": "Decimal",
+      "fieldControl": "currency",
+      "support": "generation-safe-with-rules"
+    },
+    "radio": {
+      "fieldType": "Text",
+      "fieldControl": "radio",
+      "support": "generation-safe",
+      "notes": "Use Rules.choices/options/items and store selected text."
+    },
+    "checkbox": {
+      "fieldType": "Text",
+      "fieldControl": "checkbox",
+      "support": "schema-supported-runtime-unproven",
+      "fallback": "radio or text label"
+    },
+    "switch": {
+      "fieldType": "Bit",
+      "fieldControl": "switch",
+      "support": "generation-safe"
+    },
+    "datepicker": {
+      "fieldType": "Datetime",
+      "fieldControl": "datepicker",
+      "support": "generation-safe-with-rules"
+    },
+    "time": {
+      "fieldType": "Text",
+      "fieldControl": "time",
+      "support": "fallback",
+      "fallback": "Text/input until time field runtime is proven"
+    },
+    "file-upload": {
+      "fieldType": "File",
+      "fieldControl": "file-upload",
+      "support": "deferred"
+    },
+    "icon-upload": {
+      "fieldType": "File",
+      "fieldControl": "icon-upload",
+      "support": "deferred"
+    },
+    "identity-picker": {
+      "fieldType": "Text",
+      "fieldControl": "input",
+      "support": "fallback",
+      "fallback": "Text/input display value unless user/person field metadata is proven"
+    },
+    "organization-picker": {
+      "fieldType": "Text",
+      "fieldControl": "input",
+      "support": "fallback"
+    },
+    "location-picker": {
+      "fieldType": "Text",
+      "fieldControl": "input",
+      "support": "fallback"
+    },
+    "cost-center-picker": {
+      "fieldType": "Text",
+      "fieldControl": "input",
+      "support": "fallback"
+    },
+    "lookup": {
+      "fieldType": "Text",
+      "fieldControl": "lookup",
+      "support": "generation-safe-with-local-target",
+      "notes": "Requires appid/listsetid/listid/listfield and resolved target list."
+    },
+    "lookup-list": {
+      "fieldType": "Text",
+      "fieldControl": "lookup-list",
+      "support": "deferred"
+    },
+    "list": {
+      "fieldType": "Text",
+      "fieldControl": "list",
+      "support": "schema-supported-persistence-deferred"
+    },
+    "signer": {
+      "fieldType": "Text",
+      "fieldControl": "signer",
+      "support": "deferred"
+    },
+    "tag": {
+      "fieldType": "Text",
+      "fieldControl": "tag",
+      "support": "fallback"
+    },
+    "metadata": {
+      "fieldType": "Text",
+      "fieldControl": "metadata",
+      "support": "fallback"
+    },
+    "mutiple-metadata": {
+      "fieldType": "Text",
+      "fieldControl": "mutiple-metadata",
+      "support": "fallback"
+    },
+    "hyperlink": {
+      "fieldType": "Text",
+      "fieldControl": "hyperlink",
+      "support": "fallback"
+    },
+    "rate": {
+      "fieldType": "Decimal",
+      "fieldControl": "rate",
+      "support": "fallback"
+    },
+    "calculated-column": {
+      "fieldType": "Calculated",
+      "fieldControl": "calculated-column",
+      "support": "data-list-only"
+    }
+  }
+}

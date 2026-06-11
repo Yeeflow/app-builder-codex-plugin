@@ -1,0 +1,12 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (2).yap",
+  "nodeType": "MultiAssignmentTask",
+  "pattern": "assignment-task-due-date-hours",
+  "normalizedConfig": {
+    "duedatedefinition": 120,
+    "duedatetype": "hour",
+    "isfromworkcalendar": null,
+    "duedateexpress": null
+  }
+}

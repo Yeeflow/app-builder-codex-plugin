@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[31]",
+    "childFieldPath": "Data.Childs[1].Defs[31]",
+    "fieldId": "field_22",
+    "key": "v_field_22",
+    "variableSource": "approval-variable",
+    "variableType": "img",
+    "variableRef": "field_22",
+    "reportFieldType": "icon-upload",
+    "storedType": "img",
+    "isSystem": false,
+    "required": false,
+    "rules": null
+  }
+}

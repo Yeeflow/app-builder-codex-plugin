@@ -1,0 +1,14 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "invalid process key",
+  "process": {
+    "Key": "APPROVAL-FLOW 01",
+    "DefResource": {
+      "defkey": "APPROVAL-FLOW 01"
+    }
+  },
+  "expectedError": {
+    "code": "PROCESS_KEY_INVALID_CHARS",
+    "message": "Process keys may contain only letters, numbers, and underscores."
+  }
+}

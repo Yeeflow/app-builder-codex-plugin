@@ -1,0 +1,11 @@
+{
+  "case": "grid-caption-off-layout-valid",
+  "valid": true,
+  "control": {
+    "type": "flex_grid",
+    "label": "",
+    "displayLabel": [null, false],
+    "attrs": { "displayLabel": [null, false] },
+    "children": [{ "type": "input", "label": "Amount" }]
+  }
+}

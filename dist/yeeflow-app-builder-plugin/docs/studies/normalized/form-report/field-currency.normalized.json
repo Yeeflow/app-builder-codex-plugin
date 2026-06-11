@@ -1,0 +1,22 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[1].Settings.Fields[16]",
+    "childFieldPath": "Data.Childs[2].Defs[16]",
+    "fieldId": "field_6",
+    "key": "v_field_6",
+    "variableSource": "approval-variable",
+    "variableType": "number",
+    "variableRef": "field_6",
+    "reportFieldType": "currency",
+    "storedType": "number",
+    "isSystem": false,
+    "required": false,
+    "rules": {
+      "rounded-to": "2",
+      "displayThousandths": "1",
+      "currencyCode": "SGD",
+      "displayFormat": "code"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC.yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "applicant-line-manager",
+  "rawAssigneeFieldNames": [
+    "type",
+    "method",
+    "value",
+    "title"
+  ],
+  "normalizedConfig": {
+    "type": "user",
+    "method": "expression",
+    "value": {
+      "kind": "expressionButton",
+      "label": "Applicant:Line Manager",
+      "dataShape": {
+        "type": "user",
+        "param": {
+          "id": {
+            "parseStatus": "opaque",
+            "expressionSourceHints": {
+              "types": [
+                "application"
+              ],
+              "props": [
+                "ApplicantUserID"
+              ],
+              "usesApplicantUserId": true
+            }
+          }
+        },
+        "prop": "LineManager"
+      }
+    },
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "approvalSettingsShape": {
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "isenabledemail": false,
+    "isallowreassign": false,
+    "isallowsign": false,
+    "allowskip": true,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "runtimeDependencies": [
+    "runtime-applicant-user-context",
+    "valid-user-directory-data"
+  ],
+  "generationSafety": "depends on runtime applicant context and target-tenant user/org attributes",
+  "apiAssistedInterpretation": {
+    "apiLookupRun": true,
+    "categoryConfirmedByApi": false,
+    "note": "Expression-only assignee; API confirmed directory categories are readable but no static user/org ID is embedded in this export entry."
+  }
+}

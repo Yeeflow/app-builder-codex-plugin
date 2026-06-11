@@ -1,0 +1,8 @@
+interface:
+  display_name: Yeeflow Custom Code Generator
+  short_description: Generate, document, update, debug, and redesign Yeeflow custom code
+policy:
+  products:
+  - chatgpt
+  - codex
+  allow_implicit_invocation: true

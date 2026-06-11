@@ -1,0 +1,32 @@
+{
+  "source": {
+    "export": "/Users/Renger/Downloads/Purchase Requests.ydl",
+    "proof": "export-proven",
+    "workflowType": "data-list-workflow"
+  },
+  "node": {
+    "stencil": "StartNoneEvent",
+    "nodeId": "<REDACTED_WORKFLOW_ID>",
+    "incoming": [],
+    "outgoing": [
+      "<REDACTED_SEQUENCE_FLOW_ID>"
+    ]
+  },
+  "properties": {
+    "name": "Start",
+    "taskurl": "<REDACTED_FORM_ID>",
+    "isenabledemail": true,
+    "to": "<REDACTED_START_NOTIFICATION_RECIPIENT_EXPRESSION>",
+    "subject": "<REDACTED_START_NOTIFICATION_SUBJECT_SHAPE>",
+    "html": "<REDACTED_START_NOTIFICATION_BODY_SHAPE>"
+  },
+  "approvalWorkflowFieldsAbsentInThisExport": [
+    "terminate",
+    "terminate-conditions",
+    "revoke-conditions"
+  ],
+  "notes": [
+    "Data-list workflow Start action is export-proven without allow terminate or allow recall fields in this export.",
+    "Start email notification shape is present, but delivery is not runtime-proven."
+  ]
+}

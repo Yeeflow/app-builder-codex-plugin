@@ -1,0 +1,25 @@
+{
+  "controlType": "timeline-h",
+  "templateStorage": "control.children[]",
+  "templateRoot": {
+    "type": "container",
+    "children": [
+      "dynamic-image",
+      "dynamic-field",
+      "container",
+      "dynamic-user",
+      "dynamic-file",
+      "dynamic-file"
+    ]
+  },
+  "dynamicBindings": [
+    { "type": "dynamic-image", "source": "3", "obj-f": "Text11" },
+    { "type": "dynamic-field", "source": "3", "obj-f": "Title" },
+    { "type": "dynamic-field", "source": "3", "obj-f": "Text3" },
+    { "type": "dynamic-field", "source": "3", "obj-f": "Text4" },
+    { "type": "dynamic-user", "source": "3", "obj-f": "Text10" },
+    { "type": "dynamic-file", "source": "3", "obj-f": "Text8" },
+    { "type": "dynamic-file", "source": "3", "obj-f": "Text8" }
+  ],
+  "proof": "export-proven"
+}

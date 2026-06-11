@@ -1,0 +1,13 @@
+{
+  "schema": "yeeflow-yapk-signing-resource-normalized",
+  "case": "yap_encoding_rejected",
+  "evidenceLevel": "user-tested",
+  "summary": "Normal .yap Resource encodings were rejected by the .yapk signing endpoint.",
+  "rejectedResourceEncodings": [
+    "base64(gzip(Resource JSON))",
+    "[______gizp______] + base64(gzip(Resource JSON))",
+    "plain Resource JSON as base64"
+  ],
+  "observedRejectionClass": "resource decoder rejected invalid data",
+  "conclusion": "setsign validates or decodes Resource and does not blindly sign arbitrary .yap resource encodings."
+}

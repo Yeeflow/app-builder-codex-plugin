@@ -1,0 +1,46 @@
+{
+  "proof": "vendor-onboarding-v41-page1-dashboard",
+  "packageType": "yapk",
+  "primaryPackagePath": "/Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yapk",
+  "optionalFallbackPath": "/Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yap",
+  "fallbackStatus": "regenerated_and_schema_validated_pending_manual_import",
+  "appId": 41,
+  "scope": "page_1_dashboard_only",
+  "implementedPages": [
+    "Vendor Management Dashboard"
+  ],
+  "omittedByDesign": [
+    "Vendor Detail View Page",
+    "New Vendor Request Form",
+    "Compliance Review Workspace",
+    "Vendor Print Page"
+  ],
+  "supportingDataLists": [
+    "Vendors",
+    "Vendor Documents",
+    "Compliance Reviews",
+    "Vendor Activity / History"
+  ],
+  "sampleData": {
+    "Vendors": 3,
+    "Vendor Documents": 3,
+    "Compliance Reviews": 2,
+    "Vendor Activity / History": 3
+  },
+  "runtimeControlFix": {
+    "removedUnsupportedDashboardControlTypes": [
+      "grid",
+      "text"
+    ],
+    "exportProvenReplacements": {
+      "grid": "container with grid/flex layout attributes",
+      "text": "heading"
+    }
+  },
+  "importFailureFix": {
+    "yapkInitialRuntimeError": "The package you uploaded is incorrect, please check and try again.",
+    "yapInitialRuntimeError": "Created failed",
+    "fixed": true,
+    "manualRetestRequired": true
+  }
+}

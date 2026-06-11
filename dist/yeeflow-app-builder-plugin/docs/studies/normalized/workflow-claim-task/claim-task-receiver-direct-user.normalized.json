@@ -1,0 +1,87 @@
+{
+  "proofLevel": "export-proven",
+  "workflowHost": "data-list-workflow",
+  "workflowType": 1,
+  "internalControlType": "CandidateTask",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Claim Task",
+  "taskTitlePresent": false,
+  "taskForm": {
+    "taskurl": "<REDACTED_TASK_FORM_ID>",
+    "resolvedTitle": "Approval task",
+    "resolvedType": "task-form"
+  },
+  "taskType": "approve",
+  "taskTypeTrailingSpacePresent": false,
+  "receiverConfigField": "properties.usertaskassignment",
+  "receiverCount": 3,
+  "receiverSources": [
+    {
+      "type": "user",
+      "method": "direct",
+      "title": "User: <REDACTED_USER>",
+      "value": "<REDACTED_USER_ID>",
+      "sourceCategory": "static-user"
+    },
+    {
+      "type": "user",
+      "method": "expression",
+      "title": "User: <REDACTED_USER><input type=\"button\" data=\"${ &quot;type&quot;:&quot;user&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;${\\&quot;type\\&quot;:\\&quot;application\\&quot;,\\&quot;prop\\&quot;:\\&quot;ApplicantUserID\\&quot;}&quot;},&quot;prop&quot;:&quot;LineManager&quot;}\" expr=\"__\" tabindex=\"-1\" value=\"Applicant:Line Manager\">",
+      "value": {
+        "shape": "html-expression-button",
+        "label": "Applicant:Line Manager",
+        "sourceHints": [
+          "applicant",
+          "line-manager"
+        ]
+      },
+      "sourceCategory": "applicant-context-expression"
+    },
+    {
+      "type": "user",
+      "method": "expression",
+      "title": "User: <REDACTED_USER><input type=\"button\" data=\"${ &quot;type&quot;:&quot;user&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;${\\&quot;type\\&quot;:\\&quot;listitem\\&quot;, \\&quot;prop\\&quot;:\\&quot;CreatedBy\\&quot;}&quot;},&quot;prop&quot;:&quot;LineManager&quot;}\" expr=\"__\" tabindex=\"-1\" value=\"List field:Created By:Line Manager\">",
+      "value": {
+        "shape": "html-expression-button",
+        "label": "List field:Created By:Line Manager",
+        "sourceHints": [
+          "list-item-context",
+          "created-by",
+          "line-manager"
+        ]
+      },
+      "sourceCategory": "list-field-expression"
+    }
+  ],
+  "dueDate": {
+    "duedatetype": "hour",
+    "duedatedefinition": 120,
+    "duedateexpress": null,
+    "isfromworkcalendar": null,
+    "notifyrulesShape": "array(0)"
+  },
+  "email": {
+    "isenabledemail": true,
+    "hasTo": true,
+    "hasSubject": true,
+    "hasHtml": true,
+    "toExpression": {
+      "shape": "html-expression-button",
+      "label": "Current Task Context:Assignee:Email",
+      "sourceHints": []
+    },
+    "subjectShape": "rich-text-or-expression",
+    "htmlShape": "rich-html-or-expression"
+  },
+  "quickCompletion": {
+    "disablequickapproval": null
+  },
+  "files": {
+    "hasFilesList": false,
+    "hasFilesVariables": false
+  },
+  "flow": {
+    "incomingCount": 1,
+    "outgoingCount": 2
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "invalid approval form NoRule missing index placeholder",
+  "NoRule": {
+    "Prefix": "approval_{date}",
+    "StartIndex": 1,
+    "CustomLength": 8,
+    "AutoIncrement": 1
+  },
+  "expectedError": {
+    "code": "NORULE_PREFIX_INDEX_MISSING",
+    "message": "NoRule.Prefix must include {index}."
+  }
+}

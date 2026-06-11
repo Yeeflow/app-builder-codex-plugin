@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "control": "Progress bar",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "dashboard"
+  ],
+  "observedSurfaces": [
+    "Additional controls"
+  ],
+  "internalTypes": [
+    "progress"
+  ],
+  "count": 2,
+  "attrKeys": [
+    "bar",
+    "per",
+    "title"
+  ],
+  "sourceModes": [
+    "unspecified"
+  ],
+  "styleKeys": [
+    "bar"
+  ],
+  "childTypes": [],
+  "nestedChildControlTypes": {},
+  "bindingModes": [
+    "object"
+  ],
+  "validation": [
+    "progress values must be static numeric values or numeric field/variable bindings"
+  ],
+  "generation": [
+    "use for completion percent and KPI progress"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<progress-bar:1>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "progress",
+      "attrKeys": [
+        "bar",
+        "per",
+        "title"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "per": {
+          "mode": "object",
+          "shape": {
+            "hei": 26,
+            "ty": {},
+            "bgc": "var(--c--primary-light-hover)",
+            "color": "var(--c--primary)",
+            "innc": "var(--c--background)"
+          }
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<progress-bar:2>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "progress",
+      "attrKeys": [
+        "bar",
+        "per",
+        "title"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "per": {
+          "mode": "object",
+          "shape": {
+            "hei": 26,
+            "ty": {},
+            "bgc": "var(--c--primary-light-hover)",
+            "color": "var(--c--primary)",
+            "innc": "var(--c--background)",
+            "br": 20
+          }
+        }
+      },
+      "items": {}
+    }
+  ]
+}

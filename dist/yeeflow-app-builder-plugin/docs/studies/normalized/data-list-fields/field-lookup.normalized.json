@@ -1,0 +1,68 @@
+{
+  "fieldType": "lookup",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Text34",
+    "FieldType": "Text",
+    "FieldIndex": 34,
+    "DisplayName": "__DISPLAY_NAME_64__",
+    "InternalName": "__INTERNAL_NAME_64__",
+    "Type": "lookup",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "empty",
+    "Rules": {
+      "max-selection": 20,
+      "appid": "__ID_REDACTED__",
+      "listid": "__ID_REDACTED__",
+      "listsetid": "__ID_REDACTED__",
+      "listfield": "__LISTFIELD_REDACTED__",
+      "list_tooltip_field": null,
+      "addition": [
+        {
+          "FieldName": "__FIELDNAME_REDACTED__",
+          "FieldID": "__ID_REDACTED__",
+          "IsShow": true,
+          "RelationName": "",
+          "Value": null,
+          "Order": "0"
+        },
+        {
+          "FieldName": "__FIELDNAME_REDACTED__",
+          "FieldID": "__ID_REDACTED__",
+          "IsShow": true,
+          "RelationName": "",
+          "Value": null,
+          "Order": "1"
+        },
+        {
+          "FieldName": "__FIELDNAME_REDACTED__",
+          "FieldID": "__ID_REDACTED__",
+          "IsShow": true,
+          "RelationName": "",
+          "Value": null,
+          "Order": "2"
+        }
+      ],
+      "sort-first": {
+        "SortName": "__SORTNAME_REDACTED__",
+        "SortByDesc": "__ID_REDACTED__"
+      },
+      "sort-second": null,
+      "listfilter": null,
+      "search-scope": null,
+      "search-fields": null,
+      "placeholder": "__PLACEHOLDER_REDACTED__",
+      "required": true
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

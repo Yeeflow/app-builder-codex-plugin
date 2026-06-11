@@ -1,0 +1,14 @@
+{
+  "case": "listtype-missing-invalid",
+  "proofLevel": "user-confirmed-import-failure-derived",
+  "listModel": {
+    "Type": 1,
+    "ListID": "__APP_LIST_ID__",
+    "Title": "Generated Requests"
+  },
+  "expectedFinding": {
+    "code": "MAIN_LIST_TYPE_MISSING",
+    "level": "error",
+    "mode": "generator/final"
+  }
+}

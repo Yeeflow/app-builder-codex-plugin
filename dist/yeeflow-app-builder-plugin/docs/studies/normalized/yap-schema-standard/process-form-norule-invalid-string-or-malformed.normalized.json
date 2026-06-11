@@ -1,0 +1,5 @@
+{
+  "Name": "<approval-form-name>",
+  "Key": "Approval_Form_Key",
+  "NoRule": "REQ_{yyyy}_{index}"
+}

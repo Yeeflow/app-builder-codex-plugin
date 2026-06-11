@@ -1,0 +1,29 @@
+{
+  "fieldType": "currency",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Decimal10",
+    "FieldType": "Decimal",
+    "FieldIndex": 10,
+    "DisplayName": "__DISPLAY_NAME_20__",
+    "InternalName": "__INTERNAL_NAME_20__",
+    "Type": "currency",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "empty",
+    "Rules": {
+      "currencyCode": "SGD",
+      "displayFormat": "code",
+      "placeholder": "__PLACEHOLDER_REDACTED__"
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

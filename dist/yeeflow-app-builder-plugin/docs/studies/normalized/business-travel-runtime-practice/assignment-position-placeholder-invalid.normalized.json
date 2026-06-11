@@ -1,0 +1,13 @@
+{
+  "proof": "runtime-practice-backed",
+  "invalidUsertaskassignment": [
+    {
+      "type": "position",
+      "method": "position",
+      "position": "__POSITION_ID_REQUIRED_FINANCE_MANAGER__",
+      "title": "Job position:<REDACTED_POSITION_NAME>"
+    }
+  ],
+  "validatorError": "ASSIGNMENT_TASK_POSITION_ID_INVALID",
+  "rule": "Placeholder position IDs must not be emitted into final packages."
+}

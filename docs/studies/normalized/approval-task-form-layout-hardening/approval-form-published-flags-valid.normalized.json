@@ -1,0 +1,14 @@
+{
+  "case": "approval-form-published-flags-valid",
+  "valid": true,
+  "form": {
+    "Name": "Approval Request",
+    "Deployed": true,
+    "Status": 1,
+    "DefResource": {
+      "deployed": true,
+      "status": 1,
+      "published": true
+    }
+  }
+}

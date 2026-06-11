@@ -1,0 +1,28 @@
+{
+  "proof": "export-proven from Data Lists (4).yap; private values redacted",
+  "normalized": {
+    "exportPath": "Data.Childs[].PublicForms[].Resource.children[0]/children/0/children/0/children/1",
+    "control": {
+      "id": "__CONTROL_ID__",
+      "type": "input",
+      "binding": "Text1",
+      "fieldID": "__FIELD_ID__",
+      "label": "__LABEL_REDACTED__",
+      "attrs": {
+        "placeholder": "__PLACEHOLDER_REDACTED__",
+        "required": true,
+        "input-maxlength": 200,
+        "control_event_rule": "__ID_REDACTED__"
+      }
+    },
+    "field": {
+      "FieldName": "Text1",
+      "FieldID": "__FIELD_ID__",
+      "InternalName": "__INTERNAL_NAME_REDACTED__",
+      "Type": "input",
+      "FieldType": "Text",
+      "IsSystem": false
+    },
+    "proof": "export-proven; private values redacted"
+  }
+}

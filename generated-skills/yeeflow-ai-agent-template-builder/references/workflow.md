@@ -1,0 +1,1 @@
+Use this reference for detailed Yeeflow AI Agent template preparation workflows. Keep source catalogs, icon manifests, creation manifests, live logs, and export folders synchronized. Tools remain guidance-only until real Yeeflow bindings are known.

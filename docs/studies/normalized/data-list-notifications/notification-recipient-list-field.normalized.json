@@ -1,0 +1,15 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[5].RemindRules[].Receiver",
+  "pattern": "notification-recipient-list-field",
+  "shape": {
+    "Identities": [],
+    "ListDefs": ["<identity-field-internal-name>"]
+  },
+  "notes": [
+    "List-field recipients are separate from explicit Receiver.Identities[].",
+    "The studied export used an identity-picker list field internal name."
+  ]
+}

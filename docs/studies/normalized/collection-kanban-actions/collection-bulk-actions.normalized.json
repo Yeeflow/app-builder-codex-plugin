@@ -1,0 +1,28 @@
+{
+  "proof": "export-proven from Company Overview (2).yap; identifiers redacted or synthetic",
+  "bulkToolbarDisplay": {
+    "showWhen": "var_SelectedItemsAmount > 0",
+    "action": "style_regulation_action_show"
+  },
+  "bulkUpdate": {
+    "pageAction": "Change multiple items to completed",
+    "stepTypes": ["setdatalist", "setvar", "confirm"],
+    "where": {
+      "left": "ListDataID",
+      "op": "9",
+      "rightPattern": "split(replace(var_SelectedItems, ',', '', '2'), ',')"
+    },
+    "updates": ["Text1 = Completed", "Decimal1 = 1"],
+    "totalCountTarget": "var_UpdatedItemsAmount"
+  },
+  "bulkDelete": {
+    "pageAction": "Delete multiple items",
+    "stepTypes": ["confirm", "setdatalist", "setvar", "confirm"],
+    "where": {
+      "left": "ListDataID",
+      "op": "9",
+      "rightPattern": "split(replace(var_SelectedItems, ',', '', '2'), ',')"
+    },
+    "totalCountTarget": "var_DeletedItemsAmount"
+  }
+}

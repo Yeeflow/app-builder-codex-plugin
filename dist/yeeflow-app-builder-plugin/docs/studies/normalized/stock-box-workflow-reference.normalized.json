@@ -1,0 +1,40 @@
+{
+  "summary": {
+    "sourceExport": "Spark & AI (1).yap",
+    "classification": "export-proven",
+    "hostList": "Stock Box"
+  },
+  "stockBox": {
+    "referenceKey": "list:stock-box",
+    "sourceId": "<REDACTED_LIST_ID>",
+    "fields": [
+      {
+        "fieldSlot": "Text9",
+        "displayName": "Image File",
+        "internalName": "ImageFile",
+        "type": "icon-upload"
+      },
+      {
+        "fieldSlot": "Text24",
+        "displayName": "Extract and Update Stock Box Label Data",
+        "internalName": "extract_update_stock_box_label_data",
+        "type": "flowstatus"
+      },
+      {
+        "fieldSlot": "Text25",
+        "displayName": "Label Info",
+        "internalName": "Label_Info",
+        "type": "calculated-column"
+      }
+    ],
+    "flowMappings": [
+      {
+        "name": "Extract&Update In-Stock",
+        "key": "extract_update_stock_box_label_data",
+        "method": 0,
+        "newTrigger": true,
+        "fieldName": "Text24"
+      }
+    ]
+  }
+}

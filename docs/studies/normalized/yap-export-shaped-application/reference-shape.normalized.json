@@ -1,0 +1,35 @@
+{
+  "purpose": "Sanitized structural reference for first-time generated-final YAP generation without user-provided sample files.",
+  "privacy": {
+    "rawPackagePayloadIncluded": false,
+    "customerDataIncluded": false,
+    "tenantUserWorkspacePrivateIdsIncluded": false,
+    "privateUrlsIncluded": false
+  },
+  "wrapper": {
+    "requiredKeys": ["Title", "Description", "IconUrl", "IsListSet", "Resource"]
+  },
+  "resource": {
+    "requiredKeys": ["AppID", "MainListType", "Data", "FormKeys", "ReportIds", "ReplaceIds", "SimplePortal"],
+    "replaceIds": "rebuilt from final decoded local IDs"
+  },
+  "data": {
+    "requiredAppLevelKeys": ["Item", "Childs", "Forms", "FormReports", "FormNewReports", "DataReports", "OtherModules", "AppTags", "AppMetadatas", "AppComponents", "AppThemes", "AppGroups", "PortalInfo"],
+    "rootListModelRequiredKeys": ["WorkspaceID", "TenantID", "AppID", "ListID", "Title", "Type", "TableCode", "IndexCode", "Flags", "Status", "Perm", "Ext1", "Ext2", "Ext3", "Created", "CreatedBy", "Modified", "ModifiedBy", "LayoutView"],
+    "childListModelRequiredKeys": ["WorkspaceID", "TenantID", "AppID", "ListID", "Title", "Type", "ListType", "CustomType", "TableCode", "IndexCode", "Flags", "Status", "Perm", "Ext1", "Ext2", "Ext3", "Created", "CreatedBy", "Modified", "ModifiedBy", "LayoutView"],
+    "fieldRequiredKeys": ["FieldID", "ListID", "AppID", "FieldName", "InternalName", "DisplayName", "FieldType", "Type", "Category", "FieldIndex", "Status", "IsSystem", "IsIndex", "Rules"],
+    "defaultViewRequiredShape": ["Type 0", "IsDefault true", "Ext1.Url default", "LayoutView.layout", "LayoutView.query"],
+    "listDatasShape": "object keyed by generated record ID"
+  },
+  "approvalFormWorkspace": {
+    "formListId": 0,
+    "navigationType": 105,
+    "idShape": {
+      "localResourceIds": "long numeric strings",
+      "pageurls": "strings",
+      "childshapes": "strings"
+    },
+    "defResourceRequiredKeys": ["name", "title", "workflowType", "AppListSetID", "ProcModelAppID", "ProcModelListID", "ProcModelListSetID", "ext", "lineType", "iconURL", "flowPage", "variables", "graphposition", "graphzoom", "graphver", "pageurls", "childshapes"],
+    "workflow": "StartNoneEvent -> SequenceFlow -> EndNoneEvent"
+  }
+}

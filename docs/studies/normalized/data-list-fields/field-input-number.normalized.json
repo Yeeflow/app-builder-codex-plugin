@@ -1,0 +1,27 @@
+{
+  "fieldType": "input_number",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Decimal1",
+    "FieldType": "Decimal",
+    "FieldIndex": 1,
+    "DisplayName": "__DISPLAY_NAME_11__",
+    "InternalName": "__INTERNAL_NAME_11__",
+    "Type": "input_number",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "empty",
+    "Rules": {
+      "placeholder": "__PLACEHOLDER_REDACTED__"
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "proof": "host comparison from Company Overview (3).yap export plus product-understanding-backed notes where not observed",
+  "dashboardObserved": [
+    {
+      "surface": "Tab controls",
+      "counts": {
+        "Tab": 10,
+        "Tab item": 30
+      }
+    },
+    {
+      "surface": "Toggle controls",
+      "counts": {
+        "Toggle": 5,
+        "Toggle section": 15
+      }
+    },
+    {
+      "surface": "Additional controls",
+      "counts": {
+        "Timer": 4,
+        "Icon list": 2,
+        "Divider": 5,
+        "Alert": 6,
+        "Progress bar": 2,
+        "Spacer": 2,
+        "Progress circle": 6,
+        "QR Code": 1,
+        "Steps bar": 12
+      }
+    }
+  ],
+  "dataListFormObserved": [
+    {
+      "surface": "Company Overview / View page",
+      "counts": {
+        "QR Code": 3,
+        "Barcode": 6,
+        "Embed": 1,
+        "Document embed": 1,
+        "Steps bar": 12
+      }
+    }
+  ],
+  "approvalFormSupport": "product-understanding-backed only in this branch unless a later approval-form export proves exact schema",
+  "publicFormSupport": "product-understanding-backed only in this branch unless a later public-form export proves exact schema",
+  "bindingDifferences": [
+    "dashboard examples use static settings and temp variables for advanced controls",
+    "data-list form examples use current item list_field bindings for Steps bar and Document embed",
+    "QR Code may rely on implicit host URL behavior unless explicit qr-code-link is present",
+    "Barcode value can bind to temp variables in the observed View page"
+  ],
+  "proofBoundary": [
+    "runtime rendering not proven",
+    "QR/barcode scan behavior not proven",
+    "iframe loading not proven",
+    "document preview behavior not proven",
+    "dynamic value changes not proven"
+  ]
+}

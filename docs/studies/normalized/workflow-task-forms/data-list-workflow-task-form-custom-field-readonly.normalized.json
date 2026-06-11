@@ -1,0 +1,14 @@
+{
+  "source": {
+    "export": "/Users/Renger/Downloads/Purchase Requests.ydl",
+    "proof": "export-proven"
+  },
+  "readonlyCustomField": {
+    "isListControl": true,
+    "identifier": "Text1",
+    "fieldID": "<REDACTED_FIELD_ID>",
+    "binding": "____customListFields_<CUSTOM_LIST_FIELD_REF>",
+    "readonly": true
+  },
+  "generationRule": "When the task should only display a custom source-list field, preserve readonly=true instead of allowing task completion to edit the source field."
+}

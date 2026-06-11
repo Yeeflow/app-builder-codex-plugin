@@ -1,0 +1,56 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "list_field_info",
+  "source": "product-provided ypk-schema.json",
+  "properties": [
+    "FieldID",
+    "ListID",
+    "FieldName",
+    "FieldType",
+    "FieldIndex",
+    "DisplayName",
+    "InternalName",
+    "Type"
+  ],
+  "fieldTypeEnum": [
+    "Text",
+    "Bit",
+    "Decimal",
+    "Datetime"
+  ],
+  "typeEnum": [
+    "input",
+    "textarea",
+    "richtext",
+    "hyperlink",
+    "input_number",
+    "currency",
+    "percent",
+    "calculated-column",
+    "rate",
+    "switch",
+    "checkbox",
+    "radio",
+    "select",
+    "tag",
+    "datepicker",
+    "time",
+    "identity-picker",
+    "organization-picker",
+    "cost-center-picker",
+    "signer",
+    "file-upload",
+    "icon-upload",
+    "lookup",
+    "mutiple-metadata",
+    "location-picker",
+    "flowstatus",
+    "autonumber",
+    "list"
+  ],
+  "rules": {
+    "FieldName": "must end with digits",
+    "FieldNameSuffix": "must equal FieldIndex",
+    "InternalName": "must match ^[a-zA-Z0-9_]+$"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "case": "assignment-position-placeholder-invalid",
+  "source": "synthetic Business Travel hardening reference",
+  "rule": "Direct position assignment requires a real numeric tenant position ID; placeholders are not publish-ready.",
+  "invalidAssignment": {
+    "type": "position",
+    "method": "position",
+    "position": "__POSITION_ID_REQUIRED_FINANCE_MANAGER__"
+  },
+  "validPattern": {
+    "type": "position",
+    "method": "position",
+    "position": "123456"
+  },
+  "publishOrientedFallback": {
+    "type": "user",
+    "method": "expression",
+    "valueSummary": "Applicant line-manager expression"
+  },
+  "validatorCode": "ASSIGNMENT_TASK_POSITION_ID_INVALID",
+  "caveat": "The fallback is publish-oriented and does not prove true Finance Manager routing."
+}

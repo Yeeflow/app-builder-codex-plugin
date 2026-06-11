@@ -1,0 +1,1 @@
+Manual Yeeflow AI Agent variable editing is fragile. Avoid placeholder rows, verify counts after save, and pause when UI behavior changes. Tools require real resource bindings and should usually be deferred for reusable templates.

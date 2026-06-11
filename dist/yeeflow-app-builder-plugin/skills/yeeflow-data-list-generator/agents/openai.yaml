@@ -1,0 +1,7 @@
+interface:
+  display_name: "Yeeflow Data List Generator"
+  short_description: "Generate and validate Yeeflow data lists"
+  default_prompt: "Use $yeeflow-data-list-generator to create a safe Yeeflow data list package from this requirement."
+
+policy:
+  allow_implicit_invocation: true

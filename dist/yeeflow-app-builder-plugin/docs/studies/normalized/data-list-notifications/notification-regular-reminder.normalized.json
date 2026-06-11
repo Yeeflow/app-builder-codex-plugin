@@ -1,0 +1,35 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[5].RemindRules[]",
+  "pattern": "regular-reminder",
+  "shape": {
+    "Type": 2,
+    "SendType": 1,
+    "Status": 1,
+    "Rules": {
+      "Rules": {
+        "Period": "Daily|Weekly|Monthly|Yearly",
+        "StartTime": "<date-or-month>",
+        "EndTime": "<date-or-month>",
+        "Time": "<HH:mm>",
+        "WeekDay": 1,
+        "MonthDay": 1,
+        "YearMonth": 1
+      },
+      "Conditions": {
+        "Type": 1,
+        "Data": ""
+      }
+    },
+    "Receiver": {
+      "Identities": ["<user-or-department-or-user-group>"],
+      "ListDefs": []
+    }
+  },
+  "notes": [
+    "Monthly last-day example used MonthDay=0.",
+    "Only include schedule keys relevant to the selected Period."
+  ]
+}

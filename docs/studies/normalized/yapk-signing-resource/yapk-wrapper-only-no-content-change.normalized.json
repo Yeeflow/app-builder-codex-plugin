@@ -1,0 +1,15 @@
+{
+  "schema": "yeeflow-yapk-signing-resource-normalized",
+  "case": "wrapper_only_no_content_change",
+  "evidenceLevel": "user-tested",
+  "summary": "A wrapper-only signed .yapk was accepted as a version package, but app content did not change because Resource was unchanged.",
+  "observedPackageBehavior": {
+    "signatureGenerated": true,
+    "signatureVerified": true,
+    "versionPackageAccepted": true,
+    "resourceChanged": false,
+    "appContentChanged": false
+  },
+  "proofBoundary": "version package wrapper acceptance, not app-content mutation",
+  "conclusion": "Changing wrapper metadata and Sign without changing Resource is not a content update."
+}

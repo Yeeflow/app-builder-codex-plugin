@@ -1,0 +1,51 @@
+{
+  "sourceExports": [
+    "<downloads>/Tenant Service Portal v2.yap",
+    "<downloads>/Tenant Service Portal v6.yap"
+  ],
+  "storage": "Data.Item.ListModel.LayoutView JSON string",
+  "sortVer": 1,
+  "menuRoot": {
+    "field": "sort",
+    "type": "array",
+    "order": "array-order"
+  },
+  "topLevelResourceItem": {
+    "AppID": 41,
+    "ListID": "<RESOURCE_ID>",
+    "ListSetID": "<APP_LISTSET_ID>",
+    "Type": 103,
+    "Title": "<RESOURCE_NAME>",
+    "Icon": "fa-regular fa-grid-2",
+    "DisplayName": "<CUSTOM_DISPLAY_TEXT>"
+  },
+  "topLevelGroupItem": {
+    "ID": "<GROUP_ID>",
+    "AppID": 41,
+    "ListSetID": "<APP_LISTSET_ID>",
+    "Type": "classes",
+    "Title": "<GROUP_DISPLAY_TEXT>",
+    "Icon": "fa-regular fa-layer-plus",
+    "list": []
+  },
+  "childResourceItem": {
+    "AppID": 41,
+    "ListID": "<RESOURCE_ID>",
+    "ListSetID": "<APP_LISTSET_ID>",
+    "Type": 1,
+    "IsHidden": false,
+    "Title": "<RESOURCE_NAME>",
+    "Icon": "fa-regular fa-table-list"
+  },
+  "noIconShape": {
+    "Icon": ""
+  },
+  "resourceNameFallback": {
+    "DisplayName": "<OMITTED>",
+    "fallbackField": "Title"
+  },
+  "supportedDepth": 2,
+  "exportProvenTypes": [1, 103, 105, "classes"],
+  "previouslyProvenOrSupportedTypes": [16, 32, 64],
+  "observedNonGoalTypes": ["process", "link"]
+}

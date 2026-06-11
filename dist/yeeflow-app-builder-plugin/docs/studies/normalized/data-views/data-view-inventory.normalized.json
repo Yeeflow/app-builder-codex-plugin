@@ -1,0 +1,1457 @@
+{
+  "resources": [
+    {
+      "resourceType": "data list",
+      "resourceRef": "<data-list-1>",
+      "resourceName": "<redacted-resource-name-1>",
+      "listId": "<data-list-id-1>",
+      "fieldCount": 15,
+      "viewCount": 4,
+      "defaultViews": [
+        "All Items"
+      ],
+      "viewTypes": [
+        "list",
+        "gallery",
+        "kanban"
+      ],
+      "views": [
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-1>",
+          "resourceName": "<redacted-resource-name-1>",
+          "viewRef": "<view-1-1>",
+          "viewName": "All Items",
+          "defaultOrCustom": "default",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "default",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Text2",
+            "Text3",
+            "Text4",
+            "Text5",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 12,
+          "primarySort": null,
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "Url"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "query"
+          ],
+          "specialSettings": [],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-1>",
+          "resourceName": "<redacted-resource-name-1>",
+          "viewRef": "<view-1-2>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Datetime2",
+            "Text1",
+            "Text2",
+            "Text4",
+            "Text5",
+            "Text6",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 14,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (0)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-1>",
+          "resourceName": "<redacted-resource-name-1>",
+          "viewRef": "<view-1-3>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "gallery",
+          "typeCode": 999,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1"
+          ],
+          "visibleFieldCount": 2,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (3)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-1>",
+          "resourceName": "<redacted-resource-name-1>",
+          "viewRef": "<view-1-4>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "kanban",
+          "typeCode": 104,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1",
+            "Datetime1",
+            "Datetime2"
+          ],
+          "visibleFieldCount": 4,
+          "primarySort": {
+            "field": "CreatedBy",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "proofLevel": "export-proven"
+        }
+      ]
+    },
+    {
+      "resourceType": "data list",
+      "resourceRef": "<data-list-2>",
+      "resourceName": "<redacted-resource-name-2>",
+      "listId": "<data-list-id-2>",
+      "fieldCount": 16,
+      "viewCount": 4,
+      "defaultViews": [
+        "All Items"
+      ],
+      "viewTypes": [
+        "list",
+        "gallery",
+        "kanban"
+      ],
+      "views": [
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-2>",
+          "resourceName": "<redacted-resource-name-2>",
+          "viewRef": "<view-2-1>",
+          "viewName": "All Items",
+          "defaultOrCustom": "default",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "default",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Datetime2",
+            "Text1",
+            "Decimal1",
+            "Text2",
+            "Text3",
+            "Text4",
+            "Text5",
+            "Text6",
+            "Text7",
+            "Decimal2",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 16,
+          "primarySort": null,
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "Url"
+          ],
+          "layoutViewKeys": [
+            "query",
+            "layout",
+            "rowColor"
+          ],
+          "specialSettings": [],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-2>",
+          "resourceName": "<redacted-resource-name-2>",
+          "viewRef": "<view-2-2>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Datetime2",
+            "Text1",
+            "Decimal1",
+            "Text2",
+            "Text3",
+            "Text4",
+            "Text5",
+            "Text6",
+            "Text7",
+            "Decimal2",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11",
+            "CreatedBy",
+            "Created"
+          ],
+          "visibleFieldCount": 18,
+          "primarySort": {
+            "field": "CreatedBy",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (0)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-2>",
+          "resourceName": "<redacted-resource-name-2>",
+          "viewRef": "<view-2-3>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "gallery",
+          "typeCode": 999,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Datetime1",
+            "Datetime2",
+            "Title",
+            "Text1",
+            "Decimal1"
+          ],
+          "visibleFieldCount": 5,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField",
+            "CoverField"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField",
+            "CoverField"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-2>",
+          "resourceName": "<redacted-resource-name-2>",
+          "viewRef": "<view-2-4>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "kanban",
+          "typeCode": 104,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Datetime1",
+            "Datetime2",
+            "Text1",
+            "Decimal1",
+            "Text2"
+          ],
+          "visibleFieldCount": 5,
+          "primarySort": {
+            "field": "CreatedBy",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField",
+            "CoverField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField",
+            "CoverField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "proofLevel": "export-proven"
+        }
+      ]
+    },
+    {
+      "resourceType": "data list",
+      "resourceRef": "<data-list-3>",
+      "resourceName": "<redacted-resource-name-3>",
+      "listId": "<data-list-id-3>",
+      "fieldCount": 15,
+      "viewCount": 4,
+      "defaultViews": [
+        "All Items"
+      ],
+      "viewTypes": [
+        "list",
+        "gallery",
+        "kanban"
+      ],
+      "views": [
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-3>",
+          "resourceName": "<redacted-resource-name-3>",
+          "viewRef": "<view-3-1>",
+          "viewName": "All Items",
+          "defaultOrCustom": "default",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "default",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Text2",
+            "Text3",
+            "Text4",
+            "Text5",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 12,
+          "primarySort": null,
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "Url"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "query"
+          ],
+          "specialSettings": [],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-3>",
+          "resourceName": "<redacted-resource-name-3>",
+          "viewRef": "<view-3-2>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Datetime2",
+            "Text1",
+            "Text2",
+            "Text4",
+            "Text5",
+            "Text6",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 14,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (0)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-3>",
+          "resourceName": "<redacted-resource-name-3>",
+          "viewRef": "<view-3-3>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "gallery",
+          "typeCode": 999,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1"
+          ],
+          "visibleFieldCount": 2,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (3)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-3>",
+          "resourceName": "<redacted-resource-name-3>",
+          "viewRef": "<view-3-4>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "kanban",
+          "typeCode": 104,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1",
+            "Datetime1",
+            "Datetime2"
+          ],
+          "visibleFieldCount": 4,
+          "primarySort": {
+            "field": "CreatedBy",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "proofLevel": "export-proven"
+        }
+      ]
+    },
+    {
+      "resourceType": "data list",
+      "resourceRef": "<data-list-4>",
+      "resourceName": "<redacted-resource-name-4>",
+      "listId": "<data-list-id-4>",
+      "fieldCount": 15,
+      "viewCount": 4,
+      "defaultViews": [
+        "All Items"
+      ],
+      "viewTypes": [
+        "list",
+        "gallery",
+        "kanban"
+      ],
+      "views": [
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-4>",
+          "resourceName": "<redacted-resource-name-4>",
+          "viewRef": "<view-4-1>",
+          "viewName": "All Items",
+          "defaultOrCustom": "default",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "default",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Text2",
+            "Text3",
+            "Text4",
+            "Text5",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 12,
+          "primarySort": null,
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "Url"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "query"
+          ],
+          "specialSettings": [],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-4>",
+          "resourceName": "<redacted-resource-name-4>",
+          "viewRef": "<view-4-2>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Datetime2",
+            "Text1",
+            "Text2",
+            "Text4",
+            "Text5",
+            "Text6",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 14,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (0)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-4>",
+          "resourceName": "<redacted-resource-name-4>",
+          "viewRef": "<view-4-3>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "gallery",
+          "typeCode": 999,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1"
+          ],
+          "visibleFieldCount": 2,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (3)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-4>",
+          "resourceName": "<redacted-resource-name-4>",
+          "viewRef": "<view-4-4>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "kanban",
+          "typeCode": 104,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1",
+            "Datetime1",
+            "Datetime2"
+          ],
+          "visibleFieldCount": 4,
+          "primarySort": {
+            "field": "CreatedBy",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "proofLevel": "export-proven"
+        }
+      ]
+    },
+    {
+      "resourceType": "data list",
+      "resourceRef": "<data-list-5>",
+      "resourceName": "<redacted-resource-name-5>",
+      "listId": "<data-list-id-5>",
+      "fieldCount": 15,
+      "viewCount": 4,
+      "defaultViews": [
+        "All Items"
+      ],
+      "viewTypes": [
+        "list",
+        "gallery",
+        "kanban"
+      ],
+      "views": [
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-5>",
+          "resourceName": "<redacted-resource-name-5>",
+          "viewRef": "<view-5-1>",
+          "viewName": "All Items",
+          "defaultOrCustom": "default",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "default",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Text2",
+            "Text3",
+            "Text4",
+            "Text5",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 12,
+          "primarySort": null,
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "Url"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "query"
+          ],
+          "specialSettings": [],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-5>",
+          "resourceName": "<redacted-resource-name-5>",
+          "viewRef": "<view-5-2>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Datetime2",
+            "Text1",
+            "Text2",
+            "Text4",
+            "Text5",
+            "Text6",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 14,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (0)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-5>",
+          "resourceName": "<redacted-resource-name-5>",
+          "viewRef": "<view-5-3>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "gallery",
+          "typeCode": 999,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1"
+          ],
+          "visibleFieldCount": 2,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (3)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-5>",
+          "resourceName": "<redacted-resource-name-5>",
+          "viewRef": "<view-5-4>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "kanban",
+          "typeCode": 104,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1",
+            "Datetime1",
+            "Datetime2"
+          ],
+          "visibleFieldCount": 4,
+          "primarySort": {
+            "field": "CreatedBy",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "proofLevel": "export-proven"
+        }
+      ]
+    },
+    {
+      "resourceType": "data list",
+      "resourceRef": "<data-list-6>",
+      "resourceName": "<redacted-resource-name-6>",
+      "listId": "<data-list-id-6>",
+      "fieldCount": 15,
+      "viewCount": 4,
+      "defaultViews": [
+        "All Items"
+      ],
+      "viewTypes": [
+        "list",
+        "gallery",
+        "kanban"
+      ],
+      "views": [
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-6>",
+          "resourceName": "<redacted-resource-name-6>",
+          "viewRef": "<view-6-1>",
+          "viewName": "All Items",
+          "defaultOrCustom": "default",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "default",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Text2",
+            "Text3",
+            "Text4",
+            "Text5",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 12,
+          "primarySort": null,
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "Url"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "query"
+          ],
+          "specialSettings": [],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-6>",
+          "resourceName": "<redacted-resource-name-6>",
+          "viewRef": "<view-6-2>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Title",
+            "Datetime1",
+            "Datetime2",
+            "Text1",
+            "Text2",
+            "Text4",
+            "Text5",
+            "Text6",
+            "Decimal1",
+            "Text7",
+            "Text8",
+            "Text9",
+            "Text10",
+            "Text11"
+          ],
+          "visibleFieldCount": 14,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (0)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-6>",
+          "resourceName": "<redacted-resource-name-6>",
+          "viewRef": "<view-6-3>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "gallery",
+          "typeCode": 999,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1"
+          ],
+          "visibleFieldCount": 2,
+          "primarySort": {
+            "field": "Created",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "1 condition (3)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-6>",
+          "resourceName": "<redacted-resource-name-6>",
+          "viewRef": "<view-6-4>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "kanban",
+          "typeCode": 104,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Text2",
+            "Decimal1",
+            "Datetime1",
+            "Datetime2"
+          ],
+          "visibleFieldCount": 4,
+          "primarySort": {
+            "field": "CreatedBy",
+            "descending": true
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable",
+            "TitleField",
+            "CategoryField",
+            "IncludeUncategorized"
+          ],
+          "proofLevel": "export-proven"
+        }
+      ]
+    },
+    {
+      "resourceType": "data list",
+      "resourceRef": "<data-list-7>",
+      "resourceName": "<redacted-resource-name-7>",
+      "listId": "<data-list-id-7>",
+      "fieldCount": 13,
+      "viewCount": 4,
+      "defaultViews": [
+        "All tasks"
+      ],
+      "viewTypes": [
+        "list",
+        "calendar"
+      ],
+      "views": [
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-7>",
+          "resourceName": "<redacted-resource-name-7>",
+          "viewRef": "<view-7-1>",
+          "viewName": "All tasks",
+          "defaultOrCustom": "default",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "all",
+          "visibleFields": [
+            "Title",
+            "Text1",
+            "Text2",
+            "Datetime1",
+            "Datetime2",
+            "Decimal1",
+            "Text3",
+            "Decimal2",
+            "Decimal3",
+            "Text6",
+            "Text4",
+            "Text9"
+          ],
+          "visibleFieldCount": 12,
+          "primarySort": null,
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-7>",
+          "resourceName": "<redacted-resource-name-7>",
+          "viewRef": "<view-7-2>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Title",
+            "Text1",
+            "Text2",
+            "Datetime1",
+            "Datetime2",
+            "Text3",
+            "Decimal1",
+            "Decimal2",
+            "Decimal3",
+            "Text6"
+          ],
+          "visibleFieldCount": 10,
+          "primarySort": {
+            "field": "Created",
+            "descending": false
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "2 conditions (11, 5)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-7>",
+          "resourceName": "<redacted-resource-name-7>",
+          "viewRef": "<view-7-3>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "list",
+          "typeCode": 0,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [
+            "Title",
+            "Text1",
+            "Text2",
+            "Datetime1",
+            "Datetime2",
+            "Text3",
+            "Decimal1",
+            "Decimal2",
+            "Decimal3",
+            "Text6"
+          ],
+          "visibleFieldCount": 10,
+          "primarySort": {
+            "field": "Created",
+            "descending": false
+          },
+          "secondarySort": null,
+          "dataFilterSummary": "2 conditions (11, 0)",
+          "userFilters": [],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "displayStyle",
+            "Url",
+            "ShowTable"
+          ],
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "specialSettings": [
+            "displayStyle",
+            "ShowTable"
+          ],
+          "proofLevel": "export-proven"
+        },
+        {
+          "resourceType": "data list",
+          "resourceRef": "<data-list-7>",
+          "resourceName": "<redacted-resource-name-7>",
+          "viewRef": "<view-7-4>",
+          "viewName": "<redacted-view-name>",
+          "defaultOrCustom": "custom",
+          "viewType": "calendar",
+          "typeCode": 100,
+          "urlKey": "<redacted-view-url>",
+          "visibleFields": [],
+          "visibleFieldCount": 0,
+          "primarySort": null,
+          "secondarySort": null,
+          "dataFilterSummary": "none",
+          "userFilters": [
+            "Title",
+            "ListDataID",
+            "CreatedBy",
+            "Created",
+            "ModifiedBy",
+            "Modified"
+          ],
+          "permissionSummary": "inherits or no view-level item permission flag",
+          "extKeys": [
+            "Url"
+          ],
+          "layoutViewKeys": [
+            "Scope",
+            "Columns",
+            "DefaultColor",
+            "ColorClass",
+            "Hidden",
+            "Workcalendar",
+            "ColorClassSetting",
+            "Filter",
+            "Attr_IsViewDetail",
+            "ExternalSetting",
+            "query"
+          ],
+          "specialSettings": [
+            "Scope",
+            "Columns",
+            "DefaultColor",
+            "ColorClass",
+            "Hidden",
+            "Workcalendar",
+            "ColorClassSetting",
+            "Filter",
+            "Attr_IsViewDetail",
+            "ExternalSetting"
+          ],
+          "proofLevel": "export-proven"
+        }
+      ]
+    }
+  ],
+  "proofLevel": "export-proven"
+}

@@ -1,0 +1,3072 @@
+{
+  "source": "expression training data generator.txt",
+  "version": "2026-05-14",
+  "paramTokenConvention": "Function params are arrays of expression-token arrays, except zero-param functions use params: []. Some export examples include literal strings or booleans directly inside params; validators should warn, not hard-fail, when the surrounding shape is otherwise export-backed.",
+  "functions": {
+    "abs": {
+      "category": "math",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Returns the absolute value of the parameter.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "返回参数的绝对值 / Returns the absolute value of the parameter. 如果参数是负数则返回正值，正数或零返回原值 | If the parameter is negative, returns its positive value; if positive or zero, returns the original value.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "number/数值",
+          "type": "number",
+          "description": "要计算绝对值的数值，可以是整数或小数 | The number for which to calculate the absolute value, can be integer or decimal"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "计算-5的绝对值 | Calculate the absolute value of -5",
+          "expression": "abs(-5)"
+        }
+      ],
+      "businessScenarios": [
+        "计算金额差值/金额差 | Calculate amount difference",
+        "获取距离绝对值 | Get distance absolute value",
+        "统计波动幅度 | Statistical fluctuation range"
+      ],
+      "keywords": [
+        "绝对值",
+        "absolute value",
+        "abs",
+        "取正",
+        "positive value",
+        "数值大小",
+        "magnitude"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "arrayAverage": {
+      "category": "array",
+      "minParams": 1,
+      "maxParams": 4,
+      "optionalParams": [
+        "column",
+        "filterColumn",
+        "filterValue"
+      ],
+      "returnValueType": "number",
+      "description": "Calculate the average value of an array; object arrays may specify a column and optional equality filter.",
+      "knowledgeBaseCategory": "array",
+      "bilingualDescription": "计算数组的平均值 | Calculate the average value of an array. 如果数组元素是对象，可通过column参数指定用于计算的属性 | If array elements are objects, use column parameter to specify the property for calculation. 空值不参与计算 | Empty values are excluded from calculation.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "list/数组",
+          "type": "array",
+          "description": "数组变量，包含要计算平均值的元素 | Array variable containing elements to calculate average"
+        },
+        {
+          "index": 1,
+          "name": "column/列名",
+          "type": "string",
+          "description": "可选，对象数组中用于计算的属性名 | Optional, property name in object array for calculation"
+        },
+        {
+          "index": 2,
+          "name": "filterColumn/筛选列",
+          "type": "string",
+          "description": "可选，对象数组的筛选列名 | Optional, filter column name in object array"
+        },
+        {
+          "index": 3,
+          "name": "filterValue/筛选值",
+          "type": "any",
+          "description": "可选，仅筛选列属性值等于此值的对象参与计算 | Optional, only objects with filterColumn property equal to this value are included"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "计算学生成绩的平均分，只计算数学科目 | Calculate average score of students, only for math subject",
+          "expression": "arrayAverage(scores, 'score', 'subject', '数学')"
+        }
+      ],
+      "businessScenarios": [
+        "计算平均成绩/平均分 | Calculate average score",
+        "统计平均销售额 | Statistical average sales",
+        "计算平均响应时间 | Calculate average response time"
+      ],
+      "keywords": [
+        "数组平均",
+        "array average",
+        "平均值",
+        "average",
+        "平均计算",
+        "average calculation",
+        "均值",
+        "mean"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "arrayConcat": {
+      "category": "array",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "array",
+      "description": "Return a new array containing elements of two arrays.",
+      "knowledgeBaseCategory": "array",
+      "bilingualDescription": "返回一个新数组，包含给定两个数组的所有元素 | Returns a new array containing all elements of the two given arrays. 用于合并多个数组 | Used to merge multiple arrays.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "arr1/数组1",
+          "type": "array",
+          "description": "第一个数组，其元素将出现在新数组的前部 | First array, its elements will appear at the front of the new array"
+        },
+        {
+          "index": 1,
+          "name": "arr2/数组2",
+          "type": "array",
+          "description": "第二个数组，其元素将出现在新数组的后部 | Second array, its elements will appear at the end of the new array"
+        }
+      ],
+      "returnType": "array",
+      "examples": [
+        {
+          "description": "合并两个学生名单数组 | Merge two student list arrays",
+          "expression": "arrayConcat(class1Students, class2Students)"
+        }
+      ],
+      "businessScenarios": [
+        "合并订单列表 | Merge order lists",
+        "拼接多个部门员工列表 | Concatenate multiple department employee lists",
+        "组合产品分类 | Combine product categories"
+      ],
+      "keywords": [
+        "数组合并",
+        "array concat",
+        "合并数组",
+        "concatenate arrays",
+        "数组连接",
+        "array join"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "arrayCount": {
+      "category": "array",
+      "minParams": 1,
+      "maxParams": 4,
+      "optionalParams": [
+        "column",
+        "filterColumn",
+        "filterValue"
+      ],
+      "returnValueType": "number",
+      "description": "Count items or non-empty object-column values in an array.",
+      "knowledgeBaseCategory": "array",
+      "bilingualDescription": "统计数组中的元素数量 | Count items in an array. 如果数组元素是对象，可通过column参数指定用于计算的属性 | If array elements are objects, use column parameter to specify the property for calculation. 空值不参与计数 | Empty values are excluded from counting.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "list/数组",
+          "type": "array",
+          "description": "数组变量，包含要计数的元素 | Array variable containing elements to count"
+        },
+        {
+          "index": 1,
+          "name": "column/列名",
+          "type": "string",
+          "description": "可选，对象数组中用于计数的属性名 | Optional, property name in object array for counting"
+        },
+        {
+          "index": 2,
+          "name": "filterColumn/筛选列",
+          "type": "string",
+          "description": "可选，对象数组的筛选列名 | Optional, filter column name in object array"
+        },
+        {
+          "index": 3,
+          "name": "filterValue/筛选值",
+          "type": "any",
+          "description": "可选，仅筛选列属性值等于此值的对象参与计数 | Optional, only objects with filterColumn property equal to this value are counted"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "统计学生数组中数学成绩大于60分的人数 | Count number of students with math score greater than 60",
+          "expression": "arrayCount(students, 'score', 'subject', '数学')"
+        }
+      ],
+      "businessScenarios": [
+        "统计订单数量 | Count order quantity",
+        "计算员工人数 | Calculate number of employees",
+        "统计产品种类 | Count product types"
+      ],
+      "keywords": [
+        "数组计数",
+        "array count",
+        "元素数量",
+        "element count",
+        "统计个数",
+        "count items"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "arrayIndex": {
+      "category": "array",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "number",
+      "description": "Locate a value in an array and return -1 when it does not exist.",
+      "knowledgeBaseCategory": "array",
+      "bilingualDescription": "在数组中查找指定值的位置，如果找到则返回索引，否则返回-1 | Locate the position of a value in array, return index if found, otherwise -1. 用于判断元素是否存在于数组中 | Used to determine if an element exists in the array.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "array/数组",
+          "type": "array",
+          "description": "要在其中查找的数组表达式 | Array expression to search in"
+        },
+        {
+          "index": 1,
+          "name": "value/值",
+          "type": "any",
+          "description": "要查找的值表达式 | Value expression to lookup"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "在学生数组中查找姓名为'张三'的位置 | Find position of '张三' in student array",
+          "expression": "arrayIndex(students, '张三')"
+        }
+      ],
+      "businessScenarios": [
+        "查找产品在列表中的位置 | Find product position in list",
+        "检查用户名是否存在 | Check if username exists",
+        "定位订单索引 | Locate order index"
+      ],
+      "keywords": [
+        "数组索引",
+        "array index",
+        "查找位置",
+        "find position",
+        "元素查找",
+        "element search"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "arrayMax": {
+      "category": "array",
+      "minParams": 1,
+      "maxParams": 4,
+      "optionalParams": [
+        "column",
+        "filterColumn",
+        "filterValue"
+      ],
+      "returnValueType": "number",
+      "description": "Calculate max value of an array or object-array column.",
+      "knowledgeBaseCategory": "array",
+      "bilingualDescription": "计算数组中的最大值 | Calculate the max value of an array. 如果数组元素是对象，可通过column参数指定用于计算的属性 | If array elements are objects, use column parameter to specify the property for calculation. 空值不参与计算 | Empty values are excluded from calculation.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "list/数组",
+          "type": "array",
+          "description": "数组变量，包含要查找最大值的元素 | Array variable containing elements to find maximum value"
+        },
+        {
+          "index": 1,
+          "name": "column/列名",
+          "type": "string",
+          "description": "可选，对象数组中用于查找最大值的属性名 | Optional, property name in object array for finding maximum value"
+        },
+        {
+          "index": 2,
+          "name": "filterColumn/筛选列",
+          "type": "string",
+          "description": "可选，对象数组的筛选列名 | Optional, filter column name in object array"
+        },
+        {
+          "index": 3,
+          "name": "filterValue/筛选值",
+          "type": "any",
+          "description": "可选，仅筛选列属性值等于此值的对象参与计算 | Optional, only objects with filterColumn property equal to this value are included"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "查找学生成绩数组中的最高分，只计算数学科目 | Find highest score in student array, only for math subject",
+          "expression": "arrayMax(scores, 'score', 'subject', '数学')"
+        }
+      ],
+      "businessScenarios": [
+        "查找最高销售额 | Find highest sales amount",
+        "找出最大年龄 | Find maximum age",
+        "计算最高温度 | Calculate maximum temperature"
+      ],
+      "keywords": [
+        "数组最大值",
+        "array max",
+        "最大元素",
+        "maximum element",
+        "最高值",
+        "maximum value"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "arrayMin": {
+      "category": "array",
+      "minParams": 1,
+      "maxParams": 4,
+      "optionalParams": [
+        "column",
+        "filterColumn",
+        "filterValue"
+      ],
+      "returnValueType": "number",
+      "description": "Calculate min value of an array or object-array column.",
+      "knowledgeBaseCategory": "array",
+      "bilingualDescription": "计算数组中的最小值 | Calculate the min value of an array. 如果数组元素是对象，可通过column参数指定用于计算的属性 | If array elements are objects, use column parameter to specify the property for calculation. 空值不参与计算 | Empty values are excluded from calculation.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "list/数组",
+          "type": "array",
+          "description": "数组变量，包含要查找最小值的元素 | Array variable containing elements to find minimum value"
+        },
+        {
+          "index": 1,
+          "name": "column/列名",
+          "type": "string",
+          "description": "可选，对象数组中用于查找最小值的属性名 | Optional, property name in object array for finding minimum value"
+        },
+        {
+          "index": 2,
+          "name": "filterColumn/筛选列",
+          "type": "string",
+          "description": "可选，对象数组的筛选列名 | Optional, filter column name in object array"
+        },
+        {
+          "index": 3,
+          "name": "filterValue/筛选值",
+          "type": "any",
+          "description": "可选，仅筛选列属性值等于此值的对象参与计算 | Optional, only objects with filterColumn property equal to this value are included"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "查找学生成绩数组中的最低分，只计算数学科目 | Find lowest score in student array, only for math subject",
+          "expression": "arrayMin(scores, 'score', 'subject', '数学')"
+        }
+      ],
+      "businessScenarios": [
+        "查找最低价格 | Find lowest price",
+        "找出最小年龄 | Find minimum age",
+        "计算最低温度 | Calculate minimum temperature"
+      ],
+      "keywords": [
+        "数组最小值",
+        "array min",
+        "最小元素",
+        "minimum element",
+        "最低值",
+        "minimum value"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "arraySum": {
+      "category": "array",
+      "minParams": 1,
+      "maxParams": 4,
+      "optionalParams": [
+        "column",
+        "filterColumn",
+        "filterValue"
+      ],
+      "returnValueType": "number",
+      "description": "Sum values in an array or object-array column.",
+      "knowledgeBaseCategory": "array",
+      "bilingualDescription": "计算数组中所有值的总和 | Sum the values in an array. 如果数组元素是对象，可通过column参数指定要求和的属性 | If array elements are objects, use column parameter to specify the property to sum. 空值不参与计算 | Empty values are excluded from calculation.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "list/数组",
+          "type": "array",
+          "description": "数组变量，包含要求和的元素 | Array variable containing elements to sum"
+        },
+        {
+          "index": 1,
+          "name": "column/列名",
+          "type": "string",
+          "description": "可选，对象数组中要求和的属性名 | Optional, property name in object array to sum"
+        },
+        {
+          "index": 2,
+          "name": "filterColumn/筛选列",
+          "type": "string",
+          "description": "可选，对象数组的筛选列名 | Optional, filter column name in object array"
+        },
+        {
+          "index": 3,
+          "name": "filterValue/筛选值",
+          "type": "any",
+          "description": "可选，仅筛选列属性值等于此值的对象参与计算 | Optional, only objects with filterColumn property equal to this value are included"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "计算学生成绩数组中所有数学成绩的总和 | Calculate sum of all math scores in student array",
+          "expression": "arraySum(scores, 'score', 'subject', '数学')"
+        }
+      ],
+      "businessScenarios": [
+        "计算销售总额 | Calculate total sales amount",
+        "统计总人数 | Count total number of people",
+        "求和计算 | Sum calculation"
+      ],
+      "keywords": [
+        "数组求和",
+        "array sum",
+        "总和",
+        "total sum",
+        "合计",
+        "summation"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "ceil": {
+      "category": "math",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Returns the smallest integer not less than the parameter.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "返回不小于参数的最小整数值，即向上取整 | Returns the smallest integer value not less than the parameter, i.e., rounds up. 常用于计算需要完整单位数量的场景 | Commonly used for calculating complete unit quantities.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "number/数值",
+          "type": "number",
+          "description": "要向上取整的数值 | The number to round up"
+        }
+      ],
+      "returnType": "integer",
+      "examples": [
+        {
+          "description": "计算3.2向上取整的结果 | Calculate the result of rounding 3.2 up",
+          "expression": "ceil(3.2)"
+        }
+      ],
+      "businessScenarios": [
+        "计算最少包装数量 | Calculate minimum packaging quantity",
+        "确定最少所需资源 | Determine minimum required resources",
+        "向上取整计算 | Round up calculation"
+      ],
+      "keywords": [
+        "向上取整",
+        "ceil",
+        "天花板函数",
+        "ceiling",
+        "取整",
+        "round up"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "concat": {
+      "category": "string",
+      "minParams": 1,
+      "maxParams": 4,
+      "optionalParams": [
+        "s2",
+        "s3",
+        "s4"
+      ],
+      "returnValueType": "text",
+      "description": "Concatenate string arguments.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "将多个字符串连接成一个字符串 | Concatenates multiple strings into a single string. 可以连接任意数量的参数，常用于拼接姓名、地址、生成完整描述等场景 | Can concatenate any number of arguments, commonly used for concatenating names, addresses, generating complete descriptions, etc.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "s1/字符串1",
+          "type": "string",
+          "description": "第一个要连接的字符串 | First string to concatenate"
+        },
+        {
+          "index": 1,
+          "name": "s2/字符串2",
+          "type": "string",
+          "description": "可选，第二个要连接的字符串 | Optional, second string to concatenate"
+        },
+        {
+          "index": 2,
+          "name": "s3/字符串3",
+          "type": "string",
+          "description": "可选，第三个要连接的字符串 | Optional, third string to concatenate"
+        },
+        {
+          "index": 3,
+          "name": "s4/字符串4",
+          "type": "string",
+          "description": "可选，第四个要连接的字符串 | Optional, fourth string to concatenate"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将姓和名拼接成完整姓名 | Concatenate last name and first name into full name",
+          "expression": "concat('张', '三')"
+        }
+      ],
+      "businessScenarios": [
+        "拼接客户全名 | Concatenate customer full name",
+        "生成完整地址 | Generate complete address",
+        "组合产品编号和名称 | Combine product code and name"
+      ],
+      "keywords": [
+        "字符串拼接",
+        "string concatenation",
+        "连接",
+        "concatenate",
+        "合并",
+        "join"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "currentUser": {
+      "category": "user/system",
+      "minParams": 0,
+      "maxParams": 0,
+      "returnValueType": "text",
+      "description": "Returns ID of current user.",
+      "knowledgeBaseCategory": "system",
+      "bilingualDescription": "返回当前用户的ID | Returns ID of current user. 用于获取当前登录用户的身份信息，常用于权限控制和个性化显示 | Used to get current logged-in user's identity, commonly used for permission control and personalized display.",
+      "parameters": [],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "获取当前用户的ID | Get current user's ID",
+          "expression": "currentUser()"
+        }
+      ],
+      "businessScenarios": [
+        "记录操作用户 | Record operating user",
+        "权限验证 | Permission verification",
+        "个性化显示 | Personalized display"
+      ],
+      "keywords": [
+        "当前用户",
+        "current user",
+        "用户ID",
+        "user ID",
+        "登录用户",
+        "logged-in user"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "date": {
+      "category": "date/time",
+      "minParams": 3,
+      "maxParams": 6,
+      "optionalParams": [
+        "hour",
+        "minute",
+        "second"
+      ],
+      "returnValueType": "date",
+      "description": "Create a system-formatted date string.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "根据年、月、日、时、分、秒参数创建系统格式的日期字符串 | Create a system-formatted date string based on year, month, day, hour, minute, and second parameters. 可以创建特定的日期时间 | Can create specific date and time.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "year/年份",
+          "type": "number",
+          "description": "年份，四位数字 | Year, four-digit number"
+        },
+        {
+          "index": 1,
+          "name": "month/月份",
+          "type": "number",
+          "description": "月份，1-12 | Month, 1-12"
+        },
+        {
+          "index": 2,
+          "name": "day/日期",
+          "type": "number",
+          "description": "日期，1-31 | Day, 1-31"
+        },
+        {
+          "index": 3,
+          "name": "hour/小时",
+          "type": "number",
+          "description": "可选，小时，0-23 | Optional, hour, 0-23"
+        },
+        {
+          "index": 4,
+          "name": "minute/分钟",
+          "type": "number",
+          "description": "可选，分钟，0-59 | Optional, minute, 0-59"
+        },
+        {
+          "index": 5,
+          "name": "second/秒",
+          "type": "number",
+          "description": "可选，秒，0-59 | Optional, second, 0-59"
+        }
+      ],
+      "returnType": "date",
+      "examples": [
+        {
+          "description": "创建2024年1月1日12点30分的日期 | Create date for January 1, 2024 at 12:30",
+          "expression": "date(2024, 1, 1, 12, 30, 0)"
+        }
+      ],
+      "businessScenarios": [
+        "创建特定日期 | Create specific date",
+        "生成生日日期 | Generate birth date",
+        "设置截止时间 | Set deadline time"
+      ],
+      "keywords": [
+        "创建日期",
+        "create date",
+        "日期构造",
+        "date construction",
+        "日期生成",
+        "date generation"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "dateAdd": {
+      "category": "date/time",
+      "minParams": 3,
+      "maxParams": 3,
+      "returnValueType": "date",
+      "description": "Add or subtract year, month, day, hour, minute, or second intervals from a date.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "在指定日期上添加或减去指定的时间间隔 | Add or subtract the specified time interval from the date. 可以添加年、月、日、时、分、秒等单位，常用于计算未来或过去的日期 | Can add year, month, day, hour, minute, second units, commonly used to calculate future or past dates.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date/日期",
+          "type": "date/string",
+          "description": "原始时间或时间表达式 | Original time or time expression"
+        },
+        {
+          "index": 1,
+          "name": "type/类型",
+          "type": "string",
+          "description": "要添加的时间间隔类型，包括year、month、day、hour、minute、second | Time interval type to add, including year, month, day, hour, minute, second"
+        },
+        {
+          "index": 2,
+          "name": "addedValue/增加值",
+          "type": "number",
+          "description": "要添加到原始时间的值，可以是正数（未来）或负数（过去） | Value to add to original time, can be positive (future) or negative (past)"
+        }
+      ],
+      "returnType": "date",
+      "examples": [
+        {
+          "description": "计算当前时间3天前的日期 | Calculate date 3 days before current time",
+          "expression": "dateAdd(now(), 'day', -3)"
+        }
+      ],
+      "businessScenarios": [
+        "计算到期日期 | Calculate due date",
+        "安排会议时间 | Schedule meeting time",
+        "计算项目截止日期 | Calculate project deadline"
+      ],
+      "keywords": [
+        "日期加减",
+        "date add/subtract",
+        "时间计算",
+        "time calculation",
+        "日期偏移",
+        "date offset"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "dateDiff": {
+      "category": "date/time",
+      "minParams": 4,
+      "maxParams": 4,
+      "returnValueType": "number",
+      "description": "Return the number of time intervals between two dates.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "计算两个日期之间的时间间隔数 | Calculate the number of time intervals between two dates. 可以指定年、月、日、时、分、秒等单位，如果第一个日期晚于第二个日期，返回负数 | Can specify units like year, month, day, hour, minute, second. Returns negative number if first date is later than second date.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date1/日期1",
+          "type": "date/string",
+          "description": "第一个日期或时间表达式 | First date or time expression"
+        },
+        {
+          "index": 1,
+          "name": "date2/日期2",
+          "type": "date/string",
+          "description": "第二个日期或时间表达式，用于比较 | Second date or time expression for comparison"
+        },
+        {
+          "index": 2,
+          "name": "type/类型",
+          "type": "string",
+          "description": "时间间隔类型，包括year、month、day、hour、minute、second | Time interval type, including year, month, day, hour, minute, second"
+        },
+        {
+          "index": 3,
+          "name": "precise/精确",
+          "type": "boolean",
+          "description": "可选，如果为true则返回浮点数，否则返回整数（向下取整） | Optional, if true returns floating point number, otherwise returns integer (rounded down)"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "计算当前时间与2024年1月1日之间的天数差 | Calculate day difference between current time and January 1, 2024",
+          "expression": "dateDiff(now(), '2024-01-01', 'day', true)"
+        }
+      ],
+      "businessScenarios": [
+        "计算年龄/工龄 | Calculate age/work years",
+        "统计订单处理时长 | Statistical order processing time",
+        "计算项目周期 | Calculate project duration"
+      ],
+      "keywords": [
+        "日期差",
+        "date difference",
+        "时间间隔",
+        "time interval",
+        "日期比较",
+        "date comparison"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata.",
+        "For generated token arrays, pass the date unit parameter as a raw lowercase string such as \"year\" or \"day\". Do not wrap it as [{type:\"str\",value:\"Year\"}], which renders as formcraft.formula.datetype.[object Object]."
+      ]
+    },
+    "dateFormat": {
+      "category": "date/time",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "text",
+      "description": "Format a date/time with a format string such as YYYY, MM, DD, HH, mm, ss.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "将给定的日期/时间按照指定格式进行格式化 | Format the given date/time according to specified format. 支持多种格式符号，如YYYY表示四位年份，MM表示月份等 | Supports various format symbols, such as YYYY for four-digit year, MM for month, etc.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date/日期",
+          "type": "date/string",
+          "description": "日期/时间字符串或表达式 | Date/time string or expression"
+        },
+        {
+          "index": 1,
+          "name": "format/格式",
+          "type": "string",
+          "description": "格式化字符串，如'YYYY-MM-DD HH:mm:ss' | Format string, e.g., 'YYYY-MM-DD HH:mm:ss'"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将当前时间格式化为'2024年01月01日 12:30:00'格式 | Format current time as '2024年01月01日 12:30:00'",
+          "expression": "dateFormat(now(), 'YYYY年MM月DD日 HH:mm:ss')"
+        }
+      ],
+      "businessScenarios": [
+        "日期显示格式化 | Date display formatting",
+        "生成报告时间戳 | Generate report timestamp",
+        "导出数据日期格式 | Export data date format"
+      ],
+      "keywords": [
+        "日期格式化",
+        "date formatting",
+        "时间格式化",
+        "time formatting",
+        "格式转换",
+        "format conversion"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "datePart": {
+      "category": "date/time",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "number",
+      "enumHints": {
+        "type": [
+          "Year",
+          "Quarter",
+          "Month",
+          "dayofweek",
+          "day",
+          "hour",
+          "minute",
+          "second"
+        ]
+      },
+      "description": "Return a selected date part.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "从日期中提取指定部分的值，如年、月、日、时、分、秒等 | Extract specified part from date, such as year, month, day, hour, minute, second, etc. 用于获取日期的特定组成部分 | Used to get specific components of a date.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date/日期",
+          "type": "date/string",
+          "description": "原始日期或日期表达式 | Original date or date expression"
+        },
+        {
+          "index": 1,
+          "name": "type/类型",
+          "type": "string",
+          "description": "要提取的日期部分，包括year、quarter、month、dayofweek、day、hour、minute、second | Date part to extract, including year, quarter, month, dayofweek, day, hour, minute, second"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取当前日期的月份 | Get month of current date",
+          "expression": "datePart(now(), 'month')"
+        }
+      ],
+      "businessScenarios": [
+        "提取出生年份 | Extract birth year",
+        "获取订单月份 | Get order month",
+        "分析时间段 | Analyze time period"
+      ],
+      "keywords": [
+        "日期部分",
+        "date part",
+        "提取日期",
+        "extract date",
+        "获取年/月/日",
+        "get year/month/day"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "datePicker": {
+      "category": "date/time",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "date",
+      "description": "Select a date/time; second parameter controls display time.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "用于选择日期和时间 | Select the date and time. 可以通过参数指定默认选择的日期和是否显示时间 | Can specify default selected date and whether to show time through parameters.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date/日期",
+          "type": "date/string",
+          "description": "要选择的日期，可以是日期字符串或表达式 | Date to select, can be date string or expression"
+        },
+        {
+          "index": 1,
+          "name": "showTime/显示时间",
+          "type": "boolean",
+          "description": "是否显示时间选择，true显示，false不显示 | Whether to show time selection, true shows, false does not show"
+        }
+      ],
+      "returnType": "date",
+      "examples": [
+        {
+          "description": "选择日期并显示时间 | Select date and show time",
+          "expression": "datePicker('2024-01-01', true)"
+        }
+      ],
+      "businessScenarios": [
+        "日期选择器 | Date picker",
+        "预约时间选择 | Appointment time selection",
+        "截止日期设置 | Deadline setting"
+      ],
+      "keywords": [
+        "日期选择",
+        "date picker",
+        "时间选择",
+        "time selection",
+        "日期时间选择器",
+        "datetime picker"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "safetyNotes": [
+        "Knowledge-base call_format includes a primitive parameter placeholder; validate export-backed token shape before generating primitive params."
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "day": {
+      "category": "date/time",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Returns the day of the month.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "返回指定日期的月份中的第几天（1-31） | Returns the day of the month for the specified date (1-31). 用于提取日期的日部分 | Used to extract the day part of a date.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date/日期",
+          "type": "date/string",
+          "description": "要提取日期的日期表达式 | Date expression to extract day from"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取当前日期是月份中的第几天 | Get which day of the month is the current date",
+          "expression": "day(now())"
+        }
+      ],
+      "businessScenarios": [
+        "计算账单日 | Calculate billing date",
+        "统计每日数据 | Statistical daily data",
+        "日期分析 | Date analysis"
+      ],
+      "keywords": [
+        "日",
+        "day",
+        "天数",
+        "day number",
+        "日期提取",
+        "date extraction"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "fixed": {
+      "category": "math",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "number",
+      "description": "Truncate a number to the requested decimal places.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "将数字截断到指定的小数位数 | Truncate number to specified decimal places. 如果位数为0，结果没有小数点和小数部分 | If digit is 0, result has no decimal point or fractional part. 位数可以是负数，使数字小数点左侧的指定位数变为0 | Digit can be negative to cause specified digits left of decimal point to become zero.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "number/数值",
+          "type": "number",
+          "description": "要截断的数字 | The number to truncate"
+        },
+        {
+          "index": 1,
+          "name": "digit/位数",
+          "type": "number",
+          "description": "要保留的小数位数，可以是正数、0或负数 | Number of decimal places to keep, can be positive, 0, or negative"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "将3.14159截断为两位小数 | Truncate 3.14159 to two decimal places",
+          "expression": "fixed(3.14159, 2)"
+        }
+      ],
+      "businessScenarios": [
+        "金额格式化 | Amount formatting",
+        "数据精度控制 | Data precision control",
+        "报表数值处理 | Report numerical processing"
+      ],
+      "keywords": [
+        "截断小数",
+        "truncate decimal",
+        "保留小数位",
+        "keep decimal places",
+        "数字格式化",
+        "number formatting"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "floor": {
+      "category": "math",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Returns the largest integer not greater than the parameter.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "返回不大于参数的最大整数值，即向下取整 | Returns the largest integer value not greater than the parameter, i.e., rounds down. 常用于计算完整单位数量或去除小数部分 | Commonly used to calculate complete unit quantities or remove decimal parts.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "number/数值",
+          "type": "number",
+          "description": "要向下取整的数值 | The number to round down"
+        }
+      ],
+      "returnType": "integer",
+      "examples": [
+        {
+          "description": "计算3.9向下取整的结果 | Calculate the result of rounding 3.9 down",
+          "expression": "floor(3.9)"
+        }
+      ],
+      "businessScenarios": [
+        "计算完整包装数量 | Calculate complete packaging quantity",
+        "确定最大可用资源 | Determine maximum available resources",
+        "向下取整计算 | Round down calculation"
+      ],
+      "keywords": [
+        "向下取整",
+        "floor",
+        "地板函数",
+        "floor function",
+        "取整",
+        "round down"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "formatNumber": {
+      "category": "string",
+      "minParams": 3,
+      "maxParams": 3,
+      "returnValueType": "text",
+      "description": "Format a number with decimals and optional thousandths flag.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "格式化数字并返回字符串 | Format a number and return a string. 可以指定小数位数和是否显示千分位分隔符 | Can specify number of decimal places and whether to show thousand separator.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "expression/表达式",
+          "type": "number",
+          "description": "数字表达式，要格式化的数字 | Numeric expression, the number to format"
+        },
+        {
+          "index": 1,
+          "name": "digit/位数",
+          "type": "number",
+          "description": "保留的小数位数 | Number of decimal places to keep"
+        },
+        {
+          "index": 2,
+          "name": "thousandths/千分位",
+          "type": "boolean/number",
+          "description": "是否显示千分位分隔符，1表示true，0表示false | Whether to show thousand separator, 1 for true, 0 for false"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将1234567.89格式化为带千分位和两位小数的字符串 | Format 1234567.89 as string with thousand separator and two decimal places",
+          "expression": "formatNumber(1234567.89, 2, 1)"
+        }
+      ],
+      "businessScenarios": [
+        "金额格式化显示 | Amount formatting display",
+        "报表数字格式化 | Report number formatting",
+        "数据导出格式化 | Data export formatting"
+      ],
+      "keywords": [
+        "数字格式化",
+        "number formatting",
+        "千分位",
+        "thousand separator",
+        "格式数字",
+        "format number"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "getAttr": {
+      "category": "utility",
+      "minParams": 2,
+      "maxParams": 3,
+      "optionalParams": [
+        "defaultValue"
+      ],
+      "returnValueType": "unknown",
+      "description": "Get a value at an object path and return a default when undefined.",
+      "knowledgeBaseCategory": "object",
+      "bilingualDescription": "获取对象中指定路径的属性值 | Gets the value at path of object. 如果解析的值为undefined，则返回默认值 | If the resolved value is undefined, the defaultValue is returned. 用于安全地访问嵌套对象属性 | Used for safely accessing nested object properties.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "object/对象",
+          "type": "object",
+          "description": "要查询的对象 | The object to query"
+        },
+        {
+          "index": 1,
+          "name": "path/路径",
+          "type": "string",
+          "description": "要获取属性的路径，如'user.address.city' | The path of the property to get, e.g., 'user.address.city'"
+        },
+        {
+          "index": 2,
+          "name": "defaultValue/默认值",
+          "type": "any",
+          "description": "可选，当路径不存在时返回的默认值 | Optional, default value returned when path doesn't exist"
+        }
+      ],
+      "returnType": "any",
+      "examples": [
+        {
+          "description": "获取用户对象中地址的城市属性，如果不存在则返回'未知' | Get city property of address in user object, return '未知' if doesn't exist",
+          "expression": "getAttr(user, 'address.city', '未知')"
+        }
+      ],
+      "businessScenarios": [
+        "安全访问对象属性 | Safe access to object properties",
+        "获取配置项 | Get configuration items",
+        "处理嵌套数据 | Process nested data"
+      ],
+      "keywords": [
+        "获取属性",
+        "get attribute",
+        "对象路径",
+        "object path",
+        "安全访问",
+        "safe access"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "hour": {
+      "category": "date/time",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Returns the hour for a time.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "返回指定时间的小时部分（0-23） | Returns the hour for the specified time (0-23). 用于提取时间的小时信息 | Used to extract hour information from time.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "time/时间",
+          "type": "date/string",
+          "description": "要提取小时的时间表达式 | Time expression to extract hour from"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取当前时间的小时数 | Get hour of current time",
+          "expression": "hour(now())"
+        }
+      ],
+      "businessScenarios": [
+        "分析时间段 | Analyze time period",
+        "统计小时数据 | Statistical hourly data",
+        "时间分析 | Time analysis"
+      ],
+      "keywords": [
+        "小时",
+        "hour",
+        "时间提取",
+        "time extraction",
+        "获取小时",
+        "get hour"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "iif": {
+      "category": "logical",
+      "minParams": 3,
+      "maxParams": 3,
+      "returnValueType": "unknown",
+      "description": "Return then value when condition is true, otherwise else value.",
+      "knowledgeBaseCategory": "logic",
+      "bilingualDescription": "根据条件判断返回不同的值 | Returns one of two values depending on a condition evaluation. 如果条件为真返回第一个值，否则返回第二个值 | If condition is true returns first value, otherwise returns second value. 类似于if-else语句 | Similar to if-else statement.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "condition/条件",
+          "type": "boolean",
+          "description": "逻辑表达式，判断条件，结果为真或假 | Logical expression, condition to evaluate, result is true or false"
+        },
+        {
+          "index": 1,
+          "name": "then/真值",
+          "type": "any",
+          "description": "条件为真时返回的值 | Value returned when condition is true"
+        },
+        {
+          "index": 2,
+          "name": "else/假值",
+          "type": "any",
+          "description": "条件为假时返回的值 | Value returned when condition is false"
+        }
+      ],
+      "returnType": "any",
+      "examples": [
+        {
+          "description": "如果分数大于等于60返回'及格'，否则返回'不及格' | If score is greater than or equal to 60 return 'Pass', otherwise return 'Fail'",
+          "expression": "iif(score >= 60, '及格', '不及格')"
+        }
+      ],
+      "businessScenarios": [
+        "根据成绩判断等级 | Determine grade based on score",
+        "根据金额判断客户等级 | Determine customer level based on amount",
+        "条件性计算折扣 | Conditional discount calculation"
+      ],
+      "keywords": [
+        "条件判断",
+        "conditional judgment",
+        "if else",
+        "三元运算",
+        "ternary operation",
+        "iif"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "isFalse": {
+      "category": "logical",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "boolean",
+      "description": "Evaluate whether an expression is false-like.",
+      "knowledgeBaseCategory": "logic",
+      "bilingualDescription": "判断表达式是否为假 | Determines if an expression is false. 在以下情况下返回true：null、0、空字符串、字符串'false'、字符串'False'、布尔值false，否则返回false | Returns true in following cases: null, 0, empty string, string 'false', string 'False', boolean false, otherwise returns false.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "parameter/参数",
+          "type": "any",
+          "description": "要判断的表达式 | The expression to evaluate"
+        }
+      ],
+      "returnType": "boolean",
+      "examples": [
+        {
+          "description": "判断变量值是否为假 | Determine if variable value is false",
+          "expression": "isFalse(value)"
+        }
+      ],
+      "businessScenarios": [
+        "验证表单输入 | Validate form input",
+        "检查开关状态 | Check switch status",
+        "判断条件是否满足 | Determine if condition is met"
+      ],
+      "keywords": [
+        "是否为假",
+        "is false",
+        "假值判断",
+        "false value judgment",
+        "布尔判断",
+        "boolean judgment"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "isNullOrEmpty": {
+      "category": "logical",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "boolean",
+      "description": "Return true if an expression is null or empty string.",
+      "knowledgeBaseCategory": "validation",
+      "bilingualDescription": "检查表达式是否为null或空字符串 | Checks if expression is NULL or empty string. 如果是则返回true，否则返回false | Returns true if null or empty string, otherwise returns false. 用于验证输入是否有效 | Used to verify if input is valid.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "checkExpression/检查表达式",
+          "type": "any",
+          "description": "要检查的表达式 | The expression to be checked"
+        }
+      ],
+      "returnType": "boolean",
+      "examples": [
+        {
+          "description": "检查用户名是否为空或null | Check if username is empty or null",
+          "expression": "isNullOrEmpty(username)"
+        }
+      ],
+      "businessScenarios": [
+        "表单验证 | Form validation",
+        "必填项检查 | Required field check",
+        "数据完整性验证 | Data integrity validation"
+      ],
+      "keywords": [
+        "空值检查",
+        "null check",
+        "空字符串",
+        "empty string",
+        "验证输入",
+        "validate input"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "isTrue": {
+      "category": "logical",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "boolean",
+      "description": "Evaluate whether an expression is true-like.",
+      "knowledgeBaseCategory": "logic",
+      "bilingualDescription": "判断表达式是否为真 | Determines if an expression is true. 在以下情况下返回false：null、0、空字符串、字符串'false'、字符串'False'、布尔值false，否则返回true | Returns false in following cases: null, 0, empty string, string 'false', string 'False', boolean false, otherwise returns true.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "parameter/参数",
+          "type": "any",
+          "description": "要判断的表达式 | The expression to evaluate"
+        }
+      ],
+      "returnType": "boolean",
+      "examples": [
+        {
+          "description": "判断变量值是否为真 | Determine if variable value is true",
+          "expression": "isTrue(value)"
+        }
+      ],
+      "businessScenarios": [
+        "验证表单输入 | Validate form input",
+        "检查开关状态 | Check switch status",
+        "判断条件是否满足 | Determine if condition is met"
+      ],
+      "keywords": [
+        "是否为真",
+        "is true",
+        "真值判断",
+        "true value judgment",
+        "布尔判断",
+        "boolean judgment"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "join": {
+      "category": "array",
+      "minParams": 1,
+      "maxParams": 2,
+      "optionalParams": [
+        "separator"
+      ],
+      "returnValueType": "text",
+      "description": "Join array values with comma or provided separator.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "将数组中的所有元素用指定的分隔符连接成一个字符串 | Returns a string by combining all the elements in the array with either commas or a specified separator string. 如果没有提供分隔符，则使用逗号 | If no separator is provided, commas are used.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "array/数组",
+          "type": "array",
+          "description": "数组变量，包含要连接的元素 | Array variable containing elements to join"
+        },
+        {
+          "index": 1,
+          "name": "separator/分隔符",
+          "type": "string",
+          "description": "可选，分隔符，默认为逗号 | Optional, separator, default is comma"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将数组['苹果','香蕉','橙子']用逗号连接成字符串 | Join array ['apple','banana','orange'] with comma into string",
+          "expression": "join(fruits, ', ')"
+        }
+      ],
+      "businessScenarios": [
+        "生成标签字符串 | Generate tag string",
+        "拼接选项 | Concatenate options",
+        "导出CSV数据 | Export CSV data"
+      ],
+      "keywords": [
+        "数组连接",
+        "array join",
+        "拼接字符串",
+        "join strings",
+        "连接数组",
+        "join array"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "left": {
+      "category": "string",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "text",
+      "description": "Return leftmost characters from a string.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "返回字符串左侧指定长度的字符 | Returns the leftmost specified number of characters from the string. 用于提取字符串的前缀部分 | Used to extract prefix part of string.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "str/字符串",
+          "type": "string",
+          "description": "原始字符串 | Original string"
+        },
+        {
+          "index": 1,
+          "name": "len/长度",
+          "type": "number",
+          "description": "要提取的字符长度 | Number of characters to extract"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "提取字符串'Hello World'的前5个字符 | Extract first 5 characters from string 'Hello World'",
+          "expression": "left('Hello World', 5)"
+        }
+      ],
+      "businessScenarios": [
+        "提取姓名首字母 | Extract first letter of name",
+        "截取产品编码前缀 | Extract product code prefix",
+        "获取字符串前缀 | Get string prefix"
+      ],
+      "keywords": [
+        "左截取",
+        "left extract",
+        "左侧字符",
+        "left characters",
+        "字符串截取",
+        "string extraction"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "len": {
+      "category": "string",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Return array item count or character count.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "返回值的长度 | Returns the length of the value. 如果值是数组，返回元素数量；如果是其他类型，返回字符数量 | If value is array, returns number of elements; if other type, returns number of characters. 用于获取字符串长度或数组大小 | Used to get string length or array size.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "checkExpression/检查表达式",
+          "type": "any",
+          "description": "要检查长度的表达式，可以是数组、字符串或其他类型 | Expression to check length, can be array, string or other type"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取字符串'Hello'的长度 | Get length of string 'Hello'",
+          "expression": "len('Hello')"
+        }
+      ],
+      "businessScenarios": [
+        "验证输入长度 | Validate input length",
+        "统计数组元素数量 | Count array elements",
+        "检查字符串长度 | Check string length"
+      ],
+      "keywords": [
+        "长度",
+        "length",
+        "字符数",
+        "character count",
+        "数组大小",
+        "array size"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "log": {
+      "category": "math",
+      "minParams": 1,
+      "maxParams": 2,
+      "optionalParams": [
+        "baseOrNumber"
+      ],
+      "returnValueType": "number",
+      "description": "Return natural logarithm or logarithm using a provided base.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "计算对数 | Calculate logarithm. 如果使用一个参数，返回自然对数（以e为底） | If called with one parameter, returns natural logarithm (base e). 如果使用两个参数，返回以第一个参数为底，第二个参数的对数 | If called with two parameters, returns logarithm of second parameter to base of first parameter.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "n1/底数或数值",
+          "type": "number",
+          "description": "如果只有一个参数，是要计算自然对数的数；如果有两个参数，是对数的底数 | If one parameter, number to calculate natural logarithm; if two parameters, base of logarithm"
+        },
+        {
+          "index": 1,
+          "name": "n2/真数",
+          "type": "number",
+          "description": "可选，要计算对数的真数 | Optional, number to calculate logarithm of"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "计算以10为底100的对数 | Calculate logarithm of 100 to base 10",
+          "expression": "log(10, 100)"
+        }
+      ],
+      "businessScenarios": [
+        "科学计算 | Scientific calculation",
+        "数据分析 | Data analysis",
+        "金融计算 | Financial calculation"
+      ],
+      "keywords": [
+        "对数",
+        "logarithm",
+        "自然对数",
+        "natural logarithm",
+        "log",
+        "对数计算"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "lower": {
+      "category": "string",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "text",
+      "description": "Convert text to lowercase.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "将字符串中的所有大写字符转换为小写 | Converts uppercase character data to lowercase. 用于统一字符串的大小写格式 | Used to unify string case format.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "expression/表达式",
+          "type": "string",
+          "description": "要转换为小写的字符串表达式 | String expression to convert to lowercase"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将字符串'Hello World'转换为小写 | Convert string 'Hello World' to lowercase",
+          "expression": "lower('Hello World')"
+        }
+      ],
+      "businessScenarios": [
+        "统一用户名格式 | Unify username format",
+        "标准化输入 | Standardize input",
+        "大小写转换 | Case conversion"
+      ],
+      "keywords": [
+        "小写转换",
+        "lowercase conversion",
+        "转换为小写",
+        "convert to lowercase",
+        "大小写",
+        "case"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "max": {
+      "category": "math",
+      "minParams": 1,
+      "maxParams": 4,
+      "returnValueType": "number",
+      "description": "Return maximum numeric value.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "返回输入参数中的最大值 | Returns the maximum value in the input parameters. 可以比较多个数值，找出其中的最大值 | Can compare multiple numbers and find the maximum value.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "numbers/数值",
+          "type": "number...",
+          "description": "要比较的数值，可以传入2到4个参数 | Numbers to compare, can pass 2 to 4 parameters"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "找出3、7、2、9中的最大值 | Find maximum value among 3, 7, 2, 9",
+          "expression": "max(3, 7, 2, 9)"
+        }
+      ],
+      "businessScenarios": [
+        "找出最高分 | Find highest score",
+        "比较多个价格 | Compare multiple prices",
+        "获取最大值 | Get maximum value"
+      ],
+      "keywords": [
+        "最大值",
+        "maximum",
+        "最大数",
+        "maximum number",
+        "比较数值",
+        "compare numbers"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "min": {
+      "category": "math",
+      "minParams": 1,
+      "maxParams": 4,
+      "returnValueType": "number",
+      "description": "Return minimum numeric value.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "返回输入参数中的最小值 | Returns the minimum value in the input parameters. 可以比较多个数值，找出其中的最小值 | Can compare multiple numbers and find the minimum value.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "numbers/数值",
+          "type": "number...",
+          "description": "要比较的数值，可以传入2到4个参数 | Numbers to compare, can pass 2 to 4 parameters"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "找出3、7、2、9中的最小值 | Find minimum value among 3, 7, 2, 9",
+          "expression": "min(3, 7, 2, 9)"
+        }
+      ],
+      "businessScenarios": [
+        "找出最低分 | Find lowest score",
+        "比较多个价格 | Compare multiple prices",
+        "获取最小值 | Get minimum value"
+      ],
+      "keywords": [
+        "最小值",
+        "minimum",
+        "最小数",
+        "minimum number",
+        "比较数值",
+        "compare numbers"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "minute": {
+      "category": "date/time",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Return minute for a time.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "返回指定时间的分钟部分（0-59） | Returns the minute for the specified time (0-59). 用于提取时间的分钟信息 | Used to extract minute information from time.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "time/时间",
+          "type": "date/string",
+          "description": "要提取分钟的时间表达式 | Time expression to extract minute from"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取当前时间的分钟数 | Get minute of current time",
+          "expression": "minute(now())"
+        }
+      ],
+      "businessScenarios": [
+        "分析时间段 | Analyze time period",
+        "统计分钟数据 | Statistical minute data",
+        "时间分析 | Time analysis"
+      ],
+      "keywords": [
+        "分钟",
+        "minute",
+        "时间提取",
+        "time extraction",
+        "获取分钟",
+        "get minute"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "month": {
+      "category": "date/time",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Return month for a date.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "返回指定日期的月份部分（1-12） | Returns the month for the specified date (1-12). 用于提取日期的月份信息 | Used to extract month information from date.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date/日期",
+          "type": "date/string",
+          "description": "要提取月份的日期表达式 | Date expression to extract month from"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取当前日期的月份 | Get month of current date",
+          "expression": "month(now())"
+        }
+      ],
+      "businessScenarios": [
+        "按月统计 | Monthly statistics",
+        "生日月份 | Birth month",
+        "季节性分析 | Seasonal analysis"
+      ],
+      "keywords": [
+        "月份",
+        "month",
+        "日期提取",
+        "date extraction",
+        "获取月份",
+        "get month"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "now": {
+      "category": "date/time",
+      "minParams": 0,
+      "maxParams": 0,
+      "returnValueType": "date",
+      "description": "Return current date and time.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "返回当前系统的日期和时间 | Returns the current date and time. 常用于记录时间戳、计算与当前时间相关的时间差等场景 | Commonly used for recording timestamps, calculating time differences related to current time, etc.",
+      "parameters": [],
+      "returnType": "date",
+      "examples": [
+        {
+          "description": "获取当前系统的日期和时间 | Get current system date and time",
+          "expression": "now()"
+        }
+      ],
+      "businessScenarios": [
+        "记录创建时间 | Record creation time",
+        "计算到期时间 | Calculate due time",
+        "时间戳生成 | Timestamp generation"
+      ],
+      "keywords": [
+        "当前时间",
+        "current time",
+        "现在",
+        "now",
+        "当前日期",
+        "current date"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "number": {
+      "category": "conversion",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Convert a value to number; invalid/null becomes 0.",
+      "knowledgeBaseCategory": "conversion",
+      "bilingualDescription": "将输入值转换为数字 | Converts input value to a number. 如果输入是null或无效，则返回0 | If input is null or invalid, returns 0. 用于将字符串或其他类型转换为数字 | Used to convert string or other types to number.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "X/值",
+          "type": "any",
+          "description": "要转换为数字的值 | The value to convert to number"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "将字符串'123'转换为数字123 | Convert string '123' to number 123",
+          "expression": "number('123')"
+        }
+      ],
+      "businessScenarios": [
+        "字符串转数字 | String to number conversion",
+        "数据类型转换 | Data type conversion",
+        "输入值标准化 | Input value standardization"
+      ],
+      "keywords": [
+        "转换为数字",
+        "convert to number",
+        "数字转换",
+        "number conversion",
+        "类型转换",
+        "type conversion"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "pow": {
+      "category": "math",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "number",
+      "description": "Return X raised to Y.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "返回X的Y次幂 | Returns the value of X raised to the power of Y. 用于计算指数运算，如平方、立方等 | Used to calculate exponentiation, such as square, cube, etc.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "X/底数",
+          "type": "number",
+          "description": "底数 | Base number"
+        },
+        {
+          "index": 1,
+          "name": "Y/指数",
+          "type": "number",
+          "description": "指数 | Exponent"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "计算2的3次方 | Calculate 2 to the power of 3",
+          "expression": "pow(2, 3)"
+        }
+      ],
+      "businessScenarios": [
+        "计算面积 | Calculate area",
+        "复利计算 | Compound interest calculation",
+        "科学计算 | Scientific calculation"
+      ],
+      "keywords": [
+        "幂运算",
+        "power operation",
+        "指数",
+        "exponent",
+        "次方",
+        "power"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "rand": {
+      "category": "math",
+      "minParams": 0,
+      "maxParams": 0,
+      "returnValueType": "number",
+      "description": "Return random floating point value from 0 inclusive to 1 exclusive.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "返回一个0到1之间（包含0，不包含1）的随机浮点数 | Returns a random floating-point value in the range 0 <= v < 1.0. 用于生成随机数，如抽奖、随机排序等场景 | Used to generate random numbers, such as for lottery, random sorting, etc.",
+      "parameters": [],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "生成一个0到1之间的随机数 | Generate a random number between 0 and 1",
+          "expression": "rand()"
+        }
+      ],
+      "businessScenarios": [
+        "随机抽奖 | Random draw",
+        "生成测试数据 | Generate test data",
+        "随机排序 | Random sorting"
+      ],
+      "keywords": [
+        "随机数",
+        "random number",
+        "随机",
+        "rand",
+        "随机生成",
+        "random generation"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "removeDuplicates": {
+      "category": "array",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "array",
+      "description": "Return a new array with duplicate values removed.",
+      "knowledgeBaseCategory": "array",
+      "bilingualDescription": "从给定数组中移除所有重复项，返回包含唯一元素的新数组 | Remove all duplicates from a given array and return a new array containing unique elements. 如果数组元素是对象，会转换为JSON字符串进行比较 | If elements in the array are objects, they will be converted to JSON strings for comparison.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "arr/数组",
+          "type": "array",
+          "description": "原始数组，要从中移除重复项 | Original array from which to remove duplicates"
+        }
+      ],
+      "returnType": "array",
+      "examples": [
+        {
+          "description": "移除数组[1, 2, 2, 3, 3, 3]中的重复项 | Remove duplicates from array [1, 2, 2, 3, 3, 3]",
+          "expression": "removeDuplicates([1, 2, 2, 3, 3, 3])"
+        }
+      ],
+      "businessScenarios": [
+        "去重用户列表 | Deduplicate user list",
+        "清理重复数据 | Clean duplicate data",
+        "获取唯一值 | Get unique values"
+      ],
+      "keywords": [
+        "去重",
+        "deduplicate",
+        "移除重复",
+        "remove duplicates",
+        "唯一数组",
+        "unique array"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "repeat": {
+      "category": "string",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "text",
+      "description": "Repeat a string a given number of times.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "返回由指定字符串重复指定次数组成的新字符串 | Returns a string consisting of the specified string repeated specified number of times. 如果次数小于1，返回空字符串 | If count is less than 1, returns an empty string.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "str/字符串",
+          "type": "string",
+          "description": "要重复的字符串 | The string to repeat"
+        },
+        {
+          "index": 1,
+          "name": "count/次数",
+          "type": "number",
+          "description": "重复次数 | Number of times to repeat"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将字符串'abc'重复3次 | Repeat string 'abc' 3 times",
+          "expression": "repeat('abc', 3)"
+        }
+      ],
+      "businessScenarios": [
+        "生成分隔线 | Generate separator line",
+        "创建测试数据 | Create test data",
+        "字符串重复 | String repetition"
+      ],
+      "keywords": [
+        "重复字符串",
+        "repeat string",
+        "字符串重复",
+        "string repetition",
+        "repeat",
+        "重复"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "replace": {
+      "category": "string",
+      "minParams": 4,
+      "maxParams": 4,
+      "returnValueType": "text",
+      "enumHints": {
+        "type": [
+          "1",
+          "0",
+          "2"
+        ]
+      },
+      "description": "Replace first/all/last occurrence; type 1 all, 0 first, 2 last.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "在字符串中替换指定模式的文本 | Replacing first/all/last occurrence of a specified string value with another string value. 可以替换第一次出现、最后一次出现或所有出现的模式 | Can replace first occurrence, last occurrence, or all occurrences of pattern.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "expression/表达式",
+          "type": "string",
+          "description": "要搜索的字符串表达式 | The string expression to be searched"
+        },
+        {
+          "index": 1,
+          "name": "pattern/模式",
+          "type": "string",
+          "description": "要查找的子字符串 | The substring to be found"
+        },
+        {
+          "index": 2,
+          "name": "replacement/替换文本",
+          "type": "string",
+          "description": "替换字符串 | The replacement string"
+        },
+        {
+          "index": 3,
+          "name": "type/类型",
+          "type": "number",
+          "description": "替换类型：0表示替换第一个，1表示替换所有，2表示替换最后一个 | Replacement type: 0 for first, 1 for all, 2 for last"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将字符串'hello world'中的所有'l'替换为'L' | Replace all 'l' with 'L' in string 'hello world'",
+          "expression": "replace('hello world', 'l', 'L', 1)"
+        }
+      ],
+      "businessScenarios": [
+        "文本替换 | Text replacement",
+        "模板填充 | Template filling",
+        "数据清洗 | Data cleaning"
+      ],
+      "keywords": [
+        "替换",
+        "replace",
+        "字符串替换",
+        "string replacement",
+        "文本替换",
+        "text replacement"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "right": {
+      "category": "string",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "text",
+      "description": "Return rightmost characters from a string.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "返回字符串右侧指定长度的字符 | Returns the rightmost specified number of characters from the string. 用于提取字符串的后缀部分 | Used to extract suffix part of string.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "str/字符串",
+          "type": "string",
+          "description": "原始字符串 | Original string"
+        },
+        {
+          "index": 1,
+          "name": "len/长度",
+          "type": "number",
+          "description": "要提取的字符长度 | Number of characters to extract"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "提取字符串'Hello World'的后5个字符 | Extract last 5 characters from string 'Hello World'",
+          "expression": "right('Hello World', 5)"
+        }
+      ],
+      "businessScenarios": [
+        "提取文件扩展名 | Extract file extension",
+        "获取身份证后几位 | Get last few digits of ID card",
+        "截取字符串后缀 | Extract string suffix"
+      ],
+      "keywords": [
+        "右截取",
+        "right extract",
+        "右侧字符",
+        "right characters",
+        "字符串截取",
+        "string extraction"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "round": {
+      "category": "math",
+      "minParams": 1,
+      "maxParams": 2,
+      "optionalParams": [
+        "digits"
+      ],
+      "returnValueType": "number",
+      "description": "Round to nearest integer or specified fractional digits.",
+      "knowledgeBaseCategory": "math",
+      "bilingualDescription": "将数字四舍五入到最接近的整数或指定的小数位数 | Rounds a value to the nearest integer or to the specified number of fractional digits. 用于数值的精确控制 | Used for numerical precision control.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "number/数值",
+          "type": "number",
+          "description": "要四舍五入的数字表达式 | The number expression to be processed"
+        },
+        {
+          "index": 1,
+          "name": "digits/位数",
+          "type": "number",
+          "description": "可选，要保留的小数位数，默认为0 | Optional, number of fractional digits to keep, default is 0"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "将3.14159四舍五入到两位小数 | Round 3.14159 to two decimal places",
+          "expression": "round(3.14159, 2)"
+        }
+      ],
+      "businessScenarios": [
+        "金额计算 | Amount calculation",
+        "数据精度控制 | Data precision control",
+        "报表数值处理 | Report numerical processing"
+      ],
+      "keywords": [
+        "四舍五入",
+        "round",
+        "取整",
+        "rounding",
+        "舍入",
+        "rounding"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "second": {
+      "category": "date/time",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Return second for a time.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "返回指定时间的秒部分（0-59） | Returns the second for the specified time (0-59). 用于提取时间的秒信息 | Used to extract second information from time.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "time/时间",
+          "type": "date/string",
+          "description": "要提取秒的时间表达式 | Time expression to extract second from"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取当前时间的秒数 | Get second of current time",
+          "expression": "second(now())"
+        }
+      ],
+      "businessScenarios": [
+        "计时 | Timing",
+        "时间精确分析 | Precise time analysis",
+        "秒级统计 | Second-level statistics"
+      ],
+      "keywords": [
+        "秒",
+        "second",
+        "时间提取",
+        "time extraction",
+        "获取秒",
+        "get second"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "split": {
+      "category": "string",
+      "minParams": 2,
+      "maxParams": 2,
+      "returnValueType": "array",
+      "description": "Split a string by separator.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "根据指定的分隔符将字符串分割成子字符串数组 | Splits a string into an array of substrings based on a specified delimiter. 用于解析字符串数据 | Used to parse string data.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "string/字符串",
+          "type": "string",
+          "description": "要分割的字符串 | The string variable to split"
+        },
+        {
+          "index": 1,
+          "name": "separator/分隔符",
+          "type": "string",
+          "description": "分隔符，用于分割字符串 | A string that separates the substrings"
+        }
+      ],
+      "returnType": "array",
+      "examples": [
+        {
+          "description": "将字符串'apple,banana,orange'用逗号分割成数组 | Split string 'apple,banana,orange' into array with comma",
+          "expression": "split('apple,banana,orange', ',')"
+        }
+      ],
+      "businessScenarios": [
+        "解析CSV数据 | Parse CSV data",
+        "分割路径 | Split path",
+        "字符串解析 | String parsing"
+      ],
+      "keywords": [
+        "分割字符串",
+        "split string",
+        "字符串分割",
+        "string splitting",
+        "拆分",
+        "split"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "strIndex": {
+      "category": "string",
+      "minParams": 2,
+      "maxParams": 3,
+      "optionalParams": [
+        "start_location"
+      ],
+      "returnValueType": "number",
+      "description": "Search one expression inside another and return its starting position.",
+      "sourceReferences": [
+        "expression training data generator.txt:firstPass"
+      ],
+      "safetyNotes": [
+        "Missing from expression training data generator_2.txt function knowledge base; preserve exact first-pass runtime name and do not rename from case-insensitive text."
+      ]
+    },
+    "subString": {
+      "category": "string",
+      "minParams": 3,
+      "maxParams": 3,
+      "returnValueType": "text",
+      "description": "Return part of a string from start for length.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "从字符串中提取子字符串 | Extract part of string, or text. 可以指定起始位置和长度，用于截取字符串的一部分 | Can specify start position and length, used to extract part of a string.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "expression/表达式",
+          "type": "string",
+          "description": "字符串或文本表达式 | A string, or text expression"
+        },
+        {
+          "index": 1,
+          "name": "start/起始位置",
+          "type": "number",
+          "description": "整数表达式，指定返回字符的起始位置。如果小于1，从第一个字符开始 | Integer expression that specifies where the returned characters start. If less than 1, starts at first character."
+        },
+        {
+          "index": 2,
+          "name": "length/长度",
+          "type": "number",
+          "description": "正整数表达式，指定要返回的字符数。如果为负数，返回空字符串 | Positive integer expression that specifies how many characters will be returned. If negative, returns empty string."
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "从字符串'Hello World'的第6个字符开始提取5个字符 | Extract 5 characters starting from 6th character in string 'Hello World'",
+          "expression": "subString('Hello World', 6, 5)"
+        }
+      ],
+      "businessScenarios": [
+        "提取部分文本 | Extract part of text",
+        "截取字符串 | Truncate string",
+        "获取子串 | Get substring"
+      ],
+      "keywords": [
+        "子字符串",
+        "substring",
+        "字符串截取",
+        "string extraction",
+        "提取子串",
+        "extract substring"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "text": {
+      "category": "conversion",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "text",
+      "description": "Convert a value to text.",
+      "knowledgeBaseCategory": "conversion",
+      "bilingualDescription": "将输入值转换为字符串 | Converts input value to a string value. 用于将数字、日期或其他类型转换为字符串格式 | Used to convert number, date or other types to string format.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "X/值",
+          "type": "any",
+          "description": "要转换为字符串的值 | The value to convert to string"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将数字123转换为字符串'123' | Convert number 123 to string '123'",
+          "expression": "text(123)"
+        }
+      ],
+      "businessScenarios": [
+        "数字转字符串 | Number to string conversion",
+        "数据类型转换 | Data type conversion",
+        "生成文本 | Generate text"
+      ],
+      "keywords": [
+        "转换为字符串",
+        "convert to string",
+        "文本转换",
+        "text conversion",
+        "字符串转换",
+        "string conversion"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "trim": {
+      "category": "string",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "text",
+      "description": "Remove whitespace from both ends.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "移除字符串两端的空白字符 | Removes whitespace from both ends of a string. 包括空格、制表符、换行符等，用于清理用户输入 | Includes spaces, tabs, newlines, etc., used to clean user input.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "string/字符串",
+          "type": "string",
+          "description": "要处理的字符串 | The string to process"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "移除字符串'  Hello World  '两端的空格 | Remove spaces from both ends of string '  Hello World  '",
+          "expression": "trim('  Hello World  ')"
+        }
+      ],
+      "businessScenarios": [
+        "清理用户输入 | Clean user input",
+        "数据标准化 | Data standardization",
+        "去除空格 | Remove spaces"
+      ],
+      "keywords": [
+        "去除空格",
+        "trim spaces",
+        "修剪字符串",
+        "trim string",
+        "trim",
+        "去除空白"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "UniqueID": {
+      "category": "user/system",
+      "minParams": 0,
+      "maxParams": 0,
+      "returnValueType": "text",
+      "description": "Generate a unique id.",
+      "knowledgeBaseCategory": "system",
+      "bilingualDescription": "生成一个唯一的ID | Generate a unique id. 通常用于创建记录的唯一标识符，如订单号、用户ID等 | Typically used to create unique identifiers for records, such as order numbers, user IDs, etc.",
+      "parameters": [],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "生成一个唯一的ID | Generate a unique ID",
+          "expression": "UniqueID()"
+        }
+      ],
+      "businessScenarios": [
+        "生成订单号 | Generate order number",
+        "创建用户ID | Create user ID",
+        "唯一标识生成 | Unique identifier generation"
+      ],
+      "keywords": [
+        "唯一ID",
+        "unique ID",
+        "生成ID",
+        "generate ID",
+        "唯一标识",
+        "unique identifier"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "upper": {
+      "category": "string",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "text",
+      "description": "Convert text to uppercase.",
+      "knowledgeBaseCategory": "string",
+      "bilingualDescription": "将字符串中的所有小写字符转换为大写 | Converts lowercase character data to uppercase. 用于统一字符串的大小写格式 | Used to unify string case format.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "expression/表达式",
+          "type": "string",
+          "description": "要转换为大写的字符串表达式 | String expression to convert to uppercase"
+        }
+      ],
+      "returnType": "string",
+      "examples": [
+        {
+          "description": "将字符串'Hello World'转换为大写 | Convert string 'Hello World' to uppercase",
+          "expression": "upper('Hello World')"
+        }
+      ],
+      "businessScenarios": [
+        "统一用户名格式 | Unify username format",
+        "标准化输入 | Standardize input",
+        "大小写转换 | Case conversion"
+      ],
+      "keywords": [
+        "大写转换",
+        "uppercase conversion",
+        "转换为大写",
+        "convert to uppercase",
+        "大写",
+        "uppercase"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "weekNum": {
+      "category": "date/time",
+      "minParams": 1,
+      "maxParams": 2,
+      "optionalParams": [
+        "useISO"
+      ],
+      "returnValueType": "number",
+      "description": "Return week number for a date.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "返回指定日期在一年中的周数 | Returns the week number of a specific date. 可以使用欧洲周编号系统（ISO 8601）或美国周编号系统 | Can use European week numbering system (ISO 8601) or US week numbering system.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date/日期",
+          "type": "date/string",
+          "description": "日期表达式 | The expression of the date"
+        },
+        {
+          "index": 1,
+          "name": "useISO/使用ISO标准",
+          "type": "boolean",
+          "description": "可选，是否使用ISO 8601周编号系统。1表示true，0表示false | Optional boolean value. If true, use European week numbering system (ISO 8601). 1 stands for true, 0 stands for false."
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取当前日期在一年中的周数（使用ISO标准） | Get week number of current date in the year (using ISO standard)",
+          "expression": "weekNum(now(), 1)"
+        }
+      ],
+      "businessScenarios": [
+        "周报统计 | Weekly report statistics",
+        "计划排期 | Schedule planning",
+        "时间分析 | Time analysis"
+      ],
+      "keywords": [
+        "周数",
+        "week number",
+        "星期数",
+        "week count",
+        "获取周数",
+        "get week number"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "year": {
+      "category": "date/time",
+      "minParams": 1,
+      "maxParams": 1,
+      "returnValueType": "number",
+      "description": "Return year for a date.",
+      "knowledgeBaseCategory": "date",
+      "bilingualDescription": "返回指定日期的年份部分（四位数字） | Returns the year for the specified date (four-digit number). 用于提取日期的年份信息 | Used to extract year information from date.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "date/日期",
+          "type": "date/string",
+          "description": "要提取年份的日期表达式 | Date expression to extract year from"
+        }
+      ],
+      "returnType": "number",
+      "examples": [
+        {
+          "description": "获取当前日期的年份 | Get year of current date",
+          "expression": "year(now())"
+        }
+      ],
+      "businessScenarios": [
+        "按年统计 | Yearly statistics",
+        "出生年份 | Birth year",
+        "年度分析 | Annual analysis"
+      ],
+      "keywords": [
+        "年份",
+        "year",
+        "日期提取",
+        "date extraction",
+        "获取年份",
+        "get year"
+      ],
+      "sourceReferences": [
+        "expression training data generator_2.txt:functionKnowledgeBase"
+      ],
+      "generationNotes": [
+        "Select this function when the requested business scenario matches the enriched businessScenarios metadata."
+      ]
+    },
+    "getUserAttr": {
+      "category": "user/system",
+      "minParams": 3,
+      "maxParams": 3,
+      "returnValueType": "text",
+      "description": "Read an attribute from a Yeeflow user value or Context:Current User.",
+      "knowledgeBaseCategory": "user/profile",
+      "bilingualDescription": "读取用户或当前用户上下文的属性 | Read an attribute from a user value or the current user context.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "userOrContext/用户或上下文",
+          "type": "user/application expression",
+          "description": "User variable, nested user expression, or Context:Current User token."
+        },
+        {
+          "index": 1,
+          "name": "attribute/属性",
+          "type": "attribute descriptor object",
+          "description": "Export-backed object such as { key: \"Email\", label: \"Email\" }."
+        },
+        {
+          "index": 2,
+          "name": "defaultValue/默认值",
+          "type": "expression token array",
+          "description": "Fallback token array, commonly [{ type: \"str\", value: \"N/A\" }] or [] for blank fallback."
+        }
+      ],
+      "returnType": "text",
+      "examples": [
+        {
+          "description": "Current user email",
+          "expression": "getUserAttr(Context:Current User, Email, N/A)"
+        },
+        {
+          "description": "Current user manager name",
+          "expression": "getUserAttr(getUserAttr(Context:Current User, Line Manager, N/A), Name, N/A)"
+        }
+      ],
+      "businessScenarios": [
+        "Show current requester profile fields",
+        "Pre-fill user profile summary",
+        "Persist readable requester metadata after workflow approval"
+      ],
+      "keywords": [
+        "current user",
+        "profile",
+        "requester",
+        "manager",
+        "email",
+        "employee number",
+        "job title"
+      ],
+      "observedAttributes": [
+        "Name_CN",
+        "SPAccount",
+        "DepartmentID",
+        "LineManager",
+        "EmployeeNo",
+        "Email",
+        "IsAdmin",
+        "Photo",
+        "JobTitle",
+        "JobGrade",
+        "OfficeAddress",
+        "Phone",
+        "Mobile",
+        "Telephone",
+        "Remark",
+        "LocationID",
+        "LastLoginTime",
+        "ServiceStartDate",
+        "LatestHireDate",
+        "Created",
+        "CreatedBy"
+      ],
+      "sourceReferences": [
+        "Expression Runtime Test v1 Patch.yap:user-profile-expression-export"
+      ],
+      "generationNotes": [
+        "Use the exact exported attribute descriptor object shape for the second parameter. Prefer Context:Current User token for current-login-user profile display."
+      ],
+      "safetyNotes": [
+        "Export-backed for display Text controls. Persistence through calculated variables needs generated runtime proof."
+      ]
+    },
+    "getOrgAttr": {
+      "category": "user/system",
+      "minParams": 3,
+      "maxParams": 3,
+      "returnValueType": "text",
+      "description": "Read an attribute from a Yeeflow organization/department value.",
+      "knowledgeBaseCategory": "user/profile",
+      "bilingualDescription": "读取组织或部门值的属性 | Read an attribute from an organization or department value.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "orgValue/组织值",
+          "type": "organization expression",
+          "description": "Department/organization value, often from getUserAttr(..., Department, ...)."
+        },
+        {
+          "index": 1,
+          "name": "attribute/属性",
+          "type": "attribute descriptor object",
+          "description": "Export-backed object such as { key: \"Name\", label: \"Name\" }."
+        },
+        {
+          "index": 2,
+          "name": "defaultValue/默认值",
+          "type": "expression token array",
+          "description": "Fallback token array or [] for blank fallback."
+        }
+      ],
+      "returnType": "text",
+      "examples": [
+        {
+          "description": "Current user department name",
+          "expression": "getOrgAttr(getUserAttr(Context:Current User, Department, N/A), Name, N/A)"
+        },
+        {
+          "description": "Current user parent department name",
+          "expression": "getOrgAttr(getOrgAttr(getUserAttr(Context:Current User, Department, N/A), Parent, N/A), Name, N/A)"
+        }
+      ],
+      "businessScenarios": [
+        "Display department name",
+        "Display parent department",
+        "Find department manager for a profile summary"
+      ],
+      "keywords": [
+        "department",
+        "organization",
+        "parent department",
+        "manager"
+      ],
+      "observedAttributes": [
+        "Name",
+        "ParentID",
+        "Manager"
+      ],
+      "sourceReferences": [
+        "Expression Runtime Test v1 Patch.yap:user-profile-expression-export"
+      ],
+      "generationNotes": [
+        "The exported runtime function name is getOrgAttr, not getDeptAttr. Preserve getOrgAttr in generated tokens."
+      ],
+      "safetyNotes": [
+        "Do not generate getDeptAttr unless a future export proves that exact runtime function name."
+      ]
+    },
+    "getLocAttr": {
+      "category": "user/system",
+      "minParams": 3,
+      "maxParams": 3,
+      "returnValueType": "text",
+      "description": "Read an attribute from a Yeeflow location value.",
+      "knowledgeBaseCategory": "user/profile",
+      "bilingualDescription": "读取地点/位置值的属性 | Read an attribute from a location value.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "locationValue/位置值",
+          "type": "location expression",
+          "description": "Location value, often from getUserAttr(..., Location, ...)."
+        },
+        {
+          "index": 1,
+          "name": "attribute/属性",
+          "type": "attribute descriptor object",
+          "description": "Export-backed object such as { key: \"Name\", label: \"Name\" }."
+        },
+        {
+          "index": 2,
+          "name": "defaultValue/默认值",
+          "type": "expression token array",
+          "description": "Fallback token array or [] for blank fallback."
+        }
+      ],
+      "returnType": "text",
+      "examples": [
+        {
+          "description": "Current user location name",
+          "expression": "getLocAttr(getUserAttr(Context:Current User, Location, N/A), Name, N/A)"
+        },
+        {
+          "description": "Current user location manager",
+          "expression": "getLocAttr(getUserAttr(Context:Current User, Location, N/A), Manager, N/A)"
+        }
+      ],
+      "businessScenarios": [
+        "Display requester office/location",
+        "Route or document location manager where tenant data exists"
+      ],
+      "keywords": [
+        "location",
+        "office",
+        "location manager"
+      ],
+      "observedAttributes": [
+        "Name",
+        "Manager"
+      ],
+      "sourceReferences": [
+        "Expression Runtime Test v1 Patch.yap:user-profile-expression-export"
+      ],
+      "generationNotes": [
+        "Use only observed location attributes until more exports prove additional keys."
+      ],
+      "safetyNotes": [
+        "Location data may be tenant-dependent; provide fallback values."
+      ]
+    },
+    "JSONStringfy": {
+      "category": "conversion",
+      "minParams": 1,
+      "maxParams": 1,
+      "optionalParams": [],
+      "returnValueType": "text",
+      "description": "Serialize a value or query-result collection to JSON text. Export-backed spelling from Form Actions Phase 2 is JSONStringfy.",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "value",
+          "type": "any",
+          "description": "Value or query-result collection to serialize."
+        }
+      ],
+      "returnType": "text",
+      "examples": [
+        {
+          "description": "Display a query result temp collection as JSON text.",
+          "expression": "JSONStringfy(var_CollectionofQueryItems)"
+        }
+      ],
+      "businessScenarios": [
+        "Debug/display query result collections",
+        "Inspect temporary query data in a form action test"
+      ],
+      "keywords": [
+        "json",
+        "stringify",
+        "query result",
+        "collection display"
+      ],
+      "sourceReferences": [
+        "Form Actions Phase 1 Test v1 Runtime.yap:form action query collection display"
+      ],
+      "generationNotes": [
+        "Use exact export-backed function spelling JSONStringfy. Do not rename to JSONStringify until an export proves that alias."
+      ],
+      "safetyNotes": [
+        "Use for display/debugging of query collections; do not persist raw JSON unless the business requirement explicitly asks for serialized query data."
+      ]
+    }
+  },
+  "categories": {
+    "math": [
+      "abs",
+      "ceil",
+      "fixed",
+      "floor",
+      "log",
+      "max",
+      "min",
+      "pow",
+      "rand",
+      "round"
+    ],
+    "string": [
+      "concat",
+      "formatNumber",
+      "left",
+      "len",
+      "lower",
+      "repeat",
+      "replace",
+      "right",
+      "split",
+      "strIndex",
+      "subString",
+      "trim",
+      "upper"
+    ],
+    "date/time": [
+      "date",
+      "dateAdd",
+      "dateDiff",
+      "dateFormat",
+      "datePart",
+      "datePicker",
+      "day",
+      "hour",
+      "minute",
+      "month",
+      "now",
+      "second",
+      "weekNum",
+      "year"
+    ],
+    "array": [
+      "arrayAverage",
+      "arrayConcat",
+      "arrayCount",
+      "arrayIndex",
+      "arrayMax",
+      "arrayMin",
+      "arraySum",
+      "join",
+      "removeDuplicates"
+    ],
+    "logical": [
+      "iif",
+      "isFalse",
+      "isNullOrEmpty",
+      "isTrue"
+    ],
+    "conversion": [
+      "number",
+      "text",
+      "JSONStringfy"
+    ],
+    "user/system": [
+      "UniqueID",
+      "currentUser",
+      "getLocAttr",
+      "getOrgAttr",
+      "getUserAttr"
+    ],
+    "utility": [
+      "getAttr"
+    ]
+  },
+  "enrichment": {
+    "enrichedOn": "2026-05-15",
+    "source": "expression training data generator_2.txt",
+    "enrichedFunctionCount": 54,
+    "baselineFunctionCount": 55,
+    "missingFromKnowledgeBase": [
+      "strIndex"
+    ],
+    "presentInKnowledgeBaseButMissingFromBaseline": [],
+    "screenshotObservedFunctionsMetadataPending": [
+      "addWorkDays",
+      "addWorkHours"
+    ],
+    "userProfileExpressions": {
+      "source": "Expression Runtime Test v1 Patch.yap:user-profile-expression-export",
+      "functions": [
+        "getUserAttr",
+        "getOrgAttr",
+        "getLocAttr"
+      ],
+      "note": "getDeptAttr was requested as a possible name but was not present in the export; the exact exported department function is getOrgAttr."
+    }
+  }
+}

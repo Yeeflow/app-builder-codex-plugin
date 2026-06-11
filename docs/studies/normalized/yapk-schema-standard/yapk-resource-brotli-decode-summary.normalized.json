@@ -1,0 +1,42 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "resource_brotli_decode_summary",
+  "source": "local read-only artifact inspection",
+  "decodeRuleUnderTest": "base64 Resource bytes -> Brotli -> UTF-8 JSON AppPackageInfo",
+  "artifacts": [
+    {
+      "label": "Application Settings Runtime Baseline - onheader-Version test",
+      "exists": true,
+      "readable": true,
+      "resourceStringLength": 7628,
+      "base64DecodedBytes": 5719,
+      "brotliSuccess": false
+    },
+    {
+      "label": "Application Settings Runtime Baseline - signed wrapper test",
+      "exists": true,
+      "readable": false,
+      "note": "Read attempts from this environment hang; raw file was not copied."
+    },
+    {
+      "label": "Application Settings Runtime Baseline - requested changes test",
+      "exists": true,
+      "readable": false,
+      "note": "Read attempts from this environment hang; raw file was not copied."
+    },
+    {
+      "label": "Application Settings Runtime Baseline - onheader-Mena Test",
+      "exists": true,
+      "readable": true,
+      "resourceStringLength": 11124,
+      "base64DecodedBytes": 8342,
+      "brotliSuccess": false
+    }
+  ],
+  "testedVariants": [
+    "base64 Resource bytes -> Brotli",
+    "raw Resource UTF-8 bytes -> Brotli",
+    "base64url-normalized Resource bytes -> Brotli"
+  ],
+  "conclusion": "Product schema defines a Brotli Resource path, but this path was not verified on the readable historical artifacts."
+}

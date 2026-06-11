@@ -1,0 +1,16 @@
+{
+  "proofLevel": "export-proven",
+  "path": "$.filterVars[]",
+  "shape": {
+    "path": "$.filterVars[0]",
+    "id": "filter_123",
+    "idx": "<filter-var-idx>",
+    "keys": [
+      "id",
+      "idx"
+    ]
+  },
+  "notes": [
+    "Filter variables live on the embedded dashboard page JSON, not on the root app resource."
+  ]
+}

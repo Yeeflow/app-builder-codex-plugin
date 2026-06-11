@@ -1,0 +1,51 @@
+{
+  "name": "sub-list-dynamic-layout",
+  "proof": "export-proven from Approval Form export; identifiers are synthetic",
+  "layoutSelection": {
+    "path": "control.attrs[\"list-display-preference\"]",
+    "value": "dynamic"
+  },
+  "structure": {
+    "controlType": "list",
+    "requiredChildren": [
+      "list-body",
+      "list-footer"
+    ],
+    "itemTemplateContainer": {
+      "type": "list-body",
+      "children": [
+        "__VISUAL_OR_FIELD_CONTROLS__"
+      ]
+    },
+    "footerContainer": {
+      "type": "list-footer",
+      "children": [
+        "__ACTION_BUTTONS__",
+        "__LIST_SUMMARY_CONTROLS__"
+      ]
+    }
+  },
+  "observedLayoutControlTypes": [
+    "container",
+    "dropbar",
+    "line",
+    "icon",
+    "input",
+    "input_number",
+    "datepicker",
+    "action_button",
+    "flex_grid"
+  ],
+  "validationGuidance": {
+    "hardErrorWhenGeneratedFinal": [
+      "missing associated list variable/listref",
+      "dynamic layout without list-body",
+      "dynamic row field binding does not resolve"
+    ],
+    "warningFirst": [
+      "unknown layout variants",
+      "unproven Data List custom form dynamic behavior",
+      "custom CSS variations"
+    ]
+  }
+}

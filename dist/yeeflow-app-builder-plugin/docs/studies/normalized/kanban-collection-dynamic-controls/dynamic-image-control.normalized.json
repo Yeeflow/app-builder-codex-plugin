@@ -1,0 +1,23 @@
+{
+  "feature": "dynamic-image-control",
+  "source": "Company Overview.yap",
+  "observedHosts": ["kanban item template", "collection item template"],
+  "schema": {
+    "type": "dynamic-image",
+    "attrs": {
+      "source": "3",
+      "obj-f": "Text11",
+      "preview_image": "2",
+      "setting": {
+        "img_height": [null, "<height>"],
+        "fit": [null, "2"]
+      }
+    }
+  },
+  "boundField": {
+    "fieldName": "Text11",
+    "displayName": "Cover image",
+    "controlType": "icon-upload"
+  },
+  "proof": "export-proven for dashboard item templates"
+}

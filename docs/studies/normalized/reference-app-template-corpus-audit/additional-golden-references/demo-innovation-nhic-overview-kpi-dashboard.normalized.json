@@ -1,0 +1,21 @@
+{
+  "exportName": "DEMO Innovation Ecosystem Platform (1).yap",
+  "focusPage": "NHIC Innovation Overview",
+  "decodeShape": "YAP gzip ListExportResult with Data = ListExportInfo",
+  "proofBoundary": "export-proven structure and binding evidence only",
+  "patterns": [
+    "current Type 103 dashboard with src marker",
+    "bounded padded dashboard body",
+    "filter row before metrics",
+    "multiple Summary controls arranged in row containers",
+    "summary controls with business labels, aggregate field settings, padding, border/radius, and filter bindings",
+    "chart and Pivot Table sections below KPI summaries"
+  ],
+  "templateImpact": [
+    "kpi_card_row",
+    "dashboard_header_action_bar",
+    "progress_summary_card",
+    "data_table_section"
+  ],
+  "redaction": "raw payloads, Resource, Sign, IDs, tenant data, and sample records omitted"
+}

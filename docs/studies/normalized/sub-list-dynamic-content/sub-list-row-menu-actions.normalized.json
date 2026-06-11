@@ -1,0 +1,24 @@
+{
+  "source": "Sub list Dynamic (1).yap",
+  "proof": "export-proven",
+  "host": "approval-form",
+  "controlType": "list",
+  "layout": "dynamic",
+  "rowOperationMenu": {
+    "controlType": "dropbar",
+    "location": "list-body dynamic item template",
+    "binding": "menu action_button.attrs.control_action -> parent sub list attrs.actions[].id",
+    "items": [
+      "Duplicate",
+      "Insert before",
+      "Insert after",
+      "Move up",
+      "Move down"
+    ]
+  },
+  "generatedGuidance": {
+    "visibleDeleteColumn": true,
+    "omitDeleteFromMenuWhenVisibleDeleteExists": true,
+    "runtimeStatus": "V1.4 generated and signed; manual runtime test pending"
+  }
+}

@@ -1,0 +1,842 @@
+{
+  "source": {
+    "path": "/Users/Renger/Downloads/Test ABC (1).yap",
+    "fileName": "Test ABC (1).yap",
+    "title": "Test ABC",
+    "largeNumericIdsPreservedAsStrings": 1
+  },
+  "forms": {
+    "total": 1,
+    "approvalWorkflowForms": 1
+  },
+  "assignmentTaskCount": 9,
+  "inventory": [
+    {
+      "taskNumber": 1,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 20,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "allapprove",
+        "approvepercentage": 100,
+        "appointedOrder": "sequential",
+        "issequential": true,
+        "isenabledemail": false,
+        "isallowreassign": false,
+        "isallowrecalled": null,
+        "automaticapproveddefinition": null,
+        "isallowsign": false,
+        "allowskip": true,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": false
+      },
+      "assignee": {
+        "classification": "multi-source-expression",
+        "entryClassifications": [
+          "applicant-line-manager",
+          "user-group"
+        ],
+        "assignmentCount": 2,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ],
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "user",
+            "method": "expression",
+            "value": {
+              "kind": "expressionButton",
+              "label": "Applicant:Line Manager",
+              "dataShape": {
+                "type": "user",
+                "param": {
+                  "id": {
+                    "parseStatus": "opaque",
+                    "expressionSourceHints": {
+                      "types": [
+                        "application"
+                      ],
+                      "props": [
+                        "ApplicantUserID"
+                      ],
+                      "usesApplicantUserId": true
+                    }
+                  }
+                },
+                "prop": "LineManager"
+              }
+            },
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          },
+          {
+            "type": "user",
+            "method": "expression",
+            "value": {
+              "kind": "expressionButton",
+              "label": "User group 2:All users",
+              "dataShape": {
+                "type": "usergroup",
+                "param": {
+                  "id": "<USER_REF_CONFIRMED_BY_API>"
+                },
+                "prop": "Users_ID"
+              }
+            },
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "runtime-applicant-user-context",
+        "valid-user-directory-data"
+      ],
+      "confidence": "export-proven"
+    },
+    {
+      "taskNumber": 2,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 21,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "anyprocess",
+        "approvepercentage": 100,
+        "appointedOrder": "parallel-or-default",
+        "issequential": null,
+        "isenabledemail": false,
+        "isallowreassign": false,
+        "isallowrecalled": null,
+        "automaticapproveddefinition": null,
+        "isallowsign": false,
+        "allowskip": true,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": false
+      },
+      "assignee": {
+        "classification": "multi-source-expression",
+        "entryClassifications": [
+          "applicant-department-manager",
+          "position-all-users-expression"
+        ],
+        "assignmentCount": 2,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ],
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "user",
+            "method": "expression",
+            "value": {
+              "kind": "expressionButton",
+              "label": "Applicant:Department:Manager",
+              "dataShape": {
+                "type": "org",
+                "param": {
+                  "id": {
+                    "parseStatus": "opaque",
+                    "expressionSourceHints": {
+                      "types": [
+                        "user",
+                        "application"
+                      ],
+                      "props": [
+                        "ApplicantUserID",
+                        "OrganizationID"
+                      ],
+                      "usesApplicantUserId": true
+                    }
+                  }
+                },
+                "prop": "Manager"
+              }
+            },
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          },
+          {
+            "type": "user",
+            "method": "expression",
+            "value": {
+              "kind": "expressionButton",
+              "label": "Casher:All users",
+              "dataShape": {
+                "type": "position",
+                "param": {
+                  "id": "<USER_REF_CONFIRMED_BY_API>"
+                },
+                "prop": "Users_ID"
+              }
+            },
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "runtime-applicant-user-context",
+        "valid-department-hierarchy-and-manager-data",
+        "valid-position-assignments",
+        "valid-user-directory-data"
+      ],
+      "confidence": "export-proven"
+    },
+    {
+      "taskNumber": 3,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 22,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "anyapprove",
+        "approvepercentage": 100,
+        "appointedOrder": "parallel-or-default",
+        "issequential": null,
+        "isenabledemail": false,
+        "isallowreassign": false,
+        "isallowrecalled": null,
+        "automaticapproveddefinition": null,
+        "isallowsign": false,
+        "allowskip": true,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": false
+      },
+      "assignee": {
+        "classification": "mixed-static-and-position",
+        "entryClassifications": [
+          "job-position",
+          "specific-user",
+          "specific-user"
+        ],
+        "assignmentCount": 3,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "position",
+            "title"
+          ],
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ],
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "position",
+            "method": "position",
+            "position": "<POSITION_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          },
+          {
+            "type": "user",
+            "method": "direct",
+            "value": "<USER_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          },
+          {
+            "type": "user",
+            "method": "direct",
+            "value": "<USER_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "valid-position-assignments",
+        "valid-user-directory-data"
+      ],
+      "confidence": "export-proven"
+    },
+    {
+      "taskNumber": 4,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 23,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "anyreject",
+        "approvepercentage": 100,
+        "appointedOrder": "parallel-or-default",
+        "issequential": null,
+        "isenabledemail": false,
+        "isallowreassign": false,
+        "isallowrecalled": null,
+        "automaticapproveddefinition": null,
+        "isallowsign": false,
+        "allowskip": true,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": false
+      },
+      "assignee": {
+        "classification": "mixed-static-and-position",
+        "entryClassifications": [
+          "job-position",
+          "specific-user"
+        ],
+        "assignmentCount": 2,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "position",
+            "title"
+          ],
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "position",
+            "method": "position",
+            "position": "<POSITION_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          },
+          {
+            "type": "user",
+            "method": "direct",
+            "value": "<USER_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "valid-position-assignments",
+        "valid-user-directory-data"
+      ],
+      "confidence": "export-proven"
+    },
+    {
+      "taskNumber": 5,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 24,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "custompercentage",
+        "approvepercentage": 60,
+        "appointedOrder": "parallel-or-default",
+        "issequential": null,
+        "isenabledemail": false,
+        "isallowreassign": false,
+        "isallowrecalled": null,
+        "automaticapproveddefinition": null,
+        "isallowsign": false,
+        "allowskip": true,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": false
+      },
+      "assignee": {
+        "classification": "mixed-static-and-position",
+        "entryClassifications": [
+          "position-by-department",
+          "specific-user"
+        ],
+        "assignmentCount": 2,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "position",
+            "value",
+            "title"
+          ],
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "position",
+            "method": "positionorg",
+            "position": "<POSITION_REF_CONFIRMED_BY_API>",
+            "value": "<DEPARTMENT_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          },
+          {
+            "type": "user",
+            "method": "direct",
+            "value": "<USER_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "valid-department-hierarchy-and-manager-data",
+        "valid-position-assignments",
+        "valid-user-directory-data"
+      ],
+      "confidence": "export-proven"
+    },
+    {
+      "taskNumber": 6,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 25,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "allapprove",
+        "approvepercentage": 100,
+        "appointedOrder": "parallel-or-default",
+        "issequential": null,
+        "isenabledemail": false,
+        "isallowreassign": false,
+        "isallowrecalled": true,
+        "automaticapproveddefinition": true,
+        "isallowsign": false,
+        "allowskip": false,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": false
+      },
+      "assignee": {
+        "classification": "mixed-static-and-position",
+        "entryClassifications": [
+          "position-by-applicant-department",
+          "specific-user"
+        ],
+        "assignmentCount": 2,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "position",
+            "value",
+            "title"
+          ],
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "position",
+            "method": "positionorgexpr",
+            "position": "<POSITION_REF_CONFIRMED_BY_API>",
+            "value": {
+              "kind": "expressionButton",
+              "label": "Applicant:Department",
+              "dataShape": {
+                "type": "user",
+                "param": {
+                  "id": {
+                    "parseStatus": "opaque",
+                    "expressionSourceHints": {
+                      "types": [
+                        "application"
+                      ],
+                      "props": [
+                        "ApplicantUserID"
+                      ],
+                      "usesApplicantUserId": true
+                    }
+                  }
+                },
+                "prop": "OrganizationID"
+              }
+            },
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          },
+          {
+            "type": "user",
+            "method": "direct",
+            "value": "<USER_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "runtime-applicant-user-context",
+        "valid-department-hierarchy-and-manager-data",
+        "valid-position-assignments",
+        "valid-user-directory-data"
+      ],
+      "confidence": "export-proven"
+    },
+    {
+      "taskNumber": 7,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 26,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "allapprove",
+        "approvepercentage": 100,
+        "appointedOrder": "parallel-or-default",
+        "issequential": null,
+        "isenabledemail": false,
+        "isallowreassign": true,
+        "isallowrecalled": null,
+        "automaticapproveddefinition": null,
+        "isallowsign": true,
+        "allowskip": true,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": false
+      },
+      "assignee": {
+        "classification": "position-by-location",
+        "entryClassifications": [
+          "position-by-location"
+        ],
+        "assignmentCount": 1,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "position",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "position",
+            "method": "positionloc",
+            "position": "<POSITION_REF_CONFIRMED_BY_API>",
+            "value": "<LOCATION_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "valid-location-assignments",
+        "valid-position-assignments"
+      ],
+      "confidence": "export-proven"
+    },
+    {
+      "taskNumber": 8,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 27,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "allapprove",
+        "approvepercentage": 100,
+        "appointedOrder": "parallel-or-default",
+        "issequential": null,
+        "isenabledemail": true,
+        "isallowreassign": false,
+        "isallowrecalled": null,
+        "automaticapproveddefinition": null,
+        "isallowsign": false,
+        "allowskip": true,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": true,
+        "to": {
+          "kind": "expressionButton",
+          "label": "Current Task Context:Assignee:Email",
+          "dataShape": {
+            "type": "user",
+            "param": {
+              "id": {
+                "parseStatus": "opaque",
+                "expressionSourceHints": {
+                  "types": [
+                    "task"
+                  ],
+                  "props": [
+                    "AssigneeID"
+                  ],
+                  "usesApplicantUserId": false
+                }
+              }
+            },
+            "prop": "Email"
+          }
+        },
+        "subject": {
+          "kind": "expressionButton",
+          "label": "Workflow Name",
+          "dataShape": {
+            "type": "instance",
+            "prop": "Name"
+          }
+        },
+        "html": "<REDACTED_NOTIFICATION_BODY_SHAPE>",
+        "notifyrules": "array(0)",
+        "duedatetype": "hour"
+      },
+      "assignee": {
+        "classification": "position-by-applicant-location",
+        "entryClassifications": [
+          "position-by-applicant-location"
+        ],
+        "assignmentCount": 1,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "position",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "position",
+            "method": "positionlocexpr",
+            "position": "<POSITION_REF_CONFIRMED_BY_API>",
+            "value": {
+              "kind": "expressionButton",
+              "label": "Applicant:Location",
+              "dataShape": {
+                "type": "user",
+                "param": {
+                  "id": {
+                    "parseStatus": "opaque",
+                    "expressionSourceHints": {
+                      "types": [
+                        "application"
+                      ],
+                      "props": [
+                        "ApplicantUserID"
+                      ],
+                      "usesApplicantUserId": true
+                    }
+                  }
+                },
+                "prop": "LocationID"
+              }
+            },
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "runtime-applicant-user-context",
+        "valid-location-assignments",
+        "valid-position-assignments"
+      ],
+      "confidence": "export-proven"
+    },
+    {
+      "taskNumber": 9,
+      "sourceForm": {
+        "index": 0,
+        "name": "ABC",
+        "key": "<REDACTED_FORM_KEY>",
+        "workflowType": 2
+      },
+      "node": {
+        "index": 28,
+        "type": "MultiAssignmentTask",
+        "id": "<REDACTED_WORKFLOW_NODE_ID>",
+        "resourceid": "<REDACTED_WORKFLOW_NODE_ID>",
+        "label": "Assignment Task"
+      },
+      "approvalSettings": {
+        "approveway": "allapprove",
+        "approvepercentage": 100,
+        "appointedOrder": "parallel-or-default",
+        "issequential": null,
+        "isenabledemail": false,
+        "isallowreassign": false,
+        "isallowrecalled": null,
+        "automaticapproveddefinition": null,
+        "isallowsign": false,
+        "allowskip": true,
+        "duedatedefinition": 120,
+        "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+      },
+      "notificationSettings": {
+        "isenabledemail": false
+      },
+      "assignee": {
+        "classification": "mixed",
+        "entryClassifications": [
+          "specific-user",
+          "applicant-line-manager"
+        ],
+        "assignmentCount": 2,
+        "rawFieldNames": [
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ],
+          [
+            "type",
+            "method",
+            "value",
+            "title"
+          ]
+        ],
+        "normalizedEntries": [
+          {
+            "type": "user",
+            "method": "direct",
+            "value": "<USER_REF_CONFIRMED_BY_API>",
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          },
+          {
+            "type": "user",
+            "method": "expression",
+            "value": {
+              "kind": "expressionButton",
+              "label": "Applicant:Line Manager",
+              "dataShape": {
+                "type": "user",
+                "param": {
+                  "id": {
+                    "parseStatus": "opaque",
+                    "expressionSourceHints": {
+                      "types": [
+                        "application"
+                      ],
+                      "props": [
+                        "ApplicantUserID"
+                      ],
+                      "usesApplicantUserId": true
+                    }
+                  }
+                },
+                "prop": "LineManager"
+              }
+            },
+            "title": "<REDACTED_ASSIGNEE_LABEL>"
+          }
+        ]
+      },
+      "runtimeDependencies": [
+        "runtime-applicant-user-context",
+        "valid-user-directory-data"
+      ],
+      "confidence": "export-proven"
+    }
+  ]
+}

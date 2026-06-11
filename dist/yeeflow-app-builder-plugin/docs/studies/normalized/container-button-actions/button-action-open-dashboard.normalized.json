@@ -1,0 +1,49 @@
+{
+  "proof": "export-proven",
+  "host": "dashboard",
+  "controlType": "button",
+  "actionTypeCode": "6",
+  "actionType": "open_dashboard",
+  "attrs": {
+    "action-type": "6",
+    "op": "modal",
+    "modalsize": 9,
+    "cusize": {
+      "w": 313
+    },
+    "link": {
+      "opentype": true,
+      "url": null,
+      "variable": "[REDACTED_EXPRESSION_ARRAY]"
+    },
+    "data": {
+      "list": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "ListID": "[ListID]"
+      },
+      "page": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "PageID": "[PageID]"
+      }
+    },
+    "layout": "[LayoutID]",
+    "passvalues": [
+      {
+        "Name": "Decimal1",
+        "Value": "[REDACTED_EXPRESSION_ARRAY]"
+      },
+      {
+        "Name": "Text1",
+        "Value": "[REDACTED_EXPRESSION_ARRAY]"
+      }
+    ],
+    "queryParams": [
+      {
+        "name": "QItem",
+        "value": "[REDACTED_EXPRESSION]"
+      }
+    ]
+  }
+}

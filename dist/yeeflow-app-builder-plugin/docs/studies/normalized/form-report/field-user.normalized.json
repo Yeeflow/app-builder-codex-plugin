@@ -1,0 +1,19 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[3]",
+    "childFieldPath": "Data.Childs[1].Defs[3]",
+    "fieldId": "Applicant",
+    "key": "Applicant",
+    "variableSource": "system",
+    "variableType": "system",
+    "variableRef": "Applicant",
+    "reportFieldType": "identity-picker",
+    "storedType": "identity-picker",
+    "isSystem": true,
+    "required": false,
+    "rules": {
+      "multiple": false
+    }
+  }
+}

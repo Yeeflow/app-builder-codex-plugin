@@ -1,0 +1,8 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "<downloads>/CRM - Customer relationship management.yap",
+  "page": "Dashboard",
+  "productName": "Radio filter",
+  "filterVariable": "filter_Radio",
+  "binding": "__filter_filter_Radio"
+}

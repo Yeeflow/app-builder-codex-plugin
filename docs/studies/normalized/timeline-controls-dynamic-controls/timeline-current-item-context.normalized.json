@@ -1,0 +1,17 @@
+{
+  "hostControls": ["timeline-v", "timeline-h", "collection"],
+  "currentItemBinding": {
+    "dynamicControls": {
+      "attrs.source": "3",
+      "attrs.obj-f": "<source-list-field-name>"
+    },
+    "expressionTokens": {
+      "exprType": "variable_ctx",
+      "ctx": "__ctx_coll",
+      "id": "<source-list-field-name>",
+      "namePrefix": "Collection item:"
+    }
+  },
+  "note": "The timeline export uses __ctx_coll for timeline item expressions; do not invent a separate timeline context unless another export proves it.",
+  "proof": "export-proven"
+}

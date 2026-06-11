@@ -1,0 +1,20 @@
+{
+  "proofLevel": "export-proven-plus-product-documented-button-derivation",
+  "sourceExport": "Workflow Actions Runtime Baseline (2)_Task forms.yap",
+  "assignmentTaskOptions": {
+    "reassignField": "MultiAssignmentTask.properties.isallowreassign",
+    "addAssigneeField": "MultiAssignmentTask.properties.isallowsign",
+    "skipField": "MultiAssignmentTask.properties.allowskip"
+  },
+  "enabledShape": {
+    "isallowreassign": true,
+    "isallowsign": true,
+    "allowskip": true
+  },
+  "disabledShape": {
+    "isallowreassign": false,
+    "isallowsign": false,
+    "allowskip": true
+  },
+  "actionPanelNote": "The action panel control stores generic panel configuration. Its Reassign/Add assignee button display is derived from the associated Assignment Task settings, not stored as explicit button controls in the panel."
+}

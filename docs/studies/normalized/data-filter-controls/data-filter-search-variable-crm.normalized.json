@@ -1,0 +1,8 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "/Users/Renger/Downloads/CRM - Customer relationship management.yap",
+  "page": "Dashboard",
+  "productName": "Search filter",
+  "filterVariable": "filter_Search",
+  "binding": "__filter_filter_Search"
+}

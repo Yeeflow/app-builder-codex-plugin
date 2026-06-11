@@ -1,0 +1,45 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Actions Runtime Baseline (1).yap",
+  "workflowHost": "scheduled workflow",
+  "workflowType": 3,
+  "nodeType": "StartNoneEvent",
+  "graph": {
+    "incoming": 0,
+    "outgoing": 1
+  },
+  "fieldPresence": {
+    "taskurl": true,
+    "terminate": false,
+    "terminate-conditions": false,
+    "revoke-conditions": false,
+    "isenabledemail": true,
+    "to": true,
+    "subject": true,
+    "html": true
+  },
+  "settingsShape": {
+    "isenabledemail": true,
+    "terminate": null,
+    "terminate-conditions": null,
+    "revoke-conditions": null,
+    "to": {
+      "shape": "expression-button-rich-text",
+      "redactedLabel": "Applicant:Email",
+      "context": "approval-or-application-context"
+    },
+    "subject": {
+      "shape": "expression-button-rich-text",
+      "redactedLabel": "Workflow Name",
+      "context": "approval-or-application-context"
+    },
+    "html": {
+      "shape": "rich-text-html-with-expression-buttons",
+      "context": "approval-or-application-context",
+      "redacted": true
+    },
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "generationRule": "For scheduled workflows, preserve Start email fields when present, but do not add approval-form terminate or recall fields unless a scheduled workflow export proves them.",
+  "runtimeBoundary": "No scheduled workflow was executed; email delivery was not tested."
+}

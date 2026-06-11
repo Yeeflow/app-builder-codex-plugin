@@ -1,0 +1,38 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Action Approval Test.ywf",
+  "taskForm": "WARTB Task3",
+  "correctedBinding": {
+    "button": {
+      "type": "action_button",
+      "label": "Add others to this task",
+      "controlAction": "<REDACTED_ACTION_ID>"
+    },
+    "resolvedAction": {
+      "name": "Add assignee button clicked",
+      "steps": [
+        {
+          "type": "confirm",
+          "messageShape": "static confirm string"
+        },
+        {
+          "type": "submit",
+          "name": "Add assignees",
+          "submitType": "5",
+          "operation": "add-assignee",
+          "fieldPresence": {
+            "comment": true,
+            "forword": true,
+            "remark": true,
+            "assignee": true
+          }
+        }
+      ]
+    }
+  },
+  "comparison": {
+    "previousYap": "Add others button resolved to Reject button click / submitType 2.",
+    "updatedYwf": "Add others button resolves to Add assignee button clicked / submitType 5."
+  },
+  "runtimeBoundary": "This confirms corrected export schema only. Add-assignee task execution remains not runtime-proven."
+}

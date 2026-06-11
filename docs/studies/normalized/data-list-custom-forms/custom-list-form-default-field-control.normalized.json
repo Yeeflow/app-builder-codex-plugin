@@ -1,0 +1,21 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "exportPath": "children[0]/children/0/children/0/children/0",
+  "normalized": {
+    "id": "__CONTROL_ID__",
+    "type": "input",
+    "binding": "Title",
+    "fieldID": "__FIELD_ID__",
+    "label": "__LABEL_REDACTED__",
+    "attrs": {},
+    "field": {
+      "FieldName": "Title",
+      "FieldID": "__FIELD_ID__",
+      "InternalName": "__INTERNAL_NAME_REDACTED__",
+      "Type": "input",
+      "FieldType": "Text",
+      "IsSystem": true
+    },
+    "proof": "export-proven; private values redacted"
+  }
+}

@@ -1,0 +1,5317 @@
+{
+  "summary": {
+    "count": 30
+  },
+  "tools": [
+    {
+      "ownerKey": "copilot:partner-q-a",
+      "ownerName": "Partner Q&A",
+      "ownerType": "copilot",
+      "referenceKey": "component:partner-kb",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Partner KB",
+      "type": 1,
+      "subType": null,
+      "kind": "knowledge",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Category"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": null,
+        "targetKey": null
+      },
+      "runType": null,
+      "userType": null,
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [],
+      "outputs": [],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "copilot:partner-q-a",
+      "ownerName": "Partner Q&A",
+      "ownerType": "copilot",
+      "referenceKey": "component:microsoft-graph-outlook",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Microsoft Graph - Outlook",
+      "type": 2,
+      "subType": 8,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "userType",
+        "schema",
+        "operations",
+        "credentialstype",
+        "resType",
+        "baseurl"
+      ],
+      "dataReference": {
+        "scope": "Shared",
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": "connection",
+        "targetKey": "connection:microsoft-graph-outlook"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": "2",
+      "contentType": null,
+      "resType": "1",
+      "hasSchema": true,
+      "operationCount": 24,
+      "operations": [
+        {
+          "Name": "listOutlookMessages",
+          "Label": "listOutlookMessages",
+          "Method": "GET",
+          "Path": "/me/messages",
+          "Parameters": [
+            {
+              "name": "$select",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Comma-separated fields to return, for example id,subject,from,receivedDatetime,bodyPreview,isRead."
+            },
+            {
+              "name": "$filter",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "OData filter, for example isRead eq false."
+            },
+            {
+              "name": "$orderby",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "OData order by, for example receivedDatetime desc."
+            },
+            {
+              "name": "$top",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Number of messages to return."
+            },
+            {
+              "name": "$search",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Search query, for example \"subject:invoice\"."
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "List messages in the signed-in user's mailbox.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "createOutlookDraftMessage",
+          "Label": "createOutlookDraftMessage",
+          "Method": "POST",
+          "Path": "/me/messages",
+          "Parameters": [],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "string"
+              },
+              "body": {
+                "$ref": "#/components/schemas/ItemBody"
+              },
+              "toRecipients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Recipient"
+                }
+              },
+              "ccRecipients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Recipient"
+                }
+              },
+              "bccRecipients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Recipient"
+                }
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "normal",
+                  "high"
+                ]
+              }
+            },
+            "required": [
+              "subject",
+              "body",
+              "toRecipients"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Create a draft email message.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "getOutlookMessage",
+          "Label": "getOutlookMessage",
+          "Method": "GET",
+          "Path": "/me/messages/{message-id}",
+          "Parameters": [
+            {
+              "name": "message-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$select",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Get a single email message by ID.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "updateOutlookMessage",
+          "Label": "updateOutlookMessage",
+          "Method": "PATCH",
+          "Path": "/me/messages/{message-id}",
+          "Parameters": [
+            {
+              "name": "message-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "isRead": {
+                "type": "boolean"
+              },
+              "importance": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "normal",
+                  "high"
+                ]
+              }
+            }
+          },
+          "ContentType": "application/json",
+          "Desc": "Update message properties such as read status or importance.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "deleteOutlookMessage",
+          "Label": "deleteOutlookMessage",
+          "Method": "DELETE",
+          "Path": "/me/messages/{message-id}",
+          "Parameters": [
+            {
+              "name": "message-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Delete an email message.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "sendOutlookMail",
+          "Label": "sendOutlookMail",
+          "Method": "POST",
+          "Path": "/me/sendMail",
+          "Parameters": [],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "$ref": "#/components/schemas/CreateDraftMessageRequest"
+              },
+              "saveToSentItems": {
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": [
+              "message"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Send an email message from the signed-in user's mailbox.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "sendOutlookDraftMessage",
+          "Label": "sendOutlookDraftMessage",
+          "Method": "POST",
+          "Path": "/me/messages/{message-id}/send",
+          "Parameters": [
+            {
+              "name": "message-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Send an existing draft message.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "replyToOutlookMessage",
+          "Label": "replyToOutlookMessage",
+          "Method": "POST",
+          "Path": "/me/messages/{message-id}/reply",
+          "Parameters": [
+            {
+              "name": "message-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "comment": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "comment"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Reply to an email message.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "replyAllToOutlookMessage",
+          "Label": "replyAllToOutlookMessage",
+          "Method": "POST",
+          "Path": "/me/messages/{message-id}/replyAll",
+          "Parameters": [
+            {
+              "name": "message-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "comment": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "comment"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Reply all to an email message.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "forwardOutlookMessage",
+          "Label": "forwardOutlookMessage",
+          "Method": "POST",
+          "Path": "/me/messages/{message-id}/forward",
+          "Parameters": [
+            {
+              "name": "message-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "comment": {
+                "type": "string"
+              },
+              "toRecipients": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Recipient"
+                }
+              }
+            },
+            "required": [
+              "toRecipients"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Forward an email message.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "moveOutlookMessage",
+          "Label": "moveOutlookMessage",
+          "Method": "POST",
+          "Path": "/me/messages/{message-id}/move",
+          "Parameters": [
+            {
+              "name": "message-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "destinationId": {
+                "type": "string",
+                "description": "Destination mail folder ID, such as inbox, archive, deleteditems, or a folder ID."
+              }
+            },
+            "required": [
+              "destinationId"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Move an email message to another mail folder.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "listOutlookMessagesInFolder",
+          "Label": "listOutlookMessagesInFolder",
+          "Method": "GET",
+          "Path": "/me/mailFolders/{folder-id}/messages",
+          "Parameters": [
+            {
+              "name": "folder-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Mail folder ID, for example inbox, sentitems, drafts, deleteditems, archive, or a folder ID."
+            },
+            {
+              "name": "$select",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$filter",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$orderby",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$top",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "List messages in a specific Outlook mail folder.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "listOutlookCalendars",
+          "Label": "listOutlookCalendars",
+          "Method": "GET",
+          "Path": "/me/calendars",
+          "Parameters": [],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "List calendars for the signed-in user.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "listOutlookEvents",
+          "Label": "listOutlookEvents",
+          "Method": "GET",
+          "Path": "/me/events",
+          "Parameters": [
+            {
+              "name": "$select",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$filter",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$orderby",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$top",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "List events in the signed-in user's default calendar.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "createOutlookEvent",
+          "Label": "createOutlookEvent",
+          "Method": "POST",
+          "Path": "/me/events",
+          "Parameters": [],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "string"
+              },
+              "body": {
+                "$ref": "#/components/schemas/ItemBody"
+              },
+              "start": {
+                "$ref": "#/components/schemas/DatetimeTimeZone"
+              },
+              "end": {
+                "$ref": "#/components/schemas/DatetimeTimeZone"
+              },
+              "location": {
+                "$ref": "#/components/schemas/Location"
+              },
+              "attendees": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Attendee"
+                }
+              },
+              "isOnlineMeeting": {
+                "type": "boolean"
+              },
+              "onlineMeetingProvider": {
+                "type": "string",
+                "enum": [
+                  "teamsForBusiness",
+                  "skypeForBusiness",
+                  "skypeForConsumer",
+                  "unknown"
+                ]
+              },
+              "allowNewTimeProposals": {
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": [
+              "subject",
+              "start",
+              "end"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Create an event in the signed-in user's default calendar.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "getOutlookEvent",
+          "Label": "getOutlookEvent",
+          "Method": "GET",
+          "Path": "/me/events/{event-id}",
+          "Parameters": [
+            {
+              "name": "event-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Get a calendar event by ID.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "updateOutlookEvent",
+          "Label": "updateOutlookEvent",
+          "Method": "PATCH",
+          "Path": "/me/events/{event-id}",
+          "Parameters": [
+            {
+              "name": "event-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "string"
+              },
+              "body": {
+                "$ref": "#/components/schemas/ItemBody"
+              },
+              "start": {
+                "$ref": "#/components/schemas/DatetimeTimeZone"
+              },
+              "end": {
+                "$ref": "#/components/schemas/DatetimeTimeZone"
+              },
+              "location": {
+                "$ref": "#/components/schemas/Location"
+              },
+              "attendees": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Attendee"
+                }
+              },
+              "isOnlineMeeting": {
+                "type": "boolean"
+              },
+              "onlineMeetingProvider": {
+                "type": "string",
+                "enum": [
+                  "teamsForBusiness",
+                  "skypeForBusiness",
+                  "skypeForConsumer",
+                  "unknown"
+                ]
+              }
+            }
+          },
+          "ContentType": "application/json",
+          "Desc": "Update a calendar event.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "deleteOutlookEvent",
+          "Label": "deleteOutlookEvent",
+          "Method": "DELETE",
+          "Path": "/me/events/{event-id}",
+          "Parameters": [
+            {
+              "name": "event-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Delete a calendar event.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "listOutlookCalendarView",
+          "Label": "listOutlookCalendarView",
+          "Method": "GET",
+          "Path": "/me/calendarView",
+          "Parameters": [
+            {
+              "name": "startDatetime",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Start date/time, for example 2026-05-18T00:00:00."
+            },
+            {
+              "name": "endDatetime",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "End date/time, for example 2026-05-19T00:00:00."
+            },
+            {
+              "name": "$select",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$top",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "List calendar events in a date/time range.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "listOutlookEventsInCalendar",
+          "Label": "listOutlookEventsInCalendar",
+          "Method": "GET",
+          "Path": "/me/calendars/{calendar-id}/events",
+          "Parameters": [
+            {
+              "name": "calendar-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$select",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$filter",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$top",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "List events in a specific calendar.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "createOutlookEventInCalendar",
+          "Label": "createOutlookEventInCalendar",
+          "Method": "POST",
+          "Path": "/me/calendars/{calendar-id}/events",
+          "Parameters": [
+            {
+              "name": "calendar-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "string"
+              },
+              "body": {
+                "$ref": "#/components/schemas/ItemBody"
+              },
+              "start": {
+                "$ref": "#/components/schemas/DatetimeTimeZone"
+              },
+              "end": {
+                "$ref": "#/components/schemas/DatetimeTimeZone"
+              },
+              "location": {
+                "$ref": "#/components/schemas/Location"
+              },
+              "attendees": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Attendee"
+                }
+              },
+              "isOnlineMeeting": {
+                "type": "boolean"
+              },
+              "onlineMeetingProvider": {
+                "type": "string",
+                "enum": [
+                  "teamsForBusiness",
+                  "skypeForBusiness",
+                  "skypeForConsumer",
+                  "unknown"
+                ]
+              },
+              "allowNewTimeProposals": {
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": [
+              "subject",
+              "start",
+              "end"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Create an event in a specific calendar.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "acceptOutlookEvent",
+          "Label": "acceptOutlookEvent",
+          "Method": "POST",
+          "Path": "/me/events/{event-id}/accept",
+          "Parameters": [
+            {
+              "name": "event-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "comment": {
+                "type": "string"
+              },
+              "sendResponse": {
+                "type": "boolean"
+              }
+            }
+          },
+          "ContentType": "application/json",
+          "Desc": "Accept a meeting invitation.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "declineOutlookEvent",
+          "Label": "declineOutlookEvent",
+          "Method": "POST",
+          "Path": "/me/events/{event-id}/decline",
+          "Parameters": [
+            {
+              "name": "event-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "comment": {
+                "type": "string"
+              },
+              "sendResponse": {
+                "type": "boolean"
+              }
+            }
+          },
+          "ContentType": "application/json",
+          "Desc": "Decline a meeting invitation.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "tentativelyAcceptOutlookEvent",
+          "Label": "tentativelyAcceptOutlookEvent",
+          "Method": "POST",
+          "Path": "/me/events/{event-id}/tentativelyAccept",
+          "Parameters": [
+            {
+              "name": "event-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "comment": {
+                "type": "string"
+              },
+              "sendResponse": {
+                "type": "boolean"
+              }
+            }
+          },
+          "ContentType": "application/json",
+          "Desc": "Tentatively accept a meeting invitation.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        }
+      ],
+      "resources": null,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+    },
+    {
+      "ownerKey": "copilot:partner-q-a",
+      "ownerName": "Partner Q&A",
+      "ownerType": "copilot",
+      "referenceKey": "component:sharepoint-data-operations",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "SharePoint Data Operations",
+      "type": 2,
+      "subType": 8,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "userType",
+        "schema",
+        "operations",
+        "credentialstype",
+        "resType",
+        "baseurl"
+      ],
+      "dataReference": {
+        "scope": "App",
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": "connection",
+        "targetKey": "connection:microsoft-graph-sharepoint"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": "2",
+      "contentType": null,
+      "resType": "1",
+      "hasSchema": true,
+      "operationCount": 12,
+      "operations": [
+        {
+          "Name": "getSharePointSiteByPath",
+          "Label": "getSharePointSiteByPath",
+          "Method": "GET",
+          "Path": "/sites/{hostname}:/{relative-path}",
+          "Parameters": [
+            {
+              "name": "hostname",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "SharePoint hostname, for example contoso.sharepoint.com"
+            },
+            {
+              "name": "relative-path",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Server-relative site path, for example sites/HR"
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Resolve a SharePoint site and return its Microsoft Graph site ID.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "listSharePointListItems",
+          "Label": "listSharePointListItems",
+          "Method": "GET",
+          "Path": "/sites/{site-id}/lists/{list-id}/items",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Microsoft Graph site ID."
+            },
+            {
+              "name": "list-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "SharePoint list ID."
+            },
+            {
+              "name": "$expand",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Use fields to include column values, for example: fields."
+            },
+            {
+              "name": "$filter",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Optional OData filter."
+            },
+            {
+              "name": "$top",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Maximum number of items to return."
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Get items from a SharePoint list.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "createSharePointListItem",
+          "Label": "createSharePointListItem",
+          "Method": "POST",
+          "Path": "/sites/{site-id}/lists/{list-id}/items",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "list-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "fields": {
+                "$ref": "#/components/schemas/ListItemFields"
+              }
+            },
+            "required": [
+              "fields"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Create a new item in a SharePoint list.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "getSharePointListItem",
+          "Label": "getSharePointListItem",
+          "Method": "GET",
+          "Path": "/sites/{site-id}/lists/{list-id}/items/{item-id}",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "list-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "item-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "$expand",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Use fields to include column values."
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Get a single item in a SharePoint list.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "updateSharePointListItemFields",
+          "Label": "updateSharePointListItemFields",
+          "Method": "PATCH",
+          "Path": "/sites/{site-id}/lists/{list-id}/items/{item-id}/fields",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "list-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "item-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true,
+            "description": "Field values to update on a SharePoint list item."
+          },
+          "ContentType": "application/json",
+          "Desc": "Update column values on a SharePoint list item.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "listDocumentLibraryRootItems",
+          "Label": "listDocumentLibraryRootItems",
+          "Method": "GET",
+          "Path": "/sites/{site-id}/drive/root/children",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "List files and folders in the root of a SharePoint document library.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "getDocumentLibraryItem",
+          "Label": "getDocumentLibraryItem",
+          "Method": "GET",
+          "Path": "/sites/{site-id}/drive/items/{item-id}",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "item-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": null,
+          "ContentType": "",
+          "Desc": "Get metadata for a file or folder in a SharePoint document library.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "updateDocumentLibraryItem",
+          "Label": "updateDocumentLibraryItem",
+          "Method": "PATCH",
+          "Path": "/sites/{site-id}/drive/items/{item-id}",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "item-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          },
+          "ContentType": "application/json",
+          "Desc": "Update metadata for a file or folder in a SharePoint document library.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "createDocumentLibraryFolder",
+          "Label": "createDocumentLibraryFolder",
+          "Method": "POST",
+          "Path": "/sites/{site-id}/drive/items/{parent-id}/children",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "parent-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "folder": {
+                "type": "object",
+                "properties": {}
+              },
+              "@microsoft.graph.conflictBehavior": {
+                "type": "string",
+                "enum": [
+                  "rename",
+                  "replace",
+                  "fail"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "folder"
+            ]
+          },
+          "ContentType": "application/json",
+          "Desc": "Create a folder under a parent folder in a SharePoint document library.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "Label": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "Method": "PUT",
+          "Path": "/sites/{site-id}/drive/items/{parent-id}:/{filename}:/content",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "parent-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "filename",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "string",
+            "format": "binary",
+            "description": "Raw binary file content."
+          },
+          "ContentType": "application/octet-stream",
+          "Desc": "Upload a new small file to a SharePoint document library using a parent folder item ID.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "Label": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "Method": "PUT",
+          "Path": "/sites/{site-id}/drive/root:/{filename}:/content",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "filename",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "string",
+            "format": "binary",
+            "description": "Raw binary file content."
+          },
+          "ContentType": "application/octet-stream",
+          "Desc": "Upload a small file to the root of the default SharePoint document library for a site without requiring a parent ID.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        },
+        {
+          "Name": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "Label": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "Method": "PUT",
+          "Path": "/sites/{site-id}/drive/root:/{folder-path}/{filename}:/content",
+          "Parameters": [
+            {
+              "name": "site-id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "folder-path",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "Folder path inside the document library, for example Quotations/2026."
+            },
+            {
+              "name": "filename",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "RequestBody": {
+            "type": "string",
+            "format": "binary",
+            "description": "Raw binary file content."
+          },
+          "ContentType": "application/octet-stream",
+          "Desc": "Upload a small file to a folder path inside the default SharePoint document library without requiring a parent ID.",
+          "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+          "FillType": "1"
+        }
+      ],
+      "resources": null,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+    },
+    {
+      "ownerKey": "copilot:partner-q-a",
+      "ownerName": "Partner Q&A",
+      "ownerType": "copilot",
+      "referenceKey": "component:access-current-application-resources",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Access current application resources",
+      "type": 2,
+      "subType": 10,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "userType",
+        "resType",
+        "resources"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "application",
+        "targetKey": "application:current"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": "1",
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": {
+        "approvalForms": {
+          "all": {
+            "permissions": 9
+          }
+        },
+        "dataLists": {
+          "all": {
+            "permissions": 11
+          }
+        },
+        "documentLibraries": {
+          "all": {
+            "permissions": 11
+          }
+        },
+        "formReports": {
+          "all": {
+            "permissions": 8
+          }
+        },
+        "dataReports": {
+          "all": {
+            "permissions": 8
+          }
+        },
+        "aiAgents": {
+          "all": {
+            "permissions": 1
+          }
+        }
+      },
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-ai-assistant",
+      "ownerName": "NHIC AI Assistant",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:partner-kb",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Partner KB",
+      "type": 1,
+      "subType": null,
+      "kind": "knowledge",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Category"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": null,
+        "targetKey": null
+      },
+      "runType": null,
+      "userType": null,
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [],
+      "outputs": [],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-ai-assistant",
+      "ownerName": "NHIC AI Assistant",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:query-partner-management",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Query Partner Management",
+      "type": 2,
+      "subType": 3,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:partner-management"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "Filters",
+          "name": "Data filter",
+          "label": "Data filter",
+          "type": "text",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": [
+            {
+              "key": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "pre": "and",
+              "left": "Title",
+              "op": "7",
+              "right": null,
+              "showCus": false
+            }
+          ],
+          "descriptionPresent": true
+        },
+        {
+          "id": "Fields",
+          "name": "Fields",
+          "label": "Fields",
+          "type": "text",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": [
+            {
+              "Label": "Company Name",
+              "Name": "Company Name",
+              "Id": "Title"
+            },
+            {
+              "Label": "Partner Type",
+              "Name": "Partner Type",
+              "Id": "Text1"
+            },
+            {
+              "Label": "Funding Stages",
+              "Name": "Funding Stages",
+              "Id": "Text6"
+            },
+            {
+              "Label": "Technology Areas of Interest",
+              "Name": "Technology Areas of Interest",
+              "Id": "Text5"
+            },
+            {
+              "Label": "Regions of Focus",
+              "Name": "Regions of Focus",
+              "Id": "Text7"
+            },
+            {
+              "Label": "Partnership Status",
+              "Name": "Partnership Status",
+              "Id": "Text8"
+            },
+            {
+              "Label": "Country",
+              "Name": "Country",
+              "Id": "Text2"
+            }
+          ],
+          "descriptionPresent": true
+        },
+        {
+          "id": "Sorts",
+          "name": "Sorts",
+          "label": "Sorts",
+          "type": "text",
+          "fillType": "2",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "PageNumber",
+          "name": "Page number",
+          "label": "Page number",
+          "type": "number",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "num",
+                "value": "1"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        },
+        {
+          "id": "PageSize",
+          "name": "Page size",
+          "label": "Page size",
+          "type": "number",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "num",
+                "value": "50"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "list",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "TotalCount",
+          "name": "Total Count",
+          "label": "Total Count",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-ai-assistant",
+      "ownerName": "NHIC AI Assistant",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:query-portfolio-management",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Query Portfolio Management",
+      "type": 2,
+      "subType": 3,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:portfolio-management"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "Filters",
+          "name": "Data filter",
+          "label": "Data filter",
+          "type": "text",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": [
+            {
+              "key": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "pre": "and",
+              "left": "Title",
+              "op": "7",
+              "right": null
+            }
+          ],
+          "descriptionPresent": true
+        },
+        {
+          "id": "Fields",
+          "name": "Fields",
+          "label": "Fields",
+          "type": "text",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": [
+            {
+              "Label": "Project / Company Name",
+              "Name": "Project / Company Name",
+              "Id": "Title"
+            },
+            {
+              "Label": "Technology Area",
+              "Name": "Technology Area",
+              "Id": "Text4"
+            },
+            {
+              "Label": "Commercialisation Status",
+              "Name": "Commercialisation Status",
+              "Id": "Text8"
+            },
+            {
+              "Label": "Healthcare Cluster",
+              "Name": "Healthcare Cluster",
+              "Id": "Text7"
+            },
+            {
+              "Label": "NHIC Grants Received",
+              "Name": "NHIC Grants Received",
+              "Id": "Text5"
+            },
+            {
+              "Label": "Portfolio Type",
+              "Name": "Portfolio Type",
+              "Id": "Text3"
+            },
+            {
+              "Label": "Funding Status",
+              "Name": "Funding Status",
+              "Id": "Text9"
+            },
+            {
+              "Label": "Regions of Focus",
+              "Name": "Regions of Focus",
+              "Id": "Text11"
+            },
+            {
+              "Label": "NHIC OIC",
+              "Name": "NHIC OIC",
+              "Id": "Text22"
+            },
+            {
+              "Label": "NHIC Grants",
+              "Name": "NHIC Grants",
+              "Id": "Text23"
+            }
+          ],
+          "descriptionPresent": true
+        },
+        {
+          "id": "Sorts",
+          "name": "Sorts",
+          "label": "Sorts",
+          "type": "text",
+          "fillType": "2",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "PageNumber",
+          "name": "Page number",
+          "label": "Page number",
+          "type": "number",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "num",
+                "value": "1"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        },
+        {
+          "id": "PageSize",
+          "name": "Page size",
+          "label": "Page size",
+          "type": "number",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "num",
+                "value": "50"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "list",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "TotalCount",
+          "name": "Total Count",
+          "label": "Total Count",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-ai-assistant",
+      "ownerName": "NHIC AI Assistant",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:query-contacts",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Query Contacts",
+      "type": 2,
+      "subType": 3,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:contact-database"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "Filters",
+          "name": "Data filter",
+          "label": "Data filter",
+          "type": "text",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": [
+            {
+              "key": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "pre": "and",
+              "left": "Title",
+              "op": "7",
+              "right": null
+            },
+            {
+              "key": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "pre": "and",
+              "left": "Text2",
+              "op": "8",
+              "right": {
+                "Label": "extract company name",
+                "Desc": "Extract the company or organization name mentioned in the user message"
+              },
+              "showCus": "2"
+            }
+          ],
+          "descriptionPresent": true
+        },
+        {
+          "id": "Fields",
+          "name": "Fields",
+          "label": "Fields",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Sorts",
+          "name": "Sorts",
+          "label": "Sorts",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "PageNumber",
+          "name": "Page number",
+          "label": "Page number",
+          "type": "number",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "num",
+                "value": "1"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        },
+        {
+          "id": "PageSize",
+          "name": "Page size",
+          "label": "Page size",
+          "type": "number",
+          "fillType": "2",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "num",
+                "value": "50"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "list",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "TotalCount",
+          "name": "Total Count",
+          "label": "Total Count",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-ai-assistant",
+      "ownerName": "NHIC AI Assistant",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:create-communication-record",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Create Communication Record",
+      "type": 2,
+      "subType": 4,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:communication-records"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "Title",
+          "name": "Record Title",
+          "label": "Record Title",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "str",
+                "value": "AI(\"Generate a short 5-8 word title summarizing this interaction.\")"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text1",
+          "name": "Communication Type",
+          "label": "Communication Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "str",
+                "value": "AI(\"Classify the interaction as one of: Meeting, Call, Email, Message, or Event.\")"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        },
+        {
+          "id": "Datetime1",
+          "name": "Communication Date",
+          "label": "Communication Date",
+          "type": "datepicker",
+          "fillType": "1",
+          "hasValue": true,
+          "valueShape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "str",
+                "value": "AI(\"Extract the date of the interaction. If none is mentioned, return today's date.\")"
+              }
+            ]
+          },
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text4",
+          "name": "Subject / Topic",
+          "label": "Subject / Topic",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text5",
+          "name": "Notes",
+          "label": "Notes",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text6",
+          "name": "Outcome",
+          "label": "Outcome",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text7",
+          "name": "Next Action",
+          "label": "Next Action",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text8",
+          "name": "Action Owner",
+          "label": "Action Owner",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text9",
+          "name": "Status",
+          "label": "Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Datetime2",
+          "name": "Due Date",
+          "label": "Due Date",
+          "type": "datepicker",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text13",
+          "name": "Meeting Notes / Email Content",
+          "label": "Meeting Notes / Email Content",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-ai-assistant",
+      "ownerName": "NHIC AI Assistant",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:update-communication-records",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Update Communication Records",
+      "type": 2,
+      "subType": 5,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:communication-records"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "ListDataID",
+          "name": "Item Id",
+          "label": "Item Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-ai-assistant",
+      "ownerName": "NHIC AI Assistant",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:communication-records",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Communication Records",
+      "type": 2,
+      "subType": 4,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:communication-records"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "Title",
+          "name": "Record Title",
+          "label": "Record Title",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text5",
+          "name": "Notes",
+          "label": "Notes",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text1",
+          "name": "Communication Type",
+          "label": "Communication Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "copilot:nhic-innovation-copilot",
+      "ownerName": "NHIC Innovation Copilot",
+      "ownerType": "copilot",
+      "referenceKey": "component:nhic-innovation-data-hub",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "NHIC Innovation Data Hub",
+      "type": 1,
+      "subType": null,
+      "kind": "knowledge",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Category"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": null,
+        "targetKey": null
+      },
+      "runType": null,
+      "userType": null,
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [],
+      "outputs": [],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "copilot:nhic-innovation-copilot",
+      "ownerName": "NHIC Innovation Copilot",
+      "ownerType": "copilot",
+      "referenceKey": "component:create-nhic-record",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Create NHIC Record",
+      "type": 2,
+      "subType": 1,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "resType"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "ai-resource",
+        "targetKey": "ai-agent:nhic-record-creation-agent"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": "2",
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "user message",
+          "name": "user message",
+          "label": "user message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "response",
+          "name": "response",
+          "label": "response",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "copilot:nhic-innovation-copilot",
+      "ownerName": "NHIC Innovation Copilot",
+      "ownerType": "copilot",
+      "referenceKey": "component:update-nhic-record",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Update NHIC Record",
+      "type": 2,
+      "subType": 1,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "resType"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "ai-resource",
+        "targetKey": "ai-agent:nhic-record-update-agent"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": "2",
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "user message",
+          "name": "user message",
+          "label": "user message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "response",
+          "name": "response",
+          "label": "response",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "copilot:nhic-innovation-copilot",
+      "ownerName": "NHIC Innovation Copilot",
+      "ownerType": "copilot",
+      "referenceKey": "component:delete-nhic-record",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Delete NHIC Record",
+      "type": 2,
+      "subType": 1,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "resType"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "ai-resource",
+        "targetKey": "ai-agent:nhic-record-deletion-agent"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": "2",
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "user message",
+          "name": "user message",
+          "label": "user message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "current user id",
+          "name": "current user id",
+          "label": "current user id",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "response",
+          "name": "response",
+          "label": "response",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "copilot:nhic-innovation-copilot",
+      "ownerName": "NHIC Innovation Copilot",
+      "ownerType": "copilot",
+      "referenceKey": "component:write-and-send-emails",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Write and Send Emails",
+      "type": 2,
+      "subType": 7,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "contentType",
+        "credentialstype",
+        "resType",
+        "userType",
+        "method",
+        "address",
+        "body"
+      ],
+      "dataReference": {
+        "scope": "App",
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": "connection",
+        "targetKey": "connection:microsoft-graph-outlook"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": "2",
+      "contentType": "application/json",
+      "resType": "1",
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "subject",
+          "name": "subject",
+          "label": "subject",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "content",
+          "name": "content",
+          "label": "content",
+          "type": "richtext",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "toRecipients",
+          "name": "toRecipients",
+          "label": "toRecipients",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-creation-agent",
+      "ownerName": "NHIC Record Creation Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:nhic-innovation-data-hub",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "NHIC Innovation Data Hub",
+      "type": 1,
+      "subType": null,
+      "kind": "knowledge",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Category"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": null,
+        "targetKey": null
+      },
+      "runType": null,
+      "userType": null,
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [],
+      "outputs": [],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-creation-agent",
+      "ownerName": "NHIC Record Creation Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:add-new-partner",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Add New Partner",
+      "type": 2,
+      "subType": 4,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:partner-management"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "Title",
+          "name": "Company Name",
+          "label": "Company Name",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text1",
+          "name": "Partner Type",
+          "label": "Partner Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text2",
+          "name": "Country",
+          "label": "Country",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text3",
+          "name": "Description",
+          "label": "Description",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text4",
+          "name": "Partner Mandates",
+          "label": "Partner Mandates",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text6",
+          "name": "Funding Stages",
+          "label": "Funding Stages",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text7",
+          "name": "Regions of Focus",
+          "label": "Regions of Focus",
+          "type": "checkbox",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text8",
+          "name": "Partnership Status",
+          "label": "Partnership Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text9",
+          "name": "MOU Details",
+          "label": "MOU Details",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text10",
+          "name": "Key Activities",
+          "label": "Key Activities",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text12",
+          "name": "Remarks",
+          "label": "Remarks",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text14",
+          "name": "POC (Name / Title)",
+          "label": "POC (Name / Title)",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text16",
+          "name": "NHIC OIC",
+          "label": "NHIC OIC",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Bit1",
+          "name": "Active",
+          "label": "Active",
+          "type": "switch",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text5",
+          "name": "Technology Areas of Interest",
+          "label": "Technology Areas of Interest",
+          "type": "checkbox",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text17",
+          "name": "Partner Group",
+          "label": "Partner Group",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text15",
+          "name": "POC (Email)",
+          "label": "POC (Email)",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Id",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-creation-agent",
+      "ownerName": "NHIC Record Creation Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:add-new-portfolio",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Add New Portfolio",
+      "type": 2,
+      "subType": 4,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:portfolio-management"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "Title",
+          "name": "Project / Company Name",
+          "label": "Project / Company Name",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text1",
+          "name": "Record Type",
+          "label": "Record Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text2",
+          "name": "Summary / Abstract",
+          "label": "Summary / Abstract",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text3",
+          "name": "Portfolio Type",
+          "label": "Portfolio Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text4",
+          "name": "Technology Area",
+          "label": "Technology Area",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text5",
+          "name": "NHIC Grants Received",
+          "label": "NHIC Grants Received",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text6",
+          "name": "Grant Information",
+          "label": "Grant Information",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text7",
+          "name": "Healthcare Cluster",
+          "label": "Healthcare Cluster",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text8",
+          "name": "Commercialisation Status",
+          "label": "Commercialisation Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text9",
+          "name": "Funding Status",
+          "label": "Funding Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text10",
+          "name": "Funding Information",
+          "label": "Funding Information",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text11",
+          "name": "Regions of Focus",
+          "label": "Regions of Focus",
+          "type": "checkbox",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text13",
+          "name": "Awards",
+          "label": "Awards",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text14",
+          "name": "Remarks",
+          "label": "Remarks",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text16",
+          "name": "POC (Name / Title)",
+          "label": "POC (Name / Title)",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text17",
+          "name": "POC (Email)",
+          "label": "POC (Email)",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text18",
+          "name": "Clinical PI Name / Title / Org",
+          "label": "Clinical PI Name / Title / Org",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text19",
+          "name": "Clinical PI Email",
+          "label": "Clinical PI Email",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text20",
+          "name": "Technical PI Name / Title / Org",
+          "label": "Technical PI Name / Title / Org",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text21",
+          "name": "Technical PI Email",
+          "label": "Technical PI Email",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text22",
+          "name": "NHIC OIC",
+          "label": "NHIC OIC",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Bit1",
+          "name": "Active",
+          "label": "Active",
+          "type": "switch",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text24",
+          "name": "POC",
+          "label": "POC",
+          "type": "list",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text26",
+          "name": "Partner Id",
+          "label": "Partner Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Id",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-creation-agent",
+      "ownerName": "NHIC Record Creation Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:add-new-communication-record",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Add New Communication Record",
+      "type": 2,
+      "subType": 4,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:communication-records"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "Title",
+          "name": "Record Title",
+          "label": "Record Title",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text1",
+          "name": "Communication Type",
+          "label": "Communication Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Datetime1",
+          "name": "Communication Date",
+          "label": "Communication Date",
+          "type": "datepicker",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text4",
+          "name": "Subject / Topic",
+          "label": "Subject / Topic",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text5",
+          "name": "Notes",
+          "label": "Notes",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text6",
+          "name": "Outcome",
+          "label": "Outcome",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text7",
+          "name": "Next Action",
+          "label": "Next Action",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text8",
+          "name": "Action Owner",
+          "label": "Action Owner",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Datetime2",
+          "name": "Due Date",
+          "label": "Due Date",
+          "type": "datepicker",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text9",
+          "name": "Status",
+          "label": "Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text10",
+          "name": "Related MOU / Context",
+          "label": "Related MOU / Context",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Bit1",
+          "name": "Active",
+          "label": "Active",
+          "type": "switch",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text13",
+          "name": "Meeting Notes / Email Content",
+          "label": "Meeting Notes / Email Content",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text15",
+          "name": "Partner Id",
+          "label": "Partner Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text16",
+          "name": "Portfolio Id",
+          "label": "Portfolio Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Id",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-update-agent",
+      "ownerName": "NHIC Record Update Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:nhic-innovation-data-hub",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "NHIC Innovation Data Hub",
+      "type": 1,
+      "subType": null,
+      "kind": "knowledge",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Category"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": null,
+        "targetKey": null
+      },
+      "runType": null,
+      "userType": null,
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [],
+      "outputs": [],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-update-agent",
+      "ownerName": "NHIC Record Update Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:update-partner-by-id",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Update Partner by ID",
+      "type": 2,
+      "subType": 5,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:partner-management"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "ListDataID",
+          "name": "Item Id",
+          "label": "Partner Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Title",
+          "name": "Company Name",
+          "label": "Company Name",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text1",
+          "name": "Partner Type",
+          "label": "Partner Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text2",
+          "name": "Country",
+          "label": "Country",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text3",
+          "name": "Description",
+          "label": "Description",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text4",
+          "name": "Partner Mandates",
+          "label": "Partner Mandates",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text6",
+          "name": "Funding Stages",
+          "label": "Funding Stages",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text7",
+          "name": "Regions of Focus",
+          "label": "Regions of Focus",
+          "type": "checkbox",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text8",
+          "name": "Partnership Status",
+          "label": "Partnership Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text9",
+          "name": "MOU Details",
+          "label": "MOU Details",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text10",
+          "name": "Key Activities",
+          "label": "Key Activities",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text12",
+          "name": "Remarks",
+          "label": "Remarks",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text14",
+          "name": "POC (Name / Title)",
+          "label": "POC (Name / Title)",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text16",
+          "name": "NHIC OIC",
+          "label": "NHIC OIC",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Bit1",
+          "name": "Active",
+          "label": "Active",
+          "type": "switch",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text5",
+          "name": "Technology Areas of Interest",
+          "label": "Technology Areas of Interest",
+          "type": "checkbox",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text17",
+          "name": "Partner Group",
+          "label": "Partner Group",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text15",
+          "name": "POC (Email)",
+          "label": "POC (Email)",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-update-agent",
+      "ownerName": "NHIC Record Update Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:update-portfolio-by-id",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Update Portfolio by ID",
+      "type": 2,
+      "subType": 5,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:portfolio-management"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "ListDataID",
+          "name": "Item Id",
+          "label": "Portfolio Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Title",
+          "name": "Project / Company Name",
+          "label": "Project / Company Name",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text1",
+          "name": "Record Type",
+          "label": "Record Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text2",
+          "name": "Summary / Abstract",
+          "label": "Summary / Abstract",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text3",
+          "name": "Portfolio Type",
+          "label": "Portfolio Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text4",
+          "name": "Technology Area",
+          "label": "Technology Area",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text5",
+          "name": "NHIC Grants Received",
+          "label": "NHIC Grants Received",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text6",
+          "name": "Grant Information",
+          "label": "Grant Information",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text7",
+          "name": "Healthcare Cluster",
+          "label": "Healthcare Cluster",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text8",
+          "name": "Commercialisation Status",
+          "label": "Commercialisation Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text9",
+          "name": "Funding Status",
+          "label": "Funding Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text10",
+          "name": "Funding Information",
+          "label": "Funding Information",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text11",
+          "name": "Regions of Focus",
+          "label": "Regions of Focus",
+          "type": "checkbox",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text13",
+          "name": "Awards",
+          "label": "Awards",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text14",
+          "name": "Remarks",
+          "label": "Remarks",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text16",
+          "name": "POC (Name / Title)",
+          "label": "POC (Name / Title)",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text17",
+          "name": "POC (Email)",
+          "label": "POC (Email)",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text18",
+          "name": "Clinical PI Name / Title / Org",
+          "label": "Clinical PI Name / Title / Org",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text19",
+          "name": "Clinical PI Email",
+          "label": "Clinical PI Email",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text20",
+          "name": "Technical PI Name / Title / Org",
+          "label": "Technical PI Name / Title / Org",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text21",
+          "name": "Technical PI Email",
+          "label": "Technical PI Email",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text22",
+          "name": "NHIC OIC",
+          "label": "NHIC OIC",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Bit1",
+          "name": "Active",
+          "label": "Active",
+          "type": "switch",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text24",
+          "name": "POC",
+          "label": "POC",
+          "type": "list",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text26",
+          "name": "Partner Id",
+          "label": "Partner Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-update-agent",
+      "ownerName": "NHIC Record Update Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:update-communication-record-by-id",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Update Communication Record by ID",
+      "type": 2,
+      "subType": 5,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:communication-records"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "ListDataID",
+          "name": "Item Id",
+          "label": "Communication record Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Title",
+          "name": "Record Title",
+          "label": "Record Title",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text1",
+          "name": "Communication Type",
+          "label": "Communication Type",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Datetime1",
+          "name": "Communication Date",
+          "label": "Communication Date",
+          "type": "datepicker",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text4",
+          "name": "Subject / Topic",
+          "label": "Subject / Topic",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text5",
+          "name": "Notes",
+          "label": "Notes",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text6",
+          "name": "Outcome",
+          "label": "Outcome",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text7",
+          "name": "Next Action",
+          "label": "Next Action",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text8",
+          "name": "Action Owner",
+          "label": "Action Owner",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Datetime2",
+          "name": "Due Date",
+          "label": "Due Date",
+          "type": "datepicker",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text9",
+          "name": "Status",
+          "label": "Status",
+          "type": "radio",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text10",
+          "name": "Related MOU / Context",
+          "label": "Related MOU / Context",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Bit1",
+          "name": "Active",
+          "label": "Active",
+          "type": "switch",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text13",
+          "name": "Meeting Notes / Email Content",
+          "label": "Meeting Notes / Email Content",
+          "type": "textarea",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text15",
+          "name": "Partner Id",
+          "label": "Partner Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Text16",
+          "name": "Portfolio Id",
+          "label": "Portfolio Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-deletion-agent",
+      "ownerName": "NHIC Record Deletion Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:nhic-innovation-data-hub",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "NHIC Innovation Data Hub",
+      "type": 1,
+      "subType": null,
+      "kind": "knowledge",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Category"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": null,
+        "targetKey": null
+      },
+      "runType": null,
+      "userType": null,
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [],
+      "outputs": [],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-deletion-agent",
+      "ownerName": "NHIC Record Deletion Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:delete-partner-by-id",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Delete Partner by ID",
+      "type": 2,
+      "subType": 6,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:partner-management"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "ListDataID",
+          "name": "Item Id",
+          "label": "Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-deletion-agent",
+      "ownerName": "NHIC Record Deletion Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:delete-portfolio-by-id",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Delete Portfolio by ID",
+      "type": 2,
+      "subType": 6,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:portfolio-management"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "ListDataID",
+          "name": "Item Id",
+          "label": "Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-deletion-agent",
+      "ownerName": "NHIC Record Deletion Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:delete-communication-record-by-id",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Delete Communication Record by ID",
+      "type": 2,
+      "subType": 6,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": true,
+      "settingsKeys": [
+        "Data",
+        "userType",
+        "runType",
+        "Inputs",
+        "Outputs"
+      ],
+      "dataReference": {
+        "scope": null,
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "valueType": "list",
+        "targetKey": "list:communication-records"
+      },
+      "runType": "1",
+      "userType": "1",
+      "credentialstype": null,
+      "contentType": null,
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [
+        {
+          "id": "ListDataID",
+          "name": "Item Id",
+          "label": "Id",
+          "type": "input",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Message",
+          "name": "Message",
+          "label": "Message",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-deletion-agent",
+      "ownerName": "NHIC Record Deletion Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:http-request",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "HTTP Request",
+      "type": 2,
+      "subType": 7,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": false,
+      "settingsKeys": [
+        "Data",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "contentType",
+        "credentialstype"
+      ],
+      "dataReference": {
+        "scope": "App",
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": "connection",
+        "targetKey": "connection:http-request"
+      },
+      "runType": "1",
+      "userType": null,
+      "credentialstype": "1",
+      "contentType": "application/json",
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+    },
+    {
+      "ownerKey": "ai-agent:nhic-record-deletion-agent",
+      "ownerName": "NHIC Record Deletion Agent",
+      "ownerType": "ai-agent",
+      "referenceKey": "component:microsoft-graph-outlook",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Microsoft Graph - Outlook",
+      "type": 2,
+      "subType": 7,
+      "kind": "tool",
+      "status": 1,
+      "descriptionPresent": false,
+      "settingsKeys": [
+        "Data",
+        "runType",
+        "Inputs",
+        "Outputs",
+        "contentType",
+        "credentialstype"
+      ],
+      "dataReference": {
+        "scope": "App",
+        "appIdPresent": false,
+        "listSetIdPresent": false,
+        "valueType": "connection",
+        "targetKey": "connection:microsoft-graph-outlook"
+      },
+      "runType": "1",
+      "userType": null,
+      "credentialstype": "1",
+      "contentType": "application/json",
+      "resType": null,
+      "hasSchema": false,
+      "operationCount": 0,
+      "operations": [],
+      "resources": null,
+      "inputs": [],
+      "outputs": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "label": "Data",
+          "type": "text",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "Status",
+          "name": "Status code",
+          "label": "Status code",
+          "type": "number",
+          "fillType": "1",
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+    }
+  ],
+  "knowledges": [
+    {
+      "referenceKey": "knowledge:partner-kb",
+      "sourceId": "<REDACTED_KNOWLEDGE_ID>",
+      "name": "Partner KB",
+      "dataCount": 5,
+      "datas": [
+        {
+          "referenceKey": "knowledge-data:partner-management",
+          "sourceId": "<REDACTED_KNOWLEDGE_DATA_ID>",
+          "name": "Partner Management",
+          "type": 1,
+          "settings": {
+            "AppID": 41,
+            "ListSetID": "2033878389230415872",
+            "ListID": "2033902590248235008",
+            "Fields": [
+              "Title",
+              "Text1",
+              "Text2",
+              "Text3",
+              "Text4",
+              "Text6",
+              "Text7",
+              "Text8",
+              "Text9",
+              "Text10",
+              "Text12",
+              "Text13",
+              "Text14",
+              "Text16",
+              "Bit1",
+              "Text11",
+              "Text5",
+              "Text17",
+              "Text15",
+              "ListDataID",
+              "CreatedBy",
+              "Created",
+              "ModifiedBy",
+              "Modified"
+            ],
+            "Conditions": [],
+            "Filters": []
+          }
+        },
+        {
+          "referenceKey": "knowledge-data:portfolio-management",
+          "sourceId": "<REDACTED_KNOWLEDGE_DATA_ID>",
+          "name": "Portfolio Management",
+          "type": 1,
+          "settings": {
+            "AppID": 41,
+            "ListSetID": "2033878389230415872",
+            "ListID": "2033883175947481088",
+            "Fields": [
+              "Title",
+              "Text1",
+              "Text2",
+              "Text3",
+              "Text4",
+              "Text5",
+              "Text6",
+              "Text7",
+              "Text8",
+              "Text9",
+              "Text10",
+              "Text11",
+              "Text13",
+              "Text14",
+              "Text15",
+              "Text16",
+              "Text17",
+              "Text18",
+              "Text19",
+              "Text20",
+              "Text21",
+              "Text22",
+              "Bit1",
+              "Text12",
+              "Text23",
+              "ListDataID",
+              "CreatedBy",
+              "Created",
+              "ModifiedBy",
+              "Modified"
+            ],
+            "Conditions": [],
+            "Filters": []
+          }
+        },
+        {
+          "referenceKey": "knowledge-data:communication-records",
+          "sourceId": "<REDACTED_KNOWLEDGE_DATA_ID>",
+          "name": "Communication Records",
+          "type": 1,
+          "settings": {
+            "AppID": 41,
+            "ListSetID": "2033878389230415872",
+            "ListID": "2033913908703412225",
+            "Fields": [
+              "Title",
+              "Text1",
+              "Datetime1",
+              "Text2",
+              "Text3",
+              "Text4",
+              "Text5",
+              "Text6",
+              "Text7",
+              "Text8",
+              "Datetime2",
+              "Text9",
+              "Text10",
+              "Text11",
+              "Bit1",
+              "ListDataID",
+              "CreatedBy",
+              "Created",
+              "ModifiedBy",
+              "Modified"
+            ],
+            "Conditions": [],
+            "Filters": []
+          }
+        },
+        {
+          "referenceKey": "knowledge-data:contact-database",
+          "sourceId": "<REDACTED_KNOWLEDGE_DATA_ID>",
+          "name": "Contact Database",
+          "type": 1,
+          "settings": {
+            "AppID": 41,
+            "ListSetID": "2033878389230415872",
+            "ListID": "2034157572486742017",
+            "Fields": [
+              "Title",
+              "Text1",
+              "Text2",
+              "Text3",
+              "Text4",
+              "Text5",
+              "Text6",
+              "Text7",
+              "Text8",
+              "Text9",
+              "Datetime1",
+              "Text10",
+              "Text11",
+              "Text12",
+              "Bit1",
+              "ListDataID",
+              "CreatedBy",
+              "Created",
+              "ModifiedBy",
+              "Modified"
+            ],
+            "Conditions": [],
+            "Filters": []
+          }
+        },
+        {
+          "referenceKey": "knowledge-data:nhic-grants",
+          "sourceId": "<REDACTED_KNOWLEDGE_DATA_ID>",
+          "name": "NHIC Grants",
+          "type": 1,
+          "settings": {
+            "AppID": 41,
+            "ListSetID": "2033878389230415872",
+            "ListID": "2033981123591024640",
+            "Fields": [
+              "Title",
+              "Text1",
+              "Text2",
+              "Text3",
+              "Text4",
+              "Text5",
+              "Text6",
+              "ListDataID",
+              "CreatedBy",
+              "Created",
+              "ModifiedBy",
+              "Modified"
+            ],
+            "Conditions": [],
+            "Filters": []
+          }
+        }
+      ]
+    },
+    {
+      "referenceKey": "knowledge:nhic-innovation-data-hub",
+      "sourceId": "<REDACTED_KNOWLEDGE_ID>",
+      "name": "NHIC Innovation Data Hub",
+      "dataCount": 3,
+      "datas": [
+        {
+          "referenceKey": "knowledge-data:partner-management",
+          "sourceId": "<REDACTED_KNOWLEDGE_DATA_ID>",
+          "name": "Partner Management",
+          "type": 1,
+          "settings": {
+            "AppID": 41,
+            "ListSetID": "2033878389230415872",
+            "ListID": "2033902590248235008",
+            "Fields": [
+              "Title",
+              "Text1",
+              "Text2",
+              "Text3",
+              "Text4",
+              "Text6",
+              "Text7",
+              "Text8",
+              "Text9",
+              "Text10",
+              "Text12",
+              "Text13",
+              "Text14",
+              "Text16",
+              "Bit1",
+              "Text11",
+              "Text5",
+              "Text17",
+              "Text15",
+              "Text18",
+              "ListDataID",
+              "CreatedBy",
+              "Created",
+              "ModifiedBy",
+              "Modified"
+            ],
+            "Conditions": [],
+            "Filters": []
+          }
+        },
+        {
+          "referenceKey": "knowledge-data:portfolio-management",
+          "sourceId": "<REDACTED_KNOWLEDGE_DATA_ID>",
+          "name": "Portfolio Management",
+          "type": 1,
+          "settings": {
+            "AppID": 41,
+            "ListSetID": "2033878389230415872",
+            "ListID": "2033883175947481088",
+            "Fields": [
+              "Title",
+              "Text1",
+              "Text2",
+              "Text3",
+              "Text4",
+              "Text5",
+              "Text6",
+              "Text7",
+              "Text8",
+              "Text9",
+              "Text10",
+              "Text11",
+              "Text13",
+              "Text14",
+              "Text15",
+              "Text16",
+              "Text17",
+              "Text18",
+              "Text19",
+              "Text20",
+              "Text21",
+              "Text22",
+              "Bit1",
+              "Text12",
+              "Text23",
+              "Text24",
+              "Text25",
+              "ListDataID",
+              "CreatedBy",
+              "Created",
+              "ModifiedBy",
+              "Modified"
+            ],
+            "Conditions": [],
+            "Filters": []
+          }
+        },
+        {
+          "referenceKey": "knowledge-data:communication-records",
+          "sourceId": "<REDACTED_KNOWLEDGE_DATA_ID>",
+          "name": "Communication Records",
+          "type": 1,
+          "settings": {
+            "AppID": 41,
+            "ListSetID": "2033878389230415872",
+            "ListID": "2033913908703412225",
+            "Fields": [
+              "Title",
+              "Text1",
+              "Datetime1",
+              "Text2",
+              "Text3",
+              "Text4",
+              "Text5",
+              "Text6",
+              "Text7",
+              "Text8",
+              "Datetime2",
+              "Text9",
+              "Text10",
+              "Text11",
+              "Bit1",
+              "Text12",
+              "Text13",
+              "Text14",
+              "ListDataID",
+              "CreatedBy",
+              "Created",
+              "ModifiedBy",
+              "Modified"
+            ],
+            "Conditions": [],
+            "Filters": []
+          }
+        }
+      ]
+    }
+  ]
+}

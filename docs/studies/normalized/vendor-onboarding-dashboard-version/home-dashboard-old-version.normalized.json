@@ -1,0 +1,22 @@
+{
+  "index": 0,
+  "title": "Home",
+  "type": 103,
+  "layoutId": "<id-1>",
+  "listId": "<id-2>",
+  "layoutViewKind": "empty-string",
+  "layoutViewParsed": "",
+  "ext1": "",
+  "ext2": "",
+  "ext3": "",
+  "layoutInResourcesKind": "null",
+  "layoutInResourcesCount": null,
+  "isDefault": false,
+  "isItemPerm": false,
+  "currentDashboardMarker": false,
+  "legacyDashboardSignals": [
+    "blank LayoutView",
+    "missing Ext2 src marker",
+    "LayoutInResources null/missing"
+  ]
+}

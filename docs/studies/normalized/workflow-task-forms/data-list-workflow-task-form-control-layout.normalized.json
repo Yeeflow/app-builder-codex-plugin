@@ -1,0 +1,41 @@
+{
+  "source": {
+    "export": "/Users/Renger/Downloads/Purchase Requests.ydl",
+    "proof": "export-proven"
+  },
+  "taskForm": {
+    "pageType": "assignment-task-form",
+    "controls": [
+      {
+        "kind": "list-field-control",
+        "identifier": "Title",
+        "binding": "____customListFields_<DEFAULT_LIST_FIELD_REF>",
+        "readonly": true
+      },
+      {
+        "kind": "list-field-control",
+        "identifier": "Text1",
+        "binding": "____customListFields_<CUSTOM_LIST_FIELD_REF>",
+        "readonly": true
+      },
+      {
+        "kind": "default-list-field-control",
+        "identifier": "CreatedBy",
+        "binding": "____customListFields_CreatedBy",
+        "readonly": true
+      },
+      {
+        "kind": "normal-task-form-control",
+        "binding": "<TASK_FORM_VARIABLE>"
+      }
+    ],
+    "workflowControls": [
+      "workflowControlPanel",
+      "workflowHistory"
+    ]
+  },
+  "notes": [
+    "Data-list workflow task forms can mix list-bound controls and normal workflow task-form controls.",
+    "Workflow action panel and workflow history controls are present in the studied task form."
+  ]
+}

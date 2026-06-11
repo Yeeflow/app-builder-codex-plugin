@@ -1,0 +1,17 @@
+{
+  "case": "dashboard-dynamic-display-valid",
+  "proofLevel": "user-confirmed-import-success-derived",
+  "control": {
+    "id": "__CONTROL_ID__",
+    "type": "collection",
+    "attrs": {
+      "control_display": [
+        {
+          "controlId": "__CONTROL_ID__",
+          "formulas": []
+        }
+      ]
+    }
+  },
+  "expectedFinding": null
+}

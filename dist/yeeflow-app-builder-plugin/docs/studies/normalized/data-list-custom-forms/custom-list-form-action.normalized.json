@@ -1,0 +1,103 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "normalized": {
+    "id": "__ID_REDACTED__",
+    "name": "__NAME_REDACTED__",
+    "steps": [
+      {
+        "type": "setvar",
+        "condition": [
+          {
+            "exprType": "list_field",
+            "valueType": "__VALUETYPE_REDACTED__",
+            "prop": "Text1",
+            "id": "__ID_REDACTED__",
+            "type": "expr",
+            "name": "__NAME_REDACTED__"
+          },
+          {
+            "type": "op",
+            "op": "=="
+          },
+          {
+            "type": "str",
+            "value": "__VALUE_REDACTED__"
+          }
+        ],
+        "attrs": {
+          "setvar_var": {
+            "exprType": "variable",
+            "valueType": "__VALUETYPE_REDACTED__",
+            "id": "__ID_REDACTED__",
+            "type": "expr",
+            "name": "__NAME_REDACTED__"
+          },
+          "setvar_val": [
+            {
+              "type": "num",
+              "value": "__VALUE_REDACTED__"
+            }
+          ]
+        },
+        "continue": true
+      },
+      {
+        "type": "setvar",
+        "condition": [
+          {
+            "exprType": "list_field",
+            "valueType": "__VALUETYPE_REDACTED__",
+            "prop": "Text1",
+            "id": "__ID_REDACTED__",
+            "type": "expr",
+            "name": "__NAME_REDACTED__"
+          },
+          {
+            "type": "op",
+            "op": "!="
+          },
+          {
+            "type": "str",
+            "value": "__VALUE_REDACTED__"
+          },
+          {
+            "type": "op",
+            "op": "and"
+          },
+          {
+            "exprType": "list_field",
+            "valueType": "__VALUETYPE_REDACTED__",
+            "prop": "Datetime2",
+            "id": "__ID_REDACTED__",
+            "type": "expr",
+            "name": "__NAME_REDACTED__"
+          },
+          {
+            "type": "op",
+            "op": "<"
+          },
+          {
+            "type": "func",
+            "func": "now",
+            "params": []
+          }
+        ],
+        "attrs": {
+          "setvar_var": {
+            "exprType": "variable",
+            "valueType": "__VALUETYPE_REDACTED__",
+            "id": "__ID_REDACTED__",
+            "type": "expr",
+            "name": "__NAME_REDACTED__"
+          },
+          "setvar_val": [
+            {
+              "type": "num",
+              "value": "__VALUE_REDACTED__"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "case": "route-summary-grid-invalid",
+  "valid": false,
+  "control": {
+    "type": "flex_grid",
+    "nv_label": "Approval route summary",
+    "displayLabel": [null, true],
+    "children": [{ "type": "heading", "label": "Route" }]
+  },
+  "expectedFinding": "ROUTE_SUMMARY_GRID_LAYOUT"
+}

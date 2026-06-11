@@ -1,0 +1,38 @@
+{
+  "proofLevel": "export-proven; product-documented; api-unresolved",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "user-group-expression",
+  "rawAssigneeFieldNames": [
+    "type",
+    "method",
+    "value",
+    "title"
+  ],
+  "normalizedConfig": {
+    "type": "user",
+    "method": "expression",
+    "value": {
+      "kind": "expressionButton",
+      "label": "<REDACTED_USER_GROUP_LABEL>:All users",
+      "dataShape": {
+        "type": "usergroup",
+        "param": {
+          "id": "<REDACTED_USER_GROUP_ID>"
+        },
+        "prop": "Users_ID"
+      }
+    },
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "apiAssistedInterpretation": {
+    "apiLookupRun": true,
+    "categoryConfirmedByApi": false,
+    "note": "Yeeflow API Operator v1 does not include a user-group endpoint; this shape is export-proven and product-documented only."
+  },
+  "runtimeDependencies": [
+    "valid-user-group-membership",
+    "runtime-assignee-expansion"
+  ],
+  "generationSafety": "requires explicit target-tenant user group mapping or a future safe read-only user-group lookup; runtime routing unproven"
+}

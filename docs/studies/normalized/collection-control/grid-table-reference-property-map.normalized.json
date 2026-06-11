@@ -1,0 +1,179 @@
+{
+  "study": "collection-grid-table-pattern",
+  "pattern": "collection_control_grid_table",
+  "pattern_scope": "grid_table_only",
+  "sourceApp": "Projects Center_1",
+  "samples": [
+    {
+      "file": "Projects Center_1.yap",
+      "format": "YAP",
+      "decode": "YAP wrapper with gzip Resource; decoded Resource.Data parsed",
+      "resourceLocations": ["Item.Layouts[].LayoutInResources[].Resource"]
+    },
+    {
+      "file": "Projects Center_1-v1.5 Collection Grid Tasks.yapk",
+      "format": "YAPK",
+      "decode": "AppExportPackageInfo Resource base64 plus tolerant Brotli; strict Brotli can end with Z_BUF_ERROR",
+      "resourceLocations": ["Pages[].LayoutInResources[].Resource"]
+    }
+  ],
+  "targets": [
+    {
+      "name": "All tasks",
+      "formatCoverage": ["YAP", "YAPK"],
+      "collectionCount": 1,
+      "flexGridCount": 2,
+      "variant": "normal"
+    },
+    {
+      "name": "All tasks - Multiple select",
+      "formatCoverage": ["YAP", "YAPK"],
+      "collectionCount": 1,
+      "flexGridCount": 2,
+      "variant": "multiselect"
+    }
+  ],
+  "outerWrapper": {
+    "type": "page",
+    "children": [
+      "caption/title heading",
+      "toolbar/search/add-action row",
+      "header flex_grid",
+      "Collection body"
+    ]
+  },
+  "searchArea": {
+    "controlType": "search-filter",
+    "placeholder": "Search tasks",
+    "collectionFulltext": {
+      "fieldRefs": ["Title", "Text2", "Text6"],
+      "value": ["__filter_<search_var_placeholder>"]
+    }
+  },
+  "addButtonArea": {
+    "controlType": "action_button",
+    "label": "Add Task",
+    "actionType": "5",
+    "data": "source list placeholder",
+    "control_action": "<add_task_action_placeholder>"
+  },
+  "headerGrid": {
+    "type": "flex_grid",
+    "displayLabel": [null, false],
+    "attrs": ["ver", "canFold", "columns", "rows", "cgap", "cgapU", "rgap", "rgapU", "content", "common"],
+    "captionHidden": true,
+    "mobileHidden": {
+      "attrs.common.hide": [null, null, null, true]
+    },
+    "normalColumns": {
+      "device": "1",
+      "widths": [
+        { "value": 2, "unit": "fr" },
+        { "value": 1, "unit": "fr" },
+        { "value": 1, "unit": "fr" },
+        { "value": 1, "unit": "fr" },
+        { "value": 1, "unit": "fr" },
+        { "value": 1, "unit": "fr" }
+      ]
+    },
+    "multiselectColumns": {
+      "device": "1",
+      "widths": [
+        { "value": 46, "unit": "px" },
+        { "value": 2, "unit": "fr" },
+        { "value": 1, "unit": "fr" },
+        { "value": 1, "unit": "fr" },
+        { "value": 1, "unit": "fr" },
+        { "value": 1, "unit": "fr" },
+        { "value": 1, "unit": "fr" }
+      ]
+    },
+    "labels": ["Title", "Assignee", "Start date", "End date", "Completion (%)", "Status"]
+  },
+  "collectionRoot": {
+    "type": "collection",
+    "label": "Collection",
+    "attrs": {
+      "data": {
+        "list": "<tasks_list_placeholder>",
+        "link": "<task_detail_layout_placeholder>",
+        "modalsize": 2,
+        "sort": [{ "SortName": "Datetime1", "SortByDesc": true }],
+        "fulltext": "<search_fulltext_placeholder>",
+        "ps": "optional positive number; observed 16 on multiselect page"
+      },
+      "layout": {
+        "col": [null, 1],
+        "rg": [null, 0, null, 10],
+        "cg": [null, 10],
+        "hover": { "bgColor": "#f2f2f2" }
+      },
+      "pagination": {
+        "p": {
+          "sp": [null, "--sp--s150"],
+          "ty": { "size": [null, "--sp--s200"] }
+        }
+      },
+      "actions": "required for multiselect variant"
+    }
+  },
+  "itemGrid": {
+    "type": "flex_grid",
+    "displayLabel": [null, false],
+    "captionHidden": true,
+    "desktopColumnsMustMatchHeader": true,
+    "mobileColumns": {
+      "device": "3",
+      "widths": [{ "value": 1, "unit": "fr" }]
+    },
+    "rowCells": [
+      { "name": "checkbox", "variant": "multiselect only", "controls": ["container", "icon unchecked", "icon checked"], "context": ["ListDataID", "__ctx_coll", "strIndex"] },
+      { "name": "title", "control": "dynamic-field", "field": "Title" },
+      { "name": "assignee", "control": "dynamic-user", "field": "Text2" },
+      { "name": "start date", "control": "dynamic-field", "field": "Datetime1" },
+      { "name": "end date", "control": "dynamic-field", "field": "Datetime2" },
+      { "name": "completion", "control": "progress", "expressionField": "Decimal2", "context": "__ctx_coll" },
+      { "name": "status", "control": "heading/text", "expressionField": "Text1", "context": "__ctx_coll", "styleRules": "control_display conditional styles" }
+    ]
+  },
+  "multiselect": {
+    "checkboxColumn": { "width": 46, "unit": "px" },
+    "selectedState": ["__temp_var_SelectedItems", "__temp_var_SelectedItemsAmount"],
+    "rootActionType": "coll",
+    "actionStepTypes": ["setvar", "listitem", "confirm", "setdatalist", "otheraction"],
+    "toolbar": ["selected count", "Mark as completed", "Delete selected items"],
+    "currentItemContext": ["ListDataID", "__ctx_coll"]
+  },
+  "validationErrors": [
+    "COLLECTION_GRID_TABLE_PATTERN_MISSING",
+    "COLLECTION_GRID_TABLE_SHAPE_INVALID",
+    "COLLECTION_GRID_TABLE_HEADER_GRID_MISSING",
+    "COLLECTION_GRID_TABLE_ITEM_GRID_MISSING",
+    "COLLECTION_GRID_TABLE_COLUMN_COUNT_MISMATCH",
+    "COLLECTION_GRID_TABLE_COLUMN_WIDTH_MISMATCH",
+    "COLLECTION_GRID_TABLE_HEADER_CAPTION_VISIBLE",
+    "COLLECTION_GRID_TABLE_ITEM_CAPTION_VISIBLE",
+    "COLLECTION_GRID_TABLE_FIELD_BINDING_INVALID",
+    "COLLECTION_GRID_TABLE_CHECKBOX_COLUMN_MISSING",
+    "COLLECTION_GRID_TABLE_SELECTION_STATE_MISSING",
+    "COLLECTION_GRID_TABLE_MULTISELECT_ACTION_INVALID",
+    "COLLECTION_GRID_TABLE_SEARCH_FILTER_MISSING",
+    "COLLECTION_GRID_TABLE_SEARCH_FIELDS_INVALID",
+    "COLLECTION_GRID_TABLE_EXPRESSION_CONTEXT_MISSING",
+    "COLLECTION_GRID_TABLE_PROGRESS_VALUE_BINDING_INVALID",
+    "COLLECTION_GRID_TABLE_TEXT_EXPRESSION_INVALID",
+    "COLLECTION_GRID_TABLE_HOVER_STYLE_INVALID",
+    "COLLECTION_GRID_TABLE_MOBILE_HEADER_NOT_HIDDEN",
+    "COLLECTION_GRID_TABLE_MOBILE_ITEM_GRID_COLUMNS_INVALID",
+    "COLLECTION_GRID_TABLE_PAGINATION_INVALID",
+    "COLLECTION_GRID_TABLE_RECORDS_PER_PAGE_INVALID",
+    "COLLECTION_GRID_TABLE_LIMIT_RECORDS_INVALID",
+    "COLLECTION_PATTERN_UNPROVEN"
+  ],
+  "proofBoundaries": [
+    "dashboard/page surfaces only in this sample",
+    "YAPK requires tolerant Brotli when strict Brotli ends with Z_BUF_ERROR",
+    "not interchangeable with collection_control_responsive_card_grid",
+    "approval-form and data-list-form grid/table Collection remain unproven"
+  ]
+}

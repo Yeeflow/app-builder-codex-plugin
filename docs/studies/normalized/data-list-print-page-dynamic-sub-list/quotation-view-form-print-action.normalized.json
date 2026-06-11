@@ -1,0 +1,29 @@
+{
+  "source": "Sales Quotation.yap",
+  "proof": "export-proven",
+  "dataList": "Quotation",
+  "hostForm": "View Quotation",
+  "button": "Print this quotation",
+  "action": {
+    "name": "Print Quotation",
+    "steps": [
+      {
+        "type": "print",
+        "attrs": {
+          "printtype": "select",
+          "data": {
+            "Type": "layout",
+            "SourceID": "<quotation-list-id>",
+            "AppID": "<app-id>",
+            "ListSetID": "<listset-id>"
+          },
+          "layout": "<print-page-layout-id>",
+          "listdataid": [
+            { "exprType": "list_field", "prop": "ListDataID", "id": "ListDataID" }
+          ]
+        }
+      }
+    ]
+  },
+  "targetResolvesTo": "Print Page"
+}

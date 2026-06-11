@@ -1,0 +1,454 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "exportPath": "children[0]/children/0/children/0/children/16",
+  "normalized": {
+    "id": "__CONTROL_ID__",
+    "type": "list",
+    "binding": "Text9",
+    "fieldID": "__FIELD_ID__",
+    "label": "__LABEL_REDACTED__",
+    "attrs": {
+      "required": true,
+      "list-variables": [
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "text",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "number",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "boolean",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "date",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "file",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "metadata",
+          "editable": true,
+          "value": {
+            "source": "app",
+            "categoryId": "__ID_REDACTED__"
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "user",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "costcenter",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "groupselect",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "location",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "lookup",
+          "editable": true,
+          "value": "__VALUE_REDACTED__"
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "img",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "mutiple-metadata",
+          "editable": true,
+          "value": {
+            "source": "0",
+            "categoryId": "__ID_REDACTED__"
+          }
+        }
+      ],
+      "list-fields": [
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "text",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_1",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "input",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "number",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_2",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "input_number",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "boolean",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_3",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "switch",
+            "displayLabel": [
+              null,
+              true
+            ],
+            "value": false
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "date",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_4",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "datepicker",
+            "displayLabel": [
+              null,
+              true
+            ],
+            "value": null
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "file",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_5",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__",
+              "ver": 1
+            },
+            "type": "file-upload",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "metadata",
+          "editable": true,
+          "value": {
+            "source": "app",
+            "categoryId": "__ID_REDACTED__"
+          },
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_6",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__",
+              "source": "app",
+              "categoryId": "__ID_REDACTED__"
+            },
+            "type": "metadata",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "user",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_7",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "identity-picker",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "costcenter",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_8",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "cost-center-picker",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "groupselect",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_9",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "organization-picker",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "location",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_10",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "location-picker",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "lookup",
+          "editable": true,
+          "value": "__VALUE_REDACTED__",
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_11",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__",
+              "listid": "__ID_REDACTED__",
+              "appid": "__ID_REDACTED__",
+              "listfield": "Title"
+            },
+            "type": "lookup",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "img",
+          "editable": true,
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_12",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__"
+            },
+            "type": "icon-upload",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "mutiple-metadata",
+          "editable": true,
+          "value": {
+            "source": "0",
+            "categoryId": "__ID_REDACTED__"
+          },
+          "control": {
+            "id": "__ID_REDACTED__",
+            "label": "__LABEL_REDACTED__",
+            "binding": "field_13",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text9",
+              "list_control_id": "__ID_REDACTED__",
+              "source": "0",
+              "categoryId": "__ID_REDACTED__"
+            },
+            "type": "mutiple-metadata",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        }
+      ],
+      "common": {
+        "grid": {
+          "position": [
+            null,
+            {
+              "cSpan": 2
+            }
+          ]
+        }
+      },
+      "list-fields-summary": [
+        {
+          "id": "__ID_REDACTED__",
+          "field": "field_2",
+          "type": "total",
+          "display": true,
+          "binding": {
+            "prefix": "__ID_REDACTED__",
+            "value": "__VALUE_REDACTED__"
+          }
+        }
+      ]
+    },
+    "field": {
+      "FieldName": "Text9",
+      "FieldID": "__FIELD_ID__",
+      "InternalName": "__INTERNAL_NAME_REDACTED__",
+      "Type": "list",
+      "FieldType": "Text",
+      "IsSystem": false
+    },
+    "proof": "export-proven; private values redacted"
+  }
+}

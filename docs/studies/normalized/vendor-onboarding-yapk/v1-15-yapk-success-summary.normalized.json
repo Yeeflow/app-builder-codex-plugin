@@ -1,0 +1,44 @@
+{
+  "artifact": "vendor-onboarding-compliance-management.v1.15-yapk-portalinfo-null.yapk",
+  "artifactLocation": "Downloads only; not committed",
+  "runtimeResult": "user-confirmed install success",
+  "proofDate": "2026-05-29",
+  "scope": {
+    "application": "Vendor Onboarding & Compliance Management",
+    "sourceBaseline": "v1.12 YAP import-proven content",
+    "packageType": "YAPK",
+    "version": "1.15-yapk-portalinfo-null",
+    "dataLists": 5,
+    "fields": 59,
+    "dashboardPages": 1
+  },
+  "validatedRules": [
+    "YAPK top-level object is AppExportPackageInfo",
+    "Resource is base64 Brotli AppPackageInfo JSON",
+    "decoded Resource is AppPackageInfo, not YAP ListExportResult",
+    "Childs entries use Fields, not Defs",
+    "LongAsString values remain strings",
+    "AppID is fixed to 41",
+    "Sign is produced by server signing flow",
+    "no-portal PortalInfo is null",
+    "dashboard Data table columns include Field and FieldName"
+  ],
+  "knownFailuresResolved": [
+    {
+      "candidate": "v1.13 schema-v2",
+      "result": "install failed",
+      "lesson": "schema v2 wrapper/resource shape alone was not enough"
+    },
+    {
+      "candidate": "v1.14 PortalInfo array",
+      "result": "install failed",
+      "lesson": "no-portal PortalInfo must not be an empty array"
+    },
+    {
+      "candidate": "v1.15 PortalInfo null",
+      "result": "install succeeded",
+      "lesson": "no-portal PortalInfo must be null"
+    }
+  ],
+  "proofBoundary": "Install success is proven by user report. App open, dashboard render, child-list inspection, record creation, workflow/action execution, and full UI runtime behavior remain separate checks."
+}

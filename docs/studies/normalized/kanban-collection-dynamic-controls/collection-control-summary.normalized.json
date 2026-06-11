@@ -1,0 +1,17 @@
+{
+  "feature": "dashboard-collection-control",
+  "source": "Company Overview.yap",
+  "dashboard": "Collection of activity",
+  "control": {
+    "type": "collection",
+    "id": "<control-id>",
+    "label": "Active survey program collection",
+    "dataSource": {
+      "listType": 1,
+      "listTitle": "Company Overview",
+      "listId": "<list-id>"
+    },
+    "layoutKeys": ["cg", "rg", "cp", "align-i"]
+  },
+  "proof": "export-proven"
+}

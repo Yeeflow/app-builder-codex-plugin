@@ -1,0 +1,19 @@
+{
+  "component": {
+    "Type": 2,
+    "SubType": 10,
+    "Settings": {
+      "resources": {
+        "dataLists": {
+          "items": [
+            {
+              "id": "<list-id>",
+              "permissions": 64
+            }
+          ]
+        }
+      }
+    }
+  },
+  "error": "64 contains bits outside Submit 1, Edit 2, Delete 4, Read 8"
+}

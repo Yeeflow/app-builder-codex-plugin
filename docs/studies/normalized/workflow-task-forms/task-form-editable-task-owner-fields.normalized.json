@@ -1,0 +1,22 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Actions Runtime Baseline (2)_Task forms.yap",
+  "taskForms": [
+    "WARTB Task2",
+    "WARTB Task3",
+    "WARTB Task4"
+  ],
+  "pattern": "task-specific task forms can preserve copied request controls as readonly while adding editable task-owner controls",
+  "observedEditableControlTypes": [
+    "radio",
+    "input",
+    "input_number",
+    "textarea"
+  ],
+  "observedStructure": {
+    "additionalSection": "heading plus flex_grid-style group for extra task-owner fields",
+    "readonlyCopiedControls": true,
+    "taskOnlyEditableControls": true
+  },
+  "runtimeBoundary": "Task-owner save/edit behavior is not runtime-proven by this export study."
+}

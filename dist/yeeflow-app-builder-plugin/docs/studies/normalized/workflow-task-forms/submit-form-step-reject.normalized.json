@@ -1,0 +1,26 @@
+{
+  "proofLevel": "export-proven",
+  "taskForm": "WARTB Task3",
+  "actionName": "Reject button click",
+  "submitStep": {
+    "name": "Submit as Rejected",
+    "submitType": "2",
+    "inferredOperation": "reject",
+    "fieldPresence": {
+      "comment": true,
+      "forword": false,
+      "remark": false,
+      "assignee": false
+    },
+    "expressionSources": {
+      "comment": [
+        {
+          "exprType": "variable",
+          "valueType": "text",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Task comments"
+        }
+      ]
+    }
+  }
+}

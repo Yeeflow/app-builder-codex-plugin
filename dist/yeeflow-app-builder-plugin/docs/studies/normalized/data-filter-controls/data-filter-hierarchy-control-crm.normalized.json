@@ -1,0 +1,25 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "<downloads>/CRM - Customer relationship management.yap",
+  "page": "Dashboard",
+  "productName": "Hierarchy filter",
+  "exportControlType": "hierarchy-filter",
+  "control": {
+    "path": "$.children[1].children[0].children[1].children[9]",
+    "id": "<control-id>",
+    "type": "hierarchy-filter",
+    "productName": "Hierarchy filter",
+    "label": "<control-label>",
+    "binding": "__filter_filter_Hierarchy",
+    "filterVariable": "filter_Hierarchy",
+    "applyTypeRaw": "",
+    "applyType": "default/unspecified",
+    "applyButton": "",
+    "dataSource": null,
+    "displayField": "",
+    "valueField": "",
+    "optionFilterCount": 0,
+    "settingKeys": [],
+    "settingsPreview": {}
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "list scoped identifier uniqueness",
+  "list": {
+    "title": "Redacted List",
+    "fields": [
+      {
+        "DisplayName": "Request Title",
+        "FieldName": "Text1",
+        "InternalName": "RequestTitle"
+      },
+      {
+        "DisplayName": "Request Owner",
+        "FieldName": "Text2",
+        "InternalName": "RequestOwner"
+      }
+    ]
+  },
+  "uniqueWithinList": [
+    "DisplayName",
+    "FieldName",
+    "InternalName"
+  ]
+}

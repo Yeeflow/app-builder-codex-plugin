@@ -1,0 +1,21 @@
+{
+  "controlType": "dynamic-image",
+  "observedInTimeline": true,
+  "bindingPattern": {
+    "attrs.source": "3",
+    "attrs.obj-f": "Text11"
+  },
+  "sourceField": {
+    "fieldName": "Text11",
+    "displayName": "Cover image",
+    "controlType": "icon-upload",
+    "fieldType": "Text",
+    "multiple": false
+  },
+  "observedSettings": {
+    "preview_image": "2",
+    "setting": "image height and fit observed",
+    "image": "border radius styling observed"
+  },
+  "proof": "export-proven"
+}

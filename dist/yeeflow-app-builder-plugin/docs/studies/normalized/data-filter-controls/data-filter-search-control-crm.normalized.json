@@ -1,0 +1,27 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "<downloads>/CRM - Customer relationship management.yap",
+  "page": "Dashboard",
+  "productName": "Search filter",
+  "exportControlType": "search-filter",
+  "control": {
+    "path": "$.children[1].children[0].children[1].children[1]",
+    "id": "<control-id>",
+    "type": "search-filter",
+    "productName": "Search filter",
+    "label": "<control-label>",
+    "binding": "__filter_filter_Search",
+    "filterVariable": "filter_Search",
+    "applyTypeRaw": "",
+    "applyType": "default/unspecified",
+    "applyButton": "",
+    "dataSource": null,
+    "displayField": "",
+    "valueField": "",
+    "optionFilterCount": 0,
+    "settingKeys": [
+      "placeholder"
+    ],
+    "settingsPreview": {}
+  }
+}

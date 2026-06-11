@@ -1,0 +1,24 @@
+{
+  "exportName": "Online Library (1).yap",
+  "focusPage": "Print Inventory",
+  "decodeShape": "YAP gzip ListExportResult with Data = ListExportInfo",
+  "proofBoundary": "export-proven structure only; browser print and scanned QR behavior not claimed",
+  "qrPattern": {
+    "mode": "multi-item-print",
+    "control": "list-qrcode",
+    "placement": "inside repeated Collection item context on the print page",
+    "binding": "current inventory item scope",
+    "layout": [
+      "print page container",
+      "Collection/repeated item context",
+      "table-like inventory output",
+      "padded and spaced sections"
+    ]
+  },
+  "generationRules": [
+    "place QR control inside print item template for multi-item print",
+    "bind QR to current item or item business code field",
+    "do not use static placeholder QR URLs"
+  ],
+  "redaction": "raw payloads, Resource, Sign, IDs, tenant data, sample records, and private URLs omitted"
+}

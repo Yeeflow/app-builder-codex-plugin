@@ -1,0 +1,27 @@
+{
+  "proofLevel": "export-proven",
+  "reportSourcePath": "Data.FormNewReports[].DefKey",
+  "approvalFormKeyPath": "Data.Forms[].Key",
+  "associations": [
+    {
+      "report": "<form-report-1>",
+      "reportDefKey": "<approval-form-key-1>",
+      "sourceApprovalFormPath": "Data.Forms[0]"
+    },
+    {
+      "report": "<form-report-2>",
+      "reportDefKey": "<approval-form-key-1>",
+      "sourceApprovalFormPath": "Data.Forms[0]"
+    },
+    {
+      "report": "<form-report-3>",
+      "reportDefKey": "<approval-form-key-1>",
+      "sourceApprovalFormPath": "Data.Forms[0]"
+    },
+    {
+      "report": "<form-report-4>",
+      "reportDefKey": "<approval-form-key-1>",
+      "sourceApprovalFormPath": "Data.Forms[0]"
+    }
+  ]
+}

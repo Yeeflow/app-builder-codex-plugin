@@ -1,0 +1,35 @@
+{
+  "name": "sub-list-current-list-actions",
+  "proof": "export-proven from Approval Form export for list_new, list_import, and positioned list_new",
+  "category": "Current list",
+  "steps": [
+    {
+      "uiLabel": "Add new item",
+      "exportStepType": "list_new",
+      "attrs": {}
+    },
+    {
+      "uiLabel": "Import items",
+      "exportStepType": "list_import",
+      "attrs": {}
+    },
+    {
+      "uiLabel": "Insert before current item",
+      "exportStepType": "list_new",
+      "attrs": {
+        "position": "0"
+      }
+    },
+    {
+      "uiLabel": "Insert after current item",
+      "exportStepType": "list_new",
+      "attrs": {
+        "position": "1"
+      }
+    }
+  ],
+  "notes": [
+    "Insert before/after are represented as positioned list_new variants in this export.",
+    "Execution behavior is not runtime-proven by the export."
+  ]
+}

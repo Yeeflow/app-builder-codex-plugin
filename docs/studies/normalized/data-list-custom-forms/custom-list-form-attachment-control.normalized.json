@@ -1,0 +1,23 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "exportPath": "children[0]/children/0/children/0/children/58",
+  "normalized": {
+    "id": "__CONTROL_ID__",
+    "type": "file-upload",
+    "binding": "Text28",
+    "fieldID": "__FIELD_ID__",
+    "label": "__LABEL_REDACTED__",
+    "attrs": {
+      "ver": 1
+    },
+    "field": {
+      "FieldName": "Text28",
+      "FieldID": "__FIELD_ID__",
+      "InternalName": "__INTERNAL_NAME_REDACTED__",
+      "Type": "file-upload",
+      "FieldType": "Text",
+      "IsSystem": false
+    },
+    "proof": "export-proven; private values redacted"
+  }
+}

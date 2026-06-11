@@ -1,0 +1,9 @@
+{
+  "case": "taskurl-mirrored-valid",
+  "valid": true,
+  "properties": {
+    "taskurl": "task-page-001",
+    "taskUrl": "task-page-001",
+    "TaskUrl": "task-page-001"
+  }
+}

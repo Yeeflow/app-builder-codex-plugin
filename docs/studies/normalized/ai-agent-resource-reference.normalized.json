@@ -1,0 +1,3232 @@
+{
+  "summary": {
+    "count": 4
+  },
+  "agents": [
+    {
+      "referenceKey": "ai-agent:nhic-ai-assistant",
+      "sourceId": "<REDACTED_AGENT_ID>",
+      "name": "NHIC AI Assistant",
+      "type": 0,
+      "typeName": "ai-agent",
+      "status": 1,
+      "isPublished": true,
+      "descriptionPresent": true,
+      "iconShape": {
+        "i": "fa-regular fa-vacuum-robot",
+        "b": "#666",
+        "c": "#ffffff"
+      },
+      "settingsKeys": [
+        "Prompt",
+        "ModelId",
+        "InputVariables",
+        "OutputVariables"
+      ],
+      "draftKeys": [
+        "Prompt",
+        "InputVariables",
+        "OutputVariables",
+        "Model"
+      ],
+      "promptStorage": "Prompt",
+      "instructionStorage": null,
+      "model": "gpt-5",
+      "inputVariables": [],
+      "outputVariables": [],
+      "suggestions": [],
+      "skills": [],
+      "components": [
+        {
+          "referenceKey": "component:partner-kb",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Partner KB",
+          "type": 1,
+          "subType": null,
+          "kind": "knowledge",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Category"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": null,
+            "targetKey": null
+          },
+          "runType": null,
+          "userType": null,
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [],
+          "outputs": [],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:query-partner-management",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Query Partner Management",
+          "type": 2,
+          "subType": 3,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:partner-management"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "Filters",
+              "name": "Data filter",
+              "label": "Data filter",
+              "type": "text",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": [
+                {
+                  "key": "<REDACTED_TOKEN_LIKE_VALUE>",
+                  "pre": "and",
+                  "left": "Title",
+                  "op": "7",
+                  "right": null,
+                  "showCus": false
+                }
+              ],
+              "descriptionPresent": true
+            },
+            {
+              "id": "Fields",
+              "name": "Fields",
+              "label": "Fields",
+              "type": "text",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": [
+                {
+                  "Label": "Company Name",
+                  "Name": "Company Name",
+                  "Id": "Title"
+                },
+                {
+                  "Label": "Partner Type",
+                  "Name": "Partner Type",
+                  "Id": "Text1"
+                },
+                {
+                  "Label": "Funding Stages",
+                  "Name": "Funding Stages",
+                  "Id": "Text6"
+                },
+                {
+                  "Label": "Technology Areas of Interest",
+                  "Name": "Technology Areas of Interest",
+                  "Id": "Text5"
+                },
+                {
+                  "Label": "Regions of Focus",
+                  "Name": "Regions of Focus",
+                  "Id": "Text7"
+                },
+                {
+                  "Label": "Partnership Status",
+                  "Name": "Partnership Status",
+                  "Id": "Text8"
+                },
+                {
+                  "Label": "Country",
+                  "Name": "Country",
+                  "Id": "Text2"
+                }
+              ],
+              "descriptionPresent": true
+            },
+            {
+              "id": "Sorts",
+              "name": "Sorts",
+              "label": "Sorts",
+              "type": "text",
+              "fillType": "2",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "PageNumber",
+              "name": "Page number",
+              "label": "Page number",
+              "type": "number",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "num",
+                    "value": "1"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            },
+            {
+              "id": "PageSize",
+              "name": "Page size",
+              "label": "Page size",
+              "type": "number",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "num",
+                    "value": "50"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "list",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "TotalCount",
+              "name": "Total Count",
+              "label": "Total Count",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:query-portfolio-management",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Query Portfolio Management",
+          "type": 2,
+          "subType": 3,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:portfolio-management"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "Filters",
+              "name": "Data filter",
+              "label": "Data filter",
+              "type": "text",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": [
+                {
+                  "key": "<REDACTED_TOKEN_LIKE_VALUE>",
+                  "pre": "and",
+                  "left": "Title",
+                  "op": "7",
+                  "right": null
+                }
+              ],
+              "descriptionPresent": true
+            },
+            {
+              "id": "Fields",
+              "name": "Fields",
+              "label": "Fields",
+              "type": "text",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": [
+                {
+                  "Label": "Project / Company Name",
+                  "Name": "Project / Company Name",
+                  "Id": "Title"
+                },
+                {
+                  "Label": "Technology Area",
+                  "Name": "Technology Area",
+                  "Id": "Text4"
+                },
+                {
+                  "Label": "Commercialisation Status",
+                  "Name": "Commercialisation Status",
+                  "Id": "Text8"
+                },
+                {
+                  "Label": "Healthcare Cluster",
+                  "Name": "Healthcare Cluster",
+                  "Id": "Text7"
+                },
+                {
+                  "Label": "NHIC Grants Received",
+                  "Name": "NHIC Grants Received",
+                  "Id": "Text5"
+                },
+                {
+                  "Label": "Portfolio Type",
+                  "Name": "Portfolio Type",
+                  "Id": "Text3"
+                },
+                {
+                  "Label": "Funding Status",
+                  "Name": "Funding Status",
+                  "Id": "Text9"
+                },
+                {
+                  "Label": "Regions of Focus",
+                  "Name": "Regions of Focus",
+                  "Id": "Text11"
+                },
+                {
+                  "Label": "NHIC OIC",
+                  "Name": "NHIC OIC",
+                  "Id": "Text22"
+                },
+                {
+                  "Label": "NHIC Grants",
+                  "Name": "NHIC Grants",
+                  "Id": "Text23"
+                }
+              ],
+              "descriptionPresent": true
+            },
+            {
+              "id": "Sorts",
+              "name": "Sorts",
+              "label": "Sorts",
+              "type": "text",
+              "fillType": "2",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "PageNumber",
+              "name": "Page number",
+              "label": "Page number",
+              "type": "number",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "num",
+                    "value": "1"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            },
+            {
+              "id": "PageSize",
+              "name": "Page size",
+              "label": "Page size",
+              "type": "number",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "num",
+                    "value": "50"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "list",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "TotalCount",
+              "name": "Total Count",
+              "label": "Total Count",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:query-contacts",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Query Contacts",
+          "type": 2,
+          "subType": 3,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:contact-database"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "Filters",
+              "name": "Data filter",
+              "label": "Data filter",
+              "type": "text",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": [
+                {
+                  "key": "<REDACTED_TOKEN_LIKE_VALUE>",
+                  "pre": "and",
+                  "left": "Title",
+                  "op": "7",
+                  "right": null
+                },
+                {
+                  "key": "<REDACTED_TOKEN_LIKE_VALUE>",
+                  "pre": "and",
+                  "left": "Text2",
+                  "op": "8",
+                  "right": {
+                    "Label": "extract company name",
+                    "Desc": "Extract the company or organization name mentioned in the user message"
+                  },
+                  "showCus": "2"
+                }
+              ],
+              "descriptionPresent": true
+            },
+            {
+              "id": "Fields",
+              "name": "Fields",
+              "label": "Fields",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Sorts",
+              "name": "Sorts",
+              "label": "Sorts",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "PageNumber",
+              "name": "Page number",
+              "label": "Page number",
+              "type": "number",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "num",
+                    "value": "1"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            },
+            {
+              "id": "PageSize",
+              "name": "Page size",
+              "label": "Page size",
+              "type": "number",
+              "fillType": "2",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "num",
+                    "value": "50"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "list",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "TotalCount",
+              "name": "Total Count",
+              "label": "Total Count",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:create-communication-record",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Create Communication Record",
+          "type": 2,
+          "subType": 4,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:communication-records"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "Title",
+              "name": "Record Title",
+              "label": "Record Title",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "str",
+                    "value": "AI(\"Generate a short 5-8 word title summarizing this interaction.\")"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text1",
+              "name": "Communication Type",
+              "label": "Communication Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "str",
+                    "value": "AI(\"Classify the interaction as one of: Meeting, Call, Email, Message, or Event.\")"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            },
+            {
+              "id": "Datetime1",
+              "name": "Communication Date",
+              "label": "Communication Date",
+              "type": "datepicker",
+              "fillType": "1",
+              "hasValue": true,
+              "valueShape": {
+                "type": 2,
+                "value": [
+                  {
+                    "type": "str",
+                    "value": "AI(\"Extract the date of the interaction. If none is mentioned, return today's date.\")"
+                  }
+                ]
+              },
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text4",
+              "name": "Subject / Topic",
+              "label": "Subject / Topic",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text5",
+              "name": "Notes",
+              "label": "Notes",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text6",
+              "name": "Outcome",
+              "label": "Outcome",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text7",
+              "name": "Next Action",
+              "label": "Next Action",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text8",
+              "name": "Action Owner",
+              "label": "Action Owner",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text9",
+              "name": "Status",
+              "label": "Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Datetime2",
+              "name": "Due Date",
+              "label": "Due Date",
+              "type": "datepicker",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text13",
+              "name": "Meeting Notes / Email Content",
+              "label": "Meeting Notes / Email Content",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:update-communication-records",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Update Communication Records",
+          "type": 2,
+          "subType": 5,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:communication-records"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "ListDataID",
+              "name": "Item Id",
+              "label": "Item Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:communication-records",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Communication Records",
+          "type": 2,
+          "subType": 4,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:communication-records"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "Title",
+              "name": "Record Title",
+              "label": "Record Title",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text5",
+              "name": "Notes",
+              "label": "Notes",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text1",
+              "name": "Communication Type",
+              "label": "Communication Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        }
+      ],
+      "componentCounts": {
+        "knowledge": 1,
+        "tools": 6,
+        "externalConnectionTools": 0,
+        "localListTools": 6,
+        "applicationResourceTools": 0,
+        "connectedAgentTools": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "referenceKey": "ai-agent:nhic-record-creation-agent",
+      "sourceId": "<REDACTED_AGENT_ID>",
+      "name": "NHIC Record Creation Agent",
+      "type": 0,
+      "typeName": "ai-agent",
+      "status": 1,
+      "isPublished": true,
+      "descriptionPresent": true,
+      "iconShape": {
+        "i": "fa-regular fa-vacuum-robot",
+        "b": "#666",
+        "c": "#ffffff"
+      },
+      "settingsKeys": [
+        "Prompt",
+        "ModelId",
+        "InputVariables",
+        "OutputVariables"
+      ],
+      "draftKeys": [
+        "Prompt",
+        "ModelId",
+        "InputVariables",
+        "OutputVariables"
+      ],
+      "promptStorage": "Prompt",
+      "instructionStorage": null,
+      "model": "gpt-5",
+      "inputVariables": [
+        {
+          "id": "user message",
+          "name": null,
+          "label": null,
+          "type": "text",
+          "fillType": null,
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputVariables": [
+        {
+          "id": "response",
+          "name": null,
+          "label": null,
+          "type": "text",
+          "fillType": null,
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "suggestions": [],
+      "skills": [],
+      "components": [
+        {
+          "referenceKey": "component:nhic-innovation-data-hub",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "NHIC Innovation Data Hub",
+          "type": 1,
+          "subType": null,
+          "kind": "knowledge",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Category"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": null,
+            "targetKey": null
+          },
+          "runType": null,
+          "userType": null,
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [],
+          "outputs": [],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:add-new-partner",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Add New Partner",
+          "type": 2,
+          "subType": 4,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:partner-management"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "Title",
+              "name": "Company Name",
+              "label": "Company Name",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text1",
+              "name": "Partner Type",
+              "label": "Partner Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text2",
+              "name": "Country",
+              "label": "Country",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text3",
+              "name": "Description",
+              "label": "Description",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text4",
+              "name": "Partner Mandates",
+              "label": "Partner Mandates",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text6",
+              "name": "Funding Stages",
+              "label": "Funding Stages",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text7",
+              "name": "Regions of Focus",
+              "label": "Regions of Focus",
+              "type": "checkbox",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text8",
+              "name": "Partnership Status",
+              "label": "Partnership Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text9",
+              "name": "MOU Details",
+              "label": "MOU Details",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text10",
+              "name": "Key Activities",
+              "label": "Key Activities",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text12",
+              "name": "Remarks",
+              "label": "Remarks",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text14",
+              "name": "POC (Name / Title)",
+              "label": "POC (Name / Title)",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text16",
+              "name": "NHIC OIC",
+              "label": "NHIC OIC",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Bit1",
+              "name": "Active",
+              "label": "Active",
+              "type": "switch",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text5",
+              "name": "Technology Areas of Interest",
+              "label": "Technology Areas of Interest",
+              "type": "checkbox",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text17",
+              "name": "Partner Group",
+              "label": "Partner Group",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text15",
+              "name": "POC (Email)",
+              "label": "POC (Email)",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Id",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:add-new-portfolio",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Add New Portfolio",
+          "type": 2,
+          "subType": 4,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:portfolio-management"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "Title",
+              "name": "Project / Company Name",
+              "label": "Project / Company Name",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text1",
+              "name": "Record Type",
+              "label": "Record Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text2",
+              "name": "Summary / Abstract",
+              "label": "Summary / Abstract",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text3",
+              "name": "Portfolio Type",
+              "label": "Portfolio Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text4",
+              "name": "Technology Area",
+              "label": "Technology Area",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text5",
+              "name": "NHIC Grants Received",
+              "label": "NHIC Grants Received",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text6",
+              "name": "Grant Information",
+              "label": "Grant Information",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text7",
+              "name": "Healthcare Cluster",
+              "label": "Healthcare Cluster",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text8",
+              "name": "Commercialisation Status",
+              "label": "Commercialisation Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text9",
+              "name": "Funding Status",
+              "label": "Funding Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text10",
+              "name": "Funding Information",
+              "label": "Funding Information",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text11",
+              "name": "Regions of Focus",
+              "label": "Regions of Focus",
+              "type": "checkbox",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text13",
+              "name": "Awards",
+              "label": "Awards",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text14",
+              "name": "Remarks",
+              "label": "Remarks",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text16",
+              "name": "POC (Name / Title)",
+              "label": "POC (Name / Title)",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text17",
+              "name": "POC (Email)",
+              "label": "POC (Email)",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text18",
+              "name": "Clinical PI Name / Title / Org",
+              "label": "Clinical PI Name / Title / Org",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text19",
+              "name": "Clinical PI Email",
+              "label": "Clinical PI Email",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text20",
+              "name": "Technical PI Name / Title / Org",
+              "label": "Technical PI Name / Title / Org",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text21",
+              "name": "Technical PI Email",
+              "label": "Technical PI Email",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text22",
+              "name": "NHIC OIC",
+              "label": "NHIC OIC",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Bit1",
+              "name": "Active",
+              "label": "Active",
+              "type": "switch",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text24",
+              "name": "POC",
+              "label": "POC",
+              "type": "list",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text26",
+              "name": "Partner Id",
+              "label": "Partner Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Id",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:add-new-communication-record",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Add New Communication Record",
+          "type": 2,
+          "subType": 4,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:communication-records"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "Title",
+              "name": "Record Title",
+              "label": "Record Title",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text1",
+              "name": "Communication Type",
+              "label": "Communication Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Datetime1",
+              "name": "Communication Date",
+              "label": "Communication Date",
+              "type": "datepicker",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text4",
+              "name": "Subject / Topic",
+              "label": "Subject / Topic",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text5",
+              "name": "Notes",
+              "label": "Notes",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text6",
+              "name": "Outcome",
+              "label": "Outcome",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text7",
+              "name": "Next Action",
+              "label": "Next Action",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text8",
+              "name": "Action Owner",
+              "label": "Action Owner",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Datetime2",
+              "name": "Due Date",
+              "label": "Due Date",
+              "type": "datepicker",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text9",
+              "name": "Status",
+              "label": "Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text10",
+              "name": "Related MOU / Context",
+              "label": "Related MOU / Context",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Bit1",
+              "name": "Active",
+              "label": "Active",
+              "type": "switch",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text13",
+              "name": "Meeting Notes / Email Content",
+              "label": "Meeting Notes / Email Content",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text15",
+              "name": "Partner Id",
+              "label": "Partner Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text16",
+              "name": "Portfolio Id",
+              "label": "Portfolio Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Id",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        }
+      ],
+      "componentCounts": {
+        "knowledge": 1,
+        "tools": 3,
+        "externalConnectionTools": 0,
+        "localListTools": 3,
+        "applicationResourceTools": 0,
+        "connectedAgentTools": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "referenceKey": "ai-agent:nhic-record-update-agent",
+      "sourceId": "<REDACTED_AGENT_ID>",
+      "name": "NHIC Record Update Agent",
+      "type": 0,
+      "typeName": "ai-agent",
+      "status": 1,
+      "isPublished": true,
+      "descriptionPresent": true,
+      "iconShape": {
+        "i": "fa-regular fa-vacuum-robot",
+        "b": "#666",
+        "c": "#ffffff"
+      },
+      "settingsKeys": [
+        "Prompt",
+        "ModelId",
+        "InputVariables",
+        "OutputVariables"
+      ],
+      "draftKeys": [
+        "Prompt",
+        "ModelId",
+        "InputVariables",
+        "OutputVariables"
+      ],
+      "promptStorage": "Prompt",
+      "instructionStorage": null,
+      "model": "gpt-5",
+      "inputVariables": [
+        {
+          "id": "user message",
+          "name": null,
+          "label": null,
+          "type": "text",
+          "fillType": null,
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputVariables": [
+        {
+          "id": "response",
+          "name": null,
+          "label": null,
+          "type": "text",
+          "fillType": null,
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "suggestions": [],
+      "skills": [],
+      "components": [
+        {
+          "referenceKey": "component:nhic-innovation-data-hub",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "NHIC Innovation Data Hub",
+          "type": 1,
+          "subType": null,
+          "kind": "knowledge",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Category"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": null,
+            "targetKey": null
+          },
+          "runType": null,
+          "userType": null,
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [],
+          "outputs": [],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:update-partner-by-id",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Update Partner by ID",
+          "type": 2,
+          "subType": 5,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:partner-management"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "ListDataID",
+              "name": "Item Id",
+              "label": "Partner Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Title",
+              "name": "Company Name",
+              "label": "Company Name",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text1",
+              "name": "Partner Type",
+              "label": "Partner Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text2",
+              "name": "Country",
+              "label": "Country",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text3",
+              "name": "Description",
+              "label": "Description",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text4",
+              "name": "Partner Mandates",
+              "label": "Partner Mandates",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text6",
+              "name": "Funding Stages",
+              "label": "Funding Stages",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text7",
+              "name": "Regions of Focus",
+              "label": "Regions of Focus",
+              "type": "checkbox",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text8",
+              "name": "Partnership Status",
+              "label": "Partnership Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text9",
+              "name": "MOU Details",
+              "label": "MOU Details",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text10",
+              "name": "Key Activities",
+              "label": "Key Activities",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text12",
+              "name": "Remarks",
+              "label": "Remarks",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text14",
+              "name": "POC (Name / Title)",
+              "label": "POC (Name / Title)",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text16",
+              "name": "NHIC OIC",
+              "label": "NHIC OIC",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Bit1",
+              "name": "Active",
+              "label": "Active",
+              "type": "switch",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text5",
+              "name": "Technology Areas of Interest",
+              "label": "Technology Areas of Interest",
+              "type": "checkbox",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text17",
+              "name": "Partner Group",
+              "label": "Partner Group",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text15",
+              "name": "POC (Email)",
+              "label": "POC (Email)",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:update-portfolio-by-id",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Update Portfolio by ID",
+          "type": 2,
+          "subType": 5,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:portfolio-management"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "ListDataID",
+              "name": "Item Id",
+              "label": "Portfolio Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Title",
+              "name": "Project / Company Name",
+              "label": "Project / Company Name",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text1",
+              "name": "Record Type",
+              "label": "Record Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text2",
+              "name": "Summary / Abstract",
+              "label": "Summary / Abstract",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text3",
+              "name": "Portfolio Type",
+              "label": "Portfolio Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text4",
+              "name": "Technology Area",
+              "label": "Technology Area",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text5",
+              "name": "NHIC Grants Received",
+              "label": "NHIC Grants Received",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text6",
+              "name": "Grant Information",
+              "label": "Grant Information",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text7",
+              "name": "Healthcare Cluster",
+              "label": "Healthcare Cluster",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text8",
+              "name": "Commercialisation Status",
+              "label": "Commercialisation Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text9",
+              "name": "Funding Status",
+              "label": "Funding Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text10",
+              "name": "Funding Information",
+              "label": "Funding Information",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text11",
+              "name": "Regions of Focus",
+              "label": "Regions of Focus",
+              "type": "checkbox",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text13",
+              "name": "Awards",
+              "label": "Awards",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text14",
+              "name": "Remarks",
+              "label": "Remarks",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text16",
+              "name": "POC (Name / Title)",
+              "label": "POC (Name / Title)",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text17",
+              "name": "POC (Email)",
+              "label": "POC (Email)",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text18",
+              "name": "Clinical PI Name / Title / Org",
+              "label": "Clinical PI Name / Title / Org",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text19",
+              "name": "Clinical PI Email",
+              "label": "Clinical PI Email",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text20",
+              "name": "Technical PI Name / Title / Org",
+              "label": "Technical PI Name / Title / Org",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text21",
+              "name": "Technical PI Email",
+              "label": "Technical PI Email",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text22",
+              "name": "NHIC OIC",
+              "label": "NHIC OIC",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Bit1",
+              "name": "Active",
+              "label": "Active",
+              "type": "switch",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text24",
+              "name": "POC",
+              "label": "POC",
+              "type": "list",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text26",
+              "name": "Partner Id",
+              "label": "Partner Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:update-communication-record-by-id",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Update Communication Record by ID",
+          "type": 2,
+          "subType": 5,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:communication-records"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "ListDataID",
+              "name": "Item Id",
+              "label": "Communication record Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Title",
+              "name": "Record Title",
+              "label": "Record Title",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text1",
+              "name": "Communication Type",
+              "label": "Communication Type",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Datetime1",
+              "name": "Communication Date",
+              "label": "Communication Date",
+              "type": "datepicker",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text4",
+              "name": "Subject / Topic",
+              "label": "Subject / Topic",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text5",
+              "name": "Notes",
+              "label": "Notes",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text6",
+              "name": "Outcome",
+              "label": "Outcome",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text7",
+              "name": "Next Action",
+              "label": "Next Action",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text8",
+              "name": "Action Owner",
+              "label": "Action Owner",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Datetime2",
+              "name": "Due Date",
+              "label": "Due Date",
+              "type": "datepicker",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text9",
+              "name": "Status",
+              "label": "Status",
+              "type": "radio",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text10",
+              "name": "Related MOU / Context",
+              "label": "Related MOU / Context",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Bit1",
+              "name": "Active",
+              "label": "Active",
+              "type": "switch",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text13",
+              "name": "Meeting Notes / Email Content",
+              "label": "Meeting Notes / Email Content",
+              "type": "textarea",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text15",
+              "name": "Partner Id",
+              "label": "Partner Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Text16",
+              "name": "Portfolio Id",
+              "label": "Portfolio Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        }
+      ],
+      "componentCounts": {
+        "knowledge": 1,
+        "tools": 3,
+        "externalConnectionTools": 0,
+        "localListTools": 3,
+        "applicationResourceTools": 0,
+        "connectedAgentTools": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "referenceKey": "ai-agent:nhic-record-deletion-agent",
+      "sourceId": "<REDACTED_AGENT_ID>",
+      "name": "NHIC Record Deletion Agent",
+      "type": 0,
+      "typeName": "ai-agent",
+      "status": 1,
+      "isPublished": true,
+      "descriptionPresent": true,
+      "iconShape": {
+        "i": "fa-regular fa-vacuum-robot",
+        "b": "#666",
+        "c": "#ffffff"
+      },
+      "settingsKeys": [
+        "Prompt",
+        "ModelId",
+        "InputVariables",
+        "OutputVariables"
+      ],
+      "draftKeys": [
+        "Prompt",
+        "ModelId",
+        "InputVariables",
+        "OutputVariables"
+      ],
+      "promptStorage": "Prompt",
+      "instructionStorage": null,
+      "model": "gpt-5",
+      "inputVariables": [
+        {
+          "id": "user message",
+          "name": null,
+          "label": null,
+          "type": "text",
+          "fillType": null,
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        },
+        {
+          "id": "current user id",
+          "name": null,
+          "label": null,
+          "type": "text",
+          "fillType": null,
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "outputVariables": [
+        {
+          "id": "response",
+          "name": null,
+          "label": null,
+          "type": "text",
+          "fillType": null,
+          "hasValue": false,
+          "valueShape": null,
+          "descriptionPresent": true
+        }
+      ],
+      "suggestions": [],
+      "skills": [],
+      "components": [
+        {
+          "referenceKey": "component:nhic-innovation-data-hub",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "NHIC Innovation Data Hub",
+          "type": 1,
+          "subType": null,
+          "kind": "knowledge",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Category"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": null,
+            "targetKey": null
+          },
+          "runType": null,
+          "userType": null,
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [],
+          "outputs": [],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:delete-partner-by-id",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Delete Partner by ID",
+          "type": 2,
+          "subType": 6,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:partner-management"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "ListDataID",
+              "name": "Item Id",
+              "label": "Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:delete-portfolio-by-id",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Delete Portfolio by ID",
+          "type": 2,
+          "subType": 6,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:portfolio-management"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "ListDataID",
+              "name": "Item Id",
+              "label": "Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:delete-communication-record-by-id",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Delete Communication Record by ID",
+          "type": 2,
+          "subType": 6,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "list",
+            "targetKey": "list:communication-records"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "ListDataID",
+              "name": "Item Id",
+              "label": "Id",
+              "type": "input",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Message",
+              "name": "Message",
+              "label": "Message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:http-request",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "HTTP Request",
+          "type": 2,
+          "subType": 7,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": false,
+          "settingsKeys": [
+            "Data",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "contentType",
+            "credentialstype"
+          ],
+          "dataReference": {
+            "scope": "App",
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": "connection",
+            "targetKey": "connection:http-request"
+          },
+          "runType": "1",
+          "userType": null,
+          "credentialstype": "1",
+          "contentType": "application/json",
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+        },
+        {
+          "referenceKey": "component:microsoft-graph-outlook",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Microsoft Graph - Outlook",
+          "type": 2,
+          "subType": 7,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": false,
+          "settingsKeys": [
+            "Data",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "contentType",
+            "credentialstype"
+          ],
+          "dataReference": {
+            "scope": "App",
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": "connection",
+            "targetKey": "connection:microsoft-graph-outlook"
+          },
+          "runType": "1",
+          "userType": null,
+          "credentialstype": "1",
+          "contentType": "application/json",
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+        }
+      ],
+      "componentCounts": {
+        "knowledge": 1,
+        "tools": 5,
+        "externalConnectionTools": 2,
+        "localListTools": 3,
+        "applicationResourceTools": 0,
+        "connectedAgentTools": 0,
+        "unresolved": 0
+      }
+    }
+  ]
+}

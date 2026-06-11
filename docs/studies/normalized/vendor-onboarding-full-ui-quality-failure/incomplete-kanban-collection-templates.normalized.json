@@ -1,0 +1,19 @@
+{
+  "finding": "incomplete_kanban_collection_templates",
+  "expected": [
+    "Kanban or Collection cards with meaningful dynamic fields",
+    "configured item actions",
+    "actionable review/status workflows where planned"
+  ],
+  "observed": [
+    "Kanban and Collection sections rendered as weak or empty user experiences",
+    "card actions were missing or not detectably configured",
+    "item templates were not sufficient for a usable full app"
+  ],
+  "quality_gate": [
+    "KANBAN_ITEM_TEMPLATE_EMPTY",
+    "COLLECTION_ITEM_TEMPLATE_EMPTY",
+    "ITEM_TEMPLATE_ACTIONS_MISSING",
+    "ITEM_TEMPLATE_TOO_MINIMAL"
+  ]
+}

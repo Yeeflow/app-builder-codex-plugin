@@ -1,0 +1,33 @@
+{
+  "proof": "export-proven from Company Overview (2).yap; identifiers redacted or synthetic",
+  "host": {
+    "type": "kanban",
+    "dataSource": "<included-data-list>",
+    "categoryField": "Text2"
+  },
+  "localActionsPath": "KanbanControl.attrs.actions[]",
+  "localActions": [
+    {
+      "name": "Edit item",
+      "type": "coll",
+      "steps": ["listitem"]
+    },
+    {
+      "name": "Delete item",
+      "type": "coll",
+      "steps": ["deleteitem"]
+    }
+  ],
+  "itemTemplateBindings": [
+    {
+      "controlType": "action_button",
+      "label": "Edit item",
+      "attrs.control_action": "<local-kanban-action-id>"
+    },
+    {
+      "controlType": "action_button",
+      "label": "Delete Item",
+      "attrs.control_action": "<local-kanban-action-id>"
+    }
+  ]
+}

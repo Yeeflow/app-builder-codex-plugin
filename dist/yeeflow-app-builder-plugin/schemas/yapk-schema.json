@@ -1,0 +1,1976 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://akmii.local/schemas/listset-package-info.schema.json",
+  "title": "AppExportPackageInfo",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "PackageId",
+    "TenantID",
+    "AppID",
+    "ListID",
+    "Title",
+    "Description",
+    "IconUrl",
+    "Resource",
+    "Notes",
+    "Author",
+    "Date",
+    "Version",
+    "Sign"
+  ],
+  "properties": {
+    "PackageId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "TenantID": {
+      "$ref": "#/$defs/LongAsString"
+    },
+    "AppID": {
+      "type": "integer",
+      "enum": [
+        30,
+        41
+      ],
+      "x-enumNames": [
+        "Settings",
+        "Flowcraft"
+      ]
+    },
+    "ListID": {
+      "$ref": "#/$defs/LongAsString"
+    },
+    "Title": {
+      "type": "string"
+    },
+    "Description": {
+      "type": "string"
+    },
+    "IconUrl": {
+      "type": "string"
+    },
+    "Resource": {
+      "type": "string",
+      "description": "Convert.ToBase64String(Brotli compressed) string. Decompressed JSON should match #/$defs/AppPackageInfo"
+    },
+    "Notes": {
+      "type": "string"
+    },
+    "Author": {
+      "type": "string"
+    },
+    "Date": {
+      "type": "string",
+      "description": "UTC time in yyyy-MM-ddTHH:mm:ssZ"
+    },
+    "Version": {
+      "type": "string"
+    },
+    "Sign": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "LongAsString": {
+      "type": "string",
+      "pattern": "^-?\\d+$"
+    },
+    "JsonString": {
+      "type": "string",
+      "description": "JSON serialized string field"
+    },
+    "AnyObject": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "AppPackageInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ListSet",
+        "Pages",
+        "Childs"
+      ],
+      "properties": {
+        "ListSet": {
+          "$ref": "#/$defs/ListInfo"
+        },
+        "Pages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ListLayoutInfo"
+          }
+        },
+        "Forms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProcessFormInfo"
+          }
+        },
+        "FormNewReports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProcNewReportInfo"
+          }
+        },
+        "DataReports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DataReportInfo"
+          }
+        },
+        "Groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ListGroupInfo"
+          }
+        },
+        "Tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TagCategoryInfo"
+          }
+        },
+        "Metadatas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MetadataCategoryInfo"
+          }
+        },
+        "Agents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppAgentInfo"
+          }
+        },
+        "Connections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppConnectionInfo"
+          }
+        },
+        "Knowledges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppKnowledgeInfo"
+          }
+        },
+        "Themes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppThemeInfo"
+          }
+        },
+        "Components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppComponentInfo"
+          }
+        },
+        "Childs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ListPackageInfo"
+          }
+        }
+      }
+    },
+    "ListPackageInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "List": {
+          "$ref": "#/$defs/ListInfo"
+        },
+        "Fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ListFieldInfo"
+          }
+        },
+        "Layouts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ListLayoutInfo"
+          }
+        },
+        "RemindRules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ListRemindRuleInfo"
+          }
+        },
+        "PublicForms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ListPublicFormInfo"
+          }
+        },
+        "FlowMappings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ListFlowMappingInfo"
+          }
+        }
+      },
+      "required": [
+        "List",
+        "Fields",
+        "Layouts",
+        "RemindRules",
+        "PublicForms",
+        "FlowMappings"
+      ]
+    },
+    "ListInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ListID",
+        "Title",
+        "Description",
+        "Status",
+        "IsItemPerm",
+        "IsVerRecord",
+        "HasComment",
+        "IconUrl",
+        "TableCode",
+        "Type",
+        "Flags",
+        "IndexCode"
+      ],
+      "properties": {
+        "ListID": {
+          "type": "integer"
+        },
+        "Title": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "const": 1,
+          "description": "固定值 1"
+        },
+        "IsItemPerm": {
+          "type": "boolean"
+        },
+        "IsVerRecord": {
+          "type": "boolean"
+        },
+        "HasComment": {
+          "type": "boolean"
+        },
+        "IconUrl": {
+          "type": "string"
+        },
+        "TableCode": {
+          "type": "string",
+          "enum": [
+            "setting_c",
+            "flowcraft"
+          ],
+          "description": "Required. AppID=30 -> setting_c; AppID=41 -> flowcraft."
+        },
+        "Ext1": {
+          "type": "string"
+        },
+        "Ext2": {
+          "type": "string"
+        },
+        "Ext3": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "integer",
+          "enum": [
+            1,
+            16,
+            32,
+            64,
+            1024
+          ],
+          "x-enumNames": [
+            "List",
+            "Document",
+            "WorkflowReport",
+            "DataReport",
+            "ListSet"
+          ],
+          "x-enumDescriptions": [
+            "list",
+            "Document",
+            "WorkflowReport",
+            "DataReport",
+            "ListSet"
+          ],
+          "description": "1:List, 16:Document, 32:WorkflowReport, 64:DataReport, 1024:ListSet"
+        },
+        "Flags": {
+          "type": "integer",
+          "description": "Bit flags",
+          "x-enumBitFlags": {
+            "Show": 1
+          }
+        },
+        "LayoutView": {
+          "type": "string"
+        },
+        "Perms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppListPermInfo"
+          }
+        },
+        "AdvancePerms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppListAdvancePermInfo"
+          }
+        },
+        "Items": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "IndexCode": {
+          "type": "string",
+          "enum": [
+            "setting_c",
+            "flowcraft"
+          ],
+          "description": "Required. AppID=30 -> setting_c; AppID=41 -> flowcraft."
+        }
+      },
+      "x-rules": {
+        "TableCodeIndexCodeMustBeSame": "TableCode and IndexCode must be the same value.",
+        "AppID30RequiresSettingC": "When AppID=30, TableCode and IndexCode must be setting_c.",
+        "AppID41RequiresFlowcraft": "When AppID=41, TableCode and IndexCode must be flowcraft."
+      }
+    },
+    "ListFieldInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "FieldID",
+        "ListID",
+        "FieldName",
+        "FieldType",
+        "FieldIndex",
+        "DisplayName",
+        "InternalName",
+        "Type",
+        "Status",
+        "Category",
+        "Rules",
+        "IsSort",
+        "IsSystem",
+        "IsUnique"
+      ],
+      "properties": {
+        "FieldID": {
+          "type": "integer"
+        },
+        "ListID": {
+          "type": "integer"
+        },
+        "FieldName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "FieldType": {
+          "type": "string",
+          "enum": [
+            "Text",
+            "Bit",
+            "Decimal",
+            "Datetime"
+          ]
+        },
+        "FieldIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "DisplayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "InternalName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "pattern": "^[a-zA-Z0-9_]+$"
+        },
+        "Type": {
+          "type": "string",
+          "enum": [
+            "input",
+            "textarea",
+            "richtext",
+            "hyperlink",
+            "input_number",
+            "currency",
+            "percent",
+            "calculated-column",
+            "rate",
+            "switch",
+            "checkbox",
+            "radio",
+            "select",
+            "tag",
+            "datepicker",
+            "time",
+            "identity-picker",
+            "organization-picker",
+            "cost-center-picker",
+            "signer",
+            "file-upload",
+            "icon-upload",
+            "lookup",
+            "mutiple-metadata",
+            "location-picker",
+            "flowstatus",
+            "autonumber",
+            "list"
+          ]
+        },
+        "Status": {
+          "type": "integer"
+        },
+        "Category": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "System",
+            "Custom"
+          ]
+        },
+        "DefaultValue": {
+          "type": "string"
+        },
+        "Rules": {
+          "type": "string"
+        },
+        "IsSort": {
+          "type": "boolean"
+        },
+        "IsSystem": {
+          "type": "boolean"
+        },
+        "IsUnique": {
+          "type": "boolean"
+        },
+        "Ext1": {
+          "type": "string"
+        },
+        "Ext2": {
+          "type": "string"
+        },
+        "Ext3": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "FieldType": {
+                "const": "Text"
+              }
+            },
+            "required": [
+              "FieldType"
+            ]
+          },
+          "then": {
+            "x-valueLengthRange": {
+              "min": 1,
+              "max": 300
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "FieldType": {
+                "const": "Bit"
+              }
+            },
+            "required": [
+              "FieldType"
+            ]
+          },
+          "then": {
+            "x-valueLengthRange": {
+              "min": 1,
+              "max": 50
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "FieldType": {
+                "const": "Decimal"
+              }
+            },
+            "required": [
+              "FieldType"
+            ]
+          },
+          "then": {
+            "x-valueLengthRange": {
+              "min": 1,
+              "max": 200
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "FieldType": {
+                "const": "Datetime"
+              }
+            },
+            "required": [
+              "FieldType"
+            ]
+          },
+          "then": {
+            "x-valueLengthRange": {
+              "min": 1,
+              "max": 200
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "IsSystem": {
+                "const": false
+              }
+            },
+            "required": [
+              "IsSystem",
+              "FieldType",
+              "FieldIndex",
+              "FieldName"
+            ]
+          },
+          "then": {
+            "properties": {
+              "FieldIndex": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "FieldName": {
+                "type": "string",
+                "pattern": "^(Text|Bit|Decimal|Datetime)[1-9]\\d*$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "IsSystem": {
+                "const": true
+              }
+            },
+            "required": [
+              "IsSystem"
+            ]
+          },
+          "then": {
+            "properties": {
+              "FieldIndex": {
+                "const": 0
+              },
+              "FieldName": {
+                "const": "Title"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "FieldName": {
+                "const": "Title"
+              }
+            },
+            "required": [
+              "FieldName"
+            ]
+          },
+          "then": {
+            "properties": {
+              "IsSystem": {
+                "const": true
+              },
+              "FieldIndex": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "IsSystem": {
+                "const": false
+              },
+              "FieldType": {
+                "const": "Text"
+              }
+            },
+            "required": [
+              "IsSystem",
+              "FieldType",
+              "FieldIndex"
+            ]
+          },
+          "then": {
+            "properties": {
+              "FieldIndex": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 300
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "IsSystem": {
+                "const": false
+              },
+              "FieldType": {
+                "const": "Bit"
+              }
+            },
+            "required": [
+              "IsSystem",
+              "FieldType",
+              "FieldIndex"
+            ]
+          },
+          "then": {
+            "properties": {
+              "FieldIndex": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "IsSystem": {
+                "const": false
+              },
+              "FieldType": {
+                "const": "Decimal"
+              }
+            },
+            "required": [
+              "IsSystem",
+              "FieldType",
+              "FieldIndex"
+            ]
+          },
+          "then": {
+            "properties": {
+              "FieldIndex": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "IsSystem": {
+                "const": false
+              },
+              "FieldType": {
+                "const": "Datetime"
+              }
+            },
+            "required": [
+              "IsSystem",
+              "FieldType",
+              "FieldIndex"
+            ]
+          },
+          "then": {
+            "properties": {
+              "FieldIndex": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 200
+              }
+            }
+          }
+        }
+      ],
+      "x-rules": {
+        "CustomFieldNameFormat": "If IsSystem=false then FieldName must be {FieldType}{FieldIndex}.",
+        "CustomFieldNameExactMatch": "For custom fields, FieldName must exactly equal FieldType + FieldIndex.",
+        "SystemFieldOnlyTitle": "If IsSystem=true then FieldName must be Title and FieldIndex must be 0.",
+        "TitleImpliesSystemField": "If FieldName=Title then IsSystem must be true and FieldIndex must be 0.",
+        "FieldIndexStartsFromOneForCustom": "If IsSystem=false then FieldIndex starts from 1.",
+        "FieldIndexUpperBoundByFieldType": "For custom fields, FieldIndex max depends on FieldType (see x-fieldIndexRangeByFieldType)."
+      },
+      "x-fieldIndexRangeByFieldType": {
+        "Text": {
+          "min": 1,
+          "max": 300
+        },
+        "Bit": {
+          "min": 1,
+          "max": 50
+        },
+        "Decimal": {
+          "min": 1,
+          "max": 200
+        },
+        "Datetime": {
+          "min": 1,
+          "max": 200
+        }
+      }
+    },
+    "ListLayoutInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ListID",
+        "LayoutID",
+        "Type",
+        "Title",
+        "LayoutView",
+        "IsDefault",
+        "IsItemPerm",
+        "LayoutInResources"
+      ],
+      "properties": {
+        "ListID": {
+          "type": "integer"
+        },
+        "LayoutID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Type": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            3,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            998,
+            999
+          ],
+          "x-enumNames": [
+            "ListLayout",
+            "TableLayout",
+            "Print",
+            "CalendarCustomView",
+            "MindMap",
+            "TimeLine",
+            "Dashboard",
+            "KanBan",
+            "Gantt",
+            "NewsImageText",
+            "News"
+          ],
+          "x-enumDescriptions": [
+            "列表布局",
+            "表单页面",
+            "打印页面",
+            "日历表单布局",
+            "思维导图",
+            "时间线",
+            "dashboard",
+            "看板",
+            "甘特图",
+            "图文资讯",
+            "资讯"
+          ]
+        },
+        "Title": {
+          "type": "string"
+        },
+        "LayoutView": {
+          "type": "string"
+        },
+        "Ext1": {
+          "type": "string"
+        },
+        "Ext2": {
+          "type": "string"
+        },
+        "Ext3": {
+          "type": "string"
+        },
+        "IsDefault": {
+          "type": "boolean"
+        },
+        "IsItemPerm": {
+          "type": "boolean"
+        },
+        "Perms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppListPermInfo"
+          }
+        },
+        "LayoutInResources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LayoutInResourceInfo"
+          }
+        }
+      }
+    },
+    "LayoutInResourceInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "RefId",
+        "Resource"
+      ],
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "RefId": {
+          "type": "integer"
+        },
+        "Resource": {
+          "type": "string"
+        }
+      }
+    },
+    "ListRemindRuleInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "CategoryID",
+        "ListID",
+        "Title",
+        "SendType",
+        "Type",
+        "From",
+        "Subject",
+        "Content",
+        "Rules"
+      ],
+      "properties": {
+        "ID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "CategoryID": {
+          "type": "string"
+        },
+        "ListID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Title": {
+          "type": "string"
+        },
+        "SendType": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "x-enumNames": [
+            "Email",
+            "App",
+            "WeCom",
+            "DingTalk"
+          ]
+        },
+        "Type": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "x-enumNames": [
+            "ItemAdded",
+            "RegularReminder",
+            "ExpirationReminder"
+          ]
+        },
+        "From": {
+          "type": "string"
+        },
+        "Subject": {
+          "type": "string"
+        },
+        "Content": {
+          "type": "string"
+        },
+        "Rules": {
+          "type": "string"
+        },
+        "Receiver": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Disabled",
+            "Enabled"
+          ]
+        }
+      }
+    },
+    "ListFlowMappingInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "ListID",
+        "Method",
+        "Setting",
+        "Title",
+        "DefKey",
+        "FieldName"
+      ],
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "ListID": {
+          "type": "integer"
+        },
+        "Method": {
+          "type": "integer"
+        },
+        "Setting": {
+          "type": "string"
+        },
+        "Title": {
+          "type": "string"
+        },
+        "DefKey": {
+          "type": "string"
+        },
+        "FieldName": {
+          "type": "string"
+        },
+        "Ext1": {
+          "type": "string"
+        },
+        "Ext2": {
+          "type": "string"
+        },
+        "Ext3": {
+          "type": "string"
+        }
+      }
+    },
+    "ListPublicFormInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ListID",
+        "ID",
+        "Type",
+        "Name",
+        "Desc",
+        "Status",
+        "Code",
+        "RefId",
+        "Resource"
+      ],
+      "properties": {
+        "ListID": {
+          "type": "integer"
+        },
+        "ID": {
+          "type": "integer"
+        },
+        "Type": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Desc": {
+          "type": "string"
+        },
+        "Ext": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer"
+        },
+        "Code": {
+          "type": "string"
+        },
+        "RefId": {
+          "type": "integer"
+        },
+        "Resource": {
+          "type": "string"
+        }
+      }
+    },
+    "ProcessFormInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Name",
+        "Key",
+        "IsItemPerm",
+        "AppID",
+        "ListID",
+        "ProcModelID",
+        "Description",
+        "DefResource",
+        "WorkflowType",
+        "NoRule"
+      ],
+      "properties": {
+        "Category": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Key": {
+          "type": "string",
+          "maxLength": 255,
+          "pattern": "^[a-zA-Z0-9_]+$"
+        },
+        "IsItemPerm": {
+          "type": "boolean"
+        },
+        "AppID": {
+          "type": "integer",
+          "enum": [
+            30,
+            41
+          ],
+          "x-enumNames": [
+            "Settings",
+            "Flowcraft"
+          ],
+          "description": "Must equal root AppID."
+        },
+        "ListID": {
+          "type": "integer"
+        },
+        "ProcModelID": {
+          "type": "integer"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Ext": {
+          "type": "string"
+        },
+        "DefResourceID": {
+          "type": "integer"
+        },
+        "DefResource": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "Status": {
+          "type": "integer"
+        },
+        "DeployedDefID": {
+          "type": "integer"
+        },
+        "WorkflowType": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "x-enumNames": [
+            "Manual",
+            "ListWorkflow",
+            "ApprovalWorkflow",
+            "PlanWorkflow"
+          ]
+        },
+        "Settings": {
+          "type": "string"
+        },
+        "Deployed": {
+          "type": "boolean"
+        },
+        "NoRule": {
+          "$ref": "#/$defs/FormNoRuleInfo"
+        },
+        "Perms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppWorkflowPermInfo"
+          }
+        }
+      }
+    },
+    "FormNoRuleInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Prefix",
+        "StartIndex",
+        "CustomLength",
+        "AutoIncrement"
+      ],
+      "properties": {
+        "Prefix": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": ".*\\{index\\}.*",
+          "description": "必须包含 {index}；可用: {date},{yyyy},{yy},{mm},{dd},{yymmdd},{mmdd},{index}"
+        },
+        "StartIndex": {
+          "type": "integer"
+        },
+        "CustomLength": {
+          "type": "integer"
+        },
+        "AutoIncrement": {
+          "type": "integer"
+        }
+      }
+    },
+    "ProcNewReportInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "DefKey",
+        "Name",
+        "Description",
+        "Attr",
+        "Settings"
+      ],
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "DefKey": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Attr": {
+          "type": "string"
+        },
+        "Settings": {
+          "type": "string"
+        }
+      }
+    },
+    "DataReportInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Name",
+        "Description",
+        "Status",
+        "Attr",
+        "Ver",
+        "Settings",
+        "Schedules",
+        "ScheduleTimes",
+        "ResourceDraft"
+      ],
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer"
+        },
+        "Attr": {
+          "type": "string"
+        },
+        "Ver": {
+          "type": "integer"
+        },
+        "Settings": {
+          "type": "string"
+        },
+        "Schedules": {
+          "type": "string"
+        },
+        "ScheduleTimes": {
+          "type": "string"
+        },
+        "ResourceDraft": {
+          "type": "string"
+        }
+      }
+    },
+    "ListGroupInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Code",
+        "Name",
+        "Description"
+      ],
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "Code": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        }
+      }
+    },
+    "TagCategoryInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Name",
+        "Description",
+        "Status"
+      ],
+      "properties": {
+        "ID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Ext": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Disabled",
+            "Enabled"
+          ]
+        },
+        "Tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TagInfo"
+          }
+        }
+      }
+    },
+    "TagInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "TagID",
+        "TagName",
+        "Ext",
+        "Status",
+        "TargetTagIDs"
+      ],
+      "properties": {
+        "TagID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "TagName": {
+          "type": "string"
+        },
+        "Ext": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Disabled",
+            "Enabled"
+          ]
+        },
+        "TargetTagIDs": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "MetadataCategoryInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "CategoryID",
+        "Name",
+        "Code",
+        "Status"
+      ],
+      "properties": {
+        "CategoryID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Code": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Ext": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Disabled",
+            "Enabled"
+          ]
+        },
+        "Metadatas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MetadataInfo"
+          }
+        }
+      }
+    },
+    "MetadataInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "ParentID",
+        "Name",
+        "Code",
+        "Status",
+        "Description"
+      ],
+      "properties": {
+        "ID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "ParentID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Code": {
+          "type": "string"
+        },
+        "Ext": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Disabled",
+            "Enabled"
+          ]
+        }
+      }
+    },
+    "AppThemeInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Type",
+        "Name",
+        "Description",
+        "Config",
+        "Ext"
+      ],
+      "properties": {
+        "ID": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Master",
+            "Control"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Config": {
+          "type": "string"
+        },
+        "Ext": {
+          "type": "string"
+        }
+      }
+    },
+    "AppComponentInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Type",
+        "Name",
+        "Description",
+        "Config",
+        "Ext"
+      ],
+      "properties": {
+        "ID": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "string",
+          "description": "Comment says 0:List,1:Form"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Ext": {
+          "type": "string"
+        },
+        "Config": {
+          "type": "string"
+        }
+      }
+    },
+    "AppBasePermInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Perm",
+        "PermType",
+        "PermObjID"
+      ],
+      "properties": {
+        "Perm": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128
+          ],
+          "x-enumNames": [
+            "Read",
+            "Write",
+            "Manage",
+            "Create",
+            "Edit",
+            "Remove",
+            "Export",
+            "Import"
+          ]
+        },
+        "PermType": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "x-enumNames": [
+            "User",
+            "Organization",
+            "Group"
+          ]
+        },
+        "PermObjID": {
+          "type": "integer"
+        }
+      }
+    },
+    "AppWorkflowPermInfo": {
+      "$ref": "#/$defs/AppBasePermInfo"
+    },
+    "AppListPermInfo": {
+      "$ref": "#/$defs/AppBasePermInfo"
+    },
+    "AppListAdvancePermInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "Perm",
+        "PermType",
+        "PermObjID"
+      ],
+      "properties": {
+        "Perm": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128
+          ],
+          "x-enumNames": [
+            "Read",
+            "Write",
+            "Manage",
+            "Create",
+            "Edit",
+            "Remove",
+            "Export",
+            "Import"
+          ]
+        },
+        "PermType": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3,
+            999
+          ],
+          "x-enumNames": [
+            "User",
+            "Organization",
+            "Group",
+            "CustomField"
+          ]
+        },
+        "PermObjID": {
+          "type": "string"
+        }
+      }
+    },
+    "AppConnectionInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Type",
+        "Name",
+        "Description",
+        "Config",
+        "Status"
+      ],
+      "properties": {
+        "ID": {
+          "type": "integer"
+        },
+        "Type": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Config": {
+          "$ref": "#/$defs/AnyObject"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "x-enumNames": [
+            "UnConnected",
+            "Connected",
+            "Failed"
+          ]
+        }
+      }
+    },
+    "AppAgentInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Name",
+        "Description",
+        "Type",
+        "IconUrl",
+        "Settings",
+        "Draft",
+        "Attr",
+        "Status",
+        "IsPublished",
+        "Publisher",
+        "PublishDate",
+        "Components"
+      ],
+      "properties": {
+        "ID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Agent",
+            "Copilot"
+          ]
+        },
+        "IconUrl": {
+          "type": "string"
+        },
+        "Settings": {
+          "type": "string"
+        },
+        "Draft": {
+          "type": "string"
+        },
+        "Attr": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Disabled",
+            "Enabled"
+          ]
+        },
+        "IsPublished": {
+          "type": "boolean"
+        },
+        "Publisher": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "PublishDate": {
+          "type": "string",
+          "description": "yyyy-MM-dd HH:mm:ss"
+        },
+        "Components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppAgentComponentInfo"
+          }
+        }
+      }
+    },
+    "AppAgentComponentInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Type",
+        "Name",
+        "Description",
+        "IconUrl",
+        "NameDescType",
+        "Settings",
+        "Source",
+        "Status"
+      ],
+      "properties": {
+        "ID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Type": {
+          "type": "integer",
+          "enum": [
+            1,
+            2
+          ],
+          "x-enumNames": [
+            "Knowledge",
+            "Tool"
+          ]
+        },
+        "SubType": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "x-enumNames": [
+            "Default",
+            "RunAgent",
+            "StartWorkflow",
+            "QueryItems",
+            "AddItem",
+            "EditItem",
+            "DeleteItem",
+            "CallAPI",
+            "CallRestAPI",
+            "InvokeService",
+            "AccessAppResources",
+            "GenerateDocument"
+          ]
+        },
+        "NameDescType": {
+          "type": "integer",
+          "enum": [
+            1,
+            2
+          ],
+          "x-enumNames": [
+            "Custom",
+            "UseSourceSync"
+          ]
+        },
+        "IconUrl": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Disabled",
+            "Enabled"
+          ]
+        },
+        "Settings": {
+          "type": "string"
+        },
+        "Source": {
+          "type": "string"
+        },
+        "Attr": {
+          "type": "string"
+        },
+        "Errors": {
+          "type": "string"
+        }
+      }
+    },
+    "AppKnowledgeInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Name",
+        "Description",
+        "IconUrl",
+        "Attr",
+        "Status"
+      ],
+      "properties": {
+        "ID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "IconUrl": {
+          "type": "string"
+        },
+        "Attr": {
+          "type": "string"
+        },
+        "Status": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "x-enumNames": [
+            "Disabled",
+            "Enabled"
+          ]
+        },
+        "Datas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AppKnowledgeDataInfo"
+          }
+        }
+      }
+    },
+    "AppKnowledgeDataInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ID",
+        "Name",
+        "Type",
+        "Source",
+        "IsAuto",
+        "Settings"
+      ],
+      "properties": {
+        "ID": {
+          "$ref": "#/$defs/LongAsString"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Type": {
+          "type": "integer"
+        },
+        "Source": {
+          "type": "string"
+        },
+        "IsAuto": {
+          "type": "boolean"
+        },
+        "Settings": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "x-rules": {
+    "AllAppIDMustEqualRootAppID": "Within one payload, every AppID value must be equal to root AppID.",
+    "GlobalPackageIdGeneration": {
+      "Rule": "All package IDs must be generated via API during package generation.",
+      "AppliesToFields": [
+        "ID",
+        "ListID",
+        "TagID",
+        "CategoryID",
+        "ParentID"
+      ],
+      "GenerateMode": "api",
+      "EnforceAt": "package-generation",
+      "DisallowClientProvidedIds": true,
+      "Description": "For fields ID, ListID, TagID, CategoryID, ParentID, values must be assigned by backend ID generation API, not hard-coded or client-generated.",
+      "AppliesOnlyWhenType": "integer",
+      "TypeConstraint": {
+        "TargetType": "integer",
+        "Message": "Only integer-typed ID fields are subject to API-generated ID enforcement."
+      }
+    }
+  },
+  "x-conditionalConstraints": {
+    "byAppID": {
+      "30": {
+        "ListInfo": {
+          "TableCode": "setting_c",
+          "IndexCode": "setting_c"
+        }
+      },
+      "41": {
+        "ListInfo": {
+          "TableCode": "flowcraft",
+          "IndexCode": "flowcraft"
+        }
+      }
+    }
+  }
+}

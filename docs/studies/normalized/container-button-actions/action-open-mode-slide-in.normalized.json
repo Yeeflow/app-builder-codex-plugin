@@ -1,0 +1,37 @@
+{
+  "proof": "export-proven",
+  "host": "dashboard",
+  "controlType": "container",
+  "actionTypeCode": "6",
+  "actionType": "open_dashboard",
+  "attrs": {
+    "action-type": "6",
+    "op": "slide",
+    "modalsize": 1,
+    "data": {
+      "list": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "ListID": "[ListID]"
+      },
+      "page": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "PageID": "[PageID]"
+      }
+    },
+    "layout": "[LayoutID]",
+    "passvalues": [
+      {
+        "Name": "Text1",
+        "Value": "[REDACTED_EXPRESSION_ARRAY]"
+      }
+    ],
+    "queryParams": [
+      {
+        "name": "KeyInfo",
+        "value": "[REDACTED_EXPRESSION]"
+      }
+    ]
+  }
+}

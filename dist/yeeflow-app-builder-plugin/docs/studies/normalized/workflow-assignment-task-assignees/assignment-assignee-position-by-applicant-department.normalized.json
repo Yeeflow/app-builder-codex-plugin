@@ -1,0 +1,61 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC.yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "position-by-applicant-department",
+  "rawAssigneeFieldNames": [
+    "type",
+    "method",
+    "position",
+    "value",
+    "title"
+  ],
+  "normalizedConfig": {
+    "type": "position",
+    "method": "positionorgexpr",
+    "position": "<POSITION_REF_CONFIRMED_BY_API>",
+    "value": {
+      "kind": "expressionButton",
+      "label": "Applicant:Department",
+      "dataShape": {
+        "type": "user",
+        "param": {
+          "id": {
+            "parseStatus": "opaque",
+            "expressionSourceHints": {
+              "types": [
+                "application"
+              ],
+              "props": [
+                "ApplicantUserID"
+              ],
+              "usesApplicantUserId": true
+            }
+          }
+        },
+        "prop": "OrganizationID"
+      }
+    },
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "approvalSettingsShape": {
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "isenabledemail": false,
+    "isallowreassign": false,
+    "isallowsign": false,
+    "allowskip": true,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "runtimeDependencies": [
+    "runtime-applicant-user-context",
+    "valid-department-hierarchy-and-manager-data",
+    "valid-position-assignments"
+  ],
+  "generationSafety": "requires target-tenant org/reference data and focused runtime proof before broad generation claims",
+  "apiAssistedInterpretation": {
+    "apiLookupRun": true,
+    "categoryConfirmedByApi": true,
+    "note": "Static reference category was checked against read-only API lookup and redacted in this normalized example."
+  }
+}

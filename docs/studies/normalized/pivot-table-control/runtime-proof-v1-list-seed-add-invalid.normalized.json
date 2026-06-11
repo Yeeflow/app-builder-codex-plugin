@@ -1,0 +1,52 @@
+{
+  "proofLevel": "strongly-indicated-by-v1-v2-diff",
+  "scenario": "Generated data list with seeded rows but mismatched FieldName and FieldType metadata",
+  "list": {
+    "title": "<data-list>",
+    "listModel": {
+      "Type": 1,
+      "ListType": 1,
+      "Flags": 1,
+      "Status": 1
+    },
+    "defs": [
+      {
+        "FieldName": "Title",
+        "FieldType": "Text",
+        "Type": "input"
+      },
+      {
+        "FieldName": "Text1",
+        "FieldType": "Datetime",
+        "Type": "input",
+        "invalidBecause": "Text storage fields must not keep a Datetime FieldType when seeded rows use Text1 as text."
+      },
+      {
+        "FieldName": "Datetime1",
+        "FieldType": "Text",
+        "Type": "datepicker",
+        "invalidBecause": "Datetime storage fields must keep a date/datetime FieldType."
+      },
+      {
+        "FieldName": "Decimal1",
+        "FieldType": "Text",
+        "Type": "currency",
+        "invalidBecause": "Decimal storage fields must keep a numeric/decimal FieldType."
+      }
+    ],
+    "listDatas": {
+      "<row-id>": {
+        "ListDataID": "<row-id>",
+        "Title": "<safe-title>",
+        "Text1": "<safe-text>",
+        "Datetime1": "2025-01-15",
+        "Decimal1": "12000"
+      }
+    }
+  },
+  "expectedValidation": {
+    "code": "FIELD_NAME_FIELDTYPE_MISMATCH",
+    "severity": "error in generated-final validation"
+  },
+  "redaction": "Synthetic normalized example only; no source IDs, user names, customer data, tenant IDs, emails, or raw payloads."
+}

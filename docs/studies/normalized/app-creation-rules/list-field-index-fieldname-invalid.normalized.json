@@ -1,0 +1,16 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "list field FieldIndex and FieldName suffix mismatch",
+  "field": {
+    "DisplayName": "Example Text",
+    "FieldName": "Text6",
+    "InternalName": "ExampleText",
+    "FieldIndex": 11,
+    "FieldType": "Text",
+    "Type": "input"
+  },
+  "expectedError": {
+    "code": "FIELD_NAME_FIELDINDEX_MISMATCH",
+    "message": "FieldName numeric suffix must match FieldIndex."
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "position-by-location",
+  "rawAssigneeFieldNames": [
+    [
+      "type",
+      "method",
+      "position",
+      "value",
+      "title"
+    ]
+  ],
+  "normalizedConfig": {
+    "type": "position",
+    "method": "positionloc",
+    "position": "<POSITION_REF_CONFIRMED_BY_API>",
+    "value": "<LOCATION_REF_CONFIRMED_BY_API>",
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "approvalSettingsShape": {
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "appointedOrder": "parallel-or-default",
+    "issequential": null,
+    "isenabledemail": false,
+    "isallowreassign": true,
+    "isallowrecalled": null,
+    "automaticapproveddefinition": null,
+    "isallowsign": true,
+    "allowskip": true,
+    "duedatedefinition": 120,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "notificationSettingsShape": {
+    "isenabledemail": false
+  },
+  "runtimeDependencies": [
+    "valid-location-assignments",
+    "valid-position-assignments"
+  ],
+  "generationSafety": "requires target-tenant org/reference data and focused runtime proof before broad generation claims"
+}

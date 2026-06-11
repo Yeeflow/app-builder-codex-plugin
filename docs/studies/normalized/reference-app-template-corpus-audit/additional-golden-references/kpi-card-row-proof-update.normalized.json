@@ -1,0 +1,17 @@
+{
+  "templateId": "kpi_card_row",
+  "previousStatus": "needs-golden-proof",
+  "updatedStatus": "export-proven",
+  "sourceExports": [
+    "DEMO Innovation Ecosystem Platform (1).yap / NHIC Innovation Overview",
+    "Service Desk Pro (2).yap / Executive Dashboard"
+  ],
+  "requiredPatternUpdates": [
+    "row or grid container for multiple metric cards",
+    "Summary or equivalent aggregate controls",
+    "business label and value hierarchy",
+    "card padding, border/radius/background or equivalent card-like styling",
+    "dashboard filter/aggregate bindings where dynamic"
+  ],
+  "proofBoundary": "export-proven structure and binding evidence only"
+}

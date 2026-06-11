@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Form Report Generator"
+  short_description: "Generate and validate Yeeflow Form Report app resources."
+  default_prompt: "Use this skill to inspect, generate, and validate Yeeflow Form Report resources based on approval forms, while keeping export-proven and runtime-proven behavior clearly separated."

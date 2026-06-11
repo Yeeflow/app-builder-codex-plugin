@@ -1,0 +1,12 @@
+{
+  "topic": "yeeflow-application-delivery-workflow",
+  "rule": "auto-install-confirmation-policy",
+  "autoInstallWithoutConfirmation": false,
+  "requires": [
+    "local validation passed",
+    "api key present",
+    "workspace id present",
+    "user confirms automatic installation"
+  ],
+  "apiFlow": ["upload package", "install package"]
+}

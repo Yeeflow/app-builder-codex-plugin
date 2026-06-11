@@ -1,0 +1,16 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "yap_vs_yapk_resource",
+  "yap": {
+    "purpose": "new or cloned application import",
+    "resourceEncoding": "[______gizp______] + base64 gzip",
+    "decodedShape": "YAP Resource wrapper with Data and ReplaceIds"
+  },
+  "yapk": {
+    "purpose": "existing application version upgrade",
+    "resourceEncoding": "Product schema says Brotli-compressed AppPackageInfo",
+    "decodedShape": "AppPackageInfo with ListSet, Pages, Forms, reports, app modules, PortalInfo, and Childs",
+    "artifactDecodeStatus": "not verified on readable historical artifacts"
+  },
+  "rule": "Do not use .yap gzip Resource encoding as .yapk Resource."
+}

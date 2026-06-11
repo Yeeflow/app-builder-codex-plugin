@@ -1,0 +1,22 @@
+{
+  "case": "view-column-real-field-valid",
+  "proofLevel": "user-confirmed-import-success-derived",
+  "layoutView": {
+    "layout": [
+      {
+        "FieldID": "__TITLE_FIELD_ID__",
+        "FieldName": "Title",
+        "DisplayName": "Request Title",
+        "Type": "input",
+        "Mobile": 2,
+        "Order": 1,
+        "Show": true
+      }
+    ],
+    "query": [],
+    "sort": [],
+    "rowColor": [],
+    "filter": []
+  },
+  "expectedFinding": null
+}

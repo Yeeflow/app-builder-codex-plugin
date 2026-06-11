@@ -1,0 +1,364 @@
+{
+  "proofLevel": "export-proven",
+  "internalControlType": "ContentList",
+  "frontEndAction": "Set data list",
+  "workflowHost": "approval-form-workflow",
+  "workflowType": 2,
+  "workflowName": "Workflow Action Approval Test",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Data List_1",
+  "listtype": "select",
+  "operationType": "add",
+  "target": {
+    "mode": "selected-data-source",
+    "appid": "<REDACTED_APP_ID>",
+    "listsetid": "<REDACTED_LISTSET_ID>",
+    "listid": "<REDACTED_LIST_ID>",
+    "resolvedTitle": "Purchase Requests Runtime Test",
+    "resolvedType": "data-list"
+  },
+  "listdatasShape": "array",
+  "listdatasCount": 9,
+  "mappings": [
+    {
+      "index": 0,
+      "Columns": "Title",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Title",
+        "DisplayName": "Purchase Requests Runtime Test Name",
+        "FieldType": "Text",
+        "Type": "input",
+        "IsSystem": true
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "text"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "id": "RequestTitle",
+            "name": "Workflow Variables:RequestTitle"
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "Columns": "Text1",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text1",
+        "DisplayName": "Record No.",
+        "FieldType": "Text",
+        "Type": "input",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "application"
+        ],
+        "valueTypes": [
+          "string"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "application",
+            "valueType": "string",
+            "id": "ApplicationID",
+            "name": "Instance:Form ID"
+          }
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "Columns": "Text3",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text3",
+        "DisplayName": "Category / Type",
+        "FieldType": "Text",
+        "Type": "radio",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "text"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "id": "SingleLine1",
+            "name": "Workflow Variables:Single Line 1"
+          }
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "Columns": "Text4",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text4",
+        "DisplayName": "Status",
+        "FieldType": "Text",
+        "Type": "radio",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "text"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "id": "SingleSelect1",
+            "name": "Workflow Variables:Single Select 1"
+          }
+        ]
+      }
+    },
+    {
+      "index": 4,
+      "Columns": "Text5",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text5",
+        "DisplayName": "Owner / Reviewer",
+        "FieldType": "Text",
+        "Type": "input",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "application"
+        ],
+        "valueTypes": [
+          "string"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "application",
+            "valueType": "string",
+            "id": "CreatedBy",
+            "name": "Instance:Submitter"
+          }
+        ]
+      }
+    },
+    {
+      "index": 5,
+      "Columns": "Datetime1",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Datetime1",
+        "DisplayName": "Start / Issue Date",
+        "FieldType": "Datetime",
+        "Type": "datepicker",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "application"
+        ],
+        "valueTypes": [
+          "string"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "application",
+            "valueType": "string",
+            "id": "Created",
+            "name": "Instance:Submission time"
+          }
+        ]
+      }
+    },
+    {
+      "index": 6,
+      "Columns": "Decimal1",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Decimal1",
+        "DisplayName": "Amount / Value",
+        "FieldType": "Decimal",
+        "Type": "input_number",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "number"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "id": "Amount",
+            "name": "Workflow Variables:Amount"
+          }
+        ]
+      }
+    },
+    {
+      "index": 7,
+      "Columns": "Decimal2",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Decimal2",
+        "DisplayName": "Balance / Variance",
+        "FieldType": "Decimal",
+        "Type": "input_number",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "number"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "id": "Addamount",
+            "name": "Workflow Variables:Add amount"
+          }
+        ]
+      }
+    },
+    {
+      "index": 8,
+      "Columns": "Text7",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text7",
+        "DisplayName": "Document / Attachment Notes",
+        "FieldType": "Text",
+        "Type": "textarea",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr",
+          "op"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "number",
+          "text"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "id": "Details",
+            "name": "Workflow Variables:Details"
+          },
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "id": "Number1",
+            "name": "Workflow Variables:Number 1"
+          }
+        ]
+      }
+    }
+  ],
+  "wheresShape": "array",
+  "wheresCount": 0,
+  "wheres": [],
+  "hasListFieldValue": false,
+  "hasSubListValue": false,
+  "broadMutationRisk": false,
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

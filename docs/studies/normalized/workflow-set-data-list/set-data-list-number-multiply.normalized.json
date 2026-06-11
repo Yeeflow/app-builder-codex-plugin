@@ -1,0 +1,100 @@
+{
+  "proofLevel": "export-proven",
+  "internalControlType": "ContentList",
+  "frontEndAction": "Set data list",
+  "workflowHost": "approval-form-workflow",
+  "workflowType": 2,
+  "workflowName": "Workflow Action Approval Test",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Data List_2",
+  "listtype": "select",
+  "operationType": "edit",
+  "target": {
+    "mode": "selected-data-source",
+    "appid": "<REDACTED_APP_ID>",
+    "listsetid": "<REDACTED_LISTSET_ID>",
+    "listid": "<REDACTED_LIST_ID>",
+    "resolvedTitle": "Purchase Requests Runtime Test",
+    "resolvedType": "data-list"
+  },
+  "listdatasShape": "array",
+  "listdatasCount": 4,
+  "mappings": [
+    {
+      "index": 3,
+      "Columns": "Decimal2",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Decimal2",
+        "DisplayName": "Balance / Variance",
+        "FieldType": "Decimal",
+        "Type": "input_number",
+        "IsSystem": false
+      },
+      "Per": "3",
+      "numericOperationCode": "3",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "number"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "id": "Amount",
+            "name": "Workflow Variables:Amount"
+          }
+        ]
+      }
+    }
+  ],
+  "wheresShape": "array",
+  "wheresCount": 1,
+  "wheres": [
+    {
+      "index": 0,
+      "key": "<REDACTED_CONDITION_ID>",
+      "pre": "and",
+      "left": "Text1",
+      "op": "0",
+      "right": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "application"
+        ],
+        "valueTypes": [
+          "string"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "application",
+            "valueType": "string",
+            "id": "ApplicationID",
+            "name": "Instance:Form ID"
+          }
+        ]
+      },
+      "showCus": false,
+      "nestedConditionCount": 0
+    }
+  ],
+  "hasListFieldValue": false,
+  "hasSubListValue": false,
+  "broadMutationRisk": false,
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

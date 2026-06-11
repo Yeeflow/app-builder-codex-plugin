@@ -1,0 +1,26 @@
+{
+  "proof": "export-proven from Data Lists (4).yap; private values redacted",
+  "normalized": {
+    "exportPath": "Data.Childs[].PublicForms[].Resource.children[0]/children/0/children/1/children/0",
+    "control": {
+      "id": "__CONTROL_ID__",
+      "type": "submit-button",
+      "binding": null,
+      "fieldID": null,
+      "label": "__LABEL_REDACTED__",
+      "attrs": {
+        "button-style": "2",
+        "common": {
+          "positioning": {
+            "widthtype": [
+              null,
+              "__ID_REDACTED__"
+            ]
+          }
+        }
+      }
+    },
+    "field": null,
+    "proof": "export-proven; private values redacted"
+  }
+}

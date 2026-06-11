@@ -1,0 +1,22 @@
+{
+  "controlType": "dynamic-file",
+  "observedInTimeline": true,
+  "bindingPattern": {
+    "attrs.source": "3",
+    "attrs.obj-f": "Text8"
+  },
+  "sourceField": {
+    "fieldName": "Text8",
+    "displayName": "Reference",
+    "controlType": "file-upload-merge",
+    "fieldType": "Text",
+    "multiple": true
+  },
+  "observedSettings": {
+    "i-len": [null, 2],
+    "content": "file content size, icon, padding, border/background styling observed",
+    "opbtn": "operation button style object observed",
+    "type_icon_show": "observed on one Dynamic file variant"
+  },
+  "proof": "export-proven"
+}

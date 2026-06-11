@@ -1,0 +1,20 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[40]",
+    "childFieldPath": "Data.Childs[1].Defs[40]",
+    "fieldId": "field_31",
+    "key": "v_field_31",
+    "variableSource": "approval-variable",
+    "variableType": "mutiple-metadata",
+    "variableRef": "field_31",
+    "reportFieldType": "mutiple-metadata",
+    "storedType": "mutiple-metadata",
+    "isSystem": false,
+    "required": false,
+    "rules": {
+      "source": "app",
+      "categoryId": "<id>"
+    }
+  }
+}

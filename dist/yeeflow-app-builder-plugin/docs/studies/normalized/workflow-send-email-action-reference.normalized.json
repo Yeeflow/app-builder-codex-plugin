@@ -1,0 +1,45 @@
+{
+  "summary": {
+    "inputPath": "<downloads>/AI Agent and Copilot Local Resource Baseline8.yap",
+    "title": "AI Agent and Copilot Local Resource Baseline8",
+    "replaceIds": 23,
+    "largeNumbersPreserved": 6,
+    "scheduledWorkflows": 2,
+    "aiResources": 3,
+    "localLists": 1,
+    "actionCounts": {
+      "StartNoneEvent": 2,
+      "SequenceFlow": 6,
+      "EndNoneEvent": 2,
+      "MailTask": 2,
+      "QueryData": 1,
+      "AI": 1
+    }
+  },
+  "actions": [
+    {
+      "workflow": "Weekly information update",
+      "workflowKey": "AS-WIU",
+      "id": "s_91023436524",
+      "resourceid": "s_91023436524",
+      "type": "MailTask",
+      "name": "Send Test Email",
+      "to": "<REDACTED_EMAIL>",
+      "cc": "",
+      "subject": "Test email",
+      "html": "<p>Hi there,</p>\n<p>Here is the test email for Codex.</p>\n<p>&nbsp;</p>\n<p>Yeeflow team</p>"
+    },
+    {
+      "workflow": "Daily information update",
+      "workflowKey": "AS-DIU",
+      "id": "s_91024023320",
+      "resourceid": "s_91024023320",
+      "type": "MailTask",
+      "name": "Send Email",
+      "to": "<REDACTED_EMAIL>",
+      "cc": "",
+      "subject": "<input type=\"button\" data=\"${&quot;type&quot;:&quot;variable&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;EmailSubject&quot;}}\" expr=\"__\" tabindex=\"-1\" value=\"Workflow Variables:Subject\">",
+      "html": "<p><input type=\"button\" data=\"${&quot;type&quot;:&quot;variable&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;EmailBody&quot;}}\" expr=\"__\" tabindex=\"-1\" value=\"Workflow Variables:Body Content\"></p>"
+    }
+  ]
+}

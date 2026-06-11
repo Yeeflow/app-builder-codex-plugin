@@ -1,0 +1,10 @@
+{
+  "proof": "schema-v2-backed and runtime-practice-backed",
+  "path": "Data.Item.ListModel or Data.Childs[].ListModel",
+  "example": {
+    "Title": "<REDACTED_RESOURCE_TITLE>",
+    "Type": 1,
+    "Flags": 1
+  },
+  "rule": "Generated list-like resources must include ListModel.Flags = 1."
+}

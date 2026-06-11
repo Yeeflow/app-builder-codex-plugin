@@ -1,0 +1,131 @@
+{
+  "study": "three-column-dashboard-layout-runtime-css",
+  "sourceFiles": [
+    "Dashboard Layout Golden Reference.yap",
+    "Dashboard Layout Golden Reference.yapk",
+    "Dashboard-Home.html"
+  ],
+  "rawInputsCommitted": false,
+  "hostShapes": {
+    "dashboard": {
+      "type": 103,
+      "layoutView": null,
+      "ext2Src": true,
+      "embeddedResource": true
+    },
+    "approvalRequesterPage": {
+      "outerType": 1,
+      "outerPagetype": 1,
+      "embeddedFormdefPagetype": 1
+    }
+  },
+  "runtimeCssEvidence": {
+    "page": {
+      "height": "100%",
+      "flex": "1 0 auto",
+      "padding": "zero"
+    },
+    "shell": {
+      "position": "absolute",
+      "left": "0px",
+      "right": "0px",
+      "top": "0px",
+      "bottom": "0px",
+      "display": "flex",
+      "flexDirection": "row",
+      "gap": "--sp--s100",
+      "padding": "--sp--s075"
+    },
+    "leftPanel": {
+      "display": "flex",
+      "flexDirection": "column",
+      "widthPx": 360,
+      "height": "100%",
+      "overflow": "hidden"
+    },
+    "mainPanel": {
+      "display": "flex",
+      "flexDirection": "column",
+      "widthBehavior": "fill",
+      "height": "100%",
+      "overflow": "hidden"
+    },
+    "rightPanel": {
+      "display": "flex",
+      "flexDirection": "column",
+      "widthPx": 480,
+      "height": "100%",
+      "overflow": "hidden"
+    },
+    "headers": {
+      "position": "sticky",
+      "top": "0px",
+      "zIndex": 2,
+      "display": "flex",
+      "flexDirection": "row",
+      "alignItems": "center",
+      "justifyContent": "space-between",
+      "minHeightPx": 52
+    },
+    "bodies": {
+      "overflow": "scroll",
+      "height": "100%",
+      "padding": "--sp--s200"
+    },
+    "bottomRegions": {
+      "display": "flex",
+      "flexDirection": "row",
+      "alignItems": "center",
+      "separator": "top-border"
+    }
+  },
+  "packageAttrEvidence": {
+    "shell": {
+      "attrs.common.pos": "absolute",
+      "attrs.style.direction": "row",
+      "attrs.style.gap": "--sp--s100"
+    },
+    "leftPanel": {
+      "attrs.style.widthtype": "3",
+      "attrs.style.width": 360,
+      "attrs.style.height": "2",
+      "attrs.style.cushei": 100,
+      "attrs.style.cusheiu": "%",
+      "attrs.style.overflow": "hidden"
+    },
+    "mainPanel": {
+      "attrs.style.widthtype": "0",
+      "attrs.style.height": "2",
+      "attrs.style.cushei": 100,
+      "attrs.style.cusheiu": "%",
+      "attrs.style.overflow": "hidden"
+    },
+    "rightPanel": {
+      "attrs.style.widthtype": "3",
+      "attrs.style.width": 480,
+      "attrs.style.height": "2",
+      "attrs.style.cushei": 100,
+      "attrs.style.cusheiu": "%",
+      "attrs.style.overflow": "hidden"
+    },
+    "bodyRegions": {
+      "attrs.style.overflow": "scroll",
+      "attrs.style.height": "2",
+      "attrs.style.cushei": 100,
+      "attrs.style.cusheiu": "%"
+    }
+  },
+  "forbiddenGeneratedFinalText": [
+    "Drag to add controls here"
+  ],
+  "validatorErrorCodes": [
+    "THREE_COLUMN_SHELL_MISSING",
+    "THREE_COLUMN_PANEL_MISSING",
+    "THREE_COLUMN_PANEL_WIDTH_MISSING",
+    "THREE_COLUMN_PANEL_POSITIONING_MISSING",
+    "THREE_COLUMN_PANELS_STACKED_VERTICALLY",
+    "THREE_COLUMN_OVERFLOW_MISSING",
+    "THREE_COLUMN_PLACEHOLDER_PANEL",
+    "THREE_COLUMN_RUNTIME_LAYOUT_RISK"
+  ]
+}

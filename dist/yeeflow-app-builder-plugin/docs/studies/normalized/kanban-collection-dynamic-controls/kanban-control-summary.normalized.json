@@ -1,0 +1,23 @@
+{
+  "feature": "dashboard-kanban-control",
+  "source": "Company Overview.yap",
+  "dashboard": "Company overview",
+  "control": {
+    "type": "kanban",
+    "id": "<control-id>",
+    "label": "Kanban",
+    "children": ["kanban-body", "kanban-footer"],
+    "dataSource": {
+      "listType": 1,
+      "listTitle": "Company Overview",
+      "listId": "<list-id>"
+    },
+    "categoryField": {
+      "fieldName": "Text2",
+      "displayName": "Project owner",
+      "controlType": "radio",
+      "fieldType": "Text"
+    }
+  },
+  "proof": "export-proven"
+}

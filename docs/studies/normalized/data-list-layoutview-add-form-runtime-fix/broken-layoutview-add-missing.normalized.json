@@ -1,0 +1,23 @@
+{
+  "case": "generated-data-list-layoutview-add-missing",
+  "description": "Synthetic redacted fixture for the invalid display-settings shape that can make the default New item modal load forever.",
+  "listTitle": "Synthetic Requests",
+  "layoutView": {
+    "opentype": {
+      "add": "modal"
+    },
+    "modalsize": {
+      "add": 1
+    },
+    "sort": [
+      {
+        "SortName": "Created",
+        "SortByDesc": true
+      }
+    ]
+  },
+  "expectedGeneratedFinalErrors": [
+    "LAYOUTVIEW_ADD_LAYOUT_MISSING",
+    "LAYOUTVIEW_SORT_OBJECT_UNSUPPORTED"
+  ]
+}

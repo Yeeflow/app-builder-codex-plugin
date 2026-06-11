@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow AI Agent UI Operator"
+  short_description: "Operate Yeeflow AI Agent UI safely."
+  default_prompt: "Use this skill when operating the Yeeflow AI Agent management UI to create, edit, verify, publish, or inspect AI Agents."

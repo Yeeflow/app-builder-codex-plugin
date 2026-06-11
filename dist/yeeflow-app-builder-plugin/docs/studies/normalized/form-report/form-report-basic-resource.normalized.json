@@ -1,0 +1,38 @@
+{
+  "proofLevel": "export-proven",
+  "collectionPath": "Data.FormNewReports[]",
+  "childResourcePath": "Data.Childs[] where ListModel.Type = 32 and ListModel.ListID = FormNewReports[].ID",
+  "reportConfigKeys": [
+    "ID",
+    "DefKey",
+    "Name",
+    "Description",
+    "Attr",
+    "Settings"
+  ],
+  "childListModelKeys": [
+    "AppID",
+    "ListID",
+    "Title",
+    "Description",
+    "Status",
+    "IsItemPerm",
+    "IsVerRecord",
+    "HasComment",
+    "IconUrl",
+    "TableCode",
+    "IndexCode",
+    "Ext1",
+    "Ext2",
+    "Ext3",
+    "Perm",
+    "Type",
+    "Flags",
+    "CustomType",
+    "WorkspaceID",
+    "LayoutView",
+    "IsBreakInherit",
+    "IsDataSeparate",
+    "AdvanceList"
+  ]
+}

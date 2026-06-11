@@ -1,0 +1,20 @@
+{
+  "index": 1,
+  "title": "New Dashboard",
+  "type": 103,
+  "layoutId": "<id-3>",
+  "listId": "<id-2>",
+  "layoutViewKind": "null",
+  "layoutViewParsed": null,
+  "ext1": null,
+  "ext2": {
+    "src": true
+  },
+  "ext3": null,
+  "layoutInResourcesKind": "array",
+  "layoutInResourcesCount": 0,
+  "isDefault": false,
+  "isItemPerm": false,
+  "currentDashboardMarker": true,
+  "legacyDashboardSignals": []
+}

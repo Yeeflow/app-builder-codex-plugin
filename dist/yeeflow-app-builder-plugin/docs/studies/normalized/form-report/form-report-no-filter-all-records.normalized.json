@@ -1,0 +1,6 @@
+{
+  "proofLevel": "export-proven",
+  "exportPath": "Data.FormNewReports[0].Settings.Filters",
+  "filters": null,
+  "interpretation": "No filter object/array is present in the export for this report."
+}

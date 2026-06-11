@@ -1,0 +1,10 @@
+{
+  "proof": "runtime-practice-backed",
+  "path": "Data.Item.ListModel.Flags",
+  "invalidExample": {
+    "Title": "<REDACTED_RESOURCE_TITLE>",
+    "Type": 1024
+  },
+  "validatorError": "LISTMODEL_FLAGS_INVALID",
+  "rule": "Missing or non-1 Flags can block import."
+}

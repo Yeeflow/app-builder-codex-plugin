@@ -1,0 +1,37 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Actions Runtime Baseline (2)_Task forms.yap",
+  "taskForm": "WARTB Task3",
+  "finding": "The previous .yap export had a visible Add others button and a separate Add assignee form action, but the exported button binding pointed to the Reject action placeholder instead of the Add assignee action placeholder.",
+  "button": {
+    "type": "action_button",
+    "label": "Add others to this task",
+    "controlAction": "<REDACTED_ACTION_ID_FOR_REJECT_ACTION>"
+  },
+  "unboundOrNotReferencedAction": {
+    "name": "Add assignee button clicked",
+    "submitType": "5",
+    "operation": "add-assignee"
+  },
+  "updatedExportCorrection": {
+    "sourceExport": "Workflow Action Approval Test.ywf",
+    "finding": "The updated .ywf export corrects the Add others button binding so it resolves to the Add assignee action.",
+    "button": {
+      "type": "action_button",
+      "label": "Add others to this task",
+      "controlAction": "<REDACTED_ACTION_ID_FOR_ADD_ASSIGNEE_ACTION>"
+    },
+    "resolvedAction": {
+      "name": "Add assignee button clicked",
+      "submitType": "5",
+      "operation": "add-assignee",
+      "fields": [
+        "comment",
+        "forword",
+        "remark",
+        "assignee"
+      ]
+    }
+  },
+  "validatorRecommendation": "Warn when action_button labels imply approve/reject/reassign/add/complete but attrs.control_action points to a form action whose Submit form operation does not match the label."
+}

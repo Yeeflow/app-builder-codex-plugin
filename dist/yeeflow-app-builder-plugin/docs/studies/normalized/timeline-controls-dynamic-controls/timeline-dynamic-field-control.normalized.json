@@ -1,0 +1,14 @@
+{
+  "controlType": "dynamic-field",
+  "observedInTimeline": true,
+  "bindingPattern": {
+    "attrs.source": "3",
+    "attrs.obj-f": "<source-list-field-name>"
+  },
+  "observedFields": [
+    { "fieldName": "Title", "displayName": "Name", "controlType": "input", "fieldType": "Text" },
+    { "fieldName": "Text3", "displayName": "Stakeholders", "controlType": "checkbox", "fieldType": "Text" },
+    { "fieldName": "Text4", "displayName": "RAG status", "controlType": "radio", "fieldType": "Text" }
+  ],
+  "proof": "export-proven"
+}

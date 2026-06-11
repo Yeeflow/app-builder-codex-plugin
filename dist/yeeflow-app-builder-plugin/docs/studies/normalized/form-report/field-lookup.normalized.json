@@ -1,0 +1,21 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[42]",
+    "childFieldPath": "Data.Childs[1].Defs[42]",
+    "fieldId": "field_33",
+    "key": "v_field_33",
+    "variableSource": "approval-variable",
+    "variableType": "lookup",
+    "variableRef": "field_33",
+    "reportFieldType": "lookup",
+    "storedType": "lookup",
+    "isSystem": false,
+    "required": false,
+    "rules": {
+      "appid": 41,
+      "listid": "<resource-id-1>",
+      "listfield": "Title"
+    }
+  }
+}

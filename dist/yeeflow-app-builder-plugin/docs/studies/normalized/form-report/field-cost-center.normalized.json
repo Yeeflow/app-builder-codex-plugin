@@ -1,0 +1,19 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[37]",
+    "childFieldPath": "Data.Childs[1].Defs[37]",
+    "fieldId": "field_28",
+    "key": "v_field_28",
+    "variableSource": "approval-variable",
+    "variableType": "costcenter",
+    "variableRef": "field_28",
+    "reportFieldType": "cost-center-picker",
+    "storedType": "costcenter",
+    "isSystem": false,
+    "required": false,
+    "rules": {
+      "multiple": false
+    }
+  }
+}

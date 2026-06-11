@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Feature Learning Orchestrator"
+  short_description: "Learn new Yeeflow features from exports."
+  default_prompt: "Use $yeeflow-feature-learning-orchestrator to study real Yeeflow exports, document the feature pattern, validate a minimal generated package, and update the relevant generator skill."

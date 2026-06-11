@@ -1,0 +1,19 @@
+{
+  "case": "layout-resource-id-mismatch-invalid",
+  "proofLevel": "user-confirmed-import-failure-derived",
+  "layout": {
+    "LayoutID": "__LAYOUT_ID__",
+    "LayoutInResources": [
+      {
+        "ID": "__STALE_RESOURCE_ID__",
+        "RefId": "__STALE_RESOURCE_ID__",
+        "Resource": "{}"
+      }
+    ]
+  },
+  "expectedFinding": {
+    "code": "CUSTOM_FORM_RESOURCE_ID_MISMATCH",
+    "level": "error",
+    "mode": "generator/final"
+  }
+}

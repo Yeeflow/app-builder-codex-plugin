@@ -1,0 +1,53 @@
+{
+  "proofLevel": "export-proven",
+  "subListPath": "Data.FormNewReports[2].Settings.SubListID",
+  "subListId": "vlist_field_37",
+  "subListFields": [
+    {
+      "exportPath": "Data.FormNewReports[2].Settings.Fields[49]",
+      "childFieldPath": "Data.Childs[3].Defs[49]",
+      "fieldId": "field_37",
+      "key": "vlist_field_37_Lead",
+      "variableSource": "sub-list-field",
+      "variableType": "text",
+      "variableRef": "vlist_field_37.Lead",
+      "reportFieldType": "input",
+      "storedType": "text",
+      "isSystem": false,
+      "required": false,
+      "rules": null
+    },
+    {
+      "exportPath": "Data.FormNewReports[2].Settings.Fields[50]",
+      "childFieldPath": "Data.Childs[3].Defs[50]",
+      "fieldId": "field_37",
+      "key": "vlist_field_37_Company",
+      "variableSource": "sub-list-field",
+      "variableType": "text",
+      "variableRef": "vlist_field_37.Company",
+      "reportFieldType": "input",
+      "storedType": "text",
+      "isSystem": false,
+      "required": false,
+      "rules": null
+    },
+    {
+      "exportPath": "Data.FormNewReports[2].Settings.Fields[51]",
+      "childFieldPath": "Data.Childs[3].Defs[51]",
+      "fieldId": "field_37",
+      "key": "vlist_field_37_FollowupDate",
+      "variableSource": "sub-list-field",
+      "variableType": "date",
+      "variableRef": "vlist_field_37.FollowupDate",
+      "reportFieldType": "datepicker",
+      "storedType": "date",
+      "isSystem": false,
+      "required": false,
+      "rules": {
+        "showtime": true,
+        "dateformat": "1"
+      }
+    }
+  ],
+  "mainFieldsAlsoPresent": true
+}

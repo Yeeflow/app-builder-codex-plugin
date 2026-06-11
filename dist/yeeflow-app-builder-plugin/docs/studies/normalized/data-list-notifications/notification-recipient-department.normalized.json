@@ -1,0 +1,25 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[5].RemindRules[].Receiver",
+  "pattern": "notification-recipient-department",
+  "shape": {
+    "Identities": [
+      {
+        "Type": 2,
+        "Id": "<department-id>",
+        "Name": "<department>",
+        "Attr": {
+          "ListDataID": "<department-id>",
+          "Type": "Department|BU",
+          "OrgType": "Department",
+          "ParentID": "<parent-id>",
+          "Manager": "<user-id>"
+        }
+      }
+    ],
+    "ListDefs": []
+  },
+  "redaction": "Do not commit real department/team names, managers, paths, or IDs."
+}

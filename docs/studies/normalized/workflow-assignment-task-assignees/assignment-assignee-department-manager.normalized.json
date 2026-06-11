@@ -1,0 +1,61 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC.yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "applicant-department-manager",
+  "rawAssigneeFieldNames": [
+    "type",
+    "method",
+    "value",
+    "title"
+  ],
+  "normalizedConfig": {
+    "type": "user",
+    "method": "expression",
+    "value": {
+      "kind": "expressionButton",
+      "label": "Applicant:Department:Manager",
+      "dataShape": {
+        "type": "org",
+        "param": {
+          "id": {
+            "parseStatus": "opaque",
+            "expressionSourceHints": {
+              "types": [
+                "user",
+                "application"
+              ],
+              "props": [
+                "ApplicantUserID",
+                "OrganizationID"
+              ],
+              "usesApplicantUserId": true
+            }
+          }
+        },
+        "prop": "Manager"
+      }
+    },
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "approvalSettingsShape": {
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "isenabledemail": false,
+    "isallowreassign": false,
+    "isallowsign": false,
+    "allowskip": true,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "runtimeDependencies": [
+    "runtime-applicant-user-context",
+    "valid-department-hierarchy-and-manager-data",
+    "valid-user-directory-data"
+  ],
+  "generationSafety": "requires target-tenant org/reference data and focused runtime proof before broad generation claims",
+  "apiAssistedInterpretation": {
+    "apiLookupRun": true,
+    "categoryConfirmedByApi": false,
+    "note": "Expression-only assignee; API confirmed directory categories are readable but no static user/org ID is embedded in this export entry."
+  }
+}

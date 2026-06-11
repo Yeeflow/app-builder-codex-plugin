@@ -1,0 +1,15 @@
+{
+  "study": "vendor-onboarding-full-ui-quality-failure",
+  "status": "quality_failed",
+  "runtime_import_result": {
+    "yapk_installed": true,
+    "yap_imported": true,
+    "current_dashboard_route": true,
+    "data_table_deleted_fields_error_fixed": true
+  },
+  "quality_conclusion": "Import success is not enough. The generated app is technically installable but not acceptable as a full UI implementation of the approved Vendor Onboarding spec.",
+  "safe_package_paths": [
+    "/Users/Renger/Downloads/vendor-onboarding-compliance-management.full-ui.v2-src-dashboard.yapk",
+    "/Users/Renger/Downloads/vendor-onboarding-compliance-management.full-ui.v2-src-dashboard.yap"
+  ]
+}

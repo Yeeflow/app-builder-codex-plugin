@@ -1,0 +1,96 @@
+{
+  "summary": {
+    "inputPath": "/Users/Renger/Downloads/AI Agent and Copilot Local Resource Baseline8.yap",
+    "title": "AI Agent and Copilot Local Resource Baseline8",
+    "replaceIds": 23,
+    "largeNumbersPreserved": 6,
+    "scheduledWorkflows": 2,
+    "aiResources": 3,
+    "localLists": 1,
+    "actionCounts": {
+      "StartNoneEvent": 2,
+      "SequenceFlow": 6,
+      "EndNoneEvent": 2,
+      "MailTask": 2,
+      "QueryData": 1,
+      "AI": 1
+    }
+  },
+  "actions": [
+    {
+      "workflow": "Daily information update",
+      "workflowKey": "AS-DIU",
+      "id": "s_91023620337",
+      "resourceid": "s_91023620337",
+      "type": "QueryData",
+      "name": "Query Innovation ideas",
+      "listid": "2056585556048883714",
+      "listsetid": "2056585547604570113",
+      "result": {
+        "type": "multiple",
+        "pageIndex": 1,
+        "pageSize": 1000,
+        "fieldMap": null,
+        "listName": "QueryItems",
+        "vartype": "text",
+        "listParent": "__variables_",
+        "fields": [
+          {
+            "FieldName": "Title",
+            "Type": "input",
+            "DisplayName": "Idea Title"
+          },
+          {
+            "FieldName": "Text1",
+            "Type": "radio",
+            "DisplayName": "Category"
+          },
+          {
+            "FieldName": "Text2",
+            "Type": "textarea",
+            "DisplayName": "Description"
+          },
+          {
+            "FieldName": "Text3",
+            "Type": "input",
+            "DisplayName": "Expected Benefit"
+          },
+          {
+            "FieldName": "Text4",
+            "Type": "radio",
+            "DisplayName": "Status"
+          },
+          {
+            "FieldName": "Bit1",
+            "Type": "switch",
+            "DisplayName": "Ready for Review"
+          },
+          {
+            "FieldName": "CreatedBy",
+            "Type": "identity-picker",
+            "DisplayName": "Created By"
+          },
+          {
+            "FieldName": "Created",
+            "Type": "datepicker",
+            "DisplayName": "Created Time"
+          },
+          {
+            "FieldName": "ModifiedBy",
+            "Type": "identity-picker",
+            "DisplayName": "Modified By"
+          },
+          {
+            "FieldName": "Modified",
+            "Type": "datepicker",
+            "DisplayName": "Modified Time"
+          }
+        ],
+        "totalCount": "QueryAmount",
+        "querycount_prefix": "__variables_"
+      },
+      "filters": [],
+      "sorts": []
+    }
+  ]
+}

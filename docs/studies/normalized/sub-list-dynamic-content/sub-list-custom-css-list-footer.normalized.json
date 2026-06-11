@@ -1,0 +1,12 @@
+{
+  "name": "sub-list-custom-css-list-footer",
+  "proof": "export-proven from the second Approval Form Sub List; identifiers are synthetic",
+  "path": "control.attrs.common.css",
+  "css": "selector .dynamic-list .list-footer { position: absolute; left: 0; right: 0; bottom: -60px; }",
+  "purpose": "Preserve when a fixed/footer offset is needed for a horizontally scrollable or fixed-width Dynamic Sub List layout.",
+  "validationGuidance": [
+    "Do not require this CSS for all Dynamic content Sub Lists.",
+    "Warn when a .dynamic-list .list-footer rule is present but differs from the studied fixed-footer pattern.",
+    "Preserve intentional custom CSS instead of normalizing it away."
+  ]
+}

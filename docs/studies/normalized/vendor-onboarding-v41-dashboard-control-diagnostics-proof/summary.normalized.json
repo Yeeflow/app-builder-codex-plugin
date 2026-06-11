@@ -1,0 +1,60 @@
+{
+  "proof": "vendor-onboarding-v41-dashboard-control-diagnostics",
+  "packageType": "yapk",
+  "outputPackagePath": "/Users/Renger/Downloads/vendor-onboarding-v41-dashboard-control-diagnostics.yapk",
+  "baselinePackagePath": "/Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yapk",
+  "yapGeneration": "paused",
+  "purpose": "isolate dashboard control families into separate current-dashboard pages",
+  "idPreservation": {
+    "existingLargeIdsFoundInBaseline": 54,
+    "missingExistingIdsAfterGeneration": 0,
+    "newGeneratedIdsUsed": 12,
+    "rule": "existing app/list/field/layout/sample IDs preserved; newly added dashboard pages and navigation group use new IDs"
+  },
+  "navigationGroup": "Dashboard Control Diagnostics",
+  "diagnosticPages": [
+    { "title": "01 Heading", "control": "heading" },
+    { "title": "02 Container", "control": "container" },
+    { "title": "03 Button", "control": "button" },
+    { "title": "04 Dynamic Field", "control": "dynamic-field" },
+    { "title": "05 Dynamic User", "control": "dynamic-user" },
+    { "title": "06 Progress Circle", "control": "progress-circle" },
+    { "title": "07 Progress Bar", "control": "progress" },
+    { "title": "08 Alert", "control": "alert" },
+    { "title": "09 Kanban", "control": "kanban" },
+    { "title": "10 Icon List", "control": "icon_list" },
+    { "title": "11 Data Table", "control": "data-list" },
+    { "title": "12 Timeline", "control": "timeline-v" }
+  ],
+  "sampleData": {
+    "Vendors": 3,
+    "Vendor Documents": 3,
+    "Compliance Reviews": 2,
+    "Vendor Activity / History": 3
+  },
+  "validation": [
+    {
+      "name": "YAPK strict product schema validation",
+      "status": "pass",
+      "errors": 0
+    },
+    {
+      "name": "YAPK package validator",
+      "status": "pass",
+      "errors": 0,
+      "warnings": 1
+    },
+    {
+      "name": "YAPK schema standard inspector",
+      "status": "pass"
+    },
+    {
+      "name": "Generated UI quality",
+      "status": "pass_with_warnings",
+      "errors": 0,
+      "warnings": 11,
+      "warningReason": "diagnostic pages intentionally place one major control directly on each dashboard root"
+    }
+  ],
+  "manualRuntimeProofRequired": true
+}

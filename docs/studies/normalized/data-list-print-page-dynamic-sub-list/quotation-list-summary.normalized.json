@@ -1,0 +1,19 @@
+{
+  "source": "Sales Quotation.yap",
+  "proof": "export-proven",
+  "dataList": "Quotation",
+  "fields": {
+    "title": { "field": "Title", "display": "Customer name", "type": "input", "fieldType": "Text" },
+    "quoteNumber": { "field": "Text6", "display": "Quote Number", "type": "autonumber", "fieldType": "Text" },
+    "expireDate": { "field": "Datetime1", "display": "Expire Date", "type": "datepicker", "fieldType": "Datetime" },
+    "currency": { "field": "Text8", "display": "Currency", "type": "input", "fieldType": "Text" },
+    "totalAmount": { "field": "Decimal3", "display": "Total Amount", "type": "input_number", "fieldType": "Decimal" },
+    "totalPrice": { "field": "Decimal4", "display": "Total Price", "type": "calculated-column", "fieldType": "Decimal" }
+  },
+  "subListField": {
+    "field": "Text5",
+    "display": "Products & Services",
+    "type": "list",
+    "rowFields": ["NAME", "Description", "UNITPRICE", "QTY", "SUBTOTAL"]
+  }
+}

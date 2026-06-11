@@ -1,0 +1,63 @@
+{
+  "summary": {
+    "sourceExport": "Spark & AI (1).yap",
+    "classification": "export-proven",
+    "hostContext": "data-list-workflow",
+    "workflowCount": 1
+  },
+  "workflows": [
+    {
+      "referenceKey": "workflow:stock-box-extract-update-in-stock",
+      "sourceId": "<REDACTED_WORKFLOW_ID>",
+      "name": "Extract&Update In-Stock",
+      "key": "extract_update_stock_box_label_data",
+      "workflowType": 1,
+      "hostList": {
+        "referenceKey": "list:stock-box",
+        "sourceId": "<REDACTED_LIST_ID>",
+        "name": "Stock Box"
+      },
+      "trigger": {
+        "kind": "new-item",
+        "flowMapping": {
+          "sourceId": "<REDACTED_FLOWMAPPING_ID>",
+          "method": 0,
+          "setting": {
+            "NewTrigger": true
+          },
+          "fieldName": "Text24",
+          "fieldType": "flowstatus"
+        }
+      },
+      "aiAction": {
+        "nodeName": "Update records based on image",
+        "nodeType": "AI",
+        "agentReferenceKey": "ai-agent:dental-aligner-label-info",
+        "agentSourceId": "<REDACTED_AGENT_ID>",
+        "inputVariables": [
+          {
+            "id": "label_image",
+            "type": "img",
+            "mapping": {
+              "exprType": "list_field",
+              "valueType": "icon-upload",
+              "fieldSlot": "Text9",
+              "fieldKey": "ImageFile"
+            }
+          },
+          {
+            "id": "stock_box_item_id",
+            "type": "text",
+            "mapping": {
+              "exprType": "list_field",
+              "valueType": "input",
+              "fieldSlot": "ListDataID",
+              "fieldKey": "ListDataID"
+            }
+          }
+        ],
+        "outputVariables": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "proof": "UI-reference-backed from user screenshots; Title is a primary-field exception observed in export",
+  "disallowedDefaultFields": [
+    "Id",
+    "Created By",
+    "Created Time",
+    "Modified By",
+    "Modified Time"
+  ],
+  "generationRule": "Do not generate default/system fields into Data List Public Forms except the export-proven primary Title field when needed."
+}

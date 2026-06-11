@@ -1,0 +1,23 @@
+{
+  "schema": "sub-list-dynamic-content-normalized",
+  "case": "v12_yapk_generation_plan",
+  "baseline": "user-corrected-yapk-v1.1",
+  "output": "Sub List Dynamic Runtime Proof-V1.2-grid-fixed.yapk",
+  "resourceHandling": [
+    "decode V1.1 Resource with tolerant Brotli path",
+    "preserve corrected AppPackageInfo content",
+    "re-encode Resource with finalized standard Brotli",
+    "update wrapper PackageId, Version, Date, and Notes",
+    "setsign and verifysign before handoff"
+  ],
+  "signingResult": {
+    "setsign": "passed with 32-byte signature",
+    "verifysign": "passed"
+  },
+  "structureFixes": [
+    "removed stale standalone V1 header grid before signing",
+    "wrapped body grid field controls in containers",
+    "preserved list_new, list_dup, list_del, and list_import actions"
+  ],
+  "proofBoundary": "V1.2 is generated/signed/verified; runtime upgrade confirmation is pending."
+}

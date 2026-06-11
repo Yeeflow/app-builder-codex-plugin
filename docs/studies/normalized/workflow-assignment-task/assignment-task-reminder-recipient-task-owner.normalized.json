@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (2).yap",
+  "nodeType": "MultiAssignmentTask",
+  "pattern": "assignment-task-reminder-recipient-task-owner",
+  "normalizedConfig": {
+    "isenabledemail": true,
+    "to": "<CURRENT_TASK_ASSIGNEE_EMAIL_EXPRESSION>",
+    "subject": "<REDACTED_NOTIFICATION_SUBJECT>",
+    "html": "<REDACTED_NOTIFICATION_BODY>",
+    "notifyrules": "<REDACTED_OR_NORMALIZED_NOTIFY_RULE_ARRAY>"
+  },
+  "notes": [
+    "The export stores the recipient on the task-level to field, not on individual notifyrules.",
+    "No fixed email address is included."
+  ]
+}

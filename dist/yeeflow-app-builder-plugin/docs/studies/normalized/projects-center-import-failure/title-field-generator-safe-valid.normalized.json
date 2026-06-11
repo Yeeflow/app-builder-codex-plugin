@@ -1,0 +1,14 @@
+{
+  "case": "title-field-generator-safe-valid",
+  "proofLevel": "user-confirmed-import-success-derived",
+  "field": {
+    "FieldName": "Title",
+    "InternalName": "Title",
+    "DisplayName": "Request Title",
+    "Status": 0,
+    "IsSystem": true,
+    "IsIndex": true,
+    "FieldIndex": 0
+  },
+  "expectedFinding": null
+}

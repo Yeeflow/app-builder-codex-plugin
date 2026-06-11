@@ -1,0 +1,13 @@
+{
+  "proof": "yeeflow-package-api-automation-runtime-proof",
+  "packageFilename": "package-api-smoke-test.v1.yapk",
+  "manualChecklist": [
+    "Open the disposable/test Yeeflow workspace.",
+    "Confirm the Package API Smoke Test app exists.",
+    "Open API Smoke Dashboard.",
+    "Confirm the header card, KPI cards, business alert, and data table render.",
+    "Confirm API Smoke Requests default view shows display fields.",
+    "Add and save one test record, then delete it if desired."
+  ],
+  "runtimeBrowserProof": "not-run"
+}

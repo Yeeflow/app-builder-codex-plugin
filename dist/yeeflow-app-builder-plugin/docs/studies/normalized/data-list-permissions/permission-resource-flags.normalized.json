@@ -1,0 +1,20 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[].ListModel",
+  "pattern": "coarse-resource-permission-flags",
+  "shape": {
+    "Perm": 4,
+    "IsBreakInherit": false,
+    "IsItemPerm": true,
+    "AdvanceList": [],
+    "Ext1": null,
+    "Ext2": null,
+    "Ext3": null
+  },
+  "notes": [
+    "Found on the five targeted Event planning lists.",
+    "Detailed administrator/basic/advanced audience settings were not located in the decoded package payload."
+  ]
+}

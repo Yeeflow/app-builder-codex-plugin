@@ -1,0 +1,39 @@
+{
+  "proofLevel": "export-proven",
+  "page": "Dashboard",
+  "productName": "Check range",
+  "exportControlType": "check-range",
+  "control": {
+    "path": "$.children[0].children[1].children[0].children[1].children[3]",
+    "id": "<control-id>",
+    "type": "check-range",
+    "productName": "Check range",
+    "label": "<control-label>",
+    "binding": "__filter_filter_9",
+    "filterVariable": "filter_9",
+    "applyTypeRaw": "",
+    "applyType": "default/unspecified",
+    "applyButton": "",
+    "dataSource": null,
+    "displayField": "",
+    "valueField": "",
+    "optionFilterCount": 0,
+    "settingKeys": [
+      "field",
+      "lab",
+      "lablay",
+      "options",
+      "prefix",
+      "ver"
+    ],
+    "settingsPreview": {
+      "options": [
+        {
+          "mapkey": "<uuid>",
+          "min": 100,
+          "max": 2000
+        }
+      ]
+    }
+  }
+}

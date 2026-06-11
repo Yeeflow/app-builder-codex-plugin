@@ -1,0 +1,199 @@
+{
+  "proofLevel": "export-proven",
+  "exportPath": "Data.FormNewReports[].Settings.Fields[]",
+  "fields": [
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[0]",
+      "childFieldPath": "Data.Childs[1].Defs[0]",
+      "fieldId": "FormID",
+      "key": "FormID",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "FormID",
+      "reportFieldType": "input",
+      "storedType": "input",
+      "isSystem": true,
+      "required": true,
+      "rules": null
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[1]",
+      "childFieldPath": "Data.Childs[1].Defs[1]",
+      "fieldId": "TrackingNo",
+      "key": "TrackingNo",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "TrackingNo",
+      "reportFieldType": "input",
+      "storedType": "input",
+      "isSystem": true,
+      "required": false,
+      "rules": null
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[2]",
+      "childFieldPath": "Data.Childs[1].Defs[2]",
+      "fieldId": "RequestTitle",
+      "key": "RequestTitle",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "RequestTitle",
+      "reportFieldType": "input",
+      "storedType": "input",
+      "isSystem": true,
+      "required": false,
+      "rules": null
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[3]",
+      "childFieldPath": "Data.Childs[1].Defs[3]",
+      "fieldId": "Applicant",
+      "key": "Applicant",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "Applicant",
+      "reportFieldType": "identity-picker",
+      "storedType": "identity-picker",
+      "isSystem": true,
+      "required": false,
+      "rules": {
+        "multiple": false
+      }
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[4]",
+      "childFieldPath": "Data.Childs[1].Defs[4]",
+      "fieldId": "Submitter",
+      "key": "Submitter",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "Submitter",
+      "reportFieldType": "identity-picker",
+      "storedType": "identity-picker",
+      "isSystem": true,
+      "required": false,
+      "rules": {
+        "multiple": false
+      }
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[5]",
+      "childFieldPath": "Data.Childs[1].Defs[5]",
+      "fieldId": "Department",
+      "key": "Department",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "Department",
+      "reportFieldType": "organization-picker",
+      "storedType": "organization-picker",
+      "isSystem": true,
+      "required": false,
+      "rules": {
+        "multiple": true,
+        "metadata-treeselect": true
+      }
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[6]",
+      "childFieldPath": "Data.Childs[1].Defs[6]",
+      "fieldId": "Submitted",
+      "key": "Submitted",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "Submitted",
+      "reportFieldType": "datepicker",
+      "storedType": "datepicker",
+      "isSystem": true,
+      "required": false,
+      "rules": {
+        "showtime": true,
+        "dateformat": "0"
+      }
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[7]",
+      "childFieldPath": "Data.Childs[1].Defs[7]",
+      "fieldId": "LastModified",
+      "key": "LastModified",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "LastModified",
+      "reportFieldType": "datepicker",
+      "storedType": "datepicker",
+      "isSystem": true,
+      "required": false,
+      "rules": {
+        "showtime": true,
+        "dateformat": "0"
+      }
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[8]",
+      "childFieldPath": "Data.Childs[1].Defs[8]",
+      "fieldId": "Status",
+      "key": "Status",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "Status",
+      "reportFieldType": "radio",
+      "storedType": "radio",
+      "isSystem": true,
+      "required": false,
+      "rules": {
+        "displayStyle": "dropdown",
+        "choices": [
+          "In process",
+          "Completed",
+          "Rejected",
+          "Error",
+          "Recalled",
+          "Canceled"
+        ]
+      }
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[9]",
+      "childFieldPath": "Data.Childs[1].Defs[9]",
+      "fieldId": "LineManager",
+      "key": "LineManager",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "LineManager",
+      "reportFieldType": "identity-picker",
+      "storedType": "identity-picker",
+      "isSystem": true,
+      "required": false,
+      "rules": {
+        "multiple": false
+      }
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[10]",
+      "childFieldPath": "Data.Childs[1].Defs[10]",
+      "fieldId": "EmployeeNo",
+      "key": "EmployeeNo",
+      "variableSource": "system",
+      "variableType": "system",
+      "variableRef": "EmployeeNo",
+      "reportFieldType": "input",
+      "storedType": "input",
+      "isSystem": true,
+      "required": false,
+      "rules": null
+    },
+    {
+      "exportPath": "Data.FormNewReports[0].Settings.Fields[11]",
+      "childFieldPath": "Data.Childs[1].Defs[11]",
+      "fieldId": "field_1",
+      "key": "v_field_1",
+      "variableSource": "approval-variable",
+      "variableType": "text",
+      "variableRef": "field_1",
+      "reportFieldType": "input",
+      "storedType": "text",
+      "isSystem": false,
+      "required": false,
+      "rules": null
+    }
+  ]
+}

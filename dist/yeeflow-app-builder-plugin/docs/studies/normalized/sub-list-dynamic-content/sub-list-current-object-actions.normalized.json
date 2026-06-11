@@ -1,0 +1,29 @@
+{
+  "name": "sub-list-current-object-actions",
+  "proof": "export-proven from Approval Form export for list_dup and list_del; list_move and list_update are screenshot/product-observed only in this pass",
+  "category": "Current object",
+  "exportProvenSteps": [
+    {
+      "uiLabel": "Duplicate item",
+      "exportStepType": "list_dup"
+    },
+    {
+      "uiLabel": "Delete item",
+      "exportStepType": "list_del",
+      "attrs": {
+        "confirm": "__CONFIRMATION_CONFIG__"
+      }
+    }
+  ],
+  "observedButNotExportProven": [
+    {
+      "uiLabel": "Move item",
+      "candidateStepType": "list_move"
+    },
+    {
+      "uiLabel": "Update fields",
+      "candidateStepType": "list_update"
+    }
+  ],
+  "expressionBoundary": "The export proves current-object action scope but does not prove current-object property expression token shape."
+}

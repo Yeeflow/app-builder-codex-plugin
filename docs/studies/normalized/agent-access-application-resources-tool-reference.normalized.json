@@ -1,0 +1,44 @@
+{
+  "summary": {
+    "sourceExport": "Spark & AI (1).yap",
+    "classification": "export-proven",
+    "count": 1
+  },
+  "tools": [
+    {
+      "ownerReferenceKey": "ai-agent:dental-aligner-label-info",
+      "ownerName": "Dental Aligner Label Info",
+      "referenceKey": "tool:application-resource-access",
+      "sourceId": "<REDACTED_COMPONENT_ID>",
+      "name": "Application resource access",
+      "type": 2,
+      "subType": 10,
+      "kind": "tool",
+      "dataReference": {
+        "scope": "current-app-listset",
+        "appIdPresent": true,
+        "listSetIdPresent": true,
+        "targetKey": "app:spark-ai"
+      },
+      "resources": {
+        "dataLists": [
+          {
+            "referenceKey": "list:stock-box",
+            "sourceId": "<REDACTED_LIST_ID>",
+            "permissions": 11
+          },
+          {
+            "referenceKey": "list:category",
+            "sourceId": "<REDACTED_LIST_ID>",
+            "permissions": 8
+          }
+        ]
+      },
+      "intendedOperations": [
+        "update originating Stock Box item by stock_box_item_id",
+        "read Category list to resolve lookup target"
+      ],
+      "runtimePolicy": "Update-capable tool; validate list scope locally and do not execute against real business data."
+    }
+  ]
+}

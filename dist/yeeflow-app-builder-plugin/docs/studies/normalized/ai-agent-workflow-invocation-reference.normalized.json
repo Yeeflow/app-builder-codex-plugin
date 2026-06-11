@@ -1,0 +1,441 @@
+{
+  "summary": {
+    "inputPath": "<downloads>/AI Agent and Copilot Local Resource Baseline8.yap",
+    "title": "AI Agent and Copilot Local Resource Baseline8",
+    "replaceIds": 23,
+    "largeNumbersPreserved": 6,
+    "scheduledWorkflows": 2,
+    "aiResources": 3,
+    "localLists": 1,
+    "actionCounts": {
+      "StartNoneEvent": 2,
+      "SequenceFlow": 6,
+      "EndNoneEvent": 2,
+      "MailTask": 2,
+      "QueryData": 1,
+      "AI": 1
+    }
+  },
+  "agents": [
+    {
+      "id": "2056585556048883724",
+      "name": "Local Innovation Ideas Agent",
+      "type": 0,
+      "status": 1,
+      "isPublished": true,
+      "settings": {
+        "Prompt": "Role: Innovation Ideas Analyst\n\nYou are an AI Agent for the local Innovation Ideas list in this Yeeflow application.\n\nYour job is to:\n- explain how to review local Innovation Ideas records\n- summarize user-provided idea details\n- draft safe improvement suggestions from user-provided local context only\n\nUse only the configured local Innovation Ideas tool when it is available. Do not call external systems, HTTP APIs, Outlook, SharePoint, OAuth connections, or credential-backed services.\n\nOutputFormat:\nReturn a concise response with review guidance, user-provided observations, and practical next steps.",
+        "ModelId": "gpt-5",
+        "InputVariables": [],
+        "OutputVariables": [
+          {
+            "id": "response",
+            "type": "text",
+            "description": "Summary and recommendations based only on local Innovation Ideas records."
+          }
+        ]
+      },
+      "components": [
+        {
+          "id": "2056585556048883726",
+          "type": 2,
+          "subType": 3,
+          "name": "Read Innovation Ideas",
+          "description": "Search and retrieve records from the local Innovation Ideas list. Use this tool only for local list reads and summaries.",
+          "settings": {
+            "Data": {
+              "Value": "2056585556048883714",
+              "AppID": 41,
+              "ListSetID": "2056585547604570113"
+            },
+            "runType": "1",
+            "Inputs": [
+              {
+                "Name": "Data filter",
+                "Label": "Data filter",
+                "Desc": "Data filter",
+                "Id": "Filters",
+                "Type": "text",
+                "FillType": "1"
+              },
+              {
+                "Name": "Fields",
+                "Label": "Fields",
+                "Desc": "Fields",
+                "Id": "Fields",
+                "Type": "text",
+                "FillType": "1"
+              },
+              {
+                "Name": "Sorts",
+                "Label": "Sorts",
+                "Desc": "Sorts",
+                "Id": "Sorts",
+                "Type": "text",
+                "FillType": "1"
+              },
+              {
+                "Name": "Page number",
+                "Label": "Page number",
+                "Desc": "Page number",
+                "Id": "PageNumber",
+                "Type": "number",
+                "FillType": "1"
+              },
+              {
+                "Name": "Page size",
+                "Label": "Page size",
+                "Desc": "Page size",
+                "Id": "PageSize",
+                "Type": "number",
+                "FillType": "1"
+              }
+            ],
+            "Outputs": [
+              {
+                "Name": "Data",
+                "Label": "Data",
+                "Id": "Data",
+                "Type": "list",
+                "FillType": "1",
+                "Desc": "Query retrieved items"
+              },
+              {
+                "Name": "Message",
+                "Label": "Message",
+                "Id": "Message",
+                "Type": "text",
+                "FillType": "1",
+                "Desc": "Message"
+              },
+              {
+                "Name": "Status code",
+                "Label": "Status code",
+                "Id": "Status",
+                "Type": "number",
+                "FillType": "1",
+                "Desc": "Status code"
+              },
+              {
+                "Name": "Total Count",
+                "Label": "Total Count",
+                "Id": "TotalCount",
+                "Type": "number",
+                "FillType": "1",
+                "Desc": "Total Count"
+              }
+            ],
+            "userType": "1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "2056585556048883725",
+      "name": "Local Innovation Ideas Copilot",
+      "type": 1,
+      "status": 1,
+      "isPublished": true,
+      "settings": {
+        "Prompt": "",
+        "InputVariables": [],
+        "OutputVariables": [],
+        "Instructions": "Role: Local Innovation Ideas Copilot\n\nYou help users explore the local Innovation Ideas list and draft improvement suggestions from local records.\n\nHow to work:\n- This baseline intentionally contains no Copilot tools.\n- Do not claim that you can query records directly.\n- Ask a focused question if the user request is unclear.\n- Summarize user-provided facts separately from recommendations.\n- Do not use Outlook, SharePoint, HTTP APIs, OAuth connections, or external tools.\n\nOutput style:\n- Keep answers concise and practical.\n- Include a next best action when useful.",
+        "Model": {
+          "Id": "default",
+          "Type": null
+        },
+        "Suggestions": [
+          "Summarize the current innovation ideas.",
+          "Which ideas look ready for review?",
+          "Draft improvement suggestions from the local idea list."
+        ],
+        "Skills": []
+      },
+      "components": [
+        {
+          "id": "2056585556048883727",
+          "type": 2,
+          "subType": 3,
+          "name": "Read Innovation Ideas",
+          "description": "Read the local Innovation Ideas list to answer user questions without external calls.",
+          "settings": {
+            "Data": {
+              "Value": "2056585556048883714",
+              "AppID": 41,
+              "ListSetID": "2056585547604570113"
+            },
+            "runType": "1",
+            "Inputs": [
+              {
+                "Name": "Data filter",
+                "Label": "Data filter",
+                "Desc": "Data filter",
+                "Id": "Filters",
+                "Type": "text",
+                "FillType": "1"
+              },
+              {
+                "Name": "Fields",
+                "Label": "Fields",
+                "Desc": "Fields",
+                "Id": "Fields",
+                "Type": "text",
+                "FillType": "1"
+              },
+              {
+                "Name": "Sorts",
+                "Label": "Sorts",
+                "Desc": "Sorts",
+                "Id": "Sorts",
+                "Type": "text",
+                "FillType": "1"
+              },
+              {
+                "Name": "Page number",
+                "Label": "Page number",
+                "Desc": "Page number",
+                "Id": "PageNumber",
+                "Type": "number",
+                "FillType": "1"
+              },
+              {
+                "Name": "Page size",
+                "Label": "Page size",
+                "Desc": "Page size",
+                "Id": "PageSize",
+                "Type": "number",
+                "FillType": "1"
+              }
+            ],
+            "Outputs": [
+              {
+                "Name": "Data",
+                "Label": "Data",
+                "Id": "Data",
+                "Type": "list",
+                "FillType": "1",
+                "Desc": "Query retrieved items"
+              },
+              {
+                "Name": "Message",
+                "Label": "Message",
+                "Id": "Message",
+                "Type": "text",
+                "FillType": "1",
+                "Desc": "Message"
+              },
+              {
+                "Name": "Status code",
+                "Label": "Status code",
+                "Id": "Status",
+                "Type": "number",
+                "FillType": "1",
+                "Desc": "Status code"
+              },
+              {
+                "Name": "Total Count",
+                "Label": "Total Count",
+                "Id": "TotalCount",
+                "Type": "number",
+                "FillType": "1",
+                "Desc": "Total Count"
+              }
+            ],
+            "userType": "1"
+          }
+        },
+        {
+          "id": "2056585556048883728",
+          "type": 2,
+          "subType": 1,
+          "name": "Ask Local Innovation Ideas Agent",
+          "description": "Delegate local idea summarization to the included Local Innovation Ideas Agent. This does not use external connections.",
+          "settings": {
+            "Data": {
+              "Value": "2056585556048883724",
+              "AppID": 41,
+              "ListSetID": "2056585547604570113"
+            },
+            "runType": "1",
+            "Inputs": [
+              {
+                "Name": "User question",
+                "Label": "User question",
+                "Id": "Question",
+                "Type": "text",
+                "FillType": "1",
+                "Desc": "User question"
+              }
+            ],
+            "Outputs": [
+              {
+                "Name": "Response",
+                "Label": "Response",
+                "Id": "response",
+                "Type": "text",
+                "FillType": "1",
+                "Desc": "Response"
+              }
+            ],
+            "resType": "2"
+          }
+        },
+        {
+          "id": "2056585556048883729",
+          "type": 2,
+          "subType": 10,
+          "name": "Access Local Application Resources",
+          "description": "Grant this Copilot selected access to local Innovation Ideas data and the included Agent only.",
+          "settings": {
+            "Data": {
+              "WorkspaceID": "<REDACTED_WORKSPACEID>",
+              "AppID": 41,
+              "ListSetID": "2056585547604570113",
+              "Value": "2056585547604570113"
+            },
+            "runType": "1",
+            "Inputs": [],
+            "Outputs": [
+              {
+                "Name": "Data",
+                "Label": "Data",
+                "Id": "Data",
+                "Type": "text",
+                "FillType": "1",
+                "Desc": "Data"
+              },
+              {
+                "Name": "Status code",
+                "Label": "Status code",
+                "Id": "Status",
+                "Type": "number",
+                "FillType": "1",
+                "Desc": "Status code"
+              }
+            ],
+            "userType": "1",
+            "resType": "1",
+            "resources": {
+              "approvalForms": null,
+              "dataLists": {
+                "items": [
+                  {
+                    "id": "2056585556048883714",
+                    "permissions": 1
+                  }
+                ]
+              },
+              "documentLibraries": null,
+              "formReports": null,
+              "dataReports": null,
+              "aiAgents": {
+                "items": [
+                  {
+                    "id": "2056585556048883724",
+                    "permissions": 1
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "2056591356997808129",
+      "name": "Email generation",
+      "type": 0,
+      "status": 1,
+      "isPublished": true,
+      "settings": {
+        "Prompt": "Based on the input varaible: QueryItems which is a Json format content.\nAnalyize the content to understand what the data are, and then generate the proper email notification for users to check in detials.\nSet the email subject to the output variable: Subject,\nand the email body content into the output variable: Body.\n\nThe body of the email should be in HTML format with only in-line style.",
+        "InputVariables": [
+          {
+            "id": "QueryItems",
+            "type": "text",
+            "description": "The items of the data from the query data"
+          }
+        ],
+        "OutputVariables": [
+          {
+            "id": "Subject",
+            "type": "text",
+            "description": "the proper subject of this email"
+          },
+          {
+            "id": "Body",
+            "type": "richtext",
+            "description": "the body content of this email"
+          }
+        ],
+        "Model": {
+          "Id": "default",
+          "Type": null
+        }
+      },
+      "components": []
+    }
+  ],
+  "aiActions": [
+    {
+      "workflow": "Daily information update",
+      "workflowKey": "AS-DIU",
+      "id": "s_91024023318",
+      "resourceid": "s_91024023318",
+      "type": "AI",
+      "name": "AI Generate email",
+      "aiType": "agent",
+      "data": {
+        "AppID": 41,
+        "ListSetID": "2056585547604570113",
+        "AgentID": "2056591356997808129"
+      },
+      "inputVariables": [
+        {
+          "id": "QueryItems",
+          "type": "text",
+          "description": "The items of the data from the query data",
+          "value": {
+            "type": 1,
+            "value": {
+              "exprType": "variable",
+              "valueType": "text",
+              "id": "QueryItems",
+              "type": "expr"
+            }
+          }
+        }
+      ],
+      "outputVariables": [
+        {
+          "id": "Subject",
+          "type": "text",
+          "description": "the proper subject of this email",
+          "value": {
+            "prefix": "__variables_",
+            "value": "EmailSubject"
+          }
+        },
+        {
+          "id": "Body",
+          "type": "richtext",
+          "description": "the body content of this email",
+          "value": {
+            "prefix": "__variables_",
+            "value": "EmailBody"
+          }
+        }
+      ],
+      "context": {
+        "enabled": true,
+        "selected": {
+          "application": true,
+          "workflowInstance": true,
+          "workflowVariables": true,
+          "workflowTasks": true
+        }
+      }
+    }
+  ]
+}

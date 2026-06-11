@@ -1,0 +1,41 @@
+{
+  "controlType": "timeline-v",
+  "data": {
+    "list": {
+      "AppID": "<app-id>",
+      "ListID": "<list-id>",
+      "Type": 1,
+      "Title": "Company Overview",
+      "ListSetID": "<list-set-id>"
+    },
+    "title": {
+      "value": null,
+      "variable": [
+        {
+          "exprType": "variable_ctx",
+          "ctx": "__ctx_coll",
+          "id": "Title",
+          "valueType": "input",
+          "name": "Collection item:Name"
+        }
+      ]
+    },
+    "sort": [
+      {
+        "SortName": "Datetime1",
+        "SortByDesc": true
+      }
+    ],
+    "icon": "<icon-class>",
+    "link": "<layout-id>",
+    "modalsize": 0,
+    "animate": true,
+    "align": [null, "left"],
+    "va": [null, "2"]
+  },
+  "resolvedFields": {
+    "titleField": "Title",
+    "sortField": "Datetime1"
+  },
+  "proof": "export-proven"
+}

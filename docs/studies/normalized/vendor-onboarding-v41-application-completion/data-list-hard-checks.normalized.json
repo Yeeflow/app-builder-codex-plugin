@@ -1,0 +1,66 @@
+{
+  "dataListHardChecks": [
+    {
+      "id": "native_title_field",
+      "severity": "error",
+      "validatorCodes": [
+        "NATIVE_TITLE_FIELD_MISSING",
+        "NATIVE_TITLE_FIELD_INVALID",
+        "NATIVE_TITLE_NOT_SYSTEM",
+        "NATIVE_TITLE_TYPE_INVALID",
+        "TEXT0_PRIMARY_FIELD_INVALID_WHEN_TITLE_USED"
+      ],
+      "rule": "Every generated data list must preserve the native system Title field and must not use a generated Text0 primary field."
+    },
+    {
+      "id": "field_identity_and_storage",
+      "severity": "error",
+      "validatorCodes": [
+        "FIELD_IDENTIFIER_NOT_UNIQUE",
+        "FIELD_INTERNAL_NAME_INVALID",
+        "FIELD_NAME_INDEX_MISMATCH",
+        "FIELD_STORAGE_FAMILY_MISMATCH",
+        "FIELD_TYPE_UNSUPPORTED"
+      ],
+      "rule": "DisplayName, FieldName, and InternalName must be unique; InternalName must be safe; FieldName suffix must match FieldIndex; storage family must match FieldType."
+    },
+    {
+      "id": "choice_options",
+      "severity": "error",
+      "validatorCodes": [
+        "SELECT_CHOICES_MISSING"
+      ],
+      "rule": "Single-select, multi-select, radio, checkbox, and tag fields must include non-empty option values."
+    },
+    {
+      "id": "lookup_display_field",
+      "severity": "error",
+      "validatorCodes": [
+        "LOOKUP_TARGET_LIST_UNRESOLVED",
+        "LOOKUP_DISPLAY_FIELD_MISSING",
+        "LOOKUP_DISPLAY_FIELD_UNRESOLVED",
+        "LOOKUP_DISPLAY_FIELD_TEXT0_INVALID"
+      ],
+      "rule": "Lookup fields must target an included list and must select a display field that resolves on the target list, normally Title."
+    },
+    {
+      "id": "default_view_display_fields",
+      "severity": "error",
+      "validatorCodes": [
+        "DEFAULT_VIEW_MISSING",
+        "DEFAULT_VIEW_DISPLAY_FIELDS_MISSING",
+        "DEFAULT_VIEW_TITLE_NOT_FIRST"
+      ],
+      "rule": "Every generated data list must include a default view with visible fields and Title first."
+    },
+    {
+      "id": "sample_data_dependency_order",
+      "severity": "error",
+      "validatorCodes": [
+        "SAMPLE_ROW_ID_DUPLICATE",
+        "SAMPLE_LOOKUP_PARENT_UNRESOLVED"
+      ],
+      "rule": "Sample data must seed parent lists before related lists, and lookup values must reference seeded parent row IDs."
+    }
+  ]
+}

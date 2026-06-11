@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Agent Prompt Designer"
+  short_description: "Design structured Yeeflow AI Agent prompts."
+  default_prompt: "Use this skill to rewrite Yeeflow AI Agent Persona & Prompt content with role, goals, workflow, output format, constraints, and {{variableName}} references."

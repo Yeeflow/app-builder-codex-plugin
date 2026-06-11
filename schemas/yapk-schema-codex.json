@@ -1,0 +1,487 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Yeeflow YAPK Codex Schema Overlay",
+  "description": "Codex/plugin-specific YAPK schema additions and generation/validation standards. This file is intentionally separate from the product-team canonical yapk-schema.json so the canonical schema can be replaced cleanly.",
+  "x-yeeflow-standard-additions": {
+    "description": "Additional Yeeflow YAPK schema guidance for approval form DefResource, decoded approval form controls, workflow graph shapes, and form report metadata. Existing schema members are intentionally not replaced by this block.",
+    "additiveOnly": true,
+    "appliesTo": {
+      "appPackageInfo": "#/$defs/AppPackageInfo",
+      "processFormInfo": "#/$defs/ProcessFormInfo"
+    },
+    "runtimeRules": {
+      "approvalDefResourceEncoding": {
+        "target": "#/$defs/ProcessFormInfo/properties/DefResource",
+        "type": "string",
+        "contentEncoding": "base64",
+        "pattern": "^Ojpicm90bGk6O[A-Za-z0-9+/]*={0,2}$",
+        "encoding": "base64(\"::brotli::\" + Brotli(JSON.stringify(ProcessDefResourceInfo)))",
+        "binaryPrefix": "::brotli::",
+        "compression": "brotli",
+        "decodedContent": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessDefResourceInfo",
+        "note": "Approval form controls and workflow hydrate in designer only with the prefixed Brotli payload. Simple base64 JSON can install but may render an empty approval designer."
+      },
+      "deployedApprovalDefinitionIds": {
+        "target": "#/$defs/ProcessFormInfo",
+        "note": "When WorkflowType is 2 and Deployed is true, DefResourceID and DeployedDefID should be non-zero API-issued IDs."
+      },
+      "approvalFormPageHydration": {
+        "target": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessPageUrlInfo",
+        "note": "Decoded pageurls[].formdef.id should match pageurls[].id so approval form controls hydrate in the designer."
+      },
+      "approvalWorkflowGraphHydration": {
+        "target": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowShapeInfo",
+        "note": "Decoded childshapes should include workflow stencils and sequence connectors from the Start node so workflow actions hydrate in the designer."
+      },
+      "formNewReportsIsCurrentWorkflowReport": {
+        "target": "#/$defs/AppPackageInfo/properties/FormNewReports",
+        "required": true,
+        "legacyCollection": "#/$defs/AppPackageInfo/properties/FormReports",
+        "note": "Product clarification for v0.6.9: FormReports is the legacy workflow report collection and is not required for generated YAPK apps. FormNewReports is the current workflow report collection and must be present; generated workflow reports must be written to FormNewReports."
+      }
+    },
+    "additionalDefinitions": {
+      "ProcessReportInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "ReportID": {
+            "type": "integer"
+          },
+          "ProcDefKey": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "IsItemPerm": {
+            "type": "boolean"
+          },
+          "IconUrl": {
+            "type": "string"
+          },
+          "VariableExt1": {
+            "type": "string"
+          },
+          "VariableExt2": {
+            "type": "string"
+          },
+          "ConfigExt3": {
+            "type": "string"
+          },
+          "VarDisplay": {
+            "type": "string"
+          }
+        },
+        "description": "Current approval/process report metadata used by AppPackageInfo.FormNewReports. Legacy AppPackageInfo.FormReports may appear in old packages but is not required for generated YAPK apps."
+      },
+      "LongLikeID": {
+        "type": [
+          "integer",
+          "string"
+        ],
+        "pattern": "^[0-9]+$",
+        "description": "Yeeflow 64-bit numeric identifier. Preserve as a string when needed to avoid JavaScript rounding."
+      },
+      "ProcessDefResourceInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Decoded approval form/workflow definition after removing the ::brotli:: marker and Brotli-decompressing DefResource.",
+        "properties": {
+          "defkey": {
+            "type": "string"
+          },
+          "DefKey": {
+            "type": "string"
+          },
+          "FlowKey": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "workflowType": {
+            "type": [
+              "string",
+              "integer"
+            ]
+          },
+          "deployed": {
+            "type": "boolean"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": [
+              "string",
+              "integer"
+            ]
+          },
+          "flowPage": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "lineType": {
+            "type": "string"
+          },
+          "graphposition": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowPositionInfo"
+          },
+          "graphzoom": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "graphver": {
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "ProcModelListID": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/LongLikeID"
+          },
+          "ProcModelAppID": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/LongLikeID"
+          },
+          "ProcModelListSetID": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/LongLikeID"
+          },
+          "AppListSetID": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/LongLikeID"
+          },
+          "listSet": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "listInfo": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "variables": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessVariablesInfo"
+          },
+          "pageurls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessPageUrlInfo"
+            }
+          },
+          "childshapes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowShapeInfo"
+            }
+          },
+          "ext": {
+            "type": [
+              "object",
+              "string",
+              "null"
+            ],
+            "additionalProperties": true
+          }
+        }
+      },
+      "ProcessVariablesInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "basic": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessVariableInfo"
+            }
+          },
+          "listref": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessVariableInfo"
+            }
+          },
+          "filter": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessVariableInfo"
+            }
+          },
+          "tempVars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessVariableInfo"
+            }
+          }
+        }
+      },
+      "ProcessVariableInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "idx": {
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "fieldType": {
+            "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "value": {}
+        }
+      },
+      "ProcessPageUrlInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "pagetype": {
+            "type": "string"
+          },
+          "formdef": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessFormDefInfo"
+          }
+        },
+        "description": "Approval form page entry. For designer hydration, formdef.id should match this page id."
+      },
+      "ProcessFormDefInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "pagetype": {
+            "type": "string"
+          },
+          "ver": {
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "filterVars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessVariableInfo"
+            }
+          },
+          "tempVars": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/ProcessVariableInfo"
+            }
+          },
+          "attrs": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/FormControlInfo"
+            }
+          }
+        }
+      },
+      "FormControlInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Recursive Yeeflow approval form control definition. Control-specific attrs vary by product version, so attrs are intentionally permissive.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "nv_label": {
+            "type": "string"
+          },
+          "displayLabel": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "binding": {
+            "type": [
+              "string",
+              "object",
+              "null"
+            ],
+            "additionalProperties": true
+          },
+          "readonly": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "hidden": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "required": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "attrs": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/FormControlInfo"
+            }
+          }
+        }
+      },
+      "WorkflowShapeInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Workflow graph node or connector in decoded approval DefResource.childshapes.",
+        "properties": {
+          "resourceid": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "stencil": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowStencilInfo"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "incoming": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowConnectorInfo"
+            }
+          },
+          "outgoing": {
+            "type": "array",
+            "items": {
+              "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowConnectorInfo"
+            }
+          },
+          "source": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowConnectorInfo"
+          },
+          "target": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowConnectorInfo"
+          },
+          "position": {
+            "$ref": "#/x-yeeflow-standard-additions/additionalDefinitions/WorkflowPositionInfo"
+          }
+        }
+      },
+      "WorkflowStencilInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkflowConnectorInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "resourceid": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "WorkflowPositionInfo": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "x": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "y": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "left": {
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "top": {
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

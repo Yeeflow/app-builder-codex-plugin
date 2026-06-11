@@ -1,0 +1,24 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (2).yap",
+  "nodeType": "MultiAssignmentTask",
+  "pattern": "assignment-task-due-date-reminder-before",
+  "normalizedConfig": {
+    "notifyrules": [
+      {
+        "id": "<REDACTED_NOTIFY_RULE_ID>",
+        "actiontype": "1",
+        "actiondate": {
+          "relative": "-1",
+          "value": 2,
+          "type": "day"
+        },
+        "subject": "<REDACTED_REMINDER_SUBJECT>",
+        "content": "<REDACTED_REMINDER_BODY>"
+      }
+    ]
+  },
+  "notes": [
+    "Before-due reminders were observed with day and hour units."
+  ]
+}

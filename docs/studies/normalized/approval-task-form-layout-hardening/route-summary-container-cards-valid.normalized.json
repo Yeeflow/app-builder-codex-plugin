@@ -1,0 +1,13 @@
+{
+  "case": "route-summary-container-cards-valid",
+  "valid": true,
+  "control": {
+    "type": "container",
+    "nv_label": "Approval route cards",
+    "attrs": { "style": { "direction": [null, "row"], "gap": [null, "--sp--s200"] } },
+    "children": [
+      { "type": "container", "nv_label": "Department review card", "children": [] },
+      { "type": "container", "nv_label": "Finance review card", "children": [] }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[6]",
+    "childFieldPath": "Data.Childs[1].Defs[6]",
+    "fieldId": "Submitted",
+    "key": "Submitted",
+    "variableSource": "system",
+    "variableType": "system",
+    "variableRef": "Submitted",
+    "reportFieldType": "datepicker",
+    "storedType": "datepicker",
+    "isSystem": true,
+    "required": false,
+    "rules": {
+      "showtime": true,
+      "dateformat": "0"
+    }
+  }
+}

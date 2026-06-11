@@ -1,0 +1,86 @@
+{
+  "proof": "export-proven from Data Lists (4).yap; private values redacted",
+  "normalized": {
+    "exportPath": "Data.Childs[].PublicForms[].Resource.children[0]/children/0/children/0",
+    "control": {
+      "id": "__CONTROL_ID__",
+      "type": "flex_grid",
+      "binding": null,
+      "fieldID": null,
+      "label": "__LABEL_REDACTED__",
+      "attrs": {
+        "ver": 1,
+        "columns": {
+          "1": {
+            "list": [
+              {
+                "value": 1,
+                "unit": "fr"
+              },
+              {
+                "value": 1,
+                "unit": "fr"
+              },
+              {
+                "value": 1,
+                "unit": "fr"
+              }
+            ],
+            "last": {
+              "value": 1,
+              "unit": "fr"
+            }
+          },
+          "2": {
+            "list": [
+              {
+                "value": 1,
+                "unit": "fr"
+              },
+              {
+                "value": 1,
+                "unit": "fr"
+              }
+            ],
+            "last": {
+              "value": 1,
+              "unit": "fr"
+            }
+          },
+          "3": {
+            "list": [
+              {
+                "value": 1,
+                "unit": "fr"
+              }
+            ],
+            "last": {
+              "value": 1,
+              "unit": "fr"
+            }
+          }
+        },
+        "rows": {
+          "1": {
+            "list": [
+              {
+                "unit": "auto"
+              }
+            ],
+            "last": {
+              "unit": "auto"
+            }
+          }
+        },
+        "cgap": {
+          "1": 10
+        },
+        "cgapU": {
+          "1": "px"
+        }
+      }
+    },
+    "field": null,
+    "proof": "export-proven; private values redacted"
+  }
+}

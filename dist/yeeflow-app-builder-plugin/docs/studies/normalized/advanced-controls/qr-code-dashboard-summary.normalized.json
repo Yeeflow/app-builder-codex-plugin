@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "control": "QR Code",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "dashboard"
+  ],
+  "observedSurfaces": [
+    "Additional controls"
+  ],
+  "internalTypes": [
+    "list-qrcode"
+  ],
+  "count": 1,
+  "attrKeys": [
+    "common"
+  ],
+  "sourceModes": [
+    "unspecified"
+  ],
+  "styleKeys": [
+    "common"
+  ],
+  "childTypes": [],
+  "nestedChildControlTypes": {},
+  "bindingModes": [],
+  "validation": [
+    "QR value may be implicit current page URL in exports; require explicit source or focused runtime proof before generated-final reliance"
+  ],
+  "generation": [
+    "use for page sharing or mobile access"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<qr-code:1>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "list-qrcode",
+      "attrKeys": [
+        "common"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {},
+      "items": {}
+    }
+  ]
+}

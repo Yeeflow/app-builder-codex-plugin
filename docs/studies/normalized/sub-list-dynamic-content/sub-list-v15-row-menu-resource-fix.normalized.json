@@ -1,0 +1,26 @@
+{
+  "sourceBaseline": "Sub List Dynamic Runtime Proof-V1.4-row-menu-actions.yapk",
+  "output": "Sub List Dynamic Runtime Proof-V1.5-row-menu-actions-resource-fixed.yapk",
+  "proof": "generated-signed-verified",
+  "runtimeStatus": "pending user manual test",
+  "rootCause": "V1.4 decoded with five menu items, but runtime still showed the previous two-item menu. The Purchase Request form had non-distinct rounded ProcModelID, DefResourceID, and DeployedDefID values from the earlier add-form generation.",
+  "fix": {
+    "mutatedForm": "Purchase Request Form",
+    "mutatedSubList": "PurchaseItems",
+    "resourceIdsUpdated": [
+      "DefResourceID",
+      "DeployedDefID"
+    ],
+    "rowOperationMenu": [
+      "Duplicate",
+      "Insert before",
+      "Insert after",
+      "Move up",
+      "Move down"
+    ]
+  },
+  "signing": {
+    "setsign": "passed",
+    "verifysign": "passed"
+  }
+}

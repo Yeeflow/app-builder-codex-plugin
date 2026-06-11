@@ -1,0 +1,19 @@
+{
+  "finding": "nonfunctional_actions",
+  "expected": [
+    "meaningful button labels",
+    "valid action bindings",
+    "configured view/edit/update/navigation actions where planned"
+  ],
+  "observed": [
+    "dashboard buttons displayed as default Button controls",
+    "actions were not detectably configured",
+    "button labels did not communicate useful user intent"
+  ],
+  "quality_gate": [
+    "BUTTON_ACTION_MISSING",
+    "BUTTON_ACTION_UNRESOLVED",
+    "DEFAULT_BUTTON_LABEL",
+    "EXPECTED_ACTION_MISSING"
+  ]
+}

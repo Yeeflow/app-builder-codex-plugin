@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Application Builder"
+  short_description: "Design and generate Yeeflow apps from business requirements."
+  default_prompt: "Use $yeeflow-application-builder to understand the business requirement, design the safest Yeeflow-native application, generate and validate the .yap package, runtime-test when requested, document the baseline, and report the final package path."

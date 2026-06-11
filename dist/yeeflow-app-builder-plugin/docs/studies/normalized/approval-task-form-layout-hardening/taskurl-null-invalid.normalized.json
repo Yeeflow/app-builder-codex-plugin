@@ -1,0 +1,15 @@
+{
+  "case": "taskurl-null-invalid",
+  "valid": false,
+  "workflowNode": {
+    "stencil": { "id": "MultiAssignmentTask" },
+    "properties": {
+      "name": "Department Review",
+      "pagetype": 1,
+      "taskurl": null,
+      "taskUrl": null,
+      "TaskUrl": null
+    }
+  },
+  "expectedFinding": "TASKURL_MISSING_OR_NULL"
+}

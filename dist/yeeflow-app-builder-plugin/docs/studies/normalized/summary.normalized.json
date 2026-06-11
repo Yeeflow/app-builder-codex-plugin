@@ -1,0 +1,42 @@
+{
+  "input": "<downloads>/DEMO Innovation Ecosystem Platform.yap",
+  "generatedAt": "2026-05-18T16:09:57.235Z",
+  "sourceTitle": "DEMO Innovation Ecosystem Platform",
+  "rawExportNotIncluded": true,
+  "largeNumericIdsPreserved": 21,
+  "replaceIds": 319,
+  "counts": {
+    "agents": 4,
+    "copilots": 2,
+    "connections": 3,
+    "knowledges": 2,
+    "aiTools": 30,
+    "childResources": 5
+  },
+  "connectionTypes": [
+    {
+      "referenceKey": "connection:microsoft-graph-outlook",
+      "name": "Microsoft Graph - Outlook",
+      "type": 11,
+      "providerClass": "OAuth 2.0 API"
+    },
+    {
+      "referenceKey": "connection:http-request",
+      "name": "HTTP Request",
+      "type": 10,
+      "providerClass": "HTTP API / Generic"
+    },
+    {
+      "referenceKey": "connection:microsoft-graph-sharepoint",
+      "name": "Microsoft Graph - SharePoint",
+      "type": 11,
+      "providerClass": "OAuth 2.0 API"
+    }
+  ],
+  "safety": {
+    "secretsRedacted": true,
+    "externalRuntimeCallsAllowed": false,
+    "baselineGenerationRecommended": false,
+    "reason": "Export proves rich resource shapes, but generated import behavior for app-owned Agents/Copilots/Connections is not runtime-proven."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "feature": "dynamic-field-control",
+  "source": "Company Overview.yap",
+  "observedHosts": ["kanban item template", "collection item template", "data list custom form"],
+  "schema": {
+    "type": "dynamic-field",
+    "attrs": {
+      "source": "3 or 4",
+      "obj-f": "<field-name>"
+    }
+  },
+  "observedFields": ["Title", "Text3", "Text4", "Datetime1", "Datetime2", "Decimal2"],
+  "usage": "general field display values that are not better represented by Dynamic user/image/file",
+  "proof": "export-proven"
+}

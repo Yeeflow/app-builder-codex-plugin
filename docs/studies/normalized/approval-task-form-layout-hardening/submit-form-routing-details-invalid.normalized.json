@@ -1,0 +1,12 @@
+{
+  "case": "submit-form-routing-details-invalid",
+  "valid": false,
+  "pageurl": {
+    "type": 1,
+    "title": "Submit",
+    "formdef": {
+      "children": [{ "type": "container", "nv_label": "Internal routing details", "children": [] }]
+    }
+  },
+  "expectedFinding": "SUBMIT_FORM_INTERNAL_ROUTING_DETAILS"
+}

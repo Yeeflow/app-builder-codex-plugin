@@ -1,0 +1,14 @@
+{
+  "case": "assignment-task-pagetype-valid",
+  "valid": true,
+  "workflowNode": {
+    "stencil": { "id": "MultiAssignmentTask" },
+    "properties": {
+      "name": "Department Review",
+      "pagetype": 1,
+      "taskurl": "task-page-001",
+      "taskUrl": "task-page-001",
+      "TaskUrl": "task-page-001"
+    }
+  }
+}

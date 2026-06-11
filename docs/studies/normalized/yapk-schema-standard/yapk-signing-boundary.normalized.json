@@ -1,0 +1,22 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "signing_boundary",
+  "known": [
+    "setsign/verifysign are evidence-backed for valid existing Resource payloads",
+    "wrapper-only signing does not change app content when Resource is unchanged",
+    "normal .yap Resource encodings were rejected by the signing path"
+  ],
+  "notProven": [
+    "locally generated Brotli AppPackageInfo Resource accepted by setsign",
+    "locally edited content package accepted by runtime upgrade",
+    "offline .yapk content mutation suitable for production"
+  ],
+  "futureProofPath": [
+    "decode Resource",
+    "edit schema-valid AppPackageInfo",
+    "Brotli encode Resource",
+    "sign wrapper",
+    "verify sign",
+    "runtime upgrade proof"
+  ]
+}

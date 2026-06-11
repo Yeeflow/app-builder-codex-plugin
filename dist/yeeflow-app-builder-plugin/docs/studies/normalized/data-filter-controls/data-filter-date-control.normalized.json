@@ -1,0 +1,34 @@
+{
+  "proofLevel": "export-proven",
+  "page": "Dashboard",
+  "productName": "Date filter",
+  "exportControlType": "date-filter",
+  "control": {
+    "path": "$.children[0].children[1].children[0].children[1].children[1]",
+    "id": "<control-id>",
+    "type": "date-filter",
+    "productName": "Date filter",
+    "label": "<control-label>",
+    "binding": "__filter_filter_lastupdated",
+    "filterVariable": "filter_lastupdated",
+    "applyTypeRaw": "",
+    "applyType": "default/unspecified",
+    "applyButton": "",
+    "dataSource": null,
+    "displayField": "",
+    "valueField": "",
+    "optionFilterCount": 0,
+    "settingKeys": [
+      "edit",
+      "lab",
+      "lablay",
+      "layout"
+    ],
+    "settingsPreview": {
+      "layout": [
+        null,
+        "1"
+      ]
+    }
+  }
+}

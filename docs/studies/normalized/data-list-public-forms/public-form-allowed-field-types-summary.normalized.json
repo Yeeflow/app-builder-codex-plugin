@@ -1,0 +1,22 @@
+{
+  "proof": "export-proven from Data Lists (4).yap target public forms",
+  "allowedFieldTypes": [
+    "checkbox",
+    "currency",
+    "datepicker",
+    "file-upload",
+    "hyperlink",
+    "icon-upload",
+    "input",
+    "input_number",
+    "list",
+    "percent",
+    "radio",
+    "rate",
+    "richtext",
+    "signer",
+    "switch",
+    "textarea",
+    "time"
+  ]
+}

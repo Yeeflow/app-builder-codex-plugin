@@ -1,0 +1,262 @@
+{
+  "summary": {
+    "proofLevel": "export-proven",
+    "inputFile": "Workflow Actions Runtime Baseline (6)_Signal event.yap",
+    "signalEventNodeCount": 1,
+    "countsByHost": {
+      "approval-form-workflow": 1
+    },
+    "eventdefinitions": [
+      "CancelEventDefinition",
+      "RevokeEventDefinition"
+    ],
+    "signalEventsOutsideApprovalWorkflow": 0,
+    "noIncomingSignalEvents": 1,
+    "signalEventsWithOutgoingFlow": 1,
+    "downstreamActionTypes": [
+      "ContentList"
+    ],
+    "startActions": [
+      {
+        "workflowHost": "approval-form-workflow",
+        "workflowName": "Workflow Action Approval Test",
+        "internalControlType": "StartNoneEvent",
+        "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+        "nodeName": "Start",
+        "incomingCount": 0,
+        "outgoingCount": 3,
+        "hasTerminateField": true,
+        "terminate": false,
+        "hasTerminateConditions": true,
+        "terminateConditionsShape": "null",
+        "hasRevokeConditions": true,
+        "revokeConditionsShape": "array",
+        "revokeConditionCount": 1,
+        "isenabledemail": true,
+        "emailFieldsPresent": [
+          "to",
+          "subject",
+          "html"
+        ]
+      },
+      {
+        "workflowHost": "data-list-workflow",
+        "workflowName": "Purchase Requests Runtime Workflow",
+        "internalControlType": "StartNoneEvent",
+        "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+        "nodeName": "Start",
+        "incomingCount": 0,
+        "outgoingCount": 2,
+        "hasTerminateField": false,
+        "hasTerminateConditions": false,
+        "terminateConditionsShape": "undefined",
+        "hasRevokeConditions": false,
+        "revokeConditionsShape": "undefined",
+        "revokeConditionCount": 0,
+        "isenabledemail": true,
+        "emailFieldsPresent": [
+          "to",
+          "subject",
+          "html"
+        ]
+      },
+      {
+        "workflowHost": "scheduled-workflow",
+        "workflowName": "Schedule workflow sample",
+        "internalControlType": "StartNoneEvent",
+        "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+        "nodeName": "Start",
+        "incomingCount": 0,
+        "outgoingCount": 1,
+        "hasTerminateField": false,
+        "hasTerminateConditions": false,
+        "terminateConditionsShape": "undefined",
+        "hasRevokeConditions": false,
+        "revokeConditionsShape": "undefined",
+        "revokeConditionCount": 0,
+        "isenabledemail": true,
+        "emailFieldsPresent": [
+          "to",
+          "subject",
+          "html"
+        ]
+      },
+      {
+        "workflowHost": "approval-form-workflow",
+        "workflowName": "Another approval from",
+        "internalControlType": "StartNoneEvent",
+        "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+        "nodeName": "Start",
+        "incomingCount": 0,
+        "outgoingCount": 1,
+        "hasTerminateField": false,
+        "hasTerminateConditions": false,
+        "terminateConditionsShape": "undefined",
+        "hasRevokeConditions": false,
+        "revokeConditionsShape": "undefined",
+        "revokeConditionCount": 0,
+        "isenabledemail": false,
+        "emailFieldsPresent": [
+          "to",
+          "subject",
+          "html"
+        ]
+      },
+      {
+        "workflowHost": "data-list-workflow",
+        "workflowName": "Add Product Sub Items",
+        "internalControlType": "StartNoneEvent",
+        "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+        "nodeName": "Start",
+        "incomingCount": 0,
+        "outgoingCount": 1,
+        "hasTerminateField": false,
+        "hasTerminateConditions": false,
+        "terminateConditionsShape": "undefined",
+        "hasRevokeConditions": false,
+        "revokeConditionsShape": "undefined",
+        "revokeConditionCount": 0,
+        "isenabledemail": false,
+        "emailFieldsPresent": [
+          "to",
+          "subject",
+          "html"
+        ]
+      }
+    ],
+    "hostShapeCounts": {
+      "approval-form-workflow": {
+        "SequenceFlow": 43,
+        "EndNoneEvent": 2,
+        "EndRejectEvent": 3,
+        "MultiAssignmentTask": 14,
+        "CandidateTask": 2,
+        "SetVariableTask": 5,
+        "StartNoneEvent": 2,
+        "ContentList": 7,
+        "SignalEvent": 1
+      },
+      "data-list-workflow": {
+        "SequenceFlow": 14,
+        "EndRejectEvent": 1,
+        "CandidateTask": 2,
+        "EndNoneEvent": 2,
+        "MultiAssignmentTask": 1,
+        "StartNoneEvent": 2,
+        "SetVariableTask": 2,
+        "ContentList": 4
+      },
+      "scheduled-workflow": {
+        "SequenceFlow": 3,
+        "EndNoneEvent": 1,
+        "EndRejectEvent": 1,
+        "MultiAssignmentTask": 1,
+        "StartNoneEvent": 1
+      }
+    }
+  },
+  "signalEvents": [
+    {
+      "proofLevel": "export-proven",
+      "frontEndAction": "Signal event",
+      "internalControlType": "SignalEvent",
+      "workflowHost": "approval-form-workflow",
+      "workflowType": 2,
+      "workflowName": "Workflow Action Approval Test",
+      "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+      "nodeName": "Signal event",
+      "incomingCount": 0,
+      "outgoingCount": 1,
+      "eventdefinitionsShape": "array",
+      "eventdefinitions": [
+        "RevokeEventDefinition",
+        "CancelEventDefinition"
+      ],
+      "listensForCancel": true,
+      "listensForRevoke": true,
+      "outgoingFlows": [
+        {
+          "id": "<REDACTED_SEQUENCE_FLOW_ID>",
+          "name": "Sequence flow_41",
+          "source": "<REDACTED_WORKFLOW_NODE_ID>",
+          "target": "<REDACTED_WORKFLOW_NODE_ID>"
+        }
+      ],
+      "downstreamFirstActions": [
+        {
+          "internalControlType": "ContentList",
+          "frontEndAction": "Set data list",
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "nodeName": "Set Data List_6",
+          "listtype": "select",
+          "operationType": "edit",
+          "target": {
+            "appid": "<REDACTED_APP_ID>",
+            "listsetid": "<REDACTED_LISTSET_ID>",
+            "listid": "<REDACTED_LIST_ID>"
+          },
+          "listdatasCount": 1,
+          "listdatas": [
+            {
+              "index": 0,
+              "Columns": "Decimal1",
+              "Per": "2",
+              "Data": {
+                "shape": "expression-token-array",
+                "tokenTypes": [
+                  "expr"
+                ],
+                "exprTypes": [
+                  "variable"
+                ],
+                "valueTypes": [
+                  "number"
+                ],
+                "references": [
+                  {
+                    "exprType": "variable",
+                    "valueType": "number",
+                    "id": "<REDACTED_EXPR_ID>",
+                    "name": "Workflow Variables:Decrease Amount"
+                  }
+                ]
+              }
+            }
+          ],
+          "wheresCount": 1,
+          "wheres": [
+            {
+              "index": 0,
+              "key": "<REDACTED_CONDITION_ID>",
+              "pre": "and",
+              "left": "ListDataID",
+              "op": "0",
+              "right": {
+                "shape": "expression-token-array",
+                "tokenTypes": [
+                  "expr"
+                ],
+                "exprTypes": [
+                  "variable"
+                ],
+                "valueTypes": [
+                  "lookup"
+                ],
+                "references": [
+                  {
+                    "exprType": "variable",
+                    "valueType": "lookup",
+                    "id": "<REDACTED_EXPR_ID>",
+                    "name": "Workflow Variables:Select Product"
+                  }
+                ]
+              },
+              "nestedConditionCount": 0
+            }
+          ],
+          "broadMutationRisk": false
+        }
+      ]
+    }
+  ]
+}

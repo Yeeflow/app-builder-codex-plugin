@@ -1,0 +1,13 @@
+{
+  "schema": "yeeflow-yapk-signing-resource-normalized",
+  "case": "resource_byte_flip_rejected",
+  "evidenceLevel": "user-tested",
+  "summary": "Flipping one byte inside a valid Yeeflow-generated decoded Resource caused the signing endpoint to reject the wrapper.",
+  "mutation": {
+    "type": "single-byte decoded Resource mutation",
+    "resourceRemainedBase64Text": true,
+    "setsignAccepted": false
+  },
+  "observedRejectionClass": "resource decoder rejected invalid data",
+  "conclusion": "The opaque Resource has internal validation requirements; Sign generation cannot repair corrupted Resource bytes."
+}

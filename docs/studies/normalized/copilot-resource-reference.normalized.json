@@ -1,0 +1,2054 @@
+{
+  "summary": {
+    "count": 2
+  },
+  "copilots": [
+    {
+      "referenceKey": "copilot:partner-q-a",
+      "sourceId": "<REDACTED_COPILOT_ID>",
+      "name": "Partner Q&A",
+      "type": 1,
+      "typeName": "copilot",
+      "status": 1,
+      "isPublished": true,
+      "descriptionPresent": true,
+      "iconShape": {
+        "i": "fa-regular fa-message-lines",
+        "b": "#8b46ff",
+        "c": "#ffffff"
+      },
+      "settingsKeys": [
+        "Prompt",
+        "InputVariables",
+        "OutputVariables",
+        "Instructions",
+        "Model",
+        "Suggestions",
+        "Skills"
+      ],
+      "draftKeys": [
+        "Prompt",
+        "InputVariables",
+        "OutputVariables",
+        "Instructions",
+        "Model",
+        "Suggestions",
+        "Skills"
+      ],
+      "promptStorage": "Prompt",
+      "instructionStorage": "Instructions",
+      "model": {
+        "Id": "default",
+        "Type": null
+      },
+      "inputVariables": [],
+      "outputVariables": [],
+      "suggestions": [
+        "What project information do we have about this partner?",
+        "Draft a follow-up email based on the partner knowledge.",
+        "Find related SharePoint documents for this opportunity."
+      ],
+      "skills": [
+        "canvas",
+        "image"
+      ],
+      "components": [
+        {
+          "referenceKey": "component:partner-kb",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Partner KB",
+          "type": 1,
+          "subType": null,
+          "kind": "knowledge",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Category"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": null,
+            "targetKey": null
+          },
+          "runType": null,
+          "userType": null,
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [],
+          "outputs": [],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:microsoft-graph-outlook",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Microsoft Graph - Outlook",
+          "type": 2,
+          "subType": 8,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "userType",
+            "schema",
+            "operations",
+            "credentialstype",
+            "resType",
+            "baseurl"
+          ],
+          "dataReference": {
+            "scope": "Shared",
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": "connection",
+            "targetKey": "connection:microsoft-graph-outlook"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": "2",
+          "contentType": null,
+          "resType": "1",
+          "hasSchema": true,
+          "operationCount": 24,
+          "operations": [
+            {
+              "Name": "listOutlookMessages",
+              "Label": "listOutlookMessages",
+              "Method": "GET",
+              "Path": "/me/messages",
+              "Parameters": [
+                {
+                  "name": "$select",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Comma-separated fields to return, for example id,subject,from,receivedDatetime,bodyPreview,isRead."
+                },
+                {
+                  "name": "$filter",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "OData filter, for example isRead eq false."
+                },
+                {
+                  "name": "$orderby",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "OData order by, for example receivedDatetime desc."
+                },
+                {
+                  "name": "$top",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "integer"
+                  },
+                  "description": "Number of messages to return."
+                },
+                {
+                  "name": "$search",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Search query, for example \"subject:invoice\"."
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "List messages in the signed-in user's mailbox.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "createOutlookDraftMessage",
+              "Label": "createOutlookDraftMessage",
+              "Method": "POST",
+              "Path": "/me/messages",
+              "Parameters": [],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "string"
+                  },
+                  "body": {
+                    "$ref": "#/components/schemas/ItemBody"
+                  },
+                  "toRecipients": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Recipient"
+                    }
+                  },
+                  "ccRecipients": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Recipient"
+                    }
+                  },
+                  "bccRecipients": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Recipient"
+                    }
+                  },
+                  "importance": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "normal",
+                      "high"
+                    ]
+                  }
+                },
+                "required": [
+                  "subject",
+                  "body",
+                  "toRecipients"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Create a draft email message.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "getOutlookMessage",
+              "Label": "getOutlookMessage",
+              "Method": "GET",
+              "Path": "/me/messages/{message-id}",
+              "Parameters": [
+                {
+                  "name": "message-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$select",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Get a single email message by ID.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "updateOutlookMessage",
+              "Label": "updateOutlookMessage",
+              "Method": "PATCH",
+              "Path": "/me/messages/{message-id}",
+              "Parameters": [
+                {
+                  "name": "message-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "isRead": {
+                    "type": "boolean"
+                  },
+                  "importance": {
+                    "type": "string",
+                    "enum": [
+                      "low",
+                      "normal",
+                      "high"
+                    ]
+                  }
+                }
+              },
+              "ContentType": "application/json",
+              "Desc": "Update message properties such as read status or importance.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "deleteOutlookMessage",
+              "Label": "deleteOutlookMessage",
+              "Method": "DELETE",
+              "Path": "/me/messages/{message-id}",
+              "Parameters": [
+                {
+                  "name": "message-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Delete an email message.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "sendOutlookMail",
+              "Label": "sendOutlookMail",
+              "Method": "POST",
+              "Path": "/me/sendMail",
+              "Parameters": [],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "$ref": "#/components/schemas/CreateDraftMessageRequest"
+                  },
+                  "saveToSentItems": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": [
+                  "message"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Send an email message from the signed-in user's mailbox.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "sendOutlookDraftMessage",
+              "Label": "sendOutlookDraftMessage",
+              "Method": "POST",
+              "Path": "/me/messages/{message-id}/send",
+              "Parameters": [
+                {
+                  "name": "message-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Send an existing draft message.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "replyToOutlookMessage",
+              "Label": "replyToOutlookMessage",
+              "Method": "POST",
+              "Path": "/me/messages/{message-id}/reply",
+              "Parameters": [
+                {
+                  "name": "message-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "comment"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Reply to an email message.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "replyAllToOutlookMessage",
+              "Label": "replyAllToOutlookMessage",
+              "Method": "POST",
+              "Path": "/me/messages/{message-id}/replyAll",
+              "Parameters": [
+                {
+                  "name": "message-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "comment"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Reply all to an email message.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "forwardOutlookMessage",
+              "Label": "forwardOutlookMessage",
+              "Method": "POST",
+              "Path": "/me/messages/{message-id}/forward",
+              "Parameters": [
+                {
+                  "name": "message-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "toRecipients": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Recipient"
+                    }
+                  }
+                },
+                "required": [
+                  "toRecipients"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Forward an email message.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "moveOutlookMessage",
+              "Label": "moveOutlookMessage",
+              "Method": "POST",
+              "Path": "/me/messages/{message-id}/move",
+              "Parameters": [
+                {
+                  "name": "message-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "destinationId": {
+                    "type": "string",
+                    "description": "Destination mail folder ID, such as inbox, archive, deleteditems, or a folder ID."
+                  }
+                },
+                "required": [
+                  "destinationId"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Move an email message to another mail folder.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "listOutlookMessagesInFolder",
+              "Label": "listOutlookMessagesInFolder",
+              "Method": "GET",
+              "Path": "/me/mailFolders/{folder-id}/messages",
+              "Parameters": [
+                {
+                  "name": "folder-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Mail folder ID, for example inbox, sentitems, drafts, deleteditems, archive, or a folder ID."
+                },
+                {
+                  "name": "$select",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$filter",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$orderby",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$top",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "integer"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "List messages in a specific Outlook mail folder.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "listOutlookCalendars",
+              "Label": "listOutlookCalendars",
+              "Method": "GET",
+              "Path": "/me/calendars",
+              "Parameters": [],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "List calendars for the signed-in user.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "listOutlookEvents",
+              "Label": "listOutlookEvents",
+              "Method": "GET",
+              "Path": "/me/events",
+              "Parameters": [
+                {
+                  "name": "$select",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$filter",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$orderby",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$top",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "integer"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "List events in the signed-in user's default calendar.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "createOutlookEvent",
+              "Label": "createOutlookEvent",
+              "Method": "POST",
+              "Path": "/me/events",
+              "Parameters": [],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "string"
+                  },
+                  "body": {
+                    "$ref": "#/components/schemas/ItemBody"
+                  },
+                  "start": {
+                    "$ref": "#/components/schemas/DatetimeTimeZone"
+                  },
+                  "end": {
+                    "$ref": "#/components/schemas/DatetimeTimeZone"
+                  },
+                  "location": {
+                    "$ref": "#/components/schemas/Location"
+                  },
+                  "attendees": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Attendee"
+                    }
+                  },
+                  "isOnlineMeeting": {
+                    "type": "boolean"
+                  },
+                  "onlineMeetingProvider": {
+                    "type": "string",
+                    "enum": [
+                      "teamsForBusiness",
+                      "skypeForBusiness",
+                      "skypeForConsumer",
+                      "unknown"
+                    ]
+                  },
+                  "allowNewTimeProposals": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": [
+                  "subject",
+                  "start",
+                  "end"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Create an event in the signed-in user's default calendar.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "getOutlookEvent",
+              "Label": "getOutlookEvent",
+              "Method": "GET",
+              "Path": "/me/events/{event-id}",
+              "Parameters": [
+                {
+                  "name": "event-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Get a calendar event by ID.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "updateOutlookEvent",
+              "Label": "updateOutlookEvent",
+              "Method": "PATCH",
+              "Path": "/me/events/{event-id}",
+              "Parameters": [
+                {
+                  "name": "event-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "string"
+                  },
+                  "body": {
+                    "$ref": "#/components/schemas/ItemBody"
+                  },
+                  "start": {
+                    "$ref": "#/components/schemas/DatetimeTimeZone"
+                  },
+                  "end": {
+                    "$ref": "#/components/schemas/DatetimeTimeZone"
+                  },
+                  "location": {
+                    "$ref": "#/components/schemas/Location"
+                  },
+                  "attendees": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Attendee"
+                    }
+                  },
+                  "isOnlineMeeting": {
+                    "type": "boolean"
+                  },
+                  "onlineMeetingProvider": {
+                    "type": "string",
+                    "enum": [
+                      "teamsForBusiness",
+                      "skypeForBusiness",
+                      "skypeForConsumer",
+                      "unknown"
+                    ]
+                  }
+                }
+              },
+              "ContentType": "application/json",
+              "Desc": "Update a calendar event.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "deleteOutlookEvent",
+              "Label": "deleteOutlookEvent",
+              "Method": "DELETE",
+              "Path": "/me/events/{event-id}",
+              "Parameters": [
+                {
+                  "name": "event-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Delete a calendar event.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "listOutlookCalendarView",
+              "Label": "listOutlookCalendarView",
+              "Method": "GET",
+              "Path": "/me/calendarView",
+              "Parameters": [
+                {
+                  "name": "startDatetime",
+                  "in": "query",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Start date/time, for example 2026-05-18T00:00:00."
+                },
+                {
+                  "name": "endDatetime",
+                  "in": "query",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "End date/time, for example 2026-05-19T00:00:00."
+                },
+                {
+                  "name": "$select",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$top",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "integer"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "List calendar events in a date/time range.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "listOutlookEventsInCalendar",
+              "Label": "listOutlookEventsInCalendar",
+              "Method": "GET",
+              "Path": "/me/calendars/{calendar-id}/events",
+              "Parameters": [
+                {
+                  "name": "calendar-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$select",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$filter",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$top",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "integer"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "List events in a specific calendar.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "createOutlookEventInCalendar",
+              "Label": "createOutlookEventInCalendar",
+              "Method": "POST",
+              "Path": "/me/calendars/{calendar-id}/events",
+              "Parameters": [
+                {
+                  "name": "calendar-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "string"
+                  },
+                  "body": {
+                    "$ref": "#/components/schemas/ItemBody"
+                  },
+                  "start": {
+                    "$ref": "#/components/schemas/DatetimeTimeZone"
+                  },
+                  "end": {
+                    "$ref": "#/components/schemas/DatetimeTimeZone"
+                  },
+                  "location": {
+                    "$ref": "#/components/schemas/Location"
+                  },
+                  "attendees": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Attendee"
+                    }
+                  },
+                  "isOnlineMeeting": {
+                    "type": "boolean"
+                  },
+                  "onlineMeetingProvider": {
+                    "type": "string",
+                    "enum": [
+                      "teamsForBusiness",
+                      "skypeForBusiness",
+                      "skypeForConsumer",
+                      "unknown"
+                    ]
+                  },
+                  "allowNewTimeProposals": {
+                    "type": "boolean",
+                    "default": true
+                  }
+                },
+                "required": [
+                  "subject",
+                  "start",
+                  "end"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Create an event in a specific calendar.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "acceptOutlookEvent",
+              "Label": "acceptOutlookEvent",
+              "Method": "POST",
+              "Path": "/me/events/{event-id}/accept",
+              "Parameters": [
+                {
+                  "name": "event-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "sendResponse": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "ContentType": "application/json",
+              "Desc": "Accept a meeting invitation.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "declineOutlookEvent",
+              "Label": "declineOutlookEvent",
+              "Method": "POST",
+              "Path": "/me/events/{event-id}/decline",
+              "Parameters": [
+                {
+                  "name": "event-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "sendResponse": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "ContentType": "application/json",
+              "Desc": "Decline a meeting invitation.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "tentativelyAcceptOutlookEvent",
+              "Label": "tentativelyAcceptOutlookEvent",
+              "Method": "POST",
+              "Path": "/me/events/{event-id}/tentativelyAccept",
+              "Parameters": [
+                {
+                  "name": "event-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "sendResponse": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "ContentType": "application/json",
+              "Desc": "Tentatively accept a meeting invitation.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            }
+          ],
+          "resources": null,
+          "inputs": [],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+        },
+        {
+          "referenceKey": "component:sharepoint-data-operations",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "SharePoint Data Operations",
+          "type": 2,
+          "subType": 8,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "userType",
+            "schema",
+            "operations",
+            "credentialstype",
+            "resType",
+            "baseurl"
+          ],
+          "dataReference": {
+            "scope": "App",
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": "connection",
+            "targetKey": "connection:microsoft-graph-sharepoint"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": "2",
+          "contentType": null,
+          "resType": "1",
+          "hasSchema": true,
+          "operationCount": 12,
+          "operations": [
+            {
+              "Name": "getSharePointSiteByPath",
+              "Label": "getSharePointSiteByPath",
+              "Method": "GET",
+              "Path": "/sites/{hostname}:/{relative-path}",
+              "Parameters": [
+                {
+                  "name": "hostname",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "SharePoint hostname, for example contoso.sharepoint.com"
+                },
+                {
+                  "name": "relative-path",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Server-relative site path, for example sites/HR"
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Resolve a SharePoint site and return its Microsoft Graph site ID.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "listSharePointListItems",
+              "Label": "listSharePointListItems",
+              "Method": "GET",
+              "Path": "/sites/{site-id}/lists/{list-id}/items",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Microsoft Graph site ID."
+                },
+                {
+                  "name": "list-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "SharePoint list ID."
+                },
+                {
+                  "name": "$expand",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Use fields to include column values, for example: fields."
+                },
+                {
+                  "name": "$filter",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Optional OData filter."
+                },
+                {
+                  "name": "$top",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "integer"
+                  },
+                  "description": "Maximum number of items to return."
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Get items from a SharePoint list.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "createSharePointListItem",
+              "Label": "createSharePointListItem",
+              "Method": "POST",
+              "Path": "/sites/{site-id}/lists/{list-id}/items",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "list-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "fields": {
+                    "$ref": "#/components/schemas/ListItemFields"
+                  }
+                },
+                "required": [
+                  "fields"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Create a new item in a SharePoint list.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "getSharePointListItem",
+              "Label": "getSharePointListItem",
+              "Method": "GET",
+              "Path": "/sites/{site-id}/lists/{list-id}/items/{item-id}",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "list-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "item-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "$expand",
+                  "in": "query",
+                  "required": false,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Use fields to include column values."
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Get a single item in a SharePoint list.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "updateSharePointListItemFields",
+              "Label": "updateSharePointListItemFields",
+              "Method": "PATCH",
+              "Path": "/sites/{site-id}/lists/{list-id}/items/{item-id}/fields",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "list-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "item-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true,
+                "description": "Field values to update on a SharePoint list item."
+              },
+              "ContentType": "application/json",
+              "Desc": "Update column values on a SharePoint list item.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "listDocumentLibraryRootItems",
+              "Label": "listDocumentLibraryRootItems",
+              "Method": "GET",
+              "Path": "/sites/{site-id}/drive/root/children",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "List files and folders in the root of a SharePoint document library.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "getDocumentLibraryItem",
+              "Label": "getDocumentLibraryItem",
+              "Method": "GET",
+              "Path": "/sites/{site-id}/drive/items/{item-id}",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "item-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": null,
+              "ContentType": "",
+              "Desc": "Get metadata for a file or folder in a SharePoint document library.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "updateDocumentLibraryItem",
+              "Label": "updateDocumentLibraryItem",
+              "Method": "PATCH",
+              "Path": "/sites/{site-id}/drive/items/{item-id}",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "item-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              "ContentType": "application/json",
+              "Desc": "Update metadata for a file or folder in a SharePoint document library.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "createDocumentLibraryFolder",
+              "Label": "createDocumentLibraryFolder",
+              "Method": "POST",
+              "Path": "/sites/{site-id}/drive/items/{parent-id}/children",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "parent-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "folder": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "@microsoft.graph.conflictBehavior": {
+                    "type": "string",
+                    "enum": [
+                      "rename",
+                      "replace",
+                      "fail"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "folder"
+                ]
+              },
+              "ContentType": "application/json",
+              "Desc": "Create a folder under a parent folder in a SharePoint document library.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "Label": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "Method": "PUT",
+              "Path": "/sites/{site-id}/drive/items/{parent-id}:/{filename}:/content",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "parent-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "filename",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "string",
+                "format": "binary",
+                "description": "Raw binary file content."
+              },
+              "ContentType": "application/octet-stream",
+              "Desc": "Upload a new small file to a SharePoint document library using a parent folder item ID.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "Label": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "Method": "PUT",
+              "Path": "/sites/{site-id}/drive/root:/{filename}:/content",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "filename",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "string",
+                "format": "binary",
+                "description": "Raw binary file content."
+              },
+              "ContentType": "application/octet-stream",
+              "Desc": "Upload a small file to the root of the default SharePoint document library for a site without requiring a parent ID.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            },
+            {
+              "Name": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "Label": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "Method": "PUT",
+              "Path": "/sites/{site-id}/drive/root:/{folder-path}/{filename}:/content",
+              "Parameters": [
+                {
+                  "name": "site-id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "folder-path",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  },
+                  "description": "Folder path inside the document library, for example Quotations/2026."
+                },
+                {
+                  "name": "filename",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "RequestBody": {
+                "type": "string",
+                "format": "binary",
+                "description": "Raw binary file content."
+              },
+              "ContentType": "application/octet-stream",
+              "Desc": "Upload a small file to a folder path inside the default SharePoint document library without requiring a parent ID.",
+              "Id": "<REDACTED_TOKEN_LIKE_VALUE>",
+              "FillType": "1"
+            }
+          ],
+          "resources": null,
+          "inputs": [],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+        },
+        {
+          "referenceKey": "component:access-current-application-resources",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Access current application resources",
+          "type": 2,
+          "subType": 10,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "userType",
+            "resType",
+            "resources"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "application",
+            "targetKey": "application:current"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": "1",
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": {
+            "approvalForms": {
+              "all": {
+                "permissions": 9
+              }
+            },
+            "dataLists": {
+              "all": {
+                "permissions": 11
+              }
+            },
+            "documentLibraries": {
+              "all": {
+                "permissions": 11
+              }
+            },
+            "formReports": {
+              "all": {
+                "permissions": 8
+              }
+            },
+            "dataReports": {
+              "all": {
+                "permissions": 8
+              }
+            },
+            "aiAgents": {
+              "all": {
+                "permissions": 1
+              }
+            }
+          },
+          "inputs": [],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        }
+      ],
+      "componentCounts": {
+        "knowledge": 1,
+        "tools": 3,
+        "externalConnectionTools": 2,
+        "localListTools": 0,
+        "applicationResourceTools": 1,
+        "connectedAgentTools": 0,
+        "unresolved": 0
+      }
+    },
+    {
+      "referenceKey": "copilot:nhic-innovation-copilot",
+      "sourceId": "<REDACTED_COPILOT_ID>",
+      "name": "NHIC Innovation Copilot",
+      "type": 1,
+      "typeName": "copilot",
+      "status": 1,
+      "isPublished": true,
+      "descriptionPresent": true,
+      "iconShape": {
+        "i": "fa-regular fa-layer-plus",
+        "b": "#ff6f2c",
+        "c": "#fff"
+      },
+      "settingsKeys": [
+        "Prompt",
+        "InputVariables",
+        "OutputVariables",
+        "Instructions",
+        "Model",
+        "Skills"
+      ],
+      "draftKeys": [
+        "Prompt",
+        "InputVariables",
+        "OutputVariables",
+        "Instructions",
+        "Model",
+        "Skills",
+        "Suggestions"
+      ],
+      "promptStorage": "Prompt",
+      "instructionStorage": "Instructions",
+      "model": {
+        "Id": "default",
+        "Type": null
+      },
+      "inputVariables": [],
+      "outputVariables": [],
+      "suggestions": [
+        "Any new partners added this week?",
+        "Please help me to log a communication activity",
+        "Which partner currently running the most amount of the projects?"
+      ],
+      "skills": [
+        "canvas"
+      ],
+      "components": [
+        {
+          "referenceKey": "component:nhic-innovation-data-hub",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "NHIC Innovation Data Hub",
+          "type": 1,
+          "subType": null,
+          "kind": "knowledge",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Category"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": null,
+            "targetKey": null
+          },
+          "runType": null,
+          "userType": null,
+          "credentialstype": null,
+          "contentType": null,
+          "resType": null,
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [],
+          "outputs": [],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:create-nhic-record",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Create NHIC Record",
+          "type": 2,
+          "subType": 1,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "resType"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "ai-resource",
+            "targetKey": "ai-agent:nhic-record-creation-agent"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": "2",
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "user message",
+              "name": "user message",
+              "label": "user message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "response",
+              "name": "response",
+              "label": "response",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:update-nhic-record",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Update NHIC Record",
+          "type": 2,
+          "subType": 1,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "resType"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "ai-resource",
+            "targetKey": "ai-agent:nhic-record-update-agent"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": "2",
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "user message",
+              "name": "user message",
+              "label": "user message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "response",
+              "name": "response",
+              "label": "response",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:delete-nhic-record",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Delete NHIC Record",
+          "type": 2,
+          "subType": 1,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "userType",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "resType"
+          ],
+          "dataReference": {
+            "scope": null,
+            "appIdPresent": true,
+            "listSetIdPresent": true,
+            "valueType": "ai-resource",
+            "targetKey": "ai-agent:nhic-record-deletion-agent"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": null,
+          "contentType": null,
+          "resType": "2",
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "user message",
+              "name": "user message",
+              "label": "user message",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "current user id",
+              "name": "current user id",
+              "label": "current user id",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "response",
+              "name": "response",
+              "label": "response",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "Local/app resource tool; validate references before runtime testing."
+        },
+        {
+          "referenceKey": "component:write-and-send-emails",
+          "sourceId": "<REDACTED_COMPONENT_ID>",
+          "name": "Write and Send Emails",
+          "type": 2,
+          "subType": 7,
+          "kind": "tool",
+          "status": 1,
+          "descriptionPresent": true,
+          "settingsKeys": [
+            "Data",
+            "runType",
+            "Inputs",
+            "Outputs",
+            "contentType",
+            "credentialstype",
+            "resType",
+            "userType",
+            "method",
+            "address",
+            "body"
+          ],
+          "dataReference": {
+            "scope": "App",
+            "appIdPresent": false,
+            "listSetIdPresent": false,
+            "valueType": "connection",
+            "targetKey": "connection:microsoft-graph-outlook"
+          },
+          "runType": "1",
+          "userType": "1",
+          "credentialstype": "2",
+          "contentType": "application/json",
+          "resType": "1",
+          "hasSchema": false,
+          "operationCount": 0,
+          "operations": [],
+          "resources": null,
+          "inputs": [
+            {
+              "id": "subject",
+              "name": "subject",
+              "label": "subject",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "content",
+              "name": "content",
+              "label": "content",
+              "type": "richtext",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "toRecipients",
+              "name": "toRecipients",
+              "label": "toRecipients",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "outputs": [
+            {
+              "id": "Data",
+              "name": "Data",
+              "label": "Data",
+              "type": "text",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            },
+            {
+              "id": "Status",
+              "name": "Status code",
+              "label": "Status code",
+              "type": "number",
+              "fillType": "1",
+              "hasValue": false,
+              "valueShape": null,
+              "descriptionPresent": true
+            }
+          ],
+          "runtimePolicy": "External connection tool; do not runtime-test without safe test credentials."
+        }
+      ],
+      "componentCounts": {
+        "knowledge": 1,
+        "tools": 4,
+        "externalConnectionTools": 1,
+        "localListTools": 0,
+        "applicationResourceTools": 0,
+        "connectedAgentTools": 3,
+        "unresolved": 0
+      }
+    }
+  ]
+}

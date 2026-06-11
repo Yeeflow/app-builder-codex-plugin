@@ -1,0 +1,18 @@
+{
+  "controlType": "timeline-v",
+  "orientation": "vertical",
+  "host": "dashboard",
+  "page": "Timeline with controls",
+  "dataSource": {
+    "type": "data-list",
+    "title": "Company Overview",
+    "listId": "<id>",
+    "resolved": true
+  },
+  "attrs": {
+    "dataKeys": ["list", "title", "sort", "icon", "link", "modalsize", "animate", "align", "va"],
+    "styleKeys": ["title"],
+    "itemTemplate": "children[]"
+  },
+  "proof": "export-proven from Company Overview (1).yap"
+}

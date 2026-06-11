@@ -1,0 +1,56 @@
+{
+  "fieldType": "checkbox",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Text14",
+    "FieldType": "Text",
+    "FieldIndex": 14,
+    "DisplayName": "__DISPLAY_NAME_33__",
+    "InternalName": "__INTERNAL_NAME_33__",
+    "Type": "checkbox",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "string",
+    "Rules": {
+      "choices": [
+        "Choice1",
+        "Choice2",
+        "Choice3",
+        "Choice4",
+        "Choice5"
+      ],
+      "color_choices": [
+        {
+          "value": "__VALUE_REDACTED__",
+          "key": "48a86a66-2eac-4dd4-bd59-61bcca03f1ae"
+        },
+        {
+          "value": "__VALUE_REDACTED__",
+          "key": "9b624411-a5d6-48ee-b661-8a0a6b063b19"
+        },
+        {
+          "value": "__VALUE_REDACTED__",
+          "key": "fc1e37d3-cc54-4dea-8d8e-122f07991d2d"
+        },
+        {
+          "value": "__VALUE_REDACTED__",
+          "key": "e05273a0-f154-4364-8a80-4e50f852e89f"
+        },
+        {
+          "value": "__VALUE_REDACTED__",
+          "key": "6d03e969-14ff-4515-8258-6930f3c321ec"
+        }
+      ],
+      "required": false
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (3).yap",
+  "nodeType": "StartNoneEvent",
+  "pattern": "start-action-allow-terminate-disabled",
+  "normalizedConfig": {
+    "terminate": false,
+    "terminate-conditions": null
+  },
+  "notes": [
+    "The export proves the terminate setting fields, but not an enabled terminate example."
+  ]
+}

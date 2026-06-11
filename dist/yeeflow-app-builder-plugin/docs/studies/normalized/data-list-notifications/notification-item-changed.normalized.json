@@ -1,0 +1,27 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[5].RemindRules[]",
+  "pattern": "item-changed-notification",
+  "shape": {
+    "Type": 4,
+    "SendType": 1,
+    "Status": 1,
+    "Rules": {
+      "Rules": {
+        "Period": "Daily",
+        "Type": 2,
+        "Fields": ["<field-internal-name>"]
+      },
+      "Conditions": {
+        "Type": 2,
+        "Data": "[{\"key\":\"<uuid>\",\"pre\":\"and\",\"left\":\"<field-token>\",\"op\":\"s.=\",\"right\":\"<fixed-value>\",\"group\":\"string\"}]"
+      }
+    },
+    "Receiver": {
+      "Identities": ["<department>", "<user>", "<user-group>"],
+      "ListDefs": ["<identity-field-internal-name>"]
+    }
+  }
+}

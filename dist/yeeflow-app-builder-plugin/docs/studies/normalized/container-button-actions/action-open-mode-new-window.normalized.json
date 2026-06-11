@@ -1,0 +1,36 @@
+{
+  "proof": "export-proven",
+  "host": "dashboard",
+  "controlType": "container",
+  "actionTypeCode": "5",
+  "actionType": "add_list_item",
+  "attrs": {
+    "action-type": "5",
+    "op": "new",
+    "modalsize": 9,
+    "cusize": {
+      "w": 80,
+      "wu": "vw"
+    },
+    "data": {
+      "list": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "ListID": "[ListID]"
+      }
+    },
+    "layout": "[LayoutID]",
+    "passvalues": [
+      {
+        "Name": "Text1",
+        "Value": "[REDACTED_EXPRESSION_ARRAY]"
+      }
+    ],
+    "queryParams": [
+      {
+        "name": "KeyInfo",
+        "value": "[REDACTED_EXPRESSION]"
+      }
+    ]
+  }
+}

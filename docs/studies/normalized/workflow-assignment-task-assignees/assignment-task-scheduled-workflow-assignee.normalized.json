@@ -1,0 +1,53 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Actions Runtime Baseline (1).yap",
+  "workflowHost": "scheduled workflow",
+  "workflowType": 3,
+  "nodeType": "MultiAssignmentTask",
+  "graph": {
+    "incoming": 1,
+    "outgoing": 2
+  },
+  "fieldPresence": {
+    "usertaskassignment": true,
+    "tasktype": false,
+    "approveway": true,
+    "approvepercentage": true,
+    "issequential": false,
+    "duedatedefinition": true,
+    "duedatetype": false,
+    "notifyrules": false,
+    "isenabledemail": true,
+    "taskurl": true
+  },
+  "settingsShape": {
+    "tasktype": null,
+    "taskTypeInterpretation": "approval/default by absent tasktype",
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "appointedOrder": "parallel-or-default",
+    "issequential": null,
+    "isenabledemail": false,
+    "duedatedefinition": 120,
+    "duedatetype": null,
+    "notifyrules": null,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "assigneeShape": {
+    "count": 1,
+    "entries": [
+      {
+        "type": "user",
+        "method": "expression",
+        "value": {
+          "shape": "expression-button",
+          "redactedLabel": "Applicant:Line Manager",
+          "context": "approval-or-application-context"
+        },
+        "title": "<REDACTED_ASSIGNEE_LABEL>"
+      }
+    ]
+  },
+  "generationRule": "Scheduled Workflow Assignment Task uses the same MultiAssignmentTask assignee family as approval/data-list workflows in this export, but this proof covers only an applicant-line-manager expression assignee.",
+  "runtimeBoundary": "No scheduled workflow was executed and no task routing was observed."
+}

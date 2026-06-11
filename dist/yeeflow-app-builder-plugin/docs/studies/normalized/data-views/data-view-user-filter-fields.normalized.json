@@ -1,0 +1,54 @@
+{
+  "resourceType": "data list",
+  "resourceRef": "<data-list-7>",
+  "resourceName": "<redacted-resource-name-7>",
+  "viewRef": "<view-7-4>",
+  "viewName": "<redacted-view-name>",
+  "defaultOrCustom": "custom",
+  "viewType": "calendar",
+  "typeCode": 100,
+  "urlKey": "<redacted-view-url>",
+  "visibleFields": [],
+  "visibleFieldCount": 0,
+  "primarySort": null,
+  "secondarySort": null,
+  "dataFilterSummary": "none",
+  "userFilters": [
+    "Title",
+    "ListDataID",
+    "CreatedBy",
+    "Created",
+    "ModifiedBy",
+    "Modified"
+  ],
+  "permissionSummary": "inherits or no view-level item permission flag",
+  "extKeys": [
+    "Url"
+  ],
+  "layoutViewKeys": [
+    "Scope",
+    "Columns",
+    "DefaultColor",
+    "ColorClass",
+    "Hidden",
+    "Workcalendar",
+    "ColorClassSetting",
+    "Filter",
+    "Attr_IsViewDetail",
+    "ExternalSetting",
+    "query"
+  ],
+  "specialSettings": [
+    "Scope",
+    "Columns",
+    "DefaultColor",
+    "ColorClass",
+    "Hidden",
+    "Workcalendar",
+    "ColorClassSetting",
+    "Filter",
+    "Attr_IsViewDetail",
+    "ExternalSetting"
+  ],
+  "proofLevel": "export-proven"
+}

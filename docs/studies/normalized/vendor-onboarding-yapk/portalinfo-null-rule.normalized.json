@@ -1,0 +1,28 @@
+{
+  "ruleName": "YAPK no-portal PortalInfo rule",
+  "status": "runtime install-proven for Vendor Onboarding v1.15",
+  "correctNoPortalValue": null,
+  "invalidNoPortalValues": [
+    {
+      "shape": "{}",
+      "validatorError": "YAPK_PORTALINFO_EMPTY_OBJECT_INVALID",
+      "note": "Empty object failed product review/import feedback."
+    },
+    {
+      "shape": "[]",
+      "validatorError": "YAPK_PORTALINFO_ARRAY_INVALID",
+      "note": "Empty array was tested in v1.14 and failed install."
+    }
+  ],
+  "generationGuidance": [
+    "When a YAPK package has no portal, emit PortalInfo as JSON null.",
+    "Do not use empty object or empty array as a no-portal placeholder.",
+    "When an actual portal is included, use the product-schema-compatible portal object and validate separately."
+  ],
+  "validationGuidance": [
+    "Generated-final validators must pass PortalInfo null.",
+    "Generated-final validators must fail PortalInfo empty object.",
+    "Generated-final validators must fail PortalInfo array.",
+    "Schema validators may normalize null only for schema compatibility after recording the product import rule."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "sub-list-dynamic-content-normalized",
+  "case": "broken_v1_grid_shape",
+  "observedIssue": [
+    "header grid rendered as one column",
+    "Designer Appearance settings could not expand"
+  ],
+  "problemShape": {
+    "type": "flex_grid",
+    "attrs": {
+      "columns": "array/object hybrid not matching corrected export-shaped responsive tracks",
+      "rows": "simple array"
+    },
+    "bodyTemplate": "loose row controls without matching body grid"
+  },
+  "fix": "Use corrected V1.1 header/body flex_grid attrs and caption-off Dynamic Sub List structure.",
+  "proofBoundary": "Root cause is inferred from user runtime feedback and structural comparison."
+}

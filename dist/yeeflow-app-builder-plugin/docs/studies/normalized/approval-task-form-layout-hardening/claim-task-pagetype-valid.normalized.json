@@ -1,0 +1,15 @@
+{
+  "case": "claim-task-pagetype-valid",
+  "valid": true,
+  "workflowNode": {
+    "stencil": { "id": "CandidateTask" },
+    "properties": {
+      "name": "Claim Review",
+      "tasktype": "approve",
+      "pagetype": 1,
+      "taskurl": "task-page-claim-001",
+      "taskUrl": "task-page-claim-001",
+      "TaskUrl": "task-page-claim-001"
+    }
+  }
+}

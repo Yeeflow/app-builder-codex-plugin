@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Application Generator"
+  short_description: "Generate and validate small Yeeflow .yap application packages."
+  default_prompt: "Use this skill to decompose, generate, validate, and package a small Yeeflow .yap application with related data lists and approval forms."

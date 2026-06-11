@@ -1,0 +1,48 @@
+{
+  "case": "listmodel-flags-required",
+  "source": "synthetic Business Travel hardening reference",
+  "rule": "Generated root and child list resources must carry Flags = 1 before import or YAPK signing.",
+  "invalid": {
+    "Data": {
+      "Item": {
+        "ListModel": {
+          "ListID": "1000000000001",
+          "Title": "Synthetic Travel App"
+        }
+      },
+      "Childs": [
+        {
+          "ListModel": {
+            "ListID": "1000000000002",
+            "Title": "Travel Requests",
+            "Flags": 0
+          }
+        }
+      ]
+    }
+  },
+  "valid": {
+    "Data": {
+      "Item": {
+        "ListModel": {
+          "ListID": "1000000000001",
+          "Title": "Synthetic Travel App",
+          "Flags": 1
+        }
+      },
+      "Childs": [
+        {
+          "ListModel": {
+            "ListID": "1000000000002",
+            "Title": "Travel Requests",
+            "Flags": 1
+          }
+        }
+      ]
+    }
+  },
+  "validatorCodes": [
+    "LISTMODEL_FLAGS_MISSING_OR_INVALID",
+    "YAPK_LISTMODEL_FLAGS_MISSING_OR_INVALID"
+  ]
+}

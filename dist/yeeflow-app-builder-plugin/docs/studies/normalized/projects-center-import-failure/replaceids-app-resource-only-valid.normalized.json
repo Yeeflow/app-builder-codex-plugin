@@ -1,0 +1,17 @@
+{
+  "case": "replaceids-app-resource-only-valid",
+  "proofLevel": "user-confirmed-import-success-derived",
+  "resource": {
+    "ReplaceIds": [
+      "__APP_RESOURCE_ID__",
+      "__APP_FIELD_ID__",
+      "__APP_LAYOUT_ID__"
+    ]
+  },
+  "rootListModel": {
+    "TenantID": "__TENANT_ID__",
+    "CreatedBy": "__USER_ID__",
+    "ModifiedBy": "__USER_ID__"
+  },
+  "expectedFinding": null
+}

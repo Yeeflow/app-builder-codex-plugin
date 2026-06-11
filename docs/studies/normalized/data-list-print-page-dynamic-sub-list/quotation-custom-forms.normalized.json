@@ -1,0 +1,10 @@
+{
+  "source": "Sales Quotation.yap",
+  "proof": "export-proven",
+  "dataList": "Quotation",
+  "customForms": [
+    { "name": "New Quotation", "type": 1, "purpose": "new/edit item", "subListLayout": "default", "actions": ["Cal_Tax value"] },
+    { "name": "Print Page", "type": 1, "purpose": "print target", "subListLayout": "dynamic", "actions": [] },
+    { "name": "View Quotation", "type": 1, "purpose": "view item", "subListLayout": "default", "actions": ["Print Quotation"] }
+  ]
+}

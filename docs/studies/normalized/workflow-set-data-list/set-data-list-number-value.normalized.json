@@ -1,0 +1,68 @@
+{
+  "proofLevel": "export-proven",
+  "internalControlType": "ContentList",
+  "frontEndAction": "Set data list",
+  "workflowHost": "approval-form-workflow",
+  "workflowType": 2,
+  "workflowName": "Workflow Action Approval Test",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Data List_1",
+  "listtype": "select",
+  "operationType": "add",
+  "target": {
+    "mode": "selected-data-source",
+    "appid": "<REDACTED_APP_ID>",
+    "listsetid": "<REDACTED_LISTSET_ID>",
+    "listid": "<REDACTED_LIST_ID>",
+    "resolvedTitle": "Purchase Requests Runtime Test",
+    "resolvedType": "data-list"
+  },
+  "listdatasShape": "array",
+  "listdatasCount": 9,
+  "mappings": [
+    {
+      "index": 0,
+      "Columns": "Title",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Title",
+        "DisplayName": "Purchase Requests Runtime Test Name",
+        "FieldType": "Text",
+        "Type": "input",
+        "IsSystem": true
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "text"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "id": "RequestTitle",
+            "name": "Workflow Variables:RequestTitle"
+          }
+        ]
+      }
+    }
+  ],
+  "wheresShape": "array",
+  "wheresCount": 0,
+  "wheres": [],
+  "hasListFieldValue": false,
+  "hasSubListValue": false,
+  "broadMutationRisk": false,
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

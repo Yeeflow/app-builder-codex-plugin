@@ -1,0 +1,38 @@
+{
+  "proofLevel": "export-proven",
+  "page": "Dashboard",
+  "consumer": {
+    "path": "$.exts[0]",
+    "controlType": "dashboard-report-ext",
+    "dataSource": {
+      "app": "<app>",
+      "list": "<list:5>",
+      "type": null
+    },
+    "chartType": "0",
+    "modelType": null,
+    "conditionPath": "$.exts[0].attr.settings.Conditions",
+    "conditions": [
+      {
+        "path": "$.exts[0].attr.settings.Conditions[0]",
+        "leftField": "<field:Text11>",
+        "operator": "9",
+        "pre": "and",
+        "filterVariables": [
+          "filter_5"
+        ],
+        "rightShape": "expression-array"
+      },
+      {
+        "path": "$.exts[0].attr.settings.Conditions[1]",
+        "leftField": "<field:Text1>",
+        "operator": "0",
+        "pre": "and",
+        "filterVariables": [
+          "filter_4"
+        ],
+        "rightShape": "expression-array"
+      }
+    ]
+  }
+}

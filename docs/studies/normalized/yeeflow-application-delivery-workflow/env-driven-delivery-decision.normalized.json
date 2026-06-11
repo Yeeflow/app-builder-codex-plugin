@@ -1,0 +1,26 @@
+{
+  "topic": "yeeflow-application-delivery-workflow",
+  "rule": "env-driven-delivery-decision",
+  "envPresenceOnly": true,
+  "variables": [
+    "YEEFLOW_API_BASE_URL",
+    "YEEFLOW_API_KEY",
+    "YEEFLOW_TENANT_URL",
+    "YEEFLOW_TENANT_ID",
+    "YEEFLOW_WORKSPACE_ID"
+  ],
+  "decisions": [
+    {
+      "condition": "api key missing",
+      "nextStep": "generate YAPK for manual install"
+    },
+    {
+      "condition": "api key present and workspace id missing",
+      "nextStep": "generate YAPK and provide manual install guidance"
+    },
+    {
+      "condition": "api key and workspace id present",
+      "nextStep": "ask user whether to auto-install"
+    }
+  ]
+}

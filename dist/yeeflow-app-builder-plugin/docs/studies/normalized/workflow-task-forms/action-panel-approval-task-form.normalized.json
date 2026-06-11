@@ -1,0 +1,25 @@
+{
+  "pageIndex": 1,
+  "pageId": "<REDACTED_TASK_FORM_ID>",
+  "title": "WARTB Task",
+  "pageType": "task-form",
+  "rawType": 2,
+  "hasActionPanel": true,
+  "hasWorkflowHistory": true,
+  "controlCounts": {
+    "container": 5,
+    "heading": 2,
+    "identity-picker": 1,
+    "datepicker": 2,
+    "input": 3,
+    "radio": 1,
+    "input_number": 1,
+    "textarea": 1,
+    "workflowControlPanel": 1,
+    "workflowHistory": 1
+  },
+  "readonlyControlCount": 9,
+  "editableControlCount": 0,
+  "actionButtons": [],
+  "actions": []
+}

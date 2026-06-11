@@ -1,0 +1,26 @@
+{
+  "name": "sub-list-summary-settings",
+  "proof": "export-proven from Approval Form export; identifiers are synthetic",
+  "summaryConfiguration": {
+    "path": "control.attrs[\"list-fields-summary\"][]",
+    "example": {
+      "field": "__NUMERIC_ROW_FIELD_ID__",
+      "type": "total",
+      "display": true
+    }
+  },
+  "renderedFooterControl": {
+    "type": "list-summary",
+    "label": "field2(Sum)",
+    "summary": {
+      "field": "__NUMERIC_ROW_FIELD_ID__",
+      "type": "total",
+      "display": true
+    }
+  },
+  "validationGuidance": [
+    "Summary fields should resolve to row fields in the associated listref or row-variable set.",
+    "Numeric compatibility should be warning-first unless the specific field type is proven for the summary mode.",
+    "Summary display is export-proven; recalculation behavior is runtime-sensitive."
+  ]
+}

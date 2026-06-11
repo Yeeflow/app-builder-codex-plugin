@@ -1,0 +1,34 @@
+{
+  "schema": "sub-list-dynamic-content-normalized",
+  "case": "corrected_header_grid",
+  "control": {
+    "type": "flex_grid",
+    "displayLabel": [null, false],
+    "attrs": {
+      "ver": 1,
+      "columns": {
+        "desktop": {
+          "list": [
+            { "value": 64, "unit": "px" },
+            { "value": 1, "unit": "fr" },
+            { "value": 1, "unit": "fr" },
+            { "value": 1, "unit": "fr" },
+            { "value": 64, "unit": "px" }
+          ],
+          "last": { "value": 1, "unit": "fr" }
+        }
+      },
+      "rows": {
+        "desktop": {
+          "list": [{ "unit": "auto" }],
+          "last": { "unit": "auto" }
+        }
+      },
+      "cgap": { "desktop": 10 },
+      "cgapU": { "desktop": "px" },
+      "content": { "align-i": [null, "2"] }
+    }
+  },
+  "children": "one container per visual header column",
+  "proofBoundary": "Synthetic/redacted shape normalized from the corrected V1.1 YAPK."
+}

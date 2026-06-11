@@ -1,0 +1,21 @@
+{
+  "source": {
+    "export": "/Users/Renger/Downloads/Purchase Requests.ydl",
+    "proof": "export-proven"
+  },
+  "defaultFieldControl": {
+    "isListControl": true,
+    "type": "identity-picker",
+    "identifier": "CreatedBy",
+    "InternalName": "CreatedBy",
+    "fieldID": "<REDACTED_FIELD_ID>",
+    "binding": "____customListFields_CreatedBy",
+    "attrs": {
+      "readonly": true
+    }
+  },
+  "notes": [
+    "The native Created By list field appears read-only in the studied data-list workflow task form.",
+    "Do not generalize all native-field edit behavior without runtime/designer proof."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "list_package_info",
+  "source": "product-provided ypk-schema.json",
+  "requiredFields": [
+    "List",
+    "Fields",
+    "Layouts",
+    "RemindRules",
+    "PublicForms",
+    "FlowMappings"
+  ],
+  "summary": "Child list-like packages use ListInfo plus arrays for fields, views/forms/layouts, reminders, public forms, and flow mappings.",
+  "redaction": "Synthetic reference only."
+}

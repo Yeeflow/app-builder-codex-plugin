@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[36]",
+    "childFieldPath": "Data.Childs[1].Defs[36]",
+    "fieldId": "field_27",
+    "key": "v_field_27",
+    "variableSource": "approval-variable",
+    "variableType": "location",
+    "variableRef": "field_27",
+    "reportFieldType": "location-picker",
+    "storedType": "location",
+    "isSystem": false,
+    "required": false,
+    "rules": null
+  }
+}

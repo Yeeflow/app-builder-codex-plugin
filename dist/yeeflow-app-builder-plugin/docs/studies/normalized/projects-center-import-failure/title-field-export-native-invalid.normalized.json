@@ -1,0 +1,18 @@
+{
+  "case": "title-field-export-native-invalid",
+  "proofLevel": "user-confirmed-import-failure-derived",
+  "field": {
+    "FieldName": "Title",
+    "InternalName": "Title",
+    "DisplayName": "Request Title",
+    "Status": 1,
+    "IsSystem": true,
+    "IsIndex": true,
+    "FieldIndex": 1
+  },
+  "expectedFinding": {
+    "code": "DATA_LIST_TITLE_FIELD_NATIVE_METADATA_INVALID",
+    "level": "error",
+    "mode": "generator/final"
+  }
+}

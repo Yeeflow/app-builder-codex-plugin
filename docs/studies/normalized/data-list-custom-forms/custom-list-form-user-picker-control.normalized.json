@@ -1,0 +1,24 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "exportPath": "children[0]/children/2",
+  "normalized": {
+    "id": "__CONTROL_ID__",
+    "type": "identity-picker",
+    "binding": "Text10",
+    "fieldID": "__FIELD_ID__",
+    "label": "__LABEL_REDACTED__",
+    "attrs": {
+      "identity-maxselection": "__ID_REDACTED__",
+      "multiple": true
+    },
+    "field": {
+      "FieldName": "Text10",
+      "FieldID": "__FIELD_ID__",
+      "InternalName": "__INTERNAL_NAME_REDACTED__",
+      "Type": "identity-picker",
+      "FieldType": "Text",
+      "IsSystem": false
+    },
+    "proof": "export-proven; private values redacted"
+  }
+}

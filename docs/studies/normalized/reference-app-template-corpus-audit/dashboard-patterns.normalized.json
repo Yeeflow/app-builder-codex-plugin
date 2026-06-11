@@ -1,0 +1,23 @@
+{
+  "audit": "reference-app-template-corpus-audit",
+  "patterns": [
+    {
+      "pattern": "advanced_controls_dashboard",
+      "sourceExports": ["Company Overview (3).yap"],
+      "controls": ["tabs", "toggle", "alert", "progress-circle", "progress-bar", "qrcode", "barcode", "icon-list", "embed", "document"],
+      "templateCoverage": ["business_alert_card", "progress_summary_card", "quick_links_icon_list", "recent_activity_timeline"]
+    },
+    {
+      "pattern": "operational_workspace_dashboard",
+      "sourceExports": ["Projects Center_2.yap"],
+      "controls": ["collection", "action-button", "summary", "progress", "heading"],
+      "templateCoverage": ["dashboard_header_action_bar", "collection_card_board", "progress_summary_card"]
+    },
+    {
+      "pattern": "analytics_dashboard",
+      "sourceExports": ["Sales_Management_AD.yap"],
+      "controls": ["summary", "data-list", "pie-chart", "bar-chart", "pivot-table", "filters"],
+      "templateCoverage": ["kpi_card_row", "data_table_section"]
+    }
+  ]
+}

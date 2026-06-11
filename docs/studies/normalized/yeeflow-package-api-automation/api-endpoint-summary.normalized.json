@@ -1,0 +1,48 @@
+{
+  "study": "yeeflow-package-api-automation",
+  "sourceDate": "2026-05-29",
+  "endpoints": [
+    {
+      "id": "upload_file_content",
+      "method": "POST",
+      "path": "/files/upload",
+      "purpose": "Upload local package file content before install or upgrade.",
+      "auth": "apiKey header",
+      "requestNotes": ["query isImg=false", "file body contract requires runtime confirmation"],
+      "responseNotes": ["published docs show 200 OK with no response body"]
+    },
+    {
+      "id": "import_list_set_template_package",
+      "method": "POST",
+      "path": "/listset/package/import",
+      "purpose": "Import a YAP list set template package.",
+      "auth": "apiKey header",
+      "requiredFields": ["AppID", "WorkspaceID", "Title", "Description", "IconUrl", "Resource", "Manage", "Write", "Read"],
+      "responseDataFields": ["ActionLogID", "Completed"]
+    },
+    {
+      "id": "install_package",
+      "method": "POST",
+      "path": "/listset/package/install",
+      "purpose": "Install a YAPK package into a workspace.",
+      "auth": "apiKey header",
+      "requiredFields": ["WorkspaceID", "PackageFile.Id", "PackageFile.Name", "PackageFile.FileSize"],
+      "responseDataFields": ["ID", "Continue", "Status", "LogTxt"]
+    },
+    {
+      "id": "upgrade_package",
+      "method": "POST",
+      "path": "/listset/package/upgrade",
+      "purpose": "Upgrade an existing application with a YAPK package.",
+      "auth": "apiKey header",
+      "requiredFields": ["WorkspaceID", "PackageFile.Id", "PackageFile.Name", "PackageFile.FileSize", "UpgradeCheck"],
+      "responseDataFields": ["ID", "Continue", "Status", "LogTxt"]
+    }
+  ],
+  "safety": {
+    "defaultMode": "dry-run",
+    "executeFlagRequired": true,
+    "workspaceIdSource": "YEEFLOW_WORKSPACE_ID or active YEEFLOW_<PROFILE>_WORKSPACE_ID",
+    "redactedFields": ["apiKey", "Resource", "Sign", "tenant identifiers", "workspace identifiers", "private URLs", "raw responses", "decoded payloads"]
+  }
+}

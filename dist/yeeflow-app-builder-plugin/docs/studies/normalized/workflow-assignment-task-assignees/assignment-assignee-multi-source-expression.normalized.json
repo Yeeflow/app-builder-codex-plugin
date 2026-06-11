@@ -1,0 +1,87 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "multi-source-expression",
+  "rawAssigneeFieldNames": [
+    [
+      "type",
+      "method",
+      "value",
+      "title"
+    ],
+    [
+      "type",
+      "method",
+      "value",
+      "title"
+    ]
+  ],
+  "normalizedConfig": [
+    {
+      "type": "user",
+      "method": "expression",
+      "value": {
+        "kind": "expressionButton",
+        "label": "Applicant:Line Manager",
+        "dataShape": {
+          "type": "user",
+          "param": {
+            "id": {
+              "parseStatus": "opaque",
+              "expressionSourceHints": {
+                "types": [
+                  "application"
+                ],
+                "props": [
+                  "ApplicantUserID"
+                ],
+                "usesApplicantUserId": true
+              }
+            }
+          },
+          "prop": "LineManager"
+        }
+      },
+      "title": "<REDACTED_ASSIGNEE_LABEL>"
+    },
+    {
+      "type": "user",
+      "method": "expression",
+      "value": {
+        "kind": "expressionButton",
+        "label": "User group 2:All users",
+        "dataShape": {
+          "type": "usergroup",
+          "param": {
+            "id": "<USER_REF_CONFIRMED_BY_API>"
+          },
+          "prop": "Users_ID"
+        }
+      },
+      "title": "<REDACTED_ASSIGNEE_LABEL>"
+    }
+  ],
+  "approvalSettingsShape": {
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "appointedOrder": "sequential",
+    "issequential": true,
+    "isenabledemail": false,
+    "isallowreassign": false,
+    "isallowrecalled": null,
+    "automaticapproveddefinition": null,
+    "isallowsign": false,
+    "allowskip": true,
+    "duedatedefinition": 120,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "notificationSettingsShape": {
+    "isenabledemail": false
+  },
+  "runtimeDependencies": [
+    "runtime-applicant-user-context",
+    "valid-user-directory-data"
+  ],
+  "generationSafety": "export-proven shape; runtime routing unproven"
+}

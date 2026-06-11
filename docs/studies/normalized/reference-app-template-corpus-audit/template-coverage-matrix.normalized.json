@@ -1,0 +1,199 @@
+{
+  "audit": "reference-app-template-corpus-audit",
+  "templates": [
+    {
+      "templateId": "dashboard_header_action_bar",
+      "status": "export-proven",
+      "sourceExports": [
+        "Projects Center_2.yap",
+        "Company Overview (3).yap",
+        "DEMO Innovation Ecosystem Platform (1).yap / NHIC Innovation Overview",
+        "Service Desk Pro (2).yap / Executive Dashboard"
+      ]
+    },
+    {
+      "templateId": "kpi_card_row",
+      "status": "export-proven",
+      "sourceExports": [
+        "Sales_Management_AD.yap",
+        "Projects Center_2.yap",
+        "DEMO Innovation Ecosystem Platform (1).yap / NHIC Innovation Overview",
+        "Service Desk Pro (2).yap / Executive Dashboard"
+      ],
+      "partialEvidence": false,
+      "limitations": [
+        "aggregate correctness and runtime values remain package-specific"
+      ]
+    },
+    {
+      "templateId": "progress_summary_card",
+      "status": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Projects Center_2.yap",
+        "DEMO Innovation Ecosystem Platform (1).yap / NHIC Innovation Overview",
+        "Service Desk Pro (2).yap / Executive Dashboard"
+      ]
+    },
+    {
+      "templateId": "business_alert_card",
+      "status": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ],
+      "limitations": [
+        "business-specific content still required"
+      ]
+    },
+    {
+      "templateId": "data_table_section",
+      "status": "runtime-proven",
+      "sourceExports": [
+        "Sales_Management_AD.yap",
+        "Online Library.yap / Print Inventory",
+        "Sales Quotation.yap / Print Page"
+      ]
+    },
+    {
+      "templateId": "kanban_status_board",
+      "status": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Data Lists (4).yap",
+        "Projects Center_2.yap",
+        "Sales_Management_AD.yap"
+      ]
+    },
+    {
+      "templateId": "collection_card_board",
+      "status": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Projects Center_2.yap"
+      ]
+    },
+    {
+      "templateId": "quick_links_icon_list",
+      "status": "export-proven",
+      "sourceExports": [
+        "Projects Center_2.yap",
+        "Company Overview (3).yap"
+      ]
+    },
+    {
+      "templateId": "recent_activity_timeline",
+      "status": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ]
+    },
+    {
+      "templateId": "detail_view_header_summary",
+      "status": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Projects Center_2.yap",
+        "Sales_Management_AD.yap"
+      ]
+    },
+    {
+      "templateId": "tabbed_detail_page",
+      "status": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Projects Center_2.yap"
+      ]
+    },
+    {
+      "templateId": "sectioned_new_edit_form",
+      "status": "export-proven",
+      "sourceExports": [
+        "Data Lists (4).yap",
+        "Projects Center_2.yap",
+        "Sales_Management_AD.yap"
+      ]
+    },
+    {
+      "templateId": "required_documents_checklist",
+      "status": "export-proven",
+      "sourceExports": [
+        "Data Lists (4).yap",
+        "Projects Center_2.yap"
+      ],
+      "partialEvidence": true
+    },
+    {
+      "templateId": "related_records_section",
+      "status": "export-proven",
+      "sourceExports": [
+        "Projects Center_2.yap",
+        "Sales_Management_AD.yap"
+      ]
+    },
+    {
+      "templateId": "print_page_summary",
+      "status": "export-proven",
+      "sourceExports": [
+        "Sales Quotation.yap / Print Page",
+        "Online Library.yap / Print Inventory"
+      ],
+      "limitations": [
+        "browser print and page-break behavior remain runtime/manual proof boundaries"
+      ]
+    },
+    {
+      "templateId": "print_page_document_checklist",
+      "status": "export-proven",
+      "sourceExports": [
+        "Online Library.yap / Print Inventory",
+        "Sales Quotation.yap / Print Page"
+      ],
+      "limitations": [
+        "generated print tables/checklists must bind configured fields and remain read-only"
+      ]
+    },
+    {
+      "templateId": "print_page_qr_barcode_section",
+      "status": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Online Library.yap / Detail Page and Barcode Scan",
+        "Sales Quotation.yap / Print Page",
+        "Online Library (1).yap / Print Inventory",
+        "Sales Quotation (1).yap / Print Page"
+      ],
+      "partialEvidence": false,
+      "limitations": [
+        "browser print rendering and scanned QR destination behavior remain runtime/manual proof boundaries"
+      ]
+    },
+    {
+      "templateId": "kanban_card_with_dynamic_fields",
+      "status": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ]
+    },
+    {
+      "templateId": "collection_card_with_dynamic_fields",
+      "status": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ]
+    },
+    {
+      "templateId": "item_action_bar_edit_delete_update",
+      "status": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ]
+    },
+    {
+      "templateId": "selection_bulk_toolbar",
+      "status": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ]
+    }
+  ]
+}

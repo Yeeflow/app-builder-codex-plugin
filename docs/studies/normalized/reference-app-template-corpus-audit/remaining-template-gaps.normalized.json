@@ -1,0 +1,17 @@
+{
+  "audit": "reference-app-template-corpus-audit",
+  "newGoldenAppStillNeeded": false,
+  "gaps": [
+    {
+      "templateId": "browser_print_page_break_behavior",
+      "reason": "Exports prove print structure and QR placement, not browser print output, page-break fidelity, or scanned QR destination behavior."
+    }
+  ],
+  "coveredByAdditionalRefs": [
+    "kpi_card_row",
+    "print_page_summary",
+    "print_page_document_checklist",
+    "print_page_qr_barcode_section"
+  ],
+  "recommendation": "All template-library gaps are now export-proven for structure. Use the expanded corpus for Vendor Onboarding v4.1 page-by-page generation, with manual/runtime checks for browser print/page breaks and scanned QR destination behavior."
+}

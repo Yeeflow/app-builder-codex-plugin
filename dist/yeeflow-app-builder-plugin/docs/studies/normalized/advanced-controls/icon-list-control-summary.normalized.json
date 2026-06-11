@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "control": "Icon list",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "dashboard"
+  ],
+  "observedSurfaces": [
+    "Additional controls"
+  ],
+  "internalTypes": [
+    "icon_list"
+  ],
+  "count": 2,
+  "attrKeys": [
+    "data",
+    "gen",
+    "icon",
+    "title"
+  ],
+  "sourceModes": [
+    "unspecified"
+  ],
+  "styleKeys": [
+    "icon"
+  ],
+  "childTypes": [],
+  "nestedChildControlTypes": {},
+  "bindingModes": [],
+  "validation": [
+    "icon list items should define icon, text, and link settings where required"
+  ],
+  "generation": [
+    "use for resource shortcuts and quick links"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<icon-list:1>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "icon_list",
+      "attrKeys": [
+        "data",
+        "gen",
+        "icon",
+        "title"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<icon-list:2>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "icon_list",
+      "attrKeys": [
+        "data",
+        "gen",
+        "icon",
+        "title"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {},
+      "items": {}
+    }
+  ]
+}

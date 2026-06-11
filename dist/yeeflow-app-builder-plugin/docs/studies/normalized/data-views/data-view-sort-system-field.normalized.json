@@ -1,0 +1,53 @@
+{
+  "resourceType": "data list",
+  "resourceRef": "<data-list-1>",
+  "resourceName": "<redacted-resource-name-1>",
+  "viewRef": "<view-1-2>",
+  "viewName": "<redacted-view-name>",
+  "defaultOrCustom": "custom",
+  "viewType": "list",
+  "typeCode": 0,
+  "urlKey": "<redacted-view-url>",
+  "visibleFields": [
+    "Title",
+    "Datetime1",
+    "Datetime2",
+    "Text1",
+    "Text2",
+    "Text4",
+    "Text5",
+    "Text6",
+    "Decimal1",
+    "Text7",
+    "Text8",
+    "Text9",
+    "Text10",
+    "Text11"
+  ],
+  "visibleFieldCount": 14,
+  "primarySort": {
+    "field": "Created",
+    "descending": true
+  },
+  "secondarySort": null,
+  "dataFilterSummary": "1 condition (0)",
+  "userFilters": [],
+  "permissionSummary": "inherits or no view-level item permission flag",
+  "extKeys": [
+    "displayStyle",
+    "Url",
+    "ShowTable"
+  ],
+  "layoutViewKeys": [
+    "layout",
+    "sort",
+    "query",
+    "rowColor",
+    "filter"
+  ],
+  "specialSettings": [
+    "displayStyle",
+    "ShowTable"
+  ],
+  "proofLevel": "export-proven"
+}

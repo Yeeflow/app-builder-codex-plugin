@@ -1,0 +1,45 @@
+{
+  "controlType": "timeline-h",
+  "data": {
+    "list": {
+      "AppID": "<app-id>",
+      "ListID": "<list-id>",
+      "Type": 1,
+      "Title": "Company Overview",
+      "ListSetID": "<list-set-id>"
+    },
+    "sort": [
+      {
+        "SortName": "Datetime1",
+        "SortByDesc": true
+      }
+    ],
+    "title": {
+      "value": null,
+      "variable": [
+        {
+          "exprType": "variable_ctx",
+          "ctx": "__ctx_coll",
+          "id": "Datetime1",
+          "valueType": "datepicker",
+          "name": "Collection item:Start date"
+        }
+      ]
+    },
+    "icon": "<icon-class>",
+    "ptype": "1",
+    "col": [null, 4],
+    "link": "<layout-id>",
+    "op": "modal",
+    "modalsize": 0,
+    "cardarr": true,
+    "align": [null, "center"],
+    "va": [null, "2"],
+    "slides": "4"
+  },
+  "resolvedFields": {
+    "titleField": "Datetime1",
+    "sortField": "Datetime1"
+  },
+  "proof": "export-proven"
+}

@@ -1,0 +1,31 @@
+{
+  "verticalTimeline": {
+    "recommendedFor": [
+      "chronological activity feeds",
+      "project history",
+      "approval or lifecycle logs",
+      "milestones in a vertical flow",
+      "audit or event streams"
+    ],
+    "evidence": "Yeeflow help docs plus export-proven dashboard schema"
+  },
+  "horizontalTimeline": {
+    "recommendedFor": [
+      "project schedules",
+      "roadmap phases",
+      "product timelines",
+      "campaign plans",
+      "lifecycle stages across time"
+    ],
+    "evidence": "Yeeflow help docs plus export-proven dashboard schema"
+  },
+  "collection": {
+    "recommendedFor": ["flexible cards or lists where chronological axis is not the main structure"],
+    "evidence": "previous Company Overview export-learning"
+  },
+  "kanban": {
+    "recommendedFor": ["status, stage, or category-based work management and pipeline views"],
+    "evidence": "previous Company Overview export-learning"
+  },
+  "proofBoundary": "Runtime timeline rendering and interaction are not proven by this study."
+}

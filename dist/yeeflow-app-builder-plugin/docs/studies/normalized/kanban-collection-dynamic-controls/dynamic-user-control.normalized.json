@@ -1,0 +1,22 @@
+{
+  "feature": "dynamic-user-control",
+  "source": "Company Overview.yap",
+  "observedHosts": ["kanban item template", "collection item template"],
+  "schema": {
+    "type": "dynamic-user",
+    "attrs": {
+      "source": "3",
+      "obj-f": "Text10",
+      "i-len": [null, "<display-limit>"],
+      "display_name": "<optional-boolean>",
+      "addition_fields": "<optional-array>"
+    }
+  },
+  "boundField": {
+    "fieldName": "Text10",
+    "displayName": "Assignee",
+    "controlType": "identity-picker",
+    "multiple": true
+  },
+  "proof": "export-proven for dashboard item templates"
+}

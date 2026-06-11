@@ -1,0 +1,36 @@
+{
+  "schema": "yeeflow-yapk-signing-resource-normalized",
+  "case": "wrapper_signed_valid",
+  "evidenceLevel": "user-tested-and-api-documented",
+  "summary": "The product signing utility can generate a signature for a .yapk wrapper when the Resource field is already a valid .yapk opaque payload.",
+  "apiOperations": [
+    {
+      "operation": "setSign",
+      "method": "POST",
+      "path": "/utils/apppackage/setsign",
+      "input": "wrapper fields excluding Sign",
+      "output": "Sign text",
+      "rawResponseStored": false
+    },
+    {
+      "operation": "verifySign",
+      "method": "POST",
+      "path": "/utils/apppackage/verifysign",
+      "input": "wrapper fields including Sign",
+      "output": "verification status",
+      "rawResponseStored": false
+    }
+  ],
+  "redactions": [
+    "apiKey",
+    "PackageId",
+    "TenantID",
+    "AppID",
+    "ListID",
+    "Sign",
+    "Resource",
+    "privateUrl",
+    "rawApiResponse"
+  ],
+  "conclusion": "Wrapper signing is evidence-backed for already-valid .yapk Resource payloads only."
+}

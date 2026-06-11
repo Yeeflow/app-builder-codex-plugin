@@ -1,0 +1,73 @@
+{
+  "proof": "export-proven from CRM sample Dashboard; private identifiers and values redacted",
+  "normalized": {
+    "control": "<pivot:1>",
+    "controlType": "pivot-table",
+    "extKey": "PivotTable",
+    "extCategory": "___Pivot___",
+    "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+    "dataSource": {
+      "placeholder": "<source:12>",
+      "sourceClass": "Data list",
+      "exportType": 1
+    },
+    "rows": [
+      {
+        "field": "Text1",
+        "label": "Deal Type",
+        "controlType": null,
+        "fieldType": "radio",
+        "aggregation": null,
+        "idShape": "<field>",
+        "resolved": true
+      },
+      {
+        "field": "Text4",
+        "label": "Deal Owner",
+        "controlType": null,
+        "fieldType": "identity-picker",
+        "aggregation": null,
+        "idShape": "<field>",
+        "resolved": true
+      }
+    ],
+    "columns": [
+      {
+        "field": "Datetime1",
+        "label": "Close Date",
+        "controlType": null,
+        "fieldType": "datepicker",
+        "aggregation": "DAY",
+        "idShape": "<field>_DAY",
+        "resolved": true
+      }
+    ],
+    "values": [
+      {
+        "field": "Decimal1",
+        "label": "Amount",
+        "controlType": null,
+        "fieldType": "currency",
+        "aggregation": "COUNT",
+        "idShape": "<field>_COUNT",
+        "resolved": true
+      }
+    ],
+    "filters": [],
+    "styleSections": [
+      "header",
+      "body",
+      "subtotal",
+      "grandtotal"
+    ],
+    "layoutColumns": [
+      "pt_c_0"
+    ],
+    "layoutRows": [
+      "pt_c_0",
+      "pt_c_1"
+    ],
+    "showGrandTotal": true,
+    "proofLevel": "export-proven"
+  }
+}

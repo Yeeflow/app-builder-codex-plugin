@@ -1,0 +1,3 @@
+display_name: Yeeflow AI Agent Template Builder
+short_description: Build Yeeflow AI Agent manifests.
+default_prompt: Use this skill to prepare Yeeflow AI Agent template manifests from source documents, icons, and prior export/import artifacts.

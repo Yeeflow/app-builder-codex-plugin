@@ -1,0 +1,27 @@
+{
+  "fieldType": "hyperlink",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Text4",
+    "FieldType": "Text",
+    "FieldIndex": 4,
+    "DisplayName": "__DISPLAY_NAME_12__",
+    "InternalName": "__INTERNAL_NAME_12__",
+    "Type": "hyperlink",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "empty",
+    "Rules": {
+      "hyperlink_open": "_self"
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

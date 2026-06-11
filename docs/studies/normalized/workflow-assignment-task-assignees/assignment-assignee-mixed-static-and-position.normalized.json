@@ -1,0 +1,68 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "mixed-static-and-position",
+  "rawAssigneeFieldNames": [
+    [
+      "type",
+      "method",
+      "position",
+      "title"
+    ],
+    [
+      "type",
+      "method",
+      "value",
+      "title"
+    ],
+    [
+      "type",
+      "method",
+      "value",
+      "title"
+    ]
+  ],
+  "normalizedConfig": [
+    {
+      "type": "position",
+      "method": "position",
+      "position": "<POSITION_REF_CONFIRMED_BY_API>",
+      "title": "<REDACTED_ASSIGNEE_LABEL>"
+    },
+    {
+      "type": "user",
+      "method": "direct",
+      "value": "<USER_REF_CONFIRMED_BY_API>",
+      "title": "<REDACTED_ASSIGNEE_LABEL>"
+    },
+    {
+      "type": "user",
+      "method": "direct",
+      "value": "<USER_REF_CONFIRMED_BY_API>",
+      "title": "<REDACTED_ASSIGNEE_LABEL>"
+    }
+  ],
+  "approvalSettingsShape": {
+    "approveway": "anyapprove",
+    "approvepercentage": 100,
+    "appointedOrder": "parallel-or-default",
+    "issequential": null,
+    "isenabledemail": false,
+    "isallowreassign": false,
+    "isallowrecalled": null,
+    "automaticapproveddefinition": null,
+    "isallowsign": false,
+    "allowskip": true,
+    "duedatedefinition": 120,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "notificationSettingsShape": {
+    "isenabledemail": false
+  },
+  "runtimeDependencies": [
+    "valid-position-assignments",
+    "valid-user-directory-data"
+  ],
+  "generationSafety": "requires target-tenant org/reference data and focused runtime proof before broad generation claims"
+}

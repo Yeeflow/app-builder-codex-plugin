@@ -1,0 +1,1339 @@
+{
+  "proofLevel": "export-proven",
+  "setVariableTaskCount": 7,
+  "workflowHosts": [
+    "approval-form-workflow",
+    "data-list-workflow"
+  ],
+  "variablesByForm": {
+    "WARTB": {
+      "formName": "Workflow Action Approval Test",
+      "workflowType": 2,
+      "variables": {
+        "basic": [
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "Applicant",
+            "name": "Applicant",
+            "type": "user",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "SubmissionDate",
+            "name": "SubmissionDate",
+            "type": "date",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "RequestNo",
+            "name": "RequestNo",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "RequesterCostCenterRef",
+            "name": "RequesterCostCenterRef",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "RequestTitle",
+            "name": "RequestTitle",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "RequestType",
+            "name": "RequestType",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "TargetDate",
+            "name": "TargetDate",
+            "type": "date",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "Amount",
+            "name": "Amount",
+            "type": "number",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "Details",
+            "name": "Details",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_10",
+            "name": "text10",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_11",
+            "name": "text11",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_101",
+            "name": "field_101",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_13",
+            "name": "number13",
+            "type": "number",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "Taskcomments",
+            "name": "Task comments",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "AnotherUser",
+            "name": "Another User",
+            "type": "user",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "SingleLine1",
+            "name": "Single Line 1",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "Number1",
+            "name": "Number 1",
+            "type": "number",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "SingleSelect1",
+            "name": "Single Select 1",
+            "type": "text",
+            "editable": true
+          }
+        ],
+        "listref": [],
+        "filter": []
+      }
+    },
+    "WADL1": {
+      "formName": "Purchase Requests Runtime Workflow",
+      "workflowType": 1,
+      "variables": {
+        "basic": [
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_1",
+            "name": "text1",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_2",
+            "name": "text2",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_3",
+            "name": "number3",
+            "type": "number",
+            "editable": true
+          }
+        ],
+        "listref": [],
+        "filter": []
+      }
+    },
+    "AS-SWS": {
+      "formName": "Schedule workflow sample",
+      "workflowType": 3,
+      "variables": {
+        "basic": [
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_1",
+            "name": "text1",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "field_2",
+            "name": "text2",
+            "type": "text",
+            "editable": true
+          }
+        ],
+        "listref": [],
+        "filter": []
+      }
+    },
+    "ABC-ANO": {
+      "formName": "Another approval from",
+      "workflowType": 2,
+      "variables": {
+        "basic": [
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "Applicant",
+            "name": "Applicant",
+            "type": "user",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "SubmissionDate",
+            "name": "SubmissionDate",
+            "type": "date",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "RequestNo",
+            "name": "RequestNo",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "SingleLine1",
+            "name": "SingleLine1",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "NewNumber1",
+            "name": "NewNumber1",
+            "type": "number",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "NewSingleSelect1",
+            "name": "NewSingleSelect1",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "RequesterCostCenterRef",
+            "name": "RequesterCostCenterRef",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "RequestTitle",
+            "name": "RequestTitle",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "RequestType",
+            "name": "RequestType",
+            "type": "text",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "TargetDate",
+            "name": "TargetDate",
+            "type": "date",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "Amount",
+            "name": "Amount",
+            "type": "number",
+            "editable": true
+          },
+          {
+            "idx": "<REDACTED_VARIABLE_IDX>",
+            "id": "Details",
+            "name": "Details",
+            "type": "text",
+            "editable": true
+          }
+        ],
+        "listref": [],
+        "filter": []
+      }
+    }
+  },
+  "listFields": [
+    {
+      "title": "Purchase Requests Runtime Test",
+      "listId": "<REDACTED_LIST_ID>",
+      "type": 1,
+      "fields": [
+        {
+          "FieldName": "Title",
+          "InternalName": "PurchaseRequestsName",
+          "DisplayName": "Purchase Requests Runtime Test Name",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text1",
+          "InternalName": "PurchaseRequestsRecordNo",
+          "DisplayName": "Record No.",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text2",
+          "InternalName": "PurchaseRequestsRequesterCostCenterRef",
+          "DisplayName": "Requester / Cost Center Ref.",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text3",
+          "InternalName": "PurchaseRequestsCategoryType",
+          "DisplayName": "Category / Type",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "radio"
+        },
+        {
+          "FieldName": "Text4",
+          "InternalName": "PurchaseRequestsStatus",
+          "DisplayName": "Status",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "radio"
+        },
+        {
+          "FieldName": "Text5",
+          "InternalName": "PurchaseRequestsOwnerReviewer",
+          "DisplayName": "Owner / Reviewer",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Datetime1",
+          "InternalName": "PurchaseRequestsStartIssueDate",
+          "DisplayName": "Start / Issue Date",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "datepicker"
+        },
+        {
+          "FieldName": "Datetime2",
+          "InternalName": "PurchaseRequestsDueExpiryDate",
+          "DisplayName": "Due / Expiry Date",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "datepicker"
+        },
+        {
+          "FieldName": "Decimal1",
+          "InternalName": "PurchaseRequestsAmountValue",
+          "DisplayName": "Amount / Value",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input_number"
+        },
+        {
+          "FieldName": "Decimal2",
+          "InternalName": "PurchaseRequestsBalanceVariance",
+          "DisplayName": "Balance / Variance",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input_number"
+        },
+        {
+          "FieldName": "Bit1",
+          "InternalName": "PurchaseRequestsRequiresFollowUp",
+          "DisplayName": "Requires Follow-up",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "switch"
+        },
+        {
+          "FieldName": "Text6",
+          "InternalName": "PurchaseRequestsExternalSystemRef",
+          "DisplayName": "External System Ref.",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text7",
+          "InternalName": "PurchaseRequestsDocumentAttachmentNotes",
+          "DisplayName": "Document / Attachment Notes",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "textarea"
+        },
+        {
+          "FieldName": "Text8",
+          "InternalName": "PurchaseRequestsBusinessNotes",
+          "DisplayName": "Business Notes",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "textarea"
+        }
+      ]
+    },
+    {
+      "title": "Another approval form report",
+      "listId": "<REDACTED_LIST_ID>",
+      "type": 32,
+      "fields": [
+        {
+          "FieldName": "Title",
+          "InternalName": "RequestTitle",
+          "DisplayName": "Request title",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Bigint1",
+          "InternalName": "FormID",
+          "DisplayName": "Form ID",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text1",
+          "InternalName": "TrackingNo",
+          "DisplayName": "Tracking No.",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text2",
+          "InternalName": "Applicant",
+          "DisplayName": "Applicant",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "identity-picker"
+        },
+        {
+          "FieldName": "Text3",
+          "InternalName": "Submitter",
+          "DisplayName": "Submitter",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "identity-picker"
+        },
+        {
+          "FieldName": "Text4",
+          "InternalName": "Department",
+          "DisplayName": "Department",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "organization-picker"
+        },
+        {
+          "FieldName": "Datetime1",
+          "InternalName": "Submitted",
+          "DisplayName": "Submission Date",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "datepicker"
+        },
+        {
+          "FieldName": "Datetime2",
+          "InternalName": "LastModified",
+          "DisplayName": "Modified Time",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "datepicker"
+        },
+        {
+          "FieldName": "Text5",
+          "InternalName": "Status",
+          "DisplayName": "Flow status",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "radio"
+        },
+        {
+          "FieldName": "Text6",
+          "InternalName": "LineManager",
+          "DisplayName": "Line Manager",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "identity-picker"
+        },
+        {
+          "FieldName": "Text7",
+          "InternalName": "EmployeeNo",
+          "DisplayName": "Employee No.",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Datetime3",
+          "InternalName": "v_SubmissionDate",
+          "DisplayName": "SubmissionDate",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "datepicker"
+        },
+        {
+          "FieldName": "Text8",
+          "InternalName": "v_RequestNo",
+          "DisplayName": "RequestNo",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text9",
+          "InternalName": "v_SingleLine1",
+          "DisplayName": "SingleLine1",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Decimal1",
+          "InternalName": "v_NewNumber1",
+          "DisplayName": "NewNumber1",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input_number"
+        },
+        {
+          "FieldName": "Text10",
+          "InternalName": "v_NewSingleSelect1",
+          "DisplayName": "NewSingleSelect1",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text11",
+          "InternalName": "v_RequesterCostCenterRef",
+          "DisplayName": "RequesterCostCenterRef",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text12",
+          "InternalName": "v_RequestTitle",
+          "DisplayName": "RequestTitle",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text13",
+          "InternalName": "v_RequestType",
+          "DisplayName": "RequestType",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Datetime4",
+          "InternalName": "v_TargetDate",
+          "DisplayName": "TargetDate",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "datepicker"
+        },
+        {
+          "FieldName": "Decimal2",
+          "InternalName": "v_Amount",
+          "DisplayName": "Amount",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input_number"
+        },
+        {
+          "FieldName": "Text14",
+          "InternalName": "v_Details",
+          "DisplayName": "Details",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "input"
+        },
+        {
+          "FieldName": "Text15",
+          "InternalName": "v____attachments",
+          "DisplayName": "___attachments",
+          "FieldID": "<REDACTED_FIELD_ID>",
+          "Type": "file-upload"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "proofLevel": "export-proven",
+      "workflowHost": "approval-form-workflow",
+      "workflowType": 2,
+      "internalControlType": "SetVariableTask",
+      "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+      "nodeName": "Set Variable",
+      "formtype": "current",
+      "target": {
+        "kind": "current-workflow",
+        "data": null,
+        "formids": ""
+      },
+      "variablesSetCount": 1,
+      "variableTypes": [
+        "text"
+      ],
+      "valueExpressionKinds": {
+        "hasStaticValue": true,
+        "hasWorkflowVariableValue": true,
+        "hasListFieldValue": false
+      },
+      "variablesetting": [
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "SingleLine1",
+          "name": "Single Line 1",
+          "type": "text",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "expr",
+              "op",
+              "str"
+            ],
+            "exprTypes": [
+              "variable"
+            ],
+            "functions": [],
+            "references": [
+              {
+                "exprType": "variable",
+                "valueType": "text",
+                "name": "Workflow Variables:RequestType"
+              }
+            ],
+            "redactedTokens": [
+              {
+                "type": "str",
+                "value": "ABC"
+              },
+              {
+                "type": "op",
+                "op": "&"
+              },
+              {
+                "exprType": "variable",
+                "valueType": "text",
+                "id": "RequestType",
+                "type": "expr",
+                "name": "Workflow Variables:RequestType"
+              }
+            ]
+          }
+        }
+      ],
+      "incomingCount": 1,
+      "outgoingCount": 1
+    },
+    {
+      "proofLevel": "export-proven",
+      "workflowHost": "approval-form-workflow",
+      "workflowType": 2,
+      "internalControlType": "SetVariableTask",
+      "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+      "nodeName": "Set Variable",
+      "formtype": "current",
+      "target": {
+        "kind": "current-workflow",
+        "data": null,
+        "formids": ""
+      },
+      "variablesSetCount": 1,
+      "variableTypes": [
+        "text"
+      ],
+      "valueExpressionKinds": {
+        "hasStaticValue": true,
+        "hasWorkflowVariableValue": false,
+        "hasListFieldValue": false
+      },
+      "variablesetting": [
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "SingleSelect1",
+          "name": "Single Select 1",
+          "type": "text",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "str"
+            ],
+            "exprTypes": [],
+            "functions": [],
+            "references": [],
+            "redactedTokens": [
+              {
+                "type": "str",
+                "value": "Choice1"
+              }
+            ]
+          }
+        }
+      ],
+      "incomingCount": 1,
+      "outgoingCount": 1
+    },
+    {
+      "proofLevel": "export-proven",
+      "workflowHost": "approval-form-workflow",
+      "workflowType": 2,
+      "internalControlType": "SetVariableTask",
+      "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+      "nodeName": "Set Variable",
+      "formtype": "current",
+      "target": {
+        "kind": "current-workflow",
+        "data": null,
+        "formids": ""
+      },
+      "variablesSetCount": 1,
+      "variableTypes": [
+        "number"
+      ],
+      "valueExpressionKinds": {
+        "hasStaticValue": true,
+        "hasWorkflowVariableValue": true,
+        "hasListFieldValue": false
+      },
+      "variablesetting": [
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "Number1",
+          "name": "Number 1",
+          "type": "number",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "expr",
+              "func",
+              "num",
+              "op"
+            ],
+            "exprTypes": [
+              "variable"
+            ],
+            "functions": [
+              "iif",
+              "isNullOrEmpty"
+            ],
+            "references": [
+              {
+                "exprType": "variable",
+                "valueType": "number",
+                "name": "Workflow Variables:Number 1"
+              },
+              {
+                "exprType": "variable",
+                "valueType": "number",
+                "name": "Workflow Variables:Number 1"
+              }
+            ],
+            "redactedTokens": [
+              {
+                "type": "func",
+                "func": "iif",
+                "params": [
+                  [
+                    {
+                      "type": "func",
+                      "func": "isNullOrEmpty",
+                      "params": [
+                        [
+                          {
+                            "exprType": "variable",
+                            "valueType": "number",
+                            "id": "Number1",
+                            "type": "expr",
+                            "name": "Workflow Variables:Number 1"
+                          }
+                        ]
+                      ]
+                    }
+                  ],
+                  [
+                    {
+                      "type": "num",
+                      "value": "1"
+                    }
+                  ],
+                  [
+                    {
+                      "exprType": "variable",
+                      "valueType": "number",
+                      "id": "Number1",
+                      "type": "expr",
+                      "name": "Workflow Variables:Number 1"
+                    },
+                    {
+                      "type": "op",
+                      "op": "+"
+                    },
+                    {
+                      "type": "num",
+                      "value": "1"
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "incomingCount": 1,
+      "outgoingCount": 1
+    },
+    {
+      "proofLevel": "export-proven",
+      "workflowHost": "approval-form-workflow",
+      "workflowType": 2,
+      "internalControlType": "SetVariableTask",
+      "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+      "nodeName": "Set Variable",
+      "formtype": "current",
+      "target": {
+        "kind": "current-workflow",
+        "data": null,
+        "formids": ""
+      },
+      "variablesSetCount": 3,
+      "variableTypes": [
+        "number",
+        "text"
+      ],
+      "valueExpressionKinds": {
+        "hasStaticValue": true,
+        "hasWorkflowVariableValue": true,
+        "hasListFieldValue": false
+      },
+      "variablesetting": [
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "Number1",
+          "name": "Number 1",
+          "type": "number",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "expr",
+              "func",
+              "num",
+              "op"
+            ],
+            "exprTypes": [
+              "variable"
+            ],
+            "functions": [
+              "iif",
+              "isNullOrEmpty"
+            ],
+            "references": [
+              {
+                "exprType": "variable",
+                "valueType": "number",
+                "name": "Workflow Variables:Number 1"
+              },
+              {
+                "exprType": "variable",
+                "valueType": "number",
+                "name": "Workflow Variables:Number 1"
+              }
+            ],
+            "redactedTokens": [
+              {
+                "type": "func",
+                "func": "iif",
+                "params": [
+                  [
+                    {
+                      "type": "func",
+                      "func": "isNullOrEmpty",
+                      "params": [
+                        [
+                          {
+                            "exprType": "variable",
+                            "valueType": "number",
+                            "id": "Number1",
+                            "type": "expr",
+                            "name": "Workflow Variables:Number 1"
+                          }
+                        ]
+                      ]
+                    }
+                  ],
+                  [
+                    {
+                      "type": "num",
+                      "value": "1"
+                    }
+                  ],
+                  [
+                    {
+                      "exprType": "variable",
+                      "valueType": "number",
+                      "id": "Number1",
+                      "type": "expr",
+                      "name": "Workflow Variables:Number 1"
+                    },
+                    {
+                      "type": "op",
+                      "op": "+"
+                    },
+                    {
+                      "type": "num",
+                      "value": "1"
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "SingleLine1",
+          "name": "Single Line 1",
+          "type": "text",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "str"
+            ],
+            "exprTypes": [],
+            "functions": [],
+            "references": [],
+            "redactedTokens": [
+              {
+                "type": "str",
+                "value": "Multiple variable - 2"
+              }
+            ]
+          }
+        },
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "SingleSelect1",
+          "name": "Single Select 1",
+          "type": "text",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "expr",
+              "func",
+              "op",
+              "str"
+            ],
+            "exprTypes": [
+              "variable"
+            ],
+            "functions": [
+              "iif"
+            ],
+            "references": [
+              {
+                "exprType": "variable",
+                "valueType": "text",
+                "name": "Workflow Variables:Single Select 1"
+              }
+            ],
+            "redactedTokens": [
+              {
+                "type": "func",
+                "func": "iif",
+                "params": [
+                  [
+                    {
+                      "exprType": "variable",
+                      "valueType": "text",
+                      "id": "SingleSelect1",
+                      "type": "expr",
+                      "name": "Workflow Variables:Single Select 1"
+                    },
+                    {
+                      "type": "op",
+                      "op": "=="
+                    },
+                    {
+                      "type": "str",
+                      "value": "Choice1"
+                    }
+                  ],
+                  [
+                    {
+                      "type": "str",
+                      "value": "Choice2"
+                    }
+                  ],
+                  [
+                    {
+                      "type": "str",
+                      "value": "Choice3"
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "incomingCount": 1,
+      "outgoingCount": 2
+    },
+    {
+      "proofLevel": "export-proven",
+      "workflowHost": "approval-form-workflow",
+      "workflowType": 2,
+      "internalControlType": "SetVariableTask",
+      "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+      "nodeName": "Set Variable",
+      "formtype": "custom",
+      "target": {
+        "kind": "another-approval-workflow",
+        "data": {
+          "AppID": "<REDACTED_APP_ID>",
+          "ListSetID": "<REDACTED_APP_LISTSET_ID>",
+          "ProcKey": "ABC-ANO"
+        },
+        "formids": "<REDACTED_TARGET_FORM_ID>",
+        "formidsShape": "literal-or-expression-string"
+      },
+      "variablesSetCount": 2,
+      "variableTypes": [
+        "number",
+        "text"
+      ],
+      "valueExpressionKinds": {
+        "hasStaticValue": true,
+        "hasWorkflowVariableValue": true,
+        "hasListFieldValue": false
+      },
+      "variablesetting": [
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "NewNumber1",
+          "name": "NewNumber1",
+          "type": "number",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "expr",
+              "num",
+              "op"
+            ],
+            "exprTypes": [
+              "variable"
+            ],
+            "functions": [],
+            "references": [
+              {
+                "exprType": "variable",
+                "valueType": "number",
+                "name": "Workflow Variables:Number 1"
+              }
+            ],
+            "redactedTokens": [
+              {
+                "exprType": "variable",
+                "valueType": "number",
+                "id": "Number1",
+                "type": "expr",
+                "name": "Workflow Variables:Number 1"
+              },
+              {
+                "type": "op",
+                "op": "+"
+              },
+              {
+                "type": "num",
+                "value": "1"
+              }
+            ]
+          }
+        },
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "NewSingleSelect1",
+          "name": "NewSingleSelect1",
+          "type": "text",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "str"
+            ],
+            "exprTypes": [],
+            "functions": [],
+            "references": [],
+            "redactedTokens": [
+              {
+                "type": "str",
+                "value": "Choice3"
+              }
+            ]
+          }
+        }
+      ],
+      "incomingCount": 1,
+      "outgoingCount": 1
+    },
+    {
+      "proofLevel": "export-proven",
+      "workflowHost": "data-list-workflow",
+      "workflowType": 1,
+      "internalControlType": "SetVariableTask",
+      "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+      "nodeName": "Set Variable",
+      "formtype": "current",
+      "target": {
+        "kind": "current-workflow",
+        "data": null,
+        "formids": ""
+      },
+      "variablesSetCount": 2,
+      "variableTypes": [
+        "number",
+        "text"
+      ],
+      "valueExpressionKinds": {
+        "hasStaticValue": true,
+        "hasWorkflowVariableValue": true,
+        "hasListFieldValue": false
+      },
+      "variablesetting": [
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "field_1",
+          "name": "text1",
+          "type": "text",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "expr",
+              "op",
+              "str"
+            ],
+            "exprTypes": [
+              "variable"
+            ],
+            "functions": [],
+            "references": [
+              {
+                "exprType": "variable",
+                "valueType": "text",
+                "name": "Workflow Variables:text1"
+              }
+            ],
+            "redactedTokens": [
+              {
+                "exprType": "variable",
+                "valueType": "text",
+                "id": "field_1",
+                "type": "expr",
+                "name": "Workflow Variables:text1"
+              },
+              {
+                "type": "op",
+                "op": "&"
+              },
+              {
+                "type": "str",
+                "value": "_abc"
+              }
+            ]
+          }
+        },
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "field_3",
+          "name": "number3",
+          "type": "number",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "num"
+            ],
+            "exprTypes": [],
+            "functions": [],
+            "references": [],
+            "redactedTokens": [
+              {
+                "type": "num",
+                "value": "456"
+              }
+            ]
+          }
+        }
+      ],
+      "incomingCount": 1,
+      "outgoingCount": 1
+    },
+    {
+      "proofLevel": "export-proven",
+      "workflowHost": "data-list-workflow",
+      "workflowType": 1,
+      "internalControlType": "SetVariableTask",
+      "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+      "nodeName": "Set Variable",
+      "formtype": "custom",
+      "target": {
+        "kind": "another-approval-workflow",
+        "data": {
+          "AppID": "<REDACTED_APP_ID>",
+          "ListSetID": "<REDACTED_APP_LISTSET_ID>",
+          "ProcKey": "ABC-ANO"
+        },
+        "formids": "<REDACTED_TARGET_FORM_ID>",
+        "formidsShape": "literal-or-expression-string"
+      },
+      "variablesSetCount": 4,
+      "variableTypes": [
+        "date",
+        "number",
+        "text"
+      ],
+      "valueExpressionKinds": {
+        "hasStaticValue": true,
+        "hasWorkflowVariableValue": false,
+        "hasListFieldValue": true
+      },
+      "variablesetting": [
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "NewNumber1",
+          "name": "NewNumber1",
+          "type": "number",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "num"
+            ],
+            "exprTypes": [],
+            "functions": [],
+            "references": [],
+            "redactedTokens": [
+              {
+                "type": "num",
+                "value": "123"
+              }
+            ]
+          }
+        },
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "NewSingleSelect1",
+          "name": "NewSingleSelect1",
+          "type": "text",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "str"
+            ],
+            "exprTypes": [],
+            "functions": [],
+            "references": [],
+            "redactedTokens": [
+              {
+                "type": "str",
+                "value": "Choice2"
+              }
+            ]
+          }
+        },
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "SubmissionDate",
+          "name": "SubmissionDate",
+          "type": "date",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "expr"
+            ],
+            "exprTypes": [
+              "list_field"
+            ],
+            "functions": [],
+            "references": [
+              {
+                "exprType": "list_field",
+                "valueType": "datepicker",
+                "name": "List Fields:Start / Issue Date",
+                "prop": "<REDACTED_FIELD_REF>"
+              }
+            ],
+            "redactedTokens": [
+              {
+                "exprType": "list_field",
+                "valueType": "datepicker",
+                "prop": "Datetime1",
+                "id": "PurchaseRequestsStartIssueDate",
+                "type": "expr",
+                "name": "List Fields:Start / Issue Date"
+              }
+            ]
+          }
+        },
+        {
+          "idx": "<REDACTED_VARIABLE_IDX>",
+          "id": "SingleLine1",
+          "name": "SingleLine1",
+          "type": "text",
+          "editable": true,
+          "value": {
+            "shape": "expression-token-array",
+            "tokenTypes": [
+              "expr"
+            ],
+            "exprTypes": [
+              "list_field"
+            ],
+            "functions": [],
+            "references": [
+              {
+                "exprType": "list_field",
+                "valueType": "radio",
+                "name": "List Fields:Category / Type",
+                "prop": "<REDACTED_FIELD_REF>"
+              }
+            ],
+            "redactedTokens": [
+              {
+                "exprType": "list_field",
+                "valueType": "radio",
+                "prop": "Text3",
+                "id": "PurchaseRequestsCategoryType",
+                "type": "expr",
+                "name": "List Fields:Category / Type"
+              }
+            ]
+          }
+        }
+      ],
+      "incomingCount": 1,
+      "outgoingCount": 1
+    }
+  ]
+}

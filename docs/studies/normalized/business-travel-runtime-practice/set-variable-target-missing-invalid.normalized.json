@@ -1,0 +1,15 @@
+{
+  "proof": "runtime-practice-backed",
+  "variables": {
+    "basic": []
+  },
+  "invalidVariablesetting": [
+    {
+      "id": "RequestNo",
+      "name": "Request No.",
+      "type": "text",
+      "value": []
+    }
+  ],
+  "validatorError": "SETVARIABLE_UNKNOWN_VARIABLE"
+}

@@ -1,0 +1,24 @@
+{
+  "audit": "reference-app-template-corpus-audit",
+  "patterns": [
+    {
+      "pattern": "item_action_buttons",
+      "sourceExports": ["Company Overview (3).yap"],
+      "observedActions": ["Edit item", "Delete Item", "Mark as completed"],
+      "templateCoverage": ["item_action_bar_edit_delete_update"]
+    },
+    {
+      "pattern": "selection_bulk_toolbar",
+      "sourceExports": ["Company Overview (3).yap"],
+      "observedActions": ["Mark as completed", "Delete selected items"],
+      "templateCoverage": ["selection_bulk_toolbar"]
+    },
+    {
+      "pattern": "dashboard_navigation_actions",
+      "sourceExports": ["Projects Center_2.yap"],
+      "observedActions": ["All projects", "My projects", "List", "Board", "Gantt"],
+      "templateCoverage": ["dashboard_header_action_bar", "quick_links_icon_list"]
+    }
+  ],
+  "validationBoundary": "Export evidence proves action structures and labels, but generated packages must still validate action IDs, current-item context, target layouts, variables, and update fields."
+}

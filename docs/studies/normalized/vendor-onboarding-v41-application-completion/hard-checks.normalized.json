@@ -1,0 +1,39 @@
+{
+  "hardChecks": [
+    {
+      "id": "dashboard_main_content_structure",
+      "severity": "error",
+      "rule": "Dashboard pages must use Main > Content structure with full-width content area and zero page content-area padding."
+    },
+    {
+      "id": "grid_caption_off",
+      "severity": "error",
+      "rule": "Layout-only Grid controls must have display caption disabled."
+    },
+    {
+      "id": "meaningful_navigator_labels",
+      "severity": "error",
+      "rule": "Every generated control must have a meaningful navigator label; default names such as Container, Grid, Text, Dynamic field, and Kanban are invalid."
+    },
+    {
+      "id": "kpi_summary_temp_variable_pattern",
+      "severity": "error",
+      "rule": "Dashboard KPI numeric values must be data-bound. For flexible card display, use hidden Summary controls that save to temp variables and visible Text controls bound to those variables."
+    },
+    {
+      "id": "button_action_binding",
+      "severity": "error",
+      "rule": "Active dashboard buttons must use the correct Button control shape, meaningful labels, and valid actions."
+    },
+    {
+      "id": "data_list_schema_and_samples",
+      "severity": "error",
+      "rule": "Generated data lists must satisfy system schema rules, include visible default fields, and include sample rows when the app is a demo/proof package."
+    },
+    {
+      "id": "lookup_display_field_selected",
+      "severity": "error",
+      "rule": "Every lookup field must have a selected display field that resolves to the target list, normally Title. Text0 lookup display references are invalid."
+    }
+  ]
+}

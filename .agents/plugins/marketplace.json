@@ -1,0 +1,24 @@
+{
+  "name": "yeeflow",
+  "interface": {
+    "displayName": "Yeeflow"
+  },
+  "plugins": [
+    {
+      "name": "yeeflow-app-builder",
+      "source": {
+        "source": "local",
+        "path": "./dist/yeeflow-app-builder-plugin"
+      },
+      "interface": {
+        "logo": "./dist/yeeflow-app-builder-plugin/assets/logo.png",
+        "composerIcon": "./dist/yeeflow-app-builder-plugin/assets/icon.png"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

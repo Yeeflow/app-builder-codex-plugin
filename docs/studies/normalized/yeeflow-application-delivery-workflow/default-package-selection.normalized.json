@@ -1,0 +1,13 @@
+{
+  "topic": "yeeflow-application-delivery-workflow",
+  "rule": "default-package-selection",
+  "defaults": {
+    "newApplication": "yapk",
+    "existingApplicationChange": "versioned-yapk"
+  },
+  "yapAllowedWhen": [
+    "user explicitly requests YAP",
+    "fallback/debug task specifically requires YAP"
+  ],
+  "yapImportStatus": "not-proven"
+}

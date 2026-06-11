@@ -1,0 +1,20 @@
+{
+  "proof": "yeeflow-package-api-automation-runtime-proof",
+  "packageFilename": "package-api-smoke-test.v1.yapk",
+  "endpoint": "POST /listset/package/install",
+  "httpStatus": 200,
+  "apiStatus": 0,
+  "success": true,
+  "responseFieldNames": ["Data", "Status", "TotalCount"],
+  "dataFieldNames": ["ID", "Continue", "Status"],
+  "continuePresent": true,
+  "continueValue": false,
+  "runtimeProofStatus": "runtime-proven-api-acceptance",
+  "proofBoundary": "Generated package upload and install API accepted; browser rendering and list add/save behavior are not proven in this proof.",
+  "redaction": {
+    "workspaceId": "redacted",
+    "fileId": "redacted",
+    "appOrPackageId": "redacted",
+    "rawResponseStored": false
+  }
+}

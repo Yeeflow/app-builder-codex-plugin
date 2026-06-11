@@ -1,0 +1,55 @@
+{
+  "proof": "export-proven",
+  "host": "dashboard",
+  "controlType": "button",
+  "actionTypeCode": "8",
+  "actionType": "open_approval_form",
+  "attrs": {
+    "action-type": "8",
+    "op": "new",
+    "modalsize": 0,
+    "cusize": {
+      "w": 313
+    },
+    "link": {
+      "opentype": true,
+      "url": null,
+      "variable": "[REDACTED_EXPRESSION_ARRAY]"
+    },
+    "data": {
+      "list": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "ListID": "[ListID]"
+      },
+      "page": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "PageID": "[PageID]"
+      },
+      "form": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "ProcKey": "[ProcKey]"
+      }
+    },
+    "layout": "[LayoutID]",
+    "passvalues": [
+      {
+        "Name": "Decimal1",
+        "Value": "[REDACTED_EXPRESSION_ARRAY]"
+      },
+      {
+        "Name": "Text1",
+        "Value": "[REDACTED_EXPRESSION_ARRAY]"
+      }
+    ],
+    "queryParams": [
+      {
+        "name": "QItem",
+        "value": "[REDACTED_EXPRESSION]"
+      }
+    ],
+    "setVars": "[REDACTED_SET_VARS]"
+  }
+}

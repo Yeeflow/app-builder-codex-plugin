@@ -1,0 +1,27 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "<downloads>/CRM - Customer relationship management.yap",
+  "page": "Dashboard",
+  "control": {
+    "path": "$.children[1].children[0].children[1].children[2]",
+    "id": "<control-id>",
+    "type": "search-filter",
+    "productName": "Search filter",
+    "label": "<control-label>",
+    "binding": "__filter_filter_Search3",
+    "filterVariable": "filter_Search3",
+    "applyTypeRaw": "2",
+    "applyType": "Click on apply button",
+    "applyButton": "<control-id>",
+    "dataSource": null,
+    "displayField": "",
+    "valueField": "",
+    "optionFilterCount": 0,
+    "settingKeys": [
+      "apply_btn",
+      "apply_t",
+      "placeholder"
+    ],
+    "settingsPreview": {}
+  }
+}

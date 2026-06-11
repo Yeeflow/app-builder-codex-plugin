@@ -1,0 +1,24 @@
+{
+  "case": "dashboard-listdataid-context-filter-invalid",
+  "proofLevel": "user-confirmed-import-failure-derived",
+  "collectionFilter": [
+    {
+      "left": "Project",
+      "op": "0",
+      "right": [
+        {
+          "exprType": "variable_ctx",
+          "ctx": "__ctx_coll",
+          "id": "ListDataID",
+          "name": "Collection item:Id"
+        }
+      ],
+      "showCus": false
+    }
+  ],
+  "expectedFinding": {
+    "code": "DASHBOARD_COLLECTION_EXPR_FIELD_UNRESOLVED",
+    "level": "error",
+    "mode": "generator/final"
+  }
+}

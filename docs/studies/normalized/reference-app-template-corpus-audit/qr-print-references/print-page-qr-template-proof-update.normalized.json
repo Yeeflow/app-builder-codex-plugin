@@ -1,0 +1,25 @@
+{
+  "templateId": "print_page_qr_barcode_section",
+  "previousStatus": "needs-golden-proof",
+  "updatedStatus": "export-proven",
+  "sourceExports": [
+    "Online Library (1).yap / Print Inventory",
+    "Sales Quotation (1).yap / Print Page"
+  ],
+  "observedControls": [
+    "list-qrcode",
+    "container",
+    "collection",
+    "dynamic-field"
+  ],
+  "requiredValidation": [
+    "QR control must be inside print page or print item template",
+    "QR value must be current item/current record scoped or field-bound",
+    "static placeholder QR URLs are invalid",
+    "fallback text must be business-specific and field-bound if QR is deferred"
+  ],
+  "remainingRuntimeBoundaries": [
+    "browser print/page-break behavior",
+    "scanned QR destination behavior"
+  ]
+}

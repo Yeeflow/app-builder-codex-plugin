@@ -1,0 +1,764 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Actions Runtime Baseline (2)_Task forms.yap",
+  "approvalFormCount": 1,
+  "summaries": [
+    {
+      "formName": "Workflow Action Approval Test",
+      "formKey": "<REDACTED_FORM_KEY>",
+      "workflowType": 2,
+      "submissionForms": [
+        {
+          "pageIndex": 0,
+          "pageId": "<REDACTED_TASK_FORM_ID>",
+          "title": "WARTB",
+          "pageType": "submission-form",
+          "rawType": 1,
+          "hasActionPanel": true,
+          "hasWorkflowHistory": true,
+          "controlCounts": {
+            "container": 5,
+            "heading": 2,
+            "identity-picker": 1,
+            "datepicker": 2,
+            "input": 3,
+            "radio": 1,
+            "input_number": 1,
+            "textarea": 1,
+            "workflowControlPanel": 1,
+            "workflowHistory": 1
+          },
+          "readonlyControlCount": 3,
+          "editableControlCount": 6,
+          "actionButtons": [],
+          "actions": []
+        }
+      ],
+      "taskForms": [
+        {
+          "pageIndex": 1,
+          "pageId": "<REDACTED_TASK_FORM_ID>",
+          "title": "WARTB Task",
+          "pageType": "task-form",
+          "rawType": 2,
+          "hasActionPanel": true,
+          "hasWorkflowHistory": true,
+          "controlCounts": {
+            "container": 5,
+            "heading": 2,
+            "identity-picker": 1,
+            "datepicker": 2,
+            "input": 3,
+            "radio": 1,
+            "input_number": 1,
+            "textarea": 1,
+            "workflowControlPanel": 1,
+            "workflowHistory": 1
+          },
+          "readonlyControlCount": 9,
+          "editableControlCount": 0,
+          "actionButtons": [],
+          "actions": []
+        },
+        {
+          "pageIndex": 2,
+          "pageId": "<REDACTED_TASK_FORM_ID>",
+          "title": "WARTB Task2",
+          "pageType": "task-form",
+          "rawType": 2,
+          "hasActionPanel": true,
+          "hasWorkflowHistory": true,
+          "controlCounts": {
+            "container": 6,
+            "heading": 3,
+            "identity-picker": 1,
+            "datepicker": 2,
+            "input": 5,
+            "radio": 1,
+            "input_number": 2,
+            "textarea": 2,
+            "flex_grid": 1,
+            "workflowControlPanel": 1,
+            "workflowHistory": 1
+          },
+          "readonlyControlCount": 9,
+          "editableControlCount": 5,
+          "actionButtons": [],
+          "actions": []
+        },
+        {
+          "pageIndex": 3,
+          "pageId": "<REDACTED_TASK_FORM_ID>",
+          "title": "WARTB Task3",
+          "pageType": "task-form",
+          "rawType": 2,
+          "hasActionPanel": false,
+          "hasWorkflowHistory": true,
+          "controlCounts": {
+            "container": 9,
+            "heading": 3,
+            "identity-picker": 2,
+            "datepicker": 2,
+            "input": 5,
+            "radio": 1,
+            "input_number": 2,
+            "textarea": 3,
+            "flex_grid": 1,
+            "action_button": 4,
+            "workflowHistory": 1,
+            "expr": 11
+          },
+          "readonlyControlCount": 9,
+          "editableControlCount": 5,
+          "actionButtons": [
+            {
+              "type": "action_button",
+              "label": "Approval this request",
+              "readonly": null,
+              "actionBinding": "<REDACTED_ACTION_ID>"
+            },
+            {
+              "type": "action_button",
+              "label": "Reject this request",
+              "readonly": null,
+              "actionBinding": "<REDACTED_ACTION_ID>"
+            },
+            {
+              "type": "action_button",
+              "label": "Reassign this task to others",
+              "readonly": null,
+              "actionBinding": "<REDACTED_ACTION_ID>"
+            },
+            {
+              "type": "action_button",
+              "label": "Add others to this task",
+              "readonly": null,
+              "actionBinding": "<REDACTED_ACTION_ID>"
+            }
+          ],
+          "actions": [
+            {
+              "id": "<REDACTED_PRIVATE_ID>",
+              "name": "Approval button click",
+              "stepTypes": [
+                "submit"
+              ],
+              "submitSteps": [
+                {
+                  "name": "Submit as approval",
+                  "submitType": "default",
+                  "inferredOperation": "approve-or-complete-default",
+                  "fieldPresence": {
+                    "comment": true,
+                    "forword": false,
+                    "remark": false,
+                    "assignee": false
+                  },
+                  "expressionSources": {
+                    "comment": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "text",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Task comments"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "<REDACTED_PRIVATE_ID>",
+              "name": "Reject button click",
+              "stepTypes": [
+                "submit"
+              ],
+              "submitSteps": [
+                {
+                  "name": "Submit as Rejected",
+                  "submitType": "2",
+                  "inferredOperation": "reject",
+                  "fieldPresence": {
+                    "comment": true,
+                    "forword": false,
+                    "remark": false,
+                    "assignee": false
+                  },
+                  "expressionSources": {
+                    "comment": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "text",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Task comments"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "<REDACTED_PRIVATE_ID>",
+              "name": "Reassign task button click",
+              "stepTypes": [
+                "confirm",
+                "submit"
+              ],
+              "submitSteps": [
+                {
+                  "name": "Reassign to others",
+                  "submitType": "4",
+                  "inferredOperation": "reassign",
+                  "fieldPresence": {
+                    "comment": true,
+                    "forword": true,
+                    "remark": true,
+                    "assignee": false
+                  },
+                  "expressionSources": {
+                    "comment": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "text",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Task comments"
+                      }
+                    ],
+                    "forword": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "user",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Another User"
+                      }
+                    ],
+                    "remark": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "text",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Task comments"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "<REDACTED_PRIVATE_ID>",
+              "name": "Add assignee button clicked",
+              "stepTypes": [
+                "confirm",
+                "submit"
+              ],
+              "submitSteps": [
+                {
+                  "name": "Add assignees",
+                  "submitType": "5",
+                  "inferredOperation": "add-assignee",
+                  "fieldPresence": {
+                    "comment": true,
+                    "forword": true,
+                    "remark": true,
+                    "assignee": true
+                  },
+                  "expressionSources": {
+                    "comment": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "text",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Task comments"
+                      }
+                    ],
+                    "forword": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "user",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Another User"
+                      }
+                    ],
+                    "remark": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "text",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Task comments"
+                      }
+                    ],
+                    "assignee": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "user",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Another User"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "pageIndex": 4,
+          "pageId": "<REDACTED_TASK_FORM_ID>",
+          "title": "WARTB Task4",
+          "pageType": "task-form",
+          "rawType": 2,
+          "hasActionPanel": false,
+          "hasWorkflowHistory": true,
+          "controlCounts": {
+            "container": 9,
+            "heading": 3,
+            "identity-picker": 1,
+            "datepicker": 2,
+            "input": 5,
+            "radio": 1,
+            "input_number": 2,
+            "textarea": 3,
+            "flex_grid": 1,
+            "action_button": 1,
+            "workflowHistory": 1,
+            "expr": 2
+          },
+          "readonlyControlCount": 9,
+          "editableControlCount": 5,
+          "actionButtons": [
+            {
+              "type": "action_button",
+              "label": "Task completed",
+              "readonly": null,
+              "actionBinding": "<REDACTED_ACTION_ID>"
+            }
+          ],
+          "actions": [
+            {
+              "id": "<REDACTED_PRIVATE_ID>",
+              "name": "Complete button click",
+              "stepTypes": [
+                "submit"
+              ],
+              "submitSteps": [
+                {
+                  "name": "Submit as completed",
+                  "submitType": "default",
+                  "inferredOperation": "complete-task",
+                  "fieldPresence": {
+                    "comment": true,
+                    "forword": false,
+                    "remark": false,
+                    "assignee": false
+                  },
+                  "expressionSources": {
+                    "comment": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "text",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Task comments"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "<REDACTED_PRIVATE_ID>",
+              "name": "Reject button click",
+              "stepTypes": [
+                "submit"
+              ],
+              "submitSteps": [
+                {
+                  "name": "Submit as Rejected",
+                  "submitType": "2",
+                  "inferredOperation": "reject",
+                  "fieldPresence": {
+                    "comment": true,
+                    "forword": false,
+                    "remark": false,
+                    "assignee": false
+                  },
+                  "expressionSources": {
+                    "comment": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "text",
+                        "id": "<REDACTED_PRIVATE_ID>",
+                        "name": "Workflow Variables:Task comments"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "assignmentTaskAssociations": [
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Static User Assignment",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": true,
+            "isallowsign": true,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Multiple Static Users Assignment",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task2",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 2,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Position By Department Assignment",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task3",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "custompercentage",
+            "approvepercentage": 60,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": true,
+            "isallowsign": true,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Sequential Multiple Assignees",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 2,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "sequential"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Due Date Minutes",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": true,
+            "to": true,
+            "subject": true,
+            "html": true
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Due Date Reminder Rules",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": true,
+            "to": true,
+            "subject": true,
+            "html": true
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Due Date Hours",
+          "taskType": "complete",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": true,
+            "isallowsign": true,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": true,
+            "to": true,
+            "subject": true,
+            "html": true
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Complete Task",
+          "taskType": "complete",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 2,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "sequential"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Email Notification Config",
+          "taskType": "complete",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": true,
+            "to": true,
+            "subject": true,
+            "html": true
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Any Reject Approval Mode",
+          "taskType": "complete",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 2,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Any Process Approval Mode",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 2,
+          "approvalSettings": {
+            "approveway": "anyprocess",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Parallel Multiple Assignees",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 3,
+          "approvalSettings": {
+            "approveway": "anyapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "User Group Assignment",
+          "taskType": "complete",
+          "taskForm": "WARTB Task4",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "sequential"
+          },
+          "taskOptions": {
+            "isallowreassign": false,
+            "isallowsign": false,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Position By Location Assignment",
+          "taskType": "approval-default",
+          "taskForm": "WARTB Task3",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": true,
+            "isallowsign": true,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        },
+        {
+          "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+          "taskName": "Direct Position Assignment",
+          "taskType": "complete",
+          "taskForm": "WARTB Task",
+          "taskFormId": "<REDACTED_TASK_FORM_ID>",
+          "usertaskassignmentCount": 1,
+          "approvalSettings": {
+            "approveway": "allapprove",
+            "approvepercentage": 100,
+            "appointedOrder": "parallel-or-default"
+          },
+          "taskOptions": {
+            "isallowreassign": true,
+            "isallowsign": true,
+            "allowskip": true
+          },
+          "notification": {
+            "isenabledemail": false,
+            "to": false,
+            "subject": false,
+            "html": false
+          }
+        }
+      ]
+    }
+  ]
+}

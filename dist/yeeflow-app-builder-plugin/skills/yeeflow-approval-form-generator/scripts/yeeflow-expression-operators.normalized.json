@@ -1,0 +1,46 @@
+{
+  "source": "expression training data generator.txt",
+  "version": "2026-05-14",
+  "tokenShapes": {
+    "stringLiteral": { "type": "str", "required": ["type", "value"], "valueType": "text" },
+    "numberLiteral": { "type": "num", "required": ["type", "value"], "valueType": "number", "note": "Training examples store numeric literal values as strings." },
+    "booleanLiteral": { "type": "bool", "required": ["type", "value"], "valueType": "boolean" },
+    "operator": { "type": "op", "required": ["type", "op"] },
+    "variable": {
+      "required": ["exprType", "valueType", "id", "type", "name"],
+      "exprType": "variable",
+      "type": "expr",
+      "allowedValueTypes": ["number", "text", "date", "boolean"],
+      "extraPropertiesAllowed": false
+    },
+    "function": { "type": "func", "required": ["type", "func", "params"], "paramsType": "array" }
+  },
+  "operators": {
+    "arithmetic": [
+      { "op": "+", "description": "addition" },
+      { "op": "-", "description": "subtraction" },
+      { "op": "*", "description": "multiplication" },
+      { "op": "/", "description": "division" }
+    ],
+    "grouping": [
+      { "op": "(", "description": "left parenthesis" },
+      { "op": ")", "description": "right parenthesis" }
+    ],
+    "logical": [
+      { "op": "and", "description": "logical and" },
+      { "op": "or", "description": "logical or" }
+    ],
+    "comparison": [
+      { "op": ">", "description": "greater than" },
+      { "op": ">=", "description": "greater than or equal" },
+      { "op": "<", "description": "less than" },
+      { "op": "<=", "description": "less than or equal" },
+      { "op": "==", "description": "equal" },
+      { "op": "!=", "description": "not equal" }
+    ],
+    "concatenation": [
+      { "op": "&", "description": "concatenate strings" }
+    ]
+  },
+  "allowedOperators": ["+", "-", "*", "/", "(", ")", "and", "or", ">", ">=", "<", "<=", "==", "!=", "&"]
+}

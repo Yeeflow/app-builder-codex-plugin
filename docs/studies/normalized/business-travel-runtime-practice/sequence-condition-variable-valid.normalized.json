@@ -1,0 +1,31 @@
+{
+  "proof": "validator-backed",
+  "variables": {
+    "basic": [
+      {
+        "id": "TotalAmount",
+        "type": "number",
+        "name": "Total Requested Amount"
+      }
+    ]
+  },
+  "conditioninfo": [
+    {
+      "left": {
+        "type": 1,
+        "value": {
+          "exprType": "variable",
+          "valueType": "number",
+          "id": "TotalAmount",
+          "type": "expr"
+        }
+      },
+      "op": "n.>",
+      "right": {
+        "type": 0,
+        "value": 5000
+      },
+      "group": "number"
+    }
+  ]
+}

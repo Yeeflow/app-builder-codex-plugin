@@ -1,0 +1,49 @@
+{
+  "audit": "reference-app-template-corpus-audit",
+  "exports": [
+    {
+      "exportName": "Company Overview (3).yap",
+      "decodeShape": "YAP wrapper with gzip ListExportResult and Data as ListExportInfo",
+      "appDomainType": "advanced controls and dashboard control patterns",
+      "dashboards": 6,
+      "lists": 1,
+      "customForms": 3,
+      "majorControls": ["kanban", "collection", "timeline-v", "timeline-h", "tabs", "toggle", "alert", "progress-circle", "qrcode", "barcode", "embed", "document"],
+      "strongestReusablePatterns": ["dynamic Kanban cards", "dynamic Collection cards", "bulk actions", "timeline controls", "advanced controls", "QR and Barcode controls"],
+      "limitations": ["generic alert copy appears", "not a print-page reference", "runtime action proof is not implied by export alone"]
+    },
+    {
+      "exportName": "Data Lists (4).yap",
+      "decodeShape": "YAP wrapper with gzip ListExportResult and Data as ListExportInfo",
+      "appDomainType": "data list and custom form patterns",
+      "dashboards": 0,
+      "lists": 10,
+      "customForms": 39,
+      "majorControls": ["container", "flex-grid", "field controls", "file-upload", "icon-upload", "list", "lookup", "datepicker", "identity-picker"],
+      "strongestReusablePatterns": ["custom list forms", "field grids", "Dynamic Sub List", "data-list view metadata"],
+      "limitations": ["no clear print page found", "business-specific document checklist needs stronger proof"]
+    },
+    {
+      "exportName": "Projects Center_2.yap",
+      "decodeShape": "YAP wrapper with gzip ListExportResult and Data as ListExportInfo",
+      "appDomainType": "project and work management composition",
+      "dashboards": 2,
+      "lists": 7,
+      "customForms": 23,
+      "majorControls": ["collection", "kanban", "action-button", "progress", "summary", "document forms", "detail forms"],
+      "strongestReusablePatterns": ["operational workspace dashboards", "project detail page", "related record sections", "task and issue forms", "document upload/detail forms"],
+      "limitations": ["some collections have sparse dynamic fields", "actions and filters require per-package validation"]
+    },
+    {
+      "exportName": "Sales_Management_AD.yap",
+      "decodeShape": "YAP wrapper with gzip ListExportResult and Data as ListExportInfo",
+      "appDomainType": "CRM and sales management composition",
+      "dashboards": 2,
+      "lists": 8,
+      "customForms": 32,
+      "majorControls": ["summary", "data-list", "pie-chart", "bar-chart", "pivot-table", "filters", "section", "flex-grid"],
+      "strongestReusablePatterns": ["dashboard metrics", "configured Data tables", "sales forms", "related record tables", "dashboard filters"],
+      "limitations": ["not a print-page reference", "card polish varies by page"]
+    }
+  ]
+}

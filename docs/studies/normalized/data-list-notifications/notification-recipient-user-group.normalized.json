@@ -1,0 +1,22 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[5].RemindRules[].Receiver",
+  "pattern": "notification-recipient-user-group",
+  "shape": {
+    "Identities": [
+      {
+        "Type": 3,
+        "Id": "<user-group-id>",
+        "Name": "<user-group>",
+        "Attr": {
+          "Code": "<uuid>",
+          "Category": "<app-category>"
+        }
+      }
+    ],
+    "ListDefs": []
+  },
+  "redaction": "Do not commit real group names, codes, categories, or IDs."
+}

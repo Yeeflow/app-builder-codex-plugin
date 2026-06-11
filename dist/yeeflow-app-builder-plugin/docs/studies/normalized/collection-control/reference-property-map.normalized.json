@@ -1,0 +1,412 @@
+{
+  "schemaVersion": "1.2.0",
+  "controlFamily": "Collection",
+  "study": "collection-card-golden-reference-complete",
+  "provenScope": {
+    "pattern": "collection_control_responsive_card_grid",
+    "patternScope": "card_style_only",
+    "supportingTemplates": [
+      "collection_control_card_with_item_actions",
+      "collection_control_card_with_multiselect_toolbar"
+    ],
+    "provenFormats": ["YAP", "YAPK"],
+    "provenSurfaces": ["dashboard", "approval_form", "data_list_form"],
+    "notProvenFor": [
+      "collection_grid_table_style",
+      "table_like_collection",
+      "row_list_collection",
+      "kanban_style_collection",
+      "grouped_collection",
+      "nested_collection",
+      "timeline_style_collection",
+      "gallery_or_media_variants_beyond_card_reference",
+      "unknown_non_card_collection_styles",
+      "unknown_non_card_yapk_collection_styles"
+    ]
+  },
+  "tenantNeutral": true,
+  "samples": {
+    "yap": {
+      "file": "Company Overview (5).yap",
+      "title": "Company Overview",
+      "decode": "success-gzip-resource-data",
+      "surfacesDecoded": ["dashboard", "approval-form", "data-list-form"]
+    },
+    "yapk": {
+      "file": "Company Overview-v1 Collection study.yapk",
+      "title": "Company Overview",
+      "decode": "success-tolerant-brotli-app-package-info",
+      "strictBrotli": "Z_BUF_ERROR",
+      "surfacesDecoded": ["dashboard", "approval-form", "data-list-form"]
+    }
+  },
+  "proofBoundary": {
+    "yapDashboard": "decoded",
+    "yapApprovalForm": "decoded",
+    "yapDataListForm": "decoded",
+    "yapkDashboard": "decoded-through-tolerant-brotli",
+    "yapkApprovalForm": "decoded-through-tolerant-brotli",
+    "yapkDataListForm": "decoded-through-tolerant-brotli",
+    "liveApiCallsRunForThisStudy": false,
+    "futureStudy": "Collection + Grid table-style pattern"
+  },
+  "surfaceResourceLocations": {
+    "yapDashboard": "Data.Item.Layouts[].LayoutInResources[].Resource",
+    "yapApprovalForm": "Data.Forms[].DefResource.pageurls[].formdef",
+    "yapDataListForm": "Data.Childs[].Layouts[].LayoutInResources[].Resource",
+    "yapkDashboard": "Pages[].LayoutInResources[].Resource",
+    "yapkApprovalForm": "Forms[].DefResource -> pageurls[].formdef",
+    "yapkDataListForm": "Childs[].Layouts[].LayoutInResources[].Resource"
+  },
+  "yapkDecodedAppPackageInfoSummary": {
+    "topLevelKeys": [
+      "ListSet",
+      "Pages",
+      "Forms",
+      "FormReports",
+      "FormNewReports",
+      "DataReports",
+      "Themes",
+      "PortalInfo",
+      "Childs"
+    ],
+    "pageCount": 6,
+    "formCount": 1,
+    "childCount": 1,
+    "fieldCount": 16,
+    "layoutCount": 4,
+    "decodeRule": "Use tolerant Brotli when strict Brotli ends with Z_BUF_ERROR; never print decoded payload."
+  },
+  "yapkCardCollectionReferences": {
+    "dashboard": {
+      "surface": "Collection of activity",
+      "location": "Pages[].LayoutInResources[].Resource",
+      "collectionCount": 1
+    },
+    "approvalForm": {
+      "surface": "Collection in Approval form",
+      "location": "Forms[].DefResource -> pageurls[].formdef",
+      "collectionCount": 1
+    },
+    "dataListForm": {
+      "surface": "Collection in Data list form",
+      "location": "Childs[].Layouts[].LayoutInResources[].Resource",
+      "collectionCount": 1
+    },
+    "sharedRootKeys": ["attrs", "label", "nv_label", "type"],
+    "sharedAttrsKeys": ["actions", "data", "layout", "pagination"],
+    "sharedDataKeys": ["list", "ps", "sort"],
+    "sharedLayoutKeys": ["align-i", "cg", "col", "cp", "rg"],
+    "actionStepTypes": ["confirm", "listitem", "otheraction", "setdatalist", "setvar"],
+    "dynamicControlTypes": ["dynamic-field", "dynamic-file", "dynamic-image", "dynamic-user"]
+  },
+  "sectionHeaderOperationToolbarGrid": {
+    "sectionHeader": {
+      "type": "container",
+      "attrs": {
+        "style": {
+          "direction": [null, "row", null, "column"],
+          "align_items": [null, "center"],
+          "justify_content": [null, "space-between"],
+          "gap": [null, "--sp--s200"]
+        }
+      },
+      "children": [
+        {
+          "type": "heading",
+          "label": "Text",
+          "attrs": {
+            "headc": {
+              "title": {
+                "value": "<section-title>",
+                "variable": null
+              }
+            }
+          }
+        },
+        {
+          "type": "container",
+          "role": "operation-toolbar",
+          "attrs": {
+            "style": {
+              "widthtype": [null, "2", null, "1"],
+              "direction": [null, "row"],
+              "align_items": [null, "center"],
+              "justify_content": [null, "flex-end"],
+              "gap": [null, 10]
+            },
+            "control_display": "<selected-count-greater-than-zero>"
+          },
+          "children": ["<bulk-action-button>", "<bulk-action-button>"]
+        }
+      ]
+    },
+    "selectedCount": {
+      "type": "heading",
+      "label": "Text",
+      "attrs": {
+        "headc": {
+          "title": {
+            "value": null,
+            "variable": [
+              {
+                "exprType": "variable",
+                "valueType": "string",
+                "id": "__temp_var_SelectedItemsAmount",
+                "type": "expr",
+                "name": "var_SelectedItemsAmount"
+              },
+              {
+                "type": "str",
+                "value": " Items are selected."
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "sharedCollectionRoot": {
+    "id": "<collection-control-id>",
+    "type": "collection",
+    "label": "Collection",
+    "attrs": {
+      "data": {
+        "list": {
+          "AppID": 41,
+          "ListID": "<source-list-id>",
+          "Type": 1,
+          "Title": "<source-list-title>",
+          "ListSetID": "<root-listset-id>"
+        },
+        "sort": [
+          {
+            "SortName": "Created",
+            "SortByDesc": true
+          }
+        ],
+        "ps": 9
+      },
+      "layout": {
+        "cg": [null, 16],
+        "rg": [null, 16],
+        "cp": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s0",
+            "bottom": "--sp--s0",
+            "left": "--sp--s0"
+          }
+        ],
+        "align-i": [null, "7"],
+        "col": [null, null, 2, 1]
+      },
+      "pagination": {
+        "p": "<pagination-wrapper>"
+      },
+      "actions": [
+        {
+          "id": "<select-action-id>",
+          "name": "Select Items",
+          "type": "coll",
+          "steps": ["setvar", "setvar"]
+        },
+        {
+          "id": "<edit-action-id>",
+          "name": "Edit item",
+          "type": "coll",
+          "steps": ["listitem"]
+        },
+        {
+          "id": "<delete-action-id>",
+          "name": "Delete item",
+          "type": "coll",
+          "steps": ["confirm", "setdatalist", "otheraction"]
+        },
+        {
+          "id": "<complete-action-id>",
+          "name": "Mark current item as Completed",
+          "type": "coll",
+          "steps": ["setdatalist", "otheraction"]
+        }
+      ]
+    }
+  },
+  "responsiveCardGrid": {
+    "desktopColumns": 3,
+    "tabletColumns": 2,
+    "mobileColumns": 1,
+    "exportValue": {
+      "attrs.layout.col": [null, null, 2, 1]
+    },
+    "note": "Desktop 3 columns are implicit/default in the decoded YAP and YAPK card pattern; tablet/mobile are explicit."
+  },
+  "itemTemplate": {
+    "id": "<item-template-id>",
+    "type": "container",
+    "label": "Container",
+    "attrs": {
+      "common": "<card-surface-style>",
+      "style": "<card-layout-style>"
+    },
+    "directChildren": [
+      {
+        "type": "dynamic-image",
+        "label": "Dynamic image",
+        "binding": {
+          "source": "3",
+          "obj-f": "<image-field>"
+        }
+      },
+      {
+        "type": "dynamic-field",
+        "label": "Dynamic field",
+        "binding": {
+          "source": "3",
+          "obj-f": "Title"
+        }
+      },
+      {
+        "type": "heading",
+        "label": "Text",
+        "binding": {
+          "exprType": "variable_ctx",
+          "ctx": "__ctx_coll",
+          "id": "<status-field>"
+        }
+      },
+      {
+        "type": "container",
+        "role": "top-right-selection-container",
+        "attrs": {
+          "control_action": "<select-action-id>",
+          "common": {
+            "pos": [null, "absolute"],
+            "hor": [null, "right"],
+            "horoffset": [null, 12],
+            "veroffset": [null, 12]
+          },
+          "style": {
+            "widthtype": [null, "2"],
+            "direction": [null, "row"],
+            "gap": [null, "--sp--s025"]
+          }
+        },
+        "children": [
+          {
+            "type": "icon",
+            "attrs": {
+              "icon": {
+                "icon": "fa-regular fa-square",
+                "size": [null, "--sp--s250"]
+              },
+              "common": {
+                "positioning": {
+                  "widthtype": [null, "2"]
+                }
+              },
+              "control_display": "<not-selected-display-rule>"
+            }
+          },
+          {
+            "type": "icon",
+            "attrs": {
+              "icon": {
+                "icon": "fa-regular fa-square-check",
+                "size": [null, "--sp--s250"]
+              },
+              "common": {
+                "positioning": {
+                  "widthtype": [null, "2"]
+                }
+              },
+              "control_display": "<selected-display-rule>"
+            }
+          }
+        ]
+      },
+      {
+        "type": "container",
+        "role": "category-status-row",
+        "children": ["<dynamic-field>", "<dynamic-field>"]
+      },
+      {
+        "type": "container",
+        "role": "progress-row",
+        "children": ["<dynamic-field>", "<dynamic-field>"]
+      },
+      {
+        "type": "dynamic-user",
+        "label": "Dynamic user",
+        "binding": {
+          "source": "3",
+          "obj-f": "<owner-field>"
+        }
+      },
+      {
+        "type": "dynamic-file",
+        "label": "Dynamic file",
+        "binding": {
+          "source": "3",
+          "obj-f": "<file-field>"
+        }
+      },
+      {
+        "type": "dynamic-file",
+        "label": "Dynamic file",
+        "binding": {
+          "source": "3",
+          "obj-f": "<file-field>"
+        }
+      },
+      {
+        "type": "container",
+        "role": "operation-button-row",
+        "attrs": {
+          "style": {
+            "direction": [null, "row"],
+            "align_items": [null, "center"],
+            "justify_content": [null, "space-between"]
+          }
+        },
+        "children": ["<edit-action-button>", "<complete-action-button>", "<delete-action-button>"]
+      }
+    ]
+  },
+  "actionReferences": {
+    "currentItemContext": {
+      "exprType": "variable_ctx",
+      "ctx": "__ctx_coll",
+      "id": "ListDataID"
+    },
+    "selectedState": {
+      "selectedIdsVariable": "__temp_var_SelectedItems",
+      "selectedCountVariable": "__temp_var_SelectedItemsAmount"
+    },
+    "childTrigger": {
+      "attrs.control_action": "<collection-action-id>"
+    }
+  },
+  "validationRules": [
+    "COLLECTION_RESPONSIVE_COLUMNS_MISSING",
+    "COLLECTION_RESPONSIVE_COLUMNS_INVALID",
+    "COLLECTION_ROOT_ACTIONS_MISSING",
+    "COLLECTION_ITEM_ACTION_MISSING_CONTEXT",
+    "COLLECTION_ACTION_LISTDATAID_MISSING",
+    "COLLECTION_MULTISELECT_STATE_MISSING",
+    "COLLECTION_MULTISELECT_TOOLBAR_MISSING",
+    "COLLECTION_MULTISELECT_ICON_INVALID",
+    "COLLECTION_SELECTED_COUNT_BINDING_INVALID",
+    "COLLECTION_OPERATION_CONTAINER_POSITION_INVALID",
+    "COLLECTION_OPERATION_CONTAINER_OFFSET_INVALID",
+    "COLLECTION_YAPK_DECODE_FAILED",
+    "COLLECTION_YAPK_RESOURCE_LOCATION_MISSING",
+    "COLLECTION_YAPK_CARD_SHAPE_INVALID",
+    "COLLECTION_YAPK_UNKNOWN_PATTERN",
+    "COLLECTION_PATTERN_UNPROVEN",
+    "COLLECTION_NON_CARD_PATTERN_UNPROVEN",
+    "COLLECTION_GRID_TABLE_PATTERN_UNPROVEN",
+    "COLLECTION_YAPK_SHAPE_UNPROVEN"
+  ]
+}

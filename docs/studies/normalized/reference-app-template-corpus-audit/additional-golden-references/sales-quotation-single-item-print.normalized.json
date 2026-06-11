@@ -1,0 +1,20 @@
+{
+  "exportName": "Sales Quotation.yap",
+  "focusPages": [
+    "Print Page",
+    "View Quotation"
+  ],
+  "decodeShape": "YAP gzip ListExportResult with Data = ListExportInfo",
+  "proofBoundary": "export-proven structure only; browser print output not claimed",
+  "patterns": [
+    "View page includes print action targeting print page",
+    "Print Page includes logo/picture area, customer and quotation summary fields, line-item list body/footer, totals, terms text, padding, gaps, borders, and background sections",
+    "print page is read-oriented and avoids normal mutation actions"
+  ],
+  "templateImpact": [
+    "print_page_summary",
+    "print_page_document_checklist",
+    "data_table_section"
+  ],
+  "redaction": "raw payloads, Resource, Sign, IDs, tenant data, and sample records omitted"
+}

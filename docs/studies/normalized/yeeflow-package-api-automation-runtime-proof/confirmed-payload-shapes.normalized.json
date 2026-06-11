@@ -1,0 +1,29 @@
+{
+  "proof": "yeeflow-package-api-automation-runtime-proof",
+  "payloadShapes": [
+    {
+      "operation": "upload",
+      "endpoint": "POST /files/upload",
+      "requestShape": ["multipart file", "query isImg=false"],
+      "responseShape": ["id", "name", "fileSize"]
+    },
+    {
+      "operation": "import-yap",
+      "endpoint": "POST /listset/package/import",
+      "requestShape": ["AppID", "WorkspaceID", "Title", "Description", "IconUrl", "Resource", "Manage", "Write", "Read"],
+      "proofStatus": "not-proven"
+    },
+    {
+      "operation": "install-yapk",
+      "endpoint": "POST /listset/package/install",
+      "requestShape": ["WorkspaceID", "PackageFile.Id", "PackageFile.Name", "PackageFile.FileSize"],
+      "proofStatus": "runtime-proven-api-acceptance"
+    },
+    {
+      "operation": "upgrade-yapk",
+      "endpoint": "POST /listset/package/upgrade",
+      "requestShape": ["WorkspaceID", "PackageFile.Id", "PackageFile.Name", "PackageFile.FileSize", "UpgradeCheck"],
+      "proofStatus": "dry-run-only"
+    }
+  ]
+}

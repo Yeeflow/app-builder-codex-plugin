@@ -1,0 +1,24 @@
+{
+  "topic": "yeeflow-application-delivery-workflow",
+  "rule": "api-result-classification",
+  "classes": [
+    {
+      "resultClass": "success",
+      "condition": "api status 0"
+    },
+    {
+      "resultClass": "already_installed",
+      "condition": "known duplicate or already-installed non-zero response"
+    },
+    {
+      "resultClass": "api_rejected",
+      "condition": "unknown non-zero api status"
+    },
+    {
+      "resultClass": "http_rejected",
+      "condition": "non-2xx http status"
+    }
+  ],
+  "messageKeywords": ["already exists", "already installed", "duplicate", "same application", "package exists", "app exists", "已存在", "已安装", "重复"],
+  "rawResponseStored": false
+}

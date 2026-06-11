@@ -1,0 +1,49 @@
+{
+  "resourceType": "data list",
+  "resourceRef": "<data-list-1>",
+  "resourceName": "<redacted-resource-name-1>",
+  "viewRef": "<view-1-4>",
+  "viewName": "<redacted-view-name>",
+  "defaultOrCustom": "custom",
+  "viewType": "kanban",
+  "typeCode": 104,
+  "urlKey": "<redacted-view-url>",
+  "visibleFields": [
+    "Text2",
+    "Decimal1",
+    "Datetime1",
+    "Datetime2"
+  ],
+  "visibleFieldCount": 4,
+  "primarySort": {
+    "field": "CreatedBy",
+    "descending": true
+  },
+  "secondarySort": null,
+  "dataFilterSummary": "none",
+  "userFilters": [],
+  "permissionSummary": "inherits or no view-level item permission flag",
+  "extKeys": [
+    "displayStyle",
+    "Url",
+    "ShowTable",
+    "TitleField",
+    "CategoryField",
+    "IncludeUncategorized"
+  ],
+  "layoutViewKeys": [
+    "layout",
+    "sort",
+    "query",
+    "rowColor",
+    "filter"
+  ],
+  "specialSettings": [
+    "displayStyle",
+    "ShowTable",
+    "TitleField",
+    "CategoryField",
+    "IncludeUncategorized"
+  ],
+  "proofLevel": "export-proven"
+}

@@ -1,0 +1,14 @@
+{
+  "proof": "yeeflow-package-api-automation-runtime-proof",
+  "endpoint": "POST /files/upload",
+  "httpStatus": 200,
+  "success": true,
+  "contentType": "text/plain; charset=utf-8",
+  "bodyShape": "text payload parses as JSON object",
+  "responseFieldNames": ["id", "name", "fileSize"],
+  "normalizedPackageFileFields": ["Id", "Name", "FileSize"],
+  "redaction": {
+    "fileMetadataValues": "redacted",
+    "rawResponseStored": false
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (2).yap",
+  "nodeType": "MultiAssignmentTask",
+  "pattern": "assignment-task-type-complete",
+  "normalizedConfig": {
+    "tasktype": "complete",
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "usertaskassignment": [
+      {
+        "type": "user",
+        "method": "expression",
+        "value": "<REDACTED_EXPRESSION_BUTTON>",
+        "title": "<REDACTED_ASSIGNEE_LABEL>"
+      }
+    ]
+  },
+  "notes": [
+    "Complete task is explicitly serialized with properties.tasktype = complete.",
+    "Complete button/runtime behavior is not proven by this normalized reference."
+  ]
+}

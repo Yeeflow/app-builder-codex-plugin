@@ -1,0 +1,10 @@
+interface:
+  display_name: Yeeflow Design System Alignment
+  short_description: Apply Yeeflow brand, event, brochure, blog, and service standards
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

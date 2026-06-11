@@ -1,0 +1,77 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "mixed",
+  "rawAssigneeFieldNames": [
+    [
+      "type",
+      "method",
+      "value",
+      "title"
+    ],
+    [
+      "type",
+      "method",
+      "value",
+      "title"
+    ]
+  ],
+  "normalizedConfig": [
+    {
+      "type": "user",
+      "method": "direct",
+      "value": "<USER_REF_CONFIRMED_BY_API>",
+      "title": "<REDACTED_ASSIGNEE_LABEL>"
+    },
+    {
+      "type": "user",
+      "method": "expression",
+      "value": {
+        "kind": "expressionButton",
+        "label": "Applicant:Line Manager",
+        "dataShape": {
+          "type": "user",
+          "param": {
+            "id": {
+              "parseStatus": "opaque",
+              "expressionSourceHints": {
+                "types": [
+                  "application"
+                ],
+                "props": [
+                  "ApplicantUserID"
+                ],
+                "usesApplicantUserId": true
+              }
+            }
+          },
+          "prop": "LineManager"
+        }
+      },
+      "title": "<REDACTED_ASSIGNEE_LABEL>"
+    }
+  ],
+  "approvalSettingsShape": {
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "appointedOrder": "parallel-or-default",
+    "issequential": null,
+    "isenabledemail": false,
+    "isallowreassign": false,
+    "isallowrecalled": null,
+    "automaticapproveddefinition": null,
+    "isallowsign": false,
+    "allowskip": true,
+    "duedatedefinition": 120,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "notificationSettingsShape": {
+    "isenabledemail": false
+  },
+  "runtimeDependencies": [
+    "runtime-applicant-user-context",
+    "valid-user-directory-data"
+  ],
+  "generationSafety": "export-proven shape; runtime routing unproven"
+}

@@ -1,0 +1,11 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "valid internal name",
+  "field": {
+    "DisplayName": "Request Owner",
+    "FieldName": "Text2",
+    "InternalName": "RequestOwner_2"
+  },
+  "allowedPattern": "^[a-zA-Z0-9_]+$",
+  "maximumLength": 255
+}

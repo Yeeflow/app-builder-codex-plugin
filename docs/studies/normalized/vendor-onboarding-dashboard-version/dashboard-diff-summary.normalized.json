@@ -1,0 +1,53 @@
+{
+  "source": "v1.93 export",
+  "compared": [
+    "Home",
+    "New Dashboard"
+  ],
+  "findings": [
+    {
+      "area": "storage",
+      "home": "Root Item.Layouts Type 103",
+      "newDashboard": "Root Item.Layouts Type 103",
+      "conclusion": "Both old and current dashboards are root Type 103 layouts, not DataReports."
+    },
+    {
+      "area": "LayoutView",
+      "home": "empty-string",
+      "newDashboard": "null",
+      "conclusion": "Current dashboard shell uses null LayoutView; old Home uses blank string."
+    },
+    {
+      "area": "Ext2",
+      "home": "",
+      "newDashboard": {
+        "src": true
+      },
+      "conclusion": "Current dashboard marker is Ext2 { src: true }."
+    },
+    {
+      "area": "LayoutInResources",
+      "home": "null/null",
+      "newDashboard": "array/0",
+      "conclusion": "Current manually created blank dashboard has an empty array; old Home exported as null/missing."
+    },
+    {
+      "area": "navigation",
+      "home": "LayoutView.sort references Type 103 Home layout ID",
+      "newDashboard": "not present in root navigation sort in this export",
+      "conclusion": "Creating a dashboard alone does not automatically prove nav sort registration; generator should still register Home in root navigation."
+    }
+  ],
+  "exportProven": [
+    "Current dashboard shell shape: Type 103, LayoutView null, Ext2 {src:true}, LayoutInResources []",
+    "AppID remains 41",
+    "Child list CustomType uses ListSite_<root ListID>"
+  ],
+  "inferred": [
+    "For generated Home, use the current shell markers and keep navigation sort entry pointing to the Home LayoutID.",
+    "Do not embed rich page Resource until a current-version dashboard content export proves the content shape."
+  ],
+  "unknown": [
+    "How rich current-version dashboard content is stored after adding controls in the current designer."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "case": "grid-caption-visible-layout-invalid",
+  "valid": false,
+  "control": {
+    "type": "flex_grid",
+    "label": "Field layout grid",
+    "displayLabel": [null, true],
+    "children": [{ "type": "input", "label": "Amount" }]
+  },
+  "expectedFinding": "LAYOUT_GRID_CAPTION_VISIBLE"
+}

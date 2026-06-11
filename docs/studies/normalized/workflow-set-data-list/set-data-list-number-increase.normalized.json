@@ -1,0 +1,100 @@
+{
+  "proofLevel": "export-proven",
+  "internalControlType": "ContentList",
+  "frontEndAction": "Set data list",
+  "workflowHost": "approval-form-workflow",
+  "workflowType": 2,
+  "workflowName": "Workflow Action Approval Test",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Data List",
+  "listtype": "select",
+  "operationType": "edit",
+  "target": {
+    "mode": "selected-data-source",
+    "appid": "<REDACTED_APP_ID>",
+    "listsetid": "<REDACTED_LISTSET_ID>",
+    "listid": "<REDACTED_LIST_ID>",
+    "resolvedTitle": "Products",
+    "resolvedType": "data-list"
+  },
+  "listdatasShape": "array",
+  "listdatasCount": 1,
+  "mappings": [
+    {
+      "index": 0,
+      "Columns": "Decimal1",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Decimal1",
+        "DisplayName": "Amount",
+        "FieldType": "Decimal",
+        "Type": "input_number",
+        "IsSystem": false
+      },
+      "Per": "1",
+      "numericOperationCode": "1",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "number"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "id": "Addamount",
+            "name": "Workflow Variables:Add amount"
+          }
+        ]
+      }
+    }
+  ],
+  "wheresShape": "array",
+  "wheresCount": 1,
+  "wheres": [
+    {
+      "index": 0,
+      "key": "<REDACTED_CONDITION_ID>",
+      "pre": "and",
+      "left": "ListDataID",
+      "op": "0",
+      "right": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "lookup"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "lookup",
+            "id": "SelectProduct",
+            "name": "Workflow Variables:Select Product"
+          }
+        ]
+      },
+      "showCus": false,
+      "nestedConditionCount": 0
+    }
+  ],
+  "hasListFieldValue": false,
+  "hasSubListValue": false,
+  "broadMutationRisk": false,
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

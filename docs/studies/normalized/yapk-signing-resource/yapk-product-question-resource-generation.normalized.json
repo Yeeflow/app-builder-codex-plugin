@@ -1,0 +1,16 @@
+{
+  "schema": "yeeflow-yapk-signing-resource-normalized",
+  "case": "product_question_resource_generation",
+  "evidenceLevel": "open-question",
+  "summary": "Signing is available for valid wrappers, but the API or method that rebuilds Resource after app-content changes is still missing.",
+  "questionForProduct": "We can sign .yapk wrappers with /utils/apppackage/setsign, but how do we generate or rebuild the encrypted/opaque Resource after changing lists, fields, dashboards, or forms? Please provide the API or encoding method that turns modified app package JSON into a valid .yapk Resource.",
+  "neededFor": [
+    "list changes",
+    "field changes",
+    "dashboard changes",
+    "approval form changes",
+    "workflow changes",
+    "offline app-content upgrade package generation"
+  ],
+  "currentStopRule": "Do not generate or mutate app-content .yapk packages offline until Resource generation is product-supported or proven."
+}

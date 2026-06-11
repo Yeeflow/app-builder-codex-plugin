@@ -1,0 +1,25 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "exportPath": "children[0]/children/0/children/0/children/4",
+  "normalized": {
+    "id": "__CONTROL_ID__",
+    "type": "action_button",
+    "binding": null,
+    "fieldID": null,
+    "label": "__LABEL_REDACTED__",
+    "attrs": {
+      "common": {
+        "positioning": {
+          "widthtype": [
+            null,
+            "__ID_REDACTED__"
+          ]
+        }
+      },
+      "button-style": "2",
+      "control_action": "9a74e248-6a20-49da-91a3-3e55f7698b0c"
+    },
+    "field": null,
+    "proof": "export-proven; private values redacted"
+  }
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Yeeflow API Operator"
+  short_description: "Safe read-only Yeeflow API lookup"
+  default_prompt: "Use $yeeflow-api-operator to test Yeeflow API connectivity and read directory/reference data safely."
+policy:
+  allow_implicit_invocation: true

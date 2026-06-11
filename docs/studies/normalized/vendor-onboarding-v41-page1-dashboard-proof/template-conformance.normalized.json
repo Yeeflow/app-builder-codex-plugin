@@ -1,0 +1,17 @@
+{
+  "proof": "vendor-onboarding-v41-page1-dashboard",
+  "templateLibrary": "docs/templates/yeeflow-ui-section-template-library.normalized.json",
+  "compositionChecklist": "docs/generated-app-plans/vendor-onboarding-v4-composition-checklist.normalized.json",
+  "checklistPage": "vendor_management_dashboard",
+  "templateConformance": {
+    "checked": 8,
+    "passed": 8,
+    "failed": 0
+  },
+  "strictVisualQuality": {
+    "status": "pass_with_warnings",
+    "errors": 0,
+    "warnings": 3,
+    "warningBoundary": "Non-blocking source spec section warnings only."
+  }
+}

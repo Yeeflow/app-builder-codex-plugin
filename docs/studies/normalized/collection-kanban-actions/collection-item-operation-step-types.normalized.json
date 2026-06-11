@@ -1,0 +1,32 @@
+{
+  "proof": "mixed: export-proven for serialized steps; UI-reference-backed for screenshot-only labels",
+  "exportProven": [
+    {
+      "label": "Edit item",
+      "serializedType": "listitem",
+      "attrs": {
+        "op_type": "edit"
+      }
+    },
+    {
+      "label": "Delete item",
+      "serializedType": "deleteitem"
+    },
+    {
+      "label": "Update fields",
+      "serializedType": "setdatalist",
+      "attrs": {
+        "type": "edit"
+      }
+    }
+  ],
+  "uiReferenceBackedOnlyInThisStudy": [
+    "View item",
+    "Trigger list workflow",
+    "Redirect page to",
+    "Close this window",
+    "AI assistant",
+    "Barcode scan",
+    "NFC reader"
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "exportPath": "children[0]/children/0/children/1/children/0/children/4",
+  "normalized": {
+    "id": "__CONTROL_ID__",
+    "type": "lookup",
+    "binding": "Text4",
+    "fieldID": "__FIELD_ID__",
+    "label": "__LABEL_REDACTED__",
+    "attrs": {
+      "max-selection": 20,
+      "appid": "__ID_REDACTED__",
+      "listid": "__ID_REDACTED__",
+      "listsetid": "__ID_REDACTED__",
+      "listfield": "Title",
+      "listfilter": [
+        {
+          "key": "f2b8f2b3-4920-4458-894d-056bd4ee0678",
+          "pre": "and",
+          "left": "Text6",
+          "op": "0",
+          "right": [
+            {
+              "exprType": "list_field",
+              "prop": "Text6",
+              "id": "__ID_REDACTED__",
+              "type": "expr",
+              "name": "__NAME_REDACTED__"
+            }
+          ],
+          "showCus": false
+        }
+      ],
+      "lab": {
+        "color": "rgba(0, 28, 75, 0.62)",
+        "ty": {
+          "wei": "1"
+        }
+      },
+      "edit": {
+        "normal": {
+          "bgColor": "#f8f9fb",
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": 1,
+                "right": 1,
+                "bottom": 1,
+                "left": 1
+              }
+            ],
+            "color": "#f8f9fb"
+          }
+        },
+        "pd": [
+          null,
+          {
+            "top": 5,
+            "right": 10,
+            "bottom": 5,
+            "left": 10
+          }
+        ]
+      },
+      "labWid": [
+        null,
+        "__ID_REDACTED__"
+      ],
+      "common": {
+        "grid": {
+          "position": [
+            null,
+            {
+              "type": "0",
+              "cSpan": 2
+            },
+            null,
+            {
+              "cSpan": 1
+            }
+          ]
+        }
+      },
+      "reonly": {
+        "select": {
+          "normal": {
+            "bgColor": "rgba(255, 255, 255, 0)",
+            "border": {
+              "type": "0"
+            },
+            "color": "var(--c--primary)"
+          }
+        }
+      },
+      "link": "__ID_REDACTED__",
+      "open-type": "slide",
+      "modal-size": 2
+    },
+    "field": {
+      "FieldName": "Text4",
+      "FieldID": "__FIELD_ID__",
+      "InternalName": "__INTERNAL_NAME_REDACTED__",
+      "Type": "lookup",
+      "FieldType": "Text",
+      "IsSystem": false
+    },
+    "proof": "export-proven; private values redacted"
+  }
+}

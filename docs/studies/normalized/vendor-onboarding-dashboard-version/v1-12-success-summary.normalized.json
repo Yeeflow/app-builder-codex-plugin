@@ -1,0 +1,48 @@
+{
+  "artifact": "v1-12-success-summary",
+  "package": {
+    "path": "~/Downloads/vendor-onboarding-compliance-management.v1.12-current-dashboard-data-table-fields-fixed.yap",
+    "type": "YAP",
+    "committedToGit": false
+  },
+  "runtimeResult": {
+    "importedSuccessfully": true,
+    "usesCurrentDashboardVersion": true,
+    "dataTableDeletedFieldsErrorFixed": true,
+    "confirmedBy": "user runtime test"
+  },
+  "provenRules": {
+    "yapResourceShape": "top-level Resource decodes to ListExportResult with Data as ListExportInfo JSON string",
+    "appId": "fixed 41",
+    "generatedIds": "API-issued IDs preserved without JavaScript number rounding",
+    "replaceIds": "all generated IDs collected",
+    "formKeys": "empty when no process forms exist",
+    "customType": "child lists use ListSite_<generated root ListID>",
+    "fieldCategory": "integer when present",
+    "idUniqueness": "ListID, FieldID, LayoutID, and resource IDs unique",
+    "dashboardShell": "Type 103, LayoutView null, Ext2 {src:true}",
+    "dashboardDataTable": "Field is source binding; FieldName is label"
+  },
+  "proofBoundary": {
+    "proves": [
+      "focused Vendor Onboarding YAP import",
+      "current Home dashboard shell",
+      "simple current-dashboard Data table binding fix"
+    ],
+    "doesNotProve": [
+      "full rich UI scope",
+      "lookup runtime behavior",
+      "workflow execution",
+      "record creation",
+      "advanced controls",
+      "YAPK upgrade materialization"
+    ]
+  },
+  "redaction": {
+    "rawResourceIncluded": false,
+    "rawPayloadIncluded": false,
+    "privateIdsIncluded": false,
+    "tenantDataIncluded": false,
+    "screenshotsIncluded": false
+  }
+}

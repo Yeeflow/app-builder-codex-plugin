@@ -1,0 +1,82 @@
+{
+  "ruleSet": "Vendor Onboarding YAPK schema v2 generation rules",
+  "status": "locally validated and v1.15 install-proven",
+  "wrapper": {
+    "topLevelType": "AppExportPackageInfo",
+    "requiredConcepts": [
+      "PackageId",
+      "TenantID",
+      "AppID",
+      "ListID",
+      "Title",
+      "Description",
+      "IconUrl",
+      "Resource",
+      "Notes",
+      "Author",
+      "Date",
+      "Version",
+      "Sign"
+    ],
+    "appId": 41,
+    "sign": "server signing flow"
+  },
+  "resource": {
+    "encoding": "base64(Brotli(JSON.stringify(AppPackageInfo)))",
+    "decodedShape": "AppPackageInfo",
+    "mustNotDecodeTo": [
+      "YAP ListExportResult",
+      "YAP ListExportInfo"
+    ]
+  },
+  "appPackageInfo": {
+    "requiredTopLevelKeys": [
+      "ListSet",
+      "Pages",
+      "Forms",
+      "FormReports",
+      "FormNewReports",
+      "DataReports",
+      "Groups",
+      "Tags",
+      "Metadatas",
+      "Agents",
+      "Connections",
+      "Knowledges",
+      "Themes",
+      "Components",
+      "PortalInfo",
+      "Childs"
+    ],
+    "portalInfoWhenNoPortal": null,
+    "childListShape": "Childs[].Fields, not Childs[].Defs",
+    "longAsString": "Preserve long IDs as exact strings where schema requires LongAsString."
+  },
+  "innerAppRules": {
+    "generatedIds": "Use Yeeflow generate-unique-ids API for generated IDs except AppID.",
+    "largeIds": "Preserve 19-digit API IDs exactly and do not round through JavaScript Number.",
+    "uniqueIds": "LayoutID, ListID, and FieldID values must be unique in the required domains.",
+    "fieldCategory": "Field.Category must be an integer when present.",
+    "customType": "Use the v1.9-proven CustomType rule for ListSite root ListID references.",
+    "currentDashboardShell": {
+      "Type": 103,
+      "LayoutView": null,
+      "Ext2": "{\"src\":true}",
+      "LayoutInResources": []
+    },
+    "dashboardDataTable": {
+      "requiredListMetadata": [
+        "AppID",
+        "ListID",
+        "Type",
+        "Title",
+        "ListSetID"
+      ],
+      "requiredColumnFields": [
+        "Field",
+        "FieldName"
+      ]
+    }
+  },
+  "proofBoundary": "These rules are proven for the Vendor Onboarding v1.15 YAPK install path. Broader package types, richer controls, record creation, and workflow runtime behavior require separate proof."
+}

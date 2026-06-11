@@ -1,0 +1,14 @@
+{
+  "proof": "runtime-practice-backed",
+  "variables": {
+    "basic": []
+  },
+  "invalidUsertaskassignment": [
+    {
+      "type": "user",
+      "method": "expression",
+      "value": "<input data=\"${...Applicant...}\" value=\"Workflow Variables:Applicant:Line Manager\">"
+    }
+  ],
+  "validatorError": "TASK_ASSIGNMENT_VARIABLE_UNRESOLVED"
+}

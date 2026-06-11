@@ -1,0 +1,11 @@
+{
+  "case": "task-page-pagetype-invalid",
+  "valid": false,
+  "pageurl": {
+    "id": "task-page-001",
+    "type": 2,
+    "pagetype": 2,
+    "title": "Approval Task"
+  },
+  "expectedFinding": "TASK_PAGE_OUTER_PAGETYPE_INVALID"
+}

@@ -1,0 +1,29 @@
+{
+  "source": {
+    "export": "/Users/Renger/Downloads/Purchase Requests.ydl",
+    "proof": "export-proven"
+  },
+  "startEmailNotification": {
+    "isenabledemail": true,
+    "to": {
+      "shape": "expression-button-rich-text",
+      "labels": [
+        "Applicant:Email",
+        "Submitter:Email"
+      ],
+      "value": "<REDACTED_START_NOTIFICATION_RECIPIENT_EXPRESSION>"
+    },
+    "subject": {
+      "shape": "expression-button-rich-text",
+      "value": "<REDACTED_START_NOTIFICATION_SUBJECT_SHAPE>"
+    },
+    "html": {
+      "shape": "expression-button-rich-text",
+      "value": "<REDACTED_START_NOTIFICATION_BODY_SHAPE>"
+    }
+  },
+  "safety": {
+    "emailDeliveryTested": false,
+    "realEmailAddressesCommitted": false
+  }
+}

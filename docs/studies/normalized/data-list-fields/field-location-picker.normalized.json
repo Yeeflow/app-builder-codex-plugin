@@ -1,0 +1,30 @@
+{
+  "fieldType": "location-picker",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Text25",
+    "FieldType": "Text",
+    "FieldIndex": 25,
+    "DisplayName": "__DISPLAY_NAME_55__",
+    "InternalName": "__INTERNAL_NAME_55__",
+    "Type": "location-picker",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "empty",
+    "Rules": {
+      "identity-maxselection": "__ID_REDACTED__",
+      "parentId": "__ID_REDACTED__",
+      "placeholder": "__PLACEHOLDER_REDACTED__",
+      "required": true
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

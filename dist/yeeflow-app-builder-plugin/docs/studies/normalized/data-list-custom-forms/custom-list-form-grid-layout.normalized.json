@@ -1,0 +1,21 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "exportPath": "children[0]/children/0/children/1/children/0",
+  "normalized": {
+    "idPlaceholder": "__CONTROL_ID__",
+    "type": "flex_grid",
+    "label": "Grid",
+    "columnsBreakpoints": [
+      "1",
+      "3"
+    ],
+    "rowsBreakpoints": [
+      "1"
+    ],
+    "columnGapKeys": [
+      "1"
+    ],
+    "childCount": 6,
+    "proof": "export-proven; IDs redacted"
+  }
+}

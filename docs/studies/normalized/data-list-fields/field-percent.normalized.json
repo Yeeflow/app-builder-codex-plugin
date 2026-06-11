@@ -1,0 +1,31 @@
+{
+  "fieldType": "percent",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Decimal8",
+    "FieldType": "Decimal",
+    "FieldIndex": 8,
+    "DisplayName": "__DISPLAY_NAME_18__",
+    "InternalName": "__INTERNAL_NAME_18__",
+    "Type": "percent",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "string",
+    "Rules": {
+      "placeholder": "__PLACEHOLDER_REDACTED__",
+      "rounded-to": "3",
+      "required": true,
+      "number_min": 0,
+      "number_max": 0.05
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

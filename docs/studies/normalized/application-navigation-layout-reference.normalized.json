@@ -1,0 +1,32 @@
+{
+  "sourceExports": [
+    "/Users/Renger/Downloads/Tenant Service Portal v2.yap",
+    "/Users/Renger/Downloads/Tenant Service Portal v3.yap",
+    "/Users/Renger/Downloads/Tenant Service Portal v4.yap",
+    "/Users/Renger/Downloads/Tenant Service Portal v5.yap"
+  ],
+  "storage": "Data.Item.ListModel.LayoutView attrs[\"navigator-menu\"].position",
+  "values": [
+    {
+      "label": "Horizontal",
+      "storedValue": "default",
+      "sourceExport": "Tenant Service Portal v2.yap"
+    },
+    {
+      "label": "Vertical",
+      "storedValue": "left",
+      "sourceExport": "Tenant Service Portal v3.yap"
+    },
+    {
+      "label": "On header",
+      "storedValue": "onheader",
+      "sourceExport": "Tenant Service Portal v4.yap"
+    },
+    {
+      "label": "None",
+      "storedValue": "none",
+      "sourceExport": "Tenant Service Portal v5.yap"
+    }
+  ],
+  "defaultRule": "write position default explicitly for horizontal/default layout"
+}

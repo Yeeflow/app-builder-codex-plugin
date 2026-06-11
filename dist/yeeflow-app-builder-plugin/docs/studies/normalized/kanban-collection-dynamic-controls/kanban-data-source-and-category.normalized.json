@@ -1,0 +1,27 @@
+{
+  "feature": "kanban-data-source-and-category",
+  "source": "Company Overview.yap",
+  "schema": {
+    "attrs": {
+      "data": {
+        "list": {
+          "AppID": "<app-id>",
+          "ListID": "<list-id>",
+          "ListSetID": "<list-set-id>",
+          "Title": "Company Overview",
+          "Type": 1
+        },
+        "cateField": "Text2"
+      }
+    }
+  },
+  "context": {
+    "categoryContext": {
+      "exprType": "variable_ctx",
+      "ctx": "__ctx_kanban",
+      "id": "_cate",
+      "name": "Context:Kanban category"
+    }
+  },
+  "proof": "export-proven"
+}

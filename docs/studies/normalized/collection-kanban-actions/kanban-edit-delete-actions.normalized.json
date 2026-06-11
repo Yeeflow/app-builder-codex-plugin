@@ -1,0 +1,36 @@
+{
+  "proof": "export-proven from Company Overview (2).yap; identifiers redacted or synthetic",
+  "editAction": {
+    "type": "coll",
+    "steps": [
+      {
+        "type": "listitem",
+        "attrs": {
+          "op_type": "edit",
+          "listdataid": [
+            {
+              "exprType": "variable_ctx",
+              "ctx": "__ctx_coll",
+              "id": "ListDataID",
+              "name": "Collection item:Id"
+            }
+          ],
+          "layout": "<edit-form-layout-id>",
+          "op": "modal",
+          "modalsize": 0
+        }
+      }
+    ]
+  },
+  "deleteAction": {
+    "type": "coll",
+    "steps": [
+      {
+        "type": "deleteitem",
+        "attrs": {
+          "showdlg": true
+        }
+      }
+    ]
+  }
+}

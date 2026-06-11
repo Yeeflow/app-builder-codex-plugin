@@ -1,0 +1,31 @@
+{
+  "schema": "yeeflow-yapk-signing-resource-normalized",
+  "case": "resource_comparison_wrapper_vs_generated",
+  "evidenceLevel": "locally-verified-safe-stats",
+  "summary": "A Yeeflow-generated follow-up version changed Resource substantially while preserving app identity fields.",
+  "stableWrapperFields": [
+    "TenantID",
+    "AppID",
+    "ListID",
+    "Title",
+    "Description",
+    "IconUrl",
+    "Author"
+  ],
+  "changedWrapperFields": [
+    "PackageId",
+    "Version",
+    "Notes",
+    "Date",
+    "Sign",
+    "Resource"
+  ],
+  "resourceComparison": {
+    "sourceDecodedBytes": 5719,
+    "generatedDecodedBytes": 8342,
+    "commonPrefixBytes": 0,
+    "commonSuffixBytes": 0,
+    "samePositionByteRatio": 0.0061
+  },
+  "conclusion": "Real Yeeflow version generation rebuilds Resource; wrapper signing alone does not."
+}

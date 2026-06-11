@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Package Validator"
+  short_description: "Validate Yeeflow packages before import"
+  default_prompt: "Use $yeeflow-package-validator to validate this Yeeflow package before import or runtime testing."

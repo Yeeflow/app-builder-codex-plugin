@@ -1,0 +1,23 @@
+{
+  "audit": "reference-app-template-corpus-audit",
+  "patterns": [
+    {
+      "pattern": "field_grid_custom_form",
+      "sourceExports": ["Data Lists (4).yap"],
+      "controls": ["container", "grid", "flex-grid", "field controls"],
+      "templateCoverage": ["sectioned_new_edit_form"]
+    },
+    {
+      "pattern": "business_new_edit_form",
+      "sourceExports": ["Sales_Management_AD.yap", "Projects Center_2.yap"],
+      "controls": ["section", "section-column", "flex-grid", "input", "lookup", "datepicker", "identity-picker"],
+      "templateCoverage": ["sectioned_new_edit_form"]
+    },
+    {
+      "pattern": "detail_view_summary_and_related_sections",
+      "sourceExports": ["Projects Center_2.yap", "Sales_Management_AD.yap", "Company Overview (3).yap"],
+      "controls": ["container", "dynamic-field", "collection", "kanban", "data-list", "document"],
+      "templateCoverage": ["detail_view_header_summary", "tabbed_detail_page", "related_records_section"]
+    }
+  ]
+}

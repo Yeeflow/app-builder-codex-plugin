@@ -1,0 +1,27 @@
+{
+  "source": {
+    "export": "/Users/Renger/Downloads/Purchase Requests.ydl",
+    "proof": "export-proven"
+  },
+  "assignment": {
+    "taskStencil": "MultiAssignmentTask",
+    "property": "usertaskassignment[]",
+    "type": "user",
+    "method": "expression",
+    "value": "<CREATED_BY_FIELD_ASSIGNEE_REF>",
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "expression": {
+    "shape": "expression-button",
+    "sourceType": "listitem",
+    "sourceField": "CreatedBy",
+    "valueType": "user",
+    "property": "LineManager",
+    "displayLabel": "List field:Created By:Line Manager"
+  },
+  "notes": [
+    "This export uses the Created By list field context to resolve the Created By user's line manager as an assignee.",
+    "The committed example redacts all concrete list, field, user, and tenant identifiers.",
+    "Runtime assignment to that manager is not proven."
+  ]
+}

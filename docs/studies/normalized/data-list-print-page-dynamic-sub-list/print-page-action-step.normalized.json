@@ -1,0 +1,13 @@
+{
+  "source": "Sales Quotation.yap",
+  "proof": "export-proven",
+  "stepType": "print",
+  "attrs": {
+    "printtype": "select",
+    "data.Type": "layout",
+    "layout": "<target-print-layout-id>",
+    "listdataid": "current record ListDataID expression"
+  },
+  "targetResolution": "attrs.layout resolves to a Type 1 custom form layout",
+  "runtimeBoundary": "print preview execution not proven by export inspection"
+}

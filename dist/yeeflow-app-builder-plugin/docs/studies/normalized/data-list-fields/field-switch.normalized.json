@@ -1,0 +1,28 @@
+{
+  "fieldType": "switch",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Bit1",
+    "FieldType": "Bit",
+    "FieldIndex": 1,
+    "DisplayName": "__DISPLAY_NAME_27__",
+    "InternalName": "__INTERNAL_NAME_27__",
+    "Type": "switch",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "string",
+    "Rules": {
+      "source": "0",
+      "categoryId": null
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

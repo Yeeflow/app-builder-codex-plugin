@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "control": "Tab",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "dashboard"
+  ],
+  "observedSurfaces": [
+    "Tab controls"
+  ],
+  "internalTypes": [
+    "aktabs"
+  ],
+  "count": 10,
+  "attrKeys": [
+    "item",
+    "tabs",
+    "tabs-tabposition"
+  ],
+  "sourceModes": [
+    "unspecified"
+  ],
+  "styleKeys": [
+    "item",
+    "tabs"
+  ],
+  "childTypes": [
+    "ak-tabs-tab"
+  ],
+  "nestedChildControlTypes": {
+    "action_button": 20,
+    "ak-tabs-tab": 30,
+    "collection": 10,
+    "container": 50,
+    "dynamic-field": 30,
+    "dynamic-file": 20,
+    "dynamic-image": 10,
+    "dynamic-user": 10,
+    "heading": 30
+  },
+  "bindingModes": [],
+  "validation": [
+    "aktabs must contain ak-tabs-tab children",
+    "tab items need stable ids, titles, and child content containers"
+  ],
+  "generation": [
+    "use tabs to group peer content areas",
+    "set one default tab with attrs.isDefault when a non-first tab should open first"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<tab:1>",
+      "host": "dashboard",
+      "surface": "Tab controls",
+      "type": "aktabs",
+      "attrKeys": [],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "ak-tabs-tab",
+        "ak-tabs-tab",
+        "ak-tabs-tab"
+      ],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<tab:2>",
+      "host": "dashboard",
+      "surface": "Tab controls",
+      "type": "aktabs",
+      "attrKeys": [
+        "tabs-tabposition"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "ak-tabs-tab",
+        "ak-tabs-tab",
+        "ak-tabs-tab"
+      ],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<tab:3>",
+      "host": "dashboard",
+      "surface": "Tab controls",
+      "type": "aktabs",
+      "attrKeys": [
+        "tabs-tabposition"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "ak-tabs-tab",
+        "ak-tabs-tab",
+        "ak-tabs-tab"
+      ],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<tab:4>",
+      "host": "dashboard",
+      "surface": "Tab controls",
+      "type": "aktabs",
+      "attrKeys": [
+        "tabs-tabposition"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "ak-tabs-tab",
+        "ak-tabs-tab",
+        "ak-tabs-tab"
+      ],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<tab:5>",
+      "host": "dashboard",
+      "surface": "Tab controls",
+      "type": "aktabs",
+      "attrKeys": [
+        "item",
+        "tabs-tabposition"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "ak-tabs-tab",
+        "ak-tabs-tab",
+        "ak-tabs-tab"
+      ],
+      "bindings": {},
+      "items": {}
+    }
+  ]
+}

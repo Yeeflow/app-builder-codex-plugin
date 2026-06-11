@@ -1,0 +1,43 @@
+{
+  "feature": "collection-dynamic-item-template",
+  "source": "Company Overview.yap",
+  "hostControl": "collection",
+  "templateChildren": [
+    {
+      "type": "dynamic-image",
+      "attrs": {
+        "source": "3",
+        "obj-f": "Text11"
+      },
+      "field": "Cover image"
+    },
+    {
+      "type": "dynamic-field",
+      "attrs": {
+        "source": "3",
+        "obj-f": "<general-field-name>"
+      },
+      "observedFields": ["Title", "Text3", "Text4"]
+    },
+    {
+      "type": "dynamic-user",
+      "attrs": {
+        "source": "3",
+        "obj-f": "Text10",
+        "i-len": [null, 3],
+        "addition_fields": ["Email"]
+      },
+      "field": "Assignee"
+    },
+    {
+      "type": "dynamic-file",
+      "attrs": {
+        "source": "3",
+        "obj-f": "Text8",
+        "i-len": [null, 2]
+      },
+      "field": "Reference"
+    }
+  ],
+  "proof": "export-proven"
+}

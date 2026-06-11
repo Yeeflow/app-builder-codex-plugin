@@ -1,0 +1,252 @@
+{
+  "proofLevel": "export-proven",
+  "internalControlType": "ContentList",
+  "frontEndAction": "Set data list",
+  "workflowHost": "data-list-workflow",
+  "workflowType": 1,
+  "workflowName": "Add Product Sub Items",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Data List",
+  "listtype": "select",
+  "operationType": "add",
+  "target": {
+    "mode": "selected-data-source",
+    "appid": "<REDACTED_APP_ID>",
+    "listsetid": "<REDACTED_LISTSET_ID>",
+    "listid": "<REDACTED_LIST_ID>",
+    "resolvedTitle": "Save Sub Items",
+    "resolvedType": "data-list"
+  },
+  "listdatasShape": "array",
+  "listdatasCount": 6,
+  "mappings": [
+    {
+      "index": 0,
+      "Columns": "Title",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Title",
+        "DisplayName": "Form ID",
+        "FieldType": "Text",
+        "Type": "input",
+        "IsSystem": true
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "list_field"
+        ],
+        "valueTypes": [
+          "input"
+        ],
+        "functions": [],
+        "listFieldProps": [
+          "<REDACTED_FIELD_REF>"
+        ],
+        "references": [
+          {
+            "exprType": "list_field",
+            "valueType": "input",
+            "prop": "<REDACTED_FIELD_REF>",
+            "id": "ListDataID",
+            "name": "List Fields:Id"
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "Columns": "Text1",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text1",
+        "DisplayName": "Selected Product",
+        "FieldType": "Text",
+        "Type": "lookup",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "list_field"
+        ],
+        "valueTypes": [
+          "input"
+        ],
+        "functions": [],
+        "listFieldProps": [
+          "<REDACTED_FIELD_REF>"
+        ],
+        "references": [
+          {
+            "exprType": "list_field",
+            "valueType": "input",
+            "prop": "<REDACTED_FIELD_REF>",
+            "id": "ListDataID",
+            "name": "List Fields:Id"
+          }
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "Columns": "Decimal1",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Decimal1",
+        "DisplayName": "Add number",
+        "FieldType": "Decimal",
+        "Type": "input_number",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "num"
+        ],
+        "exprTypes": [],
+        "valueTypes": [],
+        "functions": [],
+        "listFieldProps": [],
+        "references": []
+      }
+    },
+    {
+      "index": 3,
+      "Columns": "Text2",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text2",
+        "DisplayName": "Sub item Field 1",
+        "FieldType": "Text",
+        "Type": "input",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "list_field"
+        ],
+        "valueTypes": [
+          "list"
+        ],
+        "functions": [],
+        "listFieldProps": [
+          "<REDACTED_FIELD_REF>"
+        ],
+        "references": [
+          {
+            "exprType": "list_field",
+            "valueType": "list",
+            "prop": "<REDACTED_FIELD_REF>",
+            "id": "Sub_List_Items",
+            "name": "List Fields:Sub List Items:field1"
+          }
+        ]
+      }
+    },
+    {
+      "index": 4,
+      "Columns": "Decimal2",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Decimal2",
+        "DisplayName": "Sub item Field 2",
+        "FieldType": "Decimal",
+        "Type": "input_number",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "list_field"
+        ],
+        "valueTypes": [
+          "list"
+        ],
+        "functions": [],
+        "listFieldProps": [
+          "<REDACTED_FIELD_REF>"
+        ],
+        "references": [
+          {
+            "exprType": "list_field",
+            "valueType": "list",
+            "prop": "<REDACTED_FIELD_REF>",
+            "id": "Sub_List_Items",
+            "name": "List Fields:Sub List Items:field2"
+          }
+        ]
+      }
+    },
+    {
+      "index": 5,
+      "Columns": "Text3",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text3",
+        "DisplayName": "Sub item Field 3",
+        "FieldType": "Text",
+        "Type": "identity-picker",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "list_field"
+        ],
+        "valueTypes": [
+          "list"
+        ],
+        "functions": [],
+        "listFieldProps": [
+          "<REDACTED_FIELD_REF>"
+        ],
+        "references": [
+          {
+            "exprType": "list_field",
+            "valueType": "list",
+            "prop": "<REDACTED_FIELD_REF>",
+            "id": "Sub_List_Items",
+            "name": "List Fields:Sub List Items:field3"
+          }
+        ]
+      }
+    }
+  ],
+  "wheresShape": "array",
+  "wheresCount": 0,
+  "wheres": [],
+  "hasListFieldValue": true,
+  "hasSubListValue": true,
+  "broadMutationRisk": false,
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

@@ -1,0 +1,22 @@
+{
+  "OtherModules": [
+    {
+      "Type": "Agents",
+      "Data": [
+        {
+          "ID": "<agent-id>",
+          "Type": 1,
+          "Name": "<copilot-name>",
+          "Components": [
+            {
+              "ID": "<component-id>",
+              "Type": 2,
+              "SubType": 10,
+              "Settings": "{\"resources\":{\"dataLists\":{\"items\":[{\"id\":\"<list-id>\",\"permissions\":9}]}}}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

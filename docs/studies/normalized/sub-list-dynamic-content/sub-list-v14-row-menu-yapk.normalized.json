@@ -1,0 +1,32 @@
+{
+  "sourceBaseline": "Sub List Dynamic Runtime Proof-V1.3-purchase-request.yapk",
+  "output": "Sub List Dynamic Runtime Proof-V1.4-row-menu-actions.yapk",
+  "proof": "generated-signed-verified",
+  "runtimeStatus": "user reported runtime still showed prior two-item Duplicate/Delete menu",
+  "mutatedForm": "Purchase Request Form",
+  "mutatedSubList": "PurchaseItems",
+  "preserved": [
+    "hidden sub list caption",
+    "table-style header/body alignment",
+    "body grid -> containers -> controls pattern",
+    "visible last-column Delete action",
+    "Add another item footer button",
+    "Import items footer button"
+  ],
+  "rowOperationMenu": [
+    "Duplicate",
+    "Insert before",
+    "Insert after",
+    "Move up",
+    "Move down"
+  ],
+  "signing": {
+    "setsign": "passed",
+    "verifysign": "passed"
+  },
+  "followUp": {
+    "output": "Sub List Dynamic Runtime Proof-V1.5-row-menu-actions-resource-fixed.yapk",
+    "change": "bump Purchase Request DefResourceID and DeployedDefID while preserving the five-item row menu",
+    "reason": "V1.4 decoded correctly but runtime appeared to reuse a prior deployed form definition"
+  }
+}

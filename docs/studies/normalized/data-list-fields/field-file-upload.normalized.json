@@ -1,0 +1,27 @@
+{
+  "fieldType": "file-upload",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Text28",
+    "FieldType": "Text",
+    "FieldIndex": 28,
+    "DisplayName": "__DISPLAY_NAME_58__",
+    "InternalName": "__INTERNAL_NAME_58__",
+    "Type": "file-upload",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "empty",
+    "Rules": {
+      "ver": 1
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

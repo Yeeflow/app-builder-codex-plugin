@@ -1,0 +1,33 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[5].RemindRules[]",
+  "pattern": "date-field-reminder",
+  "shape": {
+    "Type": 3,
+    "SendType": 1,
+    "Status": 1,
+    "Rules": {
+      "Rules": {
+        "Period": "Daily",
+        "Duedate": "<date-field-internal-name-or-display-name>",
+        "Type": "before",
+        "Day": 2,
+        "IsCheck": true,
+        "Time": "<HH:mm>"
+      },
+      "Conditions": {
+        "Type": 1,
+        "Data": ""
+      }
+    },
+    "Receiver": {
+      "Identities": ["<user-or-department>"],
+      "ListDefs": ["<identity-field-internal-name>"]
+    }
+  },
+  "notes": [
+    "The export includes before and after-style examples; one after example omitted Rules.Type while retaining Day/Time."
+  ]
+}

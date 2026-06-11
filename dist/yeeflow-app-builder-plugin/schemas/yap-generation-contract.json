@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yeeflow.local/schemas/yap-generation-contract.json",
+  "title": "Yeeflow Generated-Final YAP Generation Contract",
+  "type": "object",
+  "required": [
+    "mode",
+    "requiresSchemaValidation",
+    "requiresImportQualificationValidation",
+    "requiredGeneratedFinalChecks",
+    "proofLevels"
+  ],
+  "properties": {
+    "mode": {
+      "const": "generated-final/import-qualified"
+    },
+    "requiresSchemaValidation": {
+      "const": true
+    },
+    "requiresImportQualificationValidation": {
+      "const": true
+    },
+    "requiredGeneratedFinalChecks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "contains": {
+        "const": "YAP_EXPORT_SHAPE_TOO_SYNTHETIC"
+      },
+      "examples": [
+        "YAP_EXPORT_SHAPE_TOO_SYNTHETIC",
+        "YAP_REPLACEIDS_FINAL_COVERAGE_INCOMPLETE",
+        "YAP_FORM_CONTROL_ID_MISSING",
+        "YAP_FORM_CONTROL_ID_DUPLICATE",
+        "YAP_HEADING_NATIVE_TITLE_MISSING",
+        "YAP_HEADING_NATIVE_TITLE_PLACEHOLDER",
+        "YAP_FORM_DESIGNER_UNPROVEN_CONTROL",
+        "YAP_CHILD_LISTTYPE_MISSING",
+        "YAP_NORULE_INVALID",
+        "YAP_FORM_STATUS_NOT_PUBLISHED",
+        "YAP_REPLACEIDS_APP_GROUP_ID_MISSING"
+      ]
+    },
+    "proofLevels": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "local validation passed",
+          "API accepted/queued",
+          "async import completed",
+          "app opened",
+          "form designer hydrated",
+          "workflow designer hydrated",
+          "controls render with intended text",
+          "single-control designer selection verified"
+        ]
+      }
+    }
+  }
+}

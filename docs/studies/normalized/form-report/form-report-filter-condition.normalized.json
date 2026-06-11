@@ -1,0 +1,20 @@
+{
+  "proofLevel": "export-proven",
+  "exportPath": "Data.FormNewReports[1].Settings.Filters",
+  "filters": [
+    {
+      "pre": "and",
+      "left": "Submitted",
+      "op": "dt.>=",
+      "right": "2026-05-19",
+      "conditions": null
+    },
+    {
+      "pre": "and",
+      "left": "Status",
+      "op": "in",
+      "right": "[\"In process\",\"Completed\"]",
+      "conditions": null
+    }
+  ]
+}

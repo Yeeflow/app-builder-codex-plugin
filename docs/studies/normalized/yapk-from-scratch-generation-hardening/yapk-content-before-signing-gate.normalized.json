@@ -1,0 +1,25 @@
+{
+  "case": "yapk-content-before-signing-gate",
+  "source": "synthetic Business Travel hardening reference",
+  "rule": "Do not sign generated YAPK content until decoded AppPackageInfo content validation passes.",
+  "requiredOrder": [
+    "generate AppPackageInfo",
+    "run package and app creation validators",
+    "run graph and workflow publish-readiness validators",
+    "run placeholder scan",
+    "Brotli compress Resource",
+    "base64 encode Resource",
+    "update wrapper metadata",
+    "setsign",
+    "verifysign",
+    "write package outside git"
+  ],
+  "blockedWhen": [
+    "inner AppPackageInfo has validation errors",
+    "workflow graph has validation errors",
+    "workflow publish-readiness checks fail",
+    "required placeholders remain"
+  ],
+  "validatorCode": "YAPK_CONTENT_VALIDATION_FAILED_BEFORE_SIGNING",
+  "boundary": "Signing verifies wrapper/resource integrity, not business publish-readiness."
+}

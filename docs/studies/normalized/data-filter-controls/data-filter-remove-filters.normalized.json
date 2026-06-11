@@ -1,0 +1,27 @@
+{
+  "proofLevel": "export-proven",
+  "page": "Dashboard",
+  "productName": "Remove filters",
+  "exportControlType": "remove-filers",
+  "control": {
+    "path": "$.children[0].children[1].children[0].children[1].children[7]",
+    "id": "<control-id>",
+    "type": "remove-filers",
+    "productName": "Remove filters",
+    "label": "<control-label>",
+    "binding": "",
+    "filterVariable": "",
+    "applyTypeRaw": "",
+    "applyType": "default/unspecified",
+    "applyButton": "",
+    "dataSource": null,
+    "displayField": "",
+    "valueField": "",
+    "optionFilterCount": 0,
+    "settingKeys": [
+      "align",
+      "common"
+    ],
+    "settingsPreview": {}
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "name": "sub-list-control-basic",
+  "proof": "export-proven from Approval Form export; identifiers are synthetic",
+  "host": "approval-form",
+  "control": {
+    "type": "list",
+    "id": "__SUB_LIST_CONTROL_ID__",
+    "label": "Sub list",
+    "binding": "__LIST_VARIABLE_ID__",
+    "attrs": {
+      "list-fields": [
+        {
+          "id": "__ROW_FIELD_1__",
+          "name": "field1",
+          "type": "text",
+          "control": {
+            "type": "input",
+            "binding": "__ROW_FIELD_1__",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "__LIST_VARIABLE_ID__",
+              "list_control_id": "__SUB_LIST_CONTROL_ID__"
+            }
+          }
+        }
+      ],
+      "list-variables": [
+        {
+          "id": "__ROW_FIELD_1__",
+          "name": "field1",
+          "type": "text"
+        }
+      ],
+      "fallback": {
+        "et": "Click the following button to add a new item."
+      }
+    }
+  },
+  "variables": {
+    "basic": {
+      "id": "__LIST_VARIABLE_ID__",
+      "type": "list",
+      "value": "__LISTREF_ID__"
+    },
+    "listref": {
+      "id": "__LISTREF_ID__",
+      "fields": [
+        {
+          "id": "__ROW_FIELD_1__",
+          "name": "field1",
+          "type": "text"
+        }
+      ]
+    }
+  }
+}

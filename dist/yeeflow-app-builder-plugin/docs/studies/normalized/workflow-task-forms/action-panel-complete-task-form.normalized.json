@@ -1,0 +1,99 @@
+{
+  "proofLevel": "export-proven-plus-product-documented-button-derivation",
+  "note": "Complete buttons are derived by task type when a task form uses workflowControlPanel; custom complete button shape is export-proven separately.",
+  "taskForm": {
+    "pageIndex": 4,
+    "pageId": "<REDACTED_TASK_FORM_ID>",
+    "title": "WARTB Task4",
+    "pageType": "task-form",
+    "rawType": 2,
+    "hasActionPanel": false,
+    "hasWorkflowHistory": true,
+    "controlCounts": {
+      "container": 9,
+      "heading": 3,
+      "identity-picker": 1,
+      "datepicker": 2,
+      "input": 5,
+      "radio": 1,
+      "input_number": 2,
+      "textarea": 3,
+      "flex_grid": 1,
+      "action_button": 1,
+      "workflowHistory": 1,
+      "expr": 2
+    },
+    "readonlyControlCount": 9,
+    "editableControlCount": 5,
+    "actionButtons": [
+      {
+        "type": "action_button",
+        "label": "Task completed",
+        "readonly": null,
+        "actionBinding": "<REDACTED_ACTION_ID>"
+      }
+    ],
+    "actions": [
+      {
+        "id": "<REDACTED_PRIVATE_ID>",
+        "name": "Complete button click",
+        "stepTypes": [
+          "submit"
+        ],
+        "submitSteps": [
+          {
+            "name": "Submit as completed",
+            "submitType": "default",
+            "inferredOperation": "complete-task",
+            "fieldPresence": {
+              "comment": true,
+              "forword": false,
+              "remark": false,
+              "assignee": false
+            },
+            "expressionSources": {
+              "comment": [
+                {
+                  "exprType": "variable",
+                  "valueType": "text",
+                  "id": "<REDACTED_PRIVATE_ID>",
+                  "name": "Workflow Variables:Task comments"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "<REDACTED_PRIVATE_ID>",
+        "name": "Reject button click",
+        "stepTypes": [
+          "submit"
+        ],
+        "submitSteps": [
+          {
+            "name": "Submit as Rejected",
+            "submitType": "2",
+            "inferredOperation": "reject",
+            "fieldPresence": {
+              "comment": true,
+              "forword": false,
+              "remark": false,
+              "assignee": false
+            },
+            "expressionSources": {
+              "comment": [
+                {
+                  "exprType": "variable",
+                  "valueType": "text",
+                  "id": "<REDACTED_PRIVATE_ID>",
+                  "name": "Workflow Variables:Task comments"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

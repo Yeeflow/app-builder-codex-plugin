@@ -1,0 +1,28 @@
+{
+  "sourceExports": [
+    "/Users/Renger/Downloads/Tenant Service Portal v2.yap",
+    "/Users/Renger/Downloads/Tenant Service Portal v6.yap"
+  ],
+  "storage": "Data.Item.ListModel.LayoutView attrs.appearance",
+  "defaultHeader": {
+    "height": 56,
+    "exportRepresentation": "height omitted",
+    "titleVisible": true,
+    "titleVisibleRepresentation": "hideTitle omitted"
+  },
+  "smallHeader": {
+    "height": 46,
+    "exportRepresentation": "height: 46",
+    "sourceExport": "Tenant Service Portal v6.yap"
+  },
+  "hiddenTitle": {
+    "storedField": "hideTitle",
+    "storedValue": true,
+    "sourceExport": "Tenant Service Portal v6.yap"
+  },
+  "colorFields": {
+    "background": "bgc",
+    "text": "color"
+  },
+  "notExportProvenHere": ["larger header height", "explicit hideTitle false"]
+}

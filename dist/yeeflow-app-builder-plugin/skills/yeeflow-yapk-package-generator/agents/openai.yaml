@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow YAPK Package Generator"
+  short_description: "Inspect and validate Yeeflow YAPK upgrades"
+  default_prompt: "Use $yeeflow-yapk-package-generator to inspect and validate this Yeeflow .yapk package without exposing private payloads."

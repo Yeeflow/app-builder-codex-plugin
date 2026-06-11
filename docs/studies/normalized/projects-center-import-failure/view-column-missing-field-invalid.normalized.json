@@ -1,0 +1,26 @@
+{
+  "case": "view-column-missing-field-invalid",
+  "proofLevel": "user-confirmed-import-failure-derived",
+  "layoutView": {
+    "layout": [
+      {
+        "FieldID": "-1",
+        "FieldName": "ListDataID",
+        "DisplayName": "Id",
+        "Type": "input",
+        "Mobile": 0,
+        "Order": 1,
+        "Show": false
+      }
+    ],
+    "query": [],
+    "sort": [],
+    "rowColor": [],
+    "filter": []
+  },
+  "expectedFinding": {
+    "code": "DATA_LIST_VIEW_FIELDID_NOT_FOUND",
+    "level": "error",
+    "mode": "generator/final"
+  }
+}

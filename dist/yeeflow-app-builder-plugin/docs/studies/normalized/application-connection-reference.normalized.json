@@ -1,0 +1,129 @@
+{
+  "summary": {
+    "count": 3
+  },
+  "connections": [
+    {
+      "referenceKey": "connection:microsoft-graph-outlook",
+      "sourceId": "<REDACTED_CONNECTION_ID>",
+      "originalSourceIdPresent": true,
+      "name": "Microsoft Graph - Outlook",
+      "type": 11,
+      "status": 1,
+      "providerClass": "OAuth 2.0 API",
+      "configKeys": [
+        "Environment",
+        "Timeout",
+        "BaseUrl",
+        "GrantType",
+        "AuthorizationMode",
+        "AuthorizationEndpoint",
+        "TokenEndpoint",
+        "ClientId",
+        "Scopes",
+        "AllowedMethods",
+        "AuthenticationMethod"
+      ],
+      "safeConfig": {
+        "Environment": "Prod",
+        "Timeout": 30,
+        "BaseUrl": "<REDACTED_ENDPOINT>",
+        "GrantType": "authorization_code",
+        "AuthorizationMode": "<REDACTED_VALUE>",
+        "AuthorizationEndpoint": "<REDACTED_ENDPOINT>",
+        "TokenEndpoint": "<REDACTED_ENDPOINT>",
+        "ClientId": "<REDACTED_CLIENT_ID>",
+        "Scopes": [
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>"
+        ],
+        "AllowedMethods": [
+          "GET",
+          "POST",
+          "DELETE",
+          "PATCH"
+        ],
+        "AuthenticationMethod": "OAuth2.0"
+      },
+      "importPolicy": "Do not copy live credentials. Generated packages may include placeholder references only after import behavior is proven; require post-import reconfiguration."
+    },
+    {
+      "referenceKey": "connection:http-request",
+      "sourceId": "<REDACTED_CONNECTION_ID>",
+      "originalSourceIdPresent": true,
+      "name": "HTTP Request",
+      "type": 10,
+      "status": 1,
+      "providerClass": "HTTP API / Generic",
+      "configKeys": [
+        "Environment",
+        "Timeout",
+        "BaseUrl",
+        "AuthenticationMethod",
+        "AllowedMethods"
+      ],
+      "safeConfig": {
+        "Environment": "Prod",
+        "Timeout": 30,
+        "BaseUrl": "<REDACTED_ENDPOINT>",
+        "AuthenticationMethod": "APIKey",
+        "AllowedMethods": [
+          "GET"
+        ]
+      },
+      "importPolicy": "Do not copy live credentials. Generated packages may include placeholder references only after import behavior is proven; require post-import reconfiguration."
+    },
+    {
+      "referenceKey": "connection:microsoft-graph-sharepoint",
+      "sourceId": "<REDACTED_CONNECTION_ID>",
+      "originalSourceIdPresent": true,
+      "name": "Microsoft Graph - SharePoint",
+      "type": 11,
+      "status": 1,
+      "providerClass": "OAuth 2.0 API",
+      "configKeys": [
+        "Environment",
+        "Timeout",
+        "BaseUrl",
+        "GrantType",
+        "AuthorizationMode",
+        "AuthorizationEndpoint",
+        "TokenEndpoint",
+        "ClientId",
+        "Scopes",
+        "AllowedMethods",
+        "AuthenticationMethod"
+      ],
+      "safeConfig": {
+        "Environment": "Prod",
+        "Timeout": 30,
+        "BaseUrl": "<REDACTED_ENDPOINT>",
+        "GrantType": "authorization_code",
+        "AuthorizationMode": "<REDACTED_VALUE>",
+        "AuthorizationEndpoint": "<REDACTED_ENDPOINT>",
+        "TokenEndpoint": "<REDACTED_ENDPOINT>",
+        "ClientId": "<REDACTED_CLIENT_ID>",
+        "Scopes": [
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>",
+          "<REDACTED_SCOPE>"
+        ],
+        "AllowedMethods": [
+          "GET",
+          "POST",
+          "PUT",
+          "DELETE",
+          "PATCH"
+        ],
+        "AuthenticationMethod": "OAuth2.0"
+      },
+      "importPolicy": "Do not copy live credentials. Generated packages may include placeholder references only after import behavior is proven; require post-import reconfiguration."
+    }
+  ]
+}

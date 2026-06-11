@@ -1,0 +1,1 @@
+Yeeflow .yaia exports use an outer JSON wrapper with Name, Description, Type, and PackageJson. Treat PackageJson as opaque unless the real encode/decode path has been validated against multiple samples.

@@ -1,0 +1,116 @@
+#!/usr/bin/env node
+
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  getCapability,
+  listCapabilities,
+  pathParamsFor,
+  YEEFLOW_API_CAPABILITIES,
+} from "./lib/yeeflow-api-capabilities.mjs";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const REQUIRED_FIELDS = ["name", "method", "path", "summary", "readOnly", "requiresConfirmation", "auth", "requiredParams", "optionalParams", "source", "notes"];
+const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+testUniqueNames();
+testRequiredFields();
+testSafetyClassification();
+testPathsAndRawCapabilityPolicy();
+testLocationsList();
+testListCommand();
+testCallHelperBlocksWrites();
+testPathParamsCovered();
+
+console.log("yeeflow-api-capabilities tests passed");
+
+function testUniqueNames() {
+  const names = new Set();
+  for (const capability of YEEFLOW_API_CAPABILITIES) {
+    assert.equal(names.has(capability.name), false, `Duplicate capability name: ${capability.name}`);
+    names.add(capability.name);
+  }
+}
+
+function testRequiredFields() {
+  for (const capability of YEEFLOW_API_CAPABILITIES) {
+    for (const field of REQUIRED_FIELDS) assert.ok(Object.prototype.hasOwnProperty.call(capability, field), `${capability.name} missing ${field}`);
+    assert.match(capability.name, /^[a-z][a-zA-Z0-9]*(?:\.[a-z][a-zA-Z0-9]*)+$/);
+    assert.match(capability.path, /^\//);
+    assert.equal(Array.isArray(capability.requiredParams), true, `${capability.name} requiredParams must be an array`);
+    assert.equal(Array.isArray(capability.optionalParams), true, `${capability.name} optionalParams must be an array`);
+    assert.equal(capability.auth, "oauth-or-api-key");
+  }
+}
+
+function testSafetyClassification() {
+  for (const capability of YEEFLOW_API_CAPABILITIES) {
+    if (capability.method === "GET") assert.equal(capability.readOnly, true, `${capability.name} GET should be read-only`);
+    if (WRITE_METHODS.has(capability.method) && !isDocumentedReadOnlyPost(capability)) {
+      assert.equal(capability.requiresConfirmation, true, `${capability.name} write operation must require confirmation`);
+      assert.equal(capability.readOnly, false, `${capability.name} write operation must not be read-only`);
+    }
+  }
+}
+
+function testPathsAndRawCapabilityPolicy() {
+  for (const capability of YEEFLOW_API_CAPABILITIES) {
+    assert.equal(capability.path.includes("<"), false, `${capability.name} has placeholder angle path`);
+    assert.equal(capability.path.includes("TODO"), false, `${capability.name} has TODO path`);
+    assert.equal(/raw|arbitrary/i.test(capability.name), false, `${capability.name} exposes raw capability`);
+  }
+}
+
+function testLocationsList() {
+  const capability = getCapability("locations.list");
+  assert.ok(capability);
+  assert.equal(capability.method, "GET");
+  assert.equal(capability.path, "/locations");
+  assert.equal(capability.readOnly, true);
+  assert.equal(capability.requiresConfirmation, false);
+}
+
+function testListCommand() {
+  const all = run(["scripts/yeeflow-api-list-capabilities.mjs"]);
+  assert.equal(all.status, 0, all.stderr);
+  const parsed = JSON.parse(all.stdout);
+  assert.equal(parsed.count, YEEFLOW_API_CAPABILITIES.length);
+
+  const readOnly = JSON.parse(run(["scripts/yeeflow-api-list-capabilities.mjs", "--read-only"]).stdout);
+  assert.ok(readOnly.capabilities.length > 0);
+  assert.equal(readOnly.capabilities.every((capability) => capability.readOnly), true);
+
+  const write = JSON.parse(run(["scripts/yeeflow-api-list-capabilities.mjs", "--write"]).stdout);
+  assert.ok(write.capabilities.length > 0);
+  assert.equal(write.capabilities.every((capability) => !capability.readOnly), true);
+
+  const locations = JSON.parse(run(["scripts/yeeflow-api-list-capabilities.mjs", "--filter", "locations"]).stdout);
+  assert.ok(locations.capabilities.some((capability) => capability.name === "locations.list"));
+}
+
+function testCallHelperBlocksWrites() {
+  const result = run(["scripts/yeeflow-api-call-capability.mjs", "--name", "items.create"]);
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /does not execute write capabilities/);
+}
+
+function testPathParamsCovered() {
+  for (const capability of YEEFLOW_API_CAPABILITIES) {
+    const requiredNames = new Set(capability.requiredParams.filter((entry) => entry.startsWith("path:")).map((entry) => entry.slice(5)));
+    for (const name of pathParamsFor(capability)) assert.equal(requiredNames.has(name), true, `${capability.name} missing required path param ${name}`);
+  }
+}
+
+function isDocumentedReadOnlyPost(capability) {
+  return capability.name === "items.query" || capability.name === "users.search";
+}
+
+function run(args) {
+  return spawnSync(process.execPath, args, {
+    cwd: ROOT,
+    encoding: "utf8",
+    env: { PATH: process.env.PATH || "" },
+  });
+}

@@ -1,0 +1,13 @@
+{
+  "source": "Sales Quotation.yap",
+  "proof": "export-proven",
+  "pattern": "read-only/display-oriented Dynamic Sub List on Print Page",
+  "signals": {
+    "captionOff": true,
+    "noLocalListActions": true,
+    "noAddImportFooterButtons": true,
+    "noRowOperationMenu": true,
+    "fieldControlsHaveCaptionOff": true
+  },
+  "generationGuidance": "Use layout/text/field controls for print display; avoid Add/Import/Edit row actions unless explicitly required."
+}

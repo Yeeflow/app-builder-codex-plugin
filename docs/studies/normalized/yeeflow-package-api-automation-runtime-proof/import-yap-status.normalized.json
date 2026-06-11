@@ -1,0 +1,16 @@
+{
+  "proof": "yeeflow-package-api-automation-runtime-proof",
+  "packageFilename": "vendor-onboarding-compliance-management.v1.12-current-dashboard-data-table-fields-fixed.yap",
+  "endpoint": "POST /listset/package/import",
+  "payloadShape": ["AppID", "WorkspaceID", "Title", "Description", "IconUrl", "Resource", "Manage", "Write", "Read"],
+  "httpStatus": 200,
+  "apiStatus": "non-zero",
+  "responseFieldNames": ["Status", "Message", "TotalCount"],
+  "runtimeProofStatus": "not-proven",
+  "nextStep": "product clarification or package-specific import diagnosis needed",
+  "redaction": {
+    "workspaceId": "redacted",
+    "resource": "redacted",
+    "rawResponseStored": false
+  }
+}

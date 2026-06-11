@@ -1,0 +1,18 @@
+{
+  "schema": "sub-list-dynamic-content-normalized",
+  "case": "caption_off_defaults",
+  "controls": [
+    {
+      "type": "list",
+      "usage": "table-style Dynamic Sub List",
+      "displayLabel": [null, false]
+    },
+    {
+      "type": "flex_grid",
+      "usage": "layout/header/body grid",
+      "displayLabel": [null, false]
+    }
+  ],
+  "rule": "Generated table-style Dynamic Sub Lists and layout grids should hide display captions unless explicitly requested.",
+  "proofBoundary": "Corrected V1.1 YAPK evidence plus generator guidance."
+}

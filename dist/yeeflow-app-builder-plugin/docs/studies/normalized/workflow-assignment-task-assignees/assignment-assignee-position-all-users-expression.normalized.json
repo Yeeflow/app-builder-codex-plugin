@@ -1,0 +1,38 @@
+{
+  "proofLevel": "export-proven; product-documented; API-category-assisted",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "position-all-users-expression",
+  "rawAssigneeFieldNames": [
+    "type",
+    "method",
+    "value",
+    "title"
+  ],
+  "normalizedConfig": {
+    "type": "user",
+    "method": "expression",
+    "value": {
+      "kind": "expressionButton",
+      "label": "<REDACTED_POSITION_LABEL>:All users",
+      "dataShape": {
+        "type": "position",
+        "param": {
+          "id": "<POSITION_REF_CONFIRMED_BY_API>"
+        },
+        "prop": "Users_ID"
+      }
+    },
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "apiAssistedInterpretation": {
+    "apiLookupRun": true,
+    "categoryConfirmedByApi": true,
+    "note": "Static position reference inside expression-button data matched the read-only positions endpoint."
+  },
+  "runtimeDependencies": [
+    "valid-position-assignments",
+    "runtime-assignee-expansion"
+  ],
+  "generationSafety": "requires target-tenant position mapping and focused runtime proof before broad generation claims"
+}

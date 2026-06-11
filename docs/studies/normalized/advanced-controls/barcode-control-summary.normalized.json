@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "control": "Barcode",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "data-list-form"
+  ],
+  "observedSurfaces": [
+    "Company Overview / View page"
+  ],
+  "internalTypes": [
+    "barcode"
+  ],
+  "count": 6,
+  "attrKeys": [
+    "barcode",
+    "common",
+    "displayValue",
+    "fallback",
+    "textPosition",
+    "type",
+    "value"
+  ],
+  "sourceModes": [
+    "unspecified",
+    "variable"
+  ],
+  "styleKeys": [
+    "barcode",
+    "common",
+    "displayValue",
+    "fallback",
+    "textPosition"
+  ],
+  "childTypes": [],
+  "nestedChildControlTypes": {},
+  "bindingModes": [
+    "object",
+    "variable"
+  ],
+  "validation": [
+    "barcode value must be static or dynamic",
+    "barcode type must be known such as CODE128/CODE128A"
+  ],
+  "generation": [
+    "use for asset tags, inventory, ticketing, record references, and scan workflows"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<barcode:1>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "barcode",
+      "attrKeys": [
+        "common",
+        "value"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "value": {
+          "mode": "object",
+          "shape": {
+            "value": "93203233",
+            "variable": null
+          }
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<barcode:2>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "barcode",
+      "attrKeys": [
+        "common",
+        "type",
+        "value"
+      ],
+      "sourceMode": "variable",
+      "childTypes": [],
+      "bindings": {
+        "value": {
+          "mode": "variable",
+          "refs": [
+            {
+              "mode": "variable",
+              "variable": "var_BarCodeNumber",
+              "valueType": "string"
+            }
+          ]
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<barcode:3>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "barcode",
+      "attrKeys": [
+        "common",
+        "textPosition",
+        "type",
+        "value"
+      ],
+      "sourceMode": "variable",
+      "childTypes": [],
+      "bindings": {
+        "value": {
+          "mode": "variable",
+          "refs": [
+            {
+              "mode": "variable",
+              "variable": "var_BarCodeNumber",
+              "valueType": "string"
+            }
+          ]
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<barcode:4>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "barcode",
+      "attrKeys": [
+        "common",
+        "fallback",
+        "textPosition",
+        "type",
+        "value"
+      ],
+      "sourceMode": "variable",
+      "childTypes": [],
+      "bindings": {
+        "value": {
+          "mode": "variable",
+          "refs": [
+            {
+              "mode": "variable",
+              "variable": "var_BarCodeNumber",
+              "valueType": "string"
+            }
+          ]
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<barcode:5>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "barcode",
+      "attrKeys": [
+        "common",
+        "displayValue",
+        "fallback",
+        "textPosition",
+        "type",
+        "value"
+      ],
+      "sourceMode": "variable",
+      "childTypes": [],
+      "bindings": {
+        "value": {
+          "mode": "variable",
+          "refs": [
+            {
+              "mode": "variable",
+              "variable": "var_BarCodeNumber",
+              "valueType": "string"
+            }
+          ]
+        }
+      },
+      "items": {}
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "feature": "collection-data-source",
+  "source": "Company Overview.yap",
+  "schema": {
+    "attrs": {
+      "data": {
+        "list": {
+          "AppID": "<app-id>",
+          "ListID": "<list-id>",
+          "ListSetID": "<list-set-id>",
+          "Title": "Company Overview",
+          "Type": 1
+        }
+      },
+      "layout": {
+        "cg": "<column-gap>",
+        "rg": "<row-gap>",
+        "cp": "<content-padding>",
+        "align-i": "<alignment>"
+      }
+    }
+  },
+  "proof": "export-proven"
+}

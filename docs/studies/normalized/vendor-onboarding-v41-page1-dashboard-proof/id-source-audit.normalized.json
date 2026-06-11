@@ -1,0 +1,13 @@
+{
+  "proof": "vendor-onboarding-v41-page1-dashboard",
+  "idSource": "Yeeflow generate unique IDs API",
+  "appId": 41,
+  "requestedCount": 80,
+  "usedCount": 43,
+  "remainingCount": 37,
+  "idRepresentation": "string_preserved_large_integer_tokens",
+  "minDigitLength": 19,
+  "maxDigitLength": 19,
+  "rawIdsIncluded": false,
+  "uniqueIdValidation": "covered_by_generator_and_package_validation"
+}

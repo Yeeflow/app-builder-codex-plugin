@@ -1,0 +1,17 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "form_no_rule_info",
+  "source": "product-provided ypk-schema.json",
+  "requiredFields": [
+    "Prefix",
+    "StartIndex",
+    "CustomLength",
+    "AutoIncrement"
+  ],
+  "rules": {
+    "Prefix": "must contain {index}; supported placeholders include date and index variants",
+    "StartIndex": "integer",
+    "CustomLength": "integer",
+    "AutoIncrement": "integer or boolean-like schema value depending on product serialization"
+  }
+}

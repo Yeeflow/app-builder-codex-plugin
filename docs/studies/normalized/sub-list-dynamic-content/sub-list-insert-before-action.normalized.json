@@ -1,0 +1,19 @@
+{
+  "source": "Sub list Dynamic (1).yap",
+  "proof": "export-proven",
+  "uiLabel": "Insert before",
+  "actionDefinition": {
+    "name": "Insert before current item",
+    "type": "list",
+    "steps": [
+      {
+        "type": "list_new",
+        "attrs": {
+          "position": "0"
+        }
+      }
+    ]
+  },
+  "scope": "current list, positioned relative to current object/current row",
+  "binding": "row menu action button uses attrs.control_action to reference this local action id"
+}

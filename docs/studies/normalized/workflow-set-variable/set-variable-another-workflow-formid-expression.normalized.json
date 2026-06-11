@@ -1,0 +1,98 @@
+{
+  "proofLevel": "export-proven",
+  "workflowHost": "approval-form-workflow",
+  "workflowType": 2,
+  "internalControlType": "SetVariableTask",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Variable",
+  "formtype": "custom",
+  "target": {
+    "kind": "another-approval-workflow",
+    "data": {
+      "AppID": "<REDACTED_APP_ID>",
+      "ListSetID": "<REDACTED_APP_LISTSET_ID>",
+      "ProcKey": "ABC-ANO"
+    },
+    "formids": "<REDACTED_TARGET_FORM_ID>",
+    "formidsShape": "literal-or-expression-string"
+  },
+  "variablesSetCount": 2,
+  "variableTypes": [
+    "number",
+    "text"
+  ],
+  "valueExpressionKinds": {
+    "hasStaticValue": true,
+    "hasWorkflowVariableValue": true,
+    "hasListFieldValue": false
+  },
+  "variablesetting": [
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "NewNumber1",
+      "name": "NewNumber1",
+      "type": "number",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr",
+          "num",
+          "op"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "functions": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "name": "Workflow Variables:Number 1"
+          }
+        ],
+        "redactedTokens": [
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "id": "Number1",
+            "type": "expr",
+            "name": "Workflow Variables:Number 1"
+          },
+          {
+            "type": "op",
+            "op": "+"
+          },
+          {
+            "type": "num",
+            "value": "1"
+          }
+        ]
+      }
+    },
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "NewSingleSelect1",
+      "name": "NewSingleSelect1",
+      "type": "text",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "str"
+        ],
+        "exprTypes": [],
+        "functions": [],
+        "references": [],
+        "redactedTokens": [
+          {
+            "type": "str",
+            "value": "Choice3"
+          }
+        ]
+      }
+    }
+  ],
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

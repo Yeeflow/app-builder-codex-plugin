@@ -1,0 +1,30 @@
+{
+  "ruleName": "current-dashboard-shell-v1.93",
+  "status": "export-proven shell, content unknown",
+  "generationRule": {
+    "location": "ListExportInfo.Item.Layouts[]",
+    "type": 103,
+    "title": "Home",
+    "LayoutView": null,
+    "Ext1": null,
+    "Ext2": {
+      "src": true
+    },
+    "Ext3": null,
+    "IsDefault": false,
+    "IsItemPerm": false,
+    "LayoutInResources": [],
+    "navigation": "Root ListModel.LayoutView.sort[] should include Type 103 item whose ListID is the Home LayoutID."
+  },
+  "validationRule": {
+    "errors": [
+      "DASHBOARD_USES_LEGACY_SCHEMA when generated Type 103 has blank LayoutView or missing Ext2 src marker and no resources",
+      "DASHBOARD_CURRENT_VERSION_MARKER_MISSING when Ext2 {src:true} is absent",
+      "Existing ROOT_APP_PAGE_RESOURCE_MISSING still applies when empty resources do not match current shell"
+    ],
+    "warnings": [
+      "Rich current-dashboard content remains unproven until a current dashboard with controls is exported."
+    ]
+  },
+  "schemaDriftNote": "The supplied product-team JSON schema still declares LayoutView as string, but the v1.93 export-proven current dashboard shell uses LayoutView null."
+}

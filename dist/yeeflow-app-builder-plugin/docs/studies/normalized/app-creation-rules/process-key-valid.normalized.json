@@ -1,0 +1,12 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "valid process key",
+  "process": {
+    "Key": "APPROVAL_FLOW_01",
+    "DefResource": {
+      "defkey": "APPROVAL_FLOW_01"
+    }
+  },
+  "allowedPattern": "^[a-zA-Z0-9_]+$",
+  "maximumLength": 255
+}

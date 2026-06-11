@@ -1,0 +1,199 @@
+{
+  "proofLevel": "export-proven",
+  "workflowHost": "approval-form-workflow",
+  "workflowType": 2,
+  "internalControlType": "SetVariableTask",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Variable",
+  "formtype": "current",
+  "target": {
+    "kind": "current-workflow",
+    "data": null,
+    "formids": ""
+  },
+  "variablesSetCount": 3,
+  "variableTypes": [
+    "number",
+    "text"
+  ],
+  "valueExpressionKinds": {
+    "hasStaticValue": true,
+    "hasWorkflowVariableValue": true,
+    "hasListFieldValue": false
+  },
+  "variablesetting": [
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "Number1",
+      "name": "Number 1",
+      "type": "number",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr",
+          "func",
+          "num",
+          "op"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "functions": [
+          "iif",
+          "isNullOrEmpty"
+        ],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "name": "Workflow Variables:Number 1"
+          },
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "name": "Workflow Variables:Number 1"
+          }
+        ],
+        "redactedTokens": [
+          {
+            "type": "func",
+            "func": "iif",
+            "params": [
+              [
+                {
+                  "type": "func",
+                  "func": "isNullOrEmpty",
+                  "params": [
+                    [
+                      {
+                        "exprType": "variable",
+                        "valueType": "number",
+                        "id": "Number1",
+                        "type": "expr",
+                        "name": "Workflow Variables:Number 1"
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                {
+                  "type": "num",
+                  "value": "1"
+                }
+              ],
+              [
+                {
+                  "exprType": "variable",
+                  "valueType": "number",
+                  "id": "Number1",
+                  "type": "expr",
+                  "name": "Workflow Variables:Number 1"
+                },
+                {
+                  "type": "op",
+                  "op": "+"
+                },
+                {
+                  "type": "num",
+                  "value": "1"
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "SingleLine1",
+      "name": "Single Line 1",
+      "type": "text",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "str"
+        ],
+        "exprTypes": [],
+        "functions": [],
+        "references": [],
+        "redactedTokens": [
+          {
+            "type": "str",
+            "value": "Multiple variable - 2"
+          }
+        ]
+      }
+    },
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "SingleSelect1",
+      "name": "Single Select 1",
+      "type": "text",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr",
+          "func",
+          "op",
+          "str"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "functions": [
+          "iif"
+        ],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "name": "Workflow Variables:Single Select 1"
+          }
+        ],
+        "redactedTokens": [
+          {
+            "type": "func",
+            "func": "iif",
+            "params": [
+              [
+                {
+                  "exprType": "variable",
+                  "valueType": "text",
+                  "id": "SingleSelect1",
+                  "type": "expr",
+                  "name": "Workflow Variables:Single Select 1"
+                },
+                {
+                  "type": "op",
+                  "op": "=="
+                },
+                {
+                  "type": "str",
+                  "value": "Choice1"
+                }
+              ],
+              [
+                {
+                  "type": "str",
+                  "value": "Choice2"
+                }
+              ],
+              [
+                {
+                  "type": "str",
+                  "value": "Choice3"
+                }
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "incomingCount": 1,
+  "outgoingCount": 2
+}

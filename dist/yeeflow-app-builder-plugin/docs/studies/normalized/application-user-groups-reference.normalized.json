@@ -1,0 +1,31 @@
+{
+  "sourceExports": [
+    "<downloads>/Tenant Service Portal v6.yap"
+  ],
+  "storage": "Data.AppGroups[]",
+  "groups": [
+    {
+      "ID": "<GROUP_ID>",
+      "Name": "User Group 1",
+      "Description": null
+    },
+    {
+      "ID": "<GROUP_ID>",
+      "Name": "User Group 2",
+      "Description": null
+    }
+  ],
+  "replaceIds": {
+    "groupIdsIncluded": true,
+    "observedDeltaVersusNoGroupExports": 2
+  },
+  "memberSchema": {
+    "status": "not export-proven",
+    "redactionPlaceholders": [
+      "<REDACTED_USER_ID>",
+      "<REDACTED_USER_EMAIL>",
+      "<REDACTED_TENANT_ID>"
+    ]
+  },
+  "generatorRule": "generate empty groups only until safe member-bearing exports are studied"
+}

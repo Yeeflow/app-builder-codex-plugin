@@ -1,0 +1,15 @@
+{
+  "remainingGaps": [
+    {
+      "templateId": "browser_print_page_break_behavior",
+      "status": "runtime-manual-proof-needed",
+      "reason": "Exports prove print structure and QR placement, not browser print output, page-break fidelity, or scanned QR destination behavior."
+    }
+  ],
+  "newGoldenAppNeeded": false,
+  "focusedGoldenProofStillUseful": [
+    "browser print/page-break behavior",
+    "scanned QR destination behavior"
+  ],
+  "vendorOnboardingV41Readiness": "can proceed page by page using expanded corpus; all template-library gaps are structurally export-proven"
+}

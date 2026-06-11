@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "control": "Timer",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "dashboard"
+  ],
+  "observedSurfaces": [
+    "Additional controls"
+  ],
+  "internalTypes": [
+    "timer"
+  ],
+  "count": 4,
+  "attrKeys": [
+    "gen",
+    "items",
+    "set"
+  ],
+  "sourceModes": [
+    "unspecified",
+    "variable"
+  ],
+  "styleKeys": [],
+  "childTypes": [],
+  "nestedChildControlTypes": {},
+  "bindingModes": [
+    "expression",
+    "object",
+    "variable"
+  ],
+  "validation": [
+    "timer must include attrs.set/date/value or dynamic date binding in generated-final packages"
+  ],
+  "generation": [
+    "use for SLA, due date, deadline, campaign countdown, and task timers"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<timer:1>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "timer",
+      "attrKeys": [
+        "set"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "set": {
+          "mode": "object",
+          "shape": {
+            "date": {
+              "value": "2026-05-29 03:25:26",
+              "variable": null
+            }
+          }
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<timer:2>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "timer",
+      "attrKeys": [
+        "set"
+      ],
+      "sourceMode": "variable",
+      "childTypes": [],
+      "bindings": {
+        "set": {
+          "mode": "variable",
+          "refs": [
+            {
+              "mode": "variable",
+              "variable": "var_Date",
+              "valueType": "string"
+            }
+          ]
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<timer:3>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "timer",
+      "attrKeys": [
+        "set"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "set": {
+          "mode": "expression",
+          "refs": [
+            {
+              "mode": "variable",
+              "variable": "var_Date",
+              "valueType": "string"
+            },
+            {
+              "mode": "variable",
+              "variable": "var_StartDate",
+              "valueType": "string"
+            }
+          ]
+        }
+      },
+      "items": {}
+    },
+    {
+      "syntheticId": "<timer:4>",
+      "host": "dashboard",
+      "surface": "Additional controls",
+      "type": "timer",
+      "attrKeys": [
+        "gen",
+        "items",
+        "set"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [],
+      "bindings": {
+        "set": {
+          "mode": "expression",
+          "refs": [
+            {
+              "mode": "variable",
+              "variable": "var_Date",
+              "valueType": "string"
+            },
+            {
+              "mode": "variable",
+              "variable": "var_StartDate",
+              "valueType": "string"
+            }
+          ]
+        }
+      },
+      "items": {}
+    }
+  ]
+}

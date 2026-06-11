@@ -1,0 +1,15 @@
+{
+  "proof": "export-proven",
+  "host": "dashboard",
+  "controlType": "container",
+  "actionTypeCode": "2",
+  "actionType": "link",
+  "attrs": {
+    "action-type": "2",
+    "link": {
+      "opentype": true,
+      "url": null,
+      "variable": "[REDACTED_EXPRESSION_ARRAY]"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (2).yap",
+  "nodeType": "MultiAssignmentTask",
+  "pattern": "assignment-task-due-date-days",
+  "normalizedConfig": {
+    "duedatedefinition": 3,
+    "duedatetype": "day",
+    "isfromworkcalendar": true,
+    "duedateexpress": "<REDACTED_DUE_DATE_EXPRESSION_BUTTON>"
+  },
+  "notes": [
+    "Day-based due dates can include isfromworkcalendar.",
+    "The export also contains day due dates without working-calendar calculation."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "proofLevel": "export-proven",
+  "page": "Dashboard",
+  "consumer": {
+    "path": "$.children[2]",
+    "controlType": "data-list",
+    "dataSource": {
+      "app": "<app>",
+      "list": "<list:5>",
+      "type": 1
+    },
+    "conditionPath": "$.children[2].attrs.data.filter",
+    "conditions": [
+      {
+        "path": "$.children[2].attrs.data.filter[0]",
+        "leftField": "<field:Text11>",
+        "operator": "9",
+        "pre": "and",
+        "filterVariables": [
+          "filter_countries"
+        ],
+        "rightShape": "expression-array"
+      },
+      {
+        "path": "$.children[2].attrs.data.filter[1]",
+        "leftField": "<field>",
+        "operator": "0",
+        "pre": "and",
+        "filterVariables": [
+          "filter_lastupdated"
+        ],
+        "rightShape": "expression-array"
+      },
+      {
+        "path": "$.children[2].attrs.data.filter[2]",
+        "leftField": "<field:Text1>",
+        "operator": "0",
+        "pre": "and",
+        "filterVariables": [
+          "filter_accountowner"
+        ],
+        "rightShape": "expression-array"
+      }
+    ]
+  }
+}

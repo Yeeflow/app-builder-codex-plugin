@@ -1,0 +1,30 @@
+{
+  "proof": "validator-backed",
+  "variables": {
+    "basic": [
+      {
+        "idx": "var-request-no",
+        "id": "RequestNo",
+        "name": "Request No.",
+        "type": "text"
+      }
+    ]
+  },
+  "variablesetting": [
+    {
+      "idx": "var-request-no",
+      "id": "RequestNo",
+      "name": "Request No.",
+      "type": "text",
+      "value": [
+        {
+          "exprType": "application",
+          "valueType": "text",
+          "id": "FlowNo",
+          "type": "expr",
+          "name": "Tracking No."
+        }
+      ]
+    }
+  ]
+}

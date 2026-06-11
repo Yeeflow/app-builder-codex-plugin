@@ -1,0 +1,25 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "resource_app_package_info",
+  "source": "product-provided ypk-schema.json",
+  "resourceRule": "Resource should decompress to AppPackageInfo",
+  "requiredFields": [
+    "ListSet",
+    "Pages",
+    "Forms",
+    "FormReports",
+    "FormNewReports",
+    "DataReports",
+    "Groups",
+    "Tags",
+    "Metadatas",
+    "Agents",
+    "Connections",
+    "Knowledges",
+    "Themes",
+    "Components",
+    "PortalInfo",
+    "Childs"
+  ],
+  "generationBoundary": "Decoded schema validity is not runtime-upgrade proof."
+}

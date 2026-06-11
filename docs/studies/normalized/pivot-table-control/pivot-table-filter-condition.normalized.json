@@ -1,0 +1,25 @@
+{
+  "proof": "export-proven from CRM sample Dashboard; private identifiers and values redacted",
+  "normalized": {
+    "filters": [
+      {
+        "left": "Datetime1",
+        "operator": "2",
+        "filterVariables": [],
+        "hasStaticRightValue": false
+      },
+      {
+        "left": "Datetime1",
+        "operator": "1",
+        "filterVariables": [],
+        "hasStaticRightValue": false
+      },
+      {
+        "left": "Text1",
+        "operator": "7",
+        "filterVariables": [],
+        "hasStaticRightValue": false
+      }
+    ]
+  }
+}

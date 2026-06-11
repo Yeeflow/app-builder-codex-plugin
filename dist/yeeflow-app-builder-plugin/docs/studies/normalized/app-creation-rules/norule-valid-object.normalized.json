@@ -1,0 +1,11 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "valid approval form NoRule",
+  "NoRule": {
+    "Prefix": "approval_{date}_{index}",
+    "StartIndex": 1,
+    "CustomLength": 8,
+    "AutoIncrement": 1
+  },
+  "requiredPlaceholder": "{index}"
+}

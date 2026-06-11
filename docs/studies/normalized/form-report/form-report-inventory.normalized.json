@@ -1,0 +1,380 @@
+{
+  "input": "/Users/Renger/Downloads/AI Training-2 (1).yap",
+  "proofLevel": "export-proven",
+  "counts": {
+    "approvalForms": 1,
+    "formNewReports": 4,
+    "formReportChildResources": 4
+  },
+  "sourceRelationships": [
+    {
+      "report": "<form-report-1>",
+      "sourceApprovalForm": "<approval-form-key-1>",
+      "selectedSubList": null,
+      "fieldCount": 49
+    },
+    {
+      "report": "<form-report-2>",
+      "sourceApprovalForm": "<approval-form-key-1>",
+      "selectedSubList": null,
+      "fieldCount": 49
+    },
+    {
+      "report": "<form-report-3>",
+      "sourceApprovalForm": "<approval-form-key-1>",
+      "selectedSubList": "vlist_field_37",
+      "fieldCount": 52
+    },
+    {
+      "report": "<form-report-4>",
+      "sourceApprovalForm": "<approval-form-key-1>",
+      "selectedSubList": "vlist_field_38",
+      "fieldCount": 10
+    }
+  ],
+  "navigation": [
+    {
+      "exportPath": "Data.Item.ListModel.LayoutView.sort[0]",
+      "listId": "<approval-form-key-1>",
+      "type": 105,
+      "isHidden": false,
+      "title": "<redacted-title>"
+    },
+    {
+      "exportPath": "Data.Item.ListModel.LayoutView.sort[1]",
+      "listId": "<approval-form-key-1>",
+      "type": 105,
+      "isHidden": null,
+      "title": "<redacted-title>"
+    },
+    {
+      "exportPath": "Data.Item.ListModel.LayoutView.sort[2]",
+      "listId": "<resource-id-1>",
+      "type": 1,
+      "isHidden": null,
+      "title": "<redacted-title>"
+    },
+    {
+      "exportPath": "Data.Item.ListModel.LayoutView.sort[3]",
+      "listId": "<resource-id-3>",
+      "type": 32,
+      "isHidden": null,
+      "title": "<redacted-title>"
+    },
+    {
+      "exportPath": "Data.Item.ListModel.LayoutView.sort[4]",
+      "listId": "<resource-id-4>",
+      "type": 32,
+      "isHidden": null,
+      "title": "<redacted-title>"
+    },
+    {
+      "exportPath": "Data.Item.ListModel.LayoutView.sort[5]",
+      "listId": "<resource-id-5>",
+      "type": 32,
+      "isHidden": null,
+      "title": "<redacted-title>"
+    }
+  ],
+  "mappings": [
+    {
+      "mapping": "boolean -> switch",
+      "count": 6
+    },
+    {
+      "mapping": "costcenter -> cost-center-picker",
+      "count": 6
+    },
+    {
+      "mapping": "date -> datepicker",
+      "count": 19
+    },
+    {
+      "mapping": "date -> time",
+      "count": 4
+    },
+    {
+      "mapping": "file -> file-upload",
+      "count": 7
+    },
+    {
+      "mapping": "groupselect -> organization-picker",
+      "count": 6
+    },
+    {
+      "mapping": "img -> icon-upload",
+      "count": 3
+    },
+    {
+      "mapping": "list -> textarea",
+      "count": 9
+    },
+    {
+      "mapping": "location -> location-picker",
+      "count": 3
+    },
+    {
+      "mapping": "lookup -> lookup",
+      "count": 10
+    },
+    {
+      "mapping": "metadata -> metadata",
+      "count": 6
+    },
+    {
+      "mapping": "mutiple-metadata -> mutiple-metadata",
+      "count": 3
+    },
+    {
+      "mapping": "number -> currency",
+      "count": 2
+    },
+    {
+      "mapping": "number -> input_number",
+      "count": 6
+    },
+    {
+      "mapping": "number -> percent",
+      "count": 2
+    },
+    {
+      "mapping": "system -> datepicker",
+      "count": 6
+    },
+    {
+      "mapping": "system -> identity-picker",
+      "count": 9
+    },
+    {
+      "mapping": "system -> input",
+      "count": 14
+    },
+    {
+      "mapping": "system -> organization-picker",
+      "count": 4
+    },
+    {
+      "mapping": "system -> radio",
+      "count": 4
+    },
+    {
+      "mapping": "text -> input",
+      "count": 21
+    },
+    {
+      "mapping": "text -> richtext",
+      "count": 1
+    },
+    {
+      "mapping": "text -> textarea",
+      "count": 2
+    },
+    {
+      "mapping": "user -> identity-picker",
+      "count": 7
+    }
+  ],
+  "reports": [
+    {
+      "reportPlaceholder": "<form-report-1>",
+      "reportResourceId": "<report-id-1>",
+      "reportCollectionPath": "Data.FormNewReports[0]",
+      "childResourcePath": "Data.Childs[1]",
+      "childResourceType": 32,
+      "sourceApprovalForm": "<approval-form-key-1>",
+      "sourceApprovalFormPath": "Data.Forms[0]",
+      "selectedVariablesCount": 38,
+      "selectedSubList": null,
+      "selectedSubListFieldCount": 0,
+      "filterCondition": null,
+      "fieldCount": 49,
+      "uniqueFieldKeys": true,
+      "attr": {
+        "isViewDetail": true,
+        "isExport": true,
+        "deletedVariables": []
+      },
+      "permissions": {
+        "inheritedFromApplication": true,
+        "listModelPerm": 4,
+        "customPermissionSchemaFound": false
+      },
+      "views": [
+        {
+          "exportPath": "Data.Childs[1].Layouts[0]",
+          "type": 0,
+          "isDefault": true,
+          "isItemPerm": false,
+          "layoutViewKeys": [
+            "Attr_IsViewDetail"
+          ],
+          "detailPageAccess": true
+        },
+        {
+          "exportPath": "Data.Childs[1].Layouts[1]",
+          "type": 0,
+          "isDefault": false,
+          "isItemPerm": false,
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter"
+          ],
+          "detailPageAccess": null
+        },
+        {
+          "exportPath": "Data.Childs[1].Layouts[2]",
+          "type": 0,
+          "isDefault": false,
+          "isItemPerm": false,
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter",
+            "Attr_IsViewDetail"
+          ],
+          "detailPageAccess": true
+        }
+      ],
+      "proofLevel": "export-proven"
+    },
+    {
+      "reportPlaceholder": "<form-report-2>",
+      "reportResourceId": "<report-id-2>",
+      "reportCollectionPath": "Data.FormNewReports[1]",
+      "childResourcePath": "Data.Childs[2]",
+      "childResourceType": 32,
+      "sourceApprovalForm": "<approval-form-key-1>",
+      "sourceApprovalFormPath": "Data.Forms[0]",
+      "selectedVariablesCount": 38,
+      "selectedSubList": null,
+      "selectedSubListFieldCount": 0,
+      "filterCondition": [
+        {
+          "pre": "and",
+          "left": "Submitted",
+          "op": "dt.>=",
+          "right": "2026-05-19",
+          "conditions": null
+        },
+        {
+          "pre": "and",
+          "left": "Status",
+          "op": "in",
+          "right": "[\"In process\",\"Completed\"]",
+          "conditions": null
+        }
+      ],
+      "fieldCount": 49,
+      "uniqueFieldKeys": true,
+      "attr": {
+        "isViewDetail": false,
+        "isExport": true,
+        "deletedVariables": []
+      },
+      "permissions": {
+        "inheritedFromApplication": true,
+        "listModelPerm": 4,
+        "customPermissionSchemaFound": false
+      },
+      "views": [
+        {
+          "exportPath": "Data.Childs[2].Layouts[0]",
+          "type": 0,
+          "isDefault": true,
+          "isItemPerm": false,
+          "layoutViewKeys": [
+            "Attr_IsViewDetail"
+          ],
+          "detailPageAccess": false
+        }
+      ],
+      "proofLevel": "export-proven"
+    },
+    {
+      "reportPlaceholder": "<form-report-3>",
+      "reportResourceId": "<report-id-3>",
+      "reportCollectionPath": "Data.FormNewReports[2]",
+      "childResourcePath": "Data.Childs[3]",
+      "childResourceType": 32,
+      "sourceApprovalForm": "<approval-form-key-1>",
+      "sourceApprovalFormPath": "Data.Forms[0]",
+      "selectedVariablesCount": 38,
+      "selectedSubList": "vlist_field_37",
+      "selectedSubListFieldCount": 3,
+      "filterCondition": null,
+      "fieldCount": 52,
+      "uniqueFieldKeys": true,
+      "attr": {
+        "isViewDetail": true,
+        "isExport": false,
+        "deletedVariables": []
+      },
+      "permissions": {
+        "inheritedFromApplication": true,
+        "listModelPerm": 4,
+        "customPermissionSchemaFound": false
+      },
+      "views": [
+        {
+          "exportPath": "Data.Childs[3].Layouts[0]",
+          "type": 0,
+          "isDefault": true,
+          "isItemPerm": false,
+          "layoutViewKeys": [
+            "Attr_IsViewDetail"
+          ],
+          "detailPageAccess": true
+        }
+      ],
+      "proofLevel": "export-proven"
+    },
+    {
+      "reportPlaceholder": "<form-report-4>",
+      "reportResourceId": "<report-id-4>",
+      "reportCollectionPath": "Data.FormNewReports[3]",
+      "childResourcePath": "Data.Childs[4]",
+      "childResourceType": 32,
+      "sourceApprovalForm": "<approval-form-key-1>",
+      "sourceApprovalFormPath": "Data.Forms[0]",
+      "selectedVariablesCount": 0,
+      "selectedSubList": "vlist_field_38",
+      "selectedSubListFieldCount": 6,
+      "filterCondition": null,
+      "fieldCount": 10,
+      "uniqueFieldKeys": true,
+      "attr": {
+        "isViewDetail": false,
+        "isExport": true,
+        "deletedVariables": []
+      },
+      "permissions": {
+        "inheritedFromApplication": true,
+        "listModelPerm": 4,
+        "customPermissionSchemaFound": false
+      },
+      "views": [
+        {
+          "exportPath": "Data.Childs[4].Layouts[0]",
+          "type": 0,
+          "isDefault": true,
+          "isItemPerm": false,
+          "layoutViewKeys": [
+            "layout",
+            "sort",
+            "query",
+            "rowColor",
+            "filter",
+            "Attr_IsViewDetail"
+          ],
+          "detailPageAccess": true
+        }
+      ],
+      "proofLevel": "export-proven"
+    }
+  ]
+}

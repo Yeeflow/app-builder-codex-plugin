@@ -1,0 +1,26 @@
+{
+  "proofLevel": "export-proven; product-documented",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "position-by-applicant-location",
+  "normalizedConfig": {
+    "isenabledemail": true,
+    "to": {
+      "kind": "expressionButton",
+      "label": "Current Task Context:Assignee:Email",
+      "dataShape": {
+        "type": "context",
+        "prop": "TaskAssigneeEmail"
+      }
+    },
+    "subject": {
+      "kind": "expressionButton",
+      "label": "Workflow Name"
+    },
+    "html": "<REDACTED_NOTIFICATION_BODY_SHAPE>",
+    "notifyrules": "array(0)",
+    "duedatetype": "hour"
+  },
+  "safety": "do not send email or test delivery in export-learning branch; redact any literal email values",
+  "runtimeBoundary": "notification configuration is export-proven; delivery is not runtime-tested"
+}

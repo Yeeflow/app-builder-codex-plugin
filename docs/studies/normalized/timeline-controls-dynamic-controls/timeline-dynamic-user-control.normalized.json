@@ -1,0 +1,21 @@
+{
+  "controlType": "dynamic-user",
+  "observedInTimeline": true,
+  "bindingPattern": {
+    "attrs.source": "3",
+    "attrs.obj-f": "Text10"
+  },
+  "sourceField": {
+    "fieldName": "Text10",
+    "displayName": "Assignee",
+    "controlType": "identity-picker",
+    "fieldType": "Text",
+    "multiple": true
+  },
+  "observedSettings": {
+    "i-len": [null, 3],
+    "addition_fields": ["Email"],
+    "picture_style": "avatar/name display styling observed"
+  },
+  "proof": "export-proven"
+}

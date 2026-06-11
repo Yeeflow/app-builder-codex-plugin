@@ -1,0 +1,7 @@
+{
+  "proof": "redaction rule for public URL/share metadata; no real public share URL is committed",
+  "normalized": {
+    "shareUrl": "https://share.yeeflow.com/f/<REDACTED_PUBLIC_FORM_CODE>",
+    "status": "__PUBLIC_FORM_STATUS_REDACTED_OR_NULL__"
+  }
+}

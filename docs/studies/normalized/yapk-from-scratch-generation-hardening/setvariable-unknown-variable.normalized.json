@@ -1,0 +1,32 @@
+{
+  "case": "setvariable-unknown-variable",
+  "source": "synthetic Business Travel hardening reference",
+  "rule": "SetVariable targets must be declared in DefResource.variables.basic[] and id/idx must match.",
+  "declaredVariables": [
+    {
+      "idx": "var-total-idx",
+      "id": "TotalAmount",
+      "name": "Total Amount",
+      "type": "number"
+    }
+  ],
+  "invalidSetVariable": {
+    "node": "Set_TR#",
+    "variablesetting": [
+      {
+        "idx": "var-trid-idx",
+        "id": "TRid",
+        "name": "Travel Request No.",
+        "type": "text",
+        "value": []
+      }
+    ]
+  },
+  "requiredDeclaration": {
+    "idx": "btr1-var-trid",
+    "id": "TRid",
+    "name": "Travel Request No.",
+    "type": "text"
+  },
+  "validatorCode": "SETVARIABLE_UNKNOWN_VARIABLE"
+}

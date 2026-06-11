@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[5].RemindRules[]",
+  "pattern": "item-added-notification",
+  "shape": {
+    "Type": 1,
+    "SendType": 1,
+    "Status": 1,
+    "Subject": "<html-template>",
+    "Content": "<html-template>",
+    "Rules": "{\"Rules\":{\"Period\":\"Daily\"},\"Conditions\":{\"Type\":1,\"Data\":\"\"}}",
+    "Receiver": "{\"Identities\":[...],\"ListDefs\":[...]}"
+  },
+  "recipientShapes": ["user", "user-group", "list-field"]
+}

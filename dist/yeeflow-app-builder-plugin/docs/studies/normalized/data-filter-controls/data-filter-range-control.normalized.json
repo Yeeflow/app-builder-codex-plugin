@@ -1,0 +1,35 @@
+{
+  "proofLevel": "export-proven",
+  "page": "Dashboard",
+  "productName": "Range filter",
+  "exportControlType": "range-filter",
+  "control": {
+    "path": "$.children[0].children[1].children[0].children[1].children[2]",
+    "id": "<control-id>",
+    "type": "range-filter",
+    "productName": "Range filter",
+    "label": "<control-label>",
+    "binding": "__filter_filter_8",
+    "filterVariable": "filter_8",
+    "applyTypeRaw": "",
+    "applyType": "default/unspecified",
+    "applyButton": "",
+    "dataSource": null,
+    "displayField": "",
+    "valueField": "",
+    "optionFilterCount": 0,
+    "settingKeys": [
+      "field",
+      "inputs",
+      "lab",
+      "lablay",
+      "number_max",
+      "slider",
+      "values",
+      "ver"
+    ],
+    "settingsPreview": {
+      "numberMax": 50000
+    }
+  }
+}

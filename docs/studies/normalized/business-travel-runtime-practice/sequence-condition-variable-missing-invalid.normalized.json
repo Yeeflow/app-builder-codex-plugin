@@ -1,0 +1,30 @@
+{
+  "proof": "runtime-practice-backed",
+  "variables": {
+    "basic": [
+      {
+        "id": "TotalAmount",
+        "type": "number"
+      }
+    ]
+  },
+  "invalidConditioninfo": [
+    {
+      "left": {
+        "type": 1,
+        "value": {
+          "exprType": "variable",
+          "valueType": "number",
+          "id": "DeletedAmount",
+          "type": "expr"
+        }
+      },
+      "op": "n.>",
+      "right": {
+        "type": 0,
+        "value": 5000
+      }
+    }
+  ],
+  "validatorError": "WORKFLOW_SEQUENCE_CONDITION_VARIABLE_UNRESOLVED"
+}

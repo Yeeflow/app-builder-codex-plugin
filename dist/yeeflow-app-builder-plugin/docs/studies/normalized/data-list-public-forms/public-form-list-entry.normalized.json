@@ -1,0 +1,15 @@
+{
+  "proof": "export-proven from Data Lists (4).yap; IDs and share metadata redacted",
+  "exportPath": "Data.Childs[].PublicForms[]",
+  "normalized": {
+    "ListID": "__LIST_ID__",
+    "ID": "__PUBLIC_FORM_ID__",
+    "Type": 0,
+    "Name": "__PUBLIC_FORM_NAME_REDACTED__",
+    "Desc": null,
+    "Ext": "__SHARE_METADATA_REDACTED_OR_NULL__",
+    "ExpiredTip": "__EXPIRED_TIP_REDACTED_OR_NULL__",
+    "RefId": "__LIST_ID__",
+    "Resource": "__PUBLIC_FORM_RESOURCE_JSON_STRING__"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Action Approval Test.ywf",
+  "taskForm": "WARTB Task3",
+  "button": {
+    "type": "action_button",
+    "label": "Add others to this task",
+    "readonly": null,
+    "actionBinding": "<REDACTED_ACTION_ID>"
+  },
+  "resolvedAction": {
+    "name": "Add assignee button clicked",
+    "submitType": "5",
+    "operation": "add-assignee"
+  },
+  "comparisonNote": "The previous .yap export had this button bound to the reject action. The updated .ywf export confirms the corrected binding to the add-assignee action."
+}

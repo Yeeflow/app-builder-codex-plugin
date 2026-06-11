@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Plugin Release Manager"
+  short_description: "Manage Yeeflow App Builder plugin releases"
+  default_prompt: "Use $yeeflow-plugin-release-manager to rebuild, validate, tag, or finalize the Yeeflow App Builder Plugin release."

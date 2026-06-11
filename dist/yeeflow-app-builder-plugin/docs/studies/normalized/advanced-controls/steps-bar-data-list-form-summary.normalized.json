@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "control": "Steps bar",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "data-list-form"
+  ],
+  "observedSurfaces": [
+    "Company Overview / View page"
+  ],
+  "internalTypes": [
+    "steps-bar"
+  ],
+  "count": 12,
+  "attrKeys": [
+    "current-icon",
+    "current-step",
+    "indicator",
+    "layout",
+    "obj-f",
+    "past-icon",
+    "source",
+    "steps-options",
+    "stepstyle",
+    "text-posi"
+  ],
+  "sourceModes": [
+    "current-item-field",
+    "variable"
+  ],
+  "styleKeys": [
+    "indicator",
+    "layout",
+    "stepstyle",
+    "text-posi"
+  ],
+  "childTypes": [],
+  "nestedChildControlTypes": {},
+  "bindingModes": [
+    "current-item-field",
+    "static",
+    "variable"
+  ],
+  "validation": [
+    "field-bound current step should resolve to single-select/status fields where applicable"
+  ],
+  "generation": [
+    "use on View pages to show current item status/phase"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<steps-bar:1>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "steps-bar",
+      "attrKeys": [
+        "current-icon",
+        "current-step",
+        "obj-f",
+        "past-icon",
+        "source",
+        "steps-options"
+      ],
+      "sourceMode": "current-item-field",
+      "childTypes": [],
+      "bindings": {
+        "current-step": {
+          "mode": "current-item-field",
+          "refs": [
+            {
+              "mode": "current-item-field",
+              "prop": "<field>",
+              "valueType": "radio"
+            }
+          ]
+        },
+        "source": {
+          "mode": "static",
+          "valueShape": "4"
+        },
+        "obj-f": {
+          "mode": "static",
+          "valueShape": "Text1"
+        }
+      },
+      "items": {
+        "steps": [
+          {
+            "key": "<step:1>",
+            "label": "Step 1"
+          },
+          {
+            "key": "<step:2>",
+            "label": "Step 2"
+          },
+          {
+            "key": "<step:3>",
+            "label": "Step 3"
+          },
+          {
+            "key": "<step:4>",
+            "label": "Step 4"
+          }
+        ]
+      }
+    },
+    {
+      "syntheticId": "<steps-bar:2>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "steps-bar",
+      "attrKeys": [
+        "current-icon",
+        "current-step",
+        "obj-f",
+        "past-icon",
+        "source",
+        "steps-options"
+      ],
+      "sourceMode": "current-item-field",
+      "childTypes": [],
+      "bindings": {
+        "current-step": {
+          "mode": "current-item-field",
+          "refs": [
+            {
+              "mode": "current-item-field",
+              "prop": "<field>",
+              "valueType": "radio"
+            }
+          ]
+        },
+        "source": {
+          "mode": "static",
+          "valueShape": "4"
+        },
+        "obj-f": {
+          "mode": "static",
+          "valueShape": "Text4"
+        }
+      },
+      "items": {
+        "steps": [
+          {
+            "key": "<step:1>",
+            "label": "Step 1"
+          },
+          {
+            "key": "<step:2>",
+            "label": "Step 2"
+          },
+          {
+            "key": "<step:3>",
+            "label": "Step 3"
+          },
+          {
+            "key": "<step:4>",
+            "label": "Step 4"
+          }
+        ]
+      }
+    },
+    {
+      "syntheticId": "<steps-bar:3>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "steps-bar",
+      "attrKeys": [
+        "current-icon",
+        "current-step",
+        "layout",
+        "obj-f",
+        "past-icon",
+        "source",
+        "steps-options"
+      ],
+      "sourceMode": "current-item-field",
+      "childTypes": [],
+      "bindings": {
+        "current-step": {
+          "mode": "current-item-field",
+          "refs": [
+            {
+              "mode": "current-item-field",
+              "prop": "<field>",
+              "valueType": "radio"
+            }
+          ]
+        },
+        "source": {
+          "mode": "static",
+          "valueShape": "4"
+        },
+        "obj-f": {
+          "mode": "static",
+          "valueShape": "Text6"
+        }
+      },
+      "items": {
+        "steps": [
+          {
+            "key": "<step:1>",
+            "label": "Step 1"
+          },
+          {
+            "key": "<step:2>",
+            "label": "Step 2"
+          },
+          {
+            "key": "<step:3>",
+            "label": "Step 3"
+          },
+          {
+            "key": "<step:4>",
+            "label": "Step 4"
+          }
+        ]
+      }
+    },
+    {
+      "syntheticId": "<steps-bar:4>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "steps-bar",
+      "attrKeys": [
+        "current-icon",
+        "current-step",
+        "layout",
+        "obj-f",
+        "past-icon",
+        "source",
+        "steps-options"
+      ],
+      "sourceMode": "current-item-field",
+      "childTypes": [],
+      "bindings": {
+        "current-step": {
+          "mode": "current-item-field",
+          "refs": [
+            {
+              "mode": "current-item-field",
+              "prop": "<field>",
+              "valueType": "radio"
+            }
+          ]
+        },
+        "source": {
+          "mode": "static",
+          "valueShape": "4"
+        },
+        "obj-f": {
+          "mode": "static",
+          "valueShape": "Text6"
+        }
+      },
+      "items": {
+        "steps": [
+          {
+            "key": "<step:1>",
+            "label": "Step 1"
+          },
+          {
+            "key": "<step:2>",
+            "label": "Step 2"
+          },
+          {
+            "key": "<step:3>",
+            "label": "Step 3"
+          },
+          {
+            "key": "<step:4>",
+            "label": "Step 4"
+          }
+        ]
+      }
+    },
+    {
+      "syntheticId": "<steps-bar:5>",
+      "host": "data-list-form",
+      "surface": "Company Overview / View page",
+      "type": "steps-bar",
+      "attrKeys": [
+        "current-icon",
+        "current-step",
+        "layout",
+        "obj-f",
+        "past-icon",
+        "source",
+        "steps-options",
+        "text-posi"
+      ],
+      "sourceMode": "current-item-field",
+      "childTypes": [],
+      "bindings": {
+        "current-step": {
+          "mode": "current-item-field",
+          "refs": [
+            {
+              "mode": "current-item-field",
+              "prop": "<field>",
+              "valueType": "radio"
+            }
+          ]
+        },
+        "source": {
+          "mode": "static",
+          "valueShape": "4"
+        },
+        "obj-f": {
+          "mode": "static",
+          "valueShape": "Text7"
+        }
+      },
+      "items": {
+        "steps": [
+          {
+            "key": "<step:1>",
+            "label": "Step 1"
+          },
+          {
+            "key": "<step:2>",
+            "label": "Step 2"
+          },
+          {
+            "key": "<step:3>",
+            "label": "Step 3"
+          },
+          {
+            "key": "<step:4>",
+            "label": "Step 4"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "feature": "kanban-dynamic-item-template",
+  "source": "Company Overview.yap",
+  "hostControl": "kanban",
+  "templateChildren": [
+    {
+      "type": "dynamic-image",
+      "attrs": {
+        "source": "3",
+        "obj-f": "Text11"
+      },
+      "field": "Cover image"
+    },
+    {
+      "type": "dynamic-user",
+      "attrs": {
+        "source": "3",
+        "obj-f": "Text10",
+        "i-len": [null, 5],
+        "display_name": false
+      },
+      "field": "Assignee"
+    },
+    {
+      "type": "dynamic-field",
+      "attrs": {
+        "source": "3",
+        "obj-f": "<general-field-name>"
+      },
+      "observedFields": ["Title", "Text3", "Datetime1", "Datetime2", "Text4", "Decimal2"]
+    }
+  ],
+  "proof": "export-proven"
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "sub-list-dynamic-content-normalized",
+  "case": "corrected_table_style_dynamic_sub_list",
+  "source": "user-corrected-yapk-v1.1",
+  "host": "approval-form",
+  "structure": [
+    "section-container",
+    "header-flex-grid",
+    "dynamic-sub-list"
+  ],
+  "rules": [
+    "keep header grid and Sub List in one visual section",
+    "turn off Sub List display caption",
+    "use matching header and body grid column tracks",
+    "preserve local Sub List attrs.actions for list actions"
+  ],
+  "proofBoundary": "V1.1 is user-corrected layout evidence; V1.2 runtime confirmation is pending."
+}

@@ -1,0 +1,29 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (2).yap",
+  "nodeType": "MultiAssignmentTask",
+  "pattern": "assignment-task-type-approval-default",
+  "normalizedConfig": {
+    "tasktype": null,
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "usertaskassignment": [
+      {
+        "type": "user",
+        "method": "direct",
+        "value": "<USER_REF_CONFIRMED_BY_API>",
+        "title": "<REDACTED_ASSIGNEE_LABEL>"
+      },
+      {
+        "type": "user",
+        "method": "expression",
+        "value": "<REDACTED_EXPRESSION_BUTTON>",
+        "title": "<REDACTED_ASSIGNEE_LABEL>"
+      }
+    ]
+  },
+  "notes": [
+    "Studied exports represent approval/default Assignment Task nodes by omitting properties.tasktype.",
+    "Runtime approval behavior is not proven by this normalized reference."
+  ]
+}

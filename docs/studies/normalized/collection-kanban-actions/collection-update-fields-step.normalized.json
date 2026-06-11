@@ -1,0 +1,30 @@
+{
+  "proof": "export-proven from Company Overview (2).yap; identifiers redacted or synthetic",
+  "currentItemUpdate": {
+    "stepType": "setdatalist",
+    "attrs": {
+      "listtype": "select",
+      "type": "edit",
+      "wheres": [
+        {
+          "left": "ListDataID",
+          "op": "0",
+          "right": ["<CurrentItem.ListDataID token>"],
+          "showCus": false
+        }
+      ],
+      "listdatas": [
+        {
+          "Per": "0",
+          "Columns": "Text1",
+          "Data": ["Completed"]
+        },
+        {
+          "Per": "0",
+          "Columns": "Decimal1",
+          "Data": [1]
+        }
+      ]
+    }
+  }
+}

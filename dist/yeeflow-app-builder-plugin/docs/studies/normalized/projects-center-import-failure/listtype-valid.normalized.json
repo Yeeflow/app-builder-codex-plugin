@@ -1,0 +1,11 @@
+{
+  "case": "listtype-valid",
+  "proofLevel": "user-confirmed-import-success-derived",
+  "listModel": {
+    "Type": 1,
+    "ListType": 1,
+    "ListID": "__APP_LIST_ID__",
+    "Title": "Generated Requests"
+  },
+  "expectedFinding": null
+}

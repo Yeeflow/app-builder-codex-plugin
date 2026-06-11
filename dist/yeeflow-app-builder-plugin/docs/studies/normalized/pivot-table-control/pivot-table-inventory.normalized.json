@@ -1,0 +1,1016 @@
+{
+  "proof": "export-proven from CRM sample Dashboard; private identifiers and values redacted",
+  "pivotTables": [
+    {
+      "control": "<pivot:1>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "DAY",
+          "idShape": "<field>_DAY",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:2>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "MONTH",
+          "idShape": "<field>_MONTH",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:3>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "QUARTER",
+          "idShape": "<field>_QUARTER",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:4>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "YEAR",
+          "idShape": "<field>_YEAR",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:5>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Text2",
+          "label": "Original Source",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "YEAR",
+          "idShape": "<field>_YEAR",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:6>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Text2",
+          "label": "Original Source",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "YEAR",
+          "idShape": "<field>_YEAR",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "COUNT_DISTINCT",
+          "idShape": "<field>_COUNT_DISTINCT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:7>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Text2",
+          "label": "Original Source",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "YEAR",
+          "idShape": "<field>_YEAR",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "SUM",
+          "idShape": "<field>_SUM",
+          "resolved": true
+        }
+      ],
+      "filters": [
+        {
+          "left": "Datetime1",
+          "operator": "2",
+          "filterVariables": [],
+          "hasStaticRightValue": false
+        },
+        {
+          "left": "Datetime1",
+          "operator": "1",
+          "filterVariables": [],
+          "hasStaticRightValue": false
+        },
+        {
+          "left": "Text1",
+          "operator": "7",
+          "filterVariables": [],
+          "hasStaticRightValue": false
+        }
+      ],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:8>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Text2",
+          "label": "Original Source",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "YEAR",
+          "idShape": "<field>_YEAR",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "AVG",
+          "idShape": "<field>_AVG",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:9>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Text2",
+          "label": "Original Source",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "YEAR",
+          "idShape": "<field>_YEAR",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "MAX",
+          "idShape": "<field>_MAX",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:10>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:12>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text1",
+          "label": "Deal Type",
+          "controlType": null,
+          "fieldType": "radio",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Text4",
+          "label": "Deal Owner",
+          "controlType": null,
+          "fieldType": "identity-picker",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Text2",
+          "label": "Original Source",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        },
+        {
+          "field": "Datetime1",
+          "label": "Close Date",
+          "controlType": null,
+          "fieldType": "datepicker",
+          "aggregation": "YEAR",
+          "idShape": "<field>_YEAR",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "Decimal1",
+          "label": "Amount",
+          "controlType": null,
+          "fieldType": "currency",
+          "aggregation": "MIN",
+          "idShape": "<field>_MIN",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:11>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:3>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text12",
+          "label": "Country/Region",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Text1",
+          "label": "Industry",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "ListDataID",
+          "label": null,
+          "controlType": null,
+          "fieldType": null,
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showGrandTotal": true,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:12>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:3>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text12",
+          "label": "Country/Region",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [
+        {
+          "field": "Text1",
+          "label": "Industry",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "ListDataID",
+          "label": null,
+          "controlType": null,
+          "fieldType": null,
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal",
+        "showsorter"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showSorter": false,
+      "showGrandTotal": false,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:13>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:3>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [
+        {
+          "field": "Text12",
+          "label": "Country/Region",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "columns": [],
+      "values": [
+        {
+          "field": "ListDataID",
+          "label": null,
+          "controlType": null,
+          "fieldType": null,
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal",
+        "showsorter"
+      ],
+      "layoutColumns": [
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "showSorter": false,
+      "showGrandTotal": false,
+      "proofLevel": "export-proven"
+    },
+    {
+      "control": "<pivot:14>",
+      "controlType": "pivot-table",
+      "extKey": "PivotTable",
+      "extCategory": "___Pivot___",
+      "location": "$.children[<n>].children[<n>].children[<n>].children[<n>].children[<n>]",
+      "dataSource": {
+        "placeholder": "<source:3>",
+        "sourceClass": "Data list",
+        "exportType": 1
+      },
+      "rows": [],
+      "columns": [
+        {
+          "field": "Text1",
+          "label": "Industry",
+          "controlType": null,
+          "fieldType": "lookup",
+          "aggregation": null,
+          "idShape": "<field>",
+          "resolved": true
+        }
+      ],
+      "values": [
+        {
+          "field": "ListDataID",
+          "label": null,
+          "controlType": null,
+          "fieldType": null,
+          "aggregation": "COUNT",
+          "idShape": "<field>_COUNT",
+          "resolved": true
+        }
+      ],
+      "filters": [],
+      "styleSections": [
+        "header",
+        "body",
+        "subtotal",
+        "grandtotal",
+        "showsorter"
+      ],
+      "layoutColumns": [
+        "pt_c_0",
+        "pt_c_1"
+      ],
+      "layoutRows": [
+        "pt_c_1"
+      ],
+      "showSorter": false,
+      "showGrandTotal": false,
+      "proofLevel": "export-proven"
+    }
+  ]
+}

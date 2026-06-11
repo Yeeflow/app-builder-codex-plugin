@@ -1,0 +1,21 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Actions Runtime Baseline (2)_Task forms.yap",
+  "taskForms": [
+    "WARTB Task3",
+    "WARTB Task4"
+  ],
+  "controlShape": {
+    "type": "textarea",
+    "label": "Task comments",
+    "variable": {
+      "id": "<TASKCOMMENTS_VARIABLE_REF>",
+      "type": "text",
+      "editable": true
+    }
+  },
+  "submitFormUsage": {
+    "comment": "<TASKCOMMENTS_VARIABLE_REF>",
+    "remark": "<TASKCOMMENTS_VARIABLE_REF>"
+  }
+}

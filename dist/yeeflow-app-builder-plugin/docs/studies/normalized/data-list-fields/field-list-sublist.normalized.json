@@ -1,0 +1,129 @@
+{
+  "fieldType": "list",
+  "proof": "export-proven from Data Lists (2).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].Defs[]",
+  "normalizedField": {
+    "FieldID": "__FIELD_ID__",
+    "ListID": "__LIST_ID__",
+    "FieldName": "Text9",
+    "FieldType": "Text",
+    "FieldIndex": 9,
+    "DisplayName": "__DISPLAY_NAME_17__",
+    "InternalName": "__INTERNAL_NAME_17__",
+    "Type": "list",
+    "Status": 1,
+    "Category": 0,
+    "DefaultValueShape": "empty",
+    "Rules": {
+      "required": true,
+      "list-variables": [
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "text",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "number",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "boolean",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "date",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "file",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "metadata",
+          "editable": true,
+          "value": {
+            "source": "app",
+            "categoryId": "__ID_REDACTED__"
+          }
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "user",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "costcenter",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "groupselect",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "location",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "lookup",
+          "editable": true,
+          "value": "__VALUE_REDACTED__"
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "img",
+          "editable": true
+        },
+        {
+          "idx": "__ID_REDACTED__",
+          "id": "__ID_REDACTED__",
+          "name": "__NAME_REDACTED__",
+          "type": "mutiple-metadata",
+          "editable": true,
+          "value": {
+            "source": "0",
+            "categoryId": "__ID_REDACTED__"
+          }
+        }
+      ]
+    },
+    "AppCreationRules": {
+      "fieldNameSuffixMatchesFieldIndex": true,
+      "identifiersUniqueWithinList": true,
+      "internalNamePattern": "^[A-Za-z0-9_]+$"
+    },
+    "Proof": "export-proven; values redacted"
+  }
+}

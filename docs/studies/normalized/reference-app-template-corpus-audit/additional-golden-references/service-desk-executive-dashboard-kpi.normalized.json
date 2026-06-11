@@ -1,0 +1,20 @@
+{
+  "exportName": "Service Desk Pro (2).yap",
+  "focusPage": "Executive Dashboard",
+  "decodeShape": "YAP gzip ListExportResult with Data = ListExportInfo",
+  "proofBoundary": "export-proven structure and binding evidence only in this study",
+  "patterns": [
+    "current Type 103 dashboard with src marker",
+    "deep container hierarchy",
+    "safe padding, gaps, borders, width constraints, and row/column grouping",
+    "many Summary controls for submitted, resolved, open, priority, response, resolution, and SLA metrics",
+    "chart and metric sections grouped under dashboard filters"
+  ],
+  "templateImpact": [
+    "kpi_card_row",
+    "dashboard_header_action_bar",
+    "progress_summary_card",
+    "business_alert_card"
+  ],
+  "redaction": "raw payloads, Resource, Sign, IDs, tenant data, and sample records omitted"
+}

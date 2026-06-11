@@ -1,0 +1,10 @@
+{
+  "case": "task-page-pagetype-valid",
+  "valid": true,
+  "pageurl": {
+    "id": "task-page-001",
+    "type": 2,
+    "pagetype": 1,
+    "title": "Approval Task"
+  }
+}

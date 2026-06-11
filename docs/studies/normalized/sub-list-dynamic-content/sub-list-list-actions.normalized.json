@@ -1,0 +1,54 @@
+{
+  "name": "sub-list-list-actions",
+  "proof": "export-proven from Approval Form export; identifiers are synthetic",
+  "storage": {
+    "path": "control.attrs.actions[]",
+    "scope": "local to the Sub List control",
+    "notStoredIn": "page.formdef.actions[]"
+  },
+  "actions": [
+    {
+      "name": "Add sub item",
+      "type": "list",
+      "steps": [
+        {
+          "type": "list_new"
+        }
+      ]
+    },
+    {
+      "name": "Duplicate item",
+      "type": "list",
+      "steps": [
+        {
+          "type": "list_dup"
+        }
+      ]
+    },
+    {
+      "name": "Delete item",
+      "type": "list",
+      "steps": [
+        {
+          "type": "list_del",
+          "attrs": {
+            "confirm": "__CONFIRMATION_CONFIG__"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Import items",
+      "type": "list",
+      "steps": [
+        {
+          "type": "list_import"
+        }
+      ]
+    }
+  ],
+  "buttonBinding": {
+    "path": "action_button.attrs.control_action",
+    "target": "an id in the same Sub List control attrs.actions[]"
+  }
+}

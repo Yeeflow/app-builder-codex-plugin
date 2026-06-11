@@ -1,0 +1,15 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "invalid approval form NoRule non-object",
+  "invalidExamples": [
+    true,
+    "approval_{date}_{index}",
+    [
+      "approval_{date}_{index}"
+    ]
+  ],
+  "expectedError": {
+    "code": "NORULE_INVALID_OBJECT",
+    "message": "NoRule must be an object with Prefix, StartIndex, CustomLength, and AutoIncrement."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "case": "assignment-variable-undeclared",
+  "source": "synthetic Business Travel hardening reference",
+  "rule": "Assignment expressions must reference declared workflow variables.",
+  "declaredVariables": [
+    {
+      "idx": "var-total-idx",
+      "id": "TotalAmount",
+      "name": "Total Amount",
+      "type": "number"
+    }
+  ],
+  "invalidAssignment": {
+    "method": "expression",
+    "type": "user",
+    "valueSummary": "Workflow Variables:Applicant:Line Manager"
+  },
+  "requiredDeclaration": {
+    "idx": "btr1-var-applicant",
+    "id": "Applicant",
+    "name": "Applicant",
+    "type": "user",
+    "editable": true
+  },
+  "validatorCode": "ASSIGNMENT_TASK_VARIABLE_UNRESOLVED"
+}

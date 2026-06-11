@@ -1,0 +1,17 @@
+{
+  "source": "Sales Quotation.yap",
+  "proof": "export-proven",
+  "parentField": {
+    "field": "Text5",
+    "display": "Products & Services",
+    "type": "list"
+  },
+  "rowBindings": [
+    { "id": "NAME", "name": "NAME", "type": "text", "control": "input" },
+    { "id": "Description", "name": "Description", "type": "text", "control": "input" },
+    { "id": "UNITPRICE", "name": "UNIT PRICE", "type": "number", "control": "input_number" },
+    { "id": "QTY", "name": "QTY", "type": "number", "control": "input_number" },
+    { "id": "SUBTOTAL", "name": "SUB TOTAL", "type": "number", "control": "calculated" }
+  ],
+  "templateBindingRule": "row controls set attrs.list_field = true and attrs.list_field_binding = Text5"
+}

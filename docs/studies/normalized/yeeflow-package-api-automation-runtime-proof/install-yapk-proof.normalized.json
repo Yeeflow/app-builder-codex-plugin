@@ -1,0 +1,27 @@
+{
+  "proof": "yeeflow-package-api-automation-runtime-proof",
+  "packageFilename": "vendor-onboarding-v41-page1-dashboard.yapk",
+  "upload": {
+    "endpoint": "POST /files/upload",
+    "httpStatus": 200,
+    "success": true,
+    "metadataPresent": true,
+    "metadataFields": ["Id", "Name", "FileSize"]
+  },
+  "install": {
+    "endpoint": "POST /listset/package/install",
+    "httpStatus": 200,
+    "apiStatus": 0,
+    "responseFieldNames": ["Data", "Status", "TotalCount"],
+    "dataFieldNames": ["ID", "Continue", "Status"],
+    "continuePresent": true,
+    "continueValue": false
+  },
+  "proofBoundary": "API install accepted and completed; browser runtime rendering not proven in this proof",
+  "redaction": {
+    "workspaceId": "redacted",
+    "fileId": "redacted",
+    "appOrPackageId": "redacted",
+    "rawResponseStored": false
+  }
+}

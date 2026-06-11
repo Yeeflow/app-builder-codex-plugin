@@ -1,0 +1,20 @@
+{
+  "source": {
+    "export": "/Users/Renger/Downloads/Purchase Requests.ydl",
+    "proof": "export-proven"
+  },
+  "taskFormControl": {
+    "context": "data-list-workflow-task-form",
+    "isListControl": true,
+    "type": "input",
+    "identifier": "Text1",
+    "InternalName": "<CUSTOM_LIST_FIELD_REF>",
+    "fieldID": "<REDACTED_FIELD_ID>",
+    "binding": "____customListFields_<CUSTOM_LIST_FIELD_REF>",
+    "readonly": true
+  },
+  "notes": [
+    "Custom data-list fields can be embedded in an Assignment Task form.",
+    "This export stores the binding through the custom-list-field binding prefix."
+  ]
+}

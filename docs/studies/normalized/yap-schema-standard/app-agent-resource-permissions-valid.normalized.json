@@ -1,0 +1,19 @@
+{
+  "component": {
+    "Type": 2,
+    "SubType": 10,
+    "Settings": {
+      "resources": {
+        "dataLists": {
+          "items": [
+            {
+              "id": "<list-id>",
+              "permissions": 9
+            }
+          ]
+        }
+      }
+    }
+  },
+  "meaning": "9 = Submit 1 + Read 8"
+}

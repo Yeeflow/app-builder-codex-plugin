@@ -1,0 +1,25 @@
+{
+  "audit": "reference-app-template-corpus-audit",
+  "patterns": [
+    {
+      "pattern": "dynamic_kanban_card",
+      "sourceExports": ["Company Overview (3).yap"],
+      "observedDynamicFieldCount": 10,
+      "observedActions": ["Edit item", "Delete Item"],
+      "templateCoverage": ["kanban_status_board", "kanban_card_with_dynamic_fields"]
+    },
+    {
+      "pattern": "dynamic_collection_card",
+      "sourceExports": ["Company Overview (3).yap"],
+      "observedDynamicFieldCount": 9,
+      "observedActions": ["Edit item", "Mark as completed", "Delete Item"],
+      "templateCoverage": ["collection_card_board", "collection_card_with_dynamic_fields"]
+    },
+    {
+      "pattern": "project_related_card_sections",
+      "sourceExports": ["Projects Center_2.yap"],
+      "observedControls": ["collection", "kanban"],
+      "templateCoverage": ["collection_card_board", "related_records_section"]
+    }
+  ]
+}

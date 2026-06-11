@@ -1,0 +1,99 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "position-by-applicant-location",
+  "rawAssigneeFieldNames": [
+    [
+      "type",
+      "method",
+      "position",
+      "value",
+      "title"
+    ]
+  ],
+  "normalizedConfig": {
+    "type": "position",
+    "method": "positionlocexpr",
+    "position": "<POSITION_REF_CONFIRMED_BY_API>",
+    "value": {
+      "kind": "expressionButton",
+      "label": "Applicant:Location",
+      "dataShape": {
+        "type": "user",
+        "param": {
+          "id": {
+            "parseStatus": "opaque",
+            "expressionSourceHints": {
+              "types": [
+                "application"
+              ],
+              "props": [
+                "ApplicantUserID"
+              ],
+              "usesApplicantUserId": true
+            }
+          }
+        },
+        "prop": "LocationID"
+      }
+    },
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "approvalSettingsShape": {
+    "approveway": "allapprove",
+    "approvepercentage": 100,
+    "appointedOrder": "parallel-or-default",
+    "issequential": null,
+    "isenabledemail": true,
+    "isallowreassign": false,
+    "isallowrecalled": null,
+    "automaticapproveddefinition": null,
+    "isallowsign": false,
+    "allowskip": true,
+    "duedatedefinition": 120,
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "notificationSettingsShape": {
+    "isenabledemail": true,
+    "to": {
+      "kind": "expressionButton",
+      "label": "Current Task Context:Assignee:Email",
+      "dataShape": {
+        "type": "user",
+        "param": {
+          "id": {
+            "parseStatus": "opaque",
+            "expressionSourceHints": {
+              "types": [
+                "task"
+              ],
+              "props": [
+                "AssigneeID"
+              ],
+              "usesApplicantUserId": false
+            }
+          }
+        },
+        "prop": "Email"
+      }
+    },
+    "subject": {
+      "kind": "expressionButton",
+      "label": "Workflow Name",
+      "dataShape": {
+        "type": "instance",
+        "prop": "Name"
+      }
+    },
+    "html": "<REDACTED_NOTIFICATION_BODY_SHAPE>",
+    "notifyrules": "array(0)",
+    "duedatetype": "hour"
+  },
+  "runtimeDependencies": [
+    "runtime-applicant-user-context",
+    "valid-location-assignments",
+    "valid-position-assignments"
+  ],
+  "generationSafety": "requires target-tenant org/reference data and focused runtime proof before broad generation claims"
+}

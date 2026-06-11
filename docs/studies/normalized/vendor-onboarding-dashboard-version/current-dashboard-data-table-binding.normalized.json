@@ -1,0 +1,65 @@
+{
+  "artifact": "current-dashboard-data-table-binding",
+  "source": "Vendor Onboarding v1.12 generated YAP runtime proof",
+  "status": "import-proven for focused Vendor Onboarding package",
+  "dashboardShell": {
+    "type": 103,
+    "layoutView": null,
+    "ext2": "{\"src\":true}",
+    "layoutInResources": "inline page resource allowed when content exists"
+  },
+  "dataTableControl": {
+    "controlType": "data-list",
+    "dataListReferenceRequiredKeys": [
+      "AppID",
+      "ListID",
+      "Type",
+      "Title",
+      "ListSetID"
+    ],
+    "columnBindingRule": {
+      "Field": "source field internal name used by runtime query, for example Text0",
+      "FieldName": "visible column label, for example Vendor Name",
+      "DisplayName": "empty string in the export-proven dashboard table pattern"
+    },
+    "knownFailureWhenFieldMissing": "Field(s) ,,,,, have been deleted. Please check the query configuration."
+  },
+  "exampleColumns": [
+    {
+      "Field": "Text0",
+      "FieldName": "Vendor Name"
+    },
+    {
+      "Field": "Text1",
+      "FieldName": "Vendor Type"
+    },
+    {
+      "Field": "Text2",
+      "FieldName": "Country / Region"
+    },
+    {
+      "Field": "Text3",
+      "FieldName": "Primary Contact"
+    },
+    {
+      "Field": "Text4",
+      "FieldName": "Email"
+    },
+    {
+      "Field": "Text5",
+      "FieldName": "Phone"
+    }
+  ],
+  "validatorRules": [
+    "DASHBOARD_DATA_TABLE_DISPLAY_FIELD_BINDING_MISSING",
+    "DASHBOARD_DATA_TABLE_DISPLAY_FIELD_UNRESOLVED",
+    "DATA_TABLE_DISPLAY_COLUMN_FIELD_BINDING_MISSING",
+    "DATA_TABLE_DISPLAY_COLUMN_UNRESOLVED"
+  ],
+  "redaction": {
+    "rawResourceIncluded": false,
+    "rawPayloadIncluded": false,
+    "privateIdsIncluded": false,
+    "screenshotsIncluded": false
+  }
+}

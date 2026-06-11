@@ -1,0 +1,32 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "process_form_info",
+  "source": "product-provided ypk-schema.json",
+  "properties": [
+    "Category",
+    "Name",
+    "Key",
+    "IsItemPerm",
+    "AppID",
+    "ListID",
+    "ProcModelID",
+    "Description",
+    "Ext",
+    "DefResourceID",
+    "DefResource",
+    "Status",
+    "DeployedDefID",
+    "WorkflowType",
+    "Settings",
+    "Deployed",
+    "NoRule",
+    "Perms"
+  ],
+  "workflowTypeEnum": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "summary": "ProcessFormInfo carries approval/data-list/scheduled workflow form metadata, serialized definition resources, request-number rules, and permissions."
+}

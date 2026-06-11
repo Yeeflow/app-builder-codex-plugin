@@ -1,0 +1,27 @@
+{
+  "source": {
+    "export": "/Users/Renger/Downloads/Purchase Requests.ydl",
+    "proof": "export-proven"
+  },
+  "assignment": {
+    "taskStencil": "MultiAssignmentTask",
+    "property": "usertaskassignment[]",
+    "type": "user",
+    "method": "expression",
+    "value": "<LIST_FIELD_ASSIGNEE_REF>",
+    "title": "<REDACTED_ASSIGNEE_LABEL>"
+  },
+  "expression": {
+    "shape": "expression-button",
+    "sourceType": "listitem",
+    "source": "data-list-field-value",
+    "valueType": "user",
+    "fieldReference": "<REDACTED_FIELD_ID>",
+    "displayLabel": "<CUSTOM_LIST_FIELD_REF>"
+  },
+  "notes": [
+    "The data-list workflow export proves list-item context can appear inside Assignment Task assignee expressions.",
+    "This generic normalized example abstracts the concrete Created By expression into a list-field assignee reference.",
+    "Runtime routing is not proven."
+  ]
+}

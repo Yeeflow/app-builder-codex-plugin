@@ -1,0 +1,26 @@
+{
+  "proofLevel": "export-proven",
+  "taskForm": "WARTB Task4",
+  "actionName": "Complete button click",
+  "submitStep": {
+    "name": "Submit as completed",
+    "submitType": "default",
+    "inferredOperation": "complete-task",
+    "fieldPresence": {
+      "comment": true,
+      "forword": false,
+      "remark": false,
+      "assignee": false
+    },
+    "expressionSources": {
+      "comment": [
+        {
+          "exprType": "variable",
+          "valueType": "text",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Task comments"
+        }
+      ]
+    }
+  }
+}

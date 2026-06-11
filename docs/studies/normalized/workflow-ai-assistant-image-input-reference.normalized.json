@@ -1,0 +1,23 @@
+{
+  "summary": {
+    "sourceExport": "Spark & AI (1).yap",
+    "classification": "export-proven",
+    "count": 1
+  },
+  "imageInputs": [
+    {
+      "workflowReferenceKey": "workflow:stock-box-extract-update-in-stock",
+      "nodeName": "Update records based on image",
+      "inputId": "label_image",
+      "inputType": "img",
+      "mapping": {
+        "exprType": "list_field",
+        "valueType": "icon-upload",
+        "fieldSlot": "Text9",
+        "fieldDisplayName": "Image File",
+        "fieldInternalName": "ImageFile"
+      },
+      "runtimePolicy": "Do not execute against real uploaded images or live records."
+    }
+  ]
+}

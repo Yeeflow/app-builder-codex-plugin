@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Copilot Template Builder"
+  short_description: "Build reusable Yeeflow Copilot manifests."
+  default_prompt: "Use this skill to prepare and validate Yeeflow Copilot template manifests from source documents, icons, instruction drafts, and exported .yaic packages."

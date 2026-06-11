@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (3).yap",
+  "nodeType": "StartNoneEvent",
+  "pattern": "start-action-email-notification-enabled",
+  "normalizedConfig": {
+    "isenabledemail": true,
+    "to": "<APPLICANT_AND_SUBMITTER_EMAIL_EXPRESSIONS>",
+    "subject": "<REDACTED_START_NOTIFICATION_SUBJECT>",
+    "html": "<REDACTED_START_NOTIFICATION_BODY>",
+    "taskurl": "<REDACTED_TASK_FORM_PAGE_ID>"
+  },
+  "notes": [
+    "Recipient expressions are redacted; no fixed real email address is included.",
+    "Email delivery is not runtime-proven."
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "case": "replaceids-tenant-user-metadata-invalid",
+  "proofLevel": "user-confirmed-import-failure-derived",
+  "resource": {
+    "ReplaceIds": [
+      "__APP_RESOURCE_ID__",
+      "__TENANT_ID__",
+      "__USER_ID__"
+    ]
+  },
+  "rootListModel": {
+    "TenantID": "__TENANT_ID__",
+    "CreatedBy": "__USER_ID__",
+    "ModifiedBy": "__USER_ID__"
+  },
+  "expectedFinding": {
+    "code": "ROOT_METADATA_IN_REPLACEIDS",
+    "level": "error",
+    "mode": "generator/final"
+  }
+}

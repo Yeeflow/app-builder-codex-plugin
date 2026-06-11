@@ -1,0 +1,12 @@
+{
+  "feature": "dynamic-current-list-item-context",
+  "source": "Company Overview.yap",
+  "hostControls": ["data-list-custom-form"],
+  "bindingPattern": {
+    "attrs.source": "4",
+    "attrs.obj-f": "<current-list-field-name>"
+  },
+  "meaning": "Dynamic controls on a Data List custom form read from the current list item.",
+  "observedControlTypes": ["dynamic-field"],
+  "proof": "export-proven where observed"
+}

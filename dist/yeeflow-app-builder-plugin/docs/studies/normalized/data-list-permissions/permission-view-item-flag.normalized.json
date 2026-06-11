@@ -1,0 +1,16 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[].Layouts[].IsItemPerm",
+  "pattern": "view-level-item-permission-flag",
+  "shape": {
+    "Type": "0|100|104|999",
+    "IsDefault": true,
+    "IsItemPerm": false
+  },
+  "notes": [
+    "Every data-view layout inspected in the five target lists used IsItemPerm=false.",
+    "This is distinct from Data.Childs[].ListModel.IsItemPerm=true on the resource."
+  ]
+}

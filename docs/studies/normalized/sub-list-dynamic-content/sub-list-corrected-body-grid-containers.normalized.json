@@ -1,0 +1,34 @@
+{
+  "schema": "sub-list-dynamic-content-normalized",
+  "case": "corrected_body_grid_template",
+  "subListChildren": [
+    {
+      "type": "list-body",
+      "children": [
+        {
+          "type": "flex_grid",
+          "displayLabel": [null, false],
+          "attrs": "matching header grid columns/rows/gaps",
+          "children": [
+            { "type": "container", "purpose": "row actions/dropbar" },
+            { "type": "container", "purpose": "field control column", "contains": "row field control" },
+            { "type": "container", "purpose": "field control column", "contains": "row field control" },
+            { "type": "container", "purpose": "field control column", "contains": "row field control" },
+            { "type": "container", "purpose": "row icon/action column" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "list-footer",
+      "children": ["Add another item button", "Import items button"]
+    }
+  ],
+  "rowFieldRules": [
+    "field controls resolve to listref row fields",
+    "attrs.list_field = true",
+    "attrs.list_field_binding equals parent Sub List binding",
+    "attrs.list_control_id points to parent Sub List control"
+  ],
+  "proofBoundary": "Container-per-field-column is generation guidance from user correction; exact runtime execution remains pending."
+}

@@ -1,0 +1,105 @@
+{
+  "source": "~/Downloads/Vendor Onboarding & Compliance Managementv1.93.yap",
+  "wrapperKeys": [
+    "Title",
+    "Description",
+    "IconUrl",
+    "IsListSet",
+    "Resource"
+  ],
+  "resourceShape": "ListExportResult",
+  "appId": 41,
+  "replaceIdsCount": 82,
+  "formKeysCount": 0,
+  "rootTitle": "Vendor Onboarding & Compliance Managementv1.93",
+  "rootListId": "<id-2>",
+  "dashboardCount": 2,
+  "dashboards": [
+    {
+      "index": 0,
+      "title": "Home",
+      "type": 103,
+      "layoutId": "<id-1>",
+      "listId": "<id-2>",
+      "layoutViewKind": "empty-string",
+      "layoutViewParsed": "",
+      "ext1": "",
+      "ext2": "",
+      "ext3": "",
+      "layoutInResourcesKind": "null",
+      "layoutInResourcesCount": null,
+      "isDefault": false,
+      "isItemPerm": false,
+      "currentDashboardMarker": false,
+      "legacyDashboardSignals": [
+        "blank LayoutView",
+        "missing Ext2 src marker",
+        "LayoutInResources null/missing"
+      ]
+    },
+    {
+      "index": 1,
+      "title": "New Dashboard",
+      "type": 103,
+      "layoutId": "<id-3>",
+      "listId": "<id-2>",
+      "layoutViewKind": "null",
+      "layoutViewParsed": null,
+      "ext1": null,
+      "ext2": {
+        "src": true
+      },
+      "ext3": null,
+      "layoutInResourcesKind": "array",
+      "layoutInResourcesCount": 0,
+      "isDefault": false,
+      "isItemPerm": false,
+      "currentDashboardMarker": true,
+      "legacyDashboardSignals": []
+    }
+  ],
+  "navigationItems": [
+    {
+      "title": "Home",
+      "type": 103,
+      "listId": "<id-1>",
+      "listSetId": "<id-2>",
+      "icon": "fa-regular fa-house"
+    },
+    {
+      "title": "Vendors",
+      "type": 1,
+      "listId": "<id-4>",
+      "listSetId": "<id-2>",
+      "icon": "fa-regular fa-list-check"
+    },
+    {
+      "title": "Vendor Documents",
+      "type": 1,
+      "listId": "<id-5>",
+      "listSetId": "<id-2>",
+      "icon": "fa-regular fa-list-check"
+    },
+    {
+      "title": "Compliance Reviews",
+      "type": 1,
+      "listId": "<id-6>",
+      "listSetId": "<id-2>",
+      "icon": "fa-regular fa-list-check"
+    },
+    {
+      "title": "Vendor Tasks",
+      "type": 1,
+      "listId": "<id-7>",
+      "listSetId": "<id-2>",
+      "icon": "fa-regular fa-list-check"
+    },
+    {
+      "title": "Vendor Activity / History",
+      "type": 1,
+      "listId": "<id-8>",
+      "listSetId": "<id-2>",
+      "icon": "fa-regular fa-list-check"
+    }
+  ]
+}

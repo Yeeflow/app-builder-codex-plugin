@@ -1,0 +1,391 @@
+{
+  "summary": {
+    "inputPath": "<downloads>/AI Agent and Copilot Local Resource Baseline8.yap",
+    "title": "AI Agent and Copilot Local Resource Baseline8",
+    "replaceIds": 23,
+    "largeNumbersPreserved": 6,
+    "scheduledWorkflows": 2,
+    "aiResources": 3,
+    "localLists": 1,
+    "actionCounts": {
+      "StartNoneEvent": 2,
+      "SequenceFlow": 6,
+      "EndNoneEvent": 2,
+      "MailTask": 2,
+      "QueryData": 1,
+      "AI": 1
+    }
+  },
+  "workflows": [
+    {
+      "name": "Weekly information update",
+      "key": "AS-WIU",
+      "procModelId": "2056589949635407873",
+      "listId": 0,
+      "workflowType": 3,
+      "deployed": true,
+      "settings": {
+        "TimeZone": "Singapore Standard Time",
+        "Times": [
+          "8:30AM"
+        ],
+        "StartDate": "2026-05-19",
+        "EndDate": "2026-06-26",
+        "Frequency": "1",
+        "Interval": 1,
+        "Values": [
+          "1",
+          "3"
+        ]
+      },
+      "def": {
+        "defkey": "AS-WIU",
+        "workflowType": 3,
+        "appListSetId": "2056585547604570113",
+        "variables": {
+          "basic": [],
+          "listref": [],
+          "filter": []
+        },
+        "pageurls": [
+          {
+            "id": "48df5dfd-60f9-4029-9cef-7691d63b1311",
+            "title": "Weekly information update",
+            "pagetype": 1
+          }
+        ],
+        "actions": [
+          {
+            "id": "c7383d4d-90c2-4f3c-989f-b6c8963fcfc5",
+            "resourceid": "c7383d4d-90c2-4f3c-989f-b6c8963fcfc5",
+            "type": "StartNoneEvent",
+            "name": "Start"
+          },
+          {
+            "id": "s_91023436525",
+            "resourceid": "s_91023436525",
+            "type": "SequenceFlow",
+            "name": "Sequence flow"
+          },
+          {
+            "id": "s_91023436526",
+            "resourceid": "s_91023436526",
+            "type": "EndNoneEvent",
+            "name": "End"
+          },
+          {
+            "id": "s_91023436527",
+            "resourceid": "s_91023436527",
+            "type": "SequenceFlow",
+            "name": "Sequence flow_1"
+          },
+          {
+            "id": "s_91023436524",
+            "resourceid": "s_91023436524",
+            "type": "MailTask",
+            "name": "Send Test Email",
+            "to": "<REDACTED_EMAIL>",
+            "cc": "",
+            "subject": "Test email",
+            "html": "<p>Hi there,</p>\n<p>Here is the test email for Codex.</p>\n<p>&nbsp;</p>\n<p>Yeeflow team</p>"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Daily information update",
+      "key": "AS-DIU",
+      "procModelId": "2056590746272153601",
+      "listId": 0,
+      "workflowType": 3,
+      "deployed": true,
+      "settings": {
+        "TimeZone": "Mountain Standard Time",
+        "Times": [
+          "5:00AM"
+        ],
+        "StartDate": "2026-05-19",
+        "EndDate": "2026-08-27",
+        "Frequency": "0",
+        "Interval": 2,
+        "IsWorkday": true
+      },
+      "def": {
+        "defkey": "AS-DIU",
+        "workflowType": 3,
+        "appListSetId": "2056585547604570113",
+        "variables": {
+          "basic": [
+            {
+              "idx": "ba147a56-d94b-4fa4-858f-8dffb5594da9",
+              "id": "QueryItems",
+              "name": "Query Items",
+              "type": "text",
+              "editable": true
+            },
+            {
+              "idx": "6b9f9714-50a4-4913-af8e-3cbfb819ec9f",
+              "id": "QueryAmount",
+              "name": "Query Amount",
+              "type": "number",
+              "editable": true,
+              "value": null
+            },
+            {
+              "idx": "54751a8d-bbd3-4898-a267-f0f402ab5bf4",
+              "id": "EmailBody",
+              "name": "Body Content",
+              "type": "text",
+              "editable": true
+            },
+            {
+              "idx": "b9791ea8-ae77-4321-8244-abd836bc7d22",
+              "id": "EmailSubject",
+              "name": "Subject",
+              "type": "text",
+              "editable": true
+            }
+          ],
+          "listref": [],
+          "filter": []
+        },
+        "pageurls": [
+          {
+            "id": "006e12af-df28-4404-bbfa-966ad92eed6d",
+            "title": "Daily information update",
+            "pagetype": 1
+          }
+        ],
+        "actions": [
+          {
+            "id": "s_91023620338",
+            "resourceid": "s_91023620338",
+            "type": "SequenceFlow",
+            "name": "Sequence flow"
+          },
+          {
+            "id": "s_91023620337",
+            "resourceid": "s_91023620337",
+            "type": "QueryData",
+            "name": "Query Innovation ideas",
+            "listid": "2056585556048883714",
+            "listsetid": "2056585547604570113",
+            "result": {
+              "type": "multiple",
+              "pageIndex": 1,
+              "pageSize": 1000,
+              "fieldMap": null,
+              "listName": "QueryItems",
+              "vartype": "text",
+              "listParent": "__variables_",
+              "fields": [
+                {
+                  "FieldName": "Title",
+                  "Type": "input",
+                  "DisplayName": "Idea Title"
+                },
+                {
+                  "FieldName": "Text1",
+                  "Type": "radio",
+                  "DisplayName": "Category"
+                },
+                {
+                  "FieldName": "Text2",
+                  "Type": "textarea",
+                  "DisplayName": "Description"
+                },
+                {
+                  "FieldName": "Text3",
+                  "Type": "input",
+                  "DisplayName": "Expected Benefit"
+                },
+                {
+                  "FieldName": "Text4",
+                  "Type": "radio",
+                  "DisplayName": "Status"
+                },
+                {
+                  "FieldName": "Bit1",
+                  "Type": "switch",
+                  "DisplayName": "Ready for Review"
+                },
+                {
+                  "FieldName": "CreatedBy",
+                  "Type": "identity-picker",
+                  "DisplayName": "Created By"
+                },
+                {
+                  "FieldName": "Created",
+                  "Type": "datepicker",
+                  "DisplayName": "Created Time"
+                },
+                {
+                  "FieldName": "ModifiedBy",
+                  "Type": "identity-picker",
+                  "DisplayName": "Modified By"
+                },
+                {
+                  "FieldName": "Modified",
+                  "Type": "datepicker",
+                  "DisplayName": "Modified Time"
+                }
+              ],
+              "totalCount": "QueryAmount",
+              "querycount_prefix": "__variables_"
+            },
+            "filters": [],
+            "sorts": []
+          },
+          {
+            "id": "s_91024023319",
+            "resourceid": "s_91024023319",
+            "type": "SequenceFlow",
+            "name": "Sequence flow_2"
+          },
+          {
+            "id": "s_91024023318",
+            "resourceid": "s_91024023318",
+            "type": "AI",
+            "name": "AI Generate email",
+            "aiType": "agent",
+            "data": {
+              "AppID": 41,
+              "ListSetID": "2056585547604570113",
+              "AgentID": "2056591356997808129"
+            },
+            "inputVariables": [
+              {
+                "id": "QueryItems",
+                "type": "text",
+                "description": "The items of the data from the query data",
+                "value": {
+                  "type": 1,
+                  "value": {
+                    "exprType": "variable",
+                    "valueType": "text",
+                    "id": "QueryItems",
+                    "type": "expr"
+                  }
+                }
+              }
+            ],
+            "outputVariables": [
+              {
+                "id": "Subject",
+                "type": "text",
+                "description": "the proper subject of this email",
+                "value": {
+                  "prefix": "__variables_",
+                  "value": "EmailSubject"
+                }
+              },
+              {
+                "id": "Body",
+                "type": "richtext",
+                "description": "the body content of this email",
+                "value": {
+                  "prefix": "__variables_",
+                  "value": "EmailBody"
+                }
+              }
+            ],
+            "context": {
+              "enabled": true,
+              "selected": {
+                "application": true,
+                "workflowInstance": true,
+                "workflowVariables": true,
+                "workflowTasks": true
+              }
+            }
+          },
+          {
+            "id": "s_91024023321",
+            "resourceid": "s_91024023321",
+            "type": "SequenceFlow",
+            "name": "Sequence flow_3"
+          },
+          {
+            "id": "s_91024023320",
+            "resourceid": "s_91024023320",
+            "type": "MailTask",
+            "name": "Send Email",
+            "to": "<REDACTED_EMAIL>",
+            "cc": "",
+            "subject": "<input type=\"button\" data=\"${&quot;type&quot;:&quot;variable&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;EmailSubject&quot;}}\" expr=\"__\" tabindex=\"-1\" value=\"Workflow Variables:Subject\">",
+            "html": "<p><input type=\"button\" data=\"${&quot;type&quot;:&quot;variable&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;EmailBody&quot;}}\" expr=\"__\" tabindex=\"-1\" value=\"Workflow Variables:Body Content\"></p>"
+          },
+          {
+            "id": "s_91024023322",
+            "resourceid": "s_91024023322",
+            "type": "SequenceFlow",
+            "name": "Sequence flow_4"
+          },
+          {
+            "id": "s_91023620339",
+            "resourceid": "s_91023620339",
+            "type": "EndNoneEvent",
+            "name": "End"
+          },
+          {
+            "id": "f917ac99-12b5-465b-987f-6feec1714a8a",
+            "resourceid": "f917ac99-12b5-465b-987f-6feec1714a8a",
+            "type": "StartNoneEvent",
+            "name": "Start"
+          }
+        ]
+      }
+    }
+  ],
+  "listResources": [
+    {
+      "title": "Innovation Ideas",
+      "listId": "2056585556048883714",
+      "type": 1,
+      "fields": [
+        {
+          "fieldId": "2056585556048883718",
+          "fieldName": "Title",
+          "displayName": "Idea Title",
+          "type": "input",
+          "fieldType": "Text"
+        },
+        {
+          "fieldId": "2056585556048883719",
+          "fieldName": "Text1",
+          "displayName": "Category",
+          "type": "radio",
+          "fieldType": "Text"
+        },
+        {
+          "fieldId": "2056585556048883720",
+          "fieldName": "Text2",
+          "displayName": "Description",
+          "type": "textarea",
+          "fieldType": "Text"
+        },
+        {
+          "fieldId": "2056585556048883721",
+          "fieldName": "Text3",
+          "displayName": "Expected Benefit",
+          "type": "input",
+          "fieldType": "Text"
+        },
+        {
+          "fieldId": "2056585556048883722",
+          "fieldName": "Text4",
+          "displayName": "Status",
+          "type": "radio",
+          "fieldType": "Text"
+        },
+        {
+          "fieldId": "2056585556048883723",
+          "fieldName": "Bit1",
+          "displayName": "Ready for Review",
+          "type": "switch",
+          "fieldType": "Bit"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "proofLevel": "unproven",
+  "source": "Data Lists (1).yap plus UI screenshots as visual reference",
+  "resourceType": "data list",
+  "pattern": "detailed-manage-permission-audience-matrix",
+  "uiConfirmedButNotExportLocated": {
+    "administrators": true,
+    "basicEditViewAllOrSpecified": true,
+    "advancedOperations": ["edit", "delete", "new", "import", "export"],
+    "audienceRows": ["user", "department/team", "user group", "field/list-field"]
+  },
+  "exportSearchResult": {
+    "administratorAudienceArrayLocated": false,
+    "basicPermissionAudienceLocated": false,
+    "advancedMatrixLocated": false,
+    "fieldAudienceRowsLocated": false
+  },
+  "notes": [
+    "Do not generate this schema from the current export.",
+    "A focused export or read-only API capture is needed before promoting detailed audience rows to export-proven generation rules."
+  ]
+}

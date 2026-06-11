@@ -1,0 +1,14 @@
+{
+  "proof": "yeeflow-package-api-automation-runtime-proof",
+  "endpoint": "POST /listset/package/upgrade",
+  "runtimeProofStatus": "deferred",
+  "dryRunStatus": "passed",
+  "deferredReason": "No explicitly identified disposable upgrade target was established for this mutation.",
+  "requiredPrerequisites": [
+    "known disposable target app",
+    "confirmed target scope",
+    "local package validation",
+    "dry-run request shape review",
+    "explicit user approval"
+  ]
+}

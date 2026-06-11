@@ -1,0 +1,21 @@
+{
+  "finding": "missing_or_weak_custom_forms",
+  "expected": [
+    "Vendor Detail View Page",
+    "New Vendor Request Form",
+    "Vendor Print Page",
+    "designed record forms for supporting lists"
+  ],
+  "observed": [
+    "runtime New item experience appeared blank or not wired to the intended designed form",
+    "supporting list forms were generic generated maintenance forms",
+    "designed form surfaces were not proven at approved mockup fidelity"
+  ],
+  "quality_gate": [
+    "CUSTOM_VIEW_FORM_MISSING",
+    "CUSTOM_NEW_FORM_MISSING",
+    "CUSTOM_PRINT_PAGE_MISSING",
+    "CUSTOM_FORM_BLANK",
+    "FORM_LAYOUT_TOO_MINIMAL"
+  ]
+}

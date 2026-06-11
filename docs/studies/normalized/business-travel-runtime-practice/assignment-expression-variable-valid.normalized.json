@@ -1,0 +1,20 @@
+{
+  "proof": "validator-backed",
+  "variables": {
+    "basic": [
+      {
+        "id": "Applicant",
+        "type": "user",
+        "name": "Applicant"
+      }
+    ]
+  },
+  "usertaskassignment": [
+    {
+      "type": "user",
+      "method": "expression",
+      "value": "<input data=\"${...Applicant...}\" value=\"Workflow Variables:Applicant:Line Manager\">",
+      "title": "User:<input data=\"${...Applicant...}\" value=\"Workflow Variables:Applicant:Line Manager\">"
+    }
+  ]
+}

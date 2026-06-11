@@ -1,0 +1,22 @@
+{
+  "proof": "export-proven from Data Lists (3).yap target data lists; private values redacted",
+  "exportPath": "Data.Childs[].ListModel.LayoutView",
+  "normalizedDisplaySetting": {
+    "list": "__LIST_TITLE_REDACTED__",
+    "usage": "view",
+    "label": "View Item",
+    "formReference": "default",
+    "formName": "Default layout",
+    "usesDefaultLayout": true,
+    "openMode": {
+      "code": null,
+      "label": "Slide in",
+      "source": "default"
+    },
+    "size": {
+      "code": 0,
+      "label": "Medium",
+      "source": "explicit"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "Name": "<approval-form-name>",
+  "Key": "Approval_Form_Key",
+  "NoRule": {
+    "Prefix": "REQ_{yyyy}",
+    "StartIndex": 1,
+    "CustomLength": 8,
+    "AutoIncrement": 1
+  }
+}

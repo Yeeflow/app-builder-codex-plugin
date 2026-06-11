@@ -1,0 +1,63 @@
+{
+  "dashboardHardChecks": [
+    {
+      "id": "main_content_structure",
+      "severity": "error",
+      "validatorCodes": [
+        "DASHBOARD_MAIN_CONTAINER_MISSING",
+        "DASHBOARD_CONTENT_CONTAINER_MISSING",
+        "DASHBOARD_CONTENT_STRUCTURE_INVALID",
+        "DASHBOARD_PAGE_PADDING_NOT_ZERO"
+      ],
+      "rule": "Dashboard pages must set the page content area to full width with zero content-area padding, then place all visual content under Main > Content."
+    },
+    {
+      "id": "grid_caption_off",
+      "severity": "error",
+      "validatorCodes": [
+        "GRID_DISPLAY_LABEL_NOT_DISABLED",
+        "GRID_DEFAULT_CAPTION_VISIBLE"
+      ],
+      "rule": "Layout Grid controls must disable display label/caption so runtime pages do not show visible Grid rows."
+    },
+    {
+      "id": "navigator_labels",
+      "severity": "error",
+      "validatorCodes": [
+        "CONTROL_NAVIGATOR_LABEL_MISSING",
+        "CONTROL_NAVIGATOR_LABEL_DEFAULT"
+      ],
+      "rule": "Every dashboard control must have a meaningful Navigator label rather than defaults such as Container, Grid, Text, Button, Summary, Dynamic field, Kanban, or Collection."
+    },
+    {
+      "id": "kpi_summary_temp_variables",
+      "severity": "error",
+      "validatorCodes": [
+        "KPI_STATIC_NUMBER_TEXT",
+        "KPI_SUMMARY_TEMP_VAR_PATTERN_MISSING",
+        "SUMMARY_CONTROL_HIDDEN_VAR_PATTERN_MISSING",
+        "KPI_TEXT_NOT_BOUND_TO_TEMP_VAR"
+      ],
+      "rule": "KPI card numbers must come from hidden Summary controls saved to dashboard temp variables and visible formatted Text controls, following the Service Desk Pro Executive Dashboard reference."
+    },
+    {
+      "id": "button_actions",
+      "severity": "error",
+      "validatorCodes": [
+        "BUTTON_ACTION_MISSING",
+        "ACTION_BUTTON_FORMAT_INVALID",
+        "NEW_VENDOR_ACTION_MISSING",
+        "COMPLIANCE_QUEUE_NAV_ACTION_MISSING"
+      ],
+      "rule": "Dashboard buttons must use the export-proven button format, meaningful labels, and valid action or navigation bindings."
+    },
+    {
+      "id": "dynamic_control_context",
+      "severity": "error",
+      "validatorCodes": [
+        "DYNAMIC_CONTROL_OUTSIDE_ITEM_TEMPLATE"
+      ],
+      "rule": "Dashboard Dynamic controls must only be placed inside row-context item templates such as Kanban, Collection, or Timeline templates."
+    }
+  ]
+}

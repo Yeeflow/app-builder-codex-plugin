@@ -1,0 +1,9 @@
+interface:
+  display_name: "Yeeflow Approval Form Generator"
+  short_description: "Generate and validate Yeeflow approval form definitions safely."
+  default_prompt: "Use this skill to decompose business requirements, generate decoded Yeeflow approval form Def JSON drafts, map dependencies from .yap metadata, run validators, and build .ywf wrappers only after validation passes."
+policy:
+  products:
+    - chatgpt
+    - codex
+  allow_implicit_invocation: true

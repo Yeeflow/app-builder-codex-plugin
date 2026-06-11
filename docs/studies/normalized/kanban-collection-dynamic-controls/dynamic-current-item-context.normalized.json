@@ -1,0 +1,11 @@
+{
+  "feature": "dynamic-current-item-context",
+  "source": "Company Overview.yap",
+  "hostControls": ["kanban", "collection"],
+  "bindingPattern": {
+    "attrs.source": "3",
+    "attrs.obj-f": "<source-list-field-name>"
+  },
+  "meaning": "Dynamic controls inside Kanban/Collection item templates read from the current dashboard item supplied by the selected data source.",
+  "proof": "export-proven"
+}

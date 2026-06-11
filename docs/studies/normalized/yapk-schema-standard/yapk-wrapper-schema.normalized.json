@@ -1,0 +1,28 @@
+{
+  "schema": "yeeflow-yapk-schema-standard-normalized",
+  "case": "wrapper_schema",
+  "source": "product-provided ypk-schema.json",
+  "topLevelTitle": "AppExportPackageInfo",
+  "requiredFields": [
+    "PackageId",
+    "TenantID",
+    "AppID",
+    "ListID",
+    "Title",
+    "Description",
+    "IconUrl",
+    "Resource",
+    "Notes",
+    "Author",
+    "Date",
+    "Version",
+    "Sign"
+  ],
+  "rules": {
+    "TenantID": "numeric string",
+    "ListID": "numeric string",
+    "Date": "UTC yyyy-MM-ddTHH:mm:ssZ",
+    "Resource": "Brotli compressed string whose decompressed JSON should match AppPackageInfo"
+  },
+  "redaction": "No raw ids, Resource, Sign, URLs, or API responses are stored."
+}

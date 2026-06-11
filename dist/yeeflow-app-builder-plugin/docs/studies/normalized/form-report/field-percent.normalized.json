@@ -1,0 +1,19 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[1].Settings.Fields[15]",
+    "childFieldPath": "Data.Childs[2].Defs[15]",
+    "fieldId": "field_5",
+    "key": "v_field_5",
+    "variableSource": "approval-variable",
+    "variableType": "number",
+    "variableRef": "field_5",
+    "reportFieldType": "percent",
+    "storedType": "number",
+    "isSystem": false,
+    "required": false,
+    "rules": {
+      "rounded-to": "1"
+    }
+  }
+}

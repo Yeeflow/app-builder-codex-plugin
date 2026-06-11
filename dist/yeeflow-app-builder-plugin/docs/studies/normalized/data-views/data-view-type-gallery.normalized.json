@@ -1,0 +1,43 @@
+{
+  "resourceType": "data list",
+  "resourceRef": "<data-list-1>",
+  "resourceName": "<redacted-resource-name-1>",
+  "viewRef": "<view-1-3>",
+  "viewName": "<redacted-view-name>",
+  "defaultOrCustom": "custom",
+  "viewType": "gallery",
+  "typeCode": 999,
+  "urlKey": "<redacted-view-url>",
+  "visibleFields": [
+    "Text2",
+    "Decimal1"
+  ],
+  "visibleFieldCount": 2,
+  "primarySort": {
+    "field": "Created",
+    "descending": true
+  },
+  "secondarySort": null,
+  "dataFilterSummary": "1 condition (3)",
+  "userFilters": [],
+  "permissionSummary": "inherits or no view-level item permission flag",
+  "extKeys": [
+    "displayStyle",
+    "Url",
+    "ShowTable",
+    "TitleField"
+  ],
+  "layoutViewKeys": [
+    "layout",
+    "sort",
+    "query",
+    "rowColor",
+    "filter"
+  ],
+  "specialSettings": [
+    "displayStyle",
+    "ShowTable",
+    "TitleField"
+  ],
+  "proofLevel": "export-proven"
+}

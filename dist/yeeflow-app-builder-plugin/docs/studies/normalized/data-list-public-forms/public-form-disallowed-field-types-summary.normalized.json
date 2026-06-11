@@ -1,0 +1,15 @@
+{
+  "proof": "UI-reference-backed from user screenshots unless a future export proves support",
+  "disallowedOrUnavailableFieldTypes": [
+    "autonumber",
+    "calculated-column",
+    "cost-center-picker",
+    "identity-picker",
+    "location-picker",
+    "lookup",
+    "metadata",
+    "mutiple-metadata",
+    "organization-picker",
+    "tag"
+  ]
+}

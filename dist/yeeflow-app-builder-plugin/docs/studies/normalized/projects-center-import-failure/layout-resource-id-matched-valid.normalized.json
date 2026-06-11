@@ -1,0 +1,15 @@
+{
+  "case": "layout-resource-id-matched-valid",
+  "proofLevel": "user-confirmed-import-success-derived",
+  "layout": {
+    "LayoutID": "__LAYOUT_ID__",
+    "LayoutInResources": [
+      {
+        "ID": "__LAYOUT_ID__",
+        "RefId": "__LAYOUT_ID__",
+        "Resource": "{}"
+      }
+    ]
+  },
+  "expectedFinding": null
+}

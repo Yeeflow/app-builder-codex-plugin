@@ -1,0 +1,34 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (3).yap",
+  "nodeType": "StartNoneEvent",
+  "pattern": "start-action-allow-recall-condition",
+  "normalizedConfig": {
+    "revoke-conditions": [
+      {
+        "key": "<REDACTED_CONDITION_ID>",
+        "pre": "and",
+        "left": {
+          "type": 1,
+          "value": {
+            "exprType": "variable",
+            "valueType": "text",
+            "id": "RequestNo",
+            "type": "expr"
+          }
+        },
+        "op": "s.!=",
+        "right": {
+          "type": 2,
+          "value": [
+            {
+              "type": "str",
+              "value": "<REDACTED_CONDITION_LITERAL>"
+            }
+          ]
+        },
+        "group": "string"
+      }
+    ]
+  }
+}

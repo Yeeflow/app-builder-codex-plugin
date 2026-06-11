@@ -1,0 +1,32 @@
+{
+  "patterns": [
+    {
+      "name": "multi_item_print_qr",
+      "source": "Online Library (1).yap / Print Inventory",
+      "control": "list-qrcode",
+      "scope": "current item in repeated list or Collection context",
+      "validation": [
+        "QR control exists inside print page",
+        "QR control is inside repeated item/list context",
+        "QR value is current item/current row scoped or field-bound",
+        "no static placeholder URL"
+      ]
+    },
+    {
+      "name": "single_item_print_qr",
+      "source": "Sales Quotation (1).yap / Print Page",
+      "control": "list-qrcode",
+      "scope": "current record on print page",
+      "validation": [
+        "QR control exists inside print page",
+        "QR control is current record scoped or field-bound",
+        "no static placeholder URL",
+        "print page remains read-oriented"
+      ]
+    }
+  ],
+  "fallback": {
+    "allowed": "field-bound business code text such as Vendor Code, Quote Number, Inventory Code, or Serial Number",
+    "notAllowed": "static placeholder URLs or unbound placeholder QR values"
+  }
+}

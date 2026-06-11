@@ -1,0 +1,13 @@
+{
+  "proof": "export-proven from Company Overview (2).yap; identifiers redacted or synthetic",
+  "selectActionPattern": {
+    "stepType": "setvar",
+    "target": "__temp_var_SelectedItems",
+    "valuePattern": "iif(strIndex(var_SelectedItems, CurrentItem.ListDataID) >= 0, replace(var_SelectedItems, CurrentItem.ListDataID & ',', '', '1'), var_SelectedItems & CurrentItem.ListDataID & ',')"
+  },
+  "countRecalcPattern": {
+    "stepType": "setvar",
+    "target": "__temp_var_SelectedItemsAmount",
+    "valuePattern": "iif(isNullOrEmpty(var_SelectedItems), 0, arrayCount(split(var_SelectedItems, ','), [], [], []))"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "exportName": "Sales Quotation (1).yap",
+  "focusPage": "Print Page",
+  "decodeShape": "YAP gzip ListExportResult with Data = ListExportInfo",
+  "proofBoundary": "export-proven structure only; browser print and scanned QR behavior not claimed",
+  "qrPattern": {
+    "mode": "single-item-print",
+    "control": "list-qrcode",
+    "placement": "inside single-record print page container",
+    "binding": "current quotation record scope",
+    "layout": [
+      "print page container",
+      "summary/header section",
+      "line-item body/footer section",
+      "terms/notes section",
+      "padded and bordered sections"
+    ]
+  },
+  "generationRules": [
+    "place QR control inside the single-record print page",
+    "bind QR to current record or record business code field",
+    "do not use static placeholder QR URLs"
+  ],
+  "redaction": "raw payloads, Resource, Sign, IDs, tenant data, sample records, and private URLs omitted"
+}

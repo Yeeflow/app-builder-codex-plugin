@@ -1,0 +1,10 @@
+{
+  "proofLevel": "export-proven",
+  "taskForm": "WARTB Task4",
+  "button": {
+    "type": "action_button",
+    "label": "Task completed",
+    "readonly": null,
+    "actionBinding": "<REDACTED_ACTION_ID>"
+  }
+}

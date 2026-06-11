@@ -1,0 +1,19 @@
+{
+  "source": "Sub list Dynamic (1).yap",
+  "proof": "export-proven",
+  "uiLabel": "Move down",
+  "actionDefinition": {
+    "name": "Move down",
+    "type": "list",
+    "steps": [
+      {
+        "type": "list_move",
+        "attrs": {
+          "moveMode": "2"
+        }
+      }
+    ]
+  },
+  "scope": "current object/current row",
+  "binding": "row menu action button uses attrs.control_action to reference this local action id"
+}

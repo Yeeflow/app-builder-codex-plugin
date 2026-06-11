@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[21]",
+    "childFieldPath": "Data.Childs[1].Defs[21]",
+    "fieldId": "field_12",
+    "key": "v_field_12",
+    "variableSource": "approval-variable",
+    "variableType": "boolean",
+    "variableRef": "field_12",
+    "reportFieldType": "switch",
+    "storedType": "boolean",
+    "isSystem": false,
+    "required": false,
+    "rules": null
+  }
+}

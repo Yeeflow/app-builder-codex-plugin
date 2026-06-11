@@ -1,0 +1,38 @@
+{
+  "name": "sub-list-table-header-grid",
+  "proof": "export-proven from Approval Form export; identifiers are synthetic",
+  "pattern": {
+    "header": {
+      "type": "flex_grid",
+      "label": "Dynamic List Header",
+      "relationshipToSubList": "adjacent sibling above the Sub List, not a formal child",
+      "children": [
+        {
+          "type": "text",
+          "text": "Field 1"
+        },
+        {
+          "type": "text",
+          "text": "Field 2"
+        },
+        {
+          "type": "text",
+          "text": "Field 3"
+        }
+      ]
+    },
+    "subList": {
+      "type": "list",
+      "attrs": {
+        "list-display-preference": "dynamic"
+      },
+      "children": [
+        {
+          "type": "list-body",
+          "containsMatchingRowGrid": true
+        }
+      ]
+    }
+  },
+  "generationGuidance": "Use the sibling header grid for table-style labels and keep data entry controls inside the Sub List dynamic item template."
+}

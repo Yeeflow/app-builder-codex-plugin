@@ -1,0 +1,12 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (2).yap",
+  "nodeType": "MultiAssignmentTask",
+  "pattern": "assignment-task-due-date-expression",
+  "normalizedConfig": {
+    "duedatedefinition": 120,
+    "duedatetype": "express",
+    "duedateexpress": "<REDACTED_DUE_DATE_EXPRESSION_BUTTON>",
+    "isfromworkcalendar": null
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "proof": "vendor-onboarding-v41-page1-dashboard",
+  "checklistPage": "vendor_management_dashboard",
+  "requiredSectionCount": 8,
+  "implementedSectionCount": 8,
+  "sections": [
+    {
+      "id": "header_action_area",
+      "title": "Header/action area",
+      "templateId": "dashboard_header_action_bar",
+      "status": "implemented"
+    },
+    {
+      "id": "kpi_card_row",
+      "title": "KPI card row",
+      "templateId": "kpi_card_row",
+      "status": "implemented"
+    },
+    {
+      "id": "onboarding_progress_section",
+      "title": "Onboarding completion progress section",
+      "templateId": "progress_summary_card",
+      "status": "implemented"
+    },
+    {
+      "id": "urgent_compliance_alert",
+      "title": "Urgent compliance alert",
+      "templateId": "business_alert_card",
+      "status": "implemented"
+    },
+    {
+      "id": "onboarding_status_board",
+      "title": "Onboarding status board",
+      "templateId": "kanban_status_board",
+      "status": "implemented"
+    },
+    {
+      "id": "vendors_data_table",
+      "title": "Vendors Data table",
+      "templateId": "data_table_section",
+      "status": "implemented"
+    },
+    {
+      "id": "quick_links",
+      "title": "Quick links",
+      "templateId": "quick_links_icon_list",
+      "status": "implemented"
+    },
+    {
+      "id": "recent_activity_timeline",
+      "title": "Recent activity timeline",
+      "templateId": "recent_activity_timeline",
+      "status": "implemented"
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "proofLevel": "export-proven",
+  "internalControlType": "ContentList",
+  "frontEndAction": "Set data list",
+  "workflowHost": "data-list-workflow",
+  "workflowType": 1,
+  "workflowName": "Purchase Requests Runtime Workflow",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Data List",
+  "listtype": "current",
+  "operationType": "add",
+  "target": {
+    "mode": "current-list",
+    "appid": "",
+    "listsetid": "",
+    "listid": "<REDACTED_LIST_ID>",
+    "resolvedTitle": "Purchase Requests Runtime Test",
+    "resolvedType": "data-list"
+  },
+  "listdatasShape": "array",
+  "listdatasCount": 4,
+  "mappings": [
+    {
+      "index": 0,
+      "Columns": "Title",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Title",
+        "DisplayName": "Purchase Requests Runtime Test Name",
+        "FieldType": "Text",
+        "Type": "input",
+        "IsSystem": true
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr",
+          "op",
+          "str"
+        ],
+        "exprTypes": [
+          "list_field"
+        ],
+        "valueTypes": [
+          "input"
+        ],
+        "functions": [],
+        "listFieldProps": [
+          "<REDACTED_FIELD_REF>"
+        ],
+        "references": [
+          {
+            "exprType": "list_field",
+            "valueType": "input",
+            "prop": "<REDACTED_FIELD_REF>",
+            "id": "PurchaseRequestsName",
+            "name": "List Fields:Purchase Requests Runtime Test Name"
+          }
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "Columns": "Decimal1",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Decimal1",
+        "DisplayName": "Amount / Value",
+        "FieldType": "Decimal",
+        "Type": "input_number",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "num"
+        ],
+        "exprTypes": [],
+        "valueTypes": [],
+        "functions": [],
+        "listFieldProps": [],
+        "references": []
+      }
+    },
+    {
+      "index": 2,
+      "Columns": "Decimal2",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Decimal2",
+        "DisplayName": "Balance / Variance",
+        "FieldType": "Decimal",
+        "Type": "input_number",
+        "IsSystem": false
+      },
+      "Per": "1",
+      "numericOperationCode": "1",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "number"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "number",
+            "id": "field_3",
+            "name": "Workflow Variables:number3"
+          }
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "Columns": "Text6",
+      "targetField": {
+        "FieldID": "<REDACTED_FIELD_ID>",
+        "FieldName": "Text6",
+        "DisplayName": "External System Ref.",
+        "FieldType": "Text",
+        "Type": "input",
+        "IsSystem": false
+      },
+      "Per": "0",
+      "numericOperationCode": "0",
+      "Data": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr",
+          "op",
+          "str"
+        ],
+        "exprTypes": [
+          "variable"
+        ],
+        "valueTypes": [
+          "text"
+        ],
+        "functions": [],
+        "listFieldProps": [],
+        "references": [
+          {
+            "exprType": "variable",
+            "valueType": "text",
+            "id": "field_1",
+            "name": "Workflow Variables:text1"
+          }
+        ]
+      }
+    }
+  ],
+  "wheresShape": "undefined",
+  "wheresCount": 0,
+  "wheres": [],
+  "hasListFieldValue": true,
+  "hasSubListValue": false,
+  "broadMutationRisk": false,
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

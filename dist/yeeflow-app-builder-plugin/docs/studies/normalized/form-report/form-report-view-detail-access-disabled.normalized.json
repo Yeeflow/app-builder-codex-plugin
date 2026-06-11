@@ -1,0 +1,14 @@
+{
+  "proofLevel": "export-proven",
+  "exportPath": "Data.Childs[].Layouts[].LayoutView.Attr_IsViewDetail",
+  "sample": {
+    "exportPath": "Data.Childs[2].Layouts[0]",
+    "type": 0,
+    "isDefault": true,
+    "isItemPerm": false,
+    "layoutViewKeys": [
+      "Attr_IsViewDetail"
+    ],
+    "detailPageAccess": false
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "feature": "dynamic-file-control",
+  "source": "Company Overview.yap",
+  "observedHosts": ["collection item template"],
+  "schema": {
+    "type": "dynamic-file",
+    "attrs": {
+      "source": "3",
+      "obj-f": "Text8",
+      "i-len": [null, 2],
+      "type_icon_show": "<optional-boolean>"
+    }
+  },
+  "boundField": {
+    "fieldName": "Text8",
+    "displayName": "Reference",
+    "controlType": "file-upload-merge",
+    "multiple": true
+  },
+  "proof": "export-proven for Collection item template"
+}

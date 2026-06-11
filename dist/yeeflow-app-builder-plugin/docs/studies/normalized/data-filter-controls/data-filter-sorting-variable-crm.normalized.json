@@ -1,0 +1,8 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "<downloads>/CRM - Customer relationship management.yap",
+  "page": "Dashboard",
+  "productName": "Sorting filter",
+  "filterVariable": "filter_Sorting",
+  "binding": "__filter_filter_Sorting"
+}

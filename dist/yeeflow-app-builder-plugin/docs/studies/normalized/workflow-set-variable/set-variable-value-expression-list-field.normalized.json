@@ -1,0 +1,148 @@
+{
+  "proofLevel": "export-proven",
+  "workflowHost": "data-list-workflow",
+  "workflowType": 1,
+  "internalControlType": "SetVariableTask",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Set Variable",
+  "formtype": "custom",
+  "target": {
+    "kind": "another-approval-workflow",
+    "data": {
+      "AppID": "<REDACTED_APP_ID>",
+      "ListSetID": "<REDACTED_APP_LISTSET_ID>",
+      "ProcKey": "ABC-ANO"
+    },
+    "formids": "<REDACTED_TARGET_FORM_ID>",
+    "formidsShape": "literal-or-expression-string"
+  },
+  "variablesSetCount": 4,
+  "variableTypes": [
+    "date",
+    "number",
+    "text"
+  ],
+  "valueExpressionKinds": {
+    "hasStaticValue": true,
+    "hasWorkflowVariableValue": false,
+    "hasListFieldValue": true
+  },
+  "variablesetting": [
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "NewNumber1",
+      "name": "NewNumber1",
+      "type": "number",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "num"
+        ],
+        "exprTypes": [],
+        "functions": [],
+        "references": [],
+        "redactedTokens": [
+          {
+            "type": "num",
+            "value": "123"
+          }
+        ]
+      }
+    },
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "NewSingleSelect1",
+      "name": "NewSingleSelect1",
+      "type": "text",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "str"
+        ],
+        "exprTypes": [],
+        "functions": [],
+        "references": [],
+        "redactedTokens": [
+          {
+            "type": "str",
+            "value": "Choice2"
+          }
+        ]
+      }
+    },
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "SubmissionDate",
+      "name": "SubmissionDate",
+      "type": "date",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "list_field"
+        ],
+        "functions": [],
+        "references": [
+          {
+            "exprType": "list_field",
+            "valueType": "datepicker",
+            "name": "List Fields:Start / Issue Date",
+            "prop": "<REDACTED_FIELD_REF>"
+          }
+        ],
+        "redactedTokens": [
+          {
+            "exprType": "list_field",
+            "valueType": "datepicker",
+            "prop": "Datetime1",
+            "id": "PurchaseRequestsStartIssueDate",
+            "type": "expr",
+            "name": "List Fields:Start / Issue Date"
+          }
+        ]
+      }
+    },
+    {
+      "idx": "<REDACTED_VARIABLE_IDX>",
+      "id": "SingleLine1",
+      "name": "SingleLine1",
+      "type": "text",
+      "editable": true,
+      "value": {
+        "shape": "expression-token-array",
+        "tokenTypes": [
+          "expr"
+        ],
+        "exprTypes": [
+          "list_field"
+        ],
+        "functions": [],
+        "references": [
+          {
+            "exprType": "list_field",
+            "valueType": "radio",
+            "name": "List Fields:Category / Type",
+            "prop": "<REDACTED_FIELD_REF>"
+          }
+        ],
+        "redactedTokens": [
+          {
+            "exprType": "list_field",
+            "valueType": "radio",
+            "prop": "Text3",
+            "id": "PurchaseRequestsCategoryType",
+            "type": "expr",
+            "name": "List Fields:Category / Type"
+          }
+        ]
+      }
+    }
+  ],
+  "incomingCount": 1,
+  "outgoingCount": 1
+}

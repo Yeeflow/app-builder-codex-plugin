@@ -1,0 +1,15 @@
+{
+  "case": "assignment-task-pagetype-invalid",
+  "valid": false,
+  "workflowNode": {
+    "stencil": { "id": "MultiAssignmentTask" },
+    "properties": {
+      "name": "Department Review",
+      "pagetype": 2,
+      "taskurl": "task-page-001",
+      "taskUrl": "task-page-001",
+      "TaskUrl": "task-page-001"
+    }
+  },
+  "expectedFinding": "TASK_NODE_PAGETYPE_INVALID"
+}

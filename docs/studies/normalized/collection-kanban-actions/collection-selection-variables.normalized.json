@@ -1,0 +1,29 @@
+{
+  "proof": "export-proven from Company Overview (2).yap; identifiers redacted or synthetic",
+  "tempVariables": [
+    {
+      "id": "var_SelectedItems",
+      "role": "comma-delimited selected ListDataID values"
+    },
+    {
+      "id": "var_SelectedItemsAmount",
+      "role": "selected item count"
+    },
+    {
+      "id": "var_isDeleteConfirmed",
+      "role": "single item delete confirmation result"
+    },
+    {
+      "id": "var_isDeleteMultipleConfirmed",
+      "role": "bulk delete confirmation result"
+    },
+    {
+      "id": "var_UpdatedItemsAmount",
+      "role": "bulk update affected row count"
+    },
+    {
+      "id": "var_DeletedItemsAmount",
+      "role": "bulk delete affected row count"
+    }
+  ]
+}

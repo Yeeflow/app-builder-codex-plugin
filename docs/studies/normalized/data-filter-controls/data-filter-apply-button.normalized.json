@@ -1,0 +1,28 @@
+{
+  "proofLevel": "export-proven",
+  "page": "Dashboard",
+  "productName": "Apply button",
+  "exportControlType": "apply-button",
+  "control": {
+    "path": "$.children[0].children[1].children[0].children[1].children[6]",
+    "id": "<control-id>",
+    "type": "apply-button",
+    "productName": "Apply button",
+    "label": "<control-label>",
+    "binding": "",
+    "filterVariable": "",
+    "applyTypeRaw": "",
+    "applyType": "default/unspecified",
+    "applyButton": "",
+    "dataSource": null,
+    "displayField": "",
+    "valueField": "",
+    "optionFilterCount": 0,
+    "settingKeys": [
+      "align",
+      "button",
+      "common"
+    ],
+    "settingsPreview": {}
+  }
+}

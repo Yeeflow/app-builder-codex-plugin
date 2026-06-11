@@ -1,0 +1,50 @@
+{
+  "proofLevel": "user-confirmed-runtime-smoke",
+  "scenario": "Generated data list with seeded rows and aligned FieldName, FieldType, and Type metadata",
+  "list": {
+    "title": "<data-list>",
+    "listModel": {
+      "Type": 1,
+      "ListType": 1,
+      "Flags": 1,
+      "Status": 1
+    },
+    "defs": [
+      {
+        "FieldName": "Title",
+        "FieldType": "Text",
+        "Type": "input"
+      },
+      {
+        "FieldName": "Text1",
+        "FieldType": "Text",
+        "Type": "input"
+      },
+      {
+        "FieldName": "Datetime1",
+        "FieldType": "Datetime",
+        "Type": "datepicker"
+      },
+      {
+        "FieldName": "Decimal1",
+        "FieldType": "Decimal",
+        "Type": "currency"
+      }
+    ],
+    "listDatas": {
+      "<row-id>": {
+        "ListDataID": "<row-id>",
+        "Title": "<safe-title>",
+        "Text1": "<safe-text>",
+        "Datetime1": "2025-01-15",
+        "Decimal1": "12000"
+      }
+    }
+  },
+  "expectedValidation": {
+    "fieldNameFieldTypeAlignment": "pass",
+    "seedRowsResolve": "pass"
+  },
+  "runtimeResult": "User confirmed sample rows and add-new-item succeeded in the v2 focused package.",
+  "redaction": "Synthetic normalized example only; no source IDs, user names, customer data, tenant IDs, emails, or raw payloads."
+}

@@ -1,0 +1,24 @@
+{
+  "proofLevel": "export-proven",
+  "source": "Data Lists (1).yap",
+  "resourceType": "data list",
+  "exportPath": "Data.Childs[5].RemindRules[].Receiver",
+  "pattern": "notification-recipient-user",
+  "shape": {
+    "Identities": [
+      {
+        "Type": 1,
+        "Id": "<user-id>",
+        "Name": "<user>",
+        "Attr": {
+          "ListDataID": "<user-id>",
+          "DepartmentID": "<department-id>",
+          "Email": "<email>",
+          "IsAdmin": "True|False"
+        }
+      }
+    ],
+    "ListDefs": []
+  },
+  "redaction": "Do not commit real user names, emails, account names, photos, or IDs."
+}

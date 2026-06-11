@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Agent Import Export Operator"
+  short_description: "Validate Yeeflow AI Agent export packages."
+  default_prompt: "Use this skill to export, inspect, validate, or prepare Yeeflow AI Agent .yaia packages and import payloads."

@@ -1,0 +1,79 @@
+{
+  "outputYapk": "/Users/Renger/Downloads/Vendor Onboarding & Compliance Management v4.1 Dashboard-4.8 - split dashboard 02.yapk",
+  "sourceYapk": "/Users/Renger/Downloads/Vendor Onboarding & Compliance Management v4.1 Dashboard-4.7 - style and list form routing.yapk",
+  "pages": [
+    "Vendor Management Dashboard",
+    "Vendor Management Dashboard 02",
+    "Vendor Management Dashboard 03"
+  ],
+  "childLists": [
+    {
+      "title": "Vendors",
+      "rows": 10,
+      "displayedFields": [
+        "Text0",
+        "Text1",
+        "Text2",
+        "Text3",
+        "Text4",
+        "Text5",
+        "Text6",
+        "Text7",
+        "Text8",
+        "Text9",
+        "Text10",
+        "Decimal11",
+        "Decimal12",
+        "Decimal13",
+        "Datetime14",
+        "Bit15",
+        "Datetime16"
+      ]
+    },
+    {
+      "title": "Vendor Documents",
+      "rows": 10,
+      "displayedFields": [
+        "Text0",
+        "Text1",
+        "Text2",
+        "Text3",
+        "Datetime4"
+      ]
+    },
+    {
+      "title": "Compliance Reviews",
+      "rows": 10,
+      "displayedFields": [
+        "Text0",
+        "Text1",
+        "Text2",
+        "Decimal3",
+        "Datetime4"
+      ]
+    },
+    {
+      "title": "Vendor Activity / History",
+      "rows": 10,
+      "displayedFields": [
+        "Text0",
+        "Text1",
+        "Text2",
+        "Datetime3",
+        "Text4",
+        "Text5"
+      ]
+    }
+  ],
+  "existingIdsBefore": 84,
+  "missingExistingIds": 40,
+  "newIdsUsed": 41,
+  "dynamicControlsRule": "Dynamic controls are only generated inside the Kanban item template.",
+  "signing": {
+    "status": "signed_and_verified",
+    "signByteLength": 32,
+    "verifyStatus": 200
+  },
+  "splitDashboardRule": "Vendor Management Dashboard 02 contains only Progress and alert section; Vendor Management Dashboard 03 contains Operational queue section and Vendor records section.",
+  "listLayoutViewRule": "Each child List.LayoutView keeps add/edit/opentype/sort/view routing for default form/list loading."
+}

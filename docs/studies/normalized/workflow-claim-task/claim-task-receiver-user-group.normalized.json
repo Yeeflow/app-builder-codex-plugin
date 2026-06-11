@@ -1,0 +1,64 @@
+{
+  "proofLevel": "export-proven",
+  "workflowHost": "approval-form-workflow",
+  "workflowType": 2,
+  "internalControlType": "CandidateTask",
+  "nodeId": "<REDACTED_WORKFLOW_NODE_ID>",
+  "nodeName": "Claim Task",
+  "taskTitlePresent": false,
+  "taskForm": {
+    "taskurl": "<REDACTED_TASK_FORM_ID>",
+    "resolvedTitle": "WARTB Task4",
+    "resolvedType": "task-form"
+  },
+  "taskType": "complete",
+  "taskTypeTrailingSpacePresent": false,
+  "receiverConfigField": "properties.usertaskassignment",
+  "receiverCount": 1,
+  "receiverSources": [
+    {
+      "type": "user",
+      "method": "expression",
+      "title": "User: <REDACTED_USER><input type=\"button\" data=\"${&quot;type&quot;:&quot;usergroup&quot;,&quot;param&quot;:{&quot;id&quot;:&quot;<REDACTED_PRIVATE_ID>&quot;},&quot;prop&quot;:&quot;Users_ID&quot;}\" expr=\"__\" tabindex=\"-1\" value=\"User group 2:All users\">",
+      "value": {
+        "shape": "html-expression-button",
+        "label": "User group 2:All users",
+        "sourceHints": [
+          "user-group"
+        ]
+      },
+      "sourceCategory": "user-group-expression"
+    }
+  ],
+  "dueDate": {
+    "duedatetype": null,
+    "duedatedefinition": 120,
+    "duedateexpress": null,
+    "isfromworkcalendar": null,
+    "notifyrulesShape": "absent"
+  },
+  "email": {
+    "isenabledemail": false,
+    "hasTo": true,
+    "hasSubject": true,
+    "hasHtml": true,
+    "toExpression": {
+      "shape": "html-expression-button",
+      "label": "Current Task Context:Assignee:Email",
+      "sourceHints": []
+    },
+    "subjectShape": "rich-text-or-expression",
+    "htmlShape": "rich-html-or-expression"
+  },
+  "quickCompletion": {
+    "disablequickapproval": null
+  },
+  "files": {
+    "hasFilesList": false,
+    "hasFilesVariables": false
+  },
+  "flow": {
+    "incomingCount": 1,
+    "outgoingCount": 1
+  }
+}

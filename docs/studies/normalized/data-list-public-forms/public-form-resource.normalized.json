@@ -1,0 +1,13 @@
+{
+  "proof": "export-proven from Data Lists (4).yap; private values redacted",
+  "exportPath": "Data.Childs[].PublicForms[].Resource",
+  "normalized": {
+    "pagetype": 3,
+    "ver": 2,
+    "attrsKeys": [
+      "container"
+    ],
+    "tempVarsShape": "array",
+    "childrenShape": "array"
+  }
+}

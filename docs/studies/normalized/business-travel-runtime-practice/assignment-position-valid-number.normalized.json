@@ -1,0 +1,12 @@
+{
+  "proof": "schema-practice-backed",
+  "usertaskassignment": [
+    {
+      "type": "position",
+      "method": "position",
+      "position": "1234567890",
+      "title": "Job position:<REDACTED_POSITION_NAME>"
+    }
+  ],
+  "rule": "Direct position assignments require a numeric position ID."
+}

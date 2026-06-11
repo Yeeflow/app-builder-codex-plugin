@@ -1,0 +1,23 @@
+{
+  "proofLevel": "export-proven; product-documented",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "multiple-assignee-default-parallel",
+  "normalizedConfig": {
+    "appointedOrder": "parallel-or-default",
+    "issequential": null,
+    "usertaskassignment": "array(2-or-more)",
+    "listOrderMeaning": "stored list order exists but no sequential field is present"
+  },
+  "relatedApprovalSettings": {
+    "observedApproveways": [
+      "allapprove",
+      "anyprocess",
+      "anyapprove",
+      "anyreject",
+      "custompercentage"
+    ],
+    "customPercentageExample": 60
+  },
+  "runtimeBoundary": "parallel task fan-out is product-documented but not runtime-proven for generated packages"
+}

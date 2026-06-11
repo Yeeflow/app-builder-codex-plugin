@@ -1,0 +1,42 @@
+{
+  "case": "workflow-sequence-variable-unresolved",
+  "source": "synthetic Business Travel hardening reference",
+  "rule": "Sequence-flow condition variables must resolve to declared workflow variables.",
+  "declaredVariables": [
+    {
+      "idx": "var-total-idx",
+      "id": "TotalAmount",
+      "name": "Total Amount",
+      "type": "number"
+    }
+  ],
+  "invalidCondition": {
+    "name": "Finance Required",
+    "left": {
+      "value": {
+        "exprType": "variable",
+        "id": "EstimatedTotalAmount",
+        "name": "Estimated Total Amount"
+      }
+    },
+    "operator": ">",
+    "right": {
+      "value": 5000
+    }
+  },
+  "validCondition": {
+    "name": "Finance Required",
+    "left": {
+      "value": {
+        "exprType": "variable",
+        "id": "TotalAmount",
+        "name": "Total Amount"
+      }
+    },
+    "operator": ">",
+    "right": {
+      "value": 5000
+    }
+  },
+  "validatorCode": "WORKFLOW_SEQUENCE_CONDITION_VARIABLE_UNRESOLVED"
+}

@@ -1,0 +1,22 @@
+{
+  "proof": "export-proven",
+  "host": "dashboard",
+  "controlType": "button",
+  "actionTypeCode": "5",
+  "actionType": "add_list_item",
+  "attrs": {
+    "action-type": "5",
+    "link": {
+      "opentype": true,
+      "url": null,
+      "variable": "[REDACTED_EXPRESSION_ARRAY]"
+    },
+    "data": {
+      "list": {
+        "AppID": "[AppID]",
+        "ListSetID": "[ListSetID]",
+        "ListID": "[ListID]"
+      }
+    }
+  }
+}

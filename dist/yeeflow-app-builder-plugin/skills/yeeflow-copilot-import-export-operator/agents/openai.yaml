@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Copilot Import Export Operator"
+  short_description: "Export and validate Yeeflow .yaic packages."
+  default_prompt: "Use this skill to export, inspect, validate, and organize Yeeflow Copilot .yaic template packages safely."

@@ -1,0 +1,156 @@
+# macOS and editor noise
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+.yeeflow-oauth/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*secret*
+*secrets*
+*token*
+*credentials*
+
+# Dependencies
+node_modules/
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+.tmp/
+.cache/
+.pytest_cache/
+coverage/
+
+# Historical root-level reports are ignored by default.
+# Curated documentation belongs under docs/.
+*.md
+!README.md
+!CHANGELOG.md
+!dashboard-collection-first-generation-test-plan.md
+!it-hardware-capex-request-v3-ui-refresh-plan.md
+!yeeflow-expression-first-generation-test-plan.md
+!docs/
+!docs/**/*.md
+!generated/README.md
+!examples/README.md
+!skills/**/*.md
+!generated-skills/**/*.md
+
+# Generated document outputs are excluded unless explicitly reviewed.
+*.docx
+
+# Raw Yeeflow exports and generated packages.
+# Commit only explicitly sanitized, reviewed samples via docs/examples.
+*.yap
+*.ydl
+*.ywf
+*.yaia
+*.yaic
+*.skill.zip
+*.zip
+
+# Downloaded/customer/output work areas
+Downloads/
+downloaded/
+customer-files/
+raw-exports/
+outputs/
+output/
+Templates/
+working/
+assets/
+yeeflow-application-generator/
+yeeflow-approval-form-generator/
+yeeflow-data-list-generator/
+!skills/installed/yeeflow-application-generator/
+!skills/installed/yeeflow-application-generator/**
+!skills/installed/yeeflow-data-list-generator/
+!skills/installed/yeeflow-data-list-generator/**
+!skills/installed/yeeflow-approval-form-generator/
+!skills/installed/yeeflow-approval-form-generator/**
+!skills/installed/yeeflow-dashboard-generator/
+!skills/installed/yeeflow-dashboard-generator/**
+!skills/installed/yeeflow-feature-learning-orchestrator/
+!skills/installed/yeeflow-feature-learning-orchestrator/**
+!skills/installed/yeeflow-expression-generator/
+!skills/installed/yeeflow-expression-generator/**
+!skills/installed/yeeflow-design-system-alignment/
+!skills/installed/yeeflow-design-system-alignment/**
+.DS_Store
+
+# Large or decoded generated artifacts that may contain customer data.
+*.json
+!dashboard-collection-first-generation-test-spec.json
+!it-hardware-capex-request-ui-generation-spec.json
+!it-hardware-capex-request-v3-ui-refresh-spec.json
+!workflow-action-configurations.normalized.json
+!control-configurations.normalized.json
+!field-configurations.normalized.json
+!doc-library-control-reference.normalized.json
+!yeeflow-expression-functions.normalized.json
+!yeeflow-expression-function-knowledge-base.normalized.json
+!yeeflow-expression-operators.normalized.json
+!yeeflow-expression-first-generation-test-spec.json
+!docs/studies/normalized/*.normalized.json
+!docs/studies/normalized/**/*.normalized.json
+!skills/installed/yeeflow-application-generator/scripts/workflow-action-configurations.normalized.json
+!skills/installed/**/*.json
+*-app-def*.json
+*-resource*.json
+*.decoded.json
+*.app-def.json
+*.resource.json
+*.metadata.json
+*inspection*.json
+*source*.json
+*exportback*.json
+!docs/studies/normalized/**/*.normalized.json
+
+# Generated package internals and reports are kept out by default.
+# Promote sanitized summaries into docs/ instead.
+*build-report*.json
+*generation-report*.json
+*validation*.json
+*graph*.json
+*compatibility*.json
+*dependencies*.json
+*decomposition*.json
+*mapping*.json
+*manifest*.json
+!docs/studies/normalized/*.normalized.json
+
+# Clean plugin repository payload.
+!.agents/
+!.agents/**
+!dist/
+!dist/yeeflow-app-builder-plugin/
+!dist/yeeflow-app-builder-plugin/**
+!scripts/
+!scripts/**
+!schemas/
+!schemas/**
+!generated-skills/
+!generated-skills/**
+
+# Keep repository scaffolding under these otherwise-generated folders.
+!generated/
+!generated/README.md
+!examples/
+!examples/README.md
+!skills/
+!skills/README.md
+!package.json
+!package-lock.json

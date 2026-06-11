@@ -1,0 +1,35 @@
+{
+  "feature": "data-list-view-page-dynamic-controls",
+  "source": "Company Overview.yap",
+  "dataList": "Company Overview",
+  "customForm": "View page",
+  "controls": [
+    {
+      "type": "dynamic-field",
+      "attrs": {
+        "source": "4",
+        "obj-f": "Title"
+      },
+      "field": "Name"
+    },
+    {
+      "type": "dynamic-field",
+      "attrs": {
+        "source": "4",
+        "obj-f": "Datetime1"
+      },
+      "field": "Start date"
+    },
+    {
+      "type": "dynamic-field",
+      "attrs": {
+        "source": "4",
+        "obj-f": "Datetime2",
+        "prefix": "-"
+      },
+      "field": "Due date"
+    }
+  ],
+  "notObservedOnViewPage": ["dynamic-user", "dynamic-image", "dynamic-file"],
+  "proof": "export-proven for Dynamic field on Data List custom form"
+}

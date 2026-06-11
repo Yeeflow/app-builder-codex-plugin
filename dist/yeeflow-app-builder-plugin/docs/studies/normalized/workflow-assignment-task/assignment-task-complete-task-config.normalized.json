@@ -1,0 +1,21 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Test ABC (2).yap",
+  "nodeType": "MultiAssignmentTask",
+  "pattern": "complete-task-additional-settings",
+  "normalizedConfig": {
+    "tasktype": "complete",
+    "automaticapproveddefinition": true,
+    "isallowrecalled": true,
+    "isallowreassign": true,
+    "isallowsign": false,
+    "allowskip": true,
+    "issequential": true,
+    "approveway": "allapprove",
+    "approvepercentage": 100
+  },
+  "notes": [
+    "This combines Complete task fields that were found on studied Complete task nodes.",
+    "Not every Complete task in the export has every optional flag."
+  ]
+}

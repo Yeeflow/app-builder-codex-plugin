@@ -1,0 +1,50 @@
+{
+  "proof": "export-proven from Data Lists (3).yap; private values redacted",
+  "exportPath": "children[0]/children/0/children/0/children/70",
+  "normalized": {
+    "id": "__CONTROL_ID__",
+    "type": "calculated-column",
+    "binding": "Decimal17",
+    "fieldID": "__FIELD_ID__",
+    "label": "__LABEL_REDACTED__",
+    "attrs": {
+      "calculated_result": {
+        "type": "number",
+        "attrs": {
+          "rounded-to": 2
+        }
+      },
+      "calculated": [
+        {
+          "exprType": "list_field",
+          "valueType": "__VALUETYPE_REDACTED__",
+          "prop": "Decimal12",
+          "id": "__ID_REDACTED__",
+          "type": "expr",
+          "name": "__NAME_REDACTED__"
+        },
+        {
+          "type": "op",
+          "op": "*"
+        },
+        {
+          "exprType": "list_field",
+          "valueType": "__VALUETYPE_REDACTED__",
+          "prop": "Decimal6",
+          "id": "__ID_REDACTED__",
+          "type": "expr",
+          "name": "__NAME_REDACTED__"
+        }
+      ]
+    },
+    "field": {
+      "FieldName": "Decimal17",
+      "FieldID": "__FIELD_ID__",
+      "InternalName": "__INTERNAL_NAME_REDACTED__",
+      "Type": "calculated-column",
+      "FieldType": "Decimal",
+      "IsSystem": false
+    },
+    "proof": "export-proven; private values redacted"
+  }
+}

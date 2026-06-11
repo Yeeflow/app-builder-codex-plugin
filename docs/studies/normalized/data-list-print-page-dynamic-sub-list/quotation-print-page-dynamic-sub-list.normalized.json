@@ -1,0 +1,21 @@
+{
+  "source": "Sales Quotation.yap",
+  "proof": "export-proven",
+  "host": "data-list-custom-form",
+  "dataList": "Quotation",
+  "form": "Print Page",
+  "subList": {
+    "label": "Products & Services",
+    "binding": "Text5",
+    "layout": "dynamic",
+    "displayLabel": [null, false],
+    "actions": [],
+    "footerButtons": []
+  },
+  "template": {
+    "body": "list-body",
+    "bodyGrid": "flex_grid",
+    "bodyGridLabel": "Pricing table content",
+    "fieldBindings": ["NAME", "Description", "UNITPRICE", "QTY", "SUBTOTAL"]
+  }
+}

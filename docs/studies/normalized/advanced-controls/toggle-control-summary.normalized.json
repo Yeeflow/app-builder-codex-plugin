@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "control": "Toggle",
+  "proof": "export-proven configuration pattern; runtime behavior not proven in this branch",
+  "observedHosts": [
+    "dashboard"
+  ],
+  "observedSurfaces": [
+    "Toggle controls"
+  ],
+  "internalTypes": [
+    "toggle"
+  ],
+  "count": 5,
+  "attrKeys": [
+    "active-default",
+    "active-icon",
+    "active-icon-type",
+    "caption",
+    "general",
+    "icon",
+    "icon-type",
+    "layout"
+  ],
+  "sourceModes": [
+    "unspecified"
+  ],
+  "styleKeys": [
+    "caption",
+    "general",
+    "icon",
+    "layout"
+  ],
+  "childTypes": [
+    "toggle-panel"
+  ],
+  "nestedChildControlTypes": {
+    "action_button": 10,
+    "collection": 5,
+    "container": 25,
+    "dynamic-field": 15,
+    "dynamic-file": 10,
+    "dynamic-image": 5,
+    "dynamic-user": 5,
+    "heading": 15,
+    "toggle-panel": 15
+  },
+  "bindingModes": [],
+  "validation": [
+    "toggle must contain toggle-panel children",
+    "each panel should have attrs.title.value and nested content"
+  ],
+  "generation": [
+    "use toggle for collapsible sections, FAQ blocks, and grouped details"
+  ],
+  "examples": [
+    {
+      "syntheticId": "<toggle:1>",
+      "host": "dashboard",
+      "surface": "Toggle controls",
+      "type": "toggle",
+      "attrKeys": [
+        "caption",
+        "general"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "toggle-panel",
+        "toggle-panel",
+        "toggle-panel"
+      ],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<toggle:2>",
+      "host": "dashboard",
+      "surface": "Toggle controls",
+      "type": "toggle",
+      "attrKeys": [
+        "active-icon",
+        "active-icon-type",
+        "caption",
+        "general",
+        "icon",
+        "icon-type"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "toggle-panel",
+        "toggle-panel",
+        "toggle-panel"
+      ],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<toggle:3>",
+      "host": "dashboard",
+      "surface": "Toggle controls",
+      "type": "toggle",
+      "attrKeys": [
+        "active-icon",
+        "active-icon-type",
+        "caption",
+        "general",
+        "icon",
+        "icon-type"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "toggle-panel",
+        "toggle-panel",
+        "toggle-panel"
+      ],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<toggle:4>",
+      "host": "dashboard",
+      "surface": "Toggle controls",
+      "type": "toggle",
+      "attrKeys": [
+        "active-icon",
+        "active-icon-type",
+        "caption",
+        "general",
+        "icon",
+        "icon-type",
+        "layout"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "toggle-panel",
+        "toggle-panel",
+        "toggle-panel"
+      ],
+      "bindings": {},
+      "items": {}
+    },
+    {
+      "syntheticId": "<toggle:5>",
+      "host": "dashboard",
+      "surface": "Toggle controls",
+      "type": "toggle",
+      "attrKeys": [
+        "active-default",
+        "active-icon",
+        "active-icon-type",
+        "caption",
+        "general",
+        "icon",
+        "icon-type",
+        "layout"
+      ],
+      "sourceMode": "unspecified",
+      "childTypes": [
+        "toggle-panel",
+        "toggle-panel",
+        "toggle-panel"
+      ],
+      "bindings": {},
+      "items": {}
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "proof": "product-rule-backed",
+  "pattern": "list field FieldIndex and FieldName suffix match",
+  "field": {
+    "DisplayName": "Example Text",
+    "FieldName": "Text11",
+    "InternalName": "ExampleText",
+    "FieldIndex": 11,
+    "FieldType": "Text",
+    "Type": "input"
+  },
+  "rule": "The numeric suffix at the absolute end of FieldName must equal FieldIndex."
+}

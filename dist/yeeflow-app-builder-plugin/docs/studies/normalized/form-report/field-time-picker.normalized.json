@@ -1,0 +1,19 @@
+{
+  "proofLevel": "export-proven",
+  "field": {
+    "exportPath": "Data.FormNewReports[0].Settings.Fields[27]",
+    "childFieldPath": "Data.Childs[1].Defs[27]",
+    "fieldId": "field_18",
+    "key": "v_field_18",
+    "variableSource": "approval-variable",
+    "variableType": "date",
+    "variableRef": "field_18",
+    "reportFieldType": "time",
+    "storedType": "date",
+    "isSystem": false,
+    "required": false,
+    "rules": {
+      "dateformat": "0"
+    }
+  }
+}

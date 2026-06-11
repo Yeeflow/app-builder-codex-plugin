@@ -1,0 +1,17 @@
+{
+  "proofLevel": "export-proven; product-documented",
+  "sourceExport": "Test ABC (1).yap",
+  "nodeType": "MultiAssignmentTask",
+  "assigneePattern": "multi-source-expression",
+  "normalizedConfig": {
+    "appointedOrder": "sequential",
+    "issequential": true,
+    "usertaskassignment": "array(2)",
+    "listOrderMeaning": "export order is preserved as the only visible ordering signal"
+  },
+  "relatedApprovalSettings": {
+    "approveway": "allapprove",
+    "approvepercentage": 100
+  },
+  "runtimeBoundary": "sequential routing order is product-documented but not runtime-proven for generated packages"
+}

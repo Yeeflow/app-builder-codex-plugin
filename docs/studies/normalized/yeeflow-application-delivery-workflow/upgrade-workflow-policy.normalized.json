@@ -1,0 +1,18 @@
+{
+  "topic": "yeeflow-application-delivery-workflow",
+  "rule": "upgrade-workflow-policy",
+  "packageType": "versioned-yapk",
+  "autoUpgradeWithoutTargetConfirmation": false,
+  "requires": [
+    "existing application target identified",
+    "target is safe",
+    "local validation passed",
+    "api key present",
+    "workspace id present",
+    "user confirms upgrade"
+  ],
+  "blockedWhen": [
+    "target ambiguous",
+    "target production-critical without explicit approval"
+  ]
+}

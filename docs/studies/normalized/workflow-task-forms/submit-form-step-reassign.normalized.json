@@ -1,0 +1,42 @@
+{
+  "proofLevel": "export-proven",
+  "taskForm": "WARTB Task3",
+  "actionName": "Reassign task button click",
+  "submitStep": {
+    "name": "Reassign to others",
+    "submitType": "4",
+    "inferredOperation": "reassign",
+    "fieldPresence": {
+      "comment": true,
+      "forword": true,
+      "remark": true,
+      "assignee": false
+    },
+    "expressionSources": {
+      "comment": [
+        {
+          "exprType": "variable",
+          "valueType": "text",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Task comments"
+        }
+      ],
+      "forword": [
+        {
+          "exprType": "variable",
+          "valueType": "user",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Another User"
+        }
+      ],
+      "remark": [
+        {
+          "exprType": "variable",
+          "valueType": "text",
+          "id": "<REDACTED_PRIVATE_ID>",
+          "name": "Workflow Variables:Task comments"
+        }
+      ]
+    }
+  }
+}

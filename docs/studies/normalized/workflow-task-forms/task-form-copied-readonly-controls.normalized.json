@@ -1,0 +1,26 @@
+{
+  "proofLevel": "export-proven",
+  "sourceExport": "Workflow Actions Runtime Baseline (2)_Task forms.yap",
+  "taskForm": "WARTB Task",
+  "pattern": "copied submission form with all value-entry controls set readonly",
+  "submissionFormControlSummary": {
+    "readonlyControlCount": 3,
+    "editableControlCount": 6
+  },
+  "taskFormControlSummary": {
+    "readonlyControlCount": 9,
+    "editableControlCount": 0
+  },
+  "copiedControlTypesObserved": [
+    "identity-picker",
+    "datepicker",
+    "input",
+    "radio",
+    "input_number",
+    "textarea"
+  ],
+  "readonlyRepresentation": {
+    "location": "control.readonly",
+    "value": true
+  }
+}

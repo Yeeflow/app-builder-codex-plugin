@@ -1,0 +1,19 @@
+{
+  "knownIssues": [
+    {
+      "id": "vendor_lookup_picker_returns_no_records",
+      "status": "product_team_follow_up_required",
+      "scope": "Vendor lookup fields on related generated data lists can be configured with selected display fields and valid target metadata, but Add/Edit lookup picker queries may still return zero rows for the generated Vendors target list.",
+      "notABlockerForCompletion": true,
+      "mustStillValidate": [
+        "lookup target list resolves",
+        "lookup display field is selected",
+        "lookup display field resolves to the target list",
+        "Text0 is not used as lookup display field when target uses native Title",
+        "default target-list view includes visible display fields",
+        "related sample rows use seeded parent ListDataID values"
+      ],
+      "nextStep": "Ask product team which generated-list metadata controls lookup picker query materialization for package-generated target lists."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "finding": "spec_fidelity_gap",
+  "approved_mockup_pages": [
+    "Vendor Management Dashboard",
+    "Vendor Detail View Page",
+    "New Vendor Request Form",
+    "Compliance Review Workspace",
+    "Vendor Print Page"
+  ],
+  "observed_gap": "The generated app included importable resources but did not provide a complete, polished, actionable implementation matching the five approved mockup pages.",
+  "quality_gate": [
+    "SPEC_CONTROL_PLACEHOLDER_ONLY",
+    "SPEC_PAGE_UNDERBUILT",
+    "SPEC_DEFERRED_FEATURE_REASON_MISSING",
+    "FULL_APP_SCOPE_NOT_MET"
+  ]
+}

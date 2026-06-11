@@ -1,0 +1,17 @@
+{
+  "proofLevel": "validator-backed-plus-v2-user-confirmed",
+  "scenario": "Reusable generated data-list add-readiness baseline for analytics demo apps",
+  "rules": [
+    "ListModel.Type must be 1 for data lists.",
+    "ListModel.ListType must be 1 for generated Type 1 data lists.",
+    "ListModel.Flags must be 1.",
+    "ListModel.Status should be 1 when present.",
+    "The native Title field keeps FieldName Title, FieldType Text, Type input, Status 0, IsSystem true, IsIndex true, and FieldIndex 0.",
+    "FieldName storage prefixes must align with FieldType: Text* -> Text, Datetime* -> Datetime/date, Decimal* -> Decimal/number, Bigint* -> Bigint/integer, Bit* -> Bit/boolean.",
+    "Seeded ListDatas keys must resolve to valid FieldName keys or allowed system metadata.",
+    "Seeded date values should use ISO-like date strings for date fields.",
+    "Seeded numeric/currency values should use numeric strings or numbers for numeric fields.",
+    "Analytics demo apps should run strict import-readiness before handoff and must not claim populated analytics proof from empty controls."
+  ],
+  "redaction": "Synthetic normalized example only; no source IDs, user names, customer data, tenant IDs, emails, or raw payloads."
+}

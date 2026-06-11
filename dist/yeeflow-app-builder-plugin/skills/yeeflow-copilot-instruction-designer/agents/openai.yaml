@@ -1,0 +1,4 @@
+interface:
+  display_name: "Yeeflow Copilot Instruction Designer"
+  short_description: "Design structured Yeeflow Copilot instructions."
+  default_prompt: "Use this skill to rewrite Yeeflow Copilot Instruction content with role, purpose, workflow, recommended tools, reusable-template note, output style, and guardrails."
