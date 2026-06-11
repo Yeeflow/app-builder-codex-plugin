@@ -4,7 +4,7 @@ Generated application navigation must use Yeeflow export-proven runtime shapes, 
 
 ## Group Shape
 
-Use `Type: "classes"` and `list`:
+Use `Type: "classes"` and `list`. This shape must be named in the app plan's `Generation Contract and Hard Gates` section when grouped navigation is planned:
 
 ```json
 {

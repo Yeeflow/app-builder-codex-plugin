@@ -6,6 +6,20 @@ Generated Yeeflow applications must conform to the approved app plan. Schema val
 
 The app plan is a generation contract. It must be compared to the generated YAP/YAPK implementation before the package is described as complete or ready.
 
+## Required App Plan Contract
+
+Every future app plan must include `Generation Contract and Hard Gates`. Use `docs/app-plan-generation-contract.md` as the concise template.
+
+The section must bind later generation to:
+
+- output package decision, including `.yapk` as default and `.yap` only when explicitly requested
+- YAPK signing gate with `POST /utils/apppackage/setsign` and `POST /utils/apppackage/verifysign` when credentials are available
+- approval-form contract that prevents approval apps from silently shipping with `Forms: []`
+- navigation runtime contract using `Type: "classes"` plus `list`, not `children`/`Childs`
+- plan-to-package conformance requirements for planned lists, fields, forms, task pages, dashboards/pages, navigation, print pages, workflows/actions, permissions, and integrations
+- proof boundary report separating plan approval, schema validation, app-plan conformance, UI/control quality, signing, signature verification, API install/import acceptance, runtime UI inspection, deferred items, and known risks
+- runtime inspection checklist for installed test packages
+
 ## Required Coverage
 
 Plan conformance validation must compare planned and generated:
@@ -40,6 +54,9 @@ Post-generation reports must separate:
 - workflow graph validation
 - UI/materialization validation
 - plan-conformance validation
+- YAPK signing and signature verification
+- API install/import acceptance
+- runtime UI inspection
 
 A package may be schema-valid and still fail plan conformance. Do not call a generated app complete when planned resources, functions, or information architecture are materially missing.
 
