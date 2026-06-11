@@ -9,6 +9,8 @@ description: generate, update, debug, document, and redesign yeeflow custom code
 
 Generate Yeeflow custom code and customer-facing documentation that match the runtime structure, coding conventions, data-access patterns, and UI quality shown in the user's working examples. Default to producing a full ready-to-paste Yeeflow code file for code-generation requests. When the user provides existing code and asks what it does, how to use it, or to document it, switch to guide-only documentation-from-code mode. When the user asks to use an existing custom code script inside a Yeeflow application, switch to app-placement mode and produce the Custom Code control configuration, parameter wiring, validation notes, and runtime test plan instead of rewriting the script. When the user explicitly asks for a patch, diff, or changed sections only, switch output mode accordingly.
 
+When participating in full application planning or generation, Custom code is an advanced capability that must be named in the standard app plan. The plan should state why standard Yeeflow controls, expressions, workflow actions, and custom CSS are insufficient; where the Custom Code control is hosted; required parameters; writable outputs; security/privacy notes; maintenance owner; native fallback; and runtime proof requirements. Do not add Custom code as an unplanned shortcut during package generation.
+
 ## Workflow
 
 1. Classify the request:

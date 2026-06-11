@@ -30,6 +30,15 @@ function plan(overrides = {}) {
       groups: NAV_GROUPS,
       ...overrides.navigation,
     },
+    generationContract: {
+      outputPackage: { defaultOutput: ".yapk", yapOnlyWhenExplicit: true },
+      signingGate: { requiredWhenCredentialsAvailable: true, endpoints: ["POST /utils/apppackage/setsign", "POST /utils/apppackage/verifysign"] },
+      approvalFormContract: { approvalRequired: true, formsMustNotBeEmpty: true },
+      navigationRuntimeContract: { groupShape: "Type: \"classes\" + list", forbidChildrenGroups: true },
+      planToPackageConformance: { required: true },
+      proofBoundary: { requiredReportSections: ["schema", "plan-conformance", "signing", "runtime UI inspection"] },
+      runtimeInspectionChecklist: { requiredWhenInstalled: true },
+    },
     deferred: overrides.deferred || [],
   };
 }
@@ -43,7 +52,18 @@ function layoutViewGrouped(groups = NAV_GROUPS) {
     sortVer: 1,
     sort: groups.map((group, groupIndex) => ({
       Title: group.title,
-      Type: "group",
+      Type: "classes",
+      list: group.items.map((title, itemIndex) => ({ Title: title, Type: groupIndex === 0 ? 103 : 1, ListID: `nav-${groupIndex}-${itemIndex}` })),
+    })),
+  });
+}
+
+function layoutViewLocalChildrenGrouped(groups = NAV_GROUPS) {
+  return JSON.stringify({
+    sortVer: 1,
+    sort: groups.map((group, groupIndex) => ({
+      Title: group.title,
+      Type: "classes",
       children: group.items.map((title, itemIndex) => ({ Title: title, Type: groupIndex === 0 ? 103 : 1, ListID: `nav-${groupIndex}-${itemIndex}` })),
     })),
   });
@@ -71,6 +91,12 @@ function decodedApp({ flat = true, navigationItems, dataLists, pages, forms, rep
     Forms: (forms || ["Approvals"]).map((title) => ({ Name: title, key: title, nodes: [{ type: "MultiAssignmentTask" }] })),
     FormNewReports: (reports || ["Reports"]).map((title) => ({ Title: title })),
   };
+}
+
+function decodedAppWithLocalChildrenNavigation() {
+  const app = decodedApp({ flat: false });
+  app.Item.ListModel.LayoutView = layoutViewLocalChildrenGrouped();
+  return app;
 }
 
 function writeJson(dir, name, obj) {
@@ -167,6 +193,14 @@ try {
     throw new Error(`grouped valid fixture should pass: ${JSON.stringify(output.report.findings, null, 2)}`);
   }
   results.push({ case: "export-proven grouped navigation shape passes", status: "pass" });
+
+  output = runValidator(basePlan, writeJson(tempDir, "local-children-grouped", decodedAppWithLocalChildrenNavigation()), ["--grouped-navigation-export-proven", "true"]);
+  expectCode("local-only grouped navigation", output.report, "PLAN_NAVIGATION_LOCAL_CHILDREN_GROUP_SHAPE");
+  results.push({ case: "local-only grouped navigation shape is rejected", status: "pass" });
+
+  output = runValidator(writeJson(tempDir, "missing-contract-plan", { ...plan(), generationContract: undefined }), writeJson(tempDir, "missing-contract-package", decodedApp({ flat: false })), ["--grouped-navigation-export-proven", "true"]);
+  expectCode("missing generation contract", output.report, "PLAN_GENERATION_CONTRACT_MISSING");
+  results.push({ case: "missing generation contract hard gate detected", status: "pass" });
 
   output = runValidator(basePlan, writeJson(tempDir, "flat-strict", decodedApp()), ["--mode", "strict"]);
   expectCode("strict unproven grouped navigation", output.report, "PLAN_GROUPED_NAVIGATION_UNPROVEN_EXPORT_SHAPE");

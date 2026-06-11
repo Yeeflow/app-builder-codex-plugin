@@ -183,6 +183,63 @@ function extractMarkdownResourceSection(text, headingPattern) {
   return uniqueStrings(items).map((title) => ({ title }));
 }
 
+function extractMarkdownSection(text, headingPattern) {
+  const lines = text.split(/\r?\n/);
+  const section = [];
+  let active = false;
+  let activeLevel = 0;
+  for (const line of lines) {
+    const heading = line.match(/^(#{1,6})\s+(.+?)\s*$/);
+    if (heading) {
+      const level = heading[1].length;
+      if (active && level <= activeLevel) break;
+      if (!active && headingPattern.test(heading[2])) {
+        active = true;
+        activeLevel = level;
+        section.push(line);
+        continue;
+      }
+    }
+    if (active) section.push(line);
+  }
+  return section.join("\n").trim();
+}
+
+function hasPattern(text, pattern) {
+  return pattern.test(safeString(text));
+}
+
+function inspectMarkdownGenerationContract(text) {
+  const section = extractMarkdownSection(text, /generation contract and hard gates/i);
+  if (!section) return { present: false, source: "markdown", sections: {}, findings: [] };
+  const sections = {
+    outputPackage: hasPattern(section, /output package|default output|package generation|\.yapk|\.yap/i),
+    signingGate: hasPattern(section, /signing|setsign|verifysign|placeholder sign|upload readiness/i),
+    approvalFormContract: hasPattern(section, /approval form contract|approval required|request page|task pages|workflow control panel|DefResource/i),
+    navigationRuntimeContract: hasPattern(section, /navigation runtime contract|Type:\s*"?classes"?|Type:\s*105|Type:\s*103|Type:\s*1|unreachable/i),
+    planToPackageConformance: hasPattern(section, /plan-to-package|plan to package|planned lists|planned fields|planned forms|planned workflows|conformance/i),
+    proofBoundary: hasPattern(section, /proof boundary|required proof report|schema validation|app-plan conformance|runtime UI inspection/i),
+    runtimeInspectionChecklist: hasPattern(section, /runtime inspection|app opens|navigation groups render|request page opens|task pages exist|lists open/i),
+  };
+  return { present: true, source: "markdown", sections, findings: [] };
+}
+
+function inspectObjectGenerationContract(source) {
+  const contract = source.generationContract || source.generationContractAndHardGates || source.hardGates || source.outputContract || {};
+  if (!isObject(contract) || !Object.keys(contract).length) return { present: false, source: "json", sections: {}, findings: [] };
+  const has = (...keys) => keys.some((key) => contract[key] !== undefined);
+  const sections = {
+    outputPackage: has("outputPackage", "package", "defaultOutput", "packageType"),
+    signingGate: has("signingGate", "yapkSigningGate", "signing", "apiSigning"),
+    approvalFormContract: has("approvalFormContract", "approval", "approvalForms"),
+    navigationRuntimeContract: has("navigationRuntimeContract", "navigation", "navigationRuntime"),
+    planToPackageConformance: has("planToPackageConformance", "conformance", "planConformance"),
+    proofBoundary: has("proofBoundary", "proofReport", "requiredProofReport"),
+    runtimeInspectionChecklist: has("runtimeInspectionChecklist", "runtimeInspection", "runtimeChecklist"),
+  };
+  return { present: true, source: "json", sections, findings: [] };
+}
+
 function parsePlan(planPath) {
   const text = fs.readFileSync(planPath, "utf8").replace(/^\uFEFF/, "");
   const parsed = parseMaybeJson(text);
@@ -210,6 +267,7 @@ function parsePlan(planPath) {
       groupedNavigationRequired: navGroups.length > 0,
       groups: navGroups,
     },
+    generationContract: inspectMarkdownGenerationContract(text),
   }, { path: planPath, sourceType: "markdown" });
 }
 
@@ -237,6 +295,9 @@ function normalizePlan(raw, meta = {}) {
       groups,
     },
     deferred,
+    generationContract: source.generationContract?.present !== undefined
+      ? source.generationContract
+      : inspectObjectGenerationContract(source),
   };
 }
 
@@ -319,10 +380,16 @@ function collectNavigation(root) {
   const groups = [];
   const flatItems = [];
   const itemGroup = new Map();
+  const invalidGroups = [];
   for (const item of sort) {
     const title = safeString(item.Title || item.title || item.name || item.label).trim();
-    const children = asArray(item.children || item.items || item.Childs || item.childs);
+    const runtimeList = asArray(item.list);
+    const localChildren = asArray(item.children || item.items || item.Childs || item.childs);
+    const children = runtimeList.length ? runtimeList : localChildren;
     const groupTitle = safeString(item.Group || item.group || item.GroupTitle || item.groupTitle || item.ParentTitle || item.parentTitle).trim();
+    const isRuntimeGroup = item.Type === "classes";
+    if (isRuntimeGroup && !runtimeList.length) invalidGroups.push({ title, reason: "TYPE_CLASSES_WITHOUT_LIST" });
+    if (localChildren.length) invalidGroups.push({ title, reason: "LOCAL_CHILDREN_GROUP_SHAPE" });
     if (children.length) {
       const childTitles = uniqueStrings(children.map((child) => safeString(child.Title || child.title || child.name || child.label)));
       groups.push({ title, items: childTitles });
@@ -346,6 +413,7 @@ function collectNavigation(root) {
     flatItems: uniqueStrings(flatItems),
     itemGroup,
     rawSortCount: sort.length,
+    invalidGroups,
   };
 }
 
@@ -437,6 +505,17 @@ function classifyNavigation(plan, inventory, options, findings) {
     implementedCount: 0,
     resourceMissingFromNavigationCount: 0,
   };
+  for (const invalidGroup of generatedNav.invalidGroups || []) {
+    addNavigationFinding(
+      findings,
+      "error",
+      invalidGroup.reason === "TYPE_CLASSES_WITHOUT_LIST" ? "PLAN_NAVIGATION_TYPE_CLASSES_MISSING_LIST" : "PLAN_NAVIGATION_LOCAL_CHILDREN_GROUP_SHAPE",
+      invalidGroup.reason === "TYPE_CLASSES_WITHOUT_LIST"
+        ? "Runtime navigation groups must use Type: \"classes\" with list[]."
+        : "Runtime grouped navigation must not use local-only children/items/Childs group shape.",
+      { group: invalidGroup.title, reason: invalidGroup.reason },
+    );
+  }
   if (!groupedRequired) return summary;
   if (!options.groupedNavigationExportProven && generatedNav.shape !== "grouped") {
     summary.unsupportedCount += plannedGroups.length;
@@ -507,10 +586,59 @@ function classifyNavigation(plan, inventory, options, findings) {
   return summary;
 }
 
+function classifyGenerationContract(plan, decodedPackage, findings) {
+  const contract = plan.generationContract || {};
+  const requiredSections = [
+    ["outputPackage", "Output Package"],
+    ["signingGate", "YAPK Signing Gate"],
+    ["approvalFormContract", "Approval Form Contract"],
+    ["navigationRuntimeContract", "Navigation Runtime Contract"],
+    ["planToPackageConformance", "Plan-to-Package Conformance Contract"],
+    ["proofBoundary", "Proof Boundary Contract"],
+    ["runtimeInspectionChecklist", "Runtime Inspection Checklist"],
+  ];
+  if (!contract.present) {
+    findings.push({
+      level: "error",
+      code: "PLAN_GENERATION_CONTRACT_MISSING",
+      message: "App plan is missing the mandatory Generation Contract and Hard Gates section.",
+      source: "plan-conformance:generation-contract",
+    });
+    return { present: false, sections: {}, missingSections: requiredSections.map(([, label]) => label), source: contract.source || plan.sourceType };
+  }
+  const missingSections = [];
+  for (const [key, label] of requiredSections) {
+    if (!contract.sections?.[key]) {
+      missingSections.push(label);
+      findings.push({
+        level: "error",
+        code: `PLAN_GENERATION_CONTRACT_${key.replace(/[A-Z]/g, (char) => `_${char}`).toUpperCase()}_MISSING`,
+        message: `Generation Contract and Hard Gates is missing ${label}.`,
+        source: "plan-conformance:generation-contract",
+      });
+    }
+  }
+  if (decodedPackage.packageType === "yapk" && !decodedPackage.wrapperSummary.hasSign) {
+    findings.push({
+      level: "warning",
+      code: "PLAN_YAPK_SIGNING_STATUS_UNREPORTED",
+      message: "Generated YAPK wrapper has no Sign value; final reports must not describe it as upload-ready without setsign and verifysign proof.",
+      source: "plan-conformance:generation-contract",
+    });
+  }
+  return { present: true, sections: contract.sections || {}, missingSections, source: contract.source || plan.sourceType };
+}
+
 function buildRecommendations(findings, navigation) {
   const recommendations = [];
+  if (findings.some((finding) => finding.code === "PLAN_GENERATION_CONTRACT_MISSING")) {
+    recommendations.push("Add the mandatory Generation Contract and Hard Gates section to the approved app plan before generation.");
+  }
   if (navigation.groupedNavigationRequired && !navigation.groupedLayoutViewExportProven) {
     recommendations.push("Confirm grouped LayoutView export shape from an export-proven Yeeflow app before generating grouped navigation metadata.");
+  }
+  if (findings.some((finding) => finding.code === "PLAN_NAVIGATION_LOCAL_CHILDREN_GROUP_SHAPE")) {
+    recommendations.push("Replace local-only navigation group children/items/Childs with runtime Type: \"classes\" plus list[].");
   }
   if (findings.some((finding) => finding.code?.includes("_MISSING"))) {
     recommendations.push("Regenerate or repair the package so every planned resource is implemented or explicitly deferred with a reason.");
@@ -534,6 +662,7 @@ function main() {
   const decodedPackage = decodePackage(packagePath);
   const inventory = collectInventory(decodedPackage.decoded);
   const findings = [];
+  const generationContract = classifyGenerationContract(plan, decodedPackage, findings);
   const resourceResult = classifyPlannedResources(plan, inventory, findings);
   const navigation = classifyNavigation(plan, inventory, { mode: args.mode, groupedNavigationExportProven: args.groupedNavigationExportProven }, findings);
   const counts = {
@@ -556,11 +685,17 @@ function main() {
       workflowGraphValidation: "separate",
       uiMaterializationValidation: "separate",
       planConformanceValidation: "this report",
+      generationContractValidation: "this report",
+      signingValidation: "separate",
+      signatureVerification: "separate",
+      apiInstallImportAcceptance: "separate",
+      runtimeUiInspection: "separate",
     },
     plan: {
       path: plan.path,
       sourceType: plan.sourceType,
       navigationGroups: plan.navigation.groups.map((group) => group.title),
+      generationContract,
     },
     package: {
       path: packagePath,

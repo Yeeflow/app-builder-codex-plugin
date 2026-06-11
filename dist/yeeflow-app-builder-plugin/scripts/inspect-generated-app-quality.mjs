@@ -8,18 +8,29 @@ import { spawnSync } from "node:child_process";
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
 const REQUIRED_PLAN_SECTIONS = [
+  "plan status",
   "application purpose",
-  "target users",
-  "business process",
-  "data lists",
-  "forms",
-  "dashboards",
-  "controls",
-  "actions",
-  "workflows",
-  "layout",
-  "validation",
+  "target users and roles",
+  "business process overview",
+  "capability coverage plan",
+  "application navigation",
+  "data model and lists",
+  "forms and approval forms",
+  "dashboards, pages, and reports",
+  "ui/ux and control mapping",
+  "golden template and reference strategy",
+  "actions and workflow logic",
+  "permissions",
+  "integrations and external services",
+  "document libraries and attachments",
+  "reports and analytics",
+  "data validation checklist",
+  "generation contract and hard gates",
+  "generation validation plan",
   "proof boundary",
+  "assumptions",
+  "deferred or runtime-proof items",
+  "recommended next prompt",
 ];
 
 const REQUIRED_SPEC_SECTIONS = [
@@ -300,7 +311,7 @@ function inspectPlan(planPath) {
       findings.push({
         level: "warning",
         code: "APP_PLAN_SECTION_MISSING",
-        message: "Generated app plans should include the standard planning sections before package generation.",
+        message: "Generated app plans should follow docs/app-plan-standard-template.md before package generation. Run scripts/validate-app-plan-template.mjs for heading and hard-gate checks.",
         section,
       });
     }

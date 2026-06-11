@@ -9,6 +9,8 @@ Schema-v2 carry-forward: Form Report child resources are list-like `CustomListMo
 
 Use this skill when a Yeeflow application needs Form Report resources or when studying/export-validating Form Report schema. A Form Report is an app-level reporting resource based on an approval form. It is not a standalone data list, does not own a workflow, and must not be treated as an editable record store.
 
+When participating in full application planning/generation, take Form Report requirements from the standard app plan's `Reports and Analytics`, `Capability Coverage Plan`, and `Generation Contract and Hard Gates` sections. Do not invent Form Reports outside the approved plan. If a planned report depends on an approval form that is deferred, mark the report deferred or external-dependency-bound in the plan and generation report.
+
 Current proof boundary: export-proven and validator-backed only from `docs/studies/form-report-resource.md` and normalized refs under `docs/studies/normalized/form-report/`. Do not claim runtime behavior until a focused import/open/designer/submission/export-back baseline passes.
 
 ## FormNewReports Workflow Report Standard
