@@ -33,6 +33,7 @@ console.log(JSON.stringify({
   idTokenPresent: summary.idTokenPresent ?? false,
   expiresAt: summary.expiresAt ?? null,
   scope: summary.scope ?? null,
+  configSources: summary.configSources,
   refreshed,
 }, null, 2));
 

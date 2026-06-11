@@ -28,7 +28,7 @@ import {
 } from "./lib/yeeflow-oauth-client.mjs";
 import { resolveYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = findRepoRoot(path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."));
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-oauth-auth-test-"));
 const tokenFile = path.join(tempDir, "token.json");
 
@@ -40,11 +40,14 @@ try {
   testPkceChallengeGeneration();
   await testTokenExchangeRequestShape();
   await testRefreshRequestShape();
+  await testMissingClientSecretMessage();
   await testExpiredTokenRefreshBehavior();
   await testRefreshFailureClearsInvalidAuthState();
   testRedaction();
   testEnvLocalIgnored();
   testNoTokenSecretFilesTracked();
+  testOAuthDefaultsWithoutEnv();
+  await testOAuthAuthWithoutApiKey();
   await testOAuthPreferredOverApiKey();
   await testApiKeyFallback();
   console.log("yeeflow-oauth-auth tests passed");
@@ -139,6 +142,17 @@ async function testRefreshRequestShape() {
   assert.equal(calls[0].body.get("scope"), "basic_api openid offline_access");
 }
 
+async function testMissingClientSecretMessage() {
+  const config = resolveOAuthConfig({
+    HOME: os.homedir(),
+    YEEFLOW_OAUTH_TOKEN_FILE: tokenFile,
+  });
+  await assert.rejects(
+    () => refreshAccessToken(config, { refresh_token: "refresh-secret" }, mockFetch([], {})),
+    /client secret is private and must stay in \.env\.local.*plugin does not bundle secrets.*PKCE\/no-secret/,
+  );
+}
+
 async function testExpiredTokenRefreshBehavior() {
   const config = testConfig();
   saveStoredToken(config, {
@@ -230,6 +244,48 @@ function testNoTokenSecretFilesTracked() {
   assert.equal(result.stdout.includes("codex-oauth-token.json"), false);
 }
 
+function testOAuthDefaultsWithoutEnv() {
+  const config = resolveOAuthConfig({
+    HOME: os.homedir(),
+    YEEFLOW_OAUTH_TOKEN_FILE: tokenFile,
+  });
+  assert.equal(config.clientId, "266479ba-1f82-463b-856d-9a50b6166e0d");
+  assert.equal(config.authUrl, "https://login.yeeflow.com/connect/authorize");
+  assert.equal(config.tokenUrl, "https://login.yeeflow.com/connect/token");
+  assert.equal(config.scopes, "basic_api openid offline_access");
+  assert.equal(config.sources.clientId, "plugin-default");
+  assert.equal(config.sources.authUrl, "plugin-default");
+  assert.equal(config.sources.tokenUrl, "plugin-default");
+  assert.equal(config.sources.scopes, "plugin-default");
+  assert.equal(config.sources.clientSecret, "not-configured");
+}
+
+async function testOAuthAuthWithoutApiKey() {
+  const config = testConfig();
+  saveStoredToken(config, normalizeTokenResponse({
+    access_token: "valid-access-no-api-key",
+    refresh_token: "valid-refresh-no-api-key",
+    expires_in: 3600,
+    token_type: "Bearer",
+  }));
+  const originalEnv = process.env;
+  process.env = {
+    HOME: os.homedir(),
+    YEEFLOW_OAUTH_TOKEN_FILE: tokenFile,
+  };
+  try {
+    const auth = await resolveYeeflowApiAuth({ loadDotenv: false });
+    assert.equal(auth.mode, "oauth");
+    assert.equal(auth.env.apiBaseUrl, "https://api.yeeflow.com/v1");
+    assert.equal(auth.env.apiKey, "");
+    assert.equal(auth.headers.Authorization, "Bearer valid-access-no-api-key");
+    assert.equal(auth.headers.apiKey, undefined);
+  } finally {
+    process.env = originalEnv;
+    clearStoredToken(config);
+  }
+}
+
 async function testOAuthPreferredOverApiKey() {
   const config = testConfig();
   saveStoredToken(config, normalizeTokenResponse({
@@ -291,4 +347,13 @@ function mockFetch(calls, payload, response = {}) {
       },
     };
   };
+}
+
+function findRepoRoot(startDir) {
+  let current = startDir;
+  while (current && current !== path.dirname(current)) {
+    if (fs.existsSync(path.join(current, ".git"))) return current;
+    current = path.dirname(current);
+  }
+  return startDir;
 }

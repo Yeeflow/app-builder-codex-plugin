@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { environmentPresence, loadDotenvFile, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
+import { mergeAuthHeaders, requireYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
 
 const OPERATIONS = new Set(["upload", "import-yap", "install-yapk", "upgrade-check-yapk", "upgrade-apply-yapk", "upgrade-yapk"]);
 
@@ -88,7 +89,6 @@ function parseArgs(argv) {
 }
 
 function validateCommonInputs(options, env, resolvedPackagePath) {
-  if (options.execute && !env.apiKey) throw new Error("YEEFLOW_API_KEY is required. Store it locally; do not paste it into chat.");
   if (options.execute && !env.apiBaseUrl) throw new Error("YEEFLOW_API_BASE_URL is required.");
   if (["upload", "import-yap", "install-yapk", "upgrade-check-yapk", "upgrade-apply-yapk", "upgrade-yapk"].includes(options.operation)) {
     if (!resolvedPackagePath) throw new Error("--package is required.");
@@ -138,26 +138,27 @@ async function buildDryRunPlan(options, resolvedPackagePath) {
 }
 
 async function executeOperation(options, env, resolvedPackagePath) {
+  const auth = await requireYeeflowApiAuth({ loadDotenv: false });
   if (options.operation === "upload") {
-    return await uploadPackageFile(env, resolvedPackagePath, options);
+    return await uploadPackageFile(env, resolvedPackagePath, options, auth);
   }
   if (options.operation === "import-yap") {
-    return await postJson(env, "/listset/package/import", buildImportBody(options, resolvedPackagePath), redactImportBody);
+    return await postJson(env, "/listset/package/import", buildImportBody(options, resolvedPackagePath), redactImportBody, auth);
   }
   const existingPackageFile = buildExistingPackageFile(options, resolvedPackagePath);
-  const packageFile = existingPackageFile || normalizePackageFile(await uploadPackageFile(env, resolvedPackagePath, options), resolvedPackagePath);
+  const packageFile = existingPackageFile || normalizePackageFile(await uploadPackageFile(env, resolvedPackagePath, options, auth), resolvedPackagePath);
   const endpoint = options.operation === "install-yapk" ? "/listset/package/install" : "/listset/package/upgrade";
-  return await postJson(env, endpoint, buildPackageActionBody(options, packageFile), redactPackageActionBody);
+  return await postJson(env, endpoint, buildPackageActionBody(options, packageFile), redactPackageActionBody, auth);
 }
 
-async function uploadPackageFile(env, resolvedPackagePath, options) {
+async function uploadPackageFile(env, resolvedPackagePath, options, auth) {
   const uploadMode = options.uploadMode || "multipart";
   const fileName = path.basename(resolvedPackagePath);
   const fileBuffer = fs.readFileSync(resolvedPackagePath);
   const url = new URL(`${env.apiBaseUrl}/files/upload`);
   url.searchParams.set("isImg", "false");
 
-  const headers = { apiKey: env.apiKey };
+  const headers = mergeAuthHeaders(auth);
   let body;
   if (uploadMode === "raw") {
     headers["Content-Type"] = "application/octet-stream";
@@ -175,14 +176,13 @@ async function uploadPackageFile(env, resolvedPackagePath, options) {
   return await summarizeResponse(response, "upload file content");
 }
 
-async function postJson(env, endpoint, body, redactBody) {
+async function postJson(env, endpoint, body, redactBody, auth) {
   const response = await fetch(`${env.apiBaseUrl}${endpoint}`, {
     method: "POST",
-    headers: {
-      apiKey: env.apiKey,
+    headers: mergeAuthHeaders(auth, {
       Accept: "application/json",
       "Content-Type": "application/json-patch+json",
-    },
+    }),
     body: JSON.stringify(body),
   });
   const summary = await summarizeResponse(response, endpoint, { upgradeCheck: body?.UpgradeCheck });

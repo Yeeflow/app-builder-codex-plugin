@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = "https://api.yeeflow.com/v1";
+import { firstNonEmpty, YEEFLOW_ENV_DEFAULTS } from "./lib/yeeflow-env-defaults.mjs";
 
 export function loadDotenvFile(fs, filePath, options = {}) {
   if (!fs.existsSync(filePath)) return false;
@@ -26,7 +26,7 @@ export function resolveYeeflowEnvironment(env = process.env) {
   );
   const tenantId = firstNonEmpty(profile ? env[`${prefix}TENANT_ID`] : null, env.YEEFLOW_TENANT_ID);
   const workspaceId = firstNonEmpty(profile ? env[`${prefix}WORKSPACE_ID`] : null, env.YEEFLOW_WORKSPACE_ID);
-  const apiBaseUrl = normalizeApiBaseUrl(firstNonEmpty(env.YEEFLOW_API_BASE_URL, env.YEEFLOW_BASE_URL, DEFAULT_API_BASE_URL));
+  const apiBaseUrl = normalizeApiBaseUrl(firstNonEmpty(env.YEEFLOW_API_BASE_URL, env.YEEFLOW_BASE_URL, YEEFLOW_ENV_DEFAULTS.apiBaseUrl));
   return {
     apiBaseUrl,
     apiKey,
@@ -34,6 +34,7 @@ export function resolveYeeflowEnvironment(env = process.env) {
     tenantId,
     tenantUrl,
     usedLegacyBaseUrl: Boolean(!env.YEEFLOW_API_BASE_URL && env.YEEFLOW_BASE_URL),
+    usedDefaultApiBaseUrl: Boolean(!env.YEEFLOW_API_BASE_URL && !env.YEEFLOW_BASE_URL),
     workspaceId,
   };
 }
@@ -41,20 +42,15 @@ export function resolveYeeflowEnvironment(env = process.env) {
 export function environmentPresence(resolved) {
   return {
     YEEFLOW_API_BASE_URL_PRESENT: Boolean(resolved.apiBaseUrl),
+    YEEFLOW_API_BASE_URL_SOURCE: resolved.usedDefaultApiBaseUrl ? "plugin-default" : "env",
     YEEFLOW_API_KEY_PRESENT: Boolean(resolved.apiKey),
+    YEEFLOW_API_KEY_MODE: resolved.apiKey ? "legacy-fallback" : "not-configured",
     YEEFLOW_BASE_URL_LEGACY_ALIAS_USED: Boolean(resolved.usedLegacyBaseUrl),
     YEEFLOW_PROFILE: resolved.profile || null,
     YEEFLOW_TENANT_ID_PRESENT: Boolean(resolved.tenantId),
     YEEFLOW_TENANT_URL_PRESENT: Boolean(resolved.tenantUrl),
     YEEFLOW_WORKSPACE_ID_PRESENT: Boolean(resolved.workspaceId),
   };
-}
-
-function firstNonEmpty(...values) {
-  for (const value of values) {
-    if (typeof value === "string" && value.trim()) return value.trim();
-  }
-  return "";
 }
 
 export function parseDotenvValue(value) {

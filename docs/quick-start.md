@@ -16,20 +16,15 @@ Expected plugin: `Yeeflow App Builder` version `0.6.23`.
 
 ## Configure Local Environment
 
-Create a gitignored `.env.local` only when local API/OAuth checks are needed. Use placeholders in docs and never commit real values.
+Create a gitignored `.env.local` only when local API/OAuth checks or package workspace operations are needed. Fixed API/OAuth defaults are bundled by the plugin; use placeholders in docs and never commit real values.
 
 ```env
-YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1
-YEEFLOW_API_KEY=<your Yeeflow API key>
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-
-YEEFLOW_OAUTH_CLIENT_ID=<your OAuth client id>
-YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
-YEEFLOW_OAUTH_AUTH_URL=https://login.yeeflow.com/connect/authorize
-YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
-YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
+# Optional only if tenant UI/browser links are needed:
+YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
+
+For OAuth login/refresh today, add `YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>` to `.env.local`. Keep it private and local; the plugin does not bundle secrets. `YEEFLOW_API_KEY` is not required for normal OAuth-backed API calls and is retained only as a legacy/deprecated fallback.
 
 ## Validate Locally
 

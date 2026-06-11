@@ -6,11 +6,12 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadDotenvFile, parseDotenvValue } from "../yeeflow-env-utils.mjs";
+import { firstNonEmpty, YEEFLOW_ENV_DEFAULTS } from "./yeeflow-env-defaults.mjs";
 
-export const DEFAULT_OAUTH_CLIENT_ID = "266479ba-1f82-463b-856d-9a50b6166e0d";
-export const DEFAULT_OAUTH_AUTH_URL = "https://login.yeeflow.com/connect/authorize";
-export const DEFAULT_OAUTH_TOKEN_URL = "https://login.yeeflow.com/connect/token";
-export const DEFAULT_OAUTH_SCOPES = "basic_api openid offline_access";
+export const DEFAULT_OAUTH_CLIENT_ID = YEEFLOW_ENV_DEFAULTS.oauthClientId;
+export const DEFAULT_OAUTH_AUTH_URL = YEEFLOW_ENV_DEFAULTS.oauthAuthUrl;
+export const DEFAULT_OAUTH_TOKEN_URL = YEEFLOW_ENV_DEFAULTS.oauthTokenUrl;
+export const DEFAULT_OAUTH_SCOPES = YEEFLOW_ENV_DEFAULTS.oauthScopes;
 export const CALLBACK_HOST = "127.0.0.1";
 export const CALLBACK_PATH = "/callback";
 export const CALLBACK_PORTS = [53720, 53721, 53722, 53723, 53724];
@@ -38,13 +39,20 @@ export function loadDotenvIntoEnv(filePath, env = {}) {
 }
 
 export function resolveOAuthConfig(env = process.env, options = {}) {
-  const clientId = nonEmpty(env.YEEFLOW_OAUTH_CLIENT_ID, DEFAULT_OAUTH_CLIENT_ID);
+  const clientId = firstNonEmpty(env.YEEFLOW_OAUTH_CLIENT_ID, DEFAULT_OAUTH_CLIENT_ID);
   return {
     clientId,
     clientSecret: env.YEEFLOW_OAUTH_CLIENT_SECRET || "",
-    authUrl: normalizeHttpsUrl(nonEmpty(env.YEEFLOW_OAUTH_AUTH_URL, DEFAULT_OAUTH_AUTH_URL), "YEEFLOW_OAUTH_AUTH_URL"),
-    tokenUrl: normalizeHttpsUrl(nonEmpty(env.YEEFLOW_OAUTH_TOKEN_URL, DEFAULT_OAUTH_TOKEN_URL), "YEEFLOW_OAUTH_TOKEN_URL"),
-    scopes: nonEmpty(env.YEEFLOW_OAUTH_SCOPES, DEFAULT_OAUTH_SCOPES),
+    authUrl: normalizeHttpsUrl(firstNonEmpty(env.YEEFLOW_OAUTH_AUTH_URL, DEFAULT_OAUTH_AUTH_URL), "YEEFLOW_OAUTH_AUTH_URL"),
+    tokenUrl: normalizeHttpsUrl(firstNonEmpty(env.YEEFLOW_OAUTH_TOKEN_URL, DEFAULT_OAUTH_TOKEN_URL), "YEEFLOW_OAUTH_TOKEN_URL"),
+    scopes: firstNonEmpty(env.YEEFLOW_OAUTH_SCOPES, DEFAULT_OAUTH_SCOPES),
+    sources: {
+      clientId: env.YEEFLOW_OAUTH_CLIENT_ID ? "env" : "plugin-default",
+      authUrl: env.YEEFLOW_OAUTH_AUTH_URL ? "env" : "plugin-default",
+      tokenUrl: env.YEEFLOW_OAUTH_TOKEN_URL ? "env" : "plugin-default",
+      scopes: env.YEEFLOW_OAUTH_SCOPES ? "env" : "plugin-default",
+      clientSecret: env.YEEFLOW_OAUTH_CLIENT_SECRET ? "env" : "not-configured",
+    },
     callbackHost: CALLBACK_HOST,
     callbackPath: CALLBACK_PATH,
     callbackPorts: CALLBACK_PORTS,
@@ -159,7 +167,7 @@ export async function startHttpsCallbackServer(config, { expectedState, timeoutM
 }
 
 export async function exchangeAuthorizationCode(config, { code, redirectUri, codeVerifier }, fetchImpl = fetch) {
-  requireClientSecret(config);
+  assertOAuthClientSecretConfigured(config);
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     client_id: config.clientId,
@@ -172,7 +180,7 @@ export async function exchangeAuthorizationCode(config, { code, redirectUri, cod
 }
 
 export async function refreshAccessToken(config, tokenRecord, fetchImpl = fetch) {
-  requireClientSecret(config);
+  assertOAuthClientSecretConfigured(config);
   if (!tokenRecord?.refresh_token) throw new Error("No refresh token is available. Run OAuth login again.");
   const body = new URLSearchParams({
     grant_type: "refresh_token",
@@ -261,11 +269,19 @@ export function isTokenExpired(tokenRecord, now = Date.now(), skewMs = TOKEN_EXP
 }
 
 export function summarizeStoredToken(config, tokenRecord = loadStoredToken(config), now = Date.now()) {
-  if (!tokenRecord) return { authenticated: false, tokenFile: config.tokenFile, tokenFilePresent: false };
+  const configSources = {
+    clientId: config.sources?.clientId || null,
+    authUrl: config.sources?.authUrl || null,
+    tokenUrl: config.sources?.tokenUrl || null,
+    scopes: config.sources?.scopes || null,
+    clientSecret: config.sources?.clientSecret || null,
+  };
+  if (!tokenRecord) return { authenticated: false, tokenFile: config.tokenFile, tokenFilePresent: false, configSources };
   return {
     authenticated: !isTokenExpired(tokenRecord, now),
     tokenFile: config.tokenFile,
     tokenFilePresent: true,
+    configSources,
     tokenType: tokenRecord.token_type || null,
     scope: tokenRecord.scope || null,
     expiresAt: tokenRecord.expires_at || null,
@@ -317,9 +333,15 @@ function resolveTokenFile(env, options) {
   return path.join(home, ".yeeflow", "codex-oauth-token.json");
 }
 
-function requireClientSecret(config) {
+export function assertOAuthClientSecretConfigured(config) {
   if (!config.clientSecret) {
-    throw new Error("YEEFLOW_OAUTH_CLIENT_SECRET is required for OAuth token exchange or refresh. Store it locally; do not paste it into chat.");
+    throw new Error(
+      [
+        "YEEFLOW_OAUTH_CLIENT_SECRET is required for the current OAuth token exchange or refresh implementation.",
+        "The client secret is private and must stay in .env.local; the plugin does not bundle secrets.",
+        "Implement PKCE/no-secret native OAuth later if this Yeeflow OAuth client can support public-client token exchange.",
+      ].join(" "),
+    );
   }
 }
 
@@ -332,10 +354,6 @@ function normalizeHttpsUrl(value, label) {
   }
   if (url.protocol !== "https:") throw new Error(`${label} must use https.`);
   return url.toString();
-}
-
-function nonEmpty(value, fallback) {
-  return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
 function base64Url(buffer) {

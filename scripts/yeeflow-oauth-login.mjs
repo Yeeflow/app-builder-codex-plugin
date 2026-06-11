@@ -2,6 +2,7 @@
 
 import { spawn } from "node:child_process";
 import {
+  assertOAuthClientSecretConfigured,
   buildAuthorizationUrl,
   createOAuthState,
   createPkcePair,
@@ -16,6 +17,7 @@ const args = new Set(process.argv.slice(2));
 loadLocalEnv(valueAfter("--dotenv", ".env.local"));
 
 const config = resolveOAuthConfig(process.env);
+assertOAuthClientSecretConfigured(config);
 const state = createOAuthState();
 const pkce = createPkcePair();
 const callbackServer = await startHttpsCallbackServer(config, { expectedState: state });

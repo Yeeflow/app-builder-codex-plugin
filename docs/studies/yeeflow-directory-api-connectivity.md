@@ -2,28 +2,27 @@
 
 ## Purpose
 
-`scripts/yeeflow-directory-connectivity-test.mjs` is a read-only smoke test for Yeeflow REST API access to basic directory and reference data. It verifies that Codex can load local credentials from `.env.local` and call the documented Yeeflow developer API without printing secrets or persisting raw responses.
+`scripts/yeeflow-directory-connectivity-test.mjs` is a legacy read-only API-key smoke test for Yeeflow REST API access to basic directory and reference data. New normal read-only API work should use the OAuth/API auth wrapper and mapped capability helper.
 
 The helper is also packaged as part of the `yeeflow-api-operator` skill, which is the preferred trigger when Codex/plugin users ask to use Yeeflow APIs for safe organization/reference-data lookup.
 
-## Required Environment
+## Environment
 
-The script expects these variables in `.env.local`:
+The current OAuth/API wrapper uses plugin defaults for the API base and prefers OAuth tokens. For normal read-only OAuth/API calls through the mapped capability helper, `YEEFLOW_API_KEY` is not required.
 
-- `YEEFLOW_API_KEY`
-- `YEEFLOW_API_BASE_URL`
-- `YEEFLOW_TENANT_URL` when tenant/app links are needed
+`.env.local` should contain only tenant/workspace values when needed:
 
-The standard API base URL is `https://api.yeeflow.com/v1`. The API key must only be loaded through `process.env.YEEFLOW_API_KEY` or the active profile key. The script reports only whether the key is present.
+- `YEEFLOW_WORKSPACE_ID` when package workspace operations are needed
+- `YEEFLOW_TENANT_URL` only when tenant/app links are needed
+- `YEEFLOW_OAUTH_CLIENT_SECRET` temporarily for OAuth login/refresh until PKCE/no-secret OAuth is implemented
+
+This legacy connectivity helper still requires a legacy API key if you choose to run it. The key must only be loaded through `process.env.YEEFLOW_API_KEY` or the active profile key. Scripts report only whether the key is present.
 
 ## How To Run
 
 From the repository root:
 
 ```bash
-set -a
-source .env.local
-set +a
 node scripts/yeeflow-directory-connectivity-test.mjs
 ```
 
@@ -59,7 +58,7 @@ That helper adds documented read-only checks for user detail, location detail, g
 
 ## API Base URL Behavior
 
-The current helper expects `YEEFLOW_API_BASE_URL` to be the shared API endpoint, normally `https://api.yeeflow.com/v1`. `YEEFLOW_TENANT_URL` is separate and is used only for tenant/app links such as `https://<yourdomain>.yeeflow.com`. `YEEFLOW_BASE_URL` is a legacy API base URL alias only and should not be used to mean tenant URL.
+The current helper uses the plugin default shared API endpoint, normally `https://api.yeeflow.com/v1`, unless `YEEFLOW_API_BASE_URL` is explicitly overridden for development/testing. `YEEFLOW_TENANT_URL` is separate and is used only for tenant/app links such as `https://<yourdomain>.yeeflow.com`. `YEEFLOW_BASE_URL` is a legacy API base URL alias only and should not be used to mean tenant URL.
 
 The script does not print the configured base URL. It reports base variants only as:
 
