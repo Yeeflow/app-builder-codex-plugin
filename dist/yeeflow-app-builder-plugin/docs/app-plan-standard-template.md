@@ -138,6 +138,18 @@ Custom list forms and public forms:
 | --- | --- | --- | --- | --- | --- |
 | <New/Edit/View/Public/Print form> | <Goal> | <Sections/controls> | <Buttons/actions> | <Required/read-only/rules> | proven/export-proven/partially proven/deferred |
 
+Custom list form field design:
+
+| Form | Section | Field ID | Display Name | Type | Binding | Required | Read Only | Default Value | Auto Fill / Source | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <New/Edit/View/Public/Print form> | <Section> | <field_id> | <Display Name> | <control type> | <list field/temp var> | Yes/No | Yes/No/Conditional | <Static/expression/current user/none> | <Lookup addition/current user/department/workflow/list value/none> | <User-facing purpose> |
+
+Custom list form field rules:
+
+- Each editable custom data-list form must state read-only behavior, default value behavior, and autofill/source behavior for every planned control.
+- View and print forms should mark display-only controls as read-only and hide or defer edit/add/delete actions unless intentionally interactive.
+- Defaults and autofill rules must name their source: static value, expression, current user, requester/applicant context, lookup addition, department/location/user metadata, workflow/list value, or deferred runtime configuration.
+
 Lookup dependencies:
 
 - <Source list> depends on <target list/display field>.
@@ -181,9 +193,9 @@ Normal form section template:
 - Purpose:
 - Layout: default/1-column/2-column/3-column/custom
 
-| Field ID | Display Name | Type | Binding | Required | Description |
-| --- | --- | --- | --- | --- | --- |
-| <field_id> | <Display Name> | <control type> | <list field/variable/temp var> | Yes/No | <User-facing purpose> |
+| Field ID | Display Name | Type | Binding | Required | Read Only | Default Value | Auto Fill / Source | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <field_id> | <Display Name> | <control type> | <list field/variable/temp var> | Yes/No | Yes/No/Conditional | <Static/expression/current user/none> | <Lookup addition/current user/department/workflow/list value/none> | <User-facing purpose> |
 
 Approval forms:
 
@@ -206,9 +218,9 @@ Approval form section template:
 - Purpose:
 - Layout: default/1-column/2-column/3-column/custom
 
-| Field ID | Display Name | Type | Binding | Required | Description |
-| --- | --- | --- | --- | --- | --- |
-| <field_id> | <Display Name> | <radio/daterange/switch/textarea/file-upload/identity-picker/dynamic-field/etc.> | <workflow variable/list field/output target> | Yes/No | <User-facing purpose> |
+| Field ID | Display Name | Type | Binding | Required | Read Only | Default Value | Auto Fill / Source | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <field_id> | <Display Name> | <radio/daterange/switch/textarea/file-upload/identity-picker/dynamic-field/etc.> | <workflow variable/list field/output target> | Yes/No | Yes/No/Conditional | <Static/expression/current user/none> | <Requester profile/lookup addition/user attribute/workflow value/none> | <User-facing purpose> |
 
 Workflow node table:
 
@@ -222,7 +234,8 @@ Workflow node table:
 Approval planning rules:
 
 - Each section must list layout and controls, not just form names.
-- Each control must state Field ID, Display Name, Type, Binding, Required, and Description.
+- Each control must state Field ID, Display Name, Type, Binding, Required, Read Only, Default Value, Auto Fill / Source, and Description.
+- Read-only, default value, and autofill rules must be explicit for applicant/profile fields, requester context, manager/department/location fields, lookup additions, calculated summaries, and task-only review fields.
 - Workflow nodes must list Step Name, Yeeflow node Type, email behavior, task/decision settings, and transition rules.
 - Applicant/profile sections can use a compact Field ID + Display Name table only when controls are read-only profile context.
 
