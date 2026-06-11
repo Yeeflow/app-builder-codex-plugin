@@ -2,7 +2,6 @@
 
 import { spawn } from "node:child_process";
 import {
-  assertOAuthClientSecretConfigured,
   buildAuthorizationUrl,
   createOAuthState,
   createPkcePair,
@@ -17,7 +16,6 @@ const args = new Set(process.argv.slice(2));
 loadLocalEnv(valueAfter("--dotenv", ".env.local"));
 
 const config = resolveOAuthConfig(process.env);
-assertOAuthClientSecretConfigured(config);
 const state = createOAuthState();
 const pkce = createPkcePair();
 const callbackServer = await startHttpsCallbackServer(config, { expectedState: state });
@@ -43,7 +41,11 @@ try {
     codeVerifier: pkce.codeVerifier,
   });
   const tokenFile = saveStoredToken(config, token);
-  console.log(`Yeeflow OAuth login succeeded. Token storage updated at ${tokenFile}`);
+  console.log(JSON.stringify({
+    loginSucceeded: true,
+    authFlow: token.oauth_flow || "unknown",
+    tokenFilePresent: Boolean(tokenFile),
+  }, null, 2));
 } catch (error) {
   console.error(error.message);
   process.exit(1);
