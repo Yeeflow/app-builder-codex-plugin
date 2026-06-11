@@ -60,10 +60,16 @@ Data updates caused by process steps:
 | Approval forms | Yes/No | <Approval form or deferred status> | proven/export-proven/partially proven/deferred | <Notes> |
 | Dashboards/pages | Yes/No | <Dashboard/page set> | proven/export-proven/partially proven/deferred | <Notes> |
 | Custom forms | Yes/No | <New/Edit/View/custom forms> | proven/export-proven/partially proven/deferred | <Notes> |
+| Data list views | Yes/No | <Default, filtered, grouped, calendar/kanban/gallery, or deferred views> | proven/export-proven/partially proven/deferred | <Notes> |
+| Data-list workflows | Yes/No | <Create/update/manual triggers, task flows, row updates, or deferred> | proven/export-proven/partially proven/deferred | <Notes> |
+| Scheduled workflows | Yes/No | <Schedule, query scope, actions, or deferred> | proven/export-proven/partially proven/deferred | <Notes> |
+| Notifications | Yes/No | <List reminders, workflow email, assignment notices, or deferred> | proven/export-proven/partially proven/deferred | <Delivery requires runtime proof> |
 | Print pages | Yes/No | <Print pages and reachability> | proven/export-proven/partially proven/deferred | <Notes> |
 | Document libraries/attachments | Yes/No | <Libraries, attachment fields, image fields> | proven/export-proven/partially proven/deferred | <Notes> |
 | Workflows/actions | Yes/No | <Status changes, form actions, workflow steps> | proven/export-proven/partially proven/deferred | <Notes> |
 | AI agents/copilots | Yes/No | <Agents, copilots, tools, or deferred> | proven/export-proven/partially proven/deferred | <Notes> |
+| Custom code/control | Yes/No | <Custom code control, custom CSS, native fallback, or deferred> | proven/export-proven/partially proven/deferred | <Use only when native controls are insufficient> |
+| Golden functions/references | Yes/No | <Reference exports, function refs, template IDs> | proven/export-proven/partially proven/deferred | <Notes> |
 | Integrations | Yes/No | <Connections/API records/post-import setup> | proven/export-proven/partially proven/deferred | <Notes> |
 | Permissions | Yes/No | <Roles, app groups, permission matrix> | proven/export-proven/partially proven/deferred | <Notes> |
 | Navigation | Yes/No | <Groups and entries> | proven/export-proven/partially proven/deferred | <Notes> |
@@ -114,9 +120,25 @@ Required views:
 - <Default view>
 - <Operational or filtered view>
 
+| View | View Type | Default | Columns/Fields | Filters/Sort/Grouping | Runtime Proof |
+| --- | --- | --- | --- | --- | --- |
+| <View> | Grid/Kanban/Calendar/Gallery/Timeline/Deferred | Yes/No | <Columns or card fields> | <Filter, sort, group rules> | proven/export-proven/partially proven/deferred |
+
+Custom list forms and public forms:
+
+| Form | Purpose | Sections | Actions | Validation | Proof Level |
+| --- | --- | --- | --- | --- | --- |
+| <New/Edit/View/Public/Print form> | <Goal> | <Sections/controls> | <Buttons/actions> | <Required/read-only/rules> | proven/export-proven/partially proven/deferred |
+
 Lookup dependencies:
 
 - <Source list> depends on <target list/display field>.
+
+List workflows and notifications:
+
+| Trigger/Event | Workflow or Notification | Actions/Recipients | Runtime-Sensitive Parts | Proof Level |
+| --- | --- | --- | --- | --- |
+| <New item/update/manual/date/schedule> | <Workflow/reminder/email> | <Row updates, tasks, QueryData, AI, MailTask, recipients> | <Delivery, row mutation, external call, AI call> | proven/export-proven/partially proven/deferred |
 
 Seed/sample rows:
 
@@ -129,6 +151,8 @@ Validation rules:
 - Choice fields use runtime-visible `Rules.choices`.
 - Lookup fields include selected display fields.
 - Sample data loads in dependency order.
+- Views, custom list forms, list workflows, and notifications are planned or explicitly deferred.
+- Notification configuration proof is separate from delivery proof.
 
 ## 8. Forms and Approval Forms
 
@@ -168,6 +192,7 @@ Repeat this subsection for each page or dashboard.
 
 - User goal:
 - Layout pattern:
+- Golden/template reference:
 - Sections:
 - Yeeflow controls:
 - Data bindings:
@@ -185,13 +210,14 @@ Layout rules:
 
 ## 10. UI/UX and Control Mapping
 
-| Page/Form | User Goal | Layout Pattern | Yeeflow Controls | Data Bindings | Actions | Styling / Quality Checks |
-| --- | --- | --- | --- | --- | --- | --- |
-| <Page/Form> | <Goal> | <Pattern> | <Controls> | <Lists/fields> | <Actions> | <Spacing, columns, item templates, bindings, responsive checks> |
+| Page/Form | User Goal | Layout Pattern | Golden/Template Reference | Yeeflow Controls | Data Bindings | Actions | Styling / Quality Checks |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Page/Form> | <Goal> | <Pattern> | <templateId/export/function ref> | <Controls> | <Lists/fields> | <Actions> | <Spacing, columns, item templates, bindings, responsive checks> |
 
 Hard rule:
 
 - Plans must map modern web-app UI patterns to Yeeflow controls. Do not plan only raw lists unless the app is intentionally simple and the user approved that scope.
+- If a requirement needs custom CSS or Custom code control, document why native controls are insufficient, the inputs/outputs, configuration parameters, maintenance owner, runtime test plan, and native fallback/deferred behavior.
 
 ## 11. Golden Template and Reference Strategy
 
@@ -201,14 +227,37 @@ Hard rule:
 - Controls or patterns to defer if no safe reference exists:
 - Rule: do not invent unproven runtime shapes.
 
+| Area | Required Function/Page/Layout | Golden Reference or Template ID | Proof Level | Validator/Check | Fallback or Deferred Rule |
+| --- | --- | --- | --- | --- | --- |
+| <Dashboard/list form/workflow/custom code/AI/report> | <Required pattern> | <Export, templateId, normalized reference, or docs path> | proven/export-proven/partially proven/deferred | <Script/manual check> | <Native fallback, staged build, or defer reason> |
+
+Reference rules:
+
+- Page and section layouts should reference the UI section template library when available.
+- Workflow, expression, AI Agent, Copilot, notification, data-view, and custom code features should cite their relevant export-proven or documented reference before generation.
+- Advanced controls without an export-proven or product-documented shape must be deferred or explicitly marked runtime-proof-required.
+
 ## 12. Actions and Workflow Logic
 
 - Safe generated actions:
 - Status transitions:
 - Approval decisions:
 - Automation rules:
+- Data-list workflows:
+- Scheduled workflows:
+- Workflow triggers:
+- Notification rules:
+- AI Agent/Copilot workflow actions:
+- External/API/email actions:
 - Deferred actions:
 - Runtime-proof requirements for advanced/bulk actions:
+
+Workflow planning rules:
+
+- Separate approval workflows, data-list workflows, scheduled workflows, and page/form actions.
+- For each workflow, state trigger, host resource, steps, variables, data reads/writes, notifications, AI calls, external calls, and stop/defer conditions.
+- QueryData, AI Assistant, MailTask/send email, HTTP/API, row update, bulk action, and scheduled execution require explicit proof level and runtime boundary.
+- Notification configuration can be export-proven, but delivery proof must be reported separately.
 
 ## 13. Permissions
 
@@ -233,11 +282,39 @@ Post-import configuration notes:
 Credential rule:
 
 - Never embed tenant URLs, API keys, webhook secrets, or private endpoints.
+- External connections, OAuth records, webhook destinations, API base URLs, and tenant-specific private endpoints must be configured post-import unless explicitly approved for a safe test tenant.
+
+### 14.x AI Agents, Copilots, and Knowledge Resources
+
+| Resource | Type | Purpose | Inputs/Outputs | Tools/Knowledge | App Resource Access | Human Review | Proof Level |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Agent/Copilot/Knowledge> | AI Agent/Copilot/Knowledge | <Goal> | <Variables/files/images> | <Local resources, connected Agent, connection, knowledge> | <Read/create/update scope> | Required/Not required | proven/export-proven/partially proven/deferred |
+
+AI planning rules:
+
+- Decide whether AI Agent, Copilot, knowledge, connected-Agent tools, local application resource access, file/image input, or workflow AI Assistant actions are required.
+- Document prompt/instruction purpose, allowed data access, create/update/read behavior, human-review boundaries, and runtime proof requirements.
+- Do not embed connection secrets or claim live AI/tool execution without focused runtime proof.
+
+### 14.y Custom Code, Custom CSS, and Advanced Components
+
+| Component | Host Page/Form | Requirement | Native Alternative Considered | Inputs/Outputs | Configuration | Runtime Test | Fallback |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Custom code/control/CSS> | <Surface> | <Why needed> | <Standard control/custom CSS/expression/action fallback> | <Params/events/results> | <Admin-editable settings> | <Browser/runtime check> | <Native/deferred fallback> |
+
+Custom code rules:
+
+- Prefer standard Yeeflow controls, expressions, workflow actions, and custom CSS before Custom code control.
+- Custom code must be planned with configuration, parameter wiring, expected outputs, security/privacy notes, maintainability notes, and runtime validation.
+- If custom code is deferred, identify the native fallback and user-visible limitation.
 
 ## 15. Document Libraries and Attachments
 
 - Required document libraries:
 - Attachment/image fields:
+- Document views and custom forms:
+- Dashboard/form document controls:
+- Folder rules and upload behavior:
 - Deferred document management items:
 
 ## 16. Reports and Analytics
@@ -254,6 +331,10 @@ Credential rule:
 - Default views include meaningful display columns.
 - Sample data exists where useful and loads in dependency order.
 - Required fields are marked and appear on relevant forms.
+- Required views, custom forms, public forms, and print pages are documented.
+- List workflows, scheduled workflows, notifications, and form actions have trigger/action/proof notes.
+- AI Agent/Copilot access scopes and knowledge/tool dependencies are documented or deferred.
+- Custom code/custom CSS dependencies have native fallback and runtime proof notes.
 - Formulas/statuses are modeled only where supported or explicitly deferred.
 - Dependency order is documented for lookup/sample rows.
 
@@ -305,7 +386,16 @@ Generator must prove:
 - planned reports exist
 - planned navigation exists
 - planned actions/workflows implemented or deferred
+- planned data-list views, custom list forms, public forms, and notifications implemented or deferred
+- planned scheduled workflows implemented or deferred
+- planned AI Agents, Copilots, knowledge resources, custom code, and custom CSS implemented or deferred
 - planned permissions/integrations implemented or deferred
+
+### Advanced Capability Gate
+
+- Custom code/control usage must match the plan, include native fallback/deferred notes, and require runtime proof before claiming behavior works.
+- Scheduled workflows, list workflows, notifications, AI Agent/Copilot actions, external/API/email actions, and row mutations must not be promoted from package-valid to runtime-proven without focused proof.
+- Golden/template references used by the plan must be cited in the generation report, and omitted planned references must be reported as deferred.
 
 ## 19. Generation Validation Plan
 
@@ -314,7 +404,12 @@ Generator must prove:
 - UI quality validation:
 - App-plan conformance validation:
 - Navigation validation:
+- Data-list views/forms/workflows/notifications validation:
 - Approval-form validation:
+- Scheduled workflow validation:
+- AI Agent/Copilot validation:
+- Custom code/custom CSS validation:
+- Golden/template conformance validation:
 - Signing validation:
 - Package wrapper validation:
 - Source/dist consistency validation:
@@ -330,6 +425,11 @@ Separate these proof levels:
 - API install/import acceptance:
 - Runtime materialization/render proof:
 - Workflow execution proof:
+- Scheduled workflow execution proof:
+- Notification delivery proof:
+- AI Agent/Copilot execution proof:
+- Custom code execution proof:
+- External integration execution proof:
 - Permission enforcement proof:
 
 ## 21. Assumptions
@@ -345,6 +445,7 @@ Separate these proof levels:
 - Anything not generated:
 - Anything generated but not runtime-proven:
 - Anything requiring browser/manual verification:
+- Anything requiring custom code, custom CSS, scheduled execution, notification delivery, AI execution, or external integration proof:
 - Anything requiring exact tenant IDs/users/configuration:
 
 ## 23. Recommended Next Prompt

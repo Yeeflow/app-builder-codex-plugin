@@ -100,7 +100,7 @@ business requirement
   -> export-back learning
 ```
 
-Prefer native Yeeflow list features first: fields, Rules, lookups, views, custom list forms, sample data, and list workflows only when truly needed.
+Prefer native Yeeflow list features first: fields, Rules, lookups, views, custom list forms, public forms, sample data, notifications, permissions, and list workflows only when truly needed. In a full application plan, each planned list should explicitly decide required views, default columns, filters/sorts/grouping, custom New/Edit/View/Public/Print forms, list workflows, notifications/reminders, permissions, sample rows, and dashboard/report consumers before generation.
 
 Data-view generation should follow `docs/studies/data-view-resource-settings.md` and the redacted refs under `docs/studies/normalized/data-views/`. Export-proven view rules from `Data Lists (1).yap`:
 

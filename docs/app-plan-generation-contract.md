@@ -4,7 +4,7 @@ Every generated Yeeflow application plan must follow `docs/app-plan-standard-tem
 
 `Generation Contract and Hard Gates` is binding for later YAPK/YAP generation and validation; it is not background guidance.
 
-Use this section in addition to the normal purpose, roles, process, lists/fields, forms, workflows, dashboards/pages, navigation, UI/UX mapping, permissions, integrations, assumptions, deferred items, and proof boundary sections.
+Use this section in addition to the normal purpose, roles, process, lists/fields, list views, custom list forms, list workflows, scheduled workflows, notifications, forms, dashboards/pages, navigation, UI/UX mapping, custom code/custom CSS decisions, AI Agent/Copilot decisions, golden references, permissions, integrations, assumptions, deferred items, and proof boundary sections.
 
 Northpeak reference note: `northpeak-resource-operations-plan.md` is the style reference for a complete plan because it uses numbered sections, plan status, target roles, process flow, navigation, detailed lists/fields, forms, dashboards/pages, UI/control mapping, golden template strategy, composition checklist, actions/workflow logic, permissions, integrations, document/attachment decisions, reports, validation, proof boundary, assumptions, deferred/runtime-proof items, and a recommended next prompt. Reuse that structure, not its business-specific content.
 
@@ -56,17 +56,36 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Planned navigation groups must exist: Yes/No
 - Planned print pages must be reachable or intentionally hidden: Yes/No
 - Planned workflows/actions must be implemented or explicitly deferred: Yes/No
+- Planned data-list views, custom list forms, public forms, and notifications must be implemented or explicitly deferred: Yes/No
+- Planned scheduled workflows must be implemented or explicitly deferred: Yes/No
+- Planned AI Agents, Copilots, knowledge resources, custom code, custom CSS, and golden/template references must be implemented or explicitly deferred: Yes/No
 - Planned permissions/integrations must be implemented or explicitly deferred: Yes/No
+
+### Advanced Capability Contract
+- Custom code/control required: Yes/No/Deferred
+- Custom CSS required: Yes/No/Deferred
+- Data-list workflows required: Yes/No/Deferred
+- Scheduled workflows required: Yes/No/Deferred
+- Notifications required: Yes/No/Deferred
+- AI Agent/Copilot/knowledge required: Yes/No/Deferred
+- Golden/template references named for each advanced feature: Yes/No
+- Runtime proof required before claiming execution/delivery works: Yes/No
 
 ### Proof Boundary Contract
 - App plan approval status:
 - Local schema validation status:
 - App-plan conformance status:
 - UI/control quality validation status:
+- Data-list views/forms/workflows/notifications validation status:
+- Scheduled workflow validation status:
+- AI Agent/Copilot validation status:
+- Custom code/custom CSS validation status:
+- Golden/template conformance status:
 - API signing status:
 - API signature verification status:
 - API install/import acceptance status:
 - Runtime UI inspection status:
+- Workflow/notification/AI/custom-code execution proof status:
 - Deferred items:
 - Known risks:
 
