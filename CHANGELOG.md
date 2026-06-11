@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.22
+
+- Restore safe development assets from the legacy Yeeflow Codex Plugins repo.
+- Preserve clean marketplace/plugin identity.
+- Keep OAuth, REST API capability map, guarded read-only helper, and write-blocking behavior.
+
 ## 2026-06-11
 
 - Restored safe development assets from the legacy `Yeeflow/yeeflow-codex-plugins` repository into the clean App Builder Codex Plugin repository.

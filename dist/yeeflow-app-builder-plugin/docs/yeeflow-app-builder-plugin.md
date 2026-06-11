@@ -8,7 +8,7 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.21-api-map.0
+- Version: 0.6.22
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities

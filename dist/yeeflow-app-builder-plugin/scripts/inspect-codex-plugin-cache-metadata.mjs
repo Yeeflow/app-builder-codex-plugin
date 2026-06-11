@@ -13,7 +13,7 @@ function argValue(name, fallback = null) {
 }
 
 const root = path.resolve(argValue("--root", process.cwd()));
-const expectedVersion = argValue("--expect-version", "0.6.21-api-map.0");
+const expectedVersion = argValue("--expect-version", "0.6.22");
 const expectedMarketplaceId = argValue("--expect-marketplace-id", "yeeflow");
 const expectedMarketplaceLabel = argValue("--expect-marketplace-label", "Yeeflow");
 const expectedPluginId = argValue("--expect-plugin-id", "yeeflow-app-builder");

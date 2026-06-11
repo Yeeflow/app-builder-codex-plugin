@@ -1,6 +1,6 @@
 # Navigation Conformance Standard
 
-Version: Official v0.6.21-api-map.0
+Version: Official v0.6.22
 
 Navigation and information architecture are part of the generated product, not decoration. Generated navigation must preserve the approved app plan's user intent.
 

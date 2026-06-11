@@ -6,7 +6,7 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.21-api-map.0`
+- Version: `0.6.22`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
 Install source:

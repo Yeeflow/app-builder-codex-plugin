@@ -1,6 +1,6 @@
 # YAP Approval Workflow PageUrl Standard
 
-Official version: 0.6.21-api-map.0
+Official version: 0.6.22
 
 ## Canonical Rule
 

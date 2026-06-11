@@ -1,6 +1,6 @@
 # App Plan Conformance Standard
 
-Version: Official v0.6.21-api-map.0
+Version: Official v0.6.22
 
 Generated Yeeflow applications must conform to the approved app plan. Schema validity, package validity, workflow graph validity, and UI materialization checks are necessary but not sufficient.
 
