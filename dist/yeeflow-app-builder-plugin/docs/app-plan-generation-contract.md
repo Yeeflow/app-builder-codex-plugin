@@ -1,8 +1,12 @@
 # App Plan Generation Contract
 
-Every generated Yeeflow application plan must include `Generation Contract and Hard Gates`. This section is binding for later YAPK/YAP generation and validation; it is not background guidance.
+Every generated Yeeflow application plan must follow `docs/app-plan-standard-template.md` unless the user explicitly requests a lightweight plan. Lightweight plans must still include `Generation Contract and Hard Gates`.
+
+`Generation Contract and Hard Gates` is binding for later YAPK/YAP generation and validation; it is not background guidance.
 
 Use this section in addition to the normal purpose, roles, process, lists/fields, forms, workflows, dashboards/pages, navigation, UI/UX mapping, permissions, integrations, assumptions, deferred items, and proof boundary sections.
+
+Northpeak reference note: `northpeak-resource-operations-plan.md` is the style reference for a complete plan because it uses numbered sections, plan status, target roles, process flow, navigation, detailed lists/fields, forms, dashboards/pages, UI/control mapping, golden template strategy, composition checklist, actions/workflow logic, permissions, integrations, document/attachment decisions, reports, validation, proof boundary, assumptions, deferred/runtime-proof items, and a recommended next prompt. Reuse that structure, not its business-specific content.
 
 ## Template
 
@@ -80,4 +84,4 @@ Use this section in addition to the normal purpose, roles, process, lists/fields
 
 ## Validation Expectation
 
-`scripts/validate-app-plan-conformance.mjs` must flag missing `Generation Contract and Hard Gates` coverage. Generation reports must keep local validation, API signing, API install/import acceptance, and runtime UI inspection as separate proof levels.
+Use `scripts/validate-app-plan-template.mjs <plan.md>` to check required Markdown headings and hard-gate text before package generation. Use `scripts/validate-app-plan-conformance.mjs` after package generation to compare the generated app against the approved plan. Generation reports must keep local validation, API signing, API install/import acceptance, and runtime UI inspection as separate proof levels.

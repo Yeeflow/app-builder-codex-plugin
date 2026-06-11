@@ -9,7 +9,13 @@ Schema-v2 carry-forward: Form Report child resources are list-like `CustomListMo
 
 Use this skill when a Yeeflow application needs Form Report resources or when studying/export-validating Form Report schema. A Form Report is an app-level reporting resource based on an approval form. It is not a standalone data list, does not own a workflow, and must not be treated as an editable record store.
 
+When participating in full application planning/generation, take Form Report requirements from the standard app plan's `Reports and Analytics`, `Capability Coverage Plan`, and `Generation Contract and Hard Gates` sections. Do not invent Form Reports outside the approved plan. If a planned report depends on an approval form that is deferred, mark the report deferred or external-dependency-bound in the plan and generation report.
+
 Current proof boundary: export-proven and validator-backed only from `docs/studies/form-report-resource.md` and normalized refs under `docs/studies/normalized/form-report/`. Do not claim runtime behavior until a focused import/open/designer/submission/export-back baseline passes.
+
+## FormNewReports Workflow Report Standard
+
+Product clarification for v0.6.9: `FormReports` is the legacy workflow report collection and is not required for generated YAPK apps. `FormNewReports` is the current workflow report collection. Generated workflow reports must be written to `FormNewReports`; validators must not require `FormReports`, but may allow it as legacy when old packages include it. A generated package with workflow report content only in legacy `FormReports` is invalid because current workflow reports must use `FormNewReports`.
 
 ## Export-Proven Shape
 
@@ -102,3 +108,29 @@ Stop and report if the export cannot be decoded, no source approval form resolve
 ## App Creation Rule Guardrails
 
 When generating a Form Report baseline that includes a source approval form, the source form must also satisfy app creation rules from `docs/studies/yeeflow-app-creation-rules.md`. Emit approval form `NoRule` as an object with `Prefix`, `StartIndex`, `CustomLength`, and `AutoIncrement`, and include `{index}` in `NoRule.Prefix`. Keep process keys alphanumeric/underscore only. Do not import a generated Form Report package when `validate-yap-package.js` or `scripts/inspect-app-creation-rules.mjs` reports generation-blocking app creation errors.
+
+<!-- data-list-document-library-fields-learning:start -->
+## Data List And Document Library Field Type Learning
+
+Use `docs/studies/data-list-document-library-field-types.md`, `docs/studies/normalized/data-list-fields/`, and `scripts/inspect-data-list-fields.mjs` before generating or validating broad Data List custom fields. `Data Lists (2).yap` export-proves the target Type `1` data lists `Data list with fields part A` and `Data list with fields part B` with 90 custom fields across `input`, `textarea`, `richtext`, `hyperlink`, `input_number`, `currency`, `percent`, `calculated-column`, `rate`, `switch`, `checkbox`, `radio`, `tag`, `datepicker`, `time`, `identity-picker`, `organization-picker`, `cost-center-picker`, `signer`, `file-upload`, `icon-upload`, `lookup`, `metadata`, `mutiple-metadata`, `location-picker`, `autonumber`, and `list`. `select` and `flowstatus` remain product-rule-backed/unproven in this export.
+
+Field generation must still pass the v0.5.12 app-creation gates: unique `DisplayName`, `FieldName`, and `InternalName`; `InternalName` matching `[A-Za-z0-9_]`; identifier length <= 255; and generated non-system `FieldName` suffix matching `FieldIndex`. Accept export-proven single metadata fields as `Type = "metadata"` with Bigint storage, even though the earlier product-team 28-type list only named `mutiple-metadata`.
+
+Use export-proven settings where relevant: choice `Rules.choices` and `color_choices`; numeric/currency/percent `displayThousandths`, `rounded-to`, `number_min`, `number_max`, `currencyCode`, `displayFormat`; picker `identity-maxselection`, `multiple`, `metadata-treeselect`, `parentId`; upload `maxsize`, `file_multiple`, `file_typeslimit`, `file_types`, `picture_size_limit`, `controlmultiple`; lookup `appid`, `listsetid`, `listid`, `listfield`, additions, filters, sorting, search, display style, and multiple; calculated columns `calculated_result` plus `calculated`; metadata `source` plus `categoryId`; tag `source`, `category`, `customTags`; autonumber `minDigits`, `startNum`, `prefix`, `suffix`; sub-list `list-variables[]`.
+
+Document Library custom-field applicability is product/user-understanding-backed only in this pass because no Type `16` document library was present. Keep Type `16` default fields and document upload rules from existing document-library studies, and do not claim runtime data-entry behavior for these field settings until focused import/open/field-creation tests pass.
+<!-- data-list-document-library-fields-learning:end -->
+
+<!-- data-list-custom-form-fields-learning:start -->
+## Data List Custom Form Boundary
+
+Data List custom list forms from `docs/studies/data-list-custom-form-fields.md` are normal editable/list-entry surfaces for Type `1` data lists. Do not transfer those custom form layouts, temp variables, or form actions into Form Report generation. Form Reports remain read/reporting-oriented Type `32` resources generated from approval-form submissions and should not receive editable Data List custom forms or Data List form actions unless a future Form Report export proves a distinct supported shape.
+<!-- data-list-custom-form-fields-learning:end -->
+
+<!-- yap-schema-standard-learning:start -->
+## YAP Schema Standard Guardrails
+
+Form Report packages must satisfy the same YAP schema-standard envelope as other app resources. The root `Item` and the matching Type `32` child resource for each Form Report must include `Defs` and `Layouts` arrays; empty arrays are valid, but `null` is invalid. Validate with `scripts/inspect-yap-schema-standard.mjs` before import attempts.
+
+Access app resource permission flags for Form Reports currently have a product conflict: `yap-schema.json` says `formReports` uses Read `8`, while the updated rules document says Submit `1`. Keep Form Report access-resource permission generation warning-level until product team clarifies. This does not resolve the separate Form Report field-source runtime diagnosis.
+<!-- yap-schema-standard-learning:end -->

@@ -17,7 +17,7 @@ If an approved app plan includes an approval workflow/form, do not ship `Forms: 
 
 Root navigation must use export-proven grouped shape `{ "Type": "classes", "list": [...] }`. Do not use local-only `children` or `Childs` navigation groups. Use `Type: 103` for dashboard/page entries, `Type: 105` with `ListID = Forms[].Key` for approval forms, and `Type: 1` with a valid child list ID for data lists. Every intended page/list/form must be visible in navigation or documented as hidden/deferred.
 
-For new generated app plans, require a `Generation Contract and Hard Gates` section before YAPK generation. Treat its output package, signing, approval-form, navigation, plan-to-package conformance, proof-boundary, and runtime inspection clauses as binding during content validation, signing, and handoff reporting.
+For new generated app plans, require the standard app-plan structure from `docs/app-plan-standard-template.md` when present, or a user-approved lightweight plan that still includes `Generation Contract and Hard Gates`, before YAPK generation. Treat its output package, signing, approval-form, navigation, plan-to-package conformance, proof-boundary, and runtime inspection clauses as binding during content validation, signing, and handoff reporting.
 
 ## YAPK Schema v5 Standard Additions
 
