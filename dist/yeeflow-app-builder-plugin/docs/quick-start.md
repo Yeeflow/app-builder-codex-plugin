@@ -12,7 +12,7 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.24`.
+Expected plugin: `Yeeflow App Builder` version `0.6.25`.
 
 ## Configure Local Environment
 
@@ -29,7 +29,7 @@ This minimal form is enough for package workspace context and normal API use whe
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.24
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.25
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```
