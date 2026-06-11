@@ -171,7 +171,7 @@ function baseWrapper(decoded = baseDecoded()) {
     Author: "regression",
     Date: "2026-06-01T00:00:00Z",
     Version: "0.0.0-test",
-    Sign: Buffer.alloc(32).toString("base64"),
+    Sign: Buffer.alloc(32, 1).toString("base64"),
   };
 }
 
@@ -262,6 +262,8 @@ try {
     ["dashboard Data table missing Field", "DASHBOARD_DATA_TABLE_DISPLAY_FIELD_BINDING_MISSING", (d) => { mutatePage(d, (page) => { delete page.children[0].children[0].children[1].attrs.listarr[0].Field; }); }],
     ["generated type text Text control", "NATIVE_TEXT_CONTROL_TYPE_INVALID", (d) => { mutatePage(d, (page) => { page.children[0].children[0].children[0].type = "text"; }); }],
     ["summary control on approval form", "SUMMARY_CONTROL_UNSUPPORTED_SURFACE", (d) => { d.Forms.push({ Title: "Approval", DefResource: JSON.stringify({ children: [{ type: "summary", name: "Summary - Invalid" }] }) }); }],
+    ["navigation group uses children", "NAVIGATION_GROUP_CHILDREN_UNSUPPORTED", (d) => { d.ListSet.LayoutView = JSON.stringify({ sort: [{ Title: "Requests", Type: "classes", children: [{ Title: "Dashboard", Type: 103, LayoutID: d.Pages[0].LayoutID }] }] }); }],
+    ["navigation approval target missing form key", "NAVIGATION_APPROVAL_FORM_TARGET_INVALID", (d) => { d.ListSet.LayoutView = JSON.stringify({ sort: [{ Title: "Requests", Type: "classes", list: [{ Title: "New Approval", Type: 105, ListID: "MISSING_FORM_KEY" }] }] }); }],
   ];
 
   for (const [name, code, mutator] of mutations) {
@@ -280,6 +282,10 @@ try {
   if (appId30BadResult.status === 0) throw new Error("AppID 30 with flowcraft should fail.");
   expectCode("AppID 30 with flowcraft", appId30BadResult, "YAPK_TABLECODE_SETTING_C_REQUIRED");
   cases.push({ case: "AppID 30 with flowcraft", expected: "YAPK_TABLECODE_SETTING_C_REQUIRED", status: "pass" });
+
+  const placeholderSignFile = writePackage(tempDir, "placeholder-sign", baseDecoded(), { Sign: Buffer.alloc(32).toString("base64") });
+  expectCode("placeholder Sign", run(["validate-yapk-package.js", placeholderSignFile]), "YAPK_SIGN_PLACEHOLDER");
+  cases.push({ case: "placeholder Sign", expected: "YAPK_SIGN_PLACEHOLDER", status: "pass" });
 
   const dataListDecoded = clone(baseDecoded());
   dataListDecoded.Childs[0].Layouts[0].LayoutView = JSON.stringify({ layout: [{ FieldID: id(10), FieldName: "Title", DisplayName: "Title", Order: 1, Mobile: 2, Show: true }], query: [] });

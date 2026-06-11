@@ -111,7 +111,7 @@ function wrapper(decoded) {
     Author: "regression",
     Date: "2026-06-03T00:00:00Z",
     Version: "0.0.0-test",
-    Sign: Buffer.alloc(32).toString("base64"),
+    Sign: Buffer.alloc(32, 1).toString("base64"),
   };
 }
 

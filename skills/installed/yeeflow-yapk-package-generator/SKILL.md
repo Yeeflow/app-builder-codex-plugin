@@ -9,6 +9,14 @@ description: Inspect, validate, compare, and plan Yeeflow .yapk existing-applica
 
 YAPK validation uses `schemas/yapk-schema.json`. YAP validation uses `schemas/yap-schema.json`. Do not hardcode versioned schema filenames in runtime logic. To update a product schema standard later, replace the canonical file contents while keeping these filenames unchanged. Keep YAP and YAPK schema standards separate: YAPK uses `AppExportPackageInfo`, Brotli `AppPackageInfo`, and `Childs[].Fields`; YAP uses the YAP wrapper, `[______gizp______]` gzip `ListExportResult`, `Defs`, and `SimplePortal`.
 
+## Leave Request Guardrails
+
+Leave Request runtime repair proved that local YAPK validation, API signing, API install acceptance, and runtime UI proof are separate gates. Never call a generated `.yapk` upload-ready, install-ready, or handoff-ready when `Sign` is still a placeholder or all-zero 32-byte value. When OAuth/API-key access is available, validate content, call `POST /utils/apppackage/setsign`, confirm the expected signature shape, call `POST /utils/apppackage/verifysign`, and report signing proof separately from schema and runtime proof.
+
+If an approved app plan includes an approval workflow/form, do not ship `Forms: []` unless the package is explicitly marked incomplete/staged and the user approves that scope. Generated approval forms must include request/task pages, workflow control panel, workflow history, encoded process `DefResource`, and workflow childshapes.
+
+Root navigation must use export-proven grouped shape `{ "Type": "classes", "list": [...] }`. Do not use local-only `children` or `Childs` navigation groups. Use `Type: 103` for dashboard/page entries, `Type: 105` with `ListID = Forms[].Key` for approval forms, and `Type: 1` with a valid child list ID for data lists. Every intended page/list/form must be visible in navigation or documented as hidden/deferred.
+
 ## YAPK Schema v5 Standard Additions
 
 YAPK validation uses `schemas/yapk-schema.json`, which now contains v5 schema content. The `x-yeeflow-standard-additions` section is actionable and not optional. Generated YAPK output must strictly follow those standards before signing, install dry-run, upgrade check, upgrade apply, or handoff. Package generation must stop if the generated output violates `schemas/yapk-schema.json` or any enforceable standard addition. API install success is not runtime render proof; report local validation, API acceptance, queued import, and runtime materialization/render proof as separate scopes.
