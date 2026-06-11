@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.24
+
+- Bump the active plugin version after the OAuth environment defaults merge.
+- Document plugin-provided fixed API/OAuth defaults and the reduced `.env.local` model.
+- Keep OAuth as the preferred API auth path, preserve legacy/deprecated API-key fallback, and keep client secrets local-only.
+
 ## 0.6.23
 
 - Add the standard Yeeflow application plan template and generation contract.
