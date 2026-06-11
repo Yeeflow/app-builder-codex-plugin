@@ -1,6 +1,6 @@
 # <Application Name> - Yeeflow Application Plan
 
-Use this template for every full Yeeflow application creation plan unless the user explicitly requests a lightweight plan. Lightweight plans must still include section 18, `Generation Contract and Hard Gates`.
+Use this template for every full Yeeflow application creation plan unless the user explicitly requests a lightweight plan. A lightweight plan is allowed only when the user explicitly asks for a quick outline. It must still include a minimum contract: Data Model and Lists, Forms and Approval Forms, Application Navigation, UI/UX and Control Mapping, Generation Contract and Hard Gates, Proof Boundary, and Assumptions/Deferred Items.
 
 Reference style: `northpeak-resource-operations-plan.md` is a good example because it uses numbered sections, concrete data models, UI/control mapping, validation boundaries, deferred items, and a ready next prompt. Do not copy its business-specific resource operations content into unrelated plans.
 

@@ -32,6 +32,8 @@ const REQUIRED_HEADINGS = [
 const REQUIRED_PATTERNS = [
   ["PLAN_STATUS_PLANNING_PLUGIN", /Planning plugin:/i],
   ["PLAN_STATUS_PACKAGE_TARGET", /Package target:/i],
+  ["LIGHTWEIGHT_PLAN_MINIMUM", /lightweight plan is allowed only when the user explicitly asks for a quick outline/i],
+  ["LIGHTWEIGHT_PLAN_REQUIRED_SECTIONS", /Data Model and Lists, Forms and Approval Forms, Application Navigation, UI\/UX and Control Mapping, Generation Contract and Hard Gates, Proof Boundary, and Assumptions\/Deferred Items/i],
   ["PURPOSE_SUCCESS_RUNTIME_EXPERIENCE", /successful runtime experience/i],
   ["ROLES_TABLE", /\|\s*Role\s*\|\s*Purpose\s*\|\s*Main Permissions/i],
   ["CAPABILITY_TABLE", /\|\s*Capability\s*\|\s*Required\s*\|\s*Planned Implementation\s*\|\s*Proof Level/i],

@@ -1,6 +1,6 @@
 # App Plan Generation Contract
 
-Every generated Yeeflow application plan must follow `docs/app-plan-standard-template.md` unless the user explicitly requests a lightweight plan. Lightweight plans must still include `Generation Contract and Hard Gates`.
+Every generated Yeeflow application plan must follow `docs/app-plan-standard-template.md` unless the user explicitly requests a lightweight plan. A lightweight plan is allowed only when the user explicitly asks for a quick outline. Lightweight plans must still include Data Model and Lists, Forms and Approval Forms, Application Navigation, UI/UX and Control Mapping, Generation Contract and Hard Gates, Proof Boundary, and Assumptions/Deferred Items.
 
 `Generation Contract and Hard Gates` is binding for later YAPK/YAP generation and validation; it is not background guidance.
 
