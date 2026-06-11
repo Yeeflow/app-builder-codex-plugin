@@ -104,10 +104,18 @@ Purpose:
 
 - <Why the list exists>
 
-| Field | Type | Required | Example/Values | Notes |
-| --- | --- | --- | --- | --- |
-| Title | Text | Yes | <Primary label> | Retain native `Title`; do not replace with generated `Text0`. |
-| <Field> | <Type> | Yes/No | <Values> | <Rules, lookup display fields, or validation> |
+| Field Name | Display Name | Type | Required | IsUnique | Placeholder | Example/Values | Description | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Title | Title | Text | Yes | No | <Primary label> | <Primary label> | Native primary label for the record. | Retain native `Title`; do not replace with generated `Text0`. |
+| <FieldName> | <Display Name> | <Yeeflow/user-facing type> | Yes/No | Yes/No | <Placeholder/help text> | <Choices/examples> | <Business purpose and usage> | <Rules, lookup display fields, validation, or storage notes> |
+
+Field planning rules:
+
+- Use stable internal `Field Name` values and human-readable `Display Name` values.
+- Include placeholder/help text for fields users will edit.
+- Include business descriptions so generator choices are not based only on labels.
+- For choice fields, list the available options in `Example/Values` or `Notes`.
+- For user, department, location, lookup, attachment, image, currency, date/date-time, and calculated/status fields, state the runtime proof level or deferred fallback where relevant.
 
 Default display columns:
 
@@ -166,6 +174,17 @@ Normal forms:
 - Actions:
 - Validation:
 
+Normal form section template:
+
+#### SECTION: <Section Name>
+
+- Purpose:
+- Layout: default/1-column/2-column/3-column/custom
+
+| Field ID | Display Name | Type | Binding | Required | Description |
+| --- | --- | --- | --- | --- | --- |
+| <field_id> | <Display Name> | <control type> | <list field/variable/temp var> | Yes/No | <User-facing purpose> |
+
 Approval forms:
 
 ### 8.y <Approval Form Name>
@@ -179,6 +198,33 @@ Approval forms:
 - Workflow history required: Yes/No
 - DefResource required: Yes/No
 - If deferred, mark app as staged/incomplete and require user approval: Yes/No
+
+Approval form section template:
+
+#### SECTION: <Section Name>
+
+- Purpose:
+- Layout: default/1-column/2-column/3-column/custom
+
+| Field ID | Display Name | Type | Binding | Required | Description |
+| --- | --- | --- | --- | --- | --- |
+| <field_id> | <Display Name> | <radio/daterange/switch/textarea/file-upload/identity-picker/dynamic-field/etc.> | <workflow variable/list field/output target> | Yes/No | <User-facing purpose> |
+
+Workflow node table:
+
+| Step Name | Type | Description | Email Enabled | Task/Decision Settings | Transition Rules |
+| --- | --- | --- | --- | --- | --- |
+| Start Event | StartNoneEvent | <How the workflow starts> | true/false | <Submit settings> | <Next step on submission> |
+| <Approval Task> | MultiAssignmentTask | <Who reviews and what they decide> | true/false | <Task type, assignment, quick completion, due date/reminders> | <Approved/Rejected/other transitions> |
+| End Event | EndNoneEvent | <Successful completion> | true/false | <End behavior> | N/A |
+| End with Rejection | EndRejectEvent | <Rejected completion> | true/false | <End behavior> | N/A |
+
+Approval planning rules:
+
+- Each section must list layout and controls, not just form names.
+- Each control must state Field ID, Display Name, Type, Binding, Required, and Description.
+- Workflow nodes must list Step Name, Yeeflow node Type, email behavior, task/decision settings, and transition rules.
+- Applicant/profile sections can use a compact Field ID + Display Name table only when controls are read-only profile context.
 
 Hard rule:
 
