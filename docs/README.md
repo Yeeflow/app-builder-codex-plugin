@@ -26,6 +26,7 @@ Sparse paths:
 - [Environment configuration](environment-configuration.md)
 - [Browser OAuth login](browser-oauth-login.md)
 - [Yeeflow REST API capability map](yeeflow-rest-api-capability-map.md)
+- [Local development policy](local-development-policy.md)
 - [Release hygiene](release-hygiene.md)
 - [Managed app connector design](yeeflow-codex-managed-app-connector.md)
 
