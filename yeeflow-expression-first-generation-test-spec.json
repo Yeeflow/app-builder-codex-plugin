@@ -1,0 +1,99 @@
+{
+  "name": "Yeeflow Expression First Generation Test",
+  "status": "planned",
+  "doNotGenerateInThisPass": true,
+  "resources": {
+    "app": "Expression Controls Test",
+    "dataLists": [
+      {
+        "name": "Products",
+        "purpose": "internal lookup source",
+        "fields": [
+          "Title",
+          "Product Code",
+          "Unit Price",
+          "Active"
+        ]
+      },
+      {
+        "name": "Expression Test Requests",
+        "purpose": "ContentList target",
+        "fields": [
+          "Title",
+          "Quantity",
+          "Unit Price",
+          "Subtotal",
+          "Amount",
+          "Reason",
+          "Required Date",
+          "Selected Product",
+          "Approval Status"
+        ]
+      }
+    ],
+    "approvalForm": {
+      "name": "Expression Test Request",
+      "freshFlowKeyRequired": true,
+      "dataFormsListId": 0
+    }
+  },
+  "expressionScenarios": [
+    {
+      "id": "subtotal",
+      "context": "calculated-control",
+      "goal": "Quantity * Unit Price",
+      "expectedValueType": "number",
+      "editorEntryPoint": "Calculation control Expression field/Edit button"
+    },
+    {
+      "id": "show-reason",
+      "context": "dynamic-display",
+      "goal": "Amount > 10000",
+      "expectedValueType": "boolean",
+      "editorEntryPoint": "Control settings Dynamic display rules button"
+    },
+    {
+      "id": "required-date-not-past",
+      "context": "custom-validation",
+      "goal": "dateDiff(Required Date, now(), day, false) >= 0",
+      "expectedValueType": "boolean",
+      "editorEntryPoint": "Field Validation section Custom validation button"
+    },
+    {
+      "id": "active-product-filter",
+      "context": "lookup-filter",
+      "goal": "Active == true",
+      "expectedValueType": "boolean",
+      "editorEntryPoint": "Lookup/data source Data filters Condition button"
+    },
+    {
+      "id": "finance-route",
+      "context": "workflow-transition-condition",
+      "goal": "Total Amount >= 5000",
+      "expectedValueType": "boolean",
+      "editorEntryPoint": "Workflow sequence/transition arrow Condition button"
+    },
+    {
+      "id": "request-number",
+      "context": "default-value-or-set-variable",
+      "goal": "concat or &: REQ-dateFormat(now(), YYYYMMDD)-UniqueID()",
+      "expectedValueType": "text",
+      "editorEntryPoint": "Default value or workflow SetVariable/action expression field when export-backed"
+    }
+  ],
+  "stopConditions": [
+    "expression wrapper shape for a context is not export-backed",
+    "validator reports structurally invalid expression JSON",
+    "lookup/data filter context cannot resolve a source field",
+    "workflow condition cannot be mapped to a proven SequenceFlow condition shape"
+  ],
+  "enrichmentNotes": {
+    "expressionKnowledgeBase": "yeeflow-expression-function-knowledge-base.normalized.json",
+    "uiContextsDocumented": "docs/yeeflow-expression-editor-ui-contexts.md",
+    "keepFirstRuntimeTestFocusedOnProvenFunctions": true,
+    "deferredObservedFunctions": [
+      "addWorkDays",
+      "addWorkHours"
+    ]
+  }
+}

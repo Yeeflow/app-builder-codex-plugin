@@ -1,0 +1,110 @@
+{
+  "name": "Smart Lookup Picker Custom Code Runtime Test",
+  "status": "passed_with_unexecuted_negative_and_public_cases",
+  "evidenceBoundary": "Runtime import and positive dashboard, approval-form, and data-list custom-form tests completed on 2026-05-18 in <yourdomain>.yeeflow.com. Public-form, negative missing-config, no-result, and full reviewer-task tests were not executed.",
+  "sourceExport": "/Users/Renger/Downloads/Demo (Custom Code).yap",
+  "generatedPackage": "/Users/Renger/Documents/Codex Projects/AI Agent and Copilot templates/custom-code-smart-lookup-picker-test.v1.yap",
+  "runtimeApp": {
+    "name": "Custom Code Smart Lookup Picker Test",
+    "urlBase": "https://<yourdomain>.yeeflow.com/",
+    "importedAppId": "2056064146070061056",
+    "dashboardUrl": "https://<yourdomain>.yeeflow.com/#/list-set/<workspace-id>/<app-id>/<resource-id>",
+    "dataListUrl": "https://<yourdomain>.yeeflow.com/#/list-set/<workspace-id>/<app-id>/<resource-id>",
+    "approvalFormUrl": "https://<yourdomain>.yeeflow.com/#/list-set/<workspace-id>/<app-id>/<resource-id>"
+  },
+  "script": "/Users/Renger/Documents/Codex Projects/Yeeflow Custom Code_26/templates/smart-lookup-picker/smart-lookup-picker.tsx",
+  "contexts": [
+    {
+      "id": "dashboard",
+      "status": "passed",
+      "page": "smart-lookup-picker",
+      "controlId": "d99fa701-09d4-411c-b173-c4ea3b2b95cf",
+      "runtimeEvidence": {
+        "selectedDisplay": "Acme Clinical Partner",
+        "selectedValue": "2056064152752766976",
+        "observedOutput": "[{\"display\":\"Acme Clinical Partner\",\"value\":\"2056064152752766976\",\"isManual\":false,\"source\":\"selected\"}][\"2056064152752766976\"][]",
+        "notes": "Dashboard picker rendered, source lookup searched successfully, and __temp_ output bindings updated visibly."
+      },
+      "requiredEvidence": [
+        "dashboard page opens",
+        "custom code control renders",
+        "search query returns expected list records",
+        "dashboard temp variable writeback is observable"
+      ]
+    },
+    {
+      "id": "approval_form",
+      "status": "passed",
+      "form": "Test Picker",
+      "formKey": "TP_Test",
+      "controlId": "fe7d181d-d75f-4d7f-88de-c8e41ebd4f8b",
+      "runtimeEvidence": {
+        "runtimeFormKey": "SLPTEST",
+        "submittedRequestId": "SLPTEST2026051700001",
+        "selectedDisplay": "Beacon Research Vendor",
+        "selectedValue": "2056064152752766977",
+        "combinedJson": "[{\"display\":\"Beacon Research Vendor\",\"value\":\"2056064152752766977\",\"isManual\":false,\"source\":\"selected\"}]",
+        "selectedValues": "[\"2056064152752766977\"]",
+        "manualValues": "[]",
+        "notes": "Submit form rendered and selection wrote __variables_ outputs. Submission succeeded and request detail view persisted the mapped values."
+      },
+      "requiredEvidence": [
+        "submit page opens",
+        "custom code control renders",
+        "selection writes to approval variables",
+        "submission succeeds",
+        "task/readonly behavior is safe"
+      ]
+    },
+    {
+      "id": "data_list_form",
+      "status": "passed",
+      "list": "Event Planning",
+      "form": "New Item",
+      "controlId": "893b7e87-ec77-4149-bea6-9eb5b511091c",
+      "runtimeEvidence": {
+        "runtimeList": "Smart Lookup Test Records",
+        "savedTitle": "List picker runtime Acme",
+        "selectedDisplay": "Acme Clinical Partner",
+        "selectedValue": "2056064152752766976",
+        "combinedJson": "[{\"display\":\"Acme Clinical Partner\",\"value\":\"2056064152752766976\",\"isManual\":false,\"source\":\"selected\"}]",
+        "selectedValues": "[\"2056064152752766976\"]",
+        "manualValues": "[]",
+        "notes": "New item custom form rendered and selection wrote __list_ outputs. Saving created a row with persisted combined JSON visible in the list grid."
+      },
+      "requiredEvidence": [
+        "custom form opens",
+        "custom code control renders",
+        "selection writes to configured list fields",
+        "record save persists output values"
+      ]
+    },
+    {
+      "id": "public_form",
+      "includedInExport": false,
+      "status": "not_tested",
+      "requiredEvidence": [
+        "public form export includes codein control",
+        "public form opens without authenticated-only assumptions",
+        "query permissions are safe",
+        "writeback behavior is safe"
+      ]
+    }
+  ],
+  "testCases": [
+    { "id": "SLP-001", "context": "dashboard", "goal": "control renders", "expected": "Picker label/input renders with no console error", "status": "passed" },
+    { "id": "SLP-002", "context": "dashboard", "goal": "parameters pass correctly", "expected": "Known Title search returns suggestions", "status": "passed" },
+    { "id": "SLP-003", "context": "dashboard", "goal": "selection/writeback", "expected": "Combined, selected-only, and manual-only outputs update temp variables where observable", "status": "passed" },
+    { "id": "SLP-004", "context": "dashboard", "goal": "manual entry", "expected": "Manual chip and manual output update", "status": "not_run" },
+    { "id": "SLP-005", "context": "approval_form", "goal": "control renders", "expected": "Picker renders on submit page with no console error", "status": "passed" },
+    { "id": "SLP-006", "context": "approval_form", "goal": "lookup behavior", "expected": "Selected chip appears and matched output variable updates", "status": "passed" },
+    { "id": "SLP-007", "context": "approval_form", "goal": "submission/persistence", "expected": "Submission succeeds and mapped variables retain expected outputs", "status": "passed" },
+    { "id": "SLP-008", "context": "approval_form", "goal": "task page behavior", "expected": "Readonly/task context does not mutate unexpectedly", "status": "partially_covered" },
+    { "id": "SLP-009", "context": "data_list_form", "goal": "control renders", "expected": "Picker renders in Event Planning New Item form", "status": "passed" },
+    { "id": "SLP-010", "context": "data_list_form", "goal": "list field writeback", "expected": "Configured list fields persist expected outputs after save", "status": "passed" },
+    { "id": "SLP-011", "context": "public_form", "goal": "compatibility", "expected": "Deferred until public-form export/runtime proof exists", "status": "not_tested" },
+    { "id": "SLP-012", "context": "negative", "goal": "missing required config", "expected": "Control does not crash and shows safe incomplete-config behavior", "status": "not_run" },
+    { "id": "SLP-013", "context": "negative", "goal": "no result", "expected": "No-result text appears without console error", "status": "not_run" },
+    { "id": "SLP-014", "context": "readonly", "goal": "readonly mode", "expected": "Control is non-mutating in readonly context", "status": "partially_covered" }
+  ]
+}

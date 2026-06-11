@@ -1,0 +1,74 @@
+{
+  "appName": "Expression Sublist Summary Workflow Test v1",
+  "purpose": "Runtime proof for sublist current-object expressions, summary binding, and workflow routing from summary-bound numeric variables.",
+  "resources": {
+    "dataLists": [
+      {
+        "name": "Sublist Summary Workflow Requests",
+        "fields": [
+          { "name": "Request Title", "fieldName": "Title", "nativeTitle": true },
+          { "name": "Total Amount", "fieldName": "Decimal1", "type": "Decimal" },
+          { "name": "Quantity Sum", "fieldName": "Decimal2", "type": "Decimal" },
+          { "name": "Average Unit Price", "fieldName": "Decimal3", "type": "Decimal" },
+          { "name": "Workflow Route", "fieldName": "Text1", "type": "Text" },
+          { "name": "Line Items Summary", "fieldName": "Text2", "type": "Text" },
+          { "name": "Approval Status", "fieldName": "Text3", "type": "Text" },
+          { "name": "Created From Workflow", "fieldName": "Bit1", "type": "Bit" }
+        ]
+      }
+    ],
+    "approvalForms": [
+      {
+        "name": "Expression Sublist Summary Workflow Test v1",
+        "flowKey": "ESSW1",
+        "listId": 0,
+        "variables": [
+          "RequestTitle",
+          "Requester",
+          "LineItems",
+          "TotalAmount",
+          "TotalQuantity",
+          "AverageUnitPrice",
+          "LineItemsSummary",
+          "DecisionNotes"
+        ],
+        "listref": {
+          "variable": "LineItems",
+          "fields": [
+            "LineProduct",
+            "LineQuantity",
+            "LineUnitPrice",
+            "LineSubTotal",
+            "LineNote"
+          ],
+          "calculatedField": {
+            "field": "LineSubTotal",
+            "expression": "Current object:Quantity * Current object:Unit Price"
+          },
+          "summaries": [
+            { "field": "LineQuantity", "type": "total", "display": true, "binding": "TotalQuantity" },
+            { "field": "LineUnitPrice", "type": "avg", "display": true, "binding": "AverageUnitPrice" },
+            { "field": "LineSubTotal", "type": "total", "display": true, "binding": "TotalAmount" }
+          ]
+        }
+      }
+    ]
+  },
+  "workflow": {
+    "routingVariable": "TotalAmount",
+    "branches": [
+      { "condition": "TotalAmount > 5000", "task": "Department Manager Approval", "persistedRoute": "Department Manager Approval" },
+      { "condition": "TotalAmount <= 5000", "task": "Line Manager Approval", "persistedRoute": "Line Manager Approval" }
+    ]
+  },
+  "validation": [
+    "node --check generator",
+    "expression smoke tests",
+    "validate-yap-package",
+    "validate-yap-graph",
+    "validate-ywf-def",
+    "validate-ydl-list",
+    "workflow-action-config-validator",
+    "build-yap-wrapper round trip"
+  ]
+}

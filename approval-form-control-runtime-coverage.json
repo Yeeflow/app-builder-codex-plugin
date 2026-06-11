@@ -1,0 +1,132 @@
+{
+  "updatedAt": "2026-05-14",
+  "sourceStudy": "docs/ai-training-approval-form-control-study.md",
+  "runtimeBaselines": [
+    "docs/generated-approval-form-controls-test-baseline.md",
+    "docs/generated-approval-form-controls-test-v2-baseline.md",
+    "docs/generated-approval-form-controls-test-v3-baseline.md",
+    "docs/generated-approval-form-controls-test-v4-baseline.md",
+    "docs/generated-approval-form-controls-test-v6-baseline.md"
+  ],
+  "statusLegend": {
+    "proven": "Generated package imported, rendered, submitted, approved, and persisted at least one representative value when applicable.",
+    "partially_proven": "Generated package imported and rendered the control, but value entry or persistence was not fully exercised.",
+    "schema_supported_but_untested": "Normalized schema or export anatomy exists, but no focused generated runtime package has proved it yet.",
+    "runtime_sensitive": "Export-backed anatomy exists but depends on environment metadata, uploads, advanced sources, or unresolved runtime behavior.",
+    "deferred": "Do not generate by default until a focused export/import proof exists."
+  },
+  "consolidatedCoverage": {
+    "runtimeProvenControls": [
+      "input",
+      "textarea",
+      "input_number",
+      "currency",
+      "percent",
+      "checkbox",
+      "switch",
+      "datepicker",
+      "time",
+      "file-upload",
+      "icon-upload",
+      "identity-picker",
+      "lookup",
+      "list",
+      "rate",
+      "hyperlink",
+      "calculated",
+      "workflowControlPanel",
+      "workflowHistory"
+    ],
+    "partiallyProvenControls": [
+      "richtext",
+      "radio",
+      "daterange",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker"
+    ],
+    "deferredControls": [
+      "metadata",
+      "mutiple-metadata",
+      "lookup-list",
+      "data-list",
+      "signer",
+      "tag",
+      "aktabs"
+    ],
+    "persistenceSafeControls": [
+      "input",
+      "textarea",
+      "input_number",
+      "currency",
+      "percent",
+      "checkbox",
+      "switch",
+      "datepicker",
+      "time",
+      "identity-picker as text-summary",
+      "lookup via addition/summary variables",
+      "list via text summary",
+      "rate",
+      "hyperlink",
+      "calculated",
+      "file-upload/icon-upload as text-summary proof only"
+    ],
+    "renderOnlyOrSelectionOnlyControls": [
+      "richtext",
+      "radio",
+      "daterange list-view persistence",
+      "organization-picker",
+      "location-picker",
+      "cost-center-picker",
+      "file-upload binary list persistence",
+      "icon-upload binary list persistence"
+    ],
+    "requiresAutofillOrSummaryVariables": [
+      "lookup",
+      "list/listref",
+      "file-upload",
+      "icon-upload",
+      "identity/organization/location/cost-center pickers when direct native persistence is not proven"
+    ],
+    "notes": [
+      "Stage 5 metadata/tag controls were intentionally skipped.",
+      "Stage 6 proved raw lookup-to-text persistence stores the internal local row ID; use attrs.addition[] or explicit summary variables for readable persistence.",
+      "Direct list/listref child-row persistence is not proven; persist a summary or generate a separate child list after export-backed proof."
+    ]
+  },
+  "controls": [
+    { "controlType": "input", "variableType": "text", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Submitted Request Title and persisted it to Title.", "requiredFutureTest": "None for basic single-line text.", "recommendedFallback": null },
+    { "controlType": "textarea", "variableType": "text", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Rendered on submit and review pages; reviewer notes textarea rendered.", "requiredFutureTest": "Exercise persistence of long text in a later form-focused package if needed.", "recommendedFallback": "input for short text only." },
+    { "controlType": "richtext", "variableType": "text", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "partially_proven", "reason": "Rich text editor rendered after loading, but no rich text value was entered or persisted.", "requiredFutureTest": "Enter formatted rich text and verify review rendering plus persistence/fallback field shape.", "recommendedFallback": "textarea until rich text value persistence is fully proven." },
+    { "controlType": "input_number", "variableType": "number", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Quantity accepted numeric input and persisted to Decimal field.", "requiredFutureTest": "None for basic decimal input.", "recommendedFallback": null },
+    { "controlType": "currency", "variableType": "number", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Unit Price rendered with USD formatting, accepted input, supported calculation, and participated in persistence.", "requiredFutureTest": "Multi-currency formatting variants can be tested separately.", "recommendedFallback": "input_number with currency label if formatting is not required." },
+    { "controlType": "percent", "variableType": "number", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "v2 accepted 25.00%, displayed it as 25.00% on the review task, participated in calculation, and persisted it to the list view.", "requiredFutureTest": "None for basic percent input.", "recommendedFallback": "input_number with percent label." },
+    { "controlType": "radio", "variableType": "text", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "partially_proven", "reason": "Dropdown radio rendered in v1 but was not filled in the runtime submission.", "requiredFutureTest": "Enter/select a value and verify text persistence in a choice-focused package.", "recommendedFallback": "input text field." },
+    { "controlType": "checkbox", "variableType": "text", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Checkbox rendered, Laptop was selected, review page showed it, and ContentList persisted a JSON-like array string.", "requiredFutureTest": "Study cleaner multi-choice list-view display if required.", "recommendedFallback": "single text field with comma-delimited choices." },
+    { "controlType": "switch", "variableType": "boolean", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Switch rendered and persisted OFF/ON-compatible Bit value shape.", "requiredFutureTest": "None for basic boolean switch.", "recommendedFallback": null },
+    { "controlType": "datepicker", "variableType": "date", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Needed By date rendered and persisted to Datetime field.", "requiredFutureTest": "Date-time mode can be isolated if required.", "recommendedFallback": "input text only when native date is unavailable." },
+    { "controlType": "daterange", "variableType": "date", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "partially_proven", "reason": "v2 accepted from/to dates and displayed them on the approval task; list-view persistence was not exposed in the selected display fields.", "requiredFutureTest": "Expose both mapped Datetime fields in a later package/list view and verify persisted from/to values.", "recommendedFallback": "two separate datepicker controls." },
+    { "controlType": "time", "variableType": "date", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "proven", "reason": "v2 accepted 10:30:00, displayed it on the approval task, and persisted it to the list view.", "requiredFutureTest": "None for basic time input.", "recommendedFallback": "input text time field." },
+    { "controlType": "file-upload", "variableType": "file", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "v3 rendered the file-upload control, accepted yeeflow-upload-stage3-test.txt, submitted successfully, displayed the uploaded file on the submitted request and reviewer task, completed approval, and created the text persistence record.", "requiredFutureTest": "Only binary ContentList/data-list persistence remains deferred; workflow form upload usage is proven.", "recommendedFallback": "textarea for external file link when binary upload is not needed." },
+    { "controlType": "icon-upload", "variableType": "img", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "proven", "reason": "v3 rendered the icon/image upload control, accepted yeeflow-upload-stage3-test.png, showed the image preview on the submitted request and reviewer task, completed approval, and created the text persistence record.", "requiredFutureTest": "Only binary ContentList/data-list persistence remains deferred; workflow form image upload usage is proven.", "recommendedFallback": "file-upload or text URL when image preview is not required." },
+    { "controlType": "identity-picker", "variableType": "user", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Requester resolved to current user in v1/v4; v4 also proved an editable single-select identity picker by selecting Renger from Yeeflow, displaying it on the submitted request and reviewer task, completing approval, and creating the text-summary record.", "requiredFutureTest": "Multiple-user picker behavior can be isolated later.", "recommendedFallback": "text field storing display name." },
+    { "controlType": "organization-picker", "variableType": "groupselect", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "partially_proven", "reason": "v4 rendered the department picker and opened the tenant organization selector with the Default department available. Selection did not retain after OK in this sandbox, so value persistence remains environment-sensitive.", "requiredFutureTest": "Retest with a known selectable department export or inspect required retention attrs from a working manual export.", "recommendedFallback": "text field or lookup to packaged department list." },
+    { "controlType": "location-picker", "variableType": "location", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "partially_proven", "reason": "v4 rendered and opened the location picker; the sandbox returned no matching location data, so selection and persistence were not exercised.", "requiredFutureTest": "Retest in a tenant with configured location metadata or use a focused export-backed working location picker.", "recommendedFallback": "text field." },
+    { "controlType": "cost-center-picker", "variableType": "costcenter", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "partially_proven", "reason": "v4 rendered and opened the cost center picker; the sandbox cost center table had no available rows, so selection and persistence were not exercised.", "requiredFutureTest": "Retest in a tenant with configured cost centers or use a focused export-backed working cost-center picker.", "recommendedFallback": "text field or packaged lookup list." },
+    { "controlType": "metadata", "variableType": "metadata", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "deferred", "reason": "Stage 5 intentionally skipped for now; requires source/categoryId values and lower priority than lookup/list controls.", "requiredFutureTest": "Resume only if category metadata is provided by export.", "recommendedFallback": "text field or packaged lookup list." },
+    { "controlType": "mutiple-metadata", "variableType": "mutiple-metadata", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "deferred", "reason": "Stage 5 intentionally skipped for now; same unresolved metadata source/category risk as metadata, plus multi-select value shape.", "requiredFutureTest": "Resume after single metadata proof.", "recommendedFallback": "checkbox or text list." },
+    { "controlType": "lookup", "variableType": "lookup", "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "v6 proved internal packaged lookup: source list imported with sample rows, lookup picker opened, Standard Laptop was selected, selected value displayed on submit/submitted/reviewer pages, addition mappings populated Product Code/Product Category/Unit Price, approval completed, and ContentList created a target row. Raw lookup-to-text persistence stores the internal local row ID, so persist display text via addition/summary fields unless an ID is intended.", "requiredFutureTest": "Lookup-list/relation lookup remains separate; multi-select lookup can be isolated later.", "recommendedFallback": "radio/input when source list is small." },
+    { "controlType": "lookup-list", "variableType": "lookup", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "deferred", "reason": "Intentionally deferred in v6 because AI Training uses relation-name addition shapes and including it with single lookup/listref would blur failure boundaries.", "requiredFutureTest": "Isolated lookup-list package using an internal packaged source list.", "recommendedFallback": "lookup single-select or packaged checkbox list." },
+    { "controlType": "list", "variableType": "list", "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "proven", "reason": "v6 proved list/listref workflow-form usage with variables.listref and child controls: rendered table, added one row, edited Product/Quantity/Unit Price/Line Note, submitted, displayed row values on submitted and reviewer pages, completed approval, and persisted a text summary through ContentList. Direct child-row-to-data-list persistence remains out of scope.", "requiredFutureTest": "Isolate direct child-row persistence or separate child data-list creation if needed.", "recommendedFallback": "textarea summary or separate child data list." },
+    { "controlType": "data-list", "variableType": null, "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "deferred", "reason": "Not included in v6; embedded data-list display should be isolated after lookup/listref structures are stable.", "requiredFutureTest": "Separate display-only source-list package.", "recommendedFallback": "dashboard/data-list navigation instead of embedded display." },
+    { "controlType": "signer", "variableType": "signer", "foundInAITraining": false, "includedInV1": false, "runtimeStatus": "deferred", "reason": "Schema-supported but not present in AI Training control inventory and no generated runtime proof exists.", "requiredFutureTest": "Stage 7 only with a focused signer export.", "recommendedFallback": "identity-picker plus approval action." },
+    { "controlType": "tag", "variableType": "tag", "foundInAITraining": false, "includedInV1": false, "runtimeStatus": "deferred", "reason": "Stage 5 intentionally skipped for now; normalized schema exists but AI Training did not include a tag control and source behavior is lower priority than lookup/list controls.", "requiredFutureTest": "Retest only with a focused tag export or explicit need.", "recommendedFallback": "text field or checkbox choices." },
+    { "controlType": "rate", "variableType": "number", "foundInAITraining": false, "includedInV1": false, "runtimeStatus": "proven", "reason": "v2 star rating rendered, accepted a 3.5 value, displayed on the approval task, and persisted to the list view.", "requiredFutureTest": "None for basic star rating.", "recommendedFallback": "input_number." },
+    { "controlType": "hyperlink", "variableType": "text", "foundInAITraining": false, "includedInV1": false, "runtimeStatus": "proven", "reason": "v2 URL input accepted https://example.com/runtime-test, rendered as an open link on the approval task, and persisted as a list-view link.", "requiredFutureTest": "None for basic URL input/display.", "recommendedFallback": "input text URL field." },
+    { "controlType": "calculated", "variableType": "number", "foundInAITraining": false, "includedInV1": true, "runtimeStatus": "proven", "reason": "v1 subtotal and v2 percent-based calculation both updated correctly; v2 calculated 200 * 25% = 50, displayed on review, and persisted.", "requiredFutureTest": "Formula variants can be isolated as needed.", "recommendedFallback": "readonly number field with deferred calculation." },
+    { "controlType": "aktabs", "variableType": null, "foundInAITraining": true, "includedInV1": false, "runtimeStatus": "schema_supported_but_untested", "reason": "AI Training includes tabs as layout controls, but generated tab behavior is not runtime-proven.", "requiredFutureTest": "Separate layout-control package after value controls.", "recommendedFallback": "section/card containers." },
+    { "controlType": "workflowControlPanel", "variableType": null, "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Submit and approval actions completed successfully.", "requiredFutureTest": "None for simple approval workflow.", "recommendedFallback": null },
+    { "controlType": "workflowHistory", "variableType": null, "foundInAITraining": true, "includedInV1": true, "runtimeStatus": "proven", "reason": "Flow history rendered on the review task page.", "requiredFutureTest": "None for simple workflow history.", "recommendedFallback": null }
+  ]
+}

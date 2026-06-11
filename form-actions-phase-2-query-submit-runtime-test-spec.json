@@ -1,0 +1,151 @@
+{
+  "appName": "Form Actions Phase 2 Query Submit Test v1",
+  "purpose": "Runtime-prove Yeeflow Form Actions Phase 2 Query data and Submit form generation.",
+  "scope": {
+    "sourceDataLists": 1,
+    "targetDataLists": 1,
+    "approvalForms": 1,
+    "workflow": "simple approval",
+    "dashboards": 0,
+    "ai": false,
+    "externalIntegrations": false,
+    "documentLibraries": false
+  },
+  "generationRules": {
+    "freshIdFamily": true,
+    "freshFlowKey": true,
+    "dataFormsListId": 0,
+    "preserveNativeTitleMetadata": true,
+    "pageBackgroundAtPageLevel": true,
+    "textControlsUseStandardInlineShape": true,
+    "mainContentFormBodyFormBottom": true,
+    "actionPanelAndFlowHistory": true,
+    "doNotHardcodeDirectUserAssignees": true
+  },
+  "sourceList": {
+    "name": "Source Requests",
+    "fields": [
+      { "fieldName": "Title", "displayName": "Title", "native": true },
+      { "fieldName": "Text1", "displayName": "Request Title", "type": "input" },
+      { "fieldName": "Text2", "displayName": "Final Notes", "type": "textarea" },
+      { "fieldName": "Text3", "displayName": "Approval Status", "type": "input" },
+      { "fieldName": "Decimal1", "displayName": "Amount", "type": "input_number" },
+      { "fieldName": "Bit1", "displayName": "Active", "type": "switch" }
+    ],
+    "sampleRows": [
+      { "Title": "SRC-001", "Request Title": "Laptop refresh", "Approval Status": "Approved", "Final Notes": "Ready for reuse", "Amount": 1200, "Active": true },
+      { "Title": "SRC-002", "Request Title": "Monitor purchase", "Approval Status": "Submitted", "Final Notes": "Awaiting review", "Amount": 800, "Active": true },
+      { "Title": "SRC-003", "Request Title": "Archived software", "Approval Status": "Closed", "Final Notes": "Inactive sample", "Amount": 300, "Active": false }
+    ]
+  },
+  "targetList": {
+    "name": "Phase 2 Query Submit Requests",
+    "fields": [
+      { "fieldName": "Title", "displayName": "Title", "native": true },
+      { "fieldName": "Text1", "displayName": "Request Title", "type": "input" },
+      { "fieldName": "Decimal1", "displayName": "Loaded Count", "type": "input_number" },
+      { "fieldName": "Text2", "displayName": "Selected Query Title", "type": "input" },
+      { "fieldName": "Text3", "displayName": "Selected Query Status", "type": "input" },
+      { "fieldName": "Text4", "displayName": "Query Summary", "type": "textarea" },
+      { "fieldName": "Decimal2", "displayName": "Sum Amount", "type": "input_number" },
+      { "fieldName": "Text5", "displayName": "Approval Status", "type": "input" },
+      { "fieldName": "Text6", "displayName": "Created From Workflow", "type": "input" }
+    ]
+  },
+  "formActions": [
+    {
+      "name": "Load Multiple Test Requests",
+      "trigger": "buttonClick",
+      "steps": [
+        {
+          "type": "querydata",
+          "queryType": "multiple",
+          "resultTarget": "workflowListVariable",
+          "resultVariable": "QueryResults",
+          "fieldMap": {
+            "Title": "field_Title",
+            "Text1": "field_RequestTitle",
+            "Text3": "field_ApprovalStatus"
+          },
+          "totalCountTempVariable": "var_TotalQueryItems"
+        }
+      ]
+    },
+    {
+      "name": "Load Single Test Request",
+      "trigger": "buttonClick",
+      "steps": [
+        {
+          "type": "querydata",
+          "queryType": "single",
+          "fieldMap": {
+            "Title": "QueryTitle",
+            "Text1": "QueryRequestTitle",
+            "Text2": "QueryFinalNotes",
+            "Text3": "QueryApprovalStatus"
+          },
+          "totalCountTempVariable": "var_TotalQueryItems"
+        }
+      ]
+    },
+    {
+      "name": "Calculate Sum With arraySum",
+      "trigger": "buttonClick",
+      "steps": [
+        {
+          "type": "querydata",
+          "queryType": "multiple",
+          "resultTarget": "tempCollection",
+          "resultVariable": "var_CollectionofQueryItems",
+          "selectedFields": [
+            { "FieldName": "Title", "Type": "input", "DisplayName": "Title" },
+            { "FieldName": "Decimal1", "Type": "input_number", "DisplayName": "Amount" }
+          ],
+          "totalCountTempVariable": "var_TotalQueryItems"
+        },
+        {
+          "type": "setvar",
+          "target": "SumAmountQueryItems",
+          "expression": "arraySum(__temp_var_CollectionofQueryItems, \"Amount\", [], [])"
+        }
+      ]
+    },
+    {
+      "name": "Submit Form For Testing",
+      "trigger": "buttonClick",
+      "steps": [{ "type": "submit" }]
+    },
+    {
+      "name": "Save As Draft",
+      "trigger": "buttonClick",
+      "steps": [
+        {
+          "type": "submit",
+          "attrs": {
+            "submitType": "3",
+            "closeForm": true,
+            "ignoreValid": true
+          }
+        }
+      ]
+    }
+  ],
+  "expressionUse": {
+    "arraySum": "generation-safe after Phase 2 export study and existing function metadata",
+    "JSONStringfy": "export-backed spelling for collection display; include only if validator references are updated",
+    "vLookup": "deferred; UI-observed label only in this export",
+    "arraySub": "do not use; warn and recommend arraySum"
+  },
+  "runtimeChecks": [
+    "app imports",
+    "form opens",
+    "query multiple populates sub list",
+    "query total count updates",
+    "query single maps fields",
+    "arraySum calculates amount",
+    "save as draft works",
+    "submit form progresses workflow",
+    "approval completes",
+    "ContentList creates target record"
+  ]
+}

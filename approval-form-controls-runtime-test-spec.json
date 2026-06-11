@@ -1,0 +1,70 @@
+{
+  "updatedAt": "2026-05-14",
+  "principles": [
+    "Use staged batches instead of one broad app.",
+    "Use fresh ID family and fresh FlowKey/form key per generated package.",
+    "Keep Data.Forms[].ListID = 0 for app-level approval forms.",
+    "Preserve native Title metadata on every data list.",
+    "Use page-level background, structural Main, Content, Form body, Form bottom, Action Panel, and Flow History.",
+    "Promote controls to runtime-proven only after generated import, render, submit, approval, and persistence proof where applicable."
+  ],
+  "stages": [
+    {
+      "stage": 2,
+      "name": "Advanced Input Controls",
+      "packageName": "Approval Form Controls Test v2",
+      "idFamily": "452",
+      "flowKey": "AFC2",
+      "controls": ["percent", "daterange", "time", "hyperlink", "rate", "calculated"],
+      "infrastructureControls": ["input", "textarea", "input_number", "identity-picker", "workflowControlPanel", "workflowHistory"],
+      "outputFiles": {
+        "generator": "generate-approval-form-controls-test-v2-advanced-inputs.mjs",
+        "appDef": "approval-form-controls-test-v2-app-def.json",
+        "formDef": "approval-form-controls-test-v2-approval-form-def.json",
+        "listDef": "approval-form-controls-test-v2-list-def.json",
+        "package": "Approval Form Controls Test v2.generated.yap"
+      },
+      "runtimeChecklist": [
+        "Import package.",
+        "Open app.",
+        "Open approval form.",
+        "Enter percent, daterange, time, hyperlink, rate, and calculation source values.",
+        "Confirm calculated value updates.",
+        "Submit request.",
+        "Open approval task.",
+        "Approve request.",
+        "Verify ContentList persisted mapped values."
+      ]
+    },
+    {
+      "stage": 3,
+      "name": "Upload and Media Controls",
+      "controls": ["file-upload", "icon-upload"],
+      "status": "planned_after_stage_2"
+    },
+    {
+      "stage": 4,
+      "name": "People and Organization Pickers",
+      "controls": ["identity-picker multiple", "organization-picker", "cost-center-picker", "location-picker"],
+      "status": "planned_after_stage_3"
+    },
+    {
+      "stage": 5,
+      "name": "Metadata and Tags",
+      "controls": ["metadata", "mutiple-metadata", "tag"],
+      "status": "planned_after_stage_4"
+    },
+    {
+      "stage": 6,
+      "name": "Lookup and List Controls",
+      "controls": ["lookup", "lookup-list", "list", "listref", "data-list"],
+      "status": "planned_after_stage_5"
+    },
+    {
+      "stage": 7,
+      "name": "Signer and Special Controls",
+      "controls": ["signer", "tabs", "remaining layout controls"],
+      "status": "planned_after_stage_6"
+    }
+  ]
+}

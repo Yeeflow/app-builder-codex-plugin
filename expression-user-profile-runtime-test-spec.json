@@ -1,0 +1,68 @@
+{
+  "appName": "Expression User Profile Test v1",
+  "purpose": "Runtime proof for user/profile expression functions in generated Yeeflow approval forms.",
+  "freshIdFamily": "463",
+  "flowKeyPrefix": "EUP1",
+  "resources": {
+    "dataLists": [
+      {
+        "name": "Expression User Profile Requests",
+        "purpose": "Persist readable profile summary values created by the approval workflow.",
+        "nativeTitleRule": true
+      }
+    ],
+    "approvalForms": [
+      {
+        "name": "Expression User Profile Test v1",
+        "submissionPage": "Submit User Profile Test",
+        "taskPage": "Review User Profile Test",
+        "dataFormsListId": 0
+      }
+    ],
+    "dashboards": [
+      {
+        "name": "Overview",
+        "type": 103,
+        "scope": "minimal shell only"
+      }
+    ]
+  },
+  "functionsUnderTest": [
+    "getUserAttr",
+    "getOrgAttr",
+    "getLocAttr",
+    "dateFormat",
+    "dateAdd"
+  ],
+  "contextToken": {
+    "id": "CurrentUser",
+    "exprType": "application",
+    "valueType": "string",
+    "type": "expr",
+    "name": "Context:Current User"
+  },
+  "contentListPersistence": [
+    "Request No",
+    "User Name",
+    "Login Account",
+    "Email",
+    "Department Name",
+    "Line Manager Name",
+    "Boarding Date",
+    "Boarding Anniversary Date",
+    "Job Title",
+    "Location Name",
+    "Approval Status",
+    "Created From Workflow"
+  ],
+  "runtimeResult": {
+    "imported": true,
+    "appOpened": true,
+    "listOpenedWithoutQuery400": true,
+    "submissionFormRendered": true,
+    "taskFormRendered": true,
+    "approvalCompleted": true,
+    "contentListCreatedRecord": true,
+    "tenantDataCaveat": "Location Name and Boarding Date were blank in the tested tenant profile. Boarding Anniversary Date rendered a fallback-derived date; populated boarding-date arithmetic remains data-dependent."
+  }
+}

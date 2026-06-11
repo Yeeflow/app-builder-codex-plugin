@@ -1,0 +1,120 @@
+{
+  "name": "Design System Request Tracker",
+  "purpose": "First runtime proof package for the Yeeflow Application Design System.",
+  "generationStatus": "planned_only",
+  "doNotGenerateYet": true,
+  "resources": {
+    "dashboard": {
+      "title": "Overview",
+      "type": 103,
+      "layout": {
+        "hideHeaderAll": true,
+        "padding": "--sp--s0",
+        "containers": ["Main", "Content", "Page header", "Summary section", "Collection section", "Empty state"]
+      },
+      "sections": [
+        {
+          "name": "Page header",
+          "content": ["title", "short business summary"]
+        },
+        {
+          "name": "Summary section",
+          "cards": [
+            { "label": "Total Requests", "semanticColor": "primary" },
+            { "label": "Approved", "semanticColor": "success" },
+            { "label": "Pending Review", "semanticColor": "warning" }
+          ]
+        },
+        {
+          "name": "Collection section",
+          "sourceList": "Requests",
+          "collectionName": "Request collection"
+        }
+      ]
+    },
+    "dataList": {
+      "title": "Requests",
+      "nativeTitleRule": {
+        "FieldName": "Title",
+        "Status": 0,
+        "IsSystem": true,
+        "IsIndex": true,
+        "FieldIndex": 0
+      },
+      "fields": [
+        { "label": "Request No.", "fieldName": "Title", "type": "text" },
+        { "label": "Request Title", "fieldName": "Text1", "type": "text" },
+        { "label": "Request Type", "fieldName": "Text2", "type": "single_select_text" },
+        { "label": "Requested By", "fieldName": "Text3", "type": "text" },
+        { "label": "Status", "fieldName": "Text4", "type": "single_select_text" },
+        { "label": "Needed By", "fieldName": "Datetime1", "type": "date" },
+        { "label": "Notes", "fieldName": "Text5", "type": "multiline_text" }
+      ],
+      "customForms": [
+        {
+          "title": "Edit Item",
+          "usage": ["new", "edit"],
+          "layout": {
+            "contentWidth": "2",
+            "padding": "--sp--s0",
+            "containers": ["Main", "Content", "Field group"]
+          }
+        },
+        {
+          "title": "View Item",
+          "usage": ["view"],
+          "layout": {
+            "contentWidth": "2",
+            "padding": "--sp--s0",
+            "containers": ["Main", "Content", "Readonly section"]
+          }
+        }
+      ]
+    },
+    "approvalForm": {
+      "title": "Submit Request",
+      "pages": [
+        {
+          "name": "Submission",
+          "type": 1,
+          "layout": {
+            "contentWidth": "2",
+            "padding": "--sp--s0",
+            "containers": ["Main", "Content", "Form body", "Form bottom"]
+          },
+          "controls": ["request fields", "workflowControlPanel", "workflowHistory"]
+        },
+        {
+          "name": "Reviewer Task",
+          "type": 2,
+          "layout": {
+            "contentWidth": "2",
+            "padding": "--sp--s0",
+            "containers": ["Main", "Content", "Form body", "Form bottom"]
+          },
+          "controls": ["readonly request fields", "approval decision", "workflowControlPanel", "workflowHistory"]
+        }
+      ],
+      "workflow": ["StartNoneEvent", "MultiAssignmentTask", "ContentList", "EndNoneEvent", "EndRejectEvent"]
+    }
+  },
+  "styleTokens": {
+    "primary": "--c--primary",
+    "success": "--c--success",
+    "warning": "--c--warning",
+    "danger": "--c--danger",
+    "neutral": "--c--neutral",
+    "background": "--c--background",
+    "text": "--c--text",
+    "bodyFontSize": "--fs--base",
+    "sectionGap": "--sp--s300",
+    "fieldGap": "--sp--s150",
+    "cardPadding": "--sp--s200"
+  },
+  "validation": {
+    "packageValidator": "node validate-yap-package.js <app-def.json> --mode generator --stage final",
+    "graphValidator": "node validate-yap-graph.js <app-def.json> --mode generator --stage final",
+    "approvalValidator": "node validate-ywf-def.js <approval-def.json> --mode final",
+    "wrapperBuilder": "node build-yap-wrapper.js <app-def.json> <output.yap>"
+  }
+}

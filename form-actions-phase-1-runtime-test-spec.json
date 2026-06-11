@@ -1,0 +1,90 @@
+{
+  "appName": "Form Actions Phase 1 Test v1",
+  "purpose": "Runtime proof for Yeeflow Form Actions Phase 1: button styles, temp variables, page-load trigger, button-click trigger, setvar step, and confirm step.",
+  "resources": {
+    "dataLists": [
+      {
+        "name": "Form Action Test Requests",
+        "fields": [
+          { "name": "Title", "fieldName": "Title", "nativeTitle": true },
+          { "name": "Request Title", "type": "text" },
+          { "name": "Final Notes", "type": "textarea" },
+          { "name": "Approval Status", "type": "text" },
+          { "name": "Created From Workflow", "type": "text" }
+        ]
+      }
+    ],
+    "approvalForms": [
+      {
+        "name": "Form Actions Phase 1 Test v1",
+        "pages": [
+          {
+            "title": "Submit Form Actions Test",
+            "type": "submission",
+            "tempVariables": [
+              { "id": "var_TempStatus", "valueType": "string" },
+              { "id": "var_ClickCount", "valueType": "string" },
+              { "id": "var_DialogResult", "valueType": "string" }
+            ],
+            "actions": [
+              {
+                "name": "Initialize Form State",
+                "trigger": "pageLoad",
+                "steps": [
+                  { "type": "setvar", "mode": "multi", "targets": ["var_TempStatus", "Notes"] }
+                ]
+              },
+              {
+                "name": "Set Default Request Title",
+                "trigger": "buttonClick",
+                "steps": [
+                  { "type": "setvar", "target": "RequestTitle", "condition": "isNullOrEmpty(RequestTitle)" }
+                ]
+              },
+              {
+                "name": "Toggle Temp Status",
+                "trigger": "buttonClick",
+                "steps": [
+                  { "type": "setvar", "target": "var_ClickCount", "value": "iif(var_ClickCount == 0, 1, 0)" },
+                  { "type": "setvar", "target": "var_TempStatus", "condition": "var_ClickCount == 0" },
+                  { "type": "setvar", "target": "var_TempStatus", "condition": "var_ClickCount == 1" }
+                ]
+              },
+              {
+                "name": "Show Confirmation Dialog",
+                "trigger": "buttonClick",
+                "steps": [
+                  { "type": "confirm", "message": "This is an important operation, please confirm!", "resultTarget": "var_DialogResult" }
+                ]
+              },
+              {
+                "name": "Reset Temp Status",
+                "trigger": "buttonClick",
+                "steps": [
+                  { "type": "setvar", "target": "var_TempStatus", "value": "Reset" }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Review Form Actions Test",
+            "type": "task"
+          }
+        ]
+      }
+    ]
+  },
+  "designRules": [
+    "page-level background only",
+    "Main / Content / Form body / Form bottom",
+    "learned Text control standard",
+    "inline action buttons by default",
+    "meaningful nv_label names"
+  ],
+  "deferred": [
+    "listitem form action step",
+    "dashboard form actions",
+    "data list custom form actions",
+    "additional form action step types"
+  ]
+}

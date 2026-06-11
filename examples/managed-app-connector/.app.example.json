@@ -1,0 +1,7 @@
+{
+  "apps": {
+    "yeeflow": {
+      "id": "connector_or_app_id_from_openai_registration"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "proof": "vendor-onboarding-v41-page1-dashboard",
+  "primaryPackage": "/Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yapk",
+  "validations": [
+    {
+      "name": "YAPK package validator",
+      "command": "node validate-yapk-package.js /Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yapk",
+      "status": "pass",
+      "errors": 0,
+      "warnings": 1
+    },
+    {
+      "name": "YAPK strict product schema validation",
+      "command": "node scripts/validate-standard-package-schema.mjs /Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yapk",
+      "status": "pass",
+      "errors": 0
+    },
+    {
+      "name": "YAPK schema v2 validation",
+      "command": "node scripts/inspect-yapk-schema-standard.mjs /Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yapk",
+      "status": "pass",
+      "errors": 0
+    },
+    {
+      "name": "YAP product-team schema/import-rule validation",
+      "command": "node scripts/inspect-yap-schema-standard.mjs /Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yap",
+      "status": "pass",
+      "errors": 0,
+      "largeNumericIdsPreserved": 54
+    },
+    {
+      "name": "Strict visual quality and composition checklist",
+      "command": "node scripts/inspect-generated-app-quality.mjs --package /Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yapk --spec docs/generated-app-plans/vendor-onboarding-compliance-ui-implementation-spec.md --composition-checklist docs/generated-app-plans/vendor-onboarding-v4-composition-checklist.normalized.json --template-library docs/templates/yeeflow-ui-section-template-library.normalized.json --strict-visual-app-quality --checklist-page vendor_management_dashboard",
+      "status": "pass_with_warnings",
+      "errors": 0,
+      "warnings": 3
+    },
+    {
+      "name": "Generated UI quality",
+      "command": "node scripts/inspect-generated-ui-quality.mjs /Users/Renger/Downloads/vendor-onboarding-v41-page1-dashboard.yapk",
+      "status": "pass",
+      "errors": 0,
+      "warnings": 0
+    }
+  ],
+  "controlTypeScan": {
+    "dashboardControlTypes": [
+      "container",
+      "heading",
+      "button",
+      "dynamic-field",
+      "progress-circle",
+      "progress",
+      "alert",
+      "kanban",
+      "dynamic-user",
+      "icon_list",
+      "data-list",
+      "timeline-v"
+    ],
+    "unsupportedGridControls": 0,
+    "unsupportedTextControls": 0
+  },
+  "sampleData": {
+    "Vendors": 3,
+    "Vendor Documents": 3,
+    "Compliance Reviews": 2,
+    "Vendor Activity / History": 3
+  },
+  "proofBoundary": "dashboard_only_local_validation_not_runtime_install",
+  "manualRetestRequired": true
+}

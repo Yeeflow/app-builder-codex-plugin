@@ -1,0 +1,91 @@
+{
+  "studyDate": "2026-05-27",
+  "schemaSource": "product-provided ypk-schema.json",
+  "schemaTitle": "AppExportPackageInfo",
+  "schemaId": "https://akmii.local/schemas/listset-package-info.schema.json",
+  "topLevelRequiredKeys": [
+    "PackageId",
+    "TenantID",
+    "AppID",
+    "ListID",
+    "Title",
+    "Description",
+    "IconUrl",
+    "Resource",
+    "Notes",
+    "Author",
+    "Date",
+    "Version",
+    "Sign"
+  ],
+  "resourceEncodingStatement": "Brotli compressed string. Decompressed JSON should match #/$defs/AppPackageInfo.",
+  "decodedResourceRequiredKeys": [
+    "ListSet",
+    "Pages",
+    "Forms",
+    "FormReports",
+    "FormNewReports",
+    "DataReports",
+    "Groups",
+    "Tags",
+    "Metadatas",
+    "Agents",
+    "Connections",
+    "Knowledges",
+    "Themes",
+    "Components",
+    "PortalInfo",
+    "Childs"
+  ],
+  "safeArtifactDecodeSummary": [
+    {
+      "label": "Application Settings Runtime Baseline - onheader-Version test",
+      "exists": true,
+      "readable": true,
+      "resourceStringLength": 7628,
+      "base64DecodedBytes": 5719,
+      "brotliSuccess": false
+    },
+    {
+      "label": "Application Settings Runtime Baseline - signed wrapper test",
+      "exists": true,
+      "readable": false,
+      "note": "Read attempts from this environment hang; raw file was not copied."
+    },
+    {
+      "label": "Application Settings Runtime Baseline - requested changes test",
+      "exists": true,
+      "readable": false,
+      "note": "Read attempts from this environment hang; raw file was not copied."
+    },
+    {
+      "label": "Application Settings Runtime Baseline - onheader-Mena Test",
+      "exists": true,
+      "readable": true,
+      "resourceStringLength": 11124,
+      "base64DecodedBytes": 8342,
+      "brotliSuccess": false
+    }
+  ],
+  "validationSummary": {
+    "schemaJsonParse": "pass",
+    "schemaCompile": "not run; ajv/jsonschema unavailable in local project",
+    "inspectorSyntax": "pass",
+    "validatorSyntax": "pass",
+    "readableArtifactBrotliDecode": "fail"
+  },
+  "proofBoundary": {
+    "wrapperSchema": "product-schema-backed",
+    "resourceDecode": "not proven on readable historical artifacts",
+    "resourceGeneration": "not proven",
+    "offlineContentMutation": "unsupported until edit -> Brotli encode -> sign -> verify -> runtime upgrade succeeds"
+  },
+  "redactionPolicy": {
+    "rawYapkCommitted": false,
+    "rawResourceCommitted": false,
+    "rawSignCommitted": false,
+    "rawIdsCommitted": false,
+    "decodedPayloadCommitted": false,
+    "rawApiResponsesCommitted": false
+  }
+}

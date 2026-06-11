@@ -1,0 +1,454 @@
+{
+  "appName": "Enterprise Service Request & Compliance Review",
+  "purpose": "Focused showcase app to use all 13 reusable Yeeflow custom code templates in realistic request, compliance, approval, and dashboard contexts.",
+  "sourceZip": "Custom Code templates.zip",
+  "readyForGeneration": true,
+  "doNotGenerateYet": false,
+  "generationGateReason": "Phase 2 readiness accepted for local package generation. Runtime proof remains pending for all templates in this generated app.",
+  "publicFormSupport": "not claimed; no public form usage planned",
+  "templates": [
+    {
+      "name": "activity-timeline",
+      "category": "Dashboard / analytics",
+      "runtimeProofStatus": "Inventory-only. Runtime rendering is not proven for this template.",
+      "plannedUsage": {
+        "location": "Dashboard and request detail section",
+        "context": "dashboard/form display",
+        "source": "Approval History / Timeline Events",
+        "output": "none"
+      },
+      "requiredParameters": [
+        "sourceListId",
+        "recordIdField",
+        "recordIdValue",
+        "eventDateField",
+        "actorField",
+        "titleField",
+        "descriptionField",
+        "statusField"
+      ],
+      "writableTargets": []
+    },
+    {
+      "name": "approval-decision-panel",
+      "category": "Approval / workflow experience",
+      "runtimeProofStatus": "Inventory-only. Needs focused approval-task runtime proof before relying on decision writeback.",
+      "plannedUsage": {
+        "location": "Manager Review and Compliance Review task pages",
+        "context": "approval form",
+        "source": "decision/comment variables",
+        "output": "__variables_.ReviewDecision and __variables_.ReviewComment"
+      },
+      "requiredParameters": [
+        "decisionField",
+        "commentField",
+        "defaultDecision",
+        "requireCommentOnReject",
+        "requireCommentOnRevise",
+        "showCommentBox",
+        "showStatusSummary"
+      ],
+      "writableTargets": []
+    },
+    {
+      "name": "approval-timeline",
+      "category": "Approval / workflow experience",
+      "runtimeProofStatus": "Inventory-only. Runtime rendering against generated approval-history records is not proven.",
+      "plannedUsage": {
+        "location": "Approval form review section",
+        "context": "approval form",
+        "source": "Approval History / Timeline Events",
+        "output": "none"
+      },
+      "requiredParameters": [
+        "sourceListId",
+        "recordIdField",
+        "recordIdValue",
+        "eventDateField",
+        "actorField",
+        "decisionField",
+        "commentField"
+      ],
+      "writableTargets": []
+    },
+    {
+      "name": "checklist-compliance-block",
+      "category": "Data entry / picker / selection",
+      "runtimeProofStatus": "Inventory-only. Needs runtime proof for checklist writeback in each form context.",
+      "plannedUsage": {
+        "location": "Submission form compliance section",
+        "context": "approval form",
+        "source": "static checklist JSON",
+        "output": "__variables_.ComplianceChecklistJson"
+      },
+      "requiredParameters": [
+        "saveToField",
+        "requireAllChecked",
+        "showProgress"
+      ],
+      "writableTargets": [
+        "saveToField"
+      ]
+    },
+    {
+      "name": "dependent-selector",
+      "category": "Data entry / picker / selection",
+      "runtimeProofStatus": "Inventory-only. Needs runtime proof for source-list query, filtering, and dual writeback.",
+      "plannedUsage": {
+        "location": "Submission form category section",
+        "context": "approval form",
+        "source": "Subcategories",
+        "output": "__variables_.SelectedCategory and __variables_.SelectedSubcategory"
+      },
+      "requiredParameters": [
+        "dataListId",
+        "parentField",
+        "childField",
+        "parentSaveToField",
+        "childSaveToField"
+      ],
+      "writableTargets": [
+        "parentSaveToField",
+        "childSaveToField"
+      ]
+    },
+    {
+      "name": "distribution-chart-module",
+      "category": "Dashboard / analytics",
+      "runtimeProofStatus": "Inventory-only. Needs dashboard runtime proof with real list records.",
+      "plannedUsage": {
+        "location": "Operations dashboard analytics band",
+        "context": "dashboard",
+        "source": "Service Requests",
+        "output": "none"
+      },
+      "requiredParameters": [
+        "dataListId",
+        "categoryField",
+        "showLegend",
+        "showCount"
+      ],
+      "writableTargets": []
+    },
+    {
+      "name": "exception-alert-panel",
+      "category": "Dashboard / analytics",
+      "runtimeProofStatus": "Inventory-only. Needs runtime proof for rule/filter behavior.",
+      "plannedUsage": {
+        "location": "Operations dashboard exception band",
+        "context": "dashboard",
+        "source": "Exception Rules / Alerts or filtered Service Requests",
+        "output": "none"
+      },
+      "requiredParameters": [
+        "sourceListId",
+        "titleField",
+        "severityField",
+        "descriptionField",
+        "showSeverity"
+      ],
+      "writableTargets": []
+    },
+    {
+      "name": "hierarchical-selector",
+      "category": "Data entry / picker / selection",
+      "runtimeProofStatus": "Inventory-only. Needs runtime proof for hierarchy query and save target.",
+      "plannedUsage": {
+        "location": "Submission form taxonomy section",
+        "context": "approval form",
+        "source": "Request Categories",
+        "output": "__variables_.SelectedHierarchy"
+      },
+      "requiredParameters": [
+        "dataListId",
+        "idField",
+        "parentField",
+        "labelField",
+        "valueField",
+        "saveToField",
+        "multiSelect"
+      ],
+      "writableTargets": [
+        "saveToField"
+      ]
+    },
+    {
+      "name": "kpi-card-set",
+      "category": "Dashboard / analytics",
+      "runtimeProofStatus": "Inventory-only. Render proof needed for each context; dashboard is the primary target.",
+      "plannedUsage": {
+        "location": "Dashboard KPI header",
+        "context": "dashboard",
+        "source": "static/dashboard KPI config JSON backed by seeded records",
+        "output": "none"
+      },
+      "requiredParameters": [
+        "titleField",
+        "valueField",
+        "subtitleField",
+        "trendField",
+        "trendDirectionField",
+        "toneField",
+        "formatField",
+        "prefixField",
+        "suffixField",
+        "iconField",
+        "targetLabelField",
+        "targetValueField",
+        "decimalsField",
+        "showTrend",
+        "showIcon",
+        "compactMode"
+      ],
+      "writableTargets": []
+    },
+    {
+      "name": "multi-entry-tag-input",
+      "category": "Data entry / picker / selection",
+      "runtimeProofStatus": "Inventory-only. Needs runtime proof for add/remove and writeback.",
+      "plannedUsage": {
+        "location": "Submission form tags section",
+        "context": "approval form",
+        "source": "user-entered tags",
+        "output": "__variables_.RequestTagsJson"
+      },
+      "requiredParameters": [
+        "saveToField",
+        "allowDuplicates"
+      ],
+      "writableTargets": [
+        "saveToField"
+      ]
+    },
+    {
+      "name": "related-record-summary-grid",
+      "category": "Dashboard / analytics",
+      "runtimeProofStatus": "Inventory-only. Needs runtime proof for relation filtering and display fields.",
+      "plannedUsage": {
+        "location": "Submission form related records and dashboard recent records",
+        "context": "approval form/dashboard",
+        "source": "Asset / Vendor / Related Records",
+        "output": "none"
+      },
+      "requiredParameters": [
+        "targetListId",
+        "relationField",
+        "relationValue",
+        "titleField",
+        "statusField"
+      ],
+      "writableTargets": []
+    },
+    {
+      "name": "smart-lookup-picker",
+      "category": "Data entry / picker / selection",
+      "runtimeProofStatus": "Export-backed and runtime-proven for dashboard, approval form, and data-list custom form. Public form is not tested.",
+      "plannedUsage": {
+        "location": "Submission form asset/vendor lookup and data-list custom form",
+        "context": "approval form/data-list form/dashboard",
+        "source": "Asset / Vendor / Related Records",
+        "output": "__variables_, __list_, or __temp_ targets by context"
+      },
+      "requiredParameters": [
+        "dataListId",
+        "displayField",
+        "valueField",
+        "saveToField",
+        "selectedItemsField",
+        "newItemsField",
+        "multiSelect",
+        "allowManualEntry"
+      ],
+      "writableTargets": []
+    },
+    {
+      "name": "trend-chart-module",
+      "category": "Dashboard / analytics",
+      "runtimeProofStatus": "Inventory-only. Needs dashboard runtime proof with dated records.",
+      "plannedUsage": {
+        "location": "Operations dashboard trend band",
+        "context": "dashboard",
+        "source": "Service Requests date fields",
+        "output": "none"
+      },
+      "requiredParameters": [
+        "dataListId",
+        "dateField",
+        "showPointLabels",
+        "showXAxisLabels",
+        "showYAxis",
+        "cumulativeMode",
+        "fillMissingBuckets"
+      ],
+      "writableTargets": []
+    }
+  ],
+  "dataModel": [
+    "Service Requests",
+    "Request Categories",
+    "Subcategories",
+    "Asset / Vendor / Related Records",
+    "Compliance Checklist Items",
+    "Request Tags",
+    "Approval History / Timeline Events",
+    "Exception Rules / Alerts",
+    "Request Metrics / Summary Records"
+  ],
+  "workflow": [
+    "Submit",
+    "Manager Review",
+    "Compliance Review",
+    "Final Approval",
+    "Rejected / Returned",
+    "Completed persistence"
+  ],
+  "validationPlan": [
+    "JSON parse checks",
+    "TSX static parse/transpile check if TypeScript tooling is available",
+    "package validation",
+    "graph validation",
+    "YWF validation",
+    "YDL validation for every list",
+    "workflow action validation",
+    "wrapper round trip",
+    "custom code control inspection",
+    "custom code parameter validation",
+    "dashboard structure inspection",
+    "duplicate field name check",
+    "lookup dependency check",
+    "safety scan for raw packages before commit"
+  ],
+  "runtimeTestPlan": [
+    {
+      "template": "activity-timeline",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "dashboard",
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render with representative data"
+    },
+    {
+      "template": "approval-decision-panel",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "approvalForm"
+      ],
+      "expectedBehavior": "render plus interaction/writeback if configured"
+    },
+    {
+      "template": "approval-timeline",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render with representative data"
+    },
+    {
+      "template": "checklist-compliance-block",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render plus interaction/writeback if configured"
+    },
+    {
+      "template": "dependent-selector",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render plus interaction/writeback if configured"
+    },
+    {
+      "template": "distribution-chart-module",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "dashboard"
+      ],
+      "expectedBehavior": "render with representative data"
+    },
+    {
+      "template": "exception-alert-panel",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "dashboard",
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render with representative data"
+    },
+    {
+      "template": "hierarchical-selector",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render plus interaction/writeback if configured"
+    },
+    {
+      "template": "kpi-card-set",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "dashboard",
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render with representative data"
+    },
+    {
+      "template": "multi-entry-tag-input",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render plus interaction/writeback if configured"
+    },
+    {
+      "template": "related-record-summary-grid",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "dashboard",
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render with representative data"
+    },
+    {
+      "template": "smart-lookup-picker",
+      "targetClassification": "Regression proof required in this generated app",
+      "contextsToTest": [
+        "dashboard",
+        "approvalForm",
+        "dataListForm"
+      ],
+      "expectedBehavior": "render plus interaction/writeback if configured"
+    },
+    {
+      "template": "trend-chart-module",
+      "targetClassification": "Not runtime-proven yet; must be classified after tenant test",
+      "contextsToTest": [
+        "dashboard"
+      ],
+      "expectedBehavior": "render with representative data"
+    }
+  ],
+  "blockers": [
+    "Full showcase .yap generation and runtime testing are intentionally deferred to Phase 2/3 to avoid silently skipping templates.",
+    "Local workspace currently lacks TypeScript/esbuild packages for real TSX compile; only source parsing is available unless tooling is installed or provided.",
+    "Twelve templates are inventory-only and need generated-app runtime proof before support claims.",
+    "Public form support is not planned or claimed."
+  ],
+  "runtimeRiskAssumptions": [
+    "Twelve templates remain inventory-only until this generated app is imported and exercised.",
+    "Smart Lookup Picker has previous runtime proof, but this showcase still needs regression testing.",
+    "Public forms are not included and public-form support is not claimed.",
+    "Custom code writeback is configured only for templates that expose writable targets."
+  ]
+}

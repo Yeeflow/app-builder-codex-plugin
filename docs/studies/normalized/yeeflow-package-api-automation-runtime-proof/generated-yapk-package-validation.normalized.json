@@ -1,0 +1,41 @@
+{
+  "proof": "yeeflow-package-api-automation-runtime-proof",
+  "packageFilename": "package-api-smoke-test.v1.yapk",
+  "application": "Package API Smoke Test",
+  "generatedStructure": {
+    "dataLists": ["API Smoke Requests"],
+    "dashboards": ["API Smoke Dashboard"],
+    "childListCount": 1,
+    "dashboardCount": 1,
+    "fieldCount": 7,
+    "customFormLayoutCount": 3,
+    "sampleDataIncluded": true
+  },
+  "validation": {
+    "yapkPackageValidator": {
+      "status": "pass",
+      "errors": 0
+    },
+    "yapkResourceDecodeInspector": {
+      "status": "pass",
+      "decodedType": "AppPackageInfo",
+      "portalInfo": "null"
+    },
+    "dataListSystemSchema": {
+      "status": "pass",
+      "errors": 0,
+      "warnings": 0
+    },
+    "generatedUiQuality": {
+      "status": "pass",
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "redaction": {
+    "rawPackageCommitted": false,
+    "rawResourceCommitted": false,
+    "rawSignCommitted": false,
+    "privateIdsRecorded": false
+  }
+}

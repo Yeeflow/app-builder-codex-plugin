@@ -1,51 +1,123 @@
 # App Builder Codex Plugin
 
-Fresh Yeeflow App Builder Codex plugin repository with a non-colliding Codex marketplace identity.
+Official Yeeflow App Builder Codex plugin repository.
+
+This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It preserves the useful scripts, schemas, validators, studies, generated skills, and plugin distribution assets while using a new non-colliding Codex plugin identity.
 
 ## Identity
 
-- Marketplace ID: yeeflow
-- Marketplace display: Yeeflow
-- Plugin ID: yeeflow-app-builder
-- Plugin display: Yeeflow App Builder
-- Version: 0.6.21-api-map.0
-- Dist path: dist/yeeflow-app-builder-plugin
+- Marketplace: Yeeflow
+- Marketplace ID: `yeeflow`
+- Plugin: Yeeflow App Builder
+- Plugin ID: `yeeflow-app-builder`
+- Version: `0.6.21-api-map.0`
+- Active dist path: `dist/yeeflow-app-builder-plugin`
 
 ## Install In Codex App
 
+```text
 Source: https://github.com/Yeeflow/app-builder-codex-plugin.git
-
 Git ref: stable
-
 Sparse paths:
+  .agents/plugins/marketplace.json
+  dist/yeeflow-app-builder-plugin
+```
+
+Expected installed identity:
 
 ```text
-.agents/plugins/marketplace.json
-dist/yeeflow-app-builder-plugin
+Marketplace: Yeeflow
+Plugin: Yeeflow App Builder
+Version: 0.6.21-api-map.0
+```
+
+Verify metadata from a checkout:
+
+```sh
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.21-api-map.0
 ```
 
 ## What Is Included
 
-This repository carries the tested Yeeflow App Builder plugin bundle from the stable OAuth/API capability-map baseline. It includes local Browser OAuth helpers, OAuth status/refresh/logout helpers, the OAuth/API auth wrapper, legacy API-key fallback, the Yeeflow REST API capability map, read-only capability-list/call helpers, package automation dry-run safety, validators, release hygiene guidance, and proof-boundary documentation.
+- `.agents/plugins/marketplace.json` for Codex marketplace installation.
+- `dist/yeeflow-app-builder-plugin` with bundled skills and plugin metadata.
+- `skills/` and `generated-skills/` source mirrors for ongoing development.
+- `scripts/` and root development helpers for YAP/YAPK/YDL/YWF generation, inspection, validation, and package automation dry-runs.
+- `schemas/yap-schema.json`, `schemas/yapk-schema.json`, and `schemas/yapk-schema-codex.json`.
+- Sanitized docs, studies, standards, templates, examples, and historical notes.
+- OAuth helpers and the documented Yeeflow REST API capability map.
+
+## Key Workflows
+
+Use the plugin to plan, generate, inspect, validate, and harden Yeeflow application packages. The current package preserves support for:
+
+- Browser OAuth login, status, refresh, logout, and OAuth/API auth wrapper helpers.
+- Legacy API-key fallback for internal/package automation scenarios.
+- Documented REST API capability listing and guarded read-only capability calls.
+- Package API automation with dry-run defaults and explicit confirmation gates.
+- YAP/YAPK/YDL/YWF validators and wrapper helpers.
+- Application plan conformance, navigation checks, runtime-binding lessons, and release hygiene.
+- Managed app connector design notes and safe example metadata.
 
 ## Safety Boundaries
 
-Use only documented Yeeflow REST API capabilities. Do not guess endpoint paths. Read-only and write capabilities remain classified separately. Write operations and package install/import/upgrade/delete flows require explicit confirmation, and package operations require stronger confirmation. Helpers must not print secrets, tokens, private tenant URLs, raw API responses, or decoded private payloads.
+Never commit tenant credentials, OAuth tokens, API keys, private tenant URLs, raw Yeeflow exports, decoded package payloads, generated runtime packages, screenshots, cert/key files, or local cache folders.
 
-## Validate
+API work must use documented Yeeflow endpoints only. Do not guess paths, do not make arbitrary raw API calls, and do not run mutating/package operations without explicit confirmation. Stronger confirmation is required for package upload, import, install, upgrade, create, update, and delete operations.
 
-```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.21-api-map.0
-node scripts/test-yeeflow-oauth-auth.mjs
-node scripts/test-yeeflow-api-capabilities.mjs
-node scripts/test-yeeflow-env-utils.mjs
-node scripts/test-package-api-dry-run-env.mjs
-node scripts/test-package-api-workspace-config.mjs
-node scripts/test-package-api-upload-response-parsing.mjs
+Proof boundaries remain separate:
+
+- Local validation is not import proof.
+- API acceptance is not runtime proof.
+- Runtime proof applies only to the exact tested scope.
+
+## Local Environment
+
+Use a gitignored `.env.local` for local credentials. Browser OAuth is preferred for user-facing API work; API-key mode remains available for internal fallback.
+
+```env
+YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1
+YEEFLOW_API_KEY=<your Yeeflow API key>
+YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+YEEFLOW_WORKSPACE_ID=<your workspace id>
+
+YEEFLOW_OAUTH_CLIENT_ID=<your OAuth client id>
+YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
+YEEFLOW_OAUTH_AUTH_URL=https://login.yeeflow.com/connect/authorize
+YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
+YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 ```
 
-These tests are local/synthetic and must not run live Yeeflow API writes.
+Do not paste secrets, authorization codes, cookies, bearer tokens, or passwords into chat.
+
+## Useful Commands
+
+```sh
+node scripts/yeeflow-oauth-status.mjs
+node scripts/yeeflow-oauth-refresh.mjs
+node scripts/yeeflow-api-list-capabilities.mjs --read-only
+node scripts/yeeflow-api-call-capability.mjs --name locations.list
+node scripts/test-yeeflow-oauth-auth.mjs
+node scripts/test-yeeflow-api-capabilities.mjs
+node scripts/test-package-api-dry-run-env.mjs
+```
+
+The read-only capability helper executes only mapped read-only `GET` capabilities and never accepts arbitrary raw paths.
+
+## Development Assets
+
+The new repo intentionally keeps more than the minimal plugin distribution:
+
+- root-level generation and inspection scripts restored from the legacy repo
+- sanitized runtime study docs and normalized references
+- plugin release hygiene and legacy release notes under `docs/legacy/`
+- managed app connector design and `.app.example.json`
+- safe examples and generated-folder guidance
+
+Generated runtime packages and raw proof payloads remain excluded.
 
 ## Migration Note
 
-The legacy repository and identity remain available for now. This clean repository avoids the old `yeeflow-internal` / `yeeflow-builder` cache identity, which has been observed resolving stale materializations in Codex App.
+The legacy repository used marketplace `yeeflow-internal`, plugin `yeeflow-builder`, and dist path `dist/yeeflow-builder-plugin`. That identity has repeatedly materialized stale Codex App cache entries such as `0.5.8`. This repository intentionally uses `yeeflow` / `yeeflow-app-builder` and `dist/yeeflow-app-builder-plugin`.
+
+Do not use the legacy repo or legacy identity for current installs unless explicitly testing migration behavior.

@@ -1,0 +1,1989 @@
+{
+  "library": "Yeeflow UI Section Template Library",
+  "version": "v1",
+  "description": "Reusable templates for full Yeeflow application generation. Composition checklists reference templateId and validators enforce template conformance.",
+  "globalDashboardRules": [
+    "page_content_area_full_width",
+    "page_content_area_padding_zero",
+    "main_container_required",
+    "content_container_required",
+    "all_visible_sections_inside_main_content",
+    "layout_grid_display_label_disabled",
+    "meaningful_navigator_labels_required",
+    "dynamic_controls_only_inside_item_templates"
+  ],
+  "templates": [
+    {
+      "templateId": "dashboard_header_action_bar",
+      "category": "dashboard",
+      "purpose": "Dashboard title, subtitle, and safe primary or secondary actions.",
+      "whenToUse": "Any generated dashboard with navigation or work-entry actions.",
+      "requiredControls": [
+        "container",
+        "grid",
+        "text",
+        "button"
+      ],
+      "requiredChildControls": [
+        "title_text",
+        "subtitle_text",
+        "action_area"
+      ],
+      "requiredDataBindings": [],
+      "requiredFields": [],
+      "layoutRules": [
+        "safe_padding",
+        "grid_row",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "typography_hierarchy",
+        "aligned_actions",
+        "no_default_button_label"
+      ],
+      "actionRules": [
+        "active_buttons_require_binding"
+      ],
+      "validationRules": [
+        "section_exists",
+        "controls_present",
+        "action_bindings_present",
+        "no_placeholder_content"
+      ],
+      "allowedFallback": "Use static action notes when navigation/form actions are not safely supported.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Projects Center_2.yap",
+        "Company Overview (3).yap",
+        "DEMO Innovation Ecosystem Platform (1).yap / NHIC Innovation Overview",
+        "Service Desk Pro (2).yap / Executive Dashboard"
+      ],
+      "observedControls": [
+        "container",
+        "heading",
+        "action-button",
+        "collection",
+        "relative-period",
+        "check-filter",
+        "select-filter"
+      ],
+      "observedPatterns": [
+        "safe padded dashboard root",
+        "header action buttons such as All projects and My projects",
+        "dashboard text hierarchy",
+        "dashboard header is followed by filter/action rows and bounded content containers in NHIC and Service Desk dashboards"
+      ],
+      "limitations": [
+        "active navigation/action semantics and filter-variable wiring still require validation per package"
+      ]
+    },
+    {
+      "templateId": "kpi_card_row",
+      "category": "dashboard",
+      "purpose": "Operational metric cards with labels, values, and context.",
+      "whenToUse": "Dashboard KPI rows, workload summaries, compliance totals, and expiry counts.",
+      "requiredControls": [
+        "container",
+        "grid",
+        "text",
+        "summary"
+      ],
+      "requiredChildControls": [
+        "kpi_card",
+        "kpi_label",
+        "kpi_value",
+        "kpi_context"
+      ],
+      "requiredDataBindings": [
+        "summary_control_source_list",
+        "summary_ext_binding",
+        "summary_save_var",
+        "dashboard_temp_var",
+        "visible_text_temp_var_binding"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "safe_padding",
+        "grid_row",
+        "card_container",
+        "section_spacing",
+        "summary_card_row"
+      ],
+      "styleRules": [
+        "card_background_or_border",
+        "internal_padding",
+        "value_typography",
+        "responsive_columns"
+      ],
+      "actionRules": [],
+      "validationRules": [
+        "section_exists",
+        "card_structure_present",
+        "not_plain_text_only",
+        "data_binding_present",
+        "summary_controls_resolve",
+        "save_var_refs_temp_vars",
+        "visible_kpi_values_bind_temp_vars",
+        "no_static_numeric_kpi_text"
+      ],
+      "allowedFallback": "Static aggregate placeholders only when labeled, explicitly approved, and documented as deferred aggregate binding.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Sales_Management_AD.yap",
+        "Projects Center_2.yap",
+        "DEMO Innovation Ecosystem Platform (1).yap / NHIC Innovation Overview",
+        "Service Desk Pro (2).yap / Executive Dashboard"
+      ],
+      "partialEvidence": false,
+      "observedControls": [
+        "summary",
+        "container",
+        "heading",
+        "progress",
+        "relative-period",
+        "check-filter",
+        "select-filter",
+        "bar-chart",
+        "pie-chart",
+        "line-chart",
+        "PivotTable"
+      ],
+      "observedPatterns": [
+        "sales dashboard summary metrics",
+        "project dashboard summaries and progress indicators",
+        "NHIC dashboard uses a padded constrained dashboard body with filter row and multiple Summary controls inside row containers",
+        "Service Desk Executive Dashboard uses a deep padded container hierarchy with 14 Summary controls, chart sections, filter controls, gaps, borders, and width-constrained rows",
+        "summary controls carry business labels, aggregate field settings, card padding, border/radius, and dashboard filter bindings",
+        "Vendor Onboarding v4.1 uses hidden Summary controls with attrs.save_var, dashboard tempVars, and visible formatted Text controls for KPI values"
+      ],
+      "limitations": [
+        "export-proven structure and binding only; aggregate correctness and runtime values still require package-specific validation",
+        "static numeric Text values are not acceptable for generated KPI cards unless explicitly approved as deferred placeholders"
+      ]
+    },
+    {
+      "templateId": "progress_summary_card",
+      "category": "dashboard",
+      "purpose": "Progress, score, or completion summary in a styled card.",
+      "whenToUse": "Completion, risk score, review progress, or onboarding state summaries.",
+      "requiredControls": [
+        "container",
+        "progress-circle",
+        "progress-bar",
+        "text",
+        "dynamic-field"
+      ],
+      "requiredChildControls": [
+        "card_title",
+        "progress_visual",
+        "progress_value",
+        "summary_text"
+      ],
+      "requiredDataBindings": [
+        "progress_or_score_field_or_fallback"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "card_container",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "visual_and_text_alignment",
+        "business_label"
+      ],
+      "actionRules": [],
+      "validationRules": [
+        "section_exists",
+        "data_binding_present",
+        "card_structure_present"
+      ],
+      "allowedFallback": "Progress bar may replace Progress circle.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Projects Center_2.yap",
+        "Service Desk Pro (2).yap / Executive Dashboard",
+        "DEMO Innovation Ecosystem Platform (1).yap / NHIC Innovation Overview"
+      ],
+      "observedControls": [
+        "progress-circle",
+        "progress-bar",
+        "progress",
+        "container",
+        "heading",
+        "summary",
+        "bar-chart",
+        "line-chart",
+        "pie-chart"
+      ],
+      "observedPatterns": [
+        "progress controls embedded with related text and dynamic fields",
+        "summary cards combine business labels with aggregate values and adjacent chart/metric sections"
+      ],
+      "limitations": [
+        "binding and aggregate calculation must still be validated per package"
+      ]
+    },
+    {
+      "templateId": "business_alert_card",
+      "category": "dashboard",
+      "purpose": "Business-specific risk, warning, or action alert.",
+      "whenToUse": "Compliance risks, expiring documents, review blockers, or required actions.",
+      "requiredControls": [
+        "container",
+        "alert",
+        "text",
+        "dynamic-field"
+      ],
+      "requiredChildControls": [
+        "alert_title",
+        "alert_description",
+        "supporting_context"
+      ],
+      "requiredDataBindings": [
+        "risk_status_date_or_action_context"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "card_container",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "severity_context",
+        "no_default_alert_copy"
+      ],
+      "actionRules": [
+        "optional_actions_require_binding"
+      ],
+      "validationRules": [
+        "section_exists",
+        "no_placeholder_content",
+        "data_binding_present"
+      ],
+      "allowedFallback": "Static business-specific alert content if dynamic alert binding is deferred.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Service Desk Pro (2).yap / Executive Dashboard"
+      ],
+      "partialEvidence": true,
+      "observedControls": [
+        "alert",
+        "container",
+        "text"
+      ],
+      "observedPatterns": [
+        "Alert advanced control appears in dashboard pages",
+        "dashboard status/metric groups provide business-specific performance context; generated alerts still require real business copy"
+      ],
+      "limitations": [
+        "business-specific alert copy remains a generation responsibility; generic alert text is still invalid"
+      ]
+    },
+    {
+      "templateId": "data_table_section",
+      "category": "dashboard",
+      "purpose": "Configured table of records with source-bound columns.",
+      "whenToUse": "Record lists, review queues, related records, and operational tables.",
+      "requiredControls": [
+        "data-list"
+      ],
+      "requiredChildControls": [
+        "section_title",
+        "configured_columns"
+      ],
+      "requiredDataBindings": [
+        "attrs.data.list",
+        "attrs.listarr[].Field",
+        "attrs.listarr[].FieldName"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "section_spacing"
+      ],
+      "styleRules": [
+        "section_grouping",
+        "no_edge_dumped_table"
+      ],
+      "actionRules": [
+        "row_actions_optional_and_bound"
+      ],
+      "validationRules": [
+        "section_exists",
+        "data_binding_present",
+        "required_fields_present"
+      ],
+      "allowedFallback": "Collection/list cards with equivalent fields if Data table is unsupported.",
+      "proofStatus": "runtime-proven",
+      "sourceExports": [
+        "Sales_Management_AD.yap",
+        "Online Library.yap / Print Inventory",
+        "Sales Quotation.yap / Print Page"
+      ],
+      "observedControls": [
+        "data-list",
+        "table-v2",
+        "list",
+        "list-body",
+        "list-footer",
+        "dynamic-field"
+      ],
+      "observedPatterns": [
+        "dashboard data table with Field and FieldName columns bound to Accounts",
+        "related data tables on Account view for Contacts and Opportunities",
+        "Online Library Print Inventory uses repeated table-v2 rows/sections with dynamic fields for multi-item inventory print output",
+        "Sales Quotation Print Page uses a line-item list body/footer pattern for product and service rows plus totals"
+      ],
+      "limitations": [
+        "dashboard Data table Field/FieldName binding remains a separate rule; print line-item lists use print/list controls rather than dashboard data-list columns"
+      ]
+    },
+    {
+      "templateId": "kanban_status_board",
+      "category": "dashboard",
+      "purpose": "Status, risk, or category board with meaningful cards.",
+      "whenToUse": "Onboarding boards, review queues, risk boards, and task boards.",
+      "requiredControls": [
+        "kanban",
+        "container",
+        "text",
+        "dynamic-field"
+      ],
+      "requiredChildControls": [
+        "board_title",
+        "lanes",
+        "item_template"
+      ],
+      "requiredDataBindings": [
+        "source_list",
+        "category_field",
+        "current_item_context"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "card_container",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "card_like_items",
+        "badges",
+        "no_title_only_cards"
+      ],
+      "actionRules": [
+        "item_actions_require_binding_when_present"
+      ],
+      "itemTemplate": {
+        "controls": [
+          "kanban"
+        ],
+        "minDynamicFields": 3,
+        "requiresActions": false
+      },
+      "validationRules": [
+        "item_template_dynamic_fields",
+        "required_fields_present",
+        "action_bindings_present"
+      ],
+      "allowedFallback": "Use collection_card_board with same field/action contract.",
+      "proofStatus": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Data Lists (4).yap",
+        "Projects Center_2.yap",
+        "Sales_Management_AD.yap"
+      ],
+      "observedControls": [
+        "kanban",
+        "dynamic-field",
+        "dynamic-user",
+        "dynamic-image",
+        "action-button"
+      ],
+      "observedPatterns": [
+        "Kanban dashboard item template with dynamic fields and item actions",
+        "data-list Kanban views for operational lists"
+      ],
+      "limitations": [
+        "drag/drop and all item action variants need focused runtime proof per generated package"
+      ]
+    },
+    {
+      "templateId": "collection_card_board",
+      "category": "dashboard",
+      "purpose": "Card board or grouped card list with dynamic item templates.",
+      "whenToUse": "Queues, related-card boards, quick review cards, and timeline fallbacks.",
+      "requiredControls": [
+        "collection",
+        "container",
+        "text",
+        "dynamic-field"
+      ],
+      "requiredChildControls": [
+        "board_title",
+        "item_template"
+      ],
+      "requiredDataBindings": [
+        "source_list",
+        "current_item_context"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "card_container",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "card_hierarchy",
+        "badges_or_status",
+        "no_blank_cards"
+      ],
+      "actionRules": [
+        "item_actions_require_binding_when_present"
+      ],
+      "itemTemplate": {
+        "controls": [
+          "collection"
+        ],
+        "minDynamicFields": 3,
+        "requiresActions": false
+      },
+      "validationRules": [
+        "item_template_dynamic_fields",
+        "required_fields_present",
+        "action_bindings_present"
+      ],
+      "allowedFallback": "Use Data table with equivalent columns and documented reason.",
+      "proofStatus": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Projects Center_2.yap"
+      ],
+      "observedControls": [
+        "collection",
+        "dynamic-field",
+        "dynamic-user",
+        "dynamic-file",
+        "dynamic-image",
+        "action-button"
+      ],
+      "observedPatterns": [
+        "Collection of activity cards with dynamic fields and item actions",
+        "project dashboard and detail-page card collections"
+      ],
+      "limitations": [
+        "some project collections use low dynamic field counts, so generated cards must still meet template minimums"
+      ]
+    },
+    {
+      "templateId": "quick_links_icon_list",
+      "category": "dashboard",
+      "purpose": "Navigation shortcuts to common app tasks.",
+      "whenToUse": "Dashboards that need fast access to forms, workspaces, or views.",
+      "requiredControls": [
+        "icon-list",
+        "container",
+        "grid",
+        "button",
+        "text"
+      ],
+      "requiredChildControls": [
+        "link_label",
+        "icon_or_marker",
+        "target_context"
+      ],
+      "requiredDataBindings": [
+        "navigation_target_for_active_links"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "card_container",
+        "grid_row",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "compact_cards_or_icon_rows",
+        "no_unlabeled_buttons"
+      ],
+      "actionRules": [
+        "active_links_require_binding"
+      ],
+      "validationRules": [
+        "section_exists",
+        "action_bindings_present",
+        "no_placeholder_content"
+      ],
+      "allowedFallback": "Use static shortcut notes when navigation action schema is unsafe.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Projects Center_2.yap",
+        "Company Overview (3).yap"
+      ],
+      "partialEvidence": true,
+      "observedControls": [
+        "action-button",
+        "icon",
+        "icon-list",
+        "container"
+      ],
+      "observedPatterns": [
+        "dashboard action buttons for All projects and My projects",
+        "Icon list advanced control in Company Overview"
+      ],
+      "limitations": [
+        "full quick-link card navigation pattern still needs package-specific action validation"
+      ]
+    },
+    {
+      "templateId": "three_column_workspace_shell",
+      "category": "dashboard",
+      "purpose": "Gmail/Outlook-style three-column business workspace shell with export-proven Yeeflow container mechanics: root page body shell, absolute full-page row layout, fixed left/right panels, fill-width main panel, full-height panels, hidden panel overflow, sticky headers, scrollable bodies, and bottom support regions.",
+      "whenToUse": "Use for task centers, service desk inboxes, CRM workspaces, renewal reviews, review queues, triage surfaces, and list-detail-detail work management pages.",
+      "whenNotToUse": "Do not use for simple forms, simple dashboards, mobile-first minimal pages, or generated-final designs with placeholder-only panels.",
+      "requiredControls": [
+        "container",
+        "heading",
+        "icon"
+      ],
+      "requiredChildControls": [
+        "left_context_panel",
+        "main_content_panel",
+        "right_detail_panel",
+        "page_header_action_area",
+        "detail_information_panel"
+      ],
+      "requiredDataBindings": [
+        "main_or_detail_business_content"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "safe_padding",
+        "three_column_workspace_shell",
+        "three_column_reference_mechanics",
+        "section_spacing",
+        "meaningful_panel_content"
+      ],
+      "styleRules": [
+        "absolute_or_positioned_row_shell",
+        "fixed_fill_fixed_column_widths",
+        "full_height_bounded_panels",
+        "hidden_panel_overflow",
+        "scrollable_panel_bodies",
+        "sticky_panel_headers",
+        "meaningful_bottom_regions",
+        "neutral_bounded_panels",
+        "icons_inline_width"
+      ],
+      "actionRules": [
+        "active_buttons_require_binding"
+      ],
+      "validationRules": [
+        "three_panels_present",
+        "three_column_shell_root_container",
+        "three_column_shell_not_nested_in_main_content",
+        "page_content_width_full",
+        "page_padding_zero",
+        "left_main_right_roles_identifiable",
+        "three_column_reference_mechanics",
+        "no_sequential_vertical_stack",
+        "icon_width_inline",
+        "icon_size_bounded",
+        "no_placeholder_content",
+        "no_zero_width_risk",
+        "dashboard_wrapper_valid",
+        "approval_task_pageurl_valid_when_used"
+      ],
+      "allowedFallback": "Use a two-column list/detail layout or standard dashboard sections when meaningful three-panel content cannot be generated safely.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Dashboard Layout Golden Reference.yap",
+        "Dashboard Layout Golden Reference.yapk",
+        "Dashboard-Home.html"
+      ],
+      "observedControls": [
+        "container",
+        "heading",
+        "icon",
+        "action_button"
+      ],
+      "observedPatterns": [
+        "root shell common.pos absolute with left/right/top/bottom runtime offsets",
+        "three_column_workspace_shell must be the root page body container for dashboard Style 2",
+        "default Main > Content wrappers can prevent full-height rendering and must not wrap the shell",
+        "dashboard page content width is Full Width and page padding is 0",
+        "root shell flex row with gap token",
+        "left panel fixed width 360px and right panel fixed width 480px",
+        "main panel fill-width behavior using widthtype 0",
+        "all panels height 100% and overflow hidden",
+        "panel body regions overflow scroll and height 100%",
+        "headers are sticky top 0 with z-index 2 and separator border",
+        "bottom regions use separator border and row alignment",
+        "runtime HTML maps attrs into ak-dynamic CSS classes"
+      ],
+      "limitations": [
+        "reference body regions contain designer drop-zone placeholders that must be replaced in generated final apps",
+        "runtime interaction and selected-record refresh remain unproven for generated apps",
+        "mobile/responsive behavior uses display conditions in the reference and needs separate proof"
+      ],
+      "requiredLayoutProperties": {
+        "shell": [
+          "root page child = three_column_workspace_shell",
+          "not nested under Main > Content",
+          "page attrs.contentWidth = full or equivalent",
+          "page attrs.container.padding = 0",
+          "attrs.common.pos = absolute",
+          "attrs.common.hor/ver centered when position-based",
+          "attrs.style.direction = row",
+          "attrs.style.gap uses a spacing token"
+        ],
+        "panels": [
+          "three direct sibling panel containers",
+          "left/right attrs.style.widthtype = 3 with explicit width",
+          "main attrs.style.widthtype = 0 fill behavior",
+          "attrs.style.height = 2 with cushei 100 and cusheiu %",
+          "attrs.style.overflow = hidden",
+          "attrs.style.justify_content = flex-start"
+        ],
+        "header": [
+          "header container attrs.common.pos = sticky",
+          "top offset/sticky target set",
+          "z-index above body",
+          "row direction, center alignment, space-between for action areas",
+          "min-height around 52px"
+        ],
+        "body": [
+          "body container attrs.style.overflow = scroll or auto",
+          "body height fills remaining panel",
+          "body padding uses --sp--s200 style spacing"
+        ],
+        "bottom": [
+          "bottom/support container present only with meaningful content",
+          "top border separator",
+          "row direction and center alignment"
+        ],
+        "icons": [
+          "icon controls use inline width behavior",
+          "icon size is intentionally bounded for panel/header context"
+        ]
+      }
+    },
+    {
+      "templateId": "multi_column_form_workspace_shell",
+      "category": "approval-form-workspace",
+      "purpose": "Stateful operational inbox/workbench on an approval/form surface with navigation, collection, selected-record workspace, and right detail/attribute panel.",
+      "whenToUse": "Service desk, help desk, CRM workbench, case console, support queue, renewal review, and operational inbox apps that need form actions, variables, selected-record behavior, comments, dynamic field controls, and action-driven filtering.",
+      "doNotUseWhen": "The page is primarily a reporting dashboard, simple request form, simple data-list view, or real approval workflow that should not be represented as a no-submit workspace shell.",
+      "requiredControls": [
+        "container",
+        "heading",
+        "icon",
+        "list"
+      ],
+      "requiredChildControls": [
+        "left_help_desk_navigation_panel",
+        "ticket_collection_panel",
+        "selected_record_workspace_panel",
+        "right_attributes_panel",
+        "workspace_filter_state",
+        "selected_record_state",
+        "comment_update_area"
+      ],
+      "requiredDataBindings": [
+        "ticket_collection_source",
+        "selected_record_state",
+        "filter_variables",
+        "dynamic_detail_fields",
+        "optional_activity_or_comment_list"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "multi_column_form_workspace_shell",
+        "four_column_service_desk_workspace",
+        "action_driven_ticket_workspace",
+        "section_spacing",
+        "meaningful_panel_content"
+      ],
+      "requiredLayoutProperties": [
+        "form workspace host surface when state/actions/comments are required",
+        "YAP workspace generation follows docs/standards/yap-approval-form-workspace-generation-standard.md",
+        "YAP approval/form workspaces use Data.Forms[].ListID = 0, root Type 105 navigation, and aligned Resource.FormKeys, Data.Forms.Key, navigation key, and DefResource defkey/key",
+        "YAP workspace form content uses DefResource.pageurls[].formdef.children with export-style lowercase controls; formdef.controls is forbidden",
+        "YAP no-submit workspace forms still include StartNoneEvent -> SequenceFlow -> EndNoneEvent",
+        "YAP workspace page settings hide default header, use Full width, and set padding 0",
+        "positioned row shell with navigation, collection, selected workspace, and details regions; reference uses common.pos absolute, centered placement, style.direction row, and style.gap 0",
+        "fixed-width navigation panel around 400px and ticket collection panel around 500px",
+        "fill-width selected workspace region with fill conversation/activity panel and fixed right attributes panel around 420px",
+        "full-height columns with independent Scroll or Auto overflow and bounded shell height; outer shell uses Hidden overflow where it owns the page",
+        "nav rows are horizontal icon plus text containers with actions, row direction, align-items, gap, padding, and bounded icons",
+        "Icon, Text/heading, Button, and Dynamic field controls use inline width behavior by default",
+        "icons in menu/text rows match nearby text size, such as 16px icons for 16px text",
+        "collection item click sets selected/current record state and uses row/card layout with padding, background, radius, and selected-state styling",
+        "details panels bind dynamic fields to selected/current record",
+        "comment/update actions target the selected record and related activity list when included",
+        "reference property map: docs/studies/normalized/service-desk-pro-form-workspace/reference-property-map.normalized.json",
+        "default-container-only implementations are forbidden",
+        "YAP Service Desk generated workspace baseline uses designer-load-safe list/container/heading/icon controls only; collection and dynamic-field require exact export-proven approval/form workspace shape",
+        "YAP child list sample data is a record-id keyed ListDatas object with row keys resolving to Defs[].FieldName",
+        "YAP Service Desk field numbering preserves native Title plus Text2... business fields and avoids generated Text1 or Lookup1 drift"
+      ],
+      "styleRules": [
+        "dense operational layout",
+        "stable headers",
+        "scrollable bodies",
+        "icon_text_navigation_rows",
+        "clear_selected_item_state",
+        "bounded_inline_icons",
+        "no_vertical_text_squeeze",
+        "no_placeholder_panels"
+      ],
+      "actionRules": [
+        "nav_menu_actions_required",
+        "filter_variable_actions_required",
+        "collection_selected_record_action_required",
+        "comment_update_action_required_when_comments_included",
+        "collapse_expand_icon_actions_when_present"
+      ],
+      "validationRules": [
+        "form_workspace_surface_exists",
+        "runtime_shell_layout_properties_present",
+        "panel_layout_valid",
+        "no_default_container_only_layout",
+        "column_widths_heights_overflow_present",
+        "no_vertical_text_risk",
+        "menu_item_row_layout_present",
+        "ticket_item_row_card_layout_present",
+        "inline_bounded_icons",
+        "inline_text_heading_controls",
+        "inline_buttons",
+        "inline_dynamic_fields",
+        "yap_form_materialization_shape",
+        "yap_form_type105_nav_present",
+        "yap_form_keys_aligned",
+        "yap_formdef_children_present",
+        "yap_formdef_controls_absent",
+        "yap_minimal_start_sequence_end_workflow",
+        "yap_workspace_page_settings",
+        "workspace_shell_hidden_overflow",
+        "workspace_columns_independent_scroll",
+        "no_fake_submit_button",
+        "no_fake_workflow_claim",
+        "nav_actions_present",
+        "filter_variables_present",
+        "collection_filter_present",
+        "selected_record_action_present",
+        "detail_bindings_present",
+        "icon_actions_present",
+        "no_placeholder_panels",
+        "yap_designer_unproven_controls_absent",
+        "yap_listdatas_keyed_records",
+        "yap_listdata_fields_resolve",
+        "yap_service_desk_field_numbering_v8_compatible"
+      ],
+      "allowedFallback": "Use static designer-safe heading/container ticket cards for YAP approval/form workspaces when collection, dynamic-field, selected-record refresh, or comment controls are not copied from an exact export-proven host shape. Use dashboard three_column_workspace_shell or standard list/detail page only when selected-record/comment/action behavior is explicitly deferred and documented.",
+      "proofStatus": "v8 designer-load-proven baseline for YAP uses list/container/heading/icon only; broader collection/dynamic-field behavior requires separate export/runtime proof for this host",
+      "sourceExports": [
+        "Service Desk Pro (1).yap / Workspace approval-form page",
+        "Service Desk Pro-v1 - Init.yapk / AppExportPackageInfo and lists"
+      ],
+      "observedControls": [
+        "list",
+        "container",
+        "heading",
+        "icon",
+        "dynamic-user",
+        "collection",
+        "dynamic-field",
+        "search-filter",
+        "radio-filter",
+        "dropbar",
+        "action_button",
+        "richtext",
+        "identity-picker",
+        "file-upload-merge"
+      ],
+      "observedPatterns": [
+        "approval/form workspace rather than dashboard",
+        "absolute row shell",
+        "fixed-width help desk navigation",
+        "fixed-width ticket collection",
+        "selected ticket conversation/detail workspace",
+        "right details and attributes panel",
+        "form actions for navigation filters",
+        "variables for current user/filter state",
+        "collection item selected-record actions",
+        "comment submission to ticket activities",
+        "collapse/expand actions"
+      ]
+    },
+    {
+      "templateId": "recent_activity_timeline",
+      "category": "dashboard",
+      "purpose": "Chronological activity, history, or milestone feed.",
+      "whenToUse": "Recent activity, history, approvals, and review timelines.",
+      "requiredControls": [
+        "timeline-v",
+        "collection",
+        "container",
+        "dynamic-field"
+      ],
+      "requiredChildControls": [
+        "date",
+        "title",
+        "type_or_status",
+        "actor",
+        "description"
+      ],
+      "requiredDataBindings": [
+        "activity_or_history_source_list"
+      ],
+      "requiredFields": [
+        "Activity Date",
+        "Activity Title"
+      ],
+      "layoutRules": [
+        "section_spacing"
+      ],
+      "styleRules": [
+        "chronological_grouping",
+        "not_plain_list"
+      ],
+      "actionRules": [],
+      "validationRules": [
+        "section_exists",
+        "data_binding_present",
+        "required_fields_present"
+      ],
+      "allowedFallback": "Use Collection with timeline-style item template.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ],
+      "observedControls": [
+        "timeline-v",
+        "timeline-h",
+        "collection",
+        "dynamic-field",
+        "dynamic-user",
+        "dynamic-file",
+        "dynamic-image"
+      ],
+      "observedPatterns": [
+        "vertical and horizontal timeline pages with dynamic item fields",
+        "collection fallback for activity display"
+      ],
+      "limitations": [
+        "runtime interaction beyond render is not proven by these exports"
+      ]
+    },
+    {
+      "templateId": "detail_view_header_summary",
+      "category": "data-list-form",
+      "purpose": "Record detail summary header.",
+      "whenToUse": "Primary list View forms and detail pages.",
+      "requiredControls": [
+        "container",
+        "grid",
+        "text",
+        "dynamic-field",
+        "dynamic-user"
+      ],
+      "requiredChildControls": [
+        "title_field",
+        "status_badge",
+        "risk_or_priority_badge",
+        "owner_or_user"
+      ],
+      "requiredDataBindings": [
+        "current_list_item"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "safe_padding",
+        "card_container",
+        "grid_row",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "header_hierarchy",
+        "badge_like_statuses"
+      ],
+      "actionRules": [
+        "active_actions_require_binding"
+      ],
+      "validationRules": [
+        "section_exists",
+        "required_fields_present",
+        "card_structure_present"
+      ],
+      "allowedFallback": "Read-only header without buttons when actions are unsafe.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Projects Center_2.yap",
+        "Sales_Management_AD.yap"
+      ],
+      "observedControls": [
+        "container",
+        "heading",
+        "dynamic-field",
+        "dynamic-user",
+        "picture",
+        "icon"
+      ],
+      "observedPatterns": [
+        "project/task/company detail pages with status, owner, picture/date, and field summary sections"
+      ],
+      "limitations": [
+        "status badge styling and action behavior need generated package validation"
+      ]
+    },
+    {
+      "templateId": "tabbed_detail_page",
+      "category": "data-list-form",
+      "purpose": "Tabbed or sectioned detail page shell.",
+      "whenToUse": "Detail pages with overview, documents, compliance, tasks, and history.",
+      "requiredControls": [
+        "tabs",
+        "container",
+        "toggle",
+        "divider"
+      ],
+      "requiredChildControls": [
+        "overview_section",
+        "documents_section",
+        "compliance_section",
+        "tasks_section",
+        "history_section"
+      ],
+      "requiredDataBindings": [
+        "current_record_and_related_lists"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "safe_padding",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "clear_section_navigation",
+        "no_empty_tab_bodies"
+      ],
+      "actionRules": [
+        "section_actions_optional_and_bound"
+      ],
+      "validationRules": [
+        "section_exists",
+        "controls_present",
+        "no_placeholder_content"
+      ],
+      "allowedFallback": "Sectioned layout when Tabs are not safely supported.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Projects Center_2.yap"
+      ],
+      "observedControls": [
+        "aktabs",
+        "ak-tabs-tab",
+        "toggle",
+        "toggle-panel",
+        "dropbar",
+        "container",
+        "collection",
+        "kanban"
+      ],
+      "observedPatterns": [
+        "dashboard Tab and Toggle control pages",
+        "Project detail page with tab/dropbar-like navigation and related sections"
+      ],
+      "limitations": [
+        "exact generated Tab host shape must match target page host"
+      ]
+    },
+    {
+      "templateId": "sectioned_new_edit_form",
+      "category": "data-list-form",
+      "purpose": "Business section cards for New/Edit forms.",
+      "whenToUse": "Data entry and request intake forms.",
+      "requiredControls": [
+        "container",
+        "grid",
+        "field",
+        "dynamic-field",
+        "text"
+      ],
+      "requiredChildControls": [
+        "section_title",
+        "grouped_fields"
+      ],
+      "requiredDataBindings": [
+        "host_list_fields"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "safe_padding",
+        "section_card",
+        "grid_row",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "section_cards",
+        "two_column_desktop_grid",
+        "clear_labels"
+      ],
+      "actionRules": [
+        "save_submit_require_form_action_binding"
+      ],
+      "validationRules": [
+        "section_exists",
+        "required_fields_present",
+        "card_structure_present"
+      ],
+      "allowedFallback": "Single-column section cards when grid settings are unsafe.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Data Lists (4).yap",
+        "Projects Center_2.yap",
+        "Sales_Management_AD.yap"
+      ],
+      "observedControls": [
+        "container",
+        "flex-grid",
+        "input",
+        "datepicker",
+        "lookup",
+        "identity-picker",
+        "textarea",
+        "richtext",
+        "radio"
+      ],
+      "observedPatterns": [
+        "Data Lists custom forms with field grids",
+        "Sales opportunity/account New/Edit sections",
+        "Project and task edit forms"
+      ],
+      "limitations": [
+        "visual card polish still must be enforced by templates"
+      ]
+    },
+    {
+      "templateId": "required_documents_checklist",
+      "category": "data-list-form",
+      "purpose": "Document requirements and file upload/status checklist.",
+      "whenToUse": "Vendor intake, compliance, and document tracking forms.",
+      "requiredControls": [
+        "list",
+        "data-list",
+        "container",
+        "field",
+        "dynamic-file"
+      ],
+      "requiredChildControls": [
+        "document_type",
+        "required_flag",
+        "file_attachment",
+        "expiry_or_review_status"
+      ],
+      "requiredDataBindings": [
+        "document_sub_list_or_related_documents_list"
+      ],
+      "requiredFields": [
+        "Document Type",
+        "Required"
+      ],
+      "layoutRules": [
+        "section_card",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "checklist_rows",
+        "clear_document_headers"
+      ],
+      "actionRules": [
+        "upload_add_remove_actions_require_binding"
+      ],
+      "validationRules": [
+        "section_exists",
+        "data_binding_present",
+        "required_fields_present"
+      ],
+      "allowedFallback": "Related Vendor Documents Data table when Dynamic Sub List is not safe.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Data Lists (4).yap",
+        "Projects Center_2.yap"
+      ],
+      "partialEvidence": true,
+      "observedControls": [
+        "list",
+        "file-upload",
+        "dynamic-file",
+        "data-list"
+      ],
+      "observedPatterns": [
+        "Dynamic Sub List field in Data Lists forms",
+        "Projects document upload/detail forms"
+      ],
+      "limitations": [
+        "Vendor-style required document checklist with upload/review lifecycle still needs golden proof or focused package validation"
+      ]
+    },
+    {
+      "templateId": "related_records_section",
+      "category": "data-list-form",
+      "purpose": "Related child records on a detail page.",
+      "whenToUse": "Documents, reviews, tasks, or history related to a primary record.",
+      "requiredControls": [
+        "data-list",
+        "collection",
+        "timeline-v",
+        "document",
+        "container"
+      ],
+      "requiredChildControls": [
+        "section_title",
+        "configured_columns_or_item_template"
+      ],
+      "requiredDataBindings": [
+        "related_source_list"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "section_card",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "grouped_table_or_cards",
+        "clear_section_title"
+      ],
+      "actionRules": [
+        "related_record_actions_optional_and_bound"
+      ],
+      "validationRules": [
+        "section_exists",
+        "data_binding_present",
+        "required_fields_present"
+      ],
+      "allowedFallback": "Read-only related list/table with documented filter-binding gap.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Projects Center_2.yap",
+        "Sales_Management_AD.yap"
+      ],
+      "observedControls": [
+        "collection",
+        "kanban",
+        "data-list",
+        "document",
+        "container"
+      ],
+      "observedPatterns": [
+        "Project detail page related task/issue/collection sections",
+        "Sales Account view related Contacts and Opportunities data tables"
+      ],
+      "limitations": [
+        "relationship filters and current-record context must be validated per generated package"
+      ]
+    },
+    {
+      "templateId": "print_page_summary",
+      "category": "data-list-form",
+      "purpose": "Read-only print-oriented record summary.",
+      "whenToUse": "Printable record or vendor summary pages.",
+      "requiredControls": [
+        "container",
+        "grid",
+        "text",
+        "dynamic-field",
+        "divider"
+      ],
+      "requiredChildControls": [
+        "print_header",
+        "summary_fields",
+        "status_badges"
+      ],
+      "requiredDataBindings": [
+        "current_list_item"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "print_layout",
+        "safe_padding",
+        "section_spacing",
+        "no_mutating_actions",
+        "print_header",
+        "print_summary",
+        "read_only_print"
+      ],
+      "styleRules": [
+        "print_spacing",
+        "section_dividers",
+        "read_only"
+      ],
+      "actionRules": [
+        "no_mutating_actions"
+      ],
+      "validationRules": [
+        "section_exists",
+        "required_fields_present",
+        "no_mutating_actions"
+      ],
+      "allowedFallback": "Use record code text when QR/barcode controls are unsafe.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Sales Quotation.yap / Print Page",
+        "Online Library.yap / Print Inventory"
+      ],
+      "observedControls": [
+        "container",
+        "heading",
+        "dynamic-field",
+        "picture",
+        "text-editor",
+        "flex_grid"
+      ],
+      "observedPatterns": [
+        "Sales Quotation Print Page uses a structured print layout with logo/picture area, customer/quotation summary fields, terms text, totals, background/border styling, padding, gaps, and width-constrained rows",
+        "Online Library Print Inventory uses a printable dashboard-like page with padded sections, heading text, dynamic fields, dynamic image, and repeated inventory output"
+      ],
+      "limitations": [
+        "export-proven only; browser print rendering and page-break behavior still require runtime/manual proof"
+      ],
+      "partialEvidence": false
+    },
+    {
+      "templateId": "print_page_document_checklist",
+      "category": "data-list-form",
+      "purpose": "Printable document checklist/status rows.",
+      "whenToUse": "Print pages with document evidence or required documents.",
+      "requiredControls": [
+        "data-list",
+        "list",
+        "container",
+        "text"
+      ],
+      "requiredChildControls": [
+        "document_type",
+        "status",
+        "expiry",
+        "reviewer_or_notes"
+      ],
+      "requiredDataBindings": [
+        "related_documents_or_sub_list"
+      ],
+      "requiredFields": [
+        "Document Type",
+        "Review Status"
+      ],
+      "layoutRules": [
+        "print_layout",
+        "section_spacing",
+        "no_mutating_actions",
+        "print_item_table",
+        "read_only_print"
+      ],
+      "styleRules": [
+        "compact_print_rows",
+        "clear_headers"
+      ],
+      "actionRules": [
+        "no_actions"
+      ],
+      "validationRules": [
+        "section_exists",
+        "data_binding_present",
+        "required_fields_present"
+      ],
+      "allowedFallback": "Static checklist rows only with documented data-binding gap.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Online Library.yap / Print Inventory",
+        "Sales Quotation.yap / Print Page"
+      ],
+      "observedControls": [
+        "table-v2",
+        "list",
+        "list-body",
+        "list-footer",
+        "dynamic-field",
+        "heading"
+      ],
+      "observedPatterns": [
+        "Online Library Print Inventory proves multi-item print table/checklist composition with repeated table-v2 sections and dynamic fields",
+        "Sales Quotation Print Page proves single-record line-item table/list composition with header, body rows, footer/totals, and descriptive fields"
+      ],
+      "limitations": [
+        "document-specific lifecycle/status semantics remain package-specific; generated print tables must bind configured fields and stay read-only"
+      ],
+      "partialEvidence": false
+    },
+    {
+      "templateId": "print_page_qr_barcode_section",
+      "category": "data-list-form",
+      "purpose": "Scannable or textual record identity on print output.",
+      "whenToUse": "Print pages requiring QR, barcode, or safe record code fallback.",
+      "requiredControls": [
+        "qrcode",
+        "barcode",
+        "container",
+        "text",
+        "dynamic-field"
+      ],
+      "requiredChildControls": [
+        "code_value",
+        "label",
+        "fallback_text"
+      ],
+      "requiredDataBindings": [
+        "record_code_field"
+      ],
+      "requiredFields": [
+        "Vendor Code"
+      ],
+      "layoutRules": [
+        "print_layout",
+        "section_spacing",
+        "qr_barcode_section",
+        "print_context",
+        "current_record_or_item_binding",
+        "no_static_placeholder_qr"
+      ],
+      "styleRules": [
+        "compact_identity_block"
+      ],
+      "actionRules": [
+        "no_actions"
+      ],
+      "validationRules": [
+        "section_exists",
+        "required_fields_present",
+        "qr_control_inside_print_page_or_item_template",
+        "qr_value_bound_to_current_record_or_item",
+        "no_static_placeholder_url",
+        "field_bound_fallback_if_deferred"
+      ],
+      "allowedFallback": "Use a field-bound business code such as Vendor Code, Quote Number, Inventory Code, or Serial Number when QR generation is deferred; do not use static placeholder URLs.",
+      "proofStatus": "export-proven",
+      "sourceExports": [
+        "Company Overview (3).yap",
+        "Online Library.yap / Detail Page and Barcode Scan",
+        "Sales Quotation.yap / Print Page",
+        "Online Library (1).yap / Print Inventory",
+        "Sales Quotation (1).yap / Print Page"
+      ],
+      "partialEvidence": false,
+      "observedControls": [
+        "qrcode",
+        "barcode",
+        "dynamic-field",
+        "list-qrcode",
+        "container",
+        "collection"
+      ],
+      "observedPatterns": [
+        "QR Code and Barcode controls appear on Company Overview View page",
+        "Online Library proves Barcode and list QR Code controls on inventory/detail surfaces and a separate printable Inventory page",
+        "Sales Quotation proves print-page layout but does not include QR/barcode controls",
+        "Online Library (1) Print Inventory places a list-qrcode control inside a repeated Collection item context so each printed inventory item receives its own QR code",
+        "Sales Quotation (1) Print Page places a list-qrcode control inside the single-record print page container so the QR is scoped to the current quotation record",
+        "QR sections sit inside padded print/container structure and rely on current item/current record context rather than static placeholder URLs"
+      ],
+      "limitations": [
+        "export-proven structure only; browser print rendering and scanned QR destination behavior still require runtime/manual proof"
+      ]
+    },
+    {
+      "templateId": "kanban_card_with_dynamic_fields",
+      "category": "item-template",
+      "purpose": "Standard Kanban item template with dynamic fields and actions.",
+      "whenToUse": "Any required Kanban item card.",
+      "requiredControls": [
+        "kanban",
+        "dynamic-field"
+      ],
+      "requiredChildControls": [
+        "title",
+        "status_or_risk_badge",
+        "owner_or_date",
+        "action_area"
+      ],
+      "requiredDataBindings": [
+        "current_kanban_item_context"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "card_container",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "card_hierarchy",
+        "no_title_only_cards"
+      ],
+      "actionRules": [
+        "view_action_when_required"
+      ],
+      "itemTemplate": {
+        "controls": [
+          "kanban"
+        ],
+        "minDynamicFields": 3,
+        "requiresActions": true
+      },
+      "validationRules": [
+        "item_template_dynamic_fields",
+        "required_fields_present",
+        "action_bindings_present"
+      ],
+      "allowedFallback": "Collection card template with same field/action contract.",
+      "proofStatus": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ],
+      "observedControls": [
+        "kanban",
+        "dynamic-field",
+        "dynamic-user",
+        "dynamic-image",
+        "action-button"
+      ],
+      "observedPatterns": [
+        "Kanban item template with 10 dynamic controls and edit/delete actions"
+      ],
+      "limitations": [
+        "new generated packages must still resolve action targets and current-item fields"
+      ]
+    },
+    {
+      "templateId": "collection_card_with_dynamic_fields",
+      "category": "item-template",
+      "purpose": "Standard Collection item template with dynamic fields and actions.",
+      "whenToUse": "Any required Collection card board or card list.",
+      "requiredControls": [
+        "collection",
+        "dynamic-field"
+      ],
+      "requiredChildControls": [
+        "title",
+        "status_or_risk",
+        "owner_or_date",
+        "action_area"
+      ],
+      "requiredDataBindings": [
+        "current_collection_item_context"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "card_container",
+        "grid_row"
+      ],
+      "styleRules": [
+        "card_hierarchy",
+        "no_blank_cards"
+      ],
+      "actionRules": [
+        "view_edit_update_delete_only_when_bound"
+      ],
+      "itemTemplate": {
+        "controls": [
+          "collection"
+        ],
+        "minDynamicFields": 3,
+        "requiresActions": true
+      },
+      "validationRules": [
+        "item_template_dynamic_fields",
+        "required_fields_present",
+        "action_bindings_present"
+      ],
+      "allowedFallback": "Data table with equivalent columns and documented reason.",
+      "proofStatus": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ],
+      "observedControls": [
+        "collection",
+        "dynamic-field",
+        "dynamic-user",
+        "dynamic-file",
+        "dynamic-image",
+        "action-button"
+      ],
+      "observedPatterns": [
+        "Collection item template with 9 dynamic controls and item actions"
+      ],
+      "limitations": [
+        "new generated packages must still resolve action targets and current-item fields"
+      ]
+    },
+    {
+      "templateId": "item_action_bar_edit_delete_update",
+      "category": "item-template",
+      "purpose": "Local item action row for cards.",
+      "whenToUse": "Cards requiring edit, delete, update, or workflow actions.",
+      "requiredControls": [
+        "button",
+        "icon"
+      ],
+      "requiredChildControls": [
+        "action_label_or_icon",
+        "action_id",
+        "current_item_context"
+      ],
+      "requiredDataBindings": [
+        "current_item_listdataid",
+        "target_layout_or_fields"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "section_spacing"
+      ],
+      "styleRules": [
+        "compact_action_row",
+        "destructive_action_distinction"
+      ],
+      "actionRules": [
+        "all_item_actions_resolve"
+      ],
+      "validationRules": [
+        "action_bindings_present",
+        "required_fields_present"
+      ],
+      "allowedFallback": "Static action notes with explicit deferred reason.",
+      "proofStatus": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ],
+      "observedControls": [
+        "action-button"
+      ],
+      "observedPatterns": [
+        "Edit item, Delete Item, Mark as completed item action buttons"
+      ],
+      "limitations": [
+        "runtime mutation proof remains scoped to previous focused package"
+      ]
+    },
+    {
+      "templateId": "selection_bulk_toolbar",
+      "category": "item-template",
+      "purpose": "Selection-aware bulk action toolbar.",
+      "whenToUse": "Multi-select update/delete/review operations.",
+      "requiredControls": [
+        "container",
+        "text",
+        "button"
+      ],
+      "requiredChildControls": [
+        "selected_count",
+        "bulk_action_buttons"
+      ],
+      "requiredDataBindings": [
+        "selected_ids_variable",
+        "selected_count_variable"
+      ],
+      "requiredFields": [],
+      "layoutRules": [
+        "card_container",
+        "section_spacing"
+      ],
+      "styleRules": [
+        "toolbar_visibility_when_selected"
+      ],
+      "actionRules": [
+        "bulk_buttons_require_binding"
+      ],
+      "validationRules": [
+        "action_bindings_present",
+        "data_binding_present"
+      ],
+      "allowedFallback": "Omit active bulk toolbar and document deferred reason.",
+      "proofStatus": "runtime-proven",
+      "sourceExports": [
+        "Company Overview (3).yap"
+      ],
+      "observedControls": [
+        "action-button",
+        "collection"
+      ],
+      "observedPatterns": [
+        "bulk Mark as completed and Delete selected items actions around Collection controls"
+      ],
+      "limitations": [
+        "selected ID/count variable wiring must be validated per generated package"
+      ]
+    },
+    {
+      "templateId": "collection_control_responsive_card_grid",
+      "purpose": "Render source-list records as responsive Collection cards.",
+      "pattern_scope": "card_style_only",
+      "proven_formats": [
+        "YAP",
+        "YAPK"
+      ],
+      "proven_surfaces": [
+        "dashboard",
+        "approval_form",
+        "data_list_form"
+      ],
+      "not_for": [
+        "table_style",
+        "grid_table",
+        "row_list",
+        "kanban",
+        "timeline",
+        "nested_collection",
+        "grouped_collection",
+        "unknown_collection_pattern"
+      ],
+      "applicableFormats": {
+        "YAP": [
+          "dashboard",
+          "approval-form",
+          "data-list-form"
+        ],
+        "YAPK": [
+          "dashboard",
+          "approval-form",
+          "data-list-form"
+        ]
+      },
+      "requiredDataSource": {
+        "kind": "data-list",
+        "mustResolveInPackage": true
+      },
+      "requiredFields": [
+        "Title",
+        "statusOrCategory",
+        "ownerOrRequester",
+        "descriptionOrProgress"
+      ],
+      "wrapperRequirements": [
+        "section header container",
+        "selected count text when multiselect is generated",
+        "operation toolbar when bulk actions are generated",
+        "Collection root below wrapper controls"
+      ],
+      "responsiveSettings": {
+        "desktopColumns": 3,
+        "tabletColumns": 2,
+        "mobileColumns": 1,
+        "exportValue": [
+          null,
+          null,
+          2,
+          1
+        ]
+      },
+      "itemCardStructure": [
+        "first-child item template container",
+        "dynamic-image when image field exists",
+        "dynamic-field title/status/category/progress",
+        "dynamic-user owner/requester",
+        "dynamic-file only when file fields exist",
+        "native heading/text metadata"
+      ],
+      "bindingRequirements": [
+        "attrs.data.list.ListID resolves",
+        "attrs.data.link optional",
+        "dynamic child attrs.source equals 3",
+        "dynamic child attrs.obj-f resolves",
+        "expression tokens use ctx __ctx_coll"
+      ],
+      "validationChecks": [
+        "COLLECTION_RESPONSIVE_COLUMNS_MISSING absent",
+        "COLLECTION_RESPONSIVE_COLUMNS_INVALID absent",
+        "COLLECTION_DATA_SOURCE_INVALID absent",
+        "COLLECTION_REFERENCED_FIELD_MISSING absent",
+        "COLLECTION_CURRENT_ITEM_CONTEXT_MISSING absent",
+        "COLLECTION_CHILD_CONTROL_ID_DUPLICATE absent"
+      ],
+      "proofBoundaries": [
+        "YAPK card Collection proven for the decoded Company Overview card pattern through strict or tolerant Brotli",
+        "YAPK validation inspects Pages[].LayoutInResources[].Resource, Forms[].DefResource pageurls[].formdef, and Childs[].Layouts[].LayoutInResources[].Resource",
+        "Collection + Grid table-style pattern is separate"
+      ]
+    },
+    {
+      "templateId": "collection_control_card_with_item_actions",
+      "purpose": "Render responsive Collection cards with export-proven item operations.",
+      "pattern_scope": "card_style_only",
+      "proven_formats": [
+        "YAP",
+        "YAPK"
+      ],
+      "proven_surfaces": [
+        "dashboard",
+        "approval_form",
+        "data_list_form"
+      ],
+      "not_for": [
+        "table_style",
+        "grid_table",
+        "row_list",
+        "kanban",
+        "timeline",
+        "nested_collection",
+        "grouped_collection",
+        "unknown_collection_pattern"
+      ],
+      "applicableFormats": {
+        "YAP": [
+          "dashboard",
+          "approval-form",
+          "data-list-form"
+        ],
+        "YAPK": [
+          "dashboard",
+          "approval-form",
+          "data-list-form"
+        ]
+      },
+      "requiredActionShape": [
+        "root attrs.actions entries",
+        "action type coll",
+        "child attrs.control_action triggers",
+        "current item __ctx_coll context",
+        "ListDataID in item operation actions"
+      ],
+      "operationControls": [
+        "container trigger for select action",
+        "action_button trigger for edit",
+        "action_button trigger for mark completed",
+        "action_button trigger for delete"
+      ],
+      "validationChecks": [
+        "COLLECTION_ROOT_ACTIONS_MISSING absent",
+        "COLLECTION_CONTROL_ACTION_REFERENCE_INVALID absent",
+        "COLLECTION_ITEM_ACTION_REFERENCE_INVALID absent",
+        "COLLECTION_ITEM_ACTION_MISSING_CONTEXT absent",
+        "COLLECTION_ACTION_LISTDATAID_MISSING absent",
+        "COLLECTION_ACTION_TRIGGER_MISSING absent"
+      ],
+      "proofBoundaries": [
+        "do not substitute form actions for Collection actions",
+        "omit unsafe guessed actions",
+        "YAPK action steps are limited to the decoded card pattern families: confirm, listitem, otheraction, setdatalist, setvar"
+      ]
+    },
+    {
+      "templateId": "collection_control_card_with_multiselect_toolbar",
+      "purpose": "Render responsive Collection cards with multiselect selected state and bulk toolbar.",
+      "pattern_scope": "card_style_only",
+      "proven_formats": [
+        "YAP",
+        "YAPK"
+      ],
+      "proven_surfaces": [
+        "dashboard",
+        "approval_form",
+        "data_list_form"
+      ],
+      "not_for": [
+        "table_style",
+        "grid_table",
+        "row_list",
+        "kanban",
+        "timeline",
+        "nested_collection",
+        "grouped_collection",
+        "unknown_collection_pattern"
+      ],
+      "applicableFormats": {
+        "YAP": [
+          "dashboard",
+          "approval-form",
+          "data-list-form"
+        ],
+        "YAPK": [
+          "dashboard",
+          "approval-form",
+          "data-list-form"
+        ]
+      },
+      "requiredMultiselectShape": [
+        "selected ids temp variable",
+        "selected count temp variable",
+        "selected item count text",
+        "bulk operation toolbar",
+        "top-right absolute selection container",
+        "checked and unchecked icon controls"
+      ],
+      "absolutePositioning": {
+        "containerType": "container",
+        "pos": [
+          null,
+          "absolute"
+        ],
+        "hor": [
+          null,
+          "right"
+        ],
+        "horoffset": "number",
+        "veroffset": "number",
+        "zIndex": "optional number"
+      },
+      "validationChecks": [
+        "COLLECTION_MULTISELECT_STATE_MISSING absent",
+        "COLLECTION_MULTISELECT_ACTION_INVALID absent",
+        "COLLECTION_MULTISELECT_TOOLBAR_MISSING absent",
+        "COLLECTION_MULTISELECT_TOOLBAR_POSITION_INVALID absent",
+        "COLLECTION_MULTISELECT_ICON_INVALID absent",
+        "COLLECTION_SELECTED_COUNT_BINDING_INVALID absent",
+        "COLLECTION_OPERATION_CONTAINER_POSITION_INVALID absent",
+        "COLLECTION_OPERATION_CONTAINER_OFFSET_INVALID absent"
+      ],
+      "proofBoundaries": [
+        "generate only when selected state and bulk actions are export-proven",
+        "YAPK multiselect proven only for the decoded card pattern",
+        "Collection + Grid table-style pattern is separate"
+      ]
+    },
+    {
+      "templateId": "collection_control_grid_table",
+      "purpose": "Render dense operational records as a table-like Collection body with a header flex_grid and repeated item flex_grid.",
+      "pattern_scope": "grid_table_only",
+      "proven_formats": [
+        "YAP",
+        "YAPK"
+      ],
+      "proven_surfaces": [
+        "dashboard_page"
+      ],
+      "not_for": [
+        "card_style",
+        "kanban",
+        "gallery",
+        "timeline",
+        "nested_collection",
+        "grouped_collection",
+        "unknown_collection_pattern"
+      ],
+      "applicableFormats": {
+        "YAP": [
+          "dashboard-page"
+        ],
+        "YAPK": [
+          "dashboard-page"
+        ]
+      },
+      "requiredDataSource": {
+        "kind": "data-list",
+        "mustResolveInPackage": true
+      },
+      "requiredStructure": [
+        "caption/title container",
+        "toolbar/search/add-action row when requested",
+        "header flex_grid",
+        "Collection root",
+        "item flex_grid as first Collection child",
+        "pagination when paging is generated"
+      ],
+      "headerGridRequirements": [
+        "type flex_grid",
+        "displayLabel [null, false]",
+        "attrs.columns[\"1\"].list defined",
+        "attrs.common.hide[3] true for mobile"
+      ],
+      "itemGridRequirements": [
+        "type flex_grid",
+        "displayLabel [null, false]",
+        "desktop columns match header count and widths",
+        "attrs.columns[\"3\"].list defines mobile columns"
+      ],
+      "validationChecks": [
+        "COLLECTION_GRID_TABLE_HEADER_GRID_MISSING absent",
+        "COLLECTION_GRID_TABLE_ITEM_GRID_MISSING absent",
+        "COLLECTION_GRID_TABLE_COLUMN_COUNT_MISMATCH absent",
+        "COLLECTION_GRID_TABLE_COLUMN_WIDTH_MISMATCH absent",
+        "COLLECTION_GRID_TABLE_HEADER_CAPTION_VISIBLE absent",
+        "COLLECTION_GRID_TABLE_ITEM_CAPTION_VISIBLE absent",
+        "COLLECTION_GRID_TABLE_MOBILE_HEADER_NOT_HIDDEN absent",
+        "COLLECTION_GRID_TABLE_MOBILE_ITEM_GRID_COLUMNS_INVALID absent"
+      ],
+      "proofBoundaries": [
+        "dashboard/page usage proven from Projects Center",
+        "approval-form and data-list-form hosts remain pending",
+        "not interchangeable with collection_control_responsive_card_grid"
+      ]
+    },
+    {
+      "templateId": "collection_control_grid_table_with_multiselect",
+      "purpose": "Render grid/table Collection rows with checkbox selection and bulk operations.",
+      "pattern_scope": "grid_table_only",
+      "proven_formats": [
+        "YAP",
+        "YAPK"
+      ],
+      "proven_surfaces": [
+        "dashboard_page"
+      ],
+      "not_for": [
+        "card_style",
+        "kanban",
+        "gallery",
+        "timeline",
+        "nested_collection",
+        "grouped_collection",
+        "unknown_collection_pattern"
+      ],
+      "requiredMultiselectShape": [
+        "leading 46px checkbox column",
+        "checked and unchecked icon controls",
+        "selected ids/count temp variables",
+        "bulk toolbar above table",
+        "Collection root attrs.actions[] with type coll",
+        "current item ListDataID and __ctx_coll"
+      ],
+      "allowedActionStepTypes": [
+        "setvar",
+        "listitem",
+        "confirm",
+        "setdatalist",
+        "otheraction"
+      ],
+      "validationChecks": [
+        "COLLECTION_GRID_TABLE_CHECKBOX_COLUMN_MISSING absent",
+        "COLLECTION_GRID_TABLE_SELECTION_STATE_MISSING absent",
+        "COLLECTION_GRID_TABLE_MULTISELECT_ACTION_INVALID absent",
+        "COLLECTION_GRID_TABLE_BULK_ACTION_REFERENCE_INVALID absent"
+      ],
+      "proofBoundaries": [
+        "generate only for the Projects Center-style multiselect table",
+        "do not infer card-style top-right selection behavior"
+      ]
+    },
+    {
+      "templateId": "collection_control_grid_table_with_search",
+      "purpose": "Add search/fulltext filtering to a grid/table Collection.",
+      "pattern_scope": "grid_table_only",
+      "proven_formats": [
+        "YAP",
+        "YAPK"
+      ],
+      "proven_surfaces": [
+        "dashboard_page"
+      ],
+      "not_for": [
+        "card_style",
+        "kanban",
+        "gallery",
+        "timeline",
+        "nested_collection",
+        "grouped_collection",
+        "unknown_collection_pattern"
+      ],
+      "requiredSearchShape": [
+        "search-filter control above table",
+        "Collection attrs.data.fulltext[]",
+        "fulltext fields resolve to source list",
+        "search variable resolves"
+      ],
+      "validationChecks": [
+        "COLLECTION_GRID_TABLE_SEARCH_FILTER_MISSING absent",
+        "COLLECTION_GRID_TABLE_SEARCH_FIELDS_INVALID absent",
+        "COLLECTION_FILTER_FIELD_INVALID absent"
+      ],
+      "proofBoundaries": [
+        "search proven for Projects Center task table fields",
+        "other operators or hosts need separate proof"
+      ]
+    }
+  ]
+}

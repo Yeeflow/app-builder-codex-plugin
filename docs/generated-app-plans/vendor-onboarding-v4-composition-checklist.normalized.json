@@ -1,0 +1,1796 @@
+{
+  "application": "Vendor Onboarding & Compliance Management",
+  "version": "v4",
+  "sourceSpec": "docs/generated-app-plans/vendor-onboarding-compliance-ui-implementation-spec.md",
+  "contractType": "pre_generation_composition_checklist",
+  "rules": [
+    "do_not_generate_package_before_approval",
+    "implement_required_sections_or_defer_with_reason",
+    "strict_visual_app_quality_required_after_generation",
+    "import_success_is_not_app_quality_success"
+  ],
+  "pages": [
+    {
+      "id": "vendor_management_dashboard",
+      "title": "Vendor Management Dashboard",
+      "type": "dashboard",
+      "required": true,
+      "sections": [
+        {
+          "id": "header_action_area",
+          "title": "Header/action area",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "text",
+            "button"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [],
+          "matchText": [
+            "Vendor Management Dashboard",
+            "Monitor onboarding",
+            "New Vendor Request",
+            "View Compliance Queue"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "New Vendor Request",
+            "View Compliance Queue"
+          ],
+          "fallback": {
+            "allowed": true,
+            "rule": "If navigation action shape is not safe, render inactive navigation notes and record reason."
+          },
+          "validationRules": [
+            "section_exists",
+            "controls_present",
+            "action_bindings_present",
+            "no_placeholder_content"
+          ],
+          "passCondition": "Header title, subtitle, and both actions are present; active buttons have valid bindings.",
+          "templateId": "dashboard_header_action_bar"
+        },
+        {
+          "id": "kpi_card_row",
+          "title": "KPI card row",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "text",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Vendor Documents",
+            "Compliance Reviews"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Onboarding Status",
+            "Risk Level",
+            "Review Status",
+            "Expiry Date"
+          ],
+          "matchText": [
+            "Total Vendors",
+            "Pending Onboarding",
+            "High Risk Vendors",
+            "Expiring Documents"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "grid_row",
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "If aggregate KPI controls are not safe, use clearly labeled summary cards and document the aggregate binding gap."
+          },
+          "validationRules": [
+            "section_exists",
+            "card_structure_present",
+            "not_plain_text_only",
+            "data_binding_present"
+          ],
+          "passCondition": "Four styled KPI cards exist with labels, values, secondary context, and source-field coverage.",
+          "templateId": "kpi_card_row"
+        },
+        {
+          "id": "onboarding_progress_section",
+          "title": "Onboarding completion progress section",
+          "status": "required",
+          "controls": [
+            "container",
+            "progress-circle",
+            "progress-bar",
+            "text",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Onboarding Completion %",
+            "Onboarding Status"
+          ],
+          "matchText": [
+            "Onboarding Completion",
+            "Average completion"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "Use progress bar instead of progress circle if circle binding is not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present",
+            "card_structure_present"
+          ],
+          "passCondition": "Progress control is in a styled card and bound to completion/status context.",
+          "templateId": "progress_summary_card"
+        },
+        {
+          "id": "urgent_compliance_alert",
+          "title": "Urgent compliance alert",
+          "status": "required",
+          "controls": [
+            "container",
+            "alert",
+            "text",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Vendor Documents",
+            "Compliance Reviews"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Risk Level",
+            "Compliance Status",
+            "Review Status",
+            "Expiry Date"
+          ],
+          "matchText": [
+            "Urgent Compliance Risks",
+            "High-risk",
+            "expired",
+            "blocked"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Default alert content is never acceptable."
+          },
+          "validationRules": [
+            "section_exists",
+            "no_placeholder_content",
+            "data_binding_present"
+          ],
+          "passCondition": "Alert has business-specific title/description and references risk or document expiry.",
+          "templateId": "business_alert_card"
+        },
+        {
+          "id": "onboarding_status_board",
+          "title": "Onboarding status board",
+          "status": "required",
+          "controls": [
+            "kanban",
+            "collection",
+            "container",
+            "text",
+            "dynamic-field",
+            "button"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Risk Level",
+            "Compliance Status",
+            "Owner",
+            "Renewal Date",
+            "Last Review Date",
+            "Onboarding Status"
+          ],
+          "matchText": [
+            "Onboarding Status Board",
+            "Vendor Name",
+            "Risk Level",
+            "Compliance Status"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "View Vendor"
+          ],
+          "itemTemplate": {
+            "controls": [
+              "kanban",
+              "collection"
+            ],
+            "minDynamicFields": 5,
+            "requiredFields": [
+              "Vendor Name",
+              "Risk Level",
+              "Compliance Status",
+              "Owner",
+              "Renewal Date"
+            ],
+            "requiresActions": true
+          },
+          "fallback": {
+            "allowed": true,
+            "rule": "Use Collection grouped by status if Kanban grouping is not safe; keep the same dynamic fields and View action."
+          },
+          "validationRules": [
+            "section_exists",
+            "item_template_fields_present",
+            "item_actions_present"
+          ],
+          "passCondition": "Kanban/Collection is bound to Vendors and item template includes required dynamic fields and action.",
+          "templateId": "kanban_status_board"
+        },
+        {
+          "id": "vendors_data_table",
+          "title": "Vendors Data table",
+          "status": "required",
+          "controls": [
+            "data-list"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Vendor Type",
+            "Country / Region",
+            "Primary Contact",
+            "Email",
+            "Phone",
+            "Risk Level",
+            "Onboarding Status",
+            "Renewal Date"
+          ],
+          "matchText": [
+            "Vendor Records",
+            "Vendor Name",
+            "Vendor Type",
+            "Country / Region"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Vendors table is required for v4."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_table_columns_configured",
+            "field_and_fieldname_required"
+          ],
+          "passCondition": "Data table is bound to Vendors and every display column has Field and FieldName.",
+          "templateId": "data_table_section"
+        },
+        {
+          "id": "quick_links",
+          "title": "Quick links",
+          "status": "required",
+          "controls": [
+            "icon-list",
+            "container",
+            "grid",
+            "button",
+            "text"
+          ],
+          "dataSources": [],
+          "requiredFields": [],
+          "matchText": [
+            "Quick Links",
+            "New Vendor",
+            "Compliance Queue",
+            "Expiring Documents"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "New Vendor Request",
+            "View Compliance Queue"
+          ],
+          "fallback": {
+            "allowed": true,
+            "rule": "Use styled static quick-link cards when icon-list navigation action binding is not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "action_bindings_present_or_deferred"
+          ],
+          "passCondition": "Quick links are visible and any active buttons have valid navigation actions.",
+          "templateId": "quick_links_icon_list"
+        },
+        {
+          "id": "recent_activity_timeline",
+          "title": "Recent activity timeline",
+          "status": "required",
+          "controls": [
+            "timeline-v",
+            "collection",
+            "container",
+            "text",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendor Activity / History"
+          ],
+          "requiredFields": [
+            "Activity Date",
+            "Activity Title",
+            "Activity Type",
+            "Actor",
+            "Description"
+          ],
+          "matchText": [
+            "Recent Vendor Activity",
+            "Activity Date",
+            "Activity Title"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "itemTemplate": {
+            "controls": [
+              "timeline-v",
+              "collection"
+            ],
+            "minDynamicFields": 4,
+            "requiredFields": [
+              "Activity Date",
+              "Activity Title",
+              "Activity Type",
+              "Actor"
+            ],
+            "requiresActions": false
+          },
+          "fallback": {
+            "allowed": true,
+            "rule": "Use Collection timeline-style item cards if Vertical Timeline is not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "item_template_fields_present"
+          ],
+          "passCondition": "Timeline or Collection shows activity date, title, type, actor, and description.",
+          "templateId": "recent_activity_timeline"
+        }
+      ]
+    },
+    {
+      "id": "vendor_detail_view_page",
+      "title": "Vendor Detail View Page",
+      "type": "custom_view_form",
+      "required": true,
+      "sections": [
+        {
+          "id": "detail_header_summary_card",
+          "title": "Header summary card",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "text",
+            "dynamic-field",
+            "dynamic-user",
+            "button"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Risk Level",
+            "Onboarding Status",
+            "Compliance Status",
+            "Owner"
+          ],
+          "matchText": [
+            "Vendor Name",
+            "Risk Level",
+            "Onboarding Status",
+            "Compliance Status",
+            "Owner"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "card_container",
+            "grid_row"
+          ],
+          "actionBindings": [
+            "Edit Vendor",
+            "Add Document",
+            "Add Task",
+            "Start Review",
+            "Print Summary"
+          ],
+          "fallback": {
+            "allowed": true,
+            "rule": "Unsupported mutating actions must be inactive notes with reason; Print Summary and Edit Vendor should remain navigation where safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present",
+            "action_bindings_present_or_deferred"
+          ],
+          "passCondition": "Header card shows key vendor fields and only safe active actions.",
+          "templateId": "detail_view_header_summary"
+        },
+        {
+          "id": "onboarding_steps_bar",
+          "title": "Onboarding steps bar",
+          "status": "required",
+          "controls": [
+            "steps",
+            "container",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Onboarding Status"
+          ],
+          "matchText": [
+            "Request Submitted",
+            "Procurement Review",
+            "Compliance Review",
+            "Legal Review",
+            "Finance Review",
+            "Approved"
+          ],
+          "layoutRules": [
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "Use styled status row if Steps bar is not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "six_stage_process_present"
+          ],
+          "passCondition": "All six stages are visible in order.",
+          "templateId": "progress_summary_card"
+        },
+        {
+          "id": "detail_tabs_or_sections",
+          "title": "Tabs or sectioned layout",
+          "status": "required",
+          "controls": [
+            "tabs",
+            "container",
+            "toggle",
+            "divider"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [],
+          "matchText": [
+            "Overview",
+            "Documents",
+            "Compliance",
+            "Tasks",
+            "History"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "Use stacked titled sections if Tabs are not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "not_plain_text_only"
+          ],
+          "passCondition": "Five detail areas are present as tabs or titled sections.",
+          "templateId": "tabbed_detail_page"
+        },
+        {
+          "id": "overview_details",
+          "title": "Overview details",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "dynamic-field",
+            "dynamic-user",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Vendor Type",
+            "Country / Region",
+            "Primary Contact",
+            "Email",
+            "Phone",
+            "Payment Terms",
+            "Annual Spend Estimate",
+            "Budget Category",
+            "Tax Review Status",
+            "Bank Info Status",
+            "Renewal Date"
+          ],
+          "matchText": [
+            "Vendor Type",
+            "Country / Region",
+            "Primary Contact",
+            "Payment Terms"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Overview details are required."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present",
+            "card_structure_present"
+          ],
+          "passCondition": "Profile and contract/payment fields are grouped into styled sections.",
+          "templateId": "sectioned_new_edit_form"
+        },
+        {
+          "id": "documents_section",
+          "title": "Documents section",
+          "status": "required",
+          "controls": [
+            "data-list",
+            "collection",
+            "document",
+            "container",
+            "dynamic-file"
+          ],
+          "dataSources": [
+            "Vendor Documents"
+          ],
+          "requiredFields": [
+            "Document Type",
+            "Review Status",
+            "Expiry Date",
+            "Reviewer",
+            "Uploaded Date",
+            "Notes"
+          ],
+          "matchText": [
+            "Documents",
+            "Document Type",
+            "Review Status",
+            "Expiry Date"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "Add Document"
+          ],
+          "fallback": {
+            "allowed": true,
+            "rule": "If Document embed is not safe, use related documents table/cards and document the embed deferral."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present",
+            "data_table_columns_configured"
+          ],
+          "passCondition": "Document table/cards exist with required columns and embed fallback is explicit when needed.",
+          "templateId": "related_records_section"
+        },
+        {
+          "id": "compliance_section",
+          "title": "Compliance section",
+          "status": "required",
+          "controls": [
+            "collection",
+            "data-list",
+            "progress-circle",
+            "alert",
+            "container",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Compliance Reviews"
+          ],
+          "requiredFields": [
+            "Review Type",
+            "Risk Score",
+            "Severity",
+            "Review Status",
+            "Findings",
+            "Required Actions",
+            "Reviewer",
+            "Review Date"
+          ],
+          "matchText": [
+            "Compliance",
+            "Risk Score",
+            "Required Actions",
+            "Review Status"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "Start Review"
+          ],
+          "itemTemplate": {
+            "controls": [
+              "collection",
+              "data-list"
+            ],
+            "minDynamicFields": 4,
+            "requiredFields": [
+              "Review Type",
+              "Risk Score",
+              "Severity",
+              "Review Status"
+            ],
+            "requiresActions": false
+          },
+          "fallback": {
+            "allowed": true,
+            "rule": "Use Data table if review cards cannot safely bind; keep risk score and alert visible."
+          },
+          "validationRules": [
+            "section_exists",
+            "item_template_fields_present",
+            "no_placeholder_content"
+          ],
+          "passCondition": "Compliance section includes review context, risk score, status, and required actions.",
+          "templateId": "related_records_section"
+        },
+        {
+          "id": "tasks_section",
+          "title": "Tasks section",
+          "status": "required",
+          "controls": [
+            "collection",
+            "data-list",
+            "container",
+            "dynamic-field",
+            "button"
+          ],
+          "dataSources": [
+            "Vendor Tasks"
+          ],
+          "requiredFields": [
+            "Task Name",
+            "Task Type",
+            "Assigned To",
+            "Due Date",
+            "Status",
+            "Priority",
+            "Notes"
+          ],
+          "matchText": [
+            "Tasks",
+            "Task Name",
+            "Assigned To",
+            "Due Date",
+            "Priority"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "Add Task"
+          ],
+          "itemTemplate": {
+            "controls": [
+              "collection",
+              "data-list"
+            ],
+            "minDynamicFields": 4,
+            "requiredFields": [
+              "Task Name",
+              "Priority",
+              "Status",
+              "Assigned To",
+              "Due Date"
+            ],
+            "requiresActions": false
+          },
+          "fallback": {
+            "allowed": true,
+            "rule": "Use Data table if task cards or Mark Complete action binding is not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "item_template_fields_present",
+            "action_bindings_present_or_deferred"
+          ],
+          "passCondition": "Task section shows task fields and only safe active actions.",
+          "templateId": "related_records_section"
+        },
+        {
+          "id": "history_timeline",
+          "title": "History timeline",
+          "status": "required",
+          "controls": [
+            "timeline-v",
+            "collection",
+            "container",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendor Activity / History"
+          ],
+          "requiredFields": [
+            "Activity Title",
+            "Activity Type",
+            "Activity Date",
+            "Actor",
+            "Description"
+          ],
+          "matchText": [
+            "History",
+            "Activity Date",
+            "Activity Title",
+            "Actor"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "itemTemplate": {
+            "controls": [
+              "timeline-v",
+              "collection"
+            ],
+            "minDynamicFields": 4,
+            "requiredFields": [
+              "Activity Title",
+              "Activity Type",
+              "Activity Date",
+              "Actor"
+            ],
+            "requiresActions": false
+          },
+          "fallback": {
+            "allowed": true,
+            "rule": "Use Collection timeline-style fallback if Vertical Timeline is not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "item_template_fields_present"
+          ],
+          "passCondition": "History section shows activity date, title, type, actor, and description.",
+          "templateId": "recent_activity_timeline"
+        }
+      ]
+    },
+    {
+      "id": "new_vendor_request_form",
+      "title": "New Vendor Request Form",
+      "type": "custom_new_form",
+      "required": true,
+      "sections": [
+        {
+          "id": "request_intro_alert",
+          "title": "Intro and required documents alert",
+          "status": "required",
+          "controls": [
+            "container",
+            "text",
+            "alert"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Vendor Documents"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Document Type",
+            "Required"
+          ],
+          "matchText": [
+            "New Vendor Request",
+            "required compliance documents",
+            "Required Documents"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Required-document alert must not be omitted."
+          },
+          "validationRules": [
+            "section_exists",
+            "no_placeholder_content"
+          ],
+          "passCondition": "Intro and business-specific required document alert are present.",
+          "templateId": "business_alert_card"
+        },
+        {
+          "id": "vendor_information",
+          "title": "Vendor Information",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "field",
+            "dynamic-field",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Vendor Type",
+            "Country / Region",
+            "Annual Spend Estimate",
+            "Owner"
+          ],
+          "matchText": [
+            "Vendor Information",
+            "Vendor Name",
+            "Vendor Type",
+            "Country / Region"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Vendor Information section is required."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present",
+            "card_structure_present"
+          ],
+          "passCondition": "Vendor identity fields are present in a styled section.",
+          "templateId": "sectioned_new_edit_form"
+        },
+        {
+          "id": "contact_information",
+          "title": "Contact Information",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "field",
+            "dynamic-field",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Primary Contact",
+            "Email",
+            "Phone"
+          ],
+          "matchText": [
+            "Contact Information",
+            "Primary Contact",
+            "Email",
+            "Phone"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Contact Information section is required."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present"
+          ],
+          "passCondition": "Contact fields are present and grouped.",
+          "templateId": "sectioned_new_edit_form"
+        },
+        {
+          "id": "business_justification",
+          "title": "Business Justification",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "field",
+            "dynamic-field",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Business Justification",
+            "Budget Category"
+          ],
+          "matchText": [
+            "Business Justification",
+            "Budget Category",
+            "Business need"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "If Business Justification field is not in base list, add it before generation or document exact deferral."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present"
+          ],
+          "passCondition": "Justification and budget context are present.",
+          "templateId": "sectioned_new_edit_form"
+        },
+        {
+          "id": "payment_contract_information",
+          "title": "Payment & Contract Information",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "field",
+            "dynamic-field",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Payment Terms",
+            "Contract Status",
+            "Renewal Date",
+            "Tax Review Status",
+            "Bank Info Status"
+          ],
+          "matchText": [
+            "Payment & Contract Information",
+            "Payment Terms",
+            "Contract Status",
+            "Renewal Date"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Payment and contract section is required."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present"
+          ],
+          "passCondition": "Payment, contract, tax, bank, and renewal fields are present.",
+          "templateId": "sectioned_new_edit_form"
+        },
+        {
+          "id": "required_documents_checklist",
+          "title": "Required Documents checklist",
+          "status": "required",
+          "controls": [
+            "list",
+            "data-list",
+            "container",
+            "field",
+            "dynamic-file"
+          ],
+          "dataSources": [
+            "Vendor Documents"
+          ],
+          "requiredFields": [
+            "Document Type",
+            "Required",
+            "File Attachment",
+            "Expiry Date",
+            "Review Status",
+            "Notes"
+          ],
+          "matchText": [
+            "Required Documents",
+            "Document Type",
+            "File Attachment",
+            "Expiry Date"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "Add Document Row"
+          ],
+          "itemTemplate": {
+            "controls": [
+              "list",
+              "data-list"
+            ],
+            "minDynamicFields": 4,
+            "requiredFields": [
+              "Document Type",
+              "Required",
+              "File Attachment",
+              "Expiry Date"
+            ],
+            "requiresActions": false
+          },
+          "fallback": {
+            "allowed": true,
+            "rule": "Use related Vendor Documents table/section if Dynamic Sub List is not safe; document the sub-list deferral."
+          },
+          "validationRules": [
+            "section_exists",
+            "item_template_fields_present",
+            "action_bindings_present_or_deferred"
+          ],
+          "passCondition": "Document checklist/sub-list/fallback exists with required document fields.",
+          "templateId": "required_documents_checklist"
+        },
+        {
+          "id": "footer_actions",
+          "title": "Footer actions",
+          "status": "required",
+          "controls": [
+            "container",
+            "button"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Onboarding Status"
+          ],
+          "matchText": [
+            "Save Draft",
+            "Submit Request"
+          ],
+          "layoutRules": [
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "Save Draft",
+            "Submit Request"
+          ],
+          "fallback": {
+            "allowed": true,
+            "rule": "If submit workflow is not safe, render Save only and document Submit deferral; do not render fake Submit."
+          },
+          "validationRules": [
+            "section_exists",
+            "action_bindings_present_or_deferred"
+          ],
+          "passCondition": "Footer actions are valid or explicitly deferred without fake active buttons.",
+          "templateId": "dashboard_header_action_bar"
+        }
+      ]
+    },
+    {
+      "id": "compliance_review_workspace",
+      "title": "Compliance Review Workspace",
+      "type": "dashboard",
+      "required": true,
+      "sections": [
+        {
+          "id": "workspace_header_filters",
+          "title": "Header and queue controls",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "text",
+            "button"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Compliance Reviews"
+          ],
+          "requiredFields": [
+            "Risk Level",
+            "Compliance Status",
+            "Review Status"
+          ],
+          "matchText": [
+            "Compliance Review Workspace",
+            "Prioritize high-risk vendors",
+            "Start Compliance Review",
+            "Bulk Request Documents"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "Start Compliance Review",
+            "Bulk Request Documents"
+          ],
+          "fallback": {
+            "allowed": true,
+            "rule": "Bulk actions must be inactive notes if selected-ID variables are not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "action_bindings_present_or_deferred"
+          ],
+          "passCondition": "Header, subtitle, queue controls, and safe actions are present.",
+          "templateId": "dashboard_header_action_bar"
+        },
+        {
+          "id": "risk_status_board",
+          "title": "Risk/status board",
+          "status": "required",
+          "controls": [
+            "kanban",
+            "collection",
+            "container",
+            "dynamic-field",
+            "button"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Compliance Reviews"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Risk Level",
+            "Compliance Status",
+            "Country / Region",
+            "Owner",
+            "Last Review Date",
+            "Annual Spend Estimate",
+            "Required Actions"
+          ],
+          "matchText": [
+            "Risk Queue",
+            "Risk Level",
+            "Compliance Status",
+            "Required Actions"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "Open Vendor Detail"
+          ],
+          "itemTemplate": {
+            "controls": [
+              "kanban",
+              "collection"
+            ],
+            "minDynamicFields": 6,
+            "requiredFields": [
+              "Vendor Name",
+              "Risk Level",
+              "Compliance Status",
+              "Owner",
+              "Last Review Date",
+              "Required Actions"
+            ],
+            "requiresActions": true
+          },
+          "fallback": {
+            "allowed": true,
+            "rule": "Use Collection board if Kanban is not safe; preserve required fields and Open Vendor Detail action."
+          },
+          "validationRules": [
+            "section_exists",
+            "item_template_fields_present",
+            "item_actions_present"
+          ],
+          "passCondition": "Risk/status board has meaningful cards and an open-detail action.",
+          "templateId": "kanban_status_board"
+        },
+        {
+          "id": "selected_vendor_summary",
+          "title": "Selected vendor/review summary",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "dynamic-field",
+            "dynamic-user",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Compliance Reviews"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Risk Level",
+            "Compliance Status",
+            "Owner",
+            "Review Status",
+            "Required Actions"
+          ],
+          "matchText": [
+            "Selected Vendor Summary",
+            "Vendor Name",
+            "Risk Level",
+            "Compliance Status"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "If selected-record variables are not safe, use a review queue summary card and document variable deferral."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present",
+            "card_structure_present"
+          ],
+          "passCondition": "Summary card shows real vendor/review fields or approved fallback.",
+          "templateId": "detail_view_header_summary"
+        },
+        {
+          "id": "risk_progress_indicator",
+          "title": "Risk progress indicator",
+          "status": "required",
+          "controls": [
+            "progress-circle",
+            "progress-bar",
+            "container",
+            "dynamic-field",
+            "text"
+          ],
+          "dataSources": [
+            "Compliance Reviews"
+          ],
+          "requiredFields": [
+            "Risk Score"
+          ],
+          "matchText": [
+            "Risk Score",
+            "50%",
+            "Risk Progress"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "Use Progress bar if Progress circle is not safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present"
+          ],
+          "passCondition": "Risk indicator is present and bound to Risk Score or approved proxy.",
+          "templateId": "progress_summary_card"
+        },
+        {
+          "id": "high_risk_alert",
+          "title": "High-risk alert",
+          "status": "required",
+          "controls": [
+            "alert",
+            "container",
+            "text",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Compliance Reviews",
+            "Vendor Documents"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Risk Level",
+            "Severity",
+            "Required Actions",
+            "Expiry Date"
+          ],
+          "matchText": [
+            "High Risk",
+            "Action Required",
+            "Missing Documents",
+            "Expired Documents"
+          ],
+          "layoutRules": [
+            "card_container",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Default alert content is not acceptable."
+          },
+          "validationRules": [
+            "section_exists",
+            "no_placeholder_content",
+            "data_binding_present"
+          ],
+          "passCondition": "Alert contains business-specific high-risk or missing-document copy.",
+          "templateId": "business_alert_card"
+        },
+        {
+          "id": "missing_documents_table",
+          "title": "Missing/expired document Data table",
+          "status": "required",
+          "controls": [
+            "data-list"
+          ],
+          "dataSources": [
+            "Vendor Documents"
+          ],
+          "requiredFields": [
+            "Vendor",
+            "Document Type",
+            "Review Status",
+            "Expiry Date",
+            "Reviewer",
+            "Notes"
+          ],
+          "matchText": [
+            "Missing or Expired Documents",
+            "Document Type",
+            "Review Status",
+            "Expiry Date"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Missing/expired documents table is required."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_table_columns_configured",
+            "field_and_fieldname_required"
+          ],
+          "passCondition": "Vendor Documents table is configured with required columns and source fields.",
+          "templateId": "data_table_section"
+        },
+        {
+          "id": "review_action_area",
+          "title": "Review action area",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "button",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Compliance Reviews",
+            "Vendor Tasks"
+          ],
+          "requiredFields": [
+            "Reviewer",
+            "Review Status",
+            "Compliance Status"
+          ],
+          "matchText": [
+            "Review Actions",
+            "Assign Reviewer",
+            "Approve Compliance",
+            "Request Missing Documents"
+          ],
+          "layoutRules": [
+            "card_container",
+            "grid_row",
+            "section_spacing"
+          ],
+          "actionBindings": [
+            "Assign Reviewer",
+            "Approve Compliance",
+            "Request Missing Documents"
+          ],
+          "fallback": {
+            "allowed": true,
+            "rule": "Unsupported mutating actions must be inactive documented deferrals; navigation-only actions may remain active."
+          },
+          "validationRules": [
+            "section_exists",
+            "action_bindings_present_or_deferred"
+          ],
+          "passCondition": "Action area exposes only valid actions or documented inactive deferrals.",
+          "templateId": "dashboard_header_action_bar"
+        }
+      ]
+    },
+    {
+      "id": "vendor_print_page",
+      "title": "Vendor Print Page",
+      "type": "custom_print_page",
+      "required": true,
+      "sections": [
+        {
+          "id": "print_header",
+          "title": "Print header",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "text",
+            "dynamic-field",
+            "dynamic-user"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Vendor Name",
+            "Vendor Code",
+            "Risk Level",
+            "Onboarding Status",
+            "Compliance Status",
+            "Owner"
+          ],
+          "matchText": [
+            "Vendor Print Page",
+            "Vendor Name",
+            "Vendor Code",
+            "Risk Level"
+          ],
+          "layoutRules": [
+            "safe_padding",
+            "print_layout",
+            "card_container"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Print header is required."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present",
+            "print_layout_present"
+          ],
+          "passCondition": "Print header shows vendor identity and status fields with print-safe styling.",
+          "templateId": "print_page_summary"
+        },
+        {
+          "id": "vendor_summary",
+          "title": "Vendor summary",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "dynamic-field",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Vendor Type",
+            "Country / Region",
+            "Primary Contact",
+            "Email",
+            "Phone",
+            "Payment Terms",
+            "Annual Spend Estimate",
+            "Renewal Date",
+            "Last Review Date"
+          ],
+          "matchText": [
+            "Vendor Summary",
+            "Vendor Type",
+            "Country / Region",
+            "Payment Terms"
+          ],
+          "layoutRules": [
+            "grid_row",
+            "section_spacing",
+            "print_layout"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": false,
+            "rule": "Vendor summary is required."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present"
+          ],
+          "passCondition": "Key vendor, contact, payment, and renewal fields are grouped.",
+          "templateId": "print_page_summary"
+        },
+        {
+          "id": "compliance_summary",
+          "title": "Compliance summary",
+          "status": "required",
+          "controls": [
+            "container",
+            "grid",
+            "dynamic-field",
+            "progress-bar",
+            "progress-circle",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors",
+            "Compliance Reviews"
+          ],
+          "requiredFields": [
+            "Risk Level",
+            "Compliance Status",
+            "Risk Score",
+            "Review Status",
+            "Required Actions"
+          ],
+          "matchText": [
+            "Compliance Summary",
+            "Risk Level",
+            "Compliance Status",
+            "Risk Score"
+          ],
+          "layoutRules": [
+            "grid_row",
+            "section_spacing",
+            "print_layout"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "Use text/badge summary if Progress control is not print-safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present"
+          ],
+          "passCondition": "Risk, compliance, latest review, and required-action fields are present.",
+          "templateId": "print_page_summary"
+        },
+        {
+          "id": "document_checklist",
+          "title": "Document checklist",
+          "status": "required",
+          "controls": [
+            "data-list",
+            "list",
+            "container",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendor Documents"
+          ],
+          "requiredFields": [
+            "Document Type",
+            "Review Status",
+            "Expiry Date",
+            "Reviewer",
+            "Notes"
+          ],
+          "matchText": [
+            "Document Checklist",
+            "Document Type",
+            "Review Status",
+            "Expiry Date"
+          ],
+          "layoutRules": [
+            "section_spacing",
+            "print_layout"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "Use Data table if Dynamic Sub List is not print-safe."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_table_columns_configured"
+          ],
+          "passCondition": "Document checklist has configured fields and print-readable rows.",
+          "templateId": "print_page_document_checklist"
+        },
+        {
+          "id": "approval_review_timeline",
+          "title": "Approval/review timeline",
+          "status": "required",
+          "controls": [
+            "timeline-v",
+            "collection",
+            "data-list",
+            "container",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendor Activity / History"
+          ],
+          "requiredFields": [
+            "Activity Date",
+            "Activity Title",
+            "Activity Type",
+            "Actor"
+          ],
+          "matchText": [
+            "Approval Timeline",
+            "Review Timeline",
+            "Activity Date",
+            "Activity Title"
+          ],
+          "layoutRules": [
+            "section_spacing",
+            "print_layout"
+          ],
+          "actionBindings": [],
+          "itemTemplate": {
+            "controls": [
+              "timeline-v",
+              "collection",
+              "data-list"
+            ],
+            "minDynamicFields": 4,
+            "requiredFields": [
+              "Activity Date",
+              "Activity Title",
+              "Activity Type",
+              "Actor"
+            ],
+            "requiresActions": false
+          },
+          "fallback": {
+            "allowed": true,
+            "rule": "Use print-readable table/Collection if Timeline is not safe in Print Page."
+          },
+          "validationRules": [
+            "section_exists",
+            "item_template_fields_present"
+          ],
+          "passCondition": "Timeline/table shows date, title, type, and actor.",
+          "templateId": "recent_activity_timeline"
+        },
+        {
+          "id": "qr_barcode_vendor_code",
+          "title": "QR/barcode or Vendor Code fallback",
+          "status": "required",
+          "controls": [
+            "qrcode",
+            "barcode",
+            "container",
+            "text",
+            "dynamic-field"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [
+            "Vendor Code"
+          ],
+          "matchText": [
+            "Vendor Code",
+            "QR Code",
+            "Barcode"
+          ],
+          "layoutRules": [
+            "section_spacing",
+            "print_layout"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "Use labeled Vendor Code text if QR/barcode binding is not safe; do not embed private tenant URLs."
+          },
+          "validationRules": [
+            "section_exists",
+            "data_binding_present",
+            "no_private_url"
+          ],
+          "passCondition": "QR/barcode or safe Vendor Code fallback is configured.",
+          "templateId": "print_page_qr_barcode_section"
+        },
+        {
+          "id": "print_styling",
+          "title": "Print styling and non-mutating output",
+          "status": "required",
+          "controls": [
+            "container",
+            "divider",
+            "custom-css",
+            "text"
+          ],
+          "dataSources": [
+            "Vendors"
+          ],
+          "requiredFields": [],
+          "matchText": [
+            "Print",
+            "Signature",
+            "Internal Notes",
+            "page-break"
+          ],
+          "layoutRules": [
+            "print_layout",
+            "no_mutating_actions",
+            "section_spacing"
+          ],
+          "actionBindings": [],
+          "fallback": {
+            "allowed": true,
+            "rule": "If scoped print CSS is not safe, document print layout notes and keep printable structure clean."
+          },
+          "validationRules": [
+            "section_exists",
+            "print_layout_present",
+            "no_mutating_actions"
+          ],
+          "passCondition": "Print layout includes print-safe spacing/CSS notes and no mutating controls.",
+          "templateId": "print_page_summary"
+        }
+      ]
+    }
+  ]
+}

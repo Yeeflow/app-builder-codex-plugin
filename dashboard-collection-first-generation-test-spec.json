@@ -1,0 +1,89 @@
+{
+  "name": "generated-dashboard-collection-card-v1",
+  "purpose": "First minimal generated dashboard Collection control test.",
+  "sourceStudy": {
+    "export": "/Users/Renger/Downloads/Service Desk Pro Dashboard Stage M.yap",
+    "dashboard": "Tickets with Collection",
+    "primaryPattern": "card-grid collection"
+  },
+  "scope": {
+    "rootApp": true,
+    "dashboards": [
+      {
+        "title": "Tickets Collection Test",
+        "type": 103,
+        "controls": [
+          {
+            "type": "collection",
+            "pattern": "card-grid",
+            "dataSource": "Support Tickets",
+            "itemTemplate": [
+              {
+                "type": "dynamic-field",
+                "source": "3",
+                "field": "Title"
+              },
+              {
+                "type": "dynamic-field",
+                "source": "3",
+                "field": "Text2",
+                "role": "priority badge"
+              },
+              {
+                "type": "dynamic-field",
+                "source": "3",
+                "field": "Text3",
+                "prefix": "Status:"
+              },
+              {
+                "type": "dynamic-field",
+                "source": "3",
+                "field": "Text4"
+              }
+            ],
+            "conditionalStyles": [
+              {
+                "field": "Text2",
+                "ctx": "__ctx_coll",
+                "operator": "==",
+                "values": ["Low", "Medium", "High", "Critical"]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "lists": [
+      {
+        "title": "Support Tickets",
+        "fields": [
+          { "fieldName": "Title", "displayName": "Ticket Title", "nativeTitle": true },
+          { "fieldName": "Text1", "displayName": "Ticket ID", "fieldType": "Text" },
+          { "fieldName": "Text2", "displayName": "Priority", "fieldType": "Text", "controlType": "radio" },
+          { "fieldName": "Text3", "displayName": "Status", "fieldType": "Text", "controlType": "radio" },
+          { "fieldName": "Text4", "displayName": "Assigned Team", "fieldType": "Text" },
+          { "fieldName": "Datetime1", "displayName": "Created Time", "fieldType": "Datetime" }
+        ]
+      }
+    ]
+  },
+  "excluded": [
+    "table-style collection",
+    "charts",
+    "dashboard filters",
+    "approval forms",
+    "workflows",
+    "reports",
+    "AI modules",
+    "connections",
+    "document libraries"
+  ],
+  "validation": [
+    "validate-yap-package.js",
+    "validate-yap-graph.js",
+    "build-yap-wrapper.js",
+    "wrapper round-trip validation",
+    "Yeeflow runtime import test"
+  ],
+  "freshIdFamilyRequired": true
+}
