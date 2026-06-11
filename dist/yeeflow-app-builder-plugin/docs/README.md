@@ -26,6 +26,10 @@ Sparse paths:
 - [Environment configuration](environment-configuration.md)
 - [Browser OAuth login](browser-oauth-login.md)
 - [Yeeflow REST API capability map](yeeflow-rest-api-capability-map.md)
+- [Local development policy](local-development-policy.md)
+- [YAPK generation guardrails](yapk-generation-guardrails.md)
+- [Application navigation generation rules](application-navigation-generation-rules.md)
+- [Package signing and runtime proof boundaries](package-signing-and-runtime-proof-boundaries.md)
 - [Release hygiene](release-hygiene.md)
 - [Managed app connector design](yeeflow-codex-managed-app-connector.md)
 

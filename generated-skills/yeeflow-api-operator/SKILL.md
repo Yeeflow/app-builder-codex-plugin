@@ -32,6 +32,8 @@ This skill is separate from package generation. It can support planning, validat
 
 Package import/install/upgrade APIs are a separate, explicitly mutating path. Use them only when the user asks to automate package import, install, or upgrade, local package validation has passed, the active workspace is confirmed, and the user explicitly approves execution. Never run package automation as part of normal lookup. Local validation is not import proof, API acceptance is not runtime proof, and runtime proof applies only to the tested scope.
 
+YAPK signing is also a separate proof gate. When a generated package is being prepared for upload-ready handoff and credentials are available, use only the documented package signing endpoints `POST /utils/apppackage/setsign` and `POST /utils/apppackage/verifysign`; never guess signing paths or print raw responses, `Resource`, `Sign`, tokens, tenant URLs, or workspace IDs. Check presence of `YEEFLOW_API_BASE_URL`, OAuth or `YEEFLOW_API_KEY`, and `YEEFLOW_TENANT_URL` before signing, and check `YEEFLOW_WORKSPACE_ID` only when install/import/upgrade automation is explicitly approved.
+
 ## When To Use
 
 Use this skill for prompts such as:

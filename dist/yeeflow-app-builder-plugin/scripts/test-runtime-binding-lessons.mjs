@@ -134,6 +134,19 @@ expectCode("unreachable resource", findings, "NAVIGATION_RESOURCE_UNREACHABLE");
 expectCode("small group id", findings, "APP_GROUP_ID_NOT_API_ISSUED");
 expectNoCode("api issued group id", validateRuntimeCompleteness({ ...navApp, Groups: [{ ID: API_ID, Name: "Issued" }] }, { navigation: { groups: [{ title: "My Leave", items: ["Request Leave"] }] } }, {}), "APP_GROUP_ID_NOT_API_ISSUED");
 
+const childrenNavApp = {
+  ListSet: {
+    LayoutView: JSON.stringify({
+      sort: [{ Title: "Requests", Type: "classes", children: [{ Title: "New Leave Request", Type: 105, ListID: "LRF" }] }],
+    }),
+  },
+  Forms: [{ Key: "LRF" }],
+};
+expectCode("children navigation group", validateRuntimeCompleteness(childrenNavApp, {}, {}), "NAVIGATION_GROUP_CHILDREN_UNSUPPORTED");
+
+const approvalRequiredPlan = { workflows: [{ title: "Leave Request Approval", type: "approval" }] };
+expectCode("approval form required by plan", validateRuntimeCompleteness({ ListSet: { LayoutView: "{}" }, Forms: [] }, approvalRequiredPlan, {}), "APPROVAL_FORM_REQUIRED_BY_PLAN_MISSING");
+
 expectCode("service portal payload excluded", validateRuntimeCompleteness({ PortalInfo: { Title: "Portal" }, ListSet: { LayoutView: "{}" } }, {}, { servicePortal: "absent" }), "SERVICE_PORTAL_PAYLOAD_PRESENT_WHEN_EXCLUDED");
 expectNoCode("service portal absent", validateRuntimeCompleteness({ ListSet: { LayoutView: "{}" }, PortalInfo: null }, {}, { servicePortal: "absent" }), "SERVICE_PORTAL_PAYLOAD_PRESENT_WHEN_EXCLUDED");
 

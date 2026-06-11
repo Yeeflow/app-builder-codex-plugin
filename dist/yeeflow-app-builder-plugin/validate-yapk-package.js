@@ -400,6 +400,10 @@ function parseMaybeJson(value, fallback = null) {
   try { return JSON.parse(value); } catch { return fallback; }
 }
 
+function safeString(value) {
+  return value === undefined || value === null ? "" : String(value);
+}
+
 function parseApprovalDefResource(form, path, errors) {
   const raw = form?.DefResource;
   if (typeof raw !== "string" || !raw.trim()) {
@@ -608,6 +612,7 @@ function validateAppPackage(decoded, errors, warnings, appId) {
   if (isObject(decoded.ListSet)) {
     validateAppStorageCodes(decoded.ListSet, "ListSet", errors, appId);
     validateRootLayoutView(decoded.ListSet, errors);
+    validateRootNavigation(decoded, errors);
   }
   counts.pages = asArray(decoded.Pages).length;
   if (decoded.FormReports !== undefined && !Array.isArray(decoded.FormReports)) add(errors, "FORMREPORTS_LEGACY_INVALID", "Legacy AppPackageInfo.FormReports may be present for old packages, but it must be an array when present and is not required for generated YAPK apps.", { path: "FormReports" });
@@ -659,6 +664,50 @@ function validateRootLayoutView(listSet, errors) {
       add(errors, "YAPK_ROOT_LAYOUTVIEW_JSON_INVALID", "Generated root ListSet.LayoutView must contain valid JSON when non-empty.", { path: "ListSet.LayoutView" });
     }
   }
+}
+
+function validateRootNavigation(decoded, errors) {
+  const layoutView = parseMaybeJson(decoded?.ListSet?.LayoutView, null);
+  if (!isObject(layoutView)) return;
+  const pagesByLayoutId = new Set(asArray(decoded.Pages).map((page) => safeString(page?.LayoutID)).filter(Boolean));
+  const formsByKey = new Set(asArray(decoded.Forms).map((form) => safeString(form?.Key || form?.FlowKey || form?.ProcKey)).filter(Boolean));
+  const childListsById = new Set(asArray(decoded.Childs).map((child) => safeString(child?.List?.ListID || child?.ListModel?.ListID)).filter(Boolean));
+  function visit(items, path, inGroup = false) {
+    for (const [index, item] of asArray(items).entries()) {
+      const itemPath = `${path}[${index}]`;
+      if (!isObject(item)) {
+        add(errors, "NAVIGATION_ITEM_NOT_OBJECT", "Navigation entries must be objects.", { path: itemPath });
+        continue;
+      }
+      const type = item.Type;
+      const title = safeString(item.Title || item.DisplayName || item.Name);
+      if (Array.isArray(item.children) || Array.isArray(item.Childs)) {
+        add(errors, "NAVIGATION_GROUP_CHILDREN_UNSUPPORTED", "Generated app navigation groups must use export-proven Type:\"classes\" with list[], not local-only children/Childs arrays.", { path: itemPath, title });
+      }
+      if (safeString(type) === "classes") {
+        if (!Array.isArray(item.list)) add(errors, "NAVIGATION_GROUP_LIST_MISSING", "Type:\"classes\" navigation groups must include list[].", { path: `${itemPath}.list`, title });
+        visit(item.list, `${itemPath}.list`, true);
+        continue;
+      }
+      if (Array.isArray(item.list)) {
+        add(errors, "NAVIGATION_GROUP_TYPE_CLASSES_REQUIRED", "Navigation items with list[] children must use Type:\"classes\".", { path: `${itemPath}.Type`, title, value: type ?? null });
+        visit(item.list, `${itemPath}.list`, true);
+        continue;
+      }
+      if (!inGroup && ![1, 16, 32, 103, 105].includes(Number(type))) continue;
+      if (Number(type) === 103) {
+        const target = safeString(item.LayoutID || item.PageID || item.ListID);
+        if (!target || !pagesByLayoutId.has(target)) add(errors, "NAVIGATION_DASHBOARD_TARGET_INVALID", "Dashboard/page navigation must use Type:103 and target an included Pages[].LayoutID.", { path: itemPath, title, target });
+      } else if (Number(type) === 105) {
+        const target = safeString(item.ListID || item.ProcKey || item.Key);
+        if (!target || !formsByKey.has(target)) add(errors, "NAVIGATION_APPROVAL_FORM_TARGET_INVALID", "Approval form navigation must use Type:105 and ListID equal to an included Forms[].Key.", { path: itemPath, title, target });
+      } else if (Number(type) === 1) {
+        const target = safeString(item.ListID);
+        if (!target || !childListsById.has(target)) add(errors, "NAVIGATION_DATA_LIST_TARGET_INVALID", "Data list navigation must use Type:1 and ListID equal to an included child list ID.", { path: itemPath, title, target });
+      }
+    }
+  }
+  visit(layoutView.sort || layoutView.list || [], "ListSet.LayoutView.sort");
 }
 
 function validateSchemaForbiddenAppIds(decoded, errors) {
@@ -1036,7 +1085,11 @@ function validate(file, baselineFile = null) {
   if (typeof wrapper.TenantID !== "string" || !NUMERIC_STRING_RE.test(wrapper.TenantID || "")) add(errors, "YAPK_TENANT_ID_INVALID", "TenantID should be a numeric string.");
   if (typeof wrapper.ListID !== "string" || !NUMERIC_STRING_RE.test(wrapper.ListID || "")) add(errors, "YAPK_LIST_ID_INVALID", "ListID should be a numeric string.");
   if (typeof wrapper.Date !== "string" || !UTC_DATE_RE.test(wrapper.Date || "")) add(errors, "YAPK_DATE_FORMAT_INVALID", "Date should be UTC yyyy-MM-ddTHH:mm:ssZ.");
-  if (typeof wrapper.Sign !== "string" || Buffer.from(wrapper.Sign || "", "base64").length !== 32) add(warnings, "YAPK_SIGN_UNEXPECTED_SHAPE", "Sign is expected to be a 32-byte base64 value in observed packages.");
+  const signBytes = typeof wrapper.Sign === "string" ? Buffer.from(wrapper.Sign || "", "base64") : Buffer.alloc(0);
+  if (typeof wrapper.Sign !== "string" || signBytes.length !== 32) add(warnings, "YAPK_SIGN_UNEXPECTED_SHAPE", "Sign is expected to be a 32-byte base64 value in observed packages.");
+  if (typeof wrapper.Sign === "string" && (/placeholder/i.test(wrapper.Sign) || (signBytes.length === 32 && signBytes.every((byte) => byte === 0)))) {
+    add(errors, "YAPK_SIGN_PLACEHOLDER", "Generated .yapk packages must not use placeholder or all-zero Sign values for handoff, upload, install, or upgrade. Use setsign and verifysign when API/OAuth access is available.", { path: "Sign" });
+  }
 
   const resource = decodeBrotliResource(wrapper.Resource, errors);
   const appValidation = resource.decoded ? validateAppPackage(resource.decoded, errors, warnings, wrapper.AppID) : { decodedKeys: [], counts: null };

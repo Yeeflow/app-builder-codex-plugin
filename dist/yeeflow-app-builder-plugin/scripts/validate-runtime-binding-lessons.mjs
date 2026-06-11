@@ -314,11 +314,26 @@ function collectNavigationItems(decoded) {
   const visible = [];
   const groups = [];
   const hidden = [];
+  const findings = [];
   function visit(items, group = "") {
     for (const item of asArray(items)) {
       const title = safeString(item.Title || item.DisplayName || item.Name);
       const isHidden = item.IsHidden === true || item.hideTitle === true;
-      const children = asArray(item.list || item.children || item.Childs);
+      const runtimeList = asArray(item.list);
+      const localChildren = asArray(item.children || item.Childs);
+      if (localChildren.length) {
+        add(findings, "error", "NAVIGATION_GROUP_CHILDREN_UNSUPPORTED", "Grouped app navigation must use export-proven Type:\"classes\" with list[], not local-only children/Childs arrays.", {
+          group: title || group,
+          recommendedFix: "Replace children/Childs with list[] on a Type:\"classes\" group.",
+        });
+      }
+      if (safeString(item.Type) === "classes" && !Array.isArray(item.list)) {
+        add(findings, "error", "NAVIGATION_GROUP_LIST_MISSING", "Type:\"classes\" navigation groups must include list[].", {
+          group: title || group,
+          recommendedFix: "Emit { Title, Type:\"classes\", list:[...] } for grouped navigation.",
+        });
+      }
+      const children = runtimeList.length ? runtimeList : localChildren;
       const isGroup = children.length > 0 || safeString(item.Type) === "classes" || safeString(item.Type) === "group";
       if (isGroup) {
         if (!isHidden && title) groups.push(title);
@@ -329,16 +344,22 @@ function collectNavigationItems(decoded) {
     }
   }
   visit(layoutView?.sort || layoutView?.list || []);
-  return { groups, visible, hidden };
+  return { groups, visible, hidden, findings };
 }
 
 export function validateRuntimeCompleteness(decoded, plan = {}, options = {}) {
   const findings = [];
   const navigation = collectNavigationItems(decoded);
+  findings.push(...navigation.findings);
   const plannedGroups = asArray(plan?.navigation?.groups).map((group) => safeString(group.title || group.name)).filter(Boolean);
   const plannedEntries = asArray(plan?.navigation?.groups).flatMap((group) => asArray(group.items).map((item) => ({ title: safeString(item.title || item.name || item), group: safeString(group.title || group.name) }))).filter((item) => item.title);
   const visibleTitles = new Set(navigation.visible.map((item) => item.title.toLowerCase()));
   const groupTitles = new Set(navigation.groups.map((item) => item.toLowerCase()));
+  if (planRequiresApprovalForms(plan, options) && !asArray(decoded?.Forms).length) {
+    add(findings, "error", "APPROVAL_FORM_REQUIRED_BY_PLAN_MISSING", "The approved app plan requires an approval workflow/form, but the generated package has no Forms[].", {
+      recommendedFix: "Generate the approval form and workflow, or mark the build incomplete/staged and get explicit user approval for the deferred scope.",
+    });
+  }
 
   for (const group of plannedGroups) {
     if (!groupTitles.has(group.toLowerCase())) add(findings, "error", "NAVIGATION_GROUP_MISSING", "Visible app navigation is missing a planned group.", { group, recommendedFix: "Generate app-level grouped navigation that matches the approved app plan." });
@@ -372,6 +393,13 @@ export function validateRuntimeCompleteness(decoded, plan = {}, options = {}) {
   }
 
   return findings;
+}
+
+function planRequiresApprovalForms(plan = {}, options = {}) {
+  if (options.approvalFormsRequired === true || plan?.approvalFormsRequired === true || plan?.requiresApprovalForm === true) return true;
+  if (options.approvalFormsRequired === false || plan?.approvalFormsRequired === false || plan?.requiresApprovalForm === false) return false;
+  const text = JSON.stringify(plan || {});
+  return /\bapproval\b|\bworkflow\b|\brequest\s+form\b|\btask\s+page\b/i.test(text);
 }
 
 function formPages(form) {

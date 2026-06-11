@@ -75,7 +75,7 @@ function writePackage(dir, name, wrapper, decoded) {
   const next = {
     ...wrapper,
     Resource: zlib.brotliCompressSync(Buffer.from(resourceText, "utf8")).toString("base64"),
-    Sign: "regression-placeholder-sign",
+    Sign: Buffer.alloc(32, 1).toString("base64"),
   };
   const file = path.join(dir, `${name}.yapk`);
   fs.writeFileSync(file, `${JSON.stringify(next)}\n`);
@@ -99,6 +99,12 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "yapk-v2-regressions-"));
 const results = [];
 
 try {
+  try {
+    fs.accessSync(packagePath, fs.constants.R_OK);
+  } catch {
+    console.log(JSON.stringify({ status: "skip", reason: "external YAPK fixture is not readable", fixture: path.basename(packagePath) }, null, 2));
+    process.exit(0);
+  }
   const { wrapper, decoded } = readPackage(packagePath);
 
   const listExportResultFile = writePackage(tempDir, "resource-list-export-result", wrapper, { MainListType: 1024, AppID: 41, Data: "{}" });
