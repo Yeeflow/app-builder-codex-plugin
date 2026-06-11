@@ -12,7 +12,7 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.22`.
+Expected plugin: `Yeeflow App Builder` version `0.6.23`.
 
 ## Configure Local Environment
 
@@ -34,7 +34,7 @@ YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.22
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.23
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```

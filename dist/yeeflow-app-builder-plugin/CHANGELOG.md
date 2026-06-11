@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.23
+
+- Add the standard Yeeflow application plan template and generation contract.
+- Make `Generation Contract and Hard Gates` mandatory for app generation planning.
+- Add YAPK signing, approval-form completeness, runtime navigation shape, plan-to-package conformance, proof-boundary, and lightweight-plan minimum guardrails.
+
 ## 0.6.22
 
 - Restore safe development assets from the legacy Yeeflow Codex Plugins repo.
