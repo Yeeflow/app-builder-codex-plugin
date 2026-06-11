@@ -14,7 +14,7 @@ YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
 YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 ```
 
-Override these only for development/testing. The current token exchange/refresh implementation still requires a private client secret in local `.env.local`:
+Override these only for development/testing. The current token exchange/refresh implementation still requires a private client secret in local `.env.local` whenever OAuth login or refresh is needed:
 
 ```env
 YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
@@ -82,7 +82,7 @@ The file contains access token, refresh token, expiry timestamp, token type, sco
 Live Yeeflow API helpers use this order:
 
 1. Valid stored OAuth access token.
-2. Refresh stored OAuth token if expired and refresh token exists.
+2. Refresh stored OAuth token if expired, a refresh token exists, and the private local client secret is configured.
 3. Legacy/deprecated `YEEFLOW_API_KEY` fallback if OAuth is unavailable.
 
 OAuth requests attach `Authorization: Bearer <access_token>`. Legacy requests attach `apiKey` exactly as the existing package automation did. Scripts must never print Authorization headers, API keys, client secrets, OAuth tokens, auth codes, cookies, raw API responses, tenant IDs, private URLs, raw package payloads, screenshots, or generated runtime packages.

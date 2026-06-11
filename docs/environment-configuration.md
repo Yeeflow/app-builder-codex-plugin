@@ -22,7 +22,7 @@ Do not use a tenant URL as the API base. Treat `YEEFLOW_BASE_URL` as a legacy AP
 
 ## Single-Tenant Setup
 
-Recommended minimal `.env.local`:
+Minimal `.env.local` for package workspace context and normal API use when OAuth is already authenticated and no refresh/token exchange is needed:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
@@ -43,7 +43,7 @@ YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 
 Override these only for development/testing.
 
-The current token exchange/refresh implementation still requires a private local client secret:
+The current token exchange/refresh implementation still requires a private local client secret whenever OAuth login or refresh is needed:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
@@ -82,7 +82,7 @@ Package upload/import/install/upgrade helpers default to dry-run behavior and re
 
 ## Legacy API Key Fallback
 
-Normal API calls use OAuth when a valid local OAuth token is available. `YEEFLOW_API_KEY` is no longer required for read-only OAuth/API calls. If configured, it is treated as a legacy/deprecated fallback for older internal workflows and must never be printed or committed.
+Normal API calls use OAuth when a valid local OAuth token is available. `YEEFLOW_API_KEY` is no longer required for read-only OAuth/API calls. If the stored OAuth token is expired and refresh is needed, the current confidential-client refresh path still requires `YEEFLOW_OAUTH_CLIENT_SECRET` locally. If configured, `YEEFLOW_API_KEY` is treated as a legacy/deprecated fallback for older internal workflows and must never be printed or committed.
 
 ## Security Reminders
 

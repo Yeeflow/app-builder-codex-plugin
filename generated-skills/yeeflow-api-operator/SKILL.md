@@ -67,7 +67,7 @@ YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
 YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 ```
 
-Recommended minimal `.env.local`:
+Minimal `.env.local` for package workspace context and normal API use when OAuth is already authenticated and no refresh/token exchange is needed:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
@@ -75,7 +75,7 @@ YEEFLOW_WORKSPACE_ID=<your workspace id>
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-Current OAuth token exchange/refresh still requires a private local client secret:
+Current OAuth token exchange/refresh still requires a private local client secret whenever OAuth login or refresh is needed:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
@@ -217,7 +217,7 @@ For assignment-routing coverage, read `docs/studies/yeeflow-api-operator-assignm
 
 ## Failure Handling
 
-- Missing `.env.local`: explain that only `YEEFLOW_WORKSPACE_ID` is normally required, with `YEEFLOW_TENANT_URL` optional for tenant UI links and `YEEFLOW_OAUTH_CLIENT_SECRET` temporarily required for OAuth login/refresh until PKCE/no-secret flow is implemented.
+- Missing `.env.local`: explain that `YEEFLOW_WORKSPACE_ID` is enough only for package workspace context and normal API use when OAuth is already authenticated and no refresh/token exchange is needed; `YEEFLOW_TENANT_URL` is optional for tenant UI links, and `YEEFLOW_OAUTH_CLIENT_SECRET` is temporarily required for OAuth login/refresh until PKCE/no-secret flow is implemented.
 - Missing OAuth auth and no legacy fallback: ask the user to run `node scripts/yeeflow-oauth-login.mjs` after storing any required private client secret locally; do not ask them to paste secrets.
 - Missing `YEEFLOW_WORKSPACE_ID` for package automation: ask the user to store it locally or configure the active profile workspace variable; do not print the value.
 - Authentication/authorization failure: report HTTP/API status and likely causes such as expired key, wrong tenant/account, insufficient permission, or wrong base; do not echo credentials.
