@@ -16,6 +16,29 @@ const workspaceId = "9876543210123456";
 
 try {
   fs.writeFileSync(dotenv, [
+    `YEEFLOW_WORKSPACE_ID="${workspaceId}"`,
+  ].join("\n"));
+  fs.writeFileSync(packagePath, "{}\n");
+
+  const minimal = spawnSync(process.execPath, [
+    "scripts/yeeflow-package-api-automation.mjs",
+    "--operation",
+    "install-yapk",
+    "--package",
+    packagePath,
+    "--dotenv",
+    dotenv,
+  ], { cwd: ROOT, encoding: "utf8", env: { PATH: process.env.PATH || "" } });
+  assert.equal(minimal.status, 0, `minimal dry-run failed:\n${minimal.stdout}\n${minimal.stderr}`);
+  assert.equal(`${minimal.stdout}\n${minimal.stderr}`.includes(workspaceId), false, "minimal dry-run printed WorkspaceID");
+  const minimalParsed = JSON.parse(minimal.stdout);
+  assert.equal(minimalParsed.environment.YEEFLOW_API_BASE_URL_PRESENT, true);
+  assert.equal(minimalParsed.environment.YEEFLOW_API_BASE_URL_SOURCE, "plugin-default");
+  assert.equal(minimalParsed.environment.YEEFLOW_API_KEY_PRESENT, false);
+  assert.equal(minimalParsed.environment.YEEFLOW_API_KEY_MODE, "not-configured");
+  assert.equal(minimalParsed.environment.YEEFLOW_WORKSPACE_ID_PRESENT, true);
+
+  fs.writeFileSync(dotenv, [
     "YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1",
     `YEEFLOW_API_KEY="${secretApiKey}"`,
     `YEEFLOW_WORKSPACE_ID="${workspaceId}"`,
@@ -43,6 +66,7 @@ try {
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.execute, false);
     assert.equal(parsed.environment.YEEFLOW_API_KEY_PRESENT, true);
+    assert.equal(parsed.environment.YEEFLOW_API_KEY_MODE, "legacy-fallback");
     assert.equal(parsed.environment.YEEFLOW_WORKSPACE_ID_PRESENT, true);
     assert.equal(parsed.workspaceId, operation === "upload" ? "present" : "present");
     assert.match(parsed.result.endpoint, /^POST \//);

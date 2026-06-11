@@ -73,20 +73,15 @@ Proof boundaries remain separate:
 
 ## Local Environment
 
-Use a gitignored `.env.local` for local credentials. Browser OAuth is preferred for user-facing API work; API-key mode remains available for internal fallback.
+Use a gitignored `.env.local` for local tenant/workspace settings and private OAuth secrets. Browser OAuth is preferred for user-facing API work. Fixed API/OAuth defaults are bundled by the plugin, and legacy API-key mode remains available only as a deprecated fallback.
 
 ```env
-YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1
-YEEFLOW_API_KEY=<your Yeeflow API key>
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-
-YEEFLOW_OAUTH_CLIENT_ID=<your OAuth client id>
-YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
-YEEFLOW_OAUTH_AUTH_URL=https://login.yeeflow.com/connect/authorize
-YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
-YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
+# Optional only if tenant UI/browser links are needed:
+YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
+
+This minimal form is enough for package workspace context and normal API use only when OAuth is already authenticated and no refresh/token exchange is needed. The plugin provides defaults for `YEEFLOW_API_BASE_URL`, `YEEFLOW_OAUTH_CLIENT_ID`, `YEEFLOW_OAUTH_AUTH_URL`, `YEEFLOW_OAUTH_TOKEN_URL`, and `YEEFLOW_OAUTH_SCOPES`; override them only for development/testing. The current OAuth token exchange and refresh implementation still requires `YEEFLOW_OAUTH_CLIENT_SECRET` in `.env.local`; it is private, must never be committed, and should be removed later by implementing PKCE/no-secret native OAuth if the Yeeflow client supports it. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only.
 
 Do not paste secrets, authorization codes, cookies, bearer tokens, or passwords into chat.
 

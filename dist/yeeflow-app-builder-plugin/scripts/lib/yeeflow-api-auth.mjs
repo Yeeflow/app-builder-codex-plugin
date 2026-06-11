@@ -81,6 +81,10 @@ export function authPresenceSummary(auth) {
       expired: Boolean(auth.oauth?.expired),
       refreshTokenPresent: Boolean(auth.oauth?.refreshTokenPresent),
       expiresAt: auth.oauth?.expiresAt || null,
+      clientIdSource: auth.oauth?.configSources?.clientId || null,
+      authUrlSource: auth.oauth?.configSources?.authUrl || null,
+      tokenUrlSource: auth.oauth?.configSources?.tokenUrl || null,
+      scopesSource: auth.oauth?.configSources?.scopes || null,
     },
   };
 }

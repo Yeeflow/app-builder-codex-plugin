@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { loadDotenvFile, parseDotenvValue, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
+import { environmentPresence, loadDotenvFile, parseDotenvValue, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
 
 assert.equal(parseDotenvValue("plain-value"), "plain-value");
 assert.equal(parseDotenvValue("plain value # comment"), "plain value");
@@ -39,11 +39,29 @@ try {
   assert.equal(loadDotenvFile(fs, dotenv), true);
   const resolved = resolveYeeflowEnvironment(process.env);
   assert.equal(resolved.apiBaseUrl, "https://api.yeeflow.com/v1");
+  assert.equal(resolved.usedDefaultApiBaseUrl, false);
   assert.equal(resolved.profile, "dev");
   assert.equal(resolved.apiKey, "secret value # redacted");
   assert.equal(resolved.workspaceId, "9876543210123456");
   assert.equal(resolved.tenantUrl, "https://example.yeeflow.com");
   assert.equal(process.env["IGNORED-NOT-VALID"], undefined);
+
+  const defaultsOnly = resolveYeeflowEnvironment({});
+  assert.equal(defaultsOnly.apiBaseUrl, "https://api.yeeflow.com/v1");
+  assert.equal(defaultsOnly.usedDefaultApiBaseUrl, true);
+  assert.equal(defaultsOnly.apiKey, "");
+  assert.equal(defaultsOnly.workspaceId, "");
+  assert.deepEqual(environmentPresence(defaultsOnly), {
+    YEEFLOW_API_BASE_URL_PRESENT: true,
+    YEEFLOW_API_BASE_URL_SOURCE: "plugin-default",
+    YEEFLOW_API_KEY_PRESENT: false,
+    YEEFLOW_API_KEY_MODE: "not-configured",
+    YEEFLOW_BASE_URL_LEGACY_ALIAS_USED: false,
+    YEEFLOW_PROFILE: null,
+    YEEFLOW_TENANT_ID_PRESENT: false,
+    YEEFLOW_TENANT_URL_PRESENT: false,
+    YEEFLOW_WORKSPACE_ID_PRESENT: false,
+  });
 } finally {
   process.env = originalEnv;
   fs.rmSync(tempDir, { recursive: true, force: true });

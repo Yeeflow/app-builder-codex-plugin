@@ -15,13 +15,13 @@ Source docs:
 - `POST https://api.yeeflow.com/v1/listset/package/install`
 - `POST https://api.yeeflow.com/v1/listset/package/upgrade`
 
-All four endpoints use the `apiKey` header. Use `YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1` and `YEEFLOW_API_KEY` from local environment variables only. Import, install, and upgrade also require `WorkspaceID`; the helper reads it from `YEEFLOW_WORKSPACE_ID` or the active profile-specific workspace variable such as `YEEFLOW_PROD_WORKSPACE_ID`.
+The helper now uses the shared OAuth/API auth wrapper: it prefers OAuth bearer tokens, refreshes them when possible, and uses legacy/deprecated `YEEFLOW_API_KEY` only as fallback. The plugin supplies the default API base `https://api.yeeflow.com/v1`. Import, install, and upgrade also require `WorkspaceID`; the helper reads it from `YEEFLOW_WORKSPACE_ID` or the active profile-specific workspace variable such as `YEEFLOW_PROD_WORKSPACE_ID`.
 
 ## Endpoint Summary
 
 | API | Purpose | Required inputs | Response shape in docs | Automation status |
 | --- | --- | --- | --- | --- |
-| Upload file content | Upload a local package file for later install/upgrade | `apiKey`, package file content, `isImg=false` query | Docs show `200 OK` with no body | Supported as dry-run and guarded execution. File body contract needs runtime confirmation. |
+| Upload file content | Upload a local package file for later install/upgrade | OAuth or legacy API-key auth, package file content, `isImg=false` query | Docs show `200 OK` with no body | Supported as dry-run and guarded execution. File body contract needs runtime confirmation. |
 | Import list set template package | Import a `.yap` ListExportResult package | `AppID`, `WorkspaceID`, `Title`, `Description`, `IconUrl`, `Resource`, `Manage`, `Write`, `Read` | `Data.ActionLogID`, `Data.Completed`, `Status`, `Message`, `TotalCount` | Supported as guarded execution from `.yap` wrapper metadata. |
 | Install package | Install a `.yapk` package | `WorkspaceID`, `PackageFile.{Id,Name,FileSize}` | `Data.ID`, `Data.Continue`, `Data.Status`, `Data.LogTxt`, `Status`, `Message`, `TotalCount` | Supported as guarded execution after upload or with explicit package-file metadata. |
 | Upgrade check package | Dry-run/check an existing-app `.yapk` upgrade | `WorkspaceID`, `PackageFile.{Id,Name,FileSize}`, `UpgradeCheck:true` | `Data.ID`, `Data.Continue`, `Data.Status`, `Data.LogTxt`, `Status`, `Message`, `TotalCount` | Supported as guarded execution via `upgrade-check-yapk`; classified as `upgrade_check_passed`, not applied. |
@@ -40,12 +40,10 @@ It defaults to dry run. It never prints API keys, raw package `Resource`, raw `S
 `WorkspaceID` is required for import/install/upgrade payloads. Store it locally:
 
 ```env
-YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1
-YEEFLOW_API_KEY=<your api key>
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
-YEEFLOW_TENANT_ID=<your tenant id if needed>
 YEEFLOW_WORKSPACE_ID=<your workspace id>
 ```
+
+`YEEFLOW_TENANT_URL` is optional and only used for tenant UI/browser links. `YEEFLOW_OAUTH_CLIENT_SECRET` is temporarily required for OAuth login/refresh until a PKCE/no-secret token exchange is implemented. Do not configure `YEEFLOW_API_KEY` for normal API calls; it remains only as legacy/deprecated fallback.
 
 Dry-run output reports `workspaceId: "present"` or `workspaceId: "missing"` only. It does not print the actual workspace ID. `--workspace-id <id>` remains available as a one-run override, but the value is redacted in all helper output.
 
@@ -88,13 +86,13 @@ Before any import/install/upgrade API call:
    - `.yap` uses the import endpoint.
    - `.yapk` uses install or upgrade endpoint.
 5. Confirm `WorkspaceID` is present in `.env.local` as `YEEFLOW_WORKSPACE_ID` or the active profile-specific workspace variable. Do not print the value.
-6. Confirm the API profile and tenant in local `.env.local`, without printing secrets.
+6. Confirm OAuth/API authentication is available and any tenant/profile context is local, without printing secrets.
 7. Use dry-run output first.
 8. Use `--execute` only after explicit approval.
 
 ## Open Questions
 
-The upload endpoint documentation currently shows the endpoint and `apiKey` auth but does not fully document the package file request body. The helper supports `multipart/form-data` by default and a raw octet-stream fallback. Runtime confirmation is still required to know the exact upload response body and whether it reliably returns `PackageFile.Id`, `Name`, and `FileSize`.
+The upload endpoint documentation currently shows the endpoint but does not fully document the package file request body. The helper supports `multipart/form-data` by default and a raw octet-stream fallback. Runtime confirmation is still required to know the exact upload response body and whether it reliably returns `PackageFile.Id`, `Name`, and `FileSize`.
 
 If upload returns no package-file metadata, callers can pass:
 
