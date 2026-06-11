@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.25
+
+- Bump the active plugin version after the PKCE OAuth support merge.
+- Add PKCE OAuth support with confidential-client fallback for login and refresh helpers.
+- Keep client secrets local-only when fallback is needed; do not present this as a secret-free OAuth release.
+- Document that no-secret refresh is not currently proven and failed safely with `invalid_client`; full secret-free OAuth still needs Yeeflow OAuth server/client configuration confirmation.
+
 ## 0.6.24
 
 - Bump the active plugin version after the OAuth environment defaults merge.
