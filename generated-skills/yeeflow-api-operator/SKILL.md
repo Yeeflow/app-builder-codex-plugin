@@ -67,7 +67,7 @@ YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
 YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 ```
 
-Minimal `.env.local` for package workspace context and normal API use when OAuth is already authenticated and no refresh/token exchange is needed:
+Case A, already authenticated / normal API use:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
@@ -75,13 +75,16 @@ YEEFLOW_WORKSPACE_ID=<your workspace id>
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
+Case B, OAuth login/refresh when confidential-client fallback is required:
+
 OAuth token exchange/refresh tries PKCE/no-secret first. Current Yeeflow OAuth refresh may still require confidential-client fallback. If Yeeflow rejects public-client exchange or refresh, configure a private local client secret as fallback only:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
-# Optional:
+# Optional only if tenant UI/browser links are needed:
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Needed when confidential-client fallback is required for OAuth login/refresh:
+YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
 ```
 
 Rules:
