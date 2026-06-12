@@ -41,6 +41,10 @@ Generator rule:
 - Generated standard dashboards should set `attrs.hideHeaderAll = true`.
 - Keep app/page title available in metadata, but hide the default Yeeflow page header so the generated layout controls the first viewport.
 
+## Grid-Table Collection Record Lists
+
+Task Tracker hardening adds a blocking generated-final gate for dashboard record-list sections that claim the grid-table Collection pattern. Use grid-table style `collection` controls, not dashboard `data-list` controls, unless the user explicitly requests Data table. Pair each Collection with a header `flex_grid`, place both controls in one wrapper container, and serialize both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]` so runtime spacing and designer Element Gap agree. When row-click detail is planned, set `attrs.data.link`, `attrs.data.opentype = "slide"`, and `attrs.data.modalsize = 2`, and ensure the link resolves to a Type `1` custom detail layout for the same source list. Run `scripts/validate-dashboard-grid-table-collections.mjs` before signing, install, upgrade-check, or handoff.
+
 ## Content Area And Padding
 
 The studied dashboard uses zero padding:

@@ -258,6 +258,13 @@ Repeat this subsection for each page or dashboard.
 - Golden/template reference:
 - Sections:
 - Yeeflow controls:
+- Record-list control choice: Data table / grid-table Collection / none
+- Grid-table Collection wrapper required: Yes/No
+- Detail open behavior:
+- Required custom detail layout:
+- Wrapper gap requirements:
+- Header hiding behavior:
+- Title/text style expectations:
 - Data bindings:
 - Actions:
 - Responsive behavior:
@@ -270,6 +277,11 @@ Layout rules:
 - 3-column workspace layout for inbox, triage, queue, CRM, renewal, resource, or service-desk workspaces.
 - 4-column layout only when justified by distinct navigation/filter, queue/list, detail, and action/attribute regions.
 - Mobile/tablet fallback must be stated for every dense or multi-column page.
+- Dashboard record-list sections must state Data table vs Collection. Use grid-table style Collection when that visual/runtime pattern is desired; do not default to dashboard `data-list` controls unless the user explicitly requests Data table.
+- Grid-table Collection sections require a paired header `flex_grid` and Collection wrapped together in one container with `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`.
+- Planned row-click detail behavior requires Collection `attrs.data.link`, `attrs.data.opentype = "slide"`, `attrs.data.modalsize = 2`, and a concrete Type `1` custom detail layout for the source data list.
+- Dashboard pages should plan `attrs.hideHeaderAll = true` when the app shell/navigation already provides page context.
+- Dashboard title/text controls must plan visible title typography such as `attrs.heads.ty = [null, "h5-medium"]`, width/positioning where needed, token typography, and plain-string color or validated color token.
 
 ## 10. UI/UX and Control Mapping
 
@@ -452,6 +464,22 @@ Custom code rules:
 - Unreachable intended resources are failures unless documented hidden/deferred
 - Missing or failed navigation runtime metadata validation stops generation before signing, install, upgrade-check, or handoff
 
+### Dashboard Grid-Table Collection Pattern Gate
+
+- Required when a dashboard record-list section claims the grid-table Collection pattern
+- Use grid-table style `collection` controls, not dashboard `data-list` controls, unless Data table is explicitly planned
+- Each grid-table Collection must be paired with a header `flex_grid`
+- The header `flex_grid` and Collection must be wrapped together in one container
+- The wrapper must set both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`
+- Row-click details require `attrs.data.link`, `attrs.data.opentype = "slide"`, and `attrs.data.modalsize = 2`
+- Collection detail links must resolve to concrete Type `1` custom detail layouts for the source data list
+- Dashboard pages should hide duplicate dashboard header bars with `attrs.hideHeaderAll = true` when app shell/navigation provides page context
+- Dashboard title controls should use visible title typography such as `attrs.heads.ty = [null, "h5-medium"]`
+- Text controls must include designer/runtime style metadata: width/positioning where needed, token typography, and plain-string color or validated color token
+- Internal helper metadata must not be enumerable in encoded package objects
+- Type `1` custom detail layout `LayoutView` must use a schema-compatible value such as an empty string, not `null`
+- Missing or failed dashboard grid-table Collection validation stops generation before signing, install, upgrade-check, or handoff when the pattern is planned
+
 ### Plan-to-Package Conformance Gate
 
 Generator must prove:
@@ -480,6 +508,12 @@ Generator must prove:
 - Schema validation:
 - ID provenance validation:
 - Navigation runtime metadata validation:
+- Dashboard grid-table Collection validation:
+- Wrapper gap validation:
+- Detail layout link validation:
+- Dashboard header visibility validation:
+- Dashboard title/text style validation:
+- Schema helper-leak validation:
 - Graph validation:
 - UI quality validation:
 - App-plan conformance validation:
@@ -508,6 +542,8 @@ Separate these proof levels:
 - Package schema validation:
 - ID provenance proof: pending / passed / failed
 - Navigation runtime metadata proof: pending / passed / failed
+- Dashboard grid-table Collection proof: pending / passed / failed / not applicable
+- Runtime/designer visual proof: pending / passed / failed / not run
 - Evidence: ID allocation manifest and validator results
 - Signing proof:
 - API install/import acceptance:
@@ -519,7 +555,7 @@ Separate these proof levels:
 - Custom code execution proof:
 - External integration execution proof:
 - Permission enforcement proof:
-- Boundary: signing/install acceptance do not prove ID provenance or navigation runtime metadata completeness
+- Boundary: signing/install acceptance do not prove ID provenance, navigation runtime metadata completeness, or dashboard runtime/designer visual fidelity
 
 ## 21. Assumptions
 
@@ -541,4 +577,4 @@ Separate these proof levels:
 
 Use this prompt after the plan is approved:
 
-`Use @yeeflow-app-builder to generate <Application Name> from <plan path>. Treat the approved plan as the implementation contract. Generate the complete planned application unless an item is explicitly deferred. Use .yapk by default unless .yap is explicitly requested. Validate schema, ID provenance, navigation runtime metadata, graph, UI quality, approval forms, app-plan conformance, package wrapper/signing readiness, and source/dist consistency. Do not run live Yeeflow API calls, write operations, install/import/upgrade, or runtime tests unless explicitly authorized. Report local validation, ID provenance, navigation runtime metadata, signing status, API acceptance, runtime proof, deferred items, and known risks separately.`
+`Use @yeeflow-app-builder to generate <Application Name> from <plan path>. Treat the approved plan as the implementation contract. Generate the complete planned application unless an item is explicitly deferred. Use .yapk by default unless .yap is explicitly requested. Validate schema, ID provenance, navigation runtime metadata, dashboard grid-table Collection patterns, graph, UI quality, approval forms, app-plan conformance, package wrapper/signing readiness, and source/dist consistency. Do not run live Yeeflow API calls, write operations, install/import/upgrade, or runtime tests unless explicitly authorized. Report local validation, ID provenance, navigation runtime metadata, dashboard grid-table Collection validation, signing status, API acceptance, runtime/designer proof, deferred items, and known risks separately.`

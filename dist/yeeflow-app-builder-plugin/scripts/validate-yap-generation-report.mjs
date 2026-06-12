@@ -64,6 +64,24 @@ if (generatedFinalYapk) {
   }
 }
 
+const dashboardHeavy = report.dashboardHeavy === true || report.dashboard_heavy === true || report.dashboardGridTableCollectionRequired === true || report.dashboard_grid_table_collection_required === true;
+if (generatedFinalYapk && dashboardHeavy) {
+  const requiredDashboardSections = [
+    ["dashboardGridTableCollectionValidation", "YAPK_REPORT_DASHBOARD_GRID_TABLE_COLLECTION_VALIDATION_MISSING"],
+    ["wrapperGapValidation", "YAPK_REPORT_DASHBOARD_WRAPPER_GAP_VALIDATION_MISSING"],
+    ["detailLayoutLinkValidation", "YAPK_REPORT_DASHBOARD_DETAIL_LAYOUT_LINK_VALIDATION_MISSING"],
+    ["dashboardHeaderVisibilityValidation", "YAPK_REPORT_DASHBOARD_HEADER_VISIBILITY_VALIDATION_MISSING"],
+    ["dashboardTitleTextStyleValidation", "YAPK_REPORT_DASHBOARD_TITLE_TEXT_STYLE_VALIDATION_MISSING"],
+    ["schemaHelperLeakValidation", "YAPK_REPORT_SCHEMA_HELPER_LEAK_VALIDATION_MISSING"],
+    ["runtimeDesignerVisualProof", "YAPK_REPORT_RUNTIME_DESIGNER_VISUAL_PROOF_MISSING"],
+  ];
+  for (const [key, code] of requiredDashboardSections) {
+    if (!(key in report) && !(key in (proofBoundary || {}))) {
+      errors.push({ code, message: `Dashboard-heavy generated-final YAPK report must include ${key} separately.` });
+    }
+  }
+}
+
 let queuedMarkedSuccess = false;
 walk(report, (value, pointer) => {
   if (typeof value !== "string") return;

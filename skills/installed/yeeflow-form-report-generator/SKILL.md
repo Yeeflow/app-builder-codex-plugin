@@ -9,6 +9,10 @@ description: generate, inspect, validate, and plan runtime proof for Yeeflow For
 
 Generated-final `.yapk` output must use API-issued numeric content IDs from `GET /utils/generate/ids?count=<n>` and must emit a redacted `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`, path-to-purpose mappings, duplicate checks, unused-ID accounting, generator provenance metadata, and no non-API IDs. Runtime navigation groups must include API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; children must include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`. Form Report navigation type requires export-proven handling before generated-final claims. Stop before signing, install, upgrade-check, or handoff if ID provenance or navigation runtime metadata validation fails.
 
+## Dashboard Grid-Table Collection Pattern Gate
+
+Dashboard-heavy Form Report apps that include record-list dashboard sections must use grid-table style `collection` controls for that visual/runtime pattern, not dashboard `data-list` controls, unless the user explicitly requests Data table. Pair each Collection with a header `flex_grid` in one wrapper container, set both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`, require concrete Type `1` custom detail layouts for planned row-click slide details, and treat signing/install acceptance as separate from dashboard runtime/designer visual proof.
+
 Schema-v2 carry-forward: Form Report child resources are list-like `CustomListModel` resources and must follow the same standard gates where applicable: `ListModel.Flags = 1`, schema-supported `ListModel.Type = 32`, arrays for `Defs` and `Layouts`, and valid approval-form variable references. Do not use Business Travel import or workflow-publish practice as Form Report runtime proof.
 
 Use this skill when a Yeeflow application needs Form Report resources or when studying/export-validating Form Report schema. A Form Report is an app-level reporting resource based on an approval form. It is not a standalone data list, does not own a workflow, and must not be treated as an editable record store.

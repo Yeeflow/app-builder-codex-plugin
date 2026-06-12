@@ -5,6 +5,10 @@ description: generate, update, debug, document, and redesign yeeflow custom code
 
 # Yeeflow Custom Code Generator
 
+## Dashboard Grid-Table Collection Pattern Gate
+
+When custom code participates in a dashboard-heavy generated app, it must not be used to mask a missing native grid-table Collection pattern. Dashboard record-list sections that require that pattern use `collection` plus a paired header `flex_grid` in one zero-gap wrapper, concrete Type `1` custom detail layouts for planned row-click slide details, hidden duplicate dashboard headers when planned, and explicit runtime/designer visual proof. Internal helper metadata must not leak into encoded package objects.
+
 ## Overview
 
 Generate Yeeflow custom code and customer-facing documentation that match the runtime structure, coding conventions, data-access patterns, and UI quality shown in the user's working examples. Default to producing a full ready-to-paste Yeeflow code file for code-generation requests. When the user provides existing code and asks what it does, how to use it, or to document it, switch to guide-only documentation-from-code mode. When the user asks to use an existing custom code script inside a Yeeflow application, switch to app-placement mode and produce the Custom Code control configuration, parameter wiring, validation notes, and runtime test plan instead of rewriting the script. When the user explicitly asks for a patch, diff, or changed sections only, switch output mode accordingly.

@@ -57,7 +57,7 @@ Cards should have concise labels, a clear value, and optional helper metadata. A
 
 ## Collection Presentation
 
-Use Collection controls for repeated list-style data when source lists are local and proven.
+Use Collection controls for repeated list-style data when source lists are local and proven. For table-like dashboard record lists, prefer the grid-table Collection pattern over dashboard `data-list` unless the user explicitly requests Data table.
 
 Recommended names:
 
@@ -69,6 +69,8 @@ Recommended names:
 - `Status badge`
 
 For table-style Collections, keep visible captions off on layout-only grids and rely on `nv_label` for designer readability.
+
+Grid-table Collections must be paired with a header `flex_grid` inside one wrapper container. The wrapper must set both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`. Planned row-click slide detail requires `attrs.data.link`, `attrs.data.opentype = "slide"`, `attrs.data.modalsize = 2`, and a concrete Type `1` custom detail layout for the source list. Helper-only metadata must not leak into encoded package objects.
 
 ## Empty States
 
@@ -84,7 +86,7 @@ Example: `No requests yet. Submitted requests will appear here after the workflo
 
 Warn when dashboards are missing hidden header, zero padding, page-level background when `Main` has a background, `Main`, `Content`, meaningful `nv_label`, or use many arbitrary hard-coded colors. Warn when `Main` carries a full-page-like background because generated dashboards should put full-page background on embedded page attrs.
 
-Dashboard Text controls should follow the shared Yeeflow Text control standard in `docs/yeeflow-text-control-generation-standards.md`: native `heading` controls, inline width by default, typography presets as `[null, token]`, and `heads.color` as a plain string. Do not reuse the old CAPEX generated text style shape with pair-shaped color values.
+Dashboard Text controls should follow the shared Yeeflow Text control standard in `docs/yeeflow-text-control-generation-standards.md`: native `heading` controls, inline width by default, typography presets as `[null, token]`, and `heads.color` as a plain string. Dashboard page titles should use a visible title token such as `attrs.heads.ty = [null, "h5-medium"]` unless another validated style is intentionally planned. Do not reuse the old CAPEX generated text style shape with pair-shaped color values.
 
 ## Form Actions Boundary
 
