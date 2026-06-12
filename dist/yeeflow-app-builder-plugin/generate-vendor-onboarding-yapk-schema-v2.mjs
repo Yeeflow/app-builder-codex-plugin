@@ -211,11 +211,11 @@ function safeParseSignResponse(text) {
   return parsed?.Data ?? parsed?.data ?? parsed?.Sign ?? parsed?.sign ?? (typeof parsed === "string" ? parsed.trim() : "");
 }
 
-async function postJson(url, apiKey, body) {
+async function postJson(url, authHeaders, body) {
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      apiKey,
+      ...authHeaders,
       "Content-Type": "application/json-patch+json",
     },
     body: JSON.stringify(body),
@@ -231,14 +231,14 @@ function utcNowNoMillis() {
 
 async function main() {
   fs.mkdirSync(".tmp/vendor-onboarding-compliance-management", { recursive: true });
-  const env = loadYeeflowApiEnvironment(".env.local");
+  const env = await loadYeeflowApiEnvironment(".env.local");
   if (env.apiBaseUrl !== "https://api.yeeflow.com/v1") throw new Error(`Unexpected API base URL: ${env.apiBaseUrl}`);
 
   const { listExportInfo } = readProvenYapApp();
   const appPackageInfo = buildAppPackageInfo(listExportInfo);
   const appPackageText = stringifyWithRawIntegerIds(appPackageInfo);
   const resource = zlib.brotliCompressSync(Buffer.from(appPackageText, "utf8")).toString("base64");
-  const packageIds = await fetchYeeflowUniqueIds({ apiBaseUrl: env.apiBaseUrl, apiKey: env.apiKey, count: 1 });
+  const packageIds = await fetchYeeflowUniqueIds({ apiBaseUrl: env.apiBaseUrl, authHeaders: env.authHeaders, count: 1 });
   const rootListId = String(appPackageInfo.ListSet.ListID);
   const unsigned = {
     PackageId: packageIds[0],
@@ -271,11 +271,11 @@ async function main() {
     fs.rmSync(preflightDir, { recursive: true, force: true });
   }
 
-  const signResponse = await postJson(`${env.apiBaseUrl}/utils/apppackage/setsign`, env.apiKey, unsigned);
+  const signResponse = await postJson(`${env.apiBaseUrl}/utils/apppackage/setsign`, env.authHeaders, unsigned);
   const sign = safeParseSignResponse(signResponse.text);
   if (typeof sign !== "string" || Buffer.from(sign, "base64").length !== 32) throw new Error("setsign did not return a 32-byte signature.");
   const signed = { ...unsigned, Sign: sign };
-  const verifyResponse = await postJson(`${env.apiBaseUrl}/utils/apppackage/verifysign`, env.apiKey, signed);
+  const verifyResponse = await postJson(`${env.apiBaseUrl}/utils/apppackage/verifysign`, env.authHeaders, signed);
   fs.writeFileSync(OUTPUT_YAPK, `\uFEFF${JSON.stringify(signed)}`, "utf8");
 
   const report = {

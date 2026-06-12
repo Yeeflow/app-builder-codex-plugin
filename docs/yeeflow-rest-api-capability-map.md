@@ -94,12 +94,13 @@ The list command performs no live API calls and prints only safe capability meta
 ```bash
 node scripts/yeeflow-api-call-capability.mjs --name locations.list
 node scripts/yeeflow-api-call-capability.mjs --name locations.get --param id=<location-id>
-node scripts/yeeflow-workspace-list.mjs --category <category>
+node scripts/yeeflow-workspace-list.mjs --all
+node scripts/yeeflow-workspace-list.mjs --category flowcraft
 ```
 
 The helper:
 
-- uses the OAuth/API-key auth wrapper
+- requires OAuth for normal workspace discovery
 - blocks all write capabilities
 - blocks non-GET read-only capabilities until a request-body contract is implemented
 - does not accept arbitrary raw paths
@@ -108,17 +109,19 @@ The helper:
 
 Use specialized guarded helpers for package automation instead of trying to call package capabilities through the generic helper.
 
-Use `scripts/yeeflow-workspace-list.mjs` for workspace discovery. It calls only documented `GET /workspaces/{category}` and reports count, title, category, status, and redacted ID previews without saving raw responses. `workspaces.get` is mapped as `GET /workspaces/{category}/{id}` and must also avoid raw workspace records or full IDs.
+Use `scripts/yeeflow-workspace-list.mjs` for workspace discovery. It calls only documented OAuth read-only `GET /workspaces/settings` and `GET /workspaces/flowcraft`, and reports count, title or user-facing fallback name, category, status, status provenance, and redacted ID previews without saving raw responses. When a user asks for all current workspaces, use `--all` to check both categories. For current app/package workflows, `flowcraft` is the relevant workspace category unless product/API docs change. `workspaces.get` is mapped as `GET /workspaces/{category}/{id}` and must also avoid raw workspace records or full IDs.
 
 ## Authentication
 
 Live capability calls use `scripts/lib/yeeflow-api-auth.mjs`.
 
-Authentication order:
+Normal authentication order:
 
-1. Prefer a valid Browser OAuth access token.
+1. Require a valid Browser OAuth access token for user-facing API access.
 2. Refresh an expired OAuth token when a refresh token is available.
-3. Fall back to legacy `YEEFLOW_API_KEY` mode only when OAuth is unavailable.
+3. If OAuth is unavailable, ask the current user to run OAuth login first.
+
+Legacy `YEEFLOW_API_KEY` mode may remain supported by older internal helpers, but it is not part of normal plugin/API operation.
 
 Do not print OAuth tokens, authorization codes, cookies, client secrets, API keys, Authorization headers, private tenant URLs, or raw responses.
 

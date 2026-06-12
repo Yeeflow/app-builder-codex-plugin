@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
-import { environmentPresence, loadDotenvFile, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
+import { authPresenceSummary, mergeAuthHeaders, requireYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
 
 // Read-only Yeeflow Assignment Task routing API coverage probe.
 // Do not add create, update, delete, assignment, enable, disable, remove, or workflow execution calls here.
@@ -130,15 +130,14 @@ function safeError(error) {
   return error.name || "Error";
 }
 
-async function requestJson(baseUrl, apiKey, endpoint) {
+async function requestJson(baseUrl, auth, endpoint) {
   if (!endpoint.readOnly) throw new Error("Blocked non-read-only endpoint configuration.");
   const response = await fetch(`${baseUrl}${endpoint.path}`, {
     method: endpoint.method,
-    headers: {
-      apiKey,
+    headers: mergeAuthHeaders(auth, {
       Accept: "application/json",
       "Content-Type": "application/json",
-    },
+    }),
     body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
   });
   let json = null;
@@ -261,23 +260,22 @@ function firstItems(set, limit = 3) {
 
 const args = parseArgs(process.argv);
 const envPath = path.join(process.cwd(), ".env.local");
-if (!fs.existsSync(envPath)) {
-  console.error("Missing .env.local in current working directory.");
-  process.exit(1);
+const envFile = fs.existsSync(envPath) ? ".env.local" : "not-present";
+let auth;
+try {
+  auth = await requireYeeflowApiAuth({ dotenv: envPath });
+} catch (error) {
+  console.error(safeAuthError(error));
+  console.error("Run node scripts/yeeflow-oauth-login.mjs before read-only assignment-routing API coverage checks.");
+  process.exit(2);
 }
-loadDotenvFile(fs, envPath);
-
-const resolvedEnv = resolveYeeflowEnvironment(process.env);
-const envPresence = environmentPresence(resolvedEnv);
 const refs = collectAssignmentReferences(args.input);
 
 console.log(
   JSON.stringify(
     {
-      environment: {
-        envFile: ".env.local",
-        ...envPresence,
-      },
+      envFile,
+      ...authPresenceSummary(auth),
       exportReferenceSummary: {
         source: args.input ? path.basename(args.input) : null,
         staticUserReferences: refs.users.size,
@@ -293,10 +291,8 @@ console.log(
   ),
 );
 
-if (!resolvedEnv.apiKey || !resolvedEnv.apiBaseUrl) process.exit(2);
-
-const baseUrl = resolvedEnv.apiBaseUrl;
-const baseVariant = resolvedEnv.usedLegacyBaseUrl ? "legacy-api-base-alias" : "api-base";
+const baseUrl = auth.env.apiBaseUrl;
+const baseVariant = auth.env.usedLegacyBaseUrl ? "legacy-api-base-alias" : "api-base";
 const endpoints = [
   {
     label: "users-search",
@@ -360,7 +356,7 @@ for (const binding of refs.positionBindings.slice(0, 3)) {
 const results = [];
 for (const endpoint of endpoints) {
   try {
-    results.push(await requestJson(baseUrl, resolvedEnv.apiKey, endpoint));
+    results.push(await requestJson(baseUrl, auth, endpoint));
   } catch (error) {
     results.push({
       label: endpoint.label,

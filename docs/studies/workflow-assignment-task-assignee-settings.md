@@ -157,7 +157,7 @@ Not created because not found in this export:
 
 Proof level: `api-assisted-category-check`
 
-The `yeeflow-api-operator` read-only connectivity helper was run with local `.env.local` credentials. The API key value was not printed. Raw API responses were not committed.
+The `yeeflow-api-operator` read-only connectivity helper was originally run with local credentials. Current helper behavior is OAuth-first and does not require `.env.local` for normal read-only checks. Raw API responses were not committed.
 
 API availability:
 
@@ -287,7 +287,7 @@ No delivery was tested. No real email addresses are committed. The notification 
 
 ### Updated API-Assisted Interpretation
 
-The read-only Yeeflow API Operator lookup was run again with local `.env.local` credentials. Only key/base presence, statuses, and counts were reported. No API key value or raw API responses were saved or committed.
+The read-only Yeeflow API Operator lookup was run again with local credentials in the historical proof. Current helper behavior is OAuth-first; only auth presence, statuses, and counts should be reported. No credential values or raw API responses were saved or committed.
 
 | Category endpoint | HTTP/API status | Count observed | Use in this study |
 |---|---:|---:|---|

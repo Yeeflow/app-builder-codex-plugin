@@ -1,30 +1,36 @@
 # Workspace Discovery And Selection
 
-Yeeflow workspace targeting is optional for normal OAuth and read-only API use. A local `.env.local` may be empty for the normal OAuth plus workspace discovery path.
-
-Optional default:
-
-```env
-YEEFLOW_WORKSPACE_ID=<optional default workspace id>
-```
+Yeeflow workspace targeting is optional for normal OAuth and read-only API use. A local `.env.local` may be absent or empty for normal OAuth plus workspace discovery. OAuth login is required before API access; do not use API keys for normal workspace discovery.
 
 ## Read-Only Discovery
 
 Use the documented workspace API:
 
 ```text
-GET /workspaces/{category}
+GET /workspaces/settings
+GET /workspaces/flowcraft
 ```
 
 The helper:
 
 ```bash
-node scripts/yeeflow-workspace-list.mjs --category <category>
+node scripts/yeeflow-workspace-list.mjs --all
+node scripts/yeeflow-workspace-list.mjs --category settings
+node scripts/yeeflow-workspace-list.mjs --category flowcraft
 ```
 
-prints only a safe summary: workspace count, title, category, status, and a redacted ID preview. It must not print tenant URLs, tenant IDs, full workspace IDs, tokens, raw workspace objects, Authorization headers, raw API responses, or private values.
+prints only a safe summary: workspace count, title or user-facing fallback name, category, status, status provenance, and a redacted ID preview. It must not print tenant URLs, tenant IDs, full workspace IDs, tokens, raw workspace objects, Authorization headers, raw API responses, or private values.
 
-No universal safe category default is documented, so the helper requires `--category` or a positional category.
+Documented categories are `settings` and `flowcraft`. When a user asks for all current workspaces, check both categories with `--all` and return a combined redacted summary. For current Yeeflow app install/import/package workflows, `flowcraft` is the relevant workspace category unless product/API docs later say otherwise.
+
+Workspace status summary:
+
+| Status | Meaning | Provenance |
+| --- | --- | --- |
+| `0` | normal user-created/editable workspace | product knowledge |
+| `1` | tenant default/shared workspace, editable but not deletable | product knowledge |
+
+If the API title is blank and `Status: 1`, display the user-facing fallback name `Shared Workspace`.
 
 ## Capability Map
 
@@ -48,11 +54,11 @@ Package install/import/upgrade remains a write path. The helper must resolve a t
 Resolution order:
 
 1. explicit CLI argument: `--workspace-id <id>`
-2. optional environment default: `YEEFLOW_WORKSPACE_ID` or active profile workspace variable
-3. explicit user-selected workspace from workspace discovery
+2. optional manual/default `YEEFLOW_WORKSPACE_ID` or active profile workspace variable, if present
+3. explicit user-selected workspace from redacted `flowcraft` workspace discovery
 4. stop with guidance if no workspace is selected
 
-For non-interactive package install/import/upgrade, do not guess. If multiple workspaces are available, ask the user to choose. If exactly one workspace is available, it may be suggested with a redacted ID preview, but the target workspace must still be confirmed before live package operations.
+For non-interactive package install/import/upgrade, do not guess. If multiple `flowcraft` workspaces are available, ask the user to choose. If exactly one `flowcraft` workspace is available, it may be suggested with a redacted ID preview, but the target workspace must still be confirmed before live package operations.
 
 ## Workspace Mutation Boundary
 

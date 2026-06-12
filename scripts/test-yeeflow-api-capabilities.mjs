@@ -10,6 +10,10 @@ import {
   pathParamsFor,
   YEEFLOW_API_CAPABILITIES,
 } from "./lib/yeeflow-api-capabilities.mjs";
+import {
+  APP_PACKAGE_WORKSPACE_CATEGORY,
+  DOCUMENTED_WORKSPACE_CATEGORIES,
+} from "./lib/yeeflow-workspace-selection.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REQUIRED_FIELDS = ["name", "method", "path", "summary", "readOnly", "requiresConfirmation", "confirmationLevel", "auth", "requiredParams", "optionalParams", "source", "notes"];
@@ -83,6 +87,11 @@ function testWorkspaceCapabilities() {
   assert.equal(list.requiresConfirmation, false);
   assert.equal(list.auth, "oauth");
   assert.deepEqual(list.requiredParams, ["path:category"]);
+  assert.deepEqual(DOCUMENTED_WORKSPACE_CATEGORIES, ["settings", "flowcraft"]);
+  assert.equal(APP_PACKAGE_WORKSPACE_CATEGORY, "flowcraft");
+  assert.match(list.notes, /settings/);
+  assert.match(list.notes, /flowcraft/);
+  assert.match(list.notes, /redacted ID previews/);
 
   const get = getCapability("workspaces.get");
   assert.ok(get);
@@ -147,6 +156,10 @@ function testCallHelperAcceptsWorkspaceReads() {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Missing required path parameter: category/);
   assert.doesNotMatch(result.stderr, /does not execute write capabilities/);
+
+  const invalidCategory = run(["scripts/yeeflow-workspace-list.mjs", "--category", "apps", "--dotenv", path.join(ROOT, "missing.env")]);
+  assert.notEqual(invalidCategory.status, 0);
+  assert.match(invalidCategory.stderr, /settings, flowcraft/);
 }
 
 function testPathParamsCovered() {

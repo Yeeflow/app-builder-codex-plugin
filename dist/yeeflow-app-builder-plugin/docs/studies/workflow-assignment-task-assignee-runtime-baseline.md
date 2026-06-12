@@ -6,7 +6,7 @@ This baseline tests whether export-proven Assignment Task assignee configuration
 
 Current proof level:
 
-- `export-proven` from `<downloads>/Test ABC.yap` and `<downloads>/Test ABC (1).yap`
+- `export-proven` from `/Users/Renger/Downloads/Test ABC.yap` and `/Users/Renger/Downloads/Test ABC (1).yap`
 - `API-category-assisted` through read-only Yeeflow API Operator checks
 - `validator-backed` through local package, graph, and assignment-inspection checks
 - `designer-proven` for the first generated package import/open/designer pass
@@ -16,18 +16,18 @@ Current proof level:
 
 | Item | Path | Commit policy |
 |---|---|---|
-| Previous source export | `<downloads>/Test ABC.yap` | not committed |
-| Latest source export | `<downloads>/Test ABC (1).yap` | not committed |
+| Previous source export | `/Users/Renger/Downloads/Test ABC.yap` | not committed |
+| Latest source export | `/Users/Renger/Downloads/Test ABC (1).yap` | not committed |
 | Generator script | `generate-assignment-task-assignee-runtime-baseline.mjs` | committed |
 | Generated package | `assignment-task-assignee-runtime-baseline.v2.yap` | ignored and not committed |
 | Upload convenience copy | `/private/tmp/a.yap` | outside repo, not committed |
-| User-exported manual repair | `<downloads>/Assignment Task Assignee Runtime Baseline.yap` | not committed |
+| User-exported manual repair | `/Users/Renger/Downloads/Assignment Task Assignee Runtime Baseline.yap` | not committed |
 
 The generator decodes the source export read-only, clones export-proven `MultiAssignmentTask.properties.usertaskassignment[]` shapes, assigns a fresh package ID family, and writes a focused `.yap` package. The generated package can contain tenant-local references copied from the source export, so it must remain ignored.
 
 ## API-Assisted Test Planning
 
-The Yeeflow API Operator assignment-routing coverage helper was run with local credentials loaded from `.env.local`. The API key value was not printed, and no raw responses were saved.
+The Yeeflow API Operator assignment-routing coverage helper was originally run with local credentials loaded from `.env.local`; current helper behavior is OAuth-first and does not require `.env.local` for normal read-only checks. No credential values or raw responses were saved.
 
 Endpoint/category results:
 
@@ -139,7 +139,7 @@ Because of this runtime environment collision, the rebuilt package remains local
 The user manually adjusted the first imported app and exported it as:
 
 ```text
-<downloads>/Assignment Task Assignee Runtime Baseline.yap
+/Users/Renger/Downloads/Assignment Task Assignee Runtime Baseline.yap
 ```
 
 The exported-back workflow had 12 Assignment Task nodes and 15 SequenceFlow nodes. It showed two important facts:

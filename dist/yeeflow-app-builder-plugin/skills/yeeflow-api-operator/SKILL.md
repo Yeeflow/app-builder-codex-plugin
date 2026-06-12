@@ -15,12 +15,12 @@ Package validation helpers use stable packaged schema paths: YAPK validation use
 - Before Yeeflow API work, run `node scripts/yeeflow-oauth-status.mjs` or `node scripts/yeeflow-api-auth-smoke.mjs` to check local auth status.
 - Before choosing an endpoint, inspect the REST API capability map with `node scripts/yeeflow-api-list-capabilities.mjs` or `scripts/lib/yeeflow-api-capabilities.mjs`.
 - Use only documented capabilities from the map. Do not guess endpoint paths, do not expose arbitrary raw API calls, and report missing API coverage when no mapped capability exists.
-- Prefer Browser OAuth-backed API calls for user-facing usage. If OAuth is not authenticated, ask the user to run `node scripts/yeeflow-oauth-login.mjs`; never ask for a Yeeflow password.
+- Use Browser OAuth-backed API calls for normal user-facing usage. If OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`; never ask for a Yeeflow password.
 - Prefer read-only capabilities for inspection and verification. Require explicit user confirmation for write capabilities and stronger confirmation for package install/import/upgrade/delete operations.
-- Keep legacy/deprecated `YEEFLOW_API_KEY` mode only as an internal fallback; do not ask users to paste API keys, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into chat.
-- Derive tenant/app link context from OAuth access token claim `tenant` when available; use `YEEFLOW_TENANT_URL` only as an optional fallback override before OAuth token context exists. Never use a tenant URL as the API base.
+- Keep legacy/deprecated `YEEFLOW_API_KEY` mode only as an older internal fallback where existing code still supports it; do not use it for normal plugin/API operation and do not ask users to paste API keys, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into chat.
+- Derive tenant/app link context from OAuth access token claim `tenant` when available. Do not require `YEEFLOW_TENANT_URL` for normal OAuth plus workspace discovery. Never use a tenant URL as the API base.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
-- Support `YEEFLOW_PROFILE` where scripts support profiles. It selects one active local tenant profile per run using `YEEFLOW_<PROFILE>_API_KEY`, `YEEFLOW_<PROFILE>_TENANT_URL`, and `YEEFLOW_<PROFILE>_TENANT_ID`. Package automation can use `YEEFLOW_<PROFILE>_WORKSPACE_ID` as an optional default when a profile is active.
+- Support `YEEFLOW_PROFILE` where scripts support profiles for legacy/internal workflows. Normal OAuth plus workspace discovery should not require profile API keys, tenant URLs, tenant IDs, or workspace IDs. Package automation can use `YEEFLOW_<PROFILE>_WORKSPACE_ID` as an optional manual default when a profile is active.
 - Validate and redact environment variables before API calls and never print API keys, OAuth access tokens, refresh tokens, ID tokens, auth codes, cookies, Authorization headers, raw API responses, tenant IDs, private URLs, raw `Resource`, raw `Sign`, decoded payloads, or generated runtime packages.
 - Keep generated examples tenant-neutral unless the user explicitly requests a target-tenant-specific package and provides safe mappings.
 
@@ -57,25 +57,12 @@ Use the API only when local credentials are available and the user has asked for
 
 ## Environment Model
 
-The plugin bundles non-secret fixed defaults for:
+The plugin bundles non-secret fixed defaults for the Yeeflow API base, OAuth client id, OAuth authorization URL, OAuth token URL, and OAuth scopes. Do not add those defaults to normal `.env.local`.
 
-```env
-YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1
-YEEFLOW_OAUTH_CLIENT_ID=266479ba-1f82-463b-856d-9a50b6166e0d
-YEEFLOW_OAUTH_AUTH_URL=https://login.yeeflow.com/connect/authorize
-YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
-YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
-```
-
-Recommended `.env.local` for OAuth login/refresh, normal API use, and workspace discovery:
+Normal local setup for OAuth login/refresh, API use, and workspace discovery:
 
 ```env
 # No required values for normal OAuth + workspace discovery.
-
-# Optional default/override for package import/install/upgrade target selection:
-# YEEFLOW_WORKSPACE_ID=<optional default workspace id>
-# Optional manual override for tenant UI/browser links before OAuth token context is available:
-# YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
 OAuth token exchange/refresh uses Authorization Code with PKCE S256. The plugin generates the `code_verifier`; no OAuth client secret is required for normal login/refresh.
@@ -83,11 +70,11 @@ OAuth token exchange/refresh uses Authorization Code with PKCE S256. The plugin 
 Rules:
 
 - OAuth token storage is local and ignored; use `node scripts/yeeflow-oauth-logout.mjs` to clear it. Local HTTPS callback cert/key files must stay ignored and uncommitted.
-- Live API helpers prefer a valid OAuth access token, refresh it when expired and possible, then fall back to legacy `YEEFLOW_API_KEY` only when OAuth is unavailable.
-- Load the API base from plugin defaults unless `YEEFLOW_API_BASE_URL` is set for development/testing; `YEEFLOW_BASE_URL` is supported only as a legacy API base URL alias.
+- Live user-facing API helpers require a valid OAuth access token and refresh it when expired and possible. If OAuth is unavailable, ask the current user to login first. Legacy `YEEFLOW_API_KEY` remains only for older internal fallback paths where existing code still supports it.
+- Load the API base from plugin defaults. Do not put `YEEFLOW_API_BASE_URL` in normal `.env.local`; `YEEFLOW_BASE_URL` is supported only as a legacy API base URL alias.
 - Do not configure `YEEFLOW_OAUTH_CLIENT_SECRET` for normal OAuth login/refresh. The plugin does not bundle secrets.
-- Load the legacy/deprecated key fallback from `YEEFLOW_API_KEY` or, when `YEEFLOW_PROFILE` is set, from `YEEFLOW_<PROFILE>_API_KEY`.
-- Load tenant/app links from OAuth token claim `tenant` after authorization, falling back to `YEEFLOW_TENANT_URL` or profile tenant URL only when token context is unavailable. Package automation resolves target workspace IDs from `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID`, active `YEEFLOW_<PROFILE>_WORKSPACE_ID`, or explicit user-selected workspace discovery.
+- Load the legacy/deprecated key fallback from `YEEFLOW_API_KEY` or, when `YEEFLOW_PROFILE` is set, from `YEEFLOW_<PROFILE>_API_KEY` only for older internal workflows.
+- Load tenant/app links from OAuth token claim `tenant` after authorization. Package automation resolves target workspace IDs from `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID`, active `YEEFLOW_<PROFILE>_WORKSPACE_ID`, or explicit user-selected `flowcraft` workspace discovery.
 - Never print the key, OAuth tokens, Authorization header, or client secret or include them in logs, docs, commits, or final answers. Never print workspace IDs either; report only present or missing.
 - Ensure `.env.local` is gitignored before running API checks.
 - If OAuth is not authenticated, explain local OAuth setup and ask the user to run `node scripts/yeeflow-oauth-login.mjs`; do not ask for passwords, tokens, client secrets, or API keys in chat.
@@ -129,7 +116,7 @@ Initial supported endpoints:
 - `GET /positions/{id}/users?bindingType=3&targetID={locationId}`
 - `GET /groups`
 - `GET /groups/{id}/users`
-- `GET /workspaces/{category}` through `node scripts/yeeflow-workspace-list.mjs --category <category>`
+- `GET /workspaces/settings` and `GET /workspaces/flowcraft` through `node scripts/yeeflow-workspace-list.mjs --all` or `--category flowcraft`
 - `GET /workspaces/{category}/{id}` when a narrow read-only lookup is explicitly needed
 
 Report only:
@@ -141,7 +128,7 @@ Report only:
 - endpoint success/failure
 - response keys
 - redacted sample schema/shape
-- workspace count/title/category/status and redacted workspace ID previews
+- workspace count/title or user-facing fallback name/category/status/status provenance and redacted workspace ID previews
 
 For user/person data, show counts and redacted field shapes by default. Do not show full names, emails, phone numbers, or broad identity dumps. Return IDs only when explicitly needed for app generation or runtime testing, and keep scope narrow.
 
@@ -162,7 +149,7 @@ node scripts/yeeflow-package-api-automation.mjs --operation install-yapk --packa
 node scripts/yeeflow-package-api-automation.mjs --operation upgrade-yapk --package <file.yapk>
 ```
 
-WorkspaceID is required for import/install/upgrade payloads, but it is not required for normal OAuth setup. Resolve the target workspace in this order: `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID` or active profile workspace variable, then explicit user-selected workspace from `node scripts/yeeflow-workspace-list.mjs --category <category>`. The helper defaults to dry run. Add `--execute` only after explicit user approval and target workspace confirmation. Dry-run operations must load `.env.local` through `scripts/yeeflow-env-utils.mjs`; do not shell-source secrets. Dry-run `upload`, `install-yapk`, `upgrade-check-yapk`, and `upgrade-apply-yapk` must confirm only redacted environment presence, workspace source, request shape, endpoint, and `UpgradeCheck` mode. Runtime proof found that `POST /files/upload` may return `text/plain` containing JSON metadata fields; parse that JSON when possible, pass only redacted `PackageFile` metadata into install/upgrade, and never print uploaded file IDs. It prints env-var presence, package name/size, request summary, HTTP/API status, response keys, and redacted data shape only. It must not print API keys, workspace IDs, raw API responses, raw package `Resource`, raw `Sign`, decoded payloads, private URLs, tenant IDs, or uploaded file IDs.
+WorkspaceID is required for import/install/upgrade payloads, but it is not required for normal OAuth setup. Resolve the target workspace in this order: `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` or active profile workspace variable if present, then explicit user-selected workspace from `node scripts/yeeflow-workspace-list.mjs --all` or `--category flowcraft`; stop if no target is selected. For current app package workflows, `flowcraft` is the relevant workspace category unless product/API docs change. The helper defaults to dry run. Add `--execute` only after explicit user approval and target workspace confirmation. Dry-run operations must load `.env.local` through `scripts/yeeflow-env-utils.mjs`; do not shell-source secrets. Dry-run `upload`, `install-yapk`, `upgrade-check-yapk`, and `upgrade-apply-yapk` must confirm only redacted environment presence, workspace source, request shape, endpoint, and `UpgradeCheck` mode. Runtime proof found that `POST /files/upload` may return `text/plain` containing JSON metadata fields; parse that JSON when possible, pass only redacted `PackageFile` metadata into install/upgrade, and never print uploaded file IDs. It prints env-var presence, package name/size, request summary, HTTP/API status, response keys, and redacted data shape only. It must not print API keys, workspace IDs, raw API responses, raw package `Resource`, raw `Sign`, decoded payloads, private URLs, tenant IDs, or uploaded file IDs.
 
 Workspace mutation APIs are mapped only as write-classified metadata: `POST /workspaces/{category}`, `PUT /workspaces/{category}/{id}`, `DELETE /workspaces/{category}/{id}`, and `POST /workspaces/{category}/sort`. Do not run them from generic helpers. Delete is destructive and requires strong confirmation if a dedicated guarded workflow is ever requested and implemented.
 
@@ -219,9 +206,9 @@ For assignment-routing coverage, read `docs/studies/yeeflow-api-operator-assignm
 ## Failure Handling
 
 - Missing `.env.local`: explain that no local values are required for normal OAuth plus workspace discovery; `YEEFLOW_WORKSPACE_ID` is only an optional package target default/override.
-- Missing OAuth auth and no legacy fallback: ask the user to run `node scripts/yeeflow-oauth-login.mjs`; do not ask them to paste secrets. If PKCE/no-secret login or refresh fails, report the safe error class and recommend product/OAuth server configuration follow-up.
-- Missing target workspace for package automation: ask the user to run `node scripts/yeeflow-workspace-list.mjs --category <category>`, pass `--workspace-id`, or set optional `YEEFLOW_WORKSPACE_ID` or active profile workspace variable; do not print the value.
-- Authentication/authorization failure: report HTTP/API status and likely causes such as expired key, wrong tenant/account, insufficient permission, or wrong base; do not echo credentials.
+- Missing OAuth auth: ask the user to run `node scripts/yeeflow-oauth-login.mjs`; do not ask them to paste secrets. If PKCE/no-secret login or refresh fails, report the safe error class and recommend product/OAuth server configuration follow-up.
+- Missing target workspace for package automation: ask the user to run `node scripts/yeeflow-workspace-list.mjs --all` or `--category flowcraft`, pass `--workspace-id`, or set optional manual `YEEFLOW_WORKSPACE_ID` or active profile workspace variable; do not print the value.
+- Authentication/authorization failure: report HTTP/API status and likely causes such as expired OAuth token, wrong account, insufficient permission, or wrong base; do not echo credentials.
 - `404` on the configured API base: verify the plugin default API base or development override is `https://api.yeeflow.com/v1`; do not substitute the tenant URL as the API base.
 - Non-JSON or unexpected responses: report status and response shape only; do not dump body content.
 

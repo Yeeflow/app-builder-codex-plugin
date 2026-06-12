@@ -430,7 +430,8 @@ function wrapper(rootId, resource) {
   };
 }
 
-function postJsonWithCurl(url, apiKey, body) {
+function postJsonWithCurl(url, authHeaders, body) {
+  const headerArgs = Object.entries(authHeaders || {}).flatMap(([name, value]) => ["--header", `${name}: ${value}`]);
   const stdout = execFileSync("curl", [
     "--silent",
     "--show-error",
@@ -438,8 +439,7 @@ function postJsonWithCurl(url, apiKey, body) {
     "30",
     "--request",
     "POST",
-    "--header",
-    `apiKey: ${apiKey}`,
+    ...headerArgs,
     "--header",
     "Accept: application/json",
     "--header",
@@ -466,20 +466,20 @@ async function signWrapper(env, unsignedWrapper) {
   const signingWrapper = env.tenantId ? { ...unsignedWrapper, TenantID: env.tenantId } : unsignedWrapper;
   const unsigned = { ...signingWrapper };
   delete unsigned.Sign;
-  const signResult = postJsonWithCurl(`${env.apiBaseUrl}/utils/apppackage/setsign`, env.apiKey, unsigned);
+  const signResult = postJsonWithCurl(`${env.apiBaseUrl}/utils/apppackage/setsign`, env.authHeaders, unsigned);
   if (signResult.status < 200 || signResult.status > 299) throw new Error(`setsign failed with HTTP ${signResult.status}.`);
   const signJson = parseApiJson(signResult.body, "setsign");
   const sign = signJson?.Data ?? signJson?.data ?? signJson?.Sign ?? signJson?.sign ?? (typeof signJson === "string" ? signJson : null);
   if (typeof sign !== "string" || Buffer.from(sign, "base64").length !== 32) throw new Error("setsign did not return a 32-byte signature.");
   const signed = { ...signingWrapper, Sign: sign };
-  const verifyResult = postJsonWithCurl(`${env.apiBaseUrl}/utils/apppackage/verifysign`, env.apiKey, signed);
+  const verifyResult = postJsonWithCurl(`${env.apiBaseUrl}/utils/apppackage/verifysign`, env.authHeaders, signed);
   if (verifyResult.status < 200 || verifyResult.status > 299) throw new Error(`verifysign failed with HTTP ${verifyResult.status}.`);
   return signed;
 }
 
 async function main() {
-  const env = loadYeeflowApiEnvironment();
-  const ids = makeAllocator(await fetchYeeflowUniqueIds({ apiBaseUrl: env.apiBaseUrl, apiKey: env.apiKey, count: requiredIdCount }));
+  const env = await loadYeeflowApiEnvironment();
+  const ids = makeAllocator(await fetchYeeflowUniqueIds({ apiBaseUrl: env.apiBaseUrl, authHeaders: env.authHeaders, count: requiredIdCount }));
   const { app, ids: appIds } = appPackageInfo(ids);
   const resource = zlib.brotliCompressSync(Buffer.from(JSON.stringify(app), "utf8")).toString("base64");
   const signed = await signWrapper(env, wrapper(appIds.rootId, resource));
