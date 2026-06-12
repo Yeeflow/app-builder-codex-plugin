@@ -1,11 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Confirm Yeeflow OAuth supports Authorization Code with PKCE S256 for login and refresh without a client secret.
+- Remove the normal local `YEEFLOW_OAUTH_CLIENT_SECRET` requirement from OAuth/API environment documentation.
+
 ## 0.6.25
 
 - Bump the active plugin version after the PKCE OAuth support merge.
-- Add PKCE OAuth support with confidential-client fallback for login and refresh helpers.
-- Keep client secrets local-only when fallback is needed; do not present this as a secret-free OAuth release.
-- Document that no-secret refresh is not currently proven and failed safely with `invalid_client`; full secret-free OAuth still needs Yeeflow OAuth server/client configuration confirmation.
+- Add initial PKCE OAuth support for login and refresh helpers.
+- Keep any legacy confidential-client fallback local-only when configured for emergency compatibility.
 
 ## 0.6.24
 

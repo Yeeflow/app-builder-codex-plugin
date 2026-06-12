@@ -67,7 +67,7 @@ YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
 YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 ```
 
-Case A, already authenticated / normal API use:
+Recommended `.env.local` for package workspace context, OAuth login/refresh, and normal API use:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
@@ -75,24 +75,14 @@ YEEFLOW_WORKSPACE_ID=<your workspace id>
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-Case B, OAuth login/refresh when confidential-client fallback is required:
-
-OAuth token exchange/refresh tries PKCE/no-secret first. Current Yeeflow OAuth refresh may still require confidential-client fallback. If Yeeflow rejects public-client exchange or refresh, configure a private local client secret as fallback only:
-
-```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
-# Optional only if tenant UI/browser links are needed:
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
-# Needed when confidential-client fallback is required for OAuth login/refresh:
-YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
-```
+OAuth token exchange/refresh uses Authorization Code with PKCE S256. The plugin generates the `code_verifier`; no OAuth client secret is required for normal login/refresh.
 
 Rules:
 
 - OAuth token storage is local and ignored; use `node scripts/yeeflow-oauth-logout.mjs` to clear it. Local HTTPS callback cert/key files must stay ignored and uncommitted.
 - Live API helpers prefer a valid OAuth access token, refresh it when expired and possible, then fall back to legacy `YEEFLOW_API_KEY` only when OAuth is unavailable.
 - Load the API base from plugin defaults unless `YEEFLOW_API_BASE_URL` is set for development/testing; `YEEFLOW_BASE_URL` is supported only as a legacy API base URL alias.
-- Treat `YEEFLOW_OAUTH_CLIENT_SECRET` as private local fallback config only. The plugin does not bundle secrets.
+- Do not configure `YEEFLOW_OAUTH_CLIENT_SECRET` for normal OAuth login/refresh. The plugin does not bundle secrets.
 - Load the legacy/deprecated key fallback from `YEEFLOW_API_KEY` or, when `YEEFLOW_PROFILE` is set, from `YEEFLOW_<PROFILE>_API_KEY`.
 - Load tenant/app links from `YEEFLOW_TENANT_URL` or, when `YEEFLOW_PROFILE` is set, from `YEEFLOW_<PROFILE>_TENANT_URL`. Load package automation workspace IDs from `YEEFLOW_WORKSPACE_ID`, or from `YEEFLOW_<PROFILE>_WORKSPACE_ID` when a profile is active.
 - Never print the key, OAuth tokens, Authorization header, or client secret or include them in logs, docs, commits, or final answers. Never print workspace IDs either; report only present or missing.
@@ -220,8 +210,8 @@ For assignment-routing coverage, read `docs/studies/yeeflow-api-operator-assignm
 
 ## Failure Handling
 
-- Missing `.env.local`: explain that `YEEFLOW_WORKSPACE_ID` is enough for package workspace context and normal API use when OAuth is already authenticated; `YEEFLOW_TENANT_URL` is optional for tenant UI links, and `YEEFLOW_OAUTH_CLIENT_SECRET` is needed only if Yeeflow rejects PKCE/no-secret login or refresh.
-- Missing OAuth auth and no legacy fallback: ask the user to run `node scripts/yeeflow-oauth-login.mjs`; do not ask them to paste secrets. If login reports that PKCE/no-secret is unsupported, tell them to store the private client secret locally in `.env.local`.
+- Missing `.env.local`: explain that `YEEFLOW_WORKSPACE_ID` is enough for package workspace context and normal API use, and `YEEFLOW_TENANT_URL` is optional for tenant UI links.
+- Missing OAuth auth and no legacy fallback: ask the user to run `node scripts/yeeflow-oauth-login.mjs`; do not ask them to paste secrets. If PKCE/no-secret login or refresh fails, report the safe error class and recommend product/OAuth server configuration follow-up.
 - Missing `YEEFLOW_WORKSPACE_ID` for package automation: ask the user to store it locally or configure the active profile workspace variable; do not print the value.
 - Authentication/authorization failure: report HTTP/API status and likely causes such as expired key, wrong tenant/account, insufficient permission, or wrong base; do not echo credentials.
 - `404` on the configured API base: verify the plugin default API base or development override is `https://api.yeeflow.com/v1`; do not substitute the tenant URL as the API base.

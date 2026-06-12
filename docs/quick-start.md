@@ -18,25 +18,13 @@ Expected plugin: `Yeeflow App Builder` version `0.6.25`.
 
 Create a gitignored `.env.local` only when local API/OAuth checks or package workspace operations are needed. Fixed API/OAuth defaults are bundled by the plugin; use placeholders in docs and never commit real values.
 
-Case A, already authenticated / normal API use:
-
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
 # Optional only if tenant UI/browser links are needed:
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-Case B, OAuth login/refresh when confidential-client fallback is required:
-
-```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
-# Optional only if tenant UI/browser links are needed:
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
-# Needed when confidential-client fallback is required for OAuth login/refresh:
-YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
-```
-
-Case A is enough for package workspace context and normal API use when OAuth is already authenticated. Use Case B for OAuth login/refresh when the current Yeeflow OAuth configuration requires confidential-client fallback. OAuth login tries PKCE/no-secret first, and refresh also tries no-secret first, but the private local fallback may still be required. Keep `YEEFLOW_OAUTH_CLIENT_SECRET` private and local; the plugin does not bundle secrets. `YEEFLOW_API_KEY` is not required for normal OAuth-backed API calls and is retained only as a legacy/deprecated fallback.
+This form is enough for package workspace context, OAuth login/refresh, and normal API use. OAuth uses Authorization Code with PKCE S256, and the plugin generates the `code_verifier`. No OAuth client secret is required for normal login/refresh. `YEEFLOW_API_KEY` is not required for normal OAuth-backed API calls and is retained only as a legacy/deprecated fallback.
 
 ## Validate Locally
 
