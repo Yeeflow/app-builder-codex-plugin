@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.28
+
+- Bump the active plugin version after the dashboard grid-table Collection hard-gate merge and latest `main` install/cache smoke.
+- Add the Dashboard Grid-Table Collection Pattern Gate for generated-final `.yapk` dashboard record-list sections.
+- Require dashboard grid-table sections to use `collection`, not dashboard `data-list`, unless Data table is explicitly requested.
+- Require header `flex_grid` and Collection in one wrapper with both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`.
+- Require row-click details to use Collection link metadata and concrete Type `1` custom detail layouts.
+- Validate dashboard header hiding, title/text styling, helper metadata leakage prevention, and Type `1` custom detail layout `LayoutView` values.
+- Keep signing/install/schema acceptance separate from dashboard runtime/designer fidelity proof.
+
 ## 0.6.27
 
 - Bump the active plugin version after the generated-final YAPK hard-gates merge.
