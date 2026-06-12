@@ -1,0 +1,36 @@
+# Generated Dashboard UI Quality Gates
+
+Generated dashboard-heavy applications must report dashboard UI validation separately from signing and API acceptance.
+
+## Dashboard Grid-Table Collection Gate
+
+For dashboard record-list sections that claim the grid-table Collection pattern:
+
+- Use `collection`, not dashboard `data-list`, unless Data table is explicitly requested.
+- Pair each Collection with a header `flex_grid`.
+- Wrap the header `flex_grid` and Collection in one container.
+- Serialize both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`.
+- When row-click detail is planned, set `attrs.data.link`, `attrs.data.opentype = "slide"`, and `attrs.data.modalsize = 2`.
+- Ensure the detail link resolves to a Type `1` custom detail layout for the same data list.
+- Hide duplicate dashboard headers with `attrs.hideHeaderAll = true` when the app shell/navigation provides context.
+- Use visible dashboard title styling, such as `attrs.heads.ty = [null, "h5-medium"]`.
+- Include Text control designer/runtime style metadata.
+- Keep internal helper metadata out of encoded package objects.
+- Emit Type `1` custom detail layout `LayoutView` as a schema-compatible value such as an empty string, not `null`.
+
+## Report Requirements
+
+Dashboard-heavy generated-final YAPK reports must include:
+
+- dashboard grid-table Collection validation
+- wrapper gap validation
+- detail layout link validation
+- dashboard header visibility validation
+- dashboard title/text style validation
+- schema helper-leak validation
+- runtime/designer visual proof boundary
+- API signing and install acceptance as separate proof
+
+## Proof Boundary
+
+`setsign`, `verifysign`, and package install acceptance do not prove dashboard runtime or designer quality. Runtime/designer proof remains separate and requires opening the dashboard, inspecting the grid-table section, clicking rows when detail behavior is planned, and confirming navigation refresh still renders the page.

@@ -62,6 +62,24 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Unreachable resources allowed only if documented hidden/deferred
 - Generation must stop before signing, install, upgrade-check, or handoff when navigation runtime metadata validation fails: Yes
 
+### Dashboard Grid-Table Collection Pattern Contract
+- Required when a dashboard record-list section claims the grid-table Collection pattern: Yes
+- Dashboard record-list control choice stated for each section: Data table / grid-table Collection / none
+- Use dashboard `data-list` control for grid-table dashboard sections: No, unless Data table is explicitly requested
+- Header `flex_grid` paired with each grid-table Collection: Yes/No
+- Header `flex_grid` and Collection wrapped in one container: Yes/No
+- Wrapper sets `attrs.container.gap = 0`: Yes/No
+- Wrapper sets `attrs.style.gap = [null, 0]`: Yes/No
+- Row-click detail behavior planned: Yes/No
+- If row-click detail is planned, Collection includes `attrs.data.link`, `attrs.data.opentype = "slide"`, and `attrs.data.modalsize = 2`: Yes/No
+- If row-click detail is planned, each source data list has a concrete Type `1` custom detail layout: Yes/No
+- Duplicate dashboard header hidden with `attrs.hideHeaderAll = true` when app shell/navigation provides context: Yes/No/Not applicable
+- Dashboard title uses visible title typography such as `attrs.heads.ty = [null, "h5-medium"]`: Yes/No
+- Text controls include width/positioning where needed, token typography, and plain-string color or validated color token: Yes/No
+- Internal helper metadata enumerable in encoded package objects: No
+- Type `1` custom detail layout `LayoutView = null` allowed: No
+- Generation must stop before signing, install, upgrade-check, or handoff when planned dashboard grid-table Collection validation fails: Yes
+
 ### Plan-to-Package Conformance Contract
 - Planned lists must exist: Yes/No
 - Planned fields must exist: Yes/No
@@ -92,6 +110,12 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Local schema validation status:
 - ID provenance proof status:
 - Navigation runtime metadata proof status:
+- Dashboard grid-table Collection validation status:
+- Wrapper gap validation status:
+- Detail layout link validation status:
+- Dashboard header visibility validation status:
+- Dashboard title/text style validation status:
+- Schema helper-leak validation status:
 - App-plan conformance status:
 - UI/control quality validation status:
 - Data-list views/forms/workflows/notifications validation status:
@@ -103,8 +127,9 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - API signature verification status:
 - API install/import acceptance status:
 - Runtime UI inspection status:
+- Runtime/designer visual proof status:
 - Evidence: ID allocation manifest and validator results
-- Boundary: signing and install acceptance do not prove ID provenance or navigation runtime metadata completeness
+- Boundary: signing and install acceptance do not prove ID provenance, navigation runtime metadata completeness, or dashboard runtime/designer visual fidelity
 - Workflow/notification/AI/custom-code execution proof status:
 - Deferred items:
 - Known risks:
@@ -117,6 +142,12 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Task pages exist:
 - Lists open:
 - Dashboards/pages render:
+- Dashboard header hidden when planned:
+- Dashboard title size/style matches plan:
+- Grid-table header and Collection have no visible gap:
+- Collection row click opens planned slide detail:
+- Detail modal size matches plan:
+- Navigation refresh still renders the dashboard:
 - Print pages are reachable if intended:
 - Generated app matches approved plan:
 ```

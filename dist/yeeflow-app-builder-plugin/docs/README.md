@@ -30,6 +30,8 @@ Sparse paths:
 - [YAPK generation guardrails](yapk-generation-guardrails.md)
 - [YAPK ID provenance hard gate](yapk-id-provenance-hard-gate.md)
 - [YAPK navigation runtime metadata gate](yapk-navigation-runtime-metadata-gate.md)
+- [Dashboard grid-table Collection pattern](dashboard-grid-table-collection-pattern.md)
+- [Generated dashboard UI quality gates](generated-dashboard-ui-quality-gates.md)
 - [Application navigation generation rules](application-navigation-generation-rules.md)
 - [Package signing and runtime proof boundaries](package-signing-and-runtime-proof-boundaries.md)
 - [Release hygiene](release-hygiene.md)

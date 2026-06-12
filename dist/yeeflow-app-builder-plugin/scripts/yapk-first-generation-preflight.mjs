@@ -45,6 +45,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("data-list-system-schema", ["scripts/validate-data-list-system-schema.mjs", resolvedPackage, "--strict-generated-list", "--json"]));
   gates.push(runGate("api-issued-content-id-provenance", ["scripts/validate-yapk-id-provenance.mjs", "--package", resolvedPackage, "--manifest", idProvenance]));
   gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
+  gates.push(runGate("dashboard-grid-table-collections", ["scripts/validate-dashboard-grid-table-collections.mjs", "--package", resolvedPackage]));
 
   const failed = gates.find((gate) => !gate.ok);
   return {
@@ -53,7 +54,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     idProvenance: summarizePath(idProvenance),
     failedGate: failed?.gate || null,
     gates,
-    proofBoundary: "Local preflight only. ID provenance and navigation metadata are local hard gates; signing/API acceptance/runtime proof still require separate explicit steps.",
+    proofBoundary: "Local preflight only. ID provenance, navigation metadata, and dashboard grid-table Collection validation are local hard gates; signing/API acceptance/runtime designer proof still require separate explicit steps.",
   };
 }
 
