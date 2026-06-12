@@ -33,6 +33,7 @@ export function resolveYeeflowEnvironment(env = process.env) {
     profile: profile ? profile.toLowerCase() : null,
     tenantId,
     tenantUrl,
+    tenantUrlSource: tenantUrl ? (profile && env[`${prefix}TENANT_URL`] ? "profile-env" : "env") : "not-configured",
     usedLegacyBaseUrl: Boolean(!env.YEEFLOW_API_BASE_URL && env.YEEFLOW_BASE_URL),
     usedDefaultApiBaseUrl: Boolean(!env.YEEFLOW_API_BASE_URL && !env.YEEFLOW_BASE_URL),
     workspaceId,
@@ -49,6 +50,7 @@ export function environmentPresence(resolved) {
     YEEFLOW_PROFILE: resolved.profile || null,
     YEEFLOW_TENANT_ID_PRESENT: Boolean(resolved.tenantId),
     YEEFLOW_TENANT_URL_PRESENT: Boolean(resolved.tenantUrl),
+    YEEFLOW_TENANT_URL_SOURCE: resolved.tenantUrlSource || "not-configured",
     YEEFLOW_WORKSPACE_ID_PRESENT: Boolean(resolved.workspaceId),
   };
 }

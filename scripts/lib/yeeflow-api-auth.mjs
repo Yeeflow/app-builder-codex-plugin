@@ -10,6 +10,7 @@ import {
   saveStoredToken,
   summarizeStoredToken,
 } from "./yeeflow-oauth-client.mjs";
+import { resolveTenantUrlFromTokenOrEnv } from "./yeeflow-oauth-token-claims.mjs";
 
 export async function resolveYeeflowApiAuth(options = {}) {
   const dotenv = options.dotenv || ".env.local";
@@ -17,6 +18,7 @@ export async function resolveYeeflowApiAuth(options = {}) {
   const env = resolveYeeflowEnvironment(process.env);
   const oauthConfig = resolveOAuthConfig(process.env);
   const token = loadStoredToken(oauthConfig);
+  applyOAuthTenantContext(env, token);
   const oauthSummary = summarizeStoredToken(oauthConfig, token);
 
   if (token?.access_token) {
@@ -32,6 +34,7 @@ export async function resolveYeeflowApiAuth(options = {}) {
       try {
         const refreshed = await refreshAccessToken(oauthConfig, token, options.fetchImpl || fetch);
         saveStoredToken(oauthConfig, refreshed);
+        applyOAuthTenantContext(env, refreshed);
         return {
           mode: "oauth",
           env,
@@ -63,6 +66,19 @@ export async function resolveYeeflowApiAuth(options = {}) {
   };
 }
 
+export function applyOAuthTenantContext(env, tokenRecord) {
+  const resolved = resolveTenantUrlFromTokenOrEnv(tokenRecord, env);
+  if (resolved.tenantUrl) {
+    env.tenantUrl = resolved.tenantUrl;
+    env.tenantUrlSource = resolved.source;
+  } else if (!env.tenantUrlSource) {
+    env.tenantUrlSource = resolved.source;
+  }
+  env.oauthTenantContext = resolved.context;
+  env.tenantContextMessage = resolved.message || "";
+  return env;
+}
+
 export async function requireYeeflowApiAuth(options = {}) {
   const auth = await resolveYeeflowApiAuth(options);
   if (auth.mode === "none") {
@@ -85,6 +101,7 @@ export function authPresenceSummary(auth) {
       authUrlSource: auth.oauth?.configSources?.authUrl || null,
       tokenUrlSource: auth.oauth?.configSources?.tokenUrl || null,
       scopesSource: auth.oauth?.configSources?.scopes || null,
+      tokenContext: auth.oauth?.tokenContext || auth.env?.oauthTenantContext || null,
     },
   };
 }

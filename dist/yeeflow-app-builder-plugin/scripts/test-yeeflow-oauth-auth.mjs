@@ -31,6 +31,13 @@ import {
   summarizeStoredToken,
 } from "./lib/yeeflow-oauth-client.mjs";
 import { resolveYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
+import {
+  decodeJwtPayload,
+  extractYeeflowTokenContext,
+  knownYeeflowTokenContextClaims,
+  resolveTenantUrlFromTokenOrEnv,
+  safeTokenContextSummary,
+} from "./lib/yeeflow-oauth-token-claims.mjs";
 
 const ROOT = findRepoRoot(path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."));
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-oauth-auth-test-"));
@@ -52,6 +59,9 @@ try {
   await testExpiredTokenRefreshBehavior();
   await testRefreshFailureClearsInvalidAuthState();
   testRedaction();
+  testTokenClaimExtraction();
+  testTokenClaimResolutionOrder();
+  testTokenContextStatusSummaryRedactsValues();
   testEnvLocalIgnored();
   testNoTokenSecretFilesTracked();
   testOAuthDefaultsWithoutEnv();
@@ -318,6 +328,63 @@ function testRedaction() {
   assert.equal(text.includes("code=abc123"), false);
 }
 
+function testTokenClaimExtraction() {
+  const token = syntheticJwt({
+    tenantid: "tenant-secret-id",
+    tenant: "example.yeeflow.com",
+    accountid: "account-secret-id",
+    unrelated: "ignored",
+  });
+  assert.deepEqual(knownYeeflowTokenContextClaims(), ["tenantid", "tenant", "accountid"]);
+  assert.equal(decodeJwtPayload(token).tenantid, "tenant-secret-id");
+  const context = extractYeeflowTokenContext(token);
+  assert.equal(context.hasTenantId, true);
+  assert.equal(context.hasTenant, true);
+  assert.equal(context.hasAccountId, true);
+  assert.equal(context.tenantUrl, "https://example.yeeflow.com");
+  assert.equal(extractYeeflowTokenContext("not-a-jwt").payloadDecoded, false);
+  assert.equal(extractYeeflowTokenContext(syntheticJwt({ tenant: "http://example.yeeflow.com" })).tenantUrl, "");
+}
+
+function testTokenClaimResolutionOrder() {
+  const token = { access_token: syntheticJwt({ tenant: "claim.yeeflow.com" }) };
+  const env = { tenantUrl: "https://env.yeeflow.com", tenantUrlSource: "env" };
+  const fromToken = resolveTenantUrlFromTokenOrEnv(token, env);
+  assert.equal(fromToken.tenantUrl, "https://claim.yeeflow.com");
+  assert.equal(fromToken.source, "oauth-token-claim");
+
+  const fromEnv = resolveTenantUrlFromTokenOrEnv({ access_token: syntheticJwt({}) }, env);
+  assert.equal(fromEnv.tenantUrl, "https://env.yeeflow.com");
+  assert.equal(fromEnv.source, "env");
+
+  const missing = resolveTenantUrlFromTokenOrEnv({ access_token: "malformed" }, {});
+  assert.equal(missing.tenantUrl, "");
+  assert.equal(missing.source, "missing");
+  assert.match(missing.message, /OAuth login.*YEEFLOW_TENANT_URL/);
+}
+
+function testTokenContextStatusSummaryRedactsValues() {
+  const token = {
+    access_token: syntheticJwt({
+      tenantid: "tenant-secret-id",
+      tenant: "private-example.yeeflow.com",
+      accountid: "account-secret-id",
+    }),
+  };
+  const summary = safeTokenContextSummary(token);
+  assert.deepEqual(summary, {
+    payloadDecoded: true,
+    tenantIdClaimPresent: true,
+    tenantClaimPresent: true,
+    accountIdClaimPresent: true,
+    tenantUrlDerived: true,
+  });
+  const text = JSON.stringify(summary);
+  assert.equal(text.includes("tenant-secret-id"), false);
+  assert.equal(text.includes("private-example"), false);
+  assert.equal(text.includes("account-secret-id"), false);
+}
+
 function testEnvLocalIgnored() {
   const result = spawnSync("git", ["check-ignore", ".env.local", ".yeeflow-oauth/local-key.pem"], { cwd: ROOT, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
@@ -415,6 +482,18 @@ async function testApiKeyFallback() {
   } finally {
     process.env = originalEnv;
   }
+}
+
+function syntheticJwt(payload) {
+  return [
+    base64UrlJson({ alg: "none", typ: "JWT" }),
+    base64UrlJson(payload),
+    "signature",
+  ].join(".");
+}
+
+function base64UrlJson(value) {
+  return Buffer.from(JSON.stringify(value)).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
 function testConfig() {

@@ -12,13 +12,13 @@ YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1
 
 Do not put this in `.env.local` unless overriding the plugin default for development/testing.
 
-Use the tenant URL only for links:
+Tenant URL is not required for normal OAuth-backed API calls. After OAuth authorization, the plugin derives tenant/user context from the access token claims `tenantid`, `tenant`, and `accountid`; the `tenant` claim is used for tenant UI/browser links when available. Use `YEEFLOW_TENANT_URL` only as an optional manual override before token context is available:
 
 ```env
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-Do not use a tenant URL as the API base. Treat `YEEFLOW_BASE_URL` as a legacy API-base alias only.
+Raw tokens and full decoded token payloads are never printed. Do not use a tenant URL as the API base. Treat `YEEFLOW_BASE_URL` as a legacy API-base alias only.
 
 ## Single-Tenant Setup
 
@@ -26,11 +26,11 @@ Recommended `.env.local`:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-# Optional only if tenant UI/browser links are needed:
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Optional manual override for tenant UI/browser links before OAuth token context is available:
+# YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-This is enough for package workspace context, OAuth login/refresh, and normal API use.
+This is enough for package workspace context, OAuth login/refresh, and normal API use. `YEEFLOW_TENANT_URL` is fallback-only because OAuth token context normally provides the tenant link value after login.
 
 ## OAuth Setup
 
@@ -49,8 +49,8 @@ OAuth login and refresh use Authorization Code with PKCE S256. The plugin create
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-# Optional only if tenant UI/browser links are needed:
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Optional manual override for tenant UI/browser links before OAuth token context is available:
+# YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
 No OAuth client secret is required for normal login/refresh. Do not commit `.env.local`, OAuth tokens, authorization codes, PKCE verifiers, or private tenant/workspace values.

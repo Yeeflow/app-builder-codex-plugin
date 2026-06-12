@@ -60,6 +60,7 @@ try {
     YEEFLOW_PROFILE: null,
     YEEFLOW_TENANT_ID_PRESENT: false,
     YEEFLOW_TENANT_URL_PRESENT: false,
+    YEEFLOW_TENANT_URL_SOURCE: "not-configured",
     YEEFLOW_WORKSPACE_ID_PRESENT: false,
   });
 } finally {
