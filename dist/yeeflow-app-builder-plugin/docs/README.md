@@ -24,6 +24,7 @@ Sparse paths:
 - [Plugin installation](plugin-installation.md)
 - [Quick start](quick-start.md)
 - [Environment configuration](environment-configuration.md)
+- [Workspace discovery and selection](workspace-discovery-and-selection.md)
 - [Browser OAuth login](browser-oauth-login.md)
 - [Yeeflow REST API capability map](yeeflow-rest-api-capability-map.md)
 - [Local development policy](local-development-policy.md)
@@ -40,7 +41,7 @@ Sparse paths:
 ## Development Areas
 
 - `../scripts/` contains reusable validation, OAuth/API, package automation, and schema utilities.
-- `../schemas/` contains YAP/YAPK canonical schema references and the Codex YAPK overlay.
+- `../schemas/` contains YAP/YAPK canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, plus the Codex YAPK overlay.
 - `../skills/` and `../generated-skills/` contain source skill material.
 - `studies/`, `standards/`, and `templates/` preserve sanitized research and generation rules.
 - `legacy/yeeflow-codex-plugins/` preserves safe historical release notes and old investigation docs. It is not current install guidance.

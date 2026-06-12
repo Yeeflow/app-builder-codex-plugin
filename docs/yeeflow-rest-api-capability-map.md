@@ -19,6 +19,7 @@ Use documented endpoints only:
 - Yeeflow API docs: `https://developer.yeeflow.com/api/`
 - OpenAPI YAML: `https://cdn.yungalaxy.com/yeeflow/developer/v1/yeeflow_en.yaml`
 - Package automation docs in this repository for the package upload/import/install/upgrade helper endpoints
+- Product-team Apifox/OpenAPI workspace docs for `GET /workspaces/{category}` and related workspace metadata endpoints
 
 If an endpoint is not documented in one of those sources, do not add it as an implemented capability and do not guess the path.
 
@@ -42,7 +43,7 @@ Each capability includes:
 }
 ```
 
-Capability names are stable dotted identifiers such as `locations.list`, `items.query`, `users.search`, `workflows.start`, and `packages.installYapk`.
+Capability names are stable dotted identifiers such as `locations.list`, `items.query`, `users.search`, `workflows.start`, `workspaces.listByCategory`, and `packages.installYapk`.
 
 ## Safety Classification
 
@@ -53,6 +54,8 @@ Default rules:
 - Mutating capabilities set `readOnly: false` and `requiresConfirmation: true`.
 - Documented search/query operations that use `POST`, such as `items.query` and `users.search`, are marked read-only with notes explaining the exception.
 - Package upload/import/install/upgrade capabilities are high-risk write capabilities and require explicit user confirmation plus active workspace confirmation.
+- Workspace discovery uses OAuth read-only `GET /workspaces/{category}` and must print only safe summaries with redacted workspace ID previews.
+- Workspace add/edit/delete/sort capabilities are mutating and must remain blocked by generic read-only helpers. The mapped Apifox paths are `POST /workspaces/{category}`, `PUT /workspaces/{category}/{id}`, `DELETE /workspaces/{category}/{id}`, and `POST /workspaces/{category}/sort`; delete is destructive and requires strong confirmation.
 
 Codex should prefer read-only capabilities for inspection and verification. Writes require an explicit user request and confirmation of the target resource, workspace, and intended effect.
 
@@ -91,6 +94,7 @@ The list command performs no live API calls and prints only safe capability meta
 ```bash
 node scripts/yeeflow-api-call-capability.mjs --name locations.list
 node scripts/yeeflow-api-call-capability.mjs --name locations.get --param id=<location-id>
+node scripts/yeeflow-workspace-list.mjs --category <category>
 ```
 
 The helper:
@@ -103,6 +107,8 @@ The helper:
 - prints status, response shape, and safe keys only
 
 Use specialized guarded helpers for package automation instead of trying to call package capabilities through the generic helper.
+
+Use `scripts/yeeflow-workspace-list.mjs` for workspace discovery. It calls only documented `GET /workspaces/{category}` and reports count, title, category, status, and redacted ID previews without saving raw responses. `workspaces.get` is mapped as `GET /workspaces/{category}/{id}` and must also avoid raw workspace records or full IDs.
 
 ## Authentication
 

@@ -78,12 +78,15 @@ Proof boundaries remain separate:
 Use a gitignored `.env.local` for local tenant/workspace settings only. Browser OAuth is preferred for user-facing API work. Fixed API/OAuth defaults are bundled by the plugin, and legacy API-key mode remains available only as a deprecated fallback.
 
 ```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
+# No required values for normal OAuth + workspace discovery.
+
+# Optional default/override for package import/install/upgrade target selection:
+# YEEFLOW_WORKSPACE_ID=<optional default workspace id>
 # Optional manual override for tenant UI/browser links before OAuth token context is available:
 # YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-This form is enough for package workspace context, OAuth login/refresh, and normal API use. The plugin uses Authorization Code with PKCE S256 and generates the `code_verifier`; no OAuth client secret is required for normal login/refresh. The plugin derives tenant/user context from OAuth access token claims `tenantid`, `tenant`, and `accountid`; `YEEFLOW_TENANT_URL` is only an optional manual override for tenant UI/browser links before token context is available. Raw tokens and full decoded token payloads are never printed. The plugin provides defaults for `YEEFLOW_API_BASE_URL`, `YEEFLOW_OAUTH_CLIENT_ID`, `YEEFLOW_OAUTH_AUTH_URL`, `YEEFLOW_OAUTH_TOKEN_URL`, and `YEEFLOW_OAUTH_SCOPES`; override them only for development/testing. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only.
+This form is enough for OAuth login/refresh, normal API use, and read-only workspace discovery. Package import/install/upgrade automation still requires an explicit target workspace, resolved in this order: `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID`, then an explicit user-selected workspace discovered with `node scripts/yeeflow-workspace-list.mjs --category <category>`. The plugin uses Authorization Code with PKCE S256 and generates the `code_verifier`; no OAuth client secret is required for normal login/refresh. The plugin derives tenant/user context from OAuth access token claims `tenantid`, `tenant`, and `accountid`; `YEEFLOW_TENANT_URL` is only an optional manual override for tenant UI/browser links before token context is available. Raw tokens, full decoded token payloads, raw workspace responses, and full workspace IDs are never printed. The plugin provides defaults for `YEEFLOW_API_BASE_URL`, `YEEFLOW_OAUTH_CLIENT_ID`, `YEEFLOW_OAUTH_AUTH_URL`, `YEEFLOW_OAUTH_TOKEN_URL`, and `YEEFLOW_OAUTH_SCOPES`; override them only for development/testing. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only.
 
 Do not paste secrets, authorization codes, cookies, bearer tokens, or passwords into chat.
 
@@ -94,6 +97,7 @@ node scripts/yeeflow-oauth-status.mjs
 node scripts/yeeflow-oauth-refresh.mjs
 node scripts/yeeflow-api-list-capabilities.mjs --read-only
 node scripts/yeeflow-api-call-capability.mjs --name locations.list
+node scripts/yeeflow-workspace-list.mjs --category <category>
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 node scripts/test-package-api-dry-run-env.mjs
