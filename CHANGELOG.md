@@ -2,9 +2,15 @@
 
 ## Unreleased
 
-- Add read-only workspace discovery through documented `GET /workspaces/{category}` with redacted workspace summaries.
-- Make `YEEFLOW_WORKSPACE_ID` an optional package target default/override instead of a required normal OAuth setup value.
-- Require package import/install/upgrade helpers to resolve and confirm an explicit target workspace while keeping workspace mutation APIs out of automatic flows.
+## 0.6.29
+
+- Bump the active plugin version after the workspace API capability/discovery merge.
+- Add workspace API capability metadata for read-only `workspaces.listByCategory` (`GET /workspaces/{category}`) and `workspaces.get` (`GET /workspaces/{category}/{id}`).
+- Add write-classified workspace capabilities for add/edit/delete/sort while keeping them out of automatic execution; workspace delete is destructive and requires strong confirmation.
+- Add read-only workspace discovery for workspace selection with redacted workspace summaries.
+- Make `YEEFLOW_WORKSPACE_ID` an optional package target default/override instead of a required normal setup value; `.env.local` can be empty for normal OAuth plus workspace discovery.
+- Require package import/install/upgrade helpers to resolve and confirm an explicit target workspace from `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID`, or explicit user-selected workspace discovery, and stop rather than guessing when no target is selected.
+- Keep `YEEFLOW_API_KEY` as a legacy/deprecated fallback only.
 
 ## 0.6.28
 

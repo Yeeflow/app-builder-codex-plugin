@@ -8,14 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.28
+- Version: 0.6.29
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
 
-Version `0.6.28` adds the Dashboard Grid-Table Collection Pattern Gate. Dashboard record-list sections that require the grid-table pattern must use `collection`, not dashboard `data-list`, unless Data table is explicitly requested. Header `flex_grid` and Collection must share one wrapper with both gap attributes, row-click detail requires Collection link metadata and concrete Type `1` custom detail layouts, and signing/install/schema acceptance remains separate from dashboard runtime/designer fidelity proof.
+Version `0.6.29` adds workspace API capability metadata and read-only workspace discovery for package target selection. `YEEFLOW_WORKSPACE_ID` is now an optional default/override instead of a required normal setup value; package install/import/upgrade must still use an explicit or user-selected workspace and must stop rather than guessing. Workspace add/edit/delete/sort are write operations and are not automatically executed; delete is destructive and requires strong confirmation. `YEEFLOW_API_KEY` remains a legacy/deprecated fallback only.
 
 ## API Safety
 

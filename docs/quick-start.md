@@ -12,7 +12,7 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.28`.
+Expected plugin: `Yeeflow App Builder` version `0.6.29`.
 
 ## Configure Local Environment
 
@@ -32,7 +32,7 @@ This form is enough for OAuth login/refresh, normal API use, and read-only works
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.28
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.29
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```

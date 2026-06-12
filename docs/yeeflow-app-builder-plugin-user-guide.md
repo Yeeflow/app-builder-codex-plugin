@@ -8,7 +8,7 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Expected Version
 
-`0.6.28`
+`0.6.29`
 
 ## Safe API Usage
 
