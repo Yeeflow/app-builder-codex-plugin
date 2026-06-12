@@ -14,10 +14,11 @@ The section must bind later generation to:
 
 - output package decision, including `.yapk` as default and `.yap` only when explicitly requested
 - YAPK signing gate with `POST /utils/apppackage/setsign` and `POST /utils/apppackage/verifysign` when credentials are available
+- API-issued content ID provenance gate requiring `GET /utils/generate/ids?count=<n>`, a redacted `dist/<app-name>-id-provenance-report.json`, and zero non-API generated content IDs for generated-final `.yapk`
 - approval-form contract that prevents approval apps from silently shipping with `Forms: []`
-- navigation runtime contract using `Type: "classes"` plus `list`, not `children`/`Childs`
+- navigation runtime metadata contract requiring API-issued group IDs, group `AppID`, group `ListSetID`, `Icon`, `list[]`, child `AppID`, child `ListSetID`, target-specific `Type`, and no `children`/`Childs`
 - plan-to-package conformance requirements for planned lists, fields, forms, task pages, dashboards/pages, navigation, print pages, workflows/actions, permissions, and integrations
-- proof boundary report separating plan approval, schema validation, app-plan conformance, UI/control quality, signing, signature verification, API install/import acceptance, runtime UI inspection, deferred items, and known risks
+- proof boundary report separating plan approval, schema validation, ID provenance validation, navigation runtime metadata validation, app-plan conformance, UI/control quality, signing, signature verification, API install/import acceptance, runtime UI inspection, deferred items, and known risks
 - runtime inspection checklist for installed test packages
 
 ## Required Coverage
@@ -50,6 +51,8 @@ Silent omission is not allowed. If the generator cannot implement a planned item
 Post-generation reports must separate:
 
 - schema validation
+- ID provenance validation
+- navigation runtime metadata validation
 - package validation
 - workflow graph validation
 - UI/materialization validation

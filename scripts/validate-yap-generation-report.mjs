@@ -41,6 +41,29 @@ if (!proofBoundary) {
   errors.push({ code: "YAP_PROOF_BOUNDARY_MISSING", message: "Generated YAP reports must include a proof boundary field." });
 }
 
+const generatedFinalYapk = report.generatedFinalYapk === true || report.generated_final_yapk === true || /\.yapk$/i.test(asString(report.package || report.packagePath || report.package_path));
+if (generatedFinalYapk) {
+  const requiredSections = [
+    ["schemaValidation", "YAPK_REPORT_SCHEMA_VALIDATION_MISSING"],
+    ["idProvenanceValidation", "YAPK_REPORT_ID_PROVENANCE_VALIDATION_MISSING"],
+    ["navigationRuntimeMetadataValidation", "YAPK_REPORT_NAVIGATION_RUNTIME_METADATA_VALIDATION_MISSING"],
+    ["appPlanConformance", "YAPK_REPORT_APP_PLAN_CONFORMANCE_MISSING"],
+    ["uiControlQuality", "YAPK_REPORT_UI_CONTROL_QUALITY_MISSING"],
+    ["approvalFormValidation", "YAPK_REPORT_APPROVAL_FORM_VALIDATION_MISSING"],
+    ["yapkSigning", "YAPK_REPORT_SIGNING_MISSING"],
+    ["signatureVerification", "YAPK_REPORT_SIGNATURE_VERIFICATION_MISSING"],
+    ["apiInstallAcceptance", "YAPK_REPORT_API_INSTALL_ACCEPTANCE_MISSING"],
+    ["runtimeUiProof", "YAPK_REPORT_RUNTIME_UI_PROOF_MISSING"],
+    ["deferredItems", "YAPK_REPORT_DEFERRED_ITEMS_MISSING"],
+    ["knownRisks", "YAPK_REPORT_KNOWN_RISKS_MISSING"],
+  ];
+  for (const [key, code] of requiredSections) {
+    if (!(key in report) && !(key in (proofBoundary || {}))) {
+      errors.push({ code, message: `Generated-final YAPK report must include ${key} separately.` });
+    }
+  }
+}
+
 let queuedMarkedSuccess = false;
 walk(report, (value, pointer) => {
   if (typeof value !== "string") return;

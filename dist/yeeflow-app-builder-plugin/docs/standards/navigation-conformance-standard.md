@@ -30,7 +30,13 @@ Before generating grouped Yeeflow navigation metadata, confirm the grouped `Layo
 
 If grouped navigation shape is proven:
 
-- generate groups and child items using the proven shape
+- generate groups and child items using the proven runtime metadata shape
+- allocate every group `ID` through the Yeeflow ID API and record it in the ID provenance manifest
+- include group `AppID`, group `ListSetID`, `Icon`, and `list[]`
+- include child `AppID`, `ListID`, `ListSetID`, `Title`, and `Type`
+- use `Type: 103` plus `LayoutID` and `ListID = LayoutID` for dashboards/pages
+- use `Type: 105` and `ListID = Forms[].Key` for approval forms
+- use `Type: 1` and `ListID = Childs[].List.ListID` for data lists
 - validate group titles and child items against the app plan
 
 If grouped navigation shape is not proven:
@@ -54,3 +60,11 @@ Navigation conformance must report:
 - items generated under the wrong group
 - resources generated but missing from navigation
 - extra navigation entries not in the approved plan
+
+For generated-final `.yapk`, also run:
+
+```bash
+node scripts/validate-yapk-navigation-runtime-metadata.mjs --package <app.yapk> --id-provenance <app-id-provenance-report.json>
+```
+
+Navigation runtime metadata failures block signing, install, upgrade-check, and handoff.

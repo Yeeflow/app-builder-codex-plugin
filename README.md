@@ -57,6 +57,7 @@ Use the plugin to plan, generate, inspect, validate, and harden Yeeflow applicat
 - Package API automation with dry-run defaults and explicit confirmation gates.
 - YAP/YAPK/YDL/YWF validators and wrapper helpers.
 - Application plan conformance, navigation checks, runtime-binding lessons, and release hygiene.
+- Generated-final YAPK hard gates for API-issued ID provenance and complete navigation runtime metadata.
 - Managed app connector design notes and safe example metadata.
 
 ## Safety Boundaries

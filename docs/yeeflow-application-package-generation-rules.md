@@ -76,6 +76,24 @@ For existing-app upgrade packages:
 - use Application Settings -> Version management -> Upgrade application for runtime testing
 - do not generate a `.yap` when the user asked to upgrade the current app, unless they explicitly want a separate clone
 
+## Generated-Final `.yapk` Hard Gates
+
+For generated-final `.yapk` application output, generation must stop before signing, install, upgrade-check, or handoff unless both hard gates pass:
+
+- API-Issued Content ID Provenance Gate: every numeric generated application content ID is allocated through `GET /utils/generate/ids?count=<n>` and recorded in `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`.
+- Navigation Runtime Metadata Gate: every runtime navigation group includes API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; every child includes `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`; targets resolve to `Pages[].LayoutID`, `Forms[].Key`, or `Childs[].List.ListID`.
+
+Local ID fallback is forbidden for generated-final output, including local sequential counters, local `id()` helpers, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds.
+
+Required validators:
+
+```bash
+node scripts/validate-yapk-id-provenance.mjs --package dist/<app>.yapk --manifest dist/<app>-id-provenance-report.json
+node scripts/validate-yapk-navigation-runtime-metadata.mjs --package dist/<app>.yapk --id-provenance dist/<app>-id-provenance-report.json
+```
+
+`setsign` / `verifysign` prove wrapper/resource signature only. Package API install acceptance proves action acceptance only. Neither proves ID provenance, navigation runtime metadata completeness, or runtime UI materialization.
+
 ## Current `.yapk` Limitation
 
 The first studied `.yapk` version package stores `Resource` as an opaque high-entropy base64 payload, not as `[______gizp______]` gzip data. Existing `.yap` decoder/builder scripts cannot decode or rebuild that resource.

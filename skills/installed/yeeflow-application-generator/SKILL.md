@@ -5,6 +5,10 @@ description: generate, inspect, validate, package, debug, and improve small yeef
 
 # Yeeflow Application Generator
 
+## Generated-Final YAPK ID And Navigation Hard Gates
+
+Generated-final `.yapk` output must use API-issued numeric content IDs from `GET /utils/generate/ids?count=<n>` and must emit a redacted `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`, path-to-purpose mappings, duplicate checks, unused-ID accounting, generator provenance metadata, and no non-API IDs. Local ID generation, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds are forbidden for generated-final `.yapk`. Runtime navigation groups must include API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; children must include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`, with dashboards/pages as `Type: 103` plus `LayoutID`, approval forms as `Type: 105`, and data lists as `Type: 1`. Run `scripts/validate-yapk-id-provenance.mjs` and `scripts/validate-yapk-navigation-runtime-metadata.mjs`; stop before signing, install, upgrade-check, or handoff if either gate fails. `setsign`/`verifysign` and install acceptance do not prove ID provenance or navigation runtime metadata completeness.
+
 ##
 Designer-qualified approval form YAP update: generated approval form workspaces must use only designer-safe export-proven controls unless separately validated, assign unique designer-level `id` values to every `formdef.children` control, populate native heading/text metadata such as `attrs.headc.title.value`, keep labels synchronized with native text, preserve child `ListType`, valid `NoRule`, published form status, full list/layout/DefResource metadata, and include app group IDs in final `Resource.ReplaceIds`. Do not treat API accepted/queued, import complete, or basic render as proof of designer hydration or single-control selection.
  Canonical Schema Files
