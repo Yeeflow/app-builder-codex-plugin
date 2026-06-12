@@ -1,6 +1,6 @@
 # Environment Configuration
 
-Use `.env.local` for local-only Yeeflow tenant/workspace settings and, only when needed, private OAuth fallback secrets. The file must stay gitignored and must never be committed.
+Use `.env.local` for local-only Yeeflow tenant/workspace settings. The file must stay gitignored and must never be committed.
 
 ## API Base And Tenant URL
 
@@ -22,7 +22,7 @@ Do not use a tenant URL as the API base. Treat `YEEFLOW_BASE_URL` as a legacy AP
 
 ## Single-Tenant Setup
 
-Case A, already authenticated / normal API use:
+Recommended `.env.local`:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
@@ -30,17 +30,7 @@ YEEFLOW_WORKSPACE_ID=<your workspace id>
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-Case B, OAuth login/refresh when confidential-client fallback is required:
-
-```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
-# Optional only if tenant UI/browser links are needed:
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
-# Needed when confidential-client fallback is required for OAuth login/refresh:
-YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
-```
-
-Case A is enough for package workspace context and normal API use when OAuth is already authenticated. Use Case B when login/refresh needs confidential-client fallback. Do not commit or paste the client secret.
+This is enough for package workspace context, OAuth login/refresh, and normal API use.
 
 ## OAuth Setup
 
@@ -55,17 +45,15 @@ YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 
 Override these only for development/testing.
 
-OAuth login tries PKCE/no-secret exchange first. Refresh also tries no-secret first, but the current Yeeflow OAuth configuration may still require confidential-client fallback. If Yeeflow rejects public-client PKCE exchange or refresh, configure a private local client secret as fallback only:
+OAuth login and refresh use Authorization Code with PKCE S256. The plugin creates the `code_verifier`, sends the matching `code_challenge`, and exchanges/refreshes tokens without a client secret:
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
 # Optional only if tenant UI/browser links are needed:
 YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
-# Needed when confidential-client fallback is required for OAuth login/refresh:
-YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>
 ```
 
-The client secret must stay in ignored `.env.local`; the plugin does not bundle secrets. Remove the fallback later only after auth-only testing proves Yeeflow supports PKCE login and refresh without a client secret for the configured client.
+No OAuth client secret is required for normal login/refresh. Do not commit `.env.local`, OAuth tokens, authorization codes, PKCE verifiers, or private tenant/workspace values.
 
 Commands:
 
@@ -95,7 +83,7 @@ Package upload/import/install/upgrade helpers default to dry-run behavior and re
 
 ## Legacy API Key Fallback
 
-Normal API calls use OAuth when a valid local OAuth token is available. `YEEFLOW_API_KEY` is no longer required for read-only OAuth/API calls. If the stored OAuth token is expired and refresh is needed, the helper tries no-secret refresh first and falls back to `YEEFLOW_OAUTH_CLIENT_SECRET` only when configured locally. Current auth-only testing shows this fallback may still be required for refresh with the configured Yeeflow OAuth client. If configured, `YEEFLOW_API_KEY` is treated as a legacy/deprecated fallback for older internal workflows and must never be printed or committed.
+Normal API calls use OAuth when a valid local OAuth token is available. `YEEFLOW_API_KEY` is no longer required for read-only OAuth/API calls. If the stored OAuth token is expired and refresh is needed, the helper refreshes without a client secret using the configured public-client PKCE flow. If configured, `YEEFLOW_API_KEY` is treated as a legacy/deprecated fallback for older internal workflows and must never be printed or committed.
 
 ## Security Reminders
 

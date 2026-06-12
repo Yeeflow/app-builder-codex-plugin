@@ -180,8 +180,8 @@ export async function exchangeAuthorizationCode(config, { code, redirectUri, cod
   } catch (error) {
     if (!config.clientSecret) {
       throw new Error(redactSensitive([
-        "OAuth PKCE/no-secret token exchange failed and no local client secret fallback is configured.",
-        "If the Yeeflow OAuth client does not support public-client PKCE exchange yet, store YEEFLOW_OAUTH_CLIENT_SECRET in .env.local only.",
+        "OAuth PKCE/no-secret token exchange failed.",
+        "Yeeflow OAuth is expected to support public-client PKCE S256 without a client secret; confirm the OAuth server/client configuration.",
         error.message,
       ].join(" ")));
     }
@@ -210,8 +210,8 @@ export async function refreshAccessToken(config, tokenRecord, fetchImpl = fetch)
   } catch (error) {
     if (!config.clientSecret) {
       throw new Error(redactSensitive([
-        "OAuth no-secret refresh failed and no local client secret fallback is configured.",
-        "If the Yeeflow OAuth client does not support public-client refresh yet, store YEEFLOW_OAUTH_CLIENT_SECRET in .env.local only.",
+        "OAuth PKCE/no-secret refresh failed.",
+        "Yeeflow OAuth is expected to support refresh without a client secret for the configured public client; confirm the OAuth server/client configuration.",
         error.message,
       ].join(" ")));
     }
@@ -394,9 +394,9 @@ export function assertOAuthClientSecretConfigured(config) {
   if (!config.clientSecret) {
     throw new Error(
       [
-        "YEEFLOW_OAUTH_CLIENT_SECRET is required for the current OAuth token exchange or refresh implementation.",
-        "The client secret is private and must stay in .env.local; the plugin does not bundle secrets.",
-        "Implement PKCE/no-secret native OAuth later if this Yeeflow OAuth client can support public-client token exchange.",
+        "YEEFLOW_OAUTH_CLIENT_SECRET is not required for normal OAuth login or refresh.",
+        "Use Authorization Code with PKCE S256; the plugin generates the code verifier and does not bundle secrets.",
+        "Only configure a client secret as a legacy emergency fallback after explicit product/security approval.",
       ].join(" "),
     );
   }

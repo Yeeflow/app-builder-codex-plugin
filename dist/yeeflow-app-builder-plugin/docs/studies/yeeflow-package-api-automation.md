@@ -43,7 +43,7 @@ It defaults to dry run. It never prints API keys, raw package `Resource`, raw `S
 YEEFLOW_WORKSPACE_ID=<your workspace id>
 ```
 
-`YEEFLOW_TENANT_URL` is optional and only used for tenant UI/browser links. OAuth login tries PKCE/no-secret first. Refresh also tries no-secret first, but current auth-only testing shows confidential-client fallback may still be needed locally; configure `YEEFLOW_OAUTH_CLIENT_SECRET` only for that fallback. Do not configure `YEEFLOW_API_KEY` for normal API calls; it remains only as legacy/deprecated fallback.
+`YEEFLOW_TENANT_URL` is optional and only used for tenant UI/browser links. OAuth login and refresh use Authorization Code with PKCE S256 and do not require an OAuth client secret for normal use. Do not configure `YEEFLOW_API_KEY` for normal API calls; it remains only as legacy/deprecated fallback.
 
 Dry-run output reports `workspaceId: "present"` or `workspaceId: "missing"` only. It does not print the actual workspace ID. `--workspace-id <id>` remains available as a one-run override, but the value is redacted in all helper output.
 

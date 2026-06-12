@@ -48,6 +48,7 @@ try {
   await testRefreshRequestShape();
   await testRefreshFallbackRequestShape();
   await testMissingClientSecretMessage();
+  testDocsNoClientSecretRequirement();
   await testExpiredTokenRefreshBehavior();
   await testRefreshFailureClearsInvalidAuthState();
   testRedaction();
@@ -226,8 +227,19 @@ async function testMissingClientSecretMessage() {
   });
   await assert.rejects(
     () => refreshAccessToken(config, { refresh_token: "refresh-secret" }, mockFetch([], {})),
-    /no-secret refresh failed and no local client secret fallback is configured.*YEEFLOW_OAUTH_CLIENT_SECRET/,
+    /PKCE\/no-secret refresh failed.*OAuth server\/client configuration/,
   );
+}
+
+function testDocsNoClientSecretRequirement() {
+  for (const relative of ["README.md", ".env.example", "docs/quick-start.md", "docs/environment-configuration.md", "docs/browser-oauth-login.md"]) {
+    const text = fs.readFileSync(path.join(ROOT, relative), "utf8");
+    assert.doesNotMatch(text, /YEEFLOW_OAUTH_CLIENT_SECRET=<your local OAuth client secret>/, `${relative} should not recommend a client secret`);
+    assert.doesNotMatch(text, /confidential-client fallback is required/, `${relative} should not require confidential fallback`);
+  }
+  const readme = fs.readFileSync(path.join(ROOT, "README.md"), "utf8");
+  assert.match(readme, /Authorization Code with PKCE S256/);
+  assert.match(readme, /no OAuth client secret is required for normal login\/refresh/i);
 }
 
 async function testExpiredTokenRefreshBehavior() {
