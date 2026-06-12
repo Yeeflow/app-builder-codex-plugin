@@ -2,6 +2,7 @@
 
 import { getCapability, pathParamsFor, summarizeCapability } from "./lib/yeeflow-api-capabilities.mjs";
 import { mergeAuthHeaders, requireYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
+import { summarizeWorkspaceList, summarizeWorkspaceRecord } from "./lib/yeeflow-workspace-selection.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 if (args.help || !args.name) {
@@ -34,7 +35,7 @@ try {
   const text = await response.text();
   const parsed = parseJson(text);
 
-  console.log(JSON.stringify({
+  const output = {
     capability: summarizeCapability(capability),
     liveCall: true,
     httpStatus: response.status,
@@ -43,7 +44,17 @@ try {
     responseKeys: parsed && typeof parsed === "object" ? Object.keys(parsed).slice(0, 20) : [],
     apiStatus: parsed?.Status ?? parsed?.status ?? null,
     dataShape: summarizeShape(parsed?.Data ?? parsed?.data ?? parsed),
-  }, null, 2));
+  };
+  if (capability.name === "workspaces.listByCategory") {
+    output.workspaceSummary = summarizeWorkspaceList(parsed);
+  } else if (capability.name === "workspaces.get") {
+    const data = parsed?.Data ?? parsed?.data ?? parsed;
+    output.workspaceSummary = data && typeof data === "object" && !Array.isArray(data)
+      ? { workspaceCount: 1, workspaces: [summarizeWorkspaceRecord(data, 1)] }
+      : { workspaceCount: 0, workspaces: [] };
+  }
+
+  console.log(JSON.stringify(output, null, 2));
 } catch (error) {
   console.error(safeAuthError(error));
   process.exit(1);

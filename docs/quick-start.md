@@ -19,12 +19,15 @@ Expected plugin: `Yeeflow App Builder` version `0.6.28`.
 Create a gitignored `.env.local` only when local API/OAuth checks or package workspace operations are needed. Fixed API/OAuth defaults are bundled by the plugin; use placeholders in docs and never commit real values.
 
 ```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
+# No required values for normal OAuth + workspace discovery.
+
+# Optional default/override for package import/install/upgrade target selection:
+# YEEFLOW_WORKSPACE_ID=<optional default workspace id>
 # Optional manual override for tenant UI/browser links before OAuth token context is available:
 # YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-This form is enough for package workspace context, OAuth login/refresh, and normal API use. OAuth uses Authorization Code with PKCE S256, and the plugin generates the `code_verifier`. No OAuth client secret is required for normal login/refresh. OAuth access token claims `tenantid`, `tenant`, and `accountid` provide tenant/user context after authorization, so `YEEFLOW_TENANT_URL` is only an optional manual override for tenant UI/browser links before token context is available. `YEEFLOW_API_KEY` is not required for normal OAuth-backed API calls and is retained only as a legacy/deprecated fallback.
+This form is enough for OAuth login/refresh, normal API use, and read-only workspace discovery. OAuth uses Authorization Code with PKCE S256, and the plugin generates the `code_verifier`. No OAuth client secret is required for normal login/refresh. OAuth access token claims `tenantid`, `tenant`, and `accountid` provide tenant/user context after authorization, so `YEEFLOW_TENANT_URL` is only an optional manual override for tenant UI/browser links before token context is available. `YEEFLOW_API_KEY` is not required for normal OAuth-backed API calls and is retained only as a legacy/deprecated fallback.
 
 ## Validate Locally
 
@@ -46,9 +49,10 @@ Run a read-only mapped smoke call only after OAuth is authenticated:
 
 ```sh
 node scripts/yeeflow-api-call-capability.mjs --name locations.list
+node scripts/yeeflow-workspace-list.mjs --category <category>
 ```
 
-Do not use guessed paths or arbitrary raw API calls. Mutating capabilities and package operations require explicit confirmation.
+Do not use guessed paths or arbitrary raw API calls. `GET /workspaces/{category}` is mapped as read-only OAuth workspace discovery and prints only redacted workspace summaries. Mutating capabilities and package operations require explicit confirmation. Package install/import/upgrade must resolve an explicit target workspace by `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID`, or user-selected workspace discovery before any request is shaped.
 
 ## Build And Validate Packages
 

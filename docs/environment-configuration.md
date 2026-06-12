@@ -20,17 +20,20 @@ Tenant URL is not required for normal OAuth-backed API calls. After OAuth author
 
 Raw tokens and full decoded token payloads are never printed. Do not use a tenant URL as the API base. Treat `YEEFLOW_BASE_URL` as a legacy API-base alias only.
 
-## Single-Tenant Setup
+## Normal OAuth And Workspace Discovery
 
 Recommended `.env.local`:
 
 ```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
+# No required values for normal OAuth + workspace discovery.
+
+# Optional default/override for package import/install/upgrade target selection:
+# YEEFLOW_WORKSPACE_ID=<optional default workspace id>
 # Optional manual override for tenant UI/browser links before OAuth token context is available:
 # YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-This is enough for package workspace context, OAuth login/refresh, and normal API use. `YEEFLOW_TENANT_URL` is fallback-only because OAuth token context normally provides the tenant link value after login.
+This is enough for OAuth login/refresh, normal API use, and read-only workspace discovery. Use `node scripts/yeeflow-workspace-list.mjs --category <category>` to list available workspaces through documented `GET /workspaces/{category}`. The helper prints only count, title, category, status, and redacted workspace ID previews. It does not print tenant URLs, tenant IDs, full workspace IDs, tokens, or raw workspace objects.
 
 ## OAuth Setup
 
@@ -48,7 +51,7 @@ Override these only for development/testing.
 OAuth login and refresh use Authorization Code with PKCE S256. The plugin creates the `code_verifier`, sends the matching `code_challenge`, and exchanges/refreshes tokens without a client secret:
 
 ```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
+# No required values for normal OAuth + workspace discovery.
 # Optional manual override for tenant UI/browser links before OAuth token context is available:
 # YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
@@ -79,7 +82,18 @@ YEEFLOW_DEV_API_KEY=<dev key>
 
 ## Package Automation
 
-Package upload/import/install/upgrade helpers default to dry-run behavior and require explicit confirmation for live operations. Use `YEEFLOW_WORKSPACE_ID` or the active profile workspace variable when a package import/install/upgrade operation needs workspace context.
+Package upload/import/install/upgrade helpers default to dry-run behavior and require explicit confirmation for live operations. Package import/install/upgrade operations still require an explicit target workspace and workspace confirmation, but `YEEFLOW_WORKSPACE_ID` is now an optional default/override rather than a required setup value.
+
+Target workspace resolution order:
+
+1. `--workspace-id <id>`
+2. optional `YEEFLOW_WORKSPACE_ID` or active profile workspace variable
+3. explicit user-selected workspace discovered with `node scripts/yeeflow-workspace-list.mjs --category <category>`
+4. if no workspace is selected, stop before request shaping
+
+For non-interactive package install/import/upgrade, do not guess. If multiple workspaces exist, ask the user to choose. If one workspace exists, report it as a suggestion with a redacted ID preview and still require target confirmation before any package write.
+
+Workspace mutation APIs such as add, edit, delete, and sort are not used automatically. If they are ever implemented, they require explicit admin confirmation and are out of scope for package automation.
 
 ## Legacy API Key Fallback
 

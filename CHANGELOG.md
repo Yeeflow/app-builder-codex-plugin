@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add read-only workspace discovery through documented `GET /workspaces/{category}` with redacted workspace summaries.
+- Make `YEEFLOW_WORKSPACE_ID` an optional package target default/override instead of a required normal OAuth setup value.
+- Require package import/install/upgrade helpers to resolve and confirm an explicit target workspace while keeping workspace mutation APIs out of automatic flows.
+
 ## 0.6.28
 
 - Bump the active plugin version after the dashboard grid-table Collection hard-gate merge and latest `main` install/cache smoke.

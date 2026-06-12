@@ -12,7 +12,9 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Safe API Usage
 
-Before Yeeflow API work, check OAuth/API auth status and the REST API capability map. Use only documented capabilities. Do not expose arbitrary raw API calls, secrets, raw responses, tenant URLs, or decoded private payloads.
+Before Yeeflow API work, check OAuth/API auth status and the REST API capability map. Use only documented capabilities. Do not expose arbitrary raw API calls, secrets, raw responses, tenant URLs, full workspace IDs, or decoded private payloads.
+
+`.env.local` can be empty for normal OAuth plus workspace discovery. `YEEFLOW_WORKSPACE_ID` is an optional default/override for package import/install/upgrade, not a required setup value. List workspaces with `node scripts/yeeflow-workspace-list.mjs --category <category>` and show only count, title, category, status, and redacted workspace ID previews. Package writes still require explicit target workspace confirmation and `--execute`.
 
 ## Generated-Final YAPK Hard Gates
 

@@ -115,7 +115,7 @@ Treat hard `YAP_*` form-workspace findings as blockers for generated form worksp
 - Before using a Yeeflow REST API, check the capability map with `node scripts/yeeflow-api-list-capabilities.mjs` or `scripts/lib/yeeflow-api-capabilities.mjs`.
 - Use only documented capabilities from the map. Do not guess endpoint paths or expose unrestricted raw API calls; report missing API coverage when no mapped capability exists.
 - Prefer Browser OAuth-backed Yeeflow API calls for user-facing usage. If OAuth is not authenticated, ask the user to run `node scripts/yeeflow-oauth-login.mjs`; never ask for a Yeeflow password.
-- Prefer read-only capabilities for inspection and verification. Require explicit user confirmation for write capabilities and stronger confirmation for package install/import/upgrade/delete.
+- Prefer read-only capabilities for inspection and verification. Require explicit user confirmation for write capabilities and stronger confirmation for package install/import/upgrade/delete. Workspace discovery is read-only through `GET /workspaces/{category}` and optional `GET /workspaces/{category}/{id}`; workspace add/edit/delete/sort are write-classified metadata only and must remain blocked by generic read-only helpers. Workspace delete is destructive and requires strong confirmation if ever implemented.
 - Keep legacy `YEEFLOW_API_KEY` mode as an internal fallback only; do not ask users to paste API keys, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into chat.
 - Use `YEEFLOW_TENANT_URL` only for tenant/app links, for example `https://<yourdomain>.yeeflow.com`; never use a tenant URL as the API base.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
@@ -155,7 +155,7 @@ Validate before import. Do not runtime-test a package with blocking structural, 
 
 New application creation defaults to `.yapk`; `.yap` should be generated only when explicitly requested or when a fallback/debug task specifically requires it. Existing app upgrade `.yapk` validation should defer to `yeeflow-yapk-package-generator`. Product schema defines `.yapk` as `AppExportPackageInfo` with `Resource` described as Brotli-compressed `AppPackageInfo`. Treat `.yapk` content generation as proof-boundary-sensitive until the exact generated content type passes Resource decode/edit/encode/sign/verify/runtime-upgrade.
 
-When package API automation is in scope, validate request shaping before execution, confirm the active workspace, and require explicit confirmation for install/upgrade. API result summaries should classify `success`, `already_installed`, `api_rejected`, and `http_rejected` so duplicate/already-installed responses do not get mixed with unknown validation failures.
+When package API automation is in scope, validate request shaping before execution, confirm the active workspace, and require explicit confirmation for install/upgrade. Resolve the workspace from `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID` or active profile default, or user-selected workspace discovery; do not guess. API result summaries should classify `success`, `already_installed`, `api_rejected`, and `http_rejected` so duplicate/already-installed responses do not get mixed with unknown validation failures.
 
 For any Yeeflow REST API operation, consult `scripts/lib/yeeflow-api-capabilities.mjs` first. If the needed capability is absent, do not invent an endpoint; report the gap and use browser/manual workflow only if the user allows it.
 

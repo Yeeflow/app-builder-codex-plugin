@@ -7,6 +7,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { environmentPresence, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
+import { redactWorkspaceId, resolveTargetWorkspaceId, summarizeWorkspaceList } from "./lib/yeeflow-workspace-selection.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const helper = path.join(repoRoot, "scripts", "yeeflow-package-api-automation.mjs");
@@ -29,9 +30,12 @@ fs.writeFileSync(yapkPath, "dry-run-yapk");
 
 try {
   testEnvResolverWorkspacePresence();
+  testWorkspaceResolutionOrder();
+  testWorkspaceListRedaction();
   testMissingWorkspaceFailsImport();
   testWorkspaceFromEnvPassesAndIsRedacted();
   testCliWorkspaceOverridePassesAndIsRedacted();
+  testSelectedWorkspacePassesAndIsRedacted();
   testUploadDoesNotRequireWorkspace();
   console.log("package-api-workspace-config tests passed");
 } finally {
@@ -56,12 +60,56 @@ function testEnvResolverWorkspacePresence() {
   assert.equal(JSON.stringify(presence).includes("profile-workspace"), false);
 }
 
+function testWorkspaceResolutionOrder() {
+  assert.deepEqual(resolveTargetWorkspaceId({
+    cliWorkspaceId: "cli-workspace",
+    envWorkspaceId: "env-workspace",
+    selectedWorkspaceId: "selected-workspace",
+  }), { workspaceId: "cli-workspace", source: "cli-argument" });
+
+  assert.deepEqual(resolveTargetWorkspaceId({
+    envWorkspaceId: "env-workspace",
+    selectedWorkspaceId: "selected-workspace",
+  }), { workspaceId: "env-workspace", source: "environment-default" });
+
+  assert.deepEqual(resolveTargetWorkspaceId({
+    selectedWorkspaceId: "selected-workspace",
+  }), { workspaceId: "selected-workspace", source: "user-selection" });
+
+  assert.deepEqual(resolveTargetWorkspaceId({}), { workspaceId: "", source: "missing" });
+}
+
+function testWorkspaceListRedaction() {
+  const rawId = "workspace-1234567890";
+  const summary = summarizeWorkspaceList({
+    Data: [
+      {
+        TenantID: 12345,
+        Category: "app",
+        ID: rawId,
+        Title: "Operations",
+        Status: 1,
+        Owners: [{ ID: "private-owner" }],
+      },
+    ],
+  });
+  assert.equal(summary.workspaceCount, 1);
+  assert.equal(summary.workspaces[0].title, "Operations");
+  assert.equal(summary.workspaces[0].category, "app");
+  assert.equal(summary.workspaces[0].status, 1);
+  assert.equal(summary.workspaces[0].idPreview, redactWorkspaceId(rawId));
+  assert.equal(JSON.stringify(summary).includes(rawId), false);
+  assert.equal(JSON.stringify(summary).includes("TenantID"), false);
+  assert.equal(JSON.stringify(summary).includes("private-owner"), false);
+}
+
 function testMissingWorkspaceFailsImport() {
   const dotenv = path.join(tempDir, "missing-workspace.env");
   fs.writeFileSync(dotenv, "\n");
   const result = runHelper(["--operation", "import-yap", "--package", yapPath, "--dotenv", dotenv]);
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /YEEFLOW_WORKSPACE_ID is required/);
+  assert.match(result.stderr, /Target workspace is required/);
+  assert.match(result.stderr, /yeeflow-workspace-list\.mjs/);
 }
 
 function testWorkspaceFromEnvPassesAndIsRedacted() {
@@ -93,6 +141,27 @@ function testCliWorkspaceOverridePassesAndIsRedacted() {
   const parsed = JSON.parse(result.stdout);
   assert.equal(parsed.workspaceId, "present");
   assert.equal(result.stdout.includes(override), false);
+}
+
+function testSelectedWorkspacePassesAndIsRedacted() {
+  const selected = "workspace-selected-value";
+  const dotenv = path.join(tempDir, "selected-workspace.env");
+  fs.writeFileSync(dotenv, "\n");
+  const result = runHelper([
+    "--operation",
+    "install-yapk",
+    "--package",
+    yapkPath,
+    "--dotenv",
+    dotenv,
+    "--selected-workspace-id",
+    selected,
+  ]);
+  assert.equal(result.status, 0, result.stderr);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.workspaceId, "present");
+  assert.equal(parsed.workspaceIdSource, "user-selection");
+  assert.equal(result.stdout.includes(selected), false);
 }
 
 function testUploadDoesNotRequireWorkspace() {

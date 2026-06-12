@@ -13,24 +13,22 @@ This note standardizes Yeeflow App Builder application delivery after the packag
 
 ## Environment-Driven Delivery
 
-Before deciding delivery mode, inspect local `.env.local` without printing values.
+Before deciding delivery mode, inspect local `.env.local` without printing values. Normal OAuth plus read-only workspace discovery does not require any `.env.local` values because plugin defaults provide the API/OAuth configuration.
 
-Required variables for API-backed delivery:
+Optional local defaults:
 
-- `YEEFLOW_API_BASE_URL`
-- `YEEFLOW_API_KEY`
-- `YEEFLOW_TENANT_URL`
-- `YEEFLOW_TENANT_ID`
-- `YEEFLOW_WORKSPACE_ID`
+- `YEEFLOW_WORKSPACE_ID` as a package target default/override.
+- `YEEFLOW_TENANT_URL` only as a manual tenant UI-link fallback before OAuth token context is available.
+- `YEEFLOW_API_KEY` only as a legacy/deprecated fallback when OAuth is unavailable.
 
-If an API key exists, generate YAPK by default. If a workspace ID also exists, ask whether the user wants automatic installation. Do not auto-install without user confirmation.
+For API-backed package delivery, prefer OAuth auth and resolve the target workspace from `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID`, or user-selected workspace discovery with `node scripts/yeeflow-workspace-list.mjs --category <category>`. Do not auto-install without user confirmation and target workspace confirmation.
 
 ## New App Workflow
 
 1. Generate YAPK.
 2. Validate locally before any API action.
-3. If API key and workspace ID are present, ask whether to auto-install.
-4. If confirmed, run upload plus install package APIs.
+3. If package automation is requested, run a dry run and confirm the target workspace.
+4. If confirmed with `--execute`, run upload plus install package APIs.
 5. If not confirmed, provide the YAPK and manual install guidance.
 
 ## Existing App Change Workflow
