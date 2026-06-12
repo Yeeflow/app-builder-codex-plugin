@@ -20,6 +20,7 @@ testRequiredFields();
 testSafetyClassification();
 testPathsAndRawCapabilityPolicy();
 testLocationsList();
+testWorkspaceCapabilities();
 testListCommand();
 testCallHelperBlocksWrites();
 testPathParamsCovered();
@@ -41,7 +42,7 @@ function testRequiredFields() {
     assert.match(capability.path, /^\//);
     assert.equal(Array.isArray(capability.requiredParams), true, `${capability.name} requiredParams must be an array`);
     assert.equal(Array.isArray(capability.optionalParams), true, `${capability.name} optionalParams must be an array`);
-    assert.equal(capability.auth, "oauth-or-api-key");
+    assert.ok(["oauth-or-api-key", "oauth"].includes(capability.auth), `${capability.name} has unsupported auth mode`);
   }
 }
 
@@ -72,6 +73,31 @@ function testLocationsList() {
   assert.equal(capability.requiresConfirmation, false);
 }
 
+function testWorkspaceCapabilities() {
+  const list = getCapability("workspaces.listByCategory");
+  assert.ok(list);
+  assert.equal(list.method, "GET");
+  assert.equal(list.path, "/workspaces/{category}");
+  assert.equal(list.readOnly, true);
+  assert.equal(list.requiresConfirmation, false);
+  assert.equal(list.auth, "oauth");
+  assert.deepEqual(list.requiredParams, ["path:category"]);
+
+  const get = getCapability("workspaces.get");
+  assert.ok(get);
+  assert.equal(get.method, "GET");
+  assert.equal(get.readOnly, true);
+  assert.equal(get.requiresConfirmation, false);
+  assert.equal(get.auth, "oauth");
+
+  for (const name of ["workspaces.add", "workspaces.edit", "workspaces.delete", "workspaces.sort"]) {
+    const capability = getCapability(name);
+    assert.ok(capability, `${name} missing`);
+    assert.equal(capability.readOnly, false, `${name} should be classified as write`);
+    assert.equal(capability.requiresConfirmation, true, `${name} should require confirmation`);
+  }
+}
+
 function testListCommand() {
   const all = run(["scripts/yeeflow-api-list-capabilities.mjs"]);
   assert.equal(all.status, 0, all.stderr);
@@ -88,12 +114,19 @@ function testListCommand() {
 
   const locations = JSON.parse(run(["scripts/yeeflow-api-list-capabilities.mjs", "--filter", "locations"]).stdout);
   assert.ok(locations.capabilities.some((capability) => capability.name === "locations.list"));
+
+  const workspaces = JSON.parse(run(["scripts/yeeflow-api-list-capabilities.mjs", "--filter", "workspaces"]).stdout);
+  assert.ok(workspaces.capabilities.some((capability) => capability.name === "workspaces.listByCategory"));
 }
 
 function testCallHelperBlocksWrites() {
   const result = run(["scripts/yeeflow-api-call-capability.mjs", "--name", "items.create"]);
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /does not execute write capabilities/);
+
+  const workspaceWrite = run(["scripts/yeeflow-api-call-capability.mjs", "--name", "workspaces.add"]);
+  assert.notEqual(workspaceWrite.status, 0);
+  assert.match(workspaceWrite.stderr, /does not execute write capabilities/);
 }
 
 function testPathParamsCovered() {

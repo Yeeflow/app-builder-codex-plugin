@@ -15,7 +15,7 @@ Source docs:
 - `POST https://api.yeeflow.com/v1/listset/package/install`
 - `POST https://api.yeeflow.com/v1/listset/package/upgrade`
 
-The helper now uses the shared OAuth/API auth wrapper: it prefers OAuth bearer tokens, refreshes them when possible, and uses legacy/deprecated `YEEFLOW_API_KEY` only as fallback. The plugin supplies the default API base `https://api.yeeflow.com/v1`. Import, install, and upgrade also require `WorkspaceID`; the helper reads it from `YEEFLOW_WORKSPACE_ID` or the active profile-specific workspace variable such as `YEEFLOW_PROD_WORKSPACE_ID`.
+The helper now uses the shared OAuth/API auth wrapper: it prefers OAuth bearer tokens, refreshes them when possible, and uses legacy/deprecated `YEEFLOW_API_KEY` only as fallback. The plugin supplies the default API base `https://api.yeeflow.com/v1`. Import, install, and upgrade also require an explicit target `WorkspaceID`; the helper resolves it from `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID` or active profile workspace variable, or an explicit user-selected workspace discovered through documented `GET /workspaces/{category}`.
 
 ## Endpoint Summary
 
@@ -37,15 +37,17 @@ node scripts/yeeflow-package-api-automation.mjs
 
 It defaults to dry run. It never prints API keys, raw package `Resource`, raw `Sign`, raw decoded payloads, tenant IDs, private URLs, or full API responses. It reports endpoint, package file name/size, request summary, HTTP/API status, response keys, and redacted data shape.
 
-`WorkspaceID` is required for import/install/upgrade payloads. Store it locally:
+`WorkspaceID` is required for import/install/upgrade payloads, but `.env.local` can be empty for normal OAuth and workspace discovery. Optional default:
 
 ```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
+YEEFLOW_WORKSPACE_ID=<optional default workspace id>
 ```
 
 `YEEFLOW_TENANT_URL` is optional and only used for tenant UI/browser links. OAuth login and refresh use Authorization Code with PKCE S256 and do not require an OAuth client secret for normal use. Do not configure `YEEFLOW_API_KEY` for normal API calls; it remains only as legacy/deprecated fallback.
 
-Dry-run output reports `workspaceId: "present"` or `workspaceId: "missing"` only. It does not print the actual workspace ID. `--workspace-id <id>` remains available as a one-run override, but the value is redacted in all helper output.
+Use `node scripts/yeeflow-workspace-list.mjs --category <category>` to list workspaces with OAuth. The helper reports only count, title, category, status, and redacted ID preview. It does not print raw workspace objects, tenant IDs, tenant URLs, or full workspace IDs.
+
+Dry-run output reports `workspaceId: "present"` or `workspaceId: "missing"` plus a safe `workspaceIdSource`. It does not print the actual workspace ID. `--workspace-id <id>` remains available as a one-run override, but the value is redacted in all helper output.
 
 Examples:
 
@@ -85,7 +87,7 @@ Before any import/install/upgrade API call:
 4. Confirm package type:
    - `.yap` uses the import endpoint.
    - `.yapk` uses install or upgrade endpoint.
-5. Confirm `WorkspaceID` is present in `.env.local` as `YEEFLOW_WORKSPACE_ID` or the active profile-specific workspace variable. Do not print the value.
+5. Confirm an explicit target `WorkspaceID` is resolved by `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID` or active profile-specific workspace variable, or explicit user-selected workspace discovery. Do not print the value.
 6. Confirm OAuth/API authentication is available and any tenant/profile context is local, without printing secrets.
 7. Use dry-run output first.
 8. Use `--execute` only after explicit approval.

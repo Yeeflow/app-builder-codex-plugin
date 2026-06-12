@@ -17,12 +17,15 @@ YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
 Override these only for development/testing. OAuth login builds an Authorization Code + PKCE S256 request. The plugin generates the `code_verifier`, sends the matching `code_challenge`, and exchanges/refreshes tokens without a client secret.
 
 ```env
-YEEFLOW_WORKSPACE_ID=<your workspace id>
+# No required values for normal OAuth + workspace discovery.
+
+# Optional default/override for package import/install/upgrade target selection:
+# YEEFLOW_WORKSPACE_ID=<optional default workspace id>
 # Optional manual override for tenant UI/browser links before OAuth token context is available:
 # YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-After authorization, the plugin derives tenant/user context from access token claims `tenantid`, `tenant`, and `accountid`; the `tenant` claim is preferred for tenant UI/browser links. `YEEFLOW_TENANT_URL` is only an optional manual override before token context is available. Raw tokens and full decoded token payloads are never printed. No OAuth client secret is required for normal login/refresh. The plugin does not bundle secrets.
+After authorization, the plugin derives tenant/user context from access token claims `tenantid`, `tenant`, and `accountid`; the `tenant` claim is preferred for tenant UI/browser links. `YEEFLOW_TENANT_URL` is only an optional manual override before token context is available. Raw tokens, full decoded token payloads, raw workspace responses, and full workspace IDs are never printed. No OAuth client secret is required for normal login/refresh. The plugin does not bundle secrets.
 
 Do not commit `.env.local`. Do not paste Yeeflow passwords, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into Codex chat.
 

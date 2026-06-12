@@ -43,6 +43,13 @@ export const YEEFLOW_API_CAPABILITIES = [
   cap("groups.users.list", "GET", "/groups/{id}/users", "Get users of a group", true, ["path:id"], ["query:keywords", "query:pageIndex", "query:pageSize"], "OpenAPI", "Read-only group membership lookup. Redact personal data by default."),
   cap("groups.users.remove", "POST", "/groups/{id}/users/remove", "Remove users from a group", false, ["path:id", "body:userIds"], [], "OpenAPI", "Changes group membership. Require explicit confirmation."),
 
+  cap("workspaces.listByCategory", "GET", "/workspaces/{category}", "Get workspaces by category", true, ["path:category"], [], "Apifox/OpenAPI", "Read-only workspace discovery for target selection. Summarize title/category/status/count and redacted ID previews only.", "oauth"),
+  cap("workspaces.get", "GET", "/workspaces/{id}", "Get workspace by id", true, ["path:id"], [], "Apifox/OpenAPI", "Read-only workspace lookup. Do not print raw workspace objects, tenant IDs, private URLs, or full workspace IDs.", "oauth"),
+  cap("workspaces.add", "POST", "/workspaces", "Add workspace", false, ["body:workspace"], [], "Apifox/OpenAPI", "Workspace mutation. Out of scope for automation; require explicit admin confirmation if ever implemented."),
+  cap("workspaces.edit", "PUT", "/workspaces/{id}", "Edit workspace", false, ["path:id", "body:workspace"], [], "Apifox/OpenAPI", "Workspace mutation. Out of scope for automation; require explicit admin confirmation if ever implemented."),
+  cap("workspaces.delete", "DELETE", "/workspaces/{id}", "Delete workspace", false, ["path:id"], [], "Apifox/OpenAPI", "Workspace mutation. Out of scope for automation; require explicit destructive confirmation if ever implemented."),
+  cap("workspaces.sort", "POST", "/workspaces/sort", "Sort workspaces", false, ["body:sort"], [], "Apifox/OpenAPI", "Workspace mutation. Out of scope for automation; require explicit admin confirmation if ever implemented."),
+
   cap("positions.create", "POST", "/positions", "Add a position", false, ["body:position"], [], "OpenAPI", "Creates a position. Require explicit confirmation."),
   cap("positions.list", "GET", "/positions", "Get positions", true, [], [], "OpenAPI", "Read-only position lookup."),
   cap("positions.update", "PUT", "/positions/{id}", "Update a position", false, ["path:id", "body:position"], [], "OpenAPI", "Updates a position. Require explicit confirmation."),
@@ -141,7 +148,7 @@ export function categoryForName(name) {
   return String(name).split(".")[0];
 }
 
-function cap(name, method, path, summary, readOnly, requiredParams, optionalParams, source, notes) {
+function cap(name, method, path, summary, readOnly, requiredParams, optionalParams, source, notes, auth = CAPABILITY_AUTH) {
   return {
     name,
     category: categoryForName(name),
@@ -150,7 +157,7 @@ function cap(name, method, path, summary, readOnly, requiredParams, optionalPara
     summary,
     readOnly,
     requiresConfirmation: !readOnly,
-    auth: CAPABILITY_AUTH,
+    auth,
     requiredParams,
     optionalParams,
     source,

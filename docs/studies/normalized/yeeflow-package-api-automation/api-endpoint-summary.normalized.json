@@ -42,7 +42,7 @@
   "safety": {
     "defaultMode": "dry-run",
     "executeFlagRequired": true,
-    "workspaceIdSource": "YEEFLOW_WORKSPACE_ID or active YEEFLOW_<PROFILE>_WORKSPACE_ID",
+    "workspaceIdSource": "--workspace-id, optional YEEFLOW_WORKSPACE_ID or active YEEFLOW_<PROFILE>_WORKSPACE_ID, or explicit user-selected workspace discovery",
     "redactedFields": ["apiKey", "Resource", "Sign", "tenant identifiers", "workspace identifiers", "private URLs", "raw responses", "decoded payloads"]
   }
 }
