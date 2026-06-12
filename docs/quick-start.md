@@ -12,7 +12,7 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.26`.
+Expected plugin: `Yeeflow App Builder` version `0.6.27`.
 
 ## Configure Local Environment
 
@@ -29,7 +29,7 @@ This form is enough for package workspace context, OAuth login/refresh, and norm
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.26
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.27
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```
@@ -59,5 +59,14 @@ node validate-yap-package.js <package.yap>
 node validate-yapk-package.js <package.yapk>
 node validate-yap-graph.js <package-or-resource>
 ```
+
+Generated-final `.yapk` packages must also pass the ID provenance and navigation runtime metadata hard gates before signing, install, upgrade-check, or handoff:
+
+```sh
+node scripts/validate-yapk-id-provenance.mjs --package <package.yapk> --manifest <id-provenance-report.json>
+node scripts/validate-yapk-navigation-runtime-metadata.mjs --package <package.yapk> --id-provenance <id-provenance-report.json>
+```
+
+The ID provenance report must prove API-issued content IDs from `GET /utils/generate/ids?count=<n>`. Local sequential, hardcoded, copied, random, timestamp, or UUID fallback IDs are forbidden for generated-final `.yapk` output. Runtime navigation groups require `ID`, `AppID`, `ListSetID`, `Type`, `Title`, `Icon`, and `list`; child items require `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`. Do not use `children` / `Childs` runtime navigation groups.
 
 Local validation is not import proof, and API acceptance is not runtime proof. Report the exact proof boundary when delivering generated work.

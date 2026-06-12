@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.6.27
+
+- Bump the active plugin version after the generated-final YAPK hard-gates merge.
+- Require generated-final `.yapk` packages to use API-issued content ID provenance from `GET /utils/generate/ids?count=<n>`, emit and validate an ID provenance manifest, and forbid local sequential, hardcoded, copied, random, timestamp, or UUID fallback IDs.
+- Require complete navigation runtime metadata for generated-final `.yapk` packages: navigation groups include `ID`, `AppID`, `ListSetID`, `Type`, `Title`, `Icon`, and `list`; child items include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`; `children` / `Childs` runtime groups are forbidden.
+- Keep signing/install acceptance separate from ID provenance, navigation runtime metadata completeness, and runtime UI proof.
+
 ## 0.6.26
 
 - Confirm Yeeflow OAuth supports Authorization Code with PKCE S256 for login and refresh without a client secret.
