@@ -18,11 +18,11 @@ Override these only for development/testing. OAuth login builds an Authorization
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-# Optional only if tenant UI/browser links are needed:
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Optional manual override for tenant UI/browser links before OAuth token context is available:
+# YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-No OAuth client secret is required for normal login/refresh. The plugin does not bundle secrets.
+After authorization, the plugin derives tenant/user context from access token claims `tenantid`, `tenant`, and `accountid`; the `tenant` claim is preferred for tenant UI/browser links. `YEEFLOW_TENANT_URL` is only an optional manual override before token context is available. Raw tokens and full decoded token payloads are never printed. No OAuth client secret is required for normal login/refresh. The plugin does not bundle secrets.
 
 Do not commit `.env.local`. Do not paste Yeeflow passwords, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into Codex chat.
 
@@ -36,7 +36,7 @@ node scripts/yeeflow-oauth-logout.mjs
 node scripts/yeeflow-api-auth-smoke.mjs
 ```
 
-`yeeflow-oauth-status` reports whether local OAuth token storage exists, whether it is expired, and whether a refresh token is present. Use `--refresh` to refresh when possible.
+`yeeflow-oauth-status` reports whether local OAuth token storage exists, whether it is expired, whether a refresh token is present, and safe tenant-claim presence booleans. It does not print tenant values or decoded payloads. Use `--refresh` to refresh when possible.
 
 `yeeflow-oauth-login` starts a local HTTPS callback server, opens the Yeeflow authorization URL, validates returned OAuth state, exchanges the code with PKCE, and stores tokens locally. It prints only safe status messages, including whether the PKCE/no-secret path was used.
 

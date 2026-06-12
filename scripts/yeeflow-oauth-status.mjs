@@ -35,6 +35,7 @@ console.log(JSON.stringify({
   scope: summary.scope ?? null,
   oauthFlow: summary.oauthFlow ?? null,
   refreshFlow: summary.refreshFlow ?? null,
+  tokenContext: summary.tokenContext ?? null,
   configSources: summary.configSources,
   refreshed,
 }, null, 2));

@@ -7,6 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadDotenvFile, parseDotenvValue } from "../yeeflow-env-utils.mjs";
 import { firstNonEmpty, YEEFLOW_ENV_DEFAULTS } from "./yeeflow-env-defaults.mjs";
+import { safeTokenContextSummary } from "./yeeflow-oauth-token-claims.mjs";
 
 export const DEFAULT_OAUTH_CLIENT_ID = YEEFLOW_ENV_DEFAULTS.oauthClientId;
 export const DEFAULT_OAUTH_AUTH_URL = YEEFLOW_ENV_DEFAULTS.oauthAuthUrl;
@@ -345,6 +346,7 @@ export function summarizeStoredToken(config, tokenRecord = loadStoredToken(confi
     idTokenPresent: Boolean(tokenRecord.id_token),
     oauthFlow: tokenRecord.oauth_flow || null,
     refreshFlow: tokenRecord.oauth_refresh_flow || null,
+    tokenContext: safeTokenContextSummary(tokenRecord),
   };
 }
 

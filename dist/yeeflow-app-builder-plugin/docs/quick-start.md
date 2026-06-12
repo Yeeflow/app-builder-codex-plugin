@@ -20,11 +20,11 @@ Create a gitignored `.env.local` only when local API/OAuth checks or package wor
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-# Optional only if tenant UI/browser links are needed:
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Optional manual override for tenant UI/browser links before OAuth token context is available:
+# YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-This form is enough for package workspace context, OAuth login/refresh, and normal API use. OAuth uses Authorization Code with PKCE S256, and the plugin generates the `code_verifier`. No OAuth client secret is required for normal login/refresh. `YEEFLOW_API_KEY` is not required for normal OAuth-backed API calls and is retained only as a legacy/deprecated fallback.
+This form is enough for package workspace context, OAuth login/refresh, and normal API use. OAuth uses Authorization Code with PKCE S256, and the plugin generates the `code_verifier`. No OAuth client secret is required for normal login/refresh. OAuth access token claims `tenantid`, `tenant`, and `accountid` provide tenant/user context after authorization, so `YEEFLOW_TENANT_URL` is only an optional manual override for tenant UI/browser links before token context is available. `YEEFLOW_API_KEY` is not required for normal OAuth-backed API calls and is retained only as a legacy/deprecated fallback.
 
 ## Validate Locally
 

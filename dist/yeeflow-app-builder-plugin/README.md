@@ -77,11 +77,11 @@ Use a gitignored `.env.local` for local tenant/workspace settings only. Browser 
 
 ```env
 YEEFLOW_WORKSPACE_ID=<your workspace id>
-# Optional only if tenant UI/browser links are needed:
-YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
+# Optional manual override for tenant UI/browser links before OAuth token context is available:
+# YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-This form is enough for package workspace context, OAuth login/refresh, and normal API use. The plugin uses Authorization Code with PKCE S256 and generates the `code_verifier`; no OAuth client secret is required for normal login/refresh. The plugin provides defaults for `YEEFLOW_API_BASE_URL`, `YEEFLOW_OAUTH_CLIENT_ID`, `YEEFLOW_OAUTH_AUTH_URL`, `YEEFLOW_OAUTH_TOKEN_URL`, and `YEEFLOW_OAUTH_SCOPES`; override them only for development/testing. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only.
+This form is enough for package workspace context, OAuth login/refresh, and normal API use. The plugin uses Authorization Code with PKCE S256 and generates the `code_verifier`; no OAuth client secret is required for normal login/refresh. The plugin derives tenant/user context from OAuth access token claims `tenantid`, `tenant`, and `accountid`; `YEEFLOW_TENANT_URL` is only an optional manual override for tenant UI/browser links before token context is available. Raw tokens and full decoded token payloads are never printed. The plugin provides defaults for `YEEFLOW_API_BASE_URL`, `YEEFLOW_OAUTH_CLIENT_ID`, `YEEFLOW_OAUTH_AUTH_URL`, `YEEFLOW_OAUTH_TOKEN_URL`, and `YEEFLOW_OAUTH_SCOPES`; override them only for development/testing. Do not use `YEEFLOW_API_KEY` for normal API calls; it is legacy/deprecated fallback only.
 
 Do not paste secrets, authorization codes, cookies, bearer tokens, or passwords into chat.
 

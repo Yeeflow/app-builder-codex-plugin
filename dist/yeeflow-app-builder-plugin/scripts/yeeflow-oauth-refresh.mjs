@@ -27,6 +27,7 @@ try {
     expiresAt: summary.expiresAt,
     tokenFilePresent: summary.tokenFilePresent,
     refreshFlow: refreshed.oauth_refresh_flow || null,
+    tokenContext: summary.tokenContext ?? null,
   }, null, 2));
 } catch (error) {
   console.error(error.message);
