@@ -13,7 +13,7 @@ if (isMainModule()) {
     printUsage();
     process.exit(args.help ? 0 : 1);
   }
-  const result = runYapkFirstGenerationPreflight(args.package);
+  const result = runYapkFirstGenerationPreflight(args.package, { idProvenance: args.idProvenance });
   if (args.json) console.log(JSON.stringify(result, null, 2));
   else printTextResult(result);
   process.exit(result.ok ? 0 : 1);
@@ -21,6 +21,7 @@ if (isMainModule()) {
 
 export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   const resolvedPackage = path.resolve(options.cwd || ROOT, packagePath);
+  const idProvenance = options.idProvenance ? path.resolve(options.cwd || ROOT, options.idProvenance) : defaultIdProvenancePath(resolvedPackage);
   const gates = [];
   if (!resolvedPackage.endsWith(".yapk")) {
     return {
@@ -42,15 +43,22 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("canonical-schema", ["scripts/validate-standard-package-schema.mjs", resolvedPackage]));
   gates.push(runGate("decoded-app-package-runtime", ["validate-yapk-package.js", resolvedPackage]));
   gates.push(runGate("data-list-system-schema", ["scripts/validate-data-list-system-schema.mjs", resolvedPackage, "--strict-generated-list", "--json"]));
+  gates.push(runGate("api-issued-content-id-provenance", ["scripts/validate-yapk-id-provenance.mjs", "--package", resolvedPackage, "--manifest", idProvenance]));
+  gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
 
   const failed = gates.find((gate) => !gate.ok);
   return {
     ok: !failed,
     package: summarizePath(resolvedPackage),
+    idProvenance: summarizePath(idProvenance),
     failedGate: failed?.gate || null,
     gates,
-    proofBoundary: "Local preflight only. Signing/API acceptance/runtime proof still require separate explicit steps.",
+    proofBoundary: "Local preflight only. ID provenance and navigation metadata are local hard gates; signing/API acceptance/runtime proof still require separate explicit steps.",
   };
+}
+
+function defaultIdProvenancePath(packagePath) {
+  return packagePath.replace(/(?:\.signed)?\.yapk$/i, "-id-provenance-report.json");
 }
 
 function runGate(gate, args) {
@@ -87,6 +95,10 @@ function parseArgs(argv) {
     const token = argv[i];
     if (token === "--help") args.help = true;
     else if (token === "--json") args.json = true;
+    else if (token === "--id-provenance") {
+      args.idProvenance = argv[i + 1];
+      i += 1;
+    }
     else if (token === "--package") {
       args.package = argv[i + 1];
       i += 1;
@@ -100,7 +112,7 @@ function parseArgs(argv) {
 }
 
 function printUsage() {
-  console.log("Usage: node scripts/yapk-first-generation-preflight.mjs --package <file.yapk> [--json]");
+  console.log("Usage: node scripts/yapk-first-generation-preflight.mjs --package <file.yapk> [--id-provenance <report.json>] [--json]");
 }
 
 function printTextResult(result) {

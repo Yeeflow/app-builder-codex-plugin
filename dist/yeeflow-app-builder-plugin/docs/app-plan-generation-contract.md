@@ -25,6 +25,16 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Required endpoints: `POST /utils/apppackage/setsign`, `POST /utils/apppackage/verifysign`
 - Placeholder `Sign` may be described as upload-ready: No
 - Local schema validation alone proves upload readiness: No
+- Signing/install acceptance proves ID provenance or navigation runtime metadata completeness: No
+
+### API-Issued Content ID Provenance Gate
+- Required for generated-final `.yapk`: Yes
+- Required API: `GET /utils/generate/ids?count=<n>`
+- Local sequential counters, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds allowed: No
+- Required proof artifact: `dist/<app-name>-id-provenance-report.json`
+- Source marker required: `api-generated`
+- Non-API numeric generated content IDs allowed: No
+- Generation must stop before signing, install, upgrade-check, or handoff when provenance validation fails: Yes
 
 ### Approval Form Contract
 - Approval required: Yes/No
@@ -39,12 +49,18 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - If deferred, user-approved staged build required: Yes/No
 
 ### Navigation Runtime Contract
-- Group shape: `Type: "classes"` + `list`
+- Navigation Runtime Metadata Gate required for generated-final `.yapk`: Yes
+- Group shape: `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list`
+- Group `ID` must be API-issued and present in the ID provenance manifest
+- Group `AppID` must equal the package/root AppID
+- Group `ListSetID` must equal the current root `ListSet.ListID`
 - Do not use `children`/`Childs` for runtime grouped navigation
-- Page entries: `Type: 103`
+- Every child item must include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`
+- Page/dashboard entries: `Type: 103`, include `LayoutID`, and use `ListID = LayoutID`
 - Approval form entries: `Type: 105`, `ListID = Forms[].Key`
-- Data list entries: `Type: 1`, `ListID = child list ID`
+- Data list entries: `Type: 1`, `ListID = Childs[].List.ListID`
 - Unreachable resources allowed only if documented hidden/deferred
+- Generation must stop before signing, install, upgrade-check, or handoff when navigation runtime metadata validation fails: Yes
 
 ### Plan-to-Package Conformance Contract
 - Planned lists must exist: Yes/No
@@ -74,6 +90,8 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 ### Proof Boundary Contract
 - App plan approval status:
 - Local schema validation status:
+- ID provenance proof status:
+- Navigation runtime metadata proof status:
 - App-plan conformance status:
 - UI/control quality validation status:
 - Data-list views/forms/workflows/notifications validation status:
@@ -85,6 +103,8 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - API signature verification status:
 - API install/import acceptance status:
 - Runtime UI inspection status:
+- Evidence: ID allocation manifest and validator results
+- Boundary: signing and install acceptance do not prove ID provenance or navigation runtime metadata completeness
 - Workflow/notification/AI/custom-code execution proof status:
 - Deferred items:
 - Known risks:

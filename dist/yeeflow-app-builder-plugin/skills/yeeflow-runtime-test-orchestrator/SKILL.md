@@ -5,6 +5,10 @@ description: Standardize runtime testing for generated or modified Yeeflow appli
 
 # Yeeflow Runtime Test Orchestrator
 
+## Generated-Final YAPK ID And Navigation Hard Gates
+
+Generated-final `.yapk` runtime testing must not proceed when `scripts/validate-yapk-id-provenance.mjs` or `scripts/validate-yapk-navigation-runtime-metadata.mjs` fails. ID provenance, navigation runtime metadata, signing/install acceptance, and runtime UI proof are separate proof levels.
+
 ##
 Designer proof boundary update: for generated approval form YAPs, import completion is not enough. Runtime reports must classify form designer hydration, intended heading/text render, and single-control selection separately. A form that renders default `Here is the title` or selects multiple controls from one click is not designer-qualified even if schema validation, API acceptance, and import/open pass.
  Canonical Schema Files

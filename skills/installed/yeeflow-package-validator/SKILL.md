@@ -5,6 +5,10 @@ description: Standardize Yeeflow package validation before import or runtime tes
 
 # Yeeflow Package Validator
 
+## Generated-Final YAPK ID And Navigation Hard Gates
+
+Generated-final `.yapk` output must use API-issued numeric content IDs from `GET /utils/generate/ids?count=<n>` and must emit a redacted `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`, path-to-purpose mappings, duplicate checks, unused-ID accounting, generator provenance metadata, and no non-API IDs. Local ID generation, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds are forbidden for generated-final `.yapk`. Runtime navigation groups must include API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; children must include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`, with dashboards/pages as `Type: 103` plus `LayoutID`, approval forms as `Type: 105`, and data lists as `Type: 1`. Run `scripts/validate-yapk-id-provenance.mjs` and `scripts/validate-yapk-navigation-runtime-metadata.mjs`; stop before signing, install, upgrade-check, or handoff if either gate fails. `setsign`/`verifysign` and install acceptance do not prove ID provenance or navigation runtime metadata completeness.
+
 ##
 YAP approval designer-shape validation: generated-final approval form YAPs must fail for missing or duplicate control IDs, unresolved control ID references, unproven control families, missing heading/text native values, placeholder heading text such as `Here is the title`, label/native text mismatch, missing child `ListType`, incomplete list/layout/DefResource metadata, invalid `NoRule`, unpublished form status, and missing app group IDs in `Resource.ReplaceIds`. Apply these as generated-final/import-qualified checks, not global historical export blockers.
  Canonical Schema Files

@@ -5,6 +5,10 @@ description: Safely use Yeeflow REST APIs from Codex when local credentials are 
 
 # Yeeflow API Operator
 
+## Generated-Final YAPK ID API Guard
+
+Generated-final `.yapk` generation must allocate numeric generated content IDs through `GET /utils/generate/ids?count=<n>` before package assembly and must emit a redacted ID provenance report with `sourceMarker: "api-generated"`. Do not use local counters, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, or deterministic local-only seeds for generated-final content IDs. Do not print raw API responses, tokens, tenant URLs, workspace IDs, or generated package payloads. Package signing, install, upgrade-check, and handoff must stop when `scripts/validate-yapk-id-provenance.mjs` or `scripts/validate-yapk-navigation-runtime-metadata.mjs` fails.
+
 ## Canonical Schema Files
 
 Package validation helpers use stable packaged schema paths: YAPK validation uses `schemas/yapk-schema.json`, and YAP validation uses `schemas/yap-schema.json`. Do not hardcode versioned schema filenames in runtime logic. To update a product schema standard later, replace the canonical file contents while keeping these filenames unchanged. Keep YAP and YAPK schema standards separate when shaping install or upgrade preflight checks.

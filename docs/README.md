@@ -28,6 +28,8 @@ Sparse paths:
 - [Yeeflow REST API capability map](yeeflow-rest-api-capability-map.md)
 - [Local development policy](local-development-policy.md)
 - [YAPK generation guardrails](yapk-generation-guardrails.md)
+- [YAPK ID provenance hard gate](yapk-id-provenance-hard-gate.md)
+- [YAPK navigation runtime metadata gate](yapk-navigation-runtime-metadata-gate.md)
 - [Application navigation generation rules](application-navigation-generation-rules.md)
 - [Package signing and runtime proof boundaries](package-signing-and-runtime-proof-boundaries.md)
 - [Release hygiene](release-hygiene.md)

@@ -5,6 +5,10 @@ description: Standardize Yeeflow package validation before import or runtime tes
 
 # Yeeflow Package Validator
 
+## Generated-Final YAPK ID And Navigation Hard Gates
+
+Generated-final `.yapk` output must use API-issued numeric content IDs from `GET /utils/generate/ids?count=<n>` and must emit a redacted `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`, path-to-purpose mappings, duplicate checks, unused-ID accounting, generator provenance metadata, and no non-API IDs. Local ID generation, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds are forbidden for generated-final `.yapk`. Runtime navigation groups must include API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; children must include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`, with dashboards/pages as `Type: 103` plus `LayoutID`, approval forms as `Type: 105`, and data lists as `Type: 1`. Run `scripts/validate-yapk-id-provenance.mjs` and `scripts/validate-yapk-navigation-runtime-metadata.mjs`; stop before signing, install, upgrade-check, or handoff if either gate fails. `setsign`/`verifysign` and install acceptance do not prove ID provenance or navigation runtime metadata completeness.
+
 ##
 YAP approval designer-shape validation: generated-final approval form YAPs must fail for missing or duplicate control IDs, unresolved control ID references, unproven control families, missing heading/text native values, placeholder heading text such as `Here is the title`, label/native text mismatch, missing child `ListType`, incomplete list/layout/DefResource metadata, invalid `NoRule`, unpublished form status, and missing app group IDs in `Resource.ReplaceIds`. Apply these as generated-final/import-qualified checks, not global historical export blockers.
  Canonical Schema Files
@@ -109,7 +113,7 @@ Treat hard `YAP_*` form-workspace findings as blockers for generated form worksp
 - Prefer Browser OAuth-backed Yeeflow API calls for user-facing usage. If OAuth is not authenticated, ask the user to run `node scripts/yeeflow-oauth-login.mjs`; never ask for a Yeeflow password.
 - Prefer read-only capabilities for inspection and verification. Require explicit user confirmation for write capabilities and stronger confirmation for package install/import/upgrade/delete.
 - Keep legacy `YEEFLOW_API_KEY` mode as an internal fallback only; do not ask users to paste API keys, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into chat.
-- Use OAuth token claim `tenant` for tenant/app links when available; use `YEEFLOW_TENANT_URL` only as an optional fallback override, for example `https://<yourdomain>.yeeflow.com`; never use a tenant URL as the API base.
+- Use `YEEFLOW_TENANT_URL` only for tenant/app links, for example `https://<yourdomain>.yeeflow.com`; never use a tenant URL as the API base.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
 - Support `YEEFLOW_PROFILE` where scripts support profiles. It selects one active local tenant profile per run using `YEEFLOW_<PROFILE>_API_KEY`, `YEEFLOW_<PROFILE>_TENANT_URL`, and `YEEFLOW_<PROFILE>_TENANT_ID`.
 - Validate and redact environment variables before API calls and never print API keys, OAuth access tokens, refresh tokens, ID tokens, auth codes, cookies, Authorization headers, raw API responses, tenant IDs, private URLs, raw `Resource`, raw `Sign`, decoded payloads, or generated runtime packages.

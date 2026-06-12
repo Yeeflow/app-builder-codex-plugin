@@ -419,6 +419,16 @@ Custom code rules:
 - Placeholder `Sign` is not upload-ready
 - Signature verification must pass before handoff
 - Local schema validation is not upload readiness
+- Signing/install acceptance does not prove ID provenance or navigation runtime metadata completeness
+
+### API-Issued Content ID Provenance Gate
+
+- Generated-final `.yapk` packages must allocate numeric generated app content IDs through `GET /utils/generate/ids?count=<n>`
+- Local sequential counters, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds are forbidden
+- Required artifact: `dist/<app-name>-id-provenance-report.json`
+- Required source marker: `api-generated`
+- Required report contents: total requested IDs, total received IDs, allocation count, unused count, duplicate check, path-to-purpose mapping, source marker, and empty non-API ID list
+- Missing or failed ID provenance validation stops generation before signing, install, upgrade-check, or handoff
 
 ### Approval Form Gate
 
@@ -429,13 +439,18 @@ Custom code rules:
 
 ### Navigation Runtime Gate
 
-- Group shape: `Type: "classes"` + `list`
-- No `children` runtime groups
+- Group shape: `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list`
+- Group `ID` must be API-issued and present in the ID provenance manifest
+- Group `AppID` must equal the package/root AppID
+- Group `ListSetID` must equal the current root `ListSet.ListID`
+- No `children` or `Childs` runtime groups
+- Every child item includes `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`
 - Resource type mapping:
-  - page/dashboard `Type: 103`
-  - approval form `Type: 105`
-  - data list `Type: 1`
+  - page/dashboard `Type: 103`, `LayoutID`, and `ListID = LayoutID`
+  - approval form `Type: 105`, `ListID = Forms[].Key`
+  - data list `Type: 1`, `ListID = Childs[].List.ListID`
 - Unreachable intended resources are failures unless documented hidden/deferred
+- Missing or failed navigation runtime metadata validation stops generation before signing, install, upgrade-check, or handoff
 
 ### Plan-to-Package Conformance Gate
 
@@ -463,6 +478,8 @@ Generator must prove:
 ## 19. Generation Validation Plan
 
 - Schema validation:
+- ID provenance validation:
+- Navigation runtime metadata validation:
 - Graph validation:
 - UI quality validation:
 - App-plan conformance validation:
@@ -474,8 +491,13 @@ Generator must prove:
 - Custom code/custom CSS validation:
 - Golden/template conformance validation:
 - Signing validation:
+- Signature verification:
+- API install/import acceptance:
+- Runtime UI proof:
 - Package wrapper validation:
 - Source/dist consistency validation:
+- Deferred items:
+- Known risks:
 
 ## 20. Proof Boundary
 
@@ -484,6 +506,9 @@ Separate these proof levels:
 - Plan approval:
 - Local generation validation:
 - Package schema validation:
+- ID provenance proof: pending / passed / failed
+- Navigation runtime metadata proof: pending / passed / failed
+- Evidence: ID allocation manifest and validator results
 - Signing proof:
 - API install/import acceptance:
 - Runtime materialization/render proof:
@@ -494,6 +519,7 @@ Separate these proof levels:
 - Custom code execution proof:
 - External integration execution proof:
 - Permission enforcement proof:
+- Boundary: signing/install acceptance do not prove ID provenance or navigation runtime metadata completeness
 
 ## 21. Assumptions
 
@@ -515,4 +541,4 @@ Separate these proof levels:
 
 Use this prompt after the plan is approved:
 
-`Use @yeeflow-app-builder to generate <Application Name> from <plan path>. Treat the approved plan as the implementation contract. Generate the complete planned application unless an item is explicitly deferred. Use .yapk by default unless .yap is explicitly requested. Validate schema, graph, UI quality, navigation, approval forms, app-plan conformance, package wrapper/signing readiness, and source/dist consistency. Do not run live Yeeflow API calls, write operations, install/import/upgrade, or runtime tests unless explicitly authorized. Report local validation, signing status, API acceptance, runtime proof, deferred items, and known risks separately.`
+`Use @yeeflow-app-builder to generate <Application Name> from <plan path>. Treat the approved plan as the implementation contract. Generate the complete planned application unless an item is explicitly deferred. Use .yapk by default unless .yap is explicitly requested. Validate schema, ID provenance, navigation runtime metadata, graph, UI quality, approval forms, app-plan conformance, package wrapper/signing readiness, and source/dist consistency. Do not run live Yeeflow API calls, write operations, install/import/upgrade, or runtime tests unless explicitly authorized. Report local validation, ID provenance, navigation runtime metadata, signing status, API acceptance, runtime proof, deferred items, and known risks separately.`

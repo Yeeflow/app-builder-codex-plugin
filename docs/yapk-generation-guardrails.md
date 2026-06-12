@@ -9,6 +9,25 @@ These rules encode the Leave Request Application lessons for future generated `.
 - The approved app plan was the implementation contract. A package with `Forms: []` was incomplete because the plan required a leave request approval workflow.
 - Local navigation conformance accepted `children`, but Yeeflow runtime grouped navigation required `Type: "classes"` with `list`.
 - Generated reports must separate schema validation, signing proof, API install acceptance, runtime UI proof, and deferred scope.
+- Generated-final packages must separate ID provenance validation and navigation runtime metadata validation from signing and install acceptance.
+
+## API-Issued Content ID Provenance Gate
+
+Every numeric generated application content ID must be allocated by Yeeflow ID API before package assembly:
+
+```text
+GET /utils/generate/ids?count=<n>
+```
+
+The generator must emit `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`, path-to-purpose mappings, duplicate checks, unused-ID accounting, generator provenance metadata, and no non-API IDs.
+
+Run:
+
+```bash
+node scripts/validate-yapk-id-provenance.mjs --package <app.yapk> --manifest <app-id-provenance-report.json>
+```
+
+Local `id()` helpers, hardcoded generated IDs, copied sample/export IDs, local counters, random values, timestamps, UUID fallback, and deterministic local-only seeds are generated-final blockers.
 
 ## Signing Gate
 
@@ -41,17 +60,23 @@ If approval-form generation is deferred, state the deferred scope in the generat
 
 ## Navigation Gate
 
-Root application navigation must use export-proven Yeeflow runtime shapes:
+Root application navigation must use export-proven Yeeflow runtime shapes with full runtime metadata:
 
 ```json
 {
+  "ID": "<api-issued-id>",
+  "AppID": 41,
+  "ListSetID": "<current-root-listset-id>",
   "Title": "Requests",
+  "Icon": "folder",
   "Type": "classes",
   "list": [
     {
+      "AppID": 41,
       "Title": "New Leave Request",
       "Type": 105,
-      "ListID": "LEAVE_REQUEST_APPROVAL_FORM"
+      "ListID": "LEAVE_REQUEST_APPROVAL_FORM",
+      "ListSetID": "<current-root-listset-id>"
     }
   ]
 }
@@ -66,6 +91,14 @@ Navigation entry targets:
 - data list: `Type: 1`, `ListID` equal to an included child list ID
 
 Every generated page, list, or form intended for use must be reachable through visible navigation or explicitly documented as hidden/deferred.
+
+Run:
+
+```bash
+node scripts/validate-yapk-navigation-runtime-metadata.mjs --package <app.yapk> --id-provenance <app-id-provenance-report.json>
+```
+
+Generation, signing, install, upgrade-check, and handoff must stop if ID provenance or navigation runtime metadata validation fails.
 
 ## Environment Checklist
 

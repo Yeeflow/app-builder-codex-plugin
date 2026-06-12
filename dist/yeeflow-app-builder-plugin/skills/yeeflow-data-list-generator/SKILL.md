@@ -5,6 +5,10 @@ description: generate, inspect, validate, package, debug, and improve yeeflow da
 
 # Yeeflow Data List Generator
 
+## Generated-Final YAPK ID And Navigation Hard Gates
+
+Generated-final `.yapk` output must use API-issued numeric content IDs from `GET /utils/generate/ids?count=<n>` and must emit a redacted `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`, path-to-purpose mappings, duplicate checks, unused-ID accounting, generator provenance metadata, and no non-API IDs. Local ID generation, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds are forbidden for generated-final `.yapk`. Runtime navigation groups must include API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; children must include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`, with data lists as `Type: 1` and `ListID = Childs[].List.ListID`. Run `scripts/validate-yapk-id-provenance.mjs` and `scripts/validate-yapk-navigation-runtime-metadata.mjs`; stop before signing, install, upgrade-check, or handoff if either gate fails. `setsign`/`verifysign` and install acceptance do not prove ID provenance or navigation runtime metadata completeness.
+
 ##
 YAP approval workspace list metadata update: child lists used by generated approval form workspaces must keep export-shaped `ListType`, full list metadata, default view/layout metadata, stringified field `Rules`, keyed `ListDatas`, and ID coverage in `Resource.ReplaceIds`. Missing list metadata can break approval form materialization even when the form tree itself looks valid.
  Canonical Schema Files
