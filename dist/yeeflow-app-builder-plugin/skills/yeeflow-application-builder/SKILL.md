@@ -80,8 +80,8 @@ For any generated YAP package, rebuild `Resource.ReplaceIds` from the final deco
 ## Public Tenant Safety
 
 - Never hardcode a tenant-specific Yeeflow URL. Use `https://<yourdomain>.yeeflow.com` in docs and examples.
-- For live API calls, prefer `YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1` and `YEEFLOW_API_KEY`; do not ask users to paste secrets into chat.
-- Use `YEEFLOW_TENANT_URL` only for tenant/app links, for example `https://<yourdomain>.yeeflow.com`; never use a tenant URL as the API base.
+- For live user-facing API calls, use OAuth; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`.
+- Do not use `YEEFLOW_API_KEY` for normal plugin/API operation; keep it only as a legacy/deprecated fallback where existing code still supports it.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
 - Support `YEEFLOW_PROFILE` where scripts support profiles. It selects one active local tenant profile per run using `YEEFLOW_<PROFILE>_API_KEY`, `YEEFLOW_<PROFILE>_TENANT_URL`, and `YEEFLOW_<PROFILE>_TENANT_ID`.
 - Validate and redact environment variables before API calls and never print API keys, raw API responses, tenant IDs, private URLs, raw `Resource`, raw `Sign`, decoded payloads, or generated runtime packages.
@@ -185,7 +185,7 @@ YAPK schema v2 rule from Vendor Onboarding v1.13-v1.15, updated for v0.6.18 cano
 
 New Yeeflow application delivery defaults to `.yapk`, not `.yap`. Generate `.yap` only when the user explicitly asks for YAP, when a product-team/debug task is specifically about YAP import, or when a documented fallback requires it. For new apps, build and validate the inner `AppPackageInfo`, then produce a YAPK package for manual install or package-API install.
 
-Before delivery, inspect local environment presence without printing values. `YEEFLOW_WORKSPACE_ID` is optional for normal OAuth and read-only workspace discovery; package install/import/upgrade must instead resolve an explicit target workspace from `--workspace-id`, optional environment default, or a user-selected workspace listed with `node scripts/yeeflow-workspace-list.mjs --category <category>`. Never auto-install without explicit confirmation and target workspace confirmation. For existing app changes, generate a versioned YAPK and use upgrade automation only after the target app/package is clearly identified, safe, and confirmed. Classify package API results as `success`, `already_installed`, `api_rejected`, or `http_rejected`; handle `already_installed` by recommending upgrade flow, cleanup, or a renamed/new-version package rather than retrying blindly.
+Before delivery, inspect local environment presence without printing values. If package automation is requested, use OAuth and resolve the target workspace from `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` if present, or user-selected `flowcraft` workspace discovery; never auto-install without explicit confirmation. For existing app changes, generate a versioned YAPK and use upgrade automation only after the target app/package is clearly identified, safe, and confirmed. Classify package API results as `success`, `already_installed`, `api_rejected`, or `http_rejected`; handle `already_installed` by recommending upgrade flow, cleanup, or a renamed/new-version package rather than retrying blindly.
 
 This skill is the top-level application-building controller. It coordinates proven generator skills:
 

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Treat OAuth as the normal workspace discovery path, document `settings` and `flowcraft` as the current workspace categories, and use `flowcraft` for app/package workspace selection.
+- Add combined workspace discovery with safe redacted summaries, including the `Shared Workspace` fallback for blank-title `Status: 1` default workspaces.
+- Remove normal `.env.local` setup requirements for API base, API key, tenant URL, tenant ID, and workspace ID; keep `YEEFLOW_WORKSPACE_ID` only as an optional manual package target override.
+
 ## 0.6.29
 
 - Bump the active plugin version after the workspace API capability/discovery merge.
@@ -35,7 +39,7 @@
 - Remove the normal local `YEEFLOW_OAUTH_CLIENT_SECRET` requirement from OAuth/API environment documentation.
 - Derive tenant/user context from OAuth access token claims `tenantid`, `tenant`, and `accountid`.
 - Make `YEEFLOW_TENANT_URL` an optional manual override only for tenant UI/browser links before token context is available.
-- Reduce the recommended `.env.local` to `YEEFLOW_WORKSPACE_ID=<your workspace id>` while keeping `YEEFLOW_API_KEY` as a legacy/deprecated fallback only.
+- Earlier OAuth docs reduced the recommended `.env.local` footprint and kept API-key mode legacy/deprecated; current guidance no longer requires `.env.local` for normal OAuth plus workspace discovery.
 
 ## 0.6.25
 

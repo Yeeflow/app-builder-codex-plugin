@@ -7,7 +7,15 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { environmentPresence, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
-import { redactWorkspaceId, resolveTargetWorkspaceId, summarizeWorkspaceList } from "./lib/yeeflow-workspace-selection.mjs";
+import {
+  APP_PACKAGE_WORKSPACE_CATEGORY,
+  combineWorkspaceSummaries,
+  DOCUMENTED_WORKSPACE_CATEGORIES,
+  redactWorkspaceId,
+  resolveTargetWorkspaceId,
+  summarizeWorkspaceList,
+  WORKSPACE_STATUS_MEANINGS,
+} from "./lib/yeeflow-workspace-selection.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const helper = path.join(repoRoot, "scripts", "yeeflow-package-api-automation.mjs");
@@ -30,6 +38,7 @@ fs.writeFileSync(yapkPath, "dry-run-yapk");
 
 try {
   testEnvResolverWorkspacePresence();
+  testDocumentedWorkspaceCategoriesAndStatusFallback();
   testWorkspaceResolutionOrder();
   testWorkspaceListRedaction();
   testMissingWorkspaceFailsImport();
@@ -60,6 +69,34 @@ function testEnvResolverWorkspacePresence() {
   assert.equal(JSON.stringify(presence).includes("profile-workspace"), false);
 }
 
+function testDocumentedWorkspaceCategoriesAndStatusFallback() {
+  assert.deepEqual(DOCUMENTED_WORKSPACE_CATEGORIES, ["settings", "flowcraft"]);
+  assert.equal(APP_PACKAGE_WORKSPACE_CATEGORY, "flowcraft");
+  assert.equal(WORKSPACE_STATUS_MEANINGS[0], "normal user-created/editable workspace");
+  assert.equal(WORKSPACE_STATUS_MEANINGS[1], "tenant default/shared workspace, editable but not deletable");
+
+  const settings = summarizeWorkspaceList({ Data: [] });
+  const flowcraft = summarizeWorkspaceList({
+    Data: [
+      { Category: "flowcraft", ID: "workspace-normal-000001", Title: "Operations", Status: 0 },
+      { Category: "flowcraft", ID: "workspace-default-000002", Title: "", Status: 1 },
+    ],
+  });
+  const combined = combineWorkspaceSummaries([
+    { category: "settings", ...settings },
+    { category: "flowcraft", ...flowcraft },
+  ]);
+
+  assert.equal(combined.workspaceCount, 2);
+  assert.deepEqual(combined.categories, ["settings", "flowcraft"]);
+  assert.equal(combined.workspaces[0].displayName, "Operations");
+  assert.equal(combined.workspaces[0].statusMeaningProvenance, "product-knowledge");
+  assert.equal(combined.workspaces[1].title, "");
+  assert.equal(combined.workspaces[1].displayName, "Shared Workspace");
+  assert.equal(combined.workspaces[1].statusMeaning, WORKSPACE_STATUS_MEANINGS[1]);
+  assert.equal(JSON.stringify(combined).includes("workspace-default-000002"), false);
+}
+
 function testWorkspaceResolutionOrder() {
   assert.deepEqual(resolveTargetWorkspaceId({
     cliWorkspaceId: "cli-workspace",
@@ -85,18 +122,20 @@ function testWorkspaceListRedaction() {
     Data: [
       {
         TenantID: 12345,
-        Category: "app",
+        Category: "flowcraft",
         ID: rawId,
         Title: "Operations",
-        Status: 1,
+        Status: 0,
         Owners: [{ ID: "private-owner" }],
       },
     ],
   });
   assert.equal(summary.workspaceCount, 1);
   assert.equal(summary.workspaces[0].title, "Operations");
-  assert.equal(summary.workspaces[0].category, "app");
-  assert.equal(summary.workspaces[0].status, 1);
+  assert.equal(summary.workspaces[0].displayName, "Operations");
+  assert.equal(summary.workspaces[0].category, "flowcraft");
+  assert.equal(summary.workspaces[0].status, 0);
+  assert.equal(summary.workspaces[0].statusMeaning, WORKSPACE_STATUS_MEANINGS[0]);
   assert.equal(summary.workspaces[0].idPreview, redactWorkspaceId(rawId));
   assert.equal(JSON.stringify(summary).includes(rawId), false);
   assert.equal(JSON.stringify(summary).includes("TenantID"), false);
@@ -109,7 +148,8 @@ function testMissingWorkspaceFailsImport() {
   const result = runHelper(["--operation", "import-yap", "--package", yapPath, "--dotenv", dotenv]);
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Target workspace is required/);
-  assert.match(result.stderr, /yeeflow-workspace-list\.mjs/);
+  assert.match(result.stderr, /yeeflow-workspace-list\.mjs --all/);
+  assert.match(result.stderr, /flowcraft workspace/);
 }
 
 function testWorkspaceFromEnvPassesAndIsRedacted() {

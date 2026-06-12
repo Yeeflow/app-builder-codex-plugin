@@ -12,9 +12,9 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Safe API Usage
 
-Before Yeeflow API work, check OAuth/API auth status and the REST API capability map. Use only documented capabilities. Do not expose arbitrary raw API calls, secrets, raw responses, tenant URLs, full workspace IDs, or decoded private payloads.
+Before Yeeflow API work, check OAuth auth status and the REST API capability map. OAuth login is required for normal user-facing API access. Use only documented capabilities. Do not expose arbitrary raw API calls, secrets, raw responses, tenant URLs, full workspace IDs, or decoded private payloads.
 
-`.env.local` can be empty for normal OAuth plus workspace discovery. `YEEFLOW_WORKSPACE_ID` is an optional default/override for package import/install/upgrade, not a required setup value. List workspaces with `node scripts/yeeflow-workspace-list.mjs --category <category>` and show only count, title, category, status, and redacted workspace ID previews. Package writes still require explicit target workspace confirmation and `--execute`.
+`.env.local` can be absent or empty for normal OAuth plus workspace discovery. `YEEFLOW_WORKSPACE_ID` is an optional manual default/override for package import/install/upgrade, not a required setup value. List all current workspaces with `node scripts/yeeflow-workspace-list.mjs --all`, or use `--category flowcraft` for app/package workspace selection. Show only count, title or user-facing fallback name, category, status, status provenance, and redacted workspace ID previews. If API title is blank and `Status: 1`, display `Shared Workspace`. Package writes still require explicit target workspace confirmation and `--execute`.
 
 ## Generated-Final YAPK Hard Gates
 

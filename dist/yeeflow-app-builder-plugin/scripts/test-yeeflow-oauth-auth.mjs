@@ -30,7 +30,7 @@ import {
   saveStoredToken,
   summarizeStoredToken,
 } from "./lib/yeeflow-oauth-client.mjs";
-import { resolveYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
+import { requireYeeflowOAuthAuth, resolveYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
 import {
   decodeJwtPayload,
   extractYeeflowTokenContext,
@@ -67,6 +67,7 @@ try {
   testOAuthDefaultsWithoutEnv();
   await testOAuthAuthWithoutApiKey();
   await testOAuthPreferredOverApiKey();
+  await testWorkspaceDiscoveryRequiresOAuth();
   await testApiKeyFallback();
   console.log("yeeflow-oauth-auth tests passed");
 } finally {
@@ -465,6 +466,22 @@ async function testOAuthPreferredOverApiKey() {
   } finally {
     process.env = originalEnv;
     clearStoredToken(config);
+  }
+}
+
+async function testWorkspaceDiscoveryRequiresOAuth() {
+  const originalEnv = process.env;
+  process.env = {
+    YEEFLOW_API_KEY: "legacy-secret",
+    YEEFLOW_OAUTH_TOKEN_FILE: path.join(tempDir, "missing-workspace-token.json"),
+  };
+  try {
+    await assert.rejects(
+      () => requireYeeflowOAuthAuth({ loadDotenv: false }),
+      /OAuth authentication is required.*yeeflow-oauth-login\.mjs/,
+    );
+  } finally {
+    process.env = originalEnv;
   }
 }
 
