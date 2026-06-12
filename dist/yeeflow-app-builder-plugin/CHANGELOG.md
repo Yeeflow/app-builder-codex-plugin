@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+## 0.6.26
+
 - Confirm Yeeflow OAuth supports Authorization Code with PKCE S256 for login and refresh without a client secret.
 - Remove the normal local `YEEFLOW_OAUTH_CLIENT_SECRET` requirement from OAuth/API environment documentation.
+- Derive tenant/user context from OAuth access token claims `tenantid`, `tenant`, and `accountid`.
+- Make `YEEFLOW_TENANT_URL` an optional manual override only for tenant UI/browser links before token context is available.
+- Reduce the recommended `.env.local` to `YEEFLOW_WORKSPACE_ID=<your workspace id>` while keeping `YEEFLOW_API_KEY` as a legacy/deprecated fallback only.
 
 ## 0.6.25
 
