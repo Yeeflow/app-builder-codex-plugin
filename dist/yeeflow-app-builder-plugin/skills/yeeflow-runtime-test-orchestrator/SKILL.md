@@ -5,6 +5,10 @@ description: Standardize runtime testing for generated or modified Yeeflow appli
 
 # Yeeflow Runtime Test Orchestrator
 
+## UI Generation Hard-Gate Skill
+
+Use `yeeflow-ui-generation-hard-gates` when runtime testing must decide whether generated dashboard/UI output, Summary/KPI display, fallback KPI values, or upgrade-lineage changes can be called proven. High-quality UI requires a page-by-page implementation contract; uncertain UI/runtime patterns should be proven on a sandbox page first; use export-proven Yeeflow control/style shapes; Summary/KPI controls require designer-shaped hidden Summary configuration; Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`; visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled as fallback; runtime screenshot evidence is required before claiming UI quality; install/signing/API acceptance is not runtime UI proof; UI upgrades must preserve ListSetID, app identity, existing IDs, and declared change scope; broad scaffold-like UI must not be claimed as high-quality UI.
+
 ## Generated-Final YAPK ID And Navigation Hard Gates
 
 YAPK upgrade ID stability hard gate: upgrade/new-version `.yapk` output must preserve IDs for existing semantic resources from the previous package/lineage manifest. Only newly added resources may consume newly API-issued IDs, removed IDs must not be reused, replacing all IDs is a hard failure, and `scripts/validate-yapk-upgrade-id-stability.mjs` must pass before signing, upgrade-check, upgrade apply, install-like writes, or handoff. Missing previous package/manifest fails closed; signing/install/upgrade acceptance is not ID-continuity proof.

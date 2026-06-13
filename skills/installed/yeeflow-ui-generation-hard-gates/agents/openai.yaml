@@ -1,0 +1,4 @@
+version: 1
+display_name: Yeeflow UI Generation Hard Gates
+short_description: Enforce Yeeflow UI generation proof gates.
+default_prompt: Use the Yeeflow UI generation hard gates to require page-by-page UI contracts, export-proven styles, Summary/KPI proof boundaries, runtime screenshot evidence, sandbox-page proof for uncertain patterns, and ListSetID/app identity stability before high-quality UI claims or upgrade handoff.
