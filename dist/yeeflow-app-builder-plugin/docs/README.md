@@ -34,6 +34,7 @@ Sparse paths:
 - [YAPK navigation runtime metadata gate](yapk-navigation-runtime-metadata-gate.md)
 - [Dashboard grid-table Collection pattern](dashboard-grid-table-collection-pattern.md)
 - [Generated dashboard UI quality gates](generated-dashboard-ui-quality-gates.md)
+- [Redacted runtime evidence template](examples/runtime-evidence.redacted.example.json)
 - [Application navigation generation rules](application-navigation-generation-rules.md)
 - [Package signing and runtime proof boundaries](package-signing-and-runtime-proof-boundaries.md)
 - [Release hygiene](release-hygiene.md)
@@ -44,6 +45,8 @@ Sparse paths:
 - `yeeflow-ui-generation-hard-gates`: use before claiming high-quality dashboard/UI output, generating Summary/KPI dashboards, relying on runtime screenshot evidence, proving uncertain UI/control/style patterns on sandbox pages, or upgrading existing UI packages where ListSetID/app identity must remain stable. This skill owns the reusable page-by-page implementation contract, export-proven style/control shape, Summary/KPI proof-boundary, fallback KPI labeling, runtime screenshot, and UI upgrade lineage standards.
 
 This routing means high-quality UI requires a page-by-page implementation contract; uncertain UI/runtime patterns should be proven on a sandbox page first; use export-proven Yeeflow control/style shapes; Summary/KPI controls require designer-shaped hidden Summary configuration; Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`; visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled as fallback; runtime screenshot evidence is required before claiming UI quality; install/signing/API acceptance is not runtime UI proof; UI upgrades must preserve ListSetID, app identity, existing IDs, and declared change scope; broad scaffold-like UI must not be claimed as high-quality UI.
+
+Use `examples/runtime-evidence.redacted.example.json` as the starting point for runtime proof reports consumed by `scripts/inspect-runtime-evidence.mjs` and `scripts/inspect-visible-kpi-runtime-bindings.mjs`. Run `node scripts/test-ui-hard-gates-all.mjs` before claiming UI quality. Dynamic visible KPI binding remains unresolved unless runtime-proven; a future golden runtime package/evidence fixture is required before promoting any exact proven dynamic KPI shape.
 
 ## Development Areas
 

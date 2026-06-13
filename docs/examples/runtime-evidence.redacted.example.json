@@ -1,0 +1,92 @@
+{
+  "templatePurpose": "Synthetic redacted runtime evidence template for UI/Summary/KPI hard-gate validators.",
+  "redactionStatus": "synthetic-only-no-private-endpoints-no-identifiers-no-response-bodies-no-payloads",
+  "appName": "Synthetic Marketing Event Management",
+  "pageName": "Event Portfolio Dashboard",
+  "pageType": "dashboard",
+  "evidenceTimestamp": "YYYY-MM-DDTHH:mm:ssZ",
+  "screenshotPath": "REDACTED_RUNTIME_SCREENSHOT_PATH.png",
+  "runtimeScreenshotCaptured": true,
+  "installOrSigningOnly": false,
+  "runtimeProofStatus": "runtime screenshot evidence required before UI-quality claim",
+  "dynamicVisibleKpiRuntimeProven": false,
+  "proofBoundaryNotes": [
+    "UI runtime proof is based on redacted screenshot/evidence metadata only.",
+    "Dynamic visible KPI binding is not considered solved in this example.",
+    "Fallback KPI values are explicitly labeled as fallback and must remain so until runtime evidence proves dynamic rendering.",
+    "Install/signing/API acceptance is not visual runtime UI proof."
+  ],
+  "kpiValuesVisible": true,
+  "hiddenSummaryVisible": false,
+  "dashboardCardsCardLike": true,
+  "filtersActionsVisible": true,
+  "tablesGridsNonScaffold": true,
+  "badgesDistinct": true,
+  "pageLooksPlainScaffold": false,
+  "kpis": [
+    {
+      "label": "Planned Events",
+      "renderedText": "Fallback: 12 planned events",
+      "fallback": true,
+      "fallbackLabeled": true,
+      "dynamicBindingClaimed": false,
+      "runtimeProven": false,
+      "proofState": "fallback-labeled-dynamic-binding-not-proven"
+    },
+    {
+      "label": "Open Risks",
+      "renderedText": "Fallback: 3 open risks",
+      "fallback": true,
+      "fallbackLabeled": true,
+      "dynamicBindingClaimed": false,
+      "runtimeProven": false,
+      "proofState": "fallback-labeled-dynamic-binding-not-proven"
+    }
+  ],
+  "summaryControls": {
+    "designerConfigured": true,
+    "validatorValid": true,
+    "runtimeProvenVisibleDynamicKpi": false,
+    "hiddenContainerExpectedHidden": true,
+    "hiddenSummaryVisibilityStatus": "not-visible-in-runtime-evidence"
+  },
+  "cards": [
+    {
+      "name": "Planned Events KPI card",
+      "cardLike": true,
+      "visibleValue": true
+    }
+  ],
+  "filters": [
+    {
+      "name": "Event status filter",
+      "visible": true,
+      "interactiveState": "not-tested-in-template"
+    }
+  ],
+  "tables": [
+    {
+      "name": "Event portfolio grid",
+      "nonScaffold": true,
+      "meaningfulHeaders": true,
+      "rowActionVisibleWhenPlanned": true
+    }
+  ],
+  "badges": [
+    {
+      "name": "Event status badge",
+      "visuallyDistinct": true
+    }
+  ],
+  "privateDataPolicy": {
+    "privateEndpointIncluded": false,
+    "privateIdentifierIncluded": false,
+    "apiResponseBodyIncluded": false,
+    "packagePayloadIncluded": false,
+    "rawResourceIncluded": false,
+    "rawSignIncluded": false,
+    "oauthTokenIncluded": false,
+    "apiKeyIncluded": false
+  },
+  "futureGoldenRuntimePackageNote": "Once dynamic KPI binding is truly runtime-proven, add a dedicated golden runtime package/evidence fixture and update the hard gate from unresolved unless proven to use this exact proven shape. Until then, dynamic visible KPI binding remains unresolved unless runtime evidence proves it."
+}

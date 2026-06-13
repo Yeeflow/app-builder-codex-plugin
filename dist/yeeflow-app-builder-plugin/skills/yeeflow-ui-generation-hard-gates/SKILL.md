@@ -24,6 +24,9 @@ This is one reusable skill for page-by-page UI/dashboard contracts, Summary/KPI 
 9. Require runtime screenshot evidence before UI-quality claims. Runtime screenshot evidence is required before claiming UI quality, including visible KPI values, hidden Summary controls not visible, card-like dashboard sections, visible filters/actions, non-scaffold tables/grids, distinct badges/chips, and no plain scaffold look.
 10. Keep proof boundaries explicit. Install/signing/API acceptance is not runtime UI proof, schema validation is not visual proof, and successful upgrade-check is not proof that dashboard runtime rendering is good.
 11. Preserve upgrade lineage. UI upgrades must preserve ListSetID, app identity, existing IDs, and declared change scope. They must also preserve existing resource IDs and final `Resource.ReplaceIds` coverage. Stop if a user requested an update but the package is classified as fresh install, existing pages/resources drift outside scope, IDs are reallocated, or lineage metadata is missing.
+12. Start runtime proof reports from `docs/examples/runtime-evidence.redacted.example.json` when evidence metadata is needed. The template is synthetic, redacted, labels fallback KPI values as fallback, and is shaped for `scripts/inspect-runtime-evidence.mjs` plus `scripts/inspect-visible-kpi-runtime-bindings.mjs`.
+13. Run `node scripts/test-ui-hard-gates-all.mjs` before claiming UI quality. The aggregate smoke is local-only and must not require live Yeeflow API access, private screenshots, package install/import/upgrade, or write operations.
+14. Keep the future dynamic KPI binding path separate from current fallback-only status. Once dynamic KPI binding is truly runtime-proven, add a dedicated golden runtime package/evidence fixture and update the hard gate from “unresolved unless proven” to “use this exact proven shape.” Until then, dynamic visible KPI binding remains unresolved unless runtime evidence proves it, and fallback KPI values must remain explicitly labeled as fallback.
 
 ## Stop Conditions
 
@@ -53,6 +56,8 @@ Use the final validator/tool names from the UI hard-gate standard:
 - `scripts/inspect-grid-table-quality.mjs` for Collection grid-table columns, headers, item templates, empty states, and row/action links
 - `scripts/inspect-yapk-upgrade-app-identity.mjs` for ListSetID/app identity, existing IDs, declared change scope, package lineage, and final `Resource.ReplaceIds` coverage
 - `scripts/decode-yapk-tolerant-brotli.mjs` only for safe structural diagnostics of official designer exports; never expose package payload content
+- `scripts/test-ui-hard-gates-all.mjs` for the aggregate local UI hard-gate smoke, including the runtime evidence template checks and layout-aware skill wording test
+- `docs/examples/runtime-evidence.redacted.example.json` as the redacted runtime evidence template for `inspect-runtime-evidence.mjs` and `inspect-visible-kpi-runtime-bindings.mjs`
 
 ## Reporting
 
