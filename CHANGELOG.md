@@ -2,8 +2,17 @@
 
 ## Unreleased
 
-- Add workflow assignment assignee guardrails: app plans must include Assignment Task assignee strategy/proof status, generated-final validation blocks empty/placeholder/invented job-position routing, and job-position writes require explicit confirmation plus confirmed system-admin permission.
-- Document read-only job-position discovery boundaries and the remaining gap for current-user/system-admin permission detection; workflow assignment routing remains runtime/browser proof required.
+## 0.6.33
+
+- Bump the active plugin version after the workflow assignment job-position guardrails merge.
+- Require every workflow Assignment Task to have an explicit assignee strategy and proof boundary in the app plan and generated application report.
+- Validate manager-based assignees only for supported expression-editor patterns: line manager, department manager, and location manager.
+- Require job-position assignees to use discovered existing, user-selected existing, or admin-created-after-confirmation proof metadata; the plugin must not invent job-position IDs or names.
+- Map `positions.list` as read-only `GET /positions` and `positions.users.list` as read-only `GET /positions/{id}/users` for discovery/lookup only.
+- Keep job-position create, update, assign, and remove operations classified as writes that require explicit confirmation and confirmed system-admin permission; no current-user/system-admin permission API is claimed unless mapped.
+- Block missing job positions unless admin status is separately confirmed and explicit write confirmation is provided, otherwise ask for system-admin creation or an existing job position/fallback.
+- Fail generated-final validation on empty assignees, placeholder assignees, invented job-position references, malformed manager expressions, missing job-position proof, and unconfirmed job-position creation paths before signing, install, upgrade, or handoff.
+- State that runtime/browser workflow verification with a safe request is still required to prove actual assignment routing.
 
 ## 0.6.32
 
