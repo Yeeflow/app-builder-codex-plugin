@@ -8,7 +8,7 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Expected Version
 
-`0.6.34`
+`0.6.35`
 
 ## Safe API Usage
 
@@ -35,3 +35,5 @@ High-quality UI requires a page-by-page UI implementation contract, and scaffold
 Summary/KPI controls require designer-shaped hidden Summary configuration. Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`. Visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled fallback.
 
 Runtime screenshot/evidence is required before claiming UI quality. Install/signing/API acceptance is not runtime UI proof. UI upgrades must preserve ListSetID, app identity, existing IDs, lineage, and declared change scope. Use `yeeflow-ui-generation-hard-gates` when dashboard/UI/Summary/KPI generation or upgrade work is requested.
+
+Version `0.6.35` fixes UI hard-gate skill test layout compatibility. `scripts/test-ui-generation-hard-gate-skills.mjs` supports source layout `skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md` and installed plugin cache layout `skills/yeeflow-ui-generation-hard-gates/SKILL.md`, reports which path is used, and keeps UI/Summary/KPI hard-gate behavior unchanged. Fully dynamic visible KPI binding remains unresolved unless runtime-proven.

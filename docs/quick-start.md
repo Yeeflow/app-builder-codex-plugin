@@ -12,7 +12,7 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.34`.
+Expected plugin: `Yeeflow App Builder` version `0.6.35`.
 
 ## Configure Local Environment
 
@@ -27,7 +27,7 @@ Run OAuth login before API access. OAuth uses Authorization Code with PKCE S256,
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.34
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.35
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```
@@ -96,6 +96,8 @@ node scripts/inspect-yapk-upgrade-app-identity.mjs --package <package.yapk> --li
 ```
 
 When a task claims high-quality dashboard/UI output, route through `yeeflow-ui-generation-hard-gates` before package generation or handoff. High-quality UI requires a page-by-page implementation contract; uncertain UI/runtime patterns should be proven on a sandbox page first; use export-proven Yeeflow control/style shapes; Summary/KPI controls require designer-shaped hidden Summary configuration; Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`; visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled as fallback; runtime screenshot evidence is required before claiming UI quality; install/signing/API acceptance is not runtime UI proof; UI upgrades must preserve ListSetID, app identity, existing IDs, and declared change scope; broad scaffold-like UI must not be claimed as high-quality UI.
+
+`scripts/test-ui-generation-hard-gate-skills.mjs` validates `yeeflow-ui-generation-hard-gates` in both supported layouts: source layout `skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md` and installed plugin cache layout `skills/yeeflow-ui-generation-hard-gates/SKILL.md`. The test reports which path is used, fails only when neither path exists, and does not weaken UI/Summary/KPI hard-gate wording checks.
 
 The materialized Codex plugin cache must include the hard-gate cache artifacts under `scripts/`: `validate-yapk-id-provenance.mjs`, `validate-yapk-navigation-runtime-metadata.mjs`, `validate-yapk-upgrade-id-stability.mjs`, `validate-dashboard-grid-table-collections.mjs`, `inspect-yeeflow-ui-design-contract.mjs`, `inspect-dashboard-style-shapes.mjs`, `inspect-dashboard-summary-control-contract.mjs`, `inspect-visible-kpi-runtime-bindings.mjs`, `inspect-runtime-evidence.mjs`, `inspect-grid-table-quality.mjs`, `inspect-yapk-upgrade-app-identity.mjs`, `decode-yapk-tolerant-brotli.mjs`, `yapk-first-generation-preflight.mjs`, `test-yapk-id-navigation-hard-gates.mjs`, `test-yapk-upgrade-id-stability.mjs`, `test-dashboard-grid-table-collections.mjs`, and `test-ui-summary-kpi-runtime-hard-gates.mjs`. The root source copies and `dist/yeeflow-app-builder-plugin/scripts/` mirrors must stay byte-identical.
 
