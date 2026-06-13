@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.6.35
+
+- Bump the active plugin version after the UI hard-gate skill test layout compatibility fix.
+- Make `scripts/test-ui-generation-hard-gate-skills.mjs` support both the source layout path `skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md` and the installed plugin cache layout path `skills/yeeflow-ui-generation-hard-gates/SKILL.md`.
+- Report which UI hard-gate skill path is used and fail only when neither supported path exists.
+- Keep UI/Summary/KPI hard-gate behavior unchanged; fully dynamic visible KPI binding remains unresolved unless runtime-proven.
+
 ## 0.6.34
 
 - Bump the active plugin version after the UI/Summary/KPI runtime hard gates and UI generation hard-gate skill routing merge.
