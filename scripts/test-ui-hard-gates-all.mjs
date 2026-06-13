@@ -17,6 +17,7 @@ const childTests = [
       "inspect-yeeflow-ui-design-contract",
       "inspect-dashboard-style-shapes",
       "inspect-dashboard-summary-control-contract",
+      "inspect-data-analytics-control-identity",
       "inspect-visible-kpi-runtime-bindings",
       "inspect-runtime-evidence",
       "inspect-grid-table-quality",
@@ -54,7 +55,7 @@ function validateRuntimeEvidenceTemplate() {
   const raw = fs.readFileSync(templatePath, "utf8");
   const evidence = JSON.parse(raw);
 
-  assert.equal(evidence.dynamicVisibleKpiRuntimeProven, false, "template must show dynamic KPI binding is not proven");
+  assert.equal(evidence.dynamicVisibleKpiRuntimeProven, false, "top-level template example must keep fallback KPI binding unproven");
   assert.equal(evidence.runtimeScreenshotCaptured, true, "template must model runtime screenshot evidence as required");
   assert.equal(evidence.installOrSigningOnly, false, "template must not treat install/signing as runtime UI proof");
   assert.ok(Array.isArray(evidence.kpis) && evidence.kpis.length > 0, "template must include visible KPI entries");
@@ -64,7 +65,12 @@ function validateRuntimeEvidenceTemplate() {
     assert.equal(kpi.runtimeProven, false, "template must not claim runtime-proven dynamic KPI rendering");
   }
   assert.match(raw, /runtime screenshot evidence required before UI-quality claim/i);
-  assert.match(raw, /dynamic visible KPI binding remains unresolved unless runtime evidence proves it/i);
+  assert.match(raw, /dynamic visible KPI binding is proven only for the exact UUID Summary v1\.0\.1 shape/i);
+  assert.match(raw, /beforeValues/i);
+  assert.match(raw, /afterValues/i);
+  assert.match(raw, /refreshedRecalculatedRuntimeEvidenceCaptured/i);
+  assert.match(raw, /Summary recalculation can be asynchronous or cache-delayed/i);
+  assert.match(raw, /Does not prove semantic or non-UUID Summary IDs/i);
 
   const forbiddenPatterns = [
     /https?:\/\/(?!example\.invalid\b)[^\s"]+/i,

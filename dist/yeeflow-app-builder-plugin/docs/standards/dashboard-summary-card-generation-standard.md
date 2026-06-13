@@ -25,6 +25,20 @@ This standard does not apply to, and must not generate Summary controls on:
 
 For unsupported surfaces, generators must not attempt to satisfy this standard by inserting Summary controls. Use a supported alternative display pattern, mark the metric as deferred if it cannot be calculated safely, and do not claim Summary-card pattern compliance for that surface.
 
+## Data Analytics Control Inventory
+
+Summary is one Yeeflow Data Analytics control. The broader Data Analytics inventory also includes:
+
+- Pie chart
+- Column chart
+- Line chart
+- Gauge
+- Funnel chart
+- Color block heatmap
+- Pivot table
+
+All generated Data Analytics controls require runtime-safe IDs. Use UUID-based control IDs unless an export-proven Yeeflow sample proves another ID shape is valid for that exact control type. Preserve existing analytics control IDs during upgrades; only newly added analytics controls get newly generated UUID/API-issued IDs. Summary has a proven UUID runtime shape through KPI Runtime Binding Proof v1.0.1. Other analytics controls require export-proven control shapes before a generator can claim runtime correctness, and runtime screenshot/evidence is required before claiming analytics dashboard quality.
+
 ## Golden Reference
 
 Use the Service Desk Pro `Executive Dashboard` dashboard as the best-practice reference for summary cards:
@@ -225,7 +239,24 @@ ${{monthlyRevenueTotal}}
 
 If the platform does not support inline formatting in the Text control, the generator must document the limitation and use the safest supported field/variable display pattern.
 
-Dynamic visible KPI binding is not solved unless runtime evidence proves nonblank visible values without raw temp variable names. If the dynamic binding shape is not runtime-proven, generation must stop or use an explicitly labeled fallback value and record the gap. A fallback value is a visual fallback, not runtime proof of dynamic KPI rendering.
+Dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape described below, unless another focused runtime proof proves a different shape. If the dynamic binding shape is not runtime-proven, generation must stop or use an explicitly labeled fallback value and record the gap. A fallback value is a visual fallback, not runtime proof of dynamic KPI rendering.
+
+### UUID Summary v1.0.1 Runtime-Proven Binding Shape
+
+KPI Runtime Binding Proof v1.0.1 proved dynamic visible KPI binding for one exact dashboard shape:
+
+- Summary control IDs are UUIDs.
+- Each Summary UUID appears in `Resource.ReportIds[]`.
+- Each Summary UUID has a matching `Resource.exts[]` entry with `i` equal to the Summary ID, `category: "___Pivot___"`, and `key: "summary"`.
+- Each Summary saves to a dashboard temp variable with a designer-shaped `attrs.save_var` expression object.
+- `Resource.tempVars[]` declares the same temp variable ids/names.
+- Visible KPI Heading/Text controls bind through `attrs.headc.title.variable[]`.
+- The proof does not use static or formatted fallback values.
+- Summary field metadata is complete in `attrs.data.field`, `attrs.field`, `fieldObject`, and `fieldInfo`.
+
+Runtime proof must include before/after source data mutation evidence, expected-value notes, inspector output, and refreshed/recalculated after-evidence. The v1.0.1 proof changed the KPI values from `3 / 600 / 2 / 300` to `4 / 1000 / 3 / 700`. Because Summary recalculation can be asynchronous or cache-delayed, stale after-evidence that still shows before values is not proof.
+
+Do not generalize this proof to semantic/non-UUID Summary IDs, approval forms, public forms, unsupported surfaces, or other visible binding shapes. If a generated package does not use the exact proven UUID Summary shape and does not provide before/after mutation proof, visible KPI binding remains unproven and fallback KPI values must be explicitly labeled fallback. Marketing Event dashboards may use this shape, but must still run their own before/after mutation proof before claiming runtime dynamic KPI success.
 
 ## Sample Data Rule
 
@@ -312,7 +343,7 @@ Before returning a generated package, check every dashboard or supported Data Li
 
 ## Proof Boundary
 
-This standard is based on the Service Desk Pro Executive Dashboard golden reference and the Vendor Onboarding v4.1 hard checks. It should be treated as the default generation rule for dashboard and supported Data List custom-form summary cards in Yeeflow App Builder and Yeeflow App Builder.
+This standard is based on the Service Desk Pro Executive Dashboard golden reference, the Vendor Onboarding v4.1 hard checks, and the KPI Runtime Binding Proof v1.0.1 UUID Summary runtime proof. The UUID Summary proof narrows dynamic visible KPI success to that exact package/runtime shape; it does not prove every Summary/KPI configuration. This standard should be treated as the default generation rule for dashboard and supported Data List custom-form summary cards in Yeeflow App Builder and Yeeflow App Builder.
 
 If a generator cannot safely implement the Summary-control-to-temp-variable pattern for a specific supported surface, it must:
 
