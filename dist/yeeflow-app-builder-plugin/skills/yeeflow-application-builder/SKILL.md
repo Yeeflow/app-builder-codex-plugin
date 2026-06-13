@@ -80,7 +80,7 @@ For any generated YAP package, rebuild `Resource.ReplaceIds` from the final deco
 ## Public Tenant Safety
 
 - Never hardcode a tenant-specific Yeeflow URL. Use `https://<yourdomain>.yeeflow.com` in docs and examples.
-- For live user-facing API calls, use OAuth; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`.
+- For live user-facing API calls, use OAuth; if OAuth is not authenticated, ask the user to sign in through the Yeeflow plugin login flow.
 - Do not use `YEEFLOW_API_KEY` for normal plugin/API operation; keep it only as a legacy/deprecated fallback where existing code still supports it.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
 - Support `YEEFLOW_PROFILE` where scripts support profiles. It selects one active local tenant profile per run using `YEEFLOW_<PROFILE>_API_KEY`, `YEEFLOW_<PROFILE>_TENANT_URL`, and `YEEFLOW_<PROFILE>_TENANT_ID`.

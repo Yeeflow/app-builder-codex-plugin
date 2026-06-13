@@ -28,7 +28,7 @@ OAuth login and refresh use Authorization Code with PKCE S256. The plugin create
 
 No OAuth client secret is required for normal login/refresh. Do not commit `.env.local`, OAuth tokens, authorization codes, PKCE verifiers, or private tenant/workspace values.
 
-Commands:
+Developer/local diagnostic commands only:
 
 ```sh
 node scripts/yeeflow-oauth-login.mjs
@@ -36,6 +36,8 @@ node scripts/yeeflow-oauth-status.mjs
 node scripts/yeeflow-oauth-refresh.mjs
 node scripts/yeeflow-oauth-logout.mjs
 ```
+
+Do not present these local Node commands as the normal user-facing login path. For normal API requests, request the Yeeflow plugin login flow and preserve the original operation. If the plugin login action is unavailable in this runtime, say: `I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`
 
 ## Multi-Tenant Profiles
 
@@ -58,7 +60,7 @@ Workspace mutation APIs such as add, edit, delete, and sort are not used automat
 
 ## Legacy API Key Fallback
 
-Normal API calls use OAuth. If no valid OAuth token exists, ask the current user to run OAuth login first. `YEEFLOW_API_KEY` is not required for normal OAuth/API calls and is treated only as a legacy/deprecated fallback for older internal workflows if existing code still supports it. It must never be printed or committed.
+Normal API calls use OAuth. If no valid OAuth token exists, request the Yeeflow plugin login flow and preserve the original operation, not a local Node command. `YEEFLOW_API_KEY` is not required for normal OAuth/API calls and is treated only as a legacy/deprecated fallback for older internal workflows if existing code still supports it. It must never be printed or committed.
 
 ## Security Reminders
 

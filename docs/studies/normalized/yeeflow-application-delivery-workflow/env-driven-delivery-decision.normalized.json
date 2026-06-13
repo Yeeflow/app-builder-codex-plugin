@@ -10,7 +10,7 @@
   "decisions": [
     {
       "condition": "OAuth missing",
-      "nextStep": "ask current user to run OAuth login"
+      "nextStep": "ask current user to sign in through the Yeeflow plugin login flow"
     },
     {
       "condition": "OAuth present and target workspace missing",

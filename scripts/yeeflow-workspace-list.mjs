@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { getCapability, summarizeCapability } from "./lib/yeeflow-api-capabilities.mjs";
-import { mergeAuthHeaders, requireYeeflowOAuthAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
+import { buildLoginRequiredResult, mergeAuthHeaders, resolveYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
 import {
   APP_PACKAGE_WORKSPACE_CATEGORY,
   combineWorkspaceSummaries,
@@ -28,7 +28,17 @@ try {
   }
 
   const capability = getCapability("workspaces.listByCategory");
-  const auth = await requireYeeflowOAuthAuth({ dotenv: args.dotenv || ".env.local" });
+  const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local" });
+  if (auth.mode !== "oauth") {
+    console.log(JSON.stringify(buildLoginRequiredResult({
+      auth,
+      originalOperation: args.all ? "workspace discovery for all documented categories" : `workspace discovery for ${categories[0]}`,
+      originalCapability: capability.name,
+      originalEndpoint: `${capability.method} ${capability.path}`,
+      capability: summarizeCapability(capability),
+    }), null, 2));
+    process.exit(1);
+  }
   const summaries = [];
   for (const value of categories) {
     summaries.push(await fetchWorkspaceCategory({ auth, capability, category: value }));

@@ -81,8 +81,11 @@ export function applyOAuthTenantContext(env, tokenRecord) {
 
 export async function requireYeeflowApiAuth(options = {}) {
   const auth = await resolveYeeflowApiAuth(options);
-  if (auth.mode === "none") {
-    throw new Error("Yeeflow API authentication is not configured. Run OAuth login first.");
+  if (auth.mode === "apiKey" && options.allowLegacyApiKey === true) {
+    return auth;
+  }
+  if (auth.mode !== "oauth") {
+    throw new Error(pluginLoginRequiredMessage());
   }
   return auth;
 }
@@ -90,7 +93,7 @@ export async function requireYeeflowApiAuth(options = {}) {
 export async function requireYeeflowOAuthAuth(options = {}) {
   const auth = await resolveYeeflowApiAuth(options);
   if (auth.mode !== "oauth") {
-    throw new Error("Yeeflow OAuth authentication is required. Run node scripts/yeeflow-oauth-login.mjs first.");
+    throw new Error(pluginLoginRequiredMessage("Yeeflow OAuth authentication is required."));
   }
   return auth;
 }
@@ -120,4 +123,57 @@ export function mergeAuthHeaders(auth, headers = {}) {
 
 export function safeAuthError(error) {
   return redactSensitive(error?.message || String(error || "Unknown Yeeflow API authentication error"));
+}
+
+export function pluginLoginRequiredMessage(prefix = "Yeeflow API authentication is not configured.") {
+  return `${prefix} Please sign in to Yeeflow using the plugin login flow so I can continue this operation. If the plugin login action is unavailable in this runtime, open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`;
+}
+
+export function pluginLoginUnavailableMessage() {
+  return "I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.";
+}
+
+export function buildLoginRequiredResult({
+  auth = null,
+  originalOperation = "",
+  originalCapability = "",
+  originalEndpoint = "",
+  capability = null,
+} = {}) {
+  const result = {
+    resultClass: "auth_required",
+    reason: "login_flow_required",
+    liveCall: false,
+    requestShaped: false,
+    rawResponsePrinted: false,
+    login: {
+      required: true,
+      flow: "plugin-login-request",
+      message: "Please sign in to Yeeflow using the plugin login flow so I can continue this operation.",
+      unavailableMessage: pluginLoginUnavailableMessage(),
+      retry: originalCapability
+        ? `After login completes, retry ${originalCapability}.`
+        : originalOperation
+          ? `After login completes, retry ${originalOperation}.`
+          : "After login completes, retry the original operation.",
+    },
+    auth: auth ? authRequiredStatusSummary(auth) : null,
+  };
+  if (originalOperation) result.originalOperation = originalOperation;
+  if (originalCapability) result.originalCapability = originalCapability;
+  if (originalEndpoint) result.originalEndpoint = originalEndpoint;
+  if (capability) result.capability = capability;
+  return result;
+}
+
+function authRequiredStatusSummary(auth) {
+  return {
+    mode: auth.mode,
+    oauth: {
+      tokenFilePresent: Boolean(auth.oauth?.tokenFilePresent),
+      authenticated: Boolean(auth.oauth?.authenticated),
+      expired: Boolean(auth.oauth?.expired),
+      refreshTokenPresent: Boolean(auth.oauth?.refreshTokenPresent),
+    },
+  };
 }

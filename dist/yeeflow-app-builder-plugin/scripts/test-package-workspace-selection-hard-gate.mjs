@@ -79,14 +79,45 @@ try {
     assert.equal(selected.stdout.includes(selectedWorkspaceId), false);
   }
 
+  const unauthenticatedDiscovery = run([
+    "--operation",
+    "install-yapk",
+    "--package",
+    yapk,
+    "--dotenv",
+    dotenv,
+  ], { YEEFLOW_OAUTH_TOKEN_FILE: path.join(tempDir, "missing-token.json") });
+  assert.equal(unauthenticatedDiscovery.status, 0, unauthenticatedDiscovery.stderr);
+  const unauthenticatedParsed = JSON.parse(unauthenticatedDiscovery.stdout);
+  assert.equal(unauthenticatedParsed.workspaceSelectionRequired, true);
+  assert.equal(unauthenticatedParsed.result.resultClass, "workspace_selection_required");
+  assert.equal(unauthenticatedParsed.result.requestShaped, false);
+  assert.equal(unauthenticatedParsed.result.livePackageWriteExecuted, false);
+  assert.equal(unauthenticatedParsed.result.workspaceDiscovery.resultClass, "auth_required");
+  assert.equal(unauthenticatedParsed.result.workspaceDiscovery.reason, "login_flow_required");
+  assert.equal(unauthenticatedParsed.result.workspaceDiscovery.originalOperation, "package workspace discovery");
+  assert.equal(unauthenticatedParsed.result.workspaceDiscovery.originalCapability, "workspaces.listByCategory");
+  assert.equal(unauthenticatedParsed.result.workspaceDiscovery.liveCall, false);
+  assert.equal(unauthenticatedParsed.result.workspaceDiscovery.requestShaped, false);
+  assert.equal(Object.hasOwn(unauthenticatedParsed.result, "request"), false);
+  assertNoLocalLoginRecovery(unauthenticatedDiscovery.stdout);
+
   console.log("package workspace-selection hard-gate tests passed");
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
 
-function run(args) {
+function run(args, extraEnv = {}) {
   return spawnSync(process.execPath, [helper, ...args], {
     encoding: "utf8",
-    env: { PATH: process.env.PATH || "" },
+    env: { PATH: process.env.PATH || "", ...extraEnv },
   });
+}
+
+function assertNoLocalLoginRecovery(text) {
+  assert.doesNotMatch(text, /yeeflow-oauth-login\.mjs/);
+  assert.doesNotMatch(text, /node\s+/);
+  assert.doesNotMatch(text, /\.codex\/plugins\/cache/);
+  assert.doesNotMatch(text, /(ask|set|configure|use|paste|run).*YEEFLOW_API_KEY/i);
+  assert.doesNotMatch(text, /(ask|set|configure|create|use).*\.env\.local/i);
 }

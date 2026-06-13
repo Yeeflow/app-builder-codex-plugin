@@ -78,7 +78,7 @@ For YAP approval/form workspace runtime tests, classify queued import acceptance
 
 ## Public Tenant Safety
 
-- Use OAuth for live user-facing API calls; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`.
+- Use OAuth for live user-facing API calls; if OAuth is not authenticated, ask the user to sign in through the Yeeflow plugin login flow.
 - Do not put API base URLs, tenant URLs, tenant IDs, API keys, or workspace IDs in normal `.env.local` setup.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
 - When `YEEFLOW_PROFILE` is set, use only the selected local profile for that run and keep all other profiles inactive.
