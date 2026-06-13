@@ -2,7 +2,17 @@
 
 ## Unreleased
 
-- Add UI/Summary/KPI runtime hard gates for page-by-page UI contracts, export-proven style shapes, Summary control contracts, visible KPI runtime evidence, grid-table quality, YAPK upgrade app identity/ListSetID stability, and safe tolerant YAPK decode diagnostics.
+## 0.6.34
+
+- Bump the active plugin version after the UI/Summary/KPI runtime hard gates and UI generation hard-gate skill routing merge.
+- Require high-quality UI claims to start from a page-by-page UI implementation contract; scaffold-like UI must not be claimed as high-quality UI.
+- Require uncertain UI/runtime patterns to be proven on a sandbox page first and require/prefer export-proven Yeeflow control/style shapes.
+- Add Summary/KPI hard gates for designer-shaped hidden Summary configuration, real field and filter bindings, temp variables, `save_var` expression objects, and page `ReportIds`.
+- Keep visible KPI dynamic binding unresolved unless runtime-proven; fallback KPI values must be explicitly labeled fallback.
+- Require runtime screenshot/evidence before claiming UI quality, and keep install/signing/API acceptance separate from runtime UI proof.
+- Add grid/table quality, YAPK upgrade app identity/ListSetID stability, existing ID, lineage, and declared change-scope gates.
+- Add safe tolerant Brotli diagnostics for official designer exports without exposing package payload content.
+- Add the reusable `yeeflow-ui-generation-hard-gates` skill and route relevant generation, dashboard, package, runtime, and learning skills through it.
 
 ## 0.6.33
 
