@@ -2,6 +2,8 @@
 
 Official v0.6.19 adds a stricter runtime-binding companion standard in `docs/standards/dashboard-runtime-binding-standard.md`. Use this file for the Summary card host/control scope, and use the runtime-binding standard to verify `attrs.data.list`, aggregate field binding, matching `page.exts[]`, `settings.values[]`, filter consumption, lookup filter record-id behavior, and `Resource.ReportIds[]` registration.
 
+The UI/Summary/KPI hard gates in `docs/standards/ui-summary-kpi-runtime-hard-gates.md` are now required for generated-final dashboard claims. Summary/KPI generation has three separate proof states: designer-configured Summary control, validator-valid Summary contract, and runtime-proven visible dynamic KPI rendering. Do not collapse these into one claim.
+
 ## Purpose
 
 This standard defines how Yeeflow application generators must create KPI and summary cards on Yeeflow surfaces that support the Summary control. It converts the golden reference pattern from the Service Desk Pro Executive Dashboard into a required generation rule.
@@ -88,6 +90,8 @@ Required behavior:
 
 - The container must contain only Summary controls and small helper controls needed for calculation.
 - The container must not appear in the user-facing dashboard.
+- The container must use `attrs.common.hide = [null, true, true, true]` so it is hidden on desktop, tablet, and mobile.
+- The container must use `attrs.style.direction = [null, "row"]`.
 - The display rule must be intentionally impossible, for example `1 == 0`.
 - The hidden state must not rely on styling tricks alone when a dynamic display rule is available.
 
@@ -164,9 +168,13 @@ Each Summary control must define:
 - Source data list.
 - Metric type, such as count, sum, average, min, or max.
 - Target field when the metric requires a field.
+- Designer-shaped field metadata in `attrs.data.field`, `attrs.field`, `fieldObject`, and `fieldInfo`.
+- Count field shape with `ListDataID` where required.
 - Filter condition when the metric represents a subset.
 - Target dashboard/form temporary variable.
+- `save_var` as a designer-exported expression object, not a plain string.
 - Clear control name in Navigator.
+- Page `ReportIds` coverage for the Summary control ID.
 
 Examples:
 
@@ -216,6 +224,8 @@ ${{monthlyRevenueTotal}}
 ```
 
 If the platform does not support inline formatting in the Text control, the generator must document the limitation and use the safest supported field/variable display pattern.
+
+Dynamic visible KPI binding is not solved unless runtime evidence proves nonblank visible values without raw temp variable names. If the dynamic binding shape is not runtime-proven, generation must stop or use an explicitly labeled fallback value and record the gap. A fallback value is a visual fallback, not runtime proof of dynamic KPI rendering.
 
 ## Sample Data Rule
 

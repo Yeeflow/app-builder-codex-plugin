@@ -83,12 +83,26 @@ Dashboard-heavy generated-final `.yapk` packages must also pass the dashboard gr
 node scripts/validate-dashboard-grid-table-collections.mjs --package <package.yapk> --require-grid-table-collections --require-hide-header --require-visible-title
 ```
 
-The materialized Codex plugin cache must include the hard-gate cache artifacts under `scripts/`: `validate-yapk-id-provenance.mjs`, `validate-yapk-navigation-runtime-metadata.mjs`, `validate-yapk-upgrade-id-stability.mjs`, `validate-dashboard-grid-table-collections.mjs`, `yapk-first-generation-preflight.mjs`, `test-yapk-id-navigation-hard-gates.mjs`, `test-yapk-upgrade-id-stability.mjs`, and `test-dashboard-grid-table-collections.mjs`. The root source copies and `dist/yeeflow-app-builder-plugin/scripts/` mirrors must stay byte-identical.
+High-quality UI, Summary/KPI, and runtime-evidence claims must also pass the UI hard gates from `docs/standards/ui-summary-kpi-runtime-hard-gates.md`:
+
+```sh
+node scripts/inspect-yeeflow-ui-design-contract.mjs --contract <ui-contract.md> --claim-high-quality-ui
+node scripts/inspect-dashboard-style-shapes.mjs --package <package.yapk>
+node scripts/inspect-dashboard-summary-control-contract.mjs --package <package.yapk>
+node scripts/inspect-visible-kpi-runtime-bindings.mjs --evidence <redacted-runtime-evidence.json>
+node scripts/inspect-runtime-evidence.mjs --evidence <redacted-runtime-evidence.json> --claim-high-quality-ui
+node scripts/inspect-grid-table-quality.mjs --package <package.yapk> --require-grid-table
+node scripts/inspect-yapk-upgrade-app-identity.mjs --package <package.yapk> --lineage <lineage.json>
+```
+
+The materialized Codex plugin cache must include the hard-gate cache artifacts under `scripts/`: `validate-yapk-id-provenance.mjs`, `validate-yapk-navigation-runtime-metadata.mjs`, `validate-yapk-upgrade-id-stability.mjs`, `validate-dashboard-grid-table-collections.mjs`, `inspect-yeeflow-ui-design-contract.mjs`, `inspect-dashboard-style-shapes.mjs`, `inspect-dashboard-summary-control-contract.mjs`, `inspect-visible-kpi-runtime-bindings.mjs`, `inspect-runtime-evidence.mjs`, `inspect-grid-table-quality.mjs`, `inspect-yapk-upgrade-app-identity.mjs`, `decode-yapk-tolerant-brotli.mjs`, `yapk-first-generation-preflight.mjs`, `test-yapk-id-navigation-hard-gates.mjs`, `test-yapk-upgrade-id-stability.mjs`, `test-dashboard-grid-table-collections.mjs`, and `test-ui-summary-kpi-runtime-hard-gates.mjs`. The root source copies and `dist/yeeflow-app-builder-plugin/scripts/` mirrors must stay byte-identical.
 
 The ID provenance report must prove API-issued content IDs from `GET /utils/generate/ids?count=<n>`. Local sequential, hardcoded, copied, random, timestamp, or UUID fallback IDs are forbidden for generated-final `.yapk` output. Runtime navigation groups require `ID`, `AppID`, `ListSetID`, `Type`, `Title`, `Icon`, and `list`; child items require `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`. Do not use `children` / `Childs` runtime navigation groups.
 
 For YAPK upgrades, existing semantic resources must keep their previous IDs. Only newly added resources may receive newly API-issued IDs, removed IDs must not be reused for different objects, and a missing previous package or lineage manifest fails closed.
 
 Dashboard grid-table Collection sections must use `collection`, not dashboard `data-list`, unless Data table is explicitly requested. Header `flex_grid` and Collection must share one wrapper with both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`; planned row-click details require Collection link metadata and a Type `1` custom detail layout. Signing/install acceptance does not prove dashboard runtime/designer visual fidelity.
+
+High-quality UI requires a page-by-page implementation contract, export-proven control/style shapes, and runtime screenshot evidence. Summary/KPI controls require designer-shaped metadata and runtime evidence; dynamic visible KPI binding is not solved unless runtime-proven, and fallback KPI values must be labeled as fallback. Upgrade UI packages must preserve ListSetID, app identity, existing IDs, package lineage, and final `ReplaceIds` coverage.
 
 Local validation is not import proof, and API acceptance is not runtime proof. Report the exact proof boundary when delivering generated work.

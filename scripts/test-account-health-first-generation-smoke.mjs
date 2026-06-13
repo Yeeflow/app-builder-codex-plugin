@@ -8,6 +8,7 @@ import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { runYapkFirstGenerationPreflight } from "./yapk-first-generation-preflight.mjs";
+import { collectNumericContentIds } from "./validate-yapk-id-provenance.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -41,12 +42,14 @@ function choiceRules(values) {
   });
 }
 
-function rootLayoutView(dashboardLayoutId) {
+function rootLayoutView(dashboardLayoutId, rootId) {
   return JSON.stringify({
     sortVer: 1,
     sort: [
       {
+        AppID: 41,
         ListID: dashboardLayoutId,
+        ListSetID: rootId,
         LayoutID: dashboardLayoutId,
         Type: 103,
         Title: "Account Health",
@@ -164,7 +167,7 @@ function decodedAccountHealth() {
       Flags: 1,
       TableCode: "flowcraft",
       IndexCode: "flowcraft",
-      LayoutView: rootLayoutView(dashboardLayoutId),
+      LayoutView: rootLayoutView(dashboardLayoutId, rootId),
       Items: {},
     }),
     Pages: [{
@@ -252,6 +255,34 @@ function writeYapk(dir, name, decoded) {
   return file;
 }
 
+function writeIdProvenance(packageFile, decoded) {
+  const packageWrapper = wrapper(decoded);
+  const idsByValue = new Map();
+  for (const item of collectNumericContentIds({ wrapper: packageWrapper, decoded })) {
+    if (!idsByValue.has(item.id)) idsByValue.set(item.id, item);
+  }
+  const packageIds = [...idsByValue.values()];
+  const allocations = packageIds.map((item) => ({
+    path: item.path,
+    id: item.id,
+    purpose: "synthetic Account Health smoke fixture ID",
+    source: "api-generated",
+  }));
+  const manifest = {
+    sourceMarker: "api-generated",
+    totalRequestedIds: allocations.length,
+    totalReceivedIds: allocations.length,
+    allocationCount: allocations.length,
+    unusedCount: 0,
+    duplicateCheck: { passed: true, duplicateIds: [] },
+    generatorProvenance: { generator: "synthetic-account-health-smoke", localIdFallbackAllowed: false },
+    pathToPurpose: Object.fromEntries(allocations.map((allocation) => [allocation.path, { id: allocation.id, purpose: allocation.purpose, source: allocation.source }])),
+    allocations,
+    nonApiIds: [],
+  };
+  fs.writeFileSync(packageFile.replace(/(?:\.signed)?\.yapk$/i, "-id-provenance-report.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+}
+
 function run(args) {
   return spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
 }
@@ -268,9 +299,10 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "account-health-first-gen-
 try {
   const decoded = decodedAccountHealth();
   const file = writeYapk(tempDir, "account-health", decoded);
+  writeIdProvenance(file, decoded);
   assert.equal(fs.existsSync(path.join(ROOT, "schemas/yapk-schema.json")), true);
   assert.equal(fs.existsSync(path.join(ROOT, "schemas/yap-schema.json")), true);
-  assert.equal(decoded.ListSet.LayoutView, rootLayoutView(decoded.Pages[0].LayoutID));
+  assert.equal(decoded.ListSet.LayoutView, rootLayoutView(decoded.Pages[0].LayoutID, decoded.ListSet.ListID));
   assert.equal(decoded.AppID, undefined);
   assert.equal(decoded.ListSet.AppID, undefined);
   assert.equal(decoded.Childs[0].List.AppID, undefined);
