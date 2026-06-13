@@ -88,9 +88,13 @@ try {
     assert.equal(parsed.environment.YEEFLOW_WORKSPACE_ID_PRESENT, true);
     assert.equal(parsed.workspaceId, operation === "upload" ? "missing" : "present");
     assert.equal(parsed.workspaceSelectionRequired, false);
-    assert.match(parsed.result.endpoint, /^POST \//);
-    if (operation === "upgrade-check-yapk") assert.equal(parsed.result.request.UpgradeCheck, true);
-    if (operation === "upgrade-apply-yapk") assert.equal(parsed.result.request.UpgradeCheck, false);
+    if (operation.startsWith("upgrade")) {
+      assert.equal(parsed.result.resultClass, "upgrade_id_stability_required");
+      assert.equal(parsed.result.requestShaped, false);
+      assert.equal(Object.hasOwn(parsed.result, "request"), false);
+    } else {
+      assert.match(parsed.result.endpoint, /^POST \//);
+    }
   }
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });

@@ -7,6 +7,8 @@ description: Standardize runtime testing for generated or modified Yeeflow appli
 
 ## Generated-Final YAPK ID And Navigation Hard Gates
 
+YAPK upgrade ID stability hard gate: upgrade/new-version `.yapk` output must preserve IDs for existing semantic resources from the previous package/lineage manifest. Only newly added resources may consume newly API-issued IDs, removed IDs must not be reused, replacing all IDs is a hard failure, and `scripts/validate-yapk-upgrade-id-stability.mjs` must pass before signing, upgrade-check, upgrade apply, install-like writes, or handoff. Missing previous package/manifest fails closed; signing/install/upgrade acceptance is not ID-continuity proof.
+
 Generated-final `.yapk` runtime testing must not proceed when `scripts/validate-yapk-id-provenance.mjs` or `scripts/validate-yapk-navigation-runtime-metadata.mjs` fails. ID provenance, navigation runtime metadata, signing/install acceptance, and runtime UI proof are separate proof levels.
 
 ##

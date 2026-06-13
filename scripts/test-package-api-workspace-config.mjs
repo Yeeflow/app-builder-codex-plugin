@@ -230,6 +230,9 @@ function testCliWorkspaceOverridePassesAndIsRedacted() {
   assert.equal(parsed.workspaceId, "present");
   assert.equal(parsed.workspaceIdSource, "cli-user-selected");
   assert.equal(parsed.workspaceSelectionRequired, false);
+  assert.equal(parsed.result.resultClass, "upgrade_id_stability_required");
+  assert.equal(parsed.result.requestShaped, false);
+  assert.equal(Object.hasOwn(parsed.result, "request"), false);
   assert.equal(result.stdout.includes(override), false);
 }
 

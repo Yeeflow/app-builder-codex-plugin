@@ -1,6 +1,6 @@
 # YAPK ID Provenance Hard Gate
 
-Generated-final `.yapk` packages must use Yeeflow API-issued numeric content IDs. Shape-valid numeric strings are not enough.
+Generated-final `.yapk` packages must use Yeeflow API-issued numeric content IDs. Shape-valid numeric strings are not enough. For YAPK upgrade/new-version workflows, existing IDs from the previous version must also remain stable; see [YAPK Upgrade ID Stability Hard Gate](yapk-upgrade-id-stability-hard-gate.md).
 
 ## Blocking Rule
 
@@ -11,6 +11,8 @@ GET /utils/generate/ids?count=<n>
 ```
 
 Generation, signing, install, upgrade-check, and handoff must stop if ID provenance validation fails.
+
+For upgrade/new-version output, generation, signing, install-like writes, upgrade-check, upgrade apply, and handoff must also stop if upgrade ID stability validation fails.
 
 ## Forbidden Sources
 
@@ -44,3 +46,5 @@ node scripts/validate-yapk-id-provenance.mjs \
 ```
 
 Signing through `setsign` / `verifysign` proves wrapper/resource signature only. Package API install acceptance proves action acceptance only. Neither proves ID provenance.
+
+Signing, install acceptance, upgrade-check acceptance, and upgrade acceptance do not prove ID continuity. Existing semantic resources must keep their previous IDs, only newly added resources may use new API-issued IDs, and removed IDs must not be reused for different objects.
