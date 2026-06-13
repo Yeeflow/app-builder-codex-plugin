@@ -43,16 +43,16 @@ Where scripts support profiles, `YEEFLOW_PROFILE` can still select one local pro
 
 ## Package Automation
 
-Package upload/import/install/upgrade helpers default to dry-run behavior and require explicit confirmation for live operations. Package import/install/upgrade operations still require an explicit target workspace and workspace confirmation, but `YEEFLOW_WORKSPACE_ID` is now an optional default/override rather than a required setup value.
+Package upload/import/install/upgrade helpers default to dry-run behavior and require explicit confirmation for live operations. Package import/install/upgrade operations still require an explicit target workspace and workspace confirmation, but local `YEEFLOW_WORKSPACE_ID` is ignored for package write target selection.
 
 Target workspace resolution order:
 
-1. `--workspace-id <id>`
-2. optional local/manual `YEEFLOW_WORKSPACE_ID` or active profile workspace variable, if present
-3. explicit user-selected workspace discovered with `node scripts/yeeflow-workspace-list.mjs --all` or `--category flowcraft`
+1. OAuth workspace discovery with `node scripts/yeeflow-workspace-list.mjs --category flowcraft`
+2. explicit user-selected workspace passed with `--selected-workspace-id <id>`
+3. documented user-selected `--workspace-id <id>` when it represents the same API-discovered choice
 4. if no workspace is selected, stop before request shaping
 
-For non-interactive package install/import/upgrade, do not guess. If multiple `flowcraft` workspaces exist, ask the user to choose. If one workspace exists, report it as a suggestion with a redacted ID preview and still require target confirmation before any package write.
+For non-interactive package install/import/upgrade, do not guess and do not fall back to environment workspace IDs. If multiple `flowcraft` workspaces exist, ask the user to choose. If one workspace exists, report it as a suggestion with a redacted ID preview and still require target confirmation before any package write.
 
 Workspace mutation APIs such as add, edit, delete, and sort are not used automatically. If they are ever implemented, they require explicit admin confirmation and are out of scope for package automation.
 

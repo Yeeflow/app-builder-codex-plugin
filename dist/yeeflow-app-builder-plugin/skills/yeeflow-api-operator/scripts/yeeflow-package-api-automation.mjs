@@ -4,8 +4,16 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { environmentPresence, loadDotenvFile, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
-import { mergeAuthHeaders, requireYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
-import { PACKAGE_WORKSPACE_OPERATIONS, requireTargetWorkspaceId, resolveTargetWorkspaceId } from "./lib/yeeflow-workspace-selection.mjs";
+import { getCapability } from "./lib/yeeflow-api-capabilities.mjs";
+import { mergeAuthHeaders, requireYeeflowApiAuth, requireYeeflowOAuthAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
+import {
+  APP_PACKAGE_WORKSPACE_CATEGORY,
+  PACKAGE_WORKSPACE_OPERATIONS,
+  WORKSPACE_SELECTION_REQUIRED,
+  requireTargetWorkspaceId,
+  resolveTargetWorkspaceId,
+  summarizeWorkspaceList,
+} from "./lib/yeeflow-workspace-selection.mjs";
 
 const OPERATIONS = new Set(["upload", "import-yap", "install-yapk", "upgrade-check-yapk", "upgrade-apply-yapk", "upgrade-yapk"]);
 
@@ -29,6 +37,8 @@ async function main() {
     selectedWorkspaceId: args.selectedWorkspaceId,
   });
   args.workspaceId = workspaceResolution.workspaceId;
+  args.workspaceIdSource = workspaceResolution.source;
+  args.workspaceSelectionBlocked = PACKAGE_WORKSPACE_OPERATIONS.has(args.operation) && !workspaceResolution.workspaceId;
   const packagePath = args.package ? path.resolve(args.package) : "";
 
   const plan = {
@@ -37,6 +47,7 @@ async function main() {
     environment: environmentPresence(env),
     workspaceId: args.workspaceId ? "present" : "missing",
     workspaceIdSource: workspaceResolution.source,
+    workspaceSelectionRequired: args.workspaceSelectionBlocked,
     package: packagePath ? summarizePackagePath(packagePath) : null,
   };
 
@@ -56,15 +67,17 @@ async function main() {
 function printUsage() {
   console.log(`Usage:
   node scripts/yeeflow-package-api-automation.mjs --operation upload --package <file.yap|file.yapk> [--execute]
-  node scripts/yeeflow-package-api-automation.mjs --operation import-yap --package <file.yap> [--workspace-id <id override>] [--app-id 41] [--execute]
-  node scripts/yeeflow-package-api-automation.mjs --operation install-yapk --package <file.yapk> [--workspace-id <id override>] [--execute]
-  node scripts/yeeflow-package-api-automation.mjs --operation upgrade-check-yapk --package <file.yapk> [--workspace-id <id override>] [--execute]
-  node scripts/yeeflow-package-api-automation.mjs --operation upgrade-apply-yapk --package <file.yapk> [--workspace-id <id override>] [--execute]
+  node scripts/yeeflow-package-api-automation.mjs --operation import-yap --package <file.yap> --selected-workspace-id <id> [--app-id 41] [--execute]
+  node scripts/yeeflow-package-api-automation.mjs --operation install-yapk --package <file.yapk> --selected-workspace-id <id> [--execute]
+  node scripts/yeeflow-package-api-automation.mjs --operation upgrade-check-yapk --package <file.yapk> --selected-workspace-id <id> [--execute]
+  node scripts/yeeflow-package-api-automation.mjs --operation upgrade-apply-yapk --package <file.yapk> --selected-workspace-id <id> [--execute]
 
 Options:
   --dotenv <path>                 Defaults to .env.local.
-  --workspace-id <id>             Explicit target workspace override. Otherwise use optional env/profile default or selected workspace.
-  --selected-workspace-id <id>    Optional interactive/user-selection handoff value used after CLI/env defaults.
+  --selected-workspace-id <id>    Preferred explicit user-selected workspace from OAuth workspace discovery.
+  --workspace-id <id>             Allowed only as an explicit user-selected workspace after API discovery.
+  --workspace-discovery-json <path>
+                                  Non-live test fixture containing a workspace list response to summarize when selection is missing.
   --upload-mode multipart|raw      Defaults to multipart. Product docs expose the endpoint but not the file-body contract.
   --file-field <name>              Multipart field name. Defaults to file.
   --package-file-id <id>           Skip upload and use an existing uploaded file id for install/upgrade.
@@ -102,7 +115,7 @@ function validateCommonInputs(options, env, resolvedPackagePath) {
     if (!resolvedPackagePath) throw new Error("--package is required.");
     if (!fs.existsSync(resolvedPackagePath)) throw new Error(`Package file not found: ${resolvedPackagePath}`);
   }
-  if (PACKAGE_WORKSPACE_OPERATIONS.has(options.operation)) {
+  if (PACKAGE_WORKSPACE_OPERATIONS.has(options.operation) && !options.workspaceSelectionBlocked) {
     requireTargetWorkspaceId({ workspaceId: options.workspaceId }, options.operation);
   }
   if (options.operation === "import-yap" && !resolvedPackagePath.endsWith(".yap")) {
@@ -128,11 +141,13 @@ async function buildDryRunPlan(options, resolvedPackagePath) {
     };
   }
   if (options.operation === "import-yap") {
+    if (options.workspaceSelectionBlocked) return await buildWorkspaceSelectionRequiredResult(options);
     return {
       endpoint: "POST /listset/package/import",
       request: redactImportBody(buildImportBody(options, resolvedPackagePath)),
     };
   }
+  if (options.workspaceSelectionBlocked) return await buildWorkspaceSelectionRequiredResult(options);
   const packageFile = buildExistingPackageFile(options, resolvedPackagePath) || {
     Id: "[from upload response]",
     Name: path.basename(resolvedPackagePath),
@@ -145,7 +160,94 @@ async function buildDryRunPlan(options, resolvedPackagePath) {
   };
 }
 
+async function buildWorkspaceSelectionRequiredResult(options) {
+  const workspaceDiscovery = await loadWorkspaceDiscoverySummary(options);
+  return {
+    resultClass: WORKSPACE_SELECTION_REQUIRED,
+    source: options.workspaceIdSource || "missing",
+    discoveredCategory: APP_PACKAGE_WORKSPACE_CATEGORY,
+    requestShaped: false,
+    livePackageWriteExecuted: false,
+    workspaceDiscovery,
+    workspaceChoices: {
+      category: workspaceDiscovery.category,
+      workspaceCount: workspaceDiscovery.workspaceCount,
+      workspaces: workspaceDiscovery.workspaces,
+    },
+    guidance: [
+      "Local YEEFLOW_WORKSPACE_ID is ignored for package install/import/upgrade target selection.",
+      "Run OAuth workspace discovery for category flowcraft.",
+      "Ask the current user to choose from the redacted workspace list.",
+      "Re-run with --selected-workspace-id <id> or --workspace-id <id> only after that explicit user selection.",
+    ],
+  };
+}
+
+async function loadWorkspaceDiscoverySummary(options) {
+  if (options.workspaceDiscoveryJson) {
+    const resolved = path.resolve(options.workspaceDiscoveryJson);
+    const payload = JSON.parse(fs.readFileSync(resolved, "utf8"));
+    const summary = summarizeWorkspaceList(payload);
+    return {
+      source: "fixture",
+      category: APP_PACKAGE_WORKSPACE_CATEGORY,
+      workspaceCount: summary.workspaceCount,
+      workspaces: summary.workspaces,
+      rawResponsePrinted: false,
+    };
+  }
+
+  try {
+    const capability = getCapability("workspaces.listByCategory");
+    const auth = await requireYeeflowOAuthAuth({ dotenv: options.dotenv || ".env.local" });
+    const url = new URL(`${auth.env.apiBaseUrl}${capability.path.replace("{category}", encodeURIComponent(APP_PACKAGE_WORKSPACE_CATEGORY))}`);
+    const response = await fetch(url, {
+      method: capability.method,
+      headers: mergeAuthHeaders(auth, { Accept: "application/json" }),
+    });
+    const contentType = response.headers.get("content-type") || "";
+    const text = await response.text();
+    const payload = parseJson(text);
+    const summary = payload ? summarizeWorkspaceList(payload) : { workspaceCount: 0, workspaces: [] };
+    return {
+      source: "oauth-read-only",
+      category: APP_PACKAGE_WORKSPACE_CATEGORY,
+      capability: "workspaces.listByCategory",
+      endpoint: "GET /workspaces/{category}",
+      httpStatus: response.status,
+      ok: response.ok,
+      contentType,
+      workspaceCount: summary.workspaceCount,
+      workspaces: summary.workspaces,
+      rawResponsePrinted: false,
+    };
+  } catch (error) {
+    return {
+      source: "oauth-read-only",
+      category: APP_PACKAGE_WORKSPACE_CATEGORY,
+      authRequired: true,
+      authErrorClass: safeAuthError(error),
+      workspaceCount: 0,
+      workspaces: [],
+      rawResponsePrinted: false,
+    };
+  }
+}
+
+function parseJson(text) {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 async function executeOperation(options, env, resolvedPackagePath) {
+  if (options.workspaceSelectionBlocked) {
+    process.exitCode = 1;
+    return await buildWorkspaceSelectionRequiredResult(options);
+  }
   const auth = await requireYeeflowApiAuth({ loadDotenv: false });
   if (options.operation === "upload") {
     return await uploadPackageFile(env, resolvedPackagePath, options, auth);

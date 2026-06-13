@@ -12,7 +12,7 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.29`.
+Expected plugin: `Yeeflow App Builder` version `0.6.30`.
 
 ## Configure Local Environment
 
@@ -27,7 +27,7 @@ Run OAuth login before API access. OAuth uses Authorization Code with PKCE S256,
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.29
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.30
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```
@@ -48,7 +48,7 @@ node scripts/yeeflow-workspace-list.mjs --all
 node scripts/yeeflow-workspace-list.mjs --category flowcraft
 ```
 
-Do not use guessed paths or arbitrary raw API calls. `GET /workspaces/settings` and `GET /workspaces/flowcraft` are mapped as read-only OAuth workspace discovery and print only redacted workspace summaries. For current app/package workflows, `flowcraft` is the relevant workspace category unless product/API docs change. Mutating capabilities and package operations require explicit confirmation. Package install/import/upgrade must resolve an explicit target workspace by `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` override if present, or user-selected workspace discovery before any request is shaped.
+Do not use guessed paths or arbitrary raw API calls. `GET /workspaces/settings` and `GET /workspaces/flowcraft` are mapped as read-only OAuth workspace discovery and print only redacted workspace summaries. For current app/package workflows, `flowcraft` is the relevant workspace category unless product/API docs change. Mutating capabilities and package operations require explicit confirmation. Package install/import/upgrade ignores local `YEEFLOW_WORKSPACE_ID` for target selection and must stop with `workspace_selection_required` before request shaping until the user chooses an API-discovered `flowcraft` workspace and passes it with `--selected-workspace-id` or documented user-selected `--workspace-id`.
 
 ## Build And Validate Packages
 

@@ -105,7 +105,7 @@ Generation, signing, install, upgrade-check, and handoff must stop if ID provena
 Before package signing or package automation, check presence without printing values:
 
 - authenticated OAuth session
-- explicit package target workspace from `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` if present, or user-selected `flowcraft` workspace discovery
+- explicit package target workspace from API-discovered `flowcraft` workspace selection passed with `--selected-workspace-id` or documented user-selected `--workspace-id`; local `YEEFLOW_WORKSPACE_ID` is ignored for package writes
 
 Missing OAuth or target workspace selection should block automation before request shaping. `.env.local` may be absent or empty for normal OAuth plus workspace discovery. Never print or commit `.env.local`, token files, cert/key files, tenant URLs, workspace IDs, raw API responses, decoded payloads, or generated runtime packages.
 

@@ -23,6 +23,8 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-package-api-works
 const yapPath = path.join(tempDir, "dry-run.yap");
 const yapkPath = path.join(tempDir, "dry-run.yapk");
 const workspaceId = "workspace-redaction-test";
+const discoveredWorkspaceId = "workspace-discovered-000002";
+const discoveryPath = path.join(tempDir, "flowcraft-workspaces.json");
 
 fs.writeFileSync(
   yapPath,
@@ -35,16 +37,23 @@ fs.writeFileSync(
   }),
 );
 fs.writeFileSync(yapkPath, "dry-run-yapk");
+fs.writeFileSync(discoveryPath, JSON.stringify({
+  Data: [
+    { Category: "flowcraft", ID: "workspace-normal-000001", Title: "Operations", Status: 0 },
+    { Category: "flowcraft", ID: discoveredWorkspaceId, Title: "", Status: 1 },
+  ],
+}));
 
 try {
   testEnvResolverWorkspacePresence();
   testDocumentedWorkspaceCategoriesAndStatusFallback();
   testWorkspaceResolutionOrder();
   testWorkspaceListRedaction();
-  testMissingWorkspaceFailsImport();
-  testWorkspaceFromEnvPassesAndIsRedacted();
+  testMissingWorkspaceBlocksBeforeRequestShape();
+  testWorkspaceFromEnvIsIgnoredAndBlocked();
   testCliWorkspaceOverridePassesAndIsRedacted();
   testSelectedWorkspacePassesAndIsRedacted();
+  testPackageWriteOperationsShareWorkspaceGate();
   testUploadDoesNotRequireWorkspace();
   console.log("package-api-workspace-config tests passed");
 } finally {
@@ -102,16 +111,21 @@ function testWorkspaceResolutionOrder() {
     cliWorkspaceId: "cli-workspace",
     envWorkspaceId: "env-workspace",
     selectedWorkspaceId: "selected-workspace",
-  }), { workspaceId: "cli-workspace", source: "cli-argument" });
+  }), { workspaceId: "selected-workspace", source: "user-selection" });
 
   assert.deepEqual(resolveTargetWorkspaceId({
     envWorkspaceId: "env-workspace",
     selectedWorkspaceId: "selected-workspace",
-  }), { workspaceId: "env-workspace", source: "environment-default" });
+  }), { workspaceId: "selected-workspace", source: "user-selection" });
 
   assert.deepEqual(resolveTargetWorkspaceId({
-    selectedWorkspaceId: "selected-workspace",
-  }), { workspaceId: "selected-workspace", source: "user-selection" });
+    cliWorkspaceId: "cli-workspace",
+    envWorkspaceId: "env-workspace",
+  }), { workspaceId: "cli-workspace", source: "cli-user-selected" });
+
+  assert.deepEqual(resolveTargetWorkspaceId({
+    envWorkspaceId: "env-workspace",
+  }), { workspaceId: "", source: "environment-default-ignored", ignoredWorkspaceIdPresent: true });
 
   assert.deepEqual(resolveTargetWorkspaceId({}), { workspaceId: "", source: "missing" });
 }
@@ -142,25 +156,59 @@ function testWorkspaceListRedaction() {
   assert.equal(JSON.stringify(summary).includes("private-owner"), false);
 }
 
-function testMissingWorkspaceFailsImport() {
+function testMissingWorkspaceBlocksBeforeRequestShape() {
   const dotenv = path.join(tempDir, "missing-workspace.env");
   fs.writeFileSync(dotenv, "\n");
-  const result = runHelper(["--operation", "import-yap", "--package", yapPath, "--dotenv", dotenv]);
-  assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /Target workspace is required/);
-  assert.match(result.stderr, /yeeflow-workspace-list\.mjs --all/);
-  assert.match(result.stderr, /flowcraft workspace/);
-}
-
-function testWorkspaceFromEnvPassesAndIsRedacted() {
-  const dotenv = path.join(tempDir, "workspace.env");
-  fs.writeFileSync(dotenv, `YEEFLOW_WORKSPACE_ID=${workspaceId}\n`);
-  const result = runHelper(["--operation", "install-yapk", "--package", yapkPath, "--dotenv", dotenv]);
+  const result = runHelper([
+    "--operation",
+    "import-yap",
+    "--package",
+    yapPath,
+    "--dotenv",
+    dotenv,
+    "--workspace-discovery-json",
+    discoveryPath,
+  ]);
   assert.equal(result.status, 0, result.stderr);
   const parsed = JSON.parse(result.stdout);
-  assert.equal(parsed.workspaceId, "present");
+  assert.equal(parsed.workspaceId, "missing");
+  assert.equal(parsed.workspaceSelectionRequired, true);
+  assert.equal(parsed.result.resultClass, "workspace_selection_required");
+  assert.equal(parsed.result.source, "missing");
+  assert.equal(parsed.result.discoveredCategory, "flowcraft");
+  assert.equal(parsed.result.workspaceDiscovery.source, "fixture");
+  assert.equal(parsed.result.workspaceChoices.workspaceCount, 2);
+  assert.equal(parsed.result.requestShaped, false);
+  assert.equal(parsed.result.livePackageWriteExecuted, false);
+  assert.equal(Object.hasOwn(parsed.result, "request"), false);
+}
+
+function testWorkspaceFromEnvIsIgnoredAndBlocked() {
+  const dotenv = path.join(tempDir, "workspace.env");
+  fs.writeFileSync(dotenv, `YEEFLOW_WORKSPACE_ID=${workspaceId}\n`);
+  const result = runHelper([
+    "--operation",
+    "install-yapk",
+    "--package",
+    yapkPath,
+    "--dotenv",
+    dotenv,
+    "--workspace-discovery-json",
+    discoveryPath,
+  ]);
+  assert.equal(result.status, 0, result.stderr);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.workspaceId, "missing");
+  assert.equal(parsed.workspaceIdSource, "environment-default-ignored");
+  assert.equal(parsed.workspaceSelectionRequired, true);
   assert.equal(parsed.environment.YEEFLOW_WORKSPACE_ID_PRESENT, true);
+  assert.equal(parsed.result.resultClass, "workspace_selection_required");
+  assert.equal(parsed.result.source, "environment-default-ignored");
+  assert.equal(parsed.result.workspaceChoices.workspaceCount, 2);
+  assert.equal(parsed.result.workspaceChoices.workspaces[1].displayName, "Shared Workspace");
+  assert.equal(JSON.stringify(parsed.result).includes("WorkspaceID"), false);
   assert.equal(result.stdout.includes(workspaceId), false);
+  assert.equal(result.stdout.includes(discoveredWorkspaceId), false);
 }
 
 function testCliWorkspaceOverridePassesAndIsRedacted() {
@@ -180,6 +228,8 @@ function testCliWorkspaceOverridePassesAndIsRedacted() {
   assert.equal(result.status, 0, result.stderr);
   const parsed = JSON.parse(result.stdout);
   assert.equal(parsed.workspaceId, "present");
+  assert.equal(parsed.workspaceIdSource, "cli-user-selected");
+  assert.equal(parsed.workspaceSelectionRequired, false);
   assert.equal(result.stdout.includes(override), false);
 }
 
@@ -201,7 +251,33 @@ function testSelectedWorkspacePassesAndIsRedacted() {
   const parsed = JSON.parse(result.stdout);
   assert.equal(parsed.workspaceId, "present");
   assert.equal(parsed.workspaceIdSource, "user-selection");
+  assert.equal(parsed.workspaceSelectionRequired, false);
   assert.equal(result.stdout.includes(selected), false);
+}
+
+function testPackageWriteOperationsShareWorkspaceGate() {
+  const dotenv = path.join(tempDir, "package-write-gate.env");
+  fs.writeFileSync(dotenv, `YEEFLOW_WORKSPACE_ID=${workspaceId}\n`);
+  for (const operation of ["import-yap", "install-yapk", "upgrade-check-yapk", "upgrade-apply-yapk", "upgrade-yapk"]) {
+    const packageFile = operation === "import-yap" ? yapPath : yapkPath;
+    const result = runHelper([
+      "--operation",
+      operation,
+      "--package",
+      packageFile,
+      "--dotenv",
+      dotenv,
+      "--workspace-discovery-json",
+      discoveryPath,
+    ]);
+    assert.equal(result.status, 0, `${operation} failed:\n${result.stderr}`);
+    const parsed = JSON.parse(result.stdout);
+    assert.equal(parsed.workspaceIdSource, "environment-default-ignored");
+    assert.equal(parsed.result.resultClass, "workspace_selection_required");
+    assert.equal(parsed.result.requestShaped, false);
+    assert.equal(result.stdout.includes(workspaceId), false);
+    assert.equal(result.stdout.includes(discoveredWorkspaceId), false);
+  }
 }
 
 function testUploadDoesNotRequireWorkspace() {
@@ -211,6 +287,7 @@ function testUploadDoesNotRequireWorkspace() {
   assert.equal(result.status, 0, result.stderr);
   const parsed = JSON.parse(result.stdout);
   assert.equal(parsed.workspaceId, "missing");
+  assert.equal(parsed.workspaceSelectionRequired, false);
   assert.equal(parsed.result.endpoint, "POST /files/upload");
 }
 

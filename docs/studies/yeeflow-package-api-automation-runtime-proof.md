@@ -157,7 +157,7 @@ Manual runtime checklist:
 
 ## Standard Delivery Workflow Update
 
-New Yeeflow application generation now defaults to YAPK. Generate YAP only when the user explicitly asks for YAP or when a fallback/debug task specifically requires it. Current package automation should use OAuth, discover or select a `flowcraft` workspace, and ask the user whether to auto-install the generated YAPK before calling upload/install APIs. `.env.local` is not required for normal OAuth plus workspace discovery; `YEEFLOW_WORKSPACE_ID` is only an optional local/manual target override.
+New Yeeflow application generation now defaults to YAPK. Generate YAP only when the user explicitly asks for YAP or when a fallback/debug task specifically requires it. Current package automation should use OAuth, discover `flowcraft` workspaces, and ask the user whether to auto-install the generated YAPK before calling upload/install APIs. `.env.local` is not required for normal OAuth plus workspace discovery; local `YEEFLOW_WORKSPACE_ID` is ignored for package writes, and missing explicit selection must stop with `workspace_selection_required` before request shaping.
 
 Existing application changes should use a new versioned YAPK package. Use upgrade APIs only after the target application/package is clearly identified, safe, and explicitly confirmed.
 

@@ -5,7 +5,7 @@
   "variables": [
     "oauthToken",
     "selectedFlowcraftWorkspace",
-    "optionalYEEFLOW_WORKSPACE_ID"
+    "YEEFLOW_WORKSPACE_ID_ignored_for_package_writes"
   ],
   "decisions": [
     {
