@@ -63,7 +63,14 @@ function run() {
   expectFail("UUID Summary proof missing Resource.ReportIds match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-missing-reportids.json", decoded({ summary: "uuid-proof-missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
   expectFail("UUID Summary proof missing Resource.tempVars match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-tempvars.json", decoded({ summary: "uuid-proof-no-tempvars" })) }), "SUMMARY_UUID_PROOF_TEMPVAR_MISSING");
   expectFail("UUID Summary proof missing attrs.headc.title.variable binding fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-visible-binding.json", decoded({ summary: "uuid-proof-no-visible-binding" })) }), "SUMMARY_UUID_PROOF_VISIBLE_BINDING_MISSING");
-  expectPass("Data Analytics Summary with UUID ID and matching exts ReportIds passes", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-valid.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", reportIds: [UUID_SUMMARY_ID] })) }));
+  expectPass("Data Analytics Summary with UUID ID, tempVar, count ListDataID, and matching exts ReportIds passes", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-valid.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", reportIds: [UUID_SUMMARY_ID] })) }));
+  expectPass("Data Analytics Summary with Resource.ReportIds registration passes", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-resource-reportids.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", resourceReportIds: [UUID_SUMMARY_ID] })) }));
+  expectFail("Data Analytics Summary with missing real source field metadata fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-missing-source-field.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", reportIds: [UUID_SUMMARY_ID], dataFieldName: "MissingField" })) }), "ANALYTICS_FIELD_REFERENCE_INVALID");
+  expectFail("Data Analytics Summary with missing temp variable declaration fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-missing-tempvar.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", reportIds: [UUID_SUMMARY_ID], omitTempVars: true })) }), "ANALYTICS_SUMMARY_TEMP_VAR_MISSING");
+  expectFail("Data Analytics Summary with missing exts entry fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-missing-exts.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, reportIds: [UUID_SUMMARY_ID] })) }), "ANALYTICS_EXTS_REGISTRATION_MISSING");
+  expectFail("Data Analytics Summary with missing ReportIds entry fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-missing-reportids.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary" })) }), "ANALYTICS_REPORTIDS_REGISTRATION_MISSING");
+  expectFail("Data Analytics Summary placeholder field still fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-placeholder-field.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", reportIds: [UUID_SUMMARY_ID], dataFieldName: "placeholder_field" })) }), "ANALYTICS_PLACEHOLDER_FIELD_REFERENCE");
+  expectFail("Non-Summary analytics invalid field still fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-pie-invalid-field.json", analyticsDecoded({ type: "pie-chart", id: "11111111-1111-4111-8111-111111111111", dataFieldName: "MissingField" })) }), "ANALYTICS_FIELD_REFERENCE_INVALID");
   expectFail("Data Analytics Summary with non-UUID ID fails unless export-proven", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-non-uuid.json", analyticsDecoded({ type: "summary", id: "summary-total" })) }), "ANALYTICS_CONTROL_ID_NOT_RUNTIME_SAFE");
   for (const [label, type] of [
     ["Pie chart", "pie-chart"],
@@ -288,19 +295,27 @@ function runtimeEvidence(overrides = {}) {
   };
 }
 
-function analyticsDecoded({ type, id, extKey, reportIds = [], runtimeProofClaimed = false, semanticKey = "analytics:synthetic" }) {
+function analyticsDecoded({ type, id, extKey, reportIds = [], resourceReportIds = [], runtimeProofClaimed = false, semanticKey = "analytics:synthetic", dataFieldName = "ListDataID", omitTempVars = false } = {}) {
+  const dataField = field(dataFieldName, dataFieldName === "Decimal1" ? "Decimal" : "Text", dataFieldName === "Decimal1" ? "Amount" : "Record ID");
+  const saveVar = { exprType: "variable", valueType: "string", id: "__temp___temp_analytics_summary", type: "expr", name: "__temp_analytics_summary" };
   const control = {
     id,
     type,
     attrs: {
       semanticKey,
       runtimeProofClaimed,
-      data: { list: { ListID: "events" }, field: field("ListDataID", "Text", "Record ID") },
-      settings: { values: [{ field: "ListDataID", aggregate: "COUNT" }] },
+      data: { list: { ListID: "events" }, field: dataField, func: "COUNT" },
+      field: dataField,
+      fieldObject: field("ListDataID", "Text", "Record ID"),
+      fieldInfo: field("ListDataID", "Text", "Record ID"),
+      settings: { values: [{ fieldName: "ListDataID", id: "ListDataID", func: "COUNT" }] },
+      ...(type === "summary" ? { save_var: saveVar } : {}),
     },
   };
   const root = {
     type: "page",
+    ReportIds: resourceReportIds,
+    tempVars: omitTempVars ? [] : [{ id: "__temp___temp_analytics_summary", name: "__temp_analytics_summary" }],
     children: [control],
   };
   if (extKey) root.exts = [{ i: id, category: "___Pivot___", key: extKey }];
