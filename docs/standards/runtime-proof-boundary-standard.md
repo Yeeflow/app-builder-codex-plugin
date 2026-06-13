@@ -55,6 +55,12 @@ Approval forms must include:
 
 Static text-only approval pages fail runtime completeness even if the package is schema-valid.
 
+## Workflow Assignment Routing
+
+Assignment task assignee validation is not runtime routing proof. Reports must list every workflow Assignment Task, its assignee source, job-position source/proof status when applicable, and any unresolved blocker. Job-position assignees must be discovered, user-selected, or admin-created after explicit confirmation; missing job positions block generation until resolved. Manager-based assignees must use supported expression-editor patterns for line manager, department manager, or location manager. Do not print raw user/job-position records, full IDs, full emails, raw API responses, decoded package payloads, raw `Resource`, or raw `Sign`.
+
+Runtime/browser proof for assignment routing requires submitting a safe request and observing that the task routes to the intended manager, job position, requester, explicit user, or supported expression result. Signing, API install acceptance, workflow designer open/publish, and local package validation do not prove task routing.
+
 ## Requester Context
 
 For native user profile attributes, use `getUserAttr` and verified workflow-variable token wrappers:

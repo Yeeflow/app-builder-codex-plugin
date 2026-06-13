@@ -24,6 +24,7 @@ testRequiredFields();
 testSafetyClassification();
 testPathsAndRawCapabilityPolicy();
 testLocationsList();
+testPositionCapabilities();
 testWorkspaceCapabilities();
 testListCommand();
 testCallHelperBlocksWrites();
@@ -79,6 +80,31 @@ function testLocationsList() {
   assert.equal(capability.path, "/locations");
   assert.equal(capability.readOnly, true);
   assert.equal(capability.requiresConfirmation, false);
+}
+
+function testPositionCapabilities() {
+  const list = getCapability("positions.list");
+  assert.ok(list);
+  assert.equal(list.method, "GET");
+  assert.equal(list.path, "/positions");
+  assert.equal(list.readOnly, true);
+  assert.equal(list.requiresConfirmation, false);
+
+  const users = getCapability("positions.users.list");
+  assert.ok(users);
+  assert.equal(users.method, "GET");
+  assert.equal(users.path, "/positions/{id}/users");
+  assert.equal(users.readOnly, true);
+  assert.deepEqual(users.requiredParams, ["path:id"]);
+
+  for (const name of ["positions.create", "positions.update", "positions.users.assign", "positions.users.remove"]) {
+    const capability = getCapability(name);
+    assert.ok(capability, `${name} missing`);
+    assert.equal(capability.readOnly, false, `${name} must be write-classified`);
+    assert.equal(capability.requiresConfirmation, true, `${name} must require confirmation`);
+    assert.equal(capability.confirmationLevel, "admin", `${name} must require admin confirmation`);
+    assert.match(capability.notes, /system-admin|admin/i);
+  }
 }
 
 function testWorkspaceCapabilities() {

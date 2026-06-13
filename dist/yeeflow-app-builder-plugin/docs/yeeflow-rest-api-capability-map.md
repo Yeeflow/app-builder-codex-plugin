@@ -56,6 +56,9 @@ Default rules:
 - Package upload/import/install/upgrade capabilities are high-risk write capabilities and require explicit user confirmation plus active workspace confirmation.
 - Workspace discovery uses OAuth read-only `GET /workspaces/{category}` and must print only safe summaries with redacted workspace ID previews.
 - Workspace add/edit/delete/sort capabilities are mutating and must remain blocked by generic read-only helpers. The mapped Apifox paths are `POST /workspaces/{category}`, `PUT /workspaces/{category}/{id}`, `DELETE /workspaces/{category}/{id}`, and `POST /workspaces/{category}/sort`; delete is destructive and requires strong confirmation.
+- Job-position discovery uses documented read-only `GET /positions` and, when a specific position has been discovered or explicitly selected, `GET /positions/{id}/users` for membership/assignment lookup. There is no standalone `GET /positions/{id}` capability in the current mapped docs.
+- Job-position create/update/user-assignment calls (`POST /positions`, `PUT /positions/{id}`, `POST /positions/{id}/users`, and `POST /positions/{id}/users/remove`) are write operations. They require explicit user confirmation plus confirmed system-admin permission and must never run automatically during app or workflow generation.
+- No mapped current-user system-admin capability is available in this repository today. If admin status cannot be proven, missing job positions block generation and the user must ask a system admin to create/update the position or select an existing job position/fallback.
 
 Codex should prefer read-only capabilities for inspection and verification. Writes require an explicit user request and confirmation of the target resource, workspace, and intended effect.
 
@@ -110,6 +113,8 @@ The helper:
 Use specialized guarded helpers for package automation instead of trying to call package capabilities through the generic helper.
 
 Use `scripts/yeeflow-workspace-list.mjs` for workspace discovery. It calls only documented OAuth read-only `GET /workspaces/settings` and `GET /workspaces/flowcraft`, and reports count, title or user-facing fallback name, category, status, status provenance, and redacted ID previews without saving raw responses. When a user asks for all current workspaces, use `--all` to check both categories. For current app/package workflows, `flowcraft` is the relevant workspace category unless product/API docs change. `workspaces.get` is mapped as `GET /workspaces/{category}/{id}` and must also avoid raw workspace records or full IDs.
+
+For workflow assignment routing, `positions.list` may be used as an OAuth read-only discovery step. Print only safe counts and redacted summaries unless the user explicitly authorizes a narrow display of names for selection. Do not print raw job-position records, user records, full IDs, full emails, raw responses, or decoded package payloads.
 
 ## Authentication
 

@@ -226,12 +226,18 @@ Approval form section template:
 
 Workflow node table:
 
-| Step Name | Type | Description | Email Enabled | Task/Decision Settings | Transition Rules |
+| Step Name | Type | Description | Email Enabled | Assignee Strategy | Task/Decision Settings | Transition Rules |
+| --- | --- | --- | --- | --- | --- | --- |
+| Start Event | StartNoneEvent | <How the workflow starts> | true/false | N/A | <Submit settings> | <Next step on submission> |
+| <Approval Task> | MultiAssignmentTask | <Who reviews and what they decide> | true/false | <line manager / department manager / location manager / job position / explicit user / requester / other supported expression> | <Task type, quick completion, due date/reminders> | <Approved/Rejected/other transitions> |
+| End Event | EndNoneEvent | <Successful completion> | true/false | N/A | <End behavior> | N/A |
+| End with Rejection | EndRejectEvent | <Rejected completion> | true/false | N/A | <End behavior> | N/A |
+
+Assignment task assignee plan:
+
+| Task Name | Assignment Type | Required Job Position Name | Source | Proof Status | Fallback or Blocker |
 | --- | --- | --- | --- | --- | --- |
-| Start Event | StartNoneEvent | <How the workflow starts> | true/false | <Submit settings> | <Next step on submission> |
-| <Approval Task> | MultiAssignmentTask | <Who reviews and what they decide> | true/false | <Task type, assignment, quick completion, due date/reminders> | <Approved/Rejected/other transitions> |
-| End Event | EndNoneEvent | <Successful completion> | true/false | <End behavior> | N/A |
-| End with Rejection | EndRejectEvent | <Rejected completion> | true/false | <End behavior> | N/A |
+| <Approval Task> | <line manager / department manager / location manager / job position / explicit user / requester / other supported expression> | <Finance Manager / Legal Reviewer / N/A> | <discovered existing job position / user-selected existing job position / admin-created after confirmation / unresolved / N/A> | <discovered / confirmed / created after confirmation / blocked / runtime proof pending> | <Fallback assignee strategy or blocker> |
 
 Approval planning rules:
 
@@ -241,6 +247,11 @@ Approval planning rules:
 - Special custom validation must state rule, trigger, user-facing error message, implementation approach, and proof level.
 - Approval validation examples include leave period start before end, total days greater than zero, attachment required for specific leave types, delegate different from requester, manager/department autofill required before submit, balance/quota checks, and routing variables required before task assignment.
 - Workflow nodes must list Step Name, Yeeflow node Type, email behavior, task/decision settings, and transition rules.
+- Every Assignment Task must include an explicit assignee strategy in the assignment task assignee plan.
+- Manager-based assignments must use supported expression-editor patterns for line manager, department manager, or location manager and must be validator-backed before package signing, install, or handoff.
+- Job-position assignments must use discovered existing, user-selected existing, or admin-created-after-confirmation job positions; the generator must not invent job-position IDs or names.
+- Missing job positions block generation until a system admin creates/updates the job position after explicit confirmation and confirmed system-admin permission, or the user selects an existing job position/fallback.
+- Explicit user assignments are tenant-sensitive and require an explicit app-plan/user request.
 - Applicant/profile sections can use a compact Field ID + Display Name table only when controls are read-only profile context.
 
 Hard rule:
@@ -461,6 +472,11 @@ Custom code rules:
 - Approval form generated: Yes/No/Deferred
 - `Forms: []` allowed only if approval is not required or user-approved staged build
 - Missing required approval form is a generation failure
+- Assignment task assignee plan required for every `MultiAssignmentTask`
+- Job-position assignees must be discovered/confirmed; invented job-position references are forbidden
+- Missing job positions block generation unless admin creation/update is explicitly confirmed and system-admin permission is proven
+- Manager-based assignment expressions must use validated supported expression-editor patterns
+- Workflow assignment runtime correctness remains unproven until browser/runtime verification
 
 ### Navigation Runtime Gate
 
