@@ -8,7 +8,7 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Expected Version
 
-`0.6.36`
+`0.6.37`
 
 ## Safe API Usage
 
@@ -36,4 +36,4 @@ Summary/KPI controls require designer-shaped hidden Summary configuration. Summa
 
 Runtime screenshot/evidence is required before claiming UI quality. Install/signing/API acceptance is not runtime UI proof. UI upgrades must preserve ListSetID, app identity, existing IDs, lineage, and declared change scope. Use `yeeflow-ui-generation-hard-gates` when dashboard/UI/Summary/KPI generation or upgrade work is requested.
 
-Version `0.6.36` adds UI runtime evidence developer-experience helpers. `docs/examples/runtime-evidence.redacted.example.json` is a synthetic/redacted template for UI/KPI proof reports shaped for `scripts/inspect-runtime-evidence.mjs` and `scripts/inspect-visible-kpi-runtime-bindings.mjs`. `scripts/test-ui-hard-gates-all.mjs` runs the related UI hard-gate tests together. KPI Runtime Binding Proof v1.0.1 promotes only the exact UUID Summary shape; Summary recalculation can be asynchronous or cache-delayed, so stale after-evidence must be replaced by refreshed/recalculated runtime evidence. Marketing Event dashboards still need their own before/after mutation proof before claiming runtime dynamic KPI success.
+Version `0.6.37` promotes KPI Runtime Binding Proof v1.0.1 and Data Analytics control identity guardrails. Dynamic visible KPI binding is proven only for the exact UUID Summary shape; Summary recalculation can be asynchronous or cache-delayed, so stale after-evidence must be replaced by refreshed/recalculated runtime evidence. Other Summary/KPI shapes remain unproven unless separately runtime-proven, fallback KPI values must remain labeled fallback, and Marketing Event dashboards still need their own before/after mutation proof before claiming runtime dynamic KPI success. Pie chart, Column chart, Line chart, Gauge, Funnel chart, Color block heatmap, Summary, and Pivot table controls require UUID/runtime-safe IDs by default; Gauge/Funnel/Color block heatmap remain unproven until sandbox/export study.
