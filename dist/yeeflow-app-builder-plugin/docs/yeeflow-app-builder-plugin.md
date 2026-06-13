@@ -8,14 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.35
+- Version: 0.6.36
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
 
-Version `0.6.35` fixes UI hard-gate skill test layout compatibility. `scripts/test-ui-generation-hard-gate-skills.mjs` supports both the source layout path `skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md` and the installed plugin cache layout path `skills/yeeflow-ui-generation-hard-gates/SKILL.md`, reports which path is used, and fails only when neither path exists. UI/Summary/KPI hard-gate behavior is unchanged, and fully dynamic visible KPI binding remains unresolved unless runtime-proven.
+Version `0.6.36` adds UI runtime evidence developer-experience helpers. `docs/examples/runtime-evidence.redacted.example.json` is a synthetic/redacted template for UI/KPI proof reports shaped for `scripts/inspect-runtime-evidence.mjs` and `scripts/inspect-visible-kpi-runtime-bindings.mjs`. `scripts/test-ui-hard-gates-all.mjs` runs the related UI hard-gate tests together. Dynamic visible KPI binding remains unresolved unless runtime-proven, future promotion requires a dedicated golden runtime package/evidence fixture, and UI/Summary/KPI hard-gate behavior is unchanged.
 
 The UI/Summary/KPI runtime hard gates and UI generation hard-gate skill routing remain active. High-quality UI requires a page-by-page UI implementation contract, uncertain UI/runtime patterns require sandbox-page proof first, and export-proven Yeeflow control/style shapes are required or preferred before real pages are changed. Summary/KPI controls require designer-shaped hidden Summary configuration with real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`. Visible KPI dynamic binding is not considered solved unless runtime-proven, fallback KPI values must be explicitly labeled fallback, and runtime screenshot/evidence is required before claiming UI quality. Install/signing/API acceptance is not runtime UI proof. UI upgrades must preserve ListSetID, app identity, existing IDs, lineage, and declared change scope. Scaffold-like UI must not be claimed as high-quality UI. The reusable `yeeflow-ui-generation-hard-gates` skill is available and routed from relevant generator, dashboard, package, runtime, and learning skills.
 
