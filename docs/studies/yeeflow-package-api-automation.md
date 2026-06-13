@@ -45,6 +45,8 @@ Workspace add, edit, delete, and sort endpoints exist in Apifox as `POST /worksp
 
 Dry-run output reports `workspaceId: "present"` or `workspaceId: "missing"` plus a safe `workspaceIdSource`. It does not print the actual workspace ID. If only environment workspace configuration exists, output uses `workspace_selection_required`, `source: environment-default-ignored`, `discoveredCategory: flowcraft`, redacted workspace choices when available, and no request body. `--selected-workspace-id <id>` is preferred; `--workspace-id <id>` remains available only as a documented user-selected workspace input, and the value is redacted in all helper output.
 
+After a successful live `install-yapk` or `import-yap`, the final user-facing report must include the selected workspace summary (`displayName`, `category`, and redacted `idPreview`), install/import result status, installed/imported application `ListSetID` when safely resolved, and the application access link when both tenant URL and ListSetID are safe. The access URL format is `<tenant-url>/#/list-set/41/<listset-id>`. The tenant URL must come from OAuth/session tenant context, not `.env.local` or `YEEFLOW_TENANT_URL`. If either value is unavailable, report `Application link: unavailable; ListSetID or tenant URL was not safely resolved.` Do not print raw API responses, raw workspace objects, full decoded token payloads, tokens, Authorization headers, raw `Resource`, or raw `Sign`. API install/import success is not browser runtime proof; the user should open the link and verify navigation, dashboards, lists, forms, and workflows.
+
 Examples:
 
 ```bash

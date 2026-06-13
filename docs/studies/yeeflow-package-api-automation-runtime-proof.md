@@ -163,6 +163,8 @@ Existing application changes should use a new versioned YAPK package. Use upgrad
 
 Package API result summaries now classify responses as `success`, `already_installed`, `api_rejected`, or `http_rejected`. A known duplicate/already-installed non-zero install response should be reported as: "The package appears to already be installed in this workspace." Keep raw response text redacted.
 
+For successful new app install/import results, include the selected workspace display name/category/redacted ID preview, result status, safe installed/imported `ListSetID` when present, and the application access link in the form `<tenant-url>/#/list-set/41/<listset-id>`. Build the tenant URL only from OAuth/session tenant context. Do not use `.env.local` or require `YEEFLOW_TENANT_URL`. If ListSetID or tenant URL is not safely resolved, report `Application link: unavailable; ListSetID or tenant URL was not safely resolved.` This link is an access convenience only; browser/runtime verification remains separate.
+
 ## Safety Boundary
 
 No `.env.local`, generated packages, uploaded package contents, raw API responses, raw `Resource`, raw `Sign`, decoded payloads, screenshots, private URLs, tenant IDs, workspace IDs, uploaded file IDs, app IDs, or package IDs are committed or recorded here.

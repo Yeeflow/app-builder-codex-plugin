@@ -109,6 +109,8 @@ Before package signing or package automation, check presence without printing va
 
 Missing OAuth or target workspace selection should block automation before request shaping. `.env.local` may be absent or empty for normal OAuth plus workspace discovery. Never print or commit `.env.local`, token files, cert/key files, tenant URLs, workspace IDs, raw API responses, decoded payloads, or generated runtime packages.
 
+After successful live install/import, final reports must include selected workspace name/category/redacted ID preview, result status, safe `ListSetID` if resolved, and application access link only when the OAuth/session tenant URL and ListSetID are both safe. Use `<tenant-url>/#/list-set/41/<listset-id>`. If the link cannot be safely built, report `Application link: unavailable; ListSetID or tenant URL was not safely resolved.` Signing/signature verification and API install/import acceptance are not browser runtime proof.
+
 ## Final Runtime Checklist
 
 Runtime UI proof requires inspection after install/import/upgrade acceptance:

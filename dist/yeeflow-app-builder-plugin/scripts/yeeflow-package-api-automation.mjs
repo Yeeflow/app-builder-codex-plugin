@@ -10,8 +10,10 @@ import {
   APP_PACKAGE_WORKSPACE_CATEGORY,
   PACKAGE_WORKSPACE_OPERATIONS,
   WORKSPACE_SELECTION_REQUIRED,
+  redactWorkspaceId,
   requireTargetWorkspaceId,
   resolveTargetWorkspaceId,
+  summarizeWorkspaceRecord,
   summarizeWorkspaceList,
 } from "./lib/yeeflow-workspace-selection.mjs";
 
@@ -253,12 +255,18 @@ async function executeOperation(options, env, resolvedPackagePath) {
     return await uploadPackageFile(env, resolvedPackagePath, options, auth);
   }
   if (options.operation === "import-yap") {
-    return await postJson(env, "/listset/package/import", buildImportBody(options, resolvedPackagePath), redactImportBody, auth);
+    return await postJson(env, "/listset/package/import", buildImportBody(options, resolvedPackagePath), redactImportBody, auth, {
+      operation: options.operation,
+      selectedWorkspace: await resolveSelectedWorkspaceSummary(options),
+    });
   }
   const existingPackageFile = buildExistingPackageFile(options, resolvedPackagePath);
   const packageFile = existingPackageFile || normalizePackageFile(await uploadPackageFile(env, resolvedPackagePath, options, auth), resolvedPackagePath);
   const endpoint = options.operation === "install-yapk" ? "/listset/package/install" : "/listset/package/upgrade";
-  return await postJson(env, endpoint, buildPackageActionBody(options, packageFile), redactPackageActionBody, auth);
+  return await postJson(env, endpoint, buildPackageActionBody(options, packageFile), redactPackageActionBody, auth, {
+    operation: options.operation,
+    selectedWorkspace: await resolveSelectedWorkspaceSummary(options),
+  });
 }
 
 async function uploadPackageFile(env, resolvedPackagePath, options, auth) {
@@ -286,7 +294,7 @@ async function uploadPackageFile(env, resolvedPackagePath, options, auth) {
   return await summarizeResponse(response, "upload file content");
 }
 
-async function postJson(env, endpoint, body, redactBody, auth) {
+async function postJson(env, endpoint, body, redactBody, auth, context = {}) {
   const response = await fetch(`${env.apiBaseUrl}${endpoint}`, {
     method: "POST",
     headers: mergeAuthHeaders(auth, {
@@ -296,10 +304,19 @@ async function postJson(env, endpoint, body, redactBody, auth) {
     body: JSON.stringify(body),
   });
   const summary = await summarizeResponse(response, endpoint, { upgradeCheck: body?.UpgradeCheck });
-  return {
+  const result = {
     request: redactBody(body),
     response: summary,
   };
+  if (context.operation === "import-yap" || context.operation === "install-yapk") {
+    result.selectedWorkspace = context.selectedWorkspace || buildSelectedWorkspaceFallback(body.WorkspaceID);
+    result.applicationAccess = buildApplicationAccessReport({
+      operation: context.operation,
+      responseSummary: summary,
+      auth,
+    });
+  }
+  return result;
 }
 
 async function summarizeResponse(response, label, context = {}) {
@@ -353,6 +370,8 @@ async function summarizeResponse(response, label, context = {}) {
     textLength: text.length,
     dataShape: summarizeDataShape(parsed?.Data ?? parsed?.data ?? parsed),
   };
+  const applicationListSetId = extractApplicationListSetId(parsed, { label });
+  if (applicationListSetId) summary.applicationListSetId = applicationListSetId;
   const packageFile = isUploadResponseLabel(label) ? extractPackageFile(parsed?.Data ?? parsed?.data ?? parsed) : null;
   if (packageFile) {
     Object.defineProperty(summary, "_packageFile", { value: packageFile, enumerable: false });
@@ -361,7 +380,85 @@ async function summarizeResponse(response, label, context = {}) {
   return summary;
 }
 
-export { classifyApiResult, extractPackageFile, summarizeResponse };
+export { buildApplicationAccessReport, classifyApiResult, extractApplicationListSetId, extractPackageFile, summarizeResponse };
+
+function buildApplicationAccessReport({ operation = "", responseSummary = {}, auth = {} } = {}) {
+  const listSetId = sanitizeListSetId(responseSummary.applicationListSetId);
+  const tenantUrl = auth?.mode === "oauth" && auth?.env?.tenantUrlSource === "oauth-token-claim"
+    ? sanitizeTenantUrl(auth.env.tenantUrl)
+    : "";
+  const unavailableMessage = "Application link: unavailable; ListSetID or tenant URL was not safely resolved.";
+  const proofBoundary = "API install/import success is not browser runtime proof; open the application and verify navigation, dashboards, lists, forms, and workflows.";
+  if (responseSummary.ok !== true || !listSetId || !tenantUrl || !["import-yap", "install-yapk"].includes(operation)) {
+    return {
+      status: "unavailable",
+      operation,
+      listSetId: listSetId || null,
+      tenantUrlSource: auth?.env?.tenantUrlSource || "missing",
+      link: null,
+      message: unavailableMessage,
+      proofBoundary,
+    };
+  }
+  const link = `${tenantUrl}/#/list-set/41/${encodeURIComponent(listSetId)}`;
+  return {
+    status: "available",
+    operation,
+    listSetId,
+    tenantUrlSource: auth.env.tenantUrlSource,
+    link,
+    message: `Application link: ${link}`,
+    proofBoundary,
+  };
+}
+
+async function resolveSelectedWorkspaceSummary(options) {
+  if (!options.workspaceId || !PACKAGE_WORKSPACE_OPERATIONS.has(options.operation)) return null;
+  if (options.workspaceDiscoveryJson) {
+    const payload = JSON.parse(fs.readFileSync(path.resolve(options.workspaceDiscoveryJson), "utf8"));
+    const record = findWorkspaceRecordById(payload, options.workspaceId);
+    if (record) return { ...summarizeWorkspaceRecord(record, 1), source: "workspace-discovery-json" };
+  }
+  return buildSelectedWorkspaceFallback(options.workspaceId);
+}
+
+function buildSelectedWorkspaceFallback(workspaceId) {
+  return {
+    displayName: "unavailable",
+    category: APP_PACKAGE_WORKSPACE_CATEGORY,
+    idPreview: redactWorkspaceId(workspaceId),
+    source: "explicit-user-selection",
+  };
+}
+
+function findWorkspaceRecordById(payload, workspaceId) {
+  const data = payload?.Data ?? payload?.data ?? payload;
+  const records = Array.isArray(data) ? data : [];
+  return records.find((record) => String(record?.ID ?? record?.Id ?? record?.id ?? "").trim() === String(workspaceId || "").trim()) || null;
+}
+
+function extractApplicationListSetId(parsed, { label = "" } = {}) {
+  const data = parsed?.Data ?? parsed?.data ?? parsed;
+  const explicit = firstNonEmpty(
+    data?.ListSetID,
+    data?.ListSetId,
+    data?.listSetID,
+    data?.listSetId,
+    data?.listsetID,
+    data?.listsetId,
+    parsed?.ListSetID,
+    parsed?.ListSetId,
+    parsed?.listSetID,
+    parsed?.listSetId,
+    parsed?.listsetID,
+    parsed?.listsetId,
+  );
+  if (explicit) return sanitizeListSetId(explicit);
+  if (String(label || "").includes("/listset/package/install")) {
+    return sanitizeListSetId(data?.ID ?? data?.Id ?? data?.id);
+  }
+  return "";
+}
 
 function buildImportBody(options, resolvedPackagePath) {
   const wrapper = JSON.parse(fs.readFileSync(resolvedPackagePath, "utf8"));
@@ -486,6 +583,37 @@ function extractPackageFile(data) {
     Name: String(name),
     FileSize: Number(fileSize),
   };
+}
+
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    const text = String(value ?? "").trim();
+    if (text) return text;
+  }
+  return "";
+}
+
+function sanitizeListSetId(value) {
+  const text = String(value ?? "").trim();
+  if (!text || text === "0") return "";
+  if (/^(?:unknown|missing|null|undefined|placeholder|example)$/i.test(text)) return "";
+  if (/^<.*>$/.test(text) || /^\[.*\]$/.test(text)) return "";
+  if (!/^[A-Za-z0-9_-]+$/.test(text)) return "";
+  return text;
+}
+
+function sanitizeTenantUrl(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  let url;
+  try {
+    url = new URL(text);
+  } catch {
+    return "";
+  }
+  if (url.protocol !== "https:") return "";
+  if (!/^[a-z0-9.-]+$/i.test(url.hostname) || !url.hostname.includes(".") || url.hostname.includes("..")) return "";
+  return `https://${url.hostname}`;
 }
 
 function looksLikeJson(value) {
