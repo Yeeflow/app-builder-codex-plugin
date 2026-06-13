@@ -8,7 +8,7 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Expected Version
 
-`0.6.35`
+`0.6.36`
 
 ## Safe API Usage
 
@@ -36,4 +36,4 @@ Summary/KPI controls require designer-shaped hidden Summary configuration. Summa
 
 Runtime screenshot/evidence is required before claiming UI quality. Install/signing/API acceptance is not runtime UI proof. UI upgrades must preserve ListSetID, app identity, existing IDs, lineage, and declared change scope. Use `yeeflow-ui-generation-hard-gates` when dashboard/UI/Summary/KPI generation or upgrade work is requested.
 
-Version `0.6.35` fixes UI hard-gate skill test layout compatibility. `scripts/test-ui-generation-hard-gate-skills.mjs` supports source layout `skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md` and installed plugin cache layout `skills/yeeflow-ui-generation-hard-gates/SKILL.md`, reports which path is used, and keeps UI/Summary/KPI hard-gate behavior unchanged. Fully dynamic visible KPI binding remains unresolved unless runtime-proven.
+Version `0.6.36` adds UI runtime evidence developer-experience helpers. `docs/examples/runtime-evidence.redacted.example.json` is a synthetic/redacted template for UI/KPI proof reports shaped for `scripts/inspect-runtime-evidence.mjs` and `scripts/inspect-visible-kpi-runtime-bindings.mjs`. `scripts/test-ui-hard-gates-all.mjs` runs the related UI hard-gate tests together. Dynamic visible KPI binding remains unresolved unless runtime-proven, future promotion requires a dedicated golden runtime package/evidence fixture, and UI/Summary/KPI hard-gate behavior is unchanged.

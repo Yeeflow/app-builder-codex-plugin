@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.6.36
+
+- Bump the active plugin version after the UI runtime evidence developer-experience helpers merge.
+- Add the synthetic/redacted `docs/examples/runtime-evidence.redacted.example.json` template for UI/KPI runtime proof reports.
+- Add `scripts/test-ui-hard-gates-all.mjs` to run the related UI hard-gate tests together, including UI contract, style shape, Summary/KPI, visible KPI runtime binding, runtime evidence, grid/table quality, and skill wording checks.
+- Document that the runtime evidence template is shaped for `scripts/inspect-runtime-evidence.mjs` and `scripts/inspect-visible-kpi-runtime-bindings.mjs`.
+- Keep dynamic visible KPI binding unresolved unless runtime-proven; future promotion requires a dedicated golden runtime package/evidence fixture.
+- Keep UI/Summary/KPI hard-gate behavior unchanged.
+
 ## 0.6.35
 
 - Bump the active plugin version after the UI hard-gate skill test layout compatibility fix.
