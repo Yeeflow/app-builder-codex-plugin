@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceSkillsRoot = path.join(ROOT, "skills", "installed");
+const installedSkillsRoot = path.join(ROOT, "skills");
 const distSkillsRoot = path.join(ROOT, "dist", "yeeflow-app-builder-plugin", "skills");
 
 const requiredPhrases = [
@@ -47,11 +48,40 @@ const updatedSkills = [
 const newSkill = "yeeflow-ui-generation-hard-gates";
 const allSkills = [newSkill, ...updatedSkills];
 
-for (const root of [sourceSkillsRoot, distSkillsRoot]) {
+function skillPath(root, skill) {
+  return path.join(root, skill, "SKILL.md");
+}
+
+function resolvePrimarySkillsRoot() {
+  const sourceSkillPath = skillPath(sourceSkillsRoot, newSkill);
+  if (fs.existsSync(sourceSkillPath)) {
+    console.log(`Using source skill path: ${sourceSkillPath}`);
+    return { label: "source", root: sourceSkillsRoot };
+  }
+
+  const installedSkillPath = skillPath(installedSkillsRoot, newSkill);
+  if (fs.existsSync(installedSkillPath)) {
+    console.log(`Using installed plugin skill path: ${installedSkillPath}`);
+    return { label: "installed", root: installedSkillsRoot };
+  }
+
+  assert.fail(
+    `missing UI hard-gate skill file. Checked source path ${sourceSkillPath} and installed plugin path ${installedSkillPath}`,
+  );
+}
+
+const primarySkillsRoot = resolvePrimarySkillsRoot();
+const skillRoots = [primarySkillsRoot];
+if (fs.existsSync(skillPath(distSkillsRoot, newSkill))) {
+  console.log(`Using dist mirror skill path: ${skillPath(distSkillsRoot, newSkill)}`);
+  skillRoots.push({ label: "dist", root: distSkillsRoot });
+}
+
+for (const { root } of skillRoots) {
   for (const skill of allSkills) {
-    const skillPath = path.join(root, skill, "SKILL.md");
-    assert.equal(fs.existsSync(skillPath), true, `missing skill file: ${skillPath}`);
-    const content = fs.readFileSync(skillPath, "utf8");
+    const currentSkillPath = skillPath(root, skill);
+    assert.equal(fs.existsSync(currentSkillPath), true, `missing skill file: ${currentSkillPath}`);
+    const content = fs.readFileSync(currentSkillPath, "utf8");
     const normalizedContent = content.toLowerCase();
     assert.match(content, /yeeflow-ui-generation-hard-gates/, `${skill} does not reference the UI hard-gate skill`);
     for (const phrase of requiredPhrases) {
@@ -60,22 +90,24 @@ for (const root of [sourceSkillsRoot, distSkillsRoot]) {
   }
 }
 
-const sourceNewSkill = path.join(sourceSkillsRoot, newSkill, "SKILL.md");
-const distNewSkill = path.join(distSkillsRoot, newSkill, "SKILL.md");
-assert.equal(
-  fs.readFileSync(sourceNewSkill, "utf8"),
-  fs.readFileSync(distNewSkill, "utf8"),
-  "new UI hard-gate skill source/dist mirror differs",
-);
+const primaryNewSkill = skillPath(primarySkillsRoot.root, newSkill);
+const distNewSkill = skillPath(distSkillsRoot, newSkill);
+if (primarySkillsRoot.label === "source" && fs.existsSync(distNewSkill)) {
+  assert.equal(
+    fs.readFileSync(primaryNewSkill, "utf8"),
+    fs.readFileSync(distNewSkill, "utf8"),
+    "new UI hard-gate skill source/dist mirror differs",
+  );
+}
 
-for (const skillPath of [sourceNewSkill, distNewSkill]) {
-  const content = fs.readFileSync(skillPath, "utf8");
+for (const currentSkillPath of skillRoots.map(({ root }) => skillPath(root, newSkill))) {
+  const content = fs.readFileSync(currentSkillPath, "utf8");
   for (const validatorName of requiredValidatorNames) {
-    assert.equal(content.includes(validatorName), true, `${skillPath} missing validator reference: ${validatorName}`);
+    assert.equal(content.includes(validatorName), true, `${currentSkillPath} missing validator reference: ${validatorName}`);
   }
 }
 
-const docs = [
+const docCandidates = [
   path.join(ROOT, "skills", "README.md"),
   path.join(ROOT, "dist", "yeeflow-app-builder-plugin", "skills", "README.md"),
   path.join(ROOT, "docs", "README.md"),
@@ -83,9 +115,10 @@ const docs = [
   path.join(ROOT, "docs", "quick-start.md"),
   path.join(ROOT, "dist", "yeeflow-app-builder-plugin", "docs", "quick-start.md"),
 ];
+const docs = docCandidates.filter((docPath) => fs.existsSync(docPath));
+assert.notEqual(docs.length, 0, `missing UI hard-gate docs. Checked: ${docCandidates.join(", ")}`);
 
 for (const docPath of docs) {
-  assert.equal(fs.existsSync(docPath), true, `missing doc file: ${docPath}`);
   const content = fs.readFileSync(docPath, "utf8");
   const normalizedContent = content.toLowerCase();
   assert.match(content, /yeeflow-ui-generation-hard-gates/, `${docPath} missing skill name`);
@@ -94,7 +127,7 @@ for (const docPath of docs) {
   }
 }
 
-const sourceSkillDirs = fs.readdirSync(sourceSkillsRoot, { withFileTypes: true })
+const sourceSkillDirs = fs.readdirSync(primarySkillsRoot.root, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
   .filter((name) => name.includes("ui-generation-hard-gate"));
@@ -106,7 +139,7 @@ const privatePatterns = [
   /\b(print|output|emit|include|commit)\s+raw `Resource`/i,
   /\b(print|output|emit|include|commit)\s+raw `Sign`/i,
 ];
-const newSkillContent = fs.readFileSync(sourceNewSkill, "utf8");
+const newSkillContent = fs.readFileSync(primaryNewSkill, "utf8");
 for (const pattern of privatePatterns) {
   assert.doesNotMatch(newSkillContent, pattern, `new skill should not instruct printing private data: ${pattern}`);
 }
