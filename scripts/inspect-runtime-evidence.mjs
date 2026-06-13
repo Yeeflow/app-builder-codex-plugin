@@ -1,0 +1,75 @@
+#!/usr/bin/env node
+
+import { pathToFileURL } from "node:url";
+import path from "node:path";
+import { addFinding, readJsonFile, safePath, statusFromFindings } from "./lib/yeeflow-ui-hard-gate-utils.mjs";
+
+if (isMainModule()) {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.help || !args.evidence) usage(args.help ? 0 : 1);
+  const report = inspectRuntimeEvidence(args);
+  console.log(JSON.stringify(report, null, 2));
+  process.exit(report.status === "pass" ? 0 : 1);
+}
+
+export function inspectRuntimeEvidence({ evidence: evidencePath, claimHighQualityUi = false } = {}) {
+  const findings = [];
+  let evidence;
+  try {
+    evidence = readJsonFile(evidencePath);
+  } catch (error) {
+    addFinding(findings, "error", "RUNTIME_EVIDENCE_READ_FAILED", `Could not read runtime evidence metadata: ${error.message}`);
+    return buildReport(evidencePath, findings);
+  }
+
+  if (claimHighQualityUi && evidence.runtimeScreenshotCaptured !== true) {
+    addFinding(findings, "error", "UI_QUALITY_RUNTIME_SCREENSHOT_MISSING", "Runtime screenshot evidence is required before claiming high-quality UI.");
+  }
+  if (claimHighQualityUi && evidence.installOrSigningOnly === true) {
+    addFinding(findings, "error", "INSTALL_SIGNING_NOT_UI_PROOF", "Install/signing/API acceptance is not visual runtime proof.");
+  }
+  if (evidence.kpiValuesVisible !== true) addFinding(findings, "error", "RUNTIME_KPI_VALUES_NOT_VISIBLE", "Runtime evidence must confirm KPI values are visible.");
+  if (evidence.hiddenSummaryVisible === true) addFinding(findings, "error", "RUNTIME_HIDDEN_SUMMARY_VISIBLE", "Hidden Summary controls must not be visible at runtime.");
+  if (evidence.dashboardCardsCardLike !== true) addFinding(findings, "error", "RUNTIME_DASHBOARD_CARDS_NOT_CARDLIKE", "Dashboard KPI/content sections must be card-like in runtime evidence.");
+  if (evidence.filtersActionsVisible !== true) addFinding(findings, "error", "RUNTIME_FILTERS_ACTIONS_NOT_VISIBLE", "Filters/actions must be visible when planned.");
+  if (evidence.tablesGridsNonScaffold !== true) addFinding(findings, "error", "RUNTIME_TABLES_GRIDS_SCAFFOLD", "Tables/grids must not be empty scaffolds in runtime evidence.");
+  if (evidence.badgesDistinct !== true) addFinding(findings, "error", "RUNTIME_BADGES_NOT_DISTINCT", "Badges/chips must be visually distinct in runtime evidence.");
+  if (evidence.pageLooksPlainScaffold === true) addFinding(findings, "error", "RUNTIME_PAGE_LOOKS_SCAFFOLD", "Runtime page still looks like a plain scaffold.");
+
+  return buildReport(evidencePath, findings, {
+    screenshot: evidence.screenshot || evidence.screenshotPath ? path.basename(evidence.screenshot || evidence.screenshotPath) : "redacted",
+    runtimeScreenshotCaptured: evidence.runtimeScreenshotCaptured === true,
+  });
+}
+
+function buildReport(evidencePath, findings, summary = {}) {
+  return {
+    status: statusFromFindings(findings),
+    evidence: safePath(evidencePath),
+    summary,
+    unavailableMessage: "When runtime evidence is unavailable, reports must say: UI runtime proof not completed; dynamic KPI visible binding not proven; install/signing is not visual runtime proof.",
+    proofBoundary: "This gate validates redacted runtime evidence metadata. It does not perform live screenshot capture.",
+    findings,
+  };
+}
+
+function parseArgs(argv) {
+  const args = { claimHighQualityUi: false };
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === "--help" || arg === "-h") args.help = true;
+    else if (arg === "--evidence") args.evidence = argv[++i];
+    else if (arg === "--claim-high-quality-ui") args.claimHighQualityUi = true;
+    else usage(1);
+  }
+  return args;
+}
+
+function usage(exitCode) {
+  console.error("Usage:\n  node scripts/inspect-runtime-evidence.mjs --evidence <runtime-evidence.json> [--claim-high-quality-ui]");
+  process.exit(exitCode);
+}
+
+function isMainModule() {
+  return import.meta.url === pathToFileURL(process.argv[1]).href;
+}

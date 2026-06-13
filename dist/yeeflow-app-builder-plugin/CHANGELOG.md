@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add UI/Summary/KPI runtime hard gates for page-by-page UI contracts, export-proven style shapes, Summary control contracts, visible KPI runtime evidence, grid-table quality, YAPK upgrade app identity/ListSetID stability, and safe tolerant YAPK decode diagnostics.
+
 ## 0.6.33
 
 - Bump the active plugin version after the workflow assignment job-position guardrails merge.
