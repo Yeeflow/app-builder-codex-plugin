@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.6.38
+
+- Bump the active plugin version after the Data Analytics Summary validator fix.
+- Fix false positives in `inspect-data-analytics-control-identity.mjs` for valid Summary analytics controls: `attrs.save_var.name` is validated as a temp variable expression name against `Resource.tempVars[]`, not as a source-list field.
+- Accept Summary `COUNT` aggregate `ListDataID` as a valid count aggregate shape and accept resource-level `ReportIds[]` registration for exported Summary resources.
+- Collect Summary field references only from explicit Summary field, value, and filter locations while keeping non-Summary analytics field validation strict.
+- Keep existing analytics guardrails active for missing `exts`, missing `ReportIds`, missing temp variables, placeholder/invented fields, runtime-proof claims without evidence, and upgrade ID drift.
+- Confirm the proven UUID KPI proof package and the Marketing Event v1.0.18 unsigned package pass Data Analytics identity validation.
+
 ## 0.6.37
 
 - Promote KPI Runtime Binding Proof v1.0.1 into UI/Summary/KPI standards, skills, validators, and synthetic tests.
