@@ -30,7 +30,7 @@ import {
   saveStoredToken,
   summarizeStoredToken,
 } from "./lib/yeeflow-oauth-client.mjs";
-import { requireYeeflowOAuthAuth, resolveYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
+import { requireYeeflowApiAuth, requireYeeflowOAuthAuth, resolveYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
 import {
   decodeJwtPayload,
   extractYeeflowTokenContext,
@@ -69,6 +69,7 @@ try {
   await testOAuthPreferredOverApiKey();
   await testWorkspaceDiscoveryRequiresOAuth();
   await testApiKeyFallback();
+  await testRequireApiAuthBlocksApiKeyFallbackForNormalCalls();
   console.log("yeeflow-oauth-auth tests passed");
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
@@ -478,7 +479,7 @@ async function testWorkspaceDiscoveryRequiresOAuth() {
   try {
     await assert.rejects(
       () => requireYeeflowOAuthAuth({ loadDotenv: false }),
-      /OAuth authentication is required.*yeeflow-oauth-login\.mjs/,
+      /OAuth authentication is required.*plugin login flow/,
     );
   } finally {
     process.env = originalEnv;
@@ -496,6 +497,25 @@ async function testApiKeyFallback() {
     const auth = await resolveYeeflowApiAuth({ loadDotenv: false });
     assert.equal(auth.mode, "apiKey");
     assert.equal(auth.headers.apiKey, "legacy-secret");
+  } finally {
+    process.env = originalEnv;
+  }
+}
+
+async function testRequireApiAuthBlocksApiKeyFallbackForNormalCalls() {
+  const originalEnv = process.env;
+  process.env = {
+    YEEFLOW_API_BASE_URL: "https://api.yeeflow.com/v1",
+    YEEFLOW_API_KEY: "legacy-secret",
+    YEEFLOW_OAUTH_TOKEN_FILE: path.join(tempDir, "missing-token-for-require.json"),
+  };
+  try {
+    await assert.rejects(
+      () => requireYeeflowApiAuth({ loadDotenv: false }),
+      /plugin login flow so I can continue this operation/,
+    );
+    const legacy = await requireYeeflowApiAuth({ loadDotenv: false, allowLegacyApiKey: true });
+    assert.equal(legacy.mode, "apiKey");
   } finally {
     process.env = originalEnv;
   }

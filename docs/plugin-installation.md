@@ -74,6 +74,8 @@ If Codex App shows an unexpected old version, confirm the marketplace source, Gi
 yeeflow/yeeflow-app-builder/0.6.31
 ```
 
+If Codex references an older cache path such as `yeeflow/yeeflow-app-builder/0.6.30` in answers or login guidance, refresh or reinstall the plugin from Git ref `stable` with the sparse paths above. Do not follow stale cache-path commands.
+
 It should not resolve to:
 
 ```text

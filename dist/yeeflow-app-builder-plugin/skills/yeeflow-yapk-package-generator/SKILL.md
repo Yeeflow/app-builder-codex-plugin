@@ -111,7 +111,7 @@ The YAP Service Desk v8 smoke lessons are shared layout guidance for YAPK page/f
 ## Public Tenant Safety
 
 - Never hardcode a tenant-specific Yeeflow URL. Use `https://<yourdomain>.yeeflow.com` in docs and examples.
-- For live user-facing API calls, use OAuth; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`.
+- For live user-facing API calls, use OAuth; if OAuth is not authenticated, ask the user to sign in through the Yeeflow plugin login flow.
 - Do not use `YEEFLOW_API_KEY` for normal plugin/API operation; keep it only as a legacy/deprecated fallback where existing code still supports it.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
 - Support `YEEFLOW_PROFILE` where scripts support profiles. It selects one active local tenant profile per run using `YEEFLOW_<PROFILE>_API_KEY`, `YEEFLOW_<PROFILE>_TENANT_URL`, and `YEEFLOW_<PROFILE>_TENANT_ID`.
@@ -299,7 +299,7 @@ Ask product to confirm whether the provided `BrotliHelper.Compress(byte[])` shou
 
 When using the signing APIs:
 
-- use OAuth through the shared Yeeflow API auth wrapper; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`
+- use OAuth through the shared Yeeflow API auth wrapper; if OAuth is not authenticated, ask the user to sign in through the Yeeflow plugin login flow
 - `.env.local` may be absent or empty for normal signing/API access; if it exists and is marked macOS `dataless`, stop before reading it and ask the user to hydrate the file
 - keep `YEEFLOW_API_KEY` only as a legacy/deprecated fallback where existing code still supports it
 - use the plugin default API base for signing API calls; `YEEFLOW_API_BASE_URL` is only an advanced development/testing override

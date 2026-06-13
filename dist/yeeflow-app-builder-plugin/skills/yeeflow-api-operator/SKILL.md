@@ -15,7 +15,7 @@ Package validation helpers use stable packaged schema paths: YAPK validation use
 - Before Yeeflow API work, run `node scripts/yeeflow-oauth-status.mjs` or `node scripts/yeeflow-api-auth-smoke.mjs` to check local auth status.
 - Before choosing an endpoint, inspect the REST API capability map with `node scripts/yeeflow-api-list-capabilities.mjs` or `scripts/lib/yeeflow-api-capabilities.mjs`.
 - Use only documented capabilities from the map. Do not guess endpoint paths, do not expose arbitrary raw API calls, and report missing API coverage when no mapped capability exists.
-- Use Browser OAuth-backed API calls for normal user-facing usage. If OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`; never ask for a Yeeflow password.
+- Use Browser OAuth-backed API calls for normal user-facing usage. If OAuth is not authenticated, request the Yeeflow plugin login flow and preserve the original operation; never ask for a Yeeflow password. If the plugin login action is unavailable in this runtime, say: `I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`
 - Prefer read-only capabilities for inspection and verification. Require explicit user confirmation for write capabilities and stronger confirmation for package install/import/upgrade/delete operations.
 - Keep legacy/deprecated `YEEFLOW_API_KEY` mode only as an older internal fallback where existing code still supports it; do not use it for normal plugin/API operation and do not ask users to paste API keys, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into chat.
 - Derive tenant/app link context from OAuth access token claim `tenant` when available. Do not require `YEEFLOW_TENANT_URL` for normal OAuth plus workspace discovery. Never use a tenant URL as the API base.
@@ -70,14 +70,14 @@ OAuth token exchange/refresh uses Authorization Code with PKCE S256. The plugin 
 Rules:
 
 - OAuth token storage is local and ignored; use `node scripts/yeeflow-oauth-logout.mjs` to clear it. Local HTTPS callback cert/key files must stay ignored and uncommitted.
-- Live user-facing API helpers require a valid OAuth access token and refresh it when expired and possible. If OAuth is unavailable, ask the current user to login first. Legacy `YEEFLOW_API_KEY` remains only for older internal fallback paths where existing code still supports it.
+- Live user-facing API helpers require a valid OAuth access token and refresh it when expired and possible. If OAuth is unavailable, request the Yeeflow plugin login flow before continuing the original operation. Legacy `YEEFLOW_API_KEY` remains only for older internal fallback paths where existing code still supports it.
 - Load the API base from plugin defaults. Do not put `YEEFLOW_API_BASE_URL` in normal `.env.local`; `YEEFLOW_BASE_URL` is supported only as a legacy API base URL alias.
 - Do not configure `YEEFLOW_OAUTH_CLIENT_SECRET` for normal OAuth login/refresh. The plugin does not bundle secrets.
 - Load the legacy/deprecated key fallback from `YEEFLOW_API_KEY` or, when `YEEFLOW_PROFILE` is set, from `YEEFLOW_<PROFILE>_API_KEY` only for older internal workflows.
 - Load tenant/app links from OAuth token claim `tenant` after authorization. Package automation ignores local `YEEFLOW_WORKSPACE_ID` and active profile workspace variables for package write target selection; discover `flowcraft` workspaces through OAuth first, ask the user to choose from the redacted list, then pass `--selected-workspace-id` or documented user-selected `--workspace-id`.
 - Never print the key, OAuth tokens, Authorization header, or client secret or include them in logs, docs, commits, or final answers. Never print workspace IDs either; report only present or missing.
 - Ensure `.env.local` is gitignored before running API checks.
-- If OAuth is not authenticated, explain local OAuth setup and ask the user to run `node scripts/yeeflow-oauth-login.mjs`; do not ask for passwords, tokens, client secrets, or API keys in chat.
+- If OAuth is not authenticated, request the Yeeflow plugin login flow and preserve the original operation; do not ask for passwords, tokens, client secrets, or API keys in chat. If the plugin login action is unavailable in this runtime, say: `I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`
 
 Use the plugin default API base for live API calls. Use OAuth token claim `tenant` or optional `YEEFLOW_TENANT_URL` fallback only for tenant/app links such as `https://<yourdomain>.yeeflow.com`. Do not use a tenant URL as the API base. `YEEFLOW_PROFILE` is a local script selector, not a Yeeflow server-side setting; it activates exactly one profile for a run.
 
@@ -208,7 +208,7 @@ For assignment-routing coverage, read `docs/studies/yeeflow-api-operator-assignm
 ## Failure Handling
 
 - Missing `.env.local`: explain that no local values are required for normal OAuth plus workspace discovery; local `YEEFLOW_WORKSPACE_ID` is ignored for package writes.
-- Missing OAuth auth: ask the user to run `node scripts/yeeflow-oauth-login.mjs`; do not ask them to paste secrets. If PKCE/no-secret login or refresh fails, report the safe error class and recommend product/OAuth server configuration follow-up.
+- Missing OAuth auth: return `auth_required` / `login_flow_required`, request the Yeeflow plugin login flow, preserve the original operation, and do not ask the user to paste secrets, set API keys, create `.env.local`, or run local Node login commands as the normal user path. If PKCE/no-secret login or refresh fails, report the safe error class and recommend product/OAuth server configuration follow-up.
 - Missing target workspace for package automation: ask the user to run `node scripts/yeeflow-workspace-list.mjs --category flowcraft`, choose from the redacted API-discovered list, and pass `--selected-workspace-id` or documented user-selected `--workspace-id`; do not use or print local environment workspace IDs.
 - Authentication/authorization failure: report HTTP/API status and likely causes such as expired OAuth token, wrong account, insufficient permission, or wrong base; do not echo credentials.
 - `404` on the configured API base: verify the plugin default API base or development override is `https://api.yeeflow.com/v1`; do not substitute the tenant URL as the API base.

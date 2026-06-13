@@ -119,7 +119,7 @@ Normal authentication order:
 
 1. Require a valid Browser OAuth access token for user-facing API access.
 2. Refresh an expired OAuth token when a refresh token is available.
-3. If OAuth is unavailable, ask the current user to run OAuth login first.
+3. If OAuth is unavailable, request the Yeeflow plugin login flow and preserve the original operation. If the plugin login action is unavailable in this runtime, say: `I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`
 
 Legacy `YEEFLOW_API_KEY` mode may remain supported by older internal helpers, but it is not part of normal plugin/API operation.
 

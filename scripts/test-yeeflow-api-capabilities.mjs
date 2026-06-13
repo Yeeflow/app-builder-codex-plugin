@@ -28,6 +28,9 @@ testWorkspaceCapabilities();
 testListCommand();
 testCallHelperBlocksWrites();
 testCallHelperAcceptsWorkspaceReads();
+testCallHelperAuthRequiredForPositions();
+testWorkspaceListAuthRequired();
+testApiAuthSmokeAuthRequired();
 testPathParamsCovered();
 
 console.log("yeeflow-api-capabilities tests passed");
@@ -162,6 +165,71 @@ function testCallHelperAcceptsWorkspaceReads() {
   assert.match(invalidCategory.stderr, /settings, flowcraft/);
 }
 
+function testCallHelperAuthRequiredForPositions() {
+  const result = run(
+    ["scripts/yeeflow-api-call-capability.mjs", "--name", "positions.list", "--dotenv", path.join(ROOT, "missing.env")],
+    { YEEFLOW_OAUTH_TOKEN_FILE: path.join(ROOT, "tmp", "missing-oauth-token-for-test.json") },
+  );
+  assert.notEqual(result.status, 0);
+  assert.equal(result.stderr, "");
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.resultClass, "auth_required");
+  assert.equal(parsed.reason, "login_flow_required");
+  assert.equal(parsed.originalCapability, "positions.list");
+  assert.equal(parsed.originalEndpoint, "GET /positions");
+  assert.equal(parsed.liveCall, false);
+  assert.equal(parsed.requestShaped, false);
+  assert.equal(parsed.rawResponsePrinted, false);
+  assert.equal(parsed.login.message, "Please sign in to Yeeflow using the plugin login flow so I can continue this operation.");
+  assert.equal(parsed.login.unavailableMessage, "I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.");
+  assert.match(parsed.login.retry, /positions\.list/);
+  assertNoLocalLoginRecovery(result.stdout);
+}
+
+function testWorkspaceListAuthRequired() {
+  const result = run(
+    ["scripts/yeeflow-workspace-list.mjs", "--category", "flowcraft", "--dotenv", path.join(ROOT, "missing.env")],
+    { YEEFLOW_OAUTH_TOKEN_FILE: path.join(ROOT, "tmp", "missing-workspace-token-for-test.json") },
+  );
+  assert.notEqual(result.status, 0);
+  assert.equal(result.stderr, "");
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.resultClass, "auth_required");
+  assert.equal(parsed.reason, "login_flow_required");
+  assert.equal(parsed.originalCapability, "workspaces.listByCategory");
+  assert.equal(parsed.originalOperation, "workspace discovery for flowcraft");
+  assert.equal(parsed.originalEndpoint, "GET /workspaces/{category}");
+  assert.equal(parsed.liveCall, false);
+  assert.equal(parsed.requestShaped, false);
+  assert.equal(parsed.rawResponsePrinted, false);
+  assertNoLocalLoginRecovery(result.stdout);
+}
+
+function testApiAuthSmokeAuthRequired() {
+  const result = run(
+    ["scripts/yeeflow-api-auth-smoke.mjs", "--dotenv", path.join(ROOT, "missing.env")],
+    { YEEFLOW_OAUTH_TOKEN_FILE: path.join(ROOT, "tmp", "missing-smoke-token-for-test.json") },
+  );
+  assert.notEqual(result.status, 0);
+  assert.equal(result.stderr, "");
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.resultClass, "auth_required");
+  assert.equal(parsed.reason, "login_flow_required");
+  assert.equal(parsed.originalOperation, "Yeeflow API auth smoke");
+  assert.equal(parsed.originalEndpoint, "GET /locations");
+  assert.equal(parsed.liveCall, false);
+  assert.equal(parsed.requestShaped, false);
+  assertNoLocalLoginRecovery(result.stdout);
+}
+
+function assertNoLocalLoginRecovery(text) {
+  assert.doesNotMatch(text, /yeeflow-oauth-login\.mjs/);
+  assert.doesNotMatch(text, /node\s+/);
+  assert.doesNotMatch(text, /\.codex\/plugins\/cache/);
+  assert.doesNotMatch(text, /(ask|set|configure|use|paste|run).*YEEFLOW_API_KEY/i);
+  assert.doesNotMatch(text, /(ask|set|configure|create|use).*\.env\.local/i);
+}
+
 function testPathParamsCovered() {
   for (const capability of YEEFLOW_API_CAPABILITIES) {
     const requiredNames = new Set(capability.requiredParams.filter((entry) => entry.startsWith("path:")).map((entry) => entry.slice(5)));
@@ -173,10 +241,10 @@ function isDocumentedReadOnlyPost(capability) {
   return capability.name === "items.query" || capability.name === "users.search";
 }
 
-function run(args) {
+function run(args, extraEnv = {}) {
   return spawnSync(process.execPath, args, {
     cwd: ROOT,
     encoding: "utf8",
-    env: { PATH: process.env.PATH || "" },
+    env: { PATH: process.env.PATH || "", ...extraEnv },
   });
 }

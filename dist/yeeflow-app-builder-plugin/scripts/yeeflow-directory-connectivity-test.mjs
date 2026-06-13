@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { authPresenceSummary, mergeAuthHeaders, requireYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
+import { authPresenceSummary, buildLoginRequiredResult, mergeAuthHeaders, resolveYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
 
 // Read-only Yeeflow directory API smoke test.
 // Do not add create, update, delete, assignment, enable, disable, or remove endpoints here.
@@ -103,11 +103,15 @@ const envPath = path.join(cwd, ".env.local");
 const envFile = fs.existsSync(envPath) ? ".env.local" : "not-present";
 
 let auth;
-try {
-  auth = await requireYeeflowApiAuth({ dotenv: envPath });
-} catch (error) {
-  console.error(safeAuthError(error));
-  console.error("Run node scripts/yeeflow-oauth-login.mjs before read-only directory smoke tests.");
+auth = await resolveYeeflowApiAuth({ dotenv: envPath });
+if (auth.mode !== "oauth") {
+  console.log(JSON.stringify({
+    envFile,
+    ...buildLoginRequiredResult({
+      auth,
+      originalOperation: "read-only directory connectivity smoke",
+    }),
+  }, null, 2));
   process.exit(2);
 }
 

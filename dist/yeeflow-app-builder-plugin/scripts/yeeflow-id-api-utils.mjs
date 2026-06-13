@@ -13,7 +13,7 @@ export async function loadYeeflowApiEnvironment(dotenvPath = ".env.local") {
 
 export async function fetchYeeflowUniqueIds({ apiBaseUrl, apiKey, authHeaders, count, batchSize = DEFAULT_BATCH_SIZE }) {
   const headers = authHeaders || (apiKey ? { apiKey } : null);
-  if (!headers) throw new Error("Yeeflow API authentication is required for API-issued ID generation. Run OAuth login first.");
+  if (!headers) throw new Error("Yeeflow API authentication is required for API-issued ID generation. Please sign in to Yeeflow using the plugin login flow before retrying this API operation.");
   if (!Number.isInteger(count) || count <= 0) throw new Error("ID count must be a positive integer.");
   const ids = [];
   while (ids.length < count) {

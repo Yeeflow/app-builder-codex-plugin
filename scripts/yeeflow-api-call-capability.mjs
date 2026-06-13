@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { getCapability, pathParamsFor, summarizeCapability } from "./lib/yeeflow-api-capabilities.mjs";
-import { mergeAuthHeaders, requireYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
+import { buildLoginRequiredResult, mergeAuthHeaders, resolveYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
 import { summarizeWorkspaceList, summarizeWorkspaceRecord } from "./lib/yeeflow-workspace-selection.mjs";
 
 const args = parseArgs(process.argv.slice(2));
@@ -23,7 +23,16 @@ try {
   const params = parseParams(args.params);
   const urlPath = buildPath(capability, params);
   const query = buildQuery(capability, params);
-  const auth = await requireYeeflowApiAuth({ dotenv: args.dotenv || ".env.local" });
+  const auth = await resolveYeeflowApiAuth({ dotenv: args.dotenv || ".env.local" });
+  if (auth.mode !== "oauth") {
+    console.log(JSON.stringify(buildLoginRequiredResult({
+      auth,
+      originalCapability: capability.name,
+      originalEndpoint: `${capability.method} ${capability.path}`,
+      capability: summarizeCapability(capability),
+    }), null, 2));
+    process.exit(1);
+  }
   const url = new URL(`${auth.env.apiBaseUrl}${urlPath}`);
   for (const [key, value] of Object.entries(query)) url.searchParams.set(key, value);
 
@@ -136,5 +145,5 @@ function printUsage() {
   node scripts/yeeflow-api-call-capability.mjs --name locations.list
   node scripts/yeeflow-api-call-capability.mjs --name locations.get --param id=<location-id>
 
-Executes only mapped read-only GET capabilities through the OAuth/API auth wrapper. It does not support arbitrary raw paths and does not save raw responses.`);
+Executes only mapped read-only GET capabilities through the OAuth/API auth wrapper. It does not support arbitrary raw paths and does not save raw responses. If OAuth is missing, normal user-facing flows should use the Yeeflow plugin login action; local OAuth CLI scripts are developer diagnostics only.`);
 }

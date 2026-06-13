@@ -5,7 +5,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { environmentPresence, loadDotenvFile, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
 import { getCapability } from "./lib/yeeflow-api-capabilities.mjs";
-import { mergeAuthHeaders, requireYeeflowApiAuth, requireYeeflowOAuthAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
+import { buildLoginRequiredResult, mergeAuthHeaders, resolveYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
 import {
   APP_PACKAGE_WORKSPACE_CATEGORY,
   PACKAGE_WORKSPACE_OPERATIONS,
@@ -201,7 +201,23 @@ async function loadWorkspaceDiscoverySummary(options) {
 
   try {
     const capability = getCapability("workspaces.listByCategory");
-    const auth = await requireYeeflowOAuthAuth({ dotenv: options.dotenv || ".env.local" });
+    const auth = await resolveYeeflowApiAuth({ dotenv: options.dotenv || ".env.local" });
+    if (auth.mode !== "oauth") {
+      return {
+        source: "oauth-read-only",
+        category: APP_PACKAGE_WORKSPACE_CATEGORY,
+        capability: "workspaces.listByCategory",
+        endpoint: "GET /workspaces/{category}",
+        ...buildLoginRequiredResult({
+          auth,
+          originalOperation: "package workspace discovery",
+          originalCapability: "workspaces.listByCategory",
+          originalEndpoint: "GET /workspaces/{category}",
+        }),
+        workspaceCount: 0,
+        workspaces: [],
+      };
+    }
     const url = new URL(`${auth.env.apiBaseUrl}${capability.path.replace("{category}", encodeURIComponent(APP_PACKAGE_WORKSPACE_CATEGORY))}`);
     const response = await fetch(url, {
       method: capability.method,
@@ -250,7 +266,14 @@ async function executeOperation(options, env, resolvedPackagePath) {
     process.exitCode = 1;
     return await buildWorkspaceSelectionRequiredResult(options);
   }
-  const auth = await requireYeeflowApiAuth({ loadDotenv: false });
+  const auth = await resolveYeeflowApiAuth({ loadDotenv: false });
+  if (auth.mode !== "oauth") {
+    process.exitCode = 1;
+    return buildLoginRequiredResult({
+      auth,
+      originalOperation: options.operation,
+    });
+  }
   if (options.operation === "upload") {
     return await uploadPackageFile(env, resolvedPackagePath, options, auth);
   }

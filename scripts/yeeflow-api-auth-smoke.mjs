@@ -1,13 +1,21 @@
 #!/usr/bin/env node
 
-import { authPresenceSummary, mergeAuthHeaders, requireYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
+import { authPresenceSummary, buildLoginRequiredResult, mergeAuthHeaders, resolveYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
 
 const args = new Set(process.argv.slice(2));
 const execute = args.has("--execute");
 const endpoint = valueAfter("--endpoint", "/locations");
 
 try {
-  const auth = await requireYeeflowApiAuth({ dotenv: valueAfter("--dotenv", ".env.local") });
+  const auth = await resolveYeeflowApiAuth({ dotenv: valueAfter("--dotenv", ".env.local") });
+  if (auth.mode !== "oauth") {
+    console.log(JSON.stringify(buildLoginRequiredResult({
+      auth,
+      originalOperation: "Yeeflow API auth smoke",
+      originalEndpoint: `GET ${endpoint}`,
+    }), null, 2));
+    process.exit(1);
+  }
   const base = auth.env.apiBaseUrl;
   const summary = authPresenceSummary(auth);
 

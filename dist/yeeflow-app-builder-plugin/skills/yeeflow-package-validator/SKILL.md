@@ -114,9 +114,9 @@ Treat hard `YAP_*` form-workspace findings as blockers for generated form worksp
 - Before Yeeflow API work, check local auth status with `node scripts/yeeflow-oauth-status.mjs` or `node scripts/yeeflow-api-auth-smoke.mjs`.
 - Before using a Yeeflow REST API, check the capability map with `node scripts/yeeflow-api-list-capabilities.mjs` or `scripts/lib/yeeflow-api-capabilities.mjs`.
 - Use only documented capabilities from the map. Do not guess endpoint paths or expose unrestricted raw API calls; report missing API coverage when no mapped capability exists.
-- Prefer Browser OAuth-backed Yeeflow API calls for user-facing usage. If OAuth is not authenticated, ask the user to run `node scripts/yeeflow-oauth-login.mjs`; never ask for a Yeeflow password.
+- Prefer Browser OAuth-backed Yeeflow API calls for user-facing usage. If OAuth is not authenticated, ask the user to sign in to Yeeflow using the plugin login flow; never ask for a Yeeflow password. If this runtime cannot start the plugin login action, ask the user to open the Yeeflow plugin login action in Codex, then retry the original request.
 - Prefer read-only capabilities for inspection and verification. Require explicit user confirmation for write capabilities and stronger confirmation for package install/import/upgrade/delete.
-- Use OAuth for normal user-facing API access; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`.
+- Use OAuth for normal user-facing API access; if OAuth is not authenticated, ask the user to sign in through the Yeeflow plugin login flow.
 - Keep legacy `YEEFLOW_API_KEY` mode as an internal fallback only where existing code still supports it; do not ask users to paste API keys, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into chat.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
 - Support `YEEFLOW_PROFILE` where scripts support profiles. It selects one active local tenant profile per run using `YEEFLOW_<PROFILE>_API_KEY`, `YEEFLOW_<PROFILE>_TENANT_URL`, and `YEEFLOW_<PROFILE>_TENANT_ID`.

@@ -14,7 +14,15 @@ After authorization, the plugin derives tenant/user context from access token cl
 
 Do not commit `.env.local`. Do not paste Yeeflow passwords, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into Codex chat.
 
-## Commands
+## Normal Plugin Login Flow
+
+For normal user-facing API requests, do not tell users to run local Node OAuth scripts. If OAuth is missing or expired, say: `Please sign in to Yeeflow using the plugin login flow so I can continue this operation.` Preserve the original operation. If the current runtime cannot start the plugin login action, say: `I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`
+
+Preserve the original requested API action, such as `positions.list`, so the user can retry after login completes.
+
+## Developer CLI Diagnostics
+
+The following commands are developer/local diagnostic tools only. They are not the normal user-facing login path:
 
 ```bash
 node scripts/yeeflow-oauth-status.mjs
@@ -73,7 +81,7 @@ Normal Yeeflow API helpers use this order:
 
 1. Valid stored OAuth access token.
 2. Refresh stored OAuth token without a client secret if expired and a refresh token exists.
-3. If OAuth is unavailable, ask the current user to run OAuth login first.
+3. If OAuth is unavailable, request the Yeeflow plugin login flow and preserve the original operation. If the plugin login action is unavailable in this runtime, say: `I need Yeeflow login before I can continue, but the plugin login action is not available in this runtime. Please open the Yeeflow plugin login flow in Codex, then ask me to retry this operation.`
 
 OAuth requests attach `Authorization: Bearer <access_token>`. Legacy API-key fallback may remain in older internal helpers but is not part of normal plugin/API operation. Scripts must never print Authorization headers, API keys, client secrets, OAuth tokens, auth codes, cookies, raw API responses, tenant IDs, private URLs, raw package payloads, screenshots, or generated runtime packages.
 

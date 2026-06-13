@@ -15,7 +15,7 @@ Source docs:
 - `POST https://api.yeeflow.com/v1/listset/package/install`
 - `POST https://api.yeeflow.com/v1/listset/package/upgrade`
 
-The helper uses OAuth for normal user-facing API access and refreshes OAuth bearer tokens when possible. If OAuth is unavailable, ask the current user to login first. Legacy/deprecated `YEEFLOW_API_KEY` support may remain for older internal workflows, but it is not part of normal plugin/API operation. Import, install, and upgrade also require an explicit target `WorkspaceID`; the helper ignores local `YEEFLOW_WORKSPACE_ID` and active profile workspace variables for package write targets, discovers `flowcraft` workspaces through documented `GET /workspaces/flowcraft`, and stops with `workspace_selection_required` before request shaping until the user selects a workspace.
+The helper uses OAuth for normal user-facing API access and refreshes OAuth bearer tokens when possible. If OAuth is unavailable, return `auth_required` / `login_flow_required`, request the Yeeflow plugin login flow, preserve the original operation, and do not suggest API keys, `.env.local`, or local Node commands. Legacy/deprecated `YEEFLOW_API_KEY` support may remain for older internal workflows, but it is not part of normal plugin/API operation. Import, install, and upgrade also require an explicit target `WorkspaceID`; the helper ignores local `YEEFLOW_WORKSPACE_ID` and active profile workspace variables for package write targets, discovers `flowcraft` workspaces through documented `GET /workspaces/flowcraft`, and stops with `workspace_selection_required` before request shaping until the user selects a workspace.
 
 ## Endpoint Summary
 

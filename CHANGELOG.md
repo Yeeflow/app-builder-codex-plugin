@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fix OAuth login request UX so unauthenticated read-only API requests return plugin-login-flow guidance instead of local Node login commands or stale cache paths.
+
 ## 0.6.31
 
 - Add package workspace selection hard gate: package install/import/upgrade ignore local `YEEFLOW_WORKSPACE_ID`, stop with `workspace_selection_required` before request shaping when no API-discovered `flowcraft` workspace is explicitly selected, and keep signing/API acceptance separate from runtime/browser proof.
