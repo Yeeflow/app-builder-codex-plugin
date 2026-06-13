@@ -17,6 +17,9 @@ import {
   statusFromFindings,
 } from "./lib/yeeflow-ui-hard-gate-utils.mjs";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const PROVEN_UUID_SUMMARY_SHAPE = "uuid-summary-v1.0.1";
+
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.package) usage(args.help ? 0 : 1);
@@ -38,10 +41,12 @@ export function inspectDashboardSummaryControlContract({ package: packagePath } 
   const pages = collectPages(pkg);
   const summaries = allControlsFromPages(pages).filter((item) => isSummaryControl(item.control));
   const tempVars = new Set();
+  const uuidProofRequested = hasUuidSummaryProofClaim(pkg);
 
   for (const item of summaries) {
     validateHiddenHost(item, findings);
     validateSummary(item, pkg, fieldMaps, findings);
+    if (uuidProofRequested || controlRequestsUuidSummaryProof(item.control)) validateUuidSummaryProofShape(item, findings);
     const saveVar = item.control.attrs?.save_var;
     if (isObject(saveVar) && saveVar.name) {
       const name = scalar(saveVar.name);
@@ -60,7 +65,7 @@ export function inspectDashboardSummaryControlContract({ package: packagePath } 
     addFinding(findings, "warning", "SUMMARY_CONTROLS_NOT_FOUND", "No Summary controls were found; run this gate only for dashboards that declare Summary/KPI generation.");
   }
 
-  return buildReport(packagePath, findings, { summaryControlCount: summaries.length });
+  return buildReport(packagePath, findings, { summaryControlCount: summaries.length, uuidSummaryProofShapeChecked: uuidProofRequested });
 }
 
 function validateHiddenHost(item, findings) {
@@ -123,6 +128,60 @@ function validateSummary(item, pkg, fieldMaps, findings) {
   }
 }
 
+function validateUuidSummaryProofShape(item, findings) {
+  const controlId = scalar(item.control.id || item.control.ID || item.control.controlId);
+  if (!UUID_RE.test(controlId)) {
+    addFinding(findings, "error", "SUMMARY_UUID_PROOF_ID_NOT_UUID", "The proven dynamic KPI shape requires UUID Summary control IDs.", { page: item.page.title, summaryId: controlId || null });
+  }
+  const saveVar = item.control.attrs?.save_var || {};
+  const saveVarIds = [saveVar.id, saveVar.name].map(scalar).filter(Boolean);
+  const pageResources = item.page.roots;
+  const exts = pageResources.flatMap((root) => asArray(root.exts || root.Exts));
+  const tempVars = pageResources.flatMap((root) => asArray(root.tempVars || root.TempVars));
+  const visibleBindings = [];
+  for (const root of pageResources) {
+    walkVisibleVariables(root, visibleBindings);
+  }
+  const extsMatch = exts.some((entry) =>
+    scalar(entry.i || entry.id || entry.ID) === controlId
+    && scalar(entry.category) === "___Pivot___"
+    && scalar(entry.key).toLowerCase() === "summary"
+  );
+  if (!extsMatch) {
+    addFinding(findings, "error", "SUMMARY_UUID_PROOF_EXTS_MISSING", "The proven UUID Summary shape requires Resource.exts[] with i equal to the Summary UUID, category ___Pivot___, and key summary.", { page: item.page.title, summaryId: controlId || null });
+  }
+  const tempVarMatch = saveVarIds.length && tempVars.some((variable) => saveVarIds.includes(scalar(variable.id || variable.ID || variable.name || variable.Name)));
+  if (!tempVarMatch) {
+    addFinding(findings, "error", "SUMMARY_UUID_PROOF_TEMPVAR_MISSING", "The proven UUID Summary shape requires Resource.tempVars[] to declare the same temp variable saved by Summary attrs.save_var.", { page: item.page.title, summaryId: controlId || null });
+  }
+  const visibleBindingMatch = saveVarIds.length && visibleBindings.some((variable) => saveVarIds.includes(scalar(variable.id || variable.ID || variable.name || variable.Name || variable)));
+  if (!visibleBindingMatch) {
+    addFinding(findings, "error", "SUMMARY_UUID_PROOF_VISIBLE_BINDING_MISSING", "The proven UUID Summary shape requires visible Heading/Text controls to bind through attrs.headc.title.variable[].", { page: item.page.title, summaryId: controlId || null });
+  }
+}
+
+function hasUuidSummaryProofClaim(pkg) {
+  if (scalar(pkg.raw?.dynamicBindingShape || pkg.raw?.provenBindingShape || pkg.raw?.kpiRuntimeProofShape) === PROVEN_UUID_SUMMARY_SHAPE) return true;
+  return collectPages(pkg).some((page) =>
+    scalar(page.page?.dynamicBindingShape || page.page?.provenBindingShape || page.page?.kpiRuntimeProofShape) === PROVEN_UUID_SUMMARY_SHAPE
+    || page.roots.some((root) => scalar(root.dynamicBindingShape || root.provenBindingShape || root.kpiRuntimeProofShape) === PROVEN_UUID_SUMMARY_SHAPE)
+  );
+}
+
+function controlRequestsUuidSummaryProof(control) {
+  const attrs = control.attrs || {};
+  return scalar(attrs.dynamicBindingShape || attrs.provenBindingShape || attrs.kpiRuntimeProofShape) === PROVEN_UUID_SUMMARY_SHAPE;
+}
+
+function walkVisibleVariables(control, variables) {
+  if (!isObject(control)) return;
+  const vars = control.attrs?.headc?.title?.variable;
+  if (Array.isArray(vars)) variables.push(...vars);
+  for (const key of ["children", "columns", "controls", "items", "rows", "cells", "list", "content"]) {
+    asArray(control[key]).forEach((child) => walkVisibleVariables(child, variables));
+  }
+}
+
 function resolvesCurrentApp(data, pkg) {
   const rootId = scalar(pkg.root.ListID || pkg.root.ListSetID || pkg.root.ID);
   const app = data.app || data.application || data.Application || {};
@@ -150,7 +209,7 @@ function buildReport(packagePath, findings, summary = {}) {
     package: safePath(packagePath),
     summary,
     proofStates: ["designer-configured Summary control", "validator-valid Summary contract", "runtime-proven visible dynamic KPI rendering"],
-    proofBoundary: "This validates designer-shaped Summary configuration. It does not prove visible dynamic KPI rendering; runtime evidence is a separate gate.",
+    proofBoundary: "This validates designer-shaped Summary configuration. The UUID Summary v1.0.1 package shape is checked only when explicitly claimed; runtime before/after mutation evidence is still required before visible dynamic KPI proof can be claimed.",
     findings,
   };
 }

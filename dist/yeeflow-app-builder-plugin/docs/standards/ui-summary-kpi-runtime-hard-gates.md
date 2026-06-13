@@ -70,9 +70,28 @@ node scripts/inspect-dashboard-summary-control-contract.mjs --package <decoded.j
 
 ## Visible KPI Runtime Boundary
 
-Visible Text/Heading controls must not show raw temp variable names and must not render blank. Dynamic visible KPI binding is not solved unless runtime evidence proves nonblank visible dynamic values without raw variable names.
+Visible Text/Heading controls must not show raw temp variable names and must not render blank. Dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape documented below, and only when runtime evidence proves nonblank visible dynamic values without raw variable names.
 
-If dynamic visible binding is not runtime-proven, generation must stop or use an explicitly labeled fallback and record the gap. Fallback values are visual fallback only; they are not proof of dynamic KPI rendering.
+If a package does not use that exact shape, visible KPI dynamic binding is not considered solved unless runtime-proven for its own shape. Generation must stop or use an explicitly labeled fallback and record the gap. Fallback values are visual fallback only; they are not proof of dynamic KPI rendering.
+
+### Exact Proven UUID Summary Shape
+
+KPI Runtime Binding Proof v1.0.1 proved dynamic visible KPI binding only for this dashboard Summary shape:
+
+- Summary control IDs are UUIDs.
+- Each Summary UUID appears in `Resource.ReportIds[]`.
+- Each Summary UUID has a matching `Resource.exts[]` entry where `i` equals the Summary control ID, `category` is `___Pivot___`, and `key` is `summary`.
+- Each Summary control saves to a dashboard temp variable through a designer-shaped `attrs.save_var` expression object.
+- `Resource.tempVars[]` declares the same temp variable ids/names.
+- Visible KPI Heading/Text controls bind through `attrs.headc.title.variable[]`.
+- Proof KPI values do not use static or formatted fallback values.
+- Summary field metadata includes `attrs.data.field`, `attrs.field`, `fieldObject`, and `fieldInfo`.
+
+Runtime proof for this shape must include before/after source data mutation evidence and refreshed/recalculated page state. The v1.0.1 proof changed expected KPI values from `3 / 600 / 2 / 300` to `4 / 1000 / 3 / 700` after adding a synthetic source row with amount `400`, status `Open`, and region `APAC`.
+
+Summary recalculation may be asynchronous or cache-delayed. Stale after-evidence that still shows the before values must not be used as the final verdict; capture final evidence only after the refreshed/recalculated runtime state is visible.
+
+This proof does not automatically prove semantic/non-UUID Summary IDs, approval forms, public forms, unsupported surfaces, or other visible KPI binding shapes. Marketing Event dashboards may use this shape, but each generated package must still run its own before/after mutation proof before claiming runtime dynamic KPI success.
 
 Run:
 
@@ -80,9 +99,7 @@ Run:
 node scripts/inspect-visible-kpi-runtime-bindings.mjs --evidence <redacted-runtime-evidence.json>
 ```
 
-Use `docs/examples/runtime-evidence.redacted.example.json` as the safe starting point for runtime proof reports. It is synthetic, labels fallback KPI values as fallback, and intentionally keeps `dynamicVisibleKpiRuntimeProven` false.
-
-Future golden runtime package path: once dynamic KPI binding is truly runtime-proven, add a dedicated golden runtime package/evidence fixture and update this hard gate from “unresolved unless proven” to “use this exact proven shape.” Until then, dynamic visible KPI binding remains unresolved unless runtime evidence proves it, and fallback KPI values must remain explicitly labeled as fallback.
+Use `docs/examples/runtime-evidence.redacted.example.json` as the safe starting point for runtime proof reports. It is synthetic, includes the exact UUID Summary v1.0.1 proof-shape fields, preserves a fallback example for unsupported shapes, and avoids private screenshots, tenant URLs, workspace IDs, raw responses, and package payloads.
 
 ## Runtime Screenshot Evidence
 

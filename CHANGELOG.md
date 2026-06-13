@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Promote KPI Runtime Binding Proof v1.0.1 into UI/Summary/KPI standards, skills, validators, and synthetic tests.
+- Treat dynamic visible KPI binding as proven only for the exact UUID Summary v1.0.1 shape: UUID Summary IDs, matching `Resource.ReportIds[]`, matching `Resource.exts[]`, dashboard `Resource.tempVars[]`, designer-shaped `attrs.save_var`, visible `attrs.headc.title.variable[]`, complete Summary field metadata, and no static/fallback proof values.
+- Require before/after source data mutation evidence, expected-value notes, inspector output, and refreshed/recalculated runtime evidence before claiming dynamic KPI proof; Summary recalculation can be asynchronous or cache-delayed.
+- Keep semantic/non-UUID Summary IDs, approval forms, public forms, unsupported surfaces, and other visible binding shapes unproven unless focused runtime proof exists. Fallback KPI values must remain explicitly labeled fallback.
+
 ## 0.6.36
 
 - Bump the active plugin version after the UI runtime evidence developer-experience helpers merge.

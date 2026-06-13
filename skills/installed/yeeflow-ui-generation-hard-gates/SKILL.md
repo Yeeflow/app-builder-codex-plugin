@@ -20,13 +20,15 @@ This is one reusable skill for page-by-page UI/dashboard contracts, Summary/KPI 
 5. Treat Summary/KPI as three proof states: designer-configured Summary control, validator-valid Summary contract, and runtime-proven visible dynamic KPI rendering. Do not collapse those states in reports.
 6. Build Summary/KPI controls with designer-shaped hidden Summary configuration. Summary/KPI controls require designer-shaped hidden Summary configuration. Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`; they must resolve to current app/list metadata; numeric summaries must use numeric fields; count summaries must use a valid count/ListDataID shape when required.
 7. Keep Summary hosts hidden with designer-compatible shape: a dedicated hidden container, `attrs.common.hide = [null, true, true, true]`, horizontal `attrs.style.direction = [null, "row"]`, and a display rule such as `attrs.display.rule = "1 == 0"` when used.
-8. Do not claim dynamic KPI display from configuration alone. Visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled as fallback and recorded as a gap.
-9. Require runtime screenshot evidence before UI-quality claims. Runtime screenshot evidence is required before claiming UI quality, including visible KPI values, hidden Summary controls not visible, card-like dashboard sections, visible filters/actions, non-scaffold tables/grids, distinct badges/chips, and no plain scaffold look.
-10. Keep proof boundaries explicit. Install/signing/API acceptance is not runtime UI proof, schema validation is not visual proof, and successful upgrade-check is not proof that dashboard runtime rendering is good.
-11. Preserve upgrade lineage. UI upgrades must preserve ListSetID, app identity, existing IDs, and declared change scope. They must also preserve existing resource IDs and final `Resource.ReplaceIds` coverage. Stop if a user requested an update but the package is classified as fresh install, existing pages/resources drift outside scope, IDs are reallocated, or lineage metadata is missing.
-12. Start runtime proof reports from `docs/examples/runtime-evidence.redacted.example.json` when evidence metadata is needed. The template is synthetic, redacted, labels fallback KPI values as fallback, and is shaped for `scripts/inspect-runtime-evidence.mjs` plus `scripts/inspect-visible-kpi-runtime-bindings.mjs`.
-13. Run `node scripts/test-ui-hard-gates-all.mjs` before claiming UI quality. The aggregate smoke is local-only and must not require live Yeeflow API access, private screenshots, package install/import/upgrade, or write operations.
-14. Keep the future dynamic KPI binding path separate from current fallback-only status. Once dynamic KPI binding is truly runtime-proven, add a dedicated golden runtime package/evidence fixture and update the hard gate from “unresolved unless proven” to “use this exact proven shape.” Until then, dynamic visible KPI binding remains unresolved unless runtime evidence proves it, and fallback KPI values must remain explicitly labeled as fallback.
+8. Do not claim dynamic KPI display from configuration alone. Dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape: UUID Summary IDs, matching `Resource.ReportIds[]`, matching `Resource.exts[]` entries where `i` is the Summary UUID, `category` is `___Pivot___`, and `key` is `summary`, dashboard `Resource.tempVars[]`, designer-shaped `attrs.save_var`, visible `attrs.headc.title.variable[]`, complete Summary field metadata, and no static/fallback proof values.
+9. Require before/after mutation proof for dynamic KPI claims. Runtime evidence must include before/after source data mutation evidence, expected-value notes, inspector output, and refreshed/recalculated runtime evidence. Summary recalculation can be asynchronous or cache-delayed; stale after-evidence that still shows before values is not a final verdict.
+10. Keep all other KPI binding shapes unproven unless focused runtime proof exists. Semantic/non-UUID Summary IDs, approval forms, public forms, unsupported surfaces, and other visible binding shapes remain unproven. For every other shape, visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled as fallback and recorded as a gap.
+11. Require runtime screenshot evidence before UI-quality claims. Runtime screenshot evidence is required before claiming UI quality, including visible KPI values, hidden Summary controls not visible, card-like dashboard sections, visible filters/actions, non-scaffold tables/grids, distinct badges/chips, and no plain scaffold look.
+12. Keep proof boundaries explicit. Install/signing/API acceptance is not runtime UI proof, schema validation is not visual proof, and successful upgrade-check is not proof that dashboard runtime rendering is good.
+13. Preserve upgrade lineage. UI upgrades must preserve ListSetID, app identity, existing IDs, and declared change scope. They must also preserve existing resource IDs and final `Resource.ReplaceIds` coverage. Stop if a user requested an update but the package is classified as fresh install, existing pages/resources drift outside scope, IDs are reallocated, or lineage metadata is missing.
+14. Start runtime proof reports from `docs/examples/runtime-evidence.redacted.example.json` when evidence metadata is needed. The template is synthetic, redacted, includes the UUID Summary v1.0.1 proof-shape fields, preserves fallback examples for unsupported shapes, and is shaped for `scripts/inspect-runtime-evidence.mjs` plus `scripts/inspect-visible-kpi-runtime-bindings.mjs`.
+15. Run `node scripts/test-ui-hard-gates-all.mjs` before claiming UI quality. The aggregate smoke is local-only and must not require live Yeeflow API access, private screenshots, package install/import/upgrade, or write operations.
+16. Apply the Marketing Event boundary carefully. Marketing Event dashboards may use the exact UUID Summary v1.0.1 shape, but must still run their own before/after mutation proof before claiming runtime dynamic KPI success.
 
 ## Stop Conditions
 
@@ -37,6 +39,8 @@ Stop before package mutation, signing, install/upgrade automation, or generated-
 - requested design/mockup references are not mapped to page sections and controls
 - weak JSON styling is used instead of export-proven Yeeflow control/style shapes
 - a Summary/KPI metric lacks real list/field/filter metadata, designer-shaped `save_var`, unique temp variable, or page `ReportIds`
+- a dynamic KPI proof claim uses semantic/non-UUID Summary IDs, lacks matching `Resource.exts[]`, lacks `Resource.tempVars[]`, or does not bind visible controls through `attrs.headc.title.variable[]`
+- before/after source data mutation evidence is missing, stale, or not captured after refreshed/recalculated runtime state
 - visible KPI text shows raw temp variable names or has no runtime evidence
 - fallback KPI values are present without explicit fallback labeling
 - runtime screenshot evidence is missing for a UI-quality claim
@@ -51,7 +55,7 @@ Use the final validator/tool names from the UI hard-gate standard:
 - `scripts/inspect-yeeflow-ui-design-contract.mjs` for page-by-page implementation contracts and scaffold/placeholder claims
 - `scripts/inspect-dashboard-style-shapes.mjs` for export-proven Yeeflow control/style shapes
 - `scripts/inspect-dashboard-summary-control-contract.mjs` for designer-shaped hidden Summary hosts, fields, filters, temp variables, `save_var`, and `ReportIds`
-- `scripts/inspect-visible-kpi-runtime-bindings.mjs` for raw temp variable names, blank KPI evidence, runtime-proven dynamic visible KPI binding, and labeled fallbacks
+- `scripts/inspect-visible-kpi-runtime-bindings.mjs` for raw temp variable names, blank KPI evidence, exact UUID Summary v1.0.1 dynamic proof evidence, and labeled fallbacks
 - `scripts/inspect-runtime-evidence.mjs` for runtime screenshot/evidence requirements before UI-quality claims
 - `scripts/inspect-grid-table-quality.mjs` for Collection grid-table columns, headers, item templates, empty states, and row/action links
 - `scripts/inspect-yapk-upgrade-app-identity.mjs` for ListSetID/app identity, existing IDs, declared change scope, package lineage, and final `Resource.ReplaceIds` coverage
@@ -66,6 +70,7 @@ Reports must state:
 - which pages have page-by-page implementation contracts
 - which controls/styles are export-proven and which required sandbox proof
 - Summary/KPI proof state for each metric: designer-configured, validator-valid, runtime-proven visible dynamic KPI, or fallback
+- whether dynamic KPI proof uses the exact UUID Summary v1.0.1 shape and before/after source mutation evidence, or remains unproven/fallback-only
 - whether runtime screenshot proof was completed
 - that install/signing/API acceptance is not runtime UI proof
 - upgrade lineage inputs and whether ListSetID/app identity/existing IDs stayed stable

@@ -16,6 +16,8 @@ import { decodeYapkTolerantBrotli } from "./decode-yapk-tolerant-brotli.mjs";
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "ui-summary-kpi-hard-gates-"));
 const cases = [];
+const UUID_SUMMARY_ID = "43c38762-5133-430f-af09-faeec1be3bc0";
+const scalar = (value) => value === undefined || value === null ? "" : String(value);
 
 try {
   run();
@@ -49,17 +51,28 @@ function run() {
   expectFail("Weak unsupported style shape fails", inspectDashboardStyleShapes({ package: writeJson("style-weak.json", decoded({ card: "weak" })) }), "DASHBOARD_WEAK_UNSUPPORTED_STYLE_SHAPE");
 
   expectPass("Hidden Summary container hide/direction/display rule shape passes", inspectDashboardSummaryControlContract({ package: writeJson("summary-valid.json", decoded({ summary: "valid" })) }));
+  expectPass("Exact UUID Summary shape with Resource.exts ReportIds tempVars and visible binding passes", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-valid.json", decoded({ summary: "uuid-proof-valid" })) }));
   expectFail("Summary with blank field fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-blank-field.json", decoded({ summary: "blank-field" })) }), "SUMMARY_FIELD_BLANK");
   expectFail("Summary with missing field metadata fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-metadata.json", decoded({ summary: "missing-metadata" })) }), "SUMMARY_FIELD_METADATA_INCOMPLETE");
   expectFail("Count Summary without valid count/ListDataID shape fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-count.json", decoded({ summary: "bad-count" })) }), "SUMMARY_COUNT_FIELD_SHAPE_INVALID");
   expectFail("Sum Summary using non-numeric field fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-sum.json", decoded({ summary: "bad-sum" })) }), "SUMMARY_NUMERIC_FIELD_REQUIRED");
   expectFail("Missing Summary save_var expression object fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-save-var.json", decoded({ summary: "bad-save-var" })) }), "SUMMARY_SAVE_VAR_EXPRESSION_OBJECT_REQUIRED");
   expectFail("Missing page ReportIds for Summary fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-reportids.json", decoded({ summary: "missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
+  expectFail("UUID Summary proof missing Resource.exts match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-exts.json", decoded({ summary: "uuid-proof-no-exts" })) }), "SUMMARY_UUID_PROOF_EXTS_MISSING");
+  expectFail("UUID Summary proof missing Resource.ReportIds match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-missing-reportids.json", decoded({ summary: "uuid-proof-missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
+  expectFail("UUID Summary proof missing Resource.tempVars match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-tempvars.json", decoded({ summary: "uuid-proof-no-tempvars" })) }), "SUMMARY_UUID_PROOF_TEMPVAR_MISSING");
+  expectFail("UUID Summary proof missing attrs.headc.title.variable binding fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-visible-binding.json", decoded({ summary: "uuid-proof-no-visible-binding" })) }), "SUMMARY_UUID_PROOF_VISIBLE_BINDING_MISSING");
 
   expectFail("Visible KPI raw variable name fails", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-raw-var.json", kpiEvidence({ text: "__temp_event_count" })) }), "KPI_VISIBLE_RAW_VARIABLE_NAME");
   expectFail("Visible KPI blank runtime evidence fails", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-blank.json", kpiEvidence({ text: "" })) }), "KPI_VISIBLE_RUNTIME_BLANK");
   expectPass("Visible KPI fallback passes only when explicitly labeled fallback", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-labeled-fallback.json", kpiEvidence({ text: "2 events", fallback: true, fallbackLabeled: true })) }));
   expectFail("Visible KPI fallback without label fails", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-unlabeled-fallback.json", kpiEvidence({ text: "2 events", fallback: true })) }), "KPI_FALLBACK_UNLABELED");
+  expectPass("Exact UUID Summary shape with before/after mutation evidence passes as dynamic-proven", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-uuid-dynamic-proven.json", dynamicKpiEvidence()) }));
+  expectFail("Exact UUID Summary shape without after-mutation evidence does not get proven verdict", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-uuid-no-after.json", dynamicKpiEvidence({ mutationProof: { beforeValues: { totalRecords: 3 }, sourceDataMutated: true, refreshedRecalculatedRuntimeEvidenceCaptured: true } })) }), "KPI_DYNAMIC_PROOF_MUTATION_VALUE_INCOMPLETE");
+  expectFail("Non-UUID Summary IDs remain unproven", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-semantic-summary-id.json", dynamicKpiEvidence({ summaryControlIds: ["summary-total-records"] })) }), "KPI_DYNAMIC_PROOF_SUMMARY_ID_NOT_UUID");
+  expectFail("Visible KPI binding not using attrs.headc.title.variable remains unproven", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-unproven-visible-binding.json", dynamicKpiEvidence({ visibleBindingShape: "attrs.text" })) }), "KPI_DYNAMIC_PROOF_VISIBLE_BINDING_SHAPE_UNPROVEN");
+  expectFail("Static fallback values cannot be claimed dynamic-proven", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-dynamic-fallback.json", dynamicKpiEvidence({ kpis: [{ label: "Total records", renderedText: "Fallback: 4", fallback: true, fallbackLabeled: true, runtimeProven: true }] })) }), "KPI_DYNAMIC_PROOF_USES_FALLBACK");
+  expectFail("Stale after-evidence where values do not change remains not proven", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-stale-after.json", dynamicKpiEvidence({ mutationProof: { beforeValues: { totalRecords: 3, amountSum: 600, openCount: 2, apacAmount: 300 }, afterValues: { totalRecords: 3, amountSum: 600, openCount: 2, apacAmount: 300 }, expectedAfterValues: { totalRecords: 4, amountSum: 1000, openCount: 3, apacAmount: 700 }, sourceDataMutated: true, refreshedRecalculatedRuntimeEvidenceCaptured: true, asyncRecalculationNote: "Synthetic note: stale after-evidence must be replaced after recalculation." } })) }), "KPI_DYNAMIC_PROOF_EXPECTED_VALUE_MISMATCH");
 
   expectFail("Runtime-evidence missing prevents UI-quality claim", inspectRuntimeEvidence({ evidence: writeJson("runtime-missing.json", { installOrSigningOnly: true }), claimHighQualityUi: true }), "UI_QUALITY_RUNTIME_SCREENSHOT_MISSING");
   expectPass("Runtime evidence with visible KPI/cards/tables passes", inspectRuntimeEvidence({ evidence: writeJson("runtime-valid.json", runtimeEvidence()) , claimHighQualityUi: true }));
@@ -91,16 +104,26 @@ function run() {
 function decoded(flags = {}) {
   const listSetId = flags.listSetId || "1900000000000001001";
   const card = flags.card === "weak" ? weakCard() : exportCard();
-  const summaryHost = flags.summary ? hiddenSummaryHost(summaryControl(flags.summary)) : null;
+  const summary = flags.summary ? summaryControl(flags.summary) : null;
+  const summaryHost = flags.summary ? hiddenSummaryHost(summary) : null;
   const gridControl = flags.grid ? grid(flags.grid) : null;
+  const uuidProof = scalar(flags.summary).startsWith("uuid-proof");
+  const root = { type: "page", children: [card, summaryHost, uuidProofVisibleKpi(flags.summary), gridControl].filter(Boolean) };
+  if (uuidProof) {
+    root.kpiRuntimeProofShape = "uuid-summary-v1.0.1";
+    if (flags.summary !== "uuid-proof-no-exts") root.exts = [{ i: UUID_SUMMARY_ID, category: "___Pivot___", key: "summary" }];
+    if (flags.summary !== "uuid-proof-no-tempvars") root.tempVars = [{ id: "__temp___temp_total_records", name: "__temp_total_records" }];
+  }
+  const summaryId = summary ? scalar(summary.id || summary.ID) : "summary-planned-events";
   return {
+    kpiRuntimeProofShape: uuidProof ? "uuid-summary-v1.0.1" : undefined,
     ListSet: { ListID: listSetId, Title: "Marketing Event Management" },
     Pages: [{
       Title: "Event Portfolio",
       Type: 103,
       LayoutID: "dashboard-event-portfolio",
-      ReportIds: flags.summary === "missing-reportids" ? [] : ["summary-planned-events"],
-      LayoutInResources: [{ Resource: JSON.stringify({ type: "page", children: [card, summaryHost, gridControl].filter(Boolean) }) }],
+      ReportIds: flags.summary === "missing-reportids" || flags.summary === "uuid-proof-missing-reportids" ? [] : [summaryId],
+      LayoutInResources: [{ Resource: JSON.stringify(root) }],
     }],
     Childs: [{
       List: { ListID: "events", Title: "Events" },
@@ -131,16 +154,38 @@ function summaryControl(mode) {
   const fieldMeta = mode === "blank-field" ? "" : mode === "bad-sum" ? field("Text1", "Text", "Status") : mode === "bad-count" ? field("Title", "Text", "Event Name") : field("ListDataID", "Text", "Record ID");
   const func = mode === "bad-sum" ? "sum" : "count";
   const metadata = mode === "missing-metadata" ? null : fieldMeta;
+  const id = scalar(mode).startsWith("uuid-proof") && mode !== "uuid-proof-non-uuid" ? UUID_SUMMARY_ID : "summary-planned-events";
+  const saveVar = scalar(mode).startsWith("uuid-proof")
+    ? { exprType: "variable", valueType: "string", id: "__temp___temp_total_records", type: "expr", name: "__temp_total_records" }
+    : { exprType: "variable", valueType: "string", id: "__temp___temp_event_count", type: "expr", name: "__temp_event_count" };
   return {
-    id: "summary-planned-events",
+    id,
     type: "summary",
     attrs: {
+      kpiRuntimeProofShape: scalar(mode).startsWith("uuid-proof") ? "uuid-summary-v1.0.1" : undefined,
       data: { app: { ListID: "1900000000000001001" }, list: { ListID: "events" }, field: fieldMeta, func },
       field: metadata,
       fieldObject: metadata,
       fieldInfo: metadata,
       allowAllRecords: true,
-      save_var: mode === "bad-save-var" ? "__temp_event_count" : { exprType: "variable", valueType: "string", id: "__temp___temp_event_count", type: "expr", name: "__temp_event_count" },
+      save_var: mode === "bad-save-var" ? "__temp_event_count" : saveVar,
+    },
+  };
+}
+
+function uuidProofVisibleKpi(mode) {
+  if (!scalar(mode).startsWith("uuid-proof")) return null;
+  if (mode === "uuid-proof-no-visible-binding") {
+    return { type: "heading", attrs: { headc: { title: { value: "4" } } } };
+  }
+  return {
+    type: "heading",
+    attrs: {
+      headc: {
+        title: {
+          variable: [{ id: "__temp___temp_total_records", name: "__temp_total_records" }],
+        },
+      },
     },
   };
 }
@@ -184,6 +229,32 @@ function kpiEvidence({ text, fallback = false, fallbackLabeled = false } = {}) {
     dynamicVisibleKpiRuntimeProven: false,
     hiddenSummaryVisible: false,
     kpis: [{ label: "Planned Events", renderedText: text, fallback, fallbackLabeled }],
+  };
+}
+
+function dynamicKpiEvidence(overrides = {}) {
+  return {
+    dynamicVisibleKpiRuntimeProven: true,
+    dynamicBindingShape: "uuid-summary-v1.0.1",
+    visibleBindingShape: "attrs.headc.title.variable[]",
+    summaryControlIds: [UUID_SUMMARY_ID],
+    hiddenSummaryVisible: false,
+    kpis: [
+      { label: "Total records", renderedText: "4", dynamicBindingClaimed: true, runtimeProven: true },
+      { label: "Amount sum", renderedText: "1000", dynamicBindingClaimed: true, runtimeProven: true },
+      { label: "Open count", renderedText: "3", dynamicBindingClaimed: true, runtimeProven: true },
+      { label: "APAC amount", renderedText: "700", dynamicBindingClaimed: true, runtimeProven: true },
+    ],
+    mutationProof: {
+      beforeValues: { totalRecords: 3, amountSum: 600, openCount: 2, apacAmount: 300 },
+      afterValues: { totalRecords: 4, amountSum: 1000, openCount: 3, apacAmount: 700 },
+      expectedAfterValues: { totalRecords: 4, amountSum: 1000, openCount: 3, apacAmount: 700 },
+      sourceDataMutated: true,
+      mutationSummary: "Synthetic Delta record added: Status Open, Amount 400, Region APAC.",
+      refreshedRecalculatedRuntimeEvidenceCaptured: true,
+      asyncRecalculationNote: "Summary recalculation can be asynchronous or cache-delayed; final evidence was captured after refresh/recalculation.",
+    },
+    ...overrides,
   };
 }
 
