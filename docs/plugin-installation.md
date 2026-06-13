@@ -6,7 +6,7 @@
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.30`
+- Version: `0.6.31`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
 ## Codex App Install Source
@@ -24,7 +24,7 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.30
+Version: 0.6.31
 ```
 
 ## Verify Installation
@@ -32,7 +32,7 @@ Version: 0.6.30
 Run from a checkout of this repository:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.30
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.31
 ```
 
 Expected metadata:
@@ -41,7 +41,7 @@ Expected metadata:
 - marketplace display: `Yeeflow`
 - plugin ID: `yeeflow-app-builder`
 - plugin display: `Yeeflow App Builder`
-- plugin version: `0.6.30`
+- plugin version: `0.6.31`
 
 ## Smoke Checks
 
@@ -71,7 +71,7 @@ The call helper executes only mapped read-only `GET` capabilities.
 If Codex App shows an unexpected old version, confirm the marketplace source, Git ref, sparse paths, cache path, and installed plugin version. The expected cache identity is:
 
 ```text
-yeeflow/yeeflow-app-builder/0.6.30
+yeeflow/yeeflow-app-builder/0.6.31
 ```
 
 It should not resolve to:

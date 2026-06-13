@@ -8,14 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.30
+- Version: 0.6.31
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
 
-Version `0.6.30` finalizes the OAuth-first environment cleanup and workspace discovery learnings. Normal plugin use requires no `.env.local`; OAuth is the standard user-facing API path; `YEEFLOW_API_KEY` is legacy/deprecated fallback only; workspace discovery uses `settings` and `flowcraft`; `flowcraft` is the app/package workspace category; "all workspaces" checks both categories; workspace summaries redact full IDs and raw records; blank title plus `Status: 1` displays as `Shared Workspace`; local `YEEFLOW_WORKSPACE_ID` is ignored for package writes; and package install/import/upgrade must stop with `workspace_selection_required` until the user explicitly selects an API-discovered workspace.
+Version `0.6.31` adds the package workspace-selection hard gate and application access-link reporting. Package install/import/upgrade ignore local `YEEFLOW_WORKSPACE_ID`, stop with `workspace_selection_required` before request shaping until an API-discovered `flowcraft` workspace is explicitly selected, show redacted workspace choices, prefer `--selected-workspace-id`, and treat `--workspace-id` only as explicit user-selected input. Successful install/import reports include `<tenant-url>/#/list-set/41/<listset-id>` only when the tenant URL comes from safe OAuth/session context and the ListSetID comes from safe install/import result fields. Signing helpers must not use hardcoded versioned Codex cache imports, and local validation, signing/signature verification, and API acceptance are not browser runtime proof.
 
 ## API Safety
 
