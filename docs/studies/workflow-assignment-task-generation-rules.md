@@ -66,11 +66,15 @@ Common task approval settings found alongside assignees:
 
 Use these rules for generated packages:
 
+- Every generated approval workflow Assignment Task must have an explicit assignee plan before package generation. The plan must list task name, assignment type, required job position name when applicable, source, proof status, fallback, and blocker.
 - Do not hardcode tenant-specific direct users by default.
 - Use `type=user`, `method=direct` only when the user explicitly supplies or authorizes a valid target-tenant user mapping.
 - Redact private IDs in docs and never commit user/org lookup output.
 - Prefer applicant/current-user expression routing or an explicit user-selection field when a package must be portable across tenants.
 - Use job-position, department, and location assignment only when target-tenant org/reference data is available and authorized.
+- Job-position assignments must use a discovered existing job position, a user-selected existing job position, or a job position created/updated only after explicit confirmation by a confirmed system admin. The generator must not silently choose a job position and must not invent job-position IDs or names.
+- If a required job position is missing and system-admin permission is not proven, stop generation and ask the user to have a system admin create/update the job position or provide an existing job position/fallback to use.
+- Job-position creation, update, assignment, and removal are write operations and must not be run automatically during workflow generation.
 - Use `yeeflow-api-operator` for read-only org/reference lookup when real users/departments/locations/positions are needed and local credentials are available.
 - API lookup may confirm that static exported values correspond to user, department, location, or position categories, but it does not prove runtime workflow routing.
 - Use placeholders such as `<USER_REF_CONFIRMED_BY_API>`, `<DEPARTMENT_REF_CONFIRMED_BY_API>`, `<LOCATION_REF_CONFIRMED_BY_API>`, and `<POSITION_REF_CONFIRMED_BY_API>` in committed normalized examples.
@@ -178,7 +182,7 @@ Do not generate these as schema-safe until an export proves their package shape.
 
 ## Validator Rules
 
-Validators should remain warning-first for this feature in compatibility mode:
+Validators should remain warning-first in compatibility mode and fail generated-final packages before signing, install, upgrade-check, package handoff, or runtime automation when assignment routing is unsafe:
 
 - warn when `MultiAssignmentTask.properties.usertaskassignment` is missing, not an array, or empty
 - warn when an assignee entry is not an object
@@ -198,8 +202,10 @@ Validators should remain warning-first for this feature in compatibility mode:
 - warn when a custom button label implies approve/reject/reassign/add-assignee/complete but the resolved Submit form operation differs
 - warn when reassign/add-assignee Submit form steps lack user-valued expression sources
 - warn when Complete task pages rely only on approval/reject custom operations, or approval/default task pages rely only on complete custom operations
+- hard-fail generated-final Assignment Tasks with empty assignees, placeholder assignee values, invented local/mock/generated job-position references, missing job-position proof status, missing required job positions without confirmed admin creation/update, unsupported manager expressions, direct user assignment without explicit app-plan/user request, or job-position write requirements that were not confirmed by a system admin
+- hard-fail generated-final packages when assignment uses a job position that was not discovered, user-selected, or admin-created-after-confirmation
 
-Hard errors should wait until generated-final invalid shapes are proven to fail import/publish/runtime safely and consistently.
+These hard gates prove only local package safety. Workflow assignment correctness is not proven until browser/runtime verification submits a safe request and observes task routing.
 
 ## References
 

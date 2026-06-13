@@ -40,6 +40,9 @@ The OpenAPI document is the source of truth for endpoint paths and methods. Help
 | location detail | added | yes | `GET /locations/{id}` | yes | yes for export static location | HTTP `200`, API status `0`, redacted location shape | redact IDs, names, manager, address | supported |
 | positions | yes | yes | `GET /positions` | yes | yes | HTTP `200`, API status `0`, returned `6` | redact IDs, names, audit fields | supported |
 | position detail | partial | no `GET /positions/{id}` documented | use `GET /positions` and `GET /positions/{id}/users` | yes for available endpoints | list and assignment tested | no standalone position detail endpoint found | redact position IDs/names | missing specific detail endpoint; list/assignments supported |
+| create job position | mapped write | yes | `POST /positions` | no | no | write operation; do not run during generation | require explicit confirmation and confirmed system-admin permission | admin-confirmation gated |
+| update job position | mapped write | yes | `PUT /positions/{id}` | no | no | write operation; do not run during generation | require explicit confirmation and confirmed system-admin permission | admin-confirmation gated |
+| assign/remove users in job position | mapped write | yes | `POST /positions/{id}/users`, `POST /positions/{id}/users/remove` | no | no | write operation; do not run during generation | require explicit confirmation and confirmed system-admin permission | admin-confirmation gated |
 | users by position | added | yes | `GET /positions/{id}/users` | yes | yes for export positions | HTTP `200`, API status `0`, returned counts `1`, `1`, `5` for tested export positions | redact user, position, target IDs | supported |
 | users by position + department | added | yes | `GET /positions/{id}/users?bindingType=2&targetID={departmentId}` | yes | yes for export binding | HTTP `200`, API status `0`, returned `1` | redact user, position, department IDs | supported |
 | users by position + location | added | yes | `GET /positions/{id}/users?bindingType=3&targetID={locationId}` | yes | yes for export binding | HTTP `200`, API status `0`, returned `1` | redact user, position, location IDs | supported |
@@ -48,6 +51,7 @@ The OpenAPI document is the source of truth for endpoint paths and methods. Help
 | user group members | added | yes | `GET /groups/{id}/users?pageIndex=&pageSize=` | yes | yes for export group | HTTP `200`, API status `0`, total `2`, returned `1` | redact member user data and group ID | supported |
 | app groups | not API Operator scope | no relevant public org endpoint found | app package `Data.AppGroups[]` only in exports | not applicable | no | application groups are package metadata, not org directory API in this audit | do not embed members/private users | not needed yet |
 | organization/group refs in Assignment Task editor | partial | yes for users, departments, locations, positions, groups | endpoints above | yes | yes | category lookup is now covered for current export refs | redact all org/private fields | supported except workflow-variable and combined dept+location |
+| current user identity / admin capability | not mapped | no current-user/system-admin endpoint found in the repository map | none found | no | no | cannot prove system-admin status from mapped API today | do not infer permissions from user records or OAuth presence | missing; stop for admin-required writes |
 
 ## New Read-Only Helper
 
@@ -85,6 +89,7 @@ With local credentials available, the safe live coverage test confirmed:
 
 - No documented `GET /departments/{id}` endpoint was found; use the department list/tree endpoint for manager/category lookup.
 - No documented `GET /positions/{id}` endpoint was found; use positions list and position-assignment lookup.
+- No documented current-user identity or system-admin permission-check endpoint is mapped in this repository. Job-position creation/update or user assignment must stop unless system-admin status is separately confirmed by an authorized path.
 - No documented combined department+location position assignment endpoint was found.
 - Workflow-variable assignee values are expression/runtime data, not directly covered by directory APIs.
 - API lookup does not prove applicant-context resolution, appointed order, group expansion, position expansion, notification delivery, or workflow routing. Those require a focused runtime baseline.

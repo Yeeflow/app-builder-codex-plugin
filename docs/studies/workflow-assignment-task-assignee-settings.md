@@ -182,6 +182,21 @@ Redaction handling:
 
 API lookup confirms org object categories, not runtime workflow routing. A reference matching a readable API category means the exported static value corresponds to a known object category in the queried tenant; it does not prove that a submitted workflow will route to the intended assignee at runtime.
 
+## Job Position Generation Policy
+
+Generated approval workflows must not invent job-position IDs or names. For each Assignment Task, the app plan and generation report must list:
+
+- task name
+- assignment type: line manager, department manager, location manager, job position, explicit user, requester/submitter, or another supported expression
+- required job position name when applicable
+- source: discovered existing job position, user-selected existing job position, admin-created after confirmation, unresolved, or not applicable
+- proof status
+- fallback or blocker
+
+If the required job position exists, generation may use it only with discovered or explicitly confirmed proof metadata. If the required job position is missing and current user system-admin status is proven, prepare a guarded creation/update plan and require explicit confirmation before any write. If admin status is missing or cannot be proven, stop and instruct the user to ask a system admin to create/update the job position or provide an existing position/fallback. Job-position creation, update, and user assignment/removal are writes and must never run automatically during generation.
+
+Generated application reports must list the workflow assignment tasks and assignee sources, state whether each job position was discovered, user-selected, created after confirmation, or unresolved, and state the blocker when unresolved. Reports must not print raw user records, raw job-position records, full IDs, full emails, raw API responses, decoded package payloads, raw `Resource`, or raw `Sign`. Workflow assignment correctness is not proven until browser/runtime verification submits a safe request and observes task routing.
+
 ## Updated Export Extension: Test ABC (1).yap
 
 `Test ABC (1).yap` decoded successfully as a read-only export and contains the same approval form/workflow shell:

@@ -52,8 +52,8 @@ Use the API only when local credentials are available and the user has asked for
 - Do not use this skill for normal Yeeflow package generation when no real org data is needed.
 - Do not ask the user to paste API keys into chat.
 - Do not run write APIs unless the user explicitly asks for package import/install/upgrade automation and you use the guarded package helper with `--execute`.
-- Do not commit `.env.local`, raw API responses, credentials, tokens, users, emails, phone numbers, tenant IDs, or private identifiers.
-- Do not add write operations until they are separately studied, safety-reviewed, and runtime-proven.
+- Do not commit `.env.local`, raw API responses, credentials, tokens, users, emails, phone numbers, tenant IDs, job-position records, user records, or private identifiers.
+- Do not create/update/delete job positions or assign/remove users from job positions unless the user separately authorizes a live write test and system-admin permission is confirmed.
 
 ## Environment Model
 
@@ -131,6 +131,14 @@ Report only:
 - workspace count/title or user-facing fallback name/category/status/status provenance and redacted workspace ID previews
 
 For user/person data, show counts and redacted field shapes by default. Do not show full names, emails, phone numbers, or broad identity dumps. Return IDs only when explicitly needed for app generation or runtime testing, and keep scope narrow.
+
+Job-position lookup for workflow assignment routing:
+
+- `GET /positions` is the mapped read-only discovery endpoint.
+- `GET /positions/{id}/users` and its documented `bindingType`/`targetID` filters are read-only assignment/membership checks after a position is discovered or explicitly selected.
+- No standalone `GET /positions/{id}` endpoint and no current-user/system-admin permission-check endpoint are mapped in this repository today.
+- `POST /positions`, `PUT /positions/{id}`, `POST /positions/{id}/users`, and `POST /positions/{id}/users/remove` are admin-confirmation-gated writes. They must never run automatically during generation.
+- If a required job position is missing and system-admin status cannot be proven, stop and ask the user to have a system admin create/update it or provide an existing job position/fallback.
 
 ## Package Automation Operations
 
@@ -220,10 +228,12 @@ When app planning or generation needs real users, departments, locations, or pos
 
 For approval workflow assignment task assignee generation, use read-only lookup only when real users, departments, locations, or positions are explicitly needed and authorized. Report only counts, status, and redacted shapes; never save or commit raw API responses.
 
+Every generated Assignment Task must have an assignee plan. Manager-based assignments must use supported expression-editor patterns; job-position assignments must use discovered existing, user-selected existing, or admin-created-after-confirmation job positions. The plugin must not invent job-position IDs/names, and runtime/browser workflow testing is still required after install to prove actual task routing.
+
 For export-learning work, you may build memory-only or ignored-temp reference sets to classify redacted assignment task references as user, department, location, or position categories. Do not commit raw ID maps, names, emails, tenant IDs, or raw records. API category confirmation supports schema interpretation only; it does not prove workflow runtime routing.
 
 User-group lookup is now supported through documented read-only `GET /groups` and `GET /groups/{id}/users`. Use it only to confirm category/member-count/readability for authorized runtime setup; do not dump group members or commit user/group data.
 
-The public OpenAPI docs do not currently expose a `GET /departments/{id}`, `GET /positions/{id}`, or combined department+location position-assignment endpoint. Do not invent those calls; use the documented list/tree and position-assignment endpoints instead.
+The public OpenAPI docs do not currently expose a `GET /departments/{id}`, `GET /positions/{id}`, current-user system-admin check, or combined department+location position-assignment endpoint. Do not invent those calls; use the documented list/tree and position-assignment endpoints instead.
 
 Keep generated packages free of private user data unless the user explicitly requires it, the data is safe to include, and the scope is narrow. Prefer placeholders, empty groups, requester/current-user expressions, or post-import configuration when that is safer.

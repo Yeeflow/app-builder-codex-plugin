@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add workflow assignment assignee guardrails: app plans must include Assignment Task assignee strategy/proof status, generated-final validation blocks empty/placeholder/invented job-position routing, and job-position writes require explicit confirmation plus confirmed system-admin permission.
+- Document read-only job-position discovery boundaries and the remaining gap for current-user/system-admin permission detection; workflow assignment routing remains runtime/browser proof required.
+
 ## 0.6.32
 
 - Bump the active plugin version after the universal login UX and YAPK upgrade ID stability hard-gate merge.

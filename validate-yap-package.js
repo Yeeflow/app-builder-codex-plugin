@@ -109,6 +109,13 @@ const CANONICAL_FIELDTYPE_BY_CONTROL_TYPE = new Map([
   ["datepicker", "Datetime"],
 ]);
 const APPROVAL_APPROVEWAYS = new Set(["allapprove", "anyapprove", "anyprocess", "anyreject", "custompercentage", "anyone"]);
+const ASSIGNMENT_PLACEHOLDER_RE = /(?:^|[\s_<{\[])(?:todo|tbd|placeholder|replace[_\s-]?me|sample|dummy|mock|fake|unknown|unresolved|required)(?:[\s_>}\]]|$)/i;
+const ASSIGNMENT_REFERENCE_PLACEHOLDER_RE = /^<[^>]+>$|^\{\{[^}]+\}\}$|^__.*__$|^(?:todo|tbd|placeholder|replace[_-]?me|sample|dummy|mock|fake|unknown|unresolved|required)$/i;
+const ASSIGNMENT_LOCAL_ID_RE = /^(?:local|temp|tmp|mock|placeholder|fallback|generated|test|demo|sample|fake)[-_]/i;
+const JOB_POSITION_METHODS = new Set(["position", "positionorg", "positionorgexpr", "positionloc", "positionlocexpr"]);
+const JOB_POSITION_PROOF_SOURCES = new Set(["discovered-existing-job-position", "user-selected-existing-job-position", "admin-created-job-position", "explicitly-confirmed-existing-job-position"]);
+const JOB_POSITION_PROOF_STATUSES = new Set(["discovered", "confirmed", "created-after-confirmation", "user-selected"]);
+const MANAGER_ASSIGNMENT_TYPES = new Set(["line-manager", "department-manager", "location-manager"]);
 const CUSTOM_FORM_DISPLAY_USAGES = ["add", "edit", "view"];
 const PIVOT_TABLE_SOURCE_TYPES = new Map([[1, "Data list"], [16, "Document library"], [32, "Form report"], [64, "Data report"]]);
 const PIVOT_TABLE_DATE_GROUPINGS = new Set(["DAY", "MONTH", "QUARTER", "YEAR"]);
@@ -321,6 +328,10 @@ function taskNodeLabel(type) {
   return type === "CandidateTask" ? "Claim Task" : "Assignment Task";
 }
 
+function nodeDisplayName(shape) {
+  return safeString(shape && shape.properties && shape.properties.name) || safeString(shapeId(shape));
+}
+
 function collectTaskUrlAliases(props = {}) {
   return ["taskurl", "taskUrl", "TaskUrl"].map((key) => ({ key, value: safeString(props[key]) }));
 }
@@ -334,6 +345,153 @@ function primaryTaskUrl(props = {}) {
     if (value) return value;
   }
   return "";
+}
+
+function decodeHtmlEntities(value) {
+  return safeString(value)
+    .replace(/&quot;/g, "\"")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function assignmentExpressionData(value) {
+  const decoded = decodeHtmlEntities(value);
+  const marker = 'data="${';
+  const markerIndex = decoded.indexOf(marker);
+  if (markerIndex === -1) return null;
+  const start = markerIndex + 'data="$'.length;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < decoded.length; i += 1) {
+    const ch = decoded[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === "\"") inString = false;
+      continue;
+    }
+    if (ch === "\"") {
+      inString = true;
+      continue;
+    }
+    if (ch === "{") depth += 1;
+    else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        try {
+          return JSON.parse(decoded.slice(start, i + 1));
+        } catch {
+          return null;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function assignmentBlob(assignment) {
+  return `${safeString(assignment && assignment.title)} ${safeString(assignment && assignment.value)} ${JSON.stringify(assignment || {})}`;
+}
+
+function classifyManagerAssignment(assignment) {
+  const text = assignmentBlob(assignment);
+  const expression = assignmentExpressionData(assignment && assignment.value) || {};
+  const type = safeString(expression.type).toLowerCase();
+  const prop = safeString(expression.prop || expression.param && expression.param.prop).toLowerCase();
+  if (/line\s*manager|linemanager|LineManager/i.test(text) || prop === "linemanager") return "line-manager";
+  if (/department\s*:\s*manager|department\s*manager|organization.*manager|OrganizationID.*Manager/i.test(text) || (type.includes("department") && prop === "manager")) return "department-manager";
+  if (/location\s*:\s*manager|location\s*manager|LocationID.*Manager/i.test(text) || (type.includes("location") && prop === "manager")) return "location-manager";
+  return "";
+}
+
+function assignmentReferenceValue(assignment) {
+  if (!isObject(assignment)) return "";
+  if (assignment.type === "position" || JOB_POSITION_METHODS.has(safeString(assignment.method))) return safeString(assignment.position);
+  return safeString(assignment.value);
+}
+
+function hasAssignmentPlaceholder(value) {
+  const text = safeString(value).trim();
+  if (!text) return false;
+  return ASSIGNMENT_REFERENCE_PLACEHOLDER_RE.test(text) || ASSIGNMENT_PLACEHOLDER_RE.test(text);
+}
+
+function validateAssignmentReferenceNotInvented(assignment, report, context, reference, kind) {
+  if (!reference) return;
+  if (hasAssignmentPlaceholder(reference)) {
+    issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_PLACEHOLDER", "Workflow assignment assignee contains placeholder or unresolved assignee text.", { ...context, assigneeKind: kind });
+    return;
+  }
+  if (ASSIGNMENT_LOCAL_ID_RE.test(reference)) {
+    issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_INVENTED_REFERENCE", "Workflow assignment assignee uses a local/mock/generated reference instead of discovered or explicitly confirmed Yeeflow org data.", { ...context, assigneeKind: kind });
+  }
+}
+
+function validateJobPositionProof(assignment, report, context) {
+  const source = safeString(assignment.source || assignment.assigneeSource || assignment.jobPositionSource);
+  const proofStatus = safeString(assignment.proofStatus || assignment.jobPositionProofStatus);
+  const requiredName = safeString(assignment.requiredJobPositionName || assignment.jobPositionName);
+  const creationRequired = assignment.creationRequired === true || /create|missing|unresolved/i.test(source) || /unresolved|blocked/i.test(proofStatus);
+  const creationConfirmed = assignment.creationConfirmed === true || assignment.adminCreationConfirmed === true;
+  const adminConfirmed = assignment.systemAdminConfirmed === true || assignment.adminPermissionConfirmed === true;
+
+  if (!requiredName || hasAssignmentPlaceholder(requiredName)) {
+    issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_NAME_UNCONFIRMED", "Job-position assignment must include a safe required job position name from discovery or explicit user selection; placeholders are not allowed.", context);
+  }
+  if (!JOB_POSITION_PROOF_SOURCES.has(source) || !JOB_POSITION_PROOF_STATUSES.has(proofStatus)) {
+    issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_PROOF_MISSING", "Job-position assignment must be backed by a discovered existing, user-selected existing, or admin-created-after-confirmation job position proof status.", { ...context, source: source || null, proofStatus: proofStatus || null });
+  }
+  if (/admin-created/.test(source) && (!creationConfirmed || !adminConfirmed)) {
+    issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_WRITE_NOT_CONFIRMED", "Job-position creation/update is a write operation and must be explicitly confirmed by a system admin before generation can use the resulting position.", { ...context, source, proofStatus });
+  }
+  if (creationRequired && (!creationConfirmed || !adminConfirmed)) {
+    issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_MISSING_BLOCKED", "Missing job positions block generation unless a system admin explicitly confirms creation/update and the resulting job position is used.", { ...context, source: source || null, proofStatus: proofStatus || null });
+  }
+}
+
+function validateWorkflowTaskAssignees(shape, form, report, index, nodeLabel) {
+  const props = shape.properties || {};
+  const assignments = asArray(props.usertaskassignment);
+  const node = nodeDisplayName(shape);
+  if (!assignments.length) {
+    issue(report, generatorFinalSeverity(report), "TASK_USERTASKASSIGNMENT_EMPTY", `${nodeLabel} nodes must include non-empty export-shaped usertaskassignment metadata.`, { form: form.Name, node });
+    return;
+  }
+  assignments.forEach((assignment, assignmentIndex) => {
+    const context = { form: form.Name, node, assignmentIndex, path: `Data.Forms[].DefResource.childshapes[${index}].properties.usertaskassignment[${assignmentIndex}]` };
+    if (!isObject(assignment)) {
+      issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_NOT_OBJECT", "Workflow assignment assignee entries must be objects.", context);
+      return;
+    }
+    const type = safeString(assignment.type);
+    const method = safeString(assignment.method);
+    const ref = assignmentReferenceValue(assignment);
+    if (!type || !method) {
+      issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_TYPE_METHOD_MISSING", "Workflow assignment assignee entries must include export-shaped type and method.", { ...context, type: type || null, method: method || null });
+    }
+    if (!ref) {
+      issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_EMPTY", "Workflow assignment assignee entry must include a non-empty value or position reference.", { ...context, type: type || null, method: method || null });
+    } else if (!(type === "user" && method === "expression")) {
+      validateAssignmentReferenceNotInvented(assignment, report, context, ref, type === "position" ? "job-position" : type || "assignee");
+    }
+    if (type === "user" && method === "direct" && assignment.explicitlyRequested !== true && assignment.userAssignmentExplicitlyRequested !== true) {
+      issue(report, generatorFinalSeverity(report), "TASK_DIRECT_USER_REQUIRES_EXPLICIT_REQUEST", "Hardcoded user assignees are tenant-sensitive and require an explicit app-plan/user request.", context);
+    }
+    if (type === "user" && method === "expression") {
+      const managerType = classifyManagerAssignment(assignment);
+      const expression = assignmentExpressionData(assignment.value);
+      if (managerType) {
+        if (!MANAGER_ASSIGNMENT_TYPES.has(managerType)) {
+          issue(report, generatorFinalSeverity(report), "TASK_MANAGER_EXPRESSION_UNSUPPORTED", "Manager-based assignment must use a supported expression-editor manager pattern.", { ...context, managerType });
+        }
+      } else if (!expression && !/{{[^}]+}}/.test(safeString(assignment.value))) {
+        issue(report, generatorFinalSeverity(report), "TASK_MANAGER_EXPRESSION_MALFORMED", "Expression-editor user assignee must preserve a supported expression-button value or a validated expression token.", context);
+      }
+    }
+    if (type === "position" || JOB_POSITION_METHODS.has(method)) validateJobPositionProof(assignment, report, context);
+  });
 }
 
 function zeroPadding(padding) {
@@ -4463,9 +4621,7 @@ function validateApprovalTaskPageReferences(def, form, report, pageById, taskPag
     if (!APPROVAL_APPROVEWAYS.has(approveway)) {
       issue(report, severity, "TASK_APPROVEWAY_INVALID", `${nodeLabel} nodes must include an export-shaped valid approveway value.`, { form: form.Name, node, approveway: approveway || null });
     }
-    if (!asArray(props.usertaskassignment).length) {
-      issue(report, severity, "TASK_USERTASKASSIGNMENT_EMPTY", `${nodeLabel} nodes must include non-empty export-shaped usertaskassignment metadata.`, { form: form.Name, node });
-    }
+    validateWorkflowTaskAssignees(shape, form, report, index, nodeLabel);
   });
   if (!taskNodeCount) {
     issue(report, severity, "APPROVAL_ASSIGNMENT_TASK_MISSING", "Generated approval workflows must include a real task node such as MultiAssignmentTask; StartNoneEvent -> EndNoneEvent alone is not a valid approval workflow.", { form: form.Name, key: form.Key });

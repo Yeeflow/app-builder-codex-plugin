@@ -54,10 +54,21 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Task pages:
 - Approval statuses:
 - Workflow steps:
+- Assignment task assignee plan:
+  - Task name:
+  - Assignment type: line manager / department manager / location manager / job position / explicit user / requester/submitter / other supported expression
+  - Required job position name, if applicable:
+  - Source: discovered existing job position / user-selected existing job position / admin-created after confirmation / unresolved / N/A
+  - Proof status:
+  - Fallback or blocker:
 - Workflow control panel required: Yes/No
 - Workflow history required: Yes/No
 - DefResource required: Yes/No
 - If deferred, user-approved staged build required: Yes/No
+- Job-position assignments may use invented IDs or names: No
+- Missing job positions block generation until resolved by discovery, user selection, or explicitly confirmed admin creation/update: Yes
+- Job-position writes require explicit confirmation and confirmed system-admin permission: Yes
+- Manager-based assignees must use supported expression-editor patterns and validator-backed shapes: Yes
 
 ### Navigation Runtime Contract
 - Navigation Runtime Metadata Gate required for generated-final `.yapk`: Yes
@@ -148,6 +159,12 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Evidence: ID allocation manifest and validator results
 - Boundary: signing and install acceptance do not prove ID provenance, navigation runtime metadata completeness, or dashboard runtime/designer visual fidelity
 - Workflow/notification/AI/custom-code execution proof status:
+- Workflow assignment runtime proof status:
+  - Assignment task assignee plan present: Yes/No
+  - Job positions discovered/confirmed/user-selected/admin-created after confirmation/unresolved:
+  - Manager expressions validator-backed: Yes/No
+  - Runtime/browser workflow routing verified: Yes/No
+  - Boundary: Workflow assignment correctness is not proven until runtime/browser verification.
 - Deferred items:
 - Known risks:
 
