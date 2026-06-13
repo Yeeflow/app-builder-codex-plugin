@@ -7,6 +7,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { inspectDashboardStyleShapes } from "./inspect-dashboard-style-shapes.mjs";
 import { inspectDashboardSummaryControlContract } from "./inspect-dashboard-summary-control-contract.mjs";
+import { inspectDataAnalyticsControlIdentity } from "./inspect-data-analytics-control-identity.mjs";
 import { inspectGridTableQuality } from "./inspect-grid-table-quality.mjs";
 import { inspectRuntimeEvidence } from "./inspect-runtime-evidence.mjs";
 import { inspectVisibleKpiRuntimeBindings } from "./inspect-visible-kpi-runtime-bindings.mjs";
@@ -62,6 +63,21 @@ function run() {
   expectFail("UUID Summary proof missing Resource.ReportIds match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-missing-reportids.json", decoded({ summary: "uuid-proof-missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
   expectFail("UUID Summary proof missing Resource.tempVars match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-tempvars.json", decoded({ summary: "uuid-proof-no-tempvars" })) }), "SUMMARY_UUID_PROOF_TEMPVAR_MISSING");
   expectFail("UUID Summary proof missing attrs.headc.title.variable binding fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-visible-binding.json", decoded({ summary: "uuid-proof-no-visible-binding" })) }), "SUMMARY_UUID_PROOF_VISIBLE_BINDING_MISSING");
+  expectPass("Data Analytics Summary with UUID ID and matching exts ReportIds passes", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-valid.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", reportIds: [UUID_SUMMARY_ID] })) }));
+  expectFail("Data Analytics Summary with non-UUID ID fails unless export-proven", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-non-uuid.json", analyticsDecoded({ type: "summary", id: "summary-total" })) }), "ANALYTICS_CONTROL_ID_NOT_RUNTIME_SAFE");
+  for (const [label, type] of [
+    ["Pie chart", "pie-chart"],
+    ["Column chart", "column-chart"],
+    ["Line chart", "line-chart"],
+    ["Gauge", "gauge"],
+    ["Funnel chart", "funnel-chart"],
+    ["Color block heatmap", "color-block-heatmap"],
+    ["Pivot table", "pivot-table"],
+  ]) {
+    expectFail(`${label} generated with non-runtime-safe ID fails or is marked unproven`, inspectDataAnalyticsControlIdentity({ package: writeJson(`analytics-${type}-non-uuid.json`, analyticsDecoded({ type, id: `${type}-semantic-id` })) }), "ANALYTICS_CONTROL_ID_NOT_RUNTIME_SAFE");
+  }
+  expectFail("Runtime proof cannot be claimed for analytics control without runtime evidence", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-runtime-proof-missing.json", analyticsDecoded({ type: "pie-chart", id: "11111111-1111-4111-8111-111111111111", runtimeProofClaimed: true })) }), "ANALYTICS_RUNTIME_PROOF_EVIDENCE_MISSING");
+  expectFail("Upgrade workflow preserves existing analytics control IDs", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-upgrade-drift.json", analyticsDecoded({ type: "pie-chart", id: "22222222-2222-4222-8222-222222222222", semanticKey: "analytics:campaign-pie" })), lineage: writeJson("analytics-lineage-drift.json", { requestedOperation: "update", previousAnalyticsControlIds: { "analytics:campaign-pie": "11111111-1111-4111-8111-111111111111" } }) }), "ANALYTICS_UPGRADE_CONTROL_ID_DRIFT");
 
   expectFail("Visible KPI raw variable name fails", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-raw-var.json", kpiEvidence({ text: "__temp_event_count" })) }), "KPI_VISIBLE_RAW_VARIABLE_NAME");
   expectFail("Visible KPI blank runtime evidence fails", inspectVisibleKpiRuntimeBindings({ evidence: writeJson("kpi-blank.json", kpiEvidence({ text: "" })) }), "KPI_VISIBLE_RUNTIME_BLANK");
@@ -269,6 +285,36 @@ function runtimeEvidence(overrides = {}) {
     badgesDistinct: true,
     pageLooksPlainScaffold: false,
     ...overrides,
+  };
+}
+
+function analyticsDecoded({ type, id, extKey, reportIds = [], runtimeProofClaimed = false, semanticKey = "analytics:synthetic" }) {
+  const control = {
+    id,
+    type,
+    attrs: {
+      semanticKey,
+      runtimeProofClaimed,
+      data: { list: { ListID: "events" }, field: field("ListDataID", "Text", "Record ID") },
+      settings: { values: [{ field: "ListDataID", aggregate: "COUNT" }] },
+    },
+  };
+  const root = {
+    type: "page",
+    children: [control],
+  };
+  if (extKey) root.exts = [{ i: id, category: "___Pivot___", key: extKey }];
+  if (type === "pivot-table" && /^[0-9a-f-]{36}$/i.test(id)) {
+    root.exts = [{ i: id, category: "___Pivot___", key: "PivotTable" }];
+    reportIds = [id];
+  }
+  return {
+    ListSet: { ListID: "1900000000000001001", Title: "Analytics Identity Proof" },
+    Pages: [{ Title: "Analytics Dashboard", Type: 103, LayoutID: "dashboard-analytics", ReportIds: reportIds, LayoutInResources: [{ Resource: JSON.stringify(root) }] }],
+    Childs: [{
+      List: { ListID: "events", Title: "Events" },
+      Fields: [field("ListDataID", "Text", "Record ID"), field("Decimal1", "Decimal", "Amount")],
+    }],
   };
 }
 

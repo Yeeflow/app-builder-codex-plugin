@@ -25,6 +25,20 @@ This standard does not apply to, and must not generate Summary controls on:
 
 For unsupported surfaces, generators must not attempt to satisfy this standard by inserting Summary controls. Use a supported alternative display pattern, mark the metric as deferred if it cannot be calculated safely, and do not claim Summary-card pattern compliance for that surface.
 
+## Data Analytics Control Inventory
+
+Summary is one Yeeflow Data Analytics control. The broader Data Analytics inventory also includes:
+
+- Pie chart
+- Column chart
+- Line chart
+- Gauge
+- Funnel chart
+- Color block heatmap
+- Pivot table
+
+All generated Data Analytics controls require runtime-safe IDs. Use UUID-based control IDs unless an export-proven Yeeflow sample proves another ID shape is valid for that exact control type. Preserve existing analytics control IDs during upgrades; only newly added analytics controls get newly generated UUID/API-issued IDs. Summary has a proven UUID runtime shape through KPI Runtime Binding Proof v1.0.1. Other analytics controls require export-proven control shapes before a generator can claim runtime correctness, and runtime screenshot/evidence is required before claiming analytics dashboard quality.
+
 ## Golden Reference
 
 Use the Service Desk Pro `Executive Dashboard` dashboard as the best-practice reference for summary cards:

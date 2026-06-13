@@ -68,6 +68,42 @@ Run:
 node scripts/inspect-dashboard-summary-control-contract.mjs --package <decoded.json-or-package.yapk>
 ```
 
+## Data Analytics Control Identity
+
+Data Analytics controls must use runtime-safe control identities. This inventory is currently in scope:
+
+- Pie chart
+- Column chart
+- Line chart
+- Gauge
+- Funnel chart
+- Color block heatmap
+- Summary
+- Pivot table
+
+For every generated Data Analytics control, the control ID must be UUID-based unless an export-proven Yeeflow sample proves another ID shape is valid for that exact control type. Do not assume the Summary control shape applies exactly to Pie chart, Column chart, Line chart, Gauge, Funnel chart, Color block heatmap, or Pivot table.
+
+Every analytics control must satisfy these generated-final rules:
+
+- Control ID shape is runtime-safe.
+- Control ID is stable across upgrades.
+- Control ID appears in the correct page/report registration metadata when required.
+- Matching `Resource.exts[]` entries exist when required.
+- `Resource.exts[].i` matches the control ID when the control uses `exts`.
+- Analytics settings, data source, fields, filters, grouping, aggregation, and display metadata are designer-shaped.
+- Placeholder fields and invented field IDs are forbidden.
+- Runtime proof is not claimed unless runtime screenshot/evidence confirms the control renders correctly.
+- Upgrade/new-version workflows preserve existing analytics control IDs.
+- Only newly added analytics controls get newly generated UUID/API-issued IDs.
+
+Summary has a proven UUID runtime shape through KPI Runtime Binding Proof v1.0.1. Pivot table has export-proven dashboard `exts[]` registration where `category = "___Pivot___"`, `key = "PivotTable"`, and `i` equals the Pivot Table control ID, with focused runtime proof for a representative dashboard package. Pie chart, Column chart, and Line chart have prior generated dashboard runtime proof for visible rendering, but their detailed generated-final identity/registration rules must still be validated from export-proven shapes before broader runtime correctness claims. Gauge, Funnel chart, and Color block heatmap remain unproven for generated-final runtime claims until sandbox/export study captures exact designer shapes.
+
+Run:
+
+```sh
+node scripts/inspect-data-analytics-control-identity.mjs --package <decoded.json-or-package.yapk>
+```
+
 ## Visible KPI Runtime Boundary
 
 Visible Text/Heading controls must not show raw temp variable names and must not render blank. Dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape documented below, and only when runtime evidence proves nonblank visible dynamic values without raw variable names.

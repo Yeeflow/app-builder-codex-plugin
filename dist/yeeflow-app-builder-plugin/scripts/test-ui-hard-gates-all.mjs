@@ -17,6 +17,7 @@ const childTests = [
       "inspect-yeeflow-ui-design-contract",
       "inspect-dashboard-style-shapes",
       "inspect-dashboard-summary-control-contract",
+      "inspect-data-analytics-control-identity",
       "inspect-visible-kpi-runtime-bindings",
       "inspect-runtime-evidence",
       "inspect-grid-table-quality",
