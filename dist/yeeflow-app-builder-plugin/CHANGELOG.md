@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-- Fix OAuth login request UX so unauthenticated read-only API requests return plugin-login-flow guidance instead of local Node login commands or stale cache paths.
+## 0.6.32
+
+- Bump the active plugin version after the universal login UX and YAPK upgrade ID stability hard-gate merge.
+- Apply universal login UX to every Yeeflow API operation: unauthenticated calls return `auth_required` / `login_flow_required`, preserve the original operation or capability, and direct normal users to the plugin login flow.
+- Keep local Node OAuth commands, Codex cache paths, API keys, and `.env.local` guidance out of normal user-facing recovery; CLI OAuth scripts remain developer/local diagnostics only.
+- Require YAPK upgrade/new-version workflows to prove previous package/manifest continuity before signing, upgrade-check, upgrade, install-like writes, or handoff.
+- Preserve IDs for existing semantic resources, assign new API-issued IDs only to newly added resources, forbid removed-ID reuse, and fail closed on missing or ambiguous lineage.
+- Treat replacing all IDs in an upgrade as a hard failure, and keep signing/install/upgrade acceptance separate from ID-continuity proof and browser runtime proof.
 
 ## 0.6.31
 
