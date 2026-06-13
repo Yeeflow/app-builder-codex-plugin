@@ -82,7 +82,15 @@ export function applyOAuthTenantContext(env, tokenRecord) {
 export async function requireYeeflowApiAuth(options = {}) {
   const auth = await resolveYeeflowApiAuth(options);
   if (auth.mode === "none") {
-    throw new Error("Yeeflow API authentication is not configured. Run OAuth login or configure legacy YEEFLOW_API_KEY locally.");
+    throw new Error("Yeeflow API authentication is not configured. Run OAuth login first.");
+  }
+  return auth;
+}
+
+export async function requireYeeflowOAuthAuth(options = {}) {
+  const auth = await resolveYeeflowApiAuth(options);
+  if (auth.mode !== "oauth") {
+    throw new Error("Yeeflow OAuth authentication is required. Run node scripts/yeeflow-oauth-login.mjs first.");
   }
   return auth;
 }

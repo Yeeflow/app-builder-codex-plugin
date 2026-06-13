@@ -27,7 +27,7 @@ The generator decodes the source export read-only, clones export-proven `MultiAs
 
 ## API-Assisted Test Planning
 
-The Yeeflow API Operator assignment-routing coverage helper was run with local credentials loaded from `.env.local`. The API key value was not printed, and no raw responses were saved.
+The Yeeflow API Operator assignment-routing coverage helper was originally run with local credentials loaded from `.env.local`; current helper behavior is OAuth-first and does not require `.env.local` for normal read-only checks. No credential values or raw responses were saved.
 
 Endpoint/category results:
 

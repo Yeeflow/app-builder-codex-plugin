@@ -1,24 +1,25 @@
-import fs from "node:fs";
-import { loadDotenvFile, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
+import { mergeAuthHeaders, requireYeeflowApiAuth } from "./lib/yeeflow-api-auth.mjs";
 
 const DEFAULT_BATCH_SIZE = 100;
 
-export function loadYeeflowApiEnvironment(dotenvPath = ".env.local") {
-  loadDotenvFile(fs, dotenvPath);
-  const env = resolveYeeflowEnvironment(process.env);
-  if (!env.apiKey) throw new Error("YEEFLOW_API_KEY is required for Yeeflow API ID generation.");
-  if (!env.apiBaseUrl) throw new Error("YEEFLOW_API_BASE_URL is required for Yeeflow API ID generation.");
-  return env;
+export async function loadYeeflowApiEnvironment(dotenvPath = ".env.local") {
+  const auth = await requireYeeflowApiAuth({ dotenv: dotenvPath });
+  return {
+    ...auth.env,
+    authMode: auth.mode,
+    authHeaders: auth.headers,
+  };
 }
 
-export async function fetchYeeflowUniqueIds({ apiBaseUrl, apiKey, count, batchSize = DEFAULT_BATCH_SIZE }) {
-  if (!apiKey) throw new Error("YEEFLOW_API_KEY is required for Yeeflow API ID generation.");
+export async function fetchYeeflowUniqueIds({ apiBaseUrl, apiKey, authHeaders, count, batchSize = DEFAULT_BATCH_SIZE }) {
+  const headers = authHeaders || (apiKey ? { apiKey } : null);
+  if (!headers) throw new Error("Yeeflow API authentication is required for API-issued ID generation. Run OAuth login first.");
   if (!Number.isInteger(count) || count <= 0) throw new Error("ID count must be a positive integer.");
   const ids = [];
   while (ids.length < count) {
     const requested = Math.min(batchSize, count - ids.length);
     const url = `${apiBaseUrl.replace(/\/+$/, "")}/utils/generate/ids?count=${requested}`;
-    const response = await fetch(url, { headers: { apiKey } });
+    const response = await fetch(url, { headers: mergeAuthHeaders({ headers }, { Accept: "application/json" }) });
     const text = await response.text();
     if (!response.ok) throw new Error(`generate ids failed with HTTP ${response.status}.`);
     let parsed;

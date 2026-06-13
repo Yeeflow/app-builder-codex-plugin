@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`scripts/yeeflow-directory-connectivity-test.mjs` is a legacy read-only API-key smoke test for Yeeflow REST API access to basic directory and reference data. New normal read-only API work should use the OAuth/API auth wrapper and mapped capability helper.
+`scripts/yeeflow-directory-connectivity-test.mjs` is a read-only OAuth/API-authenticated smoke test for Yeeflow REST API access to basic directory and reference data. New normal read-only API work should use the OAuth/API auth wrapper and mapped capability helper.
 
 The helper is also packaged as part of the `yeeflow-api-operator` skill, which is the preferred trigger when Codex/plugin users ask to use Yeeflow APIs for safe organization/reference-data lookup.
 
@@ -10,14 +10,14 @@ The helper is also packaged as part of the `yeeflow-api-operator` skill, which i
 
 The current OAuth/API wrapper uses plugin defaults for the API base and prefers OAuth tokens. For normal read-only OAuth/API calls through the mapped capability helper, `YEEFLOW_API_KEY` is not required.
 
-`.env.local` should contain only tenant/workspace values when needed:
+`.env.local` may be absent or empty for normal OAuth-backed directory/API checks. Do not put API base URLs, API keys, tenant URLs, tenant IDs, OAuth defaults, or workspace IDs in normal `.env.local` setup. Optional local/manual overrides are only for special cases:
 
-- `YEEFLOW_WORKSPACE_ID` when package workspace operations are needed
-- `YEEFLOW_TENANT_URL` only when tenant/app links are needed
+- `YEEFLOW_WORKSPACE_ID` only as a package target default/override after workspace discovery
+- `YEEFLOW_TENANT_URL` only as an optional manual tenant UI/browser-link fallback before OAuth token context exists
 
 OAuth login and refresh use Authorization Code with PKCE S256 and do not require an OAuth client secret for normal use.
 
-This legacy connectivity helper still requires a legacy API key if you choose to run it. The key must only be loaded through `process.env.YEEFLOW_API_KEY` or the active profile key. Scripts report only whether the key is present.
+Legacy/deprecated API-key fallback remains only where existing code supports it. Do not use or request API keys for normal read-only checks.
 
 ## How To Run
 
@@ -27,7 +27,7 @@ From the repository root:
 node scripts/yeeflow-directory-connectivity-test.mjs
 ```
 
-The script also parses `.env.local` itself when values are not already present in `process.env`.
+The script can parse `.env.local` when optional local overrides exist, but normal OAuth use does not require the file.
 
 ## Read-Only Endpoints
 
@@ -50,7 +50,7 @@ That helper adds documented read-only checks for user detail, location detail, g
 
 ## Safety Rules
 
-- Do not print the full API key.
+- Do not print API keys, OAuth tokens, Authorization headers, tenant URLs, workspace IDs, or raw token payloads.
 - Do not write raw API responses to disk.
 - Do not commit `.env.local`.
 - Do not commit raw response payloads, user data, credentials, tokens, tenant IDs, or private IDs.
@@ -59,7 +59,7 @@ That helper adds documented read-only checks for user detail, location detail, g
 
 ## API Base URL Behavior
 
-The current helper uses the plugin default shared API endpoint, normally `https://api.yeeflow.com/v1`, unless `YEEFLOW_API_BASE_URL` is explicitly overridden for development/testing. `YEEFLOW_TENANT_URL` is separate and is used only for tenant/app links such as `https://<yourdomain>.yeeflow.com`. `YEEFLOW_BASE_URL` is a legacy API base URL alias only and should not be used to mean tenant URL.
+The current helper uses the plugin default shared API endpoint unless `YEEFLOW_API_BASE_URL` is explicitly overridden for development/testing. `YEEFLOW_TENANT_URL` is separate and is used only as an optional manual tenant/app link fallback. `YEEFLOW_BASE_URL` is a legacy API base URL alias only and should not be used to mean tenant URL.
 
 The script does not print the configured base URL. It reports base variants only as:
 

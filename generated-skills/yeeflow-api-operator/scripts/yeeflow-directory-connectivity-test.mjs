@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { environmentPresence, loadDotenvFile, resolveYeeflowEnvironment } from "./yeeflow-env-utils.mjs";
+import { authPresenceSummary, mergeAuthHeaders, requireYeeflowApiAuth, safeAuthError } from "./lib/yeeflow-api-auth.mjs";
 
 // Read-only Yeeflow directory API smoke test.
 // Do not add create, update, delete, assignment, enable, disable, or remove endpoints here.
@@ -61,17 +61,16 @@ function safeError(error) {
   return error.name || "Error";
 }
 
-async function requestJson(baseUrl, apiKey, endpoint, baseVariant) {
+async function requestJson(baseUrl, auth, endpoint, baseVariant) {
   if (!endpoint.readOnly) {
     throw new Error("Blocked non-read-only endpoint configuration.");
   }
   const response = await fetch(`${baseUrl}${endpoint.path}`, {
     method: endpoint.method,
-    headers: {
-      apiKey,
+    headers: mergeAuthHeaders(auth, {
       Accept: "application/json",
       "Content-Type": "application/json",
-    },
+    }),
     body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
   });
 
@@ -101,36 +100,30 @@ async function requestJson(baseUrl, apiKey, endpoint, baseVariant) {
 
 const cwd = process.cwd();
 const envPath = path.join(cwd, ".env.local");
+const envFile = fs.existsSync(envPath) ? ".env.local" : "not-present";
 
-if (!fs.existsSync(envPath)) {
-  console.error("Missing .env.local in current working directory.");
-  process.exit(1);
+let auth;
+try {
+  auth = await requireYeeflowApiAuth({ dotenv: envPath });
+} catch (error) {
+  console.error(safeAuthError(error));
+  console.error("Run node scripts/yeeflow-oauth-login.mjs before read-only directory smoke tests.");
+  process.exit(2);
 }
-
-loadDotenvFile(fs, envPath);
-
-const resolvedEnv = resolveYeeflowEnvironment(process.env);
-const envPresence = environmentPresence(resolvedEnv);
 
 console.log(
   JSON.stringify(
     {
-      environment: {
-        envFile: ".env.local",
-        ...envPresence,
-      },
+      envFile,
+      ...authPresenceSummary(auth),
     },
     null,
-    2,
+  2,
   ),
 );
 
-if (!resolvedEnv.apiKey || !resolvedEnv.apiBaseUrl) {
-  process.exit(2);
-}
-
-const baseUrl = resolvedEnv.apiBaseUrl;
-const baseVariant = resolvedEnv.usedLegacyBaseUrl ? "legacy-api-base-alias" : "api-base";
+const baseUrl = auth.env.apiBaseUrl;
+const baseVariant = auth.env.usedLegacyBaseUrl ? "legacy-api-base-alias" : "api-base";
 const endpoints = [
   {
     label: "users",
@@ -151,7 +144,7 @@ for (const endpoint of endpoints) {
     results.push(
       await requestJson(
         baseUrl,
-        resolvedEnv.apiKey,
+        auth,
         endpoint,
         baseVariant,
       ),

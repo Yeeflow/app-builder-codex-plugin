@@ -85,7 +85,7 @@ Apply the packaged standards in `docs/standards/` before generating or returning
 
 YAPK is the default package type for new app delivery as well as existing app upgrades. Generate YAP only when explicitly requested or when a fallback/debug task is specifically about YAP import. For a new app, validate decoded application content first, then wrap as `AppExportPackageInfo` with Brotli/base64 `AppPackageInfo`.
 
-If package API automation is requested and `YEEFLOW_API_KEY` plus `YEEFLOW_WORKSPACE_ID` are present, ask before auto-installing a new YAPK. For existing app changes, generate a versioned YAPK and call upgrade automation only after the target app/package is clearly identified and confirmed. Classify API results as `success`, `already_installed`, `api_rejected`, or `http_rejected`; keep duplicate/already-installed responses separate from unknown failures and suggest upgrade, cleanup, or renamed/new-version delivery.
+If package API automation is requested, use OAuth and resolve the target workspace from `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` if present, or user-selected `flowcraft` workspace discovery. Ask before auto-installing a new YAPK. For existing app changes, generate a versioned YAPK and call upgrade automation only after the target app/package is clearly identified and confirmed. Classify API results as `success`, `already_installed`, `api_rejected`, or `http_rejected`; keep duplicate/already-installed responses separate from unknown failures and suggest upgrade, cleanup, or renamed/new-version delivery.
 
 
 ## Three-Column Workspace Runtime Layout Mechanics
@@ -111,8 +111,8 @@ The YAP Service Desk v8 smoke lessons are shared layout guidance for YAPK page/f
 ## Public Tenant Safety
 
 - Never hardcode a tenant-specific Yeeflow URL. Use `https://<yourdomain>.yeeflow.com` in docs and examples.
-- For live API calls, prefer `YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1` and `YEEFLOW_API_KEY`; do not ask users to paste secrets into chat.
-- Use `YEEFLOW_TENANT_URL` only for tenant/app links, for example `https://<yourdomain>.yeeflow.com`; never use a tenant URL as the API base.
+- For live user-facing API calls, use OAuth; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`.
+- Do not use `YEEFLOW_API_KEY` for normal plugin/API operation; keep it only as a legacy/deprecated fallback where existing code still supports it.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
 - Support `YEEFLOW_PROFILE` where scripts support profiles. It selects one active local tenant profile per run using `YEEFLOW_<PROFILE>_API_KEY`, `YEEFLOW_<PROFILE>_TENANT_URL`, and `YEEFLOW_<PROFILE>_TENANT_ID`.
 - Validate and redact environment variables before API calls and never print API keys, raw API responses, tenant IDs, private URLs, raw `Resource`, raw `Sign`, decoded payloads, or generated runtime packages.
@@ -138,7 +138,7 @@ Generation order for new content: build `AppPackageInfo`, validate decoded conte
 
 ## API-Backed Install And Upgrade Automation
 
-When the user explicitly asks to automate `.yapk` install or upgrade, use `scripts/yeeflow-package-api-automation.mjs --operation install-yapk` or `--operation upgrade-yapk` only after schema, decode, graph, import-readiness, dashboard, data-list, and safety validation pass. Package automation requires `YEEFLOW_WORKSPACE_ID` or the active `YEEFLOW_<PROFILE>_WORKSPACE_ID`; never print the workspace ID, and fail before request shaping if it is missing. The helper must run dry-run first and requires `--execute` before calling product APIs. Package automation uses `POST /files/upload` followed by `POST /listset/package/install` or `POST /listset/package/upgrade`; runtime proof shows upload may respond as text/plain JSON metadata with `id`, `name`, and `fileSize`, which must be parsed and redacted. If the upload response does not expose package-file metadata, require explicit uploaded file metadata from a safe source. API success is not enough: verify the app opens and the intended upgrade changes render before recording runtime proof.
+When the user explicitly asks to automate `.yapk` install or upgrade, use `scripts/yeeflow-package-api-automation.mjs --operation install-yapk` or `--operation upgrade-yapk` only after schema, decode, graph, import-readiness, dashboard, data-list, and safety validation pass. Package automation requires an explicit target workspace resolved from `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` or active profile workspace variable if present, or user-selected `flowcraft` workspace discovery; never print the workspace ID, and fail before request shaping if it is missing. The helper must run dry-run first and requires `--execute` before calling product APIs. Package automation uses `POST /files/upload` followed by `POST /listset/package/install` or `POST /listset/package/upgrade`; runtime proof shows upload may respond as text/plain JSON metadata with `id`, `name`, and `fileSize`, which must be parsed and redacted. If the upload response does not expose package-file metadata, require explicit uploaded file metadata from a safe source. API success is not enough: verify the app opens and the intended upgrade changes render before recording runtime proof.
 
 Business Travel hardening rules: set `Flags = 1` on root app/list-set and child list resources; declare every workflow variable used by sequence flows, Set Variable nodes, task assignments, form bindings, summaries, and ContentList mappings; remove stale renamed variables from conditions; do not use placeholders such as `__POSITION_ID_REQUIRED_*`; direct position assignment requires a real numeric tenant position ID or a user-approved post-import binding/fallback. Preserve the proof boundary: these rules harden content validation and do not prove arbitrary YAPK-from-scratch generation for all app types or tenant-specific routing.
 
@@ -297,13 +297,13 @@ Ask product to confirm whether the provided `BrotliHelper.Compress(byte[])` shou
 
 When using the signing APIs:
 
-- load `.env.local` without printing values
-- if `.env.local` is marked macOS `dataless`, stop before reading it and ask the user to hydrate the file; read attempts may hang indefinitely
-- require `YEEFLOW_API_KEY`
-- use `YEEFLOW_API_BASE_URL` for signing API calls; the standard value is `https://api.yeeflow.com/v1`
+- use OAuth through the shared Yeeflow API auth wrapper; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`
+- `.env.local` may be absent or empty for normal signing/API access; if it exists and is marked macOS `dataless`, stop before reading it and ask the user to hydrate the file
+- keep `YEEFLOW_API_KEY` only as a legacy/deprecated fallback where existing code still supports it
+- use the plugin default API base for signing API calls; `YEEFLOW_API_BASE_URL` is only an advanced development/testing override
 - treat `YEEFLOW_BASE_URL` only as a legacy API base URL alias
-- use `YEEFLOW_TENANT_URL` only for tenant/app links, not for signing API calls
-- when `YEEFLOW_PROFILE` is set, read the matching profile key and tenant URL while keeping other profiles inactive for that run
+- derive tenant links from OAuth token context; use `YEEFLOW_TENANT_URL` only as an optional manual tenant UI/browser-link fallback, not for signing API calls
+- when `YEEFLOW_PROFILE` is set, read only the active profile's optional local overrides while keeping other profiles inactive for that run
 - never print or persist raw API responses, `Resource`, or `Sign`
 - treat a successful `setsign`/`verifysign` on an unchanged Resource as wrapper/signing proof only
 

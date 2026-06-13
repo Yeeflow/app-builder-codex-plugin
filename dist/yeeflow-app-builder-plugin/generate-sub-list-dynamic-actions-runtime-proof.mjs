@@ -3,7 +3,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { loadDotenvFile, resolveYeeflowEnvironment } from "./scripts/yeeflow-env-utils.mjs";
+import { requireYeeflowApiAuth } from "./scripts/lib/yeeflow-api-auth.mjs";
 
 const GZIP_PREFIX = "[______gizp______]";
 const BROTLI_PREFIX = "::brotli::";
@@ -51,7 +51,7 @@ function parseJson(text, label) {
 function assertEnvReadable(filePath) {
   const flags = execFileSync("ls", ["-lO", filePath], { encoding: "utf8" });
   if (/\bdataless\b/.test(flags)) {
-    throw new Error(`${filePath} is marked dataless and cannot be read for YEEFLOW_API_KEY; hydrate it before signing.`);
+    throw new Error(`${filePath} is marked dataless and cannot be read for local auth overrides; hydrate it before signing.`);
   }
 }
 
@@ -80,17 +80,15 @@ function extractTolerantBrotliText(resource, label) {
 }
 
 async function signYapkWrapper(wrapper) {
-  loadDotenvFile(fs, ".env.local", { assertReadable: assertEnvReadable });
-  const env = resolveYeeflowEnvironment(process.env);
-  const apiKey = env.apiKey;
-  if (!apiKey) throw new Error("YEEFLOW_API_KEY is required for YAPK setsign/verifysign.");
+  if (fs.existsSync(".env.local")) assertEnvReadable(".env.local");
+  const auth = await requireYeeflowApiAuth({ dotenv: ".env.local" });
   const unsigned = { ...wrapper };
   delete unsigned.Sign;
   let lastStatus = null;
-  const baseVariant = env.usedLegacyBaseUrl ? "legacy-api-base-alias" : "api-base";
+  const baseVariant = auth.env.usedLegacyBaseUrl ? "legacy-api-base-alias" : "api-base";
   let sign = null;
   try {
-    const result = postJsonWithCurl(`${env.apiBaseUrl}/utils/apppackage/setsign`, apiKey, unsigned);
+    const result = postJsonWithCurl(`${auth.env.apiBaseUrl}/utils/apppackage/setsign`, auth.headers, unsigned);
     lastStatus = result.status;
     if (result.status >= 200 && result.status <= 299) {
       const json = parseJson(result.body, "setsign response");
@@ -105,7 +103,7 @@ async function signYapkWrapper(wrapper) {
   if (!sign) throw new Error(`setsign failed for configured API base; last HTTP status ${lastStatus ?? "none"}.`);
 
   const signed = { ...wrapper, Sign: sign };
-  const verifyResult = postJsonWithCurl(`${env.apiBaseUrl}/utils/apppackage/verifysign`, apiKey, signed);
+  const verifyResult = postJsonWithCurl(`${auth.env.apiBaseUrl}/utils/apppackage/verifysign`, auth.headers, signed);
   const verifyStatus = verifyResult.status;
   if (verifyStatus < 200 || verifyStatus > 299) {
     throw new Error(`verifysign failed with HTTP ${verifyStatus}.`);
@@ -113,7 +111,8 @@ async function signYapkWrapper(wrapper) {
   return { signed, signBytes: Buffer.from(sign, "base64").length, baseVariant, verifyStatus };
 }
 
-function postJsonWithCurl(url, apiKey, body) {
+function postJsonWithCurl(url, authHeaders, body) {
+  const headerArgs = Object.entries(authHeaders || {}).flatMap(([name, value]) => ["--header", `${name}: ${value}`]);
   const stdout = execFileSync("curl", [
     "--silent",
     "--show-error",
@@ -121,8 +120,7 @@ function postJsonWithCurl(url, apiKey, body) {
     "20",
     "--request",
     "POST",
-    "--header",
-    `apiKey: ${apiKey}`,
+    ...headerArgs,
     "--header",
     "Accept: application/json",
     "--header",

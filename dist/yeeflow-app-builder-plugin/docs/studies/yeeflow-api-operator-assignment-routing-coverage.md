@@ -20,7 +20,7 @@ The OpenAPI document is the source of truth for endpoint paths and methods. Help
 ## Safety Boundary
 
 - Only documented read-only calls were added or tested.
-- API key value was not printed.
+- Historical proof used local credentials, but current helpers use OAuth-first authentication and do not require an API key for normal read-only checks.
 - Raw API responses were not written to tracked files.
 - Results below use counts, HTTP/API status, and redacted shape summaries only.
 - User names, emails, phone numbers, tenant IDs, user IDs, group IDs, department IDs, location IDs, position IDs, and manager references must stay redacted.
@@ -54,12 +54,12 @@ The OpenAPI document is the source of truth for endpoint paths and methods. Help
 Added:
 
 ```bash
-node scripts/yeeflow-assignment-routing-api-coverage-test.mjs "<downloads>/Test ABC (1).yap"
+node scripts/yeeflow-assignment-routing-api-coverage-test.mjs "/Users/Renger/Downloads/Test ABC (1).yap"
 ```
 
 The helper:
 
-- loads credentials only through `process.env.YEEFLOW_API_KEY`
+- uses the shared OAuth/API auth wrapper; current normal runs should use OAuth rather than API keys
 - decodes the export in memory to count reference categories
 - calls only documented read-only endpoints
 - prints no raw IDs, API keys, emails, names, or response payloads

@@ -8,8 +8,8 @@ description: Standardize Yeeflow App Builder Plugin rebuild and release workflow
 ## Public Tenant Safety
 
 - Never hardcode a tenant-specific Yeeflow URL. Use `https://<yourdomain>.yeeflow.com` in docs and examples.
-- For live API calls, prefer `YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1` and `YEEFLOW_API_KEY`; do not ask users to paste secrets into chat.
-- Use `YEEFLOW_TENANT_URL` only for tenant/app links, for example `https://<yourdomain>.yeeflow.com`; never use a tenant URL as the API base.
+- For live user-facing API calls, use OAuth; if OAuth is not authenticated, ask the current user to run `node scripts/yeeflow-oauth-login.mjs`. Keep `YEEFLOW_API_KEY` only as a legacy/deprecated fallback where existing code still supports it.
+- Derive tenant/app links from OAuth token context where available; use `YEEFLOW_TENANT_URL` only as an optional manual tenant UI/browser-link fallback and never as the API base.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
 - Support `YEEFLOW_PROFILE` where scripts support profiles. It selects one active local tenant profile per run using `YEEFLOW_<PROFILE>_API_KEY`, `YEEFLOW_<PROFILE>_TENANT_URL`, and `YEEFLOW_<PROFILE>_TENANT_ID`.
 - Validate and redact environment variables before API calls and never print API keys, raw API responses, tenant IDs, private URLs, raw `Resource`, raw `Sign`, decoded payloads, or generated runtime packages.

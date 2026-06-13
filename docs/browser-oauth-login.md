@@ -1,31 +1,16 @@
 # Browser OAuth Login
 
-Yeeflow App Builder supports local browser OAuth login for Yeeflow REST API helper scripts. OAuth is preferred for user-facing API work; legacy `YEEFLOW_API_KEY` remains available only as a deprecated fallback.
+Yeeflow App Builder supports local browser OAuth login for Yeeflow REST API helper scripts. OAuth is the standard path for user-facing API work; legacy `YEEFLOW_API_KEY` remains available only as a deprecated fallback for older internal workflows.
 
 ## Local Configuration
 
-The plugin bundles fixed OAuth/API defaults:
-
-```env
-YEEFLOW_API_BASE_URL=https://api.yeeflow.com/v1
-YEEFLOW_OAUTH_CLIENT_ID=266479ba-1f82-463b-856d-9a50b6166e0d
-YEEFLOW_OAUTH_AUTH_URL=https://login.yeeflow.com/connect/authorize
-YEEFLOW_OAUTH_TOKEN_URL=https://login.yeeflow.com/connect/token
-YEEFLOW_OAUTH_SCOPES="basic_api openid offline_access"
-```
-
-Override these only for development/testing. OAuth login builds an Authorization Code + PKCE S256 request. The plugin generates the `code_verifier`, sends the matching `code_challenge`, and exchanges/refreshes tokens without a client secret.
+The plugin bundles fixed OAuth/API defaults. Override them only for development/testing. OAuth login builds an Authorization Code + PKCE S256 request. The plugin generates the `code_verifier`, sends the matching `code_challenge`, and exchanges/refreshes tokens without a client secret.
 
 ```env
 # No required values for normal OAuth + workspace discovery.
-
-# Optional default/override for package import/install/upgrade target selection:
-# YEEFLOW_WORKSPACE_ID=<optional default workspace id>
-# Optional manual override for tenant UI/browser links before OAuth token context is available:
-# YEEFLOW_TENANT_URL=https://<yourdomain>.yeeflow.com
 ```
 
-After authorization, the plugin derives tenant/user context from access token claims `tenantid`, `tenant`, and `accountid`; the `tenant` claim is preferred for tenant UI/browser links. `YEEFLOW_TENANT_URL` is only an optional manual override before token context is available. Raw tokens, full decoded token payloads, raw workspace responses, and full workspace IDs are never printed. No OAuth client secret is required for normal login/refresh. The plugin does not bundle secrets.
+After authorization, the plugin derives tenant/user context from access token claims. Raw tokens, full decoded token payloads, tenant IDs, tenant URLs, raw workspace responses, and full workspace IDs are never printed. No OAuth client secret is required for normal login/refresh. The plugin does not bundle secrets.
 
 Do not commit `.env.local`. Do not paste Yeeflow passwords, OAuth tokens, auth codes, cookies, Authorization headers, or client secrets into Codex chat.
 
@@ -84,15 +69,15 @@ The file contains access token, refresh token, expiry timestamp, token type, sco
 
 ## API Authentication Behavior
 
-Live Yeeflow API helpers use this order:
+Normal Yeeflow API helpers use this order:
 
 1. Valid stored OAuth access token.
 2. Refresh stored OAuth token without a client secret if expired and a refresh token exists.
-3. Legacy/deprecated `YEEFLOW_API_KEY` fallback if OAuth is unavailable.
+3. If OAuth is unavailable, ask the current user to run OAuth login first.
 
-OAuth requests attach `Authorization: Bearer <access_token>`. Legacy requests attach `apiKey` exactly as the existing package automation did. Scripts must never print Authorization headers, API keys, client secrets, OAuth tokens, auth codes, cookies, raw API responses, tenant IDs, private URLs, raw package payloads, screenshots, or generated runtime packages.
+OAuth requests attach `Authorization: Bearer <access_token>`. Legacy API-key fallback may remain in older internal helpers but is not part of normal plugin/API operation. Scripts must never print Authorization headers, API keys, client secrets, OAuth tokens, auth codes, cookies, raw API responses, tenant IDs, private URLs, raw package payloads, screenshots, or generated runtime packages.
 
-Before write operations such as package install or upgrade, confirm the active workspace and require explicit user approval. Local validation is not import proof, API acceptance is not runtime proof, and runtime proof applies only to the tested scope.
+Before write operations such as package install or upgrade, discover `flowcraft` workspaces with OAuth, confirm the selected target workspace, and require explicit user approval. Local validation is not import proof, API acceptance is not runtime proof, and runtime proof applies only to the tested scope.
 
 ## Public Release Note
 
