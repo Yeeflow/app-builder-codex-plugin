@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## 0.6.31
+
 - Add package workspace selection hard gate: package install/import/upgrade ignore local `YEEFLOW_WORKSPACE_ID`, stop with `workspace_selection_required` before request shaping when no API-discovered `flowcraft` workspace is explicitly selected, and keep signing/API acceptance separate from runtime/browser proof.
+- Add application access-link reporting for successful install/import only when the safe OAuth/session tenant URL and install/import `ListSetID` are both resolved; links use `<tenant-url>/#/list-set/41/<listset-id>` and are never guessed from `.env.local`.
 - Add signing helper regression coverage so scripts do not import helpers from hardcoded versioned Codex cache paths.
 
 ## 0.6.30
