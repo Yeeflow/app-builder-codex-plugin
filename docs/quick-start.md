@@ -93,9 +93,12 @@ node scripts/inspect-visible-kpi-runtime-bindings.mjs --evidence <redacted-runti
 node scripts/inspect-runtime-evidence.mjs --evidence <redacted-runtime-evidence.json> --claim-high-quality-ui
 node scripts/inspect-grid-table-quality.mjs --package <package.yapk> --require-grid-table
 node scripts/inspect-yapk-upgrade-app-identity.mjs --package <package.yapk> --lineage <lineage.json>
+node scripts/test-ui-hard-gates-all.mjs
 ```
 
 When a task claims high-quality dashboard/UI output, route through `yeeflow-ui-generation-hard-gates` before package generation or handoff. High-quality UI requires a page-by-page implementation contract; uncertain UI/runtime patterns should be proven on a sandbox page first; use export-proven Yeeflow control/style shapes; Summary/KPI controls require designer-shaped hidden Summary configuration; Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`; visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled as fallback; runtime screenshot evidence is required before claiming UI quality; install/signing/API acceptance is not runtime UI proof; UI upgrades must preserve ListSetID, app identity, existing IDs, and declared change scope; broad scaffold-like UI must not be claimed as high-quality UI.
+
+Start runtime proof reports from `docs/examples/runtime-evidence.redacted.example.json`. The template is synthetic and redacted, labels fallback KPI values as fallback, and is shaped for `scripts/inspect-runtime-evidence.mjs` plus `scripts/inspect-visible-kpi-runtime-bindings.mjs`. Run `node scripts/test-ui-hard-gates-all.mjs` before claiming UI quality.
 
 `scripts/test-ui-generation-hard-gate-skills.mjs` validates `yeeflow-ui-generation-hard-gates` in both supported layouts: source layout `skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md` and installed plugin cache layout `skills/yeeflow-ui-generation-hard-gates/SKILL.md`. The test reports which path is used, fails only when neither path exists, and does not weaken UI/Summary/KPI hard-gate wording checks.
 
@@ -108,5 +111,7 @@ For YAPK upgrades, existing semantic resources must keep their previous IDs. Onl
 Dashboard grid-table Collection sections must use `collection`, not dashboard `data-list`, unless Data table is explicitly requested. Header `flex_grid` and Collection must share one wrapper with both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`; planned row-click details require Collection link metadata and a Type `1` custom detail layout. Signing/install acceptance does not prove dashboard runtime/designer visual fidelity.
 
 High-quality UI requires a page-by-page implementation contract, export-proven control/style shapes, and runtime screenshot evidence. Summary/KPI controls require designer-shaped metadata and runtime evidence; dynamic visible KPI binding is not solved unless runtime-proven, and fallback KPI values must be labeled as fallback. Upgrade UI packages must preserve ListSetID, app identity, existing IDs, package lineage, and final `ReplaceIds` coverage.
+
+Future dynamic KPI improvement path: once dynamic KPI binding is truly runtime-proven, add a dedicated golden runtime package/evidence fixture and update the hard gate from “unresolved unless proven” to “use this exact proven shape.” Until then, dynamic visible KPI binding remains unresolved unless runtime evidence proves it, and fallback KPI values must remain explicitly labeled as fallback.
 
 Local validation is not import proof, and API acceptance is not runtime proof. Report the exact proof boundary when delivering generated work.

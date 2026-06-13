@@ -80,6 +80,10 @@ Run:
 node scripts/inspect-visible-kpi-runtime-bindings.mjs --evidence <redacted-runtime-evidence.json>
 ```
 
+Use `docs/examples/runtime-evidence.redacted.example.json` as the safe starting point for runtime proof reports. It is synthetic, labels fallback KPI values as fallback, and intentionally keeps `dynamicVisibleKpiRuntimeProven` false.
+
+Future golden runtime package path: once dynamic KPI binding is truly runtime-proven, add a dedicated golden runtime package/evidence fixture and update this hard gate from “unresolved unless proven” to “use this exact proven shape.” Until then, dynamic visible KPI binding remains unresolved unless runtime evidence proves it, and fallback KPI values must remain explicitly labeled as fallback.
+
 ## Runtime Screenshot Evidence
 
 Do not claim high-quality UI from schema validation, signing, install, upgrade-check, or API acceptance. Runtime screenshot/evidence must confirm KPI values are visible, hidden Summary controls are not visible, dashboard cards are card-like, filters/actions are visible, tables/grids are not empty scaffolds, badges/chips are distinct, and the page does not look like a plain scaffold.
@@ -88,6 +92,7 @@ Run:
 
 ```sh
 node scripts/inspect-runtime-evidence.mjs --evidence <redacted-runtime-evidence.json> --claim-high-quality-ui
+node scripts/test-ui-hard-gates-all.mjs
 ```
 
 When runtime evidence is unavailable, generated reports must say:

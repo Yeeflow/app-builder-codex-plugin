@@ -1,0 +1,134 @@
+#!/usr/bin/env node
+
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const templatePath = path.join(ROOT, "docs", "examples", "runtime-evidence.redacted.example.json");
+
+const childTests = [
+  {
+    name: "UI/Summary/KPI runtime hard-gate regression suite",
+    command: ["scripts/test-ui-summary-kpi-runtime-hard-gates.mjs"],
+    validators: [
+      "inspect-yeeflow-ui-design-contract",
+      "inspect-dashboard-style-shapes",
+      "inspect-dashboard-summary-control-contract",
+      "inspect-visible-kpi-runtime-bindings",
+      "inspect-runtime-evidence",
+      "inspect-grid-table-quality",
+    ],
+  },
+  {
+    name: "UI generation hard-gate skill wording/layout suite",
+    command: ["scripts/test-ui-generation-hard-gate-skills.mjs"],
+    validators: ["yeeflow-ui-generation-hard-gates skill wording"],
+  },
+];
+
+const results = [];
+
+try {
+  validateRuntimeEvidenceTemplate();
+  results.push({ name: "runtime evidence redacted template", status: "pass", command: "template validation" });
+
+  for (const test of childTests) {
+    const result = runChild(test);
+    results.push(result);
+    if (result.status !== "pass") {
+      printSummaryAndExit(1);
+    }
+  }
+
+  printSummaryAndExit(0);
+} catch (error) {
+  results.push({ name: "runtime evidence redacted template", status: "fail", command: "template validation", error: error.message });
+  printSummaryAndExit(1);
+}
+
+function validateRuntimeEvidenceTemplate() {
+  assert.equal(fs.existsSync(templatePath), true, `missing runtime evidence template: ${templatePath}`);
+  const raw = fs.readFileSync(templatePath, "utf8");
+  const evidence = JSON.parse(raw);
+
+  assert.equal(evidence.dynamicVisibleKpiRuntimeProven, false, "template must show dynamic KPI binding is not proven");
+  assert.equal(evidence.runtimeScreenshotCaptured, true, "template must model runtime screenshot evidence as required");
+  assert.equal(evidence.installOrSigningOnly, false, "template must not treat install/signing as runtime UI proof");
+  assert.ok(Array.isArray(evidence.kpis) && evidence.kpis.length > 0, "template must include visible KPI entries");
+  for (const kpi of evidence.kpis) {
+    assert.equal(kpi.fallback, true, "template KPI values must be fallback examples");
+    assert.equal(kpi.fallbackLabeled, true, "template fallback KPI values must be explicitly labeled");
+    assert.equal(kpi.runtimeProven, false, "template must not claim runtime-proven dynamic KPI rendering");
+  }
+  assert.match(raw, /runtime screenshot evidence required before UI-quality claim/i);
+  assert.match(raw, /dynamic visible KPI binding remains unresolved unless runtime evidence proves it/i);
+
+  const forbiddenPatterns = [
+    /https?:\/\/(?!example\.invalid\b)[^\s"]+/i,
+    /\bBearer\s+[A-Za-z0-9._-]+/i,
+    /\bsk-[A-Za-z0-9_-]+/i,
+    /\b(?:access|refresh|id)_token\b/i,
+    /"Resource"\s*:/,
+    /"Sign"\s*:/,
+    /rawApiResponse/i,
+    /rawPackagePayload/i,
+    /\b\d{15,}\b/,
+  ];
+  for (const pattern of forbiddenPatterns) {
+    assert.doesNotMatch(raw, pattern, `runtime evidence template contains private-looking value: ${pattern}`);
+  }
+}
+
+function runChild(test) {
+  const childPath = path.join(ROOT, test.command[0]);
+  if (!fs.existsSync(childPath)) {
+    return {
+      name: test.name,
+      status: "skip",
+      command: test.command.join(" "),
+      validators: test.validators,
+      note: "child test not present in this layout",
+    };
+  }
+
+  const result = spawnSync(process.execPath, [childPath], {
+    cwd: ROOT,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  if (result.stdout) process.stdout.write(result.stdout);
+  if (result.stderr) process.stderr.write(result.stderr);
+
+  return {
+    name: test.name,
+    status: result.status === 0 ? "pass" : "fail",
+    command: `node ${test.command.join(" ")}`,
+    validators: test.validators,
+    exitCode: result.status,
+  };
+}
+
+function printSummaryAndExit(exitCode) {
+  const counts = {
+    passed: results.filter((result) => result.status === "pass").length,
+    failed: results.filter((result) => result.status === "fail").length,
+    skipped: results.filter((result) => result.status === "skip").length,
+  };
+  console.log(JSON.stringify({
+    status: exitCode === 0 ? "pass" : "fail",
+    testsRun: results.length,
+    ...counts,
+    childCommands: results.map((result) => ({
+      name: result.name,
+      status: result.status,
+      command: result.command,
+      validators: result.validators,
+      note: result.note,
+    })),
+  }, null, 2));
+  process.exit(exitCode);
+}
