@@ -59,6 +59,7 @@ Use the plugin to plan, generate, inspect, validate, and harden Yeeflow applicat
 - Application plan conformance, navigation checks, runtime-binding lessons, and release hygiene.
 - Generated-final YAPK hard gates for API-issued ID provenance and complete navigation runtime metadata.
 - Dashboard grid-table Collection hard gate for dashboard record-list wrapper structure, detail links, title/header metadata, and runtime/designer proof boundaries.
+- UI/Summary/KPI runtime hard gates for page-by-page UI contracts, export-proven style shapes, Summary metadata, visible KPI evidence or labeled fallback, grid-table quality, and upgrade ListSetID/app identity stability.
 - Managed app connector design notes and safe example metadata.
 
 ## Safety Boundaries

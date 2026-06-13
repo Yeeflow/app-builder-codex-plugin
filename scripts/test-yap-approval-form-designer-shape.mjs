@@ -219,7 +219,7 @@ function defResource({ formKey, formId, rootId, pageId, taskPageId, startId, seq
           TaskUrl: taskPageId,
           approveway: "anyapprove",
           approvepercentage: 100,
-          usertaskassignment: [{ type: "user", method: "direct", title: "Sanitized approver", value: "1000000000000000999" }],
+          usertaskassignment: [{ type: "user", method: "direct", title: "Sanitized approver", value: "1000000000000000999", explicitlyRequested: true }],
         },
       },
       { id: approveSequenceId, resourceid: approveSequenceId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: endId, resourceid: endId }, properties: { name: "Approved", conditioninfo: [{ label: "Approved" }] } },

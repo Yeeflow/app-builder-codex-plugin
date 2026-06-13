@@ -41,6 +41,19 @@ Stop before package mutation, signing, install/upgrade automation, or generated-
 - grid-table sections are planned but Collection grid-table templates, columns, headers, item templates, empty states, or row/action links are missing
 - UI upgrade package ListSetID, app identity, existing IDs, or declared change scope drifts
 
+## Validator Map
+
+Use the final validator/tool names from the UI hard-gate standard:
+
+- `scripts/inspect-yeeflow-ui-design-contract.mjs` for page-by-page implementation contracts and scaffold/placeholder claims
+- `scripts/inspect-dashboard-style-shapes.mjs` for export-proven Yeeflow control/style shapes
+- `scripts/inspect-dashboard-summary-control-contract.mjs` for designer-shaped hidden Summary hosts, fields, filters, temp variables, `save_var`, and `ReportIds`
+- `scripts/inspect-visible-kpi-runtime-bindings.mjs` for raw temp variable names, blank KPI evidence, runtime-proven dynamic visible KPI binding, and labeled fallbacks
+- `scripts/inspect-runtime-evidence.mjs` for runtime screenshot/evidence requirements before UI-quality claims
+- `scripts/inspect-grid-table-quality.mjs` for Collection grid-table columns, headers, item templates, empty states, and row/action links
+- `scripts/inspect-yapk-upgrade-app-identity.mjs` for ListSetID/app identity, existing IDs, declared change scope, package lineage, and final `Resource.ReplaceIds` coverage
+- `scripts/decode-yapk-tolerant-brotli.mjs` only for safe structural diagnostics of official designer exports; never expose package payload content
+
 ## Reporting
 
 Reports must state:

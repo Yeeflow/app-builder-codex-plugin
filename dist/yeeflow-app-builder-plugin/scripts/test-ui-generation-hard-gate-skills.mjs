@@ -23,6 +23,17 @@ const requiredPhrases = [
   "broad scaffold-like UI must not be claimed as high-quality UI",
 ];
 
+const requiredValidatorNames = [
+  "scripts/inspect-yeeflow-ui-design-contract.mjs",
+  "scripts/inspect-dashboard-style-shapes.mjs",
+  "scripts/inspect-dashboard-summary-control-contract.mjs",
+  "scripts/inspect-visible-kpi-runtime-bindings.mjs",
+  "scripts/inspect-runtime-evidence.mjs",
+  "scripts/inspect-grid-table-quality.mjs",
+  "scripts/inspect-yapk-upgrade-app-identity.mjs",
+  "scripts/decode-yapk-tolerant-brotli.mjs",
+];
+
 const updatedSkills = [
   "yeeflow-application-builder",
   "yeeflow-application-generator",
@@ -57,6 +68,13 @@ assert.equal(
   "new UI hard-gate skill source/dist mirror differs",
 );
 
+for (const skillPath of [sourceNewSkill, distNewSkill]) {
+  const content = fs.readFileSync(skillPath, "utf8");
+  for (const validatorName of requiredValidatorNames) {
+    assert.equal(content.includes(validatorName), true, `${skillPath} missing validator reference: ${validatorName}`);
+  }
+}
+
 const docs = [
   path.join(ROOT, "skills", "README.md"),
   path.join(ROOT, "dist", "yeeflow-app-builder-plugin", "skills", "README.md"),
@@ -83,10 +101,10 @@ const sourceSkillDirs = fs.readdirSync(sourceSkillsRoot, { withFileTypes: true }
 assert.deepEqual(sourceSkillDirs, [newSkill], "expected one clear UI generation hard-gate skill");
 
 const privatePatterns = [
-  /raw API responses/i,
-  /raw package payloads/i,
-  /raw `Resource`/i,
-  /raw `Sign`/i,
+  /\b(print|output|emit|include|commit)\s+raw API responses/i,
+  /\b(print|output|emit|include|commit)\s+raw package payloads/i,
+  /\b(print|output|emit|include|commit)\s+raw `Resource`/i,
+  /\b(print|output|emit|include|commit)\s+raw `Sign`/i,
 ];
 const newSkillContent = fs.readFileSync(sourceNewSkill, "utf8");
 for (const pattern of privatePatterns) {
