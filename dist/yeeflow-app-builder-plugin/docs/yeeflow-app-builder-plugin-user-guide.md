@@ -8,7 +8,7 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Expected Version
 
-`0.6.33`
+`0.6.34`
 
 ## Safe API Usage
 
@@ -27,3 +27,11 @@ Navigation groups require `ID`, `AppID`, `ListSetID`, `Type`, `Title`, `Icon`, a
 Generated-final `.yapk` dashboard record-list sections that require the grid-table pattern must use `collection`, not dashboard `data-list`, unless Data table is explicitly requested. Header `flex_grid` and Collection must be wrapped in one container with both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`.
 
 Planned row-click details require Collection link metadata and concrete Type `1` custom detail layouts. Dashboard header hiding, title/text styling, helper metadata leakage prevention, and Type `1` custom detail layout `LayoutView` values are validated separately from signing/install/schema acceptance because those do not prove dashboard runtime/designer fidelity.
+
+## UI Summary/KPI Hard Gates
+
+High-quality UI requires a page-by-page UI implementation contract, and scaffold-like UI must not be claimed as high-quality UI. Uncertain UI/runtime patterns require sandbox-page proof first. Use export-proven Yeeflow control/style shapes.
+
+Summary/KPI controls require designer-shaped hidden Summary configuration. Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`. Visible KPI dynamic binding is not considered solved unless runtime-proven; fallback KPI values must be explicitly labeled fallback.
+
+Runtime screenshot/evidence is required before claiming UI quality. Install/signing/API acceptance is not runtime UI proof. UI upgrades must preserve ListSetID, app identity, existing IDs, lineage, and declared change scope. Use `yeeflow-ui-generation-hard-gates` when dashboard/UI/Summary/KPI generation or upgrade work is requested.
