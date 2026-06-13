@@ -442,6 +442,19 @@ Custom code rules:
 - Required report contents: total requested IDs, total received IDs, allocation count, unused count, duplicate check, path-to-purpose mapping, source marker, and empty non-API ID list
 - Missing or failed ID provenance validation stops generation before signing, install, upgrade-check, or handoff
 
+### YAPK Upgrade ID Stability Gate
+
+- Required for upgrade/new-version `.yapk` output: Yes/No
+- Previous package path:
+- Previous ID lineage/provenance manifest:
+- New ID lineage manifest:
+- Existing dashboards, approval forms, data lists, fields, layouts, workflows, user groups, AI Agents, Copilots, navigation items, and persisted relationship IDs must keep the same IDs
+- Only newly added resources may receive newly API-issued IDs
+- Removed object IDs must not be reused for different semantic objects
+- Renamed or reconfigured objects keep their IDs when they are the same semantic object
+- Ambiguous semantic matching requires human review; do not regenerate IDs
+- Missing or failed upgrade ID stability validation stops generation before signing, upgrade-check, upgrade, install-like writes, or handoff
+
 ### Approval Form Gate
 
 - Approval required: Yes/No

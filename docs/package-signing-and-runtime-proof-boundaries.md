@@ -6,6 +6,7 @@ Generated package reports must keep proof scopes separate.
 
 - Schema validation proves local package shape only.
 - ID provenance validation proves generated numeric content IDs are covered by an API-issued ID manifest only.
+- Upgrade ID stability validation proves existing YAPK semantic resources preserved their previous IDs and only new resources consumed newly API-issued IDs.
 - Navigation runtime metadata validation proves decoded navigation group/item metadata is complete and target-resolvable only.
 - Dashboard grid-table Collection validation proves encoded dashboard controls satisfy the planned local structure only: Collection/header wrapper, gap serialization, detail-link resolution, header/title metadata, helper-leak checks, and Type `1` detail layout shape.
 - API signing proves wrapper signature integrity only.
@@ -13,7 +14,7 @@ Generated package reports must keep proof scopes separate.
 - API install/import/upgrade acceptance proves API acceptance only.
 - Runtime UI proof requires inspecting the installed app.
 
-Do not describe a package as upload-ready, install-ready, or handoff-ready solely because local validators pass. Do not describe API acceptance as runtime UI proof. Do not use signing or install acceptance as evidence for ID provenance, navigation runtime metadata completeness, or dashboard runtime/designer visual fidelity.
+Do not describe a package as upload-ready, install-ready, upgrade-ready, or handoff-ready solely because local validators pass. Do not describe API acceptance as runtime UI proof. Do not use signing, install acceptance, upgrade-check acceptance, or upgrade acceptance as evidence for ID provenance, upgrade ID continuity, navigation runtime metadata completeness, or dashboard runtime/designer visual fidelity.
 
 ## Signing Requirements
 
@@ -30,6 +31,7 @@ Generation reports should include:
 
 - schema validation: pass/fail and validator names
 - ID provenance validation: pending, passed, failed, or not applicable, with manifest path
+- upgrade ID stability validation: pending, passed, failed, or not applicable, with previous/new package and lineage manifest paths
 - navigation runtime metadata validation: pending, passed, failed, or not applicable, with validator result
 - dashboard grid-table Collection validation: pending, passed, failed, or not applicable, with validator result
 - wrapper gap validation: pending, passed, failed, or not applicable

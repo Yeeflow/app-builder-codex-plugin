@@ -30,6 +30,7 @@ Sparse paths:
 - [Local development policy](local-development-policy.md)
 - [YAPK generation guardrails](yapk-generation-guardrails.md)
 - [YAPK ID provenance hard gate](yapk-id-provenance-hard-gate.md)
+- [YAPK upgrade ID stability hard gate](yapk-upgrade-id-stability-hard-gate.md)
 - [YAPK navigation runtime metadata gate](yapk-navigation-runtime-metadata-gate.md)
 - [Dashboard grid-table Collection pattern](dashboard-grid-table-collection-pattern.md)
 - [Generated dashboard UI quality gates](generated-dashboard-ui-quality-gates.md)

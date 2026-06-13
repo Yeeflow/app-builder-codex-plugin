@@ -16,8 +16,10 @@ import {
   summarizeWorkspaceRecord,
   summarizeWorkspaceList,
 } from "./lib/yeeflow-workspace-selection.mjs";
+import { validateYapkUpgradeIdStability } from "./validate-yapk-upgrade-id-stability.mjs";
 
 const OPERATIONS = new Set(["upload", "import-yap", "install-yapk", "upgrade-check-yapk", "upgrade-apply-yapk", "upgrade-yapk"]);
+const YAPK_UPGRADE_OPERATIONS = new Set(["upgrade-check-yapk", "upgrade-apply-yapk", "upgrade-yapk"]);
 
 if (isMainModule()) {
   await main();
@@ -85,6 +87,9 @@ Options:
   --package-file-id <id>           Skip upload and use an existing uploaded file id for install/upgrade.
   --package-file-name <name>       Name for existing uploaded file metadata.
   --package-file-size <bytes>      File size for existing uploaded file metadata.
+  --previous-package <path>        Required for YAPK upgrade/new-version ID stability validation.
+  --previous-manifest <path>       Required previous version ID lineage/provenance manifest.
+  --new-manifest <path>            Required new version ID lineage/provenance manifest.
   --upgrade-check true|false       Deprecated. Use upgrade-check-yapk or upgrade-apply-yapk.
   --manage-json <json>             Import permissions array. Defaults to [].
   --write-json <json>              Import permissions array. Defaults to [].
@@ -150,6 +155,12 @@ async function buildDryRunPlan(options, resolvedPackagePath) {
     };
   }
   if (options.workspaceSelectionBlocked) return await buildWorkspaceSelectionRequiredResult(options);
+  let upgradeIdStability = null;
+  if (YAPK_UPGRADE_OPERATIONS.has(options.operation)) {
+    const stabilityGate = buildUpgradeIdStabilityResult(options, resolvedPackagePath);
+    if (stabilityGate.status !== "pass") return stabilityGate;
+    upgradeIdStability = stabilityGate;
+  }
   const packageFile = buildExistingPackageFile(options, resolvedPackagePath) || {
     Id: "[from upload response]",
     Name: path.basename(resolvedPackagePath),
@@ -159,6 +170,7 @@ async function buildDryRunPlan(options, resolvedPackagePath) {
     endpoint: options.operation === "install-yapk" ? "POST /listset/package/install" : "POST /listset/package/upgrade",
     request: redactPackageActionBody(buildPackageActionBody(options, packageFile)),
     uploadBeforeAction: !buildExistingPackageFile(options, resolvedPackagePath),
+    upgradeIdStability,
   };
 }
 
@@ -266,6 +278,15 @@ async function executeOperation(options, env, resolvedPackagePath) {
     process.exitCode = 1;
     return await buildWorkspaceSelectionRequiredResult(options);
   }
+  let upgradeIdStability = null;
+  if (YAPK_UPGRADE_OPERATIONS.has(options.operation)) {
+    const stabilityGate = buildUpgradeIdStabilityResult(options, resolvedPackagePath);
+    if (stabilityGate.status !== "pass") {
+      process.exitCode = 1;
+      return stabilityGate;
+    }
+    upgradeIdStability = stabilityGate;
+  }
   const auth = await resolveYeeflowApiAuth({ loadDotenv: false });
   if (auth.mode !== "oauth") {
     process.exitCode = 1;
@@ -289,7 +310,55 @@ async function executeOperation(options, env, resolvedPackagePath) {
   return await postJson(env, endpoint, buildPackageActionBody(options, packageFile), redactPackageActionBody, auth, {
     operation: options.operation,
     selectedWorkspace: await resolveSelectedWorkspaceSummary(options),
+    upgradeIdStability,
   });
+}
+
+function buildUpgradeIdStabilityResult(options, resolvedPackagePath) {
+  const missing = [];
+  if (!options.previousPackage) missing.push("--previous-package");
+  if (!options.previousManifest) missing.push("--previous-manifest");
+  if (!options.newManifest) missing.push("--new-manifest");
+  if (missing.length) {
+    return {
+      resultClass: "upgrade_id_stability_required",
+      status: "fail",
+      source: "missing-upgrade-lineage-evidence",
+      missing,
+      requestShaped: false,
+      livePackageWriteExecuted: false,
+      guidance: [
+        "YAPK upgrade/new-version package writes require previous package, previous ID lineage/provenance manifest, and new ID lineage manifest.",
+        "Existing semantic objects must preserve IDs; only newly added objects may use newly API-issued IDs.",
+        "Run scripts/validate-yapk-upgrade-id-stability.mjs before upgrade-check, upgrade apply, signing, install-like writes, or handoff.",
+      ],
+    };
+  }
+  const report = validateYapkUpgradeIdStability({
+    previousPackage: path.resolve(options.previousPackage),
+    previousManifest: path.resolve(options.previousManifest),
+    newPackage: resolvedPackagePath,
+    newManifest: path.resolve(options.newManifest),
+  });
+  if (report.status !== "pass") {
+    return {
+      resultClass: "upgrade_id_stability_failed",
+      status: "fail",
+      requestShaped: false,
+      livePackageWriteExecuted: false,
+      codes: report.findings?.map((finding) => finding.code).filter(Boolean).slice(0, 25) || [],
+      summary: report.summary || null,
+      proofBoundary: report.proofBoundary,
+    };
+  }
+  return {
+    resultClass: "upgrade_id_stability_passed",
+    status: "pass",
+    requestShaped: false,
+    livePackageWriteExecuted: false,
+    summary: report.summary,
+    proofBoundary: report.proofBoundary,
+  };
 }
 
 async function uploadPackageFile(env, resolvedPackagePath, options, auth) {
@@ -331,6 +400,7 @@ async function postJson(env, endpoint, body, redactBody, auth, context = {}) {
     request: redactBody(body),
     response: summary,
   };
+  if (context.upgradeIdStability) result.upgradeIdStability = context.upgradeIdStability;
   if (context.operation === "import-yap" || context.operation === "install-yapk") {
     result.selectedWorkspace = context.selectedWorkspace || buildSelectedWorkspaceFallback(body.WorkspaceID);
     result.applicationAccess = buildApplicationAccessReport({

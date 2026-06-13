@@ -36,6 +36,17 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Non-API numeric generated content IDs allowed: No
 - Generation must stop before signing, install, upgrade-check, or handoff when provenance validation fails: Yes
 
+### YAPK Upgrade ID Stability Gate
+- Required for generated-final `.yapk` upgrade/new-version output: Yes/No
+- Previous package path:
+- Previous ID lineage/provenance manifest:
+- New ID lineage manifest:
+- Existing resource IDs preserved for dashboards, approval forms, data lists, fields, layouts, workflows, user groups, AI Agents, Copilots, navigation, and persisted relationship IDs: Yes/No
+- Only newly added resources receive new API-issued IDs: Yes/No
+- Removed IDs reused for different objects: No
+- Missing previous package/manifest may still be called upgrade-safe: No
+- Generation must stop before signing, upgrade-check, upgrade, install-like writes, or handoff when ID stability validation fails: Yes
+
 ### Approval Form Contract
 - Approval required: Yes/No
 - Approval form:

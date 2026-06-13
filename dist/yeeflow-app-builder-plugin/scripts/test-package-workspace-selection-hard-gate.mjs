@@ -74,7 +74,14 @@ try {
     assert.equal(selectedParsed.workspaceId, "present");
     assert.equal(selectedParsed.workspaceIdSource, "user-selection");
     assert.equal(selectedParsed.workspaceSelectionRequired, false);
-    assert.match(selectedParsed.result.endpoint, /^POST \/listset\/package\//);
+    if (operation.startsWith("upgrade")) {
+      assert.equal(selectedParsed.result.resultClass, "upgrade_id_stability_required");
+      assert.equal(selectedParsed.result.requestShaped, false);
+      assert.equal(selectedParsed.result.livePackageWriteExecuted, false);
+      assert.equal(Object.hasOwn(selectedParsed.result, "request"), false);
+    } else {
+      assert.match(selectedParsed.result.endpoint, /^POST \/listset\/package\//);
+    }
     assert.equal(selected.stdout.includes(envWorkspaceId), false);
     assert.equal(selected.stdout.includes(selectedWorkspaceId), false);
   }
