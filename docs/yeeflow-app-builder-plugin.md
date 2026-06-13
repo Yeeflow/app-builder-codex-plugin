@@ -8,14 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.32
+- Version: 0.6.33
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
 
-Version `0.6.32` adds universal login UX and the YAPK upgrade ID stability hard gate. Every Yeeflow API operation preserves its original operation or capability and returns `auth_required` / `login_flow_required` when OAuth is missing or expired; normal user-facing recovery uses the plugin login flow, not local Node OAuth commands, Codex cache paths, API keys, or `.env.local` guidance. CLI OAuth scripts remain developer/local diagnostics only. YAPK upgrade/new-version workflows must prove previous package/manifest continuity, preserve existing semantic resource IDs, assign new API-issued IDs only to newly added resources, forbid removed-ID reuse, fail closed on missing or ambiguous lineage, treat replacing all IDs as a hard failure, and keep signing/install/upgrade acceptance separate from ID-continuity proof and browser runtime proof.
+Version `0.6.33` adds workflow assignment job-position guardrails. Workflow Assignment Tasks require explicit assignee strategy, manager-based assignees validate only supported expression-editor patterns for line manager, department manager, and location manager, and job-position assignees require discovered, user-selected, or admin-created-after-confirmation proof metadata. The plugin must not invent job-position IDs or names. Missing job positions block generation/workflow write paths unless admin status is separately confirmed and explicit write confirmation is provided. `positions.list` and `positions.users.list` are read-only discovery/lookup capabilities, while job-position create/update/assign/remove are write operations and admin-confirmation gated. No system-admin permission API is claimed unless mapped. Generated-final validation fails on empty, placeholder, invented, malformed, missing-proof, or unconfirmed assignment paths before signing, install, upgrade, or handoff. Runtime/browser workflow verification with a safe request is still required to prove actual assignment routing.
 
 ## API Safety
 
