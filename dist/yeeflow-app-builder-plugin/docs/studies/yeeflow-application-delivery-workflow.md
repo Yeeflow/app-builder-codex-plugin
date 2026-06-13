@@ -15,9 +15,9 @@ This note standardizes Yeeflow App Builder application delivery after the packag
 
 Before deciding delivery mode, inspect local `.env.local` without printing values. Normal OAuth plus read-only workspace discovery does not require any `.env.local` values because plugin defaults provide the API/OAuth configuration.
 
-Optional local/manual `YEEFLOW_WORKSPACE_ID` can still be used as a package target default/override when present, but it is not required setup and should not be added to normal `.env.local` guidance. `YEEFLOW_API_KEY`, tenant URLs, and tenant IDs are legacy/internal or private values and are not part of normal plugin/API operation.
+Local/manual `YEEFLOW_WORKSPACE_ID` may exist for older workflows, but it is ignored for package write target selection and should not be added to normal `.env.local` guidance. `YEEFLOW_API_KEY`, tenant URLs, and tenant IDs are legacy/internal or private values and are not part of normal plugin/API operation.
 
-For API-backed package delivery, use OAuth auth and resolve the target workspace from `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` if present, or user-selected `flowcraft` workspace discovery with `node scripts/yeeflow-workspace-list.mjs --all` or `--category flowcraft`. Do not auto-install without user confirmation and target workspace confirmation.
+For API-backed package delivery, use OAuth auth and discover app/package workspaces with `node scripts/yeeflow-workspace-list.mjs --category flowcraft`. Stop with `workspace_selection_required` before request shaping until the user chooses from the redacted API-discovered list and passes `--selected-workspace-id` or documented user-selected `--workspace-id`. Do not auto-install without user confirmation and target workspace confirmation.
 
 ## New App Workflow
 

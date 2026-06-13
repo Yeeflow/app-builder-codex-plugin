@@ -157,11 +157,13 @@ Manual runtime checklist:
 
 ## Standard Delivery Workflow Update
 
-New Yeeflow application generation now defaults to YAPK. Generate YAP only when the user explicitly asks for YAP or when a fallback/debug task specifically requires it. Current package automation should use OAuth, discover or select a `flowcraft` workspace, and ask the user whether to auto-install the generated YAPK before calling upload/install APIs. `.env.local` is not required for normal OAuth plus workspace discovery; `YEEFLOW_WORKSPACE_ID` is only an optional local/manual target override.
+New Yeeflow application generation now defaults to YAPK. Generate YAP only when the user explicitly asks for YAP or when a fallback/debug task specifically requires it. Current package automation should use OAuth, discover `flowcraft` workspaces, and ask the user whether to auto-install the generated YAPK before calling upload/install APIs. `.env.local` is not required for normal OAuth plus workspace discovery; local `YEEFLOW_WORKSPACE_ID` is ignored for package writes, and missing explicit selection must stop with `workspace_selection_required` before request shaping.
 
 Existing application changes should use a new versioned YAPK package. Use upgrade APIs only after the target application/package is clearly identified, safe, and explicitly confirmed.
 
 Package API result summaries now classify responses as `success`, `already_installed`, `api_rejected`, or `http_rejected`. A known duplicate/already-installed non-zero install response should be reported as: "The package appears to already be installed in this workspace." Keep raw response text redacted.
+
+For successful new app install/import results, include the selected workspace display name/category/redacted ID preview, result status, safe installed/imported `ListSetID` when present, and the application access link in the form `<tenant-url>/#/list-set/41/<listset-id>`. Build the tenant URL only from OAuth/session tenant context. Do not use `.env.local` or require `YEEFLOW_TENANT_URL`. If ListSetID or tenant URL is not safely resolved, report `Application link: unavailable; ListSetID or tenant URL was not safely resolved.` This link is an access convenience only; browser/runtime verification remains separate.
 
 ## Safety Boundary
 

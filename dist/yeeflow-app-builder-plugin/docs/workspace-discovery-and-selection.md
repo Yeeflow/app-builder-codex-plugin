@@ -49,16 +49,16 @@ Only the read-only `GET` capabilities are eligible for the generic read-only hel
 
 ## Package Target Resolution
 
-Package install/import/upgrade remains a write path. The helper must resolve a target workspace before request shaping and must still require explicit execution confirmation before any API write.
+Package install/import/upgrade remains a write path. The helper must resolve a target workspace from OAuth workspace discovery before request shaping and must still require explicit execution confirmation before any API write. Local `YEEFLOW_WORKSPACE_ID` and profile workspace variables are ignored for package write target selection.
 
 Resolution order:
 
-1. explicit CLI argument: `--workspace-id <id>`
-2. optional manual/default `YEEFLOW_WORKSPACE_ID` or active profile workspace variable, if present
-3. explicit user-selected workspace from redacted `flowcraft` workspace discovery
-4. stop with guidance if no workspace is selected
+1. discover app/package workspaces with `node scripts/yeeflow-workspace-list.mjs --category flowcraft`
+2. explicit user-selected workspace from the redacted `flowcraft` workspace discovery result
+3. pass that selected target with `--selected-workspace-id <id>` or documented user-selected `--workspace-id <id>`
+4. stop with `workspace_selection_required` before request shaping if no workspace is selected
 
-For non-interactive package install/import/upgrade, do not guess. If multiple `flowcraft` workspaces are available, ask the user to choose. If exactly one `flowcraft` workspace is available, it may be suggested with a redacted ID preview, but the target workspace must still be confirmed before live package operations.
+For non-interactive package install/import/upgrade, do not guess and do not use local environment workspace IDs. If multiple `flowcraft` workspaces are available, ask the user to choose. If exactly one `flowcraft` workspace is available, it may be suggested with a redacted ID preview, but the target workspace must still be confirmed before live package operations.
 
 ## Workspace Mutation Boundary
 

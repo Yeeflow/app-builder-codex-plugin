@@ -2,12 +2,15 @@
 
 ## Unreleased
 
+- Add package workspace selection hard gate: package install/import/upgrade ignore local `YEEFLOW_WORKSPACE_ID`, stop with `workspace_selection_required` before request shaping when no API-discovered `flowcraft` workspace is explicitly selected, and keep signing/API acceptance separate from runtime/browser proof.
+- Add signing helper regression coverage so scripts do not import helpers from hardcoded versioned Codex cache paths.
+
 ## 0.6.30
 
 - Bump the active plugin version after the local environment cleanup and workspace discovery learning merge.
 - Treat OAuth as the normal workspace discovery path, document `settings` and `flowcraft` as the current workspace categories, and use `flowcraft` for app/package workspace selection.
 - Add combined workspace discovery with safe redacted summaries, including the `Shared Workspace` fallback for blank-title `Status: 1` default workspaces.
-- Remove normal `.env.local` setup requirements for API base, API key, tenant URL, tenant ID, and workspace ID; keep `YEEFLOW_WORKSPACE_ID` only as an optional manual package target override.
+- Remove normal `.env.local` setup requirements for API base, API key, tenant URL, tenant ID, and workspace ID; package writes must use explicit or selected workspace confirmation.
 - Require package writes to use an explicit or selected workspace and stop rather than guessing; workspace/package writes remain confirmation-gated.
 
 ## 0.6.29
@@ -16,8 +19,8 @@
 - Add workspace API capability metadata for read-only `workspaces.listByCategory` (`GET /workspaces/{category}`) and `workspaces.get` (`GET /workspaces/{category}/{id}`).
 - Add write-classified workspace capabilities for add/edit/delete/sort while keeping them out of automatic execution; workspace delete is destructive and requires strong confirmation.
 - Add read-only workspace discovery for workspace selection with redacted workspace summaries.
-- Make `YEEFLOW_WORKSPACE_ID` an optional package target default/override instead of a required normal setup value; `.env.local` can be empty for normal OAuth plus workspace discovery.
-- Require package import/install/upgrade helpers to resolve and confirm an explicit target workspace from `--workspace-id`, optional `YEEFLOW_WORKSPACE_ID`, or explicit user-selected workspace discovery, and stop rather than guessing when no target is selected.
+- Make `.env.local` empty/absent for normal OAuth plus workspace discovery and keep package workspace targeting explicit.
+- Require package import/install/upgrade helpers to resolve and confirm an explicit target workspace and stop rather than guessing when no target is selected.
 - Keep `YEEFLOW_API_KEY` as a legacy/deprecated fallback only.
 
 ## 0.6.28

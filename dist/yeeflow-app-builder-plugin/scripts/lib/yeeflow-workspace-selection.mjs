@@ -6,6 +6,7 @@ export const PACKAGE_WORKSPACE_OPERATIONS = new Set([
   "upgrade-yapk",
 ]);
 
+export const WORKSPACE_SELECTION_REQUIRED = "workspace_selection_required";
 export const DOCUMENTED_WORKSPACE_CATEGORIES = Object.freeze(["settings", "flowcraft"]);
 export const APP_PACKAGE_WORKSPACE_CATEGORY = "flowcraft";
 export const WORKSPACE_STATUS_MEANINGS = Object.freeze({
@@ -14,19 +15,19 @@ export const WORKSPACE_STATUS_MEANINGS = Object.freeze({
 });
 
 export function resolveTargetWorkspaceId({ cliWorkspaceId = "", envWorkspaceId = "", selectedWorkspaceId = "" } = {}) {
-  const cli = cleanWorkspaceId(cliWorkspaceId);
-  if (cli) return { workspaceId: cli, source: "cli-argument" };
-  const env = cleanWorkspaceId(envWorkspaceId);
-  if (env) return { workspaceId: env, source: "environment-default" };
   const selected = cleanWorkspaceId(selectedWorkspaceId);
   if (selected) return { workspaceId: selected, source: "user-selection" };
+  const cli = cleanWorkspaceId(cliWorkspaceId);
+  if (cli) return { workspaceId: cli, source: "cli-user-selected" };
+  const env = cleanWorkspaceId(envWorkspaceId);
+  if (env) return { workspaceId: "", source: "environment-default-ignored", ignoredWorkspaceIdPresent: true };
   return { workspaceId: "", source: "missing" };
 }
 
 export function requireTargetWorkspaceId(resolution, operation = "package operation") {
   if (resolution?.workspaceId) return resolution.workspaceId;
   throw new Error(
-    `Target workspace is required for ${operation}. Run node scripts/yeeflow-workspace-list.mjs --all, choose a flowcraft workspace, pass --workspace-id <id>, or set optional YEEFLOW_WORKSPACE_ID as a manual default/override.`,
+    `Target workspace is required for ${operation}. Local YEEFLOW_WORKSPACE_ID is ignored for package writes. Run node scripts/yeeflow-workspace-list.mjs --category flowcraft, choose a workspace from the redacted API-discovered list, then pass --selected-workspace-id <id> or --workspace-id <id> as the explicit user-selected target.`,
   );
 }
 

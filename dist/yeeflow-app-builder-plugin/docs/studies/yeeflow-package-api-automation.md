@@ -15,7 +15,7 @@ Source docs:
 - `POST https://api.yeeflow.com/v1/listset/package/install`
 - `POST https://api.yeeflow.com/v1/listset/package/upgrade`
 
-The helper uses OAuth for normal user-facing API access and refreshes OAuth bearer tokens when possible. If OAuth is unavailable, ask the current user to login first. Legacy/deprecated `YEEFLOW_API_KEY` support may remain for older internal workflows, but it is not part of normal plugin/API operation. Import, install, and upgrade also require an explicit target `WorkspaceID`; the helper resolves it from `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` or active profile workspace variable if present, or an explicit user-selected workspace discovered through documented `GET /workspaces/flowcraft`.
+The helper uses OAuth for normal user-facing API access and refreshes OAuth bearer tokens when possible. If OAuth is unavailable, ask the current user to login first. Legacy/deprecated `YEEFLOW_API_KEY` support may remain for older internal workflows, but it is not part of normal plugin/API operation. Import, install, and upgrade also require an explicit target `WorkspaceID`; the helper ignores local `YEEFLOW_WORKSPACE_ID` and active profile workspace variables for package write targets, discovers `flowcraft` workspaces through documented `GET /workspaces/flowcraft`, and stops with `workspace_selection_required` before request shaping until the user selects a workspace.
 
 ## Endpoint Summary
 
@@ -37,13 +37,15 @@ node scripts/yeeflow-package-api-automation.mjs
 
 It defaults to dry run. It never prints API keys, raw package `Resource`, raw `Sign`, raw decoded payloads, tenant IDs, private URLs, or full API responses. It reports endpoint, package file name/size, request summary, HTTP/API status, response keys, and redacted data shape.
 
-`WorkspaceID` is required for import/install/upgrade payloads, but `.env.local` can be absent or empty for normal OAuth and workspace discovery. `YEEFLOW_WORKSPACE_ID` is optional only as a local/manual default or override when present; it is not required setup. OAuth login and refresh use Authorization Code with PKCE S256 and do not require an OAuth client secret for normal use. Do not configure `YEEFLOW_API_KEY` for normal API calls; it remains only as legacy/deprecated fallback.
+`WorkspaceID` is required for import/install/upgrade payloads, but `.env.local` can be absent or empty for normal OAuth and workspace discovery. `YEEFLOW_WORKSPACE_ID` is not a package target mechanism and is ignored for package writes. OAuth login and refresh use Authorization Code with PKCE S256 and do not require an OAuth client secret for normal use. Do not configure `YEEFLOW_API_KEY` for normal API calls; it remains only as legacy/deprecated fallback.
 
 Use `node scripts/yeeflow-workspace-list.mjs --all` to list both documented workspace categories with OAuth, or `node scripts/yeeflow-workspace-list.mjs --category flowcraft` for the current app/package workspace category. The helper reports only count, title or user-facing fallback name, category, status, status provenance, and redacted ID preview. It does not print raw workspace objects, raw API responses, tenant IDs, tenant URLs, or full workspace IDs. If the API title is blank and `Status: 1`, show `Shared Workspace` as the user-facing fallback name. The status mapping is product-knowledge provenance unless formal API docs define the enum.
 
 Workspace add, edit, delete, and sort endpoints exist in Apifox as `POST /workspaces/{category}`, `PUT /workspaces/{category}/{id}`, `DELETE /workspaces/{category}/{id}`, and `POST /workspaces/{category}/sort`. They are write operations, are not used automatically by package automation, and must remain blocked by generic read-only helpers. Delete is destructive and requires strong confirmation if a dedicated guarded workflow is ever implemented.
 
-Dry-run output reports `workspaceId: "present"` or `workspaceId: "missing"` plus a safe `workspaceIdSource`. It does not print the actual workspace ID. `--workspace-id <id>` remains available as a one-run override, but the value is redacted in all helper output.
+Dry-run output reports `workspaceId: "present"` or `workspaceId: "missing"` plus a safe `workspaceIdSource`. It does not print the actual workspace ID. If only environment workspace configuration exists, output uses `workspace_selection_required`, `source: environment-default-ignored`, `discoveredCategory: flowcraft`, redacted workspace choices when available, and no request body. `--selected-workspace-id <id>` is preferred; `--workspace-id <id>` remains available only as a documented user-selected workspace input, and the value is redacted in all helper output.
+
+After a successful live `install-yapk` or `import-yap`, the final user-facing report must include the selected workspace summary (`displayName`, `category`, and redacted `idPreview`), install/import result status, installed/imported application `ListSetID` when safely resolved, and the application access link when both tenant URL and ListSetID are safe. The access URL format is `<tenant-url>/#/list-set/41/<listset-id>`. The tenant URL must come from OAuth/session tenant context, not `.env.local` or `YEEFLOW_TENANT_URL`. If either value is unavailable, report `Application link: unavailable; ListSetID or tenant URL was not safely resolved.` Do not print raw API responses, raw workspace objects, full decoded token payloads, tokens, Authorization headers, raw `Resource`, or raw `Sign`. API install/import success is not browser runtime proof; the user should open the link and verify navigation, dashboards, lists, forms, and workflows.
 
 Examples:
 
@@ -83,7 +85,7 @@ Before any import/install/upgrade API call:
 4. Confirm package type:
    - `.yap` uses the import endpoint.
    - `.yapk` uses install or upgrade endpoint.
-5. Confirm an explicit target `WorkspaceID` is resolved by `--workspace-id`, optional local/manual `YEEFLOW_WORKSPACE_ID` or active profile-specific workspace variable if present, or explicit user-selected `flowcraft` workspace discovery. Do not print the value.
+5. Confirm an explicit target `WorkspaceID` came from API-discovered `flowcraft` workspace selection and was passed with `--selected-workspace-id` or documented user-selected `--workspace-id`. Do not print the value. Do not use local `YEEFLOW_WORKSPACE_ID`.
 6. Confirm OAuth/API authentication is available and any tenant/profile context is local, without printing secrets.
 7. Use dry-run output first.
 8. Use `--execute` only after explicit approval.

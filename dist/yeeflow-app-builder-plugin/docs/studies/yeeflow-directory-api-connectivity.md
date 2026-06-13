@@ -12,7 +12,7 @@ The current OAuth/API wrapper uses plugin defaults for the API base and prefers 
 
 `.env.local` may be absent or empty for normal OAuth-backed directory/API checks. Do not put API base URLs, API keys, tenant URLs, tenant IDs, OAuth defaults, or workspace IDs in normal `.env.local` setup. Optional local/manual overrides are only for special cases:
 
-- `YEEFLOW_WORKSPACE_ID` only as a package target default/override after workspace discovery
+- `YEEFLOW_WORKSPACE_ID` only as legacy/local metadata; package writes ignore it and require explicit API-discovered workspace selection
 - `YEEFLOW_TENANT_URL` only as an optional manual tenant UI/browser-link fallback before OAuth token context exists
 
 OAuth login and refresh use Authorization Code with PKCE S256 and do not require an OAuth client secret for normal use.

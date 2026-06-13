@@ -527,6 +527,11 @@ Generator must prove:
 - Signing validation:
 - Signature verification:
 - API install/import acceptance:
+- Application access link after successful install/import:
+  - Selected workspace: <name/category/redacted ID preview, or N/A if no install/import>
+  - Installed/imported ListSetID: <safe value or unavailable>
+  - Application link: <tenant-url>/#/list-set/41/<listset-id> OR `Application link: unavailable; ListSetID or tenant URL was not safely resolved.`
+  - Proof boundary: API install/import success is not browser runtime proof; open the link and verify navigation, dashboards, lists, forms, and workflows.
 - Runtime UI proof:
 - Package wrapper validation:
 - Source/dist consistency validation:

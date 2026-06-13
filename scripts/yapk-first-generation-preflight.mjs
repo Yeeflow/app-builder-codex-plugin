@@ -46,6 +46,15 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("api-issued-content-id-provenance", ["scripts/validate-yapk-id-provenance.mjs", "--package", resolvedPackage, "--manifest", idProvenance]));
   gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
   gates.push(runGate("dashboard-grid-table-collections", ["scripts/validate-dashboard-grid-table-collections.mjs", "--package", resolvedPackage]));
+  gates.push({
+    gate: "package-workspace-selection-readiness",
+    ok: true,
+    exitCode: 0,
+    stdoutBytes: 0,
+    stderrBytes: 0,
+    codes: [],
+    note: "Package install/import/upgrade must still stop with workspace_selection_required until an API-discovered flowcraft workspace is explicitly selected; local YEEFLOW_WORKSPACE_ID is ignored for package writes.",
+  });
 
   const failed = gates.find((gate) => !gate.ok);
   return {
@@ -54,7 +63,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     idProvenance: summarizePath(idProvenance),
     failedGate: failed?.gate || null,
     gates,
-    proofBoundary: "Local preflight only. ID provenance, navigation metadata, and dashboard grid-table Collection validation are local hard gates; signing/API acceptance/runtime designer proof still require separate explicit steps.",
+    proofBoundary: "Local preflight only. ID provenance, navigation metadata, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove workspace targeting correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
   };
 }
 

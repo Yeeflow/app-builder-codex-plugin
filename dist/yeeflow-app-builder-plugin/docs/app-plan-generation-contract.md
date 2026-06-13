@@ -126,6 +126,12 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - API signing status:
 - API signature verification status:
 - API install/import acceptance status:
+- Application access link status after successful install/import:
+  - Selected workspace: name/category/redacted ID preview
+  - Installed/imported ListSetID: safe value or unavailable
+  - Link: `<tenant-url>/#/list-set/41/<listset-id>` only when tenant URL comes from OAuth/session context and ListSetID is safely resolved
+  - Fallback: `Application link: unavailable; ListSetID or tenant URL was not safely resolved.`
+  - Boundary: API install/import success is not browser runtime proof; open the link and verify navigation, dashboards, lists, forms, and workflows.
 - Runtime UI inspection status:
 - Runtime/designer visual proof status:
 - Evidence: ID allocation manifest and validator results
