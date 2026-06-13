@@ -2,9 +2,13 @@
 
 ## Unreleased
 
+## 0.6.30
+
+- Bump the active plugin version after the local environment cleanup and workspace discovery learning merge.
 - Treat OAuth as the normal workspace discovery path, document `settings` and `flowcraft` as the current workspace categories, and use `flowcraft` for app/package workspace selection.
 - Add combined workspace discovery with safe redacted summaries, including the `Shared Workspace` fallback for blank-title `Status: 1` default workspaces.
 - Remove normal `.env.local` setup requirements for API base, API key, tenant URL, tenant ID, and workspace ID; keep `YEEFLOW_WORKSPACE_ID` only as an optional manual package target override.
+- Require package writes to use an explicit or selected workspace and stop rather than guessing; workspace/package writes remain confirmation-gated.
 
 ## 0.6.29
 
