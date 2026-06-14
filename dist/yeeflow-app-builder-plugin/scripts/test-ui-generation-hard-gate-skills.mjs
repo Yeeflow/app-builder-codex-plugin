@@ -53,8 +53,12 @@ const requiredValidatorNames = [
 const phase3RequiredPhrases = [
   "Design/mockup reference -> choose one official Yeeflow application layout -> generate UI implementation contract -> validate application layout design rules -> validate UI contract -> define page/scope manifest -> generate or update one allowed page/scope only -> validate upgrade scope -> run local UI/package hard gates -> sign/install/upgrade only after write confirmation -> capture redacted runtime evidence -> compare design/runtime structure -> iterate exact failing controls",
   "Before generating design images for a Yeeflow app, choose one of the four official Yeeflow application layouts",
+  "PNG/JPEG layout screenshots are the primary source for generated design-image layout rules",
+  "YAPK exports are supporting structural references",
   "All page images for the same app must use the same selected layout",
+  "Design-image prompts must preserve the selected Yeeflow header/nav/content safe-area structure",
   "Do not invent arbitrary app shells, nav bars, sidebars, or top bars",
+  "Screenshot-derived rules are human-reviewed derived rules, not pixel-perfect or automated screenshot proof",
   "Application layout compliance is required before using a generated image as a UI implementation reference",
   "Run `scripts/generate-ui-contract-from-design.mjs` before generation when a design/mockup exists",
   "run `scripts/inspect-application-layout-design-rules.mjs` for generated design image specs/UI contracts",

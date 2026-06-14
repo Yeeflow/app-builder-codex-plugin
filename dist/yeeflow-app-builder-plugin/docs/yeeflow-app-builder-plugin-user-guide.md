@@ -6,7 +6,7 @@ Use Yeeflow App Builder when you need Codex to work with Yeeflow application pac
 
 Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `stable`, and sparse paths `.agents/plugins/marketplace.json` plus `dist/yeeflow-app-builder-plugin`.
 
-When generating Yeeflow app design images, choose exactly one official application layout and keep it consistent across every page image for that app. Use `docs/standards/yeeflow-application-layout-design-rules.md` and `scripts/inspect-application-layout-design-rules.mjs` before treating a generated image as a UI implementation reference. The validator enforces declared layout compliance; screenshot-derived layout rules remain human-reviewed or review-required unless a reliable parser exists.
+When generating Yeeflow app design images, choose exactly one official application layout and keep it consistent across every page image for that app. PNG/JPEG layout screenshots are the primary visual references for header/navigation/content safe-area geometry and dropdown or expanded menu behavior; YAPK exports are supporting structural references. Use `docs/standards/yeeflow-application-layout-design-rules.md` and `scripts/inspect-application-layout-design-rules.mjs` before treating a generated image as a UI implementation reference. The validator enforces declared layout compliance and blocks arbitrary app shells, custom sidebars, custom top bars, floating navigation, and unsupported chrome; screenshot-derived layout rules remain human-reviewed or review-required unless a reliable parser exists, and they are not pixel-perfect or automated screenshot proof.
 
 ## Expected Version
 

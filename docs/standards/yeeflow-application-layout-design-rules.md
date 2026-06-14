@@ -4,6 +4,14 @@ This standard defines the official Yeeflow application chrome layouts that gener
 
 The screenshot-derived layout details below are `human_reviewed_derived_rules`. They are not automated screenshot proof. If future tooling adds reliable screenshot or design-image parsing, that parser must state its proof boundary separately.
 
+## Source Priority
+
+1. PNG/JPEG screenshots are the primary source for visual layout geometry, header/navigation/content safe-area rules, dropdown or expanded menu behavior, and generated design-image prompt rules.
+2. YAPK exports are supporting structural references only. They confirm these are real Yeeflow application layouts and may provide metadata when safely inspectable.
+3. If YAPK decoding is unavailable or intentionally skipped, do not weaken the screenshot-derived visual rules.
+4. Screenshot-derived rules are `human_reviewed_derived_rules` unless a real screenshot parser exists and is named in the proof boundary.
+5. No automated image parsing, pixel-perfect comparison, or screenshot-pixel verification is claimed by this standard or by `scripts/inspect-application-layout-design-rules.mjs`.
+
 ## Layout Inventory
 
 Generated design image specs and UI implementation contracts must choose exactly one of these layout IDs:
@@ -33,13 +41,16 @@ Every generated design image spec or UI implementation contract must include:
 
 - `applicationLayoutType`
 - `applicationLayoutName`
+- `sourcePriority`
 - `applicationChrome`
-- `headerRules`
-- `navigationRules`
-- `contentSafeAreaRules`
+- `headerRegion` or equivalent structured header rules
+- `navigationRegion` or equivalent structured navigation rules, including the explicit no-nav region for layout 4
+- `contentSafeArea` or equivalent structured safe-area rules
+- `pageTitleActionArea`
+- `dropdownOrExpandedMenuBehavior`
 - `allowedCustomization`
 - `forbiddenChromePatterns`
-- `humanReviewRequired` if visual/layout verification is incomplete
+- `humanReviewRequired` or `humanReviewedDerivedRules` if visual/layout verification is incomplete or screenshot-derived
 - `layoutVerification` or equivalent wording that distinguishes declared compliance, human-reviewed derived rules, and automatically verified layout compliance
 
 Recommended contract proof wording:
@@ -53,9 +64,75 @@ Recommended contract proof wording:
     "humanReviewedDerivedRules": true,
     "automaticallyVerified": false
   },
+  "sourcePriority": [
+    "PNG/JPEG screenshots are primary visual references",
+    "YAPK exports are supporting structural references"
+  ],
+  "headerRegion": "Top Yeeflow app header with app icon, app name, and utility controls.",
+  "navigationRegion": "Persistent left vertical navigation panel below the header.",
+  "contentSafeArea": "Page content starts to the right of the left navigation panel and below the header.",
+  "pageTitleActionArea": "Page title and actions sit at the top of the content safe area.",
+  "dropdownOrExpandedMenuBehavior": "Grouped vertical menu items may expand in place inside the left navigation panel.",
+  "forbiddenChromePatterns": ["custom SaaS shells", "arbitrary sidebars", "floating navigation"],
   "humanReviewRequired": true
 }
 ```
+
+## Screenshot-Derived Visual Layout Matrix
+
+The references below come from human review of the local PNG/JPEG screenshots named in the study request. The screenshots are not committed to the repository, and these rows are derived/redacted layout rules rather than copied image content.
+
+### application-layout-1-vertical-nav
+
+- Layout name: Application layout 1: vertical navigation menu panel.
+- Screenshot source reference: `Application layout 1_vertical.png` (human-readable local reference only; not committed).
+- Header region: a full-width top app header spans the viewport. It carries the app/menu affordance, app name, and right-side utility controls.
+- Navigation region: a persistent left vertical navigation panel sits below the header. Menu items are stacked vertically with icon+label rows. Grouped items may expand in place inside this left panel.
+- Content safe area: content begins to the right of the left nav panel and below the header. Page content must not overlap, replace, or sit underneath the nav panel.
+- Page title/action area: page title and page actions sit at the top of the content area, to the right of the nav panel, not inside the app header or nav panel.
+- Dropdown or expanded menu behavior: vertical groups may expand inside the left nav region; generated design images must not render those groups as floating app shells or separate sidebars.
+- Allowed customization: app icon, app name, header colors, nav background/foreground, menu icon/text colors, selected/hover colors, and content background may change while preserving the top header plus left nav geometry.
+- Forbidden generated-image mistakes: arbitrary custom sidebars, detached left rails, content under the nav, a second top nav bar, page title inside nav, or unsupported SaaS shell chrome.
+- Proof boundary: screenshot-derived and human-reviewed; no automated screenshot parsing or pixel-perfect verification is claimed.
+
+### application-layout-2-horizontal-nav
+
+- Layout name: Application layout 2: horizontal navigation menu bar.
+- Screenshot source reference: `Application layout 2_Horizental.png` (human-readable local reference only; not committed).
+- Header region: a top app chrome/header spans the viewport with app/menu affordance, app name, and utility controls.
+- Navigation region: a horizontal navigation menu bar sits under or within the top chrome area. Primary menu items run left to right.
+- Content safe area: content begins below the horizontal navigation bar. Page-specific content must not start underneath or overlap the bar.
+- Page title/action area: page title and page actions sit below the horizontal nav, inside the content canvas.
+- Dropdown or expanded menu behavior: dropdown panels may appear below top-level horizontal nav items and must remain visually tied to those items.
+- Allowed customization: menu colors, selected state, hover state, icon color, app icon/name, header/nav backgrounds, and foreground colors may change inside the horizontal-bar structure.
+- Forbidden generated-image mistakes: persistent left sidebars, custom SaaS shells, floating nav, separate unrelated tab systems, dropdowns rendered as page cards, or content beginning under the horizontal nav.
+- Proof boundary: screenshot-derived and human-reviewed; no automated screenshot parsing or pixel-perfect verification is claimed.
+
+### application-layout-3-header-nav
+
+- Layout name: Application layout 3: navigation menu on the header.
+- Screenshot source reference: `Application layout 3_On header.png` (human-readable local reference only; not committed).
+- Header region: a single combined top header row contains app/menu affordance, primary navigation items, and right-side utility controls.
+- Navigation region: navigation lives in the header itself. Menu items are inline in the header, not in a separate second bar.
+- Content safe area: content begins directly below the combined header. Page-specific content must not enter the header row.
+- Page title/action area: page title and page actions sit at the top of the content canvas below the header.
+- Dropdown or expanded menu behavior: dropdown panels may appear below header nav items and should align with the triggering header item.
+- Allowed customization: header background/foreground, inline nav selected/hover states, icon colors, app identity, and content colors may change while preserving the single combined header/nav row.
+- Forbidden generated-image mistakes: adding a second horizontal nav bar, adding a persistent left nav, floating navigation overlays, content inside the header row, or replacing Yeeflow chrome with a custom SaaS shell.
+- Proof boundary: screenshot-derived and human-reviewed; no automated screenshot parsing or pixel-perfect verification is claimed.
+
+### application-layout-4-no-nav
+
+- Layout name: Application layout 4: no navigation menu / hidden navigation.
+- Screenshot source reference: `Application layout 4_No nav.png` (human-readable local reference only; not committed).
+- Header region: a full-width top app header remains visible with app/menu affordance, app name, and utility controls.
+- Navigation region: no visible application navigation menu is present. The design must preserve the absence of nav rather than replacing it.
+- Content safe area: content begins below the header and can use the full available page width.
+- Page title/action area: page title and page actions sit below the header at the top of the content canvas.
+- Dropdown or expanded menu behavior: no visible app-navigation dropdown is present. Page-level buttons are allowed, but they are not app navigation.
+- Allowed customization: app icon/name, header colors, foreground, utility-control styling, content background, cards, and page-level action styling may change while preserving no visible nav.
+- Forbidden generated-image mistakes: invented sidebars, nav tabs, horizontal nav bars, header nav menus, floating navigation, custom app shells, or page controls masquerading as app navigation.
+- Proof boundary: screenshot-derived and human-reviewed; no automated screenshot parsing or pixel-perfect verification is claimed.
 
 ## Layout-Specific Rules
 

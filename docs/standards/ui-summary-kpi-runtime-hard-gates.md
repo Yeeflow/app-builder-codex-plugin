@@ -45,9 +45,9 @@ Default closed-loop artifact/report paths are:
 
 ## Application Layout Design Images
 
-Generated design images for Yeeflow apps must use one of the four official Yeeflow application layouts before they become UI implementation references: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, or `application-layout-4-no-nav`. All page images in the same app must use the same selected layout, header/navigation chrome must follow that layout, and page-specific content must stay inside the content safe area.
+Generated design images for Yeeflow apps must use one of the four official Yeeflow application layouts before they become UI implementation references: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, or `application-layout-4-no-nav`. PNG/JPEG layout screenshots are the primary visual references for header/navigation/content safe-area geometry and dropdown or expanded menu behavior; YAPK exports are supporting structural references. All page images in the same app must use the same selected layout, design-image prompts must preserve that Yeeflow header/nav/content safe-area structure, header/navigation chrome must follow that layout, and page-specific content must stay inside the content safe area.
 
-Run `scripts/inspect-application-layout-design-rules.mjs` for generated design image specs or UI contracts. The validator checks declared layout compliance and blocks unsupported arbitrary app shells/navigation chrome. It does not claim automated screenshot understanding unless a future reliable parser exists; screenshot-derived layout rules must remain human-reviewed or review-required.
+Run `scripts/inspect-application-layout-design-rules.mjs` for generated design image specs or UI contracts. The validator checks declared layout compliance and blocks unsupported arbitrary app shells/navigation chrome, custom sidebars, custom top bars, floating navigation, and content that overlaps header/nav safe areas. It does not claim automated screenshot understanding unless a future reliable parser exists; screenshot-derived layout rules must remain human-reviewed or review-required and are not pixel-perfect or automated screenshot proof.
 
 Run:
 

@@ -160,20 +160,28 @@ function validateLayout(page, findings) {
   if (!hasValue(page.applicationChrome)) {
     addFinding(findings, "error", "APPLICATION_CHROME_MISSING", "applicationChrome must describe the selected Yeeflow header/navigation chrome.", { source: page.source });
   }
-  if (layout.requiresHeader && !hasValue(page.headerRules)) {
-    addFinding(findings, "error", "HEADER_REGION_MISSING", "headerRules must describe the app header region.", { source: page.source });
+  if (layout.requiresHeader && !hasValue(page.headerRegion)) {
+    addFinding(findings, "error", "HEADER_REGION_MISSING", "headerRegion or equivalent header rules must describe the app header region.", { source: page.source });
   }
-  if (layout.requiresNav && !hasValue(page.navigationRules)) {
-    addFinding(findings, "error", "NAV_REGION_MISSING", "navigationRules must describe the selected navigation region.", { source: page.source });
+  if (!hasValue(page.navigationRegion)) {
+    addFinding(findings, "error", "NAV_REGION_MISSING", "navigationRegion or equivalent navigation rules must describe the selected navigation region, including no-nav layouts.", { source: page.source });
+  } else if (layout.requiresNav && !matchesAny(textOf(page.navigationRegion), layout.navKeywords)) {
+    addFinding(findings, "error", "NAV_REGION_MISSING", "navigationRegion does not describe the selected Yeeflow navigation placement.", { source: page.source });
   }
-  if (!layout.requiresNav && textOf(page.navigationRules).match(/sidebar|horizontal menu|header nav|floating nav|custom nav/i)) {
+  if (!layout.requiresNav && textOf(page.navigationRegion).match(/sidebar|horizontal menu|header nav|floating nav|custom nav/i)) {
     addFinding(findings, "error", "UNSUPPORTED_NAVIGATION_CHROME", "No-nav layout must not replace hidden navigation with custom navigation chrome.", { source: page.source });
   }
-  if (!hasValue(page.contentSafeAreaRules)) {
-    addFinding(findings, "error", "CONTENT_SAFE_AREA_VIOLATION", "contentSafeAreaRules must state that page content stays outside header/navigation chrome.", { source: page.source });
+  if (!hasValue(page.contentSafeArea)) {
+    addFinding(findings, "error", "CONTENT_SAFE_AREA_VIOLATION", "contentSafeArea or equivalent safe-area rules must state that page content stays outside header/navigation chrome.", { source: page.source });
   }
-  if (/(may|can|should|will|allowed to)\s+(overlap|sit under|replace)|\boverlap\s+(the\s+)?(header|nav)|\bunder\s+(the\s+)?(header|nav)|\breplace\s+(the\s+)?(header|nav)|\binside\s+(the\s+)?(header|nav)/i.test(textOf(page.contentSafeAreaRules))) {
+  if (/(may|can|should|will|allowed to)\s+(overlap|sit under|replace)|\boverlap\s+(the\s+)?(header|nav)|\bunder\s+(the\s+)?(header|nav)|\breplace\s+(the\s+)?(header|nav)|\binside\s+(the\s+)?(header|nav)/i.test(textOf(page.contentSafeArea))) {
     addFinding(findings, "error", "CONTENT_SAFE_AREA_VIOLATION", "Content safe area indicates overlap or replacement of app chrome.", { source: page.source });
+  }
+  if (!hasValue(page.pageTitleActionArea)) {
+    addFinding(findings, "error", "APPLICATION_CHROME_MISSING", "pageTitleActionArea or equivalent wording must describe where page title/actions belong inside the content area.", { source: page.source });
+  }
+  if (!hasValue(page.dropdownOrExpandedMenuBehavior)) {
+    addFinding(findings, "error", "APPLICATION_CHROME_MISSING", "dropdownOrExpandedMenuBehavior or equivalent wording must describe dropdown, expanded menu, or no-nav behavior for the selected layout.", { source: page.source });
   }
   if (!hasValue(page.forbiddenChromePatterns)) {
     addFinding(findings, "error", "APPLICATION_CHROME_MISSING", "forbiddenChromePatterns must explicitly block unsupported app shells/navigation chrome.", { source: page.source });
@@ -189,8 +197,8 @@ function validateLayout(page, findings) {
 function validateChrome(primary, rawText, findings) {
   const haystack = [
     textOf(primary.applicationChrome),
-    textOf(primary.navigationRules),
-    textOf(primary.headerRules),
+    textOf(primary.navigationRegion),
+    textOf(primary.headerRegion),
   ].join("\n");
   for (const { code, pattern } of UNSUPPORTED_CHROME_PATTERNS) {
     if (pattern.test(haystack)) {
@@ -224,11 +232,21 @@ function parseMarkdownContract(raw) {
     applicationlayoutname: "applicationLayoutName",
     applicationchrome: "applicationChrome",
     headerrules: "headerRules",
+    headerregion: "headerRegion",
     navigationrules: "navigationRules",
+    navigationregion: "navigationRegion",
     contentsafearearules: "contentSafeAreaRules",
+    contentsafearea: "contentSafeArea",
+    pagetitleactionarea: "pageTitleActionArea",
+    dropdownorexpandedmenubehavior: "dropdownOrExpandedMenuBehavior",
+    dropdownmenubehavior: "dropdownOrExpandedMenuBehavior",
+    expandedmenubehavior: "dropdownOrExpandedMenuBehavior",
+    sourcepriority: "sourcePriority",
     allowedcustomization: "allowedCustomization",
     forbiddenchromepatterns: "forbiddenChromePatterns",
     humanreviewrequired: "humanReviewRequired",
+    humanreviewedderivedrules: "humanReviewedDerivedRules",
+    automaticallyverified: "automaticallyVerified",
     pagetitle: "pageName",
     targetpagename: "targetPageName",
   };
@@ -260,24 +278,53 @@ function readPageSet(pageSetPath) {
 function normalizeContract(contract = {}) {
   const source = contract.designImageSpec || contract.uiContract || contract.contract || contract;
   const layoutVerification = source.layoutVerification || source.applicationLayoutVerification || {};
+  const matrix = source.visualLayoutMatrix || source.layoutRegionRules || source.layoutRegions || {};
+  const headerRegion = firstValue(source.headerRegion, source.headerRules, matrix.headerRegion, matrix.headerRules, source.header);
+  const navigationRegion = firstValue(source.navigationRegion, source.navigationRules, source.navRules, matrix.navigationRegion, matrix.navigationRules, source.navigation);
+  const contentSafeArea = firstValue(source.contentSafeArea, source.contentSafeAreaRules, matrix.contentSafeArea, matrix.contentSafeAreaRules, source.safeArea);
+  const pageTitleActionArea = firstValue(source.pageTitleActionArea, source.pageTitleRules, matrix.pageTitleActionArea, matrix.pageTitleRules);
+  const dropdownOrExpandedMenuBehavior = firstValue(
+    source.dropdownOrExpandedMenuBehavior,
+    source.dropdownMenuBehavior,
+    source.expandedMenuBehavior,
+    source.navigationExpansionBehavior,
+    matrix.dropdownOrExpandedMenuBehavior,
+    matrix.dropdownMenuBehavior,
+    matrix.expandedMenuBehavior,
+  );
   return {
     ...source,
     applicationLayoutType: source.applicationLayoutType || source.layoutType || source.appLayoutType || null,
     applicationLayoutName: source.applicationLayoutName || source.layoutName || null,
     applicationChrome: source.applicationChrome || source.chrome || source.appChrome || null,
-    headerRules: source.headerRules || source.headerRegion || source.header || null,
-    navigationRules: source.navigationRules || source.navRules || source.navigation || null,
-    contentSafeAreaRules: source.contentSafeAreaRules || source.contentSafeArea || source.safeArea || null,
+    sourcePriority: source.sourcePriority || source.source_priority || null,
+    visualLayoutMatrix: source.visualLayoutMatrix || null,
+    headerRegion,
+    headerRules: headerRegion,
+    navigationRegion,
+    navigationRules: navigationRegion,
+    contentSafeArea,
+    contentSafeAreaRules: contentSafeArea,
+    pageTitleActionArea,
+    dropdownOrExpandedMenuBehavior,
     allowedCustomization: source.allowedCustomization || source.customization || null,
     forbiddenChromePatterns: source.forbiddenChromePatterns || source.forbiddenPatterns || null,
     humanReviewRequired: Boolean(source.humanReviewRequired || source.human_review_required),
-    humanReviewedDerivedRules: Boolean(source.humanReviewedDerivedRules || source.human_reviewed_derived_rules),
+    humanReviewedDerivedRules: Boolean(source.humanReviewedDerivedRules || source.human_reviewed_derived_rules || layoutVerification.humanReviewedDerivedRules),
     layoutVerification: {
       declaredCompliance: Boolean(layoutVerification.declaredCompliance || layoutVerification.declared_compliance),
-      humanReviewedDerivedRules: Boolean(layoutVerification.humanReviewedDerivedRules || layoutVerification.human_reviewed_derived_rules),
-      automaticallyVerified: Boolean(layoutVerification.automaticallyVerified || layoutVerification.automatically_verified),
+      humanReviewedDerivedRules: Boolean(layoutVerification.humanReviewedDerivedRules || layoutVerification.human_reviewed_derived_rules || source.humanReviewedDerivedRules || source.human_reviewed_derived_rules),
+      automaticallyVerified: Boolean(layoutVerification.automaticallyVerified || layoutVerification.automatically_verified || source.automaticallyVerified),
     },
   };
+}
+
+function firstValue(...values) {
+  return values.find((value) => hasValue(value)) ?? null;
+}
+
+function matchesAny(value, patterns) {
+  return patterns.some((pattern) => pattern.test(value));
 }
 
 function statusFromFindings(findings) {
@@ -384,5 +431,6 @@ function usage(exitCode) {
 }
 
 function isMainModule() {
+  if (!process.argv[1]) return false;
   return import.meta.url === pathToFileURL(process.argv[1]).href;
 }

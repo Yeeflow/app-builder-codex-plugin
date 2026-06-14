@@ -23,6 +23,7 @@ function run() {
   testPassLayout("application-layout-3-header-nav", "layout 3 header navigation contract");
   testPassLayout("application-layout-4-no-nav", "layout 4 no navigation contract");
   testMissingLayout();
+  testOnlyLayoutType();
   testUnsupportedLayout();
   testInconsistentMultiPageSet();
   testUnsupportedSidebarTopbar();
@@ -38,13 +39,22 @@ function run() {
 function testPassLayout(type, label) {
   const report = inspectContract(`${type}.json`, contract(type, { automaticallyVerified: true }));
   assert.equal(report.status, "pass");
-  cases.push(`Pass: ${label}`);
+  cases.push(`Pass: ${label} includes screenshot-derived header/nav/content safe-area rules`);
 }
 
 function testMissingLayout() {
   const c = contract("application-layout-1-vertical-nav");
   delete c.applicationLayoutType;
   expectFail("Fail: no application layout declared", inspectContract("missing-layout.json", c), "APPLICATION_LAYOUT_MISSING");
+}
+
+function testOnlyLayoutType() {
+  const report = inspectContract("layout-type-only.json", {
+    applicationLayoutType: "application-layout-1-vertical-nav",
+  });
+  expectFail("Fail: only applicationLayoutType is present but no visual region rules", report, "HEADER_REGION_MISSING");
+  assertHasCode(report, "NAV_REGION_MISSING");
+  assertHasCode(report, "CONTENT_SAFE_AREA_VIOLATION");
 }
 
 function testUnsupportedLayout() {
@@ -136,18 +146,22 @@ function testMarkdownContractSupport() {
     "- applicationLayoutType: application-layout-2-horizontal-nav",
     "- applicationLayoutName: Application layout 2: horizontal navigation menu bar",
     "- applicationChrome: Header plus horizontal menu bar below header.",
-    "- headerRules: Header contains app icon, app name, and utility controls.",
-    "- navigationRules: Horizontal navigation bar below header with dropdowns.",
-    "- contentSafeAreaRules: Content starts below the horizontal menu bar.",
+    "- sourcePriority: PNG/JPEG screenshots are primary visual references; YAPK exports are supporting references.",
+    "- headerRegion: Header contains app icon, app name, and utility controls.",
+    "- navigationRegion: Horizontal navigation bar below header with dropdowns.",
+    "- contentSafeArea: Content starts below the horizontal menu bar.",
+    "- pageTitleActionArea: Page title and actions sit below the horizontal navigation bar in the content area.",
+    "- dropdownOrExpandedMenuBehavior: Dropdown menus may appear below top-level horizontal nav items.",
     "- allowedCustomization: colors and icons inside selected layout.",
     "- forbiddenChromePatterns: no arbitrary app shells or unsupported sidebars.",
     "- humanReviewRequired: false",
+    "- humanReviewedDerivedRules: true",
+    "- automaticallyVerified: true",
   ].join("\n");
   const report = inspectApplicationLayoutDesignRules({ contract: writeText("contract.md", md) });
-  assert.equal(report.status, "warning");
+  assert.equal(report.status, "pass");
   assert.ok(!report.findings.some((finding) => finding.code === "MARKDOWN_CONTRACT_UNSUPPORTED"));
-  assertHasCode(report, "IMAGE_LAYOUT_VERIFICATION_UNPROVEN");
-  cases.push("Markdown contract support: valid Markdown contract with declared layout parses and enforces review boundary");
+  cases.push("Markdown contract support: valid Markdown contract with screenshot-derived region rules passes");
 }
 
 function testStudySafety() {
@@ -187,9 +201,16 @@ function contract(type, overrides = {}) {
     applicationLayoutType: type,
     applicationLayoutName: names[type] || "Unsupported layout",
     applicationChrome: overrides.applicationChrome || "Use only the selected Yeeflow application header/navigation chrome.",
-    headerRules: overrides.headerRules || "Header contains app icon, app name, and utility controls.",
-    navigationRules: overrides.navigationRules || navigationRules(type),
-    contentSafeAreaRules: overrides.contentSafeAreaRules || "Page content starts inside the content safe area, below the app chrome, and clear of header or navigation regions.",
+    sourcePriority: overrides.sourcePriority || [
+      "PNG/JPEG screenshots are the primary visual source for layout geometry.",
+      "YAPK exports are supporting structural references only.",
+      "Screenshot-derived rules are human-reviewed derived rules unless a reliable parser exists.",
+    ],
+    headerRegion: overrides.headerRegion || overrides.headerRules || "Header contains app icon, app name, and utility controls.",
+    navigationRegion: overrides.navigationRegion || overrides.navigationRules || navigationRules(type),
+    contentSafeArea: overrides.contentSafeArea || overrides.contentSafeAreaRules || "Page content starts inside the content safe area, below the app chrome, and clear of header or navigation regions.",
+    pageTitleActionArea: overrides.pageTitleActionArea || pageTitleActionArea(type),
+    dropdownOrExpandedMenuBehavior: overrides.dropdownOrExpandedMenuBehavior || dropdownBehavior(type),
     allowedCustomization: overrides.allowedCustomization || ["app icon", "app name", "menu colors", "selected color", "hover color", "foreground color"],
     forbiddenChromePatterns: overrides.forbiddenChromePatterns || ["unsupported SaaS shells", "arbitrary sidebars", "arbitrary top bars", "floating navigation"],
     humanReviewRequired: Boolean(overrides.humanReviewRequired),
@@ -207,6 +228,22 @@ function navigationRules(type) {
   if (type === "application-layout-3-header-nav") return "Navigation menu appears on the header with dropdown behavior.";
   if (type === "application-layout-4-no-nav") return "Navigation menu is hidden; no replacement nav chrome is allowed.";
   return "Unsupported navigation.";
+}
+
+function pageTitleActionArea(type) {
+  if (type === "application-layout-1-vertical-nav") return "Page title and page actions sit at the top of the content safe area to the right of the left nav.";
+  if (type === "application-layout-2-horizontal-nav") return "Page title and page actions sit below the horizontal navigation bar.";
+  if (type === "application-layout-3-header-nav") return "Page title and page actions sit below the combined header navigation row.";
+  if (type === "application-layout-4-no-nav") return "Page title and page actions sit below the header in the full-width content area.";
+  return "Unsupported page title placement.";
+}
+
+function dropdownBehavior(type) {
+  if (type === "application-layout-1-vertical-nav") return "Grouped vertical menu items may expand in place inside the left navigation panel.";
+  if (type === "application-layout-2-horizontal-nav") return "Dropdown menus may appear below top-level horizontal nav items.";
+  if (type === "application-layout-3-header-nav") return "Dropdown menus may appear below header nav items.";
+  if (type === "application-layout-4-no-nav") return "No visible navigation menu or dropdown is present; page actions are not app navigation.";
+  return "Unsupported dropdown behavior.";
 }
 
 function inspectContract(name, data) {
