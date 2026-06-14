@@ -37,6 +37,13 @@ const childTests = [
       "validate-ui-upgrade-scope",
     ],
   },
+  {
+    name: "Phase 2 design/runtime structure comparison regression suite",
+    command: ["scripts/test-ui-closed-loop-phase2.mjs"],
+    validators: [
+      "compare-design-to-runtime-structure",
+    ],
+  },
 ];
 
 const results = [];

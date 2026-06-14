@@ -16,6 +16,14 @@ node scripts/generate-ui-contract-from-design.mjs --design <design-image> --plan
 
 If no local vision parser is available, this helper emits a review-required draft from the app plan and design image reference. It must not be treated as complete visual understanding until a human reviewer resolves the visual extraction items.
 
+Phase 2 closed-loop helper:
+
+```sh
+node scripts/compare-design-to-runtime-structure.mjs --contract <ui-contract.md-or-json> --runtime-evidence <redacted-runtime-evidence.json> [--design-image <design-image>] [--strict]
+```
+
+Phase 2 adds structural design-to-runtime comparison. It is not pixel-perfect visual diffing and does not claim full automatic image understanding. It compares UI contract expectations against redacted runtime evidence, including Phase 1 evidence from `capture-runtime-ui-evidence.mjs`. When a design image is supplied without a reliable parser, the comparison must stay in contract-runtime mode, mark human review required, and emit a review warning. Runtime evidence is required before UI quality claims. Screenshots are helpful but not always mandatory unless high-quality visual proof is claimed. Dynamic KPI proof remains governed by before/after mutation evidence and the existing runtime/KPI validators.
+
 Run:
 
 ```sh
@@ -152,6 +160,14 @@ node scripts/capture-runtime-ui-evidence.mjs --pages-json <redacted-pages.json> 
 ```
 
 The capture output is redacted metadata shaped for `inspect-runtime-evidence.mjs` and `inspect-visible-kpi-runtime-bindings.mjs`. Do not store private tenant screenshots or raw runtime responses in fixtures.
+
+Use Phase 2 comparison after capture to check structural fidelity:
+
+```sh
+node scripts/compare-design-to-runtime-structure.mjs --contract <ui-contract.md-or-json> --runtime-evidence <redacted-runtime-evidence.json>
+```
+
+The comparison produces structured findings for page presence, sections, KPI cards, tables/grids, filters/actions, badges/status cells, spacing hierarchy, placeholder/filler text, weak evidence, screenshot availability, and dynamic KPI proof boundaries. It must never treat install, signing, import, upgrade, API acceptance, or package validation as visual success.
 
 ## Runtime Screenshot Evidence
 
