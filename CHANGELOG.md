@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.6.41
+
+- Bump the active plugin version after Phase 2 design-to-runtime structural comparison.
+- Add `scripts/compare-design-to-runtime-structure.mjs` to compare UI contract expectations against redacted runtime evidence and emit structured JSON/Markdown findings.
+- Accept Phase 1 evidence from `scripts/capture-runtime-ui-evidence.mjs` and keep design images as review-required references unless a reliable image parser exists.
+- Report structural findings for page/section mismatch, KPI count/label/value mismatch, table section/header/column mismatch, missing filters/actions, missing or weak badges, weak card/spacing/scaffold signals, placeholder/raw-variable text, weak runtime evidence, design image review requirements, and dynamic KPI proof boundaries.
+- Keep the proof boundary explicit: this release does not claim pixel-perfect visual diffing, full automatic image understanding, or dynamic KPI proof.
+- Keep dynamic KPI proof governed by the existing before/after mutation evidence rules.
+- Define comparison exit behavior: warning status exits 0, fail status exits nonzero, and `--strict` makes warnings exit nonzero.
+- Keep Phase 3 as deeper hard-gate integration, stronger workflow enforcement around Phase 2 findings, and expanded Marketing Event regression coverage.
+
 ## 0.6.40
 
 - Bump the active plugin version after Phase 1 of the high-quality UI closed-loop infrastructure.

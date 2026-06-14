@@ -8,7 +8,7 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Expected Version
 
-`0.6.40`
+`0.6.41`
 
 ## Safe API Usage
 
@@ -36,4 +36,4 @@ Summary/KPI controls require designer-shaped hidden Summary configuration. Summa
 
 Runtime screenshot/evidence is required before claiming UI quality. Install/signing/API acceptance is not runtime UI proof. UI upgrades must preserve ListSetID, app identity, existing IDs, lineage, and declared change scope. Use `yeeflow-ui-generation-hard-gates` when dashboard/UI/Summary/KPI generation or upgrade work is requested.
 
-Version `0.6.40` releases Phase 1 UI closed-loop infrastructure. It adds design/mockup-to-contract scaffolding with human-review-required boundaries when no reliable vision parser is available, redacted runtime UI evidence capture compatible with existing runtime/KPI inspectors, and page/scope validation for UI upgrades to block unrelated ListSetID, app identity, page/resource, list/field, form, workflow, navigation, and numeric ID drift. The workflow is strengthened from agent discipline to contract -> scope gate -> runtime evidence. Phase 2 remains visual structure comparison, and Phase 3 remains deeper hard-gate integration plus Marketing Event regression expansion. This release does not claim pixel-perfect visual diffing or full automatic image understanding.
+Version `0.6.41` releases Phase 2 design-to-runtime structural comparison. It adds `compare-design-to-runtime-structure.mjs` to compare UI contract expectations against redacted runtime evidence, accepts Phase 1 evidence from `capture-runtime-ui-evidence.mjs`, and treats design images as review-required references unless a reliable image parser exists. It produces structured JSON/Markdown findings for page/section mismatch, KPI count/label/value mismatch, table section/header/column mismatch, missing filters/actions, missing or weak badges, weak card/spacing/scaffold signals, placeholder/raw-variable text, weak runtime evidence, design image review requirements, and dynamic KPI proof boundaries. This release does not claim pixel-perfect visual diffing, full automatic image understanding, or dynamic KPI proof. Dynamic KPI proof remains governed by existing before/after mutation evidence rules, warning status exits 0, fail status exits nonzero, and `--strict` makes warnings exit nonzero. Phase 3 remains deeper hard-gate integration, stronger workflow enforcement around Phase 2 findings, and expanded Marketing Event regression coverage.
