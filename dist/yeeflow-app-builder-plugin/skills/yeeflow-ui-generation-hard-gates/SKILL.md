@@ -55,6 +55,9 @@ Stop before package mutation, signing, install/upgrade automation, or generated-
 
 Use the final validator/tool names from the UI hard-gate standard:
 
+- `scripts/generate-ui-contract-from-design.mjs` for Phase 1 review-required UI implementation contract scaffolding from a design image reference plus an optional app plan/spec. Without a local vision parser, it must mark visual extraction items unresolved and require human review.
+- `scripts/capture-runtime-ui-evidence.mjs` for Phase 1 redacted runtime UI evidence metadata shaped for the runtime and visible-KPI inspectors. It must not store or print private tenant URLs, raw responses, full workspace IDs, secrets, raw `Resource`, raw `Sign`, or private screenshots.
+- `scripts/validate-ui-upgrade-scope.mjs` for Phase 1 declared-scope UI upgrade enforcement before package mutation, including ListSetID, app identity, page/resource, data list/field, approval form, workflow, navigation, and numeric ID lineage boundaries.
 - `scripts/inspect-yeeflow-ui-design-contract.mjs` for page-by-page implementation contracts and scaffold/placeholder claims
 - `scripts/inspect-dashboard-style-shapes.mjs` for export-proven Yeeflow control/style shapes
 - `scripts/inspect-dashboard-summary-control-contract.mjs` for designer-shaped hidden Summary hosts, fields, filters, layout-resource `Resource.ReportIds`, `Resource.exts`, `Resource.tempVars`, and `save_var`
