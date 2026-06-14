@@ -17,6 +17,8 @@ This closed-loop workflow is mandatory for any request that includes high-qualit
 
 Design/mockup reference -> generate UI implementation contract -> validate UI contract -> define page/scope manifest -> generate or update one allowed page/scope only -> validate upgrade scope -> run local UI/package hard gates -> sign/install/upgrade only after write confirmation -> capture redacted runtime evidence -> compare design/runtime structure -> iterate exact failing controls.
 
+Phase 3B adds the workflow enforcement check after structure comparison and before final UI-quality/design-fidelity claims.
+
 1. Create a page-by-page implementation contract before dashboard/UI page generation or upgrade. High-quality UI requires a page-by-page implementation contract with target page name, page purpose, requested design/mockup reference, visual sections, Yeeflow control mapping, data/list bindings, KPI/Summary plan, filter/action plan, grid/table plan, status/badge plan, runtime evidence requirement, and proof boundary.
 2. Run `scripts/generate-ui-contract-from-design.mjs` before generation when a design/mockup exists, then run the canonical UI contract validator `scripts/inspect-yeeflow-ui-design-contract.mjs` before package generation. If the validator path changes in the future, locate the canonical validator and report the actual path used.
 3. Map requested designs or mockups directly to controls and sections. Design/mockup requests that are not mapped are hard failures. Broad scaffold-like UI must not be claimed as high-quality UI, and broad full-app restyling must stop unless every affected page has a page-level contract.
@@ -38,8 +40,10 @@ Design/mockup reference -> generate UI implementation contract -> validate UI co
 19. Start runtime proof reports from `docs/examples/runtime-evidence.redacted.example.json` when evidence metadata is needed. The template is synthetic, redacted, includes the UUID Summary v1.0.1 proof-shape fields, preserves fallback examples for unsupported shapes, and is shaped for `scripts/inspect-runtime-evidence.mjs` plus `scripts/inspect-visible-kpi-runtime-bindings.mjs`.
 20. Use Phase 2 structural comparison before UI-quality claims when a UI contract and runtime evidence exist. `scripts/compare-design-to-runtime-structure.mjs` compares UI contract expectations against redacted runtime evidence, accepts Phase 1 evidence from `capture-runtime-ui-evidence.mjs`, and reports missing KPIs, tables, filters/actions, badges, spacing/scaffold issues, weak evidence, and design-image review boundaries. It is not pixel-perfect visual diffing and does not claim full automatic design-image understanding. Screenshots are helpful but not always mandatory unless high-quality visual proof is claimed. Dynamic KPI proof remains governed by before/after mutation evidence.
 21. Compare design/runtime structure before claiming design fidelity, then iterate exact failing controls from the findings. Structure comparison cannot establish dynamic KPI proof; dynamic KPI proof still requires before/after mutation evidence.
-22. Run `node scripts/test-ui-hard-gates-all.mjs` before claiming UI quality. The aggregate smoke is local-only and must not require live Yeeflow API access, private screenshots, package install/import/upgrade, or write operations.
-23. Apply the Marketing Event boundary carefully. Marketing Event dashboards may use the exact UUID Summary v1.0.1 shape, but must still run their own before/after mutation proof before claiming runtime dynamic KPI success. Real Marketing Event private artifacts must not be committed; use synthetic or redacted Marketing Event-inspired fixtures only.
+22. Phase 3B adds workflow-level enforcement. Run `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` before claiming high-quality UI or design fidelity. The workflow enforcement helper is required before high-quality UI/design-fidelity claim. Final reports for high-quality UI work must include contract, scope, runtime evidence, and structure-comparison artifact paths as applicable. Generation from design/mockup requires a UI contract. UI upgrades require a scope manifest. Runtime UI quality claims require runtime evidence. Design fidelity claims require structure comparison. Dynamic KPI proof requires before/after mutation evidence. Structure comparison alone is not dynamic KPI proof. Install/sign/upgrade success is not visual proof.
+23. Use the standard closed-loop artifact/report paths unless the workflow report explicitly records valid alternatives: UI contract Markdown at `docs/generated-ui-contracts/<app-or-package>/<page>.ui-contract.md`, UI contract JSON at `docs/generated-ui-contracts/<app-or-package>/<page>.ui-contract.json`, UI upgrade scope manifest at `docs/ui-upgrade-scopes/<app-or-package>/<page>.scope.json`, runtime evidence at `dist/runtime-evidence/<app-or-package>/<page>.runtime-evidence.redacted.json`, design/runtime structure findings at `dist/runtime-evidence/<app-or-package>/<page>.design-runtime-structure.findings.json`, and workflow enforcement findings at `dist/runtime-evidence/<app-or-package>/<page>.closed-loop-workflow.findings.json`.
+24. Run `node scripts/test-ui-hard-gates-all.mjs` before claiming UI quality. The aggregate smoke is local-only and must not require live Yeeflow API access, private screenshots, package install/import/upgrade, or write operations.
+25. Apply the Marketing Event boundary carefully. Marketing Event dashboards may use the exact UUID Summary v1.0.1 shape, but must still run their own before/after mutation proof before claiming runtime dynamic KPI success. Real Marketing Event private artifacts must not be committed; use synthetic or redacted Marketing Event-inspired fixtures only.
 
 ## Stop Conditions
 
@@ -66,6 +70,7 @@ Stop before package mutation, signing, install/upgrade automation, or generated-
 - UI upgrade package ListSetID, app identity, existing IDs, or declared change scope drifts
 - structure comparison has fail findings
 - structure comparison has warning findings and the user requested strict quality
+- workflow enforcement fails or the final report omits required contract/scope/runtime evidence/structure-comparison artifact paths
 - dynamic KPI proof is claimed without before/after mutation evidence
 - package signing/install/upgrade succeeded but visual/runtime evidence is missing
 
@@ -77,6 +82,7 @@ Use the final validator/tool names from the UI hard-gate standard:
 - `scripts/capture-runtime-ui-evidence.mjs` for Phase 1 redacted runtime UI evidence metadata shaped for the runtime and visible-KPI inspectors. It must not store or print private tenant URLs, raw responses, full workspace IDs, secrets, raw `Resource`, raw `Sign`, or private screenshots.
 - `scripts/validate-ui-upgrade-scope.mjs` for Phase 1 declared-scope UI upgrade enforcement before package mutation, including ListSetID, app identity, page/resource, data list/field, approval form, workflow, navigation, and numeric ID lineage boundaries.
 - `scripts/compare-design-to-runtime-structure.mjs` for Phase 2 structural design-to-runtime comparison. It compares UI contract expectations against redacted runtime evidence, accepts Phase 1 runtime evidence, warns when design images require human review, and must not claim pixel-perfect visual diffing, full automatic image understanding, or dynamic KPI proof.
+- `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` for Phase 3B workflow/report metadata enforcement before high-quality UI, design-fidelity, runtime UI quality, or dynamic KPI proof claims. It checks contract, contract validation, scope manifest, scope validation, runtime evidence, structure comparison findings, dynamic KPI mutation evidence, final report artifact paths, unresolved findings, and warning waivers without parsing or mutating YAPK payloads.
 - `scripts/inspect-yeeflow-ui-design-contract.mjs` for page-by-page implementation contracts and scaffold/placeholder claims
 - `scripts/inspect-dashboard-style-shapes.mjs` for export-proven Yeeflow control/style shapes
 - `scripts/inspect-dashboard-summary-control-contract.mjs` for designer-shaped hidden Summary hosts, fields, filters, layout-resource `Resource.ReportIds`, `Resource.exts`, `Resource.tempVars`, and `save_var`
@@ -100,6 +106,8 @@ Reports must state:
 - whether runtime screenshot proof was completed
 - that install/signing/API acceptance is not runtime UI proof
 - upgrade lineage inputs and whether ListSetID/app identity/existing IDs stayed stable
+- the exact artifact paths for the UI contract, scope manifest and scope validation result when applicable, runtime evidence, design/runtime structure findings, workflow enforcement findings, and dynamic KPI mutation evidence when dynamic KPI proof is claimed
+- unresolved findings and warning waiver/disposition summary from the workflow enforcement report
 
 ## Related Skills
 

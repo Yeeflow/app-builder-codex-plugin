@@ -52,6 +52,14 @@ const childTests = [
       "Marketing Event-inspired synthetic regressions",
     ],
   },
+  {
+    name: "Phase 3B workflow/report enforcement regression suite",
+    command: ["scripts/test-ui-closed-loop-phase3b.mjs"],
+    validators: [
+      "inspect-ui-closed-loop-workflow-enforcement",
+      "closed-loop final report artifact enforcement",
+    ],
+  },
 ];
 
 const results = [];
