@@ -28,6 +28,15 @@ const childTests = [
     command: ["scripts/test-ui-generation-hard-gate-skills.mjs"],
     validators: ["yeeflow-ui-generation-hard-gates skill wording"],
   },
+  {
+    name: "Phase 1 UI closed-loop infrastructure regression suite",
+    command: ["scripts/test-ui-closed-loop-phase1.mjs"],
+    validators: [
+      "generate-ui-contract-from-design",
+      "capture-runtime-ui-evidence",
+      "validate-ui-upgrade-scope",
+    ],
+  },
 ];
 
 const results = [];

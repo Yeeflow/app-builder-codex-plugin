@@ -8,6 +8,14 @@ Generated Yeeflow UI quality must be treated as a product contract, not decorati
 
 Before modifying dashboards or UI-heavy pages, create a page-by-page UI implementation contract. The contract must name each target page, page purpose, design/mockup reference when requested, visual sections, Yeeflow control mapping, data/list bindings, KPI/Summary plan, filter/action plan, grid/table plan, status/badge plan, runtime evidence requirement, and proof boundary.
 
+Phase 1 closed-loop helper:
+
+```sh
+node scripts/generate-ui-contract-from-design.mjs --design <design-image> --plan <app-plan.md-or-json> --output <ui-contract.md>
+```
+
+If no local vision parser is available, this helper emits a review-required draft from the app plan and design image reference. It must not be treated as complete visual understanding until a human reviewer resolves the visual extraction items.
+
 Run:
 
 ```sh
@@ -137,6 +145,14 @@ node scripts/inspect-visible-kpi-runtime-bindings.mjs --evidence <redacted-runti
 
 Use `docs/examples/runtime-evidence.redacted.example.json` as the safe starting point for runtime proof reports. It is synthetic, includes the exact UUID Summary v1.0.1 proof-shape fields, preserves a fallback example for unsupported shapes, and avoids private screenshots, tenant URLs, workspace IDs, raw responses, and package payloads.
 
+Phase 1 closed-loop helper:
+
+```sh
+node scripts/capture-runtime-ui-evidence.mjs --pages-json <redacted-pages.json> --output <redacted-runtime-evidence.json>
+```
+
+The capture output is redacted metadata shaped for `inspect-runtime-evidence.mjs` and `inspect-visible-kpi-runtime-bindings.mjs`. Do not store private tenant screenshots or raw runtime responses in fixtures.
+
 ## Runtime Screenshot Evidence
 
 Do not claim high-quality UI from schema validation, signing, install, upgrade-check, or API acceptance. Runtime screenshot/evidence must confirm KPI values are visible, hidden Summary controls are not visible, dashboard cards are card-like, filters/actions are visible, tables/grids are not empty scaffolds, badges/chips are distinct, and the page does not look like a plain scaffold.
@@ -174,6 +190,14 @@ Run:
 node scripts/inspect-yapk-upgrade-app-identity.mjs --package <package.yapk> --lineage <lineage.json>
 node scripts/validate-yapk-upgrade-id-stability.mjs --previous-package <previous.yapk> --previous-manifest <previous-id-lineage.json> --new-package <package.yapk> --new-manifest <new-id-lineage.json>
 ```
+
+Phase 1 closed-loop helper:
+
+```sh
+node scripts/validate-ui-upgrade-scope.mjs --previous-package <previous.json-or-yapk> --new-package <new.json-or-yapk> --scope <scope-manifest.json>
+```
+
+Use this before focused UI upgrades to fail closed on ListSetID drift, app identity drift, unrelated page/resource changes, data list/field changes, approval form changes, workflow changes, navigation drift, numeric ID lineage changes, and new generated IDs without explicit allowance.
 
 ## Tolerant Decode Helper
 
