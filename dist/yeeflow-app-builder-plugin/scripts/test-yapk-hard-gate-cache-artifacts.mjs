@@ -21,6 +21,7 @@ const hardGateScripts = [
   "scripts/test-dashboard-grid-table-collections.mjs",
   "scripts/test-ui-closed-loop-phase1.mjs",
   "scripts/test-ui-closed-loop-phase2.mjs",
+  "scripts/test-ui-closed-loop-phase3.mjs",
 ];
 
 for (const sourcePath of hardGateScripts) {
