@@ -8,7 +8,7 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Expected Version
 
-`0.6.39`
+`0.6.40`
 
 ## Safe API Usage
 
@@ -36,4 +36,4 @@ Summary/KPI controls require designer-shaped hidden Summary configuration. Summa
 
 Runtime screenshot/evidence is required before claiming UI quality. Install/signing/API acceptance is not runtime UI proof. UI upgrades must preserve ListSetID, app identity, existing IDs, lineage, and declared change scope. Use `yeeflow-ui-generation-hard-gates` when dashboard/UI/Summary/KPI generation or upgrade work is requested.
 
-Version `0.6.39` releases the Summary layout-resource `ReportIds` contract fix. Layout-resource `Resource.ReportIds` is authoritative for Summary registration; top-level `Pages[].ReportIds` is optional compatibility metadata. Empty or missing top-level `Pages[].ReportIds` no longer fails Summary validation, but missing layout-resource `ReportIds`, matching `Resource.exts`, matching `Resource.tempVars`, Summary field/list metadata, or raw temp-variable visible text still fails. Dynamic KPI proof still requires the exact UUID Summary shape plus before/after mutation evidence. Marketing Event v1.0.17 static visible-value compatibility may pass with warnings only and is not dynamic KPI proof; Marketing Event v1.0.18 and the proven UUID KPI proof package pass.
+Version `0.6.40` releases Phase 1 UI closed-loop infrastructure. It adds design/mockup-to-contract scaffolding with human-review-required boundaries when no reliable vision parser is available, redacted runtime UI evidence capture compatible with existing runtime/KPI inspectors, and page/scope validation for UI upgrades to block unrelated ListSetID, app identity, page/resource, list/field, form, workflow, navigation, and numeric ID drift. The workflow is strengthened from agent discipline to contract -> scope gate -> runtime evidence. Phase 2 remains visual structure comparison, and Phase 3 remains deeper hard-gate integration plus Marketing Event regression expansion. This release does not claim pixel-perfect visual diffing or full automatic image understanding.
