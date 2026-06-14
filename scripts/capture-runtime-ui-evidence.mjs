@@ -310,5 +310,5 @@ function safePath(file) {
 }
 
 function isMainModule() {
-  return import.meta.url === pathToFileURL(process.argv[1]).href;
+  return process.argv[1] ? import.meta.url === pathToFileURL(process.argv[1]).href : false;
 }

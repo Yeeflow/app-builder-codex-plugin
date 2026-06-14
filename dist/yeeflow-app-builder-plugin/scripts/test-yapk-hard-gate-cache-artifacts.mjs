@@ -14,11 +14,13 @@ const hardGateScripts = [
   "scripts/generate-ui-contract-from-design.mjs",
   "scripts/capture-runtime-ui-evidence.mjs",
   "scripts/validate-ui-upgrade-scope.mjs",
+  "scripts/compare-design-to-runtime-structure.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
   "scripts/test-yapk-id-navigation-hard-gates.mjs",
   "scripts/test-yapk-upgrade-id-stability.mjs",
   "scripts/test-dashboard-grid-table-collections.mjs",
   "scripts/test-ui-closed-loop-phase1.mjs",
+  "scripts/test-ui-closed-loop-phase2.mjs",
 ];
 
 for (const sourcePath of hardGateScripts) {
