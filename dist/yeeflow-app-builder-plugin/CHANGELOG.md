@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.6.44
+
+- Bump the active plugin version after Yeeflow application layout design standards.
+- Add `docs/standards/yeeflow-application-layout-design-rules.md` for generated Yeeflow UI design images.
+- Add `scripts/inspect-application-layout-design-rules.mjs` and `scripts/test-application-layout-design-rules.mjs` for application-layout compliance validation and regression coverage.
+- Treat PNG/JPEG screenshots as the primary visual source for application layout rules; treat YAPK exports as supporting structural references only.
+- Require generated page design images to use one consistent official layout across the same app: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, or `application-layout-4-no-nav`.
+- Require header/nav/content safe-area rules, page title/action placement, dropdown or expanded menu behavior, and forbidden chrome patterns in design-image specs or UI contracts.
+- Support JSON and Markdown contracts and accept equivalent structured fields; a literal `visualLayoutMatrix` field is not required when header/nav/content/page-title/dropdown/forbidden-pattern rules are clearly present.
+- Reject arbitrary SaaS shells, unsupported sidebars, unsupported top bars, floating navs, and unsupported navigation chrome.
+- Keep screenshot-derived rules human-reviewed or review-required unless a real parser exists; do not claim pixel-perfect verification or automated screenshot understanding.
+- Confirm no raw YAPK files, screenshots, raw decoded package payloads, raw `Resource`, raw `Sign`, tenant URLs, workspace IDs, secrets, or private values are committed.
+
 ## 0.6.43
 
 - Bump the active plugin version after Phase 3B UI workflow enforcement.
