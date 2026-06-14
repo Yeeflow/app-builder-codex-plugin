@@ -26,6 +26,23 @@ Phase 2 adds structural design-to-runtime comparison. It is not pixel-perfect vi
 
 Phase 1 and Phase 2 are now stable closed-loop capabilities. Phase 3A makes the workflow stricter in hard-gate guidance and regression tests: design/mockup work must start with a generated and validated UI implementation contract; UI upgrades must define and validate a page/scope manifest; runtime evidence plus structural comparison is required before design fidelity claims; and agents must iterate the exact failing controls reported by the hard gates. Package validation/signing/install/upgrade success is not visual proof, and neither upgrade-check nor upgrade-apply success can be used as a substitute for redacted runtime evidence. Dynamic KPI proof remains separate and requires before/after mutation evidence. Real Marketing Event private artifacts are not committed; regression fixtures are synthetic/inspired.
 
+Phase 3B is the workflow enforcement layer. Phase 3B closes the planned UI-quality track; after Phase 3B, future work is normal incremental improvement unless a new runtime issue class appears. The workflow enforcement helper purpose is to validate workflow/report metadata and final artifact paths before high-quality UI, runtime UI quality, design fidelity, or dynamic KPI proof is claimed:
+
+```sh
+node scripts/inspect-ui-closed-loop-workflow-enforcement.mjs --workflow <workflow-report.json-or-md> [--strict]
+```
+
+High-quality UI claims require evidence chain, not just install success. Final reports must include the UI contract, contract validation result, scope manifest and scope validation result for upgrade work, runtime evidence, design/runtime structure findings, workflow enforcement findings, unresolved findings or warning waivers, and before/after KPI mutation evidence when dynamic KPI proof is claimed. Package validation/signing/install/upgrade success is not visual proof. Dynamic KPI proof remains separate. Structure comparison alone is not dynamic KPI proof. The workflow enforcement helper is required before high-quality UI/design-fidelity claim.
+
+Default closed-loop artifact/report paths are:
+
+- UI contract Markdown: `docs/generated-ui-contracts/<app-or-package>/<page>.ui-contract.md`
+- UI contract JSON: `docs/generated-ui-contracts/<app-or-package>/<page>.ui-contract.json`
+- UI upgrade scope manifest: `docs/ui-upgrade-scopes/<app-or-package>/<page>.scope.json`
+- Runtime evidence: `dist/runtime-evidence/<app-or-package>/<page>.runtime-evidence.redacted.json`
+- Design/runtime structure findings: `dist/runtime-evidence/<app-or-package>/<page>.design-runtime-structure.findings.json`
+- Workflow enforcement findings: `dist/runtime-evidence/<app-or-package>/<page>.closed-loop-workflow.findings.json`
+
 Run:
 
 ```sh

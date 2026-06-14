@@ -37,6 +37,7 @@ const requiredValidatorNames = [
   "scripts/validate-ui-upgrade-scope.mjs",
   "scripts/capture-runtime-ui-evidence.mjs",
   "scripts/compare-design-to-runtime-structure.mjs",
+  "scripts/inspect-ui-closed-loop-workflow-enforcement.mjs",
   "scripts/inspect-yeeflow-ui-design-contract.mjs",
   "scripts/inspect-dashboard-style-shapes.mjs",
   "scripts/inspect-dashboard-summary-control-contract.mjs",
@@ -62,6 +63,18 @@ const phase3RequiredPhrases = [
   "structure comparison has warning findings and the user requested strict quality",
   "package signing/install/upgrade succeeded but visual/runtime evidence is missing",
   "Real Marketing Event private artifacts must not be committed; use synthetic or redacted Marketing Event-inspired fixtures only",
+];
+
+const phase3bRequiredPhrases = [
+  "Phase 3B adds workflow-level enforcement",
+  "Final reports for high-quality UI work must include contract, scope, runtime evidence, and structure-comparison artifact paths as applicable",
+  "Run `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` before claiming high-quality UI or design fidelity",
+  "Generation from design/mockup requires a UI contract",
+  "UI upgrades require a scope manifest",
+  "Runtime UI quality claims require runtime evidence",
+  "Design fidelity claims require structure comparison",
+  "Dynamic KPI proof requires before/after mutation evidence",
+  "Install/sign/upgrade success is not visual proof",
 ];
 
 const updatedSkills = [
@@ -138,6 +151,9 @@ for (const currentSkillPath of skillRoots.map(({ root }) => skillPath(root, newS
   for (const phrase of phase3RequiredPhrases) {
     assert.equal(normalizedContent.includes(phrase.toLowerCase()), true, `${currentSkillPath} missing Phase 3A phrase: ${phrase}`);
   }
+  for (const phrase of phase3bRequiredPhrases) {
+    assert.equal(normalizedContent.includes(phrase.toLowerCase()), true, `${currentSkillPath} missing Phase 3B phrase: ${phrase}`);
+  }
 }
 
 const docCandidates = [
@@ -173,9 +189,13 @@ for (const docPath of phase3DocCandidates) {
   const content = fs.readFileSync(docPath, "utf8").toLowerCase();
   for (const phrase of [
     "Phase 3A makes the workflow stricter in hard-gate guidance and regression tests",
+    "Phase 3B is the workflow enforcement layer",
+    "Phase 3B closes the planned UI-quality track",
     "Package validation/signing/install/upgrade success is not visual proof",
+    "High-quality UI claims require evidence chain, not just install success",
     "Runtime evidence plus structural comparison is required before design fidelity claims",
     "Dynamic KPI proof remains separate and requires before/after mutation evidence",
+    "Workflow enforcement helper purpose",
     "Real Marketing Event private artifacts are not committed; regression fixtures are synthetic/inspired",
   ]) {
     assert.equal(content.includes(phrase.toLowerCase()), true, `${docPath} missing Phase 3A doc phrase: ${phrase}`);
