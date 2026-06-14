@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.42
+
+- Bump the active plugin version after Phase 3A UI closed-loop hard gates.
+- Make the closed-loop workflow mandatory for high-quality UI, design/mockup, dashboard redesign, runtime-proof, Marketing Event-style, and one-page-at-a-time work.
+- Require UI contract generation, UI contract validation, scope manifest, scope validation, local UI/package hard gates, write confirmation before signing/install/upgrade, redacted runtime evidence, design/runtime structure comparison, and iteration on exact failing controls.
+- Reinforce that package validation, signing, install, upgrade-check, and upgrade-apply success are not visual proof.
+- Reinforce that dynamic KPI proof requires before/after mutation evidence.
+- Add Marketing Event-inspired synthetic regressions for missing design contract, missing runtime evidence, one-page scope drift, Summary layout-resource ReportIds/exts/tempVars, top-level Pages[].ReportIds optional-only boundary, Summary save_var.name and COUNT ListDataID, grid-table detail-link/template/column failures, fake upgrade success evidence, missing table section, plain scaffold/placeholder detection, warning vs --strict, and dynamic KPI proof boundary.
+- Keep Phase 3B/future work as deeper workflow enforcement around Phase 2 findings, broader synthetic Marketing Event regression expansion, and live runtime automation only after explicit authorization.
+
 ## 0.6.41
 
 - Bump the active plugin version after Phase 2 design-to-runtime structural comparison.

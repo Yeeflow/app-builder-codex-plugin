@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.41
+- Version: 0.6.42
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.6.42` releases Phase 3A UI closed-loop hard gates. It makes the closed-loop workflow mandatory for high-quality UI, design/mockup, dashboard redesign, runtime-proof, Marketing Event-style, and one-page-at-a-time work; requires UI contract generation, UI contract validation, scope manifest, scope validation, local UI/package hard gates, write confirmation before signing/install/upgrade, redacted runtime evidence, design/runtime structure comparison, and iteration on exact failing controls; reinforces that package validation, signing, install, upgrade-check, and upgrade-apply success are not visual proof; reinforces that dynamic KPI proof requires before/after mutation evidence; and adds Marketing Event-inspired synthetic regressions for missing contracts, missing runtime evidence, scope drift, Summary layout-resource registration, grid-table failures, fake upgrade success evidence, missing table sections, scaffold detection, strict warnings, and dynamic KPI proof boundaries. Phase 3B/future work remains deeper workflow enforcement around Phase 2 findings, broader synthetic Marketing Event regression expansion, and live runtime automation only after explicit authorization.
 
 Version `0.6.41` releases Phase 2 design-to-runtime structural comparison. It adds `compare-design-to-runtime-structure.mjs` to compare UI contract expectations against redacted runtime evidence, accepts Phase 1 evidence from `capture-runtime-ui-evidence.mjs`, and treats design images as review-required references unless a reliable image parser exists. It produces structured JSON/Markdown findings for page/section mismatch, KPI count/label/value mismatch, table section/header/column mismatch, missing filters/actions, missing or weak badges, weak card/spacing/scaffold signals, placeholder/raw-variable text, weak runtime evidence, design image review requirements, and dynamic KPI proof boundaries. This release does not claim pixel-perfect visual diffing, full automatic image understanding, or dynamic KPI proof. Dynamic KPI proof remains governed by existing before/after mutation evidence rules, warning status exits 0, fail status exits nonzero, and `--strict` makes warnings exit nonzero. Phase 3 remains deeper hard-gate integration, stronger workflow enforcement around Phase 2 findings, and expanded Marketing Event regression coverage.
 
