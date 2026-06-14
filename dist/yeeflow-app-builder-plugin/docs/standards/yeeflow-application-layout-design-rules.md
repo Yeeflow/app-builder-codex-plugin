@@ -28,12 +28,41 @@ Generated design image specs and UI implementation contracts must choose exactly
 - Every generated design image must declare exactly one `applicationLayoutType`.
 - Every page image in the same application must use the same `applicationLayoutType`.
 - Header/navigation chrome must match the selected Yeeflow layout.
+- Every generated design image must also declare one `applicationChromeStyleId` for the app's canonical chrome pattern.
+- Every page image in the same application must preserve the same application chrome style. Page content may vary, but header/nav structure, nav background mode, app icon/name placement, menu style, selected state style, and unsupported chrome controls must stay consistent.
 - Page-specific content must stay inside the selected layout's content safe area.
 - Generated design images must not invent unsupported SaaS shells, arbitrary sidebars, arbitrary top bars, floating navigation systems, or navigation patterns outside the four Yeeflow layouts.
 - Colors, app icon, app name, menu icon color, menu text color, background color, selected color, hover color, and foreground color may be customized only inside the selected Yeeflow layout structure.
 - If the layout cannot be verified automatically from the image/spec, mark `humanReviewRequired: true`.
 - Screenshot-derived rules must be marked `human_reviewed_derived_rules` or `review_required`; do not claim automated screenshot understanding unless a real parser is implemented.
 - YAPK-derived docs/tests may contain only derived/redacted layout metadata, such as layout type, header/nav/content region concepts, configurable style categories, menu placement behavior, safe content area rules, and forbidden unsupported chrome patterns.
+
+## Application Chrome Fidelity Rules
+
+Declaring a layout type is not enough. Generated design images must follow the canonical Yeeflow application chrome pattern for the selected layout. A design image that says `application-layout-1-vertical-nav` but uses generic SaaS shell chrome, a conflicting nav panel style, a header hamburger control, or a bottom Collapse control is not compliant.
+
+For every app-level design set:
+
+- Choose one official Yeeflow `applicationLayoutType`.
+- Choose one `applicationChromeStyleId` for the app.
+- Preserve the exact same application chrome across every page image in that app.
+- Keep the same `headerMode`, `navMode`, `navBackgroundMode`, `navSelectedStateStyle`, `appIconPlacement`, `appNamePlacement`, `forbiddenChromeControls`, and `contentSafeArea` across pages unless a reviewed layout change is explicitly allowed.
+- Keep page-specific content inside the content safe area. Page dashboards, filters, tables, cards, and page actions may vary, but the header/nav chrome must not drift.
+- Treat dark/light nav panel drift, selected-state drift, extra side navs, extra top navs, floating nav buttons, and generic SaaS shell controls as hard failures when they are not part of the selected Yeeflow layout.
+- If image verification is not automated, mark chrome fidelity as human-reviewed or review-required. This standard does not claim automated screenshot understanding or pixel-perfect verification.
+
+Required multi-page design-set fields:
+
+- `applicationLayoutType`
+- `applicationChromeStyleId`
+- `headerMode`
+- `navMode`
+- `navBackgroundMode`
+- `navSelectedStateStyle`
+- `appIconPlacement`
+- `appNamePlacement`
+- `forbiddenChromeControls`
+- `contentSafeArea`
 
 ## Design-Image Contract Requirements
 
@@ -59,6 +88,14 @@ Recommended contract proof wording:
 {
   "applicationLayoutType": "application-layout-1-vertical-nav",
   "applicationLayoutName": "Application layout 1: vertical navigation menu panel",
+  "applicationChromeStyleId": "layout-1-dark-header-dark-vertical-nav",
+  "headerMode": "dark-header",
+  "navMode": "vertical-nav",
+  "navBackgroundMode": "dark",
+  "navSelectedStateStyle": "teal-filled-row-on-dark-nav",
+  "appIconPlacement": "header-left-before-app-name",
+  "appNamePlacement": "header-left-after-app-icon",
+  "forbiddenChromeControls": ["header hamburger icon", "bottom Collapse control", "floating navigation"],
   "layoutVerification": {
     "declaredCompliance": true,
     "humanReviewedDerivedRules": true,
@@ -86,13 +123,14 @@ The references below come from human review of the local PNG/JPEG screenshots na
 
 - Layout name: Application layout 1: vertical navigation menu panel.
 - Screenshot source reference: `Application layout 1_vertical.png` (human-readable local reference only; not committed).
-- Header region: a full-width top app header spans the viewport. It carries the app/menu affordance, app name, and right-side utility controls.
-- Navigation region: a persistent left vertical navigation panel sits below the header. Menu items are stacked vertically with icon+label rows. Grouped items may expand in place inside this left panel.
+- Canonical style boundary: Layout 1 may support future visual variants, but the currently documented canonical Layout 1 style from the reference screenshot uses `applicationChromeStyleId: layout-1-dark-header-dark-vertical-nav` with a dark top header and a dark vertical navigation panel. For this canonical style, `navBackgroundMode` must be `dark`. If a future Layout 1 variant is introduced, it must be explicitly named with its own `applicationChromeStyleId`; until then, mixing dark and light nav panels in the same app is a hard failure.
+- Header region: a full-width dark top app header spans the viewport. It carries the app icon and app name in the header plus right-side utility controls. The canonical Layout 1 style does not include a header hamburger menu icon.
+- Navigation region: a persistent dark left vertical navigation panel sits below or connects visually to the header. Menu items are stacked vertically with icon+label rows. Grouped items may expand in place inside this left panel.
 - Content safe area: content begins to the right of the left nav panel and below the header. Page content must not overlap, replace, or sit underneath the nav panel.
 - Page title/action area: page title and page actions sit at the top of the content area, to the right of the nav panel, not inside the app header or nav panel.
 - Dropdown or expanded menu behavior: vertical groups may expand inside the left nav region; generated design images must not render those groups as floating app shells or separate sidebars.
 - Allowed customization: app icon, app name, header colors, nav background/foreground, menu icon/text colors, selected/hover colors, and content background may change while preserving the top header plus left nav geometry.
-- Forbidden generated-image mistakes: arbitrary custom sidebars, detached left rails, content under the nav, a second top nav bar, page title inside nav, or unsupported SaaS shell chrome.
+- Forbidden generated-image mistakes: header hamburger menu icon, bottom Collapse button or Collapse control, arbitrary custom sidebars, detached left rails, white/light nav panel when the app chooses the canonical dark vertical-nav style, multiple nav styles across page images, content under the nav, a second side navigation, an extra top nav not part of Layout 1, floating navigation buttons, page title inside nav, or unsupported SaaS shell chrome.
 - Proof boundary: screenshot-derived and human-reviewed; no automated screenshot parsing or pixel-perfect verification is claimed.
 
 ### application-layout-2-horizontal-nav
@@ -138,13 +176,13 @@ The references below come from human review of the local PNG/JPEG screenshots na
 
 ### application-layout-1-vertical-nav
 
-- Header region: full-width top app header. It contains the app icon/menu affordance, app name, and right-side utility controls such as help/settings/profile.
-- Nav region: persistent left vertical navigation panel below the header. Menu items are stacked vertically with an icon and label. Grouped items may expand in place.
+- Header region: full-width dark top app header. It contains the app icon, app name, and right-side utility controls such as help/settings/profile. It must not include a header hamburger icon for the canonical `layout-1-dark-header-dark-vertical-nav` style.
+- Nav region: persistent dark left vertical navigation panel below/connected to the header. Menu items are stacked vertically with an icon and label. Grouped items may expand in place.
 - Content safe area: starts to the right of the left navigation panel and below the header. Page title, action buttons, dashboards, lists, cards, and reports must not overlap the header or left nav.
 - Page title: belongs at the top of the page content area, not inside the app header or nav panel.
 - Dashboard/content cards: belong in the central content canvas with a visible margin from the nav panel and header.
-- Allowed navigation/menu behavior: vertical selected state, hover state, icon+label rows, collapsible/expandable menu groups, and a bottom add/component area when the designer surface shows it.
-- Forbidden generated-image mistakes: arbitrary product sidebars, floating left rail detached from the header, content cards under the nav panel, page title inside the nav panel, or a second unrelated top navigation bar.
+- Allowed navigation/menu behavior: vertical selected state, hover state, icon+label rows, and grouped menu expansion inside the dark vertical nav panel.
+- Forbidden generated-image mistakes: header hamburger menu icon, bottom Collapse button/control, arbitrary product sidebars, white/light nav panel for the canonical dark style, mixed dark/light nav panels across pages, floating left rail detached from the header, content cards under the nav panel, page title inside the nav panel, second side navigation, extra top navigation bar, or floating navigation buttons.
 
 ### application-layout-2-horizontal-nav
 
