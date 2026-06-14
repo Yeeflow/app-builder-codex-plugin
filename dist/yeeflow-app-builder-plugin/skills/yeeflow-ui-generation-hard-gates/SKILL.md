@@ -13,14 +13,15 @@ This is one reusable skill for page-by-page UI/dashboard contracts, Summary/KPI 
 
 ## Required Workflow
 
-This closed-loop workflow is mandatory for any request that includes high-quality UI, a design image/mockup, dashboard UI upgrade, page visual redesign, runtime UI proof, Marketing Event-style dashboard work, "make it look like the design", "not plain scaffold", "professional dashboard", or "one page at a time":
+This closed-loop workflow is mandatory for any request that includes high-quality UI, a design image/mockup, generated design images, dashboard UI upgrade, page visual redesign, runtime UI proof, Marketing Event-style dashboard work, "make it look like the design", "not plain scaffold", "professional dashboard", or "one page at a time":
 
-Design/mockup reference -> generate UI implementation contract -> validate UI contract -> define page/scope manifest -> generate or update one allowed page/scope only -> validate upgrade scope -> run local UI/package hard gates -> sign/install/upgrade only after write confirmation -> capture redacted runtime evidence -> compare design/runtime structure -> iterate exact failing controls.
+Design/mockup reference -> choose one official Yeeflow application layout -> generate UI implementation contract -> validate application layout design rules -> validate UI contract -> define page/scope manifest -> generate or update one allowed page/scope only -> validate upgrade scope -> run local UI/package hard gates -> sign/install/upgrade only after write confirmation -> capture redacted runtime evidence -> compare design/runtime structure -> iterate exact failing controls.
 
 Phase 3B adds the workflow enforcement check after structure comparison and before final UI-quality/design-fidelity claims.
 
 1. Create a page-by-page implementation contract before dashboard/UI page generation or upgrade. High-quality UI requires a page-by-page implementation contract with target page name, page purpose, requested design/mockup reference, visual sections, Yeeflow control mapping, data/list bindings, KPI/Summary plan, filter/action plan, grid/table plan, status/badge plan, runtime evidence requirement, and proof boundary.
-2. Run `scripts/generate-ui-contract-from-design.mjs` before generation when a design/mockup exists, then run the canonical UI contract validator `scripts/inspect-yeeflow-ui-design-contract.mjs` before package generation. If the validator path changes in the future, locate the canonical validator and report the actual path used.
+2. Before generating design images for a Yeeflow app, choose one of the four official Yeeflow application layouts: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, or `application-layout-4-no-nav`. All page images for the same app must use the same selected layout. Header/navigation chrome must follow the selected layout, page-specific content must stay inside the content safe area, and generated images must not invent arbitrary app shells, nav bars, sidebars, or top bars. Do not invent arbitrary app shells, nav bars, sidebars, or top bars. Application layout compliance is required before using a generated image as a UI implementation reference. If layout cannot be verified automatically, mark `human_review_required`.
+3. Run `scripts/generate-ui-contract-from-design.mjs` before generation when a design/mockup exists, then run `scripts/inspect-application-layout-design-rules.mjs` for generated design image specs/UI contracts, and then run the canonical UI contract validator `scripts/inspect-yeeflow-ui-design-contract.mjs` before package generation. If the validator path changes in the future, locate the canonical validator and report the actual path used.
 3. Map requested designs or mockups directly to controls and sections. Design/mockup requests that are not mapped are hard failures. Broad scaffold-like UI must not be claimed as high-quality UI, and broad full-app restyling must stop unless every affected page has a page-level contract.
 4. Define a page/scope manifest for UI upgrades and run `scripts/validate-ui-upgrade-scope.mjs` before package mutation. Generate or update one allowed page/scope only unless the user explicitly approves a broader declared scope.
 5. Use export-proven Yeeflow control/style shapes. Prefer observed shapes such as `attrs.common.background.normal.classic.color`, `attrs.common.border.normal.type`, `attrs.common.border.normal.width`, `attrs.common.border.normal.color`, `attrs.common.border.normal.radius`, `attrs.common.padding`, `attrs.style.gap`, control-level typography style objects, and Collection grid-table patterns when grid-table layout is intended.
@@ -51,6 +52,10 @@ Stop before package mutation, signing, install/upgrade automation, or generated-
 
 - no page-by-page implementation contract exists for claimed high-quality UI work
 - no UI contract exists for a design/mockup request
+- no official Yeeflow application layout is declared for generated design images
+- page images in the same app use inconsistent application layouts
+- generated design image chrome invents arbitrary app shells, unsupported nav bars, unsupported sidebars, unsupported top bars, or content that overlaps/replaces header/nav safe areas
+- application layout compliance cannot be verified automatically and `human_review_required` is not recorded
 - the UI contract has unresolved required sections
 - a scope manifest is missing for a UI upgrade
 - scope validation fails
@@ -83,6 +88,7 @@ Use the final validator/tool names from the UI hard-gate standard:
 - `scripts/validate-ui-upgrade-scope.mjs` for Phase 1 declared-scope UI upgrade enforcement before package mutation, including ListSetID, app identity, page/resource, data list/field, approval form, workflow, navigation, and numeric ID lineage boundaries.
 - `scripts/compare-design-to-runtime-structure.mjs` for Phase 2 structural design-to-runtime comparison. It compares UI contract expectations against redacted runtime evidence, accepts Phase 1 runtime evidence, warns when design images require human review, and must not claim pixel-perfect visual diffing, full automatic image understanding, or dynamic KPI proof.
 - `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` for Phase 3B workflow/report metadata enforcement before high-quality UI, design-fidelity, runtime UI quality, or dynamic KPI proof claims. It checks contract, contract validation, scope manifest, scope validation, runtime evidence, structure comparison findings, dynamic KPI mutation evidence, final report artifact paths, unresolved findings, and warning waivers without parsing or mutating YAPK payloads.
+- `scripts/inspect-application-layout-design-rules.mjs` for official Yeeflow application-layout compliance in generated design image specs or UI contracts. It requires one consistent application layout across every page image in an app, blocks unsupported arbitrary app shells/navigation chrome, enforces header/nav/content safe-area declarations, and marks screenshot/image layout verification as unproven unless a reliable parser exists.
 - `scripts/inspect-yeeflow-ui-design-contract.mjs` for page-by-page implementation contracts and scaffold/placeholder claims
 - `scripts/inspect-dashboard-style-shapes.mjs` for export-proven Yeeflow control/style shapes
 - `scripts/inspect-dashboard-summary-control-contract.mjs` for designer-shaped hidden Summary hosts, fields, filters, layout-resource `Resource.ReportIds`, `Resource.exts`, `Resource.tempVars`, and `save_var`
@@ -100,6 +106,8 @@ Use the final validator/tool names from the UI hard-gate standard:
 Reports must state:
 
 - which pages have page-by-page implementation contracts
+- which official Yeeflow application layout was selected and whether every generated page image uses the same layout
+- whether application layout compliance was declared, human-reviewed, or automatically verified
 - which controls/styles are export-proven and which required sandbox proof
 - Summary/KPI proof state for each metric: designer-configured, validator-valid, runtime-proven visible dynamic KPI, or fallback
 - whether dynamic KPI proof uses the exact UUID Summary v1.0.1 shape and before/after source mutation evidence, or remains unproven/fallback-only

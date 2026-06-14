@@ -29,6 +29,14 @@ const childTests = [
     validators: ["yeeflow-ui-generation-hard-gates skill wording"],
   },
   {
+    name: "Yeeflow application layout design rule regression suite",
+    command: ["scripts/test-application-layout-design-rules.mjs"],
+    validators: [
+      "inspect-application-layout-design-rules",
+      "official Yeeflow application layout design standard",
+    ],
+  },
+  {
     name: "Phase 1 UI closed-loop infrastructure regression suite",
     command: ["scripts/test-ui-closed-loop-phase1.mjs"],
     validators: [

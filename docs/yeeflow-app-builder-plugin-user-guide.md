@@ -6,6 +6,8 @@ Use Yeeflow App Builder when you need Codex to work with Yeeflow application pac
 
 Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `stable`, and sparse paths `.agents/plugins/marketplace.json` plus `dist/yeeflow-app-builder-plugin`.
 
+When generating Yeeflow app design images, choose exactly one official application layout and keep it consistent across every page image for that app. Use `docs/standards/yeeflow-application-layout-design-rules.md` and `scripts/inspect-application-layout-design-rules.mjs` before treating a generated image as a UI implementation reference. The validator enforces declared layout compliance; screenshot-derived layout rules remain human-reviewed or review-required unless a reliable parser exists.
+
 ## Expected Version
 
 `0.6.43`
