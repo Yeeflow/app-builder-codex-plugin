@@ -8,12 +8,12 @@ Every generated Summary control must be generated as a report-backed data contro
 
 - `attrs.data.list` resolves to an included source list
 - `attrs.field` or the export-proven equivalent resolves to a source field
-- a matching page `exts[]` entry exists
+- a matching layout-resource `Resource.exts[]` entry exists
 - the matching extension uses `category: "___Pivot___"`
 - the matching extension uses `key: "summary"`
 - `exts[].i` equals the Summary control id
 - `exts[].attr.settings.values[]` includes a resolvable aggregate field, field type, and aggregate function such as `COUNT`, `SUM`, `AVG`, `MIN`, or `MAX`
-- dashboard `Resource.ReportIds[]` includes the Summary control id
+- dashboard layout-resource `Resource.ReportIds[]` includes the Summary control id
 
 The generator must not substitute static text, static numbers, or visual-only KPI cards for Summary controls when the app plan calls for calculated metrics.
 

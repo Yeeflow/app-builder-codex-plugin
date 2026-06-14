@@ -51,14 +51,21 @@ function run() {
   expectPass("Export-proven card style shape passes", inspectDashboardStyleShapes({ package: writeJson("style-valid.json", decoded({ card: "export" })) }));
   expectFail("Weak unsupported style shape fails", inspectDashboardStyleShapes({ package: writeJson("style-weak.json", decoded({ card: "weak" })) }), "DASHBOARD_WEAK_UNSUPPORTED_STYLE_SHAPE");
 
-  expectPass("Hidden Summary container hide/direction/display rule shape passes", inspectDashboardSummaryControlContract({ package: writeJson("summary-valid.json", decoded({ summary: "valid" })) }));
+  expectPass("Hidden Summary container hide/direction/display rule shape passes with zero top-level Page ReportIds", inspectDashboardSummaryControlContract({ package: writeJson("summary-valid.json", decoded({ summary: "valid" })) }));
   expectPass("Exact UUID Summary shape with Resource.exts ReportIds tempVars and visible binding passes", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-valid.json", decoded({ summary: "uuid-proof-valid" })) }));
+  expectPass("Marketing Event v1.0.17 style Summary shape with zero top-level Page ReportIds passes", inspectDashboardSummaryControlContract({ package: writeJson("summary-marketing-v1017-shape.json", decoded({ summary: "valid", summaryCount: 8 })) }));
+  expectPass("Marketing Event v1.0.18 style Summary shape with 24 layout-resource ReportIds and zero top-level Page ReportIds passes", inspectDashboardSummaryControlContract({ package: writeJson("summary-marketing-v1018-shape.json", decoded({ summary: "valid", summaryCount: 24 })) }));
+  expectPass("Compatibility shape with layout-resource and top-level Page ReportIds passes", inspectDashboardSummaryControlContract({ package: writeJson("summary-compat-page-reportids.json", decoded({ summary: "valid", includeTopLevelReportIds: true })) }));
   expectFail("Summary with blank field fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-blank-field.json", decoded({ summary: "blank-field" })) }), "SUMMARY_FIELD_BLANK");
   expectFail("Summary with missing field metadata fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-metadata.json", decoded({ summary: "missing-metadata" })) }), "SUMMARY_FIELD_METADATA_INCOMPLETE");
   expectFail("Count Summary without valid count/ListDataID shape fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-count.json", decoded({ summary: "bad-count" })) }), "SUMMARY_COUNT_FIELD_SHAPE_INVALID");
   expectFail("Sum Summary using non-numeric field fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-sum.json", decoded({ summary: "bad-sum" })) }), "SUMMARY_NUMERIC_FIELD_REQUIRED");
   expectFail("Missing Summary save_var expression object fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-save-var.json", decoded({ summary: "bad-save-var" })) }), "SUMMARY_SAVE_VAR_EXPRESSION_OBJECT_REQUIRED");
-  expectFail("Missing page ReportIds for Summary fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-reportids.json", decoded({ summary: "missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
+  expectFail("Non-UUID Summary ID fails unless explicitly export-proven", inspectDashboardSummaryControlContract({ package: writeJson("summary-non-uuid.json", decoded({ summary: "non-uuid" })) }), "SUMMARY_CONTROL_ID_NOT_RUNTIME_SAFE");
+  expectFail("Summary missing layout-resource ReportIds fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-reportids.json", decoded({ summary: "missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
+  expectFail("Summary missing layout-resource exts match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-exts.json", decoded({ summary: "missing-exts" })) }), "SUMMARY_EXTS_REGISTRATION_MISSING");
+  expectFail("Summary save_var missing from layout-resource tempVars fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-tempvars.json", decoded({ summary: "missing-tempvars" })) }), "SUMMARY_TEMP_VAR_DECLARATION_MISSING");
+  expectFail("Visible Text showing raw temp variable instead of variable binding fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-raw-temp-visible.json", decoded({ summary: "raw-temp-visible" })) }), "SUMMARY_VISIBLE_BINDING_MISSING");
   expectFail("UUID Summary proof missing Resource.exts match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-exts.json", decoded({ summary: "uuid-proof-no-exts" })) }), "SUMMARY_UUID_PROOF_EXTS_MISSING");
   expectFail("UUID Summary proof missing Resource.ReportIds match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-missing-reportids.json", decoded({ summary: "uuid-proof-missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
   expectFail("UUID Summary proof missing Resource.tempVars match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-no-tempvars.json", decoded({ summary: "uuid-proof-no-tempvars" })) }), "SUMMARY_UUID_PROOF_TEMPVAR_MISSING");
@@ -127,17 +134,27 @@ function run() {
 function decoded(flags = {}) {
   const listSetId = flags.listSetId || "1900000000000001001";
   const card = flags.card === "weak" ? weakCard() : exportCard();
-  const summary = flags.summary ? summaryControl(flags.summary) : null;
-  const summaryHost = flags.summary ? hiddenSummaryHost(summary) : null;
+  const summaryCount = flags.summaryCount || (flags.summary ? 1 : 0);
+  const summaries = flags.summary ? Array.from({ length: summaryCount }, (_, index) => summaryControl(flags.summary, index)) : [];
+  const summaryHost = flags.summary ? hiddenSummaryHost(summaries) : null;
   const gridControl = flags.grid ? grid(flags.grid) : null;
   const uuidProof = scalar(flags.summary).startsWith("uuid-proof");
-  const root = { type: "page", children: [card, summaryHost, uuidProofVisibleKpi(flags.summary), gridControl].filter(Boolean) };
+  const summaryIds = summaries.map((summary) => scalar(summary.id || summary.ID));
+  const registeredSummaryIds = flags.summary === "missing-reportids" || flags.summary === "uuid-proof-missing-reportids" ? [] : summaryIds;
+  const tempVars = summaries
+    .map((summary) => summary.attrs?.save_var)
+    .filter((saveVar) => typeof saveVar === "object")
+    .map((saveVar) => ({ id: saveVar.id, name: saveVar.name }));
+  const root = {
+    type: "page",
+    ReportIds: registeredSummaryIds,
+    exts: flags.summary === "missing-exts" || flags.summary === "uuid-proof-no-exts" || flags.summary === "non-uuid" ? [] : summaryIds.map((id) => ({ i: id, category: "___Pivot___", key: "summary" })),
+    tempVars: flags.summary === "missing-tempvars" || flags.summary === "uuid-proof-no-tempvars" ? [] : tempVars,
+    children: [card, summaryHost, ...summaries.map((summary, index) => summaryVisibleKpi(flags.summary, summary, index)), gridControl].filter(Boolean),
+  };
   if (uuidProof) {
     root.kpiRuntimeProofShape = "uuid-summary-v1.0.1";
-    if (flags.summary !== "uuid-proof-no-exts") root.exts = [{ i: UUID_SUMMARY_ID, category: "___Pivot___", key: "summary" }];
-    if (flags.summary !== "uuid-proof-no-tempvars") root.tempVars = [{ id: "__temp___temp_total_records", name: "__temp_total_records" }];
   }
-  const summaryId = summary ? scalar(summary.id || summary.ID) : "summary-planned-events";
   return {
     kpiRuntimeProofShape: uuidProof ? "uuid-summary-v1.0.1" : undefined,
     ListSet: { ListID: listSetId, Title: "Marketing Event Management" },
@@ -145,7 +162,7 @@ function decoded(flags = {}) {
       Title: "Event Portfolio",
       Type: 103,
       LayoutID: "dashboard-event-portfolio",
-      ReportIds: flags.summary === "missing-reportids" || flags.summary === "uuid-proof-missing-reportids" ? [] : [summaryId],
+      ReportIds: flags.includeTopLevelReportIds ? registeredSummaryIds : [],
       LayoutInResources: [{ Resource: JSON.stringify(root) }],
     }],
     Childs: [{
@@ -164,23 +181,23 @@ function field(FieldName, FieldType, DisplayName) {
   return { FieldName, FieldType, Type: FieldType.toLowerCase(), DisplayName, FieldID: `${FieldName}-id` };
 }
 
-function hiddenSummaryHost(summary) {
+function hiddenSummaryHost(summaries) {
   return {
     id: "hidden-summary-host",
     type: "container",
     attrs: { common: { hide: [null, true, true, true] }, style: { direction: [null, "row"] }, display: { rule: "1 == 0" } },
-    children: [summary],
+    children: summaries,
   };
 }
 
-function summaryControl(mode) {
+function summaryControl(mode, index = 0) {
   const fieldMeta = mode === "blank-field" ? "" : mode === "bad-sum" ? field("Text1", "Text", "Status") : mode === "bad-count" ? field("Title", "Text", "Event Name") : field("ListDataID", "Text", "Record ID");
   const func = mode === "bad-sum" ? "sum" : "count";
   const metadata = mode === "missing-metadata" ? null : fieldMeta;
-  const id = scalar(mode).startsWith("uuid-proof") && mode !== "uuid-proof-non-uuid" ? UUID_SUMMARY_ID : "summary-planned-events";
+  const id = mode === "non-uuid" ? "summary-planned-events" : summaryUuid(index);
   const saveVar = scalar(mode).startsWith("uuid-proof")
     ? { exprType: "variable", valueType: "string", id: "__temp___temp_total_records", type: "expr", name: "__temp_total_records" }
-    : { exprType: "variable", valueType: "string", id: "__temp___temp_event_count", type: "expr", name: "__temp_event_count" };
+    : { exprType: "variable", valueType: "string", id: `__temp___temp_event_count_${index}`, type: "expr", name: `__temp_event_count_${index}` };
   return {
     id,
     type: "summary",
@@ -196,17 +213,27 @@ function summaryControl(mode) {
   };
 }
 
-function uuidProofVisibleKpi(mode) {
-  if (!scalar(mode).startsWith("uuid-proof")) return null;
+function summaryUuid(index) {
+  if (index === 0) return UUID_SUMMARY_ID;
+  const suffix = String(index).padStart(12, "0");
+  return `43c38762-5133-430f-af09-${suffix}`;
+}
+
+function summaryVisibleKpi(mode, summary, index = 0) {
+  const saveVar = summary.attrs?.save_var;
+  if (!saveVar || typeof saveVar !== "object") return null;
   if (mode === "uuid-proof-no-visible-binding") {
     return { type: "heading", attrs: { headc: { title: { value: "4" } } } };
+  }
+  if (mode === "raw-temp-visible") {
+    return { type: "text", attrs: { headc: { title: { value: saveVar.name } } } };
   }
   return {
     type: "heading",
     attrs: {
       headc: {
         title: {
-          variable: [{ id: "__temp___temp_total_records", name: "__temp_total_records" }],
+          variable: [{ id: saveVar.id, name: saveVar.name }],
         },
       },
     },
