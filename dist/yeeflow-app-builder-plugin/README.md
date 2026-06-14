@@ -10,7 +10,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.43`
+- Version: `0.6.44`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
 ## Install In Codex App
@@ -28,13 +28,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.43
+Version: 0.6.44
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.43
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.44
 ```
 
 ## What Is Included
