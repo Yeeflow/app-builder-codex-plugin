@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.43
+
+- Bump the active plugin version after Phase 3B UI workflow enforcement.
+- Add `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` to validate workflow/report metadata only; it does not parse or mutate real YAPK packages, call Yeeflow APIs, generate packages, sign, install, import, upgrade, or create runtime evidence.
+- Connect Phase 1, Phase 2, and Phase 3A gates at workflow/report level.
+- Enforce required artifacts for high-quality UI/design-fidelity/runtime-quality/dynamic-KPI claims: UI contract, UI contract validation result, scope manifest for upgrade work, scope validation result, runtime evidence, runtime evidence validation result, design/runtime structure comparison findings, before/after KPI mutation evidence when dynamic KPI proof is claimed, and final report artifact paths.
+- Reinforce that install/upgrade success is not visual proof, structure comparison is not dynamic KPI proof, and dynamic KPI proof requires before/after mutation evidence.
+- Document standard artifact paths: `docs/generated-ui-contracts/<app-or-package>/<page>.ui-contract.md`, `docs/generated-ui-contracts/<app-or-package>/<page>.ui-contract.json`, `docs/ui-upgrade-scopes/<app-or-package>/<page>.scope.json`, `dist/runtime-evidence/<app-or-package>/<page>.runtime-evidence.redacted.json`, `dist/runtime-evidence/<app-or-package>/<page>.design-runtime-structure.findings.json`, and `dist/runtime-evidence/<app-or-package>/<page>.closed-loop-workflow.findings.json`.
+- Note that Phase 3B closes the planned UI-quality track; future work is normal incremental improvement unless a new runtime issue class is discovered.
+
 ## 0.6.42
 
 - Bump the active plugin version after Phase 3A UI closed-loop hard gates.
