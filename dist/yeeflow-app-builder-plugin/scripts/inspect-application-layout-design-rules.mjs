@@ -11,6 +11,12 @@ const LAYOUTS = {
     requiresHeader: true,
     requiresNav: true,
     navKeywords: [/vertical/i, /left/i, /side\s*nav/i, /navigation panel/i],
+    canonicalChrome: {
+      applicationChromeStyleId: "layout-1-dark-header-dark-vertical-nav",
+      headerMode: "dark-header",
+      navMode: "vertical-nav",
+      navBackgroundMode: "dark",
+    },
   },
   "application-layout-2-horizontal-nav": {
     name: "Application layout 2: horizontal navigation menu bar",
@@ -38,6 +44,17 @@ const LAYOUTS = {
 const UNSUPPORTED_CHROME_PATTERNS = [
   { code: "ARBITRARY_APP_SHELL_DETECTED", pattern: /custom\s+saas\s+shell|invented\s+app\s+shell|arbitrary\s+app\s+shell/i },
   { code: "UNSUPPORTED_NAVIGATION_CHROME", pattern: /floating\s+navigation|floating\s+nav|bottom\s+navigation|right\s+sidebar\s+navigation|secondary\s+app\s+sidebar|custom\s+top\s+bar|arbitrary\s+top\s+bar|unsupported\s+sidebar/i },
+];
+
+const CHROME_CONSISTENCY_FIELDS = [
+  "applicationChromeStyleId",
+  "headerMode",
+  "navMode",
+  "navBackgroundMode",
+  "navSelectedStateStyle",
+  "appIconPlacement",
+  "appNamePlacement",
+  "contentSafeArea",
 ];
 
 if (isMainModule()) {
@@ -87,6 +104,7 @@ export function inspectApplicationLayoutDesignRules({
   if (!findings.some((finding) => finding.severity === "error")) {
     validatePages(pages, findings);
     validateChrome(primary, rawText, findings);
+    validateChromeConsistency(pages, findings);
     validateScreenshotBoundary({ screenshot, primary }, findings);
   }
 
@@ -112,6 +130,13 @@ export function inspectApplicationLayoutDesignRules({
       humanReviewedDerivedRules: Boolean(page.layoutVerification.humanReviewedDerivedRules || page.humanReviewedDerivedRules),
       automaticallyVerified: Boolean(page.layoutVerification.automaticallyVerified),
       humanReviewRequired: Boolean(page.humanReviewRequired),
+      applicationChromeStyleId: page.applicationChromeStyleId || null,
+      headerMode: page.headerMode || null,
+      navMode: page.navMode || null,
+      navBackgroundMode: page.navBackgroundMode || null,
+      navSelectedStateStyle: page.navSelectedStateStyle || null,
+      appIconPlacement: page.appIconPlacement || null,
+      appNamePlacement: page.appNamePlacement || null,
     })),
     findings,
     proofBoundary: [
@@ -186,6 +211,7 @@ function validateLayout(page, findings) {
   if (!hasValue(page.forbiddenChromePatterns)) {
     addFinding(findings, "error", "APPLICATION_CHROME_MISSING", "forbiddenChromePatterns must explicitly block unsupported app shells/navigation chrome.", { source: page.source });
   }
+  validateCanonicalChrome(page, layout, findings);
   if (page.humanReviewRequired) {
     addFinding(findings, "warning", "LAYOUT_REVIEW_REQUIRED", "Layout compliance requires human review.", { source: page.source });
   }
@@ -199,10 +225,81 @@ function validateChrome(primary, rawText, findings) {
     textOf(primary.applicationChrome),
     textOf(primary.navigationRegion),
     textOf(primary.headerRegion),
+    textOf(primary.visibleChromeControls),
+    textOf(primary.declaredChromeControls),
+    textOf(primary.unsupportedChromeControls),
   ].join("\n");
   for (const { code, pattern } of UNSUPPORTED_CHROME_PATTERNS) {
     if (pattern.test(haystack)) {
       addFinding(findings, "error", code, "Unsupported arbitrary app shell/navigation chrome is present in the design contract.");
+    }
+  }
+}
+
+function validateCanonicalChrome(page, layout, findings) {
+  if (!hasValue(page.applicationChromeStyleId) || !hasValue(page.headerMode) || !hasValue(page.navMode) || !hasValue(page.navBackgroundMode) || !hasValue(page.navSelectedStateStyle)) {
+    addFinding(findings, "error", "CANONICAL_CHROME_PATTERN_MISSING", "Declared layout must include canonical chrome details: applicationChromeStyleId, headerMode, navMode, navBackgroundMode, and navSelectedStateStyle.", { source: page.source });
+  }
+  if (!hasValue(page.appIconPlacement) || !hasValue(page.appNamePlacement)) {
+    addFinding(findings, "error", "APP_ICON_NAME_PLACEMENT_MISSING", "App icon and app name placement must be declared for the selected application chrome.", { source: page.source });
+  }
+  if (!hasValue(page.forbiddenChromeControls)) {
+    addFinding(findings, "error", "CANONICAL_CHROME_PATTERN_MISSING", "forbiddenChromeControls must declare unsupported chrome controls for the selected canonical style.", { source: page.source });
+  }
+
+  if (page.applicationLayoutType !== "application-layout-1-vertical-nav") return;
+
+  const affirmativeChromeText = [
+    textOf(page.applicationChrome),
+    textOf(page.headerRegion),
+    textOf(page.navigationRegion),
+    textOf(page.visibleChromeControls),
+    textOf(page.declaredChromeControls),
+    textOf(page.unsupportedChromeControls),
+  ].join("\n");
+
+  if (mentionsAffirmative(affirmativeChromeText, /header\s+hamburger|hamburger\s+(?:icon|menu|control)|menu\s+hamburger/i)) {
+    addFinding(findings, "error", "HEADER_HAMBURGER_NOT_ALLOWED", "Canonical Layout 1 dark vertical-nav chrome must not include a header hamburger icon.", { source: page.source });
+  }
+  if (mentionsAffirmative(affirmativeChromeText, /bottom\s+collapse|collapse\s+(?:button|control)|nav\s+collapse|collapse\s+nav/i)) {
+    addFinding(findings, "error", "NAV_COLLAPSE_CONTROL_NOT_ALLOWED", "Canonical Layout 1 dark vertical-nav chrome must not include a bottom Collapse control.", { source: page.source });
+  }
+
+  const canonical = layout.canonicalChrome || {};
+  if (hasValue(page.navBackgroundMode) && canonical.navBackgroundMode && normalizedText(page.navBackgroundMode) !== canonical.navBackgroundMode) {
+    addFinding(findings, "error", "NAV_BACKGROUND_MISMATCH", "Canonical Layout 1 currently requires navBackgroundMode: dark.", {
+      source: page.source,
+      expected: canonical.navBackgroundMode,
+      actual: page.navBackgroundMode,
+    });
+  }
+  if (hasValue(page.applicationChromeStyleId) && canonical.applicationChromeStyleId && normalizedText(page.applicationChromeStyleId) !== canonical.applicationChromeStyleId) {
+    addFinding(findings, "error", "APPLICATION_CHROME_DRIFT", "Layout 1 canonical dark-header/dark-vertical-nav style must use its declared applicationChromeStyleId unless a reviewed variant is introduced.", {
+      source: page.source,
+      expected: canonical.applicationChromeStyleId,
+      actual: page.applicationChromeStyleId,
+    });
+  }
+}
+
+function validateChromeConsistency(pages, findings) {
+  if (pages.length < 2) return;
+  for (const field of CHROME_CONSISTENCY_FIELDS) {
+    const values = new Map();
+    for (const page of pages) {
+      if (!hasValue(page[field])) continue;
+      const normalized = normalizedText(page[field]);
+      if (!values.has(normalized)) values.set(normalized, []);
+      values.get(normalized).push(page.source || page.pageName || page.targetPageName || "page");
+    }
+    if (values.size <= 1) continue;
+    if (field === "navBackgroundMode") {
+      addFinding(findings, "error", "NAV_BACKGROUND_MISMATCH", "All page images in one app must use the same navBackgroundMode.", { values: [...values.keys()] });
+      addFinding(findings, "error", "NAV_STYLE_INCONSISTENT_ACROSS_PAGES", "Navigation background/style drift is not allowed across page images in one app.", { values: [...values.keys()] });
+    } else if (field === "navSelectedStateStyle" || field === "navMode") {
+      addFinding(findings, "error", "NAV_STYLE_INCONSISTENT_ACROSS_PAGES", `All page images in one app must use the same ${field}.`, { values: [...values.keys()] });
+    } else {
+      addFinding(findings, "error", "APPLICATION_CHROME_DRIFT", `All page images in one app must use the same ${field}.`, { values: [...values.keys()] });
     }
   }
 }
@@ -241,6 +338,21 @@ function parseMarkdownContract(raw) {
     dropdownorexpandedmenubehavior: "dropdownOrExpandedMenuBehavior",
     dropdownmenubehavior: "dropdownOrExpandedMenuBehavior",
     expandedmenubehavior: "dropdownOrExpandedMenuBehavior",
+    applicationchromestyleid: "applicationChromeStyleId",
+    chromestyleid: "applicationChromeStyleId",
+    headermode: "headerMode",
+    navmode: "navMode",
+    navigationmode: "navMode",
+    navbackgroundmode: "navBackgroundMode",
+    navigationbackgroundmode: "navBackgroundMode",
+    navselectedstatestyle: "navSelectedStateStyle",
+    navigationselectedstatestyle: "navSelectedStateStyle",
+    appiconplacement: "appIconPlacement",
+    appnameplacement: "appNamePlacement",
+    forbiddenchromecontrols: "forbiddenChromeControls",
+    visiblechromecontrols: "visibleChromeControls",
+    declaredchromecontrols: "declaredChromeControls",
+    unsupportedchromecontrols: "unsupportedChromeControls",
     sourcepriority: "sourcePriority",
     allowedcustomization: "allowedCustomization",
     forbiddenchromepatterns: "forbiddenChromePatterns",
@@ -297,6 +409,17 @@ function normalizeContract(contract = {}) {
     applicationLayoutType: source.applicationLayoutType || source.layoutType || source.appLayoutType || null,
     applicationLayoutName: source.applicationLayoutName || source.layoutName || null,
     applicationChrome: source.applicationChrome || source.chrome || source.appChrome || null,
+    applicationChromeStyleId: source.applicationChromeStyleId || source.chromeStyleId || source.appChromeStyleId || null,
+    headerMode: source.headerMode || source.applicationHeaderMode || null,
+    navMode: source.navMode || source.navigationMode || null,
+    navBackgroundMode: source.navBackgroundMode || source.navigationBackgroundMode || null,
+    navSelectedStateStyle: source.navSelectedStateStyle || source.navigationSelectedStateStyle || null,
+    appIconPlacement: source.appIconPlacement || source.applicationIconPlacement || null,
+    appNamePlacement: source.appNamePlacement || source.applicationNamePlacement || null,
+    forbiddenChromeControls: source.forbiddenChromeControls || source.forbiddenControls || null,
+    visibleChromeControls: source.visibleChromeControls || source.chromeControls || null,
+    declaredChromeControls: source.declaredChromeControls || null,
+    unsupportedChromeControls: source.unsupportedChromeControls || null,
     sourcePriority: source.sourcePriority || source.source_priority || null,
     visualLayoutMatrix: source.visualLayoutMatrix || null,
     headerRegion,
@@ -371,6 +494,17 @@ function textOf(value) {
   if (value == null) return "";
   if (typeof value === "string") return value;
   return JSON.stringify(value);
+}
+
+function normalizedText(value) {
+  return textOf(value).trim().toLowerCase().replace(/[_\s]+/g, "-");
+}
+
+function mentionsAffirmative(value, pattern) {
+  const text = textOf(value);
+  if (!pattern.test(text)) return false;
+  const negative = new RegExp(`(?:no|without|not|never|forbid(?:den)?|disallow(?:ed)?|must not|do not)[^.;\\n]{0,80}(?:${pattern.source})`, "i");
+  return !negative.test(text);
 }
 
 function safePath(value) {
