@@ -8,7 +8,7 @@ Use source https://github.com/Yeeflow/app-builder-codex-plugin.git, Git ref `sta
 
 ## Expected Version
 
-`0.6.38`
+`0.6.39`
 
 ## Safe API Usage
 
@@ -36,4 +36,4 @@ Summary/KPI controls require designer-shaped hidden Summary configuration. Summa
 
 Runtime screenshot/evidence is required before claiming UI quality. Install/signing/API acceptance is not runtime UI proof. UI upgrades must preserve ListSetID, app identity, existing IDs, lineage, and declared change scope. Use `yeeflow-ui-generation-hard-gates` when dashboard/UI/Summary/KPI generation or upgrade work is requested.
 
-Version `0.6.38` releases the Data Analytics Summary validator fix. `attrs.save_var.name` is treated as a Summary temp variable and validated against `Resource.tempVars[]`, Summary `COUNT` aggregate `ListDataID` is valid, resource-level `ReportIds[]` is valid, and Summary field references are collected from explicit Summary field/value/filter locations. Dynamic visible KPI binding remains proven only for the exact UUID Summary shape; stale after-evidence must be replaced by refreshed/recalculated runtime evidence. Other Summary/KPI shapes remain unproven unless separately runtime-proven, and non-Summary analytics controls still require UUID/runtime-safe IDs with strict field validation.
+Version `0.6.39` releases the Summary layout-resource `ReportIds` contract fix. Layout-resource `Resource.ReportIds` is authoritative for Summary registration; top-level `Pages[].ReportIds` is optional compatibility metadata. Empty or missing top-level `Pages[].ReportIds` no longer fails Summary validation, but missing layout-resource `ReportIds`, matching `Resource.exts`, matching `Resource.tempVars`, Summary field/list metadata, or raw temp-variable visible text still fails. Dynamic KPI proof still requires the exact UUID Summary shape plus before/after mutation evidence. Marketing Event v1.0.17 static visible-value compatibility may pass with warnings only and is not dynamic KPI proof; Marketing Event v1.0.18 and the proven UUID KPI proof package pass.

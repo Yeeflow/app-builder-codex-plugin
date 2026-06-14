@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.39
+
+- Bump the active plugin version after the Summary layout-resource `ReportIds` contract fix.
+- Treat dashboard layout-resource `Resource.ReportIds` as the authoritative Summary registration location; top-level `Pages[].ReportIds` is optional compatibility metadata.
+- Stop failing Summary validation when top-level `Pages[].ReportIds` is empty or missing, while still failing missing layout-resource `ReportIds`, matching `Resource.exts`, matching `Resource.tempVars`, Summary field/list metadata, or raw temp-variable visible text.
+- Keep dynamic KPI proof scoped to the exact UUID Summary shape plus before/after mutation evidence; validator success alone is not runtime dynamic KPI proof.
+- Confirm the proven UUID KPI proof package passes, Marketing Event v1.0.17 passes with static-compatibility warnings only, Marketing Event v1.0.18 passes, and Data Analytics identity and Summary contract validators agree on layout-resource registration.
+
 ## 0.6.38
 
 - Bump the active plugin version after the Data Analytics Summary validator fix.
