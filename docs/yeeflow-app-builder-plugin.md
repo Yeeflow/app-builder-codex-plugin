@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.42
+- Version: 0.6.43
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.6.43` releases Phase 3B UI workflow enforcement. It adds `inspect-ui-closed-loop-workflow-enforcement.mjs` to validate workflow/report metadata only; it does not parse or mutate real YAPK packages, call Yeeflow APIs, generate packages, sign, install, import, upgrade, or create runtime evidence. It connects Phase 1, Phase 2, and Phase 3A gates at workflow/report level and enforces required artifacts for high-quality UI, design-fidelity, runtime-quality, and dynamic-KPI claims: UI contract, UI contract validation result, scope manifest for upgrade work, scope validation result, runtime evidence, runtime evidence validation result, design/runtime structure comparison findings, before/after KPI mutation evidence when dynamic KPI proof is claimed, and final report artifact paths. It reinforces that install/upgrade success is not visual proof, structure comparison is not dynamic KPI proof, and dynamic KPI proof requires before/after mutation evidence. Standard artifact paths are documented for generated UI contracts, UI upgrade scopes, redacted runtime evidence, design/runtime structure findings, and closed-loop workflow findings. This closes the planned UI-quality track; future work is normal incremental improvement unless a new runtime issue class is discovered.
 
 Version `0.6.42` releases Phase 3A UI closed-loop hard gates. It makes the closed-loop workflow mandatory for high-quality UI, design/mockup, dashboard redesign, runtime-proof, Marketing Event-style, and one-page-at-a-time work; requires UI contract generation, UI contract validation, scope manifest, scope validation, local UI/package hard gates, write confirmation before signing/install/upgrade, redacted runtime evidence, design/runtime structure comparison, and iteration on exact failing controls; reinforces that package validation, signing, install, upgrade-check, and upgrade-apply success are not visual proof; reinforces that dynamic KPI proof requires before/after mutation evidence; and adds Marketing Event-inspired synthetic regressions for missing contracts, missing runtime evidence, scope drift, Summary layout-resource registration, grid-table failures, fake upgrade success evidence, missing table sections, scaffold detection, strict warnings, and dynamic KPI proof boundaries. Phase 3B/future work remains deeper workflow enforcement around Phase 2 findings, broader synthetic Marketing Event regression expansion, and live runtime automation only after explicit authorization.
 
