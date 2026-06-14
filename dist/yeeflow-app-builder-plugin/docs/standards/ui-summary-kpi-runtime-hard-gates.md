@@ -24,6 +24,8 @@ node scripts/compare-design-to-runtime-structure.mjs --contract <ui-contract.md-
 
 Phase 2 adds structural design-to-runtime comparison. It is not pixel-perfect visual diffing and does not claim full automatic image understanding. It compares UI contract expectations against redacted runtime evidence, including Phase 1 evidence from `capture-runtime-ui-evidence.mjs`. When a design image is supplied without a reliable parser, the comparison must stay in contract-runtime mode, mark human review required, and emit a review warning. Runtime evidence is required before UI quality claims. Screenshots are helpful but not always mandatory unless high-quality visual proof is claimed. Dynamic KPI proof remains governed by before/after mutation evidence and the existing runtime/KPI validators.
 
+Phase 1 and Phase 2 are now stable closed-loop capabilities. Phase 3A makes the workflow stricter in hard-gate guidance and regression tests: design/mockup work must start with a generated and validated UI implementation contract; UI upgrades must define and validate a page/scope manifest; runtime evidence plus structural comparison is required before design fidelity claims; and agents must iterate the exact failing controls reported by the hard gates. Package validation/signing/install/upgrade success is not visual proof, and neither upgrade-check nor upgrade-apply success can be used as a substitute for redacted runtime evidence. Dynamic KPI proof remains separate and requires before/after mutation evidence. Real Marketing Event private artifacts are not committed; regression fixtures are synthetic/inspired.
+
 Run:
 
 ```sh
@@ -171,7 +173,7 @@ The comparison produces structured findings for page presence, sections, KPI car
 
 ## Runtime Screenshot Evidence
 
-Do not claim high-quality UI from schema validation, signing, install, upgrade-check, or API acceptance. Runtime screenshot/evidence must confirm KPI values are visible, hidden Summary controls are not visible, dashboard cards are card-like, filters/actions are visible, tables/grids are not empty scaffolds, badges/chips are distinct, and the page does not look like a plain scaffold.
+Do not claim high-quality UI from schema validation, package validation, signing, install, upgrade-check, upgrade-apply, or API acceptance. Runtime screenshot/evidence must confirm KPI values are visible, hidden Summary controls are not visible, dashboard cards are card-like, filters/actions are visible, tables/grids are not empty scaffolds, badges/chips are distinct, and the page does not look like a plain scaffold.
 
 Run:
 

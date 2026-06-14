@@ -33,6 +33,10 @@ const requiredPhrases = [
 ];
 
 const requiredValidatorNames = [
+  "scripts/generate-ui-contract-from-design.mjs",
+  "scripts/validate-ui-upgrade-scope.mjs",
+  "scripts/capture-runtime-ui-evidence.mjs",
+  "scripts/compare-design-to-runtime-structure.mjs",
   "scripts/inspect-yeeflow-ui-design-contract.mjs",
   "scripts/inspect-dashboard-style-shapes.mjs",
   "scripts/inspect-dashboard-summary-control-contract.mjs",
@@ -42,6 +46,22 @@ const requiredValidatorNames = [
   "scripts/inspect-grid-table-quality.mjs",
   "scripts/inspect-yapk-upgrade-app-identity.mjs",
   "scripts/decode-yapk-tolerant-brotli.mjs",
+];
+
+const phase3RequiredPhrases = [
+  "Design/mockup reference -> generate UI implementation contract -> validate UI contract -> define page/scope manifest -> generate or update one allowed page/scope only -> validate upgrade scope -> run local UI/package hard gates -> sign/install/upgrade only after write confirmation -> capture redacted runtime evidence -> compare design/runtime structure -> iterate exact failing controls",
+  "Run `scripts/generate-ui-contract-from-design.mjs` before generation when a design/mockup exists",
+  "run `scripts/validate-ui-upgrade-scope.mjs` before package mutation",
+  "Use `scripts/capture-runtime-ui-evidence.mjs` after runtime install/upgrade",
+  "Compare design/runtime structure before claiming design fidelity",
+  "Package validation, schema validation, signing, install, upgrade-check, and upgrade-apply are not visual proof",
+  "Structure comparison cannot establish dynamic KPI proof",
+  "no UI contract exists for a design/mockup request",
+  "scope validation fails",
+  "structure comparison has fail findings",
+  "structure comparison has warning findings and the user requested strict quality",
+  "package signing/install/upgrade succeeded but visual/runtime evidence is missing",
+  "Real Marketing Event private artifacts must not be committed; use synthetic or redacted Marketing Event-inspired fixtures only",
 ];
 
 const updatedSkills = [
@@ -111,8 +131,12 @@ if (primarySkillsRoot.label === "source" && fs.existsSync(distNewSkill)) {
 
 for (const currentSkillPath of skillRoots.map(({ root }) => skillPath(root, newSkill))) {
   const content = fs.readFileSync(currentSkillPath, "utf8");
+  const normalizedContent = content.toLowerCase();
   for (const validatorName of requiredValidatorNames) {
     assert.equal(content.includes(validatorName), true, `${currentSkillPath} missing validator reference: ${validatorName}`);
+  }
+  for (const phrase of phase3RequiredPhrases) {
+    assert.equal(normalizedContent.includes(phrase.toLowerCase()), true, `${currentSkillPath} missing Phase 3A phrase: ${phrase}`);
   }
 }
 
@@ -133,6 +157,28 @@ for (const docPath of docs) {
   assert.match(content, /yeeflow-ui-generation-hard-gates/, `${docPath} missing skill name`);
   for (const phrase of requiredPhrases) {
     assert.equal(normalizedContent.includes(phrase.toLowerCase()), true, `${docPath} missing phrase: ${phrase}`);
+  }
+}
+
+const phase3DocCandidates = [
+  path.join(ROOT, "docs", "quick-start.md"),
+  path.join(ROOT, "dist", "yeeflow-app-builder-plugin", "docs", "quick-start.md"),
+  path.join(ROOT, "docs", "standards", "ui-summary-kpi-runtime-hard-gates.md"),
+  path.join(ROOT, "dist", "yeeflow-app-builder-plugin", "docs", "standards", "ui-summary-kpi-runtime-hard-gates.md"),
+  path.join(ROOT, "docs", "yeeflow-app-builder-plugin-user-guide.md"),
+  path.join(ROOT, "dist", "yeeflow-app-builder-plugin", "docs", "yeeflow-app-builder-plugin-user-guide.md"),
+].filter((docPath) => fs.existsSync(docPath));
+
+for (const docPath of phase3DocCandidates) {
+  const content = fs.readFileSync(docPath, "utf8").toLowerCase();
+  for (const phrase of [
+    "Phase 3A makes the workflow stricter in hard-gate guidance and regression tests",
+    "Package validation/signing/install/upgrade success is not visual proof",
+    "Runtime evidence plus structural comparison is required before design fidelity claims",
+    "Dynamic KPI proof remains separate and requires before/after mutation evidence",
+    "Real Marketing Event private artifacts are not committed; regression fixtures are synthetic/inspired",
+  ]) {
+    assert.equal(content.includes(phrase.toLowerCase()), true, `${docPath} missing Phase 3A doc phrase: ${phrase}`);
   }
 }
 

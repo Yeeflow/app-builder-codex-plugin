@@ -44,6 +44,14 @@ const childTests = [
       "compare-design-to-runtime-structure",
     ],
   },
+  {
+    name: "Phase 3A closed-loop hard-gate regression suite",
+    command: ["scripts/test-ui-closed-loop-phase3.mjs"],
+    validators: [
+      "closed-loop workflow enforcement",
+      "Marketing Event-inspired synthetic regressions",
+    ],
+  },
 ];
 
 const results = [];
