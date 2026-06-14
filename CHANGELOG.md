@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.40
+
+- Bump the active plugin version after Phase 1 of the high-quality UI closed-loop infrastructure.
+- Add `scripts/generate-ui-contract-from-design.mjs` for design/mockup-to-contract scaffolding with human-review-required boundaries when no reliable vision parser is available.
+- Add `scripts/capture-runtime-ui-evidence.mjs` for redacted runtime UI evidence capture compatible with the existing runtime/KPI inspectors.
+- Add `scripts/validate-ui-upgrade-scope.mjs` for page/scope validation that blocks unrelated ListSetID, app identity, page/resource, list/field, form, workflow, navigation, and numeric ID drift during UI upgrades.
+- Strengthen the workflow from agent discipline to contract -> scope gate -> runtime evidence, while keeping redaction-safe evidence boundaries explicit.
+- Keep Phase 2 as visual structure comparison and Phase 3 as deeper hard-gate integration plus Marketing Event regression expansion.
+- Do not claim pixel-perfect visual diffing or full automatic image understanding in this release.
+
 ## 0.6.39
 
 - Bump the active plugin version after the Summary layout-resource `ReportIds` contract fix.
