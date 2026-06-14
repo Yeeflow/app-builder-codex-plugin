@@ -10,12 +10,12 @@ Generated Summary controls must include:
 
 - `attrs.data.list`
 - an aggregate field through `attrs.field` or an equivalent export-proven field slot
-- a matching page `exts[]` entry
+- a matching layout-resource `Resource.exts[]` entry
 - `exts[].category = "___Pivot___"`
 - `exts[].key = "summary"`
 - `exts[].i` equal to the Summary control id
 - `exts[].attr.settings.values[]` with field, field type, and aggregate function
-- registration in the dashboard `Resource.ReportIds[]`
+- registration in the dashboard layout-resource `Resource.ReportIds[]`
 
 Dashboard filters must be wired end to end:
 

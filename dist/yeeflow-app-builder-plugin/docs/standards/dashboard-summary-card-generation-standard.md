@@ -1,6 +1,6 @@
 # Dashboard Summary Card Generation Standard
 
-Official v0.6.19 adds a stricter runtime-binding companion standard in `docs/standards/dashboard-runtime-binding-standard.md`. Use this file for the Summary card host/control scope, and use the runtime-binding standard to verify `attrs.data.list`, aggregate field binding, matching `page.exts[]`, `settings.values[]`, filter consumption, lookup filter record-id behavior, and `Resource.ReportIds[]` registration.
+Official v0.6.19 adds a stricter runtime-binding companion standard in `docs/standards/dashboard-runtime-binding-standard.md`. Use this file for the Summary card host/control scope, and use the runtime-binding standard to verify `attrs.data.list`, aggregate field binding, matching layout-resource `Resource.exts[]`, `settings.values[]`, filter consumption, lookup filter record-id behavior, and layout-resource `Resource.ReportIds[]` registration.
 
 The UI/Summary/KPI hard gates in `docs/standards/ui-summary-kpi-runtime-hard-gates.md` are now required for generated-final dashboard claims. Summary/KPI generation has three separate proof states: designer-configured Summary control, validator-valid Summary contract, and runtime-proven visible dynamic KPI rendering. Do not collapse these into one claim.
 
@@ -188,7 +188,7 @@ Each Summary control must define:
 - Target dashboard/form temporary variable.
 - `save_var` as a designer-exported expression object, not a plain string.
 - Clear control name in Navigator.
-- Page `ReportIds` coverage for the Summary control ID.
+- Layout-resource `Resource.ReportIds` coverage for the Summary control ID. Top-level `Pages[].ReportIds` is optional compatibility metadata only and is not the primary generated dashboard Summary registration path.
 
 Examples:
 

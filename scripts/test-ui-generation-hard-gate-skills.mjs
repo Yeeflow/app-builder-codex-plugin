@@ -15,7 +15,7 @@ const requiredPhrases = [
   "uncertain UI/runtime patterns should be proven on a sandbox page first",
   "use export-proven Yeeflow control/style shapes",
   "Summary/KPI controls require designer-shaped hidden Summary configuration",
-  "Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, and `ReportIds`",
+  "Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, layout-resource `Resource.ReportIds`, matching layout-resource `Resource.exts`, and layout-resource `Resource.tempVars`; top-level `Pages[].ReportIds` is optional compatibility metadata",
   "dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape",
   "before/after mutation proof",
   "refreshed/recalculated runtime evidence",

@@ -60,7 +60,7 @@ Hidden Summary controls must live in a dedicated hidden container with:
 
 Each Summary must resolve to the current app, a real list, and real field metadata. `attrs.data.field`, `attrs.field`, `fieldObject`, and `fieldInfo` must be populated consistently. Count summaries require valid count/ListDataID shape where required. Sum and average summaries must use numeric fields. Filters must use designer-compatible condition/filter shapes, unless intentionally documented as an all-record KPI.
 
-Every Summary must save to a unique temp variable with the designer-exported expression-object `save_var` shape, not a plain string. Page `ReportIds` must include the Summary control IDs.
+Every Summary must save to a unique temp variable with the designer-exported expression-object `save_var` shape, not a plain string. Summary control IDs must be registered in `Pages[].LayoutInResources[].Resource.ReportIds`. Top-level `Pages[].ReportIds` is optional compatibility metadata and must not be required unless proven by official exports.
 
 Run:
 
