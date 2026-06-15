@@ -23,6 +23,31 @@ The extension registry is stored at:
 
 The raw product catalog is not committed in this branch. The normalized registry keeps product control IDs, control types, property paths, value types, device-shape flags, descriptions, enum metadata, and source confidence.
 
+## Evidence-Backed Extension Patterns
+
+The normalized registry remains the product-catalog source of truth. Extension entries are layered on top of it; they do not replace product-catalog semantics and must not be promoted to official catalog status unless a future product catalog includes them.
+
+The extension registry can contain two kinds of study-backed knowledge:
+
+- `extensions[]`: individual property paths that are missing from the product catalog but have explicit evidence.
+- `patterns[]`: named visual-fidelity patterns that combine product-catalog paths with export/runtime-study observations.
+
+Agents must consult the base registry first, then apply approved extension patterns only when visual fidelity requires known combinations. Unknown properties remain review-required unless supported by either the product catalog or an evidence-backed extension.
+
+Current evidence-backed visual patterns include:
+
+- `radio-filter.dropdown.visual-fidelity.180px`: a fixed-width radio-filter dropdown pattern for compact Region-style filters.
+- `relative-period.dropdown.visual-fidelity.180px`: a fixed-width relative-period dropdown pattern with required field and nonempty choice-options.
+- `icon.filter.native.16px`: a native filter icon pattern using the real Yeeflow icon control with 16px icon sizing.
+
+Data Filter dropdown visual fidelity has three layers:
+
+1. wrapper layer: `attrs.style` and `attrs.common` sizing, margin, padding, border, and layout.
+2. input layer: `attrs.edit` placeholder, text, border, radius, padding, and foreground color.
+3. dropdown panel layer: `attrs.dropdown.body` panel radius and shadow.
+
+Native filter icon fidelity requires a real `icon` control, not a heading/text glyph, with `attrs.icon.icon = "fa-regular fa-filter"` and 16px sizing.
+
 ## Generation Rules
 
 - Generated UI controls must use legal product-catalog property paths or explicit extension-registry paths.

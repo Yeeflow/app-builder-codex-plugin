@@ -92,6 +92,39 @@ Filters must be real Yeeflow Data Filter controls:
 
 Do not simulate filter controls with static Text or decorative containers. Visible filters without target consumption are not functional UI proof.
 
+### Data Filter Dropdown Visual Fidelity
+
+Real Data Filter controls are required, but they are not sufficient for high-fidelity generated design/runtime alignment. High-fidelity dropdown filters must use approved extension-backed patterns from `docs/reference/yeeflow-control-property-extensions.json`.
+
+For compact Event Portfolio-style filter rows:
+
+- Region-like filters use the `radio-filter.dropdown.visual-fidelity.180px` pattern.
+- Period-like filters use the `relative-period.dropdown.visual-fidelity.180px` pattern.
+- Both patterns are fixed `180px` wide and keep display titles hidden.
+- Relative Period filters must include a valid `attrs.field` and nonempty `attrs.choice-options`.
+
+Dropdown visual fidelity must be checked across three layers:
+
+1. wrapper layer: `attrs.style` and `attrs.common` define fixed width/height, alignment, zero margin, zero padding, and border handling.
+2. input layer: `attrs.edit` defines placeholder color, text color, border type/color/radius, padding, and foreground color.
+3. dropdown panel layer: `attrs.dropdown.body` defines panel radius and shadow.
+
+Unknown Data Filter property paths remain review-required unless they are product-catalog-backed or extension-backed by redacted export/runtime evidence.
+
+### Native Filter Icon Fidelity
+
+Filter affordances should use native Yeeflow `icon` controls, not heading/text glyphs or static characters. The approved extension-backed pattern is `icon.filter.native.16px`:
+
+- `type` is `icon`.
+- `attrs.icon.icon` is `fa-regular fa-filter`.
+- `attrs.icon.view` is `default`.
+- `attrs.icon.shape` is `2`.
+- `attrs.icon.align` centers the icon.
+- `attrs.icon.size` is `16px`.
+- wrapper margin and padding are zero when the icon is used inside a compact filter chip.
+
+This is still metadata validation only. It does not claim pixel-perfect visual diffing or automatic screenshot understanding.
+
 ## KPI Card Golden Pattern
 
 KPI cards should follow the manual first-card golden pattern:

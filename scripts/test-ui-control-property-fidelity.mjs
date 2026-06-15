@@ -33,6 +33,17 @@ function run() {
   testMockRuntimeBoundaryPasses();
   testDynamicKpiProofMissingFails();
   testKnowledgeBaseBoundaryReported();
+  testRadioFilterDropdownVisualPatternPasses();
+  testRadioFilterMissingInputStyleFails();
+  testRadioFilterMissingDropdownShadowFails();
+  testRadioFilterWrongWidthFails();
+  testRelativePeriodDropdownVisualPatternPasses();
+  testRelativePeriodMissingFieldFails();
+  testRelativePeriodMissingChoicesFails();
+  testNativeFilterIconPasses();
+  testFilterIconTextGlyphFails();
+  testFilterIconSizeFails();
+  testExtensionOnlyWithoutEvidenceWarns();
   testCliSmoke();
   if (isSourceRepo) testDistMirror();
 }
@@ -124,6 +135,100 @@ function testKnowledgeBaseBoundaryReported() {
   cases.push("Pass: control-property fidelity report references the Yeeflow control property knowledge base");
 }
 
+function testRadioFilterDropdownVisualPatternPasses() {
+  const spec = goodSpec();
+  spec.dataFilters[0] = visualDataFilter("Region", "radio-filter", "radio-filter.dropdown.visual-fidelity.180px", "regionFilter");
+  const report = inspectFixture("radio-filter-visual-pattern-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: radio-filter dropdown with full visual-fidelity 180px extension pattern");
+}
+
+function testRadioFilterMissingInputStyleFails() {
+  const spec = goodSpec();
+  spec.dataFilters[0] = visualDataFilter("Region", "radio-filter", "radio-filter.dropdown.visual-fidelity.180px", "regionFilter");
+  delete spec.dataFilters[0].attrs.edit;
+  expectFail("Fail: radio-filter dropdown missing attrs.edit input styling", inspectFixture("radio-filter-missing-input.json", spec), "DATA_FILTER_INPUT_STYLE_MISMATCH");
+}
+
+function testRadioFilterMissingDropdownShadowFails() {
+  const spec = goodSpec();
+  spec.dataFilters[0] = visualDataFilter("Region", "radio-filter", "radio-filter.dropdown.visual-fidelity.180px", "regionFilter");
+  delete spec.dataFilters[0].attrs.dropdown.body.border.boxShadow;
+  expectFail("Fail: radio-filter dropdown missing dropdown body shadow", inspectFixture("radio-filter-missing-shadow.json", spec), "DATA_FILTER_DROPDOWN_PANEL_STYLE_MISSING");
+}
+
+function testRadioFilterWrongWidthFails() {
+  const spec = goodSpec();
+  spec.dataFilters[0] = visualDataFilter("Region", "radio-filter", "radio-filter.dropdown.visual-fidelity.180px", "regionFilter");
+  spec.dataFilters[0].attrs.style.width = [null, 160];
+  expectFail("Fail: radio-filter dropdown width is not fixed 180px", inspectFixture("radio-filter-wrong-width.json", spec), "DATA_FILTER_FIXED_WIDTH_MISMATCH");
+}
+
+function testRelativePeriodDropdownVisualPatternPasses() {
+  const spec = goodSpec();
+  spec.dataFilters[1] = visualDataFilter("Period", "relative-period", "relative-period.dropdown.visual-fidelity.180px", "periodFilter");
+  const report = inspectFixture("relative-period-visual-pattern-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: relative-period dropdown with field, choice-options, and full visual-fidelity 180px pattern");
+}
+
+function testRelativePeriodMissingFieldFails() {
+  const spec = goodSpec();
+  spec.dataFilters[1] = visualDataFilter("Period", "relative-period", "relative-period.dropdown.visual-fidelity.180px", "periodFilter");
+  delete spec.dataFilters[1].attrs.field;
+  expectFail("Fail: relative-period missing field", inspectFixture("relative-period-missing-field.json", spec), "RELATIVE_PERIOD_FIELD_MISSING");
+}
+
+function testRelativePeriodMissingChoicesFails() {
+  const spec = goodSpec();
+  spec.dataFilters[1] = visualDataFilter("Period", "relative-period", "relative-period.dropdown.visual-fidelity.180px", "periodFilter");
+  spec.dataFilters[1].attrs["choice-options"] = [];
+  expectFail("Fail: relative-period missing choice-options", inspectFixture("relative-period-missing-choices.json", spec), "RELATIVE_PERIOD_CHOICES_MISSING");
+}
+
+function testNativeFilterIconPasses() {
+  const spec = goodSpec();
+  spec.filterIcon = nativeFilterIcon();
+  const report = inspectFixture("native-filter-icon-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: native filter icon with fa-regular fa-filter and 16px size");
+}
+
+function testFilterIconTextGlyphFails() {
+  const spec = goodSpec();
+  spec.filterIcon = {
+    controlType: "heading",
+    type: "heading",
+    extensionPatternId: "icon.filter.native.16px",
+    attrs: { headc: { title: { value: "Filter" } } },
+  };
+  expectFail("Fail: filter icon implemented as heading/text glyph", inspectFixture("filter-icon-text-glyph.json", spec), "FILTER_ICON_NOT_NATIVE_ICON_CONTROL");
+}
+
+function testFilterIconSizeFails() {
+  const spec = goodSpec();
+  spec.filterIcon = nativeFilterIcon();
+  spec.filterIcon.attrs.icon.size = [null, 32];
+  expectFail("Fail: native icon control missing size or using default 32px", inspectFixture("filter-icon-size-32.json", spec), "FILTER_ICON_SIZE_MISMATCH");
+}
+
+function testExtensionOnlyWithoutEvidenceWarns() {
+  const spec = goodSpec();
+  spec.extensionProperties = [
+    {
+      controlType: "radio-filter",
+      propertyPath: "attrs.dropdown.body.border.futureShadow",
+      status: "needs_study",
+      confidence: "needs_study",
+      evidenceBacked: false,
+    },
+  ];
+  const report = inspectFixture("extension-without-evidence.json", spec);
+  assert.equal(report.status, "warning", JSON.stringify(report.findings, null, 2));
+  assertHasCode(report, "EXTENSION_PATTERN_NOT_EVIDENCE_BACKED");
+  cases.push("Warn/fail: extension-only property path without evidence-backed extension metadata");
+}
+
 function testCliSmoke() {
   const candidate = writeJson("cli-candidate.json", goodSpec());
   const result = spawnSync(process.execPath, [
@@ -209,6 +314,109 @@ function dataFilter(name, filterMode, width, filterVariable) {
       },
     },
     filterVariable,
+  };
+}
+
+function visualDataFilter(name, nativeType, extensionPatternId, filterVariable) {
+  const attrs = {
+    layout: "dropdown",
+    displayStyle: "dropdown",
+    "dropdown-enable": true,
+    "search-enable": false,
+    "more-enable": false,
+    displayTitle: false,
+    lablay: [null, "hide"],
+    placeholder: name === "Region" ? "Select region..." : "Select period...",
+    style: {
+      gap: [null, 0],
+      direction: [null, "column"],
+      widthtype: [null, "1"],
+      width: [null, 180],
+      widthu: [null, "px"],
+      align_items: [null, "stretch"],
+      justify_content: [null, "center"],
+      wrap: [null, "nowrap"],
+    },
+    common: {
+      positioning: { widthtype: [null, "1"] },
+      sizing: {
+        width: [null, 180],
+        minWidth: [null, 180],
+        maxWidth: [null, 180],
+        height: [null, 48],
+        minHeight: [null, 48],
+        maxHeight: [null, 48],
+      },
+      margin: [null, { top: 0, right: 0, bottom: 0, left: 0 }],
+      padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }],
+      border: { normal: { type: "0", color: "transparent" } },
+    },
+    edit: {
+      placeholder: { color: "#5f6b7a" },
+      normal: {
+        color: "#263241",
+        border: {
+          type: "1",
+          color: "var(--c--neutral-light-active)",
+          radius: 8,
+        },
+      },
+      pd: 8,
+      pcolor: "var(--c--neutral-dark-hover)",
+    },
+    dropdown: {
+      body: {
+        border: {
+          radius: 8,
+          boxShadow: "0 14px 30px rgba(15, 23, 42, 0.16)",
+        },
+      },
+    },
+  };
+  if (nativeType === "relative-period") {
+    attrs.field = { FieldName: "StartDate", Title: "Start Date" };
+    attrs["choice-options"] = [{ label: "This Quarter", value: "this-quarter" }];
+  }
+  return {
+    name,
+    controlType: "Data Filter",
+    type: nativeType,
+    filterMode: nativeType,
+    displayStyle: "dropdown",
+    displayTitleHidden: true,
+    margin: 0,
+    padding: 0,
+    border: "none",
+    placeholderStyle: "compact-muted",
+    wrapperAttrs: { style: { width: 180, height: 48, widthtype: "3" } },
+    filterVariable,
+    extensionPatternId,
+    attrs,
+  };
+}
+
+function nativeFilterIcon() {
+  return {
+    controlType: "icon",
+    type: "icon",
+    extensionPatternId: "icon.filter.native.16px",
+    attrs: {
+      icon: {
+        icon: "fa-regular fa-filter",
+        view: "default",
+        shape: "2",
+        align: [null, "center"],
+        size: [null, 16],
+      },
+      common: {
+        positioning: { widthtype: [null, "2"] },
+        margin: [null, { top: 0, right: 0, bottom: 0, left: 0 }],
+        padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }],
+      },
+      style: {
+        widthtype: [null, "2"],
+      },
+    },
   };
 }
 

@@ -58,6 +58,121 @@ const FINDING_MESSAGES = {
   KPI_TEXT_STACK_LAYOUT_MISMATCH: "KPI card text stack/value/trend layout does not match the golden pattern.",
   GRID_USED_WHERE_CONTAINER_REQUIRED: "Use Container for visual composition rows/cards unless a real data grid is required.",
   DYNAMIC_KPI_PROOF_MISSING: "Dynamic KPI proof requires before/after mutation evidence.",
+  DATA_FILTER_DROPDOWN_VISUAL_PATTERN_MISSING: "Data Filter dropdown is missing an evidence-backed visual-fidelity pattern.",
+  DATA_FILTER_WRAPPER_STYLE_MISMATCH: "Data Filter wrapper style does not match the evidence-backed visual-fidelity pattern.",
+  DATA_FILTER_INPUT_STYLE_MISMATCH: "Data Filter input style does not match the evidence-backed visual-fidelity pattern.",
+  DATA_FILTER_DROPDOWN_PANEL_STYLE_MISSING: "Data Filter dropdown panel style is missing required radius or shadow metadata.",
+  DATA_FILTER_FIXED_WIDTH_MISMATCH: "Data Filter fixed width/sizing does not match the evidence-backed visual-fidelity pattern.",
+  DATA_FILTER_LABEL_NOT_HIDDEN: "Data Filter display title/label must be hidden for the evidence-backed dropdown pattern.",
+  RELATIVE_PERIOD_FIELD_MISSING: "Relative Period filter is missing required field metadata.",
+  RELATIVE_PERIOD_CHOICES_MISSING: "Relative Period filter is missing nonempty choice-options.",
+  FILTER_ICON_NOT_NATIVE_ICON_CONTROL: "Filter icon must use a native Yeeflow icon control, not heading/text glyphs.",
+  FILTER_ICON_SIZE_MISMATCH: "Filter icon size does not match the evidence-backed 16px native icon pattern.",
+  EXTENSION_PATTERN_NOT_EVIDENCE_BACKED: "Declared extension pattern is not present as evidence-backed metadata in the extension registry.",
+};
+
+const DATA_FILTER_VISUAL_PATTERNS = {
+  "radio-filter.dropdown.visual-fidelity.180px": {
+    controlType: "radio-filter",
+    fixedWidth: 180,
+    required: {
+      type: "radio-filter",
+      "attrs.layout": "dropdown",
+      "attrs.displayStyle": "dropdown",
+      "attrs.dropdown-enable": true,
+      "attrs.search-enable": false,
+      "attrs.more-enable": false,
+      "attrs.displayTitle": false,
+      "attrs.lablay": [null, "hide"],
+      "attrs.placeholder": "present",
+      "attrs.style.gap": [null, 0],
+      "attrs.style.direction": [null, "column"],
+      "attrs.style.widthtype": [null, "1"],
+      "attrs.style.width": [null, 180],
+      "attrs.style.widthu": [null, "px"],
+      "attrs.style.align_items": [null, "stretch"],
+      "attrs.style.justify_content": [null, "center"],
+      "attrs.style.wrap": [null, "nowrap"],
+      "attrs.common.positioning.widthtype": [null, "1"],
+      "attrs.common.sizing.width": [null, 180],
+      "attrs.common.sizing.minWidth": [null, 180],
+      "attrs.common.sizing.maxWidth": [null, 180],
+      "attrs.common.sizing.height": [null, 48],
+      "attrs.common.sizing.minHeight": [null, 48],
+      "attrs.common.sizing.maxHeight": [null, 48],
+      "attrs.common.margin": "zero",
+      "attrs.common.padding": "zero",
+      "attrs.common.border.normal.type": "0",
+      "attrs.common.border.normal.color": "transparent",
+      "attrs.edit.placeholder.color": "#5f6b7a",
+      "attrs.edit.normal.color": "#263241",
+      "attrs.edit.normal.border.type": "1",
+      "attrs.edit.normal.border.color": "var(--c--neutral-light-active)",
+      "attrs.edit.normal.border.radius": 8,
+      "attrs.edit.pd": 8,
+      "attrs.edit.pcolor": "var(--c--neutral-dark-hover)",
+      "attrs.dropdown.body.border.boxShadow": "present",
+    },
+  },
+  "relative-period.dropdown.visual-fidelity.180px": {
+    controlType: "relative-period",
+    fixedWidth: 180,
+    required: {
+      type: "relative-period",
+      "attrs.layout": "dropdown",
+      "attrs.displayStyle": "dropdown",
+      "attrs.dropdown-enable": true,
+      "attrs.search-enable": false,
+      "attrs.more-enable": false,
+      "attrs.displayTitle": false,
+      "attrs.lablay": [null, "hide"],
+      "attrs.placeholder": "present",
+      "attrs.field": "present",
+      "attrs.choice-options": "nonempty",
+      "attrs.style.gap": [null, 0],
+      "attrs.style.direction": [null, "column"],
+      "attrs.style.widthtype": [null, "1"],
+      "attrs.style.width": [null, 180],
+      "attrs.style.widthu": [null, "px"],
+      "attrs.style.align_items": [null, "stretch"],
+      "attrs.style.justify_content": [null, "center"],
+      "attrs.style.wrap": [null, "nowrap"],
+      "attrs.common.positioning.widthtype": [null, "1"],
+      "attrs.common.sizing.width": [null, 180],
+      "attrs.common.sizing.minWidth": [null, 180],
+      "attrs.common.sizing.maxWidth": [null, 180],
+      "attrs.common.sizing.height": [null, 48],
+      "attrs.common.sizing.minHeight": [null, 48],
+      "attrs.common.sizing.maxHeight": [null, 48],
+      "attrs.common.margin": "zero",
+      "attrs.common.padding": "zero",
+      "attrs.common.border.normal.type": "0",
+      "attrs.common.border.normal.color": "transparent",
+      "attrs.edit.placeholder.color": "#5f6b7a",
+      "attrs.edit.normal.color": "#263241",
+      "attrs.edit.normal.border.type": "1",
+      "attrs.edit.normal.border.color": "var(--c--neutral-light-active)",
+      "attrs.edit.normal.border.radius": 8,
+      "attrs.edit.pd": 8,
+      "attrs.edit.pcolor": "var(--c--neutral-dark-hover)",
+      "attrs.dropdown.body.border.radius": 8,
+      "attrs.dropdown.body.border.boxShadow": "present",
+    },
+  },
+};
+
+const FILTER_ICON_PATTERN_ID = "icon.filter.native.16px";
+const FILTER_ICON_PATTERN = {
+  type: "icon",
+  "attrs.icon.icon": "fa-regular fa-filter",
+  "attrs.icon.view": "default",
+  "attrs.icon.shape": "2",
+  "attrs.icon.align": [null, "center"],
+  "attrs.icon.size": [null, 16],
+  "attrs.common.positioning.widthtype": [null, "2"],
+  "attrs.common.margin": "zero",
+  "attrs.common.padding": "zero",
+  "attrs.style.widthtype": [null, "2"],
 };
 
 if (isMainModule()) {
@@ -103,6 +218,8 @@ export function inspectUiControlPropertyFidelity({
   if (!findings.some((finding) => finding.severity === "error")) {
     validateFilterActionRow(candidateSpec, referenceSpec, findings);
     validateDataFilters(candidateSpec, referenceSpec, findings);
+    validateFilterIcon(candidateSpec, findings);
+    validateExtensionOnlyProperties(candidateSpec, findings);
     validateActions(candidateSpec, findings);
     validateKpiCards(candidateSpec, referenceSpec, findings);
     validateKpiProofBoundary(candidateSpec, findings);
@@ -127,6 +244,7 @@ export function inspectUiControlPropertyFidelity({
         filterVariable: filter.filterVariable || null,
         consumedBy: filter.consumedBy || [],
       })),
+      filterIconType: candidateSpec.filterIcon?.controlType || null,
       kpiCardCount: candidateSpec.kpiCards.length,
       actionCount: candidateSpec.actions.length,
     },
@@ -241,6 +359,89 @@ function validateDataFilters(spec, reference, findings) {
         filterVariable: filter.filterVariable,
       });
     }
+    validateDataFilterVisualPattern(filter, findings);
+  }
+}
+
+function validateDataFilterVisualPattern(filter, findings) {
+  const patternId = filter.extensionPatternId || filter.visualFidelityPattern || filter.visualPattern;
+  if (!patternId && !filter.requiresVisualFidelityPattern) return;
+  if (!patternId) {
+    addFinding(findings, "error", "DATA_FILTER_DROPDOWN_VISUAL_PATTERN_MISSING", `${filter.name || "Filter"} requires an evidence-backed Data Filter dropdown pattern.`);
+    return;
+  }
+  const pattern = DATA_FILTER_VISUAL_PATTERNS[patternId];
+  if (!pattern) {
+    addFinding(findings, "error", "EXTENSION_PATTERN_NOT_EVIDENCE_BACKED", `${patternId} is not an evidence-backed Data Filter visual pattern.`);
+    return;
+  }
+  assertEvidenceBackedPattern(patternId, findings);
+
+  const actualType = filter.type || filter.nativeType || filter.filterMode;
+  if (actualType !== pattern.controlType) {
+    addFinding(findings, "error", "DATA_FILTER_DROPDOWN_VISUAL_PATTERN_MISSING", `${filter.name || "Filter"} must declare native type ${pattern.controlType}.`, {
+      expected: pattern.controlType,
+      actual: actualType || null,
+    });
+  }
+  for (const [propertyPath, expected] of Object.entries(pattern.required)) {
+    const actual = propertyPath === "type" ? actualType : deepGet(filter, propertyPath);
+    if (!matchesExpected(actual, expected)) {
+      addFinding(findings, "error", classifyDataFilterPatternPath(propertyPath), `${filter.name || "Filter"} does not match ${patternId} at ${propertyPath}.`, {
+        propertyPath,
+        expected,
+        actual,
+      });
+    }
+  }
+}
+
+function classifyDataFilterPatternPath(propertyPath) {
+  if (propertyPath === "attrs.field") return "RELATIVE_PERIOD_FIELD_MISSING";
+  if (propertyPath === "attrs.choice-options") return "RELATIVE_PERIOD_CHOICES_MISSING";
+  if (propertyPath === "attrs.displayTitle" || propertyPath === "attrs.lablay") return "DATA_FILTER_LABEL_NOT_HIDDEN";
+  if (propertyPath.includes(".sizing.") || propertyPath.endsWith(".width") || propertyPath.endsWith(".widthu")) return "DATA_FILTER_FIXED_WIDTH_MISMATCH";
+  if (propertyPath.startsWith("attrs.style.") || propertyPath.startsWith("attrs.common.")) return "DATA_FILTER_WRAPPER_STYLE_MISMATCH";
+  if (propertyPath.startsWith("attrs.edit.")) return "DATA_FILTER_INPUT_STYLE_MISMATCH";
+  if (propertyPath.startsWith("attrs.dropdown.")) return "DATA_FILTER_DROPDOWN_PANEL_STYLE_MISSING";
+  return "DATA_FILTER_DROPDOWN_VISUAL_PATTERN_MISSING";
+}
+
+function validateFilterIcon(spec, findings) {
+  const icon = spec.filterIcon;
+  if (!icon) return;
+  const patternId = icon.extensionPatternId || icon.visualFidelityPattern || icon.visualPattern || (icon.requiresNativeFilterIcon ? FILTER_ICON_PATTERN_ID : null);
+  if (!patternId) return;
+  if (patternId !== FILTER_ICON_PATTERN_ID) {
+    addFinding(findings, "error", "EXTENSION_PATTERN_NOT_EVIDENCE_BACKED", `${patternId} is not an evidence-backed filter icon pattern.`);
+    return;
+  }
+  assertEvidenceBackedPattern(patternId, findings);
+  if (icon.controlType !== "icon" && icon.type !== "icon") {
+    addFinding(findings, "error", "FILTER_ICON_NOT_NATIVE_ICON_CONTROL", "Filter icon must use a native Yeeflow icon control.");
+    return;
+  }
+  for (const [propertyPath, expected] of Object.entries(FILTER_ICON_PATTERN)) {
+    const actual = propertyPath === "type" ? icon.type || icon.controlType : deepGet(icon, propertyPath);
+    if (!matchesExpected(actual, expected)) {
+      addFinding(findings, "error", propertyPath === "attrs.icon.size" ? "FILTER_ICON_SIZE_MISMATCH" : "FILTER_ICON_NOT_NATIVE_ICON_CONTROL", `Filter icon does not match ${FILTER_ICON_PATTERN_ID} at ${propertyPath}.`, {
+        propertyPath,
+        expected,
+        actual,
+      });
+    }
+  }
+}
+
+function validateExtensionOnlyProperties(spec, findings) {
+  for (const property of spec.extensionProperties) {
+    if (property.evidenceBacked === false || property.status === "needs_study" || property.confidence === "needs_study") {
+      addFinding(findings, "warning", "EXTENSION_PATTERN_NOT_EVIDENCE_BACKED", `${property.propertyPath || "Extension property"} is not evidence-backed for strong visual-fidelity claims.`, {
+        propertyPath: property.propertyPath || null,
+        status: property.status || null,
+        confidence: property.confidence || null,
+      });
+    }
   }
 }
 
@@ -296,6 +497,8 @@ function normalizeSpec(data) {
     page: root.page || root.pageName || null,
     filterActionRow: normalizeControl(root.filterActionRow || root.filterActionContainer || root.headerFilterActionParent),
     dataFilters: normalizeArray(root.dataFilters || root.filters).map(normalizeFilter),
+    filterIcon: root.filterIcon ? normalizeFilterIcon(root.filterIcon) : null,
+    extensionProperties: normalizeArray(root.extensionProperties || root.extensionOnlyProperties),
     actions: normalizeArray(root.actions || root.actionButtons).map(normalizeAction),
     kpiCards: normalizeArray(root.kpiCards || root.kpis).map(normalizeKpiCard),
     targetControls: normalizeArray(root.targetControls || root.filterTargets).map((target) => ({
@@ -322,6 +525,8 @@ function normalizeFilter(filter = {}) {
     controlType: filter.controlType || filter.type,
     filterMode: filter.filterMode || filter.mode,
     displayStyle: filter.displayStyle || filter.display,
+    extensionPatternId: filter.extensionPatternId || filter.visualFidelityPattern || filter.visualPattern,
+    requiresVisualFidelityPattern: Boolean(filter.requiresVisualFidelityPattern),
     displayTitleHidden: filter.displayTitleHidden,
     titleVisible: filter.titleVisible,
     wrapperAttrs: filter.wrapperAttrs || filter.wrapper?.attrs || filter.wrapper || {},
@@ -331,6 +536,17 @@ function normalizeFilter(filter = {}) {
     placeholderStyle: filter.placeholderStyle || filter.attrs?.placeholderStyle,
     filterVariable: filter.filterVariable || filter.variable || filter.save_var?.name,
     consumedBy: normalizeArray(filter.consumedBy),
+  };
+}
+
+function normalizeFilterIcon(icon = {}) {
+  return {
+    ...icon,
+    controlType: icon.controlType || icon.type,
+    type: icon.type || icon.controlType,
+    attrs: icon.attrs || {},
+    extensionPatternId: icon.extensionPatternId || icon.visualFidelityPattern || icon.visualPattern,
+    requiresNativeFilterIcon: Boolean(icon.requiresNativeFilterIcon),
   };
 }
 
@@ -376,6 +592,40 @@ function sameKpiPattern(card, reference) {
     && card.textStack?.direction === reference.textStack?.direction
     && Boolean(card.valuePlacement) === Boolean(reference.valuePlacement)
     && Boolean(card.trendPlacement) === Boolean(reference.trendPlacement);
+}
+
+function assertEvidenceBackedPattern(patternId, findings) {
+  const registry = readExtensionRegistry();
+  const pattern = (registry.patterns || []).find((entry) => entry.id === patternId);
+  if (!pattern || pattern.status !== "evidence-backed" || pattern.source !== "manual-export-study" || pattern.confidence !== "high") {
+    addFinding(findings, "error", "EXTENSION_PATTERN_NOT_EVIDENCE_BACKED", `${patternId} is not marked evidence-backed in docs/reference/yeeflow-control-property-extensions.json.`);
+  }
+}
+
+function readExtensionRegistry() {
+  const extensionPath = path.join(projectRoot(), DEFAULT_CONTROL_KNOWLEDGE_BASE.extensionRegistry);
+  if (!fs.existsSync(extensionPath)) return {};
+  try {
+    return readJson(extensionPath);
+  } catch {
+    return {};
+  }
+}
+
+function matchesExpected(actual, expected) {
+  if (expected === "present") return hasValue(actual);
+  if (expected === "nonempty") return Array.isArray(actual) ? actual.length > 0 : hasValue(actual);
+  if (expected === "zero") return isZeroSpacing(actual);
+  return JSON.stringify(actual) === JSON.stringify(expected);
+}
+
+function deepGet(object, propertyPath) {
+  let current = object;
+  for (const part of propertyPath.split(".")) {
+    if (!current || typeof current !== "object") return undefined;
+    current = current[part];
+  }
+  return current;
 }
 
 function isZeroSpacing(value) {

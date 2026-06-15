@@ -66,4 +66,14 @@ for (const sourcePath of requiredDocs) {
   );
 }
 
+const extensionRegistry = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/yeeflow-control-property-extensions.json"), "utf8"));
+const patternIds = new Set((extensionRegistry.patterns || []).map((pattern) => pattern.id));
+for (const patternId of [
+  "radio-filter.dropdown.visual-fidelity.180px",
+  "relative-period.dropdown.visual-fidelity.180px",
+  "icon.filter.native.16px",
+]) {
+  assert.equal(patternIds.has(patternId), true, `${patternId} extension pattern exists`);
+}
+
 console.log("YAPK hard-gate cache artifact checks passed");
