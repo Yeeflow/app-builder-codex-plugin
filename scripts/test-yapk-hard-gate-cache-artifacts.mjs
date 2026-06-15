@@ -18,6 +18,7 @@ const hardGateScripts = [
   "scripts/inspect-ui-closed-loop-workflow-enforcement.mjs",
   "scripts/inspect-application-layout-design-rules.mjs",
   "scripts/inspect-runtime-navigation-proof.mjs",
+  "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
   "scripts/test-yapk-id-navigation-hard-gates.mjs",
   "scripts/test-yapk-upgrade-id-stability.mjs",
@@ -29,6 +30,7 @@ const hardGateScripts = [
   "scripts/test-application-layout-design-rules.mjs",
   "scripts/test-design-runtime-fidelity-study-hard-gates.mjs",
   "scripts/test-runtime-navigation-proof-gates.mjs",
+  "scripts/test-ui-control-property-fidelity.mjs",
 ];
 
 for (const sourcePath of hardGateScripts) {
@@ -44,6 +46,7 @@ for (const sourcePath of hardGateScripts) {
 
 const requiredDocs = [
   "docs/standards/yeeflow-application-layout-design-rules.md",
+  "docs/standards/yeeflow-ui-control-property-fidelity.md",
   "docs/studies/marketing-event-v045-design-runtime-fidelity-study.md",
 ];
 
