@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.45
+- Version: 0.6.46
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.6.46` releases runtime navigation proof gates. It adds the structured JSON validator `inspect-runtime-navigation-proof.mjs` and runtime navigation proof regression tests. The gate enforces exact approved primary navigation labels/order, hidden support-resource expectations, explicit refresh-before-screenshot metadata, screenshot evidence metadata/path/status, and nav-scoped or exact-line runtime navigation evidence. Broad body-text navigation scans are rejected as unreliable. Extra visible primary navigation items, support resources visible in primary navigation, and signing/install/upgrade success used as visual proof are hard failures. Chrome/nav/content/dynamic KPI proof boundaries are reported separately, content-fidelity validators remain future work, and this release does not claim screenshot pixel parsing or Chrome operation.
 
 Version `0.6.45` releases application layout chrome fidelity gates for generated Yeeflow design images. Layout 1 canonical chrome now requires a dark header plus dark vertical navigation, rejects header hamburger icons, and rejects bottom Collapse controls. Multi-page design sets must keep a consistent `applicationChromeStyleId`, header/nav mode, nav background, selected state, app icon/name placement, and content safe area. Dark/light nav drift is a hard failure, and unsupported SaaS shells, arbitrary sidebars, top bars, floating navs, and unsupported navigation chrome are rejected. The Marketing Event-inspired regression is covered with Event Portfolio declaring Layout 1 plus a header hamburger and light nav while Planning Workbench declares Layout 1 with dark nav and no hamburger; expected findings include `HEADER_HAMBURGER_NOT_ALLOWED`, `NAV_BACKGROUND_MISMATCH`, and `APPLICATION_CHROME_DRIFT`. Screenshot-derived rules remain human-reviewed or review-required, this release does not claim automated screenshot parsing or pixel-perfect verification, and no raw screenshots, YAPK files, raw decoded package payloads, raw `Resource`, raw `Sign`, tenant URLs, workspace IDs, secrets, or private values are committed.
 
