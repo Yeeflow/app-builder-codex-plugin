@@ -49,6 +49,16 @@ For every app-level design set:
 - Keep the same `headerMode`, `navMode`, `navBackgroundMode`, `navSelectedStateStyle`, `appIconPlacement`, `appNamePlacement`, `forbiddenChromeControls`, and `contentSafeArea` across pages unless a reviewed layout change is explicitly allowed.
 - Keep page-specific content inside the content safe area. Page dashboards, filters, tables, cards, and page actions may vary, but the header/nav chrome must not drift.
 - Treat dark/light nav panel drift, selected-state drift, extra side navs, extra top navs, floating nav buttons, and generic SaaS shell controls as hard failures when they are not part of the selected Yeeflow layout.
+
+## Primary Navigation Fidelity Rules
+
+Generated design images and UI implementation contracts must define exact primary navigation labels and order. Visible primary navigation must be generated from the approved UI contract, not inferred from all resources in the package. Support data lists, forms, approval pages, and implementation-only resources must not automatically appear in the primary navigation when the approved design contract excludes them.
+
+When support resources are hidden from primary navigation, use schema-compatible application layout metadata such as `ListSet.LayoutView.sort`. Do not add invalid direct hidden-resource mutations such as unsupported `IsHidden` properties when the schema rejects extra properties.
+
+Runtime navigation proof must be nav-scoped or exact-line based. Broad body-text scans are not reliable navigation proof because page content and substring matches can look like menu labels. Browser screenshot proof must explicitly refresh Chrome before screenshot capture.
+
+Marketing Event v0.6.45 study guidance uses this approved six-item primary navigation example: Event Portfolio, Planning Workbench, Registration & Leads, Budget Review, Post-event Reporting, and Admin. This is a sanitized training example, not a committed runtime artifact.
 - If image verification is not automated, mark chrome fidelity as human-reviewed or review-required. This standard does not claim automated screenshot understanding or pixel-perfect verification.
 
 Required multi-page design-set fields:

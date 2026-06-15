@@ -198,6 +198,12 @@ The comparison produces structured findings for page presence, sections, KPI car
 
 Do not claim high-quality UI from schema validation, package validation, signing, install, upgrade-check, upgrade-apply, or API acceptance. Runtime screenshot/evidence must confirm KPI values are visible, hidden Summary controls are not visible, dashboard cards are card-like, filters/actions are visible, tables/grids are not empty scaffolds, badges/chips are distinct, and the page does not look like a plain scaffold.
 
+Runtime proof that depends on browser screenshots must explicitly refresh Chrome before screenshot capture. Runtime navigation evidence must be nav-scoped or exact-line based; broad body-text scans are not reliable navigation proof. Runtime proof must separately report app chrome fidelity, primary navigation fidelity, content structure fidelity, and dynamic KPI proof boundary. Signing, verifysign, upgrade-check, and upgrade-apply are not visual proof.
+
+For design-driven apps, the plan and UI contract must define exact primary navigation labels and order plus hidden support resources. Visible primary navigation must be generated from the approved UI contract, not inferred from all resources in the package. Support data lists, forms, approval pages, and implementation-only resources must not automatically appear in primary navigation when the approved contract excludes them. Hiding support resources should use schema-compatible metadata such as `ListSet.LayoutView.sort`.
+
+Content-fidelity review must cover KPI card visual richness, table badge/progress/avatar treatment, spacing, and hierarchy. If design KPI values are mock visual placeholders, runtime value mismatch is a warning only. If dynamic KPI proof is claimed, before/after mutation evidence is required.
+
 Run:
 
 ```sh

@@ -26,6 +26,7 @@ const hardGateScripts = [
   "scripts/test-ui-closed-loop-phase3.mjs",
   "scripts/test-ui-closed-loop-phase3b.mjs",
   "scripts/test-application-layout-design-rules.mjs",
+  "scripts/test-design-runtime-fidelity-study-hard-gates.mjs",
 ];
 
 for (const sourcePath of hardGateScripts) {
@@ -41,6 +42,7 @@ for (const sourcePath of hardGateScripts) {
 
 const requiredDocs = [
   "docs/standards/yeeflow-application-layout-design-rules.md",
+  "docs/studies/marketing-event-v045-design-runtime-fidelity-study.md",
 ];
 
 for (const sourcePath of requiredDocs) {
