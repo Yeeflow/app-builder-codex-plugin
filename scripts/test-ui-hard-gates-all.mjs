@@ -53,6 +53,14 @@ const childTests = [
     ],
   },
   {
+    name: "UI control property fidelity regression suite",
+    command: ["scripts/test-ui-control-property-fidelity.mjs"],
+    validators: [
+      "inspect-ui-control-property-fidelity",
+      "Container/Data Filter/filter-action/KPI card property fidelity",
+    ],
+  },
+  {
     name: "Phase 1 UI closed-loop infrastructure regression suite",
     command: ["scripts/test-ui-closed-loop-phase1.mjs"],
     validators: [
