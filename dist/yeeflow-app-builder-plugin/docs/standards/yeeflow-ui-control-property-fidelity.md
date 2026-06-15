@@ -4,6 +4,16 @@ This standard captures derived/redacted control-property lessons from the Market
 
 The goal is control-property fidelity: generated Yeeflow UI must match the intended control types and attrs, not only page layout, application chrome, navigation, or section presence.
 
+## Control Property Knowledge Base
+
+Use the Yeeflow control property knowledge base before generating controls:
+
+- normalized product-catalog registry: `docs/reference/yeeflow-control-configurations.normalized.json`
+- extension registry for study-backed gaps: `docs/reference/yeeflow-control-property-extensions.json`
+- helper: `scripts/inspect-yeeflow-control-configurations.mjs`
+
+Do not invent property paths. Product catalog paths are the baseline legal paths. The extension registry can add export-proven, runtime-proven, human-reviewed, or needs-study paths over time, but extension confidence must remain visible. Export/runtime proof is still required for visual fidelity claims: catalog-backed paths prove configurability, not final rendered quality.
+
 ## Study Summary
 
 The v0.6.46 test showed that application layout, chrome, and primary navigation fidelity are materially better. Remaining gaps are concentrated in content/control implementation:

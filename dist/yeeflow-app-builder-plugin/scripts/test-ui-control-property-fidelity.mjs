@@ -32,6 +32,7 @@ function run() {
   testCamelCaseContainerAttrsFail();
   testMockRuntimeBoundaryPasses();
   testDynamicKpiProofMissingFails();
+  testKnowledgeBaseBoundaryReported();
   testCliSmoke();
   if (isSourceRepo) testDistMirror();
 }
@@ -112,6 +113,15 @@ function testDynamicKpiProofMissingFails() {
   spec.kpiCards[0].dynamicKpiProofClaimed = true;
   spec.kpiCards[0].beforeAfterMutationEvidence = false;
   expectFail("Fail: dynamic KPI proof claimed without before/after mutation evidence", inspectFixture("missing-dynamic-proof.json", spec), "DYNAMIC_KPI_PROOF_MISSING");
+}
+
+function testKnowledgeBaseBoundaryReported() {
+  const report = inspectFixture("knowledge-base-boundary.json", goodSpec());
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  assert.equal(report.controlPropertyKnowledgeBase.available, true, "control property knowledge base should be discoverable");
+  assert.match(report.controlPropertyKnowledgeBase.normalizedRegistry, /yeeflow-control-configurations\.normalized\.json/);
+  assert.ok(report.proofBoundary.some((item) => /Control-property paths should align/i.test(item)), "proof boundary should mention the control property knowledge base");
+  cases.push("Pass: control-property fidelity report references the Yeeflow control property knowledge base");
 }
 
 function testCliSmoke() {
