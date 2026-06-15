@@ -12,7 +12,7 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.48`.
+Expected plugin: `Yeeflow App Builder` version `0.6.49`.
 
 ## Configure Local Environment
 
@@ -27,7 +27,7 @@ Run OAuth login before API access. OAuth uses Authorization Code with PKCE S256,
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.48
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.49
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```

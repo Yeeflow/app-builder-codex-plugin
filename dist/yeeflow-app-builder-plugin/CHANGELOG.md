@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.6.49
+
+- Bump the active plugin version after Data Filter/Icon visual-property extension patterns.
+- Add extension-backed visual fidelity patterns for Radio Filter dropdowns, Relative Period dropdowns, and native filter icons.
+- Keep the normalized control-configuration registry as the base source of truth.
+- Add validator coverage for Data Filter wrapper, input, and dropdown-panel style layers.
+- Add checks for fixed 180px dropdown sizing, hidden labels, Relative Period field/choices, native icon controls, and 16px filter icon sizing.
+- Reinforce that real Data Filter controls are required but not sufficient for high-fidelity visual matching.
+- Reinforce that unknown control-property paths must be catalog-backed or extension-backed.
+- Confirm this release does not claim pixel-perfect visual diffing or automatic screenshot parsing.
+- Keep future extension patterns gated on redacted export/runtime evidence for additional missing visual-property paths.
+
 ## 0.6.44
 
 - Bump the active plugin version after Yeeflow application layout design standards.
