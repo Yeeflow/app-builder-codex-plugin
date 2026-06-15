@@ -106,11 +106,7 @@ The analysis recommends these hard-gate or backlog finding codes:
 
 ### P0
 
-- Exact primary navigation contract validator.
-- Runtime refresh evidence gate.
-- Nav-scoped or exact-line runtime evidence checker.
-- Support-resource primary-nav visibility checker.
-- Sign/upgrade visual-proof boundary checker.
+- Implemented in P0 by `scripts/inspect-runtime-navigation-proof.mjs`: exact primary navigation contract validator, runtime refresh evidence gate, nav-scoped or exact-line runtime evidence checker, support-resource primary-nav visibility checker, and sign/upgrade visual-proof boundary checker using structured JSON contract/evidence only.
 
 ### P1
 

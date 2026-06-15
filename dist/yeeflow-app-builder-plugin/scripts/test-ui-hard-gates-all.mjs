@@ -45,6 +45,14 @@ const childTests = [
     ],
   },
   {
+    name: "Runtime navigation proof hard-gate regression suite",
+    command: ["scripts/test-runtime-navigation-proof-gates.mjs"],
+    validators: [
+      "inspect-runtime-navigation-proof",
+      "exact primary navigation and support-resource visibility proof",
+    ],
+  },
+  {
     name: "Phase 1 UI closed-loop infrastructure regression suite",
     command: ["scripts/test-ui-closed-loop-phase1.mjs"],
     validators: [

@@ -202,6 +202,8 @@ Runtime proof that depends on browser screenshots must explicitly refresh Chrome
 
 For design-driven apps, the plan and UI contract must define exact primary navigation labels and order plus hidden support resources. Visible primary navigation must be generated from the approved UI contract, not inferred from all resources in the package. Support data lists, forms, approval pages, and implementation-only resources must not automatically appear in primary navigation when the approved contract excludes them. Hiding support resources should use schema-compatible metadata such as `ListSet.LayoutView.sort`.
 
+P0 runtime navigation proof is enforced by `scripts/inspect-runtime-navigation-proof.mjs`. The validator accepts structured JSON contract and runtime-evidence files only; it does not inspect Chrome, parse real screenshots, parse raw package payloads, or call Yeeflow APIs. It fails when the approved primary navigation labels/order are missing or mismatched, hidden support-resource expectations are missing, support resources are visible in primary navigation, screenshot metadata lacks explicit browser refresh before capture, runtime navigation evidence is broad body-text-only rather than nav-scoped or exact-line based, or signing/verifysign/upgrade-check/upgrade-apply success is used as visual proof. Navigation fidelity passing does not mean content fidelity passed.
+
 Content-fidelity review must cover KPI card visual richness, table badge/progress/avatar treatment, spacing, and hierarchy. If design KPI values are mock visual placeholders, runtime value mismatch is a warning only. If dynamic KPI proof is claimed, before/after mutation evidence is required.
 
 Run:
