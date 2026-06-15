@@ -94,11 +94,12 @@ for (const phrase of requiredPhrases) {
 }
 
 const backlogPhrases = [
-  "Exact primary navigation contract validator",
-  "Runtime refresh evidence gate",
-  "Nav-scoped or exact-line runtime evidence checker",
-  "Support-resource primary-nav visibility checker",
-  "Sign/upgrade visual-proof boundary checker",
+  "Implemented in P0 by `scripts/inspect-runtime-navigation-proof.mjs`",
+  "exact primary navigation contract validator",
+  "runtime refresh evidence gate",
+  "nav-scoped or exact-line runtime evidence checker",
+  "support-resource primary-nav visibility checker",
+  "sign/upgrade visual-proof boundary checker",
   "Content-fidelity report schema",
   "KPI card visual structure checker",
   "Table badge/progress/avatar structure checker",

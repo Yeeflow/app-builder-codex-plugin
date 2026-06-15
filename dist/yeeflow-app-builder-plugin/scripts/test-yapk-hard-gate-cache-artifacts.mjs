@@ -17,6 +17,7 @@ const hardGateScripts = [
   "scripts/compare-design-to-runtime-structure.mjs",
   "scripts/inspect-ui-closed-loop-workflow-enforcement.mjs",
   "scripts/inspect-application-layout-design-rules.mjs",
+  "scripts/inspect-runtime-navigation-proof.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
   "scripts/test-yapk-id-navigation-hard-gates.mjs",
   "scripts/test-yapk-upgrade-id-stability.mjs",
@@ -27,6 +28,7 @@ const hardGateScripts = [
   "scripts/test-ui-closed-loop-phase3b.mjs",
   "scripts/test-application-layout-design-rules.mjs",
   "scripts/test-design-runtime-fidelity-study-hard-gates.mjs",
+  "scripts/test-runtime-navigation-proof-gates.mjs",
 ];
 
 for (const sourcePath of hardGateScripts) {

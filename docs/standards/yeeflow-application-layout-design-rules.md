@@ -58,6 +58,8 @@ When support resources are hidden from primary navigation, use schema-compatible
 
 Runtime navigation proof must be nav-scoped or exact-line based. Broad body-text scans are not reliable navigation proof because page content and substring matches can look like menu labels. Browser screenshot proof must explicitly refresh Chrome before screenshot capture.
 
+Runtime primary navigation proof must run `scripts/inspect-runtime-navigation-proof.mjs` when claiming that implementation matches the approved UI contract. The validator checks structured JSON contract/evidence only, requires exact approved primary navigation labels/order, hidden support-resource expectations, explicit refresh-before-screenshot metadata, nav-scoped or exact-line evidence, and separated app chrome, primary navigation, content structure, and dynamic KPI proof-boundary report sections. Extra visible support resources in primary navigation are a hard failure. Navigation fidelity passing does not mean content fidelity passed.
+
 Marketing Event v0.6.45 study guidance uses this approved six-item primary navigation example: Event Portfolio, Planning Workbench, Registration & Leads, Budget Review, Post-event Reporting, and Admin. This is a sanitized training example, not a committed runtime artifact.
 - If image verification is not automated, mark chrome fidelity as human-reviewed or review-required. This standard does not claim automated screenshot understanding or pixel-perfect verification.
 
