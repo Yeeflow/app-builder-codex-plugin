@@ -61,6 +61,14 @@ const childTests = [
     ],
   },
   {
+    name: "Yeeflow control property knowledge base regression suite",
+    command: ["scripts/test-yeeflow-control-property-knowledge-base.mjs"],
+    validators: [
+      "inspect-yeeflow-control-configurations",
+      "product-catalog control property registry and extension rules",
+    ],
+  },
+  {
     name: "Phase 1 UI closed-loop infrastructure regression suite",
     command: ["scripts/test-ui-closed-loop-phase1.mjs"],
     validators: [

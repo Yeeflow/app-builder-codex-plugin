@@ -31,6 +31,12 @@ const EXPECTED_FILTER_WIDTHS = {
   "Event Type": 140,
 };
 
+const DEFAULT_CONTROL_KNOWLEDGE_BASE = {
+  normalizedRegistry: "docs/reference/yeeflow-control-configurations.normalized.json",
+  extensionRegistry: "docs/reference/yeeflow-control-property-extensions.json",
+  helper: "scripts/inspect-yeeflow-control-configurations.mjs",
+};
+
 const FINDING_MESSAGES = {
   CONTROL_TYPE_MISMATCH: "Control type does not match the expected Yeeflow control.",
   CONTAINER_ATTR_MISSING: "Container control is missing required attrs.",
@@ -124,9 +130,15 @@ export function inspectUiControlPropertyFidelity({
       kpiCardCount: candidateSpec.kpiCards.length,
       actionCount: candidateSpec.actions.length,
     },
+    controlPropertyKnowledgeBase: {
+      ...DEFAULT_CONTROL_KNOWLEDGE_BASE,
+      available: fs.existsSync(path.join(projectRoot(), DEFAULT_CONTROL_KNOWLEDGE_BASE.normalizedRegistry)),
+      boundary: "Use the Yeeflow control property knowledge base before generating controls; catalog-backed paths prove legal property paths, not visual fidelity by themselves.",
+    },
     findings,
     proofBoundary: [
       "This validator checks declared/redacted Yeeflow control specs and decoded metadata shapes only.",
+      "Control-property paths should align with docs/reference/yeeflow-control-configurations.normalized.json plus evidence-backed extensions.",
       "It does not decode raw private YAPK payloads, parse screenshots, inspect Chrome, call Yeeflow APIs, sign, install, import, or upgrade packages.",
       "Runtime live values may differ from design mock values when marked visual-target-only.",
       "Dynamic KPI proof still requires before/after mutation evidence.",
@@ -475,6 +487,10 @@ function usage(exitCode) {
 function safePath(value) {
   if (!value) return null;
   return path.relative(process.cwd(), path.resolve(value)) || ".";
+}
+
+function projectRoot() {
+  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 }
 
 function isMainModule() {

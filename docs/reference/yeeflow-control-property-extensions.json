@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Study-backed extension registry for Yeeflow control property paths that are not yet present in the product catalog.",
+  "baseline": "Product catalog paths remain authoritative. Extension entries require explicit evidence before strong UI fidelity claims.",
+  "allowedConfidence": [
+    "product_catalog",
+    "export_proven",
+    "runtime_proven",
+    "human_reviewed",
+    "needs_study",
+    "unknown"
+  ],
+  "allowedStatus": [
+    "product_catalog",
+    "export_proven",
+    "runtime_proven",
+    "human_reviewed",
+    "needs_study",
+    "unknown"
+  ],
+  "extensions": [],
+  "exampleEntryShape": {
+    "controlType": "container",
+    "propertyPath": "attrs.style.example_missing_catalog_path",
+    "valueType": "string",
+    "allowDevice": false,
+    "source": "future_redacted_study",
+    "confidence": "needs_study",
+    "evidence": [
+      "redacted export/runtime artifact path or study reference"
+    ],
+    "status": "needs_study",
+    "notes": "Example only. Do not treat as an active extension."
+  }
+}
