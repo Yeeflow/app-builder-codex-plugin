@@ -37,6 +37,14 @@ const childTests = [
     ],
   },
   {
+    name: "Marketing Event design/runtime fidelity study hard-gate wording suite",
+    command: ["scripts/test-design-runtime-fidelity-study-hard-gates.mjs"],
+    validators: [
+      "Marketing Event v0.6.45 design-to-runtime lessons",
+      "primary navigation and content-fidelity training guidance",
+    ],
+  },
+  {
     name: "Phase 1 UI closed-loop infrastructure regression suite",
     command: ["scripts/test-ui-closed-loop-phase1.mjs"],
     validators: [
