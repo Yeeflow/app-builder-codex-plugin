@@ -10,7 +10,7 @@ When generating Yeeflow app design images, choose exactly one official applicati
 
 ## Expected Version
 
-`0.6.46`
+`0.6.47`
 
 ## Safe API Usage
 
@@ -43,6 +43,8 @@ Marketing Event v0.6.45 design/runtime fidelity lessons require plans and UI con
 P0 runtime navigation proof adds `inspect-runtime-navigation-proof.mjs` for structured JSON contract/evidence checks. It enforces exact primary navigation labels/order, hidden support-resource expectations, explicit refresh-before-screenshot metadata, nav-scoped or exact-line runtime evidence, and separated app chrome, primary navigation, content structure, and dynamic KPI proof-boundary report sections. It rejects broad body-text-only nav proof, support resources visible in primary nav, and signing/upgrade success as visual proof. Navigation fidelity passing does not mean content fidelity passed.
 
 UI control-property fidelity adds `inspect-ui-control-property-fidelity.mjs` for declared/redacted control specs. It checks that high-quality UI uses Container controls for visual composition rows/cards, real Data Filter controls for filters, filter variables consumed by target Summary/Collection/List controls, fixed filter/action sizing, and consistent KPI card icon-tile/text-stack patterns. Runtime live KPI values may differ from mock values only when reported as visual-target-only; dynamic KPI proof still requires before/after mutation evidence.
+
+Version `0.6.47` releases UI control property fidelity gates. It adds `scripts/inspect-ui-control-property-fidelity.mjs` and `scripts/test-ui-control-property-fidelity.mjs` for metadata-only validation of Container attrs, Data Filter controls, filter/action row structure, KPI card structure, mock-vs-runtime KPI boundaries, and dynamic KPI proof boundaries. It reinforces Container vs Grid rules for visual composition, real Data Filter controls instead of static Text for filter UI, filter variables consumed by target Summary/Collection/List controls, refreshed runtime screenshot capture, and signing/upgrade success not being visual proof. This release does not claim pixel-perfect visual diffing or automatic screenshot parsing. Remaining future work includes a latest-artifact manifest guard, runtime proof freshness validator, and richer content-fidelity report schema/scoring.
 
 Version `0.6.46` releases executable runtime navigation proof gates. It adds `scripts/inspect-runtime-navigation-proof.mjs` and `scripts/test-runtime-navigation-proof-gates.mjs` for structured JSON contract/runtime-evidence checks that enforce exact approved primary navigation labels and order, hidden support-resource expectations, explicit browser refresh-before-screenshot metadata, screenshot evidence metadata/path/status, and nav-scoped or exact-line runtime navigation evidence. Broad body-text navigation scans are rejected as unreliable. Extra visible primary navigation items, support resources visible in primary navigation, and signing/install/upgrade success used as visual proof are hard failures. App chrome fidelity, primary navigation fidelity, content structure fidelity, and dynamic KPI proof boundaries must be reported separately. Content-fidelity validators remain future work, and this release does not claim screenshot pixel parsing or Chrome operation.
 
