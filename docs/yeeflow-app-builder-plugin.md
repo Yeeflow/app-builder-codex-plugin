@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.46
+- Version: 0.6.47
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.6.47` releases UI control property fidelity gates. It adds metadata-only validation through `inspect-ui-control-property-fidelity.mjs` and synthetic regression coverage in `test-ui-control-property-fidelity.mjs` for Container attrs, Data Filter controls, filter/action row structure, KPI card structure, mock-vs-runtime KPI boundaries, and dynamic KPI proof boundaries. It reinforces Container vs Grid rules for visual composition, real Data Filter controls instead of static Text for filter UI, filter variables consumed by target Summary/Collection/List controls, refreshed runtime screenshots before capture, and signing/upgrade success not being visual proof. This release does not claim pixel-perfect visual diffing or automatic screenshot parsing. Remaining future work includes a latest-artifact manifest guard, runtime proof freshness validator, and richer content-fidelity report schema/scoring.
 
 Version `0.6.46` releases runtime navigation proof gates. It adds the structured JSON validator `inspect-runtime-navigation-proof.mjs` and runtime navigation proof regression tests. The gate enforces exact approved primary navigation labels/order, hidden support-resource expectations, explicit refresh-before-screenshot metadata, screenshot evidence metadata/path/status, and nav-scoped or exact-line runtime navigation evidence. Broad body-text navigation scans are rejected as unreliable. Extra visible primary navigation items, support resources visible in primary navigation, and signing/install/upgrade success used as visual proof are hard failures. Chrome/nav/content/dynamic KPI proof boundaries are reported separately, content-fidelity validators remain future work, and this release does not claim screenshot pixel parsing or Chrome operation.
 
