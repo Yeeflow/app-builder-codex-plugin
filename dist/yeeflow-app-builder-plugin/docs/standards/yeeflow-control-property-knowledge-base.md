@@ -39,6 +39,12 @@ Current evidence-backed visual patterns include:
 - `radio-filter.dropdown.visual-fidelity.180px`: a fixed-width radio-filter dropdown pattern for compact Region-style filters.
 - `relative-period.dropdown.visual-fidelity.180px`: a fixed-width relative-period dropdown pattern with required field and nonempty choice-options.
 - `icon.filter.native.16px`: a native filter icon pattern using the real Yeeflow icon control with 16px icon sizing.
+- `container.filter-action-row.full-width-space-between`: the outer filter/action row owns full-width `space-between` layout behavior.
+- `container.filter-group.inline-row`: the left filter group is an inline row.
+- `container.action-group.inline-row`: the right action group is an inline row.
+- `container.filter-wrapper.inline-default-height`: filter wrapper Containers are inline/default-height hierarchy holders and do not own fixed filter width.
+- `data-filter.dropdown.owns-fixed-180px-width`: the Data Filter control owns fixed/custom 180px dropdown sizing.
+- `control.navigator-label.nv_label`: `nv_label` controls Yeeflow designer Navigator-visible naming for generated structural controls.
 
 Data Filter dropdown visual fidelity has three layers:
 
@@ -48,12 +54,24 @@ Data Filter dropdown visual fidelity has three layers:
 
 Native filter icon fidelity requires a real `icon` control, not a heading/text glyph, with `attrs.icon.icon = "fa-regular fa-filter"` and 16px sizing.
 
+Filter/action row hierarchy fidelity has distinct ownership layers:
+
+- parent row: full-width `container` with `justify_content = "space-between"`
+- second-layer filter/action groups: inline `container` rows
+- filter wrappers: inline/default-height `container` controls only
+- Data Filter controls: fixed/custom `180px` sizing and dropdown visual-fidelity attrs
+
+Do not assign the fixed filter width to wrapper containers. Legacy Status/Event Type wrapper widths such as 120px or 140px are not valid under the current high-fidelity 180px dropdown pattern.
+
+Designer Navigator label fidelity is also an extension-layer rule. Manual designer evidence shows `nv_label` controls the Navigator-visible name; `id`, `name`, and `label` are useful but not sufficient substitutes. Important generated structural controls should use semantic `nv_label` values and must not remain generic values such as `Container`, `Text`, or `Grid`.
+
 ## Generation Rules
 
 - Generated UI controls must use legal product-catalog property paths or explicit extension-registry paths.
 - Unknown generated property paths are not acceptable for high-quality UI claims.
 - Control-specific paths must be checked before package generation. A property valid for `summary` is not automatically valid for `container`.
 - Do not invent camelCase aliases when the product catalog uses snake_case paths such as `attrs.style.align_items`.
+- Validate decoded package `Resource.attrs` when decoded evidence is available. Passing a normalized generated spec alone is not enough when decoded package attrs contradict the intended hierarchy or width ownership.
 - `allowDevice` controls whether a property can use device-specific responsive values.
 - Extension-only paths require evidence and must keep their confidence/status visible in reports.
 - The registry proves known configurable paths. Export/runtime evidence proves safe combinations and visual behavior.

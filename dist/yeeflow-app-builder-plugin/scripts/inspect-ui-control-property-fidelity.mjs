@@ -27,8 +27,8 @@ const CAMEL_CASE_ALIASES = {
 const EXPECTED_FILTER_WIDTHS = {
   Region: 180,
   Period: 180,
-  Status: 120,
-  "Event Type": 140,
+  Status: 180,
+  "Event Type": 180,
 };
 
 const DEFAULT_CONTROL_KNOWLEDGE_BASE = {
@@ -69,6 +69,18 @@ const FINDING_MESSAGES = {
   FILTER_ICON_NOT_NATIVE_ICON_CONTROL: "Filter icon must use a native Yeeflow icon control, not heading/text glyphs.",
   FILTER_ICON_SIZE_MISMATCH: "Filter icon size does not match the evidence-backed 16px native icon pattern.",
   EXTENSION_PATTERN_NOT_EVIDENCE_BACKED: "Declared extension pattern is not present as evidence-backed metadata in the extension registry.",
+  FILTER_ACTION_ROW_NOT_FULL_WIDTH: "Filter/action parent row must own full-width layout behavior.",
+  FILTER_GROUP_NOT_INLINE: "Filter group must be an inline row container.",
+  ACTION_GROUP_NOT_INLINE: "Action group must be an inline row container.",
+  FILTER_WRAPPER_SHOULD_BE_INLINE: "Filter wrapper containers must be inline/default-height containers.",
+  FILTER_WRAPPER_SHOULD_NOT_OWN_FIXED_FILTER_WIDTH: "Filter wrapper containers must not own the Data Filter fixed width.",
+  FILTER_CONTROL_FIXED_WIDTH_MISSING: "Data Filter controls must own the fixed 180px width.",
+  FILTER_CONTROL_WIDTH_OWNER_MISMATCH: "Fixed filter width is assigned to the wrong hierarchy layer.",
+  LEGACY_FILTER_WRAPPER_WIDTH_DETECTED: "Legacy narrow filter wrapper sizing is not allowed under the 180px dropdown pattern.",
+  DECODED_RESOURCE_ATTR_SHAPE_NOT_VALIDATED: "Decoded package Resource attrs must be validated when decoded evidence is available.",
+  NAVIGATOR_LABEL_MISSING: "Important generated structural controls must include nv_label for Yeeflow designer Navigator naming.",
+  NAVIGATOR_LABEL_GENERIC: "Navigator label must be semantic, not a generic control type such as Container, Text, or Grid.",
+  NAVIGATOR_LABEL_MISMATCH: "Navigator label does not match the expected semantic Navigator name.",
 };
 
 const DATA_FILTER_VISUAL_PATTERNS = {
@@ -217,8 +229,11 @@ export function inspectUiControlPropertyFidelity({
 
   if (!findings.some((finding) => finding.severity === "error")) {
     validateFilterActionRow(candidateSpec, referenceSpec, findings);
+    validateFilterHierarchy(candidateSpec, findings);
     validateDataFilters(candidateSpec, referenceSpec, findings);
     validateFilterIcon(candidateSpec, findings);
+    validateNavigatorLabels(candidateSpec, findings);
+    validateDecodedResourceAttrs(candidateSpec, findings);
     validateExtensionOnlyProperties(candidateSpec, findings);
     validateActions(candidateSpec, findings);
     validateKpiCards(candidateSpec, referenceSpec, findings);
@@ -236,11 +251,14 @@ export function inspectUiControlPropertyFidelity({
     findingCodes: [...new Set(findings.map((finding) => finding.code))],
     controlSummary: {
       filterActionRowType: candidateSpec.filterActionRow?.controlType || null,
+      filterGroupType: candidateSpec.filterGroup?.controlType || null,
+      actionGroupType: candidateSpec.actionGroup?.controlType || null,
       filters: candidateSpec.dataFilters.map((filter) => ({
         name: filter.name,
         controlType: filter.controlType,
         filterMode: filter.filterMode,
         wrapperWidth: getFixedWidth(filter.wrapperAttrs),
+        controlWidth: getDataFilterControlWidth(filter),
         filterVariable: filter.filterVariable || null,
         consumedBy: filter.consumedBy || [],
       })),
@@ -292,8 +310,8 @@ function validateFilterActionRow(spec, reference, findings) {
       continue;
     }
   }
-  if (attrs.widthtype && !["1", "full", "100%"].includes(String(attrs.widthtype))) {
-    addFinding(findings, "error", "CONTAINER_WIDTHTYPE_MISMATCH", "Filter/action parent must be full-width.");
+  if (attrs.widthtype && !isFullWidth(attrs.widthtype)) {
+    addFinding(findings, "error", "FILTER_ACTION_ROW_NOT_FULL_WIDTH", "Filter/action parent must be full-width.");
   }
   if (attrs.direction !== "row") {
     addFinding(findings, "error", "CONTAINER_ALIGNMENT_MISMATCH", "Filter/action parent must use direction row.");
@@ -320,6 +338,34 @@ function validateFilterActionRow(spec, reference, findings) {
   }
 }
 
+function validateFilterHierarchy(spec, findings) {
+  validateInlineGroup(spec.filterGroup, "filter group", "flex-start", "FILTER_GROUP_NOT_INLINE", findings);
+  validateInlineGroup(spec.actionGroup, "action group", "flex-end", "ACTION_GROUP_NOT_INLINE", findings);
+}
+
+function validateInlineGroup(group, label, expectedJustify, code, findings) {
+  if (!group) return;
+  if (group.controlType && group.controlType !== "Container" && group.controlType !== "container") {
+    addFinding(findings, "error", "CONTROL_TYPE_MISMATCH", `${label} must be a Container.`);
+  }
+  const attrs = styleAttrs(group.attrs);
+  if (!isInlineWidth(attrs.widthtype)) {
+    addFinding(findings, "error", code, `${label} must use inline widthtype.`);
+  }
+  if (attrs.direction !== "row") {
+    addFinding(findings, "error", code, `${label} must use direction row.`);
+  }
+  if (attrs.align_items !== "center") {
+    addFinding(findings, "error", code, `${label} must align_items center.`);
+  }
+  if (attrs.justify_content !== expectedJustify) {
+    addFinding(findings, "error", code, `${label} must justify_content ${expectedJustify}.`);
+  }
+  if (attrs.wrap && attrs.wrap !== "nowrap") {
+    addFinding(findings, "error", code, `${label} must not wrap.`);
+  }
+}
+
 function validateDataFilters(spec, reference, findings) {
   const targetVariables = new Set(spec.targetControls.flatMap((target) => target.consumedFilterVariables || []));
   const referenceFilters = new Map(reference.dataFilters.map((filter) => [filter.name, filter]));
@@ -343,14 +389,8 @@ function validateDataFilters(spec, reference, findings) {
     if (filter.placeholderStyle && filter.placeholderStyle !== "compact-muted") {
       addFinding(findings, "error", "DATA_FILTER_PLACEHOLDER_STYLE_MISMATCH", `${filter.name || "Filter"} placeholder style must match compact-muted.`);
     }
-    const expectedWidth = EXPECTED_FILTER_WIDTHS[filter.name] || getFixedWidth(referenceFilters.get(filter.name)?.wrapperAttrs);
-    const actualWidth = getFixedWidth(filter.wrapperAttrs);
-    if (expectedWidth && actualWidth !== expectedWidth) {
-      addFinding(findings, "error", "CONTAINER_FIXED_SIZE_MISMATCH", `${filter.name || "Filter"} wrapper must be fixed ${expectedWidth}px wide.`, {
-        expectedWidth,
-        actualWidth,
-      });
-    }
+    validateFilterWrapper(filter, findings);
+    validateFilterControlWidth(filter, referenceFilters.get(filter.name), findings);
     if (filter.visible !== false && !filter.filterVariable) {
       addFinding(findings, "error", "DATA_FILTER_VISIBLE_BUT_NOT_BOUND", `${filter.name || "Filter"} is visible but has no filter variable.`);
     }
@@ -360,6 +400,42 @@ function validateDataFilters(spec, reference, findings) {
       });
     }
     validateDataFilterVisualPattern(filter, findings);
+  }
+}
+
+function validateFilterWrapper(filter, findings) {
+  const wrapperAttrs = styleAttrs(filter.wrapperAttrs);
+  const wrapperWidth = getFixedWidth(filter.wrapperAttrs);
+  const wrapperHeight = getFixedHeight(filter.wrapperAttrs);
+  if (hasValue(wrapperAttrs.widthtype) && !isInlineWidth(wrapperAttrs.widthtype)) {
+    addFinding(findings, "error", "FILTER_WRAPPER_SHOULD_BE_INLINE", `${filter.name || "Filter"} wrapper must use inline widthtype.`);
+  }
+  if (wrapperHeight && !isDefaultHeight(wrapperAttrs.height ?? wrapperAttrs.cushei ?? filter.wrapperAttrs?.height)) {
+    addFinding(findings, "error", "FILTER_WRAPPER_SHOULD_BE_INLINE", `${filter.name || "Filter"} wrapper must keep default height ownership.`);
+  }
+  if (wrapperWidth) {
+    const code = [120, 140].includes(wrapperWidth) ? "LEGACY_FILTER_WRAPPER_WIDTH_DETECTED" : "FILTER_WRAPPER_SHOULD_NOT_OWN_FIXED_FILTER_WIDTH";
+    addFinding(findings, "error", code, `${filter.name || "Filter"} wrapper must not own fixed filter width.`, {
+      wrapperWidth,
+    });
+  }
+}
+
+function validateFilterControlWidth(filter, referenceFilter, findings) {
+  const expectedWidth = EXPECTED_FILTER_WIDTHS[filter.name] || getDataFilterControlWidth(referenceFilter) || 180;
+  const controlWidth = getDataFilterControlWidth(filter);
+  if (expectedWidth && controlWidth !== expectedWidth) {
+    addFinding(findings, "error", "FILTER_CONTROL_FIXED_WIDTH_MISSING", `${filter.name || "Filter"} Data Filter control must own fixed ${expectedWidth}px width.`, {
+      expectedWidth,
+      actualWidth: controlWidth,
+    });
+  }
+  const wrapperWidth = getFixedWidth(filter.wrapperAttrs);
+  if (wrapperWidth && controlWidth === expectedWidth) {
+    addFinding(findings, "error", "FILTER_CONTROL_WIDTH_OWNER_MISMATCH", `${filter.name || "Filter"} fixed width is duplicated or assigned to wrapper instead of only the Data Filter control.`, {
+      wrapperWidth,
+      controlWidth,
+    });
   }
 }
 
@@ -491,16 +567,70 @@ function validateKpiProofBoundary(spec, findings) {
   }
 }
 
+function validateNavigatorLabels(spec, findings) {
+  const controls = [
+    spec.filterActionRow,
+    spec.filterGroup,
+    spec.actionGroup,
+    ...spec.dataFilters.map((filter) => filter.wrapperControl).filter(Boolean),
+    ...spec.actions,
+    ...spec.structuralControls,
+  ];
+  for (const control of controls) {
+    if (!control || control.requiresNavigatorLabel === false) continue;
+    if (!isImportantStructuralControl(control)) continue;
+    const expected = control.expectedNavigatorLabel || control.id || control.semanticId || null;
+    const label = control.nv_label ?? control.nvLabel ?? control.navigatorLabel;
+    if (!hasValue(label)) {
+      addFinding(findings, "error", "NAVIGATOR_LABEL_MISSING", `${control.id || control.name || "Structural control"} must include nv_label.`);
+      continue;
+    }
+    if (isGenericNavigatorLabel(label)) {
+      addFinding(findings, "error", "NAVIGATOR_LABEL_GENERIC", `${control.id || control.name || "Structural control"} nv_label must be semantic.`, { nv_label: label });
+    }
+    if (expected && control.expectedNavigatorLabel && label !== expected) {
+      addFinding(findings, "error", "NAVIGATOR_LABEL_MISMATCH", `${control.id || control.name || "Structural control"} nv_label does not match expected Navigator label.`, {
+        expected,
+        actual: label,
+      });
+    }
+  }
+}
+
+function validateDecodedResourceAttrs(spec, findings) {
+  if (spec.decodedResourceEvidenceAvailable && !spec.decodedResourceAttrsValidated && !spec.decodedResources.length) {
+    addFinding(findings, "error", "DECODED_RESOURCE_ATTR_SHAPE_NOT_VALIDATED", "Decoded Resource attrs evidence is available but not validated.");
+  }
+  for (const resource of spec.decodedResources) {
+    const role = resource.expectedRole || resource.role || resource.fidelityRole;
+    if (resource.decodedAttrsMismatched || resource.normalizedSpecPassesButDecodedMismatches) {
+      addFinding(findings, "error", "DECODED_RESOURCE_ATTR_SHAPE_NOT_VALIDATED", `${resource.id || role || "Decoded Resource"} decoded attrs differ from normalized spec.`);
+    }
+    if (role === "filterActionRow") validateFilterActionRow({ filterActionRow: resource }, { dataFilters: [] }, findings);
+    if (role === "filterGroup") validateInlineGroup(resource, "decoded filter group", "flex-start", "FILTER_GROUP_NOT_INLINE", findings);
+    if (role === "actionGroup") validateInlineGroup(resource, "decoded action group", "flex-end", "ACTION_GROUP_NOT_INLINE", findings);
+    if (role === "filterWrapper") validateFilterWrapper({ name: resource.name || resource.id, wrapperAttrs: resource.attrs || resource }, findings);
+    if (role === "dataFilter") validateFilterControlWidth({ ...resource, name: resource.name || "Decoded Data Filter" }, null, findings);
+    validateNavigatorLabels({ filterActionRow: null, filterGroup: null, actionGroup: null, dataFilters: [], actions: [], structuralControls: [resource] }, findings);
+  }
+}
+
 function normalizeSpec(data) {
   const root = data?.uiControlPropertyFidelity || data?.controlPropertyFidelity || data;
   return {
     page: root.page || root.pageName || null,
     filterActionRow: normalizeControl(root.filterActionRow || root.filterActionContainer || root.headerFilterActionParent),
+    filterGroup: normalizeControl(root.filterGroup || root.leftFilterGroup || root.filterControlsGroup),
+    actionGroup: normalizeControl(root.actionGroup || root.rightActionGroup || root.actionControlsGroup),
     dataFilters: normalizeArray(root.dataFilters || root.filters).map(normalizeFilter),
     filterIcon: root.filterIcon ? normalizeFilterIcon(root.filterIcon) : null,
     extensionProperties: normalizeArray(root.extensionProperties || root.extensionOnlyProperties),
     actions: normalizeArray(root.actions || root.actionButtons).map(normalizeAction),
     kpiCards: normalizeArray(root.kpiCards || root.kpis).map(normalizeKpiCard),
+    structuralControls: normalizeArray(root.structuralControls || root.navigatorControls).map(normalizeControl),
+    decodedResources: normalizeArray(root.decodedResources || root.decodedResourceControls).map(normalizeControl),
+    decodedResourceEvidenceAvailable: Boolean(root.decodedResourceEvidenceAvailable || root.decodedPackageEvidenceAvailable),
+    decodedResourceAttrsValidated: Boolean(root.decodedResourceAttrsValidated),
     targetControls: normalizeArray(root.targetControls || root.filterTargets).map((target) => ({
       name: target.name || target.label,
       controlType: target.controlType || target.type,
@@ -510,11 +640,13 @@ function normalizeSpec(data) {
   };
 }
 
-function normalizeControl(control = {}) {
+function normalizeControl(control = null) {
+  if (!control || typeof control !== "object" || !Object.keys(control).length) return null;
   return {
     ...control,
     controlType: control.controlType || control.type || null,
     attrs: control.attrs || control,
+    nv_label: control.nv_label ?? control.nvLabel ?? control.navigatorLabel,
   };
 }
 
@@ -530,6 +662,7 @@ function normalizeFilter(filter = {}) {
     displayTitleHidden: filter.displayTitleHidden,
     titleVisible: filter.titleVisible,
     wrapperAttrs: filter.wrapperAttrs || filter.wrapper?.attrs || filter.wrapper || {},
+    wrapperControl: filter.wrapperControl ? normalizeControl(filter.wrapperControl) : null,
     margin: filter.margin ?? filter.attrs?.common?.margin ?? filter.attrs?.style?.margin,
     padding: filter.padding ?? filter.attrs?.common?.padding ?? filter.attrs?.style?.padding,
     border: filter.border ?? filter.attrs?.common?.border ?? filter.attrs?.style?.border,
@@ -553,8 +686,11 @@ function normalizeFilterIcon(icon = {}) {
 function normalizeAction(action = {}) {
   return {
     ...action,
+    id: action.id || action.actionId,
     name: action.name || action.label,
+    controlType: action.controlType || action.type,
     attrs: action.attrs || action,
+    nv_label: action.nv_label ?? action.nvLabel ?? action.navigatorLabel,
   };
 }
 
@@ -582,6 +718,57 @@ function getFixedHeight(attrs = {}) {
   const style = styleAttrs(attrs);
   const height = style.height ?? style.cushei ?? attrs.height ?? attrs.fixedHeight;
   return numeric(height);
+}
+
+function getDataFilterControlWidth(filter = {}) {
+  if (!filter) return null;
+  return firstNumeric(
+    filter.controlWidth,
+    filter.fixedWidth,
+    deepGet(filter, "attrs.style.width"),
+    deepGet(filter, "attrs.common.sizing.width"),
+    deepGet(filter, "attrs.common.sizing.minWidth"),
+    deepGet(filter, "attrs.common.sizing.maxWidth"),
+  );
+}
+
+function firstNumeric(...values) {
+  for (const value of values) {
+    const found = numeric(value);
+    if (found != null) return found;
+  }
+  return null;
+}
+
+function isFullWidth(value) {
+  const normalized = responsiveScalar(value);
+  return ["1", "full", "100%", "full-width"].includes(String(normalized));
+}
+
+function isInlineWidth(value) {
+  const normalized = responsiveScalar(value);
+  return ["2", "inline", "auto", "fit-content"].includes(String(normalized));
+}
+
+function isDefaultHeight(value) {
+  const normalized = responsiveScalar(value);
+  return normalized == null || ["0", "default", "auto"].includes(String(normalized));
+}
+
+function responsiveScalar(value) {
+  if (Array.isArray(value)) return value[value.length - 1];
+  return value;
+}
+
+function isImportantStructuralControl(control) {
+  if (control.requiresNavigatorLabel) return true;
+  const type = String(control.controlType || control.type || "").toLowerCase();
+  if (type !== "container" && type !== "grid") return false;
+  return Boolean(control.id || control.semanticId || /row|group|wrapper|container|action/i.test(control.name || control.label || ""));
+}
+
+function isGenericNavigatorLabel(value) {
+  return /^(container|text|grid|control|data filter|icon)$/i.test(String(value || "").trim());
 }
 
 function sameKpiPattern(card, reference) {
