@@ -22,11 +22,21 @@ try {
 
 function run() {
   testFilterActionRowPasses();
+  testFilterActionRowInlineFails();
+  testFilterGroupFullWidthFails();
+  testActionGroupFullWidthFails();
   testGridFails();
   testStaticTextFilterFails();
-  testFixedFilterWidthFails();
+  testFilterWrapperOwnsWidthFails();
+  testFilterControlWidthMissingFails();
+  testLegacyFilterWrapperWidthFails();
   testVisibleFilterWithoutBindingFails();
   testTargetDoesNotConsumeVariableFails();
+  testNavigatorLabelMissingFails();
+  testNavigatorLabelGenericFails();
+  testNavigatorLabelSemanticPasses();
+  testDecodedResourceAttrsPass();
+  testDecodedResourceMismatchFails();
   testKpiIconTileFails();
   testPeerKpiCardsInconsistentFails();
   testCamelCaseContainerAttrsFail();
@@ -51,7 +61,25 @@ function run() {
 function testFilterActionRowPasses() {
   const report = inspectFixture("pass-filter-action-row.json", goodSpec());
   assert.equal(report.status, "pass");
-  cases.push("Pass: Event Portfolio-like filter/action row with correct container attrs");
+  cases.push("Pass: correct full-width parent row, inline groups, inline wrappers, and Data Filter-owned 180px width");
+}
+
+function testFilterActionRowInlineFails() {
+  const spec = goodSpec();
+  spec.filterActionRow.attrs.style.widthtype = "2";
+  expectFail("Fail: parent filter/action row is inline", inspectFixture("inline-parent-row.json", spec), "FILTER_ACTION_ROW_NOT_FULL_WIDTH");
+}
+
+function testFilterGroupFullWidthFails() {
+  const spec = goodSpec();
+  spec.filterGroup.attrs.style.widthtype = "1";
+  expectFail("Fail: filter group is full/stretch instead of inline", inspectFixture("full-filter-group.json", spec), "FILTER_GROUP_NOT_INLINE");
+}
+
+function testActionGroupFullWidthFails() {
+  const spec = goodSpec();
+  spec.actionGroup.attrs.style.widthtype = "1";
+  expectFail("Fail: action group is full/stretch instead of inline", inspectFixture("full-action-group.json", spec), "ACTION_GROUP_NOT_INLINE");
 }
 
 function testGridFails() {
@@ -66,12 +94,29 @@ function testStaticTextFilterFails() {
   expectFail("Fail: static Text used instead of Data Filter", inspectFixture("static-text-filter.json", spec), "DATA_FILTER_CONTROL_TYPE_MISMATCH");
 }
 
-function testFixedFilterWidthFails() {
+function testFilterWrapperOwnsWidthFails() {
   const spec = goodSpec();
-  spec.dataFilters.find((filter) => filter.name === "Region").wrapperAttrs.style.width = 160;
-  spec.dataFilters.find((filter) => filter.name === "Period").wrapperAttrs.style.width = 200;
-  const report = inspectFixture("wrong-filter-width.json", spec);
-  expectFail("Fail: Region/Period filter not fixed 180px", report, "CONTAINER_FIXED_SIZE_MISMATCH");
+  spec.dataFilters.find((filter) => filter.name === "Region").wrapperAttrs.style.width = 180;
+  const report = inspectFixture("wrapper-owns-filter-width.json", spec);
+  expectFail("Fail: filter wrapper owns 180px width", report, "FILTER_WRAPPER_SHOULD_NOT_OWN_FIXED_FILTER_WIDTH");
+}
+
+function testFilterControlWidthMissingFails() {
+  const spec = goodSpec();
+  const region = spec.dataFilters.find((filter) => filter.name === "Region");
+  delete region.attrs.style.width;
+  delete region.attrs.common.sizing.width;
+  delete region.attrs.common.sizing.minWidth;
+  delete region.attrs.common.sizing.maxWidth;
+  expectFail("Fail: Data Filter control lacks fixed 180px width", inspectFixture("missing-filter-control-width.json", spec), "FILTER_CONTROL_FIXED_WIDTH_MISSING");
+}
+
+function testLegacyFilterWrapperWidthFails() {
+  const spec = goodSpec();
+  spec.dataFilters.find((filter) => filter.name === "Status").wrapperAttrs.style.width = 120;
+  spec.dataFilters.find((filter) => filter.name === "Event Type").wrapperAttrs.style.width = 140;
+  const report = inspectFixture("legacy-status-event-type-wrapper-width.json", spec);
+  expectFail("Fail: Status/Event Type wrapper uses legacy 120/140 width", report, "LEGACY_FILTER_WRAPPER_WIDTH_DETECTED");
 }
 
 function testVisibleFilterWithoutBindingFails() {
@@ -84,6 +129,54 @@ function testTargetDoesNotConsumeVariableFails() {
   const spec = goodSpec();
   spec.targetControls = [{ name: "Event Pipeline Collection", controlType: "Collection", consumedFilterVariables: ["statusFilter"] }];
   expectFail("Fail: target Collection/Summary/List does not consume filter variable", inspectFixture("unconsumed-filter.json", spec), "FILTER_VARIABLE_NOT_CONSUMED_BY_TARGET_CONTROL");
+}
+
+function testNavigatorLabelMissingFails() {
+  const spec = goodSpec();
+  delete spec.filterGroup.nv_label;
+  expectFail("Fail: structural containers have semantic id but no nv_label", inspectFixture("missing-navigator-label.json", spec), "NAVIGATOR_LABEL_MISSING");
+}
+
+function testNavigatorLabelGenericFails() {
+  const spec = goodSpec();
+  spec.filterGroup.nv_label = "Container";
+  expectFail("Fail: structural containers use generic nv_label like Container", inspectFixture("generic-navigator-label.json", spec), "NAVIGATOR_LABEL_GENERIC");
+}
+
+function testNavigatorLabelSemanticPasses() {
+  const report = inspectFixture("semantic-navigator-labels.json", goodSpec());
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: structural controls include semantic nv_label");
+}
+
+function testDecodedResourceAttrsPass() {
+  const spec = goodSpec();
+  spec.decodedResourceAttrsValidated = true;
+  spec.decodedResources = [
+    decodedResource("event_portfolio_filter_row", "filterActionRow", spec.filterActionRow.attrs),
+    decodedResource("event_portfolio_filter_group", "filterGroup", spec.filterGroup.attrs),
+    decodedResource("event_portfolio_region_filter_wrapper", "filterWrapper", spec.dataFilters[0].wrapperAttrs),
+    decodedResource("event_portfolio_region_filter", "dataFilter", spec.dataFilters[0].attrs),
+  ];
+  const report = inspectFixture("decoded-resource-attrs-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: decoded Resource responsive attr shapes are accepted when semantically correct");
+}
+
+function testDecodedResourceMismatchFails() {
+  const spec = goodSpec();
+  spec.decodedResourceAttrsValidated = true;
+  spec.decodedResources = [
+    {
+      id: "event_portfolio_region_filter",
+      type: "radio-filter",
+      expectedRole: "dataFilter",
+      nv_label: "event_portfolio_region_filter",
+      decodedAttrsMismatched: true,
+      attrs: { style: { widthtype: [null, "1"], width: [null, 120], widthu: [null, "px"] } },
+    },
+  ];
+  expectFail("Fail: normalized spec passes but decoded Resource attrs are mismatched", inspectFixture("decoded-resource-mismatch.json", spec), "DECODED_RESOURCE_ATTR_SHAPE_NOT_VALIDATED");
 }
 
 function testKpiIconTileFails() {
@@ -256,6 +349,10 @@ function goodSpec() {
   return {
     page: "Event Portfolio",
     filterActionRow: {
+      id: "event_portfolio_filter_action_row",
+      label: "Event Portfolio filter and action row",
+      name: "Event Portfolio filter and action row",
+      nv_label: "event_portfolio_filter_action_row",
       controlType: "Container",
       attrs: {
         style: {
@@ -270,11 +367,13 @@ function goodSpec() {
       margin: 0,
       padding: 0,
     },
+    filterGroup: structuralContainer("event_portfolio_filter_group", "flex-start"),
+    actionGroup: structuralContainer("event_portfolio_action_group", "flex-end"),
     dataFilters: [
       dataFilter("Region", "Radio", 180, "regionFilter"),
       dataFilter("Period", "Relative period", 180, "periodFilter"),
-      dataFilter("Status", "Dropdown", 120, "statusFilter"),
-      dataFilter("Event Type", "Dropdown", 140, "eventTypeFilter"),
+      dataFilter("Status", "Dropdown", 180, "statusFilter"),
+      dataFilter("Event Type", "Dropdown", 180, "eventTypeFilter"),
     ],
     actions: [
       action("New Event Request", 168, 40),
@@ -295,7 +394,9 @@ function goodSpec() {
 }
 
 function dataFilter(name, filterMode, width, filterVariable) {
+  const id = `event_portfolio_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "")}_filter`;
   return {
+    id,
     name,
     controlType: "Data Filter",
     filterMode,
@@ -307,10 +408,37 @@ function dataFilter(name, filterMode, width, filterVariable) {
     placeholderStyle: "compact-muted",
     wrapperAttrs: {
       style: {
-        widthtype: "3",
-        width,
-        widthu: "px",
+        widthtype: "2",
+        height: "0",
         direction: "column",
+      },
+    },
+    wrapperControl: {
+      id: `${id}_wrapper`,
+      controlType: "Container",
+      label: `${name} filter wrapper`,
+      name: `${name} filter wrapper`,
+      nv_label: `${id}_wrapper`,
+      attrs: {
+        style: {
+          widthtype: "2",
+          height: "0",
+          direction: "column",
+        },
+      },
+    },
+    attrs: {
+      style: {
+        widthtype: [null, "1"],
+        width: [null, width],
+        widthu: [null, "px"],
+      },
+      common: {
+        sizing: {
+          width: [null, width],
+          minWidth: [null, width],
+          maxWidth: [null, width],
+        },
       },
     },
     filterVariable,
@@ -388,7 +516,15 @@ function visualDataFilter(name, nativeType, extensionPatternId, filterVariable) 
     padding: 0,
     border: "none",
     placeholderStyle: "compact-muted",
-    wrapperAttrs: { style: { width: 180, height: 48, widthtype: "3" } },
+    wrapperAttrs: { style: { widthtype: "2", height: "0", direction: "column" } },
+    wrapperControl: {
+      id: `event_portfolio_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "")}_filter_wrapper`,
+      controlType: "Container",
+      label: `${name} filter wrapper`,
+      name: `${name} filter wrapper`,
+      nv_label: `event_portfolio_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "")}_filter_wrapper`,
+      attrs: { style: { widthtype: "2", height: "0", direction: "column" } },
+    },
     filterVariable,
     extensionPatternId,
     attrs,
@@ -421,9 +557,13 @@ function nativeFilterIcon() {
 }
 
 function action(name, width, height) {
+  const id = `event_portfolio_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "")}`;
   return {
+    id,
     name,
     controlType: "Container",
+    label: name,
+    nv_label: id,
     fixedSizeRequired: true,
     attrs: {
       style: {
@@ -434,6 +574,36 @@ function action(name, width, height) {
         cusheiu: "px",
       },
     },
+  };
+}
+
+function structuralContainer(id, justifyContent) {
+  return {
+    id,
+    controlType: "Container",
+    label: id.replace(/_/g, " "),
+    name: id.replace(/_/g, " "),
+    nv_label: id,
+    attrs: {
+      style: {
+        widthtype: "2",
+        direction: "row",
+        align_items: "center",
+        justify_content: justifyContent,
+        wrap: "nowrap",
+      },
+    },
+  };
+}
+
+function decodedResource(id, expectedRole, attrs) {
+  return {
+    id,
+    expectedRole,
+    type: expectedRole === "dataFilter" ? "radio-filter" : "container",
+    controlType: expectedRole === "dataFilter" ? "radio-filter" : "Container",
+    nv_label: id,
+    attrs,
   };
 }
 

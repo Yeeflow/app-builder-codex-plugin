@@ -148,6 +148,142 @@
       "optionalProperties": {},
       "proofBoundary": "Validates declared/redacted control metadata only. It does not prove pixel-perfect rendering or parse screenshots.",
       "notes": "Use a real Yeeflow icon control for filter affordances; do not use heading/text glyphs as visual substitutes."
+    },
+    {
+      "id": "container.filter-action-row.full-width-space-between",
+      "controlType": "container",
+      "patternName": "Filter/action parent row, full-width space-between",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Marketing Event Event Portfolio filter/action row hierarchy evidence. The parent row owns full-width layout only.",
+      "requiredProperties": {
+        "type": "container",
+        "attrs.style.widthtype": "1",
+        "attrs.style.direction": "row",
+        "attrs.style.align_items": "center",
+        "attrs.style.justify_content": "space-between",
+        "attrs.style.wrap": "nowrap",
+        "nv_label": "present"
+      },
+      "optionalProperties": {
+        "attrs.style.gap": "present"
+      },
+      "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only. It does not prove pixel-perfect rendering or parse screenshots.",
+      "notes": "Use this pattern for the outer Event Portfolio-style toolbar row. Do not apply inline widthtype to the parent row."
+    },
+    {
+      "id": "container.filter-group.inline-row",
+      "controlType": "container",
+      "patternName": "Inline left filter group row",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Marketing Event filter group hierarchy evidence. The second-layer filter group is inline and left-justified.",
+      "requiredProperties": {
+        "type": "container",
+        "attrs.style.widthtype": "2",
+        "attrs.style.direction": "row",
+        "attrs.style.align_items": "center",
+        "attrs.style.justify_content": "flex-start",
+        "attrs.style.wrap": "nowrap",
+        "nv_label": "present"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
+      "notes": "Use this pattern for the left filter-controls group inside a full-width toolbar row."
+    },
+    {
+      "id": "container.action-group.inline-row",
+      "controlType": "container",
+      "patternName": "Inline right action group row",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Marketing Event action group hierarchy evidence. The second-layer action group is inline and right-justified.",
+      "requiredProperties": {
+        "type": "container",
+        "attrs.style.widthtype": "2",
+        "attrs.style.direction": "row",
+        "attrs.style.align_items": "center",
+        "attrs.style.justify_content": "flex-end",
+        "attrs.style.wrap": "nowrap",
+        "nv_label": "present"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
+      "notes": "Use this pattern for the right action-controls group inside a full-width toolbar row."
+    },
+    {
+      "id": "container.filter-wrapper.inline-default-height",
+      "controlType": "container",
+      "patternName": "Inline default-height Data Filter wrapper",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Marketing Event filter wrapper evidence. Filter wrappers provide hierarchy only and do not own fixed filter width.",
+      "requiredProperties": {
+        "type": "container",
+        "attrs.style.widthtype": "2",
+        "attrs.style.height": "0",
+        "nv_label": "present"
+      },
+      "forbiddenProperties": {
+        "attrs.style.width": "fixed-filter-width",
+        "attrs.style.cushei": "custom-filter-height"
+      },
+      "optionalProperties": {
+        "attrs.style.direction": "column"
+      },
+      "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
+      "notes": "Use wrapper containers for hierarchy, not to fake Data Filter width. Fixed 180px width belongs to the Data Filter control."
+    },
+    {
+      "id": "data-filter.dropdown.owns-fixed-180px-width",
+      "controlType": "data-filter",
+      "patternName": "Data Filter owns fixed 180px dropdown width",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Marketing Event Data Filter evidence showing fixed 180px sizing belongs to the Data Filter control Resource attrs, not the wrapper container.",
+      "requiredProperties": {
+        "attrs.style.width": [null, 180],
+        "attrs.style.widthu": [null, "px"],
+        "attrs.common.sizing.width": [null, 180],
+        "attrs.common.sizing.minWidth": [null, 180],
+        "attrs.common.sizing.maxWidth": [null, 180]
+      },
+      "optionalProperties": {
+        "attrs.style.widthtype": [null, "1"]
+      },
+      "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
+      "notes": "Status and Event Type filters should not retain legacy 120px or 140px wrapper widths under the high-fidelity 180px dropdown pattern."
+    },
+    {
+      "id": "control.navigator-label.nv_label",
+      "controlType": "*",
+      "patternName": "Yeeflow designer Navigator semantic label",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Manual designer evidence shows nv_label controls the Yeeflow designer Navigator-visible control name. id is internal/stable, while label/name alone are not sufficient.",
+      "requiredProperties": {
+        "nv_label": "present"
+      },
+      "forbiddenValues": {
+        "nv_label": [
+          "Container",
+          "Text",
+          "Grid"
+        ]
+      },
+      "optionalProperties": {
+        "id": "stable internal generator or patch identifier",
+        "label": "human-facing descriptive label",
+        "name": "human-facing descriptive name"
+      },
+      "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
+      "notes": "Important generated structural controls should use semantic stable nv_label values such as event_portfolio_filter_group."
     }
   ],
   "exampleEntryShape": {

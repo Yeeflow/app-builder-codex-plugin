@@ -72,6 +72,12 @@ for (const patternId of [
   "radio-filter.dropdown.visual-fidelity.180px",
   "relative-period.dropdown.visual-fidelity.180px",
   "icon.filter.native.16px",
+  "container.filter-action-row.full-width-space-between",
+  "container.filter-group.inline-row",
+  "container.action-group.inline-row",
+  "container.filter-wrapper.inline-default-height",
+  "data-filter.dropdown.owns-fixed-180px-width",
+  "control.navigator-label.nv_label",
 ]) {
   assert.equal(patternIds.has(patternId), true, `${patternId} extension pattern exists`);
 }

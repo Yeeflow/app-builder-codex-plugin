@@ -21,6 +21,9 @@ The v0.6.46 test showed that application layout, chrome, and primary navigation 
 - filter/action rows need exact Container attrs, not generic visual similarity
 - Data Filters must be real Data Filter controls, not static Text controls that look like filters
 - filter variables must be bound and consumed by target Summary, Collection, or List controls
+- filter/action row hierarchy must assign full-width behavior to the parent row, inline behavior to second-layer groups, and fixed filter sizing to the Data Filter controls themselves
+- generated structural controls need semantic `nv_label` values so the Yeeflow designer Navigator is readable
+- decoded package `Resource` attrs must be validated when decoded evidence is available; passing a normalized spec alone is not enough to claim final control-property fidelity
 - KPI cards must share a consistent golden card pattern across peers
 - live KPI values can differ from mock design values only when reported as a visual-target boundary
 - signing, verifysign, upgrade-check, upgrade-apply, and install success are not visual proof
@@ -59,18 +62,18 @@ Use Container controls for visual composition rows/cards. Use Grid only for a re
 
 The Event Portfolio filter/action row should be implemented with Container controls:
 
-- parent container is full-width
+- parent row container is full-width: `attrs.style.widthtype = "1"`
 - parent direction is `row`
 - parent `align_items` is `center`
 - parent `justify_content` is `space-between`
 - parent `wrap` is `nowrap`
 - parent margin and padding are zero
-- left filter group is inline
-- right action group is inline
-- Region wrapper is fixed `180px`
-- Period wrapper is fixed `180px`
-- Status wrapper is fixed `120px`
-- Event Type wrapper is fixed `140px`
+- left filter group is an inline row: `attrs.style.widthtype = "2"`, `justify_content = "flex-start"`
+- right action group is an inline row: `attrs.style.widthtype = "2"`, `justify_content = "flex-end"`
+- each filter wrapper container is inline/default-height: `attrs.style.widthtype = "2"` and default height, without fixed `180px` width ownership
+- each filter wrapper contains exactly one Data Filter control
+- each Data Filter control owns the fixed/custom `180px` sizing through its own attrs
+- Status and Event Type must not retain legacy `120px` or `140px` wrapper sizing under the high-fidelity dropdown pattern
 - New Event Request and Export action containers/buttons have fixed sizes
 
 The row must not be a Grid/Flex-like visual wrapper that introduces unwanted hierarchy or spacing.
@@ -91,6 +94,8 @@ Filters must be real Yeeflow Data Filter controls:
 - target Summary, Collection, or List controls consume the relevant filter variables
 
 Do not simulate filter controls with static Text or decorative containers. Visible filters without target consumption are not functional UI proof.
+
+The fixed `180px` width belongs to the Data Filter control, not to the wrapper Container. Wrapper Containers are hierarchy holders only: they should remain inline/default-height and must not fake the Data Filter's width or height. When decoded package evidence is available, validate the actual decoded `Resource.attrs` shape for the row, group, wrapper, and Data Filter controls before claiming control-property fidelity.
 
 ### Data Filter Dropdown Visual Fidelity
 
@@ -124,6 +129,31 @@ Filter affordances should use native Yeeflow `icon` controls, not heading/text g
 - wrapper margin and padding are zero when the icon is used inside a compact filter chip.
 
 This is still metadata validation only. It does not claim pixel-perfect visual diffing or automatic screenshot understanding.
+
+## Designer Navigator Label Fidelity
+
+Generated structural controls must be traceable in the Yeeflow designer Navigator:
+
+- `id` is the stable internal generator/patch identifier.
+- `label` is a human-facing descriptive label.
+- `name` is a human-facing descriptive name.
+- `nv_label` controls the Navigator-visible control name in the Yeeflow designer.
+
+Important generated structural controls, including filter/action rows, filter groups, action groups, filter wrappers, and generated action containers, must include semantic `nv_label` values. Do not leave `nv_label` as generic values such as `Container`, `Text`, or `Grid`.
+
+Example:
+
+```json
+{
+  "id": "event_portfolio_filter_group",
+  "type": "container",
+  "label": "Event Portfolio filter controls",
+  "name": "Event Portfolio filter controls",
+  "nv_label": "event_portfolio_filter_group"
+}
+```
+
+Decoded package `Resource` attrs and `nv_label` values are stronger evidence than normalized planner specs. If decoded evidence exists, normalized spec validation must not hide decoded package mismatches.
 
 ## KPI Card Golden Pattern
 
@@ -195,6 +225,18 @@ Finding codes include:
 - `KPI_TEXT_STACK_LAYOUT_MISMATCH`
 - `GRID_USED_WHERE_CONTAINER_REQUIRED`
 - `DYNAMIC_KPI_PROOF_MISSING`
+- `FILTER_ACTION_ROW_NOT_FULL_WIDTH`
+- `FILTER_GROUP_NOT_INLINE`
+- `ACTION_GROUP_NOT_INLINE`
+- `FILTER_WRAPPER_SHOULD_BE_INLINE`
+- `FILTER_WRAPPER_SHOULD_NOT_OWN_FIXED_FILTER_WIDTH`
+- `FILTER_CONTROL_FIXED_WIDTH_MISSING`
+- `FILTER_CONTROL_WIDTH_OWNER_MISMATCH`
+- `LEGACY_FILTER_WRAPPER_WIDTH_DETECTED`
+- `DECODED_RESOURCE_ATTR_SHAPE_NOT_VALIDATED`
+- `NAVIGATOR_LABEL_MISSING`
+- `NAVIGATOR_LABEL_GENERIC`
+- `NAVIGATOR_LABEL_MISMATCH`
 
 ## Future Work
 
