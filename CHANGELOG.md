@@ -2,17 +2,19 @@
 
 ## Unreleased
 
-## 0.6.49
+## 0.6.50
 
-- Bump the active plugin version after Data Filter/Icon visual-property extension patterns.
-- Add extension-backed visual fidelity patterns for Radio Filter dropdowns, Relative Period dropdowns, and native filter icons.
-- Keep the normalized control-configuration registry as the base source of truth.
-- Add validator coverage for Data Filter wrapper, input, and dropdown-panel style layers.
-- Add checks for fixed 180px dropdown sizing, hidden labels, Relative Period field/choices, native icon controls, and 16px filter icon sizing.
-- Reinforce that real Data Filter controls are required but not sufficient for high-fidelity visual matching.
-- Reinforce that unknown control-property paths must be catalog-backed or extension-backed.
+- Bump the active plugin version after Data Filter row hierarchy and Navigator label fidelity gates.
+- Require the filter/action parent row to be full width.
+- Require inline left filter groups and inline right action groups.
+- Require filter wrapper containers to stay inline/default-height and not own fixed filter width.
+- Require Data Filter controls to own fixed/custom 180px width.
+- Reject legacy Status/Event Type wrapper width behavior under the 180px extension pattern.
+- Add semantic `nv_label` guidance for Yeeflow designer Navigator-visible control names.
+- Distinguish `id`, `label`, `name`, and `nv_label` for generated controls.
+- Add decoded Resource attr validation so normalized specs cannot hide package-level mismatches.
+- Keep the normalized control registry as source of truth and the extension registry evidence-backed.
 - Confirm this release does not claim pixel-perfect visual diffing or automatic screenshot parsing.
-- Keep future extension patterns gated on redacted export/runtime evidence for additional missing visual-property paths.
 
 ## 0.6.44
 
