@@ -45,6 +45,26 @@ Current evidence-backed visual patterns include:
 - `container.filter-wrapper.inline-default-height`: filter wrapper Containers are inline/default-height hierarchy holders and do not own fixed filter width.
 - `data-filter.dropdown.owns-fixed-180px-width`: the Data Filter control owns fixed/custom 180px dropdown sizing.
 - `control.navigator-label.nv_label`: `nv_label` controls Yeeflow designer Navigator-visible naming for generated structural controls.
+- `non-container.common.positioning.width-modes`: non-Container controls use `attrs.common.positioning.widthtype` for full, inline, and custom runtime width modes.
+- `non-container.common.positioning.custom-width`: non-Container custom runtime width uses `attrs.common.positioning.widthtype = [null, "3"]`, `width`, and `widthu`.
+- `non-container.common.margin-padding`: non-Container Advanced-tab spacing uses `attrs.common.margin` and `attrs.common.padding`.
+- `non-container.common.border-normal-hover-shadow`: non-Container normal/hover border, radius, and shadow use `attrs.common.border`.
+- `non-container.common.background-classic`: non-Container classic background color uses `attrs.common.background.normal`.
+- `non-container.common.background-image`: non-Container background images use `attrs.common.background.normal.classic.image`.
+- `non-container.common.background-gradient-two-color`: designer-backed non-Container gradients use two color stops unless custom CSS evidence exists.
+- `data-filter.dropdown.runtime-effective-custom-180px-width`: Data Filter dropdown runtime-effective 180px width uses `attrs.common.positioning` custom width metadata.
+
+Container is a special layout control. Container width, height, direction, alignment, flex layout, and wrap are represented by `attrs.style.widthtype`, `attrs.style.width`, `attrs.style.widthu`, `attrs.style.height`, `attrs.style.cushei`, `attrs.style.cusheiu`, `attrs.style.direction`, `attrs.style.align_items`, `attrs.style.justify_content`, and `attrs.style.wrap`.
+
+Most non-Container controls use Advanced-tab `attrs.common` metadata for runtime-effective positioning and visual styling. For non-Container controls, do not treat `attrs.style.width` as runtime-effective width proof unless the required `attrs.common.positioning` shape is also present. The non-Container width mode mapping is:
+
+- `attrs.common.positioning.widthtype = [null, "1"]`: full width
+- `attrs.common.positioning.widthtype = [null, "2"]`: inline width
+- `attrs.common.positioning.widthtype = [null, "3"]`: custom width, with `attrs.common.positioning.width` and `attrs.common.positioning.widthu`
+
+Data Filter dropdown fixed `180px` runtime width must use `attrs.common.positioning.widthtype = [null, "3"]`, `attrs.common.positioning.width = [null, 180]`, and `attrs.common.positioning.widthu = [null, "px"]`. `attrs.common.sizing` can provide constraints, but it does not replace `attrs.common.positioning` for runtime-effective width.
+
+For non-Container controls, Advanced-tab margin, padding, border, hover, shadow, and background should be checked under `attrs.common.margin`, `attrs.common.padding`, `attrs.common.border.normal`, `attrs.common.border.hover`, `attrs.common.background.normal`, and `attrs.common.background.hover`. Classic background images use `attrs.common.background.normal.classic.image`. Designer-backed gradient background evidence currently supports two colors; more complex gradient or background styling requires explicit custom CSS evidence.
 
 Data Filter dropdown visual fidelity has three layers:
 
@@ -71,6 +91,7 @@ Designer Navigator label fidelity is also an extension-layer rule. Manual design
 - Unknown generated property paths are not acceptable for high-quality UI claims.
 - Control-specific paths must be checked before package generation. A property valid for `summary` is not automatically valid for `container`.
 - Do not invent camelCase aliases when the product catalog uses snake_case paths such as `attrs.style.align_items`.
+- Do not apply Container `attrs.style` width/height rules to non-Container controls. Non-Container Advanced-tab runtime width must be represented under `attrs.common.positioning`.
 - Validate decoded package `Resource.attrs` when decoded evidence is available. Passing a normalized generated spec alone is not enough when decoded package attrs contradict the intended hierarchy or width ownership.
 - `allowDevice` controls whether a property can use device-specific responsive values.
 - Extension-only paths require evidence and must keep their confidence/status visible in reports.

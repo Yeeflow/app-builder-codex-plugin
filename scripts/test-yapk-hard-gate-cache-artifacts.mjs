@@ -78,6 +78,14 @@ for (const patternId of [
   "container.filter-wrapper.inline-default-height",
   "data-filter.dropdown.owns-fixed-180px-width",
   "control.navigator-label.nv_label",
+  "non-container.common.positioning.width-modes",
+  "non-container.common.positioning.custom-width",
+  "non-container.common.margin-padding",
+  "non-container.common.border-normal-hover-shadow",
+  "non-container.common.background-classic",
+  "non-container.common.background-image",
+  "non-container.common.background-gradient-two-color",
+  "data-filter.dropdown.runtime-effective-custom-180px-width",
 ]) {
   assert.equal(patternIds.has(patternId), true, `${patternId} extension pattern exists`);
 }

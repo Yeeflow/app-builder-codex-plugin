@@ -46,7 +46,9 @@
         "attrs.style.align_items": [null, "stretch"],
         "attrs.style.justify_content": [null, "center"],
         "attrs.style.wrap": [null, "nowrap"],
-        "attrs.common.positioning.widthtype": [null, "1"],
+        "attrs.common.positioning.widthtype": [null, "3"],
+        "attrs.common.positioning.width": [null, 180],
+        "attrs.common.positioning.widthu": [null, "px"],
         "attrs.common.sizing.width": [null, 180],
         "attrs.common.sizing.minWidth": [null, 180],
         "attrs.common.sizing.maxWidth": [null, 180],
@@ -100,7 +102,9 @@
         "attrs.style.align_items": [null, "stretch"],
         "attrs.style.justify_content": [null, "center"],
         "attrs.style.wrap": [null, "nowrap"],
-        "attrs.common.positioning.widthtype": [null, "1"],
+        "attrs.common.positioning.widthtype": [null, "3"],
+        "attrs.common.positioning.width": [null, 180],
+        "attrs.common.positioning.widthu": [null, "px"],
         "attrs.common.sizing.width": [null, 180],
         "attrs.common.sizing.minWidth": [null, 180],
         "attrs.common.sizing.maxWidth": [null, 180],
@@ -284,6 +288,162 @@
       },
       "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
       "notes": "Important generated structural controls should use semantic stable nv_label values such as event_portfolio_filter_group."
+    },
+    {
+      "id": "non-container.common.positioning.width-modes",
+      "controlType": "*",
+      "patternName": "Non-Container Advanced-tab width modes",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Yeeflow designer/export evidence showing non-Container runtime-effective width mode is stored under attrs.common.positioning rather than Container attrs.style.",
+      "requiredProperties": {
+        "nonContainer.width.full": {
+          "attrs.common.positioning.widthtype": [null, "1"]
+        },
+        "nonContainer.width.inline": {
+          "attrs.common.positioning.widthtype": [null, "2"]
+        },
+        "nonContainer.width.custom": {
+          "attrs.common.positioning.widthtype": [null, "3"],
+          "attrs.common.positioning.width": "present",
+          "attrs.common.positioning.widthu": "present"
+        }
+      },
+      "forbiddenProperties": {
+        "attrs.style.widthtype": "container-only width mode for runtime-effective layout",
+        "attrs.style.width": "container-only fixed width when common.positioning is absent"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted control metadata only. It does not prove pixel-perfect rendering or parse screenshots.",
+      "notes": "Container remains a special layout control; do not apply Container width rules to Data Filter, Icon, Heading, Summary, Collection, or other non-Container controls."
+    },
+    {
+      "id": "non-container.common.positioning.custom-width",
+      "controlType": "*",
+      "patternName": "Non-Container custom runtime width",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted designer/export evidence for runtime-effective custom width on non-Container controls.",
+      "requiredProperties": {
+        "attrs.common.positioning.widthtype": [null, "3"],
+        "attrs.common.positioning.width": "present",
+        "attrs.common.positioning.widthu": "present"
+      },
+      "optionalProperties": {
+        "attrs.common.sizing": "may provide min/max constraints but does not replace positioning width mode"
+      },
+      "proofBoundary": "Validates declared/redacted control metadata only.",
+      "notes": "Use this when a non-Container control claims custom runtime width."
+    },
+    {
+      "id": "non-container.common.margin-padding",
+      "controlType": "*",
+      "patternName": "Non-Container Advanced-tab margin and padding",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted designer/export evidence showing non-Container Advanced-tab spacing is stored under attrs.common.margin and attrs.common.padding.",
+      "requiredProperties": {
+        "attrs.common.margin": "present",
+        "attrs.common.padding": "present"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted control metadata only.",
+      "notes": "Do not use Container attrs.style spacing as proof of non-Container Advanced-tab spacing."
+    },
+    {
+      "id": "non-container.common.border-normal-hover-shadow",
+      "controlType": "*",
+      "patternName": "Non-Container Advanced-tab normal/hover border and shadow",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted designer/export evidence showing border, radius, hover style, and shadow live under attrs.common.border for non-Container controls.",
+      "requiredProperties": {
+        "attrs.common.border.normal": "present",
+        "attrs.common.border.hover": "present"
+      },
+      "optionalProperties": {
+        "attrs.common.border.normal.boxShadow": "normal-state shadow when used",
+        "attrs.common.border.hover.boxShadow": "hover-state shadow when used"
+      },
+      "proofBoundary": "Validates declared/redacted control metadata only.",
+      "notes": "Hover shadow must be checked under attrs.common.border.hover, not inferred from screenshots."
+    },
+    {
+      "id": "non-container.common.background-classic",
+      "controlType": "*",
+      "patternName": "Non-Container classic background",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted designer/export evidence showing classic background color for non-Container controls under attrs.common.background.normal.",
+      "requiredProperties": {
+        "attrs.common.background.normal.classic": "present"
+      },
+      "optionalProperties": {
+        "attrs.common.background.hover.classic": "hover classic background when used"
+      },
+      "proofBoundary": "Validates declared/redacted control metadata only.",
+      "notes": "Classic background color is an Advanced-tab common property for non-Container controls."
+    },
+    {
+      "id": "non-container.common.background-image",
+      "controlType": "*",
+      "patternName": "Non-Container classic background image",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted designer/export evidence showing non-Container background images under attrs.common.background.normal.classic.image.",
+      "requiredProperties": {
+        "attrs.common.background.normal.classic.image": "present"
+      },
+      "optionalProperties": {
+        "attrs.common.background.normal.classic.size": "image sizing when used",
+        "attrs.common.background.normal.classic.position": "image position when used"
+      },
+      "proofBoundary": "Validates declared/redacted control metadata only.",
+      "notes": "Do not commit raw image assets as evidence for this pattern."
+    },
+    {
+      "id": "non-container.common.background-gradient-two-color",
+      "controlType": "*",
+      "patternName": "Non-Container two-color gradient background",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted designer/export evidence showing designer-supported gradients as two-color common background metadata.",
+      "requiredProperties": {
+        "attrs.common.background.normal.gradient.colors": "two-colors"
+      },
+      "optionalProperties": {
+        "attrs.common.background.hover.gradient.colors": "two-colors"
+      },
+      "proofBoundary": "Validates declared/redacted control metadata only.",
+      "notes": "More complex gradient/background styling requires explicit custom CSS evidence before generation."
+    },
+    {
+      "id": "data-filter.dropdown.runtime-effective-custom-180px-width",
+      "controlType": "data-filter",
+      "patternName": "Data Filter dropdown runtime-effective custom 180px width",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Marketing Event Data Filter evidence showing the runtime-effective fixed dropdown width is the non-Container Advanced-tab custom width under attrs.common.positioning.",
+      "requiredProperties": {
+        "attrs.common.positioning.widthtype": [null, "3"],
+        "attrs.common.positioning.width": [null, 180],
+        "attrs.common.positioning.widthu": [null, "px"]
+      },
+      "optionalProperties": {
+        "attrs.common.sizing.width": [null, 180],
+        "attrs.common.sizing.minWidth": [null, 180],
+        "attrs.common.sizing.maxWidth": [null, 180]
+      },
+      "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
+      "notes": "attrs.style width can appear in normalized study specs, but it is not sufficient runtime-effective width proof for Data Filter dropdowns."
     }
   ],
   "exampleEntryShape": {
