@@ -42,6 +42,27 @@ function run() {
   testCamelCaseContainerAttrsFail();
   testMockRuntimeBoundaryPasses();
   testDynamicKpiProofMissingFails();
+  testRichKpiCardPasses();
+  testRichKpiMissingIconTileFails();
+  testRichKpiIconTileWrongSizeFails();
+  testRichKpiGridFails();
+  testSummaryRawVariableFails();
+  testLiveKpiBoundaryPasses();
+  testMockValueForcedFails();
+  testRichTablePasses();
+  testTableStatusPlainTextFails();
+  testTableProgressPlainTextFails();
+  testTableOwnerAvatarMissingFails();
+  testTablePlainScaffoldFails();
+  testAddListActionContainerPasses();
+  testActionContainerMissingActionTypeFails();
+  testActionContainerMissingTargetListFails();
+  testActionContainerWrongActionTypeFails();
+  testActionContainerMissingChildLabelFails();
+  testActionContainerMissingNavigatorLabelFails();
+  testDecorativeContainerPasses();
+  testVisibleRawVariableFails();
+  testInternalBindingHiddenPasses();
   testKnowledgeBaseBoundaryReported();
   testRadioFilterDropdownVisualPatternPasses();
   testRadioFilterMissingInputStyleFails();
@@ -235,6 +256,167 @@ function testDynamicKpiProofMissingFails() {
   spec.kpiCards[0].dynamicKpiProofClaimed = true;
   spec.kpiCards[0].beforeAfterMutationEvidence = false;
   expectFail("Fail: dynamic KPI proof claimed without before/after mutation evidence", inspectFixture("missing-dynamic-proof.json", spec), "DYNAMIC_KPI_PROOF_MISSING");
+}
+
+function testRichKpiCardPasses() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Planned Events")];
+  const report = inspectFixture("rich-kpi-card-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: rich KPI card with fixed centered icon tile, inline body, text stack, Summary value, trend, helper text");
+}
+
+function testRichKpiMissingIconTileFails() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Planned Events")];
+  delete spec.kpiCards[0].iconTile;
+  expectFail("Fail: KPI card missing icon tile", inspectFixture("rich-kpi-missing-icon-tile.json", spec), "KPI_CARD_ICON_TILE_MISSING");
+}
+
+function testRichKpiIconTileWrongSizeFails() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Planned Events")];
+  spec.kpiCards[0].iconTile.fixedWidth = 40;
+  expectFail("Fail: icon tile wrong size or icon not centered", inspectFixture("rich-kpi-icon-wrong-size.json", spec), "KPI_CARD_ICON_TILE_SIZE_MISMATCH");
+}
+
+function testRichKpiGridFails() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Planned Events")];
+  spec.kpiCards[0].controlType = "Grid";
+  const report = inspectFixture("rich-kpi-grid.json", spec);
+  expectFail("Fail: KPI card uses Grid where Container structure is required", report, "KPI_CARD_GRID_USED_WHERE_CONTAINER_REQUIRED");
+}
+
+function testSummaryRawVariableFails() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Planned Events")];
+  spec.kpiCards[0].summaryValue.visibleText = "__temp_planned_events";
+  expectFail("Fail: Summary value rendered as raw variable name", inspectFixture("summary-raw-variable-visible.json", spec), "SUMMARY_VALUE_RAW_VARIABLE_VISIBLE");
+}
+
+function testLiveKpiBoundaryPasses() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Planned Events")];
+  spec.kpiCards[0].runtimeValueDiffersFromMock = true;
+  spec.kpiCards[0].mockValueBoundary = "visual-target-only";
+  const report = inspectFixture("live-kpi-boundary-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: live KPI value differs from mock but live-data boundary is documented");
+}
+
+function testMockValueForcedFails() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Planned Events")];
+  spec.kpiCards[0].mockValueForcedAsRuntimeProof = true;
+  expectFail("Fail: mock value is forced or claimed as runtime proof", inspectFixture("mock-value-forced-runtime-proof.json", spec), "MOCK_VALUE_FORCED_AS_RUNTIME_PROOF");
+}
+
+function testRichTablePasses() {
+  const spec = goodSpec();
+  spec.tables = [richTable()];
+  const report = inspectFixture("rich-table-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: rich table with badge, progress bar, owner/avatar treatment, header hierarchy, row density");
+}
+
+function testTableStatusPlainTextFails() {
+  const spec = goodSpec();
+  spec.tables = [richTable()];
+  spec.tables[0].richCellTreatments.statusBadge = false;
+  expectFail("Fail: status rendered as plain text when badge required", inspectFixture("table-status-plain-text.json", spec), "TABLE_STATUS_BADGE_MISSING");
+}
+
+function testTableProgressPlainTextFails() {
+  const spec = goodSpec();
+  spec.tables = [richTable()];
+  spec.tables[0].richCellTreatments.progressBar = false;
+  expectFail("Fail: progress rendered as plain text when progress bar required", inspectFixture("table-progress-plain-text.json", spec), "TABLE_PROGRESS_BAR_MISSING");
+}
+
+function testTableOwnerAvatarMissingFails() {
+  const spec = goodSpec();
+  spec.tables = [richTable()];
+  spec.tables[0].richCellTreatments.ownerAvatar = false;
+  expectFail("Fail: owner/person rendered without avatar/person treatment when required", inspectFixture("table-owner-no-avatar.json", spec), "TABLE_OWNER_AVATAR_MISSING");
+}
+
+function testTablePlainScaffoldFails() {
+  const spec = goodSpec();
+  spec.tables = [richTable()];
+  spec.tables[0].plainScaffoldRendering = true;
+  expectFail("Fail: table looks like plain scaffold despite design-fidelity claim", inspectFixture("table-plain-scaffold.json", spec), "TABLE_PLAIN_SCAFFOLD_RENDERING");
+}
+
+function testAddListActionContainerPasses() {
+  const spec = goodSpec();
+  spec.actions = [addListActionContainer()];
+  const report = inspectFixture("add-list-action-container-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: add-list action Container with fixed size, child Heading/Text, action-type \"5\", target list metadata, and nv_label");
+}
+
+function testActionContainerMissingActionTypeFails() {
+  const spec = goodSpec();
+  spec.actions = [addListActionContainer()];
+  delete spec.actions[0].actionType;
+  expectFail("Fail: styled action Container missing action-type", inspectFixture("action-missing-type.json", spec), "ACTION_CONTAINER_ACTION_TYPE_MISSING");
+}
+
+function testActionContainerMissingTargetListFails() {
+  const spec = goodSpec();
+  spec.actions = [addListActionContainer()];
+  spec.actions[0].targetList = {};
+  expectFail("Fail: add-list action missing target list metadata", inspectFixture("action-missing-target-list.json", spec), "ACTION_CONTAINER_TARGET_LIST_MISSING");
+}
+
+function testActionContainerWrongActionTypeFails() {
+  const spec = goodSpec();
+  spec.actions = [addListActionContainer()];
+  spec.actions[0].actionType = "2";
+  expectFail("Fail: wrong action-type for add-list intent", inspectFixture("action-wrong-type.json", spec), "ACTION_CONTAINER_ACTION_TYPE_MISMATCH");
+}
+
+function testActionContainerMissingChildLabelFails() {
+  const spec = goodSpec();
+  spec.actions = [addListActionContainer()];
+  spec.actions[0].children = [];
+  expectFail("Fail: child visible label missing", inspectFixture("action-missing-child-label.json", spec), "ACTION_CONTAINER_CHILD_LABEL_MISSING");
+}
+
+function testActionContainerMissingNavigatorLabelFails() {
+  const spec = goodSpec();
+  spec.actions = [addListActionContainer()];
+  delete spec.actions[0].nv_label;
+  expectFail("Fail: semantic nv_label missing", inspectFixture("action-missing-nv-label.json", spec), "ACTION_CONTAINER_NAVIGATOR_LABEL_MISSING");
+}
+
+function testDecorativeContainerPasses() {
+  const spec = goodSpec();
+  spec.actions = [{ ...action("Decorative Accent", 120, 32), decorative: true, requiresNavigatorLabel: false }];
+  const report = inspectFixture("decorative-container-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: decorative Container not intended as action does not require action-type");
+}
+
+function testVisibleRawVariableFails() {
+  const spec = goodSpec();
+  spec.visibleTexts = [{ id: "event_portfolio_visible_value", text: "__temp_event_count" }];
+  expectFail("Fail: visible decoded text contains __temp_, temp_event, or internal binding/variable token", inspectFixture("visible-raw-variable.json", spec), "RAW_VARIABLE_TEXT_VISIBLE");
+}
+
+function testInternalBindingHiddenPasses() {
+  const spec = goodSpec();
+  spec.decodedResources = [
+    {
+      id: "event_portfolio_summary_hidden",
+      expectedRole: "summary",
+      attrs: { save_var: { name: "__temp_event_count" }, headc: { title: { variable: ["__temp_event_count"] } } },
+    },
+  ];
+  const report = inspectFixture("internal-binding-hidden-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: internal binding variable exists but is not visible text");
 }
 
 function testKnowledgeBaseBoundaryReported() {
@@ -796,6 +978,29 @@ function action(name, width, height) {
   };
 }
 
+function addListActionContainer() {
+  return {
+    ...action("New Event Request", 168, 40),
+    actionLike: true,
+    actionIntent: "add-list-item",
+    actionType: "5",
+    expectedWidth: 168,
+    expectedHeight: 40,
+    targetList: {
+      AppID: "app-redacted",
+      ListSetID: "listset-redacted",
+      ListID: "events-redacted",
+    },
+    childLabel: "New Event Request",
+    children: [
+      {
+        controlType: "Heading",
+        text: "New Event Request",
+      },
+    ],
+  };
+}
+
 function structuralContainer(id, justifyContent) {
   return {
     id,
@@ -842,6 +1047,49 @@ function kpiCard(name) {
     },
     valuePlacement: "below-title",
     trendPlacement: "below-value",
+  };
+}
+
+function richKpiCard(name) {
+  return {
+    ...kpiCard(name),
+    requiresRichContentFidelity: true,
+    outerCardContainer: true,
+    containerRole: "outer-card",
+    expectedIconTileSize: 56,
+    bodyLayout: "inline-icon-text-stack",
+    textStack: {
+      direction: "column",
+      alignItems: "flex-start",
+      roles: ["title", "value", "trend", "helper"],
+    },
+    summaryValue: {
+      controlType: "Summary",
+      hierarchy: "primary-value",
+      visibleText: "24",
+    },
+    trendText: "+12% vs last month",
+    helperText: "Approved events",
+  };
+}
+
+function richTable() {
+  return {
+    name: "Event Portfolio table",
+    claimsDesignFidelity: true,
+    requiresRichCells: true,
+    requiresStatusBadge: true,
+    requiresProgressBar: true,
+    requiresOwnerAvatar: true,
+    requiresHeaderHierarchy: true,
+    requiresRowDensity: true,
+    richCellTreatments: {
+      statusBadge: true,
+      progressBar: true,
+      ownerAvatar: true,
+    },
+    headerHierarchy: "designed",
+    rowDensity: "design-match",
   };
 }
 

@@ -36,25 +36,79 @@
         "attrs.search-enable": false,
         "attrs.more-enable": false,
         "attrs.displayTitle": false,
-        "attrs.lablay": [null, "hide"],
+        "attrs.lablay": [
+          null,
+          "hide"
+        ],
         "attrs.placeholder": "present",
-        "attrs.style.gap": [null, 0],
-        "attrs.style.direction": [null, "column"],
-        "attrs.style.widthtype": [null, "1"],
-        "attrs.style.width": [null, 180],
-        "attrs.style.widthu": [null, "px"],
-        "attrs.style.align_items": [null, "stretch"],
-        "attrs.style.justify_content": [null, "center"],
-        "attrs.style.wrap": [null, "nowrap"],
-        "attrs.common.positioning.widthtype": [null, "3"],
-        "attrs.common.positioning.width": [null, 180],
-        "attrs.common.positioning.widthu": [null, "px"],
-        "attrs.common.sizing.width": [null, 180],
-        "attrs.common.sizing.minWidth": [null, 180],
-        "attrs.common.sizing.maxWidth": [null, 180],
-        "attrs.common.sizing.height": [null, 48],
-        "attrs.common.sizing.minHeight": [null, 48],
-        "attrs.common.sizing.maxHeight": [null, 48],
+        "attrs.style.gap": [
+          null,
+          0
+        ],
+        "attrs.style.direction": [
+          null,
+          "column"
+        ],
+        "attrs.style.widthtype": [
+          null,
+          "1"
+        ],
+        "attrs.style.width": [
+          null,
+          180
+        ],
+        "attrs.style.widthu": [
+          null,
+          "px"
+        ],
+        "attrs.style.align_items": [
+          null,
+          "stretch"
+        ],
+        "attrs.style.justify_content": [
+          null,
+          "center"
+        ],
+        "attrs.style.wrap": [
+          null,
+          "nowrap"
+        ],
+        "attrs.common.positioning.widthtype": [
+          null,
+          "3"
+        ],
+        "attrs.common.positioning.width": [
+          null,
+          180
+        ],
+        "attrs.common.positioning.widthu": [
+          null,
+          "px"
+        ],
+        "attrs.common.sizing.width": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.minWidth": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.maxWidth": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.height": [
+          null,
+          48
+        ],
+        "attrs.common.sizing.minHeight": [
+          null,
+          48
+        ],
+        "attrs.common.sizing.maxHeight": [
+          null,
+          48
+        ],
         "attrs.common.margin": "zero",
         "attrs.common.padding": "zero",
         "attrs.common.border.normal.type": "0",
@@ -90,27 +144,81 @@
         "attrs.search-enable": false,
         "attrs.more-enable": false,
         "attrs.displayTitle": false,
-        "attrs.lablay": [null, "hide"],
+        "attrs.lablay": [
+          null,
+          "hide"
+        ],
         "attrs.placeholder": "present",
         "attrs.field": "present",
         "attrs.choice-options": "nonempty",
-        "attrs.style.gap": [null, 0],
-        "attrs.style.direction": [null, "column"],
-        "attrs.style.widthtype": [null, "1"],
-        "attrs.style.width": [null, 180],
-        "attrs.style.widthu": [null, "px"],
-        "attrs.style.align_items": [null, "stretch"],
-        "attrs.style.justify_content": [null, "center"],
-        "attrs.style.wrap": [null, "nowrap"],
-        "attrs.common.positioning.widthtype": [null, "3"],
-        "attrs.common.positioning.width": [null, 180],
-        "attrs.common.positioning.widthu": [null, "px"],
-        "attrs.common.sizing.width": [null, 180],
-        "attrs.common.sizing.minWidth": [null, 180],
-        "attrs.common.sizing.maxWidth": [null, 180],
-        "attrs.common.sizing.height": [null, 48],
-        "attrs.common.sizing.minHeight": [null, 48],
-        "attrs.common.sizing.maxHeight": [null, 48],
+        "attrs.style.gap": [
+          null,
+          0
+        ],
+        "attrs.style.direction": [
+          null,
+          "column"
+        ],
+        "attrs.style.widthtype": [
+          null,
+          "1"
+        ],
+        "attrs.style.width": [
+          null,
+          180
+        ],
+        "attrs.style.widthu": [
+          null,
+          "px"
+        ],
+        "attrs.style.align_items": [
+          null,
+          "stretch"
+        ],
+        "attrs.style.justify_content": [
+          null,
+          "center"
+        ],
+        "attrs.style.wrap": [
+          null,
+          "nowrap"
+        ],
+        "attrs.common.positioning.widthtype": [
+          null,
+          "3"
+        ],
+        "attrs.common.positioning.width": [
+          null,
+          180
+        ],
+        "attrs.common.positioning.widthu": [
+          null,
+          "px"
+        ],
+        "attrs.common.sizing.width": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.minWidth": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.maxWidth": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.height": [
+          null,
+          48
+        ],
+        "attrs.common.sizing.minHeight": [
+          null,
+          48
+        ],
+        "attrs.common.sizing.maxHeight": [
+          null,
+          48
+        ],
         "attrs.common.margin": "zero",
         "attrs.common.padding": "zero",
         "attrs.common.border.normal.type": "0",
@@ -142,12 +250,24 @@
         "attrs.icon.icon": "fa-regular fa-filter",
         "attrs.icon.view": "default",
         "attrs.icon.shape": "2",
-        "attrs.icon.align": [null, "center"],
-        "attrs.icon.size": [null, 16],
-        "attrs.common.positioning.widthtype": [null, "2"],
+        "attrs.icon.align": [
+          null,
+          "center"
+        ],
+        "attrs.icon.size": [
+          null,
+          16
+        ],
+        "attrs.common.positioning.widthtype": [
+          null,
+          "2"
+        ],
         "attrs.common.margin": "zero",
         "attrs.common.padding": "zero",
-        "attrs.style.widthtype": [null, "2"]
+        "attrs.style.widthtype": [
+          null,
+          "2"
+        ]
       },
       "optionalProperties": {},
       "proofBoundary": "Validates declared/redacted control metadata only. It does not prove pixel-perfect rendering or parse screenshots.",
@@ -251,14 +371,32 @@
       "confidence": "high",
       "evidenceSummary": "Derived from redacted Marketing Event Data Filter evidence showing fixed 180px sizing belongs to the Data Filter control Resource attrs, not the wrapper container.",
       "requiredProperties": {
-        "attrs.style.width": [null, 180],
-        "attrs.style.widthu": [null, "px"],
-        "attrs.common.sizing.width": [null, 180],
-        "attrs.common.sizing.minWidth": [null, 180],
-        "attrs.common.sizing.maxWidth": [null, 180]
+        "attrs.style.width": [
+          null,
+          180
+        ],
+        "attrs.style.widthu": [
+          null,
+          "px"
+        ],
+        "attrs.common.sizing.width": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.minWidth": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.maxWidth": [
+          null,
+          180
+        ]
       },
       "optionalProperties": {
-        "attrs.style.widthtype": [null, "1"]
+        "attrs.style.widthtype": [
+          null,
+          "1"
+        ]
       },
       "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
       "notes": "Status and Event Type filters should not retain legacy 120px or 140px wrapper widths under the high-fidelity 180px dropdown pattern."
@@ -299,13 +437,22 @@
       "evidenceSummary": "Derived from redacted Yeeflow designer/export evidence showing non-Container runtime-effective width mode is stored under attrs.common.positioning rather than Container attrs.style.",
       "requiredProperties": {
         "nonContainer.width.full": {
-          "attrs.common.positioning.widthtype": [null, "1"]
+          "attrs.common.positioning.widthtype": [
+            null,
+            "1"
+          ]
         },
         "nonContainer.width.inline": {
-          "attrs.common.positioning.widthtype": [null, "2"]
+          "attrs.common.positioning.widthtype": [
+            null,
+            "2"
+          ]
         },
         "nonContainer.width.custom": {
-          "attrs.common.positioning.widthtype": [null, "3"],
+          "attrs.common.positioning.widthtype": [
+            null,
+            "3"
+          ],
           "attrs.common.positioning.width": "present",
           "attrs.common.positioning.widthu": "present"
         }
@@ -327,7 +474,10 @@
       "confidence": "high",
       "evidenceSummary": "Derived from redacted designer/export evidence for runtime-effective custom width on non-Container controls.",
       "requiredProperties": {
-        "attrs.common.positioning.widthtype": [null, "3"],
+        "attrs.common.positioning.widthtype": [
+          null,
+          "3"
+        ],
         "attrs.common.positioning.width": "present",
         "attrs.common.positioning.widthu": "present"
       },
@@ -433,17 +583,282 @@
       "confidence": "high",
       "evidenceSummary": "Derived from redacted Marketing Event Data Filter evidence showing the runtime-effective fixed dropdown width is the non-Container Advanced-tab custom width under attrs.common.positioning.",
       "requiredProperties": {
-        "attrs.common.positioning.widthtype": [null, "3"],
-        "attrs.common.positioning.width": [null, 180],
-        "attrs.common.positioning.widthu": [null, "px"]
+        "attrs.common.positioning.widthtype": [
+          null,
+          "3"
+        ],
+        "attrs.common.positioning.width": [
+          null,
+          180
+        ],
+        "attrs.common.positioning.widthu": [
+          null,
+          "px"
+        ]
       },
       "optionalProperties": {
-        "attrs.common.sizing.width": [null, 180],
-        "attrs.common.sizing.minWidth": [null, 180],
-        "attrs.common.sizing.maxWidth": [null, 180]
+        "attrs.common.sizing.width": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.minWidth": [
+          null,
+          180
+        ],
+        "attrs.common.sizing.maxWidth": [
+          null,
+          180
+        ]
       },
       "proofBoundary": "Validates declared/redacted control metadata and decoded Resource attr shapes only.",
       "notes": "attrs.style width can appear in normalized study specs, but it is not sufficient runtime-effective width proof for Data Filter dropdowns."
+    },
+    {
+      "id": "kpi-card.container.rich-card",
+      "controlType": "container",
+      "patternName": "KPI card rich outer Container structure",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Requires a Container-based outer rich card shell for KPI cards that claim design/content fidelity. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "kpi-card.icon-tile.fixed-centered",
+      "controlType": "container",
+      "patternName": "KPI fixed centered icon tile",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Requires fixed icon tile sizing and centered native icon placement. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "kpi-card.body.inline-icon-text-stack",
+      "controlType": "container",
+      "patternName": "KPI inline icon and text-stack body",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Requires inline icon/text composition with a vertical text stack. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "kpi-card.summary-value.hierarchy",
+      "controlType": "summary",
+      "patternName": "KPI Summary value hierarchy",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Requires a Summary/value role with primary-value hierarchy, not raw variable text. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "kpi-card.trend-helper-text.hierarchy",
+      "controlType": "heading",
+      "patternName": "KPI trend and helper hierarchy",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Requires separate trend and helper text roles below the value. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "summary.value.no-raw-variable",
+      "controlType": "summary",
+      "patternName": "Summary visible value raw-variable prevention",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Visible Summary value text must not render internal variable tokens. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "summary.value.live-data-boundary",
+      "controlType": "summary",
+      "patternName": "Summary live data boundary",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Live KPI values may differ from mock values only when reported as a live-data boundary. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "summary.text-stack.title-value-trend-helper",
+      "controlType": "summary",
+      "patternName": "Summary title value trend helper text stack",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Requires title, value, trend, and helper roles for rich KPI text stacks. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "table.status.badge-treatment",
+      "controlType": "collection",
+      "patternName": "Table status badge treatment",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Status fields in design-fidelity tables require badge-style treatment metadata. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "table.progress.bar-treatment",
+      "controlType": "collection",
+      "patternName": "Table progress bar treatment",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Progress fields in design-fidelity tables require progress-bar treatment metadata. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "table.owner.avatar-person-treatment",
+      "controlType": "collection",
+      "patternName": "Table owner avatar/person treatment",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Owner/person fields require avatar/person treatment when the design calls for it. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "table.header-row.hierarchy",
+      "controlType": "collection",
+      "patternName": "Table header hierarchy",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Table headers require declared hierarchy and spacing when claiming design fidelity. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "table.row-density.design-fidelity",
+      "controlType": "collection",
+      "patternName": "Table row density fidelity",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Table rows require declared design-matching density/spacing. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "container.action-button.add-list-item",
+      "controlType": "container",
+      "patternName": "Action Container add-list behavior",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Action-looking add-list Containers require action-type 5 and target list metadata. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "container.action-button.fixed-size",
+      "controlType": "container",
+      "patternName": "Action Container fixed size",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Action Containers require fixed size when design specifies button dimensions. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "container.action-button.child-heading-label",
+      "controlType": "container",
+      "patternName": "Action Container child Heading/Text label",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Action labels should be visible child Heading/Text controls. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "container.action-button.semantic-nv-label",
+      "controlType": "container",
+      "patternName": "Action Container semantic Navigator label",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Action Containers require semantic nv_label for designer traceability. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "visible-runtime-text.no-raw-variable-names",
+      "controlType": "text",
+      "patternName": "Visible runtime raw-variable prevention",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Visible runtime text must not contain raw variable or binding tokens. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "decoded-resource.visible-text.no-raw-variable-names",
+      "controlType": "text",
+      "patternName": "Decoded Resource visible raw-variable prevention",
+      "status": "evidence-backed",
+      "source": "manual-runtime-study",
+      "confidence": "high",
+      "evidenceSummary": "Decoded Resource visible text fields must not expose raw variable tokens. Derived from redacted Marketing Event Event Portfolio design/runtime fidelity findings; extension-layer guidance only, not a product-catalog replacement.",
+      "requiredProperties": {},
+      "optionalProperties": {},
+      "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
+      "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
     }
   ],
   "exampleEntryShape": {
