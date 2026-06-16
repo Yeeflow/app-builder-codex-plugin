@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.6.53
+
+- Release Runtime Sample Data and KPI/Table Presentation Fidelity Gates.
+- Add runtime sample-data proof gates for redacted `/users/search` `AccountID` provenance, scoped item PATCH proof for blank User/person values, Events/list item batch-create proof for runtime sample rows, and retry/backoff or delayed verification for batch-created rows.
+- Add Collection grid-table fidelity checks for root overflow hidden, aligned header/body grids, padding parity, real progress bar controls for progress-like columns, numeric progress source fields, Dynamic user/person controls bound to User/identity fields, and semantic `nv_label` values.
+- Add KPI presentation fidelity checks for `formatNumber(...)`, compact K/M/B formatting, fixed decimal formatting, long raw decimal rejection, and unformatted large-number rejection.
+- Reinforce that runtime values remain live and mock values are visual targets only.
+- Confirm this release does not claim pixel-perfect visual diffing, automatic screenshot parsing, or live runtime proof before install/cache smoke and focused runtime testing are performed.
+
 ## 0.6.52
 
 - Release KPI/card/table/action content fidelity gates.
