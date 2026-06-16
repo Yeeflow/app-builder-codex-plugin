@@ -105,6 +105,21 @@ for (const patternId of [
   "container.action-button.semantic-nv-label",
   "visible-runtime-text.no-raw-variable-names",
   "decoded-resource.visible-text.no-raw-variable-names",
+  "runtime-sample-data.users-search.account-id",
+  "runtime-sample-data.items-update.user-field",
+  "runtime-sample-data.items-batch-create.events",
+  "runtime-sample-data.query-verify-retry-backoff",
+  "collection.grid-table.root-overflow-hidden",
+  "collection.grid-table.header-item-align-center",
+  "collection.grid-table.cell-padding-parity",
+  "collection.grid-table.progress-column-control",
+  "collection.grid-table.dynamic-user-column-control",
+  "collection.grid-table.semantic-nv-labels",
+  "kpi.value-display.format-number-expression",
+  "kpi.value-display.compact-number-kmb",
+  "kpi.value-display.fixed-decimal",
+  "kpi.value-display.no-raw-long-decimal",
+  "kpi.value-display.no-unformatted-large-number",
 ]) {
   assert.equal(patternIds.has(patternId), true, `${patternId} extension pattern exists`);
 }

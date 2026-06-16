@@ -124,6 +124,25 @@ const FINDING_MESSAGES = {
   ACTION_CONTAINER_STYLED_BUT_NOT_ACTIONABLE: "Styled action-looking Container is not backed by real action behavior.",
   ACTION_CONTAINER_NAVIGATOR_LABEL_MISSING: "Action Container must include a semantic nv_label.",
   ACTION_CONTAINER_FIXED_SIZE_MISMATCH: "Action Container fixed size does not match the design contract.",
+  RUNTIME_SAMPLE_USER_ID_PROVENANCE_MISSING: "Runtime User/person sample-data proof must include redacted AccountID/user identifier provenance.",
+  RUNTIME_SAMPLE_USER_ID_NOT_REDACTED: "Runtime sample-data proof must not store raw user IDs, item IDs, raw API responses, tenant URLs, or private fields.",
+  RUNTIME_SAMPLE_USER_FIELD_PATCH_PROOF_MISSING: "Existing rows with blank User/person values require scoped item PATCH proof before runtime User/person claims.",
+  RUNTIME_SAMPLE_BATCH_CREATE_PROOF_MISSING: "Additional runtime sample rows require item batch-create proof metadata.",
+  RUNTIME_SAMPLE_VERIFY_RETRY_MISSING: "Batch-created sample rows require retry/backoff or delayed verification metadata.",
+  COLLECTION_GRID_TABLE_OVERFLOW_HIDDEN_MISSING: "Collection grid-table root container must use overflow hidden to preserve rounded corners.",
+  COLLECTION_GRID_TABLE_ALIGN_CENTER_MISSING: "Collection grid-table header and item grids must align items center.",
+  COLLECTION_GRID_TABLE_CELL_PADDING_MISMATCH: "Collection grid-table header/body cell padding must match.",
+  COLLECTION_PROGRESS_CONTROL_MISSING: "Progress-like Collection columns must use a real progress bar control.",
+  COLLECTION_PROGRESS_SOURCE_NOT_NUMERIC: "Progress bar source field must be Number/number-like, not Currency or text.",
+  COLLECTION_PROGRESS_RAW_FORMULA_VISIBLE: "Progress formulas must not render as visible raw text.",
+  COLLECTION_DYNAMIC_USER_CONTROL_MISSING: "Owner/person Collection columns must use a Dynamic user/person control.",
+  COLLECTION_DYNAMIC_USER_FIELD_NOT_USER_TYPE: "Dynamic user/person controls must bind to a User/identity field.",
+  COLLECTION_NV_LABEL_MISSING: "Generated Collection grid-table subtree controls must include semantic nv_label values.",
+  KPI_VALUE_FORMAT_MISSING: "Presentation-quality KPI values must use formatNumber(...) or equivalent proven formatting.",
+  KPI_COMPACT_NUMBER_FORMAT_MISSING: "Large KPI money/count values must use compact K/M/B formatting when the design expects compact display.",
+  KPI_FIXED_DECIMAL_FORMAT_MISSING: "Rate/percentage KPI values must use fixed decimal formatting.",
+  KPI_RAW_LONG_DECIMAL_VISIBLE: "Long raw decimal KPI values must not be visible in high-quality UI claims.",
+  KPI_UNFORMATTED_LARGE_NUMBER_VISIBLE: "Large KPI values must not render as unformatted raw numbers unless explicitly waived.",
 };
 
 const DATA_FILTER_VISUAL_PATTERNS = {
@@ -287,7 +306,10 @@ export function inspectUiControlPropertyFidelity({
     validateKpiCards(candidateSpec, referenceSpec, findings);
     validateKpiProofBoundary(candidateSpec, findings);
     validateKpiContentFidelity(candidateSpec, findings);
+    validateKpiValueFormatting(candidateSpec, findings);
     validateTableContentFidelity(candidateSpec, findings);
+    validateCollectionGridTables(candidateSpec, findings);
+    validateRuntimeSampleDataProof(candidateSpec, findings);
     validateVisibleRawVariables(candidateSpec, findings);
   }
 
@@ -317,6 +339,8 @@ export function inspectUiControlPropertyFidelity({
       kpiCardCount: candidateSpec.kpiCards.length,
       actionCount: candidateSpec.actions.length,
       richTableCount: candidateSpec.tables.length,
+      gridTableCount: candidateSpec.gridTables.length,
+      runtimeSampleDataProofPresent: Boolean(candidateSpec.runtimeSampleDataProof),
       visibleTextCount: candidateSpec.visibleTexts.length,
     },
     controlPropertyKnowledgeBase: {
@@ -878,6 +902,119 @@ function validateTableContentFidelity(spec, findings) {
   }
 }
 
+function validateCollectionGridTables(spec, findings) {
+  for (const table of spec.gridTables) {
+    if (!table || !(table.claimsDesignFidelity || table.requiresGridTableFidelity || table.requiresContentFidelity)) continue;
+    const name = table.name || table.id || "Collection grid-table";
+    if (table.rootOverflowHidden !== true && deepGet(table, "root.attrs.style.overflow") !== "hidden" && deepGet(table, "root.attrs.common.overflow") !== "hidden") {
+      addFinding(findings, "error", "COLLECTION_GRID_TABLE_OVERFLOW_HIDDEN_MISSING", `${name} root must declare overflow hidden.`);
+    }
+    const headerAlign = normalizeAlignment(table.headerAlignItems ?? table.headerAlign ?? deepGet(table, "headerGrid.attrs.style.align_items"));
+    const itemAlign = normalizeAlignment(table.itemAlignItems ?? table.bodyAlignItems ?? deepGet(table, "itemGrid.attrs.style.align_items"));
+    if (headerAlign !== "center" || itemAlign !== "center") {
+      addFinding(findings, "error", "COLLECTION_GRID_TABLE_ALIGN_CENTER_MISSING", `${name} header and item grids must align center.`, {
+        headerAlign,
+        itemAlign,
+      });
+    }
+    const headerPadding = normalizePadding(table.headerCellPadding ?? deepGet(table, "headerCell.attrs.common.padding") ?? deepGet(table, "headerCell.attrs.style.padding"));
+    const bodyPadding = normalizePadding(table.bodyCellPadding ?? table.itemCellPadding ?? deepGet(table, "bodyCell.attrs.common.padding") ?? deepGet(table, "itemCell.attrs.common.padding"));
+    if (JSON.stringify(headerPadding) !== JSON.stringify(bodyPadding)) {
+      addFinding(findings, "error", "COLLECTION_GRID_TABLE_CELL_PADDING_MISMATCH", `${name} header/body cell padding must match.`, {
+        headerPadding,
+        bodyPadding,
+      });
+    }
+    for (const column of normalizeArray(table.columns)) {
+      validateGridTableColumn(table, column, findings);
+    }
+    const controls = normalizeArray(table.generatedControls || table.controls || table.subtreeControls);
+    for (const control of controls) {
+      if (!isSemanticNavigatorLabel(control.nv_label ?? control.nvLabel ?? control.navigatorLabel)) {
+        addFinding(findings, "error", "COLLECTION_NV_LABEL_MISSING", `${control.id || control.name || name} must include semantic nv_label.`);
+      }
+    }
+  }
+}
+
+function validateGridTableColumn(table, column, findings) {
+  const tableName = table.name || table.id || "Collection grid-table";
+  const name = column.name || column.label || column.id || "column";
+  const role = String(column.role || column.semanticRole || column.kind || "").toLowerCase();
+  const isProgress = Boolean(column.requiresProgressBar || column.progressLike || role.includes("progress") || /progress|registration/i.test(name));
+  const isOwner = Boolean(column.requiresDynamicUser || column.ownerPersonLike || role.includes("owner") || role.includes("person") || /owner|person/i.test(name));
+  if (isProgress) {
+    if (!isProgressControl(column.controlType || column.type || column.renderControlType)) {
+      addFinding(findings, "error", "COLLECTION_PROGRESS_CONTROL_MISSING", `${tableName} ${name} must use a real progress bar control.`);
+    }
+    if (!isNumericFieldType(column.sourceFieldType || column.fieldType || column.sourceType)) {
+      addFinding(findings, "error", "COLLECTION_PROGRESS_SOURCE_NOT_NUMERIC", `${tableName} ${name} progress source must be numeric.`);
+    }
+    if (column.rawFormulaVisible || containsRawFormulaText(column.visibleText || column.renderedText || column.text)) {
+      addFinding(findings, "error", "COLLECTION_PROGRESS_RAW_FORMULA_VISIBLE", `${tableName} ${name} must not render raw progress formula text.`);
+    }
+  }
+  if (isOwner) {
+    if (!isDynamicUserControl(column.controlType || column.type || column.renderControlType)) {
+      addFinding(findings, "error", "COLLECTION_DYNAMIC_USER_CONTROL_MISSING", `${tableName} ${name} must use Dynamic user/person control.`);
+    }
+    if (!isUserFieldType(column.boundFieldType || column.fieldType || column.sourceFieldType)) {
+      addFinding(findings, "error", "COLLECTION_DYNAMIC_USER_FIELD_NOT_USER_TYPE", `${tableName} ${name} must bind to a User/identity field.`);
+    }
+  }
+  if (!isSemanticNavigatorLabel(column.nv_label ?? column.nvLabel ?? column.navigatorLabel)) {
+    addFinding(findings, "error", "COLLECTION_NV_LABEL_MISSING", `${tableName} ${name} must include semantic nv_label.`);
+  }
+}
+
+function validateRuntimeSampleDataProof(spec, findings) {
+  const proof = spec.runtimeSampleDataProof;
+  if (!proof) return;
+  if (proof.userPersonRuntimeProofClaimed && proof.blankUserFieldValues) {
+    addFinding(findings, "error", "RUNTIME_SAMPLE_USER_FIELD_PATCH_PROOF_MISSING", "Runtime User/person proof cannot pass while live rows still have blank User field values.");
+  }
+  if (proof.userPersonRuntimeProofClaimed && !proof.usersSearchAccountIdProvenanceRedacted) {
+    addFinding(findings, "error", "RUNTIME_SAMPLE_USER_ID_PROVENANCE_MISSING", "Runtime User/person proof must include redacted AccountID provenance.");
+  }
+  if (proof.existingUserValuesWereBlank && !proof.itemPatchProof) {
+    addFinding(findings, "error", "RUNTIME_SAMPLE_USER_FIELD_PATCH_PROOF_MISSING", "Existing blank User/person rows require scoped item PATCH proof.");
+  }
+  if (proof.additionalRuntimeRowsRequired && !proof.batchCreateProof) {
+    addFinding(findings, "error", "RUNTIME_SAMPLE_BATCH_CREATE_PROOF_MISSING", "Additional runtime rows require batch-create proof.");
+  }
+  if (proof.batchCreateProof && !proof.verifyRetryBackoff && !proof.delayedVerification) {
+    addFinding(findings, "error", "RUNTIME_SAMPLE_VERIFY_RETRY_MISSING", "Batch create verification must include retry/backoff or delayed verification metadata.");
+  }
+  if (proofContainsRawPrivateIds(proof)) {
+    addFinding(findings, "error", "RUNTIME_SAMPLE_USER_ID_NOT_REDACTED", "Runtime sample-data proof contains raw identifiers or private response material.");
+  }
+}
+
+function validateKpiValueFormatting(spec, findings) {
+  for (const card of spec.kpiCards) {
+    const name = card.name || "KPI";
+    const value = card.valueDisplay || card.visibleValue || card.summaryValue?.visibleText || card.summaryValue?.value;
+    const expression = card.valueExpression || card.formatExpression || card.summaryValue?.expression || card.valueControl?.expression;
+    const waiver = card.formattingWaived || card.presentationFormattingWaived;
+    const requiresFormatting = Boolean(card.requiresValueFormatting || card.requiresPresentationFormatting || card.expectedFormattedValue);
+    if (isLongRawDecimal(value)) {
+      addFinding(findings, "error", "KPI_RAW_LONG_DECIMAL_VISIBLE", `${name} visible value contains a long raw decimal.`, { value });
+    }
+    if (requiresFormatting && !waiver && !hasFormatNumberExpression(expression)) {
+      addFinding(findings, "error", "KPI_VALUE_FORMAT_MISSING", `${name} must use formatNumber(...) or equivalent formatting expression.`);
+    }
+    if ((card.requiresCompactNumber || card.expectedCompactKmb || isLargeNumericValue(value)) && !waiver && !hasCompactNumberFormat(expression, value)) {
+      addFinding(findings, "error", "KPI_COMPACT_NUMBER_FORMAT_MISSING", `${name} must use compact K/M/B display for large values.`);
+      if (isLargeNumericValue(value)) {
+        addFinding(findings, "error", "KPI_UNFORMATTED_LARGE_NUMBER_VISIBLE", `${name} visible large number is unformatted.`, { value });
+      }
+    }
+    if ((card.requiresFixedDecimal || card.metricType === "rate" || card.metricType === "percentage") && !waiver && !hasFixedDecimalFormat(expression)) {
+      addFinding(findings, "error", "KPI_FIXED_DECIMAL_FORMAT_MISSING", `${name} rate/percentage values must use fixed decimal formatting.`);
+    }
+  }
+}
+
 function validateVisibleRawVariables(spec, findings) {
   for (const item of spec.visibleTexts) {
     const text = typeof item === "string" ? item : item.text ?? item.visibleText ?? item.value;
@@ -959,6 +1096,8 @@ function normalizeSpec(data) {
     actions: normalizeArray(root.actions || root.actionButtons).map(normalizeAction),
     kpiCards: normalizeArray(root.kpiCards || root.kpis).map(normalizeKpiCard),
     tables: normalizeArray(root.tables || root.richTables || root.tableSections).map(normalizeTable),
+    gridTables: normalizeArray(root.gridTables || root.collectionGridTables || root.collectionTables).map(normalizeGridTable),
+    runtimeSampleDataProof: normalizeRuntimeSampleDataProof(root.runtimeSampleDataProof || root.sampleDataProof || root.runtimeSampleData),
     visibleTexts: normalizeArray(root.visibleTexts || root.runtimeVisibleTexts || root.decodedVisibleTexts),
     structuralControls: normalizeArray(root.structuralControls || root.navigatorControls).map(normalizeControl),
     advancedStyleControls: normalizeArray(root.advancedStyleControls || root.controls).map(normalizeControl),
@@ -1056,6 +1195,31 @@ function normalizeTable(table = {}) {
   };
 }
 
+function normalizeGridTable(table = {}) {
+  return {
+    ...table,
+    name: table.name || table.label,
+    columns: normalizeArray(table.columns || table.gridColumns),
+    generatedControls: normalizeArray(table.generatedControls || table.controls || table.subtreeControls),
+  };
+}
+
+function normalizeRuntimeSampleDataProof(proof = null) {
+  if (!proof || typeof proof !== "object" || !Object.keys(proof).length) return null;
+  return {
+    ...proof,
+    usersSearchAccountIdProvenanceRedacted: Boolean(
+      proof.usersSearchAccountIdProvenanceRedacted ||
+      proof.accountIdProvenanceRedacted ||
+      proof.usersSearch?.accountIdProvenanceRedacted,
+    ),
+    itemPatchProof: Boolean(proof.itemPatchProof || proof.patchProof || proof.itemPatch?.status === "success"),
+    batchCreateProof: Boolean(proof.batchCreateProof || proof.batchCreate?.status === "success"),
+    verifyRetryBackoff: Boolean(proof.verifyRetryBackoff || proof.retryBackoff || proof.verification?.retryBackoff),
+    delayedVerification: Boolean(proof.delayedVerification || proof.verification?.delayed === true),
+  };
+}
+
 function styleAttrs(attrs = {}) {
   return attrs.style || attrs;
 }
@@ -1127,6 +1291,99 @@ function isContainerControl(control) {
 function isDataFilterControl(control) {
   const type = String(control.controlType || control.type || control.nativeType || "").toLowerCase();
   return type === "data filter" || type === "data-filter" || type.endsWith("-filter") || type === "relative-period";
+}
+
+function normalizeAlignment(value) {
+  return String(responsiveScalar(value) || "").toLowerCase();
+}
+
+function normalizePadding(value) {
+  const scalar = responsiveScalar(value);
+  if (scalar == null) return null;
+  if (typeof scalar === "number") return { top: scalar, right: scalar, bottom: scalar, left: scalar };
+  if (typeof scalar === "string") return scalar.trim();
+  if (typeof scalar === "object") {
+    return {
+      top: numeric(scalar.top ?? scalar.t ?? scalar.y ?? scalar.vertical ?? 0) ?? 0,
+      right: numeric(scalar.right ?? scalar.r ?? scalar.x ?? scalar.horizontal ?? 0) ?? 0,
+      bottom: numeric(scalar.bottom ?? scalar.b ?? scalar.y ?? scalar.vertical ?? 0) ?? 0,
+      left: numeric(scalar.left ?? scalar.l ?? scalar.x ?? scalar.horizontal ?? 0) ?? 0,
+    };
+  }
+  return scalar;
+}
+
+function isProgressControl(type) {
+  const normalized = String(type || "").toLowerCase();
+  return normalized === "progress" || normalized === "progress-bar" || normalized === "progress_bar";
+}
+
+function isDynamicUserControl(type) {
+  const normalized = String(type || "").toLowerCase();
+  return normalized === "dynamic-user" || normalized === "dynamic user" || normalized === "dynamic-person" || normalized === "person";
+}
+
+function isNumericFieldType(type) {
+  const normalized = String(type || "").toLowerCase();
+  return ["number", "integer", "decimal", "percentage", "percent", "numeric"].includes(normalized);
+}
+
+function isUserFieldType(type) {
+  const normalized = String(type || "").toLowerCase();
+  return ["user", "users", "person", "identity", "dynamic-user", "member"].includes(normalized);
+}
+
+function containsRawFormulaText(value) {
+  if (!hasValue(value)) return false;
+  return /(registration\s*count\s*\/|\bcount\s*\/|\bformula\(|\b[a-z0-9_]+\s*\/\s*\d+)/i.test(String(value));
+}
+
+function isSemanticNavigatorLabel(value) {
+  return hasValue(value) && !isGenericNavigatorLabel(value);
+}
+
+function proofContainsRawPrivateIds(value) {
+  return scanProofForRawPrivateIds(value);
+}
+
+function scanProofForRawPrivateIds(value, key = "") {
+  if (value == null) return false;
+  const keyText = String(key).toLowerCase();
+  if (/raw(response|payload)|tenanturl|workspaceid|userid|accountid|itemid/.test(keyText) && typeof value === "string" && !/redacted|hash|preview|masked/i.test(value)) {
+    return true;
+  }
+  if (typeof value === "string") {
+    if (/https?:\/\//i.test(value)) return true;
+    if (/(^|[^a-z])((account|user|item|workspace)[_-]?id)[:= ]+[a-z0-9_-]{8,}/i.test(value) && !/redacted|hash|preview|masked/i.test(value)) return true;
+    return false;
+  }
+  if (Array.isArray(value)) return value.some((item) => scanProofForRawPrivateIds(item, key));
+  if (typeof value === "object") return Object.entries(value).some(([childKey, childValue]) => scanProofForRawPrivateIds(childValue, childKey));
+  return false;
+}
+
+function hasFormatNumberExpression(expression) {
+  return /formatNumber\s*\(/i.test(String(expression || ""));
+}
+
+function hasCompactNumberFormat(expression, value) {
+  const text = `${expression || ""} ${value || ""}`;
+  return /formatNumber\s*\(/i.test(text) && /\b(K|M|B)\b|1000|1000000|1000000000|compact/i.test(text);
+}
+
+function hasFixedDecimalFormat(expression) {
+  return /formatNumber\s*\([^,]+,\s*\d+/i.test(String(expression || ""));
+}
+
+function isLongRawDecimal(value) {
+  return /\d+\.\d{6,}/.test(String(value || ""));
+}
+
+function isLargeNumericValue(value) {
+  if (!hasValue(value)) return false;
+  const text = String(value).replace(/[$,%\s,]/g, "");
+  if (!/^\d+(\.\d+)?$/.test(text)) return false;
+  return Number(text) >= 100000;
 }
 
 function gradientColors(gradient) {
