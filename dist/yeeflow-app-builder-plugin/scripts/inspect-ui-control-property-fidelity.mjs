@@ -93,6 +93,37 @@ const FINDING_MESSAGES = {
   COMMON_BACKGROUND_IMAGE_SHAPE_INVALID: "Non-Container background image must use attrs.common.background.normal.classic.image.",
   COMMON_BACKGROUND_GRADIENT_TOO_COMPLEX: "Designer-supported non-Container gradients are limited to two colors unless custom CSS evidence exists.",
   CONTAINER_RULE_APPLIED_TO_NON_CONTAINER: "Container attrs.style width/height rules were applied to a non-Container control.",
+  KPI_CARD_STRUCTURE_MISSING: "KPI card is missing the expected rich card container/body structure.",
+  KPI_CARD_ICON_TILE_MISSING: "KPI card is missing the fixed icon tile.",
+  KPI_CARD_ICON_TILE_SIZE_MISMATCH: "KPI card icon tile size does not match the expected rich-card pattern.",
+  KPI_CARD_ICON_NOT_CENTERED: "KPI card icon is not centered in its fixed tile.",
+  KPI_CARD_BODY_LAYOUT_MISMATCH: "KPI card body must use an inline icon plus text-stack layout.",
+  KPI_CARD_TEXT_STACK_MISSING: "KPI card is missing title/value/trend/helper text stack roles.",
+  KPI_CARD_SUMMARY_VALUE_MISSING: "KPI card is missing a Summary/value control role.",
+  KPI_CARD_SUMMARY_HIERARCHY_MISMATCH: "KPI card Summary/value hierarchy does not match the design contract.",
+  KPI_CARD_TREND_TEXT_MISSING: "KPI card is missing trend text.",
+  KPI_CARD_HELPER_TEXT_MISSING: "KPI card is missing helper text.",
+  KPI_CARD_GRID_USED_WHERE_CONTAINER_REQUIRED: "KPI cards must use Container-based rich structure, not Grid.",
+  SUMMARY_VALUE_RAW_VARIABLE_VISIBLE: "Summary value is rendering a raw variable token in visible UI.",
+  RAW_VARIABLE_TEXT_VISIBLE: "Visible runtime text contains an internal/raw variable token.",
+  MOCK_VALUE_FORCED_AS_RUNTIME_PROOF: "Mock KPI values must not be forced or claimed as runtime proof.",
+  LIVE_KPI_VALUE_BOUNDARY_MISSING: "Live KPI values differ from mock values without a documented data-value boundary.",
+  TABLE_RICH_CELL_TREATMENT_MISSING: "Table design-fidelity claim is missing rich cell treatment metadata.",
+  TABLE_STATUS_BADGE_MISSING: "Status fields must use badge treatment when required by the design.",
+  TABLE_PROGRESS_BAR_MISSING: "Progress fields must use progress-bar treatment when required by the design.",
+  TABLE_OWNER_AVATAR_MISSING: "Owner/person fields must use avatar/person treatment when required by the design.",
+  TABLE_HEADER_HIERARCHY_MISMATCH: "Table header hierarchy does not match the design contract.",
+  TABLE_ROW_DENSITY_MISMATCH: "Table row density/spacing does not match the design contract.",
+  TABLE_PLAIN_SCAFFOLD_RENDERING: "Table renders like a plain scaffold despite a design-fidelity claim.",
+  ACTION_CONTAINER_ACTION_TYPE_MISSING: "Action-looking Container is missing real Yeeflow action metadata.",
+  ACTION_CONTAINER_ACTION_TYPE_MISMATCH: "Action Container action-type does not match the declared intent.",
+  ACTION_CONTAINER_TARGET_LIST_MISSING: "Add-list action Container is missing target list metadata.",
+  ACTION_CONTAINER_TARGET_LIST_INCOMPLETE: "Add-list action Container target list metadata must include AppID, ListSetID, and ListID.",
+  ACTION_CONTAINER_CHILD_LABEL_MISSING: "Action Container must include a visible child Heading/Text label.",
+  ACTION_CONTAINER_CHILD_LABEL_MISMATCH: "Action Container child label does not match the declared visible label.",
+  ACTION_CONTAINER_STYLED_BUT_NOT_ACTIONABLE: "Styled action-looking Container is not backed by real action behavior.",
+  ACTION_CONTAINER_NAVIGATOR_LABEL_MISSING: "Action Container must include a semantic nv_label.",
+  ACTION_CONTAINER_FIXED_SIZE_MISMATCH: "Action Container fixed size does not match the design contract.",
 };
 
 const DATA_FILTER_VISUAL_PATTERNS = {
@@ -255,6 +286,9 @@ export function inspectUiControlPropertyFidelity({
     validateActions(candidateSpec, findings);
     validateKpiCards(candidateSpec, referenceSpec, findings);
     validateKpiProofBoundary(candidateSpec, findings);
+    validateKpiContentFidelity(candidateSpec, findings);
+    validateTableContentFidelity(candidateSpec, findings);
+    validateVisibleRawVariables(candidateSpec, findings);
   }
 
   const status = statusFromFindings(findings);
@@ -282,6 +316,8 @@ export function inspectUiControlPropertyFidelity({
       filterIconType: candidateSpec.filterIcon?.controlType || null,
       kpiCardCount: candidateSpec.kpiCards.length,
       actionCount: candidateSpec.actions.length,
+      richTableCount: candidateSpec.tables.length,
+      visibleTextCount: candidateSpec.visibleTexts.length,
     },
     controlPropertyKnowledgeBase: {
       ...DEFAULT_CONTROL_KNOWLEDGE_BASE,
@@ -294,6 +330,7 @@ export function inspectUiControlPropertyFidelity({
       "Control-property paths should align with docs/reference/yeeflow-control-configurations.normalized.json plus evidence-backed extensions.",
       "It does not decode raw private YAPK payloads, parse screenshots, inspect Chrome, call Yeeflow APIs, sign, install, import, or upgrade packages.",
       "Runtime live values may differ from design mock values when marked visual-target-only.",
+      "Live KPI values may differ from design mock values only when reported as a data-value boundary, not as forced runtime proof.",
       "Dynamic KPI proof still requires before/after mutation evidence.",
     ],
     nextActions: nextActions(findings),
@@ -646,6 +683,76 @@ function validateActions(spec, findings) {
     if (action.fixedSizeRequired && (!width || !height)) {
       addFinding(findings, "error", "ACTION_CONTAINER_SIZE_MISMATCH", `${action.name || "Action"} requires fixed width and height.`);
     }
+    validateActionContainerFidelity(action, findings);
+  }
+}
+
+function validateActionContainerFidelity(action, findings) {
+  const actionLike = Boolean(action.actionLike || action.isActionLike || action.actionIntent || action.requiresActionMetadata);
+  const decorative = action.decorative === true || action.intent === "decorative";
+  if (!actionLike || decorative) return;
+
+  const name = action.name || action.id || "Action Container";
+  const isContainer = isContainerControl(action);
+  if (!isContainer) return;
+
+  const actionType = String(action.actionType ?? action["action-type"] ?? deepGet(action, "attrs.action-type") ?? deepGet(action, "attrs.actionType") ?? "");
+  const intent = String(action.actionIntent || action.intent || "").toLowerCase();
+  const targetList = action.targetList || deepGet(action, "attrs.data.list") || {};
+  const label = action.childLabel || action.visibleLabel || action.labelText || "";
+  const child = normalizeArray(action.children || action.childControls).find((control) => /heading|text/i.test(String(control.controlType || control.type || "")));
+  const childText = child?.text || child?.label || child?.name || deepGet(child, "attrs.headc.title.value") || deepGet(child, "attrs.text.value");
+  const navigatorLabel = action.nv_label ?? action.nvLabel ?? action.navigatorLabel;
+  const width = getFixedWidth(action.attrs);
+  const height = getFixedHeight(action.attrs);
+
+  if (!actionType) {
+    addFinding(findings, "error", "ACTION_CONTAINER_ACTION_TYPE_MISSING", `${name} is styled as an action but is missing action-type.`);
+    addFinding(findings, "error", "ACTION_CONTAINER_STYLED_BUT_NOT_ACTIONABLE", `${name} must include real Yeeflow action metadata.`);
+  }
+  if (intent === "add-list-item" || intent === "add-list") {
+    if (actionType && actionType !== "5") {
+      addFinding(findings, "error", "ACTION_CONTAINER_ACTION_TYPE_MISMATCH", `${name} add-list action must use action-type \"5\".`, {
+        expected: "5",
+        actual: actionType,
+      });
+    }
+    if (!hasValue(targetList)) {
+      addFinding(findings, "error", "ACTION_CONTAINER_TARGET_LIST_MISSING", `${name} add-list action is missing attrs.data.list target metadata.`);
+    } else if (!hasValue(targetList.AppID) || !hasValue(targetList.ListSetID) || !hasValue(targetList.ListID)) {
+      addFinding(findings, "error", "ACTION_CONTAINER_TARGET_LIST_INCOMPLETE", `${name} target list metadata must include AppID, ListSetID, and ListID.`, {
+        hasAppID: hasValue(targetList.AppID),
+        hasListSetID: hasValue(targetList.ListSetID),
+        hasListID: hasValue(targetList.ListID),
+      });
+    }
+  }
+  if (!hasValue(childText)) {
+    addFinding(findings, "error", "ACTION_CONTAINER_CHILD_LABEL_MISSING", `${name} must include a child Heading/Text label.`);
+  } else if (hasValue(label) && String(childText).trim() !== String(label).trim()) {
+    addFinding(findings, "error", "ACTION_CONTAINER_CHILD_LABEL_MISMATCH", `${name} child label does not match declared visible label.`, {
+      expected: label,
+      actual: childText,
+    });
+  }
+  if (!hasValue(navigatorLabel)) {
+    addFinding(findings, "error", "ACTION_CONTAINER_NAVIGATOR_LABEL_MISSING", `${name} must include semantic nv_label.`);
+  } else if (isGenericNavigatorLabel(navigatorLabel)) {
+    addFinding(findings, "error", "ACTION_CONTAINER_NAVIGATOR_LABEL_MISSING", `${name} nv_label must be semantic, not generic.`, {
+      nv_label: navigatorLabel,
+    });
+  }
+  if (action.expectedWidth != null && numeric(action.expectedWidth) !== width) {
+    addFinding(findings, "error", "ACTION_CONTAINER_FIXED_SIZE_MISMATCH", `${name} fixed width does not match design contract.`, {
+      expected: numeric(action.expectedWidth),
+      actual: width,
+    });
+  }
+  if (action.expectedHeight != null && numeric(action.expectedHeight) !== height) {
+    addFinding(findings, "error", "ACTION_CONTAINER_FIXED_SIZE_MISMATCH", `${name} fixed height does not match design contract.`, {
+      expected: numeric(action.expectedHeight),
+      actual: height,
+    });
   }
 }
 
@@ -677,10 +784,116 @@ function validateKpiProofBoundary(spec, findings) {
       continue;
     }
     if (kpi.runtimeValueDiffersFromMock && !kpi.mockValueBoundary) {
-      addFinding(findings, "warning", "MOCK_VALUE_RUNTIME_VALUE_BOUNDARY_REQUIRED", `${kpi.name || "KPI"} runtime value differs from mock value without explicit boundary.`);
+      addFinding(findings, "warning", "LIVE_KPI_VALUE_BOUNDARY_MISSING", `${kpi.name || "KPI"} runtime value differs from mock value without explicit live-data boundary.`);
+    }
+    if (kpi.mockValueForcedAsRuntimeProof || kpi.mockValueClaimedRuntimeProof) {
+      addFinding(findings, "error", "MOCK_VALUE_FORCED_AS_RUNTIME_PROOF", `${kpi.name || "KPI"} mock value is being forced or claimed as runtime proof.`);
     }
     if (kpi.dynamicKpiProofClaimed && !kpi.beforeAfterMutationEvidence) {
       addFinding(findings, "error", "DYNAMIC_KPI_PROOF_MISSING", `${kpi.name || "KPI"} claims dynamic proof without before/after mutation evidence.`);
+    }
+  }
+}
+
+function validateKpiContentFidelity(spec, findings) {
+  for (const card of spec.kpiCards) {
+    if (!requiresKpiContentFidelity(card, spec)) continue;
+    const name = card.name || "KPI card";
+    if (String(card.controlType || "").toLowerCase() === "grid") {
+      addFinding(findings, "error", "KPI_CARD_GRID_USED_WHERE_CONTAINER_REQUIRED", `${name} must use Container-based rich card structure.`);
+    } else if (!isContainerControl(card)) {
+      addFinding(findings, "error", "KPI_CARD_STRUCTURE_MISSING", `${name} must use an outer Container card.`);
+    }
+    if (!card.outerCardContainer && card.containerRole !== "outer-card" && !card.richCardContainer) {
+      addFinding(findings, "error", "KPI_CARD_STRUCTURE_MISSING", `${name} missing outer rich-card container role.`);
+    }
+    if (!hasValue(card.iconTile)) {
+      addFinding(findings, "error", "KPI_CARD_ICON_TILE_MISSING", `${name} missing icon tile.`);
+    } else {
+      const width = numeric(card.iconTile.fixedWidth ?? card.iconTile.width);
+      const height = numeric(card.iconTile.fixedHeight ?? card.iconTile.height);
+      if (!width || !height || (card.expectedIconTileSize && (width !== numeric(card.expectedIconTileSize) || height !== numeric(card.expectedIconTileSize)))) {
+        addFinding(findings, "error", "KPI_CARD_ICON_TILE_SIZE_MISMATCH", `${name} icon tile must be fixed size.`);
+      }
+      if (card.iconTile.iconAlign !== "center" || card.iconTile.iconJustify !== "center") {
+        addFinding(findings, "error", "KPI_CARD_ICON_NOT_CENTERED", `${name} icon must be centered in the icon tile.`);
+      }
+    }
+    const body = card.body || {};
+    if ((card.bodyLayout || body.layout) !== "inline-icon-text-stack") {
+      addFinding(findings, "error", "KPI_CARD_BODY_LAYOUT_MISMATCH", `${name} body must use inline icon/text stack layout.`);
+    }
+    const roles = new Set(normalizeArray(card.textStack?.roles || card.roles || card.contentRoles));
+    if (!card.textStack || !roles.has("title") || !roles.has("value")) {
+      addFinding(findings, "error", "KPI_CARD_TEXT_STACK_MISSING", `${name} text stack must include title and value roles.`);
+    }
+    if (!card.summaryValue && !card.valueControl && card.valueControlType !== "Summary") {
+      addFinding(findings, "error", "KPI_CARD_SUMMARY_VALUE_MISSING", `${name} missing Summary/value control.`);
+    }
+    if (card.summaryValue && card.summaryValue.hierarchy && card.summaryValue.hierarchy !== "primary-value") {
+      addFinding(findings, "error", "KPI_CARD_SUMMARY_HIERARCHY_MISMATCH", `${name} Summary value hierarchy must be primary-value.`);
+    }
+    if (!card.trendText && !roles.has("trend")) {
+      addFinding(findings, "error", "KPI_CARD_TREND_TEXT_MISSING", `${name} missing trend text role.`);
+    }
+    if (!card.helperText && !roles.has("helper")) {
+      addFinding(findings, "error", "KPI_CARD_HELPER_TEXT_MISSING", `${name} missing helper text role.`);
+    }
+    for (const value of [card.visibleValueText, card.summaryValue?.visibleText, card.valueControl?.visibleText].filter(hasValue)) {
+      if (looksLikeRawVariable(value)) {
+        addFinding(findings, "error", "SUMMARY_VALUE_RAW_VARIABLE_VISIBLE", `${name} Summary value is rendering a raw variable token.`, {
+          visibleText: redactVisibleText(value),
+        });
+      }
+    }
+  }
+}
+
+function validateTableContentFidelity(spec, findings) {
+  for (const table of spec.tables) {
+    if (!table || !(table.claimsDesignFidelity || table.requiresRichCells || table.requiresContentFidelity)) continue;
+    const name = table.name || table.id || "Table";
+    if (table.plainScaffoldRendering || table.scaffoldLike) {
+      addFinding(findings, "error", "TABLE_PLAIN_SCAFFOLD_RENDERING", `${name} renders like a plain scaffold despite a design-fidelity claim.`);
+    }
+    const treatments = table.richCellTreatments || table.treatments || {};
+    if (!hasValue(treatments)) {
+      addFinding(findings, "error", "TABLE_RICH_CELL_TREATMENT_MISSING", `${name} missing rich cell treatment metadata.`);
+    }
+    if ((table.requiresStatusBadge || table.statusBadgeRequired) && treatments.statusBadge !== true) {
+      addFinding(findings, "error", "TABLE_STATUS_BADGE_MISSING", `${name} status fields must use badge treatment.`);
+    }
+    if ((table.requiresProgressBar || table.progressBarRequired) && treatments.progressBar !== true) {
+      addFinding(findings, "error", "TABLE_PROGRESS_BAR_MISSING", `${name} progress fields must use progress bar treatment.`);
+    }
+    if ((table.requiresOwnerAvatar || table.ownerAvatarRequired || table.requiresPersonTreatment) && treatments.ownerAvatar !== true && treatments.personAvatar !== true) {
+      addFinding(findings, "error", "TABLE_OWNER_AVATAR_MISSING", `${name} owner/person fields must use avatar/person treatment.`);
+    }
+    if (table.requiresHeaderHierarchy && table.headerHierarchy !== "designed") {
+      addFinding(findings, "error", "TABLE_HEADER_HIERARCHY_MISMATCH", `${name} header hierarchy is missing or weak.`);
+    }
+    if (table.requiresRowDensity && table.rowDensity !== "design-match") {
+      addFinding(findings, "error", "TABLE_ROW_DENSITY_MISMATCH", `${name} row density/spacing does not match design.`);
+    }
+  }
+}
+
+function validateVisibleRawVariables(spec, findings) {
+  for (const item of spec.visibleTexts) {
+    const text = typeof item === "string" ? item : item.text ?? item.visibleText ?? item.value;
+    if (looksLikeRawVariable(text)) {
+      addFinding(findings, "error", "RAW_VARIABLE_TEXT_VISIBLE", `${item.id || item.name || "Visible text"} contains an internal/raw variable token.`, {
+        visibleText: redactVisibleText(text),
+      });
+    }
+  }
+  for (const resource of spec.decodedResources) {
+    for (const text of collectVisibleTexts(resource)) {
+      if (looksLikeRawVariable(text)) {
+        addFinding(findings, "error", "RAW_VARIABLE_TEXT_VISIBLE", `${resource.id || "Decoded Resource"} visible text contains an internal/raw variable token.`, {
+          visibleText: redactVisibleText(text),
+        });
+      }
     }
   }
 }
@@ -745,11 +958,15 @@ function normalizeSpec(data) {
     extensionProperties: normalizeArray(root.extensionProperties || root.extensionOnlyProperties),
     actions: normalizeArray(root.actions || root.actionButtons).map(normalizeAction),
     kpiCards: normalizeArray(root.kpiCards || root.kpis).map(normalizeKpiCard),
+    tables: normalizeArray(root.tables || root.richTables || root.tableSections).map(normalizeTable),
+    visibleTexts: normalizeArray(root.visibleTexts || root.runtimeVisibleTexts || root.decodedVisibleTexts),
     structuralControls: normalizeArray(root.structuralControls || root.navigatorControls).map(normalizeControl),
     advancedStyleControls: normalizeArray(root.advancedStyleControls || root.controls).map(normalizeControl),
     decodedResources: normalizeArray(root.decodedResources || root.decodedResourceControls).map(normalizeControl),
     decodedResourceEvidenceAvailable: Boolean(root.decodedResourceEvidenceAvailable || root.decodedPackageEvidenceAvailable),
     decodedResourceAttrsValidated: Boolean(root.decodedResourceAttrsValidated),
+    requiresKpiCardContentFidelity: Boolean(root.requiresKpiCardContentFidelity),
+    contentFidelityRequired: Boolean(root.contentFidelityRequired),
     targetControls: normalizeArray(root.targetControls || root.filterTargets).map((target) => ({
       name: target.name || target.label,
       controlType: target.controlType || target.type,
@@ -810,6 +1027,11 @@ function normalizeAction(action = {}) {
     controlType: action.controlType || action.type,
     attrs: action.attrs || action,
     nv_label: action.nv_label ?? action.nvLabel ?? action.navigatorLabel,
+    actionType: action.actionType ?? action["action-type"] ?? action.attrs?.["action-type"] ?? action.attrs?.actionType,
+    actionIntent: action.actionIntent || action.intent,
+    targetList: action.targetList || action.attrs?.data?.list,
+    childLabel: action.childLabel || action.visibleLabel,
+    children: normalizeArray(action.children || action.childControls),
   };
 }
 
@@ -820,6 +1042,17 @@ function normalizeKpiCard(card = {}) {
     controlType: card.controlType || card.type,
     iconTile: card.iconTile || card.icon || {},
     textStack: card.textStack || {},
+    body: card.body || {},
+    summaryValue: card.summaryValue || card.valueSummary || null,
+    valueControl: card.valueControl || null,
+  };
+}
+
+function normalizeTable(table = {}) {
+  return {
+    ...table,
+    name: table.name || table.label,
+    richCellTreatments: table.richCellTreatments || table.treatments || {},
   };
 }
 
@@ -916,6 +1149,45 @@ function sameKpiPattern(card, reference) {
     && card.textStack?.direction === reference.textStack?.direction
     && Boolean(card.valuePlacement) === Boolean(reference.valuePlacement)
     && Boolean(card.trendPlacement) === Boolean(reference.trendPlacement);
+}
+
+function requiresKpiContentFidelity(card, spec) {
+  return Boolean(
+    card.requiresRichContentFidelity
+      || card.claimsDesignFidelity
+      || card.requiresKpiCardContentFidelity
+      || spec.requiresKpiCardContentFidelity
+      || spec.contentFidelityRequired,
+  );
+}
+
+function looksLikeRawVariable(value) {
+  if (!hasValue(value)) return false;
+  const text = String(value);
+  return /(__temp_|\\btemp_[a-z0-9_]*|\\$\\{[^}]+\\}|\\{\\{[^}]+\\}\\}|\\bvar[:.]|\\bvariable[:.]|attrs\\.[a-z0-9_.-]+|save_var|headc\\.title\\.variable)/i.test(text);
+}
+
+function redactVisibleText(value) {
+  return String(value).replace(/[A-Za-z0-9_-]{16,}/g, "[redacted]");
+}
+
+function collectVisibleTexts(control) {
+  const values = [];
+  for (const key of ["visibleText", "text", "label", "runtimeText"]) {
+    if (hasValue(control?.[key])) values.push(control[key]);
+  }
+  const attrs = control?.attrs || {};
+  for (const path of [
+    "headc.title.value",
+    "headc.title.text",
+    "text.value",
+    "content.text",
+    "content.value",
+  ]) {
+    const value = deepGet(attrs, path);
+    if (hasValue(value)) values.push(value);
+  }
+  return values;
 }
 
 function assertEvidenceBackedPattern(patternId, findings) {

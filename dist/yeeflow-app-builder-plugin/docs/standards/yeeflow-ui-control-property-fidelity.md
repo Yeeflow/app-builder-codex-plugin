@@ -186,6 +186,26 @@ KPI cards should follow the manual first-card golden pattern:
 
 Runtime live KPI values may differ from design mock values when the report marks the design values as visual-target-only. Dynamic KPI proof still requires before/after mutation evidence.
 
+## KPI, Table, And Action Content Fidelity
+
+Content fidelity requires the generated controls to carry the intended Yeeflow structure and behavior, not only a similar visual silhouette.
+
+KPI/card fidelity requires a Container-based rich card structure:
+
+- outer card container, not Grid, for the visual card
+- fixed icon tile with the icon centered inside it
+- inline icon/text body layout
+- text stack with title, Summary/value, trend text, and helper text roles
+- consistent structure across peer KPI cards
+
+Summary values must not render raw variable names such as temp variables, internal binding tokens, or generated placeholder IDs as visible runtime text. Live KPI values may differ from design mock values, but the report must mark that as a live-data boundary rather than forcing static mock values or claiming mock values as runtime proof.
+
+Rich table fidelity requires badge, progress, avatar/person, header hierarchy, row density, spacing, and visual hierarchy treatment when the design calls for those fields. A table that renders status, progress, or owner/person fields as plain text must not pass a design-fidelity claim when the approved design requires badge, progress-bar, or avatar/person treatment.
+
+A styled action Container is not enough for behavior fidelity. Action-looking Containers must include real Yeeflow action metadata. Add-list action Containers require `action-type = "5"`, target list metadata with `AppID`, `ListSetID`, and `ListID`, a visible child Heading/Text label, fixed-size styling when declared by the design, and semantic `nv_label` for designer Navigator traceability. Non-action decorative Containers do not need action metadata when they are not marked or styled as actions.
+
+Final UI reports must separate generator/spec gaps, runtime rendering gaps, data-value gaps, and action behavior gaps. Passing layout, navigation, or control-property checks does not automatically prove content fidelity.
+
 ## Runtime Proof And Artifact Boundaries
 
 Runtime proof must include:
@@ -265,6 +285,37 @@ Finding codes include:
 - `COMMON_BACKGROUND_IMAGE_SHAPE_INVALID`
 - `COMMON_BACKGROUND_GRADIENT_TOO_COMPLEX`
 - `CONTAINER_RULE_APPLIED_TO_NON_CONTAINER`
+- `KPI_CARD_STRUCTURE_MISSING`
+- `KPI_CARD_ICON_TILE_MISSING`
+- `KPI_CARD_ICON_TILE_SIZE_MISMATCH`
+- `KPI_CARD_ICON_NOT_CENTERED`
+- `KPI_CARD_BODY_LAYOUT_MISMATCH`
+- `KPI_CARD_TEXT_STACK_MISSING`
+- `KPI_CARD_SUMMARY_VALUE_MISSING`
+- `KPI_CARD_SUMMARY_HIERARCHY_MISMATCH`
+- `KPI_CARD_TREND_TEXT_MISSING`
+- `KPI_CARD_HELPER_TEXT_MISSING`
+- `KPI_CARD_GRID_USED_WHERE_CONTAINER_REQUIRED`
+- `SUMMARY_VALUE_RAW_VARIABLE_VISIBLE`
+- `RAW_VARIABLE_TEXT_VISIBLE`
+- `MOCK_VALUE_FORCED_AS_RUNTIME_PROOF`
+- `LIVE_KPI_VALUE_BOUNDARY_MISSING`
+- `TABLE_RICH_CELL_TREATMENT_MISSING`
+- `TABLE_STATUS_BADGE_MISSING`
+- `TABLE_PROGRESS_BAR_MISSING`
+- `TABLE_OWNER_AVATAR_MISSING`
+- `TABLE_HEADER_HIERARCHY_MISMATCH`
+- `TABLE_ROW_DENSITY_MISMATCH`
+- `TABLE_PLAIN_SCAFFOLD_RENDERING`
+- `ACTION_CONTAINER_ACTION_TYPE_MISSING`
+- `ACTION_CONTAINER_ACTION_TYPE_MISMATCH`
+- `ACTION_CONTAINER_TARGET_LIST_MISSING`
+- `ACTION_CONTAINER_TARGET_LIST_INCOMPLETE`
+- `ACTION_CONTAINER_CHILD_LABEL_MISSING`
+- `ACTION_CONTAINER_CHILD_LABEL_MISMATCH`
+- `ACTION_CONTAINER_STYLED_BUT_NOT_ACTIONABLE`
+- `ACTION_CONTAINER_NAVIGATOR_LABEL_MISSING`
+- `ACTION_CONTAINER_FIXED_SIZE_MISMATCH`
 
 ## Future Work
 
