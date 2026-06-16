@@ -2,17 +2,42 @@
 
 ## Unreleased
 
-## 0.6.49
+## 0.6.52
 
-- Bump the active plugin version after Data Filter/Icon visual-property extension patterns.
-- Add extension-backed visual fidelity patterns for Radio Filter dropdowns, Relative Period dropdowns, and native filter icons.
-- Keep the normalized control-configuration registry as the base source of truth.
-- Add validator coverage for Data Filter wrapper, input, and dropdown-panel style layers.
-- Add checks for fixed 180px dropdown sizing, hidden labels, Relative Period field/choices, native icon controls, and 16px filter icon sizing.
-- Reinforce that real Data Filter controls are required but not sufficient for high-fidelity visual matching.
-- Reinforce that unknown control-property paths must be catalog-backed or extension-backed.
+- Release KPI/card/table/action content fidelity gates.
+- Add KPI/card rich structure validation for fixed icon tiles, centered icons, inline body layout, text stacks, Summary/value hierarchy, trend text, and helper text.
+- Add Summary/raw-variable prevention so visible runtime text and Summary values cannot expose internal variable tokens.
+- Add live KPI mock-vs-runtime data-value boundary reporting instead of forcing static mock values as runtime proof.
+- Add rich table treatment checks for badge, progress, avatar/person, header hierarchy, and row density when design fidelity is claimed.
+- Add Action Container behavior fidelity checks, including add-list `action-type = "5"`, target list metadata, child Heading/Text action labels, and semantic `nv_label` requirements.
+- Confirm content fidelity is now executable through `scripts/inspect-ui-control-property-fidelity.mjs`.
+- Confirm this release does not claim pixel-perfect visual diffing, automatic screenshot parsing, or live runtime proof before install/cache smoke and focused Marketing Event runtime testing are performed.
+
+## 0.6.51
+
+- Add Non-Container Advanced Style Fidelity Gates.
+- Extend the Yeeflow control-property knowledge base with evidence-backed Advanced-tab rules for non-Container controls.
+- Keep Container controls special: Container width, height, and layout remain under `attrs.style`, including `attrs.style.height`, `attrs.style.cushei`, and `attrs.style.cusheiu`.
+- Define the non-Container common Advanced-tab style model with `attrs.common.positioning`, `attrs.common.sizing`, `attrs.common.margin`, `attrs.common.padding`, `attrs.common.border`, and `attrs.common.background`.
+- Define non-Container width modes: `attrs.common.positioning.widthtype = [null, "1"]` for full width, `[null, "2"]` for inline width, and `[null, "3"]` for custom width.
+- Update Data Filter dropdown runtime 180px width to require `attrs.common.positioning.widthtype = [null, "3"]`, `attrs.common.positioning.width = [null, 180]`, and `attrs.common.positioning.widthu = [null, "px"]`.
+- Add hard gates for non-Container width model mismatch, Data Filter runtime custom width, Container rules applied to non-Container controls, common margin/padding, common border/background/hover/shadow, and the two-color gradient boundary.
+- Reinforce that the normalized product catalog remains the base source of truth and extension registry entries remain evidence-backed rather than replacements for `control-configurations.json`.
 - Confirm this release does not claim pixel-perfect visual diffing or automatic screenshot parsing.
-- Keep future extension patterns gated on redacted export/runtime evidence for additional missing visual-property paths.
+
+## 0.6.50
+
+- Bump the active plugin version after Data Filter row hierarchy and Navigator label fidelity gates.
+- Require the filter/action parent row to be full width.
+- Require inline left filter groups and inline right action groups.
+- Require filter wrapper containers to stay inline/default-height and not own fixed filter width.
+- Require Data Filter controls to own fixed/custom 180px width.
+- Reject legacy Status/Event Type wrapper width behavior under the 180px extension pattern.
+- Add semantic `nv_label` guidance for Yeeflow designer Navigator-visible control names.
+- Distinguish `id`, `label`, `name`, and `nv_label` for generated controls.
+- Add decoded Resource attr validation so normalized specs cannot hide package-level mismatches.
+- Keep the normalized control registry as source of truth and the extension registry evidence-backed.
+- Confirm this release does not claim pixel-perfect visual diffing or automatic screenshot parsing.
 
 ## 0.6.44
 

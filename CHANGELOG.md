@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.6.52
+
+- Release KPI/card/table/action content fidelity gates.
+- Add KPI/card rich structure validation for fixed icon tiles, centered icons, inline body layout, text stacks, Summary/value hierarchy, trend text, and helper text.
+- Add Summary/raw-variable prevention so visible runtime text and Summary values cannot expose internal variable tokens.
+- Add live KPI mock-vs-runtime data-value boundary reporting instead of forcing static mock values as runtime proof.
+- Add rich table treatment checks for badge, progress, avatar/person, header hierarchy, and row density when design fidelity is claimed.
+- Add Action Container behavior fidelity checks, including add-list `action-type = "5"`, target list metadata, child Heading/Text action labels, and semantic `nv_label` requirements.
+- Confirm content fidelity is now executable through `scripts/inspect-ui-control-property-fidelity.mjs`.
+- Confirm this release does not claim pixel-perfect visual diffing, automatic screenshot parsing, or live runtime proof before install/cache smoke and focused Marketing Event runtime testing are performed.
+
 ## 0.6.51
 
 - Add Non-Container Advanced Style Fidelity Gates.
