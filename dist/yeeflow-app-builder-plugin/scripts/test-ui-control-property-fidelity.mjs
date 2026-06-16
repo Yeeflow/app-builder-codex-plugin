@@ -63,6 +63,26 @@ function run() {
   testDecorativeContainerPasses();
   testVisibleRawVariableFails();
   testInternalBindingHiddenPasses();
+  testRuntimeSampleUserPatchProofPasses();
+  testRuntimeSampleBatchRetryPasses();
+  testRuntimeSampleRawIdsFail();
+  testRuntimeSampleBlankUserValuesFail();
+  testRuntimeSampleBatchRetryMissingFails();
+  testCollectionGridTablePresentationPasses();
+  testCollectionGridTableOverflowMissingFails();
+  testCollectionGridTablePaddingMismatchFails();
+  testCollectionProgressTextFails();
+  testCollectionProgressCurrencyFails();
+  testCollectionProgressRawFormulaFails();
+  testCollectionDynamicUserPasses();
+  testCollectionOwnerPlainTextFails();
+  testCollectionDynamicUserTextFieldFails();
+  testCollectionGridTableNavigatorLabelFails();
+  testKpiCompactFormatPasses();
+  testKpiFixedDecimalPasses();
+  testKpiLongRawDecimalFails();
+  testKpiLargeNumberUnformattedFails();
+  testKpiRawVariableValueFails();
   testKnowledgeBaseBoundaryReported();
   testRadioFilterDropdownVisualPatternPasses();
   testRadioFilterMissingInputStyleFails();
@@ -417,6 +437,165 @@ function testInternalBindingHiddenPasses() {
   const report = inspectFixture("internal-binding-hidden-pass.json", spec);
   assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
   cases.push("Pass: internal binding variable exists but is not visible text");
+}
+
+function testRuntimeSampleUserPatchProofPasses() {
+  const spec = goodSpec();
+  spec.runtimeSampleDataProof = runtimeSampleProof();
+  const report = inspectFixture("runtime-sample-user-patch-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: users-search redacted AccountID provenance + PATCH proof + runtime verification");
+}
+
+function testRuntimeSampleBatchRetryPasses() {
+  const spec = goodSpec();
+  spec.runtimeSampleDataProof = {
+    ...runtimeSampleProof(),
+    additionalRuntimeRowsRequired: true,
+    batchCreateProof: true,
+    verifyRetryBackoff: { attempts: 4, delayMs: 1500 },
+  };
+  const report = inspectFixture("runtime-sample-batch-retry-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: batch create proof with delayed/retry verification");
+}
+
+function testRuntimeSampleRawIdsFail() {
+  const spec = goodSpec();
+  spec.runtimeSampleDataProof = { ...runtimeSampleProof(), rawUserId: "account_1234567890abcdef", rawItemId: "item_1234567890abcdef" };
+  expectFail("Fail: raw user IDs or item IDs stored in proof metadata", inspectFixture("runtime-sample-raw-ids.json", spec), "RUNTIME_SAMPLE_USER_ID_NOT_REDACTED");
+}
+
+function testRuntimeSampleBlankUserValuesFail() {
+  const spec = goodSpec();
+  spec.runtimeSampleDataProof = { ...runtimeSampleProof(), blankUserFieldValues: true, itemPatchProof: false };
+  expectFail("Fail: Dynamic user runtime proof claimed with blank User field values", inspectFixture("runtime-sample-blank-user-values.json", spec), "RUNTIME_SAMPLE_USER_FIELD_PATCH_PROOF_MISSING");
+}
+
+function testRuntimeSampleBatchRetryMissingFails() {
+  const spec = goodSpec();
+  spec.runtimeSampleDataProof = { ...runtimeSampleProof(), additionalRuntimeRowsRequired: true, batchCreateProof: true, verifyRetryBackoff: false, delayedVerification: false };
+  expectFail("Fail: batch create proof has no verification retry/backoff when immediate query misses rows", inspectFixture("runtime-sample-batch-no-retry.json", spec), "RUNTIME_SAMPLE_VERIFY_RETRY_MISSING");
+}
+
+function testCollectionGridTablePresentationPasses() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  const report = inspectFixture("collection-grid-table-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: root overflow hidden, header/item align center, matching cell padding");
+}
+
+function testCollectionGridTableOverflowMissingFails() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  spec.gridTables[0].rootOverflowHidden = false;
+  expectFail("Fail: root overflow hidden missing", inspectFixture("collection-grid-table-overflow-missing.json", spec), "COLLECTION_GRID_TABLE_OVERFLOW_HIDDEN_MISSING");
+}
+
+function testCollectionGridTablePaddingMismatchFails() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  spec.gridTables[0].bodyCellPadding = { top: 4, right: 12, bottom: 4, left: 12 };
+  expectFail("Fail: header/body padding mismatch", inspectFixture("collection-grid-table-padding-mismatch.json", spec), "COLLECTION_GRID_TABLE_CELL_PADDING_MISMATCH");
+}
+
+function testCollectionProgressTextFails() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  spec.gridTables[0].columns[0].controlType = "dynamic-field";
+  expectFail("Fail: Registration column uses dynamic text/raw expression instead of progress bar", inspectFixture("collection-grid-table-progress-text.json", spec), "COLLECTION_PROGRESS_CONTROL_MISSING");
+}
+
+function testCollectionProgressCurrencyFails() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  spec.gridTables[0].columns[0].sourceFieldType = "Currency";
+  expectFail("Fail: progress source field is Currency rather than Number", inspectFixture("collection-grid-table-progress-currency.json", spec), "COLLECTION_PROGRESS_SOURCE_NOT_NUMERIC");
+}
+
+function testCollectionProgressRawFormulaFails() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  spec.gridTables[0].columns[0].visibleText = "Registration Count / 600";
+  expectFail("Fail: raw progress formula text visible", inspectFixture("collection-grid-table-progress-formula.json", spec), "COLLECTION_PROGRESS_RAW_FORMULA_VISIBLE");
+}
+
+function testCollectionDynamicUserPasses() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  const report = inspectFixture("collection-grid-table-owner-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: Owner column uses Dynamic user control bound to User/identity field");
+}
+
+function testCollectionOwnerPlainTextFails() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  spec.gridTables[0].columns[1].controlType = "text";
+  expectFail("Fail: Owner column uses plain text", inspectFixture("collection-grid-table-owner-text.json", spec), "COLLECTION_DYNAMIC_USER_CONTROL_MISSING");
+}
+
+function testCollectionDynamicUserTextFieldFails() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  spec.gridTables[0].columns[1].boundFieldType = "single-line text";
+  expectFail("Fail: Dynamic user control bound to single-line text field", inspectFixture("collection-grid-table-owner-text-field.json", spec), "COLLECTION_DYNAMIC_USER_FIELD_NOT_USER_TYPE");
+}
+
+function testCollectionGridTableNavigatorLabelFails() {
+  const spec = goodSpec();
+  spec.gridTables = [collectionGridTable()];
+  delete spec.gridTables[0].generatedControls[0].nv_label;
+  expectFail("Fail: generated grid-table controls missing semantic nv_label", inspectFixture("collection-grid-table-missing-nv-label.json", spec), "COLLECTION_NV_LABEL_MISSING");
+}
+
+function testKpiCompactFormatPasses() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Approved Budget")];
+  spec.kpiCards[0].requiresValueFormatting = true;
+  spec.kpiCards[0].requiresCompactNumber = true;
+  spec.kpiCards[0].valueExpression = "formatNumber(value / 1000, 1, true) & 'K'";
+  spec.kpiCards[0].visibleValue = "225K";
+  const report = inspectFixture("kpi-compact-format-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: Approved Budget uses compact formatNumber K/M pattern");
+}
+
+function testKpiFixedDecimalPasses() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Registration Rate")];
+  spec.kpiCards[0].requiresValueFormatting = true;
+  spec.kpiCards[0].requiresFixedDecimal = true;
+  spec.kpiCards[0].metricType = "percentage";
+  spec.kpiCards[0].valueExpression = "formatNumber(value, 2, true) & '%'";
+  spec.kpiCards[0].visibleValue = "72.15%";
+  const report = inspectFixture("kpi-fixed-decimal-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: Registration Rate uses fixed decimal formatNumber(value, 2, true)");
+}
+
+function testKpiLongRawDecimalFails() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Registration Rate")];
+  spec.kpiCards[0].visibleValue = "217.16666666666666";
+  expectFail("Fail: long raw decimal visible in KPI value", inspectFixture("kpi-long-raw-decimal.json", spec), "KPI_RAW_LONG_DECIMAL_VISIBLE");
+}
+
+function testKpiLargeNumberUnformattedFails() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Approved Budget")];
+  spec.kpiCards[0].visibleValue = "225000";
+  spec.kpiCards[0].requiresCompactNumber = true;
+  spec.kpiCards[0].requiresValueFormatting = true;
+  expectFail("Fail: large KPI number unformatted where compact display is expected", inspectFixture("kpi-large-unformatted.json", spec), "KPI_COMPACT_NUMBER_FORMAT_MISSING");
+}
+
+function testKpiRawVariableValueFails() {
+  const spec = goodSpec();
+  spec.kpiCards = [richKpiCard("Planned Events")];
+  spec.kpiCards[0].summaryValue.visibleText = "__temp_event_count";
+  expectFail("Fail: raw variable name rendered in KPI value", inspectFixture("kpi-raw-variable-value.json", spec), "SUMMARY_VALUE_RAW_VARIABLE_VISIBLE");
 }
 
 function testKnowledgeBaseBoundaryReported() {
@@ -1090,6 +1269,54 @@ function richTable() {
     },
     headerHierarchy: "designed",
     rowDensity: "design-match",
+  };
+}
+
+function runtimeSampleProof() {
+  return {
+    userPersonRuntimeProofClaimed: true,
+    usersSearchAccountIdProvenanceRedacted: true,
+    existingUserValuesWereBlank: true,
+    itemPatchProof: true,
+    runtimeVerification: true,
+  };
+}
+
+function collectionGridTable() {
+  const padding = { top: 8, right: 12, bottom: 8, left: 12 };
+  return {
+    name: "Event Pipeline grid table",
+    claimsDesignFidelity: true,
+    requiresGridTableFidelity: true,
+    rootOverflowHidden: true,
+    headerAlignItems: "center",
+    itemAlignItems: "center",
+    headerCellPadding: padding,
+    bodyCellPadding: padding,
+    columns: [
+      {
+        name: "Registration",
+        role: "progress",
+        requiresProgressBar: true,
+        controlType: "progress",
+        sourceFieldType: "Number",
+        sourceExpression: "Registration Count / 600",
+        nv_label: "event_pipeline_registration_progress",
+      },
+      {
+        name: "Owner",
+        role: "owner",
+        requiresDynamicUser: true,
+        controlType: "dynamic-user",
+        boundFieldType: "User",
+        nv_label: "event_pipeline_owner_user",
+      },
+    ],
+    generatedControls: [
+      { id: "event_pipeline_grid_root", controlType: "collection", nv_label: "event_pipeline_grid_root" },
+      { id: "event_pipeline_header_registration", controlType: "container", nv_label: "event_pipeline_header_registration" },
+      { id: "event_pipeline_cell_owner", controlType: "dynamic-user", nv_label: "event_pipeline_cell_owner" },
+    ],
   };
 }
 

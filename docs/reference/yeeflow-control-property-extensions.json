@@ -859,6 +859,255 @@
       "optionalProperties": {},
       "proofBoundary": "Validates declared/redacted metadata and synthetic fixtures only. It does not decode private payloads, parse screenshots, call Yeeflow APIs, or prove pixel-perfect rendering.",
       "notes": "Use with the normalized product catalog and existing extension registry; do not invent control-property paths or force mock values as runtime proof."
+    },
+    {
+      "id": "runtime-sample-data.users-search.account-id",
+      "controlType": "runtime-proof-metadata",
+      "patternName": "Runtime sample-data users-search AccountID provenance",
+      "status": "evidence-backed",
+      "source": "redacted-runtime-api-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from the Marketing Event Event Portfolio v1.0.38 redacted runtime/API evidence: /users/search exposed usable user identifiers via AccountID for User/person sample-data repair. Store only redacted provenance.",
+      "requiredProperties": {
+        "usersSearchAccountIdProvenanceRedacted": true,
+        "rawUserIdsStored": false
+      },
+      "optionalProperties": {
+        "redactedAccountIdPreview": "present"
+      },
+      "proofBoundary": "Metadata-only proof pattern. Does not authorize live API calls and must not store raw user IDs, tenant URLs, or raw responses.",
+      "notes": "Use when runtime User/person control proof needs redacted user identifier provenance."
+    },
+    {
+      "id": "runtime-sample-data.items-update.user-field",
+      "controlType": "runtime-proof-metadata",
+      "patternName": "Runtime sample-data item PATCH for blank User fields",
+      "status": "evidence-backed",
+      "source": "redacted-runtime-api-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Marketing Event evidence where scoped PATCH /lists/{appID}/{listID}/items/{id} populated Text21 / Event Owner (User) on existing Events rows.",
+      "requiredProperties": {
+        "existingUserValuesWereBlank": true,
+        "itemPatchProof": true,
+        "runtimeVerification": true
+      },
+      "optionalProperties": {
+        "patchedField": "redacted User/person field reference"
+      },
+      "proofBoundary": "Only redacted PATCH proof metadata may be committed. Raw item IDs, user IDs, request bodies, and responses are forbidden.",
+      "notes": "Use when existing sample rows are present but User/person values are blank."
+    },
+    {
+      "id": "runtime-sample-data.items-batch-create.events",
+      "controlType": "runtime-proof-metadata",
+      "patternName": "Runtime Events sample-data batch create proof",
+      "status": "evidence-backed",
+      "source": "redacted-runtime-api-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from redacted Marketing Event evidence where POST /lists/{appID}/{listID}/items/batch created additional Events sample rows for runtime fidelity proof.",
+      "requiredProperties": {
+        "additionalRuntimeRowsRequired": true,
+        "batchCreateProof": true
+      },
+      "optionalProperties": {
+        "createdRowCount": "redacted count only"
+      },
+      "proofBoundary": "Does not authorize package or API writes in plugin training. Store redacted metadata only.",
+      "notes": "Use only for runtime proof planning/reporting after explicit user-approved live operations outside this branch."
+    },
+    {
+      "id": "runtime-sample-data.query-verify-retry-backoff",
+      "controlType": "runtime-proof-metadata",
+      "patternName": "Runtime sample-data query verification retry/backoff",
+      "status": "evidence-backed",
+      "source": "redacted-runtime-api-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Marketing Event batch-create evidence: immediate query verification can lag after batch create, so proof metadata must include retry/backoff or delayed verification before failing.",
+      "requiredProperties": {
+        "batchCreateProof": true,
+        "verifyRetryBackoff": true
+      },
+      "optionalProperties": {
+        "attempts": "redacted numeric count",
+        "delayMs": "redacted numeric delay"
+      },
+      "proofBoundary": "Metadata-only proof pattern. Does not retry live APIs inside validator.",
+      "notes": "Use when runtime sample rows are batch-created and verified through eventually consistent list queries."
+    },
+    {
+      "id": "collection.grid-table.root-overflow-hidden",
+      "controlType": "collection",
+      "patternName": "Collection grid-table root overflow hidden",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Marketing Event Event Pipeline grid-table manual subtree: root grid-table container uses overflow hidden to preserve rounded corners.",
+      "requiredProperties": {
+        "rootOverflowHidden": true
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Declared/redacted metadata only; no screenshot parsing.",
+      "notes": "Required when claiming grid-table presentation fidelity."
+    },
+    {
+      "id": "collection.grid-table.header-item-align-center",
+      "controlType": "collection",
+      "patternName": "Collection grid-table header and item center alignment",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Marketing Event Event Pipeline grid-table manual subtree: header grid and item grid align-items center.",
+      "requiredProperties": {
+        "headerAlignItems": "center",
+        "itemAlignItems": "center"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Declared/redacted metadata only.",
+      "notes": "Prevents header/body vertical drift."
+    },
+    {
+      "id": "collection.grid-table.cell-padding-parity",
+      "controlType": "collection",
+      "patternName": "Collection grid-table cell padding parity",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Marketing Event Event Pipeline grid-table manual subtree: header/body cells use matching padding such as 12px horizontal and 8px vertical.",
+      "requiredProperties": {
+        "headerCellPadding": "matches bodyCellPadding",
+        "bodyCellPadding": "matches headerCellPadding"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Declared/redacted metadata only.",
+      "notes": "Use for table spacing fidelity claims."
+    },
+    {
+      "id": "collection.grid-table.progress-column-control",
+      "controlType": "collection",
+      "patternName": "Collection grid-table progress column real progress control",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Marketing Event Event Pipeline grid-table manual subtree: Registration progress column should use a real progress control derived from numeric source data.",
+      "requiredProperties": {
+        "progressColumn.controlType": "progress",
+        "progressColumn.sourceFieldType": "Number"
+      },
+      "optionalProperties": {
+        "progressExpression": "Registration Count / 600"
+      },
+      "proofBoundary": "Declared/redacted metadata only.",
+      "notes": "Dynamic text or raw formula text is not acceptable for progress-like columns."
+    },
+    {
+      "id": "collection.grid-table.dynamic-user-column-control",
+      "controlType": "collection",
+      "patternName": "Collection grid-table owner column Dynamic user control",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Marketing Event Event Pipeline grid-table manual subtree and Events field study: Owner/person column should use Dynamic user/person control bound to a User/identity field.",
+      "requiredProperties": {
+        "ownerColumn.controlType": "dynamic-user",
+        "ownerColumn.boundFieldType": "User"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Declared/redacted metadata only; runtime proof also needs nonblank User values.",
+      "notes": "Plain text owner fields do not prove person-control fidelity."
+    },
+    {
+      "id": "collection.grid-table.semantic-nv-labels",
+      "controlType": "collection",
+      "patternName": "Collection grid-table semantic Navigator labels",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Yeeflow designer Navigator evidence: generated grid-table subtree controls need semantic nv_label for traceability.",
+      "requiredProperties": {
+        "generatedControls[].nv_label": "semantic"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Declared/redacted metadata only.",
+      "notes": "Generic labels such as Container are not semantic."
+    },
+    {
+      "id": "kpi.value-display.format-number-expression",
+      "controlType": "summary",
+      "patternName": "KPI value display formatNumber expression",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from supplied Marketing Event KPI snippets using formatNumber for Approved Budget and Registration Rate display values.",
+      "requiredProperties": {
+        "valueExpression": "formatNumber(...)"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Expression-format metadata only; runtime values remain live.",
+      "notes": "Use for presentation-quality visible KPI headings."
+    },
+    {
+      "id": "kpi.value-display.compact-number-kmb",
+      "controlType": "summary",
+      "patternName": "KPI compact K/M/B number display",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from supplied Approved Budget card using formatNumber plus K/M compact display.",
+      "requiredProperties": {
+        "requiresCompactNumber": true,
+        "valueExpression": "formatNumber(...) with K/M/B logic"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Presentation formatting only; does not force mock values.",
+      "notes": "Large money/count metrics should not render as raw 225000-style values."
+    },
+    {
+      "id": "kpi.value-display.fixed-decimal",
+      "controlType": "summary",
+      "patternName": "KPI fixed decimal rate/percentage display",
+      "status": "evidence-backed",
+      "source": "manual-export-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from supplied Registration Rate card using formatNumber(value, 2, true).",
+      "requiredProperties": {
+        "requiresFixedDecimal": true,
+        "valueExpression": "formatNumber(value, 2, true)"
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Presentation formatting only; live values may differ from mock targets.",
+      "notes": "Use for rates and percentages."
+    },
+    {
+      "id": "kpi.value-display.no-raw-long-decimal",
+      "controlType": "summary",
+      "patternName": "KPI no raw long decimal display",
+      "status": "evidence-backed",
+      "source": "runtime-fidelity-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Marketing Event runtime findings where long raw decimals were content-fidelity failures.",
+      "requiredProperties": {
+        "longRawDecimalVisible": false
+      },
+      "optionalProperties": {},
+      "proofBoundary": "Declared/runtime text metadata only.",
+      "notes": "Values like 217.16666666666666 fail unless explicitly waived."
+    },
+    {
+      "id": "kpi.value-display.no-unformatted-large-number",
+      "controlType": "summary",
+      "patternName": "KPI no unformatted large number display",
+      "status": "evidence-backed",
+      "source": "runtime-fidelity-study",
+      "confidence": "high",
+      "evidenceSummary": "Derived from Marketing Event runtime findings where large raw KPI values needed compact formatting.",
+      "requiredProperties": {
+        "unformattedLargeNumberVisible": false
+      },
+      "optionalProperties": {
+        "formattingWaived": "explicit waiver only"
+      },
+      "proofBoundary": "Declared/runtime text metadata only.",
+      "notes": "Large values should be compacted or explicitly waived."
     }
   ],
   "exampleEntryShape": {

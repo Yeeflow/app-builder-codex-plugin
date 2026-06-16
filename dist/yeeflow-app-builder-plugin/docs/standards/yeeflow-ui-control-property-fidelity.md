@@ -202,6 +202,12 @@ Summary values must not render raw variable names such as temp variables, intern
 
 Rich table fidelity requires badge, progress, avatar/person, header hierarchy, row density, spacing, and visual hierarchy treatment when the design calls for those fields. A table that renders status, progress, or owner/person fields as plain text must not pass a design-fidelity claim when the approved design requires badge, progress-bar, or avatar/person treatment.
 
+Runtime sample-data proof for User/person controls requires real User field values, not only correct Dynamic user control binding. Redacted runtime evidence may record that `/users/search` supplied usable user identifier provenance through `AccountID`, but it must store only redacted provenance and never raw user IDs, item IDs, tenant URLs, raw API responses, or private fields. When existing live rows have blank User/person values, runtime proof must include scoped item PATCH proof metadata. When additional sample rows are batch-created for runtime proof, verification must include retry/backoff or delayed verification metadata because immediate list queries can lag.
+
+Collection grid-table fidelity for Event Pipeline-style tables requires the root grid-table container to use overflow hidden, header and item grids to align items center, and header/body cells to use matching padding such as 12px horizontal and 8px vertical. Progress-like columns must use a real `progress` control derived from numeric/number-like source fields, not Dynamic text or visible raw formula text. Owner/person columns must use Dynamic user/person controls bound to User/identity fields, not plain text or single-line text fields. Generated grid-table subtree controls must include semantic `nv_label` values for designer Navigator traceability.
+
+KPI visible value controls must use `formatNumber(...)` or an equivalent proven formatting expression when presentation-quality numeric display is claimed. Large money/count metrics should use compact K/M/B display when appropriate. Rate and percentage metrics should use fixed decimal formatting, for example `formatNumber(value, 2, true)`. Long raw decimals such as `217.16666666666666` and unformatted large values such as `225000` are hard-gate issues unless an explicit waiver is documented. Runtime values remain live; mock design values are visual targets only.
+
 A styled action Container is not enough for behavior fidelity. Action-looking Containers must include real Yeeflow action metadata. Add-list action Containers require `action-type = "5"`, target list metadata with `AppID`, `ListSetID`, and `ListID`, a visible child Heading/Text label, fixed-size styling when declared by the design, and semantic `nv_label` for designer Navigator traceability. Non-action decorative Containers do not need action metadata when they are not marked or styled as actions.
 
 Final UI reports must separate generator/spec gaps, runtime rendering gaps, data-value gaps, and action behavior gaps. Passing layout, navigation, or control-property checks does not automatically prove content fidelity.
@@ -316,6 +322,25 @@ Finding codes include:
 - `ACTION_CONTAINER_STYLED_BUT_NOT_ACTIONABLE`
 - `ACTION_CONTAINER_NAVIGATOR_LABEL_MISSING`
 - `ACTION_CONTAINER_FIXED_SIZE_MISMATCH`
+- `RUNTIME_SAMPLE_USER_ID_PROVENANCE_MISSING`
+- `RUNTIME_SAMPLE_USER_ID_NOT_REDACTED`
+- `RUNTIME_SAMPLE_USER_FIELD_PATCH_PROOF_MISSING`
+- `RUNTIME_SAMPLE_BATCH_CREATE_PROOF_MISSING`
+- `RUNTIME_SAMPLE_VERIFY_RETRY_MISSING`
+- `COLLECTION_GRID_TABLE_OVERFLOW_HIDDEN_MISSING`
+- `COLLECTION_GRID_TABLE_ALIGN_CENTER_MISSING`
+- `COLLECTION_GRID_TABLE_CELL_PADDING_MISMATCH`
+- `COLLECTION_PROGRESS_CONTROL_MISSING`
+- `COLLECTION_PROGRESS_SOURCE_NOT_NUMERIC`
+- `COLLECTION_PROGRESS_RAW_FORMULA_VISIBLE`
+- `COLLECTION_DYNAMIC_USER_CONTROL_MISSING`
+- `COLLECTION_DYNAMIC_USER_FIELD_NOT_USER_TYPE`
+- `COLLECTION_NV_LABEL_MISSING`
+- `KPI_VALUE_FORMAT_MISSING`
+- `KPI_COMPACT_NUMBER_FORMAT_MISSING`
+- `KPI_FIXED_DECIMAL_FORMAT_MISSING`
+- `KPI_RAW_LONG_DECIMAL_VISIBLE`
+- `KPI_UNFORMATTED_LARGE_NUMBER_VISIBLE`
 
 ## Future Work
 
