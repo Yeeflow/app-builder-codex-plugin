@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.6.51
+
+- Add Non-Container Advanced Style Fidelity Gates.
+- Extend the Yeeflow control-property knowledge base with evidence-backed Advanced-tab rules for non-Container controls.
+- Keep Container controls special: Container width, height, and layout remain under `attrs.style`, including `attrs.style.height`, `attrs.style.cushei`, and `attrs.style.cusheiu`.
+- Define the non-Container common Advanced-tab style model with `attrs.common.positioning`, `attrs.common.sizing`, `attrs.common.margin`, `attrs.common.padding`, `attrs.common.border`, and `attrs.common.background`.
+- Define non-Container width modes: `attrs.common.positioning.widthtype = [null, "1"]` for full width, `[null, "2"]` for inline width, and `[null, "3"]` for custom width.
+- Update Data Filter dropdown runtime 180px width to require `attrs.common.positioning.widthtype = [null, "3"]`, `attrs.common.positioning.width = [null, 180]`, and `attrs.common.positioning.widthu = [null, "px"]`.
+- Add hard gates for non-Container width model mismatch, Data Filter runtime custom width, Container rules applied to non-Container controls, common margin/padding, common border/background/hover/shadow, and the two-color gradient boundary.
+- Reinforce that the normalized product catalog remains the base source of truth and extension registry entries remain evidence-backed rather than replacements for `control-configurations.json`.
+- Confirm this release does not claim pixel-perfect visual diffing or automatic screenshot parsing.
+
 ## 0.6.50
 
 - Bump the active plugin version after Data Filter row hierarchy and Navigator label fidelity gates.
