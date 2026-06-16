@@ -81,6 +81,18 @@ const FINDING_MESSAGES = {
   NAVIGATOR_LABEL_MISSING: "Important generated structural controls must include nv_label for Yeeflow designer Navigator naming.",
   NAVIGATOR_LABEL_GENERIC: "Navigator label must be semantic, not a generic control type such as Container, Text, or Grid.",
   NAVIGATOR_LABEL_MISMATCH: "Navigator label does not match the expected semantic Navigator name.",
+  NON_CONTAINER_WIDTH_MODEL_MISMATCH: "Non-Container runtime width must use attrs.common.positioning, not attrs.style.",
+  NON_CONTAINER_CUSTOM_WIDTH_MISSING: "Non-Container custom width must declare attrs.common.positioning widthtype, width, and widthu.",
+  DATA_FILTER_RUNTIME_WIDTH_NOT_CUSTOM_POSITIONING: "Data Filter dropdown 180px runtime width must use attrs.common.positioning custom width.",
+  CONTAINER_WIDTH_MODEL_REQUIRED: "Container custom width must use attrs.style widthtype, width, and widthu.",
+  CONTAINER_HEIGHT_MODEL_REQUIRED: "Container custom height must use attrs.style height/cushei and unit metadata.",
+  COMMON_MARGIN_PADDING_MISSING: "Non-Container Advanced-tab margin/padding must use attrs.common.margin and attrs.common.padding.",
+  COMMON_BORDER_STYLE_MISSING: "Non-Container Advanced-tab border/radius/shadow must use attrs.common.border.normal.",
+  COMMON_BORDER_HOVER_SHADOW_MISSING: "Non-Container Advanced-tab hover shadow must use attrs.common.border.hover.",
+  COMMON_BACKGROUND_STYLE_MISSING: "Non-Container Advanced-tab background must use attrs.common.background.",
+  COMMON_BACKGROUND_IMAGE_SHAPE_INVALID: "Non-Container background image must use attrs.common.background.normal.classic.image.",
+  COMMON_BACKGROUND_GRADIENT_TOO_COMPLEX: "Designer-supported non-Container gradients are limited to two colors unless custom CSS evidence exists.",
+  CONTAINER_RULE_APPLIED_TO_NON_CONTAINER: "Container attrs.style width/height rules were applied to a non-Container control.",
 };
 
 const DATA_FILTER_VISUAL_PATTERNS = {
@@ -105,7 +117,9 @@ const DATA_FILTER_VISUAL_PATTERNS = {
       "attrs.style.align_items": [null, "stretch"],
       "attrs.style.justify_content": [null, "center"],
       "attrs.style.wrap": [null, "nowrap"],
-      "attrs.common.positioning.widthtype": [null, "1"],
+      "attrs.common.positioning.widthtype": [null, "3"],
+      "attrs.common.positioning.width": [null, 180],
+      "attrs.common.positioning.widthu": [null, "px"],
       "attrs.common.sizing.width": [null, 180],
       "attrs.common.sizing.minWidth": [null, 180],
       "attrs.common.sizing.maxWidth": [null, 180],
@@ -149,7 +163,9 @@ const DATA_FILTER_VISUAL_PATTERNS = {
       "attrs.style.align_items": [null, "stretch"],
       "attrs.style.justify_content": [null, "center"],
       "attrs.style.wrap": [null, "nowrap"],
-      "attrs.common.positioning.widthtype": [null, "1"],
+      "attrs.common.positioning.widthtype": [null, "3"],
+      "attrs.common.positioning.width": [null, 180],
+      "attrs.common.positioning.widthu": [null, "px"],
       "attrs.common.sizing.width": [null, 180],
       "attrs.common.sizing.minWidth": [null, 180],
       "attrs.common.sizing.maxWidth": [null, 180],
@@ -232,6 +248,7 @@ export function inspectUiControlPropertyFidelity({
     validateFilterHierarchy(candidateSpec, findings);
     validateDataFilters(candidateSpec, referenceSpec, findings);
     validateFilterIcon(candidateSpec, findings);
+    validateAdvancedStyleModels(candidateSpec, findings);
     validateNavigatorLabels(candidateSpec, findings);
     validateDecodedResourceAttrs(candidateSpec, findings);
     validateExtensionOnlyProperties(candidateSpec, findings);
@@ -476,6 +493,7 @@ function classifyDataFilterPatternPath(propertyPath) {
   if (propertyPath === "attrs.field") return "RELATIVE_PERIOD_FIELD_MISSING";
   if (propertyPath === "attrs.choice-options") return "RELATIVE_PERIOD_CHOICES_MISSING";
   if (propertyPath === "attrs.displayTitle" || propertyPath === "attrs.lablay") return "DATA_FILTER_LABEL_NOT_HIDDEN";
+  if (propertyPath.startsWith("attrs.common.positioning.")) return "DATA_FILTER_RUNTIME_WIDTH_NOT_CUSTOM_POSITIONING";
   if (propertyPath.includes(".sizing.") || propertyPath.endsWith(".width") || propertyPath.endsWith(".widthu")) return "DATA_FILTER_FIXED_WIDTH_MISMATCH";
   if (propertyPath.startsWith("attrs.style.") || propertyPath.startsWith("attrs.common.")) return "DATA_FILTER_WRAPPER_STYLE_MISMATCH";
   if (propertyPath.startsWith("attrs.edit.")) return "DATA_FILTER_INPUT_STYLE_MISMATCH";
@@ -504,6 +522,106 @@ function validateFilterIcon(spec, findings) {
         propertyPath,
         expected,
         actual,
+      });
+    }
+  }
+}
+
+function validateAdvancedStyleModels(spec, findings) {
+  for (const control of spec.advancedStyleControls) {
+    if (!control) continue;
+    if (isContainerControl(control)) validateContainerAdvancedStyle(control, findings);
+    else validateNonContainerAdvancedStyle(control, findings);
+  }
+}
+
+function validateContainerAdvancedStyle(control, findings) {
+  const attrs = control.attrs || {};
+  const style = attrs.style || {};
+  if (control.claimsCustomWidth || control.expectedWidth != null) {
+    if (!hasValue(style.widthtype) || !hasValue(style.width) || !hasValue(style.widthu)) {
+      addFinding(findings, "error", "CONTAINER_WIDTH_MODEL_REQUIRED", `${control.id || control.name || "Container"} custom width must use attrs.style width metadata.`);
+    }
+  }
+  if (control.claimsCustomHeight || control.expectedHeight != null) {
+    const hasHeight = hasValue(style.height) || hasValue(style.cushei);
+    const hasUnit = hasValue(style.heightu) || hasValue(style.cusheiu);
+    if (!hasHeight || !hasUnit) {
+      addFinding(findings, "error", "CONTAINER_HEIGHT_MODEL_REQUIRED", `${control.id || control.name || "Container"} custom height must use attrs.style height/cushei metadata.`);
+    }
+  }
+}
+
+function validateNonContainerAdvancedStyle(control, findings) {
+  const attrs = control.attrs || {};
+  const style = attrs.style || {};
+  const common = attrs.common || {};
+  const positioning = common.positioning || {};
+  const controlName = control.id || control.name || control.controlType || "Non-Container control";
+  const styleDeclaresFixedWidth = hasValue(style.width) || hasValue(style.widthtype) || hasValue(style.widthu);
+  const commonDeclaresWidth = hasValue(positioning.widthtype) || hasValue(positioning.width) || hasValue(positioning.widthu);
+
+  if (styleDeclaresFixedWidth && !commonDeclaresWidth) {
+    addFinding(findings, "error", "NON_CONTAINER_WIDTH_MODEL_MISMATCH", `${controlName} declares runtime width only through attrs.style.`);
+    addFinding(findings, "error", "CONTAINER_RULE_APPLIED_TO_NON_CONTAINER", `${controlName} uses Container width metadata on a non-Container control.`);
+  }
+
+  if (control.expectedWidthMode && responsiveScalar(positioning.widthtype) !== String(control.expectedWidthMode)) {
+    addFinding(findings, "error", "NON_CONTAINER_WIDTH_MODEL_MISMATCH", `${controlName} must use attrs.common.positioning.widthtype ${control.expectedWidthMode}.`, {
+      expected: control.expectedWidthMode,
+      actual: positioning.widthtype ?? null,
+    });
+  }
+
+  if (control.claimsCustomWidth || control.expectedWidth != null) {
+    const widthtype = responsiveScalar(positioning.widthtype);
+    const width = numeric(positioning.width);
+    const unit = responsiveScalar(positioning.widthu);
+    if (widthtype !== "3" || width == null || !hasValue(unit)) {
+      addFinding(findings, "error", "NON_CONTAINER_CUSTOM_WIDTH_MISSING", `${controlName} custom width must use attrs.common.positioning widthtype 3, width, and widthu.`);
+    } else if (control.expectedWidth != null && width !== numeric(control.expectedWidth)) {
+      addFinding(findings, "error", "NON_CONTAINER_CUSTOM_WIDTH_MISSING", `${controlName} custom width does not match expected width.`, {
+        expected: numeric(control.expectedWidth),
+        actual: width,
+      });
+    }
+  }
+
+  if (isDataFilterControl(control) && (control.expectedRuntimeWidth === 180 || control.extensionPatternId === "data-filter.dropdown.runtime-effective-custom-180px-width")) {
+    const widthtype = responsiveScalar(positioning.widthtype);
+    const width = numeric(positioning.width);
+    const unit = responsiveScalar(positioning.widthu);
+    if (widthtype !== "3" || width !== 180 || unit !== "px") {
+      addFinding(findings, "error", "DATA_FILTER_RUNTIME_WIDTH_NOT_CUSTOM_POSITIONING", `${controlName} Data Filter dropdown 180px width must use attrs.common.positioning custom width.`);
+    }
+  }
+
+  if (control.requiresCommonMarginPadding && (!hasValue(common.margin) || !hasValue(common.padding))) {
+    addFinding(findings, "error", "COMMON_MARGIN_PADDING_MISSING", `${controlName} must declare attrs.common.margin and attrs.common.padding.`);
+  }
+
+  if (control.requiresCommonBorderNormal && !hasValue(common.border?.normal)) {
+    addFinding(findings, "error", "COMMON_BORDER_STYLE_MISSING", `${controlName} must declare attrs.common.border.normal.`);
+  }
+
+  if (control.requiresCommonBorderHoverShadow && !hasValue(common.border?.hover?.boxShadow)) {
+    addFinding(findings, "error", "COMMON_BORDER_HOVER_SHADOW_MISSING", `${controlName} must declare attrs.common.border.hover.boxShadow.`);
+  }
+
+  if (control.requiresCommonBackground && !hasValue(common.background?.normal)) {
+    addFinding(findings, "error", "COMMON_BACKGROUND_STYLE_MISSING", `${controlName} must declare attrs.common.background.normal.`);
+  }
+
+  if (control.requiresBackgroundImage && !hasValue(common.background?.normal?.classic?.image)) {
+    addFinding(findings, "error", "COMMON_BACKGROUND_IMAGE_SHAPE_INVALID", `${controlName} background image must use attrs.common.background.normal.classic.image.`);
+  }
+
+  const normalGradientColors = gradientColors(common.background?.normal?.gradient);
+  const hoverGradientColors = gradientColors(common.background?.hover?.gradient);
+  for (const colors of [normalGradientColors, hoverGradientColors].filter(Boolean)) {
+    if (colors.length > 2 && !control.customCssEvidence) {
+      addFinding(findings, "error", "COMMON_BACKGROUND_GRADIENT_TOO_COMPLEX", `${controlName} gradient has more than two colors without custom CSS evidence.`, {
+        colorCount: colors.length,
       });
     }
   }
@@ -628,6 +746,7 @@ function normalizeSpec(data) {
     actions: normalizeArray(root.actions || root.actionButtons).map(normalizeAction),
     kpiCards: normalizeArray(root.kpiCards || root.kpis).map(normalizeKpiCard),
     structuralControls: normalizeArray(root.structuralControls || root.navigatorControls).map(normalizeControl),
+    advancedStyleControls: normalizeArray(root.advancedStyleControls || root.controls).map(normalizeControl),
     decodedResources: normalizeArray(root.decodedResources || root.decodedResourceControls).map(normalizeControl),
     decodedResourceEvidenceAvailable: Boolean(root.decodedResourceEvidenceAvailable || root.decodedPackageEvidenceAvailable),
     decodedResourceAttrsValidated: Boolean(root.decodedResourceAttrsValidated),
@@ -725,6 +844,7 @@ function getDataFilterControlWidth(filter = {}) {
   return firstNumeric(
     filter.controlWidth,
     filter.fixedWidth,
+    deepGet(filter, "attrs.common.positioning.width"),
     deepGet(filter, "attrs.style.width"),
     deepGet(filter, "attrs.common.sizing.width"),
     deepGet(filter, "attrs.common.sizing.minWidth"),
@@ -765,6 +885,23 @@ function isImportantStructuralControl(control) {
   const type = String(control.controlType || control.type || "").toLowerCase();
   if (type !== "container" && type !== "grid") return false;
   return Boolean(control.id || control.semanticId || /row|group|wrapper|container|action/i.test(control.name || control.label || ""));
+}
+
+function isContainerControl(control) {
+  return String(control.controlType || control.type || "").toLowerCase() === "container";
+}
+
+function isDataFilterControl(control) {
+  const type = String(control.controlType || control.type || control.nativeType || "").toLowerCase();
+  return type === "data filter" || type === "data-filter" || type.endsWith("-filter") || type === "relative-period";
+}
+
+function gradientColors(gradient) {
+  if (!gradient || typeof gradient !== "object") return null;
+  if (Array.isArray(gradient.colors)) return gradient.colors;
+  if (Array.isArray(gradient.colorStops)) return gradient.colorStops;
+  if (Array.isArray(gradient.stops)) return gradient.stops;
+  return null;
 }
 
 function isGenericNavigatorLabel(value) {

@@ -54,6 +54,21 @@ function run() {
   testFilterIconTextGlyphFails();
   testFilterIconSizeFails();
   testExtensionOnlyWithoutEvidenceWarns();
+  testContainerCustomWidthHeightPasses();
+  testContainerCustomWidthMissingFails();
+  testNonContainerFullWidthCommonPositioningPasses();
+  testNonContainerInlineCommonPositioningPasses();
+  testNonContainerCustomWidthCommonPositioningPasses();
+  testNonContainerStyleOnlyWidthFails();
+  testDataFilterRuntimeWidthMissingCommonPositioningFails();
+  testDataFilterRuntimeWidthCommonPositioningPasses();
+  testCommonMarginPaddingPasses();
+  testCommonBorderNormalPasses();
+  testCommonBorderHoverShadowPasses();
+  testCommonClassicBackgroundPasses();
+  testCommonBackgroundImagePasses();
+  testCommonTwoColorGradientPasses();
+  testCommonGradientTooComplexFails();
   testCliSmoke();
   if (isSourceRepo) testDistMirror();
 }
@@ -108,6 +123,9 @@ function testFilterControlWidthMissingFails() {
   delete region.attrs.common.sizing.width;
   delete region.attrs.common.sizing.minWidth;
   delete region.attrs.common.sizing.maxWidth;
+  delete region.attrs.common.positioning.width;
+  delete region.attrs.common.positioning.widthtype;
+  delete region.attrs.common.positioning.widthu;
   expectFail("Fail: Data Filter control lacks fixed 180px width", inspectFixture("missing-filter-control-width.json", spec), "FILTER_CONTROL_FIXED_WIDTH_MISSING");
 }
 
@@ -434,6 +452,11 @@ function dataFilter(name, filterMode, width, filterVariable) {
         widthu: [null, "px"],
       },
       common: {
+        positioning: {
+          widthtype: [null, "3"],
+          width: [null, width],
+          widthu: [null, "px"],
+        },
         sizing: {
           width: [null, width],
           minWidth: [null, width],
@@ -466,7 +489,7 @@ function visualDataFilter(name, nativeType, extensionPatternId, filterVariable) 
       wrap: [null, "nowrap"],
     },
     common: {
-      positioning: { widthtype: [null, "1"] },
+      positioning: { widthtype: [null, "3"], width: [null, 180], widthu: [null, "px"] },
       sizing: {
         width: [null, 180],
         minWidth: [null, 180],
@@ -554,6 +577,202 @@ function nativeFilterIcon() {
       },
     },
   };
+}
+
+function testContainerCustomWidthHeightPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [
+    {
+      id: "event_portfolio_card_shell",
+      controlType: "Container",
+      claimsCustomWidth: true,
+      claimsCustomHeight: true,
+      expectedWidth: 320,
+      expectedHeight: 160,
+      attrs: {
+        style: {
+          widthtype: "3",
+          width: 320,
+          widthu: "px",
+          cushei: 160,
+          cusheiu: "px",
+        },
+      },
+    },
+  ];
+  const report = inspectFixture("container-custom-width-height-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: Container custom width/height through attrs.style");
+}
+
+function testContainerCustomWidthMissingFails() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [
+    {
+      id: "event_portfolio_card_shell",
+      controlType: "Container",
+      claimsCustomWidth: true,
+      attrs: { style: { widthtype: "3" } },
+    },
+  ];
+  expectFail("Fail: Container missing attrs.style custom width when claimed", inspectFixture("container-custom-width-missing.json", spec), "CONTAINER_WIDTH_MODEL_REQUIRED");
+}
+
+function testNonContainerFullWidthCommonPositioningPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("summary", { positioning: { widthtype: [null, "1"] } }, { expectedWidthMode: "1" })];
+  const report = inspectFixture("non-container-full-width-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: non-Container full width through attrs.common.positioning.widthtype [null, \"1\"]");
+}
+
+function testNonContainerInlineCommonPositioningPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("icon", { positioning: { widthtype: [null, "2"] } }, { expectedWidthMode: "2" })];
+  const report = inspectFixture("non-container-inline-width-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: non-Container inline width through attrs.common.positioning.widthtype [null, \"2\"]");
+}
+
+function testNonContainerCustomWidthCommonPositioningPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("action_button", { positioning: { widthtype: [null, "3"], width: [null, 180], widthu: [null, "px"] } }, { claimsCustomWidth: true, expectedWidth: 180 })];
+  const report = inspectFixture("non-container-custom-width-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: non-Container custom 180px width through attrs.common.positioning.widthtype [null, \"3\"]");
+}
+
+function testNonContainerStyleOnlyWidthFails() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [
+    {
+      id: "event_portfolio_status_filter",
+      controlType: "radio-filter",
+      claimsCustomWidth: true,
+      attrs: { style: { widthtype: [null, "1"], width: [null, 180], widthu: [null, "px"] } },
+    },
+  ];
+  const report = inspectFixture("non-container-style-only-width.json", spec);
+  expectFail("Fail: non-Container uses only attrs.style.width for fixed width", report, "NON_CONTAINER_WIDTH_MODEL_MISMATCH");
+}
+
+function testDataFilterRuntimeWidthMissingCommonPositioningFails() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [
+    {
+      id: "event_portfolio_region_filter",
+      controlType: "Data Filter",
+      extensionPatternId: "data-filter.dropdown.runtime-effective-custom-180px-width",
+      expectedRuntimeWidth: 180,
+      attrs: { common: { sizing: { width: [null, 180] } } },
+    },
+  ];
+  expectFail("Fail: Data Filter 180px dropdown lacks attrs.common.positioning custom width", inspectFixture("data-filter-runtime-width-missing-positioning.json", spec), "DATA_FILTER_RUNTIME_WIDTH_NOT_CUSTOM_POSITIONING");
+}
+
+function testDataFilterRuntimeWidthCommonPositioningPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [
+    {
+      id: "event_portfolio_region_filter",
+      controlType: "Data Filter",
+      extensionPatternId: "data-filter.dropdown.runtime-effective-custom-180px-width",
+      expectedRuntimeWidth: 180,
+      attrs: { common: { positioning: { widthtype: [null, "3"], width: [null, 180], widthu: [null, "px"] } } },
+    },
+  ];
+  const report = inspectFixture("data-filter-runtime-width-positioning-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: Data Filter 180px dropdown uses attrs.common.positioning custom width");
+}
+
+function testCommonMarginPaddingPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("heading", {
+    positioning: { widthtype: [null, "2"] },
+    margin: zeroBox(),
+    padding: zeroBox(),
+  }, { requiresCommonMarginPadding: true })];
+  const report = inspectFixture("common-margin-padding-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: zero margin/padding under attrs.common");
+}
+
+function testCommonBorderNormalPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("action_button", {
+    positioning: { widthtype: [null, "2"] },
+    border: { normal: { type: "1", color: "#d0d7de", radius: 8, boxShadow: "0 1px 2px rgba(15,23,42,0.08)" } },
+  }, { requiresCommonBorderNormal: true })];
+  const report = inspectFixture("common-border-normal-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: normal border/radius/shadow under attrs.common.border.normal");
+}
+
+function testCommonBorderHoverShadowPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("action_button", {
+    positioning: { widthtype: [null, "2"] },
+    border: { hover: { boxShadow: "0 8px 18px rgba(15,23,42,0.16)" } },
+  }, { requiresCommonBorderHoverShadow: true })];
+  const report = inspectFixture("common-border-hover-shadow-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: hover shadow under attrs.common.border.hover");
+}
+
+function testCommonClassicBackgroundPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("heading", {
+    positioning: { widthtype: [null, "2"] },
+    background: { normal: { classic: { color: "#ffffff" } } },
+  }, { requiresCommonBackground: true })];
+  const report = inspectFixture("common-background-classic-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: classic background color");
+}
+
+function testCommonBackgroundImagePasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("heading", {
+    positioning: { widthtype: [null, "2"] },
+    background: { normal: { classic: { image: { url: "redacted-image-ref", fit: "cover" } } } },
+  }, { requiresBackgroundImage: true })];
+  const report = inspectFixture("common-background-image-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: classic background image shape");
+}
+
+function testCommonTwoColorGradientPasses() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("heading", {
+    positioning: { widthtype: [null, "2"] },
+    background: { normal: { gradient: { colors: ["#ffffff", "#edf2ff"] } } },
+  })];
+  const report = inspectFixture("common-gradient-two-color-pass.json", spec);
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: two-color gradient background");
+}
+
+function testCommonGradientTooComplexFails() {
+  const spec = goodSpec();
+  spec.advancedStyleControls = [nonContainerAdvancedControl("heading", {
+    positioning: { widthtype: [null, "2"] },
+    background: { normal: { gradient: { colors: ["#ffffff", "#edf2ff", "#c7d2fe"] } } },
+  })];
+  expectFail("Fail/warn: gradient with more than two colors without custom CSS evidence", inspectFixture("common-gradient-too-complex.json", spec), "COMMON_BACKGROUND_GRADIENT_TOO_COMPLEX");
+}
+
+function nonContainerAdvancedControl(controlType, common, options = {}) {
+  return {
+    id: `event_portfolio_${String(controlType).replace(/[^a-z0-9]+/gi, "_").toLowerCase()}_advanced`,
+    controlType,
+    attrs: { common },
+    ...options,
+  };
+}
+
+function zeroBox() {
+  return [null, { top: 0, right: 0, bottom: 0, left: 0 }];
 }
 
 function action(name, width, height) {

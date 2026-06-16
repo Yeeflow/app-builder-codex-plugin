@@ -58,6 +58,20 @@ Use snake_case Yeeflow attrs such as `align_items` and `justify_content`. Do not
 
 Use Container controls for visual composition rows/cards. Use Grid only for a real data grid, not for card composition, filter/action toolbars, or KPI card internals.
 
+Container is a special layout control. Container width, height, direction, alignment, flex layout, and wrap use `attrs.style`. Most non-Container controls use Advanced-tab `attrs.common` properties for runtime-effective positioning, sizing, spacing, border, hover, shadow, and background. Do not apply Container `attrs.style.width` or `attrs.style.widthtype` rules to non-Container controls as runtime width proof.
+
+For non-Container controls:
+
+- full width uses `attrs.common.positioning.widthtype = [null, "1"]`
+- inline width uses `attrs.common.positioning.widthtype = [null, "2"]`
+- custom width uses `attrs.common.positioning.widthtype = [null, "3"]` plus `attrs.common.positioning.width` and `attrs.common.positioning.widthu`
+- margin and padding use `attrs.common.margin` and `attrs.common.padding`
+- normal border, radius, and shadow use `attrs.common.border.normal`
+- hover border and shadow use `attrs.common.border.hover`
+- background color, image, hover, and gradient metadata use `attrs.common.background`
+
+Designer-backed gradient backgrounds support two colors from declared metadata. More complex gradients or custom background effects require explicit custom CSS evidence before generation.
+
 ## Filter/Action Row Golden Pattern
 
 The Event Portfolio filter/action row should be implemented with Container controls:
@@ -95,7 +109,7 @@ Filters must be real Yeeflow Data Filter controls:
 
 Do not simulate filter controls with static Text or decorative containers. Visible filters without target consumption are not functional UI proof.
 
-The fixed `180px` width belongs to the Data Filter control, not to the wrapper Container. Wrapper Containers are hierarchy holders only: they should remain inline/default-height and must not fake the Data Filter's width or height. When decoded package evidence is available, validate the actual decoded `Resource.attrs` shape for the row, group, wrapper, and Data Filter controls before claiming control-property fidelity.
+The fixed `180px` width belongs to the Data Filter control, not to the wrapper Container. Wrapper Containers are hierarchy holders only: they should remain inline/default-height and must not fake the Data Filter's width or height. Data Filter is a non-Container control, so its runtime-effective fixed width must use `attrs.common.positioning.widthtype = [null, "3"]`, `attrs.common.positioning.width = [null, 180]`, and `attrs.common.positioning.widthu = [null, "px"]`; `attrs.common.sizing` can constrain the control but does not replace positioning width. When decoded package evidence is available, validate the actual decoded `Resource.attrs` shape for the row, group, wrapper, and Data Filter controls before claiming control-property fidelity.
 
 ### Data Filter Dropdown Visual Fidelity
 
@@ -115,6 +129,8 @@ Dropdown visual fidelity must be checked across three layers:
 3. dropdown panel layer: `attrs.dropdown.body` defines panel radius and shadow.
 
 Unknown Data Filter property paths remain review-required unless they are product-catalog-backed or extension-backed by redacted export/runtime evidence.
+
+The Data Filter dropdown visual patterns also require `data-filter.dropdown.runtime-effective-custom-180px-width`: the runtime-effective 180px width is the non-Container Advanced-tab custom width under `attrs.common.positioning`, not a wrapper width and not a Container-style `attrs.style.width` shortcut.
 
 ### Native Filter Icon Fidelity
 
@@ -237,6 +253,18 @@ Finding codes include:
 - `NAVIGATOR_LABEL_MISSING`
 - `NAVIGATOR_LABEL_GENERIC`
 - `NAVIGATOR_LABEL_MISMATCH`
+- `NON_CONTAINER_WIDTH_MODEL_MISMATCH`
+- `NON_CONTAINER_CUSTOM_WIDTH_MISSING`
+- `DATA_FILTER_RUNTIME_WIDTH_NOT_CUSTOM_POSITIONING`
+- `CONTAINER_WIDTH_MODEL_REQUIRED`
+- `CONTAINER_HEIGHT_MODEL_REQUIRED`
+- `COMMON_MARGIN_PADDING_MISSING`
+- `COMMON_BORDER_STYLE_MISSING`
+- `COMMON_BORDER_HOVER_SHADOW_MISSING`
+- `COMMON_BACKGROUND_STYLE_MISSING`
+- `COMMON_BACKGROUND_IMAGE_SHAPE_INVALID`
+- `COMMON_BACKGROUND_GRADIENT_TOO_COMPLEX`
+- `CONTAINER_RULE_APPLIED_TO_NON_CONTAINER`
 
 ## Future Work
 
