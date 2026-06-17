@@ -3425,6 +3425,9 @@ function validateCustomFormLayout(layout, fieldsByName, pathPrefix, report, layo
     issue(report, "error", "CUSTOM_FORM_RESOURCE_JSON_INVALID", "Custom form Resource is not valid JSON.", { title: layout.Title });
     return;
   }
+  if (!dashboardRootContentPaddingShape(form.attrs && form.attrs.container)) {
+    issue(report, generatorFinalSeverity(report), "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID", "Data-list custom form root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", { title: layout.Title, path: `${pathPrefix}.LayoutInResources[0].Resource.attrs.container` });
+  }
   for (const key of ["children", "attrs", "title", "filterVars", "ver", "tempVars"]) {
     if (form[key] === undefined) issue(report, report.mode === "generator" ? "error" : "warning", "CUSTOM_FORM_REQUIRED_KEY_MISSING", `Custom form Resource missing ${key}.`, { title: layout.Title, key });
   }

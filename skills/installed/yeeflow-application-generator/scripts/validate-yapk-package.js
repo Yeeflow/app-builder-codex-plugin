@@ -310,10 +310,27 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
   counts.fields += asArray(pkg.Fields).length;
   counts.layouts += asArray(pkg.Layouts).length;
   for (const [index, field] of asArray(pkg.Fields).entries()) validateField(field, `${path}.Fields[${index}]`, errors, warnings);
+  validateDataListCustomFormRootContentPadding(pkg, path, errors);
   validateNativeTitle(pkg.Fields, path, errors);
   validateDefaultViews(pkg, path, errors);
   validateChoiceSampleRows(pkg, path, errors);
   if ("Defs" in pkg) add(errors, "YAPK_CHILDS_USES_DEFS", "YAPK Childs items must use Fields, not YAP Defs.", { path: `${path}.Defs` });
+}
+
+function validateDataListCustomFormRootContentPadding(pkg, path, errors) {
+  for (const [layoutIndex, layout] of asArray(pkg.Layouts).entries()) {
+    if (String(layout?.Type ?? "") !== "1") continue;
+    for (const [resourceIndex, resource] of asArray(layout.LayoutInResources).entries()) {
+      const parsed = parseMaybeJson(resource?.Resource);
+      if (!parsed) continue;
+      if (!isDashboardRootContentPaddingShape(parsed.attrs?.container)) {
+        add(errors, "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID", "Data-list custom form root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", {
+          path: `${path}.Layouts[${layoutIndex}].LayoutInResources[${resourceIndex}].Resource.attrs.container`,
+          layout: layout.Title || null,
+        });
+      }
+    }
+  }
 }
 
 function storageFamilyForFieldName(fieldName) {

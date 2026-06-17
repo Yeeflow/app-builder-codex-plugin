@@ -17,6 +17,7 @@ const requiredPhrases = [
   "Summary/KPI controls require designer-shaped hidden Summary configuration",
   "Summary controls must bind real fields, filters, temp variables, `save_var` expression objects, layout-resource `Resource.ReportIds`, matching layout-resource `Resource.exts`, and layout-resource `Resource.tempVars`; top-level `Pages[].ReportIds` is optional compatibility metadata",
   "Dashboard/app page root content-area padding is a hard gate",
+  "Data-list custom form root content-area padding uses the same hard gate",
   "attrs.container.cw = \"2\"",
   "attrs.container.padding = [null, { top: \"--sp--s0\", right: \"--sp--s0\", bottom: \"--sp--s0\", left: \"--sp--s0\" }]",
   "Inner layout containers may keep intentional spacing",

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { pathToFileURL } from "node:url";
-import { addFinding, allControlsFromPages, collectPages, isObject, normalizePackage, readPackageLike, safePath, scalar, statusFromFindings } from "./lib/yeeflow-ui-hard-gate-utils.mjs";
+import { addFinding, allControlsFromPages, collectPages, extractLayoutResources, isObject, normalizePackage, readPackageLike, safePath, scalar, statusFromFindings } from "./lib/yeeflow-ui-hard-gate-utils.mjs";
 
 export const DASHBOARD_ROOT_ZERO_PADDING = Object.freeze({
   top: "--sp--s0",
@@ -34,6 +34,9 @@ export function inspectDashboardStyleShapes({ package: packagePath, strict = tru
   const pages = collectPages(pkg);
   for (const page of pages) {
     validateDashboardRootContentPadding(page, findings);
+  }
+  for (const form of collectDataListCustomForms(pkg)) {
+    validateDataListCustomFormRootContentPadding(form, findings);
   }
   for (const item of allControlsFromPages(pages)) {
     const attrs = item.control.attrs || {};
@@ -68,6 +71,14 @@ export function inspectDashboardStyleShapes({ package: packagePath, strict = tru
 }
 
 export function normalizeDashboardRootContentPadding(resourceRoot) {
+  return normalizeRootContentPadding(resourceRoot);
+}
+
+export function normalizeDataListCustomFormRootContentPadding(resourceRoot) {
+  return normalizeRootContentPadding(resourceRoot);
+}
+
+function normalizeRootContentPadding(resourceRoot) {
   if (!isObject(resourceRoot)) return resourceRoot;
   resourceRoot.attrs = isObject(resourceRoot.attrs) ? resourceRoot.attrs : {};
   resourceRoot.attrs.container = isObject(resourceRoot.attrs.container) ? resourceRoot.attrs.container : {};
@@ -92,6 +103,44 @@ function validateDashboardRootContentPadding(page, findings) {
       });
     }
   });
+}
+
+function validateDataListCustomFormRootContentPadding(form, findings) {
+  form.roots.forEach((root, index) => {
+    const container = root?.attrs?.container;
+    const cw = container?.cw;
+    const padding = container?.padding;
+    const valid = cw === "2" && isRequiredDashboardRootPadding(padding);
+    if (!valid) {
+      addFinding(findings, "error", "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID", "Data-list custom form root Resource must set attrs.container.cw = \"2\" and attrs.container.padding to the exact token-array zero-padding shape [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy the form root content-area gate.", {
+        list: form.listTitle,
+        layout: form.title,
+        pointer: `${form.path}.LayoutInResources[${index}].Resource.attrs.container`,
+        cw: scalar(cw),
+        paddingShape: describePaddingShape(root?.attrs),
+      });
+    }
+  });
+}
+
+function collectDataListCustomForms(pkg) {
+  const forms = [];
+  for (const [childIndex, child] of pkg.children.entries()) {
+    const listTitle = scalar(child.list.Title || child.list.Name || child.list.DisplayName || `Child ${childIndex + 1}`);
+    for (const [layoutIndex, layout] of child.layouts.entries()) {
+      if (scalar(layout.Type || layout.type) !== "1") continue;
+      forms.push({
+        childIndex,
+        layoutIndex,
+        listTitle,
+        title: scalar(layout.Title || layout.Name || `Custom form ${layoutIndex + 1}`),
+        path: `${pkg.raw?.Data ? "Data." : ""}Childs[${childIndex}].Layouts[${layoutIndex}]`,
+        layout,
+        roots: extractLayoutResources(layout),
+      });
+    }
+  }
+  return forms;
 }
 
 function isDashboardPage(page) {

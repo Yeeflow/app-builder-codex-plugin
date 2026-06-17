@@ -150,9 +150,11 @@ for (const findingCode of [
 const dashboardStyleInspector = fs.readFileSync(path.join(ROOT, "scripts/inspect-dashboard-style-shapes.mjs"), "utf8");
 for (const phrase of [
   "DASHBOARD_ROOT_CONTENT_PADDING_INVALID",
+  "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID",
   "attrs.container.cw = \\\"2\\\"",
   "--sp--s0",
   "normalizeDashboardRootContentPadding",
+  "normalizeDataListCustomFormRootContentPadding",
 ]) {
   assert.match(dashboardStyleInspector, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `dashboard style inspector includes root padding gate phrase: ${phrase}`);
 }
