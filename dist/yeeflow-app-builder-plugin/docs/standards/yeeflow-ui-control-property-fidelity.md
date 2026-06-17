@@ -385,6 +385,22 @@ Supplier-derived full-page fidelity requires real Yeeflow controls and bindings:
 
 The Supplier validator is `scripts/inspect-supplier-runtime-design-fidelity.mjs`; regression coverage is in `scripts/test-supplier-runtime-design-fidelity-gates.mjs`.
 
+## Full-Page Design Blueprint Workflow
+
+Customer Support Case Triage training adds a staged full-application generation gate. A canonical page design must be a full-page implementation artifact, not only a first-viewport mockup. Each per-page `.design.png` must show every planned section, lower-page region, table/form/card/filter/action/detail area, and page end unless the page truly has no below-fold content. SVG source files and `00-design-board.png` may support review but cannot replace canonical per-page PNGs.
+
+Before Yeeflow resource generation, every page must have a page implementation blueprint with page purpose, selected layout/chrome, full section list, design-to-control mapping, control hierarchy, control type, `id`, semantic `nv_label`, parent/child relationships, exact Yeeflow property paths, style rules, bindings, Summary/KPI aggregation, Data Filter variables and target consumption, Collection/detail links, Dynamic user/person bindings, progress/status/badge bindings, action metadata, and a runtime proof plan. Every property path must validate against the normalized control-property registry or the evidence-backed extension registry.
+
+After resource generation, decoded resource parity validation must prove that every blueprint section/control/type/property/binding/action/link exists and that no design element was replaced with static placeholder text or raw variable output. Package/sign/upgrade cannot start until functional spec, app plan, full-page design images, blueprint validation, control-property contract validation, decoded resource parity, and local hard gates are complete. Runtime proof cannot claim success until Chrome/runtime evidence exists.
+
+Use:
+
+- `scripts/inspect-full-page-design-artifacts.mjs`
+- `scripts/inspect-page-implementation-blueprint.mjs`
+- `scripts/compare-blueprint-to-decoded-resource.mjs`
+
+Regression coverage is in `scripts/test-full-page-design-blueprint-generation-gates.mjs`.
+
 Supplier runtime/design finding codes include:
 
 - `RUNTIME_LISTSET_ID_MISMATCH`

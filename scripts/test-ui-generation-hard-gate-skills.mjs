@@ -53,6 +53,9 @@ const requiredValidatorNames = [
   "scripts/inspect-grid-table-quality.mjs",
   "scripts/inspect-yapk-upgrade-app-identity.mjs",
   "scripts/inspect-supplier-runtime-design-fidelity.mjs",
+  "scripts/inspect-full-page-design-artifacts.mjs",
+  "scripts/inspect-page-implementation-blueprint.mjs",
+  "scripts/compare-blueprint-to-decoded-resource.mjs",
   "scripts/decode-yapk-tolerant-brotli.mjs",
 ];
 
@@ -189,6 +192,13 @@ for (const currentSkillPath of skillRoots.map(({ root }) => skillPath(root, newS
     "pixelComparison",
     "Schema validation is not UI proof",
     "Signing, install, or upgrade API acceptance is not runtime proof",
+    "Full-application generation must follow the full-page design blueprint workflow",
+    "canonical design image must be a full-page implementation artifact",
+    "inspect-full-page-design-artifacts.mjs",
+    "inspect-page-implementation-blueprint.mjs",
+    "compare-blueprint-to-decoded-resource.mjs",
+    "Every property path must be product-catalog-backed or extension-backed",
+    "Runtime success cannot be claimed until Chrome/runtime evidence exists",
   ]) {
     assert.equal(normalizedContent.includes(phrase.toLowerCase()), true, `${currentSkillPath} missing Supplier fidelity phrase: ${phrase}`);
   }

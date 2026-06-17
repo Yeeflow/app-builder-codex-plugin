@@ -1,0 +1,79 @@
+{
+  "pages": [
+    {
+      "pageSlug": "case-triage-dashboard",
+      "purpose": "Triage support cases by priority, owner, SLA, and next action.",
+      "layout": "application-layout-2-horizontal-nav",
+      "sections": [
+        "Case KPIs",
+        "Filters",
+        "Open Cases Table",
+        "Case Detail Form"
+      ],
+      "runtimeProofPlan": "Open the decoded ListSetID runtime URL, capture Chrome evidence, and compare against the canonical per-page PNG.",
+      "designElements": [
+        {
+          "id": "open-cases-table",
+          "controlId": "cases_table"
+        },
+        {
+          "id": "new-case-button",
+          "controlId": "new_case_action"
+        }
+      ],
+      "controls": [
+        {
+          "id": "case_triage_root",
+          "type": "container",
+          "nv_label": "case_triage_root",
+          "root": true,
+          "properties": [
+            {
+              "path": "attrs.style.widthtype"
+            },
+            {
+              "path": "attrs.style.direction"
+            }
+          ]
+        },
+        {
+          "id": "cases_table",
+          "type": "collection",
+          "nv_label": "cases_table",
+          "parentId": "case_triage_root",
+          "requiresBinding": true,
+          "binding": {
+            "AppID": "app-redacted",
+            "ListSetID": "listset-redacted",
+            "ListID": "cases-list-redacted"
+          },
+          "properties": [
+            {
+              "path": "attrs.data.list.ListID"
+            }
+          ]
+        },
+        {
+          "id": "new_case_action",
+          "type": "container",
+          "nv_label": "new_case_action",
+          "parentId": "case_triage_root",
+          "requiresAction": true,
+          "action": {
+            "action-type": "5",
+            "list": {
+              "AppID": "app-redacted",
+              "ListSetID": "listset-redacted",
+              "ListID": "cases-list-redacted"
+            }
+          },
+          "properties": [
+            {
+              "path": "attrs.action-type"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
