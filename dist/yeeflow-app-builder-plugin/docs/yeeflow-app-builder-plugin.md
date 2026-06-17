@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.54
+- Version: 0.6.55
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.6.55` releases dashboard and data-list custom form root padding hard gates. Dashboard/app page roots now require `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`; data-list custom form roots require the same exact token-array padding shape. Scalar zero, numeric object zero, numeric array zero, `attrs.common.padding` alone, `attrs.style.padding` alone, and missing or wrong `attrs.container.cw` are rejected. Upgrade and patch flows normalize dashboard page roots and data-list custom form roots before signing or installing. Inner containers, cards, grids, and forms may keep intentional spacing. Approval form roots are intentionally unchanged because existing evidence is mixed and needs a separate export/runtime proof task.
 
 Version `0.6.54` releases Summary/filter/collection/full-page fidelity gates. It keeps Summary controls as normal `type: "summary"` controls rather than invalid `_ak_c` clipboard wrappers; requires page `Resource.exts[]` Summary pivot metadata with `AppID`, `ListID`, `ListSetID`, and nonempty `settings.values[]`; requires COUNT Summary settings to use `ListDataID`; requires top-level and attrs-level `save_var` / `saveVar`; requires hidden Summary source hosts to hide on desktop, tablet, and mobile with `display:none`; and requires visible KPI values to bind to Summary temp variables instead of rendering raw variables. The release also reinforces real Data Filter controls instead of static Text, Add/New Containers with `action-type = "5"` and target list metadata, Collection grid-table column gap `0`, resolved collection links, progress controls instead of raw formula text, Dynamic user controls bound to User/identity fields, and field type compatibility gates. This release does not claim pixel-perfect visual diffing, automatic screenshot parsing, or live runtime proof before install/cache smoke and focused runtime testing are performed.
 
