@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.6.57
+
+- Release horizontal navigation active-state runtime gates.
+- Do not treat `ListSet.LayoutView.attrs["navigator-menu"]` active-state metadata as runtime proof.
+- Do not treat `LayoutView.customcss` as runtime-injected proof without DOM/style tag evidence.
+- Require hidden `codein` CSS injectors for app chrome styling to be placed inside rendered page containers such as `Content`, not directly under the visual resource root.
+- Require runtime proof that the style tag exists, the intended selector exists, `.ak-listset-new-navigation-item.active` exists, the active background is transparent, active text is blue, and the active bottom border is blue, solid, and nonzero.
+- Require a fresh top-level cache-busted load after upgrade when app chrome or page resources changed.
+- Reinforce that package schema validation, signing, upgrade API acceptance, ID stability, decoded CSS presence, and decoded control presence are not enough to claim app chrome style success.
+- Keep Supplier runtime/design and validation-layer proof gates from `0.6.56` as baseline behavior and keep dashboard/data-list custom form root-padding gates from `0.6.55` as baseline behavior.
+- Keep approval-form root padding deferred because evidence remains mixed.
+- Confirm this release does not claim pixel-perfect comparison or live runtime proof before actual runtime evidence exists.
+
 ## 0.6.56
 
 - Release Supplier runtime/design fidelity gates and Supplier validation-layer proof gates.

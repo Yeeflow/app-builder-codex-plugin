@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+## 0.6.57
+
+- Release horizontal navigation active-state runtime gates.
+- Do not treat `ListSet.LayoutView.attrs["navigator-menu"]` active-state metadata as runtime proof.
+- Do not treat `LayoutView.customcss` as runtime-injected proof without DOM/style tag evidence.
+- Require hidden `codein` CSS injectors for app chrome styling to be placed inside rendered page containers such as `Content`, not directly under the visual resource root.
+- Require runtime proof that the style tag exists, the intended selector exists, `.ak-listset-new-navigation-item.active` exists, the active background is transparent, active text is blue, and the active bottom border is blue, solid, and nonzero.
+- Require a fresh top-level cache-busted load after upgrade when app chrome or page resources changed.
+- Reinforce that package schema validation, signing, upgrade API acceptance, ID stability, decoded CSS presence, and decoded control presence are not enough to claim app chrome style success.
+- Keep Supplier runtime/design and validation-layer proof gates from `0.6.56` as baseline behavior and keep dashboard/data-list custom form root-padding gates from `0.6.55` as baseline behavior.
+- Keep approval-form root padding deferred because evidence remains mixed.
+- Confirm this release does not claim pixel-perfect comparison or live runtime proof before actual runtime evidence exists.
+
+## 0.6.56
+
+- Release Supplier runtime/design fidelity gates and Supplier validation-layer proof gates.
+- Add runtime proof gates for installed application `ListSetID` and runtime URL proof, including rejection of install-log IDs as runtime `ListSetID` proof.
+- Require design section mapping, KPI count/design mapping, page background and chrome consistency, real Data Filter bindings, filter/action row `nv_label`, Collection source/detail-link validation, real analytics controls for chart sections, progress/status treatment, and Summary/KPI raw-variable prevention.
+- Require one canonical PNG per planned page, reject SVG files and design boards as replacements for canonical per-page PNGs, and validate design manifest page count, order, and name mapping.
+- Require layered proof reporting across `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison`.
+- Prevent false proof claims: schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, design-control mapping must be explicit, and the control-binding graph must be complete.
+- Keep the root padding hard gates from `0.6.55` as baseline behavior and keep approval-form root padding deferred because evidence remains mixed.
+- Confirm this release does not claim pixel-perfect comparison or live runtime proof unless runtime screenshots/pixel comparison and browser evidence are actually run.
+
+## 0.6.55
+
+- Release dashboard and data-list custom form root padding hard gates.
+- Require dashboard/app page roots to use `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`.
+- Require data-list custom form roots under `Data.Childs[].Layouts[].LayoutInResources[].Resource` and `Childs[].Layouts[].LayoutInResources[].Resource` to use the same exact token-array zero-padding shape.
+- Reject invalid root padding shapes including scalar zero, numeric object zero, numeric array zero, `attrs.common.padding` alone, `attrs.style.padding` alone, and missing or wrong `attrs.container.cw`.
+- Normalize dashboard page roots and data-list custom form roots during upgrade/patch flows before signing or installing.
+- Keep intentional spacing allowed on inner containers, cards, grids, and forms.
+- Defer approval form root padding hard gates because existing approval form evidence is mixed and needs a separate export/runtime proof task.
+
 ## 0.6.54
 
 - Release Summary/filter/collection/full-page fidelity gates.
