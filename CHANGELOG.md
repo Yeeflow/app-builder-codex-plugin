@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.55
+
+- Release dashboard and data-list custom form root padding hard gates.
+- Require dashboard/app page roots to use `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`.
+- Require data-list custom form roots under `Data.Childs[].Layouts[].LayoutInResources[].Resource` and `Childs[].Layouts[].LayoutInResources[].Resource` to use the same exact token-array zero-padding shape.
+- Reject invalid root padding shapes including scalar zero, numeric object zero, numeric array zero, `attrs.common.padding` alone, `attrs.style.padding` alone, and missing or wrong `attrs.container.cw`.
+- Normalize dashboard page roots and data-list custom form roots during upgrade/patch flows before signing or installing.
+- Keep intentional spacing allowed on inner containers, cards, grids, and forms.
+- Defer approval form root padding hard gates because existing approval form evidence is mixed and needs a separate export/runtime proof task.
+
 ## 0.6.54
 
 - Release Summary/filter/collection/full-page fidelity gates.
