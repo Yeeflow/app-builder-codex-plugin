@@ -210,6 +210,22 @@ KPI visible value controls must use `formatNumber(...)` or an equivalent proven 
 
 A styled action Container is not enough for behavior fidelity. Action-looking Containers must include real Yeeflow action metadata. Add-list action Containers require `action-type = "5"`, target list metadata with `AppID`, `ListSetID`, and `ListID`, a visible child Heading/Text label, fixed-size styling when declared by the design, and semantic `nv_label` for designer Navigator traceability. Non-action decorative Containers do not need action metadata when they are not marked or styled as actions.
 
+## Summary, Filter, Collection Link, And Full-App Page Fidelity
+
+Full-app page generation must generalize the proven Event Portfolio patterns to every generated page, not only the first or best-tested page. Planning Workbench, Registration and Leads, Budget Review, Post-event Reporting, Admin, and future pages must run the same Summary, filter, action, Collection, progress, Dynamic user, and KPI formatting checks before high-quality UI or content-fidelity claims.
+
+Summary controls used as KPI/source metrics must remain normal page child controls with `type: "summary"`. Do not insert Designer clipboard wrapper objects such as `{ "_ak_c": ..., "_ak_c_opt": ... }` into page resource `children`; those wrappers can materialize as undefined controls in Designer. Summary pivot metadata belongs in page resource `exts`, not as nested clipboard options.
+
+Each Summary source control must have a matching page resource `exts[]` entry where `category = "___Pivot___"`, `key = "summary"`, `i` equals the Summary control id, `attr.AppID`, `attr.ListID`, and `attr.ListSetID` are present, and `attr.settings.values[]` is nonempty. COUNT Summary settings must use `{ "fieldName": "ListDataID", "func": "COUNT", "id": "ListDataID" }`. SUM and AVG Summary settings must use the selected numeric field for `fieldName` and `id`.
+
+Summary controls must include both top-level and attrs-level temp variable metadata: `save_var`, `saveVar`, `attrs.save_var`, and `attrs.saveVar`. Visible KPI value controls must bind to those Summary temp variables and must not render raw temp variable names, formulas, or generated binding tokens as visible text.
+
+Summary source controls must live inside a hidden metric data source Container. The host must use `attrs.common.hide = [null, true, true, true]` and `attrs.style.display = "none"`. The hidden host name, label, and `nv_label` must avoid the word `Summary` so validators and Designer heuristics do not misclassify the host as a Summary control.
+
+Page-wide filter/action/table fidelity is required on every generated page. Expected filters must be real Data Filter controls, not static Text. Filter variables must be consumed by target Summary, Collection, or List controls. Visual Add/New action Containers must include real add-list behavior with `action-type = "5"`, target list metadata, a child Heading/Text label, and semantic `nv_label`.
+
+Collection grid-table headers and item grids must use column gap `0`, align items center, and preserve header/body cell padding parity. Collection row links must resolve to valid form options; raw unresolved IDs are not enough and can open blank slide-in pages. Progress-like columns must use progress controls driven by numeric fields and must not render raw formula text. Dynamic user/person columns must bind to User/identity fields. If a generated page needs a field-type change, the report must identify the minimal data-list schema change required.
+
 Final UI reports must separate generator/spec gaps, runtime rendering gaps, data-value gaps, and action behavior gaps. Passing layout, navigation, or control-property checks does not automatically prove content fidelity.
 
 ## Runtime Proof And Artifact Boundaries

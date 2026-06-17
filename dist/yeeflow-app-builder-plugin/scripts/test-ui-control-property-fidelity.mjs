@@ -83,6 +83,21 @@ function run() {
   testKpiLongRawDecimalFails();
   testKpiLargeNumberUnformattedFails();
   testKpiRawVariableValueFails();
+  testFullPageSummaryFidelityPasses();
+  testSummaryWrapperObjectFails();
+  testSummaryPivotExtMissingFails();
+  testSummarySettingsValuesMissingFails();
+  testSummaryCountFieldFails();
+  testSummaryTopLevelSaveVarFails();
+  testSummaryHiddenHostVisibleFails();
+  testSummaryHiddenHostNameMisclassifiedFails();
+  testVisibleKpiNotBoundToSummaryFails();
+  testExpectedFilterStaticTextFails();
+  testAddNewActionMissingActionTypeFails();
+  testCollectionGridGapFails();
+  testCollectionLinkRawIdFails();
+  testProgressRawFormulaNewCodeFails();
+  testDynamicUserNonUserFieldNewCodeFails();
   testKnowledgeBaseBoundaryReported();
   testRadioFilterDropdownVisualPatternPasses();
   testRadioFilterMissingInputStyleFails();
@@ -596,6 +611,99 @@ function testKpiRawVariableValueFails() {
   spec.kpiCards = [richKpiCard("Planned Events")];
   spec.kpiCards[0].summaryValue.visibleText = "__temp_event_count";
   expectFail("Fail: raw variable name rendered in KPI value", inspectFixture("kpi-raw-variable-value.json", spec), "SUMMARY_VALUE_RAW_VARIABLE_VISIBLE");
+}
+
+function testFullPageSummaryFidelityPasses() {
+  const report = inspectFixture("full-page-summary-fidelity-pass.json", fullPageSpec());
+  assert.equal(report.status, "pass", JSON.stringify(report.findings, null, 2));
+  cases.push("Pass: valid page with Summary, filters, action container, grid-table, progress, Dynamic user, and KPI formatting");
+}
+
+function testSummaryWrapperObjectFails() {
+  const spec = fullPageSpec();
+  spec.pageResource.children.push({ _ak_c: { id: "wrapped_summary", type: "summary" }, _ak_c_opt: {} });
+  expectFail("Fail: Summary represented as _ak_c wrapper child", inspectFixture("summary-wrapper-object.json", spec), "SUMMARY_CONTROL_WRAPPER_OBJECT_INVALID");
+}
+
+function testSummaryPivotExtMissingFails() {
+  const spec = fullPageSpec();
+  spec.pageResource.exts = [];
+  expectFail("Fail: Summary control lacks resource-level exts", inspectFixture("summary-pivot-missing.json", spec), "SUMMARY_PIVOT_EXT_MISSING");
+}
+
+function testSummarySettingsValuesMissingFails() {
+  const spec = fullPageSpec();
+  spec.pageResource.exts[0].attr.settings.values = [];
+  expectFail("Fail: Summary settings.values missing", inspectFixture("summary-values-missing.json", spec), "SUMMARY_PIVOT_SETTINGS_VALUES_MISSING");
+}
+
+function testSummaryCountFieldFails() {
+  const spec = fullPageSpec();
+  spec.pageResource.exts[0].attr.settings.values[0] = { fieldName: "EventName", func: "COUNT", id: "EventName" };
+  expectFail("Fail: COUNT Summary uses a business/display field instead of ListDataID", inspectFixture("summary-count-field.json", spec), "SUMMARY_COUNT_FIELD_MUST_BE_LISTDATAID");
+}
+
+function testSummaryTopLevelSaveVarFails() {
+  const spec = fullPageSpec();
+  delete spec.summaryControls[0].save_var;
+  delete spec.summaryControls[0].saveVar;
+  expectFail("Fail: Summary missing top-level save_var / saveVar", inspectFixture("summary-top-level-save-var.json", spec), "SUMMARY_SAVE_VAR_TOP_LEVEL_MISSING");
+}
+
+function testSummaryHiddenHostVisibleFails() {
+  const spec = fullPageSpec();
+  spec.summaryHiddenHost.attrs.common.hide = [null, true, false, true];
+  expectFail("Fail: Summary source container visible on desktop/tablet/mobile", inspectFixture("summary-host-visible.json", spec), "SUMMARY_HIDDEN_HOST_NOT_HIDDEN_ALL_DEVICES");
+}
+
+function testSummaryHiddenHostNameMisclassifiedFails() {
+  const spec = fullPageSpec();
+  spec.summaryHiddenHost.name = "Planning Workbench Summary Sources";
+  expectFail("Fail: hidden host name/label/nv_label contains Summary and is misclassified", inspectFixture("summary-host-name.json", spec), "SUMMARY_HIDDEN_HOST_NAME_MISCLASSIFIED");
+}
+
+function testVisibleKpiNotBoundToSummaryFails() {
+  const spec = fullPageSpec();
+  spec.visibleKpiValues[0].summaryTempVar = "__temp_other";
+  expectFail("Fail: visible KPI value is not bound to Summary temp variable", inspectFixture("visible-kpi-unbound-summary.json", spec), "VISIBLE_KPI_VALUE_NOT_BOUND_TO_SUMMARY_TEMP_VAR");
+}
+
+function testExpectedFilterStaticTextFails() {
+  const spec = fullPageSpec();
+  spec.dataFilters[0].controlType = "Text";
+  spec.dataFilters[0].expectedFilterBehavior = true;
+  expectFail("Fail: Data Filter expected but static Text generated", inspectFixture("expected-filter-static-text.json", spec), "DATA_FILTER_EXPECTED_STATIC_TEXT_FOUND");
+}
+
+function testAddNewActionMissingActionTypeFails() {
+  const spec = fullPageSpec();
+  delete spec.actions[0].actionType;
+  expectFail("Fail: Add/New action Container missing action-type = 5", inspectFixture("add-action-missing-type.json", spec), "ACTION_CONTAINER_ACTION_TYPE_MISSING");
+}
+
+function testCollectionGridGapFails() {
+  const spec = fullPageSpec();
+  spec.gridTables[0].headerColumnGap = 16;
+  spec.gridTables[0].itemColumnGap = 16;
+  expectFail("Fail: collection grid-table column gap is 16 instead of 0", inspectFixture("grid-gap-16.json", spec), "GRID_TABLE_COLUMN_GAP_MISMATCH");
+}
+
+function testCollectionLinkRawIdFails() {
+  const spec = fullPageSpec();
+  spec.gridTables[0].collectionLinks = [{ targetFormId: "SYNTHETIC_RAW_FORM_ID", rawIdOnly: true }];
+  expectFail("Fail: collection link target is unresolved raw ID", inspectFixture("collection-link-raw-id.json", spec), "COLLECTION_LINK_FORM_UNRESOLVED");
+}
+
+function testProgressRawFormulaNewCodeFails() {
+  const spec = fullPageSpec();
+  spec.gridTables[0].columns[0].visibleText = "{{Registration Count / 600}}";
+  expectFail("Fail: progress column renders raw formula text", inspectFixture("progress-raw-formula-new-code.json", spec), "PROGRESS_COLUMN_RAW_FORMULA_RENDERED");
+}
+
+function testDynamicUserNonUserFieldNewCodeFails() {
+  const spec = fullPageSpec();
+  spec.gridTables[0].columns[1].boundFieldType = "SingleLineText";
+  expectFail("Fail: Dynamic user control bound to non-User field", inspectFixture("dynamic-user-non-user-field-new-code.json", spec), "DYNAMIC_USER_BOUND_TO_NON_USER_FIELD");
 }
 
 function testKnowledgeBaseBoundaryReported() {
@@ -1318,6 +1426,92 @@ function collectionGridTable() {
       { id: "event_pipeline_cell_owner", controlType: "dynamic-user", nv_label: "event_pipeline_cell_owner" },
     ],
   };
+}
+
+function fullPageSpec() {
+  const spec = goodSpec();
+  const summary = {
+    id: "planning_total_events_summary",
+    type: "summary",
+    controlType: "summary",
+    hiddenHostId: "planning_metric_data_sources",
+    attrs: {
+      save_var: { exprType: "variable", name: "__temp_planning_total_events" },
+      saveVar: "__temp_planning_total_events",
+      data: {
+        list: {
+          AppID: 41,
+          ListID: "events",
+          ListSetID: "marketing_event_management",
+        },
+        func: "COUNT",
+      },
+    },
+    save_var: { exprType: "variable", name: "__temp_planning_total_events" },
+    saveVar: "__temp_planning_total_events",
+  };
+  spec.summaryHiddenHost = {
+    id: "planning_metric_data_sources",
+    type: "container",
+    controlType: "container",
+    name: "Planning Workbench Metric Data Sources",
+    label: "Planning Workbench Metric Data Sources",
+    nv_label: "planning_metric_data_sources",
+    attrs: {
+      common: { hide: [null, true, true, true] },
+      style: { display: "none" },
+    },
+    children: [summary.id],
+  };
+  spec.summaryControls = [summary];
+  spec.pageResource = {
+    children: [spec.summaryHiddenHost],
+    exts: [
+      {
+        category: "___Pivot___",
+        key: "summary",
+        i: summary.id,
+        attr: {
+          AppID: 41,
+          ListID: "events",
+          ListSetID: "marketing_event_management",
+          settings: {
+            values: [
+              {
+                fieldName: "ListDataID",
+                func: "COUNT",
+                id: "ListDataID",
+              },
+            ],
+          },
+        },
+      },
+    ],
+  };
+  spec.visibleKpiValues = [
+    {
+      id: "planning_total_events_value",
+      summaryTempVar: "__temp_planning_total_events",
+      visibleText: "24",
+    },
+  ];
+  spec.gridTables = [collectionGridTable()];
+  spec.gridTables[0].headerColumnGap = 0;
+  spec.gridTables[0].itemColumnGap = 0;
+  spec.gridTables[0].collectionLinks = [
+    {
+      targetFormId: "event_details_form",
+      formOptionName: "Event Details",
+      resolved: true,
+    },
+  ];
+  spec.actions = [addListActionContainer()];
+  spec.kpiCards = [richKpiCard("Approved Budget")];
+  spec.kpiCards[0].requiresValueFormatting = true;
+  spec.kpiCards[0].requiresCompactNumber = true;
+  spec.kpiCards[0].valueExpression = "formatNumber(value, 1, true) & 'K'";
+  spec.kpiCards[0].visibleValue = "225K";
+  return spec;
 }
 
 function inspectFixture(name, spec) {
