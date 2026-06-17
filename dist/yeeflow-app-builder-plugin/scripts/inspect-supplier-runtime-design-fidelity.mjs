@@ -25,6 +25,7 @@ export function inspectSupplierRuntimeDesignFidelity({
   const runtimeProof = runtimeProofPath ? readOptionalJson(runtimeProofPath, findings, "RUNTIME_PROOF_READ_FAILED") : pkg.runtimeProof;
   const supplier = isObject(pkg.supplierFidelity) ? pkg.supplierFidelity : pkg;
 
+  validateProofLayers(pkg, supplier, runtimeProof || supplier.runtimeProof, findings);
   validateRuntimeProof(runtimeProof || supplier.runtimeProof, supplier, findings);
   validateDesignImplementation(supplier.design || supplier.designContract, supplier.implementation || supplier, findings);
   validateFilters(supplier.filters || supplier.implementation?.filters, findings);
@@ -48,9 +49,11 @@ function validateRuntimeProof(proof, supplier, findings) {
   if (!proof) return;
   const expectedAppId = scalar(proof.expectedAppId || proof.AppID || supplier?.expectedAppId || "41");
   const expectedListSetId = scalar(proof.expectedListSetId || proof.installedListSetId || supplier?.expectedListSetId || supplier?.ListSetID);
+  const decodedListSetId = scalar(proof.decodedListSetId || proof.decodedListSetID || supplier?.decodedListSetId || supplier?.decodedListSetID);
   const finalUrl = scalar(proof.finalUrl || proof.url || proof.runtimeUrl);
   const pageTitle = scalar(proof.pageTitle || proof.runtimePageTitle || proof.title);
   const installLogIds = asArray(proof.installLogIds || proof.operationIds || proof.installOperationIds).map(scalar).filter(Boolean);
+  const runtimeUrlListSetId = parseRuntimeListSetId(finalUrl);
 
   if (finalUrl && /#\/(?:$|designer|admin|login|app-designer|workflow-designer)/i.test(finalUrl)) {
     addFinding(findings, "error", "RUNTIME_PROOF_LANDED_IN_DESIGNER", "Runtime proof landed on root, designer, admin, or login route instead of the application runtime URL.");
@@ -66,6 +69,12 @@ function validateRuntimeProof(proof, supplier, findings) {
       });
     }
   }
+  if (decodedListSetId && runtimeUrlListSetId && decodedListSetId !== runtimeUrlListSetId) {
+    addFinding(findings, "error", "DECODED_LISTSET_ID_NOT_RUNTIME_URL", "Runtime browser proof must use the decoded installed ListSetID URL, not an install log ID or unrelated ListSetID.", {
+      decodedListSetId,
+      runtimeUrlListSetId,
+    });
+  }
   if (installLogIds.some((id) => id && finalUrl.includes(id))) {
     addFinding(findings, "error", "INSTALL_LOG_ID_USED_AS_LISTSET_ID", "Install or upgrade operation IDs must not be used as the runtime ListSetID.");
   }
@@ -74,11 +83,83 @@ function validateRuntimeProof(proof, supplier, findings) {
   }
 }
 
+function validateProofLayers(pkg, supplier, proof, findings) {
+  const report = firstObject(supplier.validationReport, supplier.finalReport, pkg.validationReport, pkg.finalReport);
+  const layers = firstObject(supplier.proofLayers, pkg.proofLayers, report?.proofLayers, report?.layers);
+  const requiresLayeredProof = Boolean(
+    supplier.requiresLayeredProof ||
+    supplier.plan?.requiresLayeredProof ||
+    supplier.appPlan?.requiresLayeredProof ||
+    report?.requiresLayeredProof ||
+    layers ||
+    report?.overallStatus ||
+    report?.genericPass,
+  );
+  if (!requiresLayeredProof) return;
+
+  const requiredLayers = [
+    "schemaValidation",
+    "appPlanConformance",
+    "designContractValidation",
+    "controlBindingValidation",
+    "exactMetadataShapeValidation",
+    "idStabilityValidation",
+    "signVerify",
+    "installOrUpgrade",
+    "runtimeBrowserProof",
+    "pixelComparison",
+  ];
+
+  if (!isObject(layers)) {
+    addFinding(findings, "error", "VALIDATION_PROOF_LAYER_COLLAPSED", "Final validation reports must separate schema, design, control-binding, metadata-shape, ID stability, signing, install/upgrade, runtime browser, and pixel-comparison proof layers.");
+  } else {
+    for (const layer of requiredLayers) {
+      if (!(layer in layers)) {
+        addFinding(findings, "error", "VALIDATION_PROOF_LAYER_COLLAPSED", "Final validation reports must not collapse required proof layers into one generic pass.", { missingLayer: layer });
+      }
+    }
+  }
+
+  const schemaPassed = layerPassed(layers?.schemaValidation);
+  const signPassed = layerPassed(layers?.signVerify);
+  const installPassed = layerPassed(layers?.installOrUpgrade);
+  const designLayer = layers?.designContractValidation;
+  const controlLayer = layers?.controlBindingValidation;
+  const runtimeLayer = layers?.runtimeBrowserProof;
+  const pixelLayer = layers?.pixelComparison;
+
+  if ((report?.genericPass === true || report?.proofLayersCollapsed === true || report?.overallStatus === "pass") && (!isObject(layers) || requiredLayers.some((layer) => !(layer in layers)))) {
+    addFinding(findings, "error", "VALIDATION_PROOF_LAYER_COLLAPSED", "A generic pass cannot stand in for separate schema/sign/runtime/pixel proof layers.");
+  }
+  if (schemaPassed && (!layerPassed(designLayer) || !layerPassed(controlLayer) || !layerPassed(runtimeLayer) || !layerPassed(pixelLayer))) {
+    addFinding(findings, "error", "SCHEMA_PASS_USED_AS_UI_PROOF", "Package/schema validation does not prove design, control binding, runtime, or pixel correctness.");
+  }
+  if ((signPassed || installPassed || report?.runtimeProofSource === "api-acceptance") && !layerPassed(runtimeLayer)) {
+    addFinding(findings, "error", "API_ACCEPTANCE_USED_AS_RUNTIME_PROOF", "Signing, install, or upgrade API acceptance does not prove runtime browser correctness.");
+  }
+  if (!layerPassed(controlLayer) || layerIncomplete(controlLayer)) {
+    addFinding(findings, "error", "CONTROL_BINDING_GRAPH_INCOMPLETE", "Full E2E generation must validate the control binding graph before signing or installing.");
+  }
+  if (!layerPassed(designLayer) || layerIncomplete(designLayer)) {
+    addFinding(findings, "error", "DESIGN_CONTROL_MAPPING_MISSING", "Design sections and controls must be mapped to implementation controls before signing or installing.");
+  }
+
+  const decodedListSetId = scalar(layers?.idStabilityValidation?.decodedListSetId || proof?.decodedListSetId || supplier.decodedListSetId);
+  const runtimeUrl = scalar(layers?.runtimeBrowserProof?.runtimeUrl || layers?.runtimeBrowserProof?.finalUrl || proof?.finalUrl || proof?.runtimeUrl);
+  const runtimeUrlListSetId = parseRuntimeListSetId(runtimeUrl);
+  if (decodedListSetId && runtimeUrlListSetId && decodedListSetId !== runtimeUrlListSetId) {
+    addFinding(findings, "error", "DECODED_LISTSET_ID_NOT_RUNTIME_URL", "Decoded ListSetID must match the browser runtime URL ListSetID.");
+  }
+}
+
 function validateDesignImplementation(design = {}, impl = {}, findings) {
   const designSections = asArray(design.sections).map(normalizeName).filter(Boolean);
   const implSections = new Set(asArray(impl.sections).map(normalizeName).filter(Boolean));
   for (const section of designSections) {
-    if (!implSections.has(section)) addFinding(findings, "error", "DESIGN_SECTION_MISSING", "Every design section must map to implementation controls.", { section });
+    if (!implSections.has(section)) {
+      addFinding(findings, "error", "DESIGN_SECTION_MISSING", "Every design section must map to implementation controls.", { section });
+      addFinding(findings, "error", "DESIGN_CONTROL_MAPPING_MISSING", "Design sections and controls must be mapped to implementation controls before signing or installing.", { section });
+    }
   }
 
   const designKpis = asArray(design.kpis).map(normalizeName).filter(Boolean);
@@ -101,6 +182,7 @@ function validateDesignImplementation(design = {}, impl = {}, findings) {
     const actual = implCharts.find((candidate) => normalizeName(candidate.title || candidate.name) === title);
     if (!actual) {
       addFinding(findings, "error", "DESIGN_CHART_SECTION_NOT_IMPLEMENTED", "Required chart/table/filter sections from the design must not be dropped.", { chart: title });
+      addFinding(findings, "error", "DESIGN_CONTROL_MAPPING_MISSING", "Design sections and controls must be mapped to implementation controls before signing or installing.", { chart: title });
     } else if (expectedType && normalizeControlType(actual.controlType || actual.type) !== expectedType) {
       addFinding(findings, "error", "ANALYTICS_CONTROL_TYPE_MISMATCH", "Analytics control type must match the design/spec.", { chart: title });
     }
@@ -345,6 +427,25 @@ function hasAll(object, keys) {
 
 function hasFieldMetadata(field) {
   return isObject(field) && Boolean(scalar(field.FieldName || field.fieldName || field.Name || field.id));
+}
+
+function firstObject(...values) {
+  return values.find((value) => isObject(value));
+}
+
+function layerPassed(layer) {
+  if (typeof layer === "string") return normalizeName(layer) === "pass";
+  if (!isObject(layer)) return false;
+  return normalizeName(layer.status || layer.result || layer.verdict) === "pass";
+}
+
+function layerIncomplete(layer) {
+  return isObject(layer) && (layer.incomplete === true || layer.valid === false || layer.complete === false || layer.missing === true);
+}
+
+function parseRuntimeListSetId(url) {
+  const match = scalar(url).match(/#\/list-set\/[^/]+\/([^/?#]+)/i);
+  return match ? decodeURIComponent(match[1]) : "";
 }
 
 function safeLabel(value) {

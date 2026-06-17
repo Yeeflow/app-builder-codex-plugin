@@ -16,6 +16,21 @@ Reports should show:
 - API install or upgrade-apply
 - runtime/designer/manual proof
 
+For full end-to-end app generation and Supplier-like validation reports, use these explicit proof-layer keys:
+
+- `schemaValidation`
+- `appPlanConformance`
+- `designContractValidation`
+- `controlBindingValidation`
+- `exactMetadataShapeValidation`
+- `idStabilityValidation`
+- `signVerify`
+- `installOrUpgrade`
+- `runtimeBrowserProof`
+- `pixelComparison`
+
+`schemaValidation: pass` is not UI proof. `signVerify: pass` or `installOrUpgrade: pass` is not runtime proof. Runtime browser proof must open the decoded installed `#/list-set/{AppID}/{ListSetID}` URL, not an install log or operation ID. Pixel/design comparison must use canonical per-page PNG artifacts and must not be collapsed into schema, API, or runtime status.
+
 ## Signing
 
 HTTP 200 from a signing endpoint is not enough. A signed package should verify:

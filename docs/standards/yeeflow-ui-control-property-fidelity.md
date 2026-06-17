@@ -366,6 +366,8 @@ Before app generation starts for a designed Yeeflow application, create one cano
 
 Runtime proof must record the final URL and page title. The final URL must start with `#/list-set/{AppID}/{ListSetID}` for the installed application. Install logs, upgrade operation IDs, root routes, designer/admin/login routes, or unrelated ListSetIDs do not prove runtime app fidelity.
 
+Supplier validation-gap analysis adds a required proof-layer model for full end-to-end app generation. A final report must not collapse package/schema acceptance, signing, install/upgrade, runtime browser evidence, and pixel/design comparison into one generic pass. Report and validate these layers separately: `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison`. Schema validation does not prove UI correctness. Signing, install, or upgrade API acceptance does not prove runtime correctness. Runtime browser proof must use the decoded installed ListSetID URL, and canonical PNG pixel comparison must remain a separate layer.
+
 Supplier-derived full-page fidelity requires real Yeeflow controls and bindings:
 
 - all required design sections must map to implementation controls
@@ -388,6 +390,12 @@ Supplier runtime/design finding codes include:
 - `RUNTIME_URL_NOT_APPLICATION`
 - `RUNTIME_PROOF_LANDED_IN_DESIGNER`
 - `RUNTIME_PAGE_TITLE_MISSING`
+- `VALIDATION_PROOF_LAYER_COLLAPSED`
+- `SCHEMA_PASS_USED_AS_UI_PROOF`
+- `API_ACCEPTANCE_USED_AS_RUNTIME_PROOF`
+- `CONTROL_BINDING_GRAPH_INCOMPLETE`
+- `DECODED_LISTSET_ID_NOT_RUNTIME_URL`
+- `DESIGN_CONTROL_MAPPING_MISSING`
 - `DESIGN_SECTION_MISSING`
 - `KPI_CARD_COUNT_MISMATCH`
 - `PAGE_BACKGROUND_MISMATCH`

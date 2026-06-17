@@ -183,6 +183,12 @@ for (const currentSkillPath of skillRoots.map(({ root }) => skillPath(root, newS
     "Collection source-list and resolved detail-link metadata",
     "real analytics controls instead of approximations",
     "progress controls instead of raw formula text",
+    "Supplier validation-layer reports must keep proof layers separate",
+    "schemaValidation",
+    "runtimeBrowserProof",
+    "pixelComparison",
+    "Schema validation is not UI proof",
+    "Signing, install, or upgrade API acceptance is not runtime proof",
   ]) {
     assert.equal(normalizedContent.includes(phrase.toLowerCase()), true, `${currentSkillPath} missing Supplier fidelity phrase: ${phrase}`);
   }
