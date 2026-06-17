@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.6.58
+
+- Release full-page design artifact, page implementation blueprint, staged workflow, and decoded resource-vs-blueprint parity gates.
+- Require canonical page PNGs to be full-page implementation-ready artifacts, not first-viewport mockups; reject viewport-only designs when below-fold content exists.
+- Reject missing planned sections, missing table/form detail, missing page end, unresolved placeholder regions, SVG-only artifacts, and design-board substitutes for canonical per-page PNGs.
+- Require every page to have an implementation blueprint before Yeeflow resource generation.
+- Require blueprints to map every visible design element to Yeeflow controls with hierarchy, control type, `id`, semantic `nv_label`, parent/child relationships, exact property paths, sizing/spacing/border/background/shadow/typography rules, data/list/field bindings, Summary/KPI aggregation, Data Filter variables, Collection/table columns, row links, Dynamic user/person bindings, progress/status/badge bindings, actions, interactions, and runtime proof plan.
+- Require blueprint property paths to validate against the normalized control-property registry or evidence-backed extension registry.
+- Require decoded resources to match the blueprint before package/sign/upgrade; fail on missing section/control, wrong control type, missing required property, missing binding, missing action, missing or invalid `nv_label`, and placeholder/static substitutions for mapped design elements.
+- Enforce staged workflow exit criteria: functional spec before app plan, app plan before full-page designs, full-page designs before blueprint, blueprint/control-property validation before resource generation, decoded resource-vs-blueprint parity before package/sign/upgrade, and runtime proof kept separate from local/schema/API proof.
+- Keep navigation active-style gates from `0.6.57`, Supplier runtime/design and proof-layer gates from `0.6.56`, dashboard/data-list custom form root-padding gates from `0.6.55`, and Summary/filter/collection/content fidelity gates as baseline behavior.
+- Keep approval-form root padding deferred because evidence remains mixed, and do not claim pixel-perfect or live-runtime proof before actual runtime evidence exists.
+
 ## 0.6.57
 
 - Release horizontal navigation active-state runtime gates.
