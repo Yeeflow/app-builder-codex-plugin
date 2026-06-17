@@ -358,6 +358,80 @@ Finding codes include:
 - `KPI_RAW_LONG_DECIMAL_VISIBLE`
 - `KPI_UNFORMATTED_LARGE_NUMBER_VISIBLE`
 
+## Supplier Runtime And Design Fidelity Gates
+
+The Supplier Onboarding & Risk Review runtime/design study adds a focused hard-gate layer for future full-application generation. Design images are implementation contracts, not inspiration. Runtime proof must use the exact installed application ListSetID, and local semantic JSON is not enough when export/runtime-proven Yeeflow metadata shapes are available.
+
+Before app generation starts for a designed Yeeflow application, create one canonical PNG per planned page and a `design-image-manifest.json`. The canonical page artifact is `assets/generated-ui/<app-slug>/01-<page-slug>.design.png`, `02-<page-slug>.design.png`, and so on. Each PNG must contain exactly one app page, include the selected Yeeflow app chrome, preserve page order, and map directly to the app plan. SVG files may be generated as optional editable source files such as `01-<page-slug>.source.svg`, but SVG is not the canonical comparison artifact. A combined `00-design-board.png` is useful for review but cannot replace per-page PNGs.
+
+Runtime proof must record the final URL and page title. The final URL must start with `#/list-set/{AppID}/{ListSetID}` for the installed application. Install logs, upgrade operation IDs, root routes, designer/admin/login routes, or unrelated ListSetIDs do not prove runtime app fidelity.
+
+Supplier-derived full-page fidelity requires real Yeeflow controls and bindings:
+
+- all required design sections must map to implementation controls
+- KPI card count and core KPI labels must match the page design/spec
+- required chart/table/filter sections must not be dropped
+- selected Yeeflow application chrome/layout style must remain consistent across all pages
+- filter-looking UI must use real Data Filter controls with AppID, ListSetID, ListID, field metadata, display/value fields where applicable, and filter variables consumed by target collections/tables
+- filter/action rows must be Container-based and important containers must use semantic `nv_label`
+- Collection/grid-table controls must bind to the intended list by AppID, ListSetID, ListID, Type, and Title, and row detail links must resolve to valid form/layout choices
+- line, pie, bar, and other required analytics sections must use real Yeeflow analytics controls unless the user explicitly allows approximation
+- progress columns must use real progress controls or proven visual progress components with value, range, and style metadata
+- Summary/KPI controls must keep normal Summary controls, complete pivot metadata, hidden source containers, Summary temp-variable binding, and formatted visible KPI values
+
+The Supplier validator is `scripts/inspect-supplier-runtime-design-fidelity.mjs`; regression coverage is in `scripts/test-supplier-runtime-design-fidelity-gates.mjs`.
+
+Supplier runtime/design finding codes include:
+
+- `RUNTIME_LISTSET_ID_MISMATCH`
+- `INSTALL_LOG_ID_USED_AS_LISTSET_ID`
+- `RUNTIME_URL_NOT_APPLICATION`
+- `RUNTIME_PROOF_LANDED_IN_DESIGNER`
+- `RUNTIME_PAGE_TITLE_MISSING`
+- `DESIGN_SECTION_MISSING`
+- `KPI_CARD_COUNT_MISMATCH`
+- `PAGE_BACKGROUND_MISMATCH`
+- `DESIGN_CHART_SECTION_NOT_IMPLEMENTED`
+- `APP_CHROME_STYLE_MIXED`
+- `DATA_FILTER_CONTROL_STATIC_TEXT`
+- `DATA_FILTER_BINDING_MISSING`
+- `DATA_FILTER_FIELD_METADATA_INVALID`
+- `DATA_FILTER_VARIABLE_NOT_USED_BY_TARGET_COLLECTION`
+- `DATA_FILTER_RUNTIME_CONTROL_NOT_RENDERED`
+- `FILTER_ACTION_CONTAINER_WIDTH_NOT_INLINE`
+- `FILTER_ACTION_CONTAINER_NV_LABEL_MISSING`
+- `FILTER_ACTION_ROW_NOT_CONTAINER_BASED`
+- `COLLECTION_DATA_SOURCE_MISMATCH`
+- `COLLECTION_LISTSETID_MISSING`
+- `COLLECTION_DETAIL_LINK_INVALID`
+- `COLLECTION_FILTER_TARGET_MISMATCH`
+- `ANALYTICS_CONTROL_APPROXIMATION_USED`
+- `ANALYTICS_CONTROL_TYPE_MISMATCH`
+- `ANALYTICS_DATA_BINDING_INCOMPLETE`
+- `PROGRESS_CONTROL_MISSING`
+- `PROGRESS_RENDERED_AS_RAW_TEXT`
+- `PROGRESS_STYLE_METADATA_MISSING`
+- `SUMMARY_CONTROL_TYPE_INVALID`
+- `SUMMARY_PIVOT_METADATA_INCOMPLETE`
+- `SUMMARY_COUNT_FIELD_NOT_LISTDATAID`
+- `SUMMARY_SOURCE_CONTAINER_VISIBLE`
+- `KPI_RAW_VARIABLE_VISIBLE`
+- `KPI_VALUE_FORMAT_INVALID`
+- `DESIGN_CANONICAL_PNG_MISSING`
+- `DESIGN_CANONICAL_PNG_NOT_ONE_PAGE`
+- `DESIGN_PAGE_COUNT_MISMATCH`
+- `DESIGN_PAGE_FILENAME_UNMAPPED`
+- `DESIGN_PAGE_ORDER_MISMATCH`
+- `DESIGN_LAYOUT_CHROME_MISMATCH`
+- `DESIGN_USES_SVG_AS_CANONICAL`
+- `DESIGN_BOARD_USED_AS_PAGE_ARTIFACT`
+- `PIXEL_COMPARE_INPUT_NOT_CANONICAL_PNG`
+- `PIXEL_COMPARE_PAGE_SCREENSHOT_MISSING`
+- `PIXEL_COMPARE_PAGE_MAP_MISSING`
+- `PIXEL_COMPARE_RENDERED_FROM_SVG_WARNING`
+- `APP_GENERATION_STARTED_WITHOUT_PAGE_DESIGN_PNGS`
+- `UI_IMPLEMENTATION_PAGE_DESIGN_UNMAPPED`
+
 ## Future Work
 
 Future implementation can add a latest-artifact manifest guard, runtime proof freshness validator, and richer content-fidelity report schema. Those are not implemented by this standard unless an executable validator exists and is included in aggregate hard gates.

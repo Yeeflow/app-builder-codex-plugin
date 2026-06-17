@@ -19,6 +19,7 @@ const hardGateScripts = [
   "scripts/inspect-application-layout-design-rules.mjs",
   "scripts/inspect-dashboard-style-shapes.mjs",
   "scripts/inspect-runtime-navigation-proof.mjs",
+  "scripts/inspect-supplier-runtime-design-fidelity.mjs",
   "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/inspect-yeeflow-control-configurations.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
@@ -32,6 +33,7 @@ const hardGateScripts = [
   "scripts/test-application-layout-design-rules.mjs",
   "scripts/test-design-runtime-fidelity-study-hard-gates.mjs",
   "scripts/test-runtime-navigation-proof-gates.mjs",
+  "scripts/test-supplier-runtime-design-fidelity-gates.mjs",
   "scripts/test-ui-control-property-fidelity.mjs",
   "scripts/test-yeeflow-control-property-knowledge-base.mjs",
 ];
@@ -157,6 +159,51 @@ for (const phrase of [
   "normalizeDataListCustomFormRootContentPadding",
 ]) {
   assert.match(dashboardStyleInspector, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `dashboard style inspector includes root padding gate phrase: ${phrase}`);
+}
+
+const supplierFidelityInspector = fs.readFileSync(path.join(ROOT, "scripts/inspect-supplier-runtime-design-fidelity.mjs"), "utf8");
+for (const findingCode of [
+  "RUNTIME_LISTSET_ID_MISMATCH",
+  "INSTALL_LOG_ID_USED_AS_LISTSET_ID",
+  "RUNTIME_URL_NOT_APPLICATION",
+  "RUNTIME_PROOF_LANDED_IN_DESIGNER",
+  "RUNTIME_PAGE_TITLE_MISSING",
+  "DESIGN_SECTION_MISSING",
+  "KPI_CARD_COUNT_MISMATCH",
+  "PAGE_BACKGROUND_MISMATCH",
+  "DESIGN_CHART_SECTION_NOT_IMPLEMENTED",
+  "APP_CHROME_STYLE_MIXED",
+  "DATA_FILTER_CONTROL_STATIC_TEXT",
+  "DATA_FILTER_BINDING_MISSING",
+  "DATA_FILTER_FIELD_METADATA_INVALID",
+  "DATA_FILTER_VARIABLE_NOT_USED_BY_TARGET_COLLECTION",
+  "DATA_FILTER_RUNTIME_CONTROL_NOT_RENDERED",
+  "FILTER_ACTION_CONTAINER_WIDTH_NOT_INLINE",
+  "FILTER_ACTION_CONTAINER_NV_LABEL_MISSING",
+  "FILTER_ACTION_ROW_NOT_CONTAINER_BASED",
+  "COLLECTION_DATA_SOURCE_MISMATCH",
+  "COLLECTION_LISTSETID_MISSING",
+  "COLLECTION_DETAIL_LINK_INVALID",
+  "COLLECTION_FILTER_TARGET_MISMATCH",
+  "ANALYTICS_CONTROL_APPROXIMATION_USED",
+  "ANALYTICS_CONTROL_TYPE_MISMATCH",
+  "ANALYTICS_DATA_BINDING_INCOMPLETE",
+  "PROGRESS_CONTROL_MISSING",
+  "PROGRESS_RENDERED_AS_RAW_TEXT",
+  "PROGRESS_STYLE_METADATA_MISSING",
+  "SUMMARY_CONTROL_TYPE_INVALID",
+  "SUMMARY_PIVOT_METADATA_INCOMPLETE",
+  "SUMMARY_COUNT_FIELD_NOT_LISTDATAID",
+  "SUMMARY_SOURCE_CONTAINER_VISIBLE",
+  "KPI_RAW_VARIABLE_VISIBLE",
+  "KPI_VALUE_FORMAT_INVALID",
+  "DESIGN_CANONICAL_PNG_MISSING",
+  "DESIGN_USES_SVG_AS_CANONICAL",
+  "DESIGN_BOARD_USED_AS_PAGE_ARTIFACT",
+  "PIXEL_COMPARE_INPUT_NOT_CANONICAL_PNG",
+  "APP_GENERATION_STARTED_WITHOUT_PAGE_DESIGN_PNGS",
+]) {
+  assert.match(supplierFidelityInspector, new RegExp(findingCode), `${findingCode} is enforced by inspect-supplier-runtime-design-fidelity`);
 }
 
 const skillText = fs.readFileSync(path.join(ROOT, "skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md"), "utf8");

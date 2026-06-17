@@ -53,6 +53,14 @@ const childTests = [
     ],
   },
   {
+    name: "Supplier runtime/design fidelity regression suite",
+    command: ["scripts/test-supplier-runtime-design-fidelity-gates.mjs"],
+    validators: [
+      "inspect-supplier-runtime-design-fidelity",
+      "Supplier runtime ListSetID, design PNG, Data Filter, Collection, analytics, progress, Summary/KPI gates",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [
