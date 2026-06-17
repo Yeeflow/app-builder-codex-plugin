@@ -243,6 +243,19 @@ Within the selected layout structure, generated design images may customize:
 
 Customization must not change the selected layout's region model. A vertical layout remains vertical, a horizontal layout remains horizontal, an on-header layout keeps navigation on the header, and a no-nav layout stays navigation-free.
 
+## Canonical Page Design Artifacts
+
+Supplier Onboarding & Risk Review training showed that design images are easiest to enforce when each planned app page has a direct, standalone runtime counterpart. For well-designed Yeeflow apps, generate one canonical PNG per planned page before app generation:
+
+```text
+assets/generated-ui/<app-slug>/01-<page-slug>.design.png
+assets/generated-ui/<app-slug>/02-<page-slug>.design.png
+```
+
+Each canonical PNG must contain exactly one app page, include the selected Yeeflow application chrome, follow the app plan page order, and map directly to a runtime screenshot. A combined `00-design-board.png` can be generated for human review but cannot replace per-page PNGs. SVG may be generated as optional editable source, such as `01-<page-slug>.source.svg`, but it is not the canonical pixel-comparison input.
+
+Create `design-image-manifest.json` before implementation. Include `appSlug`, selected layout/chrome, canonical format, page order, page title, page slug, canonical PNG path, optional source path, and expected viewport. Use `scripts/inspect-supplier-runtime-design-fidelity.mjs` when validating Supplier-like full-app fidelity, canonical PNG coverage, and runtime screenshot mapping.
+
 ## Validator
 
 Use `scripts/inspect-application-layout-design-rules.mjs` to validate generated design image specs or UI implementation contracts before using them as visual implementation references. The validator checks declared layout compliance and safe-area/chrome declarations. It does not visually parse screenshots or design images.

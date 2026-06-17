@@ -52,6 +52,7 @@ const requiredValidatorNames = [
   "scripts/inspect-runtime-evidence.mjs",
   "scripts/inspect-grid-table-quality.mjs",
   "scripts/inspect-yapk-upgrade-app-identity.mjs",
+  "scripts/inspect-supplier-runtime-design-fidelity.mjs",
   "scripts/decode-yapk-tolerant-brotli.mjs",
 ];
 
@@ -170,6 +171,20 @@ for (const currentSkillPath of skillRoots.map(({ root }) => skillPath(root, newS
   }
   for (const phrase of phase3bRequiredPhrases) {
     assert.equal(normalizedContent.includes(phrase.toLowerCase()), true, `${currentSkillPath} missing Phase 3B phrase: ${phrase}`);
+  }
+  for (const phrase of [
+    "Supplier Onboarding runtime/design fidelity lessons are hard gates",
+    "one canonical PNG per planned page",
+    "design-image-manifest.json",
+    "SVG may be optional source only",
+    "install log IDs, operation IDs, root routes, designer/admin/login routes, and unrelated ListSetIDs are not runtime proof",
+    "runtime ListSetID proof",
+    "real Data Filter controls",
+    "Collection source-list and resolved detail-link metadata",
+    "real analytics controls instead of approximations",
+    "progress controls instead of raw formula text",
+  ]) {
+    assert.equal(normalizedContent.includes(phrase.toLowerCase()), true, `${currentSkillPath} missing Supplier fidelity phrase: ${phrase}`);
   }
 }
 
