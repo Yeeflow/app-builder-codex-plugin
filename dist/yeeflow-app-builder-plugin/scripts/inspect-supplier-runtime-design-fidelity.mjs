@@ -34,6 +34,7 @@ export function inspectSupplierRuntimeDesignFidelity({
   validateAnalytics(supplier.analytics || supplier.implementation?.analytics, supplier.design?.charts || [], findings);
   validateProgress(supplier.progressColumns || supplier.implementation?.progressColumns, findings);
   validateSummaryKpi(supplier.summaries || supplier.implementation?.summaries, supplier.kpis || supplier.implementation?.kpis, findings);
+  validateNavigationActiveStyle(supplier.navigationActiveStyle || supplier.implementation?.navigationActiveStyle || supplier.appChrome?.navigationActiveStyle, runtimeProof || supplier.runtimeProof, findings);
   validateDesignManifest(designManifest, supplier.plan || supplier.appPlan || supplier.designPlan, supplier.pixelCompare || supplier.runtimeComparison, findings, { strict });
 
   return {
@@ -319,6 +320,96 @@ function validateSummaryKpi(summaries = [], kpis = [], findings) {
   }
 }
 
+function validateNavigationActiveStyle(nav = {}, runtimeProof = {}, findings) {
+  if (!isObject(nav) || !nav.required) return;
+  const runtime = firstObject(nav.runtimeProof, runtimeProof?.navigationActiveStyle, runtimeProof?.appChromeActiveStyle, runtimeProof?.computedStyleProof);
+  const metadata = firstObject(nav.navigatorMenuMetadata, nav.layoutView?.attrs?.["navigator-menu"], nav.layoutView?.attrs?.navigatorMenu);
+  const customCss = scalar(nav.layoutView?.customcss || nav.customcss || nav.customCss);
+  const cssInjector = firstObject(nav.cssInjector, nav.codeinInjector, nav.styleInjector);
+
+  if (metadata && !nav.navigatorMenuActiveRuntimeProven) {
+    addFinding(findings, "error", "NAV_ACTIVE_STYLE_METADATA_UNPROVEN", "ListSet.LayoutView.attrs[\"navigator-menu\"] active-state metadata is not runtime proof for app chrome active styling.");
+  }
+  if (customCss && !nav.layoutViewCustomCssRuntimeInjected) {
+    addFinding(findings, "error", "LAYOUTVIEW_CUSTOMCSS_NOT_RUNTIME_INJECTED", "LayoutView.customcss is not accepted as runtime app-chrome CSS unless DOM proof shows it is injected and affects the target selector.");
+  }
+  if (customCss && (!runtime?.styleTagExists || !runtime?.selectorHasEffect)) {
+    addFinding(findings, "error", "CUSTOM_CSS_STYLE_TAG_MISSING", "Package metadata containing custom CSS is not enough; runtime proof must show a matching style tag.");
+    addFinding(findings, "error", "CUSTOM_CSS_SELECTOR_NO_EFFECT", "Runtime proof must show custom CSS affects the target active navigation selector.");
+  }
+
+  if (cssInjector || nav.cssInjectorRequired) {
+    const placement = scalar(cssInjector?.placement || cssInjector?.parentRole || cssInjector?.parentName);
+    const type = normalizeControlType(cssInjector?.type || cssInjector?.controlType || "codein");
+    if (type === "codein" && (cssInjector?.rootChild === true || placement === "root" || placement === "resource-root")) {
+      addFinding(findings, "error", "CODEIN_ROOT_CHILD_EXECUTION_RISK", "Execution-critical codein controls must not be direct children of the visual Resource root.");
+    }
+    if (type === "codein" && cssInjector?.expectedToExecute !== false && !isRenderedContainerPlacement(placement)) {
+      addFinding(findings, "error", "CODEIN_EXPECTED_TO_EXECUTE_NOT_IN_RENDERED_CONTAINER", "Execution-critical codein controls must be placed inside a rendered page container such as Content.");
+    }
+    if (type === "codein" && cssInjector?.runtimeNodeExists === false) {
+      addFinding(findings, "error", "CODEIN_RUNTIME_NODE_MISSING", "Runtime proof must show the expected codein injector node mounted.");
+    }
+    if (cssInjector?.hidden === false || cssInjector?.nonvisual === false) {
+      addFinding(findings, "error", "CODEIN_EXPECTED_TO_EXECUTE_NOT_IN_RENDERED_CONTAINER", "CSS injector codein controls must be hidden/nonvisual while mounted in a rendered container.");
+    }
+  }
+
+  if (nav.changedAppChromeOrPageResources && !runtime?.freshTopLevelLoad) {
+    addFinding(findings, "error", "FRESH_LOAD_RUNTIME_PROOF_REQUIRED", "After sign/upgrade with app chrome or page-resource changes, runtime verification must use a fresh top-level URL load.");
+  }
+  if (nav.changedAppChromeOrPageResources && !runtime?.cacheBustBeforeHash) {
+    addFinding(findings, "error", "RUNTIME_LAYOUT_CACHE_STALE", "Reports must distinguish stale browser/runtime resource cache from failed package generation by using safe cache-busting before the hash route.");
+  }
+
+  if (!runtime) {
+    addFinding(findings, "error", "NAV_ACTIVE_STYLE_RUNTIME_PROOF_MISSING", "Active navigation styling requires Chrome DOM/computed-style proof.");
+    addFinding(findings, "error", "APP_CHROME_RUNTIME_COMPUTED_STYLE_REQUIRED", "Package schema, signing, upgrade acceptance, decoded CSS, or decoded controls are not app chrome style proof.");
+    return;
+  }
+
+  if (!runtime.activeSelectorExists && !runtime.activeElementExists) {
+    addFinding(findings, "error", "RUNTIME_DOM_SELECTOR_PROOF_MISSING", "Runtime proof must show .ak-listset-new-navigation-item.active exists.");
+  }
+  if (!runtime.styleTagExists) {
+    addFinding(findings, "error", "STYLE_INJECTOR_TAG_MISSING", "Runtime proof must show the uniquely identified style injector tag exists.");
+  }
+  const expectedSelector = scalar(nav.selector || runtime.selector || ".ak-listset-new-navigation-item.active");
+  const styleText = scalar(runtime.styleText || runtime.injectedStyleText);
+  if (!styleText.includes(expectedSelector)) {
+    addFinding(findings, "error", "STYLE_INJECTOR_SELECTOR_MISSING", "Runtime style tag text must include the intended active navigation selector.");
+  }
+  if (runtime.selectorHasEffect === false) {
+    addFinding(findings, "error", "STYLE_INJECTOR_SELECTOR_NO_EFFECT", "Runtime proof must show the active navigation selector is affected by the injected CSS.");
+  }
+
+  const computed = firstObject(runtime.computedStyle, runtime.computed, runtime.activeComputedStyle) || {};
+  const background = scalar(computed.backgroundColor || runtime.activeBackground || runtime.backgroundColor);
+  const color = scalar(computed.color || runtime.activeTextColor || runtime.color);
+  const borderWidth = scalar(computed.borderBottomWidth || runtime.borderBottomWidth);
+  const borderStyle = scalar(computed.borderBottomStyle || runtime.borderBottomStyle);
+  const borderColor = scalar(computed.borderBottomColor || runtime.borderBottomColor);
+  const border = scalar(computed.borderBottom || runtime.borderBottom);
+
+  if (background && !isTransparent(background)) {
+    addFinding(findings, "error", "NAV_ACTIVE_BACKGROUND_MISMATCH", "Active navigation background must be transparent at runtime.", { actual: background });
+  }
+  if (color && !isBlue(color)) {
+    addFinding(findings, "error", "NAV_ACTIVE_TEXT_COLOR_MISMATCH", "Active navigation text must be the expected blue at runtime.", { actual: color });
+  }
+  if (!hasBlueSolidNonzeroBorder({ border, borderWidth, borderStyle, borderColor })) {
+    addFinding(findings, "error", "NAV_ACTIVE_BOTTOM_BORDER_MISMATCH", "Active navigation bottom border must be blue, solid, and nonzero at runtime.", {
+      border,
+      borderWidth,
+      borderStyle,
+      borderColor,
+    });
+  }
+  if (runtime.packageValidButRuntimeStyleFailed) {
+    addFinding(findings, "error", "PACKAGE_VALID_BUT_RUNTIME_STYLE_FAILED", "Package validation, signing, upgrade API acceptance, ID stability, decoded CSS, and decoded control presence are insufficient when runtime computed styles fail.");
+  }
+}
+
 function validateDesignManifest(manifest, plan = {}, pixelCompare = {}, findings, { strict }) {
   if (!manifest && !plan?.requiresCanonicalDesignPngs) return;
   if (!manifest) {
@@ -441,6 +532,29 @@ function layerPassed(layer) {
 
 function layerIncomplete(layer) {
   return isObject(layer) && (layer.incomplete === true || layer.valid === false || layer.complete === false || layer.missing === true);
+}
+
+function isRenderedContainerPlacement(value) {
+  const placement = normalizeName(value);
+  return ["content", "content container", "rendered container", "section", "section container", "card", "panel", "first meaningful content"].includes(placement);
+}
+
+function isTransparent(value) {
+  const normalized = scalar(value).replace(/\s+/g, " ").toLowerCase();
+  return normalized === "transparent" || normalized === "rgba(0, 0, 0, 0)" || normalized === "rgba(0,0,0,0)";
+}
+
+function isBlue(value) {
+  const normalized = scalar(value).replace(/\s+/g, " ").toLowerCase();
+  return normalized === "rgb(37, 99, 235)" || normalized === "rgb(37,99,235)" || normalized === "#2563eb";
+}
+
+function hasBlueSolidNonzeroBorder({ border, borderWidth, borderStyle, borderColor }) {
+  const borderText = scalar(border).replace(/\s+/g, " ").toLowerCase();
+  if (borderText) return /(?:^| )(?:[1-9]\d*px|3px) solid /.test(borderText) && (borderText.includes("rgb(37, 99, 235)") || borderText.includes("rgb(37,99,235)") || borderText.includes("#2563eb"));
+  const widthText = scalar(borderWidth).toLowerCase();
+  const styleText = scalar(borderStyle).toLowerCase();
+  return styleText === "solid" && !["", "0", "0px", "none"].includes(widthText) && isBlue(borderColor);
 }
 
 function parseRuntimeListSetId(url) {

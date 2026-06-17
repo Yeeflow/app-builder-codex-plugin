@@ -368,6 +368,8 @@ Runtime proof must record the final URL and page title. The final URL must start
 
 Supplier validation-gap analysis adds a required proof-layer model for full end-to-end app generation. A final report must not collapse package/schema acceptance, signing, install/upgrade, runtime browser evidence, and pixel/design comparison into one generic pass. Report and validate these layers separately: `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison`. Schema validation does not prove UI correctness. Signing, install, or upgrade API acceptance does not prove runtime correctness. Runtime browser proof must use the decoded installed ListSetID URL, and canonical PNG pixel comparison must remain a separate layer.
 
+Horizontal app chrome active-state styling is runtime-sensitive. Do not treat `ListSet.LayoutView.attrs["navigator-menu"]` active-state metadata or `LayoutView.customcss` as runtime-proven active text/background/border styling unless export/runtime proof shows the mechanism works. If active navigation styling is required, final acceptance requires Chrome DOM and computed-style proof for `.ak-listset-new-navigation-item.active`: a unique injected style tag exists, the style text includes the intended selector, the active navigation item exists, the computed background is transparent such as `rgba(0, 0, 0, 0)`, the computed text color is blue such as `rgb(37, 99, 235)`, and the computed bottom border is blue, solid, and nonzero such as `3px solid rgb(37, 99, 235)`. If a CSS injector is needed, place a hidden nonvisual `codein` control inside a rendered page container such as the first meaningful `Content` container; execution-critical `codein` controls directly under the visual resource root are an execution risk. After signing or upgrading page resources or app chrome styling, runtime verification must use a fresh top-level URL load with a safe cache-busting query before the hash route. Reports must distinguish stale browser/runtime resource cache from failed package generation.
+
 Supplier-derived full-page fidelity requires real Yeeflow controls and bindings:
 
 - all required design sections must map to implementation controls
@@ -396,6 +398,25 @@ Supplier runtime/design finding codes include:
 - `CONTROL_BINDING_GRAPH_INCOMPLETE`
 - `DECODED_LISTSET_ID_NOT_RUNTIME_URL`
 - `DESIGN_CONTROL_MAPPING_MISSING`
+- `NAV_ACTIVE_STYLE_METADATA_UNPROVEN`
+- `NAV_ACTIVE_STYLE_RUNTIME_PROOF_MISSING`
+- `NAV_ACTIVE_BACKGROUND_MISMATCH`
+- `NAV_ACTIVE_TEXT_COLOR_MISMATCH`
+- `NAV_ACTIVE_BOTTOM_BORDER_MISMATCH`
+- `LAYOUTVIEW_CUSTOMCSS_NOT_RUNTIME_INJECTED`
+- `CUSTOM_CSS_STYLE_TAG_MISSING`
+- `CUSTOM_CSS_SELECTOR_NO_EFFECT`
+- `CODEIN_ROOT_CHILD_EXECUTION_RISK`
+- `CODEIN_EXPECTED_TO_EXECUTE_NOT_IN_RENDERED_CONTAINER`
+- `CODEIN_RUNTIME_NODE_MISSING`
+- `STYLE_INJECTOR_TAG_MISSING`
+- `STYLE_INJECTOR_SELECTOR_MISSING`
+- `STYLE_INJECTOR_SELECTOR_NO_EFFECT`
+- `RUNTIME_LAYOUT_CACHE_STALE`
+- `FRESH_LOAD_RUNTIME_PROOF_REQUIRED`
+- `APP_CHROME_RUNTIME_COMPUTED_STYLE_REQUIRED`
+- `PACKAGE_VALID_BUT_RUNTIME_STYLE_FAILED`
+- `RUNTIME_DOM_SELECTOR_PROOF_MISSING`
 - `DESIGN_SECTION_MISSING`
 - `KPI_CARD_COUNT_MISMATCH`
 - `PAGE_BACKGROUND_MISMATCH`
