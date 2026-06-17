@@ -57,7 +57,7 @@ const childTests = [
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [
       "inspect-ui-control-property-fidelity",
-      "Container/Data Filter/filter-action/KPI card property fidelity",
+      "Container/Data Filter/filter-action/KPI card/Summary/full-page property fidelity",
     ],
   },
   {

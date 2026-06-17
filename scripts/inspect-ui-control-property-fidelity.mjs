@@ -143,6 +143,24 @@ const FINDING_MESSAGES = {
   KPI_FIXED_DECIMAL_FORMAT_MISSING: "Rate/percentage KPI values must use fixed decimal formatting.",
   KPI_RAW_LONG_DECIMAL_VISIBLE: "Long raw decimal KPI values must not be visible in high-quality UI claims.",
   KPI_UNFORMATTED_LARGE_NUMBER_VISIBLE: "Large KPI values must not render as unformatted raw numbers unless explicitly waived.",
+  SUMMARY_CONTROL_WRAPPER_OBJECT_INVALID: "Summary controls in page resource children must be normal controls, not clipboard wrapper objects.",
+  SUMMARY_PIVOT_EXT_MISSING: "Summary controls used for KPI/source metrics must have matching page Resource.exts pivot metadata.",
+  SUMMARY_PIVOT_SETTINGS_VALUES_MISSING: "Summary pivot metadata must include nonempty attr.settings.values.",
+  SUMMARY_COUNT_FIELD_MUST_BE_LISTDATAID: "COUNT Summary pivot settings must use ListDataID.",
+  SUMMARY_PIVOT_LISTSETID_MISSING: "Summary pivot metadata must include AppID, ListID, and ListSetID.",
+  SUMMARY_SAVE_VAR_TOP_LEVEL_MISSING: "Summary controls must include top-level save_var and saveVar metadata.",
+  SUMMARY_SAVE_VAR_ATTRS_MISSING: "Summary controls must include attrs.save_var and attrs.saveVar metadata.",
+  SUMMARY_HIDDEN_HOST_MISSING: "Summary source controls must live inside a hidden metric data source Container.",
+  SUMMARY_HIDDEN_HOST_NOT_HIDDEN_ALL_DEVICES: "Hidden metric data source host must hide on desktop, tablet, and mobile and use display none.",
+  SUMMARY_HIDDEN_HOST_NAME_MISCLASSIFIED: "Hidden metric data source host name/label/nv_label must not contain Summary.",
+  SUMMARY_CONTROL_VISIBLE_OUTSIDE_HIDDEN_HOST: "Summary source controls must not appear as visible page content.",
+  VISIBLE_KPI_VALUE_NOT_BOUND_TO_SUMMARY_TEMP_VAR: "Visible KPI values must bind to Summary temp variables.",
+  DATA_FILTER_EXPECTED_STATIC_TEXT_FOUND: "Expected filter behavior must use real Data Filter controls, not static Text.",
+  GRID_TABLE_COLUMN_GAP_MISMATCH: "Collection grid-table header/body column gap must be 0.",
+  COLLECTION_LINK_FORM_UNRESOLVED: "Collection link target must resolve to a valid form option, not only a raw ID.",
+  PROGRESS_COLUMN_RAW_FORMULA_RENDERED: "Progress-like Collection columns must not render raw formula text.",
+  DYNAMIC_USER_BOUND_TO_NON_USER_FIELD: "Dynamic user/person controls must bind to User/identity fields.",
+  CONTROL_FIELD_TYPE_INCOMPATIBLE: "Control source field type is incompatible with the requested runtime control.",
 };
 
 const DATA_FILTER_VISUAL_PATTERNS = {
@@ -309,6 +327,7 @@ export function inspectUiControlPropertyFidelity({
     validateKpiValueFormatting(candidateSpec, findings);
     validateTableContentFidelity(candidateSpec, findings);
     validateCollectionGridTables(candidateSpec, findings);
+    validateSummaryPageFidelity(candidateSpec, findings);
     validateRuntimeSampleDataProof(candidateSpec, findings);
     validateVisibleRawVariables(candidateSpec, findings);
   }
@@ -340,6 +359,7 @@ export function inspectUiControlPropertyFidelity({
       actionCount: candidateSpec.actions.length,
       richTableCount: candidateSpec.tables.length,
       gridTableCount: candidateSpec.gridTables.length,
+      summaryControlCount: candidateSpec.summaryControls.length,
       runtimeSampleDataProofPresent: Boolean(candidateSpec.runtimeSampleDataProof),
       visibleTextCount: candidateSpec.visibleTexts.length,
     },
@@ -451,6 +471,9 @@ function validateDataFilters(spec, reference, findings) {
   for (const filter of spec.dataFilters) {
     if (filter.controlType !== "Data Filter") {
       addFinding(findings, "error", "DATA_FILTER_CONTROL_TYPE_MISMATCH", `${filter.name || "Filter"} must use a real Data Filter control.`);
+      if (filter.expectedFilterBehavior || filter.expectedDataFilter || /text/i.test(String(filter.controlType || ""))) {
+        addFinding(findings, "error", "DATA_FILTER_EXPECTED_STATIC_TEXT_FOUND", `${filter.name || "Filter"} declares filter behavior but is implemented as ${filter.controlType || "static text"}.`);
+      }
     }
     if (filter.displayStyle && !/dropdown|select|chip/i.test(filter.displayStyle)) {
       addFinding(findings, "error", "DATA_FILTER_DISPLAY_STYLE_MISMATCH", `${filter.name || "Filter"} must use dropdown/select display style.`);
@@ -917,6 +940,14 @@ function validateCollectionGridTables(spec, findings) {
         itemAlign,
       });
     }
+    const headerGap = numeric(responsiveScalar(table.headerColumnGap ?? table.headerGap ?? deepGet(table, "headerGrid.attrs.style.gap") ?? deepGet(table, "headerGrid.attrs.layout.cgap")));
+    const itemGap = numeric(responsiveScalar(table.itemColumnGap ?? table.bodyColumnGap ?? table.itemGap ?? deepGet(table, "itemGrid.attrs.style.gap") ?? deepGet(table, "itemGrid.attrs.layout.cgap")));
+    if ((headerGap != null && headerGap !== 0) || (itemGap != null && itemGap !== 0)) {
+      addFinding(findings, "error", "GRID_TABLE_COLUMN_GAP_MISMATCH", `${name} header/body grid column gap must be 0.`, {
+        headerGap,
+        itemGap,
+      });
+    }
     const headerPadding = normalizePadding(table.headerCellPadding ?? deepGet(table, "headerCell.attrs.common.padding") ?? deepGet(table, "headerCell.attrs.style.padding"));
     const bodyPadding = normalizePadding(table.bodyCellPadding ?? table.itemCellPadding ?? deepGet(table, "bodyCell.attrs.common.padding") ?? deepGet(table, "itemCell.attrs.common.padding"));
     if (JSON.stringify(headerPadding) !== JSON.stringify(bodyPadding)) {
@@ -927,6 +958,15 @@ function validateCollectionGridTables(spec, findings) {
     }
     for (const column of normalizeArray(table.columns)) {
       validateGridTableColumn(table, column, findings);
+    }
+    for (const link of normalizeArray(table.collectionLinks || table.links || table.rowLinks)) {
+      const resolved = link.resolved === true || link.formOptionResolved === true || hasValue(link.formOptionName);
+      const rawOnly = link.rawIdOnly === true || (hasValue(link.targetFormId) && !resolved);
+      if (!resolved || rawOnly) {
+        addFinding(findings, "error", "COLLECTION_LINK_FORM_UNRESOLVED", `${name} collection link target must resolve to a valid form option.`, {
+          targetFormId: link.targetFormId || link.formId || null,
+        });
+      }
     }
     const controls = normalizeArray(table.generatedControls || table.controls || table.subtreeControls);
     for (const control of controls) {
@@ -949,9 +989,11 @@ function validateGridTableColumn(table, column, findings) {
     }
     if (!isNumericFieldType(column.sourceFieldType || column.fieldType || column.sourceType)) {
       addFinding(findings, "error", "COLLECTION_PROGRESS_SOURCE_NOT_NUMERIC", `${tableName} ${name} progress source must be numeric.`);
+      addFinding(findings, "error", "CONTROL_FIELD_TYPE_INCOMPATIBLE", `${tableName} ${name} progress source field is incompatible with a progress control.`);
     }
     if (column.rawFormulaVisible || containsRawFormulaText(column.visibleText || column.renderedText || column.text)) {
       addFinding(findings, "error", "COLLECTION_PROGRESS_RAW_FORMULA_VISIBLE", `${tableName} ${name} must not render raw progress formula text.`);
+      addFinding(findings, "error", "PROGRESS_COLUMN_RAW_FORMULA_RENDERED", `${tableName} ${name} renders raw progress formula text.`);
     }
   }
   if (isOwner) {
@@ -960,10 +1002,96 @@ function validateGridTableColumn(table, column, findings) {
     }
     if (!isUserFieldType(column.boundFieldType || column.fieldType || column.sourceFieldType)) {
       addFinding(findings, "error", "COLLECTION_DYNAMIC_USER_FIELD_NOT_USER_TYPE", `${tableName} ${name} must bind to a User/identity field.`);
+      addFinding(findings, "error", "DYNAMIC_USER_BOUND_TO_NON_USER_FIELD", `${tableName} ${name} Dynamic user/person control is bound to a non-User field.`);
+      addFinding(findings, "error", "CONTROL_FIELD_TYPE_INCOMPATIBLE", `${tableName} ${name} source field is incompatible with a Dynamic user/person control.`);
     }
   }
   if (!isSemanticNavigatorLabel(column.nv_label ?? column.nvLabel ?? column.navigatorLabel)) {
     addFinding(findings, "error", "COLLECTION_NV_LABEL_MISSING", `${tableName} ${name} must include semantic nv_label.`);
+  }
+}
+
+function validateSummaryPageFidelity(spec, findings) {
+  const summaries = spec.summaryControls;
+  const pageResource = spec.pageResource || {};
+  const resourceExts = normalizeArray(pageResource.exts || spec.resourceExts || spec.summaryPivotExts);
+  const host = spec.summaryHiddenHost;
+  const hostIds = new Set(normalizeArray(host?.children || host?.childIds || host?.summaryControlIds).map((item) => typeof item === "string" ? item : item?.id).filter(Boolean));
+  const summaryTempVars = new Set();
+
+  for (const child of normalizeArray(pageResource.children || spec.pageChildren)) {
+    if (child && typeof child === "object" && Object.prototype.hasOwnProperty.call(child, "_ak_c")) {
+      addFinding(findings, "error", "SUMMARY_CONTROL_WRAPPER_OBJECT_INVALID", "Page resource children must not contain _ak_c clipboard wrapper objects.");
+    }
+  }
+
+  if (summaries.length && !host) {
+    addFinding(findings, "error", "SUMMARY_HIDDEN_HOST_MISSING", "Summary source controls require a hidden metric data source host Container.");
+  } else if (host) {
+    if (!isHiddenOnAllDevices(host)) {
+      addFinding(findings, "error", "SUMMARY_HIDDEN_HOST_NOT_HIDDEN_ALL_DEVICES", `${host.id || host.name || "Hidden host"} must use attrs.common.hide [null,true,true,true] and attrs.style.display none.`);
+    }
+    const hostName = [host.name, host.label, host.nv_label, host.nvLabel].filter(Boolean).join(" ");
+    if (/\bsummary\b/i.test(hostName)) {
+      addFinding(findings, "error", "SUMMARY_HIDDEN_HOST_NAME_MISCLASSIFIED", `${host.id || host.name || "Hidden host"} name/label/nv_label must not contain Summary.`);
+    }
+  }
+
+  for (const summary of summaries) {
+    const name = summary.name || summary.id || "Summary control";
+    if (summary.wrapperObject || summary._ak_c || summary._ak_c_opt) {
+      addFinding(findings, "error", "SUMMARY_CONTROL_WRAPPER_OBJECT_INVALID", `${name} must be a normal type: summary control, not a clipboard wrapper.`);
+    }
+    if (String(summary.type || summary.controlType || "").toLowerCase() !== "summary") {
+      addFinding(findings, "error", "SUMMARY_CONTROL_WRAPPER_OBJECT_INVALID", `${name} must remain type: "summary".`);
+    }
+    const pivot = resourceExts.find((ext) => ext?.category === "___Pivot___" && ext?.key === "summary" && ext?.i === summary.id);
+    if (!pivot) {
+      addFinding(findings, "error", "SUMMARY_PIVOT_EXT_MISSING", `${name} missing matching page resource exts[] pivot metadata.`);
+    } else {
+      const attr = pivot.attr || {};
+      if (!hasValue(attr.AppID) || !hasValue(attr.ListID) || !hasValue(attr.ListSetID)) {
+        addFinding(findings, "error", "SUMMARY_PIVOT_LISTSETID_MISSING", `${name} pivot metadata must include AppID, ListID, and ListSetID.`);
+      }
+      const values = normalizeArray(attr.settings?.values);
+      if (!values.length) {
+        addFinding(findings, "error", "SUMMARY_PIVOT_SETTINGS_VALUES_MISSING", `${name} pivot metadata must include settings.values.`);
+      }
+      for (const value of values) {
+        if (String(value.func || "").toUpperCase() === "COUNT" && (value.fieldName !== "ListDataID" || value.id !== "ListDataID")) {
+          addFinding(findings, "error", "SUMMARY_COUNT_FIELD_MUST_BE_LISTDATAID", `${name} COUNT pivot settings must use ListDataID.`);
+        }
+        if (/^(SUM|AVG)$/i.test(String(value.func || "")) && (!hasValue(value.fieldName) || !hasValue(value.id))) {
+          addFinding(findings, "error", "SUMMARY_PIVOT_SETTINGS_VALUES_MISSING", `${name} SUM/AVG pivot settings must include the selected numeric field.`);
+        }
+      }
+    }
+    if (!hasValue(summary.save_var) || !hasValue(summary.saveVar)) {
+      addFinding(findings, "error", "SUMMARY_SAVE_VAR_TOP_LEVEL_MISSING", `${name} missing top-level save_var/saveVar.`);
+    }
+    if (!hasValue(summary.attrs?.save_var) || !hasValue(summary.attrs?.saveVar)) {
+      addFinding(findings, "error", "SUMMARY_SAVE_VAR_ATTRS_MISSING", `${name} missing attrs.save_var/saveVar.`);
+    }
+    const tempVar = summary.saveVar || summary.attrs?.saveVar || summary.save_var?.name || summary.attrs?.save_var?.name;
+    if (hasValue(tempVar)) summaryTempVars.add(String(tempVar));
+    const inHiddenHost = summary.hiddenHostId && host?.id && summary.hiddenHostId === host.id;
+    const listedByHost = hostIds.has(summary.id);
+    if (summaries.length && (!host || (!inHiddenHost && !listedByHost))) {
+      addFinding(findings, "error", "SUMMARY_CONTROL_VISIBLE_OUTSIDE_HIDDEN_HOST", `${name} is not proven to be inside the hidden metric data source host.`);
+    }
+  }
+
+  for (const kpi of spec.visibleKpiValues) {
+    const binding = kpi.summaryTempVar || kpi.boundSummaryTempVar || kpi.variable || deepGet(kpi, "attrs.headc.title.variable.0");
+    const text = kpi.visibleText || kpi.text || kpi.value;
+    if (looksLikeRawVariable(text) || containsRawFormulaText(text)) {
+      addFinding(findings, "error", "RAW_VARIABLE_TEXT_VISIBLE", `${kpi.id || kpi.name || "Visible KPI"} renders a raw variable/formula.`, {
+        visibleText: redactVisibleText(text),
+      });
+    }
+    if (kpi.requiresSummaryTempBinding !== false && (!hasValue(binding) || (summaryTempVars.size && !summaryTempVars.has(String(binding))))) {
+      addFinding(findings, "error", "VISIBLE_KPI_VALUE_NOT_BOUND_TO_SUMMARY_TEMP_VAR", `${kpi.id || kpi.name || "Visible KPI"} is not bound to a Summary temp variable.`);
+    }
   }
 }
 
@@ -1097,6 +1225,10 @@ function normalizeSpec(data) {
     kpiCards: normalizeArray(root.kpiCards || root.kpis).map(normalizeKpiCard),
     tables: normalizeArray(root.tables || root.richTables || root.tableSections).map(normalizeTable),
     gridTables: normalizeArray(root.gridTables || root.collectionGridTables || root.collectionTables).map(normalizeGridTable),
+    summaryControls: normalizeArray(root.summaryControls || root.summaries || root.hiddenSummaryControls).map(normalizeSummaryControl),
+    pageResource: normalizePageResource(root.pageResource || root.resource || root.decodedPageResource),
+    summaryHiddenHost: root.summaryHiddenHost || root.hiddenSummaryHost || root.hiddenMetricDataSourceHost ? normalizeControl(root.summaryHiddenHost || root.hiddenSummaryHost || root.hiddenMetricDataSourceHost) : null,
+    visibleKpiValues: normalizeArray(root.visibleKpiValues || root.kpiValueControls || root.visibleSummaryBindings),
     runtimeSampleDataProof: normalizeRuntimeSampleDataProof(root.runtimeSampleDataProof || root.sampleDataProof || root.runtimeSampleData),
     visibleTexts: normalizeArray(root.visibleTexts || root.runtimeVisibleTexts || root.decodedVisibleTexts),
     structuralControls: normalizeArray(root.structuralControls || root.navigatorControls).map(normalizeControl),
@@ -1112,6 +1244,25 @@ function normalizeSpec(data) {
       consumedFilterVariables: normalizeArray(target.consumedFilterVariables || target.filterVariables || target.variables),
     })),
     kpiGoldenPattern: root.kpiGoldenPattern ? normalizeKpiCard(root.kpiGoldenPattern) : null,
+  };
+}
+
+function normalizeSummaryControl(summary = {}) {
+  return {
+    ...summary,
+    id: summary.id || summary.controlId,
+    type: summary.type || summary.controlType,
+    controlType: summary.controlType || summary.type,
+    attrs: summary.attrs || {},
+  };
+}
+
+function normalizePageResource(resource = null) {
+  if (!resource || typeof resource !== "object") return null;
+  return {
+    ...resource,
+    children: normalizeArray(resource.children || resource.Children),
+    exts: normalizeArray(resource.exts || resource.Exts),
   };
 }
 
@@ -1270,6 +1421,13 @@ function isInlineWidth(value) {
 function isDefaultHeight(value) {
   const normalized = responsiveScalar(value);
   return normalized == null || ["0", "default", "auto"].includes(String(normalized));
+}
+
+function isHiddenOnAllDevices(control = {}) {
+  const hide = deepGet(control, "attrs.common.hide") ?? deepGet(control, "common.hide") ?? control.hide;
+  const display = deepGet(control, "attrs.style.display") ?? deepGet(control, "style.display") ?? control.display;
+  const responsiveHide = Array.isArray(hide) ? hide.slice(1) : [];
+  return responsiveHide.length >= 3 && responsiveHide.every(Boolean) && String(display || "").toLowerCase() === "none";
 }
 
 function responsiveScalar(value) {

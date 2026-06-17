@@ -124,4 +124,41 @@ for (const patternId of [
   assert.equal(patternIds.has(patternId), true, `${patternId} extension pattern exists`);
 }
 
+const uiFidelityInspector = fs.readFileSync(path.join(ROOT, "scripts/inspect-ui-control-property-fidelity.mjs"), "utf8");
+for (const findingCode of [
+  "SUMMARY_CONTROL_WRAPPER_OBJECT_INVALID",
+  "SUMMARY_PIVOT_EXT_MISSING",
+  "SUMMARY_PIVOT_SETTINGS_VALUES_MISSING",
+  "SUMMARY_COUNT_FIELD_MUST_BE_LISTDATAID",
+  "SUMMARY_SAVE_VAR_TOP_LEVEL_MISSING",
+  "SUMMARY_SAVE_VAR_ATTRS_MISSING",
+  "SUMMARY_HIDDEN_HOST_MISSING",
+  "SUMMARY_HIDDEN_HOST_NOT_HIDDEN_ALL_DEVICES",
+  "VISIBLE_KPI_VALUE_NOT_BOUND_TO_SUMMARY_TEMP_VAR",
+  "DATA_FILTER_EXPECTED_STATIC_TEXT_FOUND",
+  "ACTION_CONTAINER_ACTION_TYPE_MISSING",
+  "GRID_TABLE_COLUMN_GAP_MISMATCH",
+  "COLLECTION_LINK_FORM_UNRESOLVED",
+  "PROGRESS_COLUMN_RAW_FORMULA_RENDERED",
+  "DYNAMIC_USER_BOUND_TO_NON_USER_FIELD",
+  "CONTROL_FIELD_TYPE_INCOMPATIBLE",
+]) {
+  assert.match(uiFidelityInspector, new RegExp(findingCode), `${findingCode} is enforced by inspect-ui-control-property-fidelity`);
+}
+
+const skillText = fs.readFileSync(path.join(ROOT, "skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md"), "utf8");
+for (const phrase of [
+  /type: "summary"/,
+  /_ak_c/,
+  /category = "___Pivot___"/,
+  /COUNT (Summary settings|summaries) must use `?ListDataID`?/i,
+  /attrs\.common\.hide = \[null, true, true, true\]/,
+  /column gap `?0`?/i,
+  /resolved collection form links|Collection links must resolve/i,
+  /Dynamic user\/person controls (must bind|bound) to User/i,
+  /formatNumber/i,
+]) {
+  assert.match(skillText, phrase, `hard-gate skill includes Summary/full-page wording: ${phrase}`);
+}
+
 console.log("YAPK hard-gate cache artifact checks passed");
