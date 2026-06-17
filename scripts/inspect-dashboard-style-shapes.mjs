@@ -1,7 +1,15 @@
 #!/usr/bin/env node
 
 import { pathToFileURL } from "node:url";
-import { addFinding, allControlsFromPages, collectPages, normalizePackage, readPackageLike, safePath, statusFromFindings } from "./lib/yeeflow-ui-hard-gate-utils.mjs";
+import { addFinding, allControlsFromPages, collectPages, isObject, normalizePackage, readPackageLike, safePath, scalar, statusFromFindings } from "./lib/yeeflow-ui-hard-gate-utils.mjs";
+
+export const DASHBOARD_ROOT_ZERO_PADDING = Object.freeze({
+  top: "--sp--s0",
+  right: "--sp--s0",
+  bottom: "--sp--s0",
+  left: "--sp--s0",
+});
+export const DASHBOARD_ROOT_PADDING_SHAPE = Object.freeze([null, DASHBOARD_ROOT_ZERO_PADDING]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -23,7 +31,11 @@ export function inspectDashboardStyleShapes({ package: packagePath, strict = tru
 
   let cardLikeCount = 0;
   let exportProvenCardCount = 0;
-  for (const item of allControlsFromPages(collectPages(pkg))) {
+  const pages = collectPages(pkg);
+  for (const page of pages) {
+    validateDashboardRootContentPadding(page, findings);
+  }
+  for (const item of allControlsFromPages(pages)) {
     const attrs = item.control.attrs || {};
     const type = String(item.control.type || item.control.Type || "").toLowerCase();
     const wantsCard = type === "card" || attrs.role === "kpi-card" || attrs.role === "dashboard-card" || attrs.styleIntent === "card" || attrs["data-ui-role"] === "card";
@@ -53,6 +65,62 @@ export function inspectDashboardStyleShapes({ package: packagePath, strict = tru
   }
 
   return buildReport(packagePath, findings, { cardLikeCount, exportProvenCardCount });
+}
+
+export function normalizeDashboardRootContentPadding(resourceRoot) {
+  if (!isObject(resourceRoot)) return resourceRoot;
+  resourceRoot.attrs = isObject(resourceRoot.attrs) ? resourceRoot.attrs : {};
+  resourceRoot.attrs.container = isObject(resourceRoot.attrs.container) ? resourceRoot.attrs.container : {};
+  resourceRoot.attrs.container.cw = "2";
+  resourceRoot.attrs.container.padding = [null, { ...DASHBOARD_ROOT_ZERO_PADDING }];
+  return resourceRoot;
+}
+
+function validateDashboardRootContentPadding(page, findings) {
+  if (!isDashboardPage(page.page)) return;
+  page.roots.forEach((root, index) => {
+    const container = root?.attrs?.container;
+    const cw = container?.cw;
+    const padding = container?.padding;
+    const valid = cw === "2" && isRequiredDashboardRootPadding(padding);
+    if (!valid) {
+      addFinding(findings, "error", "DASHBOARD_ROOT_CONTENT_PADDING_INVALID", "Dashboard/app page root Resource must set attrs.container.cw = \"2\" and attrs.container.padding to the exact token-array zero-padding shape [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy the root content-area gate.", {
+        page: page.title,
+        pointer: `Pages[${page.index}].LayoutInResources[${index}].Resource.attrs.container`,
+        cw: scalar(cw),
+        paddingShape: describePaddingShape(root?.attrs),
+      });
+    }
+  });
+}
+
+function isDashboardPage(page) {
+  const type = scalar(page?.Type || page?.type || page?.LayoutType || page?.layoutType);
+  return type === "103" || /dashboard|app page/i.test(scalar(page?.Title || page?.Name || page?.title));
+}
+
+function isRequiredDashboardRootPadding(value) {
+  return Array.isArray(value)
+    && value.length === 2
+    && value[0] === null
+    && isObject(value[1])
+    && Object.keys(value[1]).sort().join(",") === "bottom,left,right,top"
+    && value[1].top === DASHBOARD_ROOT_ZERO_PADDING.top
+    && value[1].right === DASHBOARD_ROOT_ZERO_PADDING.right
+    && value[1].bottom === DASHBOARD_ROOT_ZERO_PADDING.bottom
+    && value[1].left === DASHBOARD_ROOT_ZERO_PADDING.left;
+}
+
+function describePaddingShape(attrs) {
+  if (!isObject(attrs)) return "attrs missing";
+  if (attrs.container?.padding !== undefined) {
+    if (Array.isArray(attrs.container.padding)) return "attrs.container.padding array";
+    if (isObject(attrs.container.padding)) return "attrs.container.padding object";
+    return `attrs.container.padding ${typeof attrs.container.padding}`;
+  }
+  if (attrs.common?.padding !== undefined) return "attrs.common.padding only";
+  if (attrs.style?.padding !== undefined) return "attrs.style.padding only";
+  return "attrs.container.padding missing";
 }
 
 function hasExportProvenCardShape(attrs) {

@@ -174,3 +174,6 @@ Use this skill with:
 - `yeeflow-package-validator` for generated-final hard gates and proof-boundary reporting
 - `yeeflow-runtime-test-orchestrator` for screenshot/runtime evidence classification
 - `yeeflow-feature-learning-orchestrator` when a UI/control/style shape is uncertain and needs sandbox-page learning first
+
+
+Dashboard/app page root content-area padding is a hard gate: every generated or upgraded Type 103 dashboard/app page must serialize `Pages[].LayoutInResources[].Resource` with root `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`. Scalar padding, object/numeric padding, numeric array padding, `attrs.common.padding`, or `attrs.style.padding` alone are invalid for the root content area. Normalize existing dashboard/app page roots to this exact token-array shape before signing, installing, importing, or upgrading. Inner layout containers may keep intentional spacing.

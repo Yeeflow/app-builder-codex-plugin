@@ -1696,9 +1696,8 @@ function validateDashboardPageResource(page, layout, resource, listsById, fields
   if (page.attrs && page.attrs.hideHeaderAll !== true) {
     uiStandardWarning(report, "UI_STANDARD_DASHBOARD_HEADER_NOT_HIDDEN", "UI/UX standard dashboards should set attrs.hideHeaderAll to true.", { title, layoutId });
   }
-  const dashboardRootPadding = page.attrs && page.attrs.container && page.attrs.container.padding;
-  if (!zeroPadding(dashboardRootPadding) && !hasSafeHorizontalPaddingValue(dashboardRootPadding)) {
-    uiStandardWarning(report, "UI_STANDARD_DASHBOARD_PADDING_UNUSUAL", "Dashboard page root padding should be either zero with padded inner sections or safe horizontal page padding.", { title, layoutId });
+  if (!dashboardRootContentPaddingShape(page.attrs && page.attrs.container)) {
+    issue(report, severity, "DASHBOARD_ROOT_CONTENT_PADDING_INVALID", "Dashboard page root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", { title, layoutId });
   }
   if (!hasSafeHorizontalPaddingNearRoot(page)) {
     uiStandardWarning(report, "UI_QUALITY_DASHBOARD_SAFE_PADDING_MISSING", "Generated dashboards should include safe left/right padding on an outer page section or container so controls do not touch window edges.", { title, layoutId });
@@ -1817,6 +1816,18 @@ function validateDashboardPageResource(page, layout, resource, listsById, fields
   validateDashboardPivotTableControls(title, layoutId, pivotTableControls, pivotExtByControlId, listsById, fieldsByList, filterVars, report);
   validateDashboardCollectionControls(page, title, layoutId, listsById, fieldsByList, filterVars, report);
   validateDashboardFunctionalQuality(page, title, layoutId, report);
+}
+
+function dashboardRootContentPaddingShape(container) {
+  if (!container || typeof container !== "object" || container.cw !== "2") return false;
+  const padding = container.padding;
+  if (!Array.isArray(padding) || padding.length !== 2 || padding[0] !== null || !padding[1] || typeof padding[1] !== "object") return false;
+  const keys = Object.keys(padding[1]).sort().join(",");
+  return keys === "bottom,left,right,top"
+    && padding[1].top === "--sp--s0"
+    && padding[1].right === "--sp--s0"
+    && padding[1].bottom === "--sp--s0"
+    && padding[1].left === "--sp--s0";
 }
 
 function validateAdvancedControl(control, report, context) {

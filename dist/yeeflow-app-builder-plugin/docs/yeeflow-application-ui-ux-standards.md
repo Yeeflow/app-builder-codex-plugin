@@ -237,3 +237,6 @@ The first generated test package should be layout-focused:
 - No external connections, AI, document library, custom code, or complex workflow logic.
 
 See `yeeflow-ui-ux-standard-first-generation-test-plan.md` and `yeeflow-ui-ux-standard-first-generation-test-spec.json`.
+
+
+Dashboard/app page root content-area padding is a hard gate: every generated or upgraded Type 103 dashboard/app page must serialize `Pages[].LayoutInResources[].Resource` with root `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`. Scalar padding, object/numeric padding, numeric array padding, `attrs.common.padding`, or `attrs.style.padding` alone are invalid for the root content area. Normalize existing dashboard/app page roots to this exact token-array shape before signing, installing, importing, or upgrading. Inner layout containers may keep intentional spacing.

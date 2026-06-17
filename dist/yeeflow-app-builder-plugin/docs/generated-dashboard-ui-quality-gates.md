@@ -34,3 +34,6 @@ Dashboard-heavy generated-final YAPK reports must include:
 ## Proof Boundary
 
 `setsign`, `verifysign`, and package install acceptance do not prove dashboard runtime or designer quality. Runtime/designer proof remains separate and requires opening the dashboard, inspecting the grid-table section, clicking rows when detail behavior is planned, and confirming navigation refresh still renders the page.
+
+
+Dashboard/app page root content-area padding is a hard gate: every generated or upgraded Type 103 dashboard/app page must serialize `Pages[].LayoutInResources[].Resource` with root `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`. Scalar padding, object/numeric padding, numeric array padding, `attrs.common.padding`, or `attrs.style.padding` alone are invalid for the root content area. Normalize existing dashboard/app page roots to this exact token-array shape before signing, installing, importing, or upgrading. Inner layout containers may keep intentional spacing.

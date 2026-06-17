@@ -67,7 +67,7 @@ The studied dashboard uses zero padding:
 }
 ```
 
-The dashboard export did not include `attrs.container.cw`. For dashboard pages, treat zero padding plus the standard `Main` / `Content` container structure as the proven exported pattern. Do not invent a dashboard `cw` setting until another export proves it.
+Supplier Onboarding & Risk Review runtime/designer evidence proves that generated dashboard/app page roots must set `attrs.container.cw = "2"` and use the exact token-array zero-padding shape `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`. Earlier dashboard exports that omitted `cw` are superseded for generated and upgraded dashboard/app page roots. Keep intentional spacing on inner layout containers, not on the page root.
 
 ## Container Tree
 
@@ -156,3 +156,6 @@ The first generated UI/UX standard dashboard should add content inside the prove
 - one table or Collection bound to a local included list
 
 Do not add charts or filters in the first UI/UX standard test unless the goal is specifically to prove dashboard data binding.
+
+
+Dashboard/app page root content-area padding is a hard gate: every generated or upgraded Type 103 dashboard/app page must serialize `Pages[].LayoutInResources[].Resource` with root `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`. Scalar padding, object/numeric padding, numeric array padding, `attrs.common.padding`, or `attrs.style.padding` alone are invalid for the root content area. Normalize existing dashboard/app page roots to this exact token-array shape before signing, installing, importing, or upgrading. Inner layout containers may keep intentional spacing.
