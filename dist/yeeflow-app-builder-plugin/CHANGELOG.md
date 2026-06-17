@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.6.54
+
+- Release Summary/filter/collection/full-page fidelity gates.
+- Keep Summary controls as normal `type: "summary"` controls and reject invalid `_ak_c` clipboard wrapper child objects.
+- Require page `Resource.exts[]` Summary pivot metadata with `AppID`, `ListID`, `ListSetID`, and nonempty `settings.values[]`.
+- Require COUNT Summary settings to use `ListDataID`.
+- Require top-level and attrs-level `save_var` / `saveVar`.
+- Require hidden Summary source hosts to hide on desktop, tablet, and mobile with `display:none`.
+- Require visible KPI values to bind to Summary temp variables instead of rendering raw variables.
+- Reinforce real Data Filter controls instead of static Text, Add/New Containers with `action-type = "5"` and target list metadata, Collection grid-table column gap `0`, resolved collection links, progress controls instead of raw formula text, Dynamic user controls bound to User/identity fields, and field type compatibility gates.
+- Confirm this release does not claim pixel-perfect visual diffing, automatic screenshot parsing, or live runtime proof before install/cache smoke and focused runtime testing are performed.
+
+
 ## 0.6.53
 
 - Release Runtime Sample Data and KPI/Table Presentation Fidelity Gates.
