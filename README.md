@@ -10,8 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.56`
+- Version: `0.6.57`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
+
+Current release `0.6.57` adds horizontal navigation active-state runtime gates: active-state `navigator-menu` metadata and `LayoutView.customcss` are not runtime proof without DOM/style tag evidence, hidden `codein` injectors must be placed inside rendered containers such as `Content`, fresh cache-busted top-level loads are required after app chrome/page-resource changes, and runtime proof must show the style tag, intended selector, active item, transparent background, blue text, and blue solid nonzero bottom border. Supplier proof-layer gates from `0.6.56` and root-padding gates from `0.6.55` remain baseline behavior; approval-form root padding remains deferred pending clearer evidence.
 
 ## Install In Codex App
 
@@ -28,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.56
+Version: 0.6.57
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.56
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.57
 ```
 
 ## What Is Included
