@@ -12,6 +12,8 @@ Supplier Onboarding runtime/design fidelity lessons require one canonical PNG pe
 
 Supplier validation-layer reporting must keep package/schema acceptance separate from UI correctness. Full end-to-end generation reports must list `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` as separate layers. A schema pass is not UI proof, signing/install/upgrade API acceptance is not runtime proof, runtime browser proof must use the decoded ListSetID URL, and canonical PNG pixel comparison must not be collapsed into runtime or schema status.
 
+Horizontal navigation active-state styling is a runtime-computed style claim. Decoded `ListSet.LayoutView.attrs["navigator-menu"]` active metadata and `LayoutView.customcss` are not enough unless runtime proof shows the CSS appears in the DOM and affects `.ak-listset-new-navigation-item.active`. When active nav styling is required, use a hidden nonvisual `codein` injector inside a rendered page container such as `Content`, not directly under the resource root, then verify a fresh cache-busted load with Chrome computed styles: transparent active background, blue active text, and blue solid nonzero bottom border.
+
 ## Expected Version
 
 `0.6.56`

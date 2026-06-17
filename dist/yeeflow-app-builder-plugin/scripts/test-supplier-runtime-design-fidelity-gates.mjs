@@ -35,6 +35,15 @@ try {
   testSchemaPassNotUiProofFails();
   testApiAcceptanceNotRuntimeProofFails();
   testCollapsedFinalReportFails();
+  testNavigatorMenuActiveMetadataAloneFails();
+  testLayoutViewCustomCssAloneFails();
+  testRootLevelCodeinFails();
+  testCodeinInRenderedContentPassesPlacement();
+  testNavigationActiveRuntimeProofPasses();
+  testNavigationActiveGrayBackgroundFails();
+  testNavigationActiveWrongTextColorFails();
+  testNavigationActiveMissingUnderlineFails();
+  testFreshLoadRequiredAfterChromeChange();
   testValidManifestPasses();
   testRuntimeScreenshotMapUsingCanonicalPngsPasses();
   testExistingRootPaddingSuiteStillPasses();
@@ -211,6 +220,103 @@ function testCollapsedFinalReportFails() {
   expectFail("Final report collapses schema/sign/runtime/pixel proof into one generic pass", inspectFixture("collapsed-final-report.json", spec), "VALIDATION_PROOF_LAYER_COLLAPSED");
 }
 
+function testNavigatorMenuActiveMetadataAloneFails() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = {
+    required: true,
+    navigatorMenuMetadata: { activeColor: "#2563eb", activeBackground: "transparent", activeBorderBottom: "3px solid #2563eb" },
+  };
+  const report = inspectFixture("nav-active-metadata-alone.json", spec);
+  expectFail("Decoded navigator-menu active metadata alone fails without runtime proof", report, "NAV_ACTIVE_STYLE_METADATA_UNPROVEN");
+  assertHasCode(report, "NAV_ACTIVE_STYLE_RUNTIME_PROOF_MISSING");
+}
+
+function testLayoutViewCustomCssAloneFails() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = {
+    required: true,
+    layoutView: {
+      customcss: ".ak-listset-new-navigation-item.active { color: #2563eb; }",
+    },
+    runtimeProof: {
+      activeSelectorExists: true,
+      styleTagExists: false,
+      selectorHasEffect: false,
+      computedStyle: activeComputedStyle(),
+    },
+  };
+  const report = inspectFixture("layoutview-customcss-alone.json", spec);
+  expectFail("LayoutView.customcss alone fails without DOM/style proof", report, "LAYOUTVIEW_CUSTOMCSS_NOT_RUNTIME_INJECTED");
+  assertHasCode(report, "CUSTOM_CSS_STYLE_TAG_MISSING");
+  assertHasCode(report, "CUSTOM_CSS_SELECTOR_NO_EFFECT");
+}
+
+function testRootLevelCodeinFails() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = navigationActiveStylePass();
+  spec.supplierFidelity.navigationActiveStyle.cssInjector = {
+    type: "codein",
+    placement: "resource-root",
+    rootChild: true,
+    expectedToExecute: true,
+    hidden: true,
+    nonvisual: true,
+  };
+  expectFail("Root-level execution-critical codein fails", inspectFixture("root-level-codein.json", spec), "CODEIN_ROOT_CHILD_EXECUTION_RISK");
+}
+
+function testCodeinInRenderedContentPassesPlacement() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = navigationActiveStylePass();
+  spec.supplierFidelity.navigationActiveStyle.cssInjector = {
+    type: "codein",
+    placement: "Content",
+    expectedToExecute: true,
+    hidden: true,
+    nonvisual: true,
+    runtimeNodeExists: true,
+  };
+  expectPass("Codein inside rendered Content passes decoded placement validation", inspectFixture("content-codein-placement.json", spec));
+}
+
+function testNavigationActiveRuntimeProofPasses() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = navigationActiveStylePass();
+  expectPass("Runtime proof with transparent background, blue text, and blue bottom border passes", inspectFixture("nav-active-runtime-proof-pass.json", spec));
+}
+
+function testNavigationActiveGrayBackgroundFails() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = navigationActiveStylePass();
+  spec.supplierFidelity.navigationActiveStyle.runtimeProof.computedStyle.backgroundColor = "rgba(0, 0, 0, 0.1)";
+  expectFail("Runtime proof with gray active background fails", inspectFixture("nav-active-gray-background.json", spec), "NAV_ACTIVE_BACKGROUND_MISMATCH");
+}
+
+function testNavigationActiveWrongTextColorFails() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = navigationActiveStylePass();
+  spec.supplierFidelity.navigationActiveStyle.runtimeProof.computedStyle.color = "rgb(31, 41, 55)";
+  expectFail("Runtime proof with non-blue active text fails", inspectFixture("nav-active-wrong-text.json", spec), "NAV_ACTIVE_TEXT_COLOR_MISMATCH");
+}
+
+function testNavigationActiveMissingUnderlineFails() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = navigationActiveStylePass();
+  spec.supplierFidelity.navigationActiveStyle.runtimeProof.computedStyle.borderBottomWidth = "0px";
+  spec.supplierFidelity.navigationActiveStyle.runtimeProof.computedStyle.borderBottomStyle = "none";
+  expectFail("Runtime proof with missing underline fails", inspectFixture("nav-active-missing-underline.json", spec), "NAV_ACTIVE_BOTTOM_BORDER_MISMATCH");
+}
+
+function testFreshLoadRequiredAfterChromeChange() {
+  const spec = goodSpec();
+  spec.supplierFidelity.navigationActiveStyle = navigationActiveStylePass();
+  spec.supplierFidelity.navigationActiveStyle.runtimeProof.freshTopLevelLoad = false;
+  spec.supplierFidelity.navigationActiveStyle.runtimeProof.cacheBustBeforeHash = false;
+  const report = inspectFixture("nav-active-fresh-load-required.json", spec);
+  expectFail("Fresh top-level cache-bust proof is required after app chrome/page resource changes", report, "FRESH_LOAD_RUNTIME_PROOF_REQUIRED");
+  assertHasCode(report, "RUNTIME_LAYOUT_CACHE_STALE");
+}
+
 function testValidManifestPasses() {
   expectPass("Valid manifest with one PNG per page passes", inspectFixture("valid-manifest.json", goodSpec()));
 }
@@ -382,6 +488,41 @@ function goodSpec() {
         ],
       },
     },
+  };
+}
+
+function navigationActiveStylePass() {
+  return {
+    required: true,
+    changedAppChromeOrPageResources: true,
+    selector: ".ak-listset-new-navigation-item.active",
+    cssInjector: {
+      type: "codein",
+      placement: "Content",
+      expectedToExecute: true,
+      hidden: true,
+      nonvisual: true,
+      runtimeNodeExists: true,
+    },
+    runtimeProof: {
+      freshTopLevelLoad: true,
+      cacheBustBeforeHash: true,
+      activeSelectorExists: true,
+      styleTagExists: true,
+      selectorHasEffect: true,
+      styleText: "#supplier-horizontal-nav-active-style-v117 { } .ak-listset-new-navigation-item.active { color: rgb(37, 99, 235); background: transparent; border-bottom: 3px solid rgb(37, 99, 235); }",
+      computedStyle: activeComputedStyle(),
+    },
+  };
+}
+
+function activeComputedStyle() {
+  return {
+    backgroundColor: "rgba(0, 0, 0, 0)",
+    color: "rgb(37, 99, 235)",
+    borderBottomWidth: "3px",
+    borderBottomStyle: "solid",
+    borderBottomColor: "rgb(37, 99, 235)",
   };
 }
 

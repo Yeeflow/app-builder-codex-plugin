@@ -31,6 +31,8 @@ For full end-to-end app generation and Supplier-like validation reports, use the
 
 `schemaValidation: pass` is not UI proof. `signVerify: pass` or `installOrUpgrade: pass` is not runtime proof. Runtime browser proof must open the decoded installed `#/list-set/{AppID}/{ListSetID}` URL, not an install log or operation ID. Pixel/design comparison must use canonical per-page PNG artifacts and must not be collapsed into schema, API, or runtime status.
 
+Horizontal navigation active-state styling needs its own runtime proof boundary. `ListSet.LayoutView.attrs["navigator-menu"]` active-state metadata and `LayoutView.customcss` are decoded metadata only unless a runtime export/browser study proves they affect the app chrome. If active styling is required, final proof must use a fresh top-level load with a safe cache-busting query before the hash route and record Chrome DOM/computed-style evidence for `.ak-listset-new-navigation-item.active`: injected style tag present, selector text present, active item present, transparent active background, blue active text, and blue solid nonzero bottom border. A hidden `codein` CSS injector may be used only when placed inside a rendered page container such as `Content`; a root-child execution-critical `codein` is not enough. Package validation, signing, upgrade acceptance, ID stability, decoded CSS presence, and decoded control presence do not prove app chrome active-style success.
+
 ## Signing
 
 HTTP 200 from a signing endpoint is not enough. A signed package should verify:

@@ -51,6 +51,7 @@ for (const sourcePath of hardGateScripts) {
 
 const requiredDocs = [
   "docs/standards/yeeflow-application-layout-design-rules.md",
+  "docs/standards/runtime-proof-boundary-standard.md",
   "docs/standards/yeeflow-ui-control-property-fidelity.md",
   "docs/standards/yeeflow-control-property-knowledge-base.md",
   "docs/reference/yeeflow-control-configurations.normalized.json",
@@ -208,6 +209,25 @@ for (const findingCode of [
   "CONTROL_BINDING_GRAPH_INCOMPLETE",
   "DECODED_LISTSET_ID_NOT_RUNTIME_URL",
   "DESIGN_CONTROL_MAPPING_MISSING",
+  "NAV_ACTIVE_STYLE_METADATA_UNPROVEN",
+  "NAV_ACTIVE_STYLE_RUNTIME_PROOF_MISSING",
+  "NAV_ACTIVE_BACKGROUND_MISMATCH",
+  "NAV_ACTIVE_TEXT_COLOR_MISMATCH",
+  "NAV_ACTIVE_BOTTOM_BORDER_MISMATCH",
+  "LAYOUTVIEW_CUSTOMCSS_NOT_RUNTIME_INJECTED",
+  "CUSTOM_CSS_STYLE_TAG_MISSING",
+  "CUSTOM_CSS_SELECTOR_NO_EFFECT",
+  "CODEIN_ROOT_CHILD_EXECUTION_RISK",
+  "CODEIN_EXPECTED_TO_EXECUTE_NOT_IN_RENDERED_CONTAINER",
+  "CODEIN_RUNTIME_NODE_MISSING",
+  "STYLE_INJECTOR_TAG_MISSING",
+  "STYLE_INJECTOR_SELECTOR_MISSING",
+  "STYLE_INJECTOR_SELECTOR_NO_EFFECT",
+  "RUNTIME_LAYOUT_CACHE_STALE",
+  "FRESH_LOAD_RUNTIME_PROOF_REQUIRED",
+  "APP_CHROME_RUNTIME_COMPUTED_STYLE_REQUIRED",
+  "PACKAGE_VALID_BUT_RUNTIME_STYLE_FAILED",
+  "RUNTIME_DOM_SELECTOR_PROOF_MISSING",
 ]) {
   assert.match(supplierFidelityInspector, new RegExp(findingCode), `${findingCode} is enforced by inspect-supplier-runtime-design-fidelity`);
 }
@@ -226,6 +246,12 @@ for (const phrase of [
   /Dashboard\/app page root content-area padding is a hard gate/i,
   /attrs\.container\.cw = "2"/,
   /--sp--s0/,
+  /Horizontal navigation active-state styling is runtime-sensitive/,
+  /ListSet\.LayoutView\.attrs\["navigator-menu"\]/,
+  /LayoutView\.customcss/,
+  /ak-listset-new-navigation-item\.active/,
+  /fresh top-level cache-busted load/,
+  /hidden nonvisual `codein` inside a rendered page container/,
 ]) {
   assert.match(skillText, phrase, `hard-gate skill includes Summary/full-page wording: ${phrase}`);
 }
