@@ -10,6 +10,8 @@ When generating Yeeflow app design images, choose exactly one official applicati
 
 Supplier Onboarding runtime/design fidelity lessons require one canonical PNG per planned page before full app generation. Use `assets/generated-ui/<app-slug>/01-<page-slug>.design.png`, `02-<page-slug>.design.png`, and a `design-image-manifest.json` that maps page order, title, slug, canonical PNG, optional source SVG, and viewport. SVG is optional source only; a combined design board is not a page artifact. Runtime proof must open the exact installed `#/list-set/{AppID}/{ListSetID}` URL and record the landed page title. Use `scripts/inspect-supplier-runtime-design-fidelity.mjs` to validate runtime ListSetID proof, design section coverage, KPI count/labels, page background/chrome consistency, real Data Filter bindings, Collection data source/detail links, analytics controls, progress/status treatment, Summary/KPI metadata, and canonical PNG pixel-compare mapping.
 
+Supplier validation-layer reporting must keep package/schema acceptance separate from UI correctness. Full end-to-end generation reports must list `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` as separate layers. A schema pass is not UI proof, signing/install/upgrade API acceptance is not runtime proof, runtime browser proof must use the decoded ListSetID URL, and canonical PNG pixel comparison must not be collapsed into runtime or schema status.
+
 ## Expected Version
 
 `0.6.55`

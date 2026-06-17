@@ -15,10 +15,12 @@ const cases = [];
 try {
   testRuntimeProofRejectsInstallLogId();
   testRuntimeProofRejectsDesignerUrl();
+  testRuntimeProofRejectsDecodedListSetMismatch();
   testMissingDesignSectionFails();
   testKpiCountMismatchFails();
   testStaticTextFilterFails();
   testFilterMissingBindingMetadataFails();
+  testFilterVariableNotConsumedFails();
   testCollectionWrongListFails();
   testCollectionDetailLinkUnresolvedFails();
   testChartApproximationFails();
@@ -30,6 +32,9 @@ try {
   testSvgCanonicalFails();
   testDesignBoardOnlyFails();
   testPageCountOrderMismatchFails();
+  testSchemaPassNotUiProofFails();
+  testApiAcceptanceNotRuntimeProofFails();
+  testCollapsedFinalReportFails();
   testValidManifestPasses();
   testRuntimeScreenshotMapUsingCanonicalPngsPasses();
   testExistingRootPaddingSuiteStillPasses();
@@ -54,10 +59,21 @@ function testRuntimeProofRejectsDesignerUrl() {
   expectFail("Runtime proof rejects designer/root/admin URL", inspectFixture("runtime-designer-url.json", spec), "RUNTIME_PROOF_LANDED_IN_DESIGNER");
 }
 
+function testRuntimeProofRejectsDecodedListSetMismatch() {
+  const spec = goodSpec();
+  spec.runtimeProof.decodedListSetId = "supplier-listset-redacted";
+  spec.runtimeProof.finalUrl = "https://example.invalid/#/list-set/41/install-log-123";
+  spec.proofLayers.runtimeBrowserProof.runtimeUrl = spec.runtimeProof.finalUrl;
+  spec.proofLayers.idStabilityValidation.decodedListSetId = "supplier-listset-redacted";
+  expectFail("Runtime proof URL uses install log ID instead of decoded ListSetID", inspectFixture("decoded-listset-runtime-url-mismatch.json", spec), "DECODED_LISTSET_ID_NOT_RUNTIME_URL");
+}
+
 function testMissingDesignSectionFails() {
   const spec = goodSpec();
   spec.supplierFidelity.implementation.sections = ["filters", "kpis", "recent supplier intakes"];
-  expectFail("Missing design section fails", inspectFixture("missing-design-section.json", spec), "DESIGN_SECTION_MISSING");
+  const report = inspectFixture("missing-design-section.json", spec);
+  expectFail("Package schema passes but design section is missing", report, "DESIGN_SECTION_MISSING");
+  assertHasCode(report, "DESIGN_CONTROL_MAPPING_MISSING");
 }
 
 function testKpiCountMismatchFails() {
@@ -82,10 +98,16 @@ function testFilterMissingBindingMetadataFails() {
   assertHasCode(report, "DATA_FILTER_FIELD_METADATA_INVALID");
 }
 
+function testFilterVariableNotConsumedFails() {
+  const spec = goodSpec();
+  spec.supplierFidelity.filters[0].targetCollection.consumedFilterVariables = [];
+  expectFail("Package schema passes but filter variable is not consumed by target collection", inspectFixture("filter-variable-not-consumed.json", spec), "DATA_FILTER_VARIABLE_NOT_USED_BY_TARGET_COLLECTION");
+}
+
 function testCollectionWrongListFails() {
   const spec = goodSpec();
   spec.supplierFidelity.collections[0].data.list.ListID = "wrong-list";
-  expectFail("Collection bound to wrong list fails", inspectFixture("collection-wrong-list.json", spec), "COLLECTION_DATA_SOURCE_MISMATCH");
+  expectFail("Package schema passes but collection uses wrong ListSetID/list metadata", inspectFixture("collection-wrong-list.json", spec), "COLLECTION_DATA_SOURCE_MISMATCH");
 }
 
 function testCollectionDetailLinkUnresolvedFails() {
@@ -98,7 +120,7 @@ function testCollectionDetailLinkUnresolvedFails() {
 function testChartApproximationFails() {
   const spec = goodSpec();
   spec.supplierFidelity.analytics[0].approximation = true;
-  expectFail("Chart approximation used where line/pie chart required fails", inspectFixture("chart-approximation.json", spec), "ANALYTICS_CONTROL_APPROXIMATION_USED");
+  expectFail("Package schema passes but chart requirement is satisfied by static approximation", inspectFixture("chart-approximation.json", spec), "ANALYTICS_CONTROL_APPROXIMATION_USED");
 }
 
 function testAnalyticsBindingIncompleteFails() {
@@ -159,6 +181,36 @@ function testPageCountOrderMismatchFails() {
   assertHasCode(report, "DESIGN_PAGE_ORDER_MISMATCH");
 }
 
+function testSchemaPassNotUiProofFails() {
+  const spec = goodSpec();
+  spec.proofLayers.designContractValidation = { status: "missing" };
+  spec.proofLayers.controlBindingValidation = { status: "missing" };
+  spec.proofLayers.runtimeBrowserProof = { status: "missing" };
+  spec.proofLayers.pixelComparison = { status: "missing" };
+  const report = inspectFixture("schema-pass-not-ui-proof.json", spec);
+  expectFail("Package schema passes but design/control/runtime/pixel proof layers are missing", report, "SCHEMA_PASS_USED_AS_UI_PROOF");
+  assertHasCode(report, "CONTROL_BINDING_GRAPH_INCOMPLETE");
+  assertHasCode(report, "DESIGN_CONTROL_MAPPING_MISSING");
+}
+
+function testApiAcceptanceNotRuntimeProofFails() {
+  const spec = goodSpec();
+  spec.proofLayers.runtimeBrowserProof = { status: "not-run" };
+  spec.validationReport = { requiresLayeredProof: true, runtimeProofSource: "api-acceptance", proofLayers: spec.proofLayers };
+  expectFail("Upgrade API acceptance is incorrectly used as runtime proof", inspectFixture("api-acceptance-not-runtime-proof.json", spec), "API_ACCEPTANCE_USED_AS_RUNTIME_PROOF");
+}
+
+function testCollapsedFinalReportFails() {
+  const spec = goodSpec();
+  delete spec.proofLayers;
+  spec.validationReport = {
+    requiresLayeredProof: true,
+    overallStatus: "pass",
+    proofLayersCollapsed: true,
+  };
+  expectFail("Final report collapses schema/sign/runtime/pixel proof into one generic pass", inspectFixture("collapsed-final-report.json", spec), "VALIDATION_PROOF_LAYER_COLLAPSED");
+}
+
 function testValidManifestPasses() {
   expectPass("Valid manifest with one PNG per page passes", inspectFixture("valid-manifest.json", goodSpec()));
 }
@@ -204,9 +256,22 @@ function goodSpec() {
   const list = { AppID: "41", ListSetID: "supplier-listset-redacted", ListID: "suppliers-list-redacted", Type: "list", Title: "Suppliers" };
   const field = { FieldName: "Text4", DisplayName: "Onboarding Stage", Type: "text" };
   return {
+    proofLayers: {
+      schemaValidation: { status: "pass" },
+      appPlanConformance: { status: "pass" },
+      designContractValidation: { status: "pass" },
+      controlBindingValidation: { status: "pass" },
+      exactMetadataShapeValidation: { status: "pass" },
+      idStabilityValidation: { status: "pass", decodedListSetId: "supplier-listset-redacted" },
+      signVerify: { status: "pass" },
+      installOrUpgrade: { status: "pass" },
+      runtimeBrowserProof: { status: "pass", runtimeUrl: "https://example.invalid/#/list-set/41/supplier-listset-redacted" },
+      pixelComparison: { status: "pass" },
+    },
     runtimeProof: {
       expectedAppId: "41",
       expectedListSetId: "supplier-listset-redacted",
+      decodedListSetId: "supplier-listset-redacted",
       finalUrl: "https://example.invalid/#/list-set/41/supplier-listset-redacted",
       pageTitle: "Supplier Intake Dashboard",
       installLogIds: ["install-log-123"],
@@ -222,6 +287,7 @@ function goodSpec() {
     },
     supplierFidelity: {
       plan: {
+        requiresLayeredProof: true,
         requiresCanonicalDesignPngs: true,
         pages: [
           { pageTitle: "Supplier Intake Dashboard" },

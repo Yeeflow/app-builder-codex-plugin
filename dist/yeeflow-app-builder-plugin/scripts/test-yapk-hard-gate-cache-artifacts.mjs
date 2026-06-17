@@ -202,6 +202,12 @@ for (const findingCode of [
   "DESIGN_BOARD_USED_AS_PAGE_ARTIFACT",
   "PIXEL_COMPARE_INPUT_NOT_CANONICAL_PNG",
   "APP_GENERATION_STARTED_WITHOUT_PAGE_DESIGN_PNGS",
+  "VALIDATION_PROOF_LAYER_COLLAPSED",
+  "SCHEMA_PASS_USED_AS_UI_PROOF",
+  "API_ACCEPTANCE_USED_AS_RUNTIME_PROOF",
+  "CONTROL_BINDING_GRAPH_INCOMPLETE",
+  "DECODED_LISTSET_ID_NOT_RUNTIME_URL",
+  "DESIGN_CONTROL_MAPPING_MISSING",
 ]) {
   assert.match(supplierFidelityInspector, new RegExp(findingCode), `${findingCode} is enforced by inspect-supplier-runtime-design-fidelity`);
 }
