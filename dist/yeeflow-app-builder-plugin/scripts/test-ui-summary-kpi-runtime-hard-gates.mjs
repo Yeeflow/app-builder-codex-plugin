@@ -5,7 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import zlib from "node:zlib";
-import { inspectDashboardStyleShapes } from "./inspect-dashboard-style-shapes.mjs";
+import { inspectDashboardStyleShapes, normalizeDashboardRootContentPadding, normalizeDataListCustomFormRootContentPadding } from "./inspect-dashboard-style-shapes.mjs";
 import { inspectDashboardSummaryControlContract } from "./inspect-dashboard-summary-control-contract.mjs";
 import { inspectDataAnalyticsControlIdentity } from "./inspect-data-analytics-control-identity.mjs";
 import { inspectGridTableQuality } from "./inspect-grid-table-quality.mjs";
@@ -50,6 +50,30 @@ function run() {
 
   expectPass("Export-proven card style shape passes", inspectDashboardStyleShapes({ package: writeJson("style-valid.json", decoded({ card: "export" })) }));
   expectFail("Weak unsupported style shape fails", inspectDashboardStyleShapes({ package: writeJson("style-weak.json", decoded({ card: "weak" })) }), "DASHBOARD_WEAK_UNSUPPORTED_STYLE_SHAPE");
+  expectFail("Dashboard root scalar padding fails", inspectDashboardStyleShapes({ package: writeJson("dashboard-root-padding-scalar.json", decoded({ dashboardRootPadding: 0 })) }), "DASHBOARD_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Dashboard root object/numeric padding fails", inspectDashboardStyleShapes({ package: writeJson("dashboard-root-padding-object.json", decoded({ dashboardRootPadding: { "1": { top: 0, right: 0, bottom: 0, left: 0 } } })) }), "DASHBOARD_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Dashboard root numeric array padding fails", inspectDashboardStyleShapes({ package: writeJson("dashboard-root-padding-numeric-array.json", decoded({ dashboardRootPadding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] })) }), "DASHBOARD_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Dashboard root common/style padding alone fails", inspectDashboardStyleShapes({ package: writeJson("dashboard-root-padding-common-style.json", decoded({ dashboardRootPadding: undefined, omitDashboardRootContainerPadding: true, commonPaddingOnly: true, stylePaddingOnly: true })) }), "DASHBOARD_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Dashboard root missing cw fails", inspectDashboardStyleShapes({ package: writeJson("dashboard-root-cw-missing.json", decoded({ omitDashboardRootCw: true })) }), "DASHBOARD_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Dashboard root wrong cw fails", inspectDashboardStyleShapes({ package: writeJson("dashboard-root-cw-wrong.json", decoded({ dashboardRootCw: "1" })) }), "DASHBOARD_ROOT_CONTENT_PADDING_INVALID");
+  expectPass("Dashboard root exact token-array padding passes", inspectDashboardStyleShapes({ package: writeJson("dashboard-root-padding-token-array.json", decoded({ card: "export" })) }));
+  const normalizableRoot = { attrs: { container: { padding: 0 } }, children: [exportCard()] };
+  normalizeDashboardRootContentPadding(normalizableRoot);
+  assert.deepEqual(normalizableRoot.attrs.container, { cw: "2", padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] });
+  expectPass("Upgrade normalization rewrites dashboard page root padding to exact token-array shape", inspectDashboardStyleShapes({ package: writeJson("dashboard-root-padding-normalized.json", decoded({ rootOverride: normalizableRoot })) }));
+  expectPass("Non-root inner containers may keep intentional padding", inspectDashboardStyleShapes({ package: writeJson("dashboard-inner-padding-valid.json", decoded({ innerPadding: [null, { top: "--sp--s300", right: "--sp--s300", bottom: "--sp--s300", left: "--sp--s300" }] })) }));
+  expectFail("Data-list custom form root scalar padding fails", inspectDashboardStyleShapes({ package: writeJson("custom-form-root-padding-scalar.json", decoded({ customFormRootPadding: 0 })) }), "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Data-list custom form root object/numeric padding fails", inspectDashboardStyleShapes({ package: writeJson("custom-form-root-padding-object.json", decoded({ customFormRootPadding: { "1": { top: 0, right: 0, bottom: 0, left: 0 } } })) }), "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Data-list custom form root numeric array padding fails", inspectDashboardStyleShapes({ package: writeJson("custom-form-root-padding-numeric-array.json", decoded({ customFormRootPadding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] })) }), "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Data-list custom form root common/style padding alone fails", inspectDashboardStyleShapes({ package: writeJson("custom-form-root-padding-common-style.json", decoded({ customFormRootPadding: undefined, omitCustomFormRootContainerPadding: true, customFormCommonPaddingOnly: true, customFormStylePaddingOnly: true })) }), "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Data-list custom form root missing cw fails", inspectDashboardStyleShapes({ package: writeJson("custom-form-root-cw-missing.json", decoded({ omitCustomFormRootCw: true })) }), "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID");
+  expectFail("Data-list custom form root wrong cw fails", inspectDashboardStyleShapes({ package: writeJson("custom-form-root-cw-wrong.json", decoded({ customFormRootCw: "1", customFormRootPadding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] })) }), "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID");
+  expectPass("Data-list custom form root exact token-array padding passes", inspectDashboardStyleShapes({ package: writeJson("custom-form-root-padding-token-array.json", decoded({ customFormRootPadding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] })) }));
+  const normalizableFormRoot = { attrs: { container: { padding: { "1": { top: 0, right: 0, bottom: 0, left: 0 } } } }, children: [innerPaddedContainer([null, { top: "--sp--s200", right: "--sp--s200", bottom: "--sp--s200", left: "--sp--s200" }])] };
+  normalizeDataListCustomFormRootContentPadding(normalizableFormRoot);
+  assert.deepEqual(normalizableFormRoot.attrs.container, { cw: "2", padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] });
+  expectPass("Upgrade normalization rewrites data-list custom form root padding to exact token-array shape", inspectDashboardStyleShapes({ package: writeJson("custom-form-root-padding-normalized.json", decoded({ customFormRootOverride: normalizableFormRoot })) }));
+  expectPass("Data-list custom form inner containers may keep intentional padding", inspectDashboardStyleShapes({ package: writeJson("custom-form-inner-padding-valid.json", decoded({ customFormInnerPadding: [null, { top: "--sp--s300", right: "--sp--s300", bottom: "--sp--s300", left: "--sp--s300" }] })) }));
 
   expectPass("Hidden Summary container hide/direction/display rule shape passes with zero top-level Page ReportIds", inspectDashboardSummaryControlContract({ package: writeJson("summary-valid.json", decoded({ summary: "valid" })) }));
   expectPass("Exact UUID Summary shape with Resource.exts ReportIds tempVars and visible binding passes", inspectDashboardSummaryControlContract({ package: writeJson("summary-uuid-proof-valid.json", decoded({ summary: "uuid-proof-valid" })) }));
@@ -145,12 +169,13 @@ function decoded(flags = {}) {
     .map((summary) => summary.attrs?.save_var)
     .filter((saveVar) => typeof saveVar === "object")
     .map((saveVar) => ({ id: saveVar.id, name: saveVar.name }));
-  const root = {
+  const root = flags.rootOverride || {
     type: "page",
+    attrs: dashboardRootAttrs(flags),
     ReportIds: registeredSummaryIds,
     exts: flags.summary === "missing-exts" || flags.summary === "uuid-proof-no-exts" || flags.summary === "non-uuid" ? [] : summaryIds.map((id) => ({ i: id, category: "___Pivot___", key: "summary" })),
     tempVars: flags.summary === "missing-tempvars" || flags.summary === "uuid-proof-no-tempvars" ? [] : tempVars,
-    children: [card, summaryHost, ...summaries.map((summary, index) => summaryVisibleKpi(flags.summary, summary, index)), gridControl].filter(Boolean),
+    children: [card, flags.innerPadding ? innerPaddedContainer(flags.innerPadding) : null, summaryHost, ...summaries.map((summary, index) => summaryVisibleKpi(flags.summary, summary, index)), gridControl].filter(Boolean),
   };
   if (uuidProof) {
     root.kpiRuntimeProofShape = "uuid-summary-v1.0.1";
@@ -173,7 +198,73 @@ function decoded(flags = {}) {
         field("Decimal1", "Decimal", "Budget"),
         field("Text1", "Text", "Status"),
       ],
+      Layouts: flags.customFormRootPadding !== undefined || flags.omitCustomFormRootCw || flags.omitCustomFormRootContainerPadding || flags.customFormRootOverride || flags.customFormInnerPadding
+        ? [customFormLayout(flags)]
+        : [],
     }],
+  };
+}
+
+function customFormLayout(flags = {}) {
+  return {
+    Title: "Edit Item",
+    Type: 1,
+    LayoutID: "layout-edit-item",
+    LayoutInResources: [{ Resource: JSON.stringify(flags.customFormRootOverride || {
+      type: "page",
+      attrs: customFormRootAttrs(flags),
+      children: [flags.customFormInnerPadding ? innerPaddedContainer(flags.customFormInnerPadding) : fieldSection()].filter(Boolean),
+      title: "Edit Item",
+      filterVars: [],
+      ver: "1.0",
+      tempVars: [],
+    }) }],
+  };
+}
+
+function customFormRootAttrs(flags = {}) {
+  const attrs = {};
+  if (flags.customFormCommonPaddingOnly) attrs.common = { padding: 0 };
+  if (flags.customFormStylePaddingOnly) attrs.style = { padding: 0 };
+  attrs.container = {};
+  if (!flags.omitCustomFormRootCw) attrs.container.cw = flags.customFormRootCw || "2";
+  if (!flags.omitCustomFormRootContainerPadding) {
+    attrs.container.padding = flags.customFormRootPadding === undefined
+      ? [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]
+      : flags.customFormRootPadding;
+  }
+  return attrs;
+}
+
+function fieldSection() {
+  return {
+    id: "custom-form-field-section",
+    type: "container",
+    attrs: { common: { padding: [null, { top: "--sp--s200", right: "--sp--s200", bottom: "--sp--s200", left: "--sp--s200" }] } },
+    children: [],
+  };
+}
+
+function dashboardRootAttrs(flags = {}) {
+  const attrs = {};
+  if (flags.commonPaddingOnly) attrs.common = { padding: 0 };
+  if (flags.stylePaddingOnly) attrs.style = { padding: 0 };
+  attrs.container = {};
+  if (!flags.omitDashboardRootCw) attrs.container.cw = flags.dashboardRootCw || "2";
+  if (!flags.omitDashboardRootContainerPadding) {
+    attrs.container.padding = flags.dashboardRootPadding === undefined
+      ? [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]
+      : flags.dashboardRootPadding;
+  }
+  return attrs;
+}
+
+function innerPaddedContainer(padding) {
+  return {
+    id: "intentionally-padded-inner-section",
+    type: "container",
+    attrs: { common: { padding } },
+    children: [],
   };
 }
 

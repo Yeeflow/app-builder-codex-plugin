@@ -310,10 +310,27 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
   counts.fields += asArray(pkg.Fields).length;
   counts.layouts += asArray(pkg.Layouts).length;
   for (const [index, field] of asArray(pkg.Fields).entries()) validateField(field, `${path}.Fields[${index}]`, errors, warnings);
+  validateDataListCustomFormRootContentPadding(pkg, path, errors);
   validateNativeTitle(pkg.Fields, path, errors);
   validateDefaultViews(pkg, path, errors);
   validateChoiceSampleRows(pkg, path, errors);
   if ("Defs" in pkg) add(errors, "YAPK_CHILDS_USES_DEFS", "YAPK Childs items must use Fields, not YAP Defs.", { path: `${path}.Defs` });
+}
+
+function validateDataListCustomFormRootContentPadding(pkg, path, errors) {
+  for (const [layoutIndex, layout] of asArray(pkg.Layouts).entries()) {
+    if (String(layout?.Type ?? "") !== "1") continue;
+    for (const [resourceIndex, resource] of asArray(layout.LayoutInResources).entries()) {
+      const parsed = parseMaybeJson(resource?.Resource);
+      if (!parsed) continue;
+      if (!isDashboardRootContentPaddingShape(parsed.attrs?.container)) {
+        add(errors, "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID", "Data-list custom form root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", {
+          path: `${path}.Layouts[${layoutIndex}].LayoutInResources[${resourceIndex}].Resource.attrs.container`,
+          layout: layout.Title || null,
+        });
+      }
+    }
+  }
 }
 
 function storageFamilyForFieldName(fieldName) {
@@ -845,8 +862,9 @@ function validateDashboardResourceShape(parsed, path, errors) {
     const content = asArray(main.children).find((child) => child?.id === "Content" || child?.name === "Content");
     if (!content) add(errors, "DASHBOARD_MAIN_CONTENT_NOT_IN_CHILDREN", "Dashboard Content container must be inside the top-level Main container for standard dashboard pages.", { path });
   }
-  const pagePadding = parsed.attrs?.container?.padding ?? parsed.attrs?.style?.padding ?? parsed.attrs?.padding;
-  if (!isZeroPadding(pagePadding)) add(errors, "DASHBOARD_PAGE_PADDING_MISSING", "Dashboard page content-area padding should be explicitly zero; spacing belongs in Main > Content for Style 1 dashboards or in the root shell for Style 2 workspace dashboards.", { path: `${path}.attrs.container.padding` });
+  if (!isDashboardRootContentPaddingShape(parsed.attrs?.container)) {
+    add(errors, "DASHBOARD_ROOT_CONTENT_PADDING_INVALID", "Dashboard page root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", { path: `${path}.attrs.container` });
+  }
   if (hasRootWorkspaceShell && !pageContentWidthIsFull(parsed)) {
     add(errors, "THREE_COLUMN_PAGE_WIDTH_NOT_FULL", "Three-column workspace dashboard pages must set content width to Full Width.", { path: `${path}.attrs.contentWidth` });
   }
@@ -858,11 +876,16 @@ function validateDashboardResourceShape(parsed, path, errors) {
   });
 }
 
-function isZeroPadding(value) {
-  if (value === 0 || value === "0" || value === "0px" || value === "--sp--s0") return true;
-  if (Array.isArray(value)) return value.every((item) => item === null || isZeroPadding(item));
-  if (isObject(value)) return Object.values(value).every(isZeroPadding);
-  return false;
+function isDashboardRootContentPaddingShape(container) {
+  if (!isObject(container) || container.cw !== "2") return false;
+  const padding = container.padding;
+  if (!Array.isArray(padding) || padding.length !== 2 || padding[0] !== null || !isObject(padding[1])) return false;
+  const keys = Object.keys(padding[1]).sort().join(",");
+  return keys === "bottom,left,right,top"
+    && padding[1].top === "--sp--s0"
+    && padding[1].right === "--sp--s0"
+    && padding[1].bottom === "--sp--s0"
+    && padding[1].left === "--sp--s0";
 }
 
 function hasRootThreeColumnWorkspaceShell(page) {

@@ -17,6 +17,7 @@ const hardGateScripts = [
   "scripts/compare-design-to-runtime-structure.mjs",
   "scripts/inspect-ui-closed-loop-workflow-enforcement.mjs",
   "scripts/inspect-application-layout-design-rules.mjs",
+  "scripts/inspect-dashboard-style-shapes.mjs",
   "scripts/inspect-runtime-navigation-proof.mjs",
   "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/inspect-yeeflow-control-configurations.mjs",
@@ -146,6 +147,18 @@ for (const findingCode of [
   assert.match(uiFidelityInspector, new RegExp(findingCode), `${findingCode} is enforced by inspect-ui-control-property-fidelity`);
 }
 
+const dashboardStyleInspector = fs.readFileSync(path.join(ROOT, "scripts/inspect-dashboard-style-shapes.mjs"), "utf8");
+for (const phrase of [
+  "DASHBOARD_ROOT_CONTENT_PADDING_INVALID",
+  "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID",
+  "attrs.container.cw = \\\"2\\\"",
+  "--sp--s0",
+  "normalizeDashboardRootContentPadding",
+  "normalizeDataListCustomFormRootContentPadding",
+]) {
+  assert.match(dashboardStyleInspector, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `dashboard style inspector includes root padding gate phrase: ${phrase}`);
+}
+
 const skillText = fs.readFileSync(path.join(ROOT, "skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md"), "utf8");
 for (const phrase of [
   /type: "summary"/,
@@ -157,6 +170,9 @@ for (const phrase of [
   /resolved collection form links|Collection links must resolve/i,
   /Dynamic user\/person controls (must bind|bound) to User/i,
   /formatNumber/i,
+  /Dashboard\/app page root content-area padding is a hard gate/i,
+  /attrs\.container\.cw = "2"/,
+  /--sp--s0/,
 ]) {
   assert.match(skillText, phrase, `hard-gate skill includes Summary/full-page wording: ${phrase}`);
 }
