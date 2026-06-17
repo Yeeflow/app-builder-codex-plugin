@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.57`
+- Version: `0.6.58`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.57` adds horizontal navigation active-state runtime gates: active-state `navigator-menu` metadata and `LayoutView.customcss` are not runtime proof without DOM/style tag evidence, hidden `codein` injectors must be placed inside rendered containers such as `Content`, fresh cache-busted top-level loads are required after app chrome/page-resource changes, and runtime proof must show the style tag, intended selector, active item, transparent background, blue text, and blue solid nonzero bottom border. Supplier proof-layer gates from `0.6.56` and root-padding gates from `0.6.55` remain baseline behavior; approval-form root padding remains deferred pending clearer evidence.
+Current release `0.6.58` adds full-page design blueprint generation gates: canonical page PNGs must be full-page implementation-ready artifacts, not first-viewport mockups, and viewport-only designs, missing planned sections, missing table/form detail, missing page end, unresolved placeholders, SVG-only artifacts, and design-board substitutes are rejected. Every page now needs an implementation blueprint before Yeeflow resource generation, with design-to-control mapping, hierarchy, control type, `id`, semantic `nv_label`, parent/child relationships, exact property paths, sizing/spacing/border/background/shadow/typography rules, data/list/field bindings, Summary/KPI aggregation, Data Filter variables, Collection/table columns, row links, Dynamic user/person bindings, progress/status/badge bindings, actions, interactions, and runtime proof plan. Decoded resources must match the blueprint before package/sign/upgrade; local/schema/API proof remains separate from runtime proof. Navigation gates from `0.6.57`, Supplier proof gates from `0.6.56`, root-padding gates from `0.6.55`, and Summary/filter/collection/content fidelity gates remain baseline behavior; approval-form root padding remains deferred.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.57
+Version: 0.6.58
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.57
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.58
 ```
 
 ## What Is Included
