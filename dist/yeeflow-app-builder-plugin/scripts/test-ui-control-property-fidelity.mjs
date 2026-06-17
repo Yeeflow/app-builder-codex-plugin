@@ -88,7 +88,9 @@ function run() {
   testSummaryPivotExtMissingFails();
   testSummarySettingsValuesMissingFails();
   testSummaryCountFieldFails();
+  testSummaryPivotListSetIdMissingFails();
   testSummaryTopLevelSaveVarFails();
+  testSummaryAttrsSaveVarFails();
   testSummaryHiddenHostVisibleFails();
   testSummaryHiddenHostNameMisclassifiedFails();
   testVisibleKpiNotBoundToSummaryFails();
@@ -643,11 +645,24 @@ function testSummaryCountFieldFails() {
   expectFail("Fail: COUNT Summary uses a business/display field instead of ListDataID", inspectFixture("summary-count-field.json", spec), "SUMMARY_COUNT_FIELD_MUST_BE_LISTDATAID");
 }
 
+function testSummaryPivotListSetIdMissingFails() {
+  const spec = fullPageSpec();
+  delete spec.pageResource.exts[0].attr.ListSetID;
+  expectFail("Fail: Summary pivot metadata missing ListSetID", inspectFixture("summary-listsetid-missing.json", spec), "SUMMARY_PIVOT_LISTSETID_MISSING");
+}
+
 function testSummaryTopLevelSaveVarFails() {
   const spec = fullPageSpec();
   delete spec.summaryControls[0].save_var;
   delete spec.summaryControls[0].saveVar;
   expectFail("Fail: Summary missing top-level save_var / saveVar", inspectFixture("summary-top-level-save-var.json", spec), "SUMMARY_SAVE_VAR_TOP_LEVEL_MISSING");
+}
+
+function testSummaryAttrsSaveVarFails() {
+  const spec = fullPageSpec();
+  delete spec.summaryControls[0].attrs.save_var;
+  delete spec.summaryControls[0].attrs.saveVar;
+  expectFail("Fail: Summary missing attrs-level save_var / saveVar", inspectFixture("summary-attrs-save-var.json", spec), "SUMMARY_SAVE_VAR_ATTRS_MISSING");
 }
 
 function testSummaryHiddenHostVisibleFails() {
