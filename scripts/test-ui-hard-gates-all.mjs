@@ -61,6 +61,15 @@ const childTests = [
     ],
   },
   {
+    name: "Full-page design blueprint generation regression suite",
+    command: ["scripts/test-full-page-design-blueprint-generation-gates.mjs"],
+    validators: [
+      "inspect-full-page-design-artifacts",
+      "inspect-page-implementation-blueprint",
+      "compare-blueprint-to-decoded-resource",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [

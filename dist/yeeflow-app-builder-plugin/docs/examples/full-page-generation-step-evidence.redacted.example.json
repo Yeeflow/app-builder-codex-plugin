@@ -1,0 +1,42 @@
+{
+  "workflow": {
+    "functionalSpec": {
+      "status": "complete",
+      "artifact": "docs/generated-ui-contracts/customer-support-case-triage/functional-spec.md"
+    },
+    "appPlan": {
+      "status": "complete",
+      "artifact": "docs/generated-ui-contracts/customer-support-case-triage/app-plan.md"
+    },
+    "fullPageDesignImages": {
+      "status": "complete",
+      "artifact": "assets/generated-ui/customer-support-case-triage/design-image-manifest.json"
+    },
+    "pageImplementationBlueprint": {
+      "status": "complete",
+      "artifact": "docs/generated-ui-contracts/customer-support-case-triage/page-implementation-blueprint.json"
+    },
+    "controlPropertyContract": {
+      "status": "complete",
+      "artifact": "docs/generated-ui-contracts/customer-support-case-triage/control-property-contract.json"
+    },
+    "resourceGeneration": {
+      "status": "complete",
+      "artifact": "dist/generated/customer-support-case-triage/decoded-resource.redacted.json"
+    },
+    "decodedResourceParityValidation": {
+      "status": "pass",
+      "evidence": "compare-blueprint-to-decoded-resource"
+    },
+    "localHardGates": {
+      "status": "pass",
+      "evidence": "test-ui-hard-gates-all"
+    },
+    "packageSignUpgrade": {
+      "status": "not-started"
+    },
+    "runtimeProof": {
+      "status": "not-started"
+    }
+  }
+}

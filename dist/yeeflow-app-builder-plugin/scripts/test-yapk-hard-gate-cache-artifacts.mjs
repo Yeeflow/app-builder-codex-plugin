@@ -20,6 +20,9 @@ const hardGateScripts = [
   "scripts/inspect-dashboard-style-shapes.mjs",
   "scripts/inspect-runtime-navigation-proof.mjs",
   "scripts/inspect-supplier-runtime-design-fidelity.mjs",
+  "scripts/inspect-full-page-design-artifacts.mjs",
+  "scripts/inspect-page-implementation-blueprint.mjs",
+  "scripts/compare-blueprint-to-decoded-resource.mjs",
   "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/inspect-yeeflow-control-configurations.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
@@ -34,6 +37,7 @@ const hardGateScripts = [
   "scripts/test-design-runtime-fidelity-study-hard-gates.mjs",
   "scripts/test-runtime-navigation-proof-gates.mjs",
   "scripts/test-supplier-runtime-design-fidelity-gates.mjs",
+  "scripts/test-full-page-design-blueprint-generation-gates.mjs",
   "scripts/test-ui-control-property-fidelity.mjs",
   "scripts/test-yeeflow-control-property-knowledge-base.mjs",
 ];
@@ -52,6 +56,7 @@ for (const sourcePath of hardGateScripts) {
 const requiredDocs = [
   "docs/standards/yeeflow-application-layout-design-rules.md",
   "docs/standards/runtime-proof-boundary-standard.md",
+  "docs/standards/full-page-design-blueprint-generation-standard.md",
   "docs/standards/yeeflow-ui-control-property-fidelity.md",
   "docs/standards/yeeflow-control-property-knowledge-base.md",
   "docs/reference/yeeflow-control-configurations.normalized.json",
@@ -163,6 +168,9 @@ for (const phrase of [
 }
 
 const supplierFidelityInspector = fs.readFileSync(path.join(ROOT, "scripts/inspect-supplier-runtime-design-fidelity.mjs"), "utf8");
+const fullPageDesignInspector = fs.readFileSync(path.join(ROOT, "scripts/inspect-full-page-design-artifacts.mjs"), "utf8");
+const pageBlueprintInspector = fs.readFileSync(path.join(ROOT, "scripts/inspect-page-implementation-blueprint.mjs"), "utf8");
+const blueprintParityInspector = fs.readFileSync(path.join(ROOT, "scripts/compare-blueprint-to-decoded-resource.mjs"), "utf8");
 for (const findingCode of [
   "RUNTIME_LISTSET_ID_MISMATCH",
   "INSTALL_LOG_ID_USED_AS_LISTSET_ID",
@@ -232,6 +240,47 @@ for (const findingCode of [
   assert.match(supplierFidelityInspector, new RegExp(findingCode), `${findingCode} is enforced by inspect-supplier-runtime-design-fidelity`);
 }
 
+for (const findingCode of [
+  "FULL_PAGE_DESIGN_ARTIFACT_MISSING",
+  "CANONICAL_PAGE_DESIGN_NOT_FULL_PAGE",
+  "DESIGN_IMAGE_VIEWPORT_CROP_ONLY",
+  "DESIGN_IMAGE_MISSING_PLANNED_SECTION",
+  "DESIGN_IMAGE_MISSING_TABLE_DETAIL",
+  "DESIGN_IMAGE_MISSING_FORM_DETAIL",
+  "DESIGN_IMAGE_MISSING_PAGE_END",
+  "DESIGN_IMAGE_PLACEHOLDER_REGION_UNRESOLVED",
+  "STEP_COMPLETION_EVIDENCE_MISSING",
+  "NEXT_STEP_STARTED_WITH_INCOMPLETE_PRIOR_STEP",
+]) {
+  assert.match(fullPageDesignInspector, new RegExp(findingCode), `${findingCode} is enforced by inspect-full-page-design-artifacts`);
+}
+
+for (const findingCode of [
+  "PAGE_IMPLEMENTATION_BLUEPRINT_MISSING",
+  "PAGE_BLUEPRINT_INCOMPLETE",
+  "DESIGN_ELEMENT_UNMAPPED_TO_CONTROL",
+  "CONTROL_PROPERTY_CONTRACT_INCOMPLETE",
+  "CONTROL_PROPERTY_PATH_UNVERIFIED",
+  "CONTROL_BINDING_CONTRACT_INCOMPLETE",
+  "CONTROL_INTERACTION_CONTRACT_INCOMPLETE",
+  "BLUEPRINT_VALIDATION_NOT_RUN",
+]) {
+  assert.match(pageBlueprintInspector, new RegExp(findingCode), `${findingCode} is enforced by inspect-page-implementation-blueprint`);
+}
+
+for (const findingCode of [
+  "RESOURCE_BLUEPRINT_PARITY_MISSING",
+  "RESOURCE_SECTION_MISSING_FROM_BLUEPRINT",
+  "RESOURCE_CONTROL_MISSING_FROM_BLUEPRINT",
+  "RESOURCE_CONTROL_TYPE_MISMATCH",
+  "RESOURCE_CONTROL_PROPERTY_MISSING",
+  "RESOURCE_BINDING_MISSING",
+  "RESOURCE_ACTION_MISSING",
+  "NEXT_STEP_STARTED_WITH_INCOMPLETE_PRIOR_STEP",
+]) {
+  assert.match(blueprintParityInspector, new RegExp(findingCode), `${findingCode} is enforced by compare-blueprint-to-decoded-resource`);
+}
+
 const skillText = fs.readFileSync(path.join(ROOT, "skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md"), "utf8");
 for (const phrase of [
   /type: "summary"/,
@@ -252,6 +301,12 @@ for (const phrase of [
   /ak-listset-new-navigation-item\.active/,
   /fresh top-level cache-busted load/,
   /hidden nonvisual `codein` inside a rendered page container/,
+  /Full-application generation must follow the full-page design blueprint workflow/,
+  /inspect-full-page-design-artifacts\.mjs/,
+  /inspect-page-implementation-blueprint\.mjs/,
+  /compare-blueprint-to-decoded-resource\.mjs/,
+  /viewport mockup/i,
+  /product-catalog-backed or extension-backed/i,
 ]) {
   assert.match(skillText, phrase, `hard-gate skill includes Summary/full-page wording: ${phrase}`);
 }

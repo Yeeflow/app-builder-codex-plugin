@@ -132,6 +132,16 @@ Supplier Onboarding runtime/design lessons add a stricter full-app workflow gate
 
 Supplier validation-gap gates require layered proof reporting for full end-to-end app generation. Keep `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` separate. A schema pass is not UI proof; signing/install/upgrade API acceptance is not runtime proof; runtime browser proof must use the decoded ListSetID URL; and canonical PNG pixel comparison must be reported as its own layer.
 
+Full-application generation now requires a full-page design blueprint workflow before resource generation. A canonical design image must be a full-page implementation artifact, not a viewport-only mockup, and it must include all planned sections, controls, tables, forms, cards, filters, actions, lower-page regions, and page end. Create and validate a page implementation blueprint before generating resources, then compare decoded resources back to the blueprint before signing or upgrading:
+
+```bash
+node scripts/inspect-full-page-design-artifacts.mjs --manifest design-image-manifest.json
+node scripts/inspect-page-implementation-blueprint.mjs --blueprint page-implementation-blueprint.json
+node scripts/compare-blueprint-to-decoded-resource.mjs --blueprint page-implementation-blueprint.json --resource decoded-resource.json
+```
+
+The blueprint must map every visible design element to Yeeflow controls with `id`, semantic `nv_label`, hierarchy, exact property paths, bindings, interactions, and a runtime proof plan. Unknown property paths, invented aliases, incomplete binding/action contracts, missing decoded controls, and skipped stage evidence fail before package/sign/upgrade.
+
 Horizontal navigation active-state styling requires runtime DOM/computed-style proof when claimed. Do not accept decoded `navigator-menu` active metadata or `LayoutView.customcss` alone as proof. If the generated app needs active nav styling, verify a hidden `codein` injector is placed inside a rendered page container such as `Content`, then load the app with a fresh cache-busted top-level URL and inspect `.ak-listset-new-navigation-item.active`: style tag present, selector present, active item present, transparent background, blue text, and blue solid nonzero bottom border.
 
 The ID provenance report must prove API-issued content IDs from `GET /utils/generate/ids?count=<n>`. Local sequential, hardcoded, copied, random, timestamp, or UUID fallback IDs are forbidden for generated-final `.yapk` output. Runtime navigation groups require `ID`, `AppID`, `ListSetID`, `Type`, `Title`, `Icon`, and `list`; child items require `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`. Do not use `children` / `Childs` runtime navigation groups.

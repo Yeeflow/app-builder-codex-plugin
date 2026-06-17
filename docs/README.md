@@ -11,6 +11,8 @@ Current install identity:
 
 Current release `0.6.57` adds horizontal navigation active-state runtime gates: active-state `navigator-menu` metadata and `LayoutView.customcss` are not runtime proof without DOM/style tag evidence, hidden `codein` injectors must be placed inside rendered containers such as `Content`, fresh cache-busted top-level loads are required after app chrome/page-resource changes, and runtime proof must show the style tag, intended selector, active item, transparent background, blue text, and blue solid nonzero bottom border. Supplier proof-layer gates from `0.6.56` and root-padding gates from `0.6.55` remain baseline behavior; approval-form root padding remains deferred pending clearer evidence.
 
+Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
+
 Install source:
 
 ```text
