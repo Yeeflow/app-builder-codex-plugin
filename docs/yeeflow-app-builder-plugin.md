@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.53
+- Version: 0.6.54
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.6.54` releases Summary/filter/collection/full-page fidelity gates. It keeps Summary controls as normal `type: "summary"` controls rather than invalid `_ak_c` clipboard wrappers; requires page `Resource.exts[]` Summary pivot metadata with `AppID`, `ListID`, `ListSetID`, and nonempty `settings.values[]`; requires COUNT Summary settings to use `ListDataID`; requires top-level and attrs-level `save_var` / `saveVar`; requires hidden Summary source hosts to hide on desktop, tablet, and mobile with `display:none`; and requires visible KPI values to bind to Summary temp variables instead of rendering raw variables. The release also reinforces real Data Filter controls instead of static Text, Add/New Containers with `action-type = "5"` and target list metadata, Collection grid-table column gap `0`, resolved collection links, progress controls instead of raw formula text, Dynamic user controls bound to User/identity fields, and field type compatibility gates. This release does not claim pixel-perfect visual diffing, automatic screenshot parsing, or live runtime proof before install/cache smoke and focused runtime testing are performed.
 
 Version `0.6.53` releases Runtime Sample Data and KPI/Table Presentation Fidelity Gates. It adds runtime sample-data proof gates for redacted `/users/search` `AccountID` provenance, scoped item PATCH proof for blank User/person values, Events/list item batch-create proof for runtime sample rows, and retry/backoff or delayed verification for batch-created rows. Collection grid-table fidelity now covers root overflow hidden, aligned header/body grids, padding parity, real progress bar controls for progress-like columns, numeric progress source fields, Dynamic user/person controls bound to User/identity fields, and semantic `nv_label` values. KPI presentation fidelity now covers `formatNumber(...)`, compact K/M/B formatting, fixed decimal formatting, long raw decimal rejection, and unformatted large-number rejection. Runtime values remain live and mock values are visual targets only. This release does not claim pixel-perfect visual diffing, automatic screenshot parsing, or live runtime proof before install/cache smoke and focused runtime testing are performed.
 
