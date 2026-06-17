@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.6.56
+
+- Release Supplier runtime/design fidelity gates and Supplier validation-layer proof gates.
+- Add runtime proof gates for installed application `ListSetID` and runtime URL proof, including rejection of install-log IDs as runtime `ListSetID` proof.
+- Require design section mapping, KPI count/design mapping, page background and chrome consistency, real Data Filter bindings, filter/action row `nv_label`, Collection source/detail-link validation, real analytics controls for chart sections, progress/status treatment, and Summary/KPI raw-variable prevention.
+- Require one canonical PNG per planned page, reject SVG files and design boards as replacements for canonical per-page PNGs, and validate design manifest page count, order, and name mapping.
+- Require layered proof reporting across `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison`.
+- Prevent false proof claims: schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, design-control mapping must be explicit, and the control-binding graph must be complete.
+- Keep the root padding hard gates from `0.6.55` as baseline behavior and keep approval-form root padding deferred because evidence remains mixed.
+- Confirm this release does not claim pixel-perfect comparison or live runtime proof unless runtime screenshots/pixel comparison and browser evidence are actually run.
+
 ## 0.6.55
 
 - Release dashboard and data-list custom form root padding hard gates.
