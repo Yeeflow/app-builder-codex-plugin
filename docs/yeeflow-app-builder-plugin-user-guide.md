@@ -14,7 +14,9 @@ Supplier validation-layer reporting must keep package/schema acceptance separate
 
 ## Expected Version
 
-`0.6.55`
+`0.6.56`
+
+Version `0.6.56` releases Supplier runtime/design fidelity gates and validation-layer proof gates. Runtime proof must use the installed application `ListSetID` and runtime URL, never install-log IDs. Design implementation must map design sections, KPI counts, page background/chrome, Data Filter bindings, Collection detail links, analytics controls, progress/status treatments, Summary/KPI bindings, and canonical one-PNG-per-page artifacts through explicit design manifest mapping. Reports must keep `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` separate; schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, and the control-binding graph must be complete. Root padding gates from `0.6.55` remain baseline behavior, approval-form root padding remains deferred because evidence is mixed, and no pixel-perfect or live runtime proof claim is made before the matching runtime/browser evidence exists.
 
 ## Safe API Usage
 

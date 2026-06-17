@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.55
+- Version: 0.6.56
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.6.56` releases Supplier runtime/design fidelity gates and Supplier validation-layer proof gates. It adds runtime `ListSetID` proof and runtime URL proof, rejects install-log IDs as runtime `ListSetID` proof, and requires design section mapping, KPI count/design mapping, page background and chrome consistency, real Data Filter bindings, filter/action row `nv_label`, Collection source/detail-link validation, real analytics controls for chart sections, progress/status treatment, and Summary/KPI raw-variable prevention. It requires one canonical PNG per planned page, rejects SVG files and design boards as replacements for canonical per-page PNGs, and validates design manifest page count, order, and name mapping. It also requires layered proof reporting across `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison`. Schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, design-control mapping must be explicit, and the control-binding graph must be complete. Root padding hard gates from `0.6.55` remain baseline behavior; approval-form root padding remains deferred because evidence is mixed. This release does not claim pixel-perfect comparison or live runtime proof unless runtime screenshots/pixel comparison and browser evidence are actually run.
 
 Version `0.6.55` releases dashboard and data-list custom form root padding hard gates. Dashboard/app page roots now require `attrs.container.cw = "2"` and `attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`; data-list custom form roots require the same exact token-array padding shape. Scalar zero, numeric object zero, numeric array zero, `attrs.common.padding` alone, `attrs.style.padding` alone, and missing or wrong `attrs.container.cw` are rejected. Upgrade and patch flows normalize dashboard page roots and data-list custom form roots before signing or installing. Inner containers, cards, grids, and forms may keep intentional spacing. Approval form roots are intentionally unchanged because existing evidence is mixed and needs a separate export/runtime proof task.
 

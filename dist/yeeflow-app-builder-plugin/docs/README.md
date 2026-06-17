@@ -6,8 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.55`
+- Version: `0.6.56`
 - Dist path: `dist/yeeflow-app-builder-plugin`
+
+Current release `0.6.56` adds Supplier runtime/design fidelity gates and validation-layer proof gates: runtime `ListSetID` URL proof, install-log ID rejection, design section/KPI/page chrome mapping, real Data Filter and Collection bindings, analytics/progress/Summary/KPI fidelity, canonical one-PNG-per-page artifacts, explicit design manifest mapping, and separated proof layers from schema validation through runtime browser proof and pixel comparison. Schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, root padding gates from `0.6.55` remain baseline, and approval-form root padding remains deferred pending clearer evidence.
 
 Install source:
 
