@@ -2,7 +2,7 @@
 
 Use this lifecycle whenever the user provides Yeeflow application requirements, screenshots, sample forms, SOPs, process documents, sample exports, or app ideas and asks Codex to build, implement, create, generate, test, or output an application package, `.yap`, or `.yapk`.
 
-The builder is the main controller. Coordinate the application, data-list, approval-form, dashboard, and expression generator skills as needed. Use proven knowledge first; send genuinely unknown platform behavior to `yeeflow-feature-learning-orchestrator`.
+The builder is the top-level application-building controller. Coordinate the application, data-list, approval-form, form-report, schedule-workflow, dashboard, AI Agent, Copilot, custom-code, package-validator, and expression generator skills as needed. Use proven plugin knowledge first; send genuinely unknown platform behavior to `yeeflow-feature-learning-orchestrator`.
 
 ## Trigger Behavior
 
@@ -10,7 +10,7 @@ Run this lifecycle for requests such as:
 
 - "Build this Yeeflow app from the uploaded requirement."
 - "Implement this application."
-- "Generate the .yap for this process."
+- "Generate the .yapk for this process."
 - "Generate an upgrade .yapk for this existing application."
 - "Create the Yeeflow application based on this document."
 - "Use the current skills to build this app."
@@ -19,10 +19,14 @@ Run this lifecycle for requests such as:
 
 Do not generate an app when the user explicitly asks only for study, review, planning, or learning.
 
-Before generation, confirm package target:
+## Package Target Gate
 
-- new/cloned app: generate `.yap`
-- existing-app upgrade: require a Yeeflow Version management baseline `.yapk`, preserve app identity and stable object IDs, and generate `.yapk` only when the upgrade package structure is safe
+Before generation, confirm package target and scope:
+
+- New application defaults to `.yapk`.
+- `.yap` is used only when explicitly requested or when a documented fallback/debug scope requires YAP.
+- Existing application upgrade requires an official baseline `.yapk` from Yeeflow Version management, identity preservation, and ID stability.
+- Existing application upgrades must not use fresh-ID clone generation rules unless the user explicitly asks for a cloned app.
 
 ## 1. Requirement Intake
 
@@ -31,15 +35,20 @@ Read all uploaded requirement files, screenshots, sample forms, sample exports, 
 Extract:
 
 - business purpose
+- source materials
 - user roles
 - app modules
-- data entities
-- data lists
-- approval forms
-- data list forms
-- dashboards
-- reports
-- workflows
+- business objects
+- data concepts
+- data lists and document libraries
+- approval/review needs
+- form report needs
+- data list custom forms
+- dashboards/pages
+- data list views
+- workflows and automations
+- notifications
+- AI Agent or Copilot needs
 - documents/files
 - lookups/reference data
 - sublists/line items
@@ -49,74 +58,99 @@ Extract:
 - integrations, if any
 - risky, unsupported, or deferred features
 
-For master/reference data, line items, and availability-sensitive processes, explicitly identify:
+Classify the input detail level as brief, moderate, detailed, document-backed, screenshot-backed, export-backed, or mixed. Preserve source files as references; do not copy them directly into the final requirements.
 
-- whether each master list is a real maintained v1 list, an external dependency, or deferred out of the package
-- whether line items are persisted as workflow sublist summary only, direct child-row records, or a separate transaction item list
-- whether availability/stock/capacity checks are manual review only, query-based availability, or inventory/reservation based
-- which dashboard queues/KPIs are meaningful for v1 and which dashboard ideas are deferred
-- which features are runtime-unproven and require focused proof before being claimed as complete
+## 2. Functional Specification
 
-If supplied exports or manually improved samples contain reusable patterns, study them read-only before generation. Preserve original files.
+Create a Functional Specification using:
 
-## 2. Initial Business Analysis
+`docs/standards/functional-specification-standard-template.md`
 
-Before designing resources, summarize:
+The Functional Specification is the business requirement document. It must describe what the business needs before selecting exact Yeeflow resources or package shapes.
 
-- the operational process
-- start/end states
-- actors and handoffs
-- approval/review gates
-- exceptions and rejection/rework paths
-- data that must be captured, calculated, persisted, or reported
+For brief requirements:
 
-Document reasonable assumptions instead of blocking unnecessarily. Ask only when a missing answer would materially change the app architecture.
+- infer and supplement a complete business requirement document with explicit assumptions
+- keep business-critical gaps as clarification questions
+- avoid blocking on minor gaps that can be safely assumed
 
-## 3. Initial App Plan/Spec
+For detailed requirements:
 
-Create:
+- analyze and reorganize the material into the standard Functional Specification template
+- preserve important details without copying whole source sections verbatim
 
-- `<app-name>-app-plan.md`
-- `<app-name>-app-spec.json`
+For uploaded documents, screenshots, reference materials, or existing samples:
 
-The plan must include:
+- treat them as supporting references
+- produce a new standardized Functional Specification based on the understood requirements
+- list original materials in Source Input Summary
 
-1. App overview
-2. Resources to generate
-3. Data lists and fields
-4. Approval forms and form sections
-5. Data list custom forms, if needed
-6. Dashboards, if needed
-7. Workflow design
-8. Expressions and calculated fields
-9. Sublist/list controls and summaries
-10. Form actions and temp variables, if needed
-11. Query data requirements, if needed
-12. ContentList persistence strategy
-13. UI/UX design approach
-14. Runtime test checklist
-15. Deferred/risky items
-16. Recommended v1 scope
+Business-critical uncertainty must be recorded in Business Decision Gates and Risks, Constraints, and Unknowns.
 
-The plan/spec must also make key design decisions explicit when relevant:
+## 3. Functional Specification Review Gate
 
-- requester/applicant model, including whether proxy submission is allowed
-- applicant profile snapshot and readonly/persistence rules
-- quota cycle, occupation timing, release behavior, and eligibility source
-- multiple product/item sublist strategy
-- master/reference list runtime purpose and sample/reference data needs
-- line-item persistence strategy: sublist summary only, direct child rows, or separate transaction item list
-- availability/stock/capacity strategy: manual review, query-based, or reservation/inventory update
-- dashboard scope: minimal shell, meaningful v1 queues/KPIs, or deferred
-- form-action recalculation triggers for page load, driver-field change, and submit
+Review the Functional Specification before creating the App Plan. The review must confirm:
 
-If the plan uses manual reviewer judgment for availability, label it as review-only and do not describe it as stock decrement, reservation, or true inventory control.
+- required 23 sections are present
+- requirement interpretation method is explicit
+- business purpose is clear
+- target roles are identified
+- business objects and data concepts are present or explicitly not applicable
+- relationships and dependency rules are present or explicitly not applicable
+- process, status lifecycle, approval/review, forms, workflow/action, reporting/dashboard, document/attachment, AI, integration, permissions, UI, assumptions, and risks are covered
+- business decision gates are answered, default-approved, or listed as blockers
+- Readiness for App Plan is marked Yes only when the specification is consistent and complete enough
 
-Validate the spec with a JSON parse check before using it for generation. The spec should include a package-target decision (`newApplication` / `.yap` or `existingApplicationUpgrade` / `.yapk`) when the request may apply to an already imported app.
+If inconsistent, incomplete, or incorrect content is found, revise and validate again. A failed Functional Specification review gate blocks the Yeeflow App Plan stage.
 
-## 4. Business Clarification Gate
+## 4. Yeeflow App Plan
 
-After the initial app plan/spec is created, identify business-critical decisions that are still unanswered.
+Create the Yeeflow App Plan only from the reviewed Functional Specification, using:
+
+`docs/standards/app-plan-standard-template.md`
+
+The App Plan is not a free-form plan, generic project plan, or ad hoc script plan. It is the Yeeflow resource generation contract and must convert business requirements into Yeeflow-supported resources in this standard order:
+
+1. Data lists and Document libraries
+2. Approval forms
+3. Form reports
+4. Schedule workflows
+5. AI Agents
+6. Copilots
+7. Custom Data List forms
+8. Data List workflows
+9. Notifications
+10. Data List views
+11. Dashboard pages
+12. Application navigation
+13. Target users, roles, groups, and permissions
+
+Form Report is an independent Yeeflow resource based on a specific Approval Form. It is not a Dashboard page, not a Data List view, and must not be mixed into Dashboard planning. Normally, one Approval Form should have one corresponding Form Report unless the plan states why not.
+
+All fields, controls, variables, workflow nodes, form actions, schedule workflow properties, page controls, and configuration shapes must come from active plugin-known skills, standards, validators, template library entries, or export-proven references. Unknown capabilities must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`. Temporary scripts and ad hoc generation logic must not bypass plugin knowledge.
+
+## 5. App Plan Review Gate
+
+Review the App Plan before any full-page design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+
+The review must confirm:
+
+- required 23 sections are present
+- Resource Generation Order uses the standard Yeeflow order
+- Data Lists and Document Libraries include field names, field types, dependencies, validation, relationships, sample rows, and Placeholder planning
+- Approval Forms include submission fields with Placeholder, task form fields with Placeholder, workflow nodes, assignments, form actions, temp variables, Query data, and Set data list targets
+- Form Reports are standalone and based on Approval Forms
+- Schedule workflows, AI Agents, Copilots, Custom Data List forms, Data List workflows, Notifications, Views, Dashboards, Navigation, and Permissions are planned or explicitly not applicable
+- Dashboard planning is separate from Form Report planning
+- Dashboard controls come from plugin-known controls, template library, validators, or export-proven references
+- field/control/workflow/action/schedule/resource types are plugin-supported or marked for learning/proof/deferment
+- Generation Contract and Hard Gates, Validation Plan, Proof Boundary, Assumptions, Deferred or Runtime-Proof Items, and Recommended Next Prompt are present
+
+If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
+
+## 6. Business Clarification Gate
+
+After the Functional Specification and App Plan are drafted, identify business-critical decisions that are still unanswered.
 
 Business-critical questions include anything that changes:
 
@@ -129,21 +163,10 @@ Business-critical questions include anything that changes:
 - required attachments/documents
 - persistence timing
 - compliance/audit handling
-- dashboard inclusion if it affects v1 scope
+- dashboard inclusion if it affects app scope
 - integration responsibility
 - role permissions
 - what happens on approval/rejection/resubmission
-
-Examples:
-
-- Should quota reset by calendar year or employee anniversary year?
-- Should quota be occupied on submission or final approval?
-- Is manager approval mandatory?
-- Is custom pricing fixed or manually entered?
-- Which attachments are required by scenario?
-- Should v1 include a home dashboard?
-- Should rejected records be automatically expired or manually closed?
-- Should approval route depend on amount threshold?
 
 When unanswered business decisions exist, output a clear question block in the Codex chat:
 
@@ -156,291 +179,106 @@ Business clarification required before generation:
    - Recommended default:
    - Why this matters:
 
-2. <Question>
-   - Option A:
-   - Option B:
-   - Recommended default:
-   - Why this matters:
-
 Generation is paused until these questions are answered or defaults are explicitly approved.
 ```
 
-Stop after outputting the clarification block. Do not continue to `.yap` generation in the same turn.
+Stop after outputting the clarification block. Do not continue to Yeeflow resource/package generation in the same turn.
 
-Generation may continue only after:
+Generation may continue only after the user answers the questions or explicitly approves default assumptions.
 
-- the user answers the questions, or
-- the user explicitly approves default assumptions.
-
-## 5. Wait For User Answers
-
-If the clarification gate is open, wait. Do not generate an app, import anything, operate Yeeflow UI, or silently choose defaults.
-
-When the user answers:
-
-- update the app plan/spec
-- mark each relevant `businessDecisionGates[].status` as `answered` or `defaultApproved`
-- record the confirmed answer
-- adjust v1 scope, workflow, form actions, data model, dashboards, and runtime checklist accordingly
-
-## 6. Apply Confirmed Answers To Plan/Spec
-
-App specs should include decision gates using this shape:
-
-```json
-"businessDecisionGates": [
-  {
-    "key": "quotaCycle",
-    "question": "Should quota reset by calendar year or employee anniversary year?",
-    "options": ["calendarYear", "employeeAnniversaryYear"],
-    "recommendedDefault": "calendarYear",
-    "requiredBeforeGeneration": true,
-    "status": "unanswered"
-  }
-]
-```
-
-Technical assumptions should be recorded separately from business decision gates. Technical assumptions can be tested by Codex during generation/runtime and should have fallback behavior.
-
-Examples:
-
-- whether `getUserAttr(RequesterApplicant, ...)` works directly
-- whether a tenant profile field is populated
-- whether a dashboard widget binding needs a specific runtime pattern
-- whether a form action step needs a reduced runtime proof
-
-Technical assumptions should not block generation unless they affect business correctness.
-
-## 7. Generation-Readiness Review
+## 7. Generation Readiness Review
 
 Before generation, confirm:
 
+- Functional Specification review gate passed
+- App Plan review gate passed
 - all required business decision gates are answered or defaults are explicitly approved
-- mandatory v1 business capabilities are not misclassified as v2 enhancements
+- mandatory business capabilities are not misclassified as future enhancements
+- package target is `.yapk` by default for new applications, `.yap` only when explicitly requested/fallback scoped, or versioned `.yapk` for a safe existing-app upgrade
 - technical assumptions have validation/fallback plans
 - approval form design-quality gates are represented
-- generated resource inventory matches required v1 scope, especially master/reference lists, line-item storage, and dashboard pages
-- every generated data list has standalone validation coverage, including `validate-ydl-list` when extracted from an app package
+- Form Report requirements are represented as standalone resources
+- generated resource inventory matches required scope
 - runtime-unproven features are marked as focused proof items or documented limitations
-- the JSON spec parses
+- plugin capability and standards compliance has no invented unsupported shapes
 
-Stop if any required business decision gate remains unanswered.
+Stop if any required business decision gate remains unanswered or either review gate is failed.
 
-## 8. Decide Safe V1 Scope
+## 8. Decide Safe Build Scope
 
-Choose the safest first working version.
+Choose the safest build scope that satisfies the reviewed Functional Specification and App Plan.
 
-Default v1 scope:
+Default scope is the complete functional application described by the approved App Plan, not a simple MVP, unless the user requests staged generation or approves deferral. Staged generation is allowed when:
 
-- core data lists
-- one main approval form
-- simple workflow
-- ContentList persistence
-- essential expressions/calculations
-- no unnecessary dashboards/reports/integrations unless required
+- the app is too large for one safe package
+- critical information is missing and the user approves assumptions
+- a focused runtime proof package is explicitly requested
+- an advanced capability must be learned or runtime-proven before full generation
 
-If the requirement is large, defer advanced features to v2/v3. Prefer a working, importable, testable v1 over a large all-at-once package.
+Do not defer core business capabilities silently.
 
-## 9. Generate V1 Package
+## 9. Resource/Package Generation
 
-Generate:
+Generate resources in the App Plan order:
 
-- `<app-name>-app-def.v1.json`
-- `<app-name>-approval-form-def.v1.json`, if applicable
-- `<app-name>.v1.yap`
-- generation report
-- validation reports
+1. Data lists and Document libraries
+2. Approval forms
+3. Form reports
+4. Schedule workflows
+5. AI Agents
+6. Copilots
+7. Custom Data List forms
+8. Data List workflows
+9. Notifications
+10. Data List views
+11. Dashboard pages
+12. Application navigation
+13. Target users, roles, groups, and permissions
 
-Use current proven generation rules:
+Use only current proven generation rules:
 
-- use a fresh ID family
-- use a fresh FlowKey/form key
-- keep `Data.Forms[].ListID = 0` for app-level approval forms
-- preserve native Title metadata on all generated data lists
-- use requester/current-user expression assignment instead of hardcoded tenant-specific users unless export-backed
-- set full-page background on the page/form background, not the `Main` container
-- use Main / Content / Form body / Form bottom
-- place Action Panel and Flow History in Form bottom
-- use the learned Text control standard
-- make Text controls inline width by default
-- use two-column grids for normal fields
-- use full-row layout for textarea, richtext, list, and sublist controls
-- use meaningful `nv_label` names
-- use correct `attrs.querydata_filters` plural for Query data filters
-- for Query data filter variables/calculations, use expression-token arrays in `right` with `showCus: false`; direct literal values such as `"Active"` can use primitive `right` values with `showCus: true`
-- never put frontend expression-button HTML strings such as `<input type="button" ... Workflow Variables:...>` in `attrs.querydata_filters[].right`
-- use readable lookup summary variables instead of raw lookup IDs when persistence/display should be readable
-- treat temp variables as frontend-only; do not use them for backend persistence unless copied into workflow/form variables
-- use requester/applicant variables or snapshot variables for applicant business logic after defaulting from Current User
-- when an editable applicant field drives profile/quota logic, bind its change action to rerun applicant snapshot and quota/policy calculations
-- when quota is employee-anniversary based, persist a numeric cycle field on usage records and query by applicant identity + cycle + status
-- when using `dateDiff`, encode the third unit parameter as a raw lowercase string such as `"year"`, not an expression-token array
-- keep dependent Set variable calculations ordered; use multi-value Set variables only for independent assignments
-- ensure ContentList mappings use valid workflow/form variables
+- field types from plugin Data List / Document Library standards
+- Approval Form field and variable types from plugin Approval Form standards
+- workflow nodes and form actions from plugin workflow/action knowledge
+- schedule workflow configs from plugin Schedule Workflow knowledge
+- dashboard/page controls from plugin-known controls, template library, validators, or export-proven references
+- runtime navigation metadata from current navigation hard gates
+- API-issued IDs for generated-final `.yapk` output
+- ID stability for upgrades from official baseline `.yapk`
 
-Use current proven feature foundations:
-
-- approval-control runtime coverage
-- expression generation rules
-- sublist current-object expressions
-- sublist summary binding
-- workflow numeric routing
-- latest SequenceFlow condition operand wrappers; use direct selector/value wrappers for simple routing and expression-editor operands for calculated/date/threshold routing
-- form actions Phase 1 and Phase 2
-- Query data multiple/single
-- Submit form / Save changes
-- `arraySum` and `JSONStringfy` where export-backed
+Do not generate with temporary custom scripts that invent resource/control/action shapes outside the plugin standards. If a generator helper is needed, it must consume the reviewed Functional Specification, reviewed App Plan, plugin templates, validators, and export-proven references.
 
 ## 10. Local Validation
 
-Run the relevant local checks:
+Run the relevant safe local checks for the generated artifact and proof boundaries. At minimum, validate schema, graph/resource structure, Functional Specification/App Plan conformance, ID provenance for generated-final `.yapk`, navigation runtime metadata, approval forms, Form Reports, schedule workflows, AI/Copilot resources, custom data list forms, data-list workflows, notifications, views, dashboard controls, grid-table Collection patterns, root padding, plan-to-package conformance, and source/dist consistency as applicable.
 
-```bash
-node --check <generator>
-node scripts/smoke-expression-validation.mjs
-node validate-yap-package.js <app-def-or-yap> --mode generator --stage final
-node validate-yap-graph.js <app-def-or-yap> --mode generator --stage final
-node validate-ywf-def.js <approval-form-def>
-node validate-ydl-list.js <list-def>
-node workflow-action-config-validator.js <app-def-or-workflow>
-node build-yap-wrapper.js <app-def.json> <output.yap>
-node scripts/inspect-yap-materialization.mjs <output.yap>
-node scripts/inspect-yap-schema-standard.mjs <output.yap>
-node scripts/inspect-app-creation-rules.mjs <output.yap>
-node scripts/inspect-yap-import-readiness.mjs <output.yap>
-```
+Do not sign, install, import, upgrade, or run live Yeeflow writes unless explicitly authorized.
 
-Also run JSON parse checks for generated specs and decoded/package JSON.
+## 11. Runtime Import/Testing Only When Requested Or Authorized
 
-Do not import or hand off a newly generated `.yap` if strict generator/import-readiness validation has structural errors. Compatibility validation is for historical exports and is not sufficient for new generated packages. Warning-level findings may be acceptable only when documented and classified as non-import-blocking.
+Runtime proof is a separate layer from local validation, package schema validation, signing, API acceptance, and browser/design proof. Run runtime import/testing only when the user requests or authorizes it.
 
-## 11. Runtime Test
+## 12. Runtime Issue Fixing
 
-Use:
-
-`https://<yourdomain>.yeeflow.com`
-
-Runtime checklist:
-
-1. Import app.
-2. App opens.
-3. Data lists open without `datas/query` 400.
-4. Approval forms open.
-5. Data list custom forms open, if included.
-6. Dashboards render, if included.
-7. Required controls render.
-8. Expressions work.
-9. Sublist calculations and summaries work, if included.
-10. Form actions work, if included.
-11. Query data works, if included.
-12. Submit workflow.
-13. Approval task opens.
-14. Approval/rejection works.
-15. ContentList creates records.
-16. Persisted values are readable and correct.
-
-Runtime testing requires explicit user intent to test/import or an app-generation request that asks for end-to-end testing. Do not operate Yeeflow UI for study-only tasks.
-
-## 12. Fix Runtime Issues
-
-If runtime fails:
-
-- capture console/network evidence
-- identify the root cause
-- do not guess
-- patch only after the root cause is clear
-- regenerate with a fresh ID family and fresh FlowKey/form key
-- retest
-
-Known root-cause checks:
-
-- bad native Title metadata can cause data list query failure
-- hardcoded tenant user assignment can fail after import
-- raw lookup value persisted to text stores a row ID, not display name
-- temp variables are not backend persistence variables
-- Query data filters must use `attrs.querydata_filters` plural
-- Text control `attrs.heads.color` must be a plain string, not an array
-- `Main` container should not carry page-level background
-- `Data.Forms[].ListID` must be `0` for app-level approval forms
+If authorized runtime testing finds issues, fix the smallest resource/package surface that addresses the issue, rerun local validation, and keep runtime proof boundaries explicit.
 
 ## 13. Documentation
 
-Create:
+Document generated artifacts, validation results, proof boundaries, deferred items, and known follow-up items.
 
-- `docs/generated-<app-name>-baseline-v1.md`
+## 14. Skill Updates Only If Reusable Knowledge Is Learned
 
-Include:
+Update skills, standards, validators, or references only when the run produces reusable Yeeflow knowledge. Keep tenant-specific details, raw API responses, raw package `Resource`, raw `Sign`, tenant URLs, full workspace IDs, raw user IDs, and private screenshots out of docs.
 
-- generated resources
-- field/control types used
-- workflow shape
-- expressions
-- sublists/summaries
-- form actions
-- ContentList mappings
-- validation results
-- runtime result
-- known limitations
-- v2 recommendations
+## 15. Git Commit/Push And Final Package Output
 
-## 14. Skill Updates
+Commit and push only the intended safe source changes when requested. Final package output must separately report:
 
-If new reusable Yeeflow patterns are learned:
-
-- update docs
-- update validators if safe
-- update relevant project skill mirrors
-- sync to `~/.codex/skills`
-- run skill checks
-
-Do not update skills for app-specific content unless it is reusable.
-
-## 15. Git
-
-After success or honest partial result:
-
-- run `git status`
-- confirm no raw exports/secrets are staged
-- stage safe files only
-- commit and push the current branch
-
-Suggested commit message:
-
-```text
-Generate <App Name> v1 baseline
-```
-
-## 12. Final Output
-
-Report:
-
-- generated `.yap` path
-- upload/download copy path, if any
-- app plan/spec paths
-- validation results
-- runtime result
-- known limitations
-- docs updated
-- skills updated, if any
-- commit hash
-- branch status
-
-## Usage Example
-
-Example user request:
-
-```text
-Here is the requirement document. Use the Yeeflow app generation lifecycle to implement this application and output the final .yap.
-```
-
-Expected Codex behavior:
-
-1. Study the requirement.
-2. Create plan/spec.
-3. Generate v1.
-4. Validate locally.
-5. Import/runtime-test in `<yourdomain>.yeeflow.com` if requested as part of the app build/test.
-6. Fix issues with fresh IDs if needed.
-7. Document result.
-8. Commit/push.
-9. Report final `.yap` path.
+- Functional Specification status
+- App Plan status
+- local validation status
+- signing status
+- API acceptance status
+- runtime/browser proof status
+- deferred or runtime-proof-required items
+- safety boundaries
