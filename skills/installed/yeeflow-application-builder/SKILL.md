@@ -5,6 +5,34 @@ description: build real Yeeflow business applications from requirements, process
 
 # Yeeflow Application Builder
 
+## Functional Specification And App Plan Stage Gates
+
+This skill is the top-level application-building controller. For every new application build, first create a standardized Functional Specification from the user's input with `docs/standards/functional-specification-standard-template.md`.
+
+User input may be brief, detailed, document-backed, screenshot-backed, or mixed. Classify the input detail level, interpret and supplement incomplete requirements with explicit assumptions, extract and normalize detailed requirements into the standard Functional Specification template, list business-critical clarification questions, and run the Functional Specification completeness review before moving to the App Plan. For uploaded documents, reference materials, screenshots, exports, or existing samples, do not merely copy the source material; produce a new standardized Functional Specification based on the understood requirements and keep originals as supporting references.
+
+The Yeeflow App Plan must be generated only from the reviewed Functional Specification and must follow `docs/standards/app-plan-standard-template.md`. The App Plan converts business requirements into Yeeflow-supported resources and defines the resource generation order. It is the Yeeflow resource generation contract, not a free-form project plan, generic project plan, or ad hoc script plan.
+
+The App Plan must follow this Yeeflow resource generation order:
+
+1. Data lists and Document libraries
+2. Approval forms
+3. Form reports
+4. Schedule workflows
+5. AI Agents
+6. Copilots
+7. Custom Data List forms
+8. Data List workflows
+9. Notifications
+10. Data List views
+11. Dashboard pages
+12. Application navigation
+13. Target users, roles, groups, and permissions
+
+All planned field types, variable types, control types, workflow node types, form actions, schedule configs, and configuration shapes must come from active plugin-known skills, standards, validators, template library, or export-proven references. Do not invent unsupported shapes. Unsupported or unknown capabilities must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
+
+Do not proceed to full-page canonical design images, page implementation blueprints, Yeeflow resource/package generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof until the Functional Specification and App Plan review gates pass. Do not let temporary scripts or ad hoc generation logic bypass plugin knowledge, templates, validators, or export-proven references.
+
 ## UI Generation Hard-Gate Skill
 
 Phase 3B adds workflow-level enforcement. Final reports for high-quality UI work must include contract, scope, runtime evidence, and structure-comparison artifact paths as applicable. Run `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` before claiming high-quality UI or design fidelity. Generation from design/mockup requires a UI contract. UI upgrades require a scope manifest. Runtime UI quality claims require runtime evidence. Design fidelity claims require structure comparison. Dynamic KPI proof requires before/after mutation evidence. Install/sign/upgrade success is not visual proof.
@@ -109,9 +137,9 @@ For any generated YAP package, rebuild `Resource.ReplaceIds` from the final deco
 
 ## Plan-First Full-Scope Generation
 
-For application-generation requests, create an application plan Markdown file before building a `.yap` or `.yapk` package unless the user explicitly says to skip planning. Save safe plans under `docs/generated-app-plans/<safe-app-name>-plan.md` when the plan is suitable for git. If the plan contains tenant-specific, private, or runtime-generated details that should not be committed, save it outside git and clearly report the path.
+For application-generation requests, create a Functional Specification Markdown file and then a Yeeflow App Plan Markdown file before building a `.yap` or `.yapk` package unless the user explicitly asks only for study/review. Save safe Functional Specifications and App Plans under `docs/generated-app-plans/` when suitable for git. If an artifact contains tenant-specific, private, or runtime-generated details that should not be committed, save it outside git and clearly report the path.
 
-Every full app plan must follow `docs/app-plan-standard-template.md` when present. The Northpeak Resource Operations plan is the style reference: numbered sections, plan status, purpose, roles, business process, capability coverage, navigation, data lists/fields, data-list views, custom list forms, list workflows, scheduled workflows, notifications, forms, dashboards/pages, UI/UX control mapping, custom code/custom CSS decisions, AI Agent/Copilot decisions, golden template/reference strategy, actions/workflow logic, permissions, integrations, document/attachment decisions, reports, validation, proof boundary, assumptions, deferred/runtime-proof items, and recommended next prompt. For data lists, use a detailed field table with `Field Name`, `Display Name`, `Type`, `Required`, `IsUnique`, `Placeholder`, `Example/Values`, `Description`, and `Notes`. For custom data-list forms, normal forms, and approval forms, use section/layout/control tables with `Field ID`, `Display Name`, `Type`, `Binding`, `Required`, `Read Only`, `Default Value`, `Auto Fill / Source`, `Custom Validation`, and `Description`, plus a workflow node table for approval processes. Do not produce app plans that are only brief object lists. A lightweight plan is allowed only when the user explicitly asks for a quick outline; it must still include Data Model and Lists, Forms and Approval Forms, Application Navigation, UI/UX and Control Mapping, Generation Contract and Hard Gates, Proof Boundary, and Assumptions/Deferred Items.
+Every Functional Specification must follow `docs/standards/functional-specification-standard-template.md`. Every full App Plan must follow the canonical `docs/standards/app-plan-standard-template.md`. `docs/app-plan-standard-template.md` is only a compatibility entrypoint for older scripts/docs and must not be treated as a competing standard. The App Plan must be organized by Yeeflow resource generation order and must include concrete resource, field, control, workflow, action, proof-boundary, and validation details. Do not produce app plans that are only brief object lists.
 
 For generated YAP root dashboards, use the current dashboard shell learned from the Vendor Onboarding v1.93 export: root `Type = 103`, `LayoutView = null`, `Ext2 = "{\"src\":true}"`, and `LayoutInResources = []` when no inline dashboard resource is present. Current dashboards can include inline `LayoutInResources` content; Vendor Onboarding v1.12 proves a simple current-dashboard Data table can import and render without query errors when columns use `Field` for source bindings and `FieldName` for labels. Keep root navigation pointing to the dashboard `LayoutID`, and preserve the import-learned YAP rules: `AppID = 41`, API-issued IDs, populated `ReplaceIds`, integer `Field.Category`, unique IDs, product-schema `ListExportResult`, and child `CustomType = ListSite_<root ListID>`.
 
@@ -127,7 +155,7 @@ The navigation contract must require export-proven runtime shape: groups use `Ty
 
 Ask focused clarification questions before generation when blocking details are missing: app purpose, roles, data lists, important fields, views, custom list forms, statuses, approval flow, dashboards/reports, required actions/workflows, scheduled workflows, notifications, AI Agent/Copilot needs, custom code/custom CSS needs, integrations, package type, or target output. Ask only the minimum needed to avoid a bad package. If uncertainty is not blocking, state assumptions in the plan and proceed.
 
-Generation must not proceed until the plan is approved, or the user explicitly authorizes direct generation from the visible plan/assumptions.
+Generation must not proceed until the Functional Specification completeness gate and App Plan review gate pass, or the user explicitly authorizes direct generation from the visible reviewed Functional Specification, App Plan, and assumptions.
 
 Do not default to a simple, MVP, basic, or small v1 package. The default is the complete functional application described in the plan, including all core data lists, fields, forms, dashboards, actions, workflows, and major controls that are safe to generate. Staged generation is allowed only when the user requests it, the app is too large for one safe package, critical information is missing and the user accepts assumptions, or the task is explicitly a focused runtime proof package.
 
@@ -346,15 +374,15 @@ Think like an experienced business consultant and Yeeflow solution architect:
 For requirement-to-application requests, load `references/requirement-to-yap-generation-lifecycle.md` and follow it end to end:
 
 1. Requirement intake
-2. Initial business analysis
-3. Initial app plan/spec Markdown file
-4. Business clarification gate
-5. Wait for user answers when business-critical decisions are missing
-6. Apply confirmed answers to plan/spec and update the saved Markdown plan
+2. Functional Specification generation
+3. Functional Specification review/validation gate
+4. Yeeflow App Plan generation from reviewed Functional Specification
+5. App Plan review/validation gate
+6. Business clarification gate
 7. Generation-readiness review
-8. Generate the correct package type only if ready: `.yapk` for new applications by default, `.yap` only when explicitly requested or fallback/debug scoped, and versioned `.yapk` for existing-app upgrades when a safe baseline exists
+8. Resource/package generation
 9. Local validation
-10. Runtime import testing when requested or included in the user's build/test request
+10. Runtime import/testing only when requested or authorized
 11. Runtime issue fixing
 12. Documentation
 13. Skill updates only if new reusable knowledge is learned

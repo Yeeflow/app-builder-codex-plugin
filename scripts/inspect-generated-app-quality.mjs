@@ -311,7 +311,7 @@ function inspectPlan(planPath) {
       findings.push({
         level: "warning",
         code: "APP_PLAN_SECTION_MISSING",
-        message: "Generated app plans should follow docs/app-plan-standard-template.md before package generation. Run scripts/validate-app-plan-template.mjs for heading and hard-gate checks.",
+        message: "Generated app plans should follow docs/standards/app-plan-standard-template.md before package generation. Run scripts/validate-app-plan-resource-order.mjs for heading, resource-order, Placeholder, Form Report, and hard-gate checks.",
         section,
       });
     }

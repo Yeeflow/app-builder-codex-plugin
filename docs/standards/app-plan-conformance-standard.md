@@ -8,7 +8,7 @@ The app plan is a generation contract. It must be compared to the generated YAP/
 
 ## Required App Plan Contract
 
-Every future full app plan must follow `docs/app-plan-standard-template.md` unless the user explicitly requests a lightweight plan. Lightweight plans must still include `Generation Contract and Hard Gates`. Use `docs/app-plan-generation-contract.md` for the hard-gate contract details.
+Every future full app plan must follow the canonical `docs/standards/app-plan-standard-template.md` unless the user explicitly requests a lightweight plan. `docs/app-plan-standard-template.md` is a compatibility entrypoint only. Lightweight plans must still include `Generation Contract and Hard Gates`. Use `docs/app-plan-generation-contract.md` for the hard-gate contract details.
 
 The section must bind later generation to:
 
@@ -68,7 +68,7 @@ A package may be schema-valid and still fail plan conformance. Do not call a gen
 Before generation, validate the Markdown plan structure with:
 
 ```bash
-node scripts/validate-app-plan-template.mjs <plan.md>
+node scripts/validate-app-plan-resource-order.mjs <plan.md>
 ```
 
 This validator checks required headings and hard-gate text only. It does not call APIs.

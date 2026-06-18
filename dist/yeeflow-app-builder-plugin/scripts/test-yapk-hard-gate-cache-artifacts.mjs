@@ -23,6 +23,9 @@ const hardGateScripts = [
   "scripts/inspect-full-page-design-artifacts.mjs",
   "scripts/inspect-page-implementation-blueprint.mjs",
   "scripts/compare-blueprint-to-decoded-resource.mjs",
+  "scripts/validate-functional-specification.mjs",
+  "scripts/validate-app-plan-resource-order.mjs",
+  "scripts/test-functional-specification-and-app-plan-gates.mjs",
   "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/inspect-yeeflow-control-configurations.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
@@ -54,6 +57,8 @@ for (const sourcePath of hardGateScripts) {
 }
 
 const requiredDocs = [
+  "docs/standards/functional-specification-standard-template.md",
+  "docs/standards/app-plan-standard-template.md",
   "docs/standards/yeeflow-application-layout-design-rules.md",
   "docs/standards/runtime-proof-boundary-standard.md",
   "docs/standards/full-page-design-blueprint-generation-standard.md",
