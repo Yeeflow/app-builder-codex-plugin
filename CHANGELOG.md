@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.60
+
+- Release the executable Business Clarification Gate validator at `scripts/validate-business-clarification-gate.mjs`.
+- Release the executable Generation Readiness Review validator at `scripts/validate-generation-readiness-review.mjs`.
+- Release the Functional Specification to App Plan traceability validator at `scripts/validate-functional-spec-to-app-plan-traceability.mjs`.
+- Add regression coverage in `scripts/test-clarification-readiness-traceability-gates.mjs`.
+- Block progression beyond planning when business decision gates remain unanswered, App Plan resource areas are missing, empty, placeholder-only, or incomplete, or Functional Specification requirements are not mapped to App Plan resources or explicit deferred/not-applicable coverage.
+- Require these gates to pass before full-page design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+- Clarify that these validators prove planning readiness and traceability only, not package validity, business correctness, signing/API acceptance, or runtime behavior.
+
 ## 0.6.59
 
 - Release the required Stage 1 Functional Specification template and review gate for every new application build.
