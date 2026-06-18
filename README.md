@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.59`
+- Version: `0.6.60`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.59` releases the Functional Specification and Yeeflow App Plan flow gates. New application generation must start with the Stage 1 Functional Specification template and review gate at `docs/standards/functional-specification-standard-template.md`, then create the Stage 2 Yeeflow App Plan resource-order template and review gate at `docs/standards/app-plan-standard-template.md`; `docs/app-plan-standard-template.md` remains a compatibility entrypoint. The new validators are `scripts/validate-functional-specification.mjs` and `scripts/validate-app-plan-resource-order.mjs`, with regression coverage in `scripts/test-functional-specification-and-app-plan-gates.mjs`. Form Report is planned as a standalone Yeeflow resource based on Approval Form, not Dashboard, and Placeholder planning is required for Data List fields, Approval Form Submission fields, Task Form fields, and Custom Data List Form fields. These gates must pass before full-page canonical design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+Current release `0.6.60` releases executable Business Clarification, Generation Readiness, and Functional Specification to App Plan traceability gates. The new validators are `scripts/validate-business-clarification-gate.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs`, with regression coverage in `scripts/test-clarification-readiness-traceability-gates.mjs`. These gates block progression beyond planning when business decision gates remain unanswered, App Plan resource areas are missing, empty, placeholder-only, or incomplete, or Functional Specification requirements are not mapped to App Plan resources or explicit deferred/not-applicable coverage. They must pass before full-page design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof. These validators prove planning readiness and traceability only, not package validity, business correctness, signing/API acceptance, or runtime behavior.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.59
+Version: 0.6.60
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.59
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.60
 ```
 
 ## What Is Included
