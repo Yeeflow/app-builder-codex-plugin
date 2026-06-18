@@ -31,7 +31,7 @@ The App Plan must follow this Yeeflow resource generation order:
 
 All planned field types, variable types, control types, workflow node types, form actions, schedule configs, and configuration shapes must come from active plugin-known skills, standards, validators, template library, or export-proven references. Do not invent unsupported shapes. Unsupported or unknown capabilities must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
 
-Do not proceed to full-page canonical design images, page implementation blueprints, Yeeflow resource/package generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof until the Functional Specification and App Plan review gates pass. Do not let temporary scripts or ad hoc generation logic bypass plugin knowledge, templates, validators, or export-proven references.
+Do not proceed to full-page canonical design images, page implementation blueprints, Yeeflow resource/package generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof until the Functional Specification review gate, App Plan review gate, Business Clarification Gate, Generation Readiness Review, and Functional Specification to App Plan traceability gate pass. Use `scripts/validate-functional-specification.mjs`, `scripts/validate-app-plan-resource-order.mjs`, `scripts/validate-business-clarification-gate.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs` for executable Markdown gate checks when the artifacts are available. These gates prove planning readiness only; they do not prove package validity, signing/API acceptance, install/upgrade success, or runtime behavior. Do not let temporary scripts or ad hoc generation logic bypass plugin knowledge, templates, validators, or export-proven references.
 
 ## UI Generation Hard-Gate Skill
 
@@ -127,7 +127,7 @@ For any generated YAP package, rebuild `Resource.ReplaceIds` from the final deco
 
 ## Public Tenant Safety
 
-- Never hardcode a tenant-specific Yeeflow URL. Use `https://<yourdomain>.yeeflow.com` in docs and examples.
+- Never hardcode a tenant-specific Yeeflow URL. Use `<tenant-url>` in docs and examples.
 - For live user-facing API calls, use OAuth; if OAuth is not authenticated, ask the user to sign in through the Yeeflow plugin login flow.
 - Do not use `YEEFLOW_API_KEY` for normal plugin/API operation; keep it only as a legacy/deprecated fallback where existing code still supports it.
 - Treat `YEEFLOW_BASE_URL` as a legacy API base URL alias only, not as a tenant URL.
@@ -155,7 +155,7 @@ The navigation contract must require export-proven runtime shape: groups use `Ty
 
 Ask focused clarification questions before generation when blocking details are missing: app purpose, roles, data lists, important fields, views, custom list forms, statuses, approval flow, dashboards/reports, required actions/workflows, scheduled workflows, notifications, AI Agent/Copilot needs, custom code/custom CSS needs, integrations, package type, or target output. Ask only the minimum needed to avoid a bad package. If uncertainty is not blocking, state assumptions in the plan and proceed.
 
-Generation must not proceed until the Functional Specification completeness gate and App Plan review gate pass, or the user explicitly authorizes direct generation from the visible reviewed Functional Specification, App Plan, and assumptions.
+Generation must not proceed until the Functional Specification completeness gate, App Plan review gate, Business Clarification Gate, Generation Readiness Review, and Functional Specification to App Plan traceability gate pass, or the user explicitly authorizes direct generation from the visible reviewed Functional Specification, App Plan, and assumptions while accepting the documented planning-readiness risks.
 
 Do not default to a simple, MVP, basic, or small v1 package. The default is the complete functional application described in the plan, including all core data lists, fields, forms, dashboards, actions, workflows, and major controls that are safe to generate. Staged generation is allowed only when the user requests it, the app is too large for one safe package, critical information is missing and the user accepts assumptions, or the task is explicitly a focused runtime proof package.
 

@@ -4,6 +4,14 @@ Every generated Yeeflow application plan must follow the canonical `docs/standar
 
 `Generation Contract and Hard Gates` is binding for later YAPK/YAP generation and validation; it is not background guidance.
 
+Before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, signing, install/upgrade, or runtime proof, the planning gates are executable:
+
+- `scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md> --plan <app-plan.md>`
+- `scripts/validate-generation-readiness-review.mjs --plan <app-plan.md>`
+- `scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>`
+
+These validators prove planning readiness and traceability only. They do not prove package schema validity, package conformance, signing/API acceptance, install/upgrade success, or runtime behavior.
+
 Use this section in addition to the normal purpose, roles, process, lists/fields, list views, custom list forms, list workflows, scheduled workflows, notifications, forms, dashboards/pages, navigation, UI/UX mapping, custom code/custom CSS decisions, AI Agent/Copilot decisions, golden references, permissions, integrations, assumptions, deferred items, and proof boundary sections.
 
 Northpeak reference note: `northpeak-resource-operations-plan.md` is the style reference for a complete plan because it uses numbered sections, plan status, target roles, process flow, navigation, detailed lists/fields, forms, dashboards/pages, UI/control mapping, golden template strategy, composition checklist, actions/workflow logic, permissions, integrations, document/attachment decisions, reports, validation, proof boundary, assumptions, deferred/runtime-proof items, and a recommended next prompt. Reuse that structure, not its business-specific content.
@@ -188,4 +196,4 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 
 ## Validation Expectation
 
-Use `scripts/validate-app-plan-resource-order.mjs <plan.md>` to check required Markdown headings, Yeeflow resource generation order, Placeholder planning, Form Report separation, and hard-gate text before package generation. Use `scripts/validate-app-plan-conformance.mjs` after package generation to compare the generated app against the approved plan. Generation reports must keep local validation, API signing, API install/import acceptance, and runtime UI inspection as separate proof levels.
+Use `scripts/validate-app-plan-resource-order.mjs <plan.md>` to check required Markdown headings, Yeeflow resource generation order, Placeholder planning, Form Report separation, and hard-gate text before package generation. Use `scripts/validate-business-clarification-gate.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs` to enforce business decision closure, 13-area planning readiness, and Functional Specification to App Plan traceability before package generation. Use `scripts/validate-app-plan-conformance.mjs` after package generation to compare the generated app against the approved plan. Generation reports must keep local validation, API signing, API install/import acceptance, and runtime UI inspection as separate proof levels.

@@ -35,6 +35,7 @@ Map each major requirement from the Functional Specification to Yeeflow resource
 Rules:
 
 - Every core business requirement must map to a Yeeflow resource, a supported configuration, or an explicitly deferred item.
+- Functional Specification to App Plan traceability is executable with `scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>`.
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
 - Do not include resources only to make the plan look complete. Every generated resource must serve a runtime purpose.
 - Do not invent unsupported controls, field types, workflow node types, variable types, or action shapes.
@@ -386,6 +387,9 @@ Rules:
 | --- | --- | --- | --- |
 | Functional spec approved | Yes | Approved or defaults approved | Generation |
 | App Plan approved | Yes | Approved by user | Generation |
+| Business Clarification Gate | Yes | `validate-business-clarification-gate.mjs` passes or no blockers exist | Generation |
+| Functional Spec to App Plan traceability | Yes | `validate-functional-spec-to-app-plan-traceability.mjs` passes | Generation |
+| Generation Readiness Review | Yes | `validate-generation-readiness-review.mjs` passes | Design/generation |
 | Plugin capability compliance | Yes | No unsupported invented resource/control/action shape | Generation |
 | Schema validation | Yes | Package schema passes | Signing |
 | API-issued ID provenance | For generated-final `.yapk` | All generated IDs API-issued and reported | Signing/install |
@@ -409,6 +413,9 @@ Rules:
 | Validation Layer | Scope | Tool/Method | Expected Result | Proof Boundary |
 | --- | --- | --- | --- | --- |
 | App-plan conformance | Resources vs plan | <Validator/manual> | pass/fail | Local proof |
+| Business clarification | Decision gates | `validate-business-clarification-gate.mjs` | pass/fail | Planning readiness only |
+| Generation readiness | 13 resource areas and review gates | `validate-generation-readiness-review.mjs` | pass/fail | Planning readiness only |
+| Functional Spec to App Plan traceability | Requirement categories vs planned resources | `validate-functional-spec-to-app-plan-traceability.mjs` | pass/fail | Planning traceability only |
 | Package schema | `.yapk`/`.yap` schema | <Validator> | pass/fail | Local proof |
 | Control/property fidelity | Controls and bindings | <Validator> | pass/fail | Local proof |
 | Runtime UI | Browser load/screenshots | <Runtime test> | pass/fail | Runtime proof |
@@ -455,6 +462,7 @@ Separate these proof levels:
 Boundary rule:
 
 - Signing/install/upgrade acceptance does not prove runtime UI fidelity, workflow execution, notification delivery, AI execution, permission enforcement, or external integration behavior.
+- Business Clarification Gate, Generation Readiness Review, and Functional Spec to App Plan traceability prove planning readiness only. They must pass before full-page canonical design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, but they do not prove generated package validity or runtime behavior.
 
 ## 21. Assumptions
 
