@@ -73,6 +73,16 @@ node scripts/validate-app-plan-resource-order.mjs <plan.md>
 
 This validator checks required headings, Yeeflow resource generation order, Placeholder planning, Form Report separation, and hard-gate text. It does not call APIs.
 
+Before generation, also validate executable planning readiness and traceability gates:
+
+```bash
+node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md> --plan <plan.md>
+node scripts/validate-generation-readiness-review.mjs --plan <plan.md>
+node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <plan.md>
+```
+
+These validators fail unresolved business decision gates, incomplete 13-area generation readiness, missing review-gate evidence, unmapped Functional Specification requirement categories, and deferred items without reason/fallback/proof impact. They must pass before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, signing, install/upgrade, or runtime proof. They prove planning readiness only and do not prove generated package conformance or runtime behavior.
+
 After generation, validate plan-to-package conformance with:
 
 ```bash

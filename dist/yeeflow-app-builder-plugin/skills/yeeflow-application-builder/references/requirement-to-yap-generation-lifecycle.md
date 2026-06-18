@@ -186,6 +186,14 @@ Stop after outputting the clarification block. Do not continue to Yeeflow resour
 
 Generation may continue only after the user answers the questions or explicitly approves default assumptions.
 
+When Functional Specification and/or App Plan Markdown artifacts exist, run:
+
+```bash
+node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md> --plan <app-plan.md>
+```
+
+The gate fails on unanswered, pending, TBD, open, requires-clarification, or generation-paused decision gates, and on decision tables that omit status/answer/default approval evidence. This validator proves clarification-gate document readiness only; it does not prove the business answer is correct.
+
 ## 7. Generation Readiness Review
 
 Before generation, confirm:
@@ -203,6 +211,22 @@ Before generation, confirm:
 - plugin capability and standards compliance has no invented unsupported shapes
 
 Stop if any required business decision gate remains unanswered or either review gate is failed.
+
+When an App Plan Markdown artifact exists, run:
+
+```bash
+node scripts/validate-generation-readiness-review.mjs --plan <app-plan.md>
+```
+
+The review fails when any of the 13 Yeeflow resource areas is missing, empty, placeholder-only, or lacks concrete planned resources or explicit not-applicable/deferred/runtime-proof status. It also checks that Functional Specification review, App Plan review, business decision closure, and unsupported-shape gates are documented as passed. This validator proves planning readiness only; it does not prove package generation, schema validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+
+Before design images, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, also run:
+
+```bash
+node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>
+```
+
+Traceability fails when business objects, relationships, approvals, forms, workflows, reporting, documents, AI/Copilot, integrations, permissions, or UI/experience requirements in the Functional Specification are not mapped to Yeeflow resources, planning sections, or explicit deferred/not-applicable coverage in the App Plan. Deferred items must include a reason, fallback, proof impact, or follow-up. This validator proves planning traceability only; it does not prove generated package conformance or runtime behavior.
 
 ## 8. Decide Safe Build Scope
 

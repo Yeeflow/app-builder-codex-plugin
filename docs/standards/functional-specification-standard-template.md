@@ -251,6 +251,14 @@ List decisions that materially affect workflow, data persistence, validation, da
 
 If unresolved business-critical decisions exist, stop before final App Plan unless the user approves defaults.
 
+Executable gate:
+
+```bash
+node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md>
+```
+
+The Business Clarification Gate fails when decision gates remain unanswered, pending, TBD, open, require clarification, or when generation is paused until answers are provided. It proves clarification-gate document readiness only, not that the business answer is correct.
+
 ## 20. Assumptions
 
 - Business assumptions:
@@ -294,3 +302,5 @@ If unresolved business-critical decisions exist, stop before final App Plan unle
 - Defaults approved by user:
 - Requirement document path:
 - App Plan should be created after:
+
+Before moving to the Yeeflow App Plan, `validate-functional-specification.mjs` and `validate-business-clarification-gate.mjs` should pass or the unresolved business decisions must be explicitly treated as blockers.
