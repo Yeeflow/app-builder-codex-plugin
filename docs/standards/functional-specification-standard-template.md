@@ -1,6 +1,6 @@
 # <Application Name> - Functional Specification
 
-Use this template as Step 1 for every Yeeflow application build. The purpose of this document is to convert the user's request, documents, screenshots, examples, and clarifications into a complete business requirement specification before creating the Yeeflow App Plan.
+Use this template as Stage 1 / Step 1 for every Yeeflow application build. The purpose of this document is to convert the user's request, documents, screenshots, examples, and clarifications into a complete business requirement specification before creating the Yeeflow App Plan.
 
 This document focuses on business requirements and expected application behavior. It should not be a package-generation blueprint. Yeeflow resource selection, generation order, field internal names, control implementation shapes, package validation, signing, and runtime proof belong in the App Plan and later steps.
 
@@ -294,4 +294,3 @@ If unresolved business-critical decisions exist, stop before final App Plan unle
 - Defaults approved by user:
 - Requirement document path:
 - App Plan should be created after:
-

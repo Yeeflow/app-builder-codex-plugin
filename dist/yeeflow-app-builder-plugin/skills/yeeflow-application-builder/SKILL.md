@@ -7,7 +7,7 @@ description: build real Yeeflow business applications from requirements, process
 
 ## Functional Specification And App Plan Stage Gates
 
-This skill is the top-level application-building controller. For every new application build, first create a standardized Functional Specification from the user's input with `docs/standards/functional-specification-standard-template.md`.
+This skill is the top-level application-building controller. For every new application build, Stage 1 is a standardized Functional Specification from the user's input with `docs/standards/functional-specification-standard-template.md`, and Stage 2 is a standardized Yeeflow App Plan from the reviewed Functional Specification with `docs/standards/app-plan-standard-template.md`.
 
 User input may be brief, detailed, document-backed, screenshot-backed, or mixed. Classify the input detail level, interpret and supplement incomplete requirements with explicit assumptions, extract and normalize detailed requirements into the standard Functional Specification template, list business-critical clarification questions, and run the Functional Specification completeness review before moving to the App Plan. For uploaded documents, reference materials, screenshots, exports, or existing samples, do not merely copy the source material; produce a new standardized Functional Specification based on the understood requirements and keep originals as supporting references.
 

@@ -71,7 +71,7 @@ Before generation, validate the Markdown plan structure with:
 node scripts/validate-app-plan-resource-order.mjs <plan.md>
 ```
 
-This validator checks required headings and hard-gate text only. It does not call APIs.
+This validator checks required headings, Yeeflow resource generation order, Placeholder planning, Form Report separation, and hard-gate text. It does not call APIs.
 
 After generation, validate plan-to-package conformance with:
 

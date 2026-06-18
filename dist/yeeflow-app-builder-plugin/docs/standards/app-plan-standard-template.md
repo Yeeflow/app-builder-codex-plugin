@@ -1,6 +1,6 @@
 # <Application Name> - Yeeflow App Plan
 
-Use this template as Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct generation order.
+Use this template as Stage 2 / Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct generation order.
 
 This document is the implementation contract for package generation after user approval. It must use only Yeeflow resource types, field types, variable types, controls, workflow nodes, form actions, and configuration shapes supported by the active `@yeeflow-app-builder` plugin knowledge base, skills, standards, validators, template library, or export-proven references.
 
