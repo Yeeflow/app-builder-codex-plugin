@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.6.59
+
+- Release the required Stage 1 Functional Specification template and review gate for every new application build.
+- Release the required Stage 2 Yeeflow App Plan resource-order template and review gate, generated only from the reviewed Functional Specification.
+- Document canonical templates at `docs/standards/functional-specification-standard-template.md` and `docs/standards/app-plan-standard-template.md`, while keeping `docs/app-plan-standard-template.md` as the compatibility entrypoint.
+- Add `scripts/validate-functional-specification.mjs`, `scripts/validate-app-plan-resource-order.mjs`, and regression coverage in `scripts/test-functional-specification-and-app-plan-gates.mjs`.
+- Require the App Plan to be a Yeeflow resource generation contract organized by Yeeflow resource generation order, not a generic project plan.
+- Treat Form Report as a standalone Yeeflow resource based on Approval Form, not Dashboard or Data List view planning.
+- Require Placeholder planning for Data List fields, Approval Form Submission fields, Task Form fields, and Custom Data List Form fields.
+- Require Functional Specification and App Plan gates to pass before full-page canonical design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+
 ## 0.6.58
 
 - Release full-page design artifact, page implementation blueprint, staged workflow, and decoded resource-vs-blueprint parity gates.
