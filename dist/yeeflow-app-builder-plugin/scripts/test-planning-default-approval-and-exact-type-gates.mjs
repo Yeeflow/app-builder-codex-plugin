@@ -73,6 +73,26 @@ function businessGates(status, reason = "Recommended defaults unblock planning o
 `;
 }
 
+function duplicatedVendorBusinessGates(status) {
+  const gates = [
+    ["approvalRoute", "Which approval route should contracts follow?", "Legal + Finance + Operations Manager"],
+    ["renewalReminderOffsets", "Which renewal reminder offsets should be used?", "90/60/30/7 days before renewal"],
+    ["requiredDocumentPolicy", "Which documents are mandatory before a contract can be active?", "Signed contract plus amendments when applicable"],
+    ["renewalDecisionPolicy", "Who decides whether a contract renews, renegotiates, or terminates?", "Contract owner recommends; operations manager approves"],
+    ["permissionModel", "Who may view and edit vendor and contract records?", "Operations can view; owners edit assigned records; admins override"],
+  ];
+  const rows = gates.map(([key, question, defaultValue]) => `| ${key} | ${question} | confirm / revise | ${defaultValue} | Yes | ${status} | Planning default only; generation requires user approval |`);
+  return `
+# Vendor Contract Management Planning Artifact
+
+## 19. Business Decision Gates
+
+| Key | Question | Options | Recommended Default | Required Before Generation | Status | Reason / Fallback / Proof Impact |
+| --- | --- | --- | --- | --- | --- | --- |
+${rows.join("\n")}
+`;
+}
+
 function basePlan(overrides = {}) {
   const dataListHeader = overrides.dataListHeader ?? "| Field | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Proof Label | Fallback / Deferred Reason |";
   const dataListRow = overrides.dataListRow ?? "| Contract Owner | User | user picker control | validator-backed | N/A |";
@@ -172,7 +192,28 @@ try {
   assert.equal(planningReport.warnings > 0, true);
   assert.equal(planningReport.findings.some((finding) => finding.level === "warning" && finding.code === "BUSINESS_CLARIFICATION_DEFAULT_APPLIED_FOR_PLANNING"), true);
 
+  const duplicatedSpec = writeFixture(tempDir, "duplicated-vendor-spec.md", duplicatedVendorBusinessGates("default-applied-for-planning"));
+  const duplicatedPlan = writeFixture(tempDir, "duplicated-vendor-plan.md", duplicatedVendorBusinessGates("default-applied-for-planning"));
+  const duplicatedPlanningReport = expectPass("duplicated planning defaults report five unique gates from ten raw findings", ["scripts/validate-business-clarification-gate.mjs", "--spec", duplicatedSpec, "--plan", duplicatedPlan, "--mode", "planning", "--json"], results);
+  assert.equal(duplicatedPlanningReport.warnings, 10);
+  assert.equal(duplicatedPlanningReport.rawFindingCount, 10);
+  assert.equal(duplicatedPlanningReport.uniqueUnresolvedGateCount, 5);
+  assert.deepEqual(duplicatedPlanningReport.uniqueUnresolvedGateKeys, [
+    "approvalRoute",
+    "permissionModel",
+    "renewalDecisionPolicy",
+    "renewalReminderOffsets",
+    "requiredDocumentPolicy",
+  ]);
+  assert.equal(duplicatedPlanningReport.gateOccurrences.approvalRoute.length, 2);
+
   expectFail("default-applied-for-planning fails generation mode", ["scripts/validate-business-clarification-gate.mjs", "--spec", planningDefault, "--mode", "generation", "--json"], "BUSINESS_CLARIFICATION_DEFAULT_ONLY_FOR_PLANNING", results);
+
+  const duplicatedGenerationReport = expectFail("duplicated planning defaults fail generation mode with five unique gates", ["scripts/validate-business-clarification-gate.mjs", "--spec", duplicatedSpec, "--plan", duplicatedPlan, "--mode", "generation", "--json"], "BUSINESS_CLARIFICATION_DEFAULT_ONLY_FOR_PLANNING", results);
+  assert.equal(duplicatedGenerationReport.errors, 10);
+  assert.equal(duplicatedGenerationReport.rawFindingCount, 10);
+  assert.equal(duplicatedGenerationReport.uniqueUnresolvedGateCount, 5);
+  assert.deepEqual(duplicatedGenerationReport.uniqueUnresolvedGateKeys, duplicatedPlanningReport.uniqueUnresolvedGateKeys);
 
   const generationDefault = writeFixture(tempDir, "generation-default.md", businessGates("user-default-approved-for-generation"));
   expectPass("user-default-approved-for-generation passes generation mode", ["scripts/validate-business-clarification-gate.mjs", "--spec", generationDefault, "--mode", "generation", "--json"], results);

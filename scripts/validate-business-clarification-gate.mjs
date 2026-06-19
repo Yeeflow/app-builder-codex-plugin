@@ -113,6 +113,55 @@ function hasWarningOrErrorIntegrity(report) {
   return report.warnings === warningFindings && report.errors === errorFindings;
 }
 
+const UNRESOLVED_GATE_CODES = new Set([
+  "BUSINESS_CLARIFICATION_UNANSWERED_GATE",
+  "BUSINESS_CLARIFICATION_STATUS_MISSING",
+  "BUSINESS_CLARIFICATION_DEFAULT_APPLIED_FOR_PLANNING",
+  "BUSINESS_CLARIFICATION_DEFAULT_ONLY_FOR_PLANNING",
+  "BUSINESS_CLARIFICATION_AMBIGUOUS_DEFAULT_APPROVAL",
+  "BUSINESS_CLARIFICATION_STATUS_UNRECOGNIZED",
+]);
+
+function normalizeGateKey(value) {
+  return String(value ?? "")
+    .trim()
+    .replace(/^`|`$/g, "")
+    .replace(/^<|>$/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function summarizeUniqueUnresolvedGates(findings) {
+  const gateMap = new Map();
+  for (const finding of findings) {
+    if (!UNRESOLVED_GATE_CODES.has(finding.code)) continue;
+    const gateKey = normalizeGateKey(finding.gateKey);
+    const question = normalizeGateKey(finding.question);
+    if (!gateKey && !question) continue;
+    const key = gateKey || question;
+    const existing = gateMap.get(key) ?? {
+      key,
+      question: question || null,
+      occurrences: [],
+    };
+    if (!existing.question && question) existing.question = question;
+    existing.occurrences.push({
+      level: finding.level,
+      code: finding.code,
+      file: finding.file,
+      section: finding.section ?? null,
+      statusText: finding.statusText ?? "",
+    });
+    gateMap.set(key, existing);
+  }
+  const gates = [...gateMap.values()].sort((left, right) => left.key.localeCompare(right.key));
+  return {
+    rawFindingCount: findings.length,
+    uniqueUnresolvedGateCount: gates.length,
+    uniqueUnresolvedGateKeys: gates.map((gate) => gate.key),
+    gateOccurrences: Object.fromEntries(gates.map((gate) => [gate.key, gate.occurrences])),
+  };
+}
+
 function analyzeFile(file, kind, mode) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const sections = gateSections(text);
@@ -294,11 +343,16 @@ function main() {
   const findings = [...errors, ...reports.flatMap((report) => report.findings)];
   const warnings = reports.flatMap((report) => report.warnings);
   const allFindings = [...findings, ...warnings];
+  const unresolvedSummary = summarizeUniqueUnresolvedGates(allFindings);
   const report = {
     status: findings.length ? "fail" : "pass",
     errors: findings.length,
     warnings: warnings.length,
     findings: allFindings,
+    rawFindingCount: unresolvedSummary.rawFindingCount,
+    uniqueUnresolvedGateCount: unresolvedSummary.uniqueUnresolvedGateCount,
+    uniqueUnresolvedGateKeys: unresolvedSummary.uniqueUnresolvedGateKeys,
+    gateOccurrences: unresolvedSummary.gateOccurrences,
     spec: spec ? path.resolve(spec) : null,
     plan: plan ? path.resolve(plan) : null,
     mode,

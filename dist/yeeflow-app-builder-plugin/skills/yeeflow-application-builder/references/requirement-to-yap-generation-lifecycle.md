@@ -257,6 +257,8 @@ Validation reports must distinguish structural planning checks from overall gene
 
 If Generation Readiness structural check passes but generation-mode Business Clarification Gate fails, write `Overall generation readiness: blocked by Business Clarification Gate`. Do not write only `Validation passed` or `all passed` when business clarification is intentionally unresolved or only `default-applied-for-planning`.
 
+When the same unresolved business decision gate appears in both the Functional Specification and App Plan, use the Business Clarification validator's deduplicated summary for user-facing reporting. Show raw finding count, unique unresolved gate count, unique gate keys, and occurrence locations when helpful. Do not make users infer five decisions from ten duplicated raw findings.
+
 Before design images, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, also run:
 
 ```bash
