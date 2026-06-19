@@ -85,6 +85,37 @@ Minimum acceptance criteria:
 - table cells, buttons, badges, chips, cards, timelines, Kanban/Collection cards, and form fields avoid visible text overflow and element overlap
 - mobile designs stack multi-column layouts, reduce column counts, or use scroll/card-list alternatives rather than preserving cramped desktop columns
 
+## 3A. HTML Preview Design Tokens And UI Pattern Templates
+
+For complex business applications, the Application Design System must define the HTML-first preview contract used by `docs/standards/ui-surface-contract-template.md` and `docs/standards/html-preview-design-standard.md`.
+
+The HTML-first workflow inherits every Full-page Canonical Design Artifact gate. The Application Design System must define tokens, layout rules, component patterns, responsive rules, and visual quality standards that allow UI Surface Contracts and HTML previews to prove the same design-stage gates previously required from canonical design images. It must not permit arbitrary SaaS shells, generic form scaffolds, placeholder lower-page regions, weak visual hierarchy, text overflow, element overlap, mobile layout pressure, or template reuse without purposeful surface differences.
+
+- HTML design token namespace:
+- Typography token/class map:
+- Spacing token/class map:
+- Color token/class map:
+- Border/radius/shadow token/class map:
+- Card and section component patterns:
+- Form section component patterns:
+- Data table and Sub List component patterns:
+- Collection/Kanban/Timeline component patterns:
+- Button/action placement component patterns:
+- Badge/chip/status component patterns:
+- Dashboard KPI/analytics component patterns:
+- Mobile responsive component patterns:
+- Approved UI pattern templates by surface type:
+  - Dashboard page:
+  - Approval Submission form:
+  - Approval Task form:
+  - Approval Print page:
+  - Data List New/Edit form:
+  - Data List View/Detail form:
+  - Document Library New/Edit form:
+  - Document Library View form:
+
+HTML previews must use these tokens and approved pattern templates. HTML preview is not a low-fidelity scaffold; it must be a modern, polished, design-system-driven prototype equal to or better than static generated design images. Screenshots are evidence generated from validated HTML, not the primary implementation contract.
+
 ## 4. Form And Detail Semantic Quality Standard
 
 Approval Submission forms, Approval Task forms, Approval Print pages, Data List Add/Edit forms, Data List View forms, Data List Detail forms, and other custom form/detail surfaces must show page-specific business meaning. Full-page height alone is not enough.

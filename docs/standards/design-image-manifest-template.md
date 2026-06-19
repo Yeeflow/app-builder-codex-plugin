@@ -17,6 +17,11 @@ Form Reports are standalone Yeeflow resources and are not required canonical des
 | `applicationChromeStyleId` |  |
 | Layout rule source | `docs/standards/yeeflow-application-layout-design-rules.md` |
 | Application Design System path |  |
+| UI Surface Contract directory/path |  |
+| HTML preview directory/path |  |
+| Desktop/mobile screenshot evidence directory/path |  |
+| HTML preview validation report path |  |
+| Blueprint-to-UI Surface Contract comparison report path |  |
 | Application Design System status |  |
 | Design System generated before images | yes/no |
 | Manifest status | draft / reviewed / ready for blueprint |
@@ -49,6 +54,25 @@ List every UI surface from the approved App Plan that requires page/form design.
 ## Canonical Design Artifact Rows
 
 Every row must reference the Application Design System and the approved App Plan. Dashboard rows must include the selected official layout/chrome and `includeHeaderNavigation: true`. Approval and Data List form rows do not require application header/navigation and may use `form-surface-no-app-chrome` as the explicit non-dashboard surface marker.
+
+For complex business applications, every blueprint-ready row should also reference its UI Surface Contract, high-fidelity HTML preview, desktop/mobile screenshots generated from HTML, HTML validation report, and blueprint-to-contract comparison report. PNG canonical images remain useful evidence, but they are not the sole implementation contract when the HTML-first workflow is used.
+
+The HTML-first workflow inherits all Full-page Canonical Design Artifact gates. Manifest rows must not mark a surface ready for blueprint when the UI Surface Contract or HTML preview bypasses layout fidelity, modern visual quality, surface responsibility, field/action coverage, forbidden-region checks, semantic consistency, lower-page visual concreteness, visual usability, template reuse risk, full-page completeness, page-end evidence, or mobile/responsive evidence.
+
+Additional HTML-first row fields:
+
+- UI Surface Contract path
+- HTML Preview path
+- Desktop Screenshot path
+- Mobile Screenshot path
+- HTML Validation Report path
+- Blueprint-to-Contract Report path
+- inherited Full-page Design gate summary
+- official dashboard application layout/header/navigation evidence
+- form-surface no-app-chrome evidence
+- full-page/page-end evidence
+- App Plan field/action coverage evidence
+- visual usability/text overflow/overlap/spacing/mobile pressure evidence
 
 Every row must also declare surface responsibility and App Plan coverage evidence before `readyForBlueprint: true`. Required fields are `surfaceType`, `appPlanResourceRef`, `sourceResourceType`, `sourceResourceName`, `sourceListOrFormName`, `surfaceResponsibility`, `plannedFieldCoverage`, `requiredFieldsShown`, `optionalFieldsShown`, `missingPlannedFields`, `fieldCoverageStatus`, `plannedActions`, `actionsShown`, `missingRequiredActions`, `actionCoverageStatus`, `forbiddenRegionsPresent`, `forbiddenRegionStatus`, `surfaceResponsibilityStatus`, and `appPlanTraceabilityStatus`.
 
