@@ -12,9 +12,9 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.72`.
+Expected plugin: `Yeeflow App Builder` version `0.6.73`.
 
-Version `0.6.72` releases HTML-to-Yeeflow Control Mapping and Blueprint parity gates. HTML previews must now be control-mapped with machine-readable `data-*` metadata, with the UI Surface Contract remaining the primary implementation contract and the Control Mapping Registry governing `data-yeeflow-control` values. New validation covers field metadata parity for field ID/name/type, binding, required, readonly, default, and validation rules; action metadata parity for action ID/type/contract, row context, and parent/current item binding; list and region metadata parity for source resource, source list, parent binding, and row context; and style/layout/responsive token checks. Blueprint parity now checks control type, binding, action contract, source list/context, hidden/helper controls, and style-token intent, while unknown controls are blocked unless explicitly marked `deferred`, `export-learning-required`, or `runtime-proof-required`. These gates prove design, HTML, and blueprint mapping readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+Version `0.6.73` releases HTML-first New/Edit form body discipline gates. New/Edit primary fields must stay in form body field groups and control mappings; generic lower regions such as `Primary form fields`, `Main form fields`, `Editable fields`, and `Document metadata fields` fail for New/Edit surfaces; duplicate primary actions fail unless row/item/Sub List scoped; fake lower-region cards made from field/action names fail; editable field labels cannot be rendered as values without explicit placeholder semantics; and invalid UI Surface Contracts are rejected before HTML/Blueprint parity can incorrectly pass. These gates prove design, HTML, and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
 
 Version `0.6.56` releases Supplier runtime/design fidelity gates and validation-layer proof gates. Runtime proof must use the installed application `ListSetID` and runtime URL, never install-log IDs. Design implementation must map design sections, KPI counts, page background/chrome, Data Filter bindings, Collection detail links, analytics controls, progress/status treatments, Summary/KPI bindings, and canonical one-PNG-per-page artifacts through explicit design manifest mapping. Reports must keep `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` separate; schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, and the control-binding graph must be complete. Root padding gates from `0.6.55` remain baseline behavior, approval-form root padding remains deferred because evidence is mixed, and no pixel-perfect or live runtime proof claim is made before the matching runtime/browser evidence exists.
 
@@ -31,7 +31,7 @@ Run OAuth login before API access. OAuth uses Authorization Code with PKCE S256,
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.72
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.73
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```

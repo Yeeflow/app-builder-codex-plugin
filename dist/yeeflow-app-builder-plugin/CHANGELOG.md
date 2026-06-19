@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.6.73
+
+- Release HTML-first New/Edit form body discipline gates from PR #113.
+- Require New/Edit primary fields to stay in form body field groups and control mappings.
+- Reject generic lower regions such as `Primary form fields`, `Main form fields`, `Editable fields`, and `Document metadata fields` for New/Edit surfaces.
+- Reject duplicate primary actions unless they are row/item/Sub List scoped.
+- Reject fake lower-region cards made from field/action names.
+- Reject editable field labels rendered as values without explicit placeholder semantics.
+- Reject invalid UI Surface Contracts before HTML/Blueprint parity can incorrectly pass.
+- Preserve the proof boundary: these gates prove design, HTML, and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+
 ## 0.6.72
 
 - Release HTML-to-Yeeflow Control Mapping and Blueprint parity gates from PR #111.
