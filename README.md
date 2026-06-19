@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.63`
+- Version: `0.6.64`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.63` releases planning default approval and exact type gates from PR #93. Business Clarification validation now supports planning and generation modes: `default-applied-for-planning` is allowed only for planning-mode validation and blocks generation-mode validation, while `user-default-approved-for-generation` is required before default-based generation can proceed. Planning validator warning/error counts now require matching findings. Generation Readiness rejects combined exact type/control headings, slash-combined exact implementation values such as `Lookup / lookup control`, and broad `where supported` implementation wording unless marked `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof impact. App Plan standards require exact Yeeflow type/control/action values to be split into separate columns. Focused regression coverage in `scripts/test-planning-default-approval-and-exact-type-gates.mjs` enforces these cases before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting from PR #95. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show that duplicated gates across the Functional Specification and Yeeflow App Plan are ten raw findings but five unique unresolved business decisions. Planning/generation mode behavior is unchanged: planning mode can pass with warnings for `default-applied-for-planning`, while generation mode remains blocked until gates are answered or explicitly approved for generation.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.63
+Version: 0.6.64
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.63
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.64
 ```
 
 ## What Is Included

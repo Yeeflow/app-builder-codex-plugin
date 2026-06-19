@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.63`
+- Version: `0.6.64`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.63` releases planning default approval and exact type gates. Business Clarification validation now supports planning and generation modes: `default-applied-for-planning` is allowed only for planning-mode validation and blocks generation-mode validation, while `user-default-approved-for-generation` is required before default-based generation can proceed. Planning validator warning/error counts now require matching findings. Generation Readiness rejects combined exact type/control headings, slash-combined exact implementation values such as `Lookup / lookup control`, and broad `where supported` implementation wording unless marked `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof impact. App Plan standards require exact Yeeflow type/control/action values to be split into separate columns. Updated validators and regression coverage in `scripts/test-planning-default-approval-and-exact-type-gates.mjs` enforce these planning gates before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show duplicated Functional Specification/App Plan gate findings separately from the unique unresolved business decisions that the user must answer or explicitly approve for generation.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
