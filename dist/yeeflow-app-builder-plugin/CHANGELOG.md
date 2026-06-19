@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.6.63
+
+- Release planning default approval and exact type gates from PR #93.
+- Add Business Clarification validation modes for planning and generation.
+- Allow `default-applied-for-planning` only for planning-mode validation and block it in generation-mode validation.
+- Require `user-default-approved-for-generation` before default-based generation can proceed.
+- Require warning/error counts to have matching warning/error findings.
+- Reject combined exact type/control headings in Generation Readiness validation.
+- Reject slash-combined exact implementation values such as `Lookup / lookup control`.
+- Reject broad `where supported` implementation wording unless marked `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof impact.
+- Require App Plan exact Yeeflow type/control/action values to be split into separate columns.
+- Add focused regression coverage in `scripts/test-planning-default-approval-and-exact-type-gates.mjs`.
+
 ## 0.6.62
 
 - Release Business Clarification and App Plan precision gates from PR #91.
