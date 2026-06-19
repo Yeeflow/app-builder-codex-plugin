@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.6.66
+
+- Release Full-page Design Artifact layout fidelity and modern visual quality gates from PR #99.
+- Require official Yeeflow `applicationLayoutType` IDs for design artifacts: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, and `application-layout-4-no-nav`.
+- Require Application Design System and manifest layout fields: `applicationChromeStyleId`, `headerMode`, `navMode`, `navBackgroundMode`, `contentSafeArea`, and `layoutRuleSource`.
+- Add Dashboard manifest layout/chrome fidelity checks, including header/navigation requirements and selected layout/chrome compliance declarations.
+- Preserve form-surface no-app-chrome behavior so Approval and Data List form surfaces do not inherit Dashboard application chrome requirements.
+- Reject Layout 1 forbidden chrome markers such as custom sidebars, arbitrary SaaS shells, detached left rails, header hamburgers, bottom collapse controls, extra top navigation, and mixed nav panels.
+- Require modern visual quality status, checklist, and anti-pattern gates for canonical design artifacts.
+- Block `readyForBlueprint: true` unless layout fidelity and modern visual quality pass.
+- Block `human_review_required` blueprint readiness unless the item is explicitly deferred with reason, fallback, and proof impact.
+
 ## 0.6.65
 
 - Release Full-page Canonical Design Artifacts stage standardization from PR #97.
