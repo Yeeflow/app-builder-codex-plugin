@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.6.65
+
+- Release Full-page Canonical Design Artifacts stage standardization from PR #97.
+- Add the Application Design System template at `docs/standards/application-design-system-template.md`.
+- Add the Design Image Manifest template at `docs/standards/design-image-manifest-template.md`.
+- Add `scripts/validate-full-page-design-artifacts.mjs` and focused regression coverage in `scripts/test-full-page-design-artifacts-application-design-system-gates.mjs`.
+- Require the Application Design System to be generated before canonical design images, and require the manifest plus every artifact row to reference it.
+- Require full-page design coverage for Dashboard pages, Approval Submission/Task/Print surfaces, and planned Data List custom forms before Page Implementation Blueprints.
+- Exclude Form Reports from required design-image surfaces; they remain standalone Form Report resources.
+- Require Dashboard designs to include selected application layout/header/navigation coverage, while Approval/Data List form pages do not require application header/navigation.
+- Require each design artifact to include a desktop image plus mobile image or responsive plan reference, full-page/page-end coverage, App Plan traceability, business examples, and blueprint readiness.
+
 ## 0.6.64
 
 - Release Business Clarification unique unresolved gate summary reporting from PR #95.
