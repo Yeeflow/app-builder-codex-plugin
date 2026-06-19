@@ -12,6 +12,10 @@ Before design images, page implementation blueprints, resource generation, decod
 
 These validators prove planning readiness and traceability only. They do not prove package schema validity, package conformance, signing/API acceptance, install/upgrade success, or runtime behavior.
 
+The App Plan must explicitly plan how Data List records are displayed on pages before implementation begins. Each record-list section must choose Data table, Collection, Kanban, Vertical timeline, or Horizontal timeline and state the reason. Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls must plan item-template Dynamic controls with source fields. Collection and Kanban controls must plan item actions or explicitly state `No Collection/Kanban item actions required`. Approval Forms and Custom Data List forms that use Sub List controls must plan Sub List list actions or explicitly state `No custom Sub List actions required`.
+
+All App Plan resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes must come from the active plugin's known skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references. Unknown shapes must be marked `export-learning-required`, `runtime-proof-required`, or `deferred` and must not be treated as generation-ready.
+
 Use this section in addition to the normal purpose, roles, process, lists/fields, list views, custom list forms, list workflows, scheduled workflows, notifications, forms, dashboards/pages, navigation, UI/UX mapping, custom code/custom CSS decisions, AI Agent/Copilot decisions, golden references, permissions, integrations, assumptions, deferred items, and proof boundary sections.
 
 Northpeak reference note: `northpeak-resource-operations-plan.md` is the style reference for a complete plan because it uses numbered sections, plan status, target roles, process flow, navigation, detailed lists/fields, forms, dashboards/pages, UI/control mapping, golden template strategy, composition checklist, actions/workflow logic, permissions, integrations, document/attachment decisions, reports, validation, proof boundary, assumptions, deferred/runtime-proof items, and a recommended next prompt. Reuse that structure, not its business-specific content.
@@ -94,8 +98,11 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 
 ### Dashboard Grid-Table Collection Pattern Contract
 - Required when a dashboard record-list section claims the grid-table Collection pattern: Yes
-- Dashboard record-list control choice stated for each section: Data table / grid-table Collection / none
+- Dashboard record-list control choice stated for each section: Data table / Collection / Kanban / Vertical timeline / Horizontal timeline / none
+- Record Display Control Selection reason stated for each Data List record section: Yes/No
 - Use dashboard `data-list` control for grid-table dashboard sections: No, unless Data table is explicitly requested
+- Item-template Dynamic controls planned for every Collection, Kanban, Vertical Timeline, or Horizontal Timeline: Yes/No
+- Collection/Kanban item actions planned or explicitly marked `No Collection/Kanban item actions required`: Yes/No
 - Header `flex_grid` paired with each grid-table Collection: Yes/No
 - Header `flex_grid` and Collection wrapped in one container: Yes/No
 - Wrapper sets `attrs.container.gap = 0`: Yes/No
@@ -120,6 +127,7 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Planned navigation groups must exist: Yes/No
 - Planned print pages must be reachable or intentionally hidden: Yes/No
 - Planned workflows/actions must be implemented or explicitly deferred: Yes/No
+- Planned record display controls, item-template Dynamic controls, Collection/Kanban actions, and Sub List list actions must be implemented or explicitly deferred: Yes/No
 - Planned data-list views, custom list forms, public forms, and notifications must be implemented or explicitly deferred: Yes/No
 - Planned scheduled workflows must be implemented or explicitly deferred: Yes/No
 - Planned AI Agents, Copilots, knowledge resources, custom code, custom CSS, and golden/template references must be implemented or explicitly deferred: Yes/No
@@ -133,6 +141,7 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Notifications required: Yes/No/Deferred
 - AI Agent/Copilot/knowledge required: Yes/No/Deferred
 - Golden/template references named for each advanced feature: Yes/No
+- Plugin-supported type/property/action rule satisfied for controls, Dynamic controls, action types, property paths, bindings, and configuration shapes: Yes/No
 - Runtime proof required before claiming execution/delivery works: Yes/No
 
 ### Proof Boundary Contract
@@ -196,4 +205,4 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 
 ## Validation Expectation
 
-Use `scripts/validate-app-plan-resource-order.mjs <plan.md>` to check required Markdown headings, Yeeflow resource generation order, Placeholder planning, Form Report separation, and hard-gate text before package generation. Use `scripts/validate-business-clarification-gate.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs` to enforce business decision closure, 13-area planning readiness, and Functional Specification to App Plan traceability before package generation. Use `scripts/validate-app-plan-conformance.mjs` after package generation to compare the generated app against the approved plan. Generation reports must keep local validation, API signing, API install/import acceptance, and runtime UI inspection as separate proof levels.
+Use `scripts/validate-app-plan-resource-order.mjs <plan.md>` to check required Markdown headings, Yeeflow resource generation order, Placeholder planning, Form Report separation, record display control selection, item-template Dynamic control planning, Collection/Kanban action decisions, Sub List action decisions, plugin-supported type/property rules, and hard-gate text before package generation. Use `scripts/validate-business-clarification-gate.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs` to enforce business decision closure, 13-area planning readiness, App Plan control/action/property decisions, and Functional Specification to App Plan traceability before package generation. Use `scripts/validate-app-plan-conformance.mjs` after package generation to compare the generated app against the approved plan. Generation reports must keep local validation, API signing, API install/import acceptance, and runtime UI inspection as separate proof levels.

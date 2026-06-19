@@ -84,6 +84,57 @@ function deferredWithoutReason(planText) {
   return findings;
 }
 
+function hasRelevantDeferredCoverage(planText, topicPattern) {
+  return planText.split(/\r?\n/).some((line) => topicPattern.test(line) && /\b(deferred|runtime-proof-required|export-learning-required|not applicable|N\/A)\b/i.test(line));
+}
+
+function addSpecializedTraceabilityFindings(specText, planText, findings, unmappedRequirementCategories, coverage) {
+  const recordDisplayNeed = /\b(card list|cards|board|status board|work board|timeline|history|audit|activity feed|event feed|list view|record display|record list|queue)\b/i;
+  const recordDisplayCovered = /\b(Data table|Collection|Kanban|Vertical Timeline|Horizontal Timeline|Vertical timeline|Horizontal timeline)\b/i;
+  if (recordDisplayNeed.test(specText) && !recordDisplayCovered.test(planText) && !hasRelevantDeferredCoverage(planText, /\b(record display|card|cards|board|timeline|history|audit|activity|queue|dashboard)\b/i)) {
+    unmappedRequirementCategories.push("recordDisplayControls");
+    coverage.recordDisplayControls = { matched: false, planSections: ["Dashboard Pages Plan", "Data List Views Plan", "Deferred or Runtime-Proof Items"] };
+    findings.push({
+      level: "error",
+      code: "TRACEABILITY_RECORD_DISPLAY_CONTROL_UNMAPPED",
+      category: "recordDisplayControls",
+      message: "Functional Specification describes record display needs, but the App Plan does not map them to Data table, Collection, Kanban, Vertical Timeline, Horizontal Timeline, or explicit deferred coverage.",
+    });
+  } else {
+    coverage.recordDisplayControls = { matched: true, planSections: ["Dashboard Pages Plan", "Data List Views Plan", "Deferred or Runtime-Proof Items"] };
+  }
+
+  const itemActionNeed = /\b(item-level action|item action|bulk action|bulk update|bulk delete|edit item|delete item|update item|status update|current item|selected item|selection toolbar|mark .* complete)\b/i;
+  const itemActionCovered = /\b(Collection\/Kanban item actions|Collection and Kanban Item Actions|current item context|No Collection\/Kanban item actions required|setdatalist|update row|bulk toolbar)\b/i;
+  if (itemActionNeed.test(specText) && !itemActionCovered.test(planText) && !hasRelevantDeferredCoverage(planText, /\b(item action|bulk action|status update|current item|selected item|Collection|Kanban)\b/i)) {
+    unmappedRequirementCategories.push("itemActions");
+    coverage.itemActions = { matched: false, planSections: ["Dashboard Pages Plan", "Deferred or Runtime-Proof Items"] };
+    findings.push({
+      level: "error",
+      code: "TRACEABILITY_ITEM_ACTION_UNMAPPED",
+      category: "itemActions",
+      message: "Functional Specification describes item or bulk actions, but the App Plan does not include Collection/Kanban action planning or explicit deferred coverage.",
+    });
+  } else {
+    coverage.itemActions = { matched: true, planSections: ["Dashboard Pages Plan", "Deferred or Runtime-Proof Items"] };
+  }
+
+  const subListNeed = /\b(line item|line items|request item|request items|invoice item|invoice items|quotation item|quotation items|sublist rows|sub-list rows|Sub List|repeated row|repeated rows|row-level operation|row operation|row operations|duplicate row|delete row|insert row|move row)\b/i;
+  const subListCovered = /\b(Sub List List Actions|No custom Sub List actions required|current row context|summary fields affected|parent field binding)\b/i;
+  if (subListNeed.test(specText) && !subListCovered.test(planText) && !hasRelevantDeferredCoverage(planText, /\b(Sub List|line item|request item|invoice item|quotation item|row-level|row action|duplicate row|delete row|insert row|move row)\b/i)) {
+    unmappedRequirementCategories.push("subListActions");
+    coverage.subListActions = { matched: false, planSections: ["Approval Forms Plan", "Custom Data List Forms Plan", "Deferred or Runtime-Proof Items"] };
+    findings.push({
+      level: "error",
+      code: "TRACEABILITY_SUB_LIST_ACTION_UNMAPPED",
+      category: "subListActions",
+      message: "Functional Specification describes repeated line items or row-level operations, but the App Plan does not include Sub List and Sub List action planning or explicit deferred coverage.",
+    });
+  } else {
+    coverage.subListActions = { matched: true, planSections: ["Approval Forms Plan", "Custom Data List Forms Plan", "Deferred or Runtime-Proof Items"] };
+  }
+}
+
 function validate(specFile, planFile) {
   const specText = fs.readFileSync(specFile, "utf8").replace(/^\uFEFF/, "");
   const planText = fs.readFileSync(planFile, "utf8").replace(/^\uFEFF/, "");
@@ -123,6 +174,8 @@ function validate(specFile, planFile) {
       line,
     });
   }
+
+  addSpecializedTraceabilityFindings(specText, planText, findings, unmappedRequirementCategories, coverage);
 
   return {
     status: findings.length ? "fail" : "pass",

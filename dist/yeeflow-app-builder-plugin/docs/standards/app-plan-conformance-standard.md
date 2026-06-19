@@ -18,6 +18,7 @@ The section must bind later generation to:
 - approval-form contract that prevents approval apps from silently shipping with `Forms: []`
 - navigation runtime metadata contract requiring API-issued group IDs, group `AppID`, group `ListSetID`, `Icon`, `list[]`, child `AppID`, child `ListSetID`, target-specific `Type`, and no `children`/`Childs`
 - plan-to-package conformance requirements for planned lists, fields, forms, task pages, dashboards/pages, navigation, print pages, workflows/actions, permissions, and integrations
+- App Plan control/action/property requirements for record display control selection, item-template Dynamic controls, Collection/Kanban action decisions, Sub List list-action decisions, and plugin-supported type/property/action sources
 - proof boundary report separating plan approval, schema validation, ID provenance validation, navigation runtime metadata validation, app-plan conformance, UI/control quality, signing, signature verification, API install/import acceptance, runtime UI inspection, deferred items, and known risks
 - runtime inspection checklist for installed test packages
 
@@ -71,7 +72,7 @@ Before generation, validate the Markdown plan structure with:
 node scripts/validate-app-plan-resource-order.mjs <plan.md>
 ```
 
-This validator checks required headings, Yeeflow resource generation order, Placeholder planning, Form Report separation, and hard-gate text. It does not call APIs.
+This validator checks required headings, Yeeflow resource generation order, Placeholder planning, Form Report separation, record display control selection, item-template Dynamic control planning, Collection/Kanban action decisions, Sub List action decisions, plugin-supported type/property rule text, and hard-gate text. It does not call APIs.
 
 Before generation, also validate executable planning readiness and traceability gates:
 
@@ -81,7 +82,7 @@ node scripts/validate-generation-readiness-review.mjs --plan <plan.md>
 node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <plan.md>
 ```
 
-These validators fail unresolved business decision gates, incomplete 13-area generation readiness, missing review-gate evidence, unmapped Functional Specification requirement categories, and deferred items without reason/fallback/proof impact. They must pass before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, signing, install/upgrade, or runtime proof. They prove planning readiness only and do not prove generated package conformance or runtime behavior.
+These validators fail unresolved business decision gates, incomplete 13-area generation readiness, missing review-gate evidence, missing record display control selection, missing item-template Dynamic controls, missing Collection/Kanban or Sub List action decisions, unsupported type/property wording without a proof/deferred label, unmapped Functional Specification requirement categories, and deferred items without reason/fallback/proof impact. They must pass before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, signing, install/upgrade, or runtime proof. They prove planning readiness only and do not prove generated package conformance or runtime behavior.
 
 After generation, validate plan-to-package conformance with:
 

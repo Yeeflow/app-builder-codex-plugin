@@ -2,7 +2,7 @@
 
 Use this template as Stage 2 / Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct generation order.
 
-This document is the implementation contract for package generation after user approval. It must use only Yeeflow resource types, field types, variable types, controls, workflow nodes, form actions, and configuration shapes supported by the active `@yeeflow-app-builder` plugin knowledge base, skills, standards, validators, template library, or export-proven references.
+This document is the implementation contract for package generation after user approval. It must use only Yeeflow resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes supported by the active `@yeeflow-app-builder` plugin knowledge base, skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references.
 
 ## 1. Plan Status
 
@@ -38,7 +38,7 @@ Rules:
 - Functional Specification to App Plan traceability is executable with `scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>`.
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
 - Do not include resources only to make the plan look complete. Every generated resource must serve a runtime purpose.
-- Do not invent unsupported controls, field types, workflow node types, variable types, or action shapes.
+- Do not invent unsupported controls, Dynamic controls, field types, workflow node types, variable types, action shapes, property paths, bindings, or configuration shapes.
 
 ## 3. Resource Generation Order
 
@@ -183,12 +183,28 @@ Required when the approval workflow contains Assignment task nodes.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Action> | Submission / Task / Other | Page Load / Field Change / Submission / Button | <Type> | <Variables> | <Steps> | <Data> | <Data> | <Controls> | <Notes> |
 
+#### Sub List List Actions
+
+Required whenever a Sub List control appears on a submission page or task page.
+
+| Host Form | Sub List Field/Control | Action Name | Action Type | Current Row Context | Steps | Summary Fields Affected | Parent Field Binding | Runtime Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Form> | <Sub List> | No custom Sub List actions required / <Action> | add item / duplicate item / delete item / import items / move up/down / insert before/after / supported custom action | <Current row context> | <Steps> | <Summary fields> | <Binding> | Runtime action execution is separate proof |
+
 Rules:
 
 - State exactly which form hosts each form action.
 - State where the action is triggered.
 - Temp variables are frontend-only.
 - Query data and Set data list actions must identify target application/list/fields.
+- If a form includes a Sub List, explicitly state whether custom List actions are required.
+- If custom Sub List actions are required, list each action and its steps.
+- Supported list action types must come from plugin-known/export-proven Sub List action shapes, such as add item, duplicate item, delete item, import items, move up/down, insert before/after, or supported custom action patterns.
+- Each Sub List action must state current row context.
+- If Summary fields are used, identify which Summary fields are affected.
+- If Summary is bound to parent form fields, state the binding.
+- Runtime execution proof for Sub List actions is separate from package validation.
+- If no custom List actions are required, explicitly write: `No custom Sub List actions required`.
 
 ## 6. Form Reports Plan
 
@@ -254,11 +270,24 @@ Return to the Data lists and Document libraries from Section 4 and plan their cu
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Action> | <Form> | Page Load / Field Change / Submission / Button | <Type> | <Variables> | <Steps> | <Data> | <Data> | <Controls> | <Notes> |
 
+#### Sub List List Actions
+
+Required whenever a Sub List control appears on a New/Edit/View/Detail/Custom/Print form.
+
+| Host Form | Sub List Field/Control | Action Name | Action Type | Current Row Context | Steps | Summary Fields Affected | Parent Field Binding | Runtime Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Form> | <Sub List> | No custom Sub List actions required / <Action> | add item / duplicate item / delete item / import items / move up/down / insert before/after / supported custom action | <Current row context> | <Steps> | <Summary fields> | <Binding> | Runtime action execution is separate proof |
+
 Rules:
 
 - Every list that users create or edit records in should have a runtime-safe Add/New form plan.
 - Query data and Set data list actions must identify target application/list/fields.
 - Data List custom form root padding must follow the active plugin standard.
+- If a custom Data List form includes a Sub List, explicitly state whether custom List actions are required.
+- If custom Sub List actions are required, list each action and its steps, current row context, affected Summary fields, and parent field bindings.
+- Supported list action types must come from plugin-known/export-proven Sub List action shapes, such as add item, duplicate item, delete item, import items, move up/down, insert before/after, or supported custom action patterns.
+- Runtime execution proof for Sub List actions is separate from package validation.
+- If no custom List actions are required, explicitly write: `No custom Sub List actions required`.
 
 ## 11. Data List Workflows Plan
 
@@ -331,6 +360,59 @@ Rules:
 - Dashboard root padding and header hiding must follow active plugin hard gates.
 - Every visible control in a design-backed page must map to a Yeeflow control and style contract before generation.
 
+#### Record Display Control Selection
+
+Required for every Dashboard/Page section that displays Data List records.
+
+| Section | Data Source | Display Need | Selected Control | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- |
+| <Section> | <Data List> | <Cards/table/status board/activity history/roadmap/etc.> | Data table / Collection / Kanban / Vertical timeline / Horizontal timeline | <Reason> | <Open/edit/detail behavior> | <Local/runtime proof boundary> |
+
+Rules:
+
+- Allowed selected controls are Data table, Collection, Kanban, Vertical timeline, and Horizontal timeline.
+- Prefer Collection over Data table when both can satisfy the requirement, unless a dense native table/grid is specifically required.
+- Use Kanban for status, lane, queue, or work-board patterns.
+- Use Vertical Timeline for activity, history, audit, event feed, and chronological log patterns.
+- Use Horizontal Timeline for roadmap, phase, lifecycle, and milestone progression patterns.
+- Use Data table only when a true tabular data grid is required.
+- The reason for the selected control must be stated.
+
+#### Item Template Dynamic Controls
+
+Required for every Collection, Kanban, Vertical Timeline, or Horizontal Timeline control.
+
+| Host Control | Source List | Item Template Region | Dynamic Control Type | Bound Field | Display Purpose | Empty/Fallback Behavior | Style/Badge/Format Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Collection/Kanban/Timeline> | <List> | <Header/body/footer/card/lane item> | dynamic-field / dynamic-user / dynamic-image / dynamic-file / dynamic-date / supported display control | <Field> | <Purpose> | <Fallback> | <Style notes> |
+
+Rules:
+
+- Allowed Dynamic control types must come from plugin-known/export-proven controls, such as dynamic-field, dynamic-user, dynamic-image, dynamic-file, dynamic-date or a supported date display field/control if documented.
+- Status or badge display is allowed only when backed by supported Yeeflow controls or template styling.
+- Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls must not have empty item templates.
+- Every visible item-template value must map to a Dynamic control and a real source field.
+- User/person displays must bind to User/person fields.
+- Status, priority, and condition displays must bind to supported Choice fields or supported display fields.
+- Unsupported Dynamic control types or property paths must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
+
+#### Collection and Kanban Item Actions
+
+Required for Collection and Kanban controls.
+
+| Host Control | Action Name | Trigger Control | Action Type | Current Item Context | Temp Variables | Steps | Data Read | Data Write | Runtime Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Collection/Kanban> | No Collection/Kanban item actions required / <Action> | <Button/icon/card/menu> | <Supported action type> | <Current item context> | <Variables> | <Steps> | <Data read> | <Target app/list/fields> | Runtime action execution is separate proof |
+
+Rules:
+
+- Collection/Kanban actions must use plugin-known/export-proven action shapes.
+- Each action must state how current item context is passed.
+- Steps must identify Query data, Set data list, open detail, update row, local variable, or other supported action types.
+- If an action writes data, state target application, list, and fields.
+- Runtime execution proof is separate from package validation.
+- If no custom actions are required, explicitly write: `No Collection/Kanban item actions required`.
+
 ## 15. Application Navigation Plan
 
 | Navigation Order | Group | Item | Yeeflow Resource Type | Target Resource | Visible | Icon | Notes |
@@ -369,8 +451,10 @@ Rules:
 Rules:
 
 - The App Plan must be based on plugin-supported capabilities.
+- All App Plan resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes must come from the active plugin's known skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references.
 - If a requirement depends on an unknown capability, mark it as export-learning-required, runtime-proof-required, or deferred.
-- Do not plan invented control shapes, field types, variable types, workflow nodes, or action schemas.
+- Do not plan invented control shapes, Dynamic control types, field types, variable types, workflow nodes, action schemas, property paths, bindings, or configuration shapes.
+- Unknown shapes must be marked `export-learning-required`, `runtime-proof-required`, or `deferred` and must not be treated as generation-ready.
 
 ## 18. Generation Contract and Hard Gates
 
@@ -387,10 +471,10 @@ Rules:
 | --- | --- | --- | --- |
 | Functional spec approved | Yes | Approved or defaults approved | Generation |
 | App Plan approved | Yes | Approved by user | Generation |
-| Business Clarification Gate | Yes | `validate-business-clarification-gate.mjs` passes or no blockers exist | Generation |
+| Business Clarification Gate | Yes | Business decision gates answered/default-approved or no blockers; `validate-business-clarification-gate.mjs` passes | Generation |
 | Functional Spec to App Plan traceability | Yes | `validate-functional-spec-to-app-plan-traceability.mjs` passes | Generation |
 | Generation Readiness Review | Yes | `validate-generation-readiness-review.mjs` passes | Design/generation |
-| Plugin capability compliance | Yes | No unsupported invented resource/control/action shape | Generation |
+| Plugin capability compliance | Yes | No invented unsupported shapes; any unsupported resource/control/action/property shape is marked `export-learning-required`, `runtime-proof-required`, or `deferred` | Generation |
 | Schema validation | Yes | Package schema passes | Signing |
 | API-issued ID provenance | For generated-final `.yapk` | All generated IDs API-issued and reported | Signing/install |
 | Upgrade ID stability | For upgrades | Existing semantic IDs preserved | Upgrade |
@@ -403,9 +487,9 @@ Rules:
 
 ### Advanced Capability Gate
 
-- AI Agents, Copilots, custom code, custom CSS, integrations, notifications, schedule workflows, external calls, and advanced controls must cite plugin-known skills, standards, validators, template library entries, or export-proven references before generation.
+- AI Agents, Copilots, custom code, custom CSS, integrations, notifications, schedule workflows, external calls, advanced controls, Dynamic controls, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes must cite plugin-known skills, standards, validators, template library entries, control/property knowledge base entries, extension registry entries, or export-proven references before generation.
 - Unknown or partially proven advanced capabilities must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
-- Do not invent unsupported control, resource, action, workflow-node, schedule, AI, Copilot, custom-code, notification, or integration shapes.
+- Do not invent unsupported control, resource, action, workflow-node, schedule, AI, Copilot, custom-code, notification, integration, property, binding, or configuration shapes.
 - Runtime execution proof for AI, notifications, schedule workflows, external integrations, custom code, and permission enforcement is separate from package generation, signing, install/import/upgrade acceptance, and browser render proof.
 
 ## 19. Validation Plan
@@ -491,4 +575,4 @@ Include:
 
 Use this prompt after the plan is approved:
 
-`Use @yeeflow-app-builder to generate <Application Name> from <app plan path>. Treat the approved Functional Specification and App Plan as the implementation contract. Generate the complete planned application unless an item is explicitly deferred. Use .yapk by default unless .yap is explicitly requested. Follow the resource generation order in the App Plan. Use only plugin-supported Yeeflow resource types, field types, variable types, controls, workflow nodes, form actions, and configuration shapes. Validate schema, ID provenance, navigation runtime metadata, approval forms, form reports, schedule workflows, AI/Copilot resources, custom data list forms, data-list workflows, notifications, views, dashboard controls, grid-table Collection patterns, root padding, graph, UI quality, app-plan conformance, package wrapper/signing readiness, and source/dist consistency. Do not run live Yeeflow API calls, write operations, install/import/upgrade, or runtime tests unless explicitly authorized. Report local validation, signing status, API acceptance, runtime proof, deferred items, and known risks separately.`
+`Use @yeeflow-app-builder to generate <Application Name> from <app plan path>. Treat the approved Functional Specification and App Plan as the implementation contract. Generate the complete planned application unless an item is explicitly deferred. Use .yapk by default unless .yap is explicitly requested. Follow the resource generation order in the App Plan. Use only plugin-supported Yeeflow resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes. Validate schema, ID provenance, navigation runtime metadata, approval forms, form reports, schedule workflows, AI/Copilot resources, custom data list forms, Sub List actions, data-list workflows, notifications, views, dashboard control selection, item-template Dynamic controls, Collection/Kanban actions, grid-table Collection patterns, root padding, graph, UI quality, app-plan conformance, package wrapper/signing readiness, and source/dist consistency. Do not run live Yeeflow API calls, write operations, install/import/upgrade, or runtime tests unless explicitly authorized. Report local validation, signing status, API acceptance, runtime proof, deferred items, and known risks separately.`
