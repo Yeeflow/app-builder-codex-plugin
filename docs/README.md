@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.64`
+- Version: `0.6.65`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show duplicated Functional Specification/App Plan gate findings separately from the unique unresolved business decisions that the user must answer or explicitly approve for generation.
+Current release `0.6.65` releases Full-page Canonical Design Artifacts stage standardization. The release adds the Application Design System template, Design Image Manifest template, `validate-full-page-design-artifacts.mjs`, and focused full-page design artifact regression tests. The stage now requires design-system sequencing and manifest reference gates, excludes Form Reports from required design-image surfaces, decomposes Approval forms into Submission/Task/Print surfaces, covers planned Data List custom forms, requires Dashboard layout/header/navigation coverage, keeps form pages independent from application header/navigation, and requires mobile images or responsive planning before Page Implementation Blueprints.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
