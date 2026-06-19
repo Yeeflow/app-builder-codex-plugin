@@ -31,7 +31,9 @@ The App Plan must follow this Yeeflow resource generation order:
 
 All planned field types, variable types, control types, workflow node types, form actions, schedule configs, and configuration shapes must come from active plugin-known skills, standards, validators, template library, or export-proven references. Do not invent unsupported shapes. Unsupported or unknown capabilities must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
 
-Do not proceed to full-page canonical design images, page implementation blueprints, Yeeflow resource/package generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof until the Functional Specification review gate, App Plan review gate, Business Clarification Gate, Generation Readiness Review, and Functional Specification to App Plan traceability gate pass. Use `scripts/validate-functional-specification.mjs`, `scripts/validate-app-plan-resource-order.mjs`, `scripts/validate-business-clarification-gate.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs` for executable Markdown gate checks when the artifacts are available. These gates prove planning readiness only; they do not prove package validity, signing/API acceptance, install/upgrade success, or runtime behavior. Do not let temporary scripts or ad hoc generation logic bypass plugin knowledge, templates, validators, or export-proven references.
+Do not proceed to the Full-page Canonical Design Artifacts stage, page implementation blueprints, Yeeflow resource/package generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof until the Functional Specification review gate, App Plan review gate, Business Clarification Gate for generation, Generation Readiness Review, and Functional Specification to App Plan traceability gate pass. Use `scripts/validate-functional-specification.mjs`, `scripts/validate-app-plan-resource-order.mjs`, `scripts/validate-business-clarification-gate.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs` for executable Markdown gate checks when the artifacts are available. These gates prove planning readiness only; they do not prove package validity, signing/API acceptance, install/upgrade success, or runtime behavior. Do not let temporary scripts or ad hoc generation logic bypass plugin knowledge, templates, validators, or export-proven references.
+
+After planning gates pass and business decisions are answered or `user-default-approved-for-generation`, run the Full-page Canonical Design Artifacts stage before Page Implementation Blueprints. This stage must create an Application Design System with `docs/standards/application-design-system-template.md`, full-page canonical design images for every required Dashboard page, Approval Submission form, planned Approval Task form, planned Approval Print page, and planned Data List custom form, a Design Image Manifest with `docs/standards/design-image-manifest-template.md`, and a design-stage validation/review report. Generate the Application Design System before any canonical image, and require every manifest row and canonical artifact to reference it. Form Reports are excluded from required canonical design image coverage and remain standalone Form Report resources. Run `scripts/validate-full-page-design-artifacts.mjs --manifest <design-image-manifest.json>` before Page Implementation Blueprints. This design-stage gate proves visual-contract readiness only; it does not prove Yeeflow resource serialization, package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
 
 ## UI Generation Hard-Gate Skill
 
@@ -388,14 +390,17 @@ For requirement-to-application requests, load `references/requirement-to-yap-gen
 5. App Plan review/validation gate
 6. Business clarification gate
 7. Generation-readiness review
-8. Resource/package generation
-9. Local validation
-10. Runtime import/testing only when requested or authorized
-11. Runtime issue fixing
-12. Documentation
-13. Skill updates only if new reusable knowledge is learned
-14. Git commit/push
-15. Final package output
+8. Full-page Canonical Design Artifacts and Application Design System gate
+9. Page Implementation Blueprints
+10. Blueprint/control-property validation
+11. Resource/package generation
+12. Local validation
+13. Runtime import/testing only when requested or authorized
+14. Runtime issue fixing
+15. Documentation
+16. Skill updates only if new reusable knowledge is learned
+17. Git commit/push
+18. Final package output
 
 ## Package Type Gate
 
@@ -434,7 +439,7 @@ During final validation and runtime planning, also use the active workspace chec
 
 Before generating a real `.yap`, identify business choices that materially change workflow, validation, data persistence, pricing, quota logic, attachment rules, dashboards, or approval responsibility.
 
-Treat these as confirmation gates, not technical notes. `default-applied-for-planning` may be used only to create Stage 1/Stage 2 planning artifacts and run planning validators. Stop before design images, blueprints, resource generation, package generation, signing, install/upgrade, or runtime proof if business-critical gates are unanswered, only default-applied-for-planning, or otherwise not explicitly answered or `user-default-approved-for-generation`.
+Treat these as confirmation gates, not technical notes. `default-applied-for-planning` may be used only to create Stage 1/Stage 2 planning artifacts and run planning validators. Stop before the Full-page Canonical Design Artifacts stage, design images, blueprints, resource generation, package generation, signing, install/upgrade, or runtime proof if business-critical gates are unanswered, only default-applied-for-planning, or otherwise not explicitly answered or `user-default-approved-for-generation`.
 
 ### Business Clarification Gate
 

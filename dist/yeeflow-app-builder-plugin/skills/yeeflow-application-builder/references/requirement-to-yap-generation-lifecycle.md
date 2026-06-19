@@ -131,7 +131,7 @@ All fields, controls, Dynamic controls, variables, workflow nodes, form actions,
 
 ## 5. App Plan Review Gate
 
-Review the App Plan before any full-page design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+Review the App Plan before the Full-page Canonical Design Artifacts stage, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
 
 The review must confirm:
 
@@ -150,7 +150,7 @@ The review must confirm:
 - field/control/Dynamic control/workflow/action/schedule/resource/property types are plugin-supported or marked for learning/proof/deferment
 - Generation Contract and Hard Gates, Validation Plan, Proof Boundary, Assumptions, Deferred or Runtime-Proof Items, and Recommended Next Prompt are present
 
-If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
+If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, full-page canonical design artifacts, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
 
 ## 6. Business Clarification Gate
 
@@ -259,7 +259,7 @@ If Generation Readiness structural check passes but generation-mode Business Cla
 
 When the same unresolved business decision gate appears in both the Functional Specification and App Plan, use the Business Clarification validator's deduplicated summary for user-facing reporting. Show raw finding count, unique unresolved gate count, unique gate keys, and occurrence locations when helpful. Do not make users infer five decisions from ten duplicated raw findings.
 
-Before design images, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, also run:
+Before the Full-page Canonical Design Artifacts stage, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, also run:
 
 ```bash
 node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>
@@ -267,7 +267,46 @@ node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <funct
 
 Traceability fails when business objects, relationships, approvals, forms, workflows, reporting, documents, AI/Copilot, integrations, permissions, or UI/experience requirements in the Functional Specification are not mapped to Yeeflow resources, planning sections, or explicit deferred/not-applicable coverage in the App Plan. Deferred items must include a reason, fallback, proof impact, or follow-up. This validator proves planning traceability only; it does not prove generated package conformance or runtime behavior.
 
-## 8. Decide Safe Build Scope
+## 8. Full-page Canonical Design Artifacts
+
+After the Functional Specification review, App Plan review, Business Clarification Gate for generation, Generation Readiness Review, and traceability gate pass, create the design-stage visual contract before Page Implementation Blueprints or resource/package generation.
+
+This stage must produce:
+
+- an Application Design System document using `docs/standards/application-design-system-template.md`
+- full-page canonical design images for all required UI surfaces
+- a Design Image Manifest using `docs/standards/design-image-manifest-template.md`
+- a validation/review report showing readiness for Page Implementation Blueprints
+
+Generate the Application Design System before any canonical design image. Every canonical design artifact and every Design Image Manifest row must reference the selected Application Design System. If the design system is missing, incomplete, generated after images, or not referenced by manifest rows, stop before Page Implementation Blueprints.
+
+Required UI design coverage:
+
+- Dashboard pages, including operational home pages, workbench/queue pages, detail/workspace pages, reporting pages, KPI/Summary, Data Analytics, Data table, Collection, Kanban, Timeline, filters, action areas, and detail panels when planned
+- Approval forms decomposed into one Submission form, planned Task forms, and planned Print pages
+- Data List Add/Edit, View, Detail, and other custom forms when planned
+
+Form Reports are excluded from required canonical design image coverage. They remain standalone Yeeflow resources and must not be mixed into Dashboard design coverage.
+
+Dashboard pages must reflect the selected Yeeflow Application Layout, including header/navigation/content shell where applicable. Approval forms and Data List forms are complete form pages and do not need application header/navigation. All design artifacts must share the Application Design System's visual language, typography, spacing, color, card/container treatment, table style, form style, action style, badges, KPI/Summary style, Data Analytics style, and Collection/Kanban/Timeline item-card style.
+
+Every canonical design artifact must be a full-page implementation artifact or complete design board, not a viewport-only mockup. It must show realistic business rows, cards, field labels, dates, statuses, owners, documents, tasks, action regions, relevant states, lower-page regions, and page end.
+
+The design stage must include mobile/responsive planning through either separate mobile canonical images for key pages or responsive rules documented in the Application Design System and Design Image Manifest. Responsive planning must cover stacking, grid column changes, table scroll or card-list fallback, Collection/Kanban/Timeline behavior, form fields becoming single-column, action behavior, navigation/header behavior, hidden/shown secondary fields, and desktop/mobile content consistency.
+
+Run:
+
+```bash
+node scripts/validate-full-page-design-artifacts.mjs --manifest <design-image-manifest.json>
+```
+
+This validator proves design-stage artifact readiness for Page Implementation Blueprints only. It does not prove package validity, control/property serialization, signing/API acceptance, install/upgrade success, or runtime behavior.
+
+## 9. Page Implementation Blueprints
+
+Create Page Implementation Blueprints only after the Full-page Canonical Design Artifacts stage passes. Blueprints must consume the approved Application Design System, canonical design images, and Design Image Manifest as the visual contract.
+
+## 10. Decide Safe Build Scope
 
 Choose the safest build scope that satisfies the reviewed Functional Specification and App Plan.
 
@@ -280,7 +319,7 @@ Default scope is the complete functional application described by the approved A
 
 Do not defer core business capabilities silently.
 
-## 9. Resource/Package Generation
+## 11. Resource/Package Generation
 
 Generate resources in the App Plan order:
 
@@ -311,13 +350,13 @@ Use only current proven generation rules:
 
 Do not generate with temporary custom scripts that invent resource/control/action shapes outside the plugin standards. If a generator helper is needed, it must consume the reviewed Functional Specification, reviewed App Plan, plugin templates, validators, and export-proven references.
 
-## 10. Local Validation
+## 12. Local Validation
 
 Run the relevant safe local checks for the generated artifact and proof boundaries. At minimum, validate schema, graph/resource structure, Functional Specification/App Plan conformance, ID provenance for generated-final `.yapk`, navigation runtime metadata, approval forms, Form Reports, schedule workflows, AI/Copilot resources, custom data list forms, data-list workflows, notifications, views, dashboard controls, grid-table Collection patterns, root padding, plan-to-package conformance, and source/dist consistency as applicable.
 
 Do not sign, install, import, upgrade, or run live Yeeflow writes unless explicitly authorized.
 
-## 11. Runtime Import/Testing Only When Requested Or Authorized
+## 13. Runtime Import/Testing Only When Requested Or Authorized
 
 Runtime proof is a separate layer from local validation, package schema validation, signing, API acceptance, and browser/design proof. Run runtime import/testing only when the user requests or authorizes it.
 
