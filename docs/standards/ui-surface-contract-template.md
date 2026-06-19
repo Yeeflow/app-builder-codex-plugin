@@ -131,6 +131,16 @@ Required inherited status JSON fields when `readyForBlueprint` is true:
 - Document Library View forms must include document/file preview or open/download behavior, document metadata, linked record context, and planned document actions.
 - Dashboard pages must include planned KPI/Summary, analytics, filters, record display controls, actions, and layout/chrome responsibilities.
 
+## New/Edit Form Body Discipline
+
+For `Data List New/Edit form` and `Document Library New/Edit form` surfaces, the primary editable fields are the form body. They must live in `fieldGroups`, `editableFields`, and `controlMapping`; they must not be duplicated as `allowedRegions`, `relatedRegions`, lower-page grids, cards, tables, or collections.
+
+Do not use generic field-body region names such as `Primary form fields`, `Main form fields`, `Editable fields`, or `Document metadata fields` as lower-page or related regions. Related regions are valid only when the App Plan explicitly maps a real related data source, Sub List, or document/task/list relationship to that New/Edit surface. A UI Surface Contract that invents a generic field-body region is invalid even if HTML and Blueprint parity later preserve it.
+
+New/Edit forms should normally expose one primary action bar with Save/Cancel, Save/Submit, Upload/Save, or the App Plan-defined equivalent. Duplicate primary action bars are forbidden unless a duplicate action is clearly row-level, item-level, or Sub List-level, declares row/current-item context, and is explicitly planned.
+
+Editable controls must distinguish `placeholder`, `sampleValue`, `defaultValue`, and actual current value. A field label must not be rendered or mapped as its field value. If a blank field needs guidance, use placeholder semantics and styling; if example data is needed, provide a realistic sample value.
+
 ## JSON Shape
 
 ```json
@@ -152,6 +162,7 @@ Required inherited status JSON fields when `readyForBlueprint` is true:
   "optionalFields": [],
   "readOnlyFields": [],
   "editableFields": [],
+  "valueSemantics": {},
   "fieldTypeMapping": {},
   "requiredActions": [],
   "optionalActions": [],

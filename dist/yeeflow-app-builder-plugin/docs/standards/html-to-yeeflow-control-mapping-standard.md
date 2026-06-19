@@ -62,6 +62,14 @@ Use these attributes on implementation-relevant HTML elements when applicable:
 | Display controls and badges | `data-blueprint-id`, registered `data-yeeflow-control`, role, binding/source field where data-backed, style/layout/responsive tokens, proof boundary. |
 | Hidden/helper/runtime controls | Must be explicitly declared in the UI Surface Contract and marked helper/runtime. They must not be silently invented by Blueprint generation. |
 
+## New/Edit Field And Action Mapping Discipline
+
+For Data List and Document Library New/Edit surfaces, primary editable fields must map as field controls in the form body. They must not be mapped as a lower-page `grid`, `collection`, `data-table`, card region, or other related-region pattern named `Primary form fields`, `Main form fields`, `Editable fields`, or `Document metadata fields`.
+
+Primary actions such as Save/Cancel, Save/Submit, Upload/Save, Submit, Approve/Reject, and Complete must not be duplicated in mapped lower regions unless the duplicate is an App Plan-planned row/item action and declares row/current-item context. Action IDs such as `primary-form-fields.save` fail when they duplicate a surface-level action without row or Sub List context.
+
+Editable field mappings should include value semantics when values are shown: `sample-value`, `default-value`, `placeholder`, `empty`, or `read-only-current-value`. A mapped editable field whose value equals its label fails unless the element is explicitly encoded as placeholder semantics and rendered as placeholder guidance.
+
 ## Unsupported Mappings
 
 Unsupported controls, action shapes, property paths, style tokens, or configuration shapes must fail validation unless explicitly marked:

@@ -116,6 +116,10 @@ const SURFACE_RESPONSIBILITY_RULES = [
 
 const PROOF_BOUNDARY =
   "UI Surface Contract validation proves design-contract readiness only; it does not prove Yeeflow package validity, signing/API acceptance, install/upgrade success, or runtime rendering.";
+const NEW_EDIT_SURFACE_RE = /\b(new\/edit|add\/edit)\b|\bnew\b.*\bedit\b/i;
+const GENERIC_PRIMARY_FIELD_REGION_RE = /\b(primary form fields?|main form fields?|editable fields?|document metadata fields?|primary editable fields?|main editable fields?)\b/i;
+const PRIMARY_ACTION_RE = /\b(save(?: as draft)?|cancel|submit|upload|approve|reject|complete)\b/i;
+const PRIMARY_FIELD_REGION_CONTROL_RE = /\b(grid|collection|data-table|data table|kanban|timeline|card pattern|lower-region)\b/i;
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -290,6 +294,77 @@ export function validateContract(contract, index, findings, context = {}) {
       surfaceId,
     });
   }
+
+  validateNewEditBodyDiscipline(contract, findings, surfaceId, surfaceType);
+}
+
+function validateNewEditBodyDiscipline(contract, findings, surfaceId, surfaceType) {
+  if (!isNewEditSurface(surfaceType)) return;
+
+  for (const [fieldName, value] of [
+    ["allowedRegions", contract.allowedRegions],
+    ["relatedRegions", contract.relatedRegions],
+  ]) {
+    for (const region of asTextArray(value)) {
+      if (GENERIC_PRIMARY_FIELD_REGION_RE.test(region) && !hasExplicitPlanning(contract, region)) {
+        add(findings, "error", "UI_SURFACE_CONTRACT_PRIMARY_FIELD_REGION_FORBIDDEN", "New/Edit primary editable fields belong in fieldGroups/controlMapping, not allowedRegions or relatedRegions.", {
+          surfaceId,
+          surfaceType,
+          field: fieldName,
+          region,
+        });
+      }
+    }
+  }
+
+  const genericRegionText = searchable([contract.allowedRegions, contract.relatedRegions, contract.lowerPageBusinessRegions, contract.regions, contract.sections]);
+  if (GENERIC_PRIMARY_FIELD_REGION_RE.test(genericRegionText) && PRIMARY_FIELD_REGION_CONTROL_RE.test(genericRegionText) && !hasExplicitPlanning(contract, "primary form fields")) {
+    add(findings, "error", "UI_SURFACE_CONTRACT_PRIMARY_FIELD_BODY_AS_REGION", "New/Edit form body must not be modeled as a lower-page grid/collection/table/card region.", {
+      surfaceId,
+      surfaceType,
+    });
+  }
+
+  const actionEntries = actionEntriesFromMapping(contract.controlMapping)
+    .filter((entry) => PRIMARY_ACTION_RE.test(entry.actionText));
+  const primaryActions = actionEntries.filter((entry) => !hasRowOrItemContext(entry));
+  const seen = new Map();
+  for (const entry of primaryActions) {
+    const key = normalize(primaryActionName(entry.actionText));
+    if (!key) continue;
+    const previous = seen.get(key);
+    if (previous) {
+      add(findings, "error", "UI_SURFACE_CONTRACT_DUPLICATE_PRIMARY_ACTION", "New/Edit primary actions must appear once unless the duplicate is explicitly row/item/sublist-scoped and App Plan-traced.", {
+        surfaceId,
+        action: entry.actionText,
+        firstBlueprintId: previous.blueprintId,
+        duplicateBlueprintId: entry.blueprintId,
+      });
+    } else {
+      seen.set(key, entry);
+    }
+    if (/primary-form-fields|main-form-fields|editable-fields/i.test(text([entry.actionId, entry.blueprintId, entry.controlId]))) {
+      add(findings, "error", "UI_SURFACE_CONTRACT_PRIMARY_FIELD_REGION_ACTION_ID", "Action IDs under primary-form-fields/main-form-fields indicate a duplicated field-body region rather than a primary action bar.", {
+        surfaceId,
+        actionId: entry.actionId,
+        blueprintId: entry.blueprintId,
+      });
+    }
+  }
+
+  for (const mapping of controlMappingObjects(contract.controlMapping)) {
+    if (!isEditableFieldMapping(mapping)) continue;
+    const fieldName = text(mapping.fieldName || mapping.label || mapping.name);
+    const value = text(mapping.value ?? mapping.sampleValue ?? mapping.currentValue);
+    const semantics = text(mapping.valueSemantics);
+    if (fieldName && value && normalize(fieldName) === normalize(value) && !isPlaceholderSemantics(mapping, semantics)) {
+      add(findings, "error", "UI_SURFACE_CONTRACT_LABEL_AS_VALUE", "Editable field labels must not be reused as field values; use placeholder, sampleValue, defaultValue, or explicit empty semantics.", {
+        surfaceId,
+        fieldName,
+        value,
+      });
+    }
+  }
 }
 
 function validateAppPlanSurfaceCoverage(contracts, appPlanText, findings) {
@@ -430,6 +505,40 @@ function actionsFromMapping(mapping) {
   return [];
 }
 
+function controlMappingObjects(mapping) {
+  return Array.isArray(mapping) ? mapping.filter((entry) => entry && typeof entry === "object") : [];
+}
+
+function actionEntriesFromMapping(mapping) {
+  return controlMappingObjects(mapping)
+    .filter((entry) => text([entry.actionId, entry.actionType, entry.actionContract, entry.actionName, entry.label, entry.controlRole]))
+    .map((entry) => ({
+      ...entry,
+      actionText: text([entry.actionName, entry.actionId, entry.actionType, entry.actionContract, entry.label]),
+    }));
+}
+
+function isNewEditSurface(surfaceType) {
+  return NEW_EDIT_SURFACE_RE.test(surfaceType) && /\b(data\s+list|document|library|form)\b/i.test(surfaceType);
+}
+
+function hasRowOrItemContext(entry) {
+  return /\b(row|item|sub\s*list|collection|kanban|current item|current row)\b/i.test(text([entry.rowContext, entry.parentBinding, entry.controlRole, entry.actionScope, entry.regionType]));
+}
+
+function primaryActionName(value) {
+  const match = text(value).match(PRIMARY_ACTION_RE);
+  return match ? match[1] : "";
+}
+
+function isEditableFieldMapping(mapping) {
+  return /\b(field|input|textarea|select|choice|date|user|number|file|upload)\b/i.test(text([mapping.controlRole, mapping.yeeflowControl, mapping.controlType])) && !/true|yes/i.test(text(mapping.readonly));
+}
+
+function isPlaceholderSemantics(mapping, semantics = "") {
+  return /\bplaceholder\b/i.test(text([semantics, mapping.placeholder, mapping.valueRole, mapping.displayMode])) && !/\b(sample-value|default-value|read-only-current-value)\b/i.test(semantics);
+}
+
 function searchable(value) {
   return text(value).toLowerCase();
 }
@@ -451,7 +560,8 @@ function hasDeferral(contract, needle = "") {
 
 function hasExplicitPlanning(contract, pattern) {
   const explicit = searchable([contract.explicitlyPlannedRegions, contract.allowedRegions, contract.appPlanTraceabilityNotes, contract.proofImpact]);
-  return pattern.test(explicit) && /\b(explicitly planned|app plan|allowed|mapped|visible ui)\b/i.test(explicit);
+  const matches = pattern instanceof RegExp ? pattern.test(explicit) : explicit.includes(normalize(pattern));
+  return matches && /\b(explicitly planned|app plan|allowed|mapped|visible ui)\b/i.test(explicit);
 }
 
 function mentionsDesignSystem(designSystemText, ref) {

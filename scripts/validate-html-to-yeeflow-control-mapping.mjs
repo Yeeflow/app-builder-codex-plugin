@@ -38,6 +38,9 @@ const ACTION_CONTROLS = new Set(["button"]);
 const LIST_CONTROLS = new Set(["sub-list", "collection", "data-table", "kanban", "vertical-timeline", "horizontal-timeline"]);
 const IMPLEMENTATION_TAGS = new Set(["input", "textarea", "select", "button", "table"]);
 const ALLOWED_PROOF_LABEL_RE = /\b(export-learning-required|runtime-proof-required|deferred)\b/i;
+const NEW_EDIT_SURFACE_RE = /\b(new\/edit|add\/edit)\b|\bnew\b.*\bedit\b/i;
+const GENERIC_PRIMARY_FIELD_REGION_RE = /\b(primary form fields?|main form fields?|editable fields?|document metadata fields?|primary editable fields?|main editable fields?)\b/i;
+const PRIMARY_FIELD_REGION_CONTROL_RE = /^(grid|layout-grid|collection|data-table|kanban|vertical-timeline|horizontal-timeline)$/i;
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -167,6 +170,7 @@ export function validateElements(contract, elements, registry, findings, buckets
     if (FIELD_CONTROLS.has(control)) validateFieldElement(contract, element, findings, buckets);
     if (ACTION_CONTROLS.has(control)) validateActionElement(contract, element, findings, buckets);
     if (LIST_CONTROLS.has(control)) validateListElement(contract, element, findings, buckets);
+    validateNewEditMappedElement(contract, element, findings, buckets);
     validateStyleTokens(element, findings, buckets);
   }
 }
@@ -198,6 +202,45 @@ function validateFieldElement(contract, element, findings, buckets) {
         blueprintId,
         expected: text(mapping[mappingKey]),
         actual: attr(element, htmlAttr),
+      });
+      findings.push(finding);
+      buckets.fieldMappingFindings.push(finding);
+    }
+  }
+}
+
+function validateNewEditMappedElement(contract, element, findings, buckets) {
+  if (!isNewEditSurface(contract.surfaceType)) return;
+  const surfaceId = buckets.surfaceId;
+  const blueprintId = attr(element, "data-blueprint-id");
+  const control = normalize(attr(element, "data-yeeflow-control"));
+  const sectionText = text([attr(element, "data-section-id"), attr(element, "data-region-name"), attr(element, "data-control-role"), attr(element, "aria-label"), attr(element, "data-label")]);
+
+  if (GENERIC_PRIMARY_FIELD_REGION_RE.test(sectionText)) {
+    findings.push(findingFor("error", "HTML_MAPPING_NEW_EDIT_PRIMARY_FIELD_REGION", "New/Edit HTML mapping must not model primary editable fields as a standalone lower/related region.", {
+      surfaceId,
+      blueprintId,
+      section: sectionText,
+    }));
+  }
+  if (PRIMARY_FIELD_REGION_CONTROL_RE.test(control) && GENERIC_PRIMARY_FIELD_REGION_RE.test(sectionText)) {
+    findings.push(findingFor("error", "HTML_MAPPING_PRIMARY_FORM_BODY_AS_REGION_CONTROL", "New/Edit primary form body must be field controls, not grid/collection/data-table lower-region controls.", {
+      surfaceId,
+      blueprintId,
+      control,
+    }));
+  }
+
+  if (FIELD_CONTROLS.has(control)) {
+    const fieldName = attr(element, "data-field-name");
+    const value = attr(element, "data-value") || attr(element, "value");
+    const semantics = attr(element, "data-value-semantics") || attr(element, "data-value-role");
+    if (fieldName && value && normalize(fieldName) === normalize(value) && !isPlaceholderSemantics(element, semantics)) {
+      const finding = findingFor("error", "HTML_FIELD_LABEL_AS_VALUE", "Editable mapped fields must not reuse the field label as the field value unless encoded as placeholder semantics.", {
+        surfaceId,
+        blueprintId,
+        fieldName,
+        value,
       });
       findings.push(finding);
       buckets.fieldMappingFindings.push(finding);
@@ -423,6 +466,14 @@ function selectorMatches(element, selector) {
 
 function isRepeatedTemplate(element) {
   return /true|yes|row-template|repeated/i.test(text([attr(element, "data-repeat-template"), attr(element, "data-repeat-context"), attr(element, "data-row-template")]));
+}
+
+function isNewEditSurface(surfaceType) {
+  return NEW_EDIT_SURFACE_RE.test(text(surfaceType)) && /\b(data\s+list|document|library|form)\b/i.test(text(surfaceType));
+}
+
+function isPlaceholderSemantics(element, semantics = "") {
+  return /\bplaceholder\b/i.test(text([semantics, attr(element, "placeholder"), attr(element, "data-placeholder")])) && !/\b(sample-value|default-value|read-only-current-value)\b/i.test(text(semantics));
 }
 
 function knownToken(value) {

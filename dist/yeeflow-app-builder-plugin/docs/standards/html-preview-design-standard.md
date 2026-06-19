@@ -40,6 +40,14 @@ The HTML-first workflow inherits and enforces all Full-page Canonical Design Art
 - Screenshots are evidence generated from HTML, not the design source of truth.
 - HTML preview must not look like a raw scaffold, plain unstyled controls, field dump, generic admin table, or low-fidelity wireframe.
 
+## New/Edit Form Body Discipline
+
+For Data List and Document Library New/Edit surfaces, the HTML preview must render the primary editable fields once as the form body. It must not add a separate lower-page region named `Primary form fields`, `Main form fields`, `Editable fields`, `Document metadata fields`, or a similar generic label for the same fields.
+
+Do not generate fake lower-page cards, grids, or tables from field names or action names such as `Contract title` or `Save`. Do not duplicate Save/Cancel, Save/Submit, Upload/Save, Submit, Approve/Reject, or Complete action bars in a lower region unless the region is an App Plan-mapped Sub List, Collection, or related record area and each duplicated action is row/item scoped with row/current-item context.
+
+Editable controls must keep label text, placeholder text, sample value, default value, and read-only current value separate. Rendering the label `Start date` as the value for the `Start date` field fails unless it is encoded and styled as a placeholder, not as an actual value.
+
 ## Design-System Evidence
 
 Every blueprint-ready HTML preview must include evidence for:

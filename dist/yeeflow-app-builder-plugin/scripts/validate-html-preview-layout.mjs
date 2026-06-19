@@ -27,6 +27,9 @@ const TEMPLATE_REUSE_RE = /\b(data-template-reuse-risk=["']?(pass|warning|pass-w
 const SEMANTIC_CONSISTENCY_RE = /\b(data-semantic-consistency=["']?pass|semantic-consistency-pass|field-value-semantics-pass)\b/i;
 const LOWER_REGION_CONCRETE_RE = /\b(data-lower-region-visual-concreteness=["']?pass|lower-region-concrete|rendered-example-count=["']?[1-9]|document-card|timeline-row|checklist-row|sub-list-row|related-record-card|activity-feed)\b/i;
 const VISUAL_USABILITY_RE = /\b(data-visual-usability=["']?(pass|pass-with-reviewed-risk)|visual-usability-pass|text-overflow=["']?pass|overlap-status=["']?pass|spacing-status=["']?pass)\b/i;
+const NEW_EDIT_SURFACE_RE = /\b(new\/edit|add\/edit)\b|\bnew\b.*\bedit\b/i;
+const GENERIC_PRIMARY_FIELD_REGION_RE = /\b(primary form fields?|main form fields?|editable fields?|document metadata fields?|primary editable fields?|main editable fields?)\b/i;
+const PRIMARY_ACTION_WORDS = ["save as draft", "save", "cancel", "submit", "upload", "approve", "reject", "complete"];
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -109,6 +112,7 @@ export function validateHtmlForContract(contract, index, args, findings, screens
   }
 
   validateInheritedDesignStageHtml(contract, html, plain, findings, surfaceId);
+  validateNewEditHtmlDiscipline(contract, html, plain, findings, surfaceId, htmlPath);
 
   if (!DESIGN_TOKEN_RE.test(html)) {
     add(findings, "error", "HTML_DESIGN_SYSTEM_TOKEN_EVIDENCE_MISSING", "HTML preview must use Application Design System tokens/classes or documented equivalent mappings.", { surfaceId });
@@ -151,6 +155,71 @@ export function validateHtmlForContract(contract, index, args, findings, screens
         surfaceId,
         screenshotType: screenshot.type,
         path: safePath(screenshot.path),
+      });
+    }
+  }
+}
+
+function validateNewEditHtmlDiscipline(contract, html, plain, findings, surfaceId, htmlPath) {
+  if (!isNewEditSurface(contract.surfaceType)) return;
+
+  if (GENERIC_PRIMARY_FIELD_REGION_RE.test(plain) && !/explicitly planned visible ui|data-proof-boundary=["'][^"']*(deferred|runtime-proof-required|export-learning-required)/i.test(html)) {
+    add(findings, "error", "HTML_NEW_EDIT_PRIMARY_FIELD_REGION_FORBIDDEN", "New/Edit HTML must not render Primary form fields/Main form fields as a standalone lower-page region.", {
+      surfaceId,
+      html: safePath(htmlPath),
+    });
+  }
+
+  const primaryFields = new Set([
+    ...asTextArray(contract.requiredFields),
+    ...asTextArray(contract.editableFields),
+    ...asTextArray(contract.fieldGroups),
+  ].map(normalize).filter(Boolean));
+  if (GENERIC_PRIMARY_FIELD_REGION_RE.test(plain)) {
+    const duplicatedFields = [...primaryFields].filter((field) => field && countOccurrences(plain, field) > 1);
+    if (duplicatedFields.length) {
+      add(findings, "error", "HTML_NEW_EDIT_PRIMARY_FIELDS_DUPLICATED_IN_LOWER_REGION", "New/Edit HTML must render primary editable fields once in the form body, not again as lower-region cards/tables.", {
+        surfaceId,
+        duplicatedFields,
+      });
+    }
+  }
+
+  const lowerRegionSlices = lowerRegionTextSlices(html);
+  for (const action of PRIMARY_ACTION_WORDS) {
+    if (!asTextArray(contract.requiredActions).some((required) => normalize(required).includes(action))) continue;
+    const total = countOccurrences(plain, action);
+    if (total > 1 && !/data-row-context=["'][^"']*(row|item|sub-list|sub list|current item|current row)/i.test(html)) {
+      add(findings, "error", "HTML_DUPLICATE_PRIMARY_ACTION", "Primary actions such as Save/Cancel/Submit must not be duplicated outside the primary action bar unless row/sublist context is declared.", {
+        surfaceId,
+        action,
+        occurrences: total,
+      });
+    }
+  }
+
+  for (const slice of lowerRegionSlices) {
+    const sliceText = normalize(stripTags(slice));
+    const fieldCard = [...primaryFields].find((field) => field && sliceText.includes(field));
+    const actionCard = PRIMARY_ACTION_WORDS.find((action) => sliceText.includes(action));
+    if ((fieldCard || actionCard) && /card|tile|data-card|collection-card|grid-card/i.test(slice)) {
+      add(findings, "error", "HTML_NEW_EDIT_FAKE_FIELD_ACTION_CARD", "New/Edit HTML must not generate fake lower-region cards from field names or primary action names.", {
+        surfaceId,
+        field: fieldCard || undefined,
+        action: actionCard || undefined,
+      });
+    }
+  }
+
+  for (const element of extractTaggedElements(html)) {
+    const fieldName = attr(element, "data-field-name") || attr(element, "aria-label") || attr(element, "name");
+    const value = attr(element, "data-value") || attr(element, "value");
+    const semantics = attr(element, "data-value-semantics") || attr(element, "data-value-role");
+    if (fieldName && value && normalize(fieldName) === normalize(value) && !isPlaceholderSemantics(semantics, element)) {
+      add(findings, "error", "HTML_LABEL_RENDERED_AS_FIELD_VALUE", "Editable field label text must not be rendered as the field value; use placeholder/sample/default/current value semantics.", {
+        surfaceId,
+        fieldName,
+        value,
       });
     }
   }
@@ -284,6 +353,44 @@ function containsField(html, plain, field) {
 
 function containsText(plain, value) {
   return plain.includes(normalize(value));
+}
+
+function countOccurrences(haystack, needle) {
+  const normalizedNeedle = normalize(needle);
+  if (!normalizedNeedle) return 0;
+  return haystack.split(normalizedNeedle).length - 1;
+}
+
+function lowerRegionTextSlices(html) {
+  return html.split(/data-(?:section|region|control-role)=["'][^"']*(?:lower|related|region|collection|grid|card)[^"']*["']/i).slice(1);
+}
+
+function extractTaggedElements(html) {
+  const elements = [];
+  const tagRe = /<([a-z][a-z0-9-]*)(\s[^<>]*?)?>/gi;
+  let match;
+  while ((match = tagRe.exec(html))) elements.push({ tag: match[1].toLowerCase(), attrs: parseAttrs(match[2] || "") });
+  return elements;
+}
+
+function parseAttrs(rawAttrs) {
+  const attrs = {};
+  const attrRe = /([:@a-zA-Z0-9_-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+  let match;
+  while ((match = attrRe.exec(rawAttrs))) attrs[match[1].toLowerCase()] = match[2] ?? match[3] ?? match[4] ?? "true";
+  return attrs;
+}
+
+function attr(element, name) {
+  return text(element?.attrs?.[name.toLowerCase()]);
+}
+
+function isNewEditSurface(surfaceType) {
+  return NEW_EDIT_SURFACE_RE.test(text(surfaceType)) && /\b(data\s+list|document|library|form)\b/i.test(text(surfaceType));
+}
+
+function isPlaceholderSemantics(semantics, element) {
+  return /\bplaceholder\b/i.test(text([semantics, attr(element, "placeholder"), attr(element, "data-placeholder")])) && !/\b(sample-value|default-value|read-only-current-value)\b/i.test(text(semantics));
 }
 
 function normalize(value) {

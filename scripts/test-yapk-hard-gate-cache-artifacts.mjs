@@ -61,6 +61,7 @@ const hardGateScripts = [
   "scripts/test-full-page-design-surface-responsibility-field-coverage-gates.mjs",
   "scripts/test-html-first-high-fidelity-ui-surface-contract-workflow-gates.mjs",
   "scripts/test-html-to-yeeflow-control-mapping-blueprint-parity-gates.mjs",
+  "scripts/test-html-first-new-edit-form-body-discipline-gates.mjs",
   "scripts/test-ui-control-property-fidelity.mjs",
   "scripts/test-yeeflow-control-property-knowledge-base.mjs",
 ];

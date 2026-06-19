@@ -127,6 +127,16 @@ const childTests = [
     ],
   },
   {
+    name: "HTML-first New/Edit form body discipline regression suite",
+    command: ["scripts/test-html-first-new-edit-form-body-discipline-gates.mjs"],
+    validators: [
+      "validate-ui-surface-contracts New/Edit body discipline",
+      "validate-html-preview-layout duplicate action and label/value semantics",
+      "validate-html-to-yeeflow-control-mapping placeholder/value semantics",
+      "compare-blueprint-to-ui-surface-contract New/Edit body parity gates",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [
