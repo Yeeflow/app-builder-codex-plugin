@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+## 0.6.71
+
+- Release HTML-first high-fidelity UI Surface Contract workflow gates from PR #109.
+- Establish UI Surface Contracts as the primary implementation contract between the approved App Plan/Application Design System and high-fidelity HTML previews.
+- Require HTML previews to be high-fidelity design-system-driven prototypes, not low-fidelity scaffolds, with PNG/screenshots treated as evidence generated from validated HTML rather than the design source of truth.
+- Add `scripts/validate-ui-surface-contracts.mjs`, `scripts/validate-html-preview-layout.mjs`, and `scripts/compare-blueprint-to-ui-surface-contract.mjs`.
+- Enforce App Plan traceability, surface responsibility, field/action coverage, forbidden-region checks, `designSystemRef`, and `uiPatternTemplateRef` before screenshot evidence or Page Implementation Blueprints.
+- Validate HTML DOM required fields/actions, forbidden-region absence, high-fidelity visual quality, design-token/style evidence, meaningful sibling-overlap detection without treating parent-child containment as overlap, and screenshot evidence gates.
+- Compare Page Implementation Blueprints back to UI Surface Contracts, including style intent, action placement, badge/status semantics, responsive intent, fields, actions, regions, and control mapping.
+- Preserve the proof boundary: these gates prove design and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+
+## 0.6.70
+
+- Release Full-page Design surface responsibility and App Plan field/action coverage gates from PR #107.
+- Require design artifacts to prove surface responsibility and App Plan traceability for Approval Submission, Approval Task, Approval Print Page, Data List New/Edit, Data List View, Document Library New/Edit, and Document Library View surfaces.
+- Add App Plan field/action coverage gates so required fields and required actions must be shown or explicitly deferred with reason, fallback, and proof impact.
+- Add required action checks for submission, task, print, data-list, and document-library surfaces, including Save as draft/Submit, Approve/Reject or Complete, print read-only behavior, Save/Cancel, and document open/download behavior where planned.
+- Add forbidden-region checks by surface type so generic dashboard regions, audit/route preview UI, unrelated lower-page regions, or approval-only controls cannot satisfy form/design readiness unless explicitly planned.
+- Block `readyForBlueprint: true` when surface responsibility, field coverage, action coverage, forbidden-region, or App Plan traceability gates fail.
+- Preserve the proof boundary: these gates prove design artifact readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime rendering.
+
+## 0.6.69
+
+- Release Full-page Design lower-page semantic consistency and visual usability gates from PR #105.
+- Require lower-page business regions to keep source list/data source, region purpose, displayed business fields, displayed implementation fields, actions, behavior, proof impact, and blueprint mapping hints aligned.
+- Block semantic copy-residue such as Linked Contracts sourced from Contracts inheriting Renewal Task fields/actions or Renewal Task blueprint mapping hints.
+- Add visual usability gates for text overflow, overlap, spacing, mobile pressure, wrapping/truncation evidence, container-boundary evidence, and SVG/source risk hints.
+- Block `readyForBlueprint: true` when semantic consistency or visual usability fails, requires human review without deferral proof, or uses reviewed risk without risk/mitigation/proof impact.
+- Preserve the proof boundary: these gates prove design artifact readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime rendering.
+
 ## 0.6.68
 
 - Release Full-page lower-page region visual concreteness gates.

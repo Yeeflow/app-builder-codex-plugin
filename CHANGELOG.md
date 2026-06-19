@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.6.71
+
+- Release HTML-first high-fidelity UI Surface Contract workflow gates from PR #109.
+- Establish UI Surface Contracts as the primary implementation contract between the approved App Plan/Application Design System and high-fidelity HTML previews.
+- Require HTML previews to be high-fidelity design-system-driven prototypes, not low-fidelity scaffolds, with PNG/screenshots treated as evidence generated from validated HTML rather than the design source of truth.
+- Add `scripts/validate-ui-surface-contracts.mjs`, `scripts/validate-html-preview-layout.mjs`, and `scripts/compare-blueprint-to-ui-surface-contract.mjs`.
+- Enforce App Plan traceability, surface responsibility, field/action coverage, forbidden-region checks, `designSystemRef`, and `uiPatternTemplateRef` before screenshot evidence or Page Implementation Blueprints.
+- Validate HTML DOM required fields/actions, forbidden-region absence, high-fidelity visual quality, design-token/style evidence, meaningful sibling-overlap detection without treating parent-child containment as overlap, and screenshot evidence gates.
+- Compare Page Implementation Blueprints back to UI Surface Contracts, including style intent, action placement, badge/status semantics, responsive intent, fields, actions, regions, and control mapping.
+- Preserve the proof boundary: these gates prove design and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+
 ## 0.6.70
 
 - Release Full-page Design surface responsibility and App Plan field/action coverage gates from PR #107.
