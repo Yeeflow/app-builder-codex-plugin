@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.67
+
+- Release Full-page form/detail semantic quality gates from PR #101.
+- Add form/detail semantic quality gates for Approval Submission forms, Approval Task forms, Approval Print pages, Data List Add/Edit forms, Data List View forms, Data List Detail forms, and other custom form/detail surfaces.
+- Add conservative field/value mismatch guardrails so obvious semantic errors, such as status values in title/name fields or task/status labels in owner/person fields, block blueprint readiness.
+- Require meaningful lower-page business regions instead of blank space, page-end markers, generic notes, or design-stage explanation text.
+- Require page-specific quality evidence for form/detail artifacts rather than generic visual-quality checklist text alone.
+- Add template reuse risk checks so identical generic form/detail scaffolds require purposeful functional differences or explicit deferral.
+- Block `readyForBlueprint: true` when semantic quality, lower-page business regions, page-specific evidence, or template reuse risk fails.
+
 ## 0.6.66
 
 - Release Full-page Design Artifact layout fidelity and modern visual quality gates from PR #99.

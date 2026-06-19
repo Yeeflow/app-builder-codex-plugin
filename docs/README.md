@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.66`
+- Version: `0.6.67`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.66` releases Full-page Design Artifact layout fidelity and modern visual quality gates from PR #99. The design stage now requires official Yeeflow `applicationLayoutType` IDs, `applicationChromeStyleId`, `headerMode`, `navMode`, `navBackgroundMode`, `contentSafeArea`, and `layoutRuleSource`; validates Dashboard manifest layout/chrome fidelity; keeps form surfaces as no-app-chrome pages; rejects Layout 1 forbidden chrome markers; requires modern visual quality status, checklist, and anti-pattern gates; blocks `readyForBlueprint: true` unless layout fidelity and visual quality pass; and blocks `human_review_required` blueprint readiness unless explicitly deferred with reason, fallback, and proof impact.
+Current release `0.6.67` releases Full-page form/detail semantic quality gates from PR #101. It adds form/detail semantic quality gates for Approval and Data List form/detail design artifacts; validates field/value mismatch guardrails; requires meaningful lower-page business regions instead of page-end/generic notes; requires page-specific quality evidence; checks template reuse risk; and blocks `readyForBlueprint: true` when semantic quality, lower-page business regions, page-specific evidence, or template reuse risk fails.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
