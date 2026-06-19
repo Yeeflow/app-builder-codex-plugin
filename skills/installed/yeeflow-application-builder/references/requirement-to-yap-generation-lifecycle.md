@@ -280,6 +280,19 @@ This stage must produce:
 
 Generate the Application Design System before any canonical design image. Every canonical design artifact and every Design Image Manifest row must reference the selected Application Design System. If the design system is missing, incomplete, generated after images, or not referenced by manifest rows, stop before Page Implementation Blueprints.
 
+The Application Design System must use exact official Yeeflow layout fields before any design image is accepted:
+
+- `applicationLayoutType`
+- `applicationLayoutName`
+- `applicationChromeStyleId`
+- `headerMode`
+- `navMode`
+- `navBackgroundMode`
+- `contentSafeArea`
+- `layoutRuleSource: docs/standards/yeeflow-application-layout-design-rules.md`
+
+Allowed `applicationLayoutType` values are exactly `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, and `application-layout-4-no-nav`. Free-form layout names such as `left navigation with compact header and content shell`, `custom sidebar`, `SaaS shell`, `compact header`, or arbitrary custom layout descriptions are not generation-ready and must fail the design-stage gate.
+
 Required UI design coverage:
 
 - Dashboard pages, including operational home pages, workbench/queue pages, detail/workspace pages, reporting pages, KPI/Summary, Data Analytics, Data table, Collection, Kanban, Timeline, filters, action areas, and detail panels when planned
@@ -288,9 +301,13 @@ Required UI design coverage:
 
 Form Reports are excluded from required canonical design image coverage. They remain standalone Yeeflow resources and must not be mixed into Dashboard design coverage.
 
-Dashboard pages must reflect the selected Yeeflow Application Layout, including header/navigation/content shell where applicable. Approval forms and Data List forms are complete form pages and do not need application header/navigation. All design artifacts must share the Application Design System's visual language, typography, spacing, color, card/container treatment, table style, form style, action style, badges, KPI/Summary style, Data Analytics style, and Collection/Kanban/Timeline item-card style.
+Dashboard pages must reflect the selected Yeeflow Application Layout, including header/navigation/content shell where applicable. Dashboard manifest rows must include `applicationLayoutType`, `applicationChromeStyleId`, `includeHeaderNavigation: true`, `layoutFidelityStatus`, and a selected layout/chrome compliance declaration. Approval forms and Data List forms are complete form pages and do not need application header/navigation; use `form-surface-no-app-chrome` where a form row needs an explicit non-dashboard surface marker. All design artifacts must share the Application Design System's visual language, typography, spacing, color, card/container treatment, table style, form style, action style, badges, KPI/Summary style, Data Analytics style, and Collection/Kanban/Timeline item-card style.
+
+Layout 1 vertical navigation must follow `docs/standards/yeeflow-application-layout-design-rules.md`: full-width dark top app header, persistent dark left vertical navigation connected to/below the header, content safe area to the right of the left nav and below the header, page title/action area inside the content safe area, no header hamburger, no bottom Collapse control, no arbitrary product sidebar, no detached left rail, no custom SaaS shell, no extra top navigation, and no mixed dark/light nav panels across pages. Layout 2 must not use a persistent left sidebar. Layout 3 must keep navigation on the header and must not add a second nav bar or left nav. Layout 4 must not invent sidebars, nav tabs, or replacement app shell navigation.
 
 Every canonical design artifact must be a full-page implementation artifact or complete design board, not a viewport-only mockup. It must show realistic business rows, cards, field labels, dates, statuses, owners, documents, tasks, action regions, relevant states, lower-page regions, and page end.
+
+Structural design coverage is not enough. The Design Image Manifest must include `visualQualityStatus`, a modern visual quality checklist, an anti-pattern check, and `readyForBlueprint` for each artifact. `readyForBlueprint: true` is allowed only when layout fidelity and modern visual quality both pass. Reject generic scaffold pages, title-only or helper-text-heavy lower sections, placeholder chart graphics without labels/context, arbitrary custom SaaS shells, weak KPI/Summary cards, unintentional Data Analytics regions, and pages without realistic business data examples or clear action priority.
 
 The design stage must include mobile/responsive planning through either separate mobile canonical images for key pages or responsive rules documented in the Application Design System and Design Image Manifest. Responsive planning must cover stacking, grid column changes, table scroll or card-list fallback, Collection/Kanban/Timeline behavior, form fields becoming single-column, action behavior, navigation/header behavior, hidden/shown secondary fields, and desktop/mobile content consistency.
 
@@ -370,7 +387,7 @@ Document generated artifacts, validation results, proof boundaries, deferred ite
 
 ## 14. Skill Updates Only If Reusable Knowledge Is Learned
 
-Update skills, standards, validators, or references only when the run produces reusable Yeeflow knowledge. Keep tenant-specific details, raw API responses, raw package `Resource`, raw `Sign`, tenant URLs, full workspace IDs, raw user IDs, and private screenshots out of docs.
+Update skills, standards, validators, or references only when the run produces reusable Yeeflow knowledge. Keep tenant-specific details, raw API responses, raw package `Resource`, raw `Sign`, tenant URLs, full workspace IDs, raw user IDs, and nonpublic visual evidence out of docs.
 
 ## 15. Git Commit/Push And Final Package Output
 
