@@ -117,6 +117,16 @@ const childTests = [
     ],
   },
   {
+    name: "HTML-to-Yeeflow control mapping and blueprint parity regression suite",
+    command: ["scripts/test-html-to-yeeflow-control-mapping-blueprint-parity-gates.mjs"],
+    validators: [
+      "validate-html-to-yeeflow-control-mapping",
+      "compare-blueprint-to-ui-surface-contract HTML mapping parity",
+      "Control Mapping Registry",
+      "control-mapped HTML preview workflow gates",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [

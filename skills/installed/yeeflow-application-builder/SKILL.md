@@ -704,6 +704,16 @@ Validation guidance:
 Proof boundary: Tab and Toggle dashboard usage, Additional-controls dashboard usage, and Company Overview / View page Data List form usage are export-proven only. Approval Form/Public Form support is product-understanding-backed unless separately export-proven. Runtime rendering, link navigation, QR/barcode scan behavior, iframe loading, document preview behavior, and dynamic value changes are not proven in this branch.
 <!-- advanced-controls-learning:end -->
 
+<!-- html-control-mapping-gates:start -->
+## HTML-to-Yeeflow Control Mapping Gates
+
+For complex business apps using the HTML-first workflow, high-fidelity HTML previews must be control-mapped before Page Implementation Blueprints. Every implementation-relevant HTML element must declare stable Yeeflow mapping metadata such as `data-blueprint-id`, `data-yeeflow-control`, field/action/source-list bindings, row/current-item context, parent binding, and design-system style/layout/responsive tokens.
+
+Generate Page Implementation Blueprints from the UI Surface Contract, `docs/standards/html-to-yeeflow-control-mapping-registry.md`, and validated HTML mapping metadata. Do not infer Yeeflow controls from visual HTML appearance. Unsupported mappings block generation unless marked `export-learning-required`, `runtime-proof-required`, or `deferred` with reason, fallback, and proof impact.
+
+Run `scripts/validate-html-to-yeeflow-control-mapping.mjs` before Page Implementation Blueprints. Run `scripts/compare-blueprint-to-ui-surface-contract.mjs` with `--html` and the Control Mapping Registry before Yeeflow resource generation. Keep HTML mapping validation, blueprint parity, resource-vs-blueprint parity, package schema, signing/API acceptance, install/upgrade success, and runtime proof as separate proof layers.
+<!-- html-control-mapping-gates:end -->
+
 <!-- advanced-controls-runtime-proof:start -->
 ## Advanced Controls Runtime Proof Pattern
 

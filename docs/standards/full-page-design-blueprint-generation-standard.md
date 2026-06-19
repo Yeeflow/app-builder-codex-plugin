@@ -146,3 +146,23 @@ node scripts/compare-blueprint-to-decoded-resource.mjs --blueprint page-implemen
 ```
 
 These checks are local and synthetic/redacted-safe. They do not claim pixel-perfect comparison, runtime UI success, signing success, or live Yeeflow runtime proof.
+
+## HTML Mapping Parity Before Resource Generation
+
+For HTML-first workflows, Page Implementation Blueprints must be generated from:
+
+1. the approved UI Surface Contract,
+2. `docs/standards/html-to-yeeflow-control-mapping-registry.md`,
+3. the control-mapped HTML preview, and
+4. the Application Design System tokens.
+
+Blueprint generation must not infer Yeeflow controls from HTML appearance. Every field, action, list region, current item context, source list, binding, and style/layout/responsive intent must come from contract and HTML mapping metadata.
+
+Blueprint readiness is blocked when a mapped HTML element lacks `data-blueprint-id`, `data-yeeflow-control` is unknown or unsupported, HTML field/action/list metadata differs from the UI Surface Contract, style intent exists only as arbitrary CSS, the Blueprint changes control type/source list/binding/action contract/row context/style token intent, or the Blueprint adds implementation-relevant controls not declared by the UI Surface Contract or HTML mapping. Hidden/helper/runtime controls are allowed only when the UI Surface Contract declares them explicitly and the Blueprint preserves that helper boundary.
+
+Run:
+
+```bash
+node scripts/validate-html-to-yeeflow-control-mapping.mjs --contracts ui-surface-contracts --html html-previews --registry docs/standards/html-to-yeeflow-control-mapping-registry.md
+node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts ui-surface-contracts --html html-previews --blueprints page-implementation-blueprints --registry docs/standards/html-to-yeeflow-control-mapping-registry.md
+```

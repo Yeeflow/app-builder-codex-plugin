@@ -196,3 +196,29 @@ Run:
 ```sh
 node scripts/validate-ui-surface-contracts.mjs --contracts <dir-or-json> --app-plan <app-plan.md> --design-system <application-design-system.md>
 ```
+
+## HTML-to-Yeeflow Control Mapping Requirements
+
+Every blueprint-ready UI Surface Contract must include a `controlMapping` array that can be validated against `docs/standards/html-to-yeeflow-control-mapping-registry.md` and the control-mapped HTML preview. The mapping must be specific enough that Page Implementation Blueprints can be generated without visually guessing HTML structure.
+
+Each `controlMapping` entry must include, when applicable:
+
+| Field | Requirement |
+| --- | --- |
+| `controlId` | Stable contract control identifier. |
+| `blueprintId` | Stable ID that must appear as `data-blueprint-id` in HTML and as a Blueprint control ID. |
+| `htmlSelector` or `htmlDataSelector` | Selector or data selector that identifies the HTML element. Prefer `[data-blueprint-id="..."]`. |
+| `yeeflowControl` | Registered mapping from the Control Mapping Registry. |
+| `controlRole` | Field, action, list-region, layout, display, helper, or runtime. |
+| `sourceResource` | App Plan resource source when data-backed. |
+| `sourceList` | Data List, Document Library, Approval form, or parent source. |
+| `fieldId` / `fieldName` / `fieldType` | Required for field-backed controls. Must match App Plan and HTML metadata. |
+| `binding` | Exact current-record, field, variable, or parent binding. |
+| `required` / `readonly` / `defaultValue` / `validationRules` | Field state and validation contract. |
+| `actionId` / `actionType` / `actionContract` | Required for action controls. |
+| `rowContext` / `parentBinding` | Required for Sub List, Collection, Kanban, Timeline, and current-item actions. |
+| `styleToken` / `layoutToken` / `responsiveToken` | Design-system tokens that must be preserved by HTML and Blueprint. |
+| `supportedStatus` | `validator-backed`, `plugin-known`, `export-proven`, `runtime-proof-required`, `export-learning-required`, or `deferred`. |
+| `proofBoundary` | Mapping proof boundary. |
+
+Unknown `yeeflowControl` values must fail unless marked `export-learning-required`, `runtime-proof-required`, or `deferred` with reason, fallback, and proof impact. Hidden/helper controls are allowed only when explicitly declared in the contract and marked as helper/runtime controls. Arbitrary CSS is not Yeeflow style proof; implementation style intent must use design-system tokens.
