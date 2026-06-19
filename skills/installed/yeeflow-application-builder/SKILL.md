@@ -445,22 +445,41 @@ Use this exact chat format:
 ```text
 Business clarification required before generation:
 
-1. <Question>
+Artifacts:
+- Functional Specification: <path>
+- Yeeflow App Plan: <path>
+- Validation report: <path or not generated>
+
+Validation summary:
+- Functional Specification structure: pass/fail
+- App Plan resource order: pass/fail
+- Functional Spec to App Plan traceability: pass/fail
+- Generation Readiness structural check: pass/fail
+- Business Clarification Gate: blocked
+- Overall generation readiness: blocked by Business Clarification Gate
+
+Unresolved business decision gates:
+
+1. <gateKey>: <Question>
    - Option A:
    - Option B:
    - Recommended default:
    - Why this matters:
 
-2. <Question>
+2. <gateKey>: <Question>
    - Option A:
    - Option B:
    - Recommended default:
    - Why this matters:
 
-Generation is paused until these questions are answered or defaults are explicitly approved.
+Approve all recommended defaults for: <gate1>, <gate2>, ...
+
+No package generation will proceed until the business gates are answered or explicitly default-approved.
 ```
 
-After outputting this block, do not continue to `.yap` generation in the same turn. Wait for the user's answers or explicit approval of the recommended defaults.
+List every unresolved business decision gate from the Functional Specification and App Plan by key and question. If the final response offers "approve all recommended defaults", it must name every unresolved gate covered by that approval option. Do not collapse five unresolved gates into three visible questions or rely on an ambiguous "approve defaults" sentence.
+
+After outputting this block, do not continue to package generation in the same turn. Wait for the user's answers or explicit approval of the recommended defaults.
 
 Examples:
 

@@ -31,6 +31,7 @@ const hardGateScripts = [
   "scripts/validate-functional-spec-to-app-plan-traceability.mjs",
   "scripts/test-clarification-readiness-traceability-gates.mjs",
   "scripts/test-app-plan-control-action-property-gates.mjs",
+  "scripts/test-business-clarification-and-app-plan-precision-gates.mjs",
   "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/inspect-yeeflow-control-configurations.mjs",
   "scripts/yapk-first-generation-preflight.mjs",

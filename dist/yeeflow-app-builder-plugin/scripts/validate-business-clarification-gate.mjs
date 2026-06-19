@@ -5,7 +5,10 @@ import path from "node:path";
 
 const FAIL_STATUS = /\b(unanswered|pending|TBD|to be confirmed|requires clarification|not answered|open)\b/i;
 const PASS_STATUS = /\b(answered|default-approved|default approved|approved default|resolved|not applicable|N\/A)\b/i;
+const DEFERRED_STATUS = /\b(deferred|runtime-proof-required|export-learning-required)\b/i;
 const PAUSED = /generation is paused|paused until .*answered|stop before .*generation|cannot proceed .*until/i;
+const NON_BUSINESS_GATE_SECTION = /\b(generation contract|hard gates?|required gates?|validation plan|generation validation|proof boundary|schema|signing|runtime|package validation|advanced capability|plan-to-package)\b/i;
+const BUSINESS_GATE_SECTION = /\bbusiness\b.*\b(decision|decisions|clarification|clarifications)\b|\b(decision|decisions|clarification|clarifications)\b.*\bbusiness\b/i;
 
 function usage(exitCode = 1) {
   const text = [
@@ -81,12 +84,19 @@ function tableRows(section) {
 }
 
 function gateSections(text) {
-  return extractSections(text).filter((section) => /business decision gates|business clarification|clarification gate|generation contract and hard gates/i.test(section.title));
+  return extractSections(text).filter((section) => BUSINESS_GATE_SECTION.test(section.title) && !NON_BUSINESS_GATE_SECTION.test(section.title));
 }
 
 function rowValue(header, row, names) {
   const index = header.findIndex((cell) => names.some((name) => new RegExp(`^${name}$`, "i").test(cell)));
   return index === -1 ? "" : row[index] ?? "";
+}
+
+function rowHasDeferredReason(header, row) {
+  const rowText = row.join(" ");
+  return /\b(reason|fallback|proof|impact|follow-up|why|handling)\b/i.test(header.join(" "))
+    ? /\b\w{3,}\b/.test(rowText.replace(DEFERRED_STATUS, ""))
+    : /\b(reason|fallback|proof|impact|follow-up|because|manual|post-import|runtime)\b/i.test(rowText);
 }
 
 function analyzeFile(file, kind) {
@@ -95,35 +105,35 @@ function analyzeFile(file, kind) {
   const findings = [];
   const warnings = [];
 
-  if (!sections.length) {
+  if (PAUSED.test(text)) {
     findings.push({
       level: "error",
+      code: "BUSINESS_CLARIFICATION_GENERATION_PAUSED",
+      file: path.resolve(file),
+      section: null,
+      statusText: text.match(PAUSED)?.[0] ?? "",
+      message: "Document states generation is paused until clarification is answered.",
+    });
+  }
+
+  if (!sections.length) {
+    warnings.push({
+      level: "warning",
       code: "BUSINESS_CLARIFICATION_SECTION_MISSING",
       file: path.resolve(file),
       section: null,
-      message: `${kind} does not include a Business Decision Gates or Business Clarification section.`,
+      message: `${kind} does not include an explicit Business Decision Gates or Business Clarification section.`,
     });
   }
 
   for (const section of sections) {
-    if (PAUSED.test(section.body)) {
-      findings.push({
-        level: "error",
-        code: "BUSINESS_CLARIFICATION_GENERATION_PAUSED",
-        file: path.resolve(file),
-        section: section.heading,
-        statusText: section.body.match(PAUSED)?.[0] ?? "",
-        message: "Document states generation is paused until clarification is answered.",
-      });
-    }
-
     const tables = tableRows(section);
     for (const table of tables) {
       const hasGateColumns = table.header.some((cell) => /key|question|gate/i.test(cell));
       if (!hasGateColumns) continue;
       const statusIndex = table.header.findIndex((cell) => /^status$/i.test(cell));
       const answerIndex = table.header.findIndex((cell) => /answer|default approval|recommended default|default/i.test(cell));
-      if (statusIndex === -1 && answerIndex === -1) {
+      if (statusIndex === -1 || answerIndex === -1) {
         findings.push({
           level: "error",
           code: "BUSINESS_CLARIFICATION_STATUS_MISSING",
@@ -134,10 +144,12 @@ function analyzeFile(file, kind) {
       }
       for (const row of table.rows) {
         if (row.every((cell) => !cell || /^<.*>$/.test(cell))) continue;
-        const statusText = [statusIndex === -1 ? "" : row[statusIndex] ?? "", answerIndex === -1 ? "" : row[answerIndex] ?? ""].join(" ").trim();
+        const statusCell = statusIndex === -1 ? "" : row[statusIndex] ?? "";
+        const answerCell = answerIndex === -1 ? "" : row[answerIndex] ?? "";
+        const statusText = [statusCell, answerCell].join(" ").trim();
         const gateKey = rowValue(table.header, row, ["Key", "Gate", "ID"]);
         const question = rowValue(table.header, row, ["Question", "Decision", "Gate Question"]);
-        if (!statusText || /^<.*>$/.test(statusText)) {
+        if (!statusCell.trim() || /^<.*>$/.test(statusCell.trim()) || !answerCell.trim() || /^<.*>$/.test(answerCell.trim())) {
           findings.push({
             level: "error",
             code: "BUSINESS_CLARIFICATION_STATUS_MISSING",
@@ -158,6 +170,17 @@ function analyzeFile(file, kind) {
             question,
             statusText,
             message: "Business decision gate is still unanswered or pending.",
+          });
+        } else if (DEFERRED_STATUS.test(statusText) && !rowHasDeferredReason(table.header, row)) {
+          findings.push({
+            level: "error",
+            code: "BUSINESS_CLARIFICATION_STATUS_MISSING",
+            file: path.resolve(file),
+            section: section.heading,
+            gateKey,
+            question,
+            statusText,
+            message: "Deferred business decision gates must include reason, fallback, proof impact, or follow-up evidence.",
           });
         } else if (!PASS_STATUS.test(statusText)) {
           warnings.push({

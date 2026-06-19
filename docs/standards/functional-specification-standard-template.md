@@ -259,6 +259,14 @@ node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md
 
 The Business Clarification Gate fails when decision gates remain unanswered, pending, TBD, open, require clarification, or when generation is paused until answers are provided. It proves clarification-gate document readiness only, not that the business answer is correct.
 
+Final planning-output rule:
+
+- When any business decision gate remains unresolved, the assistant's final planning response must list every unresolved gate by `Key` and `Question`.
+- The response must include the recommended default for each unresolved gate.
+- If the response offers an "approve all recommended defaults" option, it must name every gate covered by that option, for example: `Approve all recommended defaults for: approvalRoute, financeThreshold, reminderOffsets, requiredDocuments, permissionModel`.
+- The response must include: `No package generation will proceed until the business gates are answered or explicitly default-approved.`
+- Do not shorten the visible clarification list in a way that hides unresolved gates.
+
 ## 20. Assumptions
 
 - Business assumptions:

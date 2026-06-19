@@ -68,7 +68,7 @@ function clarificationSpecMissingStatus() {
 }
 
 const allAreas = {
-  dataLists: "### 4.1 Requests\n- Resource type: Data list\n- Business purpose: Track requests.\n#### Fields\n| Field Order | Display Name | Internal ID / Field Key | Yeeflow Field Type | Placeholder |\n| --- | --- | --- | --- | --- |\n| 1 | Request Title | Title | Title/Text | Enter title |",
+  dataLists: "### 4.1 Requests\n- Resource type: Data list\n- Business purpose: Track requests.\n#### Fields\n| Field Order | Display Name | Internal ID / Field Key | Yeeflow Field Type | Placeholder |\n| --- | --- | --- | --- | --- |\n| 1 | Request Title | Title | Title | Enter title |",
   approvalForms: "### 5.1 Request Approval\n- Approval form name: Request Approval\n- Form reports required: Yes\n#### Submission Form Fields\n| Field | Placeholder |\n| --- | --- |\n| Title | Enter title |\n#### Approval Workflow Nodes\n| Node Name | Node Type |\n| --- | --- |\n| Manager Approval | Assignment task |",
   formReports: "| Form Report Name | Related Approval Form | Purpose | Notes |\n| --- | --- | --- | --- |\n| Request Approval Report | Request Approval | Print approval outcome | Based on the Approval form |",
   scheduleWorkflows: "No schedule workflows required; not applicable.",
