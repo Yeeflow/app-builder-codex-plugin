@@ -125,7 +125,7 @@ function readinessPlan(overrides = {}) {
 ## 1. Plan Status
 - Functional Specification review gate passed: Yes
 - App Plan review gate passed: Yes
-- Business decision gates answered/default-approved or no blockers: Yes
+- Business decision gates answered/user-default-approved-for-generation or no blockers: Yes
 - No invented unsupported shapes: Yes
 
 ## 4. Data Lists and Document Libraries Plan
@@ -173,7 +173,7 @@ All App Plan resource types, field types, variable types, controls, Dynamic cont
 ## 18. Generation Contract and Hard Gates
 - Functional Specification review gate passed: Yes
 - App Plan review gate passed: Yes
-- Business decision gates answered/default-approved or no blockers: Yes
+- Business decision gates answered/user-default-approved-for-generation or no blockers: Yes
 - No invented unsupported shapes: Yes
 `;
 }
@@ -188,13 +188,13 @@ try {
   assert.deepEqual(unresolvedGateKeys, ["approvalRoute", "financeThreshold", "permissionModel", "reminderOffsets", "requiredDocuments"].sort());
 
   const approvedSpec = writeFixture(tempDir, "vendor-default-approved.md", businessGateSpec({
-    approvalRoute: "default-approved",
-    financeThreshold: "default-approved",
-    reminderOffsets: "default-approved",
-    requiredDocuments: "default-approved",
-    permissionModel: "default-approved",
+    approvalRoute: "user-default-approved-for-generation",
+    financeThreshold: "user-default-approved-for-generation",
+    reminderOffsets: "user-default-approved-for-generation",
+    requiredDocuments: "user-default-approved-for-generation",
+    permissionModel: "user-default-approved-for-generation",
   }));
-  expectPass("default-approved business gates pass", ["scripts/validate-business-clarification-gate.mjs", "--spec", approvedSpec, "--json"], results);
+  expectPass("user-default-approved-for-generation business gates pass", ["scripts/validate-business-clarification-gate.mjs", "--spec", approvedSpec, "--mode", "generation", "--json"], results);
 
   const hardGateOnly = writeFixture(tempDir, "hard-gate-only.md", hardGateOnlyPlan());
   const hardGateOnlyReport = expectPass("Generation Contract hard-gate table is not a business gate table", ["scripts/validate-business-clarification-gate.mjs", "--plan", hardGateOnly, "--json"], results);

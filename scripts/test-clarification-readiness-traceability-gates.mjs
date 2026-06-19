@@ -49,7 +49,7 @@ function clarificationSpec(status = "answered", extra = "") {
 | Key | Question | Options | Recommended Default | Required Before App Plan? | Status | Why This Matters |
 | --- | --- | --- | --- | --- | --- | --- |
 | BD-1 | Who approves high value requests? | Manager / Finance | Finance | Yes | ${status} | Controls approval routing |
-| BD-2 | Is AI required? | Yes / No | No | No | default-approved | Scope decision |
+| BD-2 | Is AI required? | Yes / No | No | No | user-default-approved-for-generation | Scope decision |
 
 ${extra}
 `;
@@ -91,7 +91,7 @@ function readinessPlan(overrides = {}) {
 ## 1. Plan Status
 - Functional Specification review gate passed: Yes
 - App Plan review gate passed: Yes
-- Business decision gates answered/default-approved or no blockers: Yes
+- Business decision gates answered/user-default-approved-for-generation or no blockers: Yes
 - No invented unsupported shapes: Yes
 
 ## 4. Data Lists and Document Libraries Plan
@@ -136,7 +136,7 @@ ${area.permissions}
 ## 18. Generation Contract and Hard Gates
 - Functional Specification review gate passed: Yes
 - App Plan review gate passed: Yes
-- Business decision gates answered/default-approved or no blockers: Yes
+- Business decision gates answered/user-default-approved-for-generation or no blockers: Yes
 - No invented unsupported shapes: Yes
 `;
 }
@@ -280,7 +280,7 @@ const results = [];
 
 try {
   const clarificationPass = writeFixture(tempDir, "clarification-pass.md", clarificationSpec("answered"));
-  expectPass("Business Clarification pass: answered/default-approved/not applicable", ["scripts/validate-business-clarification-gate.mjs", "--spec", clarificationPass, "--json"], results);
+  expectPass("Business Clarification pass: answered/user-default-approved-for-generation/not applicable", ["scripts/validate-business-clarification-gate.mjs", "--spec", clarificationPass, "--mode", "generation", "--json"], results);
 
   const clarificationUnanswered = writeFixture(tempDir, "clarification-unanswered.md", clarificationSpec("unanswered"));
   expectFail("Business Clarification fail: unanswered gate", ["scripts/validate-business-clarification-gate.mjs", "--spec", clarificationUnanswered, "--json"], "BUSINESS_CLARIFICATION_UNANSWERED_GATE", results);

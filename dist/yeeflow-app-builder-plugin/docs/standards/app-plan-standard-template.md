@@ -92,9 +92,9 @@ Repeat this subsection for each Data list or Document library.
 
 #### Fields
 
-| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Support Source | Proof Label | Fallback / Deferred Reason | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Contract title | Title | Title | Title | plugin-known field type | validator-backed | N/A | Yes | No | | <Placeholder text> | | | | | | Native title field |
+| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Contract title | Title | Title | Title | input control | plugin-known field/control type | validator-backed | N/A | Yes | No | | <Placeholder text> | | | | | | Native title field |
 
 Field rules:
 
@@ -110,7 +110,7 @@ Field rules:
 - Currency/number fields must use supported numeric field types.
 - Multiline notes, descriptions, and justifications must use supported multiline text fields.
 - Barcode, serial number, asset tag, and external code values should use text unless a supported barcode-specific field is required.
-- Placeholder text should be defined for user-entered fields where supported by the target field/control.
+- Placeholder text must be defined for user-entered fields when the exact selected field/control type supports placeholders. If placeholder support is unknown, mark the row `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof/generation impact.
 
 #### List Relationships
 
@@ -142,9 +142,9 @@ Repeat this subsection for each Approval form.
 
 #### Submission Form Fields
 
-| Field Order | Business Label | Field Name | Field ID / Variable ID | Exact Yeeflow Variable Type / Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | <Business label> | <Field> | <ID> | <Exact type/control> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
+| Field Order | Business Label | Field Name | Field ID / Variable ID | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | <Business label> | <Field> | <ID> | <Exact variable type> | <Exact control type> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
 
 Submission form rules:
 
@@ -153,7 +153,7 @@ Submission form rules:
 - Lookup fields must identify target list, display field, and additional fields.
 - Sublist fields must define row fields, summary fields, and any summary-to-form-field bindings.
 - Default values, dynamic display rules, read-only state, and validations must be explicit.
-- Placeholder text must be planned for editable fields where supported.
+- Placeholder text must be planned for editable fields when the exact selected variable/control type supports placeholders. If support is unknown, mark the row `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof/generation impact.
 
 #### Approval Workflow Nodes
 
@@ -178,9 +178,9 @@ Required when the approval workflow contains Assignment task nodes.
 
 ##### Task Form Fields
 
-| Field Order | Business Label | Field Name | Field ID / Variable ID | Exact Yeeflow Variable Type / Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | <Business label> | <Field> | <ID> | <Exact type/control> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
+| Field Order | Business Label | Field Name | Field ID / Variable ID | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | <Business label> | <Field> | <ID> | <Exact variable type> | <Exact control type> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
 
 #### Form Actions and Temp Variables
 
@@ -266,9 +266,9 @@ Return to the Data lists and Document libraries from Section 4 and plan their cu
 
 #### Form Fields
 
-| Form Name | Field Order | Business Label | Field Name | Field ID | Exact Yeeflow Field Type / Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Form> | 1 | <Business label> | <Field> | <ID> | <Exact type/control> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
+| Form Name | Field Order | Business Label | Field Name | Field ID | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Form> | 1 | <Business label> | <Field> | <ID> | <Exact field type> | <Exact control type> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
 
 #### Custom Form Actions and Temp Variables
 
@@ -361,7 +361,7 @@ Repeat for each Dashboard page.
 Rules:
 
 - Controls must come from active plugin control knowledge, template library, or export-proven references.
-- Summary/KPI cards must be data-bound where supported and must not be static text unless explicitly marked fallback.
+- Summary/KPI cards must be data-bound using plugin-supported controls and bindings. Static text may be used only when explicitly marked fallback, `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof/generation impact.
 - Collection, Kanban, Timeline, Data Filter, Data table, Summary, chart, action button, and dynamic controls must include source, field, and action bindings.
 - Grid-table Collection pattern requires header `flex_grid` plus Collection wrapped together with zero gap.
 - Dashboard root padding and header hiding must follow active plugin hard gates.
@@ -461,7 +461,7 @@ Rules:
 
 - The App Plan must be based on plugin-supported capabilities.
 - All App Plan resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes must come from the active plugin's known skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references.
-- Business-friendly labels must be separate from exact implementation types. Use columns such as `Business Label`, `Exact Yeeflow Type / Control / Action`, `Support Source`, `Proof Label`, and `Fallback / Deferred Reason` where needed.
+- Business-friendly labels must be separate from exact implementation types. Use split columns such as `Business Label`, `Exact Yeeflow Field Type`, `Exact Yeeflow Variable Type`, `Exact Yeeflow Control Type`, `Exact Yeeflow Action Type`, `Support Source`, `Proof Label`, and `Fallback / Deferred Reason` where needed.
 - Slash-combined or vague implementation wording such as `Title/Text`, `Currency/Number`, `User/person`, `Attachment/File upload`, `Document library / Data list`, `Type 1/document library`, `Lookup/read-only dynamic field`, `Document/list section`, `Open detail/slide panel where supported`, or `Update row/status where supported` is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
 - If a requirement depends on an unknown capability, mark it as export-learning-required, runtime-proof-required, or deferred.
 - Do not plan invented control shapes, Dynamic control types, field types, variable types, workflow nodes, action schemas, property paths, bindings, or configuration shapes.
@@ -480,9 +480,9 @@ Rules:
 
 | Gate | Required | Pass Criteria | Blocks Generation/Signing/Install |
 | --- | --- | --- | --- |
-| Functional spec approved | Yes | Approved or defaults approved | Generation |
+| Functional spec approved | Yes | Approved, answered, or user-default-approved-for-generation | Generation |
 | App Plan approved | Yes | Approved by user | Generation |
-| Business Clarification Gate | Yes | Business decision gates answered/default-approved or no blockers; `validate-business-clarification-gate.mjs` passes | Generation |
+| Business Clarification Gate | Yes | Planning mode may pass `default-applied-for-planning`; generation mode requires answered, not applicable, deferred with reason/fallback/proof impact, or `user-default-approved-for-generation`; `validate-business-clarification-gate.mjs --mode generation` passes before generation | Generation |
 | Functional Spec to App Plan traceability | Yes | `validate-functional-spec-to-app-plan-traceability.mjs` passes | Generation |
 | Generation Readiness Review | Yes | `validate-generation-readiness-review.mjs` passes | Design/generation |
 | Plugin capability compliance | Yes | No invented unsupported shapes; any unsupported resource/control/action/property shape is marked `export-learning-required`, `runtime-proof-required`, or `deferred` | Generation |
@@ -495,6 +495,8 @@ Rules:
 | Root padding gate | For dashboards/custom forms | Token-array root padding valid | Signing/install |
 | Plan-to-package conformance | Yes | Planned resources implemented or explicitly deferred | Handoff |
 | Advanced capability gate | If planned | AI Agents, Copilots, custom code, custom CSS, integrations, notifications, schedule workflows, and external execution are plugin-supported, export-proven, runtime-proof-required, or deferred | Generation/handoff |
+
+- Business decision gates answered/user-default-approved-for-generation or no blockers: Yes/No
 
 ### Advanced Capability Gate
 
@@ -540,10 +542,11 @@ Report wording requirement:
 - App Plan resource order: pass/fail
 - Functional Spec to App Plan traceability: pass/fail
 - Generation Readiness structural check: pass/fail
-- Business Clarification Gate: pass/fail
-- Overall generation readiness: pass only if all required planning gates pass
+- Business Clarification Gate for planning: pass/fail
+- Business Clarification Gate for generation: pass/fail
+- Overall generation readiness: pass only if all required planning gates pass for generation
 
-If Generation Readiness structural check passes but Business Clarification Gate fails, write exactly: `Overall generation readiness: blocked by Business Clarification Gate`. Do not write only `Validation passed` when business clarification is intentionally unresolved.
+If Generation Readiness structural check passes but Business Clarification Gate for generation fails, write exactly: `Overall generation readiness: blocked by Business Clarification Gate`. Do not write only `Validation passed` or `all passed` when planning defaults are only applied for planning.
 
 ## 20. Proof Boundary
 

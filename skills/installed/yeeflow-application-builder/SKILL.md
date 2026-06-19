@@ -434,7 +434,7 @@ During final validation and runtime planning, also use the active workspace chec
 
 Before generating a real `.yap`, identify business choices that materially change workflow, validation, data persistence, pricing, quota logic, attachment rules, dashboards, or approval responsibility.
 
-Treat these as confirmation gates, not technical notes. Stop before generation if business-critical gates are unanswered and the user has not explicitly approved default assumptions.
+Treat these as confirmation gates, not technical notes. `default-applied-for-planning` may be used only to create Stage 1/Stage 2 planning artifacts and run planning validators. Stop before design images, blueprints, resource generation, package generation, signing, install/upgrade, or runtime proof if business-critical gates are unanswered, only default-applied-for-planning, or otherwise not explicitly answered or `user-default-approved-for-generation`.
 
 ### Business Clarification Gate
 
@@ -455,8 +455,10 @@ Validation summary:
 - App Plan resource order: pass/fail
 - Functional Spec to App Plan traceability: pass/fail
 - Generation Readiness structural check: pass/fail
-- Business Clarification Gate: blocked
+- Business Clarification Gate for planning: pass/fail
+- Business Clarification Gate for generation: blocked until user approves defaults or answers gates
 - Overall generation readiness: blocked by Business Clarification Gate
+- No package generation was performed
 
 Unresolved business decision gates:
 
@@ -472,12 +474,12 @@ Unresolved business decision gates:
    - Recommended default:
    - Why this matters:
 
-Approve all recommended defaults for: <gate1>, <gate2>, ...
+Approve all recommended defaults for generation for: <gate1>, <gate2>, ...
 
-No package generation will proceed until the business gates are answered or explicitly default-approved.
+No package generation will proceed until the business gates are answered or explicitly user-default-approved-for-generation.
 ```
 
-List every unresolved business decision gate from the Functional Specification and App Plan by key and question. If the final response offers "approve all recommended defaults", it must name every unresolved gate covered by that approval option. Do not collapse five unresolved gates into three visible questions or rely on an ambiguous "approve defaults" sentence.
+List every unresolved business decision gate from the Functional Specification and App Plan by key and question. If the final response offers "approve all recommended defaults", it must name every unresolved gate covered by that approval option and must say whether the approval is for planning only or for generation. Do not collapse five unresolved gates into three visible questions or rely on an ambiguous "approve defaults" sentence. Never write only `Validation results: all passed` or `all passed` when generation-mode Business Clarification is blocked.
 
 After outputting this block, do not continue to package generation in the same turn. Wait for the user's answers or explicit approval of the recommended defaults.
 

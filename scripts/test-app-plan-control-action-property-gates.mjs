@@ -84,7 +84,7 @@ function readinessPlan(overrides = {}) {
 ## 1. Plan Status
 - Functional Specification review gate passed: Yes
 - App Plan review gate passed: Yes
-- Business decision gates answered/default-approved or no blockers: Yes
+- Business decision gates answered/user-default-approved-for-generation or no blockers: Yes
 - No invented unsupported shapes: Yes
 
 ## 4. Data Lists and Document Libraries Plan
@@ -132,7 +132,7 @@ All App Plan resource types, field types, variable types, controls, Dynamic cont
 ## 18. Generation Contract and Hard Gates
 - Functional Specification review gate passed: Yes
 - App Plan review gate passed: Yes
-- Business decision gates answered/default-approved or no blockers: Yes
+- Business decision gates answered/user-default-approved-for-generation or no blockers: Yes
 - No invented unsupported shapes: Yes
 `;
 }
