@@ -32,6 +32,9 @@ const DEFAULT_REGISTRY = new Map([
   ["custom-code", "Custom code"],
 ]);
 const ALLOWED_PROOF_LABEL_RE = /\b(export-learning-required|runtime-proof-required|deferred)\b/i;
+const NEW_EDIT_SURFACE_RE = /\b(new\/edit|add\/edit)\b|\bnew\b.*\bedit\b/i;
+const GENERIC_PRIMARY_FIELD_REGION_RE = /\b(primary form fields?|main form fields?|editable fields?|document metadata fields?|primary editable fields?|main editable fields?)\b/i;
+const PRIMARY_ACTION_RE = /\b(save(?: as draft)?|cancel|submit|upload|approve|reject|complete)\b/i;
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -83,6 +86,8 @@ function main() {
 
 export function validateBlueprintParity(contract, blueprint, findings, surfaceId) {
   const blueprintText = normalize(blueprint);
+  validateNewEditBlueprintDiscipline(contract, blueprint, blueprintText, findings, surfaceId);
+
   for (const field of asTextArray(contract.requiredFields)) {
     if (!containsItem(blueprint, blueprintText, field) && !hasDeferral(blueprint, field)) {
       add(findings, "error", "BLUEPRINT_REQUIRED_FIELD_MISSING", "Blueprint omits a required field from the UI Surface Contract.", { surfaceId, field });
@@ -135,6 +140,56 @@ export function validateBlueprintParity(contract, blueprint, findings, surfaceId
 
   if (/\bunsupported control|unsupported property|invented property|unknown control\b/i.test(blueprintText) && !hasDeferral(blueprint, "unsupported")) {
     add(findings, "error", "BLUEPRINT_UNSUPPORTED_CONTROL_OR_PROPERTY", "Blueprint must not invent unsupported controls or properties unless explicitly deferred/proof-labeled.", { surfaceId });
+  }
+}
+
+function validateNewEditBlueprintDiscipline(contract, blueprint, blueprintText, findings, surfaceId) {
+  if (!isNewEditSurface(contract.surfaceType)) return;
+
+  if (GENERIC_PRIMARY_FIELD_REGION_RE.test(blueprintText) && !hasDeferral(blueprint, "primary form fields")) {
+    add(findings, "error", "BLUEPRINT_NEW_EDIT_PRIMARY_FIELD_REGION_FORBIDDEN", "Blueprint must not preserve a generic Primary form fields/Main form fields lower region for New/Edit surfaces.", {
+      surfaceId,
+    });
+  }
+
+  const controls = blueprintControlObjects(blueprint);
+  for (const control of controls) {
+    const section = text([control.sectionId, control.regionName, control.sectionName, control.controlRole, control.label, control.title]);
+    if (GENERIC_PRIMARY_FIELD_REGION_RE.test(section) && /\b(grid|collection|data-table|data table|kanban|timeline|card|lower-region)\b/i.test(text([control.yeeflowControl, control.controlType, control.type, control.pattern]))) {
+      add(findings, "error", "BLUEPRINT_NEW_EDIT_PRIMARY_FORM_BODY_AS_REGION_CONTROL", "Blueprint must model New/Edit primary fields as field controls, not lower-region grid/collection/table/card controls.", {
+        surfaceId,
+        blueprintId: text(control.blueprintId || control.id || control.controlId),
+      });
+    }
+    const fieldName = text(control.fieldName || control.label || control.name);
+    const value = text(control.value ?? control.sampleValue ?? control.currentValue);
+    const semantics = text(control.valueSemantics);
+    if (fieldName && value && normalize(fieldName) === normalize(value) && !/\bplaceholder\b/i.test(text([semantics, control.placeholder, control.valueRole]))) {
+      add(findings, "error", "BLUEPRINT_LABEL_AS_FIELD_VALUE", "Blueprint editable fields must not reuse labels as field values without placeholder semantics.", {
+        surfaceId,
+        blueprintId: text(control.blueprintId || control.id || control.controlId),
+        fieldName,
+      });
+    }
+  }
+
+  const primaryActions = controls
+    .filter((control) => PRIMARY_ACTION_RE.test(text([control.actionId, control.actionType, control.actionContract, control.label, control.actionName])))
+    .filter((control) => !isRowOrItemAction(control));
+  const seen = new Map();
+  for (const control of primaryActions) {
+    const action = primaryActionName(text([control.actionName, control.actionId, control.actionType, control.actionContract, control.label]));
+    if (!action) continue;
+    if (seen.has(action)) {
+      add(findings, "error", "BLUEPRINT_DUPLICATE_PRIMARY_ACTION", "Blueprint must not duplicate primary Save/Cancel/Submit actions unless the duplicate is row/item/sublist-scoped and declared.", {
+        surfaceId,
+        action,
+        firstBlueprintId: text(seen.get(action).blueprintId || seen.get(action).id || seen.get(action).controlId),
+        duplicateBlueprintId: text(control.blueprintId || control.id || control.controlId),
+      });
+    } else {
+      seen.set(action, control);
+    }
   }
 }
 
@@ -341,6 +396,19 @@ function controlTypesMatch(htmlType, blueprintType, registry) {
 
 function isHelperControl(control) {
   return /helper|hidden|runtime/.test(normalize([control.helperRuntimeControl, control.controlRole, control.supportedStatus]));
+}
+
+function isNewEditSurface(surfaceType) {
+  return NEW_EDIT_SURFACE_RE.test(text(surfaceType)) && /\b(data\s+list|document|library|form)\b/i.test(text(surfaceType));
+}
+
+function isRowOrItemAction(control) {
+  return /\b(row|item|sub\s*list|collection|kanban|current row|current item)\b/i.test(text([control.rowContext, control.parentBinding, control.controlRole, control.actionScope, control.regionType]));
+}
+
+function primaryActionName(value) {
+  const match = text(value).match(PRIMARY_ACTION_RE);
+  return match ? normalize(match[1]) : "";
 }
 
 function add(findings, level, code, message, detail = {}) {
