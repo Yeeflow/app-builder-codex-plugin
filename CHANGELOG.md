@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.6.69
+
+- Release Full-page Design lower-page semantic consistency and visual usability gates from PR #105.
+- Require lower-page business regions to keep source list/data source, region purpose, displayed business fields, displayed implementation fields, actions, behavior, proof impact, and blueprint mapping hints aligned.
+- Block semantic copy-residue such as Linked Contracts sourced from Contracts inheriting Renewal Task fields/actions or Renewal Task blueprint mapping hints.
+- Add visual usability gates for text overflow, overlap, spacing, mobile pressure, wrapping/truncation evidence, container-boundary evidence, and SVG/source risk hints.
+- Block `readyForBlueprint: true` when semantic consistency or visual usability fails, requires human review without deferral proof, or uses reviewed risk without risk/mitigation/proof impact.
+- Preserve the proof boundary: these gates prove design artifact readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime rendering.
+
 ## 0.6.68
 
 - Release Full-page lower-page region visual concreteness gates.

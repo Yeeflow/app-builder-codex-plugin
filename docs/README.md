@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.68`
+- Version: `0.6.69`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.68` releases Full-page lower-page region visual concreteness gates. Lower-page business regions in Approval/Data List form/detail canonical design artifacts must show concrete rendered UI examples, not only source-list notes, field lists, or generic descriptions. Supported visual patterns include Data table, Collection cards, timeline rows, checklist rows, document table/cards, activity feeds, signature blocks, and read-only field groups. The validator rejects placeholder-only `Source:` / field-list / generic-notes regions and blocks `readyForBlueprint: true` when lower-page visual concreteness fails.
+Current release `0.6.69` releases Full-page Design lower-page semantic consistency and visual usability gates. Lower-page regions must keep source list/data source, region purpose, displayed fields, actions, behavior, proof impact, and blueprint mapping aligned; copy-residue such as Linked Contracts inheriting Renewal Task fields/actions/mappings is blocked. Canonical design artifacts now require visual usability evidence for text overflow, overlap, spacing, mobile pressure, wrapping/truncation, container boundaries, and SVG/source risk hints. `readyForBlueprint: true` is blocked when semantic consistency or visual usability fails. These gates prove design artifact readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime rendering.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
