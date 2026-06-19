@@ -102,6 +102,30 @@ function contractViewArtifact(lowerPageBusinessRegions) {
       "Contract View shows contract title, vendor, owner, renewal date, approval status, and payment terms.",
       "Contract View lower page shows related documents, renewal tasks, and approval history as concrete UI regions.",
     ],
+    ...surfaceResponsibilityDefaults("Contract View", "Data List View form", "Contracts"),
+  };
+}
+
+function surfaceResponsibilityDefaults(surfaceName, surfaceType, sourceResourceName) {
+  const fields = ["Contract Title", "Vendor", "Contract Owner", "Renewal Date", "Approval Status", "Payment Terms"];
+  return {
+    appPlanResourceRef: `Custom Data List Forms Plan > ${sourceResourceName}`,
+    sourceResourceType: "Data List",
+    sourceListOrFormName: sourceResourceName,
+    surfaceResponsibility: `${surfaceName} displays the current ${sourceResourceName} record and explicitly planned related business regions.`,
+    plannedFieldCoverage: fields,
+    requiredFieldsShown: fields,
+    optionalFieldsShown: [],
+    missingPlannedFields: [],
+    fieldCoverageStatus: "pass",
+    plannedActions: ["Edit", "Open related record"],
+    actionsShown: ["Edit", "Open related record"],
+    missingRequiredActions: [],
+    actionCoverageStatus: "pass",
+    forbiddenRegionsPresent: [],
+    forbiddenRegionStatus: "pass",
+    surfaceResponsibilityStatus: "pass",
+    appPlanTraceabilityStatus: "pass",
   };
 }
 

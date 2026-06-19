@@ -101,7 +101,31 @@ function vendorViewArtifact(lowerPageBusinessRegions, overrides = {}) {
       "Vendor View shows vendor owner, payment terms, contract exposure, and linked contracts.",
       "Linked Contracts rows show contract, owner, renewal date, lifecycle status, and contract actions.",
     ],
+    ...surfaceResponsibilityDefaults("Vendor View", "Data List View form", "Vendors"),
     ...overrides,
+  };
+}
+
+function surfaceResponsibilityDefaults(surfaceName, surfaceType, sourceResourceName) {
+  const fields = ["Vendor Name", "Vendor Owner", "Payment Terms", "Vendor Status"];
+  return {
+    appPlanResourceRef: `Custom Data List Forms Plan > ${sourceResourceName}`,
+    sourceResourceType: "Data List",
+    sourceListOrFormName: sourceResourceName,
+    surfaceResponsibility: `${surfaceName} displays the current ${sourceResourceName} record plus explicitly planned linked contracts.`,
+    plannedFieldCoverage: fields,
+    requiredFieldsShown: fields,
+    optionalFieldsShown: [],
+    missingPlannedFields: [],
+    fieldCoverageStatus: "pass",
+    plannedActions: ["Edit", "Open related contract"],
+    actionsShown: ["Edit", "Open related contract"],
+    missingRequiredActions: [],
+    actionCoverageStatus: "pass",
+    forbiddenRegionsPresent: [],
+    forbiddenRegionStatus: "pass",
+    surfaceResponsibilityStatus: "pass",
+    appPlanTraceabilityStatus: "pass",
   };
 }
 

@@ -63,6 +63,7 @@ function surface(surfaceName, surfaceType, sourceAppPlanSection, sourceResourceN
 }
 
 function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResourceName, extra = {}) {
+  const isAddEdit = /add\/edit|new|edit/i.test(surfaceType);
   return {
     surfaceName,
     surfaceType,
@@ -73,8 +74,8 @@ function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResource
     responsivePlanReference: "docs/generated-ui/vendor-contract-management/application-design-system.md#mobile-responsive-rules",
     imageDimensions: "1440x2200",
     fullPageCoverageStatus: "full-page",
-    includedSections: ["Header", "Primary content", "Action area", "Lower-page region"],
-    majorPlannedControlsShown: ["Collection", "Data table", "Status badges"],
+    includedSections: isAddEdit ? ["Current record fields", "Validation hints", "Action row"] : ["Header", "Primary content", "Action area", "Lower-page region"],
+    majorPlannedControlsShown: isAddEdit ? ["Input controls", "Status badges", "Save and Cancel actions"] : ["Collection", "Data table", "Status badges"],
     businessDataExamplesShown: ["Acme Supplies renewal due 2026-08-15 owned by Mira Chen"],
     pageEndIncluded: true,
     layoutFidelityStatus: "pass",
@@ -98,6 +99,7 @@ function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResource
     antiPatternCheck: "pass: no generic scaffold, title-only, helper-text-heavy, placeholder chart, or arbitrary SaaS shell anti-patterns",
     readyForBlueprint: true,
     generatedAt: "2026-06-19T01:05:00Z",
+    ...surfaceResponsibilityDefaults(surfaceName, surfaceType, sourceResourceName),
     ...semanticDefaults(surfaceName, surfaceType),
     ...extra,
   };
@@ -142,6 +144,31 @@ function semanticDefaults(surfaceName, surfaceType) {
       `${surfaceName} shows vendor contract fields, owner, renewal date, and approval status.`,
       `${surfaceName} lower page shows renewal tasks and linked contract evidence.`,
     ],
+    ...surfaceResponsibilityDefaults(surfaceName, surfaceType),
+  };
+}
+
+function surfaceResponsibilityDefaults(surfaceName, surfaceType, sourceResourceName = "Vendor Contracts") {
+  const fields = ["Contract Title", "Vendor", "Contract Owner", "Renewal Date", "Approval Status"];
+  const isDashboard = /dashboard/i.test(surfaceType);
+  return {
+    appPlanResourceRef: `${isDashboard ? "Dashboard Pages Plan" : "Custom Data List Forms Plan"} > ${sourceResourceName}`,
+    sourceResourceType: isDashboard ? "Dashboard page" : "Data List",
+    sourceListOrFormName: sourceResourceName,
+    surfaceResponsibility: `${surfaceName} covers current Vendor Contract fields and planned actions for ${surfaceType}.`,
+    plannedFieldCoverage: isDashboard ? ["KPI cards", "Contract rows", "Renewal queue"] : fields,
+    requiredFieldsShown: isDashboard ? ["KPI cards", "Contract rows", "Renewal queue"] : fields,
+    optionalFieldsShown: [],
+    missingPlannedFields: [],
+    fieldCoverageStatus: "pass",
+    plannedActions: isDashboard ? ["Open contract", "Review renewal"] : ["Save", "Cancel"],
+    actionsShown: isDashboard ? ["Open contract", "Review renewal"] : ["Save", "Cancel"],
+    missingRequiredActions: [],
+    actionCoverageStatus: "pass",
+    forbiddenRegionsPresent: [],
+    forbiddenRegionStatus: "pass",
+    surfaceResponsibilityStatus: "pass",
+    appPlanTraceabilityStatus: "pass",
   };
 }
 

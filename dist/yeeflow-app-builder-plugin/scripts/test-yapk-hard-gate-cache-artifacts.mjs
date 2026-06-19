@@ -54,6 +54,7 @@ const hardGateScripts = [
   "scripts/test-full-page-form-detail-semantic-quality-gates.mjs",
   "scripts/test-full-page-lower-region-visual-concreteness-gates.mjs",
   "scripts/test-full-page-design-semantic-consistency-visual-usability-gates.mjs",
+  "scripts/test-full-page-design-surface-responsibility-field-coverage-gates.mjs",
   "scripts/test-ui-control-property-fidelity.mjs",
   "scripts/test-yeeflow-control-property-knowledge-base.mjs",
 ];

@@ -67,6 +67,9 @@ function surface(surfaceName, surfaceType, sourceAppPlanSection, sourceResourceN
 }
 
 function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResourceName, extra = {}) {
+  const isAddEdit = /add\/edit|new|edit/i.test(surfaceType);
+  const isDashboard = /dashboard/i.test(surfaceType);
+  const isPrint = /print/i.test(surfaceType);
   return {
     surfaceName,
     surfaceType,
@@ -77,8 +80,20 @@ function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResource
     responsivePlanReference: "docs/generated-ui/vendor-contract-management/application-design-system.md#mobile-responsive-rules",
     imageDimensions: "1440x2200",
     fullPageCoverageStatus: "full-page",
-    includedSections: ["Header", "Primary content", "Action area", "Lower-page region"],
-    majorPlannedControlsShown: ["Collection", "Data table", "Status badges"],
+    includedSections: isAddEdit
+      ? ["Current record fields", "Validation hints", "Action row"]
+      : isDashboard
+        ? ["Header", "Primary content", "Action area", "Lower-page region"]
+        : isPrint
+          ? ["Read-only printable fields", "Approval evidence", "Signature block"]
+          : ["Form fields", "Action row", "Related business region"],
+    majorPlannedControlsShown: isAddEdit
+      ? ["Input controls", "Status badges", "Save and Cancel actions"]
+      : isDashboard
+        ? ["Collection", "Data table", "Status badges"]
+        : isPrint
+          ? ["Read-only field group", "Signature block", "Print footer"]
+          : ["Input controls", "Status badges", "Form action buttons"],
     businessDataExamplesShown: ["Acme Supplies renewal due 2026-08-15 owned by Mira Chen"],
     pageEndIncluded: true,
     layoutFidelityStatus: "pass",
@@ -101,6 +116,7 @@ function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResource
     antiPatternCheck: "pass: no title-only, helper-text-heavy, placeholder chart, or generic SaaS shell anti-patterns",
     readyForBlueprint: true,
     generatedAt: "2026-06-19T01:05:00Z",
+    ...surfaceResponsibilityDefaults(surfaceName, surfaceType, sourceResourceName),
     ...semanticDefaults(surfaceName, surfaceType),
     ...extra,
   };
@@ -150,6 +166,41 @@ function semanticDefaults(surfaceName, surfaceType) {
       `${surfaceName} shows vendor contract fields, owner, renewal date, approval status, and payment context.`,
       `${surfaceName} lower page shows approval history, renewal tasks, document evidence, or print signature content.`,
     ],
+    ...surfaceResponsibilityDefaults(surfaceName, surfaceType),
+  };
+}
+
+function surfaceResponsibilityDefaults(surfaceName, surfaceType, sourceResourceName = "Vendor Contracts") {
+  const isTask = /task/i.test(surfaceType);
+  const isPrint = /print/i.test(surfaceType);
+  const isSubmission = /submission/i.test(surfaceType);
+  const isDashboard = /dashboard/i.test(surfaceType);
+  const fields = isTask
+    ? ["Contract Title", "Vendor", "Contract Owner", "Reviewer Comment", "Decision"]
+    : isPrint
+      ? ["Contract Title", "Vendor", "Contract Owner", "Approval Decision", "Signature Date"]
+      : isDashboard
+        ? ["KPI cards", "Contract rows", "Renewal queue"]
+        : ["Contract Title", "Vendor", "Contract Owner", "Renewal Date", "Approval Status", "Payment Terms"];
+  const actions = isTask ? ["Approve", "Reject"] : isPrint ? ["Print", "Export PDF"] : isSubmission ? ["Save as draft", "Submit"] : isDashboard ? ["Open contract", "Review renewal"] : ["Save", "Cancel"];
+  return {
+    appPlanResourceRef: `${/approval/i.test(surfaceType) ? "Approval Forms Plan" : isDashboard ? "Dashboard Pages Plan" : "Custom Data List Forms Plan"} > ${sourceResourceName}`,
+    sourceResourceType: /approval/i.test(surfaceType) ? "Approval form" : isDashboard ? "Dashboard page" : "Data List",
+    sourceListOrFormName: /approval/i.test(surfaceType) ? "Contract Approval" : sourceResourceName,
+    surfaceResponsibility: `${surfaceName} fulfills ${surfaceType} responsibility${isPrint ? " as a read-only print-oriented surface" : ""}.`,
+    plannedFieldCoverage: fields,
+    requiredFieldsShown: fields,
+    optionalFieldsShown: [],
+    missingPlannedFields: [],
+    fieldCoverageStatus: "pass",
+    plannedActions: actions,
+    actionsShown: actions,
+    missingRequiredActions: [],
+    actionCoverageStatus: "pass",
+    forbiddenRegionsPresent: [],
+    forbiddenRegionStatus: "pass",
+    surfaceResponsibilityStatus: "pass",
+    appPlanTraceabilityStatus: "pass",
   };
 }
 

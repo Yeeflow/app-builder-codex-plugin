@@ -157,7 +157,39 @@ function baseArtifact(surfaceName, surfaceType, sourceAppPlanSection, sourceReso
       "Contract View shows contract header, vendor, owner, renewal date, approval status, and payment terms.",
       "Contract View lower page shows related documents, renewal tasks, and approval history for the selected contract.",
     ],
+    ...surfaceResponsibilityDefaults(surfaceName, surfaceType, sourceResourceName),
     ...extra,
+  };
+}
+
+function surfaceResponsibilityDefaults(surfaceName, surfaceType, sourceResourceName) {
+  const isTask = /task/i.test(surfaceType);
+  const isPrint = /print/i.test(surfaceType);
+  const isSubmission = /submission/i.test(surfaceType);
+  const fields = isTask
+    ? ["Contract Title", "Vendor", "Contract Owner", "Reviewer Comment", "Decision"]
+    : isPrint
+      ? ["Contract Title", "Vendor", "Contract Owner", "Approval Decision", "Signature Date"]
+      : ["Contract Title", "Vendor", "Contract Owner", "Renewal Date", "Approval Status", "Payment Terms"];
+  const actions = isTask ? ["Approve", "Reject"] : isPrint ? ["Print", "Export PDF"] : isSubmission ? ["Save as draft", "Submit"] : ["Edit", "Open related record"];
+  return {
+    appPlanResourceRef: `${/approval/i.test(surfaceType) ? "Approval Forms Plan" : "Custom Data List Forms Plan"} > ${sourceResourceName}`,
+    sourceResourceType: /approval/i.test(surfaceType) ? "Approval form" : "Data List",
+    sourceListOrFormName: sourceResourceName,
+    surfaceResponsibility: `${surfaceName} fulfills ${surfaceType} responsibility for ${sourceResourceName}${isPrint ? " as a read-only print-oriented page" : ""}.`,
+    plannedFieldCoverage: fields,
+    requiredFieldsShown: fields,
+    optionalFieldsShown: [],
+    missingPlannedFields: [],
+    fieldCoverageStatus: "pass",
+    plannedActions: actions,
+    actionsShown: actions,
+    missingRequiredActions: [],
+    actionCoverageStatus: "pass",
+    forbiddenRegionsPresent: [],
+    forbiddenRegionStatus: "pass",
+    surfaceResponsibilityStatus: "pass",
+    appPlanTraceabilityStatus: "pass",
   };
 }
 
