@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.64
+
+- Release Business Clarification unique unresolved gate summary reporting from PR #95.
+- Preserve raw Business Clarification findings while adding JSON summary fields: `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences`.
+- Make user-facing planning reports distinguish duplicated findings from unique unresolved business decisions when the same gate appears in both the Functional Specification and Yeeflow App Plan.
+- Keep planning and generation mode behavior unchanged: planning mode can pass with warnings for `default-applied-for-planning`, while generation mode remains blocked until gates are answered or explicitly approved for generation.
+- Add focused regression coverage proving five duplicated business gates across Functional Specification and App Plan produce ten raw findings but five unique unresolved gates.
+
 ## 0.6.63
 
 - Release planning default approval and exact type gates from PR #93.
