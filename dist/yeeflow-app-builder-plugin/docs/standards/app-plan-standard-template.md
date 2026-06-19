@@ -24,7 +24,7 @@ Map each major requirement from the Functional Specification to Yeeflow resource
 
 | Requirement Area | Business Requirement | Yeeflow Resource Type | Planned Resource Name | Required | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Data management | <Requirement> | Data list / Document library | <Name> | Yes/No | <Notes> |
+| Data management | <Requirement> | Data list or Document library | <Name> | Yes/No | Select one exact Yeeflow resource type |
 | Approval/review | <Requirement> | Approval form | <Name> | Yes/No | <Notes> |
 | Approval output | <Requirement> | Form report | <Name> | Yes/No | Must be based on a specific Approval form |
 | List browsing | <Requirement> | Data List view | <Name> | Yes/No | Must belong to a specific Data list or Document library |
@@ -79,7 +79,8 @@ Repeat this subsection for each Data list or Document library.
 
 ### 4.x <List or Library Name>
 
-- Resource type: Data list / Document library
+- Selected Yeeflow resource type: Data list or Document library
+- Package/navigation representation: Type `1` Data list / documented Document library representation / `export-learning-required`
 - Description:
 - Business purpose:
 - Master/transaction/reference:
@@ -91,13 +92,16 @@ Repeat this subsection for each Data list or Document library.
 
 #### Fields
 
-| Field Order | Display Name | Internal ID / Field Key | Yeeflow Field Type | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Title | Title | Title/Text | Yes | No | | <Placeholder text> | | | | | | Native title field |
+| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Support Source | Proof Label | Fallback / Deferred Reason | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Contract title | Title | Title | Title | plugin-known field type | validator-backed | N/A | Yes | No | | <Placeholder text> | | | | | | Native title field |
 
 Field rules:
 
 - Field types must follow active plugin Data List / Document Library field standards.
+- Distinguish business-friendly labels from exact Yeeflow implementation types. `Business Label` may say `Owner/person`, but `Exact Yeeflow Field Type` must say the exact plugin-supported type such as `User`.
+- Do not use slash-combined final implementation types such as `Title/Text`, `Currency/Number`, `User/person`, `Attachment/File upload`, `Document library / Data list`, or `Type 1/document library` unless the row is marked `export-learning-required`, `runtime-proof-required`, or `deferred` with a fallback/deferred reason.
+- Document Library planning must select one clear Yeeflow resource type. If the package/navigation representation is not known, mark it `export-learning-required` or `runtime-proof-required` and do not treat the resource as generation-ready.
 - Keep the native `Title` field unless the plugin standard explicitly allows otherwise.
 - Choice fields must define runtime-visible choices using the supported schema.
 - Lookup fields must identify target list, display field, and additional fields when needed.
@@ -138,13 +142,14 @@ Repeat this subsection for each Approval form.
 
 #### Submission Form Fields
 
-| Field Order | Field Name | Field ID / Variable ID | Variable Type / Control Type | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | <Field> | <ID> | <Type> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
+| Field Order | Business Label | Field Name | Field ID / Variable ID | Exact Yeeflow Variable Type / Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | <Business label> | <Field> | <ID> | <Exact type/control> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
 
 Submission form rules:
 
 - Variable and control types must follow active plugin Approval Form standards.
+- Distinguish business labels from exact Yeeflow implementation types. Slash-combined or vague implementation wording is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
 - Lookup fields must identify target list, display field, and additional fields.
 - Sublist fields must define row fields, summary fields, and any summary-to-form-field bindings.
 - Default values, dynamic display rules, read-only state, and validations must be explicit.
@@ -173,9 +178,9 @@ Required when the approval workflow contains Assignment task nodes.
 
 ##### Task Form Fields
 
-| Field Order | Field Name | Field ID / Variable ID | Variable Type / Control Type | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | <Field> | <ID> | <Type> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
+| Field Order | Business Label | Field Name | Field ID / Variable ID | Exact Yeeflow Variable Type / Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | <Business label> | <Field> | <ID> | <Exact type/control> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
 
 #### Form Actions and Temp Variables
 
@@ -187,9 +192,9 @@ Required when the approval workflow contains Assignment task nodes.
 
 Required whenever a Sub List control appears on a submission page or task page.
 
-| Host Form | Sub List Field/Control | Action Name | Action Type | Current Row Context | Steps | Summary Fields Affected | Parent Field Binding | Runtime Proof Boundary |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Form> | <Sub List> | No custom Sub List actions required / <Action> | add item / duplicate item / delete item / import items / move up/down / insert before/after / supported custom action | <Current row context> | <Steps> | <Summary fields> | <Binding> | Runtime action execution is separate proof |
+| Host Form | Sub List Field/Control | Action Name | Exact Yeeflow List Action Type | Support Source | Proof Label | Fallback / Deferred Reason | Current Row Context | Steps | Summary Fields Affected | Parent Field Binding | Runtime Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Form> | <Sub List> | No custom Sub List actions required / <Action> | add item / duplicate item / delete item / import items / move up/down / insert before/after / supported custom action | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Current row context> | <Steps> | <Summary fields> | <Binding> | Runtime action execution is separate proof |
 
 Rules:
 
@@ -200,6 +205,7 @@ Rules:
 - If a form includes a Sub List, explicitly state whether custom List actions are required.
 - If custom Sub List actions are required, list each action and its steps.
 - Supported list action types must come from plugin-known/export-proven Sub List action shapes, such as add item, duplicate item, delete item, import items, move up/down, insert before/after, or supported custom action patterns.
+- `Exact Yeeflow List Action Type` must use a plugin-known/export-proven action type or be marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
 - Each Sub List action must state current row context.
 - If Summary fields are used, identify which Summary fields are affected.
 - If Summary is bound to parent form fields, state the binding.
@@ -260,9 +266,9 @@ Return to the Data lists and Document libraries from Section 4 and plan their cu
 
 #### Form Fields
 
-| Form Name | Field Order | Field Name | Field ID | Field Type / Control Type | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Form> | 1 | <Field> | <ID> | <Type> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
+| Form Name | Field Order | Business Label | Field Name | Field ID | Exact Yeeflow Field Type / Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Form> | 1 | <Business label> | <Field> | <ID> | <Exact type/control> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
 
 #### Custom Form Actions and Temp Variables
 
@@ -274,15 +280,16 @@ Return to the Data lists and Document libraries from Section 4 and plan their cu
 
 Required whenever a Sub List control appears on a New/Edit/View/Detail/Custom/Print form.
 
-| Host Form | Sub List Field/Control | Action Name | Action Type | Current Row Context | Steps | Summary Fields Affected | Parent Field Binding | Runtime Proof Boundary |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Form> | <Sub List> | No custom Sub List actions required / <Action> | add item / duplicate item / delete item / import items / move up/down / insert before/after / supported custom action | <Current row context> | <Steps> | <Summary fields> | <Binding> | Runtime action execution is separate proof |
+| Host Form | Sub List Field/Control | Action Name | Exact Yeeflow List Action Type | Support Source | Proof Label | Fallback / Deferred Reason | Current Row Context | Steps | Summary Fields Affected | Parent Field Binding | Runtime Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Form> | <Sub List> | No custom Sub List actions required / <Action> | add item / duplicate item / delete item / import items / move up/down / insert before/after / supported custom action | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Current row context> | <Steps> | <Summary fields> | <Binding> | Runtime action execution is separate proof |
 
 Rules:
 
 - Every list that users create or edit records in should have a runtime-safe Add/New form plan.
 - Query data and Set data list actions must identify target application/list/fields.
 - Data List custom form root padding must follow the active plugin standard.
+- Distinguish business labels from exact Yeeflow implementation types. Slash-combined or vague implementation wording is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
 - If a custom Data List form includes a Sub List, explicitly state whether custom List actions are required.
 - If custom Sub List actions are required, list each action and its steps, current row context, affected Summary fields, and parent field bindings.
 - Supported list action types must come from plugin-known/export-proven Sub List action shapes, such as add item, duplicate item, delete item, import items, move up/down, insert before/after, or supported custom action patterns.
@@ -382,13 +389,14 @@ Rules:
 
 Required for every Collection, Kanban, Vertical Timeline, or Horizontal Timeline control.
 
-| Host Control | Source List | Item Template Region | Dynamic Control Type | Bound Field | Display Purpose | Empty/Fallback Behavior | Style/Badge/Format Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| <Collection/Kanban/Timeline> | <List> | <Header/body/footer/card/lane item> | dynamic-field / dynamic-user / dynamic-image / dynamic-file / dynamic-date / supported display control | <Field> | <Purpose> | <Fallback> | <Style notes> |
+| Host Control | Source List | Item Template Region | Business Label | Exact Yeeflow Dynamic Control Type | Bound Field | Support Source | Proof Label | Fallback / Deferred Reason | Display Purpose | Empty/Fallback Behavior | Style/Badge/Format Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Collection/Kanban/Timeline> | <List> | <Header/body/footer/card/lane item> | <Business label> | dynamic-field / dynamic-user / dynamic-image / dynamic-file / dynamic-date / supported display control | <Field> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Purpose> | <Fallback> | <Style notes> |
 
 Rules:
 
 - Allowed Dynamic control types must come from plugin-known/export-proven controls, such as dynamic-field, dynamic-user, dynamic-image, dynamic-file, dynamic-date or a supported date display field/control if documented.
+- `Exact Yeeflow Dynamic Control Type` must contain the exact supported Dynamic control/control type. Business labels may be friendly, but final implementation columns must not use ambiguous phrases such as `Lookup/read-only dynamic field` unless marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
 - Status or badge display is allowed only when backed by supported Yeeflow controls or template styling.
 - Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls must not have empty item templates.
 - Every visible item-template value must map to a Dynamic control and a real source field.
@@ -400,15 +408,16 @@ Rules:
 
 Required for Collection and Kanban controls.
 
-| Host Control | Action Name | Trigger Control | Action Type | Current Item Context | Temp Variables | Steps | Data Read | Data Write | Runtime Proof Boundary |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Collection/Kanban> | No Collection/Kanban item actions required / <Action> | <Button/icon/card/menu> | <Supported action type> | <Current item context> | <Variables> | <Steps> | <Data read> | <Target app/list/fields> | Runtime action execution is separate proof |
+| Host Control | Action Name | Trigger Control | Exact Yeeflow Action Type | Support Source | Proof Label | Fallback / Deferred Reason | Current Item Context | Temp Variables | Steps | Data Read | Data Write | Runtime Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Collection/Kanban> | No Collection/Kanban item actions required / <Action> | <Button/icon/card/menu> | <Supported action type> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Current item context> | <Variables> | <Steps> | <Data read> | <Target app/list/fields> | Runtime action execution is separate proof |
 
 Rules:
 
 - Collection/Kanban actions must use plugin-known/export-proven action shapes.
 - Each action must state how current item context is passed.
 - Steps must identify Query data, Set data list, open detail, update row, local variable, or other supported action types.
+- Vague action wording such as `Open detail/slide panel where supported` or `Update row/status where supported` is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
 - If an action writes data, state target application, list, and fields.
 - Runtime execution proof is separate from package validation.
 - If no custom actions are required, explicitly write: `No Collection/Kanban item actions required`.
@@ -452,6 +461,8 @@ Rules:
 
 - The App Plan must be based on plugin-supported capabilities.
 - All App Plan resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes must come from the active plugin's known skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references.
+- Business-friendly labels must be separate from exact implementation types. Use columns such as `Business Label`, `Exact Yeeflow Type / Control / Action`, `Support Source`, `Proof Label`, and `Fallback / Deferred Reason` where needed.
+- Slash-combined or vague implementation wording such as `Title/Text`, `Currency/Number`, `User/person`, `Attachment/File upload`, `Document library / Data list`, `Type 1/document library`, `Lookup/read-only dynamic field`, `Document/list section`, `Open detail/slide panel where supported`, or `Update row/status where supported` is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
 - If a requirement depends on an unknown capability, mark it as export-learning-required, runtime-proof-required, or deferred.
 - Do not plan invented control shapes, Dynamic control types, field types, variable types, workflow nodes, action schemas, property paths, bindings, or configuration shapes.
 - Unknown shapes must be marked `export-learning-required`, `runtime-proof-required`, or `deferred` and must not be treated as generation-ready.
@@ -522,6 +533,17 @@ Include:
 - Signing validation:
 - Upgrade-check/upgrade-apply validation:
 - Runtime verification:
+
+Report wording requirement:
+
+- Functional Specification structure: pass/fail
+- App Plan resource order: pass/fail
+- Functional Spec to App Plan traceability: pass/fail
+- Generation Readiness structural check: pass/fail
+- Business Clarification Gate: pass/fail
+- Overall generation readiness: pass only if all required planning gates pass
+
+If Generation Readiness structural check passes but Business Clarification Gate fails, write exactly: `Overall generation readiness: blocked by Business Clarification Gate`. Do not write only `Validation passed` when business clarification is intentionally unresolved.
 
 ## 20. Proof Boundary
 

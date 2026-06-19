@@ -41,7 +41,7 @@ function expectFail(name, args, code, results) {
 }
 
 const baseAreas = {
-  dataLists: "### 4.1 Requests\n- Resource type: Data list\n- Business purpose: Track requests.\n#### Fields\n| Field Order | Display Name | Internal ID / Field Key | Yeeflow Field Type | Placeholder |\n| --- | --- | --- | --- | --- |\n| 1 | Request Title | Title | Title/Text | Enter title |\n| 2 | Owner | User1 | User | Select owner |\n| 3 | Status | Text1 | Choice | Select status |",
+  dataLists: "### 4.1 Requests\n- Resource type: Data list\n- Business purpose: Track requests.\n#### Fields\n| Field Order | Display Name | Internal ID / Field Key | Yeeflow Field Type | Placeholder |\n| --- | --- | --- | --- | --- |\n| 1 | Request Title | Title | Title | Enter title |\n| 2 | Owner | User1 | User | Select owner |\n| 3 | Status | Text1 | Choice | Select status |",
   approvalForms: "### 5.1 Request Approval\n- Approval form name: Request Approval\n- Form reports required: Yes\n#### Submission Form Fields\n| Field | Placeholder | Sublist/Summary Notes |\n| --- | --- | --- |\n| Request Title | Enter title | N/A |\n#### Approval Workflow Nodes\n| Node Name | Node Type |\n| --- | --- |\n| Manager Approval | Assignment task |\n#### Sub List List Actions\nNo custom Sub List actions required.",
   formReports: "| Form Report Name | Related Approval Form | Purpose | Notes |\n| --- | --- | --- | --- |\n| Request Approval Report | Request Approval | Print approval outcome | Based on the Approval form |",
   scheduleWorkflows: "No schedule workflows required; not applicable.",

@@ -22,6 +22,22 @@ const AREAS = [
 const PLACEHOLDER_ONLY = /^(?:\s|[|:\-#`])*<[^>]+>(?:\s|[|:\-#`])*$/;
 const DEFERRED = /\b(not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required)\b/i;
 const RECORD_DISPLAY_CONTROLS = ["Data table", "Collection", "Kanban", "Vertical timeline", "Horizontal timeline"];
+const AMBIGUOUS_IMPLEMENTATION_PATTERNS = [
+  /\bTitle\s*\/\s*Text\b/i,
+  /\bCurrency\s*\/\s*Number\b/i,
+  /\bUser\s*\/\s*person\b/i,
+  /\bAttachment\s*\/\s*File upload\b/i,
+  /\bDocument library\s*\/\s*Data list\b/i,
+  /\bType\s*1\s*\/\s*document library\b/i,
+  /\bwhere supported\b/i,
+  /\bsupported where possible\b/i,
+  /\bopen detail\s*\/\s*slide panel where supported\b/i,
+  /\bupdate row\s*\/\s*status where supported\b/i,
+  /\bdocument\s*\/\s*list section\b/i,
+  /\blookup\s*\/\s*read-only dynamic field\b/i,
+];
+const EXACT_IMPLEMENTATION_HEADER = /\b(exact yeeflow|implementation type|implementation control|implementation action|selected resource type|selected control|action type|field type|variable type|control type|dynamic control type|property path|binding)\b/i;
+const BUSINESS_LABEL_HEADER = /\b(business label|display label|business requirement|display need|selection reason|notes?|description|purpose|fallback|deferred reason|proof label|proof boundary|support source|why)\b/i;
 
 function usage(exitCode = 1) {
   const text = [
@@ -79,12 +95,95 @@ function meaningfulBody(body) {
   return lines.filter((line) => !/^\|?\s*:?-{3,}/.test(line) && !/^rules?:?$/i.test(line));
 }
 
+function splitTableRow(line) {
+  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+}
+
+function isSeparatorRow(cells) {
+  return cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+}
+
+function tableRows(body) {
+  const lines = body.split(/\r?\n/).filter((line) => /^\s*\|.*\|\s*$/.test(line));
+  const tables = [];
+  for (let index = 0; index < lines.length - 1; index++) {
+    const header = splitTableRow(lines[index]);
+    const separator = splitTableRow(lines[index + 1]);
+    if (!isSeparatorRow(separator)) continue;
+    const rows = [];
+    for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex++) {
+      const cells = splitTableRow(lines[rowIndex]);
+      if (!cells.length || isSeparatorRow(cells)) break;
+      rows.push({ cells, line: lines[rowIndex] });
+    }
+    tables.push({ header, rows });
+  }
+  return tables;
+}
+
 function isPlaceholderOnly(body) {
   const meaningful = meaningfulBody(body);
   if (!meaningful.length) return false;
   const relevant = meaningful.filter((line) => !/^include:|^repeat this|^return to|^required when|^rules:/i.test(line));
   if (!relevant.length) return false;
   return relevant.every((line) => PLACEHOLDER_ONLY.test(line) || /<[^>]+>/.test(line));
+}
+
+function hasPlaceholder(text) {
+  return /<[^>]+>/.test(text);
+}
+
+function ambiguousPattern(text) {
+  return AMBIGUOUS_IMPLEMENTATION_PATTERNS.find((pattern) => pattern.test(text)) ?? null;
+}
+
+function implementationCellsToScan(header, cells) {
+  const hasExactColumn = header.some((cell) => EXACT_IMPLEMENTATION_HEADER.test(cell));
+  if (!hasExactColumn) return cells.map((cell, index) => ({ cell, header: header[index] ?? "" }));
+  return cells
+    .map((cell, index) => ({ cell, header: header[index] ?? "" }))
+    .filter(({ header: headerCell }) => !BUSINESS_LABEL_HEADER.test(headerCell));
+}
+
+function validateAmbiguousImplementationWording(text, sections) {
+  const findings = [];
+  const implementationSectionTitles = [
+    "Requirement-to-Yeeflow Resource Mapping Summary",
+    "Data Lists and Document Libraries Plan",
+    "Approval Forms Plan",
+    "Custom Data List Forms Plan",
+    "Dashboard Pages Plan",
+    "Application Navigation Plan",
+    "Plugin Capability and Standards Compliance",
+    "Generation Contract and Hard Gates",
+  ];
+  const implementationSections = sections.filter((section) =>
+    implementationSectionTitles.some((title) => section.normalizedTitle.includes(title.toLowerCase())),
+  );
+
+  for (const section of implementationSections) {
+    for (const table of tableRows(section.body)) {
+      for (const row of table.rows) {
+        const rowText = row.cells.join(" ");
+        if (hasPlaceholder(rowText) || DEFERRED.test(rowText)) continue;
+        for (const { cell, header } of implementationCellsToScan(table.header, row.cells)) {
+          const pattern = ambiguousPattern(cell);
+          if (!pattern) continue;
+          findings.push({
+            level: "error",
+            code: "GENERATION_READINESS_AMBIGUOUS_IMPLEMENTATION_WORDING",
+            area: section.title,
+            section: section.heading,
+            statusText: cell,
+            message: `Ambiguous generation-ready wording "${cell}" appears in ${header || "an implementation table"} without runtime-proof-required, export-learning-required, or deferred.`,
+          });
+        }
+      }
+    }
+
+  }
+
+  return findings;
 }
 
 function validateDataLists(section) {
@@ -315,6 +414,7 @@ function validate(file) {
   }
 
   for (const finding of validateControlActionPropertyGates(text, sections)) findings.push(finding);
+  for (const finding of validateAmbiguousImplementationWording(text, sections)) findings.push(finding);
 
   const errors = findings.length;
   return {
