@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.70
+
+- Release Full-page Design surface responsibility and App Plan field/action coverage gates from PR #107.
+- Require design artifacts to prove surface responsibility and App Plan traceability for Approval Submission, Approval Task, Approval Print Page, Data List New/Edit, Data List View, Document Library New/Edit, and Document Library View surfaces.
+- Add App Plan field/action coverage gates so required fields and required actions must be shown or explicitly deferred with reason, fallback, and proof impact.
+- Add required action checks for submission, task, print, data-list, and document-library surfaces, including Save as draft/Submit, Approve/Reject or Complete, print read-only behavior, Save/Cancel, and document open/download behavior where planned.
+- Add forbidden-region checks by surface type so generic dashboard regions, audit/route preview UI, unrelated lower-page regions, or approval-only controls cannot satisfy form/design readiness unless explicitly planned.
+- Block `readyForBlueprint: true` when surface responsibility, field coverage, action coverage, forbidden-region, or App Plan traceability gates fail.
+- Preserve the proof boundary: these gates prove design artifact readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime rendering.
+
 ## 0.6.69
 
 - Release Full-page Design lower-page semantic consistency and visual usability gates from PR #105.
