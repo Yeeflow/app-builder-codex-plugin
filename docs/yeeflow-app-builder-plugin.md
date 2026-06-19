@@ -8,14 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.6.66
+- Version: 0.6.67
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
 
-Version `0.6.66` releases Full-page Design Artifact layout fidelity and modern visual quality gates from PR #99. It requires official Yeeflow `applicationLayoutType` IDs, `applicationChromeStyleId`, `headerMode`, `navMode`, `navBackgroundMode`, `contentSafeArea`, and `layoutRuleSource`; validates Dashboard manifest layout/chrome fidelity checks; preserves form-surface no-app-chrome behavior; rejects Layout 1 forbidden chrome markers; requires modern visual quality status/checklist/anti-pattern gates; blocks `readyForBlueprint: true` unless layout fidelity and visual quality pass; and blocks `human_review_required` blueprint readiness unless explicitly deferred with reason, fallback, and proof impact.
+Version `0.6.67` releases Full-page form/detail semantic quality gates from PR #101. It adds form/detail semantic quality gates for Approval and Data List form/detail design artifacts; validates field/value mismatch guardrails; requires meaningful lower-page business regions instead of page-end/generic notes; requires page-specific quality evidence; checks template reuse risk; and blocks `readyForBlueprint: true` when semantic quality, lower-page business regions, page-specific evidence, or template reuse risk fails.
 
 Version `0.6.59` releases the Stage 1 Functional Specification and Stage 2 Yeeflow App Plan flow gates. New application generation must first produce and review the standardized Functional Specification at `docs/standards/functional-specification-standard-template.md`, then produce and review the Yeeflow resource-order App Plan at `docs/standards/app-plan-standard-template.md`; `docs/app-plan-standard-template.md` remains a compatibility entrypoint. The release adds `scripts/validate-functional-specification.mjs`, `scripts/validate-app-plan-resource-order.mjs`, and regression coverage in `scripts/test-functional-specification-and-app-plan-gates.mjs`. Form Report is explicitly planned as a standalone Yeeflow resource based on Approval Form, not Dashboard or Data List view planning. Placeholder planning is required for Data List fields, Approval Form Submission fields, Task Form fields, and Custom Data List Form fields. The Functional Specification and App Plan gates must pass before full-page canonical design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
 

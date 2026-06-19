@@ -20,9 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.6.66`
+`0.6.67`
 
-Version `0.6.66` releases Full-page Design Artifact layout fidelity and modern visual quality gates from PR #99. It requires official Yeeflow `applicationLayoutType` IDs, `applicationChromeStyleId`, `headerMode`, `navMode`, `navBackgroundMode`, `contentSafeArea`, and `layoutRuleSource`; validates Dashboard manifest layout/chrome fidelity checks; preserves form-surface no-app-chrome behavior; rejects Layout 1 forbidden chrome markers; requires modern visual quality status/checklist/anti-pattern gates; blocks `readyForBlueprint: true` unless layout fidelity and visual quality pass; and blocks `human_review_required` blueprint readiness unless explicitly deferred with reason, fallback, and proof impact.
+Version `0.6.67` releases Full-page form/detail semantic quality gates from PR #101. It adds form/detail semantic quality gates for Approval and Data List form/detail design artifacts; validates field/value mismatch guardrails; requires meaningful lower-page business regions instead of page-end/generic notes; requires page-specific quality evidence; checks template reuse risk; and blocks `readyForBlueprint: true` when semantic quality, lower-page business regions, page-specific evidence, or template reuse risk fails.
 
 Version `0.6.61` releases App Plan control-selection, action, and plugin-supported type/property planning gates. App Plans must explicitly choose record display controls from Data table, Collection, Kanban, Vertical timeline, or Horizontal timeline; prefer Collection over Data table when both are suitable; plan Collection/Kanban/timeline item-template Dynamic controls with field bindings; and explicitly plan or mark not applicable Collection/Kanban item actions and Sub List list actions. App Plan output must use plugin-supported Yeeflow control, action, workflow node, field, variable, property, and binding types, or mark unsupported shapes as `export-learning-required`, `runtime-proof-required`, or `deferred`. Updated validators and regression coverage in `scripts/test-app-plan-control-action-property-gates.mjs` enforce these planning gates before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
 
