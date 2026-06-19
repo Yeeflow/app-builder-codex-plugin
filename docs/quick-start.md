@@ -12,9 +12,9 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.61`.
+Expected plugin: `Yeeflow App Builder` version `0.6.62`.
 
-Version `0.6.61` releases App Plan control-selection, action, and plugin-supported type/property planning gates. App Plans must explicitly choose record display controls from Data table, Collection, Kanban, Vertical timeline, or Horizontal timeline; prefer Collection over Data table when both are suitable; plan Collection/Kanban/timeline item-template Dynamic controls with field bindings; and explicitly plan or mark not applicable Collection/Kanban item actions and Sub List list actions. App Plan output must use plugin-supported Yeeflow control, action, workflow node, field, variable, property, and binding types, or mark unsupported shapes as `export-learning-required`, `runtime-proof-required`, or `deferred`. Updated validators and regression coverage in `scripts/test-app-plan-control-action-property-gates.mjs` enforce these planning gates before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+Version `0.6.62` releases Business Clarification and App Plan precision gates. The Business Clarification validator now ignores generic hard-gate/proof/validation tables and only parses explicit business clarification sections. Planning output must enumerate every unresolved business decision gate, or clearly state that approving all recommended defaults covers each named gate. Generation readiness reporting separates structural readiness from overall readiness blocked by the Business Clarification Gate. App Plan generation-readiness validation rejects ambiguous implementation wording such as slash-combined types or "where supported" actions unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`. Document Library planning must use a clear selected Yeeflow resource type or mark uncertainty with the required proof/deferred label. New focused Vendor-style regression coverage lives in `scripts/test-business-clarification-and-app-plan-precision-gates.mjs`.
 
 Version `0.6.56` releases Supplier runtime/design fidelity gates and validation-layer proof gates. Runtime proof must use the installed application `ListSetID` and runtime URL, never install-log IDs. Design implementation must map design sections, KPI counts, page background/chrome, Data Filter bindings, Collection detail links, analytics controls, progress/status treatments, Summary/KPI bindings, and canonical one-PNG-per-page artifacts through explicit design manifest mapping. Reports must keep `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` separate; schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, and the control-binding graph must be complete. Root padding gates from `0.6.55` remain baseline behavior, approval-form root padding remains deferred because evidence is mixed, and no pixel-perfect or live runtime proof claim is made before the matching runtime/browser evidence exists.
 
@@ -31,7 +31,7 @@ Run OAuth login before API access. OAuth uses Authorization Code with PKCE S256,
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.61
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.62
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```

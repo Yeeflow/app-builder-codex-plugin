@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.62
+
+- Release Business Clarification and App Plan precision gates from PR #91.
+- Update the Business Clarification validator so it ignores generic hard-gate/proof/validation/schema/runtime/package tables and only parses explicit business clarification sections.
+- Require final planning output to enumerate every unresolved business decision gate, or clearly state that approving all recommended defaults covers each named gate.
+- Require generation readiness reports to separate structural generation readiness from overall readiness blocked by Business Clarification Gate.
+- Reject ambiguous App Plan implementation wording such as slash-combined types or "where supported" actions unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
+- Require Document Library planning to use a clear selected Yeeflow resource type or mark uncertainty with the required proof/deferred label.
+- Add focused Vendor-style regression coverage in `scripts/test-business-clarification-and-app-plan-precision-gates.mjs`.
+
 ## 0.6.61
 
 - Release App Plan control-selection, action, and plugin-supported type/property planning gates.
