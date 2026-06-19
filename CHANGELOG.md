@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.6.68
+
+- Release Full-page lower-page region visual concreteness gates.
+- Require lower-page business regions in Approval/Data List form/detail canonical design artifacts to show concrete rendered UI examples rather than only source-list notes, field lists, generic descriptions, or design-stage explanation text.
+- Require lower-page visual evidence fields such as `visualPattern`, `plannedYeeflowControl`, `renderedExampleCount`, `renderedExampleSummary`, `displayedBusinessFields`, `actionsShown`, `visualConcretenessStatus`, `antiPlaceholderStatus`, and `blueprintMappingHint`.
+- Support concrete visual patterns including Data table, Collection cards, timeline rows, checklist rows, document table/cards, activity feeds, signature blocks, and read-only field groups.
+- Reject placeholder-only `Source:` sections, field-list-only summaries, `Show ...` descriptions without concrete item examples, generic notes, and page-end-only lower-page regions.
+- Block `readyForBlueprint: true` when lower-page visual concreteness fails.
+
 ## 0.6.67
 
 - Release Full-page form/detail semantic quality gates from PR #101.

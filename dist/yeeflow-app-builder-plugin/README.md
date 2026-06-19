@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.64`
+- Version: `0.6.68`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting from PR #95. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show that duplicated gates across the Functional Specification and Yeeflow App Plan are ten raw findings but five unique unresolved business decisions. Planning/generation mode behavior is unchanged: planning mode can pass with warnings for `default-applied-for-planning`, while generation mode remains blocked until gates are answered or explicitly approved for generation.
+Current release `0.6.68` releases Full-page lower-page region visual concreteness gates. Lower-page business regions in Approval/Data List form/detail canonical design artifacts must show concrete rendered UI examples, not only source-list notes, field lists, or generic descriptions. Supported visual patterns include Data table, Collection cards, timeline rows, checklist rows, document table/cards, activity feeds, signature blocks, and read-only field groups. The validator rejects placeholder-only `Source:` / field-list / generic-notes regions and blocks `readyForBlueprint: true` when lower-page visual concreteness fails.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.64
+Version: 0.6.68
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.64
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.68
 ```
 
 ## What Is Included
