@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.59`
+- Version: `0.6.62`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.59` releases the Functional Specification and Yeeflow App Plan flow gates. New application generation must start with the Stage 1 Functional Specification template and review gate at `docs/standards/functional-specification-standard-template.md`, then create the Stage 2 Yeeflow App Plan resource-order template and review gate at `docs/standards/app-plan-standard-template.md`; `docs/app-plan-standard-template.md` remains a compatibility entrypoint. The new validators are `scripts/validate-functional-specification.mjs` and `scripts/validate-app-plan-resource-order.mjs`, with regression coverage in `scripts/test-functional-specification-and-app-plan-gates.mjs`. Form Report is planned as a standalone Yeeflow resource based on Approval Form, not Dashboard, and Placeholder planning is required for Data List fields, Approval Form Submission fields, Task Form fields, and Custom Data List Form fields. These gates must pass before full-page canonical design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+Current release `0.6.62` releases Business Clarification and App Plan precision gates from PR #91. The Business Clarification validator now ignores generic hard-gate, proof-boundary, validation, schema, runtime, and package-validation tables and parses only explicit business clarification sections. Planning output must enumerate every unresolved business decision gate, or clearly state that approving all recommended defaults covers each named gate. Generation readiness reporting separates the structural readiness check from overall readiness blocked by the Business Clarification Gate. App Plan generation-readiness validation now rejects ambiguous implementation wording such as slash-combined types or "where supported" actions unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`. Document Library planning must use one clear selected Yeeflow resource type or mark uncertainty with the required proof/deferred label. Focused Vendor-style regression coverage in `scripts/test-business-clarification-and-app-plan-precision-gates.mjs` enforces these cases before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.59
+Version: 0.6.62
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.59
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.62
 ```
 
 ## What Is Included
