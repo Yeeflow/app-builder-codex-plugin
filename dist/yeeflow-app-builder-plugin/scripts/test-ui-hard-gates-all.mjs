@@ -70,6 +70,15 @@ const childTests = [
     ],
   },
   {
+    name: "Full-page form/detail semantic quality regression suite",
+    command: ["scripts/test-full-page-form-detail-semantic-quality-gates.mjs"],
+    validators: [
+      "validate-full-page-design-artifacts",
+      "form/detail semantic field-value guardrails",
+      "lower-page business-region and template-reuse gates",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [

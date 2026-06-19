@@ -63,6 +63,20 @@ const LAYOUT_FORBIDDEN_CHROME = new Map([
     ],
   ],
 ]);
+const FORM_DETAIL_SURFACE_RE =
+  /\bapproval\b.*\b(submission|task|print)\b|\bdata\s+list\b.*\b(add\/edit|view|detail|custom)\b|\b(add\/edit|view|detail)\s+form\b|\bcustom\s+form\b/i;
+const GENERIC_QUALITY_RE =
+  /\b(strong visual hierarchy|professional spacing|professional spacing and density|polished cards|polished sections|polished cards, sections, tables, and forms|meaningful business examples|modern design|good layout|readable layout|responsive layout|clean ui|visual quality)\b/i;
+const BUSINESS_NOUN_RE =
+  /\b(contract|vendor|renewal|document|approval|payment|owner|task|reminder|workflow|reviewer|comment|history|status|field|terms|effective|expiration|expiry|audit|activity|signature|checklist|record|evidence)\b/i;
+const MEANINGFUL_LOWER_REGION_RE =
+  /\b(workflow|approval|decision|history|reviewer|comment|document|checklist|renewal|task|contract|vendor|reminder|activity|audit|validation|service|status|linked\s+record|evidence|signature|footer|payment|owner)\b/i;
+const GENERIC_LOWER_REGION_RE =
+  /\b(page\s*end|end\s*marker|generic\s+notes?|notes?\s+only|blank|white\s+space|empty\s+space|lower\s+content|placeholder|design[- ]stage explanation|helper\s+text)\b/i;
+const STATUS_VALUE_RE = /\b(active|inactive|approved|pending|rejected|overdue|task overdue|in review|expired|draft|renewal due|complete|completed|blocked|open|closed)\b/i;
+const DOCUMENT_FILENAME_RE = /\b[\w .-]+\.(pdf|docx?|xlsx?|pptx?|png|jpe?g|gif|zip)\b/i;
+const REVIEW_COMMENT_RE = /\b(review comment|looks good|please review|needs changes|approved by|reject because|comment:|reviewer note)\b/i;
+const PERSON_OR_VENDOR_VALUE_RE = /\b([A-Z][a-z]+ [A-Z][a-z]+|[A-Z][A-Za-z0-9&.,' -]+ (Inc|LLC|Ltd|Corp|Company|Vendor|Co\.?))\b/;
 
 export function validateFullPageDesignArtifacts(manifest, options = {}) {
   const findings = [];
@@ -119,6 +133,7 @@ export function validateFullPageDesignArtifacts(manifest, options = {}) {
   const designSystemGeneratedAt = parseTime(firstText(manifest.applicationDesignSystem?.generatedAt, manifest.designSystemGeneratedAt));
   const artifactCoverage = new Set();
   const deferredCoverage = new Set();
+  const formDetailArtifacts = [];
 
   for (const deferred of deferredSurfaces) {
     const key = surfaceKey(deferred);
@@ -285,6 +300,11 @@ export function validateFullPageDesignArtifacts(manifest, options = {}) {
       });
     }
 
+    if (isFormDetailSurface(artifact)) {
+      formDetailArtifacts.push({ artifact, index, surfaceName, surfaceType });
+      validateFormDetailSemanticQuality(findings, artifact, { row: index + 1, surfaceName, surfaceType });
+    }
+
     validateVisualQuality(findings, artifact, { row: index + 1, surfaceName, surfaceType });
     validateBlueprintReadiness(findings, artifact, { row: index + 1, surfaceName, surfaceType });
 
@@ -297,6 +317,8 @@ export function validateFullPageDesignArtifacts(manifest, options = {}) {
       });
     }
   }
+
+  validateTemplateReuseRisk(findings, formDetailArtifacts);
 
   const plannedNonReportSurfaces = plannedSurfaces.filter((surface) => !isFormReportSurface(surface));
   for (const planned of plannedNonReportSurfaces) {
@@ -465,6 +487,246 @@ function validateBlueprintReadiness(findings, artifact, context = {}) {
   }
 }
 
+function validateFormDetailSemanticQuality(findings, artifact, context = {}) {
+  requireText(findings, artifact, ["primaryBusinessObject"], "FORM_DETAIL_PRIMARY_BUSINESS_OBJECT_MISSING", "Form/detail design artifacts must declare primaryBusinessObject.", context);
+
+  const semanticExamples = normalizeFieldExamples(artifact.semanticFieldExamples || artifact.fieldValueExamples || artifact.businessFieldExamples);
+  if (!semanticExamples.length) {
+    addFinding(findings, "error", "FORM_DETAIL_SEMANTIC_FIELD_EXAMPLES_MISSING", "Form/detail design artifacts must include semanticFieldExamples with realistic field/value pairs.", context);
+  }
+  for (const example of semanticExamples) validateSemanticFieldExample(findings, example, context);
+
+  requirePassingStatus(findings, artifact, ["fieldValueSemanticsStatus", "semanticQualityStatus"], "FORM_DETAIL_FIELD_VALUE_SEMANTICS_STATUS_MISSING", "Form/detail artifacts must declare fieldValueSemanticsStatus.", context);
+  if (truthy(artifact.readyForBlueprint) && !isPassingReviewStatus(firstText(artifact.fieldValueSemanticsStatus, artifact.semanticQualityStatus))) {
+    addFinding(findings, "error", "FORM_DETAIL_READY_WITHOUT_SEMANTIC_QUALITY", "Form/detail artifact cannot be ready for blueprint until field/value semantic quality passes.", {
+      ...context,
+      fieldValueSemanticsStatus: firstText(artifact.fieldValueSemanticsStatus, artifact.semanticQualityStatus),
+    });
+  }
+
+  validateLowerPageBusinessRegions(findings, artifact, context);
+  validatePageSpecificQualityEvidence(findings, artifact, context);
+  validateTemplateReuseStatus(findings, artifact, context);
+}
+
+function validateSemanticFieldExample(findings, example, context = {}) {
+  const field = firstText(example.field, example.fieldName, example.label, example.name);
+  const value = firstText(example.value, example.exampleValue, example.displayValue);
+  if (!field || !value) {
+    addFinding(findings, "error", "FORM_DETAIL_SEMANTIC_FIELD_EXAMPLE_INCOMPLETE", "Each semantic field example must include a field/label and realistic value.", context);
+    return;
+  }
+  const fieldText = lower(field);
+  const valueText = scalar(value).trim();
+  let code = "";
+  let reason = "";
+  if (/\b(title|name)\b/.test(fieldText) && STATUS_VALUE_RE.test(valueText)) {
+    code = "FORM_DETAIL_FIELD_VALUE_SEMANTIC_MISMATCH";
+    reason = "Title/name fields must not use lifecycle status values.";
+  } else if (/\b(owner|person|user|assignee|contact)\b/.test(fieldText) && STATUS_VALUE_RE.test(valueText)) {
+    code = "FORM_DETAIL_FIELD_VALUE_SEMANTIC_MISMATCH";
+    reason = "Owner/person fields must not use task or status values.";
+  } else if (/\b(date|renewal|effective|expiry|expiration|deadline)\b/.test(fieldText) && DOCUMENT_FILENAME_RE.test(valueText)) {
+    code = "FORM_DETAIL_FIELD_VALUE_SEMANTIC_MISMATCH";
+    reason = "Date fields must not use document filenames.";
+  } else if (/\b(status|state|stage)\b/.test(fieldText) && PERSON_OR_VENDOR_VALUE_RE.test(valueText) && !STATUS_VALUE_RE.test(valueText)) {
+    code = "FORM_DETAIL_FIELD_VALUE_SEMANTIC_MISMATCH";
+    reason = "Status fields must not use person or vendor names.";
+  } else if (/\b(document|evidence|file|attachment)\b/.test(fieldText) && REVIEW_COMMENT_RE.test(valueText)) {
+    code = "FORM_DETAIL_FIELD_VALUE_SEMANTIC_MISMATCH";
+    reason = "Document/evidence fields must not use review comment text.";
+  } else if (/\b(related|linked|record|reference)\b/.test(fieldText) && STATUS_VALUE_RE.test(valueText)) {
+    code = "FORM_DETAIL_FIELD_VALUE_SEMANTIC_MISMATCH";
+    reason = "Related-record fields must not use validation/status labels.";
+  }
+  if (code) {
+    addFinding(findings, "error", code, "Form/detail semantic field examples contain an obvious field/value mismatch.", {
+      ...context,
+      field,
+      value,
+      reason,
+    });
+  }
+}
+
+function validateLowerPageBusinessRegions(findings, artifact, context = {}) {
+  const regions = asArray(artifact.lowerPageBusinessRegions || artifact.businessRegionEvidence || artifact.lowerPageRegions);
+  if (!regions.length) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_PAGE_BUSINESS_REGION_MISSING", "Form/detail artifacts must include at least one meaningful lower-page business region.", context);
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITHOUT_LOWER_PAGE_BUSINESS_REGION", "Form/detail artifact cannot be ready for blueprint without a meaningful lower-page business region.", context);
+    return;
+  }
+
+  let meaningful = 0;
+  for (const region of regions) {
+    const text = scalarRegion(region);
+    if (!text || GENERIC_LOWER_REGION_RE.test(text) || !MEANINGFUL_LOWER_REGION_RE.test(text)) {
+      addFinding(findings, "error", "FORM_DETAIL_LOWER_PAGE_BUSINESS_REGION_GENERIC", "Lower-page business regions must contain planned business data, records, history, evidence, or actions, not only page-end markers, generic notes, blank space, or design explanation text.", {
+        ...context,
+        region: text,
+      });
+      continue;
+    }
+    meaningful += 1;
+    if (typeof region === "object" && region !== null) {
+      for (const [keys, code, message] of [
+        [["name", "regionName"], "FORM_DETAIL_LOWER_REGION_NAME_MISSING", "Lower-page business region must include a region name."],
+        [["purpose", "regionPurpose"], "FORM_DETAIL_LOWER_REGION_PURPOSE_MISSING", "Lower-page business region must include a purpose."],
+        [["sourceList", "dataSource", "source"], "FORM_DETAIL_LOWER_REGION_SOURCE_MISSING", "Lower-page business region must include source list or data source."],
+        [["displayedFields", "displayedItems", "fields"], "FORM_DETAIL_LOWER_REGION_FIELDS_MISSING", "Lower-page business region must include displayed fields/items."],
+        [["behavior", "actionOrReadOnlyBehavior", "actionBehavior"], "FORM_DETAIL_LOWER_REGION_BEHAVIOR_MISSING", "Lower-page business region must include action or read-only behavior."],
+        [["proofImpact", "validationImpact"], "FORM_DETAIL_LOWER_REGION_PROOF_IMPACT_MISSING", "Lower-page business region must include proof impact."],
+      ]) {
+        requireText(findings, region, keys, code, message, context);
+      }
+    }
+  }
+  if (!meaningful) blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITHOUT_LOWER_PAGE_BUSINESS_REGION", "Form/detail artifact cannot be ready for blueprint when lower-page regions are generic or page-end-only.", context);
+}
+
+function validatePageSpecificQualityEvidence(findings, artifact, context = {}) {
+  const entries = asArray(artifact.pageSpecificQualityEvidence || artifact.businessQualityEvidence);
+  if (entries.length < 2) {
+    addFinding(findings, "error", "FORM_DETAIL_PAGE_SPECIFIC_QUALITY_EVIDENCE_MISSING", "Form/detail artifacts must include at least two pageSpecificQualityEvidence entries.", context);
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITHOUT_PAGE_SPECIFIC_QUALITY_EVIDENCE", "Form/detail artifact cannot be ready for blueprint without page-specific quality evidence.", context);
+    return;
+  }
+  const meaningfulEntries = entries.filter((entry) => {
+    const text = scalar(entry);
+    return BUSINESS_NOUN_RE.test(text) && !isGenericQualityOnly(text);
+  });
+  if (meaningfulEntries.length < 2) {
+    addFinding(findings, "error", "FORM_DETAIL_PAGE_SPECIFIC_QUALITY_EVIDENCE_GENERIC", "Page-specific quality evidence must name business objects, planned resources, fields, records, history, or actions; generic checklist text is not enough.", {
+      ...context,
+      evidence: entries.map(scalar).join(" | "),
+    });
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITHOUT_PAGE_SPECIFIC_QUALITY_EVIDENCE", "Form/detail artifact cannot be ready for blueprint when page-specific quality evidence is generic-only.", context);
+  }
+}
+
+function validateTemplateReuseStatus(findings, artifact, context = {}) {
+  const status = lower(firstText(artifact.templateReuseRiskStatus));
+  if (!status) {
+    addFinding(findings, "error", "FORM_DETAIL_TEMPLATE_REUSE_RISK_STATUS_MISSING", "Form/detail artifacts must declare templateReuseRiskStatus.", context);
+    return;
+  }
+  if (!/^(pass|warning|fail|human_review_required|human[-_ ]review[-_ ]required)$/i.test(status)) {
+    addFinding(findings, "error", "FORM_DETAIL_TEMPLATE_REUSE_RISK_STATUS_INVALID", "templateReuseRiskStatus must be pass, warning, fail, or human_review_required.", {
+      ...context,
+      templateReuseRiskStatus: status,
+    });
+  }
+  if (/(fail|human[-_ ]review[-_ ]required)/i.test(status) && !isDeferredWithProof(artifact)) {
+    addFinding(findings, "error", "FORM_DETAIL_TEMPLATE_REUSE_RISK_BLOCKS_BLUEPRINT", "templateReuseRiskStatus fail or human_review_required blocks blueprint readiness unless deferred with reason, fallback, and proof impact.", {
+      ...context,
+      templateReuseRiskStatus: status,
+    });
+  }
+}
+
+function validateTemplateReuseRisk(findings, entries) {
+  const groups = new Map();
+  for (const entry of entries) {
+    const artifact = entry.artifact;
+    if (isDeferredWithProof(artifact)) continue;
+    const signature = [
+      normalizeSignatureValue(artifact.includedSections),
+      normalizeSignatureValue(artifact.semanticFieldExamples || artifact.fieldValueExamples || artifact.businessFieldExamples),
+      normalizeSignatureValue(artifact.lowerPageBusinessRegions || artifact.businessRegionEvidence || artifact.lowerPageRegions),
+    ].join("||");
+    if (!signature || signature === "||||") continue;
+    if (!groups.has(signature)) groups.set(signature, []);
+    groups.get(signature).push(entry);
+  }
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const justified = group.every(({ artifact }) => hasPurposefulFormDifference(artifact));
+    if (justified) continue;
+    for (const { artifact, index, surfaceName, surfaceType } of group) {
+      addFinding(findings, "error", "FORM_DETAIL_TEMPLATE_REUSE_RISK", "Multiple form/detail artifacts reuse identical sections, semantic fields, and lower-page regions without declared purposeful functional differences.", {
+        row: index + 1,
+        surfaceName,
+        surfaceType,
+      });
+      blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITH_TEMPLATE_REUSE_RISK", "Form/detail artifact cannot be ready for blueprint when template reuse risk is unresolved.", {
+        row: index + 1,
+        surfaceName,
+        surfaceType,
+      });
+    }
+  }
+}
+
+function normalizeFieldExamples(value) {
+  const items = asArray(value);
+  if (!items.length && typeof value === "string") return parseFieldExamplesText(value);
+  return items.flatMap((item) => {
+    if (item && typeof item === "object") return [item];
+    return parseFieldExamplesText(item);
+  });
+}
+
+function parseFieldExamplesText(value) {
+  return scalar(value)
+    .split(/[;\n|]+/)
+    .map((part) => {
+      const match = part.match(/^\s*([^:=]+?)\s*(?:=|:)\s*(.+?)\s*$/);
+      return match ? { field: match[1].trim(), value: match[2].trim() } : null;
+    })
+    .filter(Boolean);
+}
+
+function scalarRegion(region) {
+  if (region && typeof region === "object") {
+    return [
+      region.name,
+      region.regionName,
+      region.purpose,
+      region.regionPurpose,
+      region.sourceList,
+      region.dataSource,
+      region.displayedFields,
+      region.displayedItems,
+      region.behavior,
+      region.actionOrReadOnlyBehavior,
+      region.proofImpact,
+    ]
+      .flatMap((value) => asArray(value).length ? asArray(value) : [value])
+      .map(scalar)
+      .join(" ");
+  }
+  return scalar(region);
+}
+
+function isGenericQualityOnly(value) {
+  const text = scalar(value).trim();
+  if (!text) return true;
+  const stripped = text.replace(GENERIC_QUALITY_RE, "").replace(/[,\s.;:-]+/g, "");
+  return !stripped || !BUSINESS_NOUN_RE.test(text);
+}
+
+function normalizeSignatureValue(value) {
+  return JSON.stringify(value ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function hasPurposefulFormDifference(artifact) {
+  const text = [
+    artifact.formPurposeDifferentiators,
+    artifact.purposefulDifferences,
+    artifact.functionalDifferences,
+    artifact.templateReuseJustification,
+  ]
+    .flatMap((value) => asArray(value).length ? asArray(value) : [value])
+    .map(scalar)
+    .join(" ");
+  return /\b(action|read[- ]only|decision|comment|workflow|approval|task|submission|print|field|section|history|document|checklist|timeline|purposeful|different)\b/i.test(text);
+}
+
+function blockReadyForBlueprint(findings, artifact, code, message, context = {}) {
+  if (!truthy(artifact.readyForBlueprint)) return;
+  addFinding(findings, "error", code, message, context);
+}
+
 function requirePassingStatus(findings, object, keys, code, message, context = {}) {
   const status = lower(firstText(...keys.map((key) => object?.[key])));
   if (!status) {
@@ -511,6 +773,11 @@ function requireText(findings, object, keys, code, message, detail = {}) {
 function isFormReportSurface(surface) {
   const combined = [surface?.surfaceType, surface?.yeeflowSurfaceType, surface?.type, surface?.sourceAppPlanSection].map(scalar).join(" ");
   return FORM_REPORT_RE.test(combined);
+}
+
+function isFormDetailSurface(surface) {
+  const combined = [surface?.surfaceType, surface?.yeeflowSurfaceType, surface?.type].map(scalar).join(" ");
+  return FORM_DETAIL_SURFACE_RE.test(combined) && !FORM_REPORT_RE.test(combined);
 }
 
 function surfaceKey(surface) {

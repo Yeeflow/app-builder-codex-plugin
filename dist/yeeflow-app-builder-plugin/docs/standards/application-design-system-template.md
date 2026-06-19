@@ -78,7 +78,32 @@ Minimum acceptance criteria:
 - realistic business data examples
 - readable responsive/mobile layout planning
 
-## 4. Application Visual Language
+## 4. Form And Detail Semantic Quality Standard
+
+Approval Submission forms, Approval Task forms, Approval Print pages, Data List Add/Edit forms, Data List View forms, Data List Detail forms, and other custom form/detail surfaces must show page-specific business meaning. Full-page height alone is not enough.
+
+- Field/value semantic guardrails:
+- Required form/detail business fields:
+- Required lower-page business regions:
+- Page-specific quality evidence rules:
+- Template reuse risk rules:
+- Shared-style allowance:
+- Form/detail anti-patterns to reject:
+
+Minimum acceptance criteria:
+
+- every form/detail artifact declares `primaryBusinessObject`
+- every form/detail artifact includes `semanticFieldExamples` with realistic field/value pairs
+- `fieldValueSemanticsStatus` must pass before `readyForBlueprint: true`
+- field labels and values must match business semantics; for example, contract title/name fields must not contain lifecycle status values, owner/person fields must not contain task/status labels, date fields must not contain document filenames, and document/evidence fields must not contain review comment text
+- every form/detail artifact includes at least one meaningful `lowerPageBusinessRegions` entry with region name, purpose, source list/data source, displayed fields/items, action or read-only behavior, and proof impact
+- lower-page regions must contain planned business data, records, history, evidence, or actions; blank space, `Page end`, generic notes, or design-stage explanation text do not satisfy full-page coverage
+- every form/detail artifact includes at least two `pageSpecificQualityEvidence` entries naming concrete business objects, fields, records, histories, actions, or planned resources
+- generic visual quality phrases such as `strong visual hierarchy` or `professional spacing` are not enough for blueprint readiness unless paired with page-specific business evidence
+- `templateReuseRiskStatus` must be `pass`, `warning`, `fail`, or `human_review_required`; `fail` and `human_review_required` block blueprint readiness unless explicitly deferred with reason, fallback, and proof impact
+- similar Submission/Task/View forms may share visual style only when the manifest declares purposeful functional differences such as editable versus read-only fields, action row differences, decision panels, reviewer comments, workflow/history regions, print footer/signature blocks, or related-record sections
+
+## 5. Application Visual Language
 
 - Visual style:
 - Density:
@@ -88,7 +113,7 @@ Minimum acceptance criteria:
 
 All generated design artifacts must share one coherent application-level style while allowing function-specific layouts.
 
-## 5. Color Palette
+## 6. Color Palette
 
 | Token | Color | Usage | Accessibility Notes |
 | --- | --- | --- | --- |
@@ -102,7 +127,7 @@ All generated design artifacts must share one coherent application-level style w
 | Error |  |  |  |
 | Info |  |  |  |
 
-## 6. Typography Scale
+## 7. Typography Scale
 
 | Token | Size/Weight | Usage |
 | --- | --- | --- |
@@ -114,7 +139,7 @@ All generated design artifacts must share one coherent application-level style w
 | Form label |  |  |
 | Badge text |  |  |
 
-## 7. Spacing Scale
+## 8. Spacing Scale
 
 | Token | Value | Usage |
 | --- | --- | --- |
@@ -125,7 +150,7 @@ All generated design artifacts must share one coherent application-level style w
 | Table row height |  |  |
 | Action gap |  |  |
 
-## 8. Card And Container Style
+## 9. Card And Container Style
 
 - Card radius:
 - Border/shadow:
@@ -133,7 +158,7 @@ All generated design artifacts must share one coherent application-level style w
 - Section container pattern:
 - Empty/error/loading state treatment:
 
-## 9. Table Style
+## 10. Table Style
 
 - Header style:
 - Row style:
@@ -143,7 +168,7 @@ All generated design artifacts must share one coherent application-level style w
 - Empty/loading/error states:
 - Mobile fallback:
 
-## 10. Form Field Style
+## 11. Form Field Style
 
 - Label placement:
 - Required marker:
@@ -155,8 +180,11 @@ All generated design artifacts must share one coherent application-level style w
 - Task form decision/action area:
 - Workflow/history panel:
 - Print page treatment:
+- Field/value semantic treatment:
+- Lower-page business region treatment:
+- Template reuse differentiation treatment:
 
-## 11. Action Button Style
+## 12. Action Button Style
 
 - Primary action:
 - Secondary action:
@@ -164,7 +192,7 @@ All generated design artifacts must share one coherent application-level style w
 - Icon/action treatment:
 - Sticky/mobile action behavior:
 
-## 12. Status Badge Style
+## 13. Status Badge Style
 
 - Status badge shape:
 - Approval status colors:
@@ -172,7 +200,7 @@ All generated design artifacts must share one coherent application-level style w
 - Priority/condition colors:
 - Accessibility notes:
 
-## 13. KPI/Summary And Data Analytics Style
+## 14. KPI/Summary And Data Analytics Style
 
 - KPI card structure:
 - Summary value treatment:
@@ -181,7 +209,7 @@ All generated design artifacts must share one coherent application-level style w
 - Empty/loading/error states:
 - Mobile stacking:
 
-## 14. Collection, Kanban, And Timeline Item Card Style
+## 15. Collection, Kanban, And Timeline Item Card Style
 
 - Collection card layout:
 - Kanban card layout:
@@ -192,7 +220,7 @@ All generated design artifacts must share one coherent application-level style w
 - Empty/loading/error states:
 - Mobile behavior:
 
-## 15. Dashboard Surface Rules
+## 16. Dashboard Surface Rules
 
 - Required header/navigation shell:
 - Page title/action area:
@@ -200,7 +228,7 @@ All generated design artifacts must share one coherent application-level style w
 - Detail/workbench panel behavior:
 - Lower-page/page-end treatment:
 
-## 16. Approval Form Surface Rules
+## 17. Approval Form Surface Rules
 
 - Submission form layout:
 - Task form layout:
@@ -208,7 +236,7 @@ All generated design artifacts must share one coherent application-level style w
 - Expected submission/task differences:
 - Print page layout:
 
-## 17. Data List Custom Form Surface Rules
+## 18. Data List Custom Form Surface Rules
 
 - Add/Edit layout:
 - View/detail layout:
@@ -216,7 +244,7 @@ All generated design artifacts must share one coherent application-level style w
 - Action areas:
 - Sub List/table treatment:
 
-## 18. Mobile And Responsive Rules
+## 19. Mobile And Responsive Rules
 
 Document either separate mobile canonical images for key pages or a responsive plan referenced by the Design Image Manifest.
 
@@ -232,7 +260,7 @@ Document either separate mobile canonical images for key pages or a responsive p
 - Hidden/shown secondary fields:
 - Content consistency rules:
 
-## 19. Accessibility And Readability Notes
+## 20. Accessibility And Readability Notes
 
 - Contrast:
 - Touch targets:
@@ -240,11 +268,11 @@ Document either separate mobile canonical images for key pages or a responsive p
 - Readability:
 - Error/validation clarity:
 
-## 20. Design Proof Boundary
+## 21. Design Proof Boundary
 
 This document proves application-level design intent and visual consistency for later canonical image and Page Implementation Blueprint work. It does not prove Yeeflow package validity, control/property serialization, signing/API acceptance, install/upgrade success, or runtime behavior.
 
-## 21. Deferred Or Unsupported Design Decisions
+## 22. Deferred Or Unsupported Design Decisions
 
 | Decision | Reason | Fallback | Proof Impact | Required Follow-up |
 | --- | --- | --- | --- | --- |
