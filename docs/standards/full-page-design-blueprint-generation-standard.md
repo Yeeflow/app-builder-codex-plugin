@@ -4,24 +4,44 @@ Full-application Yeeflow generation is a staged evidence workflow. A visually po
 
 ## Mandatory Stage Order
 
-1. Functional spec.
-2. App plan.
-3. Full-page canonical design images.
-4. Page implementation blueprint.
-5. Yeeflow control/property contract validation.
-6. Resource generation.
-7. Decoded resource parity validation.
-8. Local hard gates.
-9. Package/sign/upgrade only after explicit write approval.
-10. Runtime/browser proof only after Chrome/runtime evidence exists.
+1. Functional Specification.
+2. Yeeflow App Plan.
+3. Business Clarification Gate approved for generation and Generation Readiness final check.
+4. Full-page Canonical Design Artifacts stage.
+5. Page Implementation Blueprint.
+6. Yeeflow control/property contract validation.
+7. Resource generation.
+8. Decoded resource parity validation.
+9. Local hard gates.
+10. Package/sign/upgrade only after explicit write approval.
+11. Runtime/browser proof only after Chrome/runtime evidence exists.
 
 Do not start a later stage when the prior stage lacks completion evidence. Schema validation, signing, install, upgrade, decoded CSS, decoded controls, or ID stability do not prove UI fidelity or runtime behavior. Runtime proof cannot claim success until Chrome/runtime evidence exists.
+
+## Full-Page Canonical Design Artifacts
+
+The Full-page Canonical Design Artifacts stage creates the application-level visual contract from the approved Functional Specification and Yeeflow App Plan. It must not generate `.yap` or `.yapk` packages, sign packages, install/import/upgrade apps, or run live Yeeflow writes.
+
+This stage must produce:
+
+- an Application Design System document using `docs/standards/application-design-system-template.md`
+- full-page canonical design images for all required UI surfaces
+- a Design Image Manifest using `docs/standards/design-image-manifest-template.md`
+- a validation/review report showing readiness for the Page Implementation Blueprint stage
+
+Generate the Application Design System before any canonical design image. Every canonical design artifact and every Design Image Manifest row must reference the selected Application Design System. If the design system is missing, incomplete, generated after images, or not referenced by the manifest rows, the design artifact stage fails and must not proceed to Page Implementation Blueprints.
 
 ## Canonical Page Design Images
 
 Each page must have one canonical PNG at `assets/generated-ui/<app-slug>/NN-<page-slug>.design.png`. The canonical page image must be a full-page implementation artifact, not a first-viewport mockup. It must show all planned sections, major controls, tables, forms, cards, filters, actions, lower-page regions, and page end. A viewport-only screenshot or cropped top-page mockup fails unless the page truly has no below-fold content.
 
 SVG files and combined design boards may support review, but they cannot replace the canonical per-page PNG. The design manifest must map page order, page title, page slug, canonical PNG path, optional source file, selected Yeeflow layout/chrome, and expected viewport.
+
+Required design coverage includes Dashboard pages, Approval Submission forms, planned Approval Task forms, planned Approval Print pages, and planned Data List Add/Edit, View, Detail, or other custom forms. Dashboard pages must include the selected application layout shell with header/navigation/content behavior where applicable. Approval forms and Data List custom forms are complete form pages and do not need the application header/navigation shell.
+
+Form Reports are not part of the Full-page Canonical Design Images coverage requirement. Form Reports remain standalone Yeeflow resources and should be planned, generated, and validated in their own Form Report flow. Do not mix Form Report design coverage into Dashboard page design coverage.
+
+Canonical design artifacts must show realistic business structure from the approved App Plan, including meaningful rows, cards, status badges, field labels, dates, owners, documents, tasks, action regions, and relevant empty/error/loading states. They must include either mobile canonical images for key pages or responsive behavior documented in the Application Design System and Design Image Manifest.
 
 ## Page Implementation Blueprint
 
@@ -48,6 +68,7 @@ After generation, inspect decoded JSON and compare it to the blueprint. All sect
 Run:
 
 ```bash
+node scripts/validate-full-page-design-artifacts.mjs --manifest design-image-manifest.json
 node scripts/inspect-full-page-design-artifacts.mjs --manifest design-image-manifest.json
 node scripts/inspect-page-implementation-blueprint.mjs --blueprint page-implementation-blueprint.json
 node scripts/compare-blueprint-to-decoded-resource.mjs --blueprint page-implementation-blueprint.json --resource decoded-resource.json
