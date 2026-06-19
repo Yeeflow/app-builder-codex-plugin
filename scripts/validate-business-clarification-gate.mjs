@@ -4,7 +4,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 const FAIL_STATUS = /\b(unanswered|pending|TBD|to be confirmed|requires clarification|not answered|open)\b/i;
-const PASS_STATUS = /\b(answered|default-approved|default approved|approved default|resolved|not applicable|N\/A)\b/i;
+const PASS_STATUS = /\b(answered|resolved|not applicable|N\/A)\b/i;
+const PLANNING_DEFAULT_STATUS = /\b(default-applied-for-planning|default approved for planning|default-approved for planning)\b/i;
+const GENERATION_DEFAULT_STATUS = /\b(user-default-approved-for-generation|user default approved for generation|user approved default for generation)\b/i;
+const AMBIGUOUS_DEFAULT_STATUS = /\b(default-approved|default approved|approved default)\b/i;
 const DEFERRED_STATUS = /\b(deferred|runtime-proof-required|export-learning-required)\b/i;
 const PAUSED = /generation is paused|paused until .*answered|stop before .*generation|cannot proceed .*until/i;
 const NON_BUSINESS_GATE_SECTION = /\b(generation contract|hard gates?|required gates?|validation plan|generation validation|proof boundary|schema|signing|runtime|package validation|advanced capability|plan-to-package)\b/i;
@@ -13,11 +16,12 @@ const BUSINESS_GATE_SECTION = /\bbusiness\b.*\b(decision|decisions|clarification
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
-    "  node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md> --plan <app-plan.md> [--json]",
-    "  node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md> [--json]",
-    "  node scripts/validate-business-clarification-gate.mjs --plan <app-plan.md> [--json]",
+    "  node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md> --plan <app-plan.md> [--mode planning|generation] [--json]",
+    "  node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md> [--mode planning|generation] [--json]",
+    "  node scripts/validate-business-clarification-gate.mjs --plan <app-plan.md> [--mode planning|generation] [--json]",
     "",
     "Validates business clarification gate readiness from Markdown only. No API calls are made.",
+    "Default mode is generation, which blocks defaults that were only applied for planning.",
   ].join("\n");
   (exitCode === 0 ? console.log : console.error)(text);
   process.exit(exitCode);
@@ -66,14 +70,16 @@ function isSeparatorRow(cells) {
 }
 
 function tableRows(section) {
-  const lines = section.body.split(/\r?\n/).filter((line) => /^\s*\|.*\|\s*$/.test(line));
+  const lines = section.body.split(/\r?\n/);
   const tables = [];
   for (let index = 0; index < lines.length - 1; index++) {
+    if (!/^\s*\|.*\|\s*$/.test(lines[index]) || !/^\s*\|.*\|\s*$/.test(lines[index + 1])) continue;
     const header = splitTableRow(lines[index]);
     const separator = splitTableRow(lines[index + 1]);
     if (!isSeparatorRow(separator)) continue;
     const rows = [];
     for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex++) {
+      if (!/^\s*\|.*\|\s*$/.test(lines[rowIndex])) break;
       const cells = splitTableRow(lines[rowIndex]);
       if (!cells.length || isSeparatorRow(cells)) break;
       rows.push(cells);
@@ -94,12 +100,20 @@ function rowValue(header, row, names) {
 
 function rowHasDeferredReason(header, row) {
   const rowText = row.join(" ");
-  return /\b(reason|fallback|proof|impact|follow-up|why|handling)\b/i.test(header.join(" "))
-    ? /\b\w{3,}\b/.test(rowText.replace(DEFERRED_STATUS, ""))
-    : /\b(reason|fallback|proof|impact|follow-up|because|manual|post-import|runtime)\b/i.test(rowText);
+  const headerText = header.join(" ");
+  const hasReasonColumn = /\b(reason|fallback|proof|impact|follow-up|why|handling)\b/i.test(headerText);
+  const hasImpactLanguage = /\b(fallback|proof|impact|generation impact|follow-up|because|manual|post-import|runtime)\b/i.test(rowText);
+  const hasSubstantiveDeferredCell = row.some((cell, index) => /\b(reason|fallback|proof|impact|why|handling)\b/i.test(header[index] ?? "") && /\b\w{3,}\b/.test(cell.replace(DEFERRED_STATUS, "")));
+  return hasImpactLanguage && (!hasReasonColumn || hasSubstantiveDeferredCell);
 }
 
-function analyzeFile(file, kind) {
+function hasWarningOrErrorIntegrity(report) {
+  const warningFindings = report.findings.filter((finding) => finding.level === "warning").length;
+  const errorFindings = report.findings.filter((finding) => finding.level === "error").length;
+  return report.warnings === warningFindings && report.errors === errorFindings;
+}
+
+function analyzeFile(file, kind, mode) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const sections = gateSections(text);
   const findings = [];
@@ -182,6 +196,43 @@ function analyzeFile(file, kind) {
             statusText,
             message: "Deferred business decision gates must include reason, fallback, proof impact, or follow-up evidence.",
           });
+        } else if (PLANNING_DEFAULT_STATUS.test(statusText)) {
+          if (mode === "generation") {
+            findings.push({
+              level: "error",
+              code: "BUSINESS_CLARIFICATION_DEFAULT_ONLY_FOR_PLANNING",
+              file: path.resolve(file),
+              section: section.heading,
+              gateKey,
+              question,
+              statusText,
+              message: "Default was applied for planning only and does not authorize generation.",
+            });
+          } else {
+            warnings.push({
+              level: "warning",
+              code: "BUSINESS_CLARIFICATION_DEFAULT_APPLIED_FOR_PLANNING",
+              file: path.resolve(file),
+              section: section.heading,
+              gateKey,
+              question,
+              statusText,
+              message: "Default is applied for planning only; generation remains blocked until the user answers or approves defaults for generation.",
+            });
+          }
+        } else if (GENERATION_DEFAULT_STATUS.test(statusText)) {
+          // Explicit user generation approval is accepted in both modes.
+        } else if (AMBIGUOUS_DEFAULT_STATUS.test(statusText)) {
+          findings.push({
+            level: "error",
+            code: "BUSINESS_CLARIFICATION_AMBIGUOUS_DEFAULT_APPROVAL",
+            file: path.resolve(file),
+            section: section.heading,
+            gateKey,
+            question,
+            statusText,
+            message: "Ambiguous default-approved wording must be replaced with default-applied-for-planning or user-default-approved-for-generation.",
+          });
         } else if (!PASS_STATUS.test(statusText)) {
           warnings.push({
             level: "warning",
@@ -220,7 +271,9 @@ function main() {
   const json = process.argv.includes("--json");
   const spec = argValue("--spec");
   const plan = argValue("--plan");
+  const mode = argValue("--mode") ?? "generation";
   if (!spec && !plan) usage();
+  if (!["planning", "generation"].includes(mode)) usage();
 
   const reports = [];
   const errors = [];
@@ -235,20 +288,31 @@ function main() {
       });
       continue;
     }
-    reports.push(analyzeFile(file, kind));
+    reports.push(analyzeFile(file, kind, mode));
   }
 
   const findings = [...errors, ...reports.flatMap((report) => report.findings)];
   const warnings = reports.flatMap((report) => report.warnings);
+  const allFindings = [...findings, ...warnings];
   const report = {
     status: findings.length ? "fail" : "pass",
     errors: findings.length,
     warnings: warnings.length,
-    findings,
+    findings: allFindings,
     spec: spec ? path.resolve(spec) : null,
     plan: plan ? path.resolve(plan) : null,
+    mode,
     proofBoundary: "Business clarification gate document readiness only; this does not prove the business answer is correct.",
   };
+  if (!hasWarningOrErrorIntegrity(report)) {
+    report.status = "fail";
+    report.errors += 1;
+    report.findings.push({
+      level: "error",
+      code: "BUSINESS_CLARIFICATION_REPORT_INTEGRITY_MISMATCH",
+      message: "Warning/error counts must match warning/error findings.",
+    });
+  }
 
   if (json) console.log(JSON.stringify(report, null, 2));
   else if (report.status === "pass") console.log("business clarification gate validation passed");
@@ -256,7 +320,7 @@ function main() {
     console.error("business clarification gate validation failed");
     for (const finding of findings) console.error(`${finding.code}: ${finding.message}`);
   }
-  if (findings.length) process.exitCode = 1;
+  if (report.errors) process.exitCode = 1;
 }
 
 main();

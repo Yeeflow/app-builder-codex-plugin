@@ -247,7 +247,7 @@ List decisions that materially affect workflow, data persistence, validation, da
 
 | Key | Question | Options | Recommended Default | Required Before App Plan? | Status | Why This Matters |
 | --- | --- | --- | --- | --- | --- | --- |
-| <key> | <Question> | <Options> | <Default> | Yes/No | unanswered/answered/default-approved | <Reason> |
+| <key> | <Question> | <Options> | <Default> | Yes/No | unanswered/answered/default-applied-for-planning/user-default-approved-for-generation/deferred/not applicable | <Reason, fallback, and proof/generation impact when deferred> |
 
 If unresolved business-critical decisions exist, stop before final App Plan unless the user approves defaults.
 
@@ -257,14 +257,14 @@ Executable gate:
 node scripts/validate-business-clarification-gate.mjs --spec <functional-spec.md>
 ```
 
-The Business Clarification Gate fails when decision gates remain unanswered, pending, TBD, open, require clarification, or when generation is paused until answers are provided. It proves clarification-gate document readiness only, not that the business answer is correct.
+The Business Clarification Gate has two modes. Planning mode allows `default-applied-for-planning` so the Functional Specification and App Plan can be created from explicit assumptions. Generation mode blocks `default-applied-for-planning` and requires `answered`, `not applicable`, `user-default-approved-for-generation`, or `deferred` with reason, fallback, and proof/generation impact. It fails when decision gates remain unanswered, pending, TBD, open, require clarification, or when generation is paused until answers are provided. It proves clarification-gate document readiness only, not that the business answer is correct.
 
 Final planning-output rule:
 
 - When any business decision gate remains unresolved, the assistant's final planning response must list every unresolved gate by `Key` and `Question`.
 - The response must include the recommended default for each unresolved gate.
 - If the response offers an "approve all recommended defaults" option, it must name every gate covered by that option, for example: `Approve all recommended defaults for: approvalRoute, financeThreshold, reminderOffsets, requiredDocuments, permissionModel`.
-- The response must include: `No package generation will proceed until the business gates are answered or explicitly default-approved.`
+- The response must include: `No package generation will proceed until the business gates are answered or explicitly user-default-approved-for-generation.`
 - Do not shorten the visible clarification list in a way that hides unresolved gates.
 
 ## 20. Assumptions

@@ -21,21 +21,41 @@ const AREAS = [
 
 const PLACEHOLDER_ONLY = /^(?:\s|[|:\-#`])*<[^>]+>(?:\s|[|:\-#`])*$/;
 const DEFERRED = /\b(not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required)\b/i;
+const PROOF_OR_DEFERRED_LABEL = /\b(deferred|runtime-proof-required|export-learning-required)\b/i;
 const RECORD_DISPLAY_CONTROLS = ["Data table", "Collection", "Kanban", "Vertical timeline", "Horizontal timeline"];
 const AMBIGUOUS_IMPLEMENTATION_PATTERNS = [
   /\bTitle\s*\/\s*Text\b/i,
+  /\bTitle\s*\/\s*input control\b/i,
   /\bCurrency\s*\/\s*Number\b/i,
   /\bUser\s*\/\s*person\b/i,
+  /\bUser\s*\/\s*user picker control\b/i,
   /\bAttachment\s*\/\s*File upload\b/i,
+  /\bAttachment\s*\/\s*upload control\b/i,
+  /\bLookup\s*\/\s*radio dropdown control\b/i,
+  /\bTextarea\s*\/\s*textarea control\b/i,
+  /\bBoolean\s*\/\s*switch control\b/i,
+  /\bDateTime\s*\/\s*date control\b/i,
+  /\bMultiline Text\s*\/\s*textarea control\b/i,
+  /\bChoice\s*\/\s*radio dropdown control\b/i,
+  /\bText\s*\/\s*input control\b/i,
   /\bDocument library\s*\/\s*Data list\b/i,
   /\bType\s*1\s*\/\s*document library\b/i,
   /\bwhere supported\b/i,
+  /\bif supported\b/i,
   /\bsupported where possible\b/i,
+  /\bwhere available\b/i,
+  /\bif available\b/i,
+  /\bas supported\b/i,
+  /\bwhen supported\b/i,
+  /\bwhere safe\b/i,
   /\bopen detail\s*\/\s*slide panel where supported\b/i,
   /\bupdate row\s*\/\s*status where supported\b/i,
   /\bdocument\s*\/\s*list section\b/i,
   /\blookup\s*\/\s*read-only dynamic field\b/i,
 ];
+const AMBIGUOUS_PHRASE = /\b(where supported|if supported|supported where possible|where available|if available|as supported|when supported|where safe)\b/i;
+const SLASH_COMBINED_EXACT_VALUE = /\b[A-Za-z][A-Za-z0-9 -]*\s*\/\s*[A-Za-z][A-Za-z0-9 -]*(?:\s+(?:control|type|picker|dropdown|upload|input|textarea|switch|date|field))?\b/i;
+const COMBINED_EXACT_HEADER = /\bExact\b.*\b(?:Field Type|Variable Type|Type)\s*\/\s*(?:Control Type|Action Type|Type)\b/i;
 const EXACT_IMPLEMENTATION_HEADER = /\b(exact yeeflow|implementation type|implementation control|implementation action|selected resource type|selected control|action type|field type|variable type|control type|dynamic control type|property path|binding)\b/i;
 const BUSINESS_LABEL_HEADER = /\b(business label|display label|business requirement|display need|selection reason|notes?|description|purpose|fallback|deferred reason|proof label|proof boundary|support source|why)\b/i;
 
@@ -104,14 +124,16 @@ function isSeparatorRow(cells) {
 }
 
 function tableRows(body) {
-  const lines = body.split(/\r?\n/).filter((line) => /^\s*\|.*\|\s*$/.test(line));
+  const lines = body.split(/\r?\n/);
   const tables = [];
   for (let index = 0; index < lines.length - 1; index++) {
+    if (!/^\s*\|.*\|\s*$/.test(lines[index]) || !/^\s*\|.*\|\s*$/.test(lines[index + 1])) continue;
     const header = splitTableRow(lines[index]);
     const separator = splitTableRow(lines[index + 1]);
     if (!isSeparatorRow(separator)) continue;
     const rows = [];
     for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex++) {
+      if (!/^\s*\|.*\|\s*$/.test(lines[rowIndex])) break;
       const cells = splitTableRow(lines[rowIndex]);
       if (!cells.length || isSeparatorRow(cells)) break;
       rows.push({ cells, line: lines[rowIndex] });
@@ -151,11 +173,16 @@ function validateAmbiguousImplementationWording(text, sections) {
     "Requirement-to-Yeeflow Resource Mapping Summary",
     "Data Lists and Document Libraries Plan",
     "Approval Forms Plan",
+    "Schedule Workflows Plan",
     "Custom Data List Forms Plan",
+    "Data List Workflows Plan",
+    "Notifications Plan",
+    "Data List Views Plan",
     "Dashboard Pages Plan",
     "Application Navigation Plan",
     "Plugin Capability and Standards Compliance",
     "Generation Contract and Hard Gates",
+    "Recommended Next Prompt",
   ];
   const implementationSections = sections.filter((section) =>
     implementationSectionTitles.some((title) => section.normalizedTitle.includes(title.toLowerCase())),
@@ -163,24 +190,52 @@ function validateAmbiguousImplementationWording(text, sections) {
 
   for (const section of implementationSections) {
     for (const table of tableRows(section.body)) {
-      for (const row of table.rows) {
-        const rowText = row.cells.join(" ");
-        if (hasPlaceholder(rowText) || DEFERRED.test(rowText)) continue;
-        for (const { cell, header } of implementationCellsToScan(table.header, row.cells)) {
-          const pattern = ambiguousPattern(cell);
-          if (!pattern) continue;
+      for (const headerCell of table.header) {
+        if (COMBINED_EXACT_HEADER.test(headerCell)) {
           findings.push({
             level: "error",
-            code: "GENERATION_READINESS_AMBIGUOUS_IMPLEMENTATION_WORDING",
+            code: "GENERATION_READINESS_EXACT_TYPE_CONTROL_COMBINED",
+            area: section.title,
+            section: section.heading,
+            statusText: headerCell,
+            message: "Exact Yeeflow type/control/action headings must split exact types and exact controls/actions into separate columns.",
+          });
+        }
+      }
+      for (const row of table.rows) {
+        const rowText = row.cells.join(" ");
+        if (hasPlaceholder(rowText) || PROOF_OR_DEFERRED_LABEL.test(rowText)) continue;
+        for (const { cell, header } of implementationCellsToScan(table.header, row.cells)) {
+          const pattern = ambiguousPattern(cell);
+          const exactSlash = /\bExact\b/i.test(header) && SLASH_COMBINED_EXACT_VALUE.test(cell);
+          if (!pattern && !exactSlash) continue;
+          findings.push({
+            level: "error",
+            code: exactSlash ? "GENERATION_READINESS_EXACT_VALUE_SLASH_COMBINED" : "GENERATION_READINESS_AMBIGUOUS_IMPLEMENTATION_WORDING",
             area: section.title,
             section: section.heading,
             statusText: cell,
-            message: `Ambiguous generation-ready wording "${cell}" appears in ${header || "an implementation table"} without runtime-proof-required, export-learning-required, or deferred.`,
+            message: exactSlash
+              ? `Slash-combined exact implementation value "${cell}" appears in ${header || "an exact implementation table"} without runtime-proof-required, export-learning-required, or deferred.`
+              : `Ambiguous generation-ready wording "${cell}" appears in ${header || "an implementation table"} without runtime-proof-required, export-learning-required, or deferred.`,
           });
         }
       }
     }
 
+    for (const [offset, line] of section.body.split(/\r?\n/).entries()) {
+      if (!AMBIGUOUS_PHRASE.test(line) || PROOF_OR_DEFERRED_LABEL.test(line) || hasPlaceholder(line)) continue;
+      if (!/\b(implementation|generation-ready|action|workflow|control|field|variable|binding|property|query data|temp variable|history|link|placeholder|dashboard filter)\b/i.test(line)) continue;
+      findings.push({
+        level: "error",
+        code: "GENERATION_READINESS_AMBIGUOUS_IMPLEMENTATION_WORDING",
+        area: section.title,
+        section: section.heading,
+        line: section.line + offset + 1,
+        statusText: line.trim(),
+        message: "Ambiguous support wording in implementation-contract sections must be marked runtime-proof-required, export-learning-required, or deferred with reason/fallback/proof impact.",
+      });
+    }
   }
 
   return findings;
@@ -404,7 +459,7 @@ function validate(file) {
   const gateEvidence = [
     ["Functional Specification review gate passed", /Functional spec(ification)? (review )?(gate )?(passed|approved)|Functional Specification review gate passed/i],
     ["App Plan review gate passed", /App Plan (review )?(gate )?(passed|approved)|App Plan review gate passed/i],
-    ["Business decision gates answered/default-approved or no blockers", /business decision gates?.*(answered|default-approved|no blockers|resolved)|no business clarification blockers/i],
+    ["Business decision gates answered/user-default-approved-for-generation or no blockers", /business decision gates?.*(answered|user-default-approved-for-generation|no blockers|resolved)|no business clarification blockers/i],
     ["No invented unsupported shapes", /no invented unsupported shapes|do not invent unsupported|unsupported.*marked.*(deferred|runtime-proof-required|export-learning-required)/i],
   ];
   for (const [label, pattern] of gateEvidence) {

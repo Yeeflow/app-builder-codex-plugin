@@ -98,7 +98,7 @@ Review the Functional Specification before creating the App Plan. The review mus
 - business objects and data concepts are present or explicitly not applicable
 - relationships and dependency rules are present or explicitly not applicable
 - process, status lifecycle, approval/review, forms, workflow/action, reporting/dashboard, document/attachment, AI, integration, permissions, UI, assumptions, and risks are covered
-- business decision gates are answered, default-approved, or listed as blockers
+- business decision gates are answered, `user-default-approved-for-generation`, not applicable, deferred with reason/fallback/proof impact, or listed as blockers
 - Readiness for App Plan is marked Yes only when the specification is consistent and complete enough
 
 If inconsistent, incomplete, or incorrect content is found, revise and validate again. A failed Functional Specification review gate blocks the Yeeflow App Plan stage.
@@ -187,8 +187,10 @@ Validation summary:
 - App Plan resource order: pass/fail
 - Functional Spec to App Plan traceability: pass/fail
 - Generation Readiness structural check: pass/fail
-- Business Clarification Gate: blocked
+- Business Clarification Gate for planning: pass/fail
+- Business Clarification Gate for generation: blocked until user approves defaults or answers gates
 - Overall generation readiness: blocked by Business Clarification Gate
+- No package generation was performed
 
 Unresolved business decision gates:
 
@@ -200,7 +202,7 @@ Unresolved business decision gates:
 
 Approve all recommended defaults for: <gate1>, <gate2>, ...
 
-No package generation will proceed until the business gates are answered or explicitly default-approved.
+No package generation will proceed until the business gates are answered or explicitly user-default-approved-for-generation.
 ```
 
 The final planning response must enumerate every unresolved business decision gate by key and question. If it offers "approve all recommended defaults", it must explicitly name each gate covered by that approval option.
@@ -249,10 +251,11 @@ Validation reports must distinguish structural planning checks from overall gene
 - App Plan resource order: pass/fail
 - Functional Spec to App Plan traceability: pass/fail
 - Generation Readiness structural check: pass/fail
-- Business Clarification Gate: pass/fail
-- Overall generation readiness: pass only if all required planning gates pass
+- Business Clarification Gate for planning: pass/fail
+- Business Clarification Gate for generation: pass/fail
+- Overall generation readiness: pass only if all required planning gates pass for generation
 
-If Generation Readiness structural check passes but Business Clarification Gate fails, write `Overall generation readiness: blocked by Business Clarification Gate`. Do not write only `Validation passed` when business clarification is intentionally unresolved.
+If Generation Readiness structural check passes but generation-mode Business Clarification Gate fails, write `Overall generation readiness: blocked by Business Clarification Gate`. Do not write only `Validation passed` or `all passed` when business clarification is intentionally unresolved or only `default-applied-for-planning`.
 
 Before design images, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, also run:
 
