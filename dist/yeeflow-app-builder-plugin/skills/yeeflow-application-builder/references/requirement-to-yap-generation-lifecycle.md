@@ -343,27 +343,31 @@ Required order:
 2. UI Surface Contracts using `docs/standards/ui-surface-contract-template.md`.
 3. High-fidelity HTML previews generated from the UI Surface Contracts and Application Design System.
 4. DOM/layout/visual-quality validation.
-5. Desktop/mobile screenshot evidence captured from HTML previews.
-6. Page Implementation Blueprints.
-7. Blueprint-to-UI Surface Contract comparison.
+5. HTML-to-Yeeflow control mapping validation using `docs/standards/html-to-yeeflow-control-mapping-registry.md`.
+6. Desktop/mobile screenshot evidence captured from HTML previews.
+7. Page Implementation Blueprints generated from the UI Surface Contract, Control Mapping Registry, and validated HTML mapping metadata.
+8. Blueprint-to-UI Surface Contract and HTML mapping parity comparison.
 
 PNG screenshots are evidence generated from validated HTML previews, not the primary implementation contract. HTML preview is not a low-fidelity scaffold; it must be a modern, polished, design-system-driven prototype equal to or better than generated static design images. It must use Application Design System tokens/classes, approved UI pattern templates, required DOM fields/actions, forbidden-region exclusion, responsive/mobile stack behavior, and text wrapping/truncation/container evidence.
+
+HTML previews for complex business applications must also be control-mapped. Every implementation-relevant HTML element must declare stable Yeeflow mapping metadata such as `data-blueprint-id`, `data-yeeflow-control`, field/action/source-list bindings, row/current-item context, parent binding, and style/layout/responsive tokens. Page Implementation Blueprints must be generated from the UI Surface Contract plus the Control Mapping Registry plus HTML mapping metadata, not by visually guessing from HTML. Unsupported mappings block generation unless explicitly marked `export-learning-required`, `runtime-proof-required`, or `deferred` with reason, fallback, and proof impact. Style conversion must use design-system style tokens and supported Yeeflow property mappings, not arbitrary CSS copying.
 
 Run:
 
 ```sh
 node scripts/validate-ui-surface-contracts.mjs --contracts <dir-or-json> --app-plan <app-plan.md> --design-system <application-design-system.md>
 node scripts/validate-html-preview-layout.mjs --contracts <dir-or-json> --html <dir> --screenshots <dir> --design-system <application-design-system.md>
-node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts <dir-or-json> --blueprints <dir-or-json> --design-system <application-design-system.md>
+node scripts/validate-html-to-yeeflow-control-mapping.mjs --contracts <dir-or-json> --html <dir> --registry docs/standards/html-to-yeeflow-control-mapping-registry.md
+node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts <dir-or-json> --html <dir> --blueprints <dir-or-json> --registry docs/standards/html-to-yeeflow-control-mapping-registry.md --design-system <application-design-system.md>
 ```
 
-Do not proceed to Page Implementation Blueprints if UI Surface Contract, HTML preview, visual quality, screenshot evidence, or layout validation fails. Do not proceed to Yeeflow resource/package generation if blueprint-to-contract parity fails. Contract validation, HTML/DOM validation, screenshot evidence, blueprint parity, package schema, signing/API acceptance, install/upgrade success, and runtime proof are separate proof layers.
+Do not proceed to Page Implementation Blueprints if UI Surface Contract, HTML preview, visual quality, screenshot evidence, layout validation, or HTML-to-Yeeflow control mapping validation fails. Do not proceed to Yeeflow resource/package generation if blueprint-to-contract/HTML mapping parity fails. Contract validation, HTML/DOM validation, HTML control mapping validation, screenshot evidence, blueprint parity, resource-vs-blueprint parity, package schema, signing/API acceptance, install/upgrade success, and runtime proof are separate proof layers.
 
 The overlap heuristic for HTML preview validation must check meaningful sibling collisions and must not count parent-child containment as overlap.
 
 ## 10. Page Implementation Blueprints
 
-Create Page Implementation Blueprints only after the Full-page Canonical Design Artifacts stage passes and, for complex business applications, after UI Surface Contract and high-fidelity HTML preview validation pass. Blueprints must consume the approved Application Design System, UI Surface Contract, validated HTML structure, screenshot evidence, canonical design images where used, and Design Image Manifest as the visual contract.
+Create Page Implementation Blueprints only after the Full-page Canonical Design Artifacts stage passes and, for complex business applications, after UI Surface Contract, high-fidelity HTML preview, and HTML-to-Yeeflow control mapping validation pass. Blueprints must consume the approved Application Design System, UI Surface Contract, Control Mapping Registry, validated HTML mapping metadata, screenshot evidence, canonical design images where used, and Design Image Manifest as the visual contract. Blueprints must preserve control type, field binding, action contract, source list, row/current item context, parent binding, and style/layout/responsive token intent.
 
 ## 10. Decide Safe Build Scope
 

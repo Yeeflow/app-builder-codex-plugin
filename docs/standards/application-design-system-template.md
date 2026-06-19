@@ -337,3 +337,15 @@ This document proves application-level design intent and visual consistency for 
 | Decision | Reason | Fallback | Proof Impact | Required Follow-up |
 | --- | --- | --- | --- | --- |
 |  |  |  |  |  |
+
+## 23. Implementation Token Mapping
+
+HTML-first workflows must translate visual style intent through design-system tokens. Do not treat arbitrary CSS declarations as Yeeflow property support.
+
+Define token families that HTML previews and Page Implementation Blueprints must preserve:
+
+- `data-style-token` for typography, color, badge, table, form, card, action, and status treatments.
+- `data-layout-token` for page shell, form sections, row/column patterns, lower-page regions, and action placement.
+- `data-responsive-token` for mobile stacking, table/card fallbacks, action wrapping, and content priority.
+
+Unsupported style tokens must be marked `export-learning-required`, `runtime-proof-required`, or `deferred` with reason, fallback, and proof impact before generation continues.

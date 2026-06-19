@@ -247,3 +247,17 @@ When using `scripts/validate-full-page-design-artifacts.mjs`, store the manifest
 ## Proof Boundary
 
 This manifest proves design-stage coverage and readiness for Page Implementation Blueprint work only. It does not prove Yeeflow resource generation, package/schema validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+
+## HTML-First Mapping References
+
+When the workflow uses HTML previews as the high-fidelity design source, each manifest row should reference:
+
+| Field | Requirement |
+| --- | --- |
+| `uiSurfaceContractPath` | Path to the UI Surface Contract for the surface. |
+| `controlMappedHtmlPath` | Path to the validated HTML preview. |
+| `controlMappingRegistryRef` | Usually `docs/standards/html-to-yeeflow-control-mapping-registry.md`. |
+| `htmlControlMappingValidationStatus` | Must be `pass` before Page Implementation Blueprint generation. |
+| `htmlToBlueprintParityStatus` | Must be `pass` before Yeeflow resource generation. |
+
+PNG/screenshots are evidence generated from HTML previews. They are not the primary source of truth for control type, binding, action, source list, or style-token mapping.

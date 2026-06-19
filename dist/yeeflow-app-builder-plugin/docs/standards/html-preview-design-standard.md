@@ -86,3 +86,18 @@ Run:
 ```sh
 node scripts/validate-html-preview-layout.mjs --contracts <dir-or-json> --html <dir> --screenshots <dir> --design-system <application-design-system.md>
 ```
+
+## Control-Mapped HTML Requirement
+
+HTML previews are high-fidelity prototypes and machine-readable implementation contracts. They must not rely on visual interpretation to become Yeeflow controls.
+
+Before a preview is marked blueprint-ready:
+
+- Every implementation-relevant HTML element must declare `data-blueprint-id`.
+- Every Yeeflow-bound element must declare `data-yeeflow-control` from `docs/standards/html-to-yeeflow-control-mapping-registry.md`.
+- Field elements must declare field ID, field name, exact field type, binding, required/read-only/default/validation metadata, and style/layout/responsive tokens.
+- Action elements must declare action ID, action type, action contract, row/current item context when applicable, and style/layout/responsive tokens.
+- Sub List, Collection, Data Table, Kanban, and Timeline elements must declare source list/resource, parent/current item binding, row context, displayed field/action metadata, and tokens.
+- Screenshot evidence is generated from the validated HTML preview; screenshots are evidence, not the design source of truth.
+
+Run `scripts/validate-html-to-yeeflow-control-mapping.mjs` before Page Implementation Blueprint generation. Run `scripts/compare-blueprint-to-ui-surface-contract.mjs` with `--html` and the Control Mapping Registry before Yeeflow resource generation.
