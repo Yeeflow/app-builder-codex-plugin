@@ -57,6 +57,10 @@ Structural design coverage is not enough. Every canonical design artifact must m
 - Analytics/chart quality expectations:
 - Collection/Kanban/Data table quality expectations:
 - Responsive/mobile readability expectations:
+- Text wrapping/truncation strategy:
+- Container boundary and clipping rules:
+- Element overlap and spacing review rules:
+- Mobile layout pressure rules:
 - Anti-patterns to reject:
 - Minimum acceptance criteria:
 
@@ -77,6 +81,9 @@ Minimum acceptance criteria:
 - clear action placement and priority
 - realistic business data examples
 - readable responsive/mobile layout planning
+- long labels wrap, truncate with intentional ellipsis, or receive wider/responsive containers
+- table cells, buttons, badges, chips, cards, timelines, Kanban/Collection cards, and form fields avoid visible text overflow and element overlap
+- mobile designs stack multi-column layouts, reduce column counts, or use scroll/card-list alternatives rather than preserving cramped desktop columns
 
 ## 4. Form And Detail Semantic Quality Standard
 
@@ -86,6 +93,8 @@ Approval Submission forms, Approval Task forms, Approval Print pages, Data List 
 - Required form/detail business fields:
 - Required lower-page business regions:
 - Lower-page visual concreteness rules:
+- Lower-page semantic consistency rules:
+- Form/detail visual usability rules:
 - Page-specific quality evidence rules:
 - Template reuse risk rules:
 - Shared-style allowance:
@@ -101,12 +110,16 @@ Minimum acceptance criteria:
 - lower-page regions must contain planned business data, records, history, evidence, or actions; blank space, `Page end`, generic notes, or design-stage explanation text do not satisfy full-page coverage
 - every lower-page business region must show concrete visual UI representation in the canonical design artifact: rendered rows, cards, timeline entries, checklist rows, document evidence cards/table, activity feed rows, signature rows, or read-only field groups
 - lower-page regions must declare `visualPattern`, `plannedYeeflowControl`, `renderedExampleCount`, `renderedExampleSummary`, `displayedBusinessFields`, `actionsShown`, `visualConcretenessStatus`, `antiPlaceholderStatus`, and `blueprintMappingHint`
+- lower-page regions must keep `sourceListOrDataSource`, `regionPurpose`, `displayedBusinessFields`, `displayedFields`, `actionsShown`, `behavior`, `proofImpact`, and `blueprintMappingHint` semantically consistent; for example, Linked Contracts sourced from Contracts must not inherit Renewal Task fields/actions or mapping hints
+- if `displayedBusinessFields` and `displayedFields` differ, the manifest must include `fieldAliasMap`, `semanticFieldMapping`, or an explicit proof/deferred explanation
 - source-list notes such as `Source: Contract Documents`, field-name lists such as `Document name, type, status`, and `Show ...` explanatory text may appear only as supporting metadata; they must not be the actual visual implementation
 - intentional empty-state lower regions must show an empty-state component with reason and next action; blank space or page-end markers are not valid empty states
 - every form/detail artifact includes at least two `pageSpecificQualityEvidence` entries naming concrete business objects, fields, records, histories, actions, or planned resources
 - generic visual quality phrases such as `strong visual hierarchy` or `professional spacing` are not enough for blueprint readiness unless paired with page-specific business evidence
 - `templateReuseRiskStatus` must be `pass`, `warning`, `fail`, or `human_review_required`; `fail` and `human_review_required` block blueprint readiness unless explicitly deferred with reason, fallback, and proof impact
 - similar Submission/Task/View forms may share visual style only when the manifest declares purposeful functional differences such as editable versus read-only fields, action row differences, decision panels, reviewer comments, workflow/history regions, print footer/signature blocks, or related-record sections
+- every blueprint-ready artifact declares `visualUsabilityStatus`, `textOverflowStatus`, `overlapStatus`, `spacingStatus`, `mobileUsabilityStatus`, `responsiveLayoutEvidence`, `textWrappingStrategy`, `containerBoundaryEvidence`, and `visualUsabilityFindings`
+- text overflow, element overlap, bad spacing, clipped content, or mobile layout pressure blocks `readyForBlueprint: true` unless explicitly deferred with reason, fallback, and proof impact
 
 ## 5. Application Visual Language
 

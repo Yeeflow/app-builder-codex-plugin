@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import fs from "node:fs";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { addFinding, asArray, readJsonFile, safePath, scalar, statusFromFindings } from "./lib/yeeflow-ui-hard-gate-utils.mjs";
 
@@ -103,6 +105,51 @@ const STATUS_VALUE_RE = /\b(active|inactive|approved|pending|rejected|overdue|ta
 const DOCUMENT_FILENAME_RE = /\b[\w .-]+\.(pdf|docx?|xlsx?|pptx?|png|jpe?g|gif|zip)\b/i;
 const REVIEW_COMMENT_RE = /\b(review comment|looks good|please review|needs changes|approved by|reject because|comment:|reviewer note)\b/i;
 const PERSON_OR_VENDOR_VALUE_RE = /\b([A-Z][a-z]+ [A-Z][a-z]+|[A-Z][A-Za-z0-9&.,' -]+ (Inc|LLC|Ltd|Corp|Company|Vendor|Co\.?))\b/;
+const VISUAL_USABILITY_STATUS_RE = /^(pass|pass-with-reviewed-risk|human_review_required|human[-_ ]review[-_ ]required|fail|deferred)$/i;
+const VISUAL_USABILITY_PASS_RE = /^(pass|passed|validated|verified)$/i;
+const VISUAL_USABILITY_REVIEWED_RISK_RE = /^pass-with-reviewed-risk$/i;
+const VISUAL_USABILITY_BLOCKING_RE = /^(fail|failed|human_review_required|human[-_ ]review[-_ ]required)$/i;
+const LONG_LABEL_RE = /\b[A-Za-z][A-Za-z0-9 -]{42,}\b/;
+const WRAP_TRUNCATE_RE = /\b(wrap|wrapped|truncate|truncation|ellipsis|line[- ]break|responsive|stack|stacking|horizontal scroll|scroll|wider|adaptive)\b/i;
+const DESKTOP_MULTI_COLUMN_RE = /\b(3[- ]column|4[- ]column|multi[- ]column|desktop columns?|side[- ]by[- ]side)\b/i;
+const MOBILE_STACK_RE = /\b(single[- ]column|stack|stacked|vertical|card[- ]list|horizontal scroll|mobile fallback|reduced column)\b/i;
+const REGION_SEMANTIC_PROFILES = {
+  contract: {
+    required: /\b(contract|owner|renewal|lifecycle|status|payment|vendor|effective|expiry|expiration)\b/i,
+    forbidden: /\b(task|due date|priority|open task detail|mark complete|reassign task|renewal tasks filtered by current contract)\b/i,
+    allowedActions: /\b(open contract|review renewal|start approval|archive contract|read-only|read only|open detail)\b/i,
+  },
+  renewalTask: {
+    required: /\b(task|owner|due date|status|priority|reminder|assignee)\b/i,
+    forbidden: /\b(archive contract|start approval|contract lifecycle|payment terms)\b/i,
+    allowedActions: /\b(open task detail|mark complete|reassign task|create reminder schedule|open related contract|read-only|read only)\b/i,
+  },
+  document: {
+    required: /\b(document|file|evidence|attachment|uploaded|received|required|document type|current file)\b/i,
+    forbidden: /\b(task|due date|priority|open task detail|mark complete|contract lifecycle|review renewal)\b/i,
+    allowedActions: /\b(open document|request missing file|upload replacement|open file|download|read-only|read only)\b/i,
+  },
+  approval: {
+    required: /\b(reviewer|decision|timestamp|date|status|step|comment|approval|route)\b/i,
+    forbidden: /\b(document name|document type|task card|task detail|priority|uploaded date|current file)\b/i,
+    allowedActions: /\b(view approval|open task|review evidence|read-only|read only|open approval)\b/i,
+  },
+  audit: {
+    required: /\b(activity|actor|timestamp|record|audit|change|event)\b/i,
+    forbidden: /\b(document type|priority|mark complete|signature block)\b/i,
+    allowedActions: /\b(open related record|read-only|read only|open record)\b/i,
+  },
+  signature: {
+    required: /\b(signer|reviewer|role|decision|signature|date|signed)\b/i,
+    forbidden: /\b(task|priority|document type|kanban|mark complete)\b/i,
+    allowedActions: /\b(print|export pdf|capture signature|read-only|read only)\b/i,
+  },
+  checklist: {
+    required: /\b(checklist|item|status|owner|evidence|required document|required|received|current file)\b/i,
+    forbidden: /\b(open task detail|mark complete|contract lifecycle)\b/i,
+    allowedActions: /\b(open document|request missing file|upload replacement|check item|read-only|read only)\b/i,
+  },
+};
 
 export function validateFullPageDesignArtifacts(manifest, options = {}) {
   const findings = [];
@@ -326,6 +373,8 @@ export function validateFullPageDesignArtifacts(manifest, options = {}) {
       });
     }
 
+    validateVisualUsability(findings, artifact, { row: index + 1, surfaceName, surfaceType, manifestFile });
+
     if (isFormDetailSurface(artifact)) {
       formDetailArtifacts.push({ artifact, index, surfaceName, surfaceType });
       validateFormDetailSemanticQuality(findings, artifact, { row: index + 1, surfaceName, surfaceType });
@@ -493,6 +542,87 @@ function validateVisualQuality(findings, artifact, context = {}) {
   }
 }
 
+function validateVisualUsability(findings, artifact, context = {}) {
+  if (!truthy(artifact.readyForBlueprint)) return;
+  const statuses = [
+    ["visualUsabilityStatus", firstText(artifact.visualUsabilityStatus, artifact.visualUsabilityReviewStatus), "DESIGN_ARTIFACT_VISUAL_USABILITY_STATUS_MISSING"],
+    ["textOverflowStatus", firstText(artifact.textOverflowStatus), "DESIGN_ARTIFACT_TEXT_OVERFLOW_STATUS_MISSING"],
+    ["overlapStatus", firstText(artifact.overlapStatus, artifact.elementOverlapStatus), "DESIGN_ARTIFACT_OVERLAP_STATUS_MISSING"],
+    ["spacingStatus", firstText(artifact.spacingStatus), "DESIGN_ARTIFACT_SPACING_STATUS_MISSING"],
+    ["mobileUsabilityStatus", firstText(artifact.mobileUsabilityStatus, artifact.responsiveUsabilityStatus), "DESIGN_ARTIFACT_MOBILE_USABILITY_STATUS_MISSING"],
+  ];
+  let blocking = false;
+  for (const [field, status, missingCode] of statuses) {
+    const normalized = scalar(status).trim();
+    if (!normalized) {
+      addFinding(findings, "error", missingCode, "Blueprint-ready design artifacts must include visual usability status evidence.", {
+        ...context,
+        field,
+      });
+      blocking = true;
+      continue;
+    }
+    if (!VISUAL_USABILITY_STATUS_RE.test(normalized) && !isPassingReviewStatus(normalized)) {
+      addFinding(findings, "error", "DESIGN_ARTIFACT_VISUAL_USABILITY_STATUS_INVALID", "Visual usability statuses must be pass, pass-with-reviewed-risk, human_review_required, fail, or deferred.", {
+        ...context,
+        field,
+        status: normalized,
+      });
+      blocking = true;
+    }
+    if (VISUAL_USABILITY_BLOCKING_RE.test(normalized) && !isDeferredWithProof(artifact)) {
+      addFinding(findings, "error", "DESIGN_ARTIFACT_READY_WITH_VISUAL_USABILITY_BLOCKER", "readyForBlueprint cannot be true when text overflow, overlap, spacing, mobile usability, or visual usability is failing or requires human review without explicit deferral.", {
+        ...context,
+        field,
+        status: normalized,
+      });
+      blocking = true;
+    }
+    if (VISUAL_USABILITY_REVIEWED_RISK_RE.test(normalized) && !hasReviewedRiskEvidence(artifact)) {
+      addFinding(findings, "error", "DESIGN_ARTIFACT_REVIEWED_RISK_INCOMPLETE", "pass-with-reviewed-risk requires documented risk, mitigation, and proof impact.", {
+        ...context,
+        field,
+        status: normalized,
+      });
+      blocking = true;
+    }
+  }
+
+  for (const [keys, code, message] of [
+    [["responsiveLayoutEvidence", "mobileResponsiveEvidence"], "DESIGN_ARTIFACT_RESPONSIVE_EVIDENCE_MISSING", "Blueprint-ready artifacts must include responsiveLayoutEvidence."],
+    [["textWrappingStrategy", "textOverflowStrategy"], "DESIGN_ARTIFACT_TEXT_WRAPPING_STRATEGY_MISSING", "Blueprint-ready artifacts must include textWrappingStrategy."],
+    [["containerBoundaryEvidence", "boundaryEvidence"], "DESIGN_ARTIFACT_CONTAINER_BOUNDARY_EVIDENCE_MISSING", "Blueprint-ready artifacts must include containerBoundaryEvidence."],
+    [["visualUsabilityFindings", "visualUsabilityNotes"], "DESIGN_ARTIFACT_VISUAL_USABILITY_FINDINGS_MISSING", "Blueprint-ready artifacts must include visualUsabilityFindings or equivalent review notes."],
+  ]) {
+    requireText(findings, artifact, keys, code, message, context);
+  }
+
+  const usabilityText = [
+    artifact.visualUsabilityFindings,
+    artifact.visualUsabilityNotes,
+    artifact.textWrappingStrategy,
+    artifact.containerBoundaryEvidence,
+    artifact.responsiveLayoutEvidence,
+    artifact.businessDataExamplesShown,
+    artifact.modernVisualQualityChecklist,
+  ]
+    .flatMap((value) => asArray(value).length ? asArray(value) : [value])
+    .map(scalar)
+    .join(" ");
+  if (LONG_LABEL_RE.test(usabilityText) && !WRAP_TRUNCATE_RE.test(usabilityText)) {
+    addFinding(findings, "error", "DESIGN_ARTIFACT_LONG_TEXT_WITHOUT_WRAP_STRATEGY", "Long button, badge, table, card, or field text requires wrapping, truncation, ellipsis, stacking, or responsive layout evidence.", context);
+    blocking = true;
+  }
+  const mobileText = [artifact.mobileLayoutDescription, artifact.responsiveLayoutEvidence, artifact.responsivePlanReference, artifact.responsivePlan].map(scalar).join(" ");
+  if (DESKTOP_MULTI_COLUMN_RE.test(mobileText) && !MOBILE_STACK_RE.test(mobileText)) {
+    addFinding(findings, "error", "DESIGN_ARTIFACT_MOBILE_LAYOUT_PRESSURE", "Mobile design evidence must stack, reduce columns, or provide a scroll/card-list fallback instead of carrying desktop multi-column pressure into mobile.", context);
+    blocking = true;
+  }
+
+  validateSvgUsabilityHints(findings, artifact, context);
+  if (blocking) blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_VISUAL_USABILITY_FAILURE", "Design artifact cannot be ready for blueprint when visual usability evidence fails or is incomplete.", context);
+}
+
 function validateBlueprintReadiness(findings, artifact, context = {}) {
   if (!truthy(artifact.readyForBlueprint)) return;
   const layoutStatus = lower(firstText(artifact.layoutFidelityStatus, artifact.layoutFidelity));
@@ -607,6 +737,7 @@ function validateLowerPageBusinessRegions(findings, artifact, context = {}) {
         requireText(findings, region, keys, code, message, context);
       }
       validateLowerPageRegionVisualConcreteness(findings, region, artifact, context);
+      validateLowerPageRegionSemanticConsistency(findings, region, artifact, context);
     } else {
       addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_VISUAL_EVIDENCE_MISSING", "Lower-page business regions must be structured manifest objects with visual concreteness evidence, not plain descriptive text.", {
         ...context,
@@ -704,6 +835,69 @@ function validateLowerPageRegionVisualConcreteness(findings, region, artifact, c
     isPlaceholderOnlyRenderedSummary(renderedExampleSummary, displayedBusinessFields);
   if (hasBlocking) {
     blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITHOUT_LOWER_REGION_VISUAL_CONCRETENESS", "Form/detail artifact cannot be ready for blueprint when lower-page regions are not visually concrete.", context);
+  }
+}
+
+function validateLowerPageRegionSemanticConsistency(findings, region, artifact, context = {}) {
+  const regionName = firstText(region.regionName, region.name);
+  const regionContext = { ...context, regionName: regionName || scalarRegion(region) };
+  const source = firstText(region.sourceList, region.sourceListOrDataSource, region.dataSource, region.source);
+  const purpose = firstText(region.regionPurpose, region.purpose);
+  const fields = asArray(region.displayedFields || region.displayedItems || region.fields).map(scalar).filter(Boolean);
+  const businessFields = asArray(region.displayedBusinessFields || region.businessFields).map(scalar).filter(Boolean);
+  const actions = asArray(region.actionsShown || region.actions || region.actionOrReadOnlyBehavior || region.behavior).map(scalar).filter(Boolean);
+  const blueprintMappingHint = firstText(region.blueprintMappingHint, region.blueprintHint, region.controlMappingHint);
+  const behavior = firstText(region.behavior, region.actionOrReadOnlyBehavior);
+  const proofImpact = firstText(region.proofImpact, region.validationImpact);
+  const category = inferLowerRegionCategory(region);
+  const combined = [source, regionName, purpose, fields, businessFields, actions, blueprintMappingHint, behavior, proofImpact].flatMap((value) => asArray(value).length ? asArray(value) : [value]).map(scalar).join(" ");
+
+  if (businessFields.length && fields.length && !sameFieldList(businessFields, fields) && !hasSemanticMappingExplanation(region)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_FIELD_SEMANTIC_MISMATCH", "displayedBusinessFields and displayedFields must match or include fieldAliasMap, semanticFieldMapping, runtime-proof-required, export-learning-required, or deferred explanation.", {
+      ...regionContext,
+      displayedBusinessFields: businessFields,
+      displayedFields: fields,
+    });
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITH_LOWER_REGION_SEMANTIC_MISMATCH", "Form/detail artifact cannot be ready for blueprint when lower-page region field semantics are inconsistent.", context);
+  }
+
+  if (!category) return;
+  const profile = REGION_SEMANTIC_PROFILES[category];
+  if (profile?.required && !profile.required.test(combined)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_REQUIRED_SEMANTICS_MISSING", "Lower-page business region fields/actions/mapping must include semantics matching its source list and purpose.", {
+      ...regionContext,
+      sourceListOrDataSource: source,
+      inferredCategory: category,
+    });
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITH_LOWER_REGION_SEMANTIC_MISMATCH", "Form/detail artifact cannot be ready for blueprint when lower-page region source/purpose/fields/actions are semantically inconsistent.", context);
+  }
+  if (profile?.forbidden && profile.forbidden.test(combined) && !hasAllowedCrossObjectExplanation(region, category)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_CROSS_OBJECT_SEMANTIC_MISMATCH", "Lower-page business region mixes source-list semantics, displayed fields, actions, or mapping hints from a different business object.", {
+      ...regionContext,
+      sourceListOrDataSource: source,
+      inferredCategory: category,
+      fields,
+      actions,
+      blueprintMappingHint,
+    });
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITH_LOWER_REGION_SEMANTIC_MISMATCH", "Form/detail artifact cannot be ready for blueprint when lower-page region source/purpose/fields/actions are semantically inconsistent.", context);
+  }
+  if (actions.length && profile?.allowedActions && !actions.every((action) => profile.allowedActions.test(action) || /read[- ]only|none|required|not applicable|n\/a/i.test(action) || hasAllowedCrossObjectExplanation(region, category))) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_ACTION_SEMANTIC_MISMATCH", "actionsShown must match the lower-page region business object or document an explicit related-record explanation.", {
+      ...regionContext,
+      inferredCategory: category,
+      actions,
+    });
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITH_LOWER_REGION_SEMANTIC_MISMATCH", "Form/detail artifact cannot be ready for blueprint when lower-page region actions belong to another business object.", context);
+  }
+  if (blueprintMappingHint && isWrongBlueprintMappingForCategory(blueprintMappingHint, category) && !hasAllowedCrossObjectExplanation(region, category)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_BLUEPRINT_MAPPING_SEMANTIC_MISMATCH", "blueprintMappingHint must reference the same source list/business object or explain a valid related-record relationship.", {
+      ...regionContext,
+      sourceListOrDataSource: source,
+      inferredCategory: category,
+      blueprintMappingHint,
+    });
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITH_LOWER_REGION_SEMANTIC_MISMATCH", "Form/detail artifact cannot be ready for blueprint when lower-page region blueprint mapping points to the wrong business object.", context);
   }
 }
 
@@ -880,6 +1074,126 @@ function hasPurposefulFormDifference(artifact) {
     .map(scalar)
     .join(" ");
   return /\b(action|read[- ]only|decision|comment|workflow|approval|task|submission|print|field|section|history|document|checklist|timeline|purposeful|different)\b/i.test(text);
+}
+
+function hasReviewedRiskEvidence(artifact) {
+  return (
+    firstText(artifact.visualUsabilityRisk, artifact.reviewedRisk, artifact.risk) &&
+    firstText(artifact.visualUsabilityMitigation, artifact.riskMitigation, artifact.mitigation) &&
+    firstText(artifact.visualUsabilityProofImpact, artifact.proofImpact, artifact.validationImpact)
+  );
+}
+
+function validateSvgUsabilityHints(findings, artifact, context = {}) {
+  const svgPath = firstText(artifact.sourceSvgPath, artifact.svgSourcePath, artifact.canonicalSvgPath, artifact.sourceDesignPath);
+  if (!svgPath || !/\.svg$/i.test(svgPath)) return;
+  const resolved = path.resolve(context.manifestFile ? path.dirname(context.manifestFile) : process.cwd(), svgPath);
+  if (!fs.existsSync(resolved)) {
+    if (!firstText(artifact.visualUsabilityReviewStatus, artifact.visualUsabilityStatus)) {
+      addFinding(findings, "error", "DESIGN_ARTIFACT_SVG_SOURCE_UNAVAILABLE_WITHOUT_USABILITY_REVIEW", "When an SVG/source artifact cannot be inspected, blueprint-ready rows must include explicit visual usability review metadata.", {
+        ...context,
+        sourceSvgPath: safePath(svgPath),
+      });
+    }
+    return;
+  }
+  const svg = fs.readFileSync(resolved, "utf8");
+  const textNodes = [...svg.matchAll(/<text\b[^>]*>([\s\S]*?)<\/text>/gi)].map((match) => stripTags(match[1]).trim()).filter(Boolean);
+  const wrappingText = firstText(artifact.textWrappingStrategy, artifact.containerBoundaryEvidence, artifact.visualUsabilityFindings);
+  if (textNodes.some((text) => text.length > 36) && !WRAP_TRUNCATE_RE.test(wrappingText)) {
+    addFinding(findings, "error", "DESIGN_ARTIFACT_SVG_LONG_TEXT_WITHOUT_WRAP_STRATEGY", "SVG source contains long text labels but the manifest does not declare wrapping, truncation, ellipsis, or responsive layout strategy.", context);
+  }
+  const positions = [...svg.matchAll(/<text\b[^>]*\bx=["']?([0-9.]+)["']?[^>]*\by=["']?([0-9.]+)["']?[^>]*>/gi)].map((match) => `${match[1]}:${match[2]}`);
+  const duplicatePositions = positions.filter((position, index) => positions.indexOf(position) !== index);
+  if (duplicatePositions.length && !/pass|reviewed|intentional|no overlap/i.test(firstText(artifact.overlapStatus, artifact.containerBoundaryEvidence, artifact.visualUsabilityFindings))) {
+    addFinding(findings, "error", "DESIGN_ARTIFACT_SVG_TEXT_OVERLAP_RISK", "SVG source has repeated fixed text coordinates that may indicate overlapping labels; overlap evidence must explicitly review this risk.", {
+      ...context,
+      repeatedTextPositions: [...new Set(duplicatePositions)].slice(0, 5),
+    });
+  }
+}
+
+function inferLowerRegionCategory(region) {
+  const source = lower(firstText(region.sourceList, region.sourceListOrDataSource, region.dataSource, region.source));
+  const namePurpose = lower([region.regionName, region.name, region.regionPurpose, region.purpose].map(scalar).join(" "));
+  if (/\b(signature|signer|signed|print signature)\b/.test(namePurpose)) return "signature";
+  if (/\b(checklist|required document policy|required document checklist)\b/.test(namePurpose)) return "checklist";
+  if (/\b(renewal task|renewal tasks|tasks?|reminders?)\b/.test(source)) return "renewalTask";
+  if (/\b(contract documents?|documents?|files?|attachments?|evidence)\b/.test(source)) return "document";
+  if (/\b(contract approval|approval|approval history|approval route)\b/.test(source)) return "approval";
+  if (/\b(audit|activity)\b/.test(source)) return "audit";
+  if (/\b(signature|signer)\b/.test(source)) return "signature";
+  if (/\b(checklist|required documents?)\b/.test(source)) return "checklist";
+  if (/\b(contracts?)\b/.test(source)) return "contract";
+  const combined = `${source} ${namePurpose}`;
+  if (/\b(signature|signer|signed|print signature)\b/.test(combined)) return "signature";
+  if (/\b(checklist|required document policy|required document checklist)\b/.test(combined)) return "checklist";
+  if (/\b(approval history|approval route|approval|reviewer|decision)\b/.test(combined)) return "approval";
+  if (/\b(audit|activity|activity feed|actor)\b/.test(combined)) return "audit";
+  if (/\b(document|documents|file|attachment|evidence)\b/.test(combined)) return "document";
+  if (/\b(renewal task|renewal tasks|task|tasks|reminder|reminders)\b/.test(combined)) return "renewalTask";
+  if (/\b(linked contracts|contracts|contract)\b/.test(combined)) return "contract";
+  return "";
+}
+
+function sameFieldList(left, right) {
+  const normalize = (values) => values.map((value) => normalizeKey(value)).filter(Boolean);
+  const a = normalize(left);
+  const b = normalize(right);
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function hasSemanticMappingExplanation(region) {
+  if (region.fieldAliasMap || region.semanticFieldMapping) return true;
+  const text = [
+    region.fieldAliasMap,
+    region.semanticFieldMapping,
+    region.relatedRecordRelationship,
+    region.relationshipExplanation,
+    region.proofLabel,
+    region.visualConcretenessStatus,
+    region.proofImpact,
+    region.validationImpact,
+  ]
+    .flatMap((value) => asArray(value).length ? asArray(value) : [value])
+    .map(scalar)
+    .join(" ");
+  return /\b(field alias|semantic field mapping|runtime-proof-required|export-learning-required|deferred|fallback|proof impact)\b/i.test(text) || isDeferredWithProof(region);
+}
+
+function hasAllowedCrossObjectExplanation(region, category) {
+  const text = [
+    region.relatedRecordRelationship,
+    region.relationshipExplanation,
+    region.semanticFieldMapping,
+    region.blueprintMappingHint,
+    region.proofImpact,
+    region.proofLabel,
+  ]
+    .flatMap((value) => asArray(value).length ? asArray(value) : [value])
+    .map(scalar)
+    .join(" ");
+  if (/\b(runtime-proof-required|export-learning-required|deferred)\b/i.test(text) && firstText(region.proofImpact, region.validationImpact, region.fallback, region.fallbackPlan)) return true;
+  if (category === "renewalTask" && /\b(related contract|contract context|filtered by current contract)\b/i.test(text)) return true;
+  if (category === "contract" && /\b(filtered by current vendor|attached to current vendor|current vendor relationship|vendor contracts)\b/i.test(text) && !/\b(task|tasks|renewal tasks)\b/i.test(text)) return true;
+  return false;
+}
+
+function isWrongBlueprintMappingForCategory(hint, category) {
+  const text = lower(hint);
+  if (!text) return false;
+  if (category === "contract") return /\b(renewal tasks?|task detail|mark complete|task cards?)\b/.test(text);
+  if (category === "renewalTask") return /\b(contract documents?|approval history|signature block)\b/.test(text) && !/\b(tasks?|renewal tasks?)\b/.test(text);
+  if (category === "document") return /\b(renewal tasks?|task detail|mark complete|contract lifecycle|approval route)\b/.test(text) && !/\b(documents?|files?|evidence|attachments?)\b/.test(text);
+  if (category === "approval") return /\b(contract documents?|document cards?|renewal tasks?|task cards?)\b/.test(text) && !/\b(approval|review|decision|route|history)\b/.test(text);
+  if (category === "audit") return /\b(documents?|tasks?|signature)\b/.test(text) && !/\b(audit|activity|actor|record)\b/.test(text);
+  if (category === "signature") return /\b(tasks?|documents?|kanban|collection)\b/.test(text) && !/\b(signature|signer|print|pdf)\b/.test(text);
+  if (category === "checklist") return /\b(renewal tasks?|task cards?|contract lifecycle)\b/.test(text) && !/\b(checklist|required|received|evidence|document)\b/.test(text);
+  return false;
+}
+
+function stripTags(value) {
+  return scalar(value).replace(/<[^>]*>/g, "").replace(/\s+/g, " ");
 }
 
 function blockReadyForBlueprint(findings, artifact, code, message, context = {}) {
