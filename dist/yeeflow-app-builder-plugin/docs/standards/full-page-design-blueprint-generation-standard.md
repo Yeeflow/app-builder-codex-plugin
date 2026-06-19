@@ -31,6 +31,16 @@ This stage must produce:
 
 Generate the Application Design System before any canonical design image. Every canonical design artifact and every Design Image Manifest row must reference the selected Application Design System. If the design system is missing, incomplete, generated after images, or not referenced by the manifest rows, the design artifact stage fails and must not proceed to Page Implementation Blueprints.
 
+Structural design coverage is not enough. The design artifact stage must also pass layout fidelity and modern visual quality gates before Page Implementation Blueprints:
+
+- The Application Design System must choose exactly one official Yeeflow `applicationLayoutType`: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, or `application-layout-4-no-nav`.
+- The Application Design System must include `applicationLayoutName`, `applicationChromeStyleId`, `headerMode`, `navMode`, `navBackgroundMode`, `contentSafeArea`, and `layoutRuleSource: docs/standards/yeeflow-application-layout-design-rules.md`.
+- Generated design images that use arbitrary custom SaaS shells, custom sidebars, detached left rails, extra top navigation, or free-form layout names such as `left navigation with compact header and content shell` must fail.
+- Dashboard manifest rows must include `applicationLayoutType`, `applicationChromeStyleId`, `includeHeaderNavigation: true`, `layoutFidelityStatus`, and a selected layout/chrome compliance declaration.
+- Approval form and Data List form surfaces are complete form pages and do not require application header/navigation; they may use `form-surface-no-app-chrome` as a non-dashboard surface marker.
+- Every artifact must include `visualQualityStatus`, a modern visual quality checklist, and an anti-pattern check.
+- `readyForBlueprint: true` is forbidden unless layout fidelity passes, modern visual quality passes, and anti-pattern checks pass.
+
 ## Canonical Page Design Images
 
 Each page must have one canonical PNG at `assets/generated-ui/<app-slug>/NN-<page-slug>.design.png`. The canonical page image must be a full-page implementation artifact, not a first-viewport mockup. It must show all planned sections, major controls, tables, forms, cards, filters, actions, lower-page regions, and page end. A viewport-only screenshot or cropped top-page mockup fails unless the page truly has no below-fold content.
@@ -42,6 +52,8 @@ Required design coverage includes Dashboard pages, Approval Submission forms, pl
 Form Reports are not part of the Full-page Canonical Design Images coverage requirement. Form Reports remain standalone Yeeflow resources and should be planned, generated, and validated in their own Form Report flow. Do not mix Form Report design coverage into Dashboard page design coverage.
 
 Canonical design artifacts must show realistic business structure from the approved App Plan, including meaningful rows, cards, status badges, field labels, dates, owners, documents, tasks, action regions, and relevant empty/error/loading states. They must include either mobile canonical images for key pages or responsive behavior documented in the Application Design System and Design Image Manifest.
+
+Modern visual quality is part of blueprint readiness. Canonical images must show strong visual hierarchy, professional spacing and density, polished cards/sections, purposeful dashboard composition, meaningful KPI/Summary card design, intentional Data Analytics regions with labels/context, Collection/Kanban/Data table regions with realistic hierarchy and item detail, distinct but consistent page-specific layouts, clear action placement, and readable responsive/mobile behavior. Reject generic scaffold pages, title-only or helper-text-heavy lower sections, placeholder chart graphics without labels/context, and design-stage explanation text inside the UI unless it is actual product content.
 
 ## Page Implementation Blueprint
 

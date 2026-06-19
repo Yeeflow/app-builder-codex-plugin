@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 
 const ROOT = process.cwd();
 const validator = path.join(ROOT, "scripts/validate-full-page-design-artifacts.mjs");
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-design-artifacts-"));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-design-layout-quality-"));
 
 function baseManifest() {
   const designSystemPath = "docs/generated-ui/vendor-contract-management/application-design-system.md";
@@ -30,33 +30,29 @@ function baseManifest() {
       headerMode: "dark-header",
       navMode: "vertical-nav",
       navBackgroundMode: "dark",
-      contentSafeArea: "right-of-left-nav-below-header",
+      contentSafeArea: "content starts to the right of the left nav and below the header",
       layoutRuleSource: "docs/standards/yeeflow-application-layout-design-rules.md",
-      modernVisualQualityStandard: "strong hierarchy, polished density, realistic data, no scaffold anti-patterns",
+      modernVisualQualityStandard:
+        "Strong hierarchy, polished spacing, purposeful dashboard composition, meaningful analytics, realistic business data, and no generic scaffold anti-patterns.",
       responsivePlan: "Desktop dashboard shell stacks to mobile card lists; forms become single-column.",
       designProofBoundary: "Design-stage visual contract only.",
     },
     plannedSurfaces: [
       surface("Operations Dashboard", "Dashboard page", "Dashboard Pages Plan", "Operations Dashboard"),
-      surface("Contract Approval - Submission", "Approval Submission form", "Approval Forms Plan", "Contract Approval"),
-      surface("Contract Approval - Manager Task", "Approval Task form", "Approval Forms Plan", "Contract Approval"),
-      surface("Contract Approval - Print", "Approval Print page", "Approval Forms Plan", "Contract Approval"),
       surface("Vendor Contract - Add/Edit", "Data List Add/Edit form", "Custom Data List Forms Plan", "Vendor Contracts"),
-      surface("Vendor Contract - View", "Data List View form", "Custom Data List Forms Plan", "Vendor Contracts"),
-      surface("Contract Approval Form Report", "Form Report", "Form Reports Plan", "Contract Approval"),
     ],
     artifacts: [
       artifact("Operations Dashboard", "Dashboard page", "Dashboard Pages Plan", "Operations Dashboard", {
         includeHeaderNavigation: true,
         applicationLayoutType: "application-layout-1-vertical-nav",
         applicationChromeStyleId: "layout-1-dark-header-dark-vertical-nav",
-        selectedLayoutChromeCompliance: "pass: dark header and dark connected vertical nav follow the selected layout chrome",
+        selectedLayoutChromeCompliance:
+          "pass: full-width dark header, connected dark left vertical nav, and content safe area comply with Layout 1.",
       }),
-      artifact("Contract Approval - Submission", "Approval Submission form", "Approval Forms Plan", "Contract Approval", { includeHeaderNavigation: false }),
-      artifact("Contract Approval - Manager Task", "Approval Task form", "Approval Forms Plan", "Contract Approval", { includeHeaderNavigation: false }),
-      artifact("Contract Approval - Print", "Approval Print page", "Approval Forms Plan", "Contract Approval", { includeHeaderNavigation: false }),
-      artifact("Vendor Contract - Add/Edit", "Data List Add/Edit form", "Custom Data List Forms Plan", "Vendor Contracts", { includeHeaderNavigation: false }),
-      artifact("Vendor Contract - View", "Data List View form", "Custom Data List Forms Plan", "Vendor Contracts", { includeHeaderNavigation: false }),
+      artifact("Vendor Contract - Add/Edit", "Data List Add/Edit form", "Custom Data List Forms Plan", "Vendor Contracts", {
+        includeHeaderNavigation: false,
+        applicationLayoutType: "form-surface-no-app-chrome",
+      }),
     ],
     deferredSurfaces: [],
   };
@@ -86,10 +82,11 @@ function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResource
     modernVisualQualityChecklist: [
       "strong visual hierarchy",
       "professional spacing and density",
-      "realistic business rows/cards/statuses",
-      "no generic scaffold look",
+      "polished cards and sections",
+      "purposeful dashboard composition",
+      "realistic business rows and status examples",
     ],
-    antiPatternCheck: "pass: no title-only, helper-text-heavy, placeholder chart, or generic SaaS shell anti-patterns",
+    antiPatternCheck: "pass: no generic scaffold, title-only, helper-text-heavy, placeholder chart, or arbitrary SaaS shell anti-patterns",
     readyForBlueprint: true,
     generatedAt: "2026-06-19T01:05:00Z",
     ...extra,
@@ -120,7 +117,6 @@ function assertPass(name, manifest) {
   const { result, parsed } = runCase(name, manifest);
   assert.equal(result.status, 0, `${name} should pass:\n${JSON.stringify(parsed.findings, null, 2)}`);
   assert.equal(parsed.status, "pass", `${name} JSON status`);
-  return parsed;
 }
 
 function assertFail(name, manifest, code) {
@@ -128,70 +124,85 @@ function assertFail(name, manifest, code) {
   assert.notEqual(result.status, 0, `${name} should fail`);
   assert.equal(parsed.status, "fail", `${name} JSON status`);
   assert(parsed.findings.some((finding) => finding.code === code), `${name} should include ${code}:\n${JSON.stringify(parsed.findings, null, 2)}`);
-  return parsed;
-}
-
-assertPass("form reports excluded from required design image surfaces", baseManifest());
-
-{
-  const manifest = baseManifest();
-  manifest.plannedSurfaces = manifest.plannedSurfaces.filter((entry) => entry.surfaceType !== "Approval Submission form");
-  assertFail("approval forms require submission surface", manifest, "APPROVAL_SUBMISSION_DESIGN_SURFACE_MISSING");
 }
 
 {
   const manifest = baseManifest();
-  manifest.artifacts = manifest.artifacts.filter((entry) => entry.surfaceName !== "Vendor Contract - Add/Edit");
-  assertFail("data list custom forms require artifact coverage", manifest, "DESIGN_SURFACE_COVERAGE_MISSING");
+  manifest.applicationLayoutType = "left navigation with compact header and content shell";
+  manifest.selectedApplicationLayout = manifest.applicationLayoutType;
+  manifest.applicationDesignSystem.applicationLayoutType = manifest.applicationLayoutType;
+  assertFail("free-form layout name fails", manifest, "DESIGN_MANIFEST_APPLICATION_LAYOUT_INVALID");
 }
 
 {
   const manifest = baseManifest();
-  manifest.artifacts.find((entry) => entry.surfaceType === "Dashboard page").includeHeaderNavigation = false;
-  assertFail("dashboard pages require application layout header navigation", manifest, "DASHBOARD_DESIGN_HEADER_NAVIGATION_MISSING");
-}
-
-assertPass("forms do not require application header navigation", baseManifest());
-
-{
-  const manifest = baseManifest();
-  delete manifest.artifacts[0].responsivePlanReference;
-  assertFail("manifest requires mobile image or responsive plan reference", manifest, "DESIGN_ARTIFACT_RESPONSIVE_PLAN_MISSING");
+  delete manifest.applicationDesignSystem.applicationChromeStyleId;
+  assertFail("missing applicationChromeStyleId fails", manifest, "DESIGN_SYSTEM_CHROME_STYLE_ID_MISSING");
 }
 
 {
   const manifest = baseManifest();
-  delete manifest.designSystemPath;
-  delete manifest.applicationDesignSystem;
-  for (const row of manifest.artifacts) delete row.designSystemPath;
-  assertFail("missing design system blocks readiness", manifest, "DESIGN_SYSTEM_MISSING");
+  delete manifest.artifacts[0].applicationLayoutType;
+  assertFail("dashboard row missing applicationLayoutType fails", manifest, "DASHBOARD_DESIGN_APPLICATION_LAYOUT_MISSING");
 }
 
 {
   const manifest = baseManifest();
-  delete manifest.artifacts[0].designSystemPath;
-  assertFail("manifest rows must reference design system", manifest, "DESIGN_ARTIFACT_DESIGN_SYSTEM_REFERENCE_MISSING");
+  manifest.artifacts[0].includeHeaderNavigation = false;
+  assertFail("dashboard row without header navigation fails", manifest, "DASHBOARD_DESIGN_HEADER_NAVIGATION_MISSING");
+}
+
+assertPass("data list form row without header navigation passes", baseManifest());
+
+{
+  const manifest = baseManifest();
+  manifest.artifacts[0].forbiddenChromeMarkers = ["custom-sidebar"];
+  assertFail("layout 1 custom sidebar fails", manifest, "DESIGN_ARTIFACT_FORBIDDEN_CHROME_DECLARED");
 }
 
 {
   const manifest = baseManifest();
-  manifest.applicationDesignSystem.generatedAt = "2026-06-19T02:00:00Z";
-  assertFail("design system must be generated before images", manifest, "DESIGN_SYSTEM_GENERATED_AFTER_IMAGE");
+  manifest.artifacts[0].forbiddenChromeMarkers = ["arbitrary-saas-shell"];
+  assertFail("layout 1 arbitrary SaaS shell fails", manifest, "DESIGN_ARTIFACT_FORBIDDEN_CHROME_DECLARED");
 }
 
 {
   const manifest = baseManifest();
-  manifest.artifacts = manifest.artifacts.filter((entry) => entry.surfaceName !== "Vendor Contract - View");
-  manifest.deferredSurfaces = [
-    {
-      surfaceName: "Vendor Contract - View",
-      surfaceType: "Data List View form",
-      sourceAppPlanSection: "Custom Data List Forms Plan",
-      sourceResourceName: "Vendor Contracts",
-      reason: "Detail layout depends on runtime-proven related document panel.",
-    },
-  ];
-  assertFail("deferred surfaces require reason fallback proof impact", manifest, "DEFERRED_DESIGN_SURFACE_INCOMPLETE");
+  manifest.artifacts[0].layoutFidelityStatus = "human_review_required";
+  assertFail("ready for blueprint fails when layout fidelity is not pass", manifest, "DESIGN_ARTIFACT_READY_WITHOUT_LAYOUT_FIDELITY");
 }
 
-console.log("Full-page design artifact Application Design System gate tests passed");
+{
+  const manifest = baseManifest();
+  manifest.artifacts[0].visualQualityStatus = "human_review_required";
+  assertFail("ready for blueprint fails when visual quality is not pass", manifest, "DESIGN_ARTIFACT_READY_WITHOUT_VISUAL_QUALITY");
+}
+
+{
+  const manifest = baseManifest();
+  delete manifest.artifacts[0].modernVisualQualityChecklist;
+  assertFail("missing modern visual quality checklist fails", manifest, "DESIGN_ARTIFACT_VISUAL_QUALITY_CHECKLIST_MISSING");
+}
+
+assertPass("valid layout 1 fidelity and modern visual quality manifest passes", baseManifest());
+
+{
+  const manifest = baseManifest();
+  manifest.artifacts[0].layoutFidelityStatus = "human_review_required";
+  manifest.artifacts[0].readyForBlueprint = false;
+  assertFail("human review required blocks blueprint readiness without deferral", manifest, "DESIGN_ARTIFACT_LAYOUT_FIDELITY_STATUS_NOT_PASSING");
+}
+
+{
+  const manifest = baseManifest();
+  manifest.artifacts[0].layoutFidelityStatus = "human_review_required";
+  manifest.artifacts[0].visualQualityStatus = "human_review_required";
+  manifest.artifacts[0].status = "deferred";
+  manifest.artifacts[0].readyForBlueprint = false;
+  manifest.artifacts[0].reason = "Image-level automated chrome review is not available for this edge case.";
+  manifest.artifacts[0].fallback = "Human review must approve the official Layout 1 chrome before blueprint work.";
+  manifest.artifacts[0].proofImpact = "Blueprint readiness remains blocked until reviewed evidence is attached.";
+  assertPass("human review required passes only as explicitly deferred with proof impact", manifest);
+}
+
+console.log("Full-page design layout fidelity and visual quality gate tests passed");
