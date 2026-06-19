@@ -97,6 +97,16 @@ const childTests = [
     ],
   },
   {
+    name: "Full-page surface responsibility and field/action coverage regression suite",
+    command: ["scripts/test-full-page-design-surface-responsibility-field-coverage-gates.mjs"],
+    validators: [
+      "validate-full-page-design-artifacts",
+      "surface responsibility gates",
+      "App Plan field/action coverage gates",
+      "forbidden-region checks by surface type",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [

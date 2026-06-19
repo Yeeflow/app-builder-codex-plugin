@@ -97,6 +97,9 @@ Approval Submission forms, Approval Task forms, Approval Print pages, Data List 
 - Form/detail visual usability rules:
 - Page-specific quality evidence rules:
 - Template reuse risk rules:
+- Surface responsibility rules:
+- App Plan field/action coverage rules:
+- Forbidden-region rules:
 - Shared-style allowance:
 - Form/detail anti-patterns to reject:
 
@@ -105,6 +108,14 @@ Minimum acceptance criteria:
 - every form/detail artifact declares `primaryBusinessObject`
 - every form/detail artifact includes `semanticFieldExamples` with realistic field/value pairs
 - `fieldValueSemanticsStatus` must pass before `readyForBlueprint: true`
+- every blueprint-ready artifact declares `appPlanResourceRef`, `sourceResourceType`, `sourceListOrFormName`, `surfaceResponsibility`, `plannedFieldCoverage`, `requiredFieldsShown`, `missingPlannedFields`, `fieldCoverageStatus`, `plannedActions`, `actionsShown`, `missingRequiredActions`, `actionCoverageStatus`, `forbiddenRegionsPresent`, `forbiddenRegionStatus`, `surfaceResponsibilityStatus`, and `appPlanTraceabilityStatus`
+- full-page design images must be faithful to approved App Plan fields, controls, and actions; visual completeness alone is not enough
+- Approval Submission forms focus on editable request input fields, planned Sub List controls, Save as draft, and Submit; route preview, audit activity, workflow history, duplicated hero/title cards, dashboard analytics, and validation-only checklists are forbidden unless explicitly planned as visible UI
+- Approval Task forms focus on read-only request context, task fields, reviewer comments/decision areas, and Approve/Reject or Complete actions; Submit-only task forms fail unless explicitly planned
+- Approval Print pages are read-only print-oriented surfaces and must not include editable inputs or workflow decision buttons
+- Data List New/Edit forms prioritize all App Plan add/edit fields for the current list and Save/Cancel or Save/Submit actions; unrelated lower-page regions, Collection, filters, analytics, audit, and route preview are forbidden unless explicitly planned
+- Data List View/Detail forms show current-record display fields and only App Plan-mapped related regions/actions
+- Document Library New/Edit and View forms use document/file fields, metadata, linked record context, and open/download/preview or upload/save actions; generic approval/data-list patterns are not acceptable substitutes
 - field labels and values must match business semantics; for example, contract title/name fields must not contain lifecycle status values, owner/person fields must not contain task/status labels, date fields must not contain document filenames, and document/evidence fields must not contain review comment text
 - every form/detail artifact includes at least one meaningful `lowerPageBusinessRegions` entry with region name, purpose, source list/data source, displayed fields/items, action or read-only behavior, and proof impact
 - lower-page regions must contain planned business data, records, history, evidence, or actions; blank space, `Page end`, generic notes, or design-stage explanation text do not satisfy full-page coverage

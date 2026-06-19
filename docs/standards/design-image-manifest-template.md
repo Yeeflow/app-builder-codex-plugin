@@ -50,6 +50,20 @@ List every UI surface from the approved App Plan that requires page/form design.
 
 Every row must reference the Application Design System and the approved App Plan. Dashboard rows must include the selected official layout/chrome and `includeHeaderNavigation: true`. Approval and Data List form rows do not require application header/navigation and may use `form-surface-no-app-chrome` as the explicit non-dashboard surface marker.
 
+Every row must also declare surface responsibility and App Plan coverage evidence before `readyForBlueprint: true`. Required fields are `surfaceType`, `appPlanResourceRef`, `sourceResourceType`, `sourceResourceName`, `sourceListOrFormName`, `surfaceResponsibility`, `plannedFieldCoverage`, `requiredFieldsShown`, `optionalFieldsShown`, `missingPlannedFields`, `fieldCoverageStatus`, `plannedActions`, `actionsShown`, `missingRequiredActions`, `actionCoverageStatus`, `forbiddenRegionsPresent`, `forbiddenRegionStatus`, `surfaceResponsibilityStatus`, and `appPlanTraceabilityStatus`.
+
+Surface responsibility rules:
+
+- Approval Submission forms must show all App Plan editable submission fields, planned Sub List controls as Sub List controls, Save as draft when draft behavior is planned/default-supported, and Submit. They must not show duplicated hero/title cards, route previews, audit activity, workflow history, reviewer-only decisions, generic analytics, unrelated tables/collections, or validation-only checklists unless explicitly planned as visible UI.
+- Approval Task forms must show read-only request context, task-specific fields when planned, and task decision/completion actions such as Approve/Reject or Complete. Submit is not enough for an approval task unless the App Plan explicitly defines a submission-like task.
+- Approval Print pages must be read-only and print-oriented. Editable inputs, Save/Submit/Approve/Reject buttons, filters, analytics, and dashboard controls are forbidden.
+- Data List New/Edit forms must prioritize all App Plan add/edit fields for the current list plus Save/Cancel or Save/Submit actions. They must not include Collection, Data table, Data filters, Data analytics, Kanban, Timeline, audit activity, route preview, unrelated document/task/approval regions, or approval-only status cards unless explicitly planned for that form.
+- Data List View/Detail forms must show the current record's read-only/display fields and only explicitly planned related regions/actions.
+- Document Library New/Edit forms must show file upload/file fields and document metadata such as name/title, type, linked contract/vendor/request, status, uploaded by/date, notes, and planned required-document flags plus Save/Cancel or Upload/Save actions.
+- Document Library View forms must show document/file preview or open/download behavior, metadata, linked record context when planned, and allowed document actions.
+
+`readyForBlueprint: true` is blocked when field coverage fails, required actions are missing, forbidden regions are present, surface responsibility fails, App Plan traceability is unresolved, or the artifact is visually complete but not faithful to the App Plan. `fieldCoverageStatus: pass` with non-empty `missingPlannedFields`, or `actionCoverageStatus: pass` with non-empty `missingRequiredActions`, is invalid.
+
 | Page/Form Surface Name | Yeeflow Surface Type | Source App Plan Section | Source Resource Name | Application Design System Path | `applicationLayoutType` | `applicationChromeStyleId` | `includeHeaderNavigation` | Layout Chrome Compliance Declaration | `layoutFidelityStatus` | `visualQualityStatus` | `visualUsabilityStatus` | `textOverflowStatus` | `overlapStatus` | `spacingStatus` | `mobileUsabilityStatus` | Responsive Layout Evidence | Text Wrapping Strategy | Container Boundary Evidence | Visual Usability Findings | Modern Visual Quality Checklist | Anti-pattern Check | Primary Business Object | Semantic Field Examples | `fieldValueSemanticsStatus` | Business Region Evidence | Lower-page Business Regions | Form Purpose Differentiators | `templateReuseRiskStatus` | Page-specific Quality Evidence | Canonical Desktop Image Path | Mobile Image Path | Responsive Plan Reference | Image Dimensions | Full-page Coverage Status | Included Sections | Major Planned Controls Shown | Business Data Examples Shown | Page End Included | Deferred/Gap Notes | Ready For Blueprint |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | Dashboard page |  |  |  | application-layout-1-vertical-nav / application-layout-2-horizontal-nav / application-layout-3-header-nav / application-layout-4-no-nav |  | true |  | pass / human_review_required / deferred | pass / human_review_required / deferred | pass / pass-with-reviewed-risk / human_review_required / fail / deferred | pass / fail | pass / fail | pass / fail | pass / fail |  |  |  |  |  | pass / fail | n/a | n/a | n/a | n/a | n/a | n/a | n/a |  |  |  |  |  | full-page / complete-design-board / deferred |  |  |  | yes/no |  | yes/no |
@@ -123,6 +137,23 @@ When using `scripts/validate-full-page-design-artifacts.mjs`, store the manifest
       "surfaceType": "Data List View form",
       "sourceAppPlanSection": "Custom Data List Forms Plan",
       "sourceResourceName": "",
+      "appPlanResourceRef": "Custom Data List Forms Plan > Contracts > Contract View",
+      "sourceResourceType": "Data List",
+      "sourceListOrFormName": "Contracts",
+      "surfaceResponsibility": "Display the current Contract record and explicitly planned related regions.",
+      "plannedFieldCoverage": ["Contract Title", "Vendor", "Contract Owner", "Renewal Date", "Approval Status", "Payment Terms"],
+      "requiredFieldsShown": ["Contract Title", "Vendor", "Contract Owner", "Renewal Date", "Approval Status", "Payment Terms"],
+      "optionalFieldsShown": [],
+      "missingPlannedFields": [],
+      "fieldCoverageStatus": "pass",
+      "plannedActions": ["Edit", "Open related record"],
+      "actionsShown": ["Edit", "Open related record"],
+      "missingRequiredActions": [],
+      "actionCoverageStatus": "pass",
+      "forbiddenRegionsPresent": [],
+      "forbiddenRegionStatus": "pass",
+      "surfaceResponsibilityStatus": "pass",
+      "appPlanTraceabilityStatus": "pass",
       "designSystemPath": "",
       "applicationLayoutType": "form-surface-no-app-chrome",
       "includeHeaderNavigation": false,

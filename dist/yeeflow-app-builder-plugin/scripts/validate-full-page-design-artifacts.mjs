@@ -113,6 +113,21 @@ const LONG_LABEL_RE = /\b[A-Za-z][A-Za-z0-9 -]{42,}\b/;
 const WRAP_TRUNCATE_RE = /\b(wrap|wrapped|truncate|truncation|ellipsis|line[- ]break|responsive|stack|stacking|horizontal scroll|scroll|wider|adaptive)\b/i;
 const DESKTOP_MULTI_COLUMN_RE = /\b(3[- ]column|4[- ]column|multi[- ]column|desktop columns?|side[- ]by[- ]side)\b/i;
 const MOBILE_STACK_RE = /\b(single[- ]column|stack|stacked|vertical|card[- ]list|horizontal scroll|mobile fallback|reduced column)\b/i;
+const STATUS_PASS_RE = /^(pass|passed|validated|verified|complete|covered)$/i;
+const STATUS_BLOCKING_RE = /^(fail|failed|missing|incomplete|unresolved|human_review_required|human[-_ ]review[-_ ]required|not[-_ ]mapped|not[-_ ]validated)$/i;
+const SUBMISSION_FORBIDDEN_REGION_RE =
+  /\b(duplicated title|duplicate title|hero card|title hero|approval route preview|audit activity|workflow history|reviewer decision|reviewer-only|dashboard analytics|data analytics|kanban|collection|generic data table|required document checklist)\b/i;
+const TASK_FORBIDDEN_REGION_RE =
+  /\b(data list new|data list edit|add\/edit|audit activity|approval route preview|generic analytics|dashboard analytics|data analytics|generic dashboard)\b/i;
+const PRINT_FORBIDDEN_REGION_RE =
+  /\b(editable|input|save|submit|approve|reject|filter|analytics|dashboard|kanban|collection|data table)\b/i;
+const NEW_EDIT_FORBIDDEN_REGION_RE =
+  /\b(collection|data table|data filter|data filters|data analytics|kanban|timeline|audit activity|approval route preview|document region|task region|approval-only status card|status card)\b/i;
+const VIEW_FORBIDDEN_REGION_RE =
+  /\b(unrelated task|unrelated document|unrelated approval|approval route preview|generic dashboard analytics|data analytics)\b/i;
+const DOCUMENT_FORBIDDEN_REGION_RE =
+  /\b(approval route preview|audit activity|dashboard analytics|kanban|workflow history|reviewer decision)\b/i;
+const DOCUMENT_REQUIRED_FIELD_RE = /\b(file|upload|document|title|name|type|linked|contract|vendor|status|uploaded|date|notes?)\b/i;
 const REGION_SEMANTIC_PROFILES = {
   contract: {
     required: /\b(contract|owner|renewal|lifecycle|status|payment|vendor|effective|expiry|expiration)\b/i,
@@ -154,6 +169,7 @@ const REGION_SEMANTIC_PROFILES = {
 export function validateFullPageDesignArtifacts(manifest, options = {}) {
   const findings = [];
   const manifestFile = options.manifestFile || null;
+  const appPlanFile = options.appPlanFile || null;
   const designSystemPath = firstText(manifest.designSystemPath, manifest.applicationDesignSystemPath, manifest.applicationDesignSystem?.path);
   const designSystem = manifest.applicationDesignSystem || {};
   const selectedApplicationLayoutType = firstText(
@@ -373,7 +389,10 @@ export function validateFullPageDesignArtifacts(manifest, options = {}) {
       });
     }
 
-    validateVisualUsability(findings, artifact, { row: index + 1, surfaceName, surfaceType, manifestFile });
+    const artifactContext = { row: index + 1, surfaceName, surfaceType, manifestFile };
+
+    validateSurfaceResponsibilityAndCoverage(findings, artifact, artifactContext);
+    validateVisualUsability(findings, artifact, artifactContext);
 
     if (isFormDetailSurface(artifact)) {
       formDetailArtifacts.push({ artifact, index, surfaceName, surfaceType });
@@ -425,6 +444,7 @@ export function validateFullPageDesignArtifacts(manifest, options = {}) {
   return {
     status: statusFromFindings(findings),
     manifest: safePath(manifestFile),
+    appPlan: safePath(appPlanFile),
     counts: {
       plannedSurfaces: plannedSurfaces.length,
       designArtifacts: artifacts.length,
@@ -521,6 +541,259 @@ function validateForbiddenChrome(findings, artifact, layoutType, context = {}) {
         forbiddenChrome: label,
       });
     }
+  }
+}
+
+function validateSurfaceResponsibilityAndCoverage(findings, artifact, context = {}) {
+  if (isFormReportSurface(artifact) || isDeferred(artifact)) return;
+
+  const surfaceKind = inferSurfaceKind(artifact);
+  if (!surfaceKind && !truthy(artifact.readyForBlueprint)) return;
+
+  const requiredManifestFields = [
+    ["appPlanResourceRef", "DESIGN_ARTIFACT_APP_PLAN_RESOURCE_REF_MISSING"],
+    ["sourceResourceType", "DESIGN_ARTIFACT_SOURCE_RESOURCE_TYPE_MISSING"],
+    ["sourceListOrFormName", "DESIGN_ARTIFACT_SOURCE_LIST_OR_FORM_MISSING"],
+    ["surfaceResponsibility", "DESIGN_ARTIFACT_SURFACE_RESPONSIBILITY_MISSING"],
+    ["plannedFieldCoverage", "DESIGN_ARTIFACT_PLANNED_FIELD_COVERAGE_MISSING"],
+    ["requiredFieldsShown", "DESIGN_ARTIFACT_REQUIRED_FIELDS_SHOWN_MISSING"],
+    ["optionalFieldsShown", "DESIGN_ARTIFACT_OPTIONAL_FIELDS_SHOWN_MISSING"],
+    ["missingPlannedFields", "DESIGN_ARTIFACT_MISSING_PLANNED_FIELDS_DECLARATION_MISSING"],
+    ["fieldCoverageStatus", "DESIGN_ARTIFACT_FIELD_COVERAGE_STATUS_MISSING"],
+    ["plannedActions", "DESIGN_ARTIFACT_PLANNED_ACTIONS_MISSING"],
+    ["actionsShown", "DESIGN_ARTIFACT_ACTIONS_SHOWN_MISSING"],
+    ["missingRequiredActions", "DESIGN_ARTIFACT_MISSING_REQUIRED_ACTIONS_DECLARATION_MISSING"],
+    ["actionCoverageStatus", "DESIGN_ARTIFACT_ACTION_COVERAGE_STATUS_MISSING"],
+    ["forbiddenRegionsPresent", "DESIGN_ARTIFACT_FORBIDDEN_REGIONS_DECLARATION_MISSING"],
+    ["forbiddenRegionStatus", "DESIGN_ARTIFACT_FORBIDDEN_REGION_STATUS_MISSING"],
+    ["surfaceResponsibilityStatus", "DESIGN_ARTIFACT_SURFACE_RESPONSIBILITY_STATUS_MISSING"],
+    ["appPlanTraceabilityStatus", "DESIGN_ARTIFACT_APP_PLAN_TRACEABILITY_STATUS_MISSING"],
+  ];
+  for (const [field, code] of requiredManifestFields) {
+    if (!hasFieldDeclaration(artifact, field)) {
+      addFinding(findings, "error", code, "Blueprint-ready design artifacts must declare surface responsibility, App Plan traceability, field coverage, action coverage, and forbidden-region evidence.", {
+        ...context,
+        field,
+      });
+    }
+  }
+
+  validateCoverageStatus(findings, artifact, "fieldCoverageStatus", artifact.missingPlannedFields, "DESIGN_ARTIFACT_FIELD_COVERAGE_INCONSISTENT", "fieldCoverageStatus cannot be pass when missingPlannedFields is non-empty.", context);
+  validateCoverageStatus(findings, artifact, "actionCoverageStatus", artifact.missingRequiredActions, "DESIGN_ARTIFACT_ACTION_COVERAGE_INCONSISTENT", "actionCoverageStatus cannot be pass when missingRequiredActions is non-empty.", context);
+  validateBlockingStatus(findings, artifact, "fieldCoverageStatus", "DESIGN_ARTIFACT_READY_WITH_FIELD_COVERAGE_FAILURE", "readyForBlueprint cannot be true when field coverage is failing, unresolved, or human-review-required.", context);
+  validateBlockingStatus(findings, artifact, "actionCoverageStatus", "DESIGN_ARTIFACT_READY_WITH_ACTION_COVERAGE_FAILURE", "readyForBlueprint cannot be true when required action coverage is failing, unresolved, or human-review-required.", context);
+  validateBlockingStatus(findings, artifact, "forbiddenRegionStatus", "DESIGN_ARTIFACT_READY_WITH_FORBIDDEN_REGION_FAILURE", "readyForBlueprint cannot be true when forbidden regions are present or unresolved.", context);
+  validateBlockingStatus(findings, artifact, "surfaceResponsibilityStatus", "DESIGN_ARTIFACT_READY_WITH_SURFACE_RESPONSIBILITY_FAILURE", "readyForBlueprint cannot be true when surface responsibility is failing or unresolved.", context);
+  validateBlockingStatus(findings, artifact, "appPlanTraceabilityStatus", "DESIGN_ARTIFACT_READY_WITH_APP_PLAN_TRACEABILITY_FAILURE", "readyForBlueprint cannot be true when App Plan traceability is missing or unresolved.", context);
+
+  const requiredFields = arrayText(artifact.requiredFieldsShown);
+  const plannedFields = plannedFieldNames(artifact);
+  const missingFields = arrayText(artifact.missingPlannedFields);
+  const shownActions = arrayText(artifact.actionsShown);
+  const missingActions = arrayText(artifact.missingRequiredActions);
+  const forbiddenRegions = arrayText(artifact.forbiddenRegionsPresent);
+  const includedSections = arrayText(artifact.includedSections);
+  const controlsShown = arrayText(artifact.majorPlannedControlsShown || artifact.controlsShown);
+  const combinedRegionText = [forbiddenRegions, includedSections, controlsShown, artifact.surfaceResponsibility, artifact.businessRegionEvidence]
+    .flatMap((value) => asArray(value).length ? asArray(value) : [value])
+    .map(scalar)
+    .join(" ");
+
+  if (plannedFields.length && requiredFields.length < plannedFields.length && !hasCoverageDeferral(artifact, "field")) {
+    addFinding(findings, "error", "DESIGN_ARTIFACT_PLANNED_FIELD_COVERAGE_INCOMPLETE", "Design surface declares fewer shown required fields than the planned App Plan field coverage without explicit field deferral.", {
+      ...context,
+      plannedFieldCount: plannedFields.length,
+      requiredFieldsShownCount: requiredFields.length,
+    });
+    blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FIELD_COVERAGE_FAILURE", "Design artifact cannot be ready for blueprint when App Plan planned fields are not covered.", context);
+  }
+  if (missingFields.length && !hasCoverageDeferral(artifact, "field")) {
+    addFinding(findings, "error", "DESIGN_ARTIFACT_MISSING_PLANNED_FIELDS_UNJUSTIFIED", "Missing App Plan fields must be explicitly deferred with reason, fallback, and proof impact.", {
+      ...context,
+      missingPlannedFields: missingFields,
+    });
+    blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FIELD_COVERAGE_FAILURE", "Design artifact cannot be ready for blueprint with unjustified missing planned fields.", context);
+  }
+  if (missingActions.length && !hasCoverageDeferral(artifact, "action")) {
+    addFinding(findings, "error", "DESIGN_ARTIFACT_MISSING_REQUIRED_ACTIONS_UNJUSTIFIED", "Missing required actions must be explicitly deferred with reason, fallback, and proof impact.", {
+      ...context,
+      missingRequiredActions: missingActions,
+    });
+    blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_ACTION_COVERAGE_FAILURE", "Design artifact cannot be ready for blueprint with unjustified missing required actions.", context);
+  }
+  if (forbiddenRegions.length && !hasExplicitPlanningForForbiddenRegion(artifact)) {
+    addFinding(findings, "error", "DESIGN_ARTIFACT_FORBIDDEN_REGIONS_PRESENT", "Forbidden or surface-inappropriate regions must not be present unless explicitly planned in the App Plan.", {
+      ...context,
+      forbiddenRegionsPresent: forbiddenRegions,
+    });
+    blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FORBIDDEN_REGION_FAILURE", "Design artifact cannot be ready for blueprint with unplanned forbidden regions.", context);
+  }
+
+  if (surfaceKind === "approvalSubmission") {
+    requireActionCoverage(findings, artifact, shownActions, ["Save as draft", "Submit"], "APPROVAL_SUBMISSION_REQUIRED_ACTION_MISSING", "Approval Submission form must show Save as draft and Submit actions.", context);
+    if (SUBMISSION_FORBIDDEN_REGION_RE.test(combinedRegionText) && !hasExplicitPlanningForForbiddenRegion(artifact)) {
+      addFinding(findings, "error", "APPROVAL_SUBMISSION_FORBIDDEN_REGION_PRESENT", "Approval Submission forms must not include duplicated hero cards, route preview, audit/workflow regions, reviewer-only decisions, analytics, or unrelated regions unless explicitly planned.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FORBIDDEN_REGION_FAILURE", "Approval Submission artifact cannot be ready for blueprint with unplanned forbidden regions.", context);
+    }
+    validateSubListRendering(findings, artifact, context);
+  } else if (surfaceKind === "approvalTask") {
+    if (!hasAnyAction(shownActions, [/approve/i, /reject/i, /complete/i]) && !hasCoverageDeferral(artifact, "action")) {
+      addFinding(findings, "error", "APPROVAL_TASK_REQUIRED_DECISION_ACTION_MISSING", "Approval Task forms must show Approve/Reject or Complete according to the planned task type.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_ACTION_COVERAGE_FAILURE", "Approval Task artifact cannot be ready for blueprint without task decision/completion actions.", context);
+    }
+    if (shownActions.length && shownActions.every((action) => /^submit$/i.test(action) || /submit as primary/i.test(action))) {
+      addFinding(findings, "error", "APPROVAL_TASK_SUBMIT_ONLY_ACTION_INVALID", "Approval Task forms must not use Submit as the only primary task action unless explicitly planned as a submission-like task.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_ACTION_COVERAGE_FAILURE", "Approval Task artifact cannot be ready for blueprint with Submit as the only primary action.", context);
+    }
+    if (TASK_FORBIDDEN_REGION_RE.test(combinedRegionText) && !hasExplicitPlanningForForbiddenRegion(artifact)) {
+      addFinding(findings, "error", "APPROVAL_TASK_FORBIDDEN_REGION_PRESENT", "Approval Task forms must not include unrelated Data List New/Edit, route preview, audit, or analytics regions unless explicitly planned.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FORBIDDEN_REGION_FAILURE", "Approval Task artifact cannot be ready for blueprint with unplanned forbidden regions.", context);
+    }
+  } else if (surfaceKind === "approvalPrint") {
+    const printText = [artifact.surfaceResponsibility, artifact.fieldCoverageStatus, artifact.includedSections, controlsShown].flatMap((value) => asArray(value).length ? asArray(value) : [value]).map(scalar).join(" ");
+    if (!/\bread[- ]only\b/i.test(printText)) {
+      addFinding(findings, "error", "APPROVAL_PRINT_READ_ONLY_MISSING", "Approval Print pages must declare read-only print-oriented coverage.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_SURFACE_RESPONSIBILITY_FAILURE", "Approval Print artifact cannot be ready for blueprint without read-only print-oriented responsibility.", context);
+    }
+    if (PRINT_FORBIDDEN_REGION_RE.test([combinedRegionText, shownActions].flat().map(scalar).join(" ")) && !hasExplicitPlanningForForbiddenRegion(artifact)) {
+      addFinding(findings, "error", "APPROVAL_PRINT_EDITABLE_CONTROL_PRESENT", "Approval Print pages must not include editable inputs, Save/Submit/Approve/Reject buttons, filters, analytics, or dashboard controls.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FORBIDDEN_REGION_FAILURE", "Approval Print artifact cannot be ready for blueprint with editable or dashboard controls.", context);
+    }
+  } else if (surfaceKind === "dataListNewEdit") {
+    requireAnyActionCoverage(findings, artifact, shownActions, [[/save/i, /cancel/i], [/save/i, /submit/i], [/upload/i, /save/i]], "DATA_LIST_NEW_EDIT_REQUIRED_ACTION_MISSING", "Data List New/Edit forms must show Save/Cancel or Save/Submit style actions.", context);
+    if (NEW_EDIT_FORBIDDEN_REGION_RE.test(combinedRegionText) && !hasExplicitPlanningForForbiddenRegion(artifact)) {
+      addFinding(findings, "error", "DATA_LIST_NEW_EDIT_FORBIDDEN_REGION_PRESENT", "Data List New/Edit forms must focus on current-list fields and must not include Collection, filters, analytics, audit, route preview, or unrelated regions unless explicitly planned.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FORBIDDEN_REGION_FAILURE", "Data List New/Edit artifact cannot be ready for blueprint with unplanned forbidden regions.", context);
+    }
+  } else if (surfaceKind === "dataListView") {
+    if (VIEW_FORBIDDEN_REGION_RE.test(combinedRegionText) && !hasExplicitPlanningForForbiddenRegion(artifact)) {
+      addFinding(findings, "error", "DATA_LIST_VIEW_UNRELATED_REGION_PRESENT", "Data List View/Detail forms must show current-record fields and explicitly planned related regions only.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FORBIDDEN_REGION_FAILURE", "Data List View artifact cannot be ready for blueprint with unrelated regions.", context);
+    }
+  } else if (surfaceKind === "documentNewEdit") {
+    if (!requiredFields.some((field) => /\b(file|upload)\b/i.test(field)) || !requiredFields.some((field) => DOCUMENT_REQUIRED_FIELD_RE.test(field))) {
+      addFinding(findings, "error", "DOCUMENT_NEW_EDIT_METADATA_FIELD_COVERAGE_MISSING", "Document Library New/Edit forms must include file upload plus document metadata fields such as type, status, linked record, uploaded details, and notes.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FIELD_COVERAGE_FAILURE", "Document Library New/Edit artifact cannot be ready for blueprint without document metadata field coverage.", context);
+    }
+    requireAnyActionCoverage(findings, artifact, shownActions, [[/save/i, /cancel/i], [/upload/i, /save/i]], "DOCUMENT_NEW_EDIT_REQUIRED_ACTION_MISSING", "Document Library New/Edit forms must show Save/Cancel or Upload/Save actions.", context);
+    if (DOCUMENT_FORBIDDEN_REGION_RE.test(combinedRegionText) && !hasExplicitPlanningForForbiddenRegion(artifact)) {
+      addFinding(findings, "error", "DOCUMENT_NEW_EDIT_FORBIDDEN_REGION_PRESENT", "Document Library New/Edit forms must not reuse unrelated approval, task, or dashboard regions unless explicitly planned.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_FORBIDDEN_REGION_FAILURE", "Document Library New/Edit artifact cannot be ready for blueprint with unplanned forbidden regions.", context);
+    }
+  } else if (surfaceKind === "documentView") {
+    if (!hasAnyAction(shownActions, [/open document/i, /download/i, /preview/i, /view linked/i, /request replacement/i]) && !hasCoverageDeferral(artifact, "action")) {
+      addFinding(findings, "error", "DOCUMENT_VIEW_OPEN_DOWNLOAD_ACTION_MISSING", "Document Library View forms must show document preview/open/download or planned linked-record actions.", context);
+      blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_ACTION_COVERAGE_FAILURE", "Document Library View artifact cannot be ready for blueprint without document open/download behavior.", context);
+    }
+  }
+}
+
+function inferSurfaceKind(artifact) {
+  const text = lower([
+    artifact.surfaceType,
+    artifact.yeeflowSurfaceType,
+    artifact.type,
+    artifact.sourceResourceType,
+    artifact.sourceAppPlanSection,
+    artifact.sourceResourceName,
+    artifact.sourceListOrFormName,
+  ].map(scalar).join(" "));
+  if (/approval/.test(text) && /submission/.test(text)) return "approvalSubmission";
+  if (/approval/.test(text) && /task/.test(text)) return "approvalTask";
+  if (/approval/.test(text) && /print/.test(text)) return "approvalPrint";
+  if (/document/.test(text) && /(new|edit|add|upload)/.test(text)) return "documentNewEdit";
+  if (/document/.test(text) && /(view|detail|preview)/.test(text)) return "documentView";
+  if (/data list/.test(text) && /(new|edit|add\/edit|add|custom)/.test(text) && !/(view|detail)/.test(text)) return "dataListNewEdit";
+  if (/data list/.test(text) && /(view|detail)/.test(text)) return "dataListView";
+  return "";
+}
+
+function hasFieldDeclaration(object, field) {
+  if (!Object.prototype.hasOwnProperty.call(object, field)) return false;
+  const value = object[field];
+  if (Array.isArray(value)) return true;
+  if (value && typeof value === "object") return true;
+  return scalar(value).trim() !== "";
+}
+
+function arrayText(value) {
+  return asArray(value)
+    .map((entry) => firstText(entry?.field, entry?.name, entry?.action, entry?.label, entry))
+    .filter(Boolean);
+}
+
+function plannedFieldNames(artifact) {
+  const coverage = artifact.plannedFieldCoverage;
+  if (Array.isArray(coverage)) return arrayText(coverage);
+  if (coverage && typeof coverage === "object") {
+    return arrayText(coverage.fields || coverage.requiredFields || coverage.editableFields || coverage.displayFields || coverage.plannedFields);
+  }
+  return arrayText(coverage);
+}
+
+function validateCoverageStatus(findings, artifact, statusField, missingValue, code, message, context = {}) {
+  const status = lower(artifact[statusField]);
+  const missing = arrayText(missingValue);
+  if (STATUS_PASS_RE.test(status) && missing.length) {
+    addFinding(findings, "error", code, message, { ...context, [statusField]: status, missing });
+    blockReadyForBlueprint(findings, artifact, statusField === "fieldCoverageStatus" ? "DESIGN_ARTIFACT_READY_WITH_FIELD_COVERAGE_FAILURE" : "DESIGN_ARTIFACT_READY_WITH_ACTION_COVERAGE_FAILURE", "Design artifact cannot be ready for blueprint when declared pass coverage conflicts with missing coverage.", context);
+  }
+}
+
+function validateBlockingStatus(findings, artifact, statusField, code, message, context = {}) {
+  if (!truthy(artifact.readyForBlueprint)) return;
+  const status = lower(artifact[statusField]);
+  const kind = /action/i.test(statusField) ? "action" : "field";
+  if (STATUS_BLOCKING_RE.test(status) && !hasCoverageDeferral(artifact, kind)) {
+    addFinding(findings, "error", code, message, { ...context, [statusField]: status });
+  }
+}
+
+function hasCoverageDeferral(artifact, kind) {
+  if (isDeferredWithProof(artifact)) return true;
+  const deferrals = [
+    artifact.fieldActionCoverageDeferrals,
+    artifact.coverageDeferrals,
+    kind === "field" ? artifact.missingPlannedFieldDeferrals : artifact.missingRequiredActionDeferrals,
+  ].flatMap((value) => asArray(value));
+  return deferrals.some((entry) => isDeferredWithProof(entry) || (firstText(entry?.reason, entry?.deferredReason) && firstText(entry?.fallback, entry?.fallbackPlan) && firstText(entry?.proofImpact, entry?.validationImpact)));
+}
+
+function hasExplicitPlanningForForbiddenRegion(artifact) {
+  return Boolean(
+    firstText(artifact.explicitlyPlannedForbiddenRegions, artifact.forbiddenRegionPlanningJustification, artifact.appPlanTraceabilityForForbiddenRegions) ||
+      asArray(artifact.explicitlyPlannedRegions || artifact.appPlanMappedRegions).length ||
+      isDeferredWithProof(artifact),
+  );
+}
+
+function hasAnyAction(actions, patterns) {
+  return actions.some((action) => patterns.some((pattern) => pattern.test(action)));
+}
+
+function requireActionCoverage(findings, artifact, actions, required, code, message, context = {}) {
+  const missing = required.filter((requiredAction) => !actions.some((action) => normalizeKey(action).includes(normalizeKey(requiredAction))));
+  if (missing.length && !hasCoverageDeferral(artifact, "action")) {
+    addFinding(findings, "error", code, message, { ...context, missingRequiredActions: missing });
+    blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_ACTION_COVERAGE_FAILURE", "Design artifact cannot be ready for blueprint with required actions missing.", context);
+  }
+}
+
+function requireAnyActionCoverage(findings, artifact, actions, actionSets, code, message, context = {}) {
+  const passes = actionSets.some((patterns) => patterns.every((pattern) => actions.some((action) => pattern.test(action))));
+  if (!passes && !hasCoverageDeferral(artifact, "action")) {
+    addFinding(findings, "error", code, message, { ...context, actionsShown: actions });
+    blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_ACTION_COVERAGE_FAILURE", "Design artifact cannot be ready for blueprint with required actions missing.", context);
+  }
+}
+
+function validateSubListRendering(findings, artifact, context = {}) {
+  const planned = [artifact.surfaceResponsibility, artifact.plannedFieldCoverage, artifact.plannedControls, artifact.appPlanTraceabilityNotes].map(scalar).join(" ");
+  if (!/\bsub\s*list\b/i.test(planned)) return;
+  const shown = [artifact.majorPlannedControlsShown, artifact.includedSections, artifact.lowerPageBusinessRegions].flatMap((value) => asArray(value).length ? asArray(value) : [value]).map(scalar).join(" ");
+  if (!/\bsub\s*list\b/i.test(shown) || /\bgeneric\s+(data\s+)?table\b/i.test(shown)) {
+    addFinding(findings, "error", "APPROVAL_SUBMISSION_SUB_LIST_RENDERING_MISMATCH", "Submission form document rows planned as a Sub List must be represented as a Sub List, not a generic lower-page table.", context);
+    blockReadyForBlueprint(findings, artifact, "DESIGN_ARTIFACT_READY_WITH_SURFACE_RESPONSIBILITY_FAILURE", "Submission artifact cannot be ready for blueprint when planned Sub List controls are rendered as generic tables.", context);
   }
 }
 
@@ -1313,10 +1586,11 @@ function escapeRegex(value) {
 }
 
 function parseArgs(argv) {
-  const args = { manifest: "", json: false };
+  const args = { manifest: "", appPlan: "", json: false };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--manifest") args.manifest = argv[++index] || "";
+    else if (arg === "--app-plan") args.appPlan = argv[++index] || "";
     else if (arg === "--json" || arg === "--format=json") args.json = true;
     else if (arg === "--format") args.json = (argv[++index] || "").toLowerCase() === "json";
     else if (!arg.startsWith("-") && !args.manifest) args.manifest = arg;
@@ -1344,11 +1618,12 @@ function renderMarkdown(result) {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.manifest) {
-    console.error("Usage: node scripts/validate-full-page-design-artifacts.mjs --manifest <design-image-manifest.json> [--json]");
+    console.error("Usage: node scripts/validate-full-page-design-artifacts.mjs --manifest <design-image-manifest.json> [--app-plan <app-plan.md>] [--json]");
     process.exit(2);
   }
   const manifest = readJsonFile(args.manifest);
-  const result = validateFullPageDesignArtifacts(manifest, { manifestFile: args.manifest });
+  const appPlanText = args.appPlan ? fs.readFileSync(args.appPlan, "utf8") : "";
+  const result = validateFullPageDesignArtifacts(manifest, { manifestFile: args.manifest, appPlanFile: args.appPlan, appPlanText });
   if (args.json) console.log(JSON.stringify(result, null, 2));
   else process.stdout.write(renderMarkdown(result));
   process.exit(result.status === "pass" ? 0 : 1);
