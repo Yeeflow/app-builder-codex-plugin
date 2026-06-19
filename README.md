@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.60`
+- Version: `0.6.61`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.60` releases executable Business Clarification, Generation Readiness, and Functional Specification to App Plan traceability gates. The new validators are `scripts/validate-business-clarification-gate.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs`, with regression coverage in `scripts/test-clarification-readiness-traceability-gates.mjs`. These gates block progression beyond planning when business decision gates remain unanswered, App Plan resource areas are missing, empty, placeholder-only, or incomplete, or Functional Specification requirements are not mapped to App Plan resources or explicit deferred/not-applicable coverage. They must pass before full-page design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof. These validators prove planning readiness and traceability only, not package validity, business correctness, signing/API acceptance, or runtime behavior.
+Current release `0.6.61` releases App Plan control-selection, action, and plugin-supported type/property planning gates. App Plans must explicitly choose record display controls from Data table, Collection, Kanban, Vertical timeline, or Horizontal timeline; prefer Collection over Data table when both are suitable; plan Collection/Kanban/timeline item-template Dynamic controls with field bindings; and explicitly plan or mark not applicable Collection/Kanban item actions and Sub List list actions. App Plan output must use plugin-supported Yeeflow control, action, workflow node, field, variable, property, and binding types, or mark unsupported shapes as `export-learning-required`, `runtime-proof-required`, or `deferred`. Updated validators and regression coverage in `scripts/test-app-plan-control-action-property-gates.mjs` enforce these planning gates before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.60
+Version: 0.6.61
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.60
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.61
 ```
 
 ## What Is Included
