@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.68`
+- Version: `0.6.72`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.68` releases Full-page lower-page region visual concreteness gates. Lower-page business regions in Approval/Data List form/detail canonical design artifacts must show concrete rendered UI examples, not only source-list notes, field lists, or generic descriptions. Supported visual patterns include Data table, Collection cards, timeline rows, checklist rows, document table/cards, activity feeds, signature blocks, and read-only field groups. The validator rejects placeholder-only `Source:` / field-list / generic-notes regions and blocks `readyForBlueprint: true` when lower-page visual concreteness fails.
+Current release `0.6.72` releases HTML-to-Yeeflow Control Mapping and Blueprint parity gates. HTML previews must now be control-mapped with machine-readable `data-*` metadata, with the UI Surface Contract remaining the primary implementation contract and the Control Mapping Registry governing `data-yeeflow-control` values. New validation covers field metadata parity for field ID/name/type, binding, required, readonly, default, and validation rules; action metadata parity for action ID/type/contract, row context, and parent/current item binding; list and region metadata parity for source resource, source list, parent binding, and row context; and style/layout/responsive token checks. Blueprint parity now checks control type, binding, action contract, source list/context, hidden/helper controls, and style-token intent, while unknown controls are blocked unless explicitly marked `deferred`, `export-learning-required`, or `runtime-proof-required`. These gates prove design, HTML, and blueprint mapping readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.68
+Version: 0.6.72
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.68
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.72
 ```
 
 ## What Is Included

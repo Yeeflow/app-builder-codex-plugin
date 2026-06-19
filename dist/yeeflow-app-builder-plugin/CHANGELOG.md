@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.6.72
+
+- Release HTML-to-Yeeflow Control Mapping and Blueprint parity gates from PR #111.
+- Require control-mapped HTML previews with machine-readable `data-*` metadata so Blueprint generation reads the UI Surface Contract, Control Mapping Registry, and HTML mapping attributes instead of guessing Yeeflow controls from visual HTML.
+- Add the Control Mapping Registry for `data-yeeflow-control` values and block unknown controls unless explicitly marked `deferred`, `export-learning-required`, or `runtime-proof-required` with proof impact.
+- Validate field metadata parity for field ID/name/type, binding, required, readonly, default, and validation rules.
+- Validate action metadata parity for action ID/type/contract, row context, and parent/current item binding.
+- Validate list and region metadata parity for source resource, source list, parent binding, and row context.
+- Add style/layout/responsive token checks so arbitrary CSS is not treated as Yeeflow property support.
+- Extend Blueprint parity checks for control type, binding, action contract, source list/context, hidden/helper controls, and style-token intent.
+- Preserve the proof boundary: these gates prove design, HTML, and blueprint mapping readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+
 ## 0.6.71
 
 - Release HTML-first high-fidelity UI Surface Contract workflow gates from PR #109.
