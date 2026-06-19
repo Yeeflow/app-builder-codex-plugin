@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+## 0.6.61
+
+- Release App Plan control-selection, action, and plugin-supported type/property planning gates.
+- Require every App Plan record display section to select a supported display control: Data table, Collection, Kanban, Vertical timeline, or Horizontal timeline.
+- Prefer Collection over Data table when both controls can satisfy the requirement, unless a dense native table/grid is specifically required.
+- Require Collection, Kanban, Vertical timeline, and Horizontal timeline plans to include item-template Dynamic controls with source-field bindings.
+- Require Collection/Kanban custom item actions to be explicitly planned with current-item context and steps, or explicitly marked not applicable.
+- Require Approval Form and Custom Data List form Sub List custom List actions to be explicitly planned with current-row context and steps, or explicitly marked not applicable.
+- Require App Plan output to use plugin-supported Yeeflow control, action, workflow node, field, variable, property, and binding types, or mark unsupported shapes as `export-learning-required`, `runtime-proof-required`, or `deferred`.
+- Update `scripts/validate-app-plan-resource-order.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs` to enforce these planning gates.
+- Add regression coverage in `scripts/test-app-plan-control-action-property-gates.mjs`.
+
+## 0.6.60
+
+- Release the executable Business Clarification Gate validator at `scripts/validate-business-clarification-gate.mjs`.
+- Release the executable Generation Readiness Review validator at `scripts/validate-generation-readiness-review.mjs`.
+- Release the Functional Specification to App Plan traceability validator at `scripts/validate-functional-spec-to-app-plan-traceability.mjs`.
+- Add regression coverage in `scripts/test-clarification-readiness-traceability-gates.mjs`.
+- Block progression beyond planning when business decision gates remain unanswered, App Plan resource areas are missing, empty, placeholder-only, or incomplete, or Functional Specification requirements are not mapped to App Plan resources or explicit deferred/not-applicable coverage.
+- Require these gates to pass before full-page design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+- Clarify that these validators prove planning readiness and traceability only, not package validity, business correctness, signing/API acceptance, or runtime behavior.
+
 ## 0.6.59
 
 - Release the required Stage 1 Functional Specification template and review gate for every new application build.

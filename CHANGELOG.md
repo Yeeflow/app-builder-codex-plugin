@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.6.61
+
+- Release App Plan control-selection, action, and plugin-supported type/property planning gates.
+- Require every App Plan record display section to select a supported display control: Data table, Collection, Kanban, Vertical timeline, or Horizontal timeline.
+- Prefer Collection over Data table when both controls can satisfy the requirement, unless a dense native table/grid is specifically required.
+- Require Collection, Kanban, Vertical timeline, and Horizontal timeline plans to include item-template Dynamic controls with source-field bindings.
+- Require Collection/Kanban custom item actions to be explicitly planned with current-item context and steps, or explicitly marked not applicable.
+- Require Approval Form and Custom Data List form Sub List custom List actions to be explicitly planned with current-row context and steps, or explicitly marked not applicable.
+- Require App Plan output to use plugin-supported Yeeflow control, action, workflow node, field, variable, property, and binding types, or mark unsupported shapes as `export-learning-required`, `runtime-proof-required`, or `deferred`.
+- Update `scripts/validate-app-plan-resource-order.mjs`, `scripts/validate-generation-readiness-review.mjs`, and `scripts/validate-functional-spec-to-app-plan-traceability.mjs` to enforce these planning gates.
+- Add regression coverage in `scripts/test-app-plan-control-action-property-gates.mjs`.
+
 ## 0.6.60
 
 - Release the executable Business Clarification Gate validator at `scripts/validate-business-clarification-gate.mjs`.
