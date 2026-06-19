@@ -67,6 +67,15 @@ function baseArtifact(surfaceName, surfaceType, sourceAppPlanSection, sourceReso
     pageEndIncluded: true,
     layoutFidelityStatus: "pass",
     visualQualityStatus: "pass",
+    visualUsabilityStatus: "pass",
+    textOverflowStatus: "pass",
+    overlapStatus: "pass",
+    spacingStatus: "pass",
+    mobileUsabilityStatus: "pass",
+    responsiveLayoutEvidence: "Mobile form stacks sections and lower-page regions vertically; tables use card-list fallback where needed.",
+    textWrappingStrategy: "Long contract, document, approval, and task labels wrap or truncate with ellipsis inside their containers.",
+    containerBoundaryEvidence: "Field labels, cards, rows, action chips, and timeline entries fit inside reviewed container bounds.",
+    visualUsabilityFindings: ["No visible text overflow, overlap, clipped content, or mobile layout pressure is declared."],
     modernVisualQualityChecklist: [
       "contract header hierarchy shows vendor, owner, renewal date, approval status, and payment terms",
       "related renewal tasks and approval history are visually separated in lower-page business regions",
@@ -96,7 +105,7 @@ function baseArtifact(surfaceName, surfaceType, sourceAppPlanSection, sourceReso
         renderedExampleSummary:
           "Row 1: Signed MSA.pdf, type Signed Contract, status Received, uploaded 2026-06-01. Row 2: Insurance Certificate.pdf, type Compliance Evidence, status Required, uploaded 2026-06-04.",
         displayedBusinessFields: ["Document name", "Document type", "Status", "Uploaded by", "Upload date"],
-        displayedFields: ["Document name", "Document type", "Uploaded by", "Upload date"],
+        displayedFields: ["Document name", "Document type", "Status", "Uploaded by", "Upload date"],
         actionsShown: ["Open document"],
         visualConcretenessStatus: "pass",
         antiPlaceholderStatus: "pass",
@@ -178,7 +187,7 @@ function validApprovalTask(extra = {}) {
         renderedExampleSummary:
           "Checklist row 1: Signed Contract, required yes, received yes, current file Signed MSA.pdf. Row 2: Insurance Certificate, required yes, received yes. Row 3: DPA, required yes, received no, next action Request file.",
         displayedBusinessFields: ["Document type", "Required", "Received", "Current file", "Owner"],
-        displayedFields: ["Document type", "Required", "Received", "Owner"],
+        displayedFields: ["Document type", "Required", "Received", "Current file", "Owner"],
         actionsShown: ["Open document", "Request missing file"],
         visualConcretenessStatus: "pass",
         antiPlaceholderStatus: "pass",

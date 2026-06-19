@@ -88,6 +88,15 @@ const childTests = [
     ],
   },
   {
+    name: "Full-page semantic consistency and visual usability regression suite",
+    command: ["scripts/test-full-page-design-semantic-consistency-visual-usability-gates.mjs"],
+    validators: [
+      "validate-full-page-design-artifacts",
+      "lower-page source/field/action/mapping semantic consistency",
+      "text overflow, overlap, spacing, and mobile usability gates",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [
