@@ -127,7 +127,7 @@ The App Plan is not a free-form plan, generic project plan, or ad hoc script pla
 
 Form Report is an independent Yeeflow resource based on a specific Approval Form. It is not a Dashboard page, not a Data List view, and must not be mixed into Dashboard planning. Normally, one Approval Form should have one corresponding Form Report unless the plan states why not.
 
-All fields, controls, variables, workflow nodes, form actions, schedule workflow properties, page controls, and configuration shapes must come from active plugin-known skills, standards, validators, template library entries, or export-proven references. Unknown capabilities must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`. Temporary scripts and ad hoc generation logic must not bypass plugin knowledge.
+All fields, controls, Dynamic controls, variables, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, schedule workflow properties, page controls, property paths, bindings, and configuration shapes must come from active plugin-known skills, standards, validators, template library entries, control/property knowledge base entries, extension registry entries, or export-proven references. Unknown capabilities must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`. Temporary scripts and ad hoc generation logic must not bypass plugin knowledge.
 
 ## 5. App Plan Review Gate
 
@@ -143,7 +143,11 @@ The review must confirm:
 - Schedule workflows, AI Agents, Copilots, Custom Data List forms, Data List workflows, Notifications, Views, Dashboards, Navigation, and Permissions are planned or explicitly not applicable
 - Dashboard planning is separate from Form Report planning
 - Dashboard controls come from plugin-known controls, template library, validators, or export-proven references
-- field/control/workflow/action/schedule/resource types are plugin-supported or marked for learning/proof/deferment
+- Dashboard/Page sections that display Data List records state selected display control and reason: Data table, Collection, Kanban, Vertical Timeline, or Horizontal Timeline
+- Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls include item-template Dynamic control planning with bound fields
+- Collection and Kanban controls include item actions or explicitly state `No Collection/Kanban item actions required`
+- Approval Forms and Custom Data List forms with Sub List controls include Sub List list actions or explicitly state `No custom Sub List actions required`
+- field/control/Dynamic control/workflow/action/schedule/resource/property types are plugin-supported or marked for learning/proof/deferment
 - Generation Contract and Hard Gates, Validation Plan, Proof Boundary, Assumptions, Deferred or Runtime-Proof Items, and Recommended Next Prompt are present
 
 If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.

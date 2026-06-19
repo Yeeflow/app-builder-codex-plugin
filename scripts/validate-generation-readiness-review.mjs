@@ -21,6 +21,7 @@ const AREAS = [
 
 const PLACEHOLDER_ONLY = /^(?:\s|[|:\-#`])*<[^>]+>(?:\s|[|:\-#`])*$/;
 const DEFERRED = /\b(not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required)\b/i;
+const RECORD_DISPLAY_CONTROLS = ["Data table", "Collection", "Kanban", "Vertical timeline", "Horizontal timeline"];
 
 function usage(exitCode = 1) {
   const text = [
@@ -126,6 +127,143 @@ function validateDashboards(section) {
     : [["GENERATION_READINESS_DASHBOARD_BINDING_MISSING", "Dashboard planning must include page name, purpose, controls, and data source/binding expectations or explicit deferred status."]];
 }
 
+function selectedControlsFromRecordDisplay(body) {
+  const controls = [];
+  const tableMatch = body.match(/Record Display Control Selection([\s\S]*?)(?:\n####|\n##|$)/i);
+  const source = tableMatch?.[1] ?? "";
+  for (const line of source.split(/\r?\n/)) {
+    if (!line.includes("|")) continue;
+    for (const control of RECORD_DISPLAY_CONTROLS) {
+      if (new RegExp(`\\b${control.replace(/\s+/g, "\\s+")}\\b`, "i").test(line)) controls.push(control);
+    }
+  }
+  return [...new Set(controls)];
+}
+
+function hasDataListRecordDisplayNeed(body) {
+  return /\b(Data List records|data-list records|record display|Data Source|Source List|list records|records displayed)\b/i.test(body)
+    || /\b(Data table|Collection|Kanban|Vertical timeline|Horizontal timeline|Vertical Timeline|Horizontal Timeline)\b/i.test(body);
+}
+
+function validateControlActionPropertyGates(text, sections) {
+  const findings = [];
+  const dashboard = findSection(sections, "Dashboard Pages Plan");
+  const approvalForms = findSection(sections, "Approval Forms Plan");
+  const customForms = findSection(sections, "Custom Data List Forms Plan");
+
+  if (dashboard && hasDataListRecordDisplayNeed(dashboard.body)) {
+    if (!/Record Display Control Selection/i.test(dashboard.body)) {
+      findings.push({
+        level: "error",
+        code: "GENERATION_READINESS_RECORD_DISPLAY_CONTROL_MISSING",
+        area: "Dashboard Pages Plan",
+        message: "Dashboard pages that display Data List records must include Record Display Control Selection.",
+      });
+    } else {
+      const controls = selectedControlsFromRecordDisplay(dashboard.body);
+      if (!controls.length && !DEFERRED.test(dashboard.body)) {
+        findings.push({
+          level: "error",
+          code: "GENERATION_READINESS_UNSUPPORTED_RECORD_DISPLAY_CONTROL",
+          area: "Dashboard Pages Plan",
+          message: `Record Display Control Selection must select one of: ${RECORD_DISPLAY_CONTROLS.join(", ")}.`,
+        });
+      }
+    }
+  }
+
+  if (dashboard && /\b(Collection|Kanban|Vertical Timeline|Horizontal Timeline|Vertical timeline|Horizontal timeline)\b/i.test(dashboard.body) && !/Item Template Dynamic Controls/i.test(dashboard.body)) {
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_ITEM_TEMPLATE_DYNAMIC_CONTROLS_MISSING",
+      area: "Dashboard Pages Plan",
+      message: "Collection/Kanban/Timeline controls must include item-template Dynamic control planning.",
+    });
+  }
+
+  const dynamicSection = dashboard?.body.match(/Item Template Dynamic Controls([\s\S]*?)(?:\n####|\n##|$)/i)?.[1] ?? "";
+  if (dynamicSection && /\b(magic-dynamic|custom-dynamic|unsupported-dynamic|invented-dynamic)\b/i.test(dynamicSection) && !DEFERRED.test(dynamicSection)) {
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_UNSUPPORTED_TYPE_PROPERTY_UNMARKED",
+      area: "Dashboard Pages Plan",
+      message: "Unsupported Dynamic control types must be marked export-learning-required, runtime-proof-required, or deferred.",
+    });
+  }
+  for (const line of dynamicSection.split(/\r?\n/)) {
+    if (!/dynamic-user/i.test(line)) continue;
+    const cells = line.split("|").map((cell) => cell.trim()).filter(Boolean);
+    const boundField = cells[4] ?? line;
+    if (/\b(Status|Priority|Amount|Total|Title|Date)\b/i.test(boundField) && !/\b(User|Owner|Requester|Approver|Assignee|Person|Member)\b/i.test(boundField)) {
+      findings.push({
+        level: "error",
+        code: "GENERATION_READINESS_DYNAMIC_USER_FIELD_MISMATCH",
+        area: "Dashboard Pages Plan",
+        message: "Dynamic user controls must bind to User/person fields when detectable.",
+      });
+    }
+  }
+
+  if (dashboard && /\b(Collection|Kanban)\b/i.test(dashboard.body) && !/(Collection (and|\/) Kanban Item Actions|No Collection\/Kanban item actions required)/i.test(dashboard.body)) {
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_COLLECTION_KANBAN_ACTION_DECISION_MISSING",
+      area: "Dashboard Pages Plan",
+      message: "Collection/Kanban controls must include item action planning or an explicit no-action decision.",
+    });
+  }
+  const collectionActionSection = dashboard?.body.match(/Collection (?:and|\/) Kanban Item Actions([\s\S]*?)(?:\n####|\n##|$)/i)?.[1] ?? "";
+  if (collectionActionSection && !/No Collection\/Kanban item actions required/i.test(collectionActionSection)) {
+    if (!/Current Item Context/i.test(collectionActionSection) || !/\bSteps\b/i.test(collectionActionSection)) {
+      findings.push({
+        level: "error",
+        code: "GENERATION_READINESS_COLLECTION_KANBAN_ACTION_DECISION_MISSING",
+        area: "Dashboard Pages Plan",
+        message: "Collection/Kanban item action planning must include current item context and steps.",
+      });
+    }
+  }
+
+  const subListText = [approvalForms?.body ?? "", customForms?.body ?? ""].join("\n");
+  if (/\bSub List\b/i.test(subListText) && !/(Sub List List Actions|No custom Sub List actions required)/i.test(subListText)) {
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_SUB_LIST_ACTION_DECISION_MISSING",
+      area: "Approval Forms / Custom Data List Forms",
+      message: "Sub List controls must include list action planning or an explicit no-action decision.",
+    });
+  }
+  const subListActionSections = [...subListText.matchAll(/Sub List List Actions([\s\S]*?)(?:\n####|\n##|$)/gi)];
+  for (const match of subListActionSections) {
+    const body = match[1] ?? "";
+    if (/No custom Sub List actions required/i.test(body)) continue;
+    if (!/Current Row Context/i.test(body) || !/\bSteps\b/i.test(body)) {
+      findings.push({
+        level: "error",
+        code: "GENERATION_READINESS_SUB_LIST_ACTION_DECISION_MISSING",
+        area: "Approval Forms / Custom Data List Forms",
+        message: "Sub List list action planning must include current row context and steps.",
+      });
+    }
+  }
+
+  for (const [index, line] of text.split(/\r?\n/).entries()) {
+    if (!/\b(unsupported|unconfirmed|invented)\b/i.test(line)) continue;
+    if (/do not|must not|must be marked|mark(ed)? it as|marked/i.test(line)) continue;
+    if (DEFERRED.test(line)) continue;
+    if (!/\b(control|type|property|path|action|binding|shape|configuration)\b/i.test(line)) continue;
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_UNSUPPORTED_TYPE_PROPERTY_UNMARKED",
+      area: "Plugin Capability and Standards Compliance",
+      line: index + 1,
+      message: "Unknown, unsupported, invented, or unconfirmed type/property/action wording must be marked export-learning-required, runtime-proof-required, or deferred.",
+    });
+  }
+
+  return findings;
+}
+
 function validate(file) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const sections = extractSections(text);
@@ -175,6 +313,8 @@ function validate(file) {
       findings.push({ level: "error", code: "GENERATION_READINESS_REVIEW_GATE_NOT_PASSED", area: "Review gates", message: `Missing readiness evidence: ${label}.` });
     }
   }
+
+  for (const finding of validateControlActionPropertyGates(text, sections)) findings.push(finding);
 
   const errors = findings.length;
   return {

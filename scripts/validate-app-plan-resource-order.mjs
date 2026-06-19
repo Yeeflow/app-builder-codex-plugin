@@ -62,6 +62,14 @@ const REQUIRED_PATTERNS = [
   ["RECOMMENDED_NEXT_PROMPT", /Recommended Next Prompt/i],
   ["DO_NOT_INVENT_UNSUPPORTED_SHAPES", /Do not invent unsupported|Do not plan invented/i],
   ["UNKNOWN_CAPABILITY_LABELS", /export-learning-required[\s\S]*runtime-proof-required[\s\S]*deferred/i],
+  ["RECORD_DISPLAY_CONTROL_SELECTION", /Record Display Control Selection/i],
+  ["ITEM_TEMPLATE_DYNAMIC_CONTROLS", /Item Template Dynamic Controls/i],
+  ["COLLECTION_KANBAN_ACTIONS", /Collection (and|\/) Kanban Item Actions|Collection\/Kanban item actions/i],
+  ["SUB_LIST_ACTIONS", /Sub List List Actions|No custom Sub List actions required/i],
+  [
+    "PLUGIN_SUPPORTED_TYPE_PROPERTY_RULE",
+    /resource types[\s\S]*field types[\s\S]*variable types[\s\S]*controls[\s\S]*Dynamic controls[\s\S]*workflow nodes[\s\S]*form actions[\s\S]*Collection\/Kanban actions[\s\S]*Sub List actions[\s\S]*property paths[\s\S]*(configuration shapes|bindings)/i,
+  ],
 ];
 
 function usage(exitCode = 1) {
@@ -112,6 +120,32 @@ function validateResourceOrder(text, findings) {
   });
 }
 
+function validateControlActionPlanning(text, findings) {
+  if (/\b(Collection|Kanban|Vertical Timeline|Horizontal Timeline|Vertical timeline|Horizontal timeline)\b/i.test(text) && !/Item Template Dynamic Controls/i.test(text)) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_ITEM_TEMPLATE_DYNAMIC_CONTROLS_MISSING",
+      message: "Collection, Kanban, Vertical Timeline, or Horizontal Timeline planning requires item-template Dynamic control planning.",
+    });
+  }
+
+  if (/\b(Collection|Kanban)\b/i.test(text) && !/(Collection (and|\/) Kanban Item Actions|No Collection\/Kanban item actions required)/i.test(text)) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_COLLECTION_KANBAN_ACTION_DECISION_MISSING",
+      message: "Collection/Kanban planning requires item action planning or an explicit no-action decision.",
+    });
+  }
+
+  if (/\bSub List\b/i.test(text) && !/(Sub List List Actions|No custom Sub List actions required)/i.test(text)) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_SUB_LIST_ACTION_DECISION_MISSING",
+      message: "Sub List planning requires list action planning or an explicit no-action decision.",
+    });
+  }
+}
+
 function validate(file) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const headings = headingLineIndexes(text);
@@ -152,6 +186,7 @@ function validate(file) {
   }
 
   validateResourceOrder(text, findings);
+  validateControlActionPlanning(text, findings);
 
   for (const [code, pattern] of REQUIRED_PATTERNS) {
     if (!pattern.test(text)) {
