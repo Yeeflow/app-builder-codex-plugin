@@ -107,6 +107,16 @@ const childTests = [
     ],
   },
   {
+    name: "HTML-first UI Surface Contract workflow regression suite",
+    command: ["scripts/test-html-first-high-fidelity-ui-surface-contract-workflow-gates.mjs"],
+    validators: [
+      "validate-ui-surface-contracts",
+      "validate-html-preview-layout",
+      "compare-blueprint-to-ui-surface-contract",
+      "HTML-first high-fidelity UI preview workflow gates",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [

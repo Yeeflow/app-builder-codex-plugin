@@ -331,9 +331,39 @@ node scripts/validate-full-page-design-artifacts.mjs --manifest <design-image-ma
 
 This validator proves design-stage artifact readiness for Page Implementation Blueprints only. It does not prove package validity, control/property serialization, signing/API acceptance, install/upgrade success, or runtime behavior.
 
-## 9. Page Implementation Blueprints
+## 9. HTML-first UI Surface Contract Workflow
 
-Create Page Implementation Blueprints only after the Full-page Canonical Design Artifacts stage passes. Blueprints must consume the approved Application Design System, canonical design images, and Design Image Manifest as the visual contract.
+For complex business applications, add the HTML-first high-fidelity UI Surface Contract workflow after the Full-page Canonical Design Artifacts stage is structurally ready and before Page Implementation Blueprints.
+
+This workflow inherits and enforces all Full-page Canonical Design Artifact gates. It must not replace or bypass official Yeeflow dashboard layout/chrome, no-app-chrome form surfaces, full-page/page-end completeness, modern visual quality, surface responsibility, App Plan field/action coverage, forbidden-region checks, semantic consistency, lower-page visual concreteness, visual usability, text overflow/overlap/spacing/mobile-pressure checks, clipping checks, or template reuse risk. All requirements previously applied to generated design images apply to UI Surface Contracts and HTML previews before screenshots and Page Implementation Blueprints.
+
+Required order:
+
+1. Application Design System.
+2. UI Surface Contracts using `docs/standards/ui-surface-contract-template.md`.
+3. High-fidelity HTML previews generated from the UI Surface Contracts and Application Design System.
+4. DOM/layout/visual-quality validation.
+5. Desktop/mobile screenshot evidence captured from HTML previews.
+6. Page Implementation Blueprints.
+7. Blueprint-to-UI Surface Contract comparison.
+
+PNG screenshots are evidence generated from validated HTML previews, not the primary implementation contract. HTML preview is not a low-fidelity scaffold; it must be a modern, polished, design-system-driven prototype equal to or better than generated static design images. It must use Application Design System tokens/classes, approved UI pattern templates, required DOM fields/actions, forbidden-region exclusion, responsive/mobile stack behavior, and text wrapping/truncation/container evidence.
+
+Run:
+
+```sh
+node scripts/validate-ui-surface-contracts.mjs --contracts <dir-or-json> --app-plan <app-plan.md> --design-system <application-design-system.md>
+node scripts/validate-html-preview-layout.mjs --contracts <dir-or-json> --html <dir> --screenshots <dir> --design-system <application-design-system.md>
+node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts <dir-or-json> --blueprints <dir-or-json> --design-system <application-design-system.md>
+```
+
+Do not proceed to Page Implementation Blueprints if UI Surface Contract, HTML preview, visual quality, screenshot evidence, or layout validation fails. Do not proceed to Yeeflow resource/package generation if blueprint-to-contract parity fails. Contract validation, HTML/DOM validation, screenshot evidence, blueprint parity, package schema, signing/API acceptance, install/upgrade success, and runtime proof are separate proof layers.
+
+The overlap heuristic for HTML preview validation must check meaningful sibling collisions and must not count parent-child containment as overlap.
+
+## 10. Page Implementation Blueprints
+
+Create Page Implementation Blueprints only after the Full-page Canonical Design Artifacts stage passes and, for complex business applications, after UI Surface Contract and high-fidelity HTML preview validation pass. Blueprints must consume the approved Application Design System, UI Surface Contract, validated HTML structure, screenshot evidence, canonical design images where used, and Design Image Manifest as the visual contract.
 
 ## 10. Decide Safe Build Scope
 

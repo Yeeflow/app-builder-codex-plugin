@@ -8,13 +8,14 @@ Full-application Yeeflow generation is a staged evidence workflow. A visually po
 2. Yeeflow App Plan.
 3. Business Clarification Gate approved for generation and Generation Readiness final check.
 4. Full-page Canonical Design Artifacts stage.
-5. Page Implementation Blueprint.
-6. Yeeflow control/property contract validation.
-7. Resource generation.
-8. Decoded resource parity validation.
-9. Local hard gates.
-10. Package/sign/upgrade only after explicit write approval.
-11. Runtime/browser proof only after Chrome/runtime evidence exists.
+5. UI Surface Contract and high-fidelity HTML Preview workflow for complex business applications.
+6. Page Implementation Blueprint.
+7. Yeeflow control/property contract validation.
+8. Resource generation.
+9. Decoded resource parity validation.
+10. Local hard gates.
+11. Package/sign/upgrade only after explicit write approval.
+12. Runtime/browser proof only after Chrome/runtime evidence exists.
 
 Do not start a later stage when the prior stage lacks completion evidence. Schema validation, signing, install, upgrade, decoded CSS, decoded controls, or ID stability do not prove UI fidelity or runtime behavior. Runtime proof cannot claim success until Chrome/runtime evidence exists.
 
@@ -40,6 +41,45 @@ Structural design coverage is not enough. The design artifact stage must also pa
 - Approval form and Data List form surfaces are complete form pages and do not require application header/navigation; they may use `form-surface-no-app-chrome` as a non-dashboard surface marker.
 - Every artifact must include `visualQualityStatus`, a modern visual quality checklist, and an anti-pattern check.
 - `readyForBlueprint: true` is forbidden unless layout fidelity passes, modern visual quality passes, visual usability/text overflow/overlap/spacing/mobile usability pass or have reviewed risk evidence, and anti-pattern checks pass.
+
+## HTML-First UI Surface Contract Workflow
+
+PNG-first canonical images remain supported as visual evidence, but they are insufficient as the sole implementation contract for complex business apps. When an application includes approval forms, data list custom forms, document library forms, dashboards, or non-trivial responsive UI, the recommended hard-gated path is:
+
+```text
+App Plan
+-> Application Design System
+-> UI Surface Contract
+-> High-fidelity HTML Preview
+-> DOM/Layout/Visual Quality Validation
+-> Screenshot Evidence
+-> Page Implementation Blueprint
+-> Blueprint-to-Contract comparison
+```
+
+The UI Surface Contract is the primary implementation contract for fields, actions, surface responsibility, allowed/forbidden regions, related regions, responsive behavior, and intended Yeeflow control mapping. Use `docs/standards/ui-surface-contract-template.md` and validate with:
+
+```bash
+node scripts/validate-ui-surface-contracts.mjs --contracts <dir-or-json> --app-plan <app-plan.md> --design-system <application-design-system.md>
+```
+
+The high-fidelity HTML preview is the primary visual preview source. It must be generated from the UI Surface Contract, reference the Application Design System, use design-system tokens/classes, use approved UI pattern templates, render desktop and mobile variants, include required DOM sections/fields/actions, exclude forbidden regions, and meet modern visual quality expectations. HTML preview is not a low-fidelity scaffold, plain field dump, generic admin table, or arbitrary unstyled form. Use `docs/standards/html-preview-design-standard.md` and validate with:
+
+```bash
+node scripts/validate-html-preview-layout.mjs --contracts <dir-or-json> --html <dir> --screenshots <dir> --design-system <application-design-system.md>
+```
+
+Screenshots are evidence generated from validated HTML previews, not the source of truth. SVG is allowed only for icons, small visual assets, charts, or optional supplemental visuals, not as the primary app UI source for complex form/dashboard surfaces.
+
+Generate Page Implementation Blueprints only from the approved UI Surface Contract plus validated HTML structure. Then compare every blueprint back to the contract and design-system style intent:
+
+```bash
+node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts <dir-or-json> --blueprints <dir-or-json> --design-system <application-design-system.md>
+```
+
+`readyForBlueprint: true` requires UI Surface Contract validation, HTML/DOM layout validation, HTML visual quality validation, screenshot evidence, and blueprint-to-contract comparison when using the HTML-first workflow. Do not proceed to Yeeflow resource/package generation if blueprint-to-contract parity fails. Contract validation, HTML/DOM validation, screenshot evidence, blueprint parity, package schema validation, signing/API acceptance, install/upgrade success, and runtime proof are separate proof layers.
+
+The HTML-first workflow inherits every Full-page Canonical Design Artifact gate. It does not replace the existing requirements for official application layout, dashboard chrome, no-app-chrome form surfaces, full-page/page-end completeness, modern visual quality, surface responsibility, App Plan field/action coverage, forbidden-region checks, semantic consistency, lower-page visual concreteness, visual usability, text overflow/overlap/spacing/mobile-pressure checks, clipping checks, and template reuse risk. Page Implementation Blueprints may start only when both the UI Surface Contract and the HTML preview prove those inherited gates.
 
 ## Canonical Page Design Images
 
@@ -97,6 +137,9 @@ Run:
 
 ```bash
 node scripts/validate-full-page-design-artifacts.mjs --manifest design-image-manifest.json
+node scripts/validate-ui-surface-contracts.mjs --contracts ui-surface-contracts --app-plan app-plan.md --design-system application-design-system.md
+node scripts/validate-html-preview-layout.mjs --contracts ui-surface-contracts --html html-previews --screenshots screenshots --design-system application-design-system.md
+node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts ui-surface-contracts --blueprints page-implementation-blueprints --design-system application-design-system.md
 node scripts/inspect-full-page-design-artifacts.mjs --manifest design-image-manifest.json
 node scripts/inspect-page-implementation-blueprint.mjs --blueprint page-implementation-blueprint.json
 node scripts/compare-blueprint-to-decoded-resource.mjs --blueprint page-implementation-blueprint.json --resource decoded-resource.json
