@@ -73,6 +73,32 @@ const MEANINGFUL_LOWER_REGION_RE =
   /\b(workflow|approval|decision|history|reviewer|comment|document|checklist|renewal|task|contract|vendor|reminder|activity|audit|validation|service|status|linked\s+record|evidence|signature|footer|payment|owner)\b/i;
 const GENERIC_LOWER_REGION_RE =
   /\b(page\s*end|end\s*marker|generic\s+notes?|notes?\s+only|blank|white\s+space|empty\s+space|lower\s+content|placeholder|design[- ]stage explanation|helper\s+text)\b/i;
+const SUPPORTED_LOWER_REGION_PATTERNS = [
+  "data table",
+  "collection",
+  "kanban",
+  "vertical timeline",
+  "horizontal timeline",
+  "dynamic sub list",
+  "checklist rows",
+  "related-record cards",
+  "related record cards",
+  "document table",
+  "document cards",
+  "document evidence cards",
+  "activity feed",
+  "audit feed",
+  "workflow timeline",
+  "approval timeline",
+  "signature block",
+  "read-only field group",
+  "read only field group",
+];
+const SUPPORTED_LOWER_REGION_PATTERN_RE = new RegExp(`\\b(${SUPPORTED_LOWER_REGION_PATTERNS.map(escapeRegex).join("|")})\\b`, "i");
+const PLACEHOLDER_REGION_TEXT_RE =
+  /^(source\s*:|show\b|page\s*end\b|generic\s+notes?\b|design[- ]stage explanation\b|document name,\s*type,\s*status|field names?\b|fields?\s*:)/i;
+const FIELD_LIST_ONLY_RE =
+  /^\s*(?:[A-Za-z][A-Za-z /-]+)(?:\s*,\s*[A-Za-z][A-Za-z /-]+){2,}\s*$/;
 const STATUS_VALUE_RE = /\b(active|inactive|approved|pending|rejected|overdue|task overdue|in review|expired|draft|renewal due|complete|completed|blocked|open|closed)\b/i;
 const DOCUMENT_FILENAME_RE = /\b[\w .-]+\.(pdf|docx?|xlsx?|pptx?|png|jpe?g|gif|zip)\b/i;
 const REVIEW_COMMENT_RE = /\b(review comment|looks good|please review|needs changes|approved by|reject because|comment:|reviewer note)\b/i;
@@ -565,6 +591,7 @@ function validateLowerPageBusinessRegions(findings, artifact, context = {}) {
         ...context,
         region: text,
       });
+      if (typeof region === "object" && region !== null) validateLowerPageRegionVisualConcreteness(findings, region, artifact, context);
       continue;
     }
     meaningful += 1;
@@ -579,9 +606,133 @@ function validateLowerPageBusinessRegions(findings, artifact, context = {}) {
       ]) {
         requireText(findings, region, keys, code, message, context);
       }
+      validateLowerPageRegionVisualConcreteness(findings, region, artifact, context);
+    } else {
+      addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_VISUAL_EVIDENCE_MISSING", "Lower-page business regions must be structured manifest objects with visual concreteness evidence, not plain descriptive text.", {
+        ...context,
+        region: text,
+      });
+      blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITHOUT_LOWER_REGION_VISUAL_CONCRETENESS", "Form/detail artifact cannot be ready for blueprint when lower-page region visual evidence is missing.", context);
     }
   }
   if (!meaningful) blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITHOUT_LOWER_PAGE_BUSINESS_REGION", "Form/detail artifact cannot be ready for blueprint when lower-page regions are generic or page-end-only.", context);
+}
+
+function validateLowerPageRegionVisualConcreteness(findings, region, artifact, context = {}) {
+  const regionName = firstText(region.regionName, region.name);
+  const visualPattern = firstText(region.visualPattern, region.pattern);
+  const plannedControl = firstText(region.plannedYeeflowControl, region.yeeflowControl, region.control, region.controlPattern);
+  const renderedExampleSummary = firstText(region.renderedExampleSummary, region.exampleSummary, region.renderedExamples);
+  const displayedBusinessFields = asArray(region.displayedBusinessFields || region.displayedFields || region.displayedItems || region.fields);
+  const visualConcretenessStatus = firstText(region.visualConcretenessStatus, region.visualEvidenceStatus);
+  const antiPlaceholderStatus = firstText(region.antiPlaceholderStatus, region.placeholderStatus);
+  const emptyState = truthy(region.emptyState) || (region.emptyState && typeof region.emptyState === "object" && !("enabled" in region.emptyState)) || truthy(region.emptyState?.enabled);
+  const renderedExampleCount = Number(firstText(region.renderedExampleCount, region.exampleCount, region.renderedRows, region.renderedItems));
+  const regionContext = { ...context, regionName: regionName || scalarRegion(region) };
+
+  if (!visualPattern) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_VISUAL_PATTERN_MISSING", "Lower-page business region must declare visualPattern.", regionContext);
+  } else if (!SUPPORTED_LOWER_REGION_PATTERN_RE.test(visualPattern)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_VISUAL_PATTERN_UNSUPPORTED", "Lower-page business region visualPattern must be a concrete Yeeflow-control-shaped pattern, not notes or generic description.", {
+      ...regionContext,
+      visualPattern,
+    });
+  }
+
+  if (!plannedControl) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_CONTROL_MISSING", "Lower-page business region must declare plannedYeeflowControl.", regionContext);
+  } else if (!SUPPORTED_LOWER_REGION_PATTERN_RE.test(plannedControl)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_CONTROL_UNSUPPORTED", "plannedYeeflowControl must be a supported visual/control pattern for the lower-page region.", {
+      ...regionContext,
+      plannedYeeflowControl: plannedControl,
+    });
+  }
+
+  if (!displayedBusinessFields.length) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_BUSINESS_FIELDS_MISSING", "Lower-page business region must declare displayedBusinessFields or equivalent displayed fields/items.", regionContext);
+  }
+  requireText(findings, region, ["actionsShown", "actions", "actionOrReadOnlyBehavior", "behavior"], "FORM_DETAIL_LOWER_REGION_ACTIONS_SHOWN_MISSING", "Lower-page business region must declare actionsShown or read-only behavior.", regionContext);
+  requireText(findings, region, ["blueprintMappingHint", "blueprintHint", "controlMappingHint"], "FORM_DETAIL_LOWER_REGION_BLUEPRINT_HINT_MISSING", "Lower-page business region must include a blueprintMappingHint.", regionContext);
+
+  if (!isPassingReviewStatus(visualConcretenessStatus)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_VISUAL_CONCRETENESS_NOT_PASSING", "Lower-page business region visualConcretenessStatus must be pass before blueprint readiness.", {
+      ...regionContext,
+      visualConcretenessStatus,
+    });
+  }
+  if (!isPassingReviewStatus(antiPlaceholderStatus)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_ANTI_PLACEHOLDER_NOT_PASSING", "Lower-page business region antiPlaceholderStatus must be pass before blueprint readiness.", {
+      ...regionContext,
+      antiPlaceholderStatus,
+    });
+  }
+
+  if (!emptyState && (!Number.isFinite(renderedExampleCount) || renderedExampleCount <= 0)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_RENDERED_EXAMPLE_COUNT_MISSING", "Lower-page business region must include renderedExampleCount greater than 0 unless it declares an intentional empty-state component.", {
+      ...regionContext,
+      renderedExampleCount: Number.isFinite(renderedExampleCount) ? renderedExampleCount : firstText(region.renderedExampleCount, region.exampleCount),
+    });
+  }
+  if (emptyState) validateLowerPageEmptyState(findings, region, regionContext);
+
+  if (!renderedExampleSummary) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_RENDERED_EXAMPLE_SUMMARY_MISSING", "Lower-page business region must include renderedExampleSummary with actual sample rows/cards/items.", regionContext);
+  } else if (isPlaceholderOnlyRenderedSummary(renderedExampleSummary, displayedBusinessFields)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_RENDERED_EXAMPLE_PLACEHOLDER_ONLY", "renderedExampleSummary must describe actual rendered rows/cards/items, not only source notes, field lists, or Show-style explanatory text.", {
+      ...regionContext,
+      renderedExampleSummary,
+    });
+  }
+
+  if (/generic notes?|notes/i.test(visualPattern) || /generic notes?|notes/i.test(plannedControl)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_GENERIC_VISUAL_PATTERN", "Lower-page business region cannot use generic notes as its visual pattern or planned control.", {
+      ...regionContext,
+      visualPattern,
+      plannedYeeflowControl: plannedControl,
+    });
+  }
+
+  const hasBlocking =
+    !visualPattern ||
+    !plannedControl ||
+    !SUPPORTED_LOWER_REGION_PATTERN_RE.test(visualPattern) ||
+    !SUPPORTED_LOWER_REGION_PATTERN_RE.test(plannedControl) ||
+    !isPassingReviewStatus(visualConcretenessStatus) ||
+    !isPassingReviewStatus(antiPlaceholderStatus) ||
+    (!emptyState && (!Number.isFinite(renderedExampleCount) || renderedExampleCount <= 0)) ||
+    !renderedExampleSummary ||
+    isPlaceholderOnlyRenderedSummary(renderedExampleSummary, displayedBusinessFields);
+  if (hasBlocking) {
+    blockReadyForBlueprint(findings, artifact, "FORM_DETAIL_READY_WITHOUT_LOWER_REGION_VISUAL_CONCRETENESS", "Form/detail artifact cannot be ready for blueprint when lower-page regions are not visually concrete.", context);
+  }
+}
+
+function validateLowerPageEmptyState(findings, region, context = {}) {
+  const emptyState = region.emptyState && typeof region.emptyState === "object" ? region.emptyState : region;
+  if (!firstText(emptyState.emptyStateComponent, emptyState.component, emptyState.visualComponent)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_EMPTY_STATE_COMPONENT_MISSING", "Intentional empty lower-page regions must show an empty-state component, not blank space or explanation text.", context);
+  }
+  if (!firstText(emptyState.emptyStateReason, emptyState.reason)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_EMPTY_STATE_REASON_MISSING", "Intentional empty lower-page regions must include an empty-state reason.", context);
+  }
+  if (!firstText(emptyState.emptyStateNextAction, emptyState.nextAction)) {
+    addFinding(findings, "error", "FORM_DETAIL_LOWER_REGION_EMPTY_STATE_NEXT_ACTION_MISSING", "Intentional empty lower-page regions must include a next action.", context);
+  }
+}
+
+function isPlaceholderOnlyRenderedSummary(summary, displayedFields = []) {
+  const text = scalar(summary).trim();
+  if (!text) return true;
+  if (PLACEHOLDER_REGION_TEXT_RE.test(text)) return true;
+  if (FIELD_LIST_ONLY_RE.test(text) && !/[=:]\s*[^,;|]+/.test(text)) return true;
+  const normalized = normalizeKey(text);
+  const fieldLabels = displayedFields.map(scalar).filter(Boolean);
+  if (fieldLabels.length >= 2) {
+    const fieldOnlyText = normalizeKey(fieldLabels.join(", "));
+    if (normalized === fieldOnlyText) return true;
+  }
+  const hasConcreteValueMarker = /[=:]\s*[^,;|]+|\b(row|card|item|task|document|decision|timeline|checklist|signed|received|owner|due|approved|pending|msa-|acme|mira|legal|finance|net\s+\d+)\b/i.test(text);
+  return !hasConcreteValueMarker;
 }
 
 function validatePageSpecificQualityEvidence(findings, artifact, context = {}) {
@@ -685,10 +836,19 @@ function scalarRegion(region) {
       region.regionPurpose,
       region.sourceList,
       region.dataSource,
+      region.sourceListOrDataSource,
+      region.visualPattern,
+      region.plannedYeeflowControl,
+      region.renderedExampleSummary,
+      region.displayedBusinessFields,
       region.displayedFields,
       region.displayedItems,
+      region.actionsShown,
       region.behavior,
       region.actionOrReadOnlyBehavior,
+      region.visualConcretenessStatus,
+      region.antiPlaceholderStatus,
+      region.blueprintMappingHint,
       region.proofImpact,
     ]
       .flatMap((value) => asArray(value).length ? asArray(value) : [value])

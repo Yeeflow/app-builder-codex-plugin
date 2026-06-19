@@ -68,6 +68,10 @@ For Approval and Data List form/detail rows:
 - `semanticFieldExamples` must include realistic field/value pairs, such as `Contract Title = MSA-2026 Acme Supplies`, `Contract Owner = Mira Chen`, and `Renewal Date = 2026-08-15`.
 - Field labels and values must match business semantics. Do not put lifecycle statuses in title/name fields, task/status labels in owner/person fields, document filenames in date fields, person/vendor names in status fields, review comments in document/evidence fields, or status labels in related-record fields.
 - `lowerPageBusinessRegions` must include at least one meaningful business region with name, purpose, source list/data source, displayed fields/items, action or read-only behavior, and proof impact.
+- Each lower-page business region must also declare visual concreteness evidence: `regionName`, `regionPurpose`, `sourceListOrDataSource`, `visualPattern`, `plannedYeeflowControl`, `renderedExampleCount`, `renderedExampleSummary`, `displayedBusinessFields`, `actionsShown`, `visualConcretenessStatus`, `antiPlaceholderStatus`, and `blueprintMappingHint`.
+- The canonical PNG/design contract must show the intended runtime-like visual representation for every lower-page business region: realistic rendered rows, cards, timeline entries, checklist rows, document evidence cards/table, activity feed rows, signature rows, or read-only field groups. Source-list notes and field-name lists may appear as supporting metadata, but they must not be the only visual content in the region.
+- Supported lower-page visual patterns include Data table, Collection, Kanban, Vertical Timeline, Horizontal Timeline, Dynamic Sub List, checklist rows, related-record cards, document table/cards, activity feed, workflow/approval timeline, signature block, and read-only field group.
+- `renderedExampleCount` must be greater than `0` unless the region intentionally shows an empty-state component with reason and next action. `renderedExampleSummary` must describe concrete sample rows/cards/items, not only `Source: ...`, `Show ...`, or plain field names.
 - Lower-page regions must not be only `Page end`, generic notes, blank space, or design-stage explanation text.
 - `pageSpecificQualityEvidence` must include at least two page-specific entries that name business objects, fields, records, histories, actions, or planned resources. Generic checklist wording is not enough.
 - `templateReuseRiskStatus: fail` or `human_review_required` blocks blueprint readiness unless the surface is explicitly deferred with reason, fallback, and proof impact.
@@ -137,8 +141,17 @@ When using `scripts/validate-full-page-design-artifacts.mjs`, store the manifest
           "name": "Approval History",
           "purpose": "Show prior review decisions and comments.",
           "sourceList": "Contract Approval",
+          "visualPattern": "Vertical Timeline",
+          "plannedYeeflowControl": "Vertical Timeline",
+          "renderedExampleCount": 2,
+          "renderedExampleSummary": "Timeline event 1: Legal Review, reviewer Nia Patel, decision Approved, comment Terms acceptable, date 2026-06-03. Timeline event 2: Finance Review, reviewer Omar Chen, decision Pending, date 2026-06-05.",
+          "displayedBusinessFields": ["Step", "Reviewer", "Decision", "Comment", "Decision date"],
           "displayedFields": ["Step", "Reviewer", "Decision", "Comment", "Decision date"],
+          "actionsShown": ["Read-only timeline"],
+          "visualConcretenessStatus": "pass",
+          "antiPlaceholderStatus": "pass",
           "behavior": "read-only timeline",
+          "blueprintMappingHint": "Map to Vertical Timeline events bound to Contract Approval history.",
           "proofImpact": "Blueprint must preserve the approval history section."
         }
       ],

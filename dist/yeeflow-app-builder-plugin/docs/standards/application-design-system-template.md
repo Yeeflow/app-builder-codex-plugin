@@ -85,6 +85,7 @@ Approval Submission forms, Approval Task forms, Approval Print pages, Data List 
 - Field/value semantic guardrails:
 - Required form/detail business fields:
 - Required lower-page business regions:
+- Lower-page visual concreteness rules:
 - Page-specific quality evidence rules:
 - Template reuse risk rules:
 - Shared-style allowance:
@@ -98,6 +99,10 @@ Minimum acceptance criteria:
 - field labels and values must match business semantics; for example, contract title/name fields must not contain lifecycle status values, owner/person fields must not contain task/status labels, date fields must not contain document filenames, and document/evidence fields must not contain review comment text
 - every form/detail artifact includes at least one meaningful `lowerPageBusinessRegions` entry with region name, purpose, source list/data source, displayed fields/items, action or read-only behavior, and proof impact
 - lower-page regions must contain planned business data, records, history, evidence, or actions; blank space, `Page end`, generic notes, or design-stage explanation text do not satisfy full-page coverage
+- every lower-page business region must show concrete visual UI representation in the canonical design artifact: rendered rows, cards, timeline entries, checklist rows, document evidence cards/table, activity feed rows, signature rows, or read-only field groups
+- lower-page regions must declare `visualPattern`, `plannedYeeflowControl`, `renderedExampleCount`, `renderedExampleSummary`, `displayedBusinessFields`, `actionsShown`, `visualConcretenessStatus`, `antiPlaceholderStatus`, and `blueprintMappingHint`
+- source-list notes such as `Source: Contract Documents`, field-name lists such as `Document name, type, status`, and `Show ...` explanatory text may appear only as supporting metadata; they must not be the actual visual implementation
+- intentional empty-state lower regions must show an empty-state component with reason and next action; blank space or page-end markers are not valid empty states
 - every form/detail artifact includes at least two `pageSpecificQualityEvidence` entries naming concrete business objects, fields, records, histories, actions, or planned resources
 - generic visual quality phrases such as `strong visual hierarchy` or `professional spacing` are not enough for blueprint readiness unless paired with page-specific business evidence
 - `templateReuseRiskStatus` must be `pass`, `warning`, `fail`, or `human_review_required`; `fail` and `human_review_required` block blueprint readiness unless explicitly deferred with reason, fallback, and proof impact
