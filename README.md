@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.65`
+- Version: `0.6.66`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.65` releases Full-page Canonical Design Artifacts stage standardization from PR #97. It adds the Application Design System template, Design Image Manifest template, `validate-full-page-design-artifacts.mjs`, and focused regression tests. The stage now requires design-system sequencing and manifest reference gates, excludes Form Reports from required design-image surfaces, decomposes Approval forms into Submission/Task/Print design surfaces, covers planned Data List custom forms, requires Dashboard application layout/header/navigation coverage, treats form pages as complete pages without app header/navigation, and requires mobile images or responsive planning before Page Implementation Blueprints.
+Current release `0.6.66` releases Full-page Design Artifact layout fidelity and modern visual quality gates from PR #99. The design stage now requires official Yeeflow `applicationLayoutType` IDs, `applicationChromeStyleId`, `headerMode`, `navMode`, `navBackgroundMode`, `contentSafeArea`, and `layoutRuleSource`; validates Dashboard manifest layout/chrome fidelity; keeps form surfaces as no-app-chrome pages; rejects Layout 1 forbidden chrome markers; requires modern visual quality status, checklist, and anti-pattern gates; blocks `readyForBlueprint: true` unless layout fidelity and visual quality pass; and blocks `human_review_required` blueprint readiness unless explicitly deferred with reason, fallback, and proof impact.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.65
+Version: 0.6.66
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.65
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.66
 ```
 
 ## What Is Included
