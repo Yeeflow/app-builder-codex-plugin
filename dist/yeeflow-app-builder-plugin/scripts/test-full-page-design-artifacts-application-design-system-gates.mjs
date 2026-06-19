@@ -92,7 +92,44 @@ function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResource
     antiPatternCheck: "pass: no title-only, helper-text-heavy, placeholder chart, or generic SaaS shell anti-patterns",
     readyForBlueprint: true,
     generatedAt: "2026-06-19T01:05:00Z",
+    ...semanticDefaults(surfaceName, surfaceType),
     ...extra,
+  };
+}
+
+function semanticDefaults(surfaceName, surfaceType) {
+  if (!/form|print/i.test(surfaceType)) return {};
+  const isTask = /task/i.test(surfaceType);
+  const isPrint = /print/i.test(surfaceType);
+  return {
+    primaryBusinessObject: isTask ? "Contract Approval Task" : "Vendor Contract",
+    semanticFieldExamples: [
+      { field: "Contract Title", value: `${surfaceName} MSA-2026` },
+      { field: "Vendor", value: "Acme Supplies" },
+      { field: "Contract Owner", value: "Mira Chen" },
+      { field: "Renewal Date", value: "2026-08-15" },
+      { field: "Approval Status", value: isPrint ? "Approved" : "Pending Legal Review" },
+    ],
+    fieldValueSemanticsStatus: "pass",
+    lowerPageBusinessRegions: [
+      {
+        name: isPrint ? `${surfaceName} Signature Footer` : `${surfaceName} Approval History`,
+        purpose: isPrint ? "Show print signature and decision history evidence." : "Show approval decisions and renewal task evidence for this surface.",
+        sourceList: isPrint ? "Contract Approval" : "Renewal Tasks",
+        displayedFields: isPrint ? ["Signer", "Decision", "Decision date"] : ["Task", "Owner", "Due date", "Status"],
+        behavior: "read-only related records",
+        proofImpact: "Blueprint must preserve the lower-page business evidence region.",
+      },
+    ],
+    businessRegionEvidence: `${surfaceName} includes page-specific approval, renewal, or signature evidence.`,
+    formPurposeDifferentiators: [
+      `${surfaceName} has purposeful differences for ${isTask ? "task decision controls" : isPrint ? "print signature output" : "form entry or view workflow"}.`,
+    ],
+    templateReuseRiskStatus: "pass",
+    pageSpecificQualityEvidence: [
+      `${surfaceName} shows vendor contract fields, owner, renewal date, approval status, and payment context.`,
+      `${surfaceName} lower page shows approval history, renewal tasks, document evidence, or print signature content.`,
+    ],
   };
 }
 

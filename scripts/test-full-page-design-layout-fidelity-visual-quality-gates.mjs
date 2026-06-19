@@ -89,7 +89,40 @@ function artifact(surfaceName, surfaceType, sourceAppPlanSection, sourceResource
     antiPatternCheck: "pass: no generic scaffold, title-only, helper-text-heavy, placeholder chart, or arbitrary SaaS shell anti-patterns",
     readyForBlueprint: true,
     generatedAt: "2026-06-19T01:05:00Z",
+    ...semanticDefaults(surfaceName, surfaceType),
     ...extra,
+  };
+}
+
+function semanticDefaults(surfaceName, surfaceType) {
+  if (!/form/i.test(surfaceType)) return {};
+  return {
+    primaryBusinessObject: "Vendor Contract",
+    semanticFieldExamples: [
+      { field: "Contract Title", value: `${surfaceName} MSA-2026` },
+      { field: "Vendor", value: "Acme Supplies" },
+      { field: "Contract Owner", value: "Mira Chen" },
+      { field: "Renewal Date", value: "2026-08-15" },
+      { field: "Approval Status", value: "Pending Legal Review" },
+    ],
+    fieldValueSemanticsStatus: "pass",
+    lowerPageBusinessRegions: [
+      {
+        name: `${surfaceName} Renewal Tasks`,
+        purpose: "Show renewal task history and linked actions for this form surface.",
+        sourceList: "Renewal Tasks",
+        displayedFields: ["Task", "Owner", "Due date", "Status"],
+        behavior: "read-only related records",
+        proofImpact: "Blueprint must include lower-page renewal task evidence.",
+      },
+    ],
+    businessRegionEvidence: `${surfaceName} includes renewal task history and contract evidence.`,
+    formPurposeDifferentiators: [`${surfaceName} has its own field state, action area, and lower-page renewal task evidence.`],
+    templateReuseRiskStatus: "pass",
+    pageSpecificQualityEvidence: [
+      `${surfaceName} shows vendor contract fields, owner, renewal date, and approval status.`,
+      `${surfaceName} lower page shows renewal tasks and linked contract evidence.`,
+    ],
   };
 }
 
