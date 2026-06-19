@@ -479,7 +479,7 @@ Approve all recommended defaults for generation for: <gate1>, <gate2>, ...
 No package generation will proceed until the business gates are answered or explicitly user-default-approved-for-generation.
 ```
 
-List every unresolved business decision gate from the Functional Specification and App Plan by key and question. If the final response offers "approve all recommended defaults", it must name every unresolved gate covered by that approval option and must say whether the approval is for planning only or for generation. Do not collapse five unresolved gates into three visible questions or rely on an ambiguous "approve defaults" sentence. Never write only `Validation results: all passed` or `all passed` when generation-mode Business Clarification is blocked.
+List every unresolved business decision gate from the Functional Specification and App Plan by key and question. Deduplicate repeated gates by gate key when the same unresolved decision appears in both artifacts: report the raw finding count, unique unresolved gate count, and unique gate keys from `validate-business-clarification-gate.mjs` JSON output. If the final response offers "approve all recommended defaults", it must name every unresolved gate covered by that approval option and must say whether the approval is for planning only or for generation. Do not collapse five unresolved gates into three visible questions or rely on an ambiguous "approve defaults" sentence. Never write only `Validation results: all passed` or `all passed` when generation-mode Business Clarification is blocked.
 
 After outputting this block, do not continue to package generation in the same turn. Wait for the user's answers or explicit approval of the recommended defaults.
 

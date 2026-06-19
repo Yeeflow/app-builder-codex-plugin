@@ -87,6 +87,8 @@ These validators fail unresolved business decision gates, planning defaults used
 
 Planning reports must distinguish `Generation Readiness structural check: pass/fail` from overall readiness and must separate `Business Clarification Gate for planning` from `Business Clarification Gate for generation`. If structural readiness passes but generation-mode Business Clarification Gate fails, write `Overall generation readiness: blocked by Business Clarification Gate`; do not summarize the run as simply `Validation passed` or `all passed`.
 
+When Functional Specification and App Plan both repeat the same unresolved business decision gates, report the raw finding count separately from the unique unresolved gate count. Use the Business Clarification validator JSON fields `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` so users see the real number of decisions to answer even when each gate appears in multiple artifacts.
+
 After generation, validate plan-to-package conformance with:
 
 ```bash
