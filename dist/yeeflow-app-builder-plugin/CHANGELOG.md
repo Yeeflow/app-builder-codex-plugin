@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+## 0.6.68
+
+- Release Full-page lower-page region visual concreteness gates.
+- Require lower-page business regions in Approval/Data List form/detail canonical design artifacts to show concrete rendered UI examples rather than only source-list notes, field lists, generic descriptions, or design-stage explanation text.
+- Require lower-page visual evidence fields such as `visualPattern`, `plannedYeeflowControl`, `renderedExampleCount`, `renderedExampleSummary`, `displayedBusinessFields`, `actionsShown`, `visualConcretenessStatus`, `antiPlaceholderStatus`, and `blueprintMappingHint`.
+- Support concrete visual patterns including Data table, Collection cards, timeline rows, checklist rows, document table/cards, activity feeds, signature blocks, and read-only field groups.
+- Reject placeholder-only `Source:` sections, field-list-only summaries, `Show ...` descriptions without concrete item examples, generic notes, and page-end-only lower-page regions.
+- Block `readyForBlueprint: true` when lower-page visual concreteness fails.
+
+## 0.6.67
+
+- Release Full-page form/detail semantic quality gates from PR #101.
+- Add form/detail semantic quality gates for Approval Submission forms, Approval Task forms, Approval Print pages, Data List Add/Edit forms, Data List View forms, Data List Detail forms, and other custom form/detail surfaces.
+- Add conservative field/value mismatch guardrails so obvious semantic errors, such as status values in title/name fields or task/status labels in owner/person fields, block blueprint readiness.
+- Require meaningful lower-page business regions instead of blank space, page-end markers, generic notes, or design-stage explanation text.
+- Require page-specific quality evidence for form/detail artifacts rather than generic visual-quality checklist text alone.
+- Add template reuse risk checks so identical generic form/detail scaffolds require purposeful functional differences or explicit deferral.
+- Block `readyForBlueprint: true` when semantic quality, lower-page business regions, page-specific evidence, or template reuse risk fails.
+
+## 0.6.66
+
+- Release Full-page Design Artifact layout fidelity and modern visual quality gates from PR #99.
+- Require official Yeeflow `applicationLayoutType` IDs for design artifacts: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, and `application-layout-4-no-nav`.
+- Require Application Design System and manifest layout fields: `applicationChromeStyleId`, `headerMode`, `navMode`, `navBackgroundMode`, `contentSafeArea`, and `layoutRuleSource`.
+- Add Dashboard manifest layout/chrome fidelity checks, including header/navigation requirements and selected layout/chrome compliance declarations.
+- Preserve form-surface no-app-chrome behavior so Approval and Data List form surfaces do not inherit Dashboard application chrome requirements.
+- Reject Layout 1 forbidden chrome markers such as custom sidebars, arbitrary SaaS shells, detached left rails, header hamburgers, bottom collapse controls, extra top navigation, and mixed nav panels.
+- Require modern visual quality status, checklist, and anti-pattern gates for canonical design artifacts.
+- Block `readyForBlueprint: true` unless layout fidelity and modern visual quality pass.
+- Block `human_review_required` blueprint readiness unless the item is explicitly deferred with reason, fallback, and proof impact.
+
+## 0.6.65
+
+- Release Full-page Canonical Design Artifacts stage standardization from PR #97.
+- Add the Application Design System template at `docs/standards/application-design-system-template.md`.
+- Add the Design Image Manifest template at `docs/standards/design-image-manifest-template.md`.
+- Add `scripts/validate-full-page-design-artifacts.mjs` and focused regression coverage in `scripts/test-full-page-design-artifacts-application-design-system-gates.mjs`.
+- Require the Application Design System to be generated before canonical design images, and require the manifest plus every artifact row to reference it.
+- Require full-page design coverage for Dashboard pages, Approval Submission/Task/Print surfaces, and planned Data List custom forms before Page Implementation Blueprints.
+- Exclude Form Reports from required design-image surfaces; they remain standalone Form Report resources.
+- Require Dashboard designs to include selected application layout/header/navigation coverage, while Approval/Data List form pages do not require application header/navigation.
+- Require each design artifact to include a desktop image plus mobile image or responsive plan reference, full-page/page-end coverage, App Plan traceability, business examples, and blueprint readiness.
+
 ## 0.6.64
 
 - Release Business Clarification unique unresolved gate summary reporting from PR #95.

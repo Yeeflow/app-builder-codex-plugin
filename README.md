@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.67`
+- Version: `0.6.68`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.67` releases Full-page form/detail semantic quality gates from PR #101. It adds form/detail semantic quality gates for Approval and Data List form/detail design artifacts; validates field/value mismatch guardrails; requires meaningful lower-page business regions instead of page-end/generic notes; requires page-specific quality evidence; checks template reuse risk; and blocks `readyForBlueprint: true` when semantic quality, lower-page business regions, page-specific evidence, or template reuse risk fails.
+Current release `0.6.68` releases Full-page lower-page region visual concreteness gates. Lower-page business regions in Approval/Data List form/detail canonical design artifacts must show concrete rendered UI examples, not only source-list notes, field lists, or generic descriptions. Supported visual patterns include Data table, Collection cards, timeline rows, checklist rows, document table/cards, activity feeds, signature blocks, and read-only field groups. The validator rejects placeholder-only `Source:` / field-list / generic-notes regions and blocks `readyForBlueprint: true` when lower-page visual concreteness fails.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.67
+Version: 0.6.68
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.67
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.68
 ```
 
 ## What Is Included

@@ -20,9 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.6.67`
+`0.6.68`
 
-Version `0.6.67` releases Full-page form/detail semantic quality gates from PR #101. It adds form/detail semantic quality gates for Approval and Data List form/detail design artifacts; validates field/value mismatch guardrails; requires meaningful lower-page business regions instead of page-end/generic notes; requires page-specific quality evidence; checks template reuse risk; and blocks `readyForBlueprint: true` when semantic quality, lower-page business regions, page-specific evidence, or template reuse risk fails.
+Version `0.6.68` releases Full-page lower-page region visual concreteness gates. Lower-page business regions in Approval/Data List form/detail canonical design artifacts must show concrete rendered UI examples, not only source-list notes, field lists, or generic descriptions. Supported visual patterns include Data table, Collection cards, timeline rows, checklist rows, document table/cards, activity feeds, signature blocks, and read-only field groups. The validator rejects placeholder-only `Source:` / field-list / generic-notes regions and blocks `readyForBlueprint: true` when lower-page visual concreteness fails.
 
 Version `0.6.61` releases App Plan control-selection, action, and plugin-supported type/property planning gates. App Plans must explicitly choose record display controls from Data table, Collection, Kanban, Vertical timeline, or Horizontal timeline; prefer Collection over Data table when both are suitable; plan Collection/Kanban/timeline item-template Dynamic controls with field bindings; and explicitly plan or mark not applicable Collection/Kanban item actions and Sub List list actions. App Plan output must use plugin-supported Yeeflow control, action, workflow node, field, variable, property, and binding types, or mark unsupported shapes as `export-learning-required`, `runtime-proof-required`, or `deferred`. Updated validators and regression coverage in `scripts/test-app-plan-control-action-property-gates.mjs` enforce these planning gates before design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
 
