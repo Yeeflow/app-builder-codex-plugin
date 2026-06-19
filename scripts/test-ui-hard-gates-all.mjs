@@ -79,6 +79,15 @@ const childTests = [
     ],
   },
   {
+    name: "Full-page lower-region visual concreteness regression suite",
+    command: ["scripts/test-full-page-lower-region-visual-concreteness-gates.mjs"],
+    validators: [
+      "validate-full-page-design-artifacts",
+      "lower-page rendered examples",
+      "placeholder-only lower-region rejection",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [
