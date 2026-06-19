@@ -12,9 +12,9 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.70`.
+Expected plugin: `Yeeflow App Builder` version `0.6.71`.
 
-Version `0.6.70` releases Full-page Design surface responsibility and App Plan field/action coverage gates. Canonical design artifacts must prove the surface responsibility, App Plan field coverage, required action coverage, forbidden-region checks, and App Plan traceability for Approval Submission, Approval Task, Approval Print Page, Data List New/Edit, Data List View, Document Library New/Edit, and Document Library View surfaces. `readyForBlueprint: true` is blocked when surface responsibility, field coverage, action coverage, forbidden-region, or App Plan traceability gates fail. These gates prove design artifact readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime rendering.
+Version `0.6.71` releases HTML-first high-fidelity UI Surface Contract workflow gates. UI Surface Contracts are now the primary implementation contract between the App Plan/Application Design System and high-fidelity HTML previews. HTML previews must be design-system-driven prototypes, not low-fidelity scaffolds, and PNG/screenshots are evidence generated from validated HTML previews rather than the design source of truth. New validators `scripts/validate-ui-surface-contracts.mjs`, `scripts/validate-html-preview-layout.mjs`, and `scripts/compare-blueprint-to-ui-surface-contract.mjs` enforce App Plan traceability, surface responsibility, field/action coverage, forbidden-region checks, `designSystemRef`, `uiPatternTemplateRef`, DOM required field/action validation, high-fidelity visual quality and design-token evidence, meaningful sibling-overlap detection without treating parent-child containment as overlap, screenshot evidence gates, and blueprint-to-contract/style-intent comparison. These gates prove design and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
 
 Version `0.6.56` releases Supplier runtime/design fidelity gates and validation-layer proof gates. Runtime proof must use the installed application `ListSetID` and runtime URL, never install-log IDs. Design implementation must map design sections, KPI counts, page background/chrome, Data Filter bindings, Collection detail links, analytics controls, progress/status treatments, Summary/KPI bindings, and canonical one-PNG-per-page artifacts through explicit design manifest mapping. Reports must keep `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` separate; schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, and the control-binding graph must be complete. Root padding gates from `0.6.55` remain baseline behavior, approval-form root padding remains deferred because evidence is mixed, and no pixel-perfect or live runtime proof claim is made before the matching runtime/browser evidence exists.
 
@@ -31,7 +31,7 @@ Run OAuth login before API access. OAuth uses Authorization Code with PKCE S256,
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.70
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.71
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```
