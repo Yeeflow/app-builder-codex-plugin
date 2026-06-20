@@ -145,6 +145,15 @@ function splitItems(text) {
   );
 }
 
+function splitResourceNames(text) {
+  return uniqueStrings(
+    safeString(text)
+      .split(/[,;|]/g)
+      .map((item) => item.replace(/^[\s\-*0-9.)]+/, "").trim())
+      .filter(Boolean),
+  );
+}
+
 function coercePlannedItems(value) {
   return asArray(value).flatMap((item) => {
     if (typeof item === "string") return [{ title: item }];
@@ -156,22 +165,25 @@ function coercePlannedItems(value) {
 function extractMarkdownNavigation(text) {
   const groups = [];
   const section = extractMarkdownSection(text, /application navigation|navigation/i);
-  const lines = (section || "").split(/\r?\n/);
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) continue;
-    const cells = trimmed.slice(1, -1).split("|").map((cell) => cell.trim());
-    if (cells.length < 2) continue;
-    const firstCell = cells[0].replace(/\s+/g, "");
-    if (/^-+$/.test(firstCell)) continue;
-    const header = cells.map((cell) => normalizeName(cell));
+  for (const table of markdownTables(section || "")) {
+    const header = table.header.map((cell) => normalizeName(cell));
     const groupIndex = header.findIndex((cell) => /^(navigation )?group$/.test(cell) || cell === "group name");
-    const itemIndex = header.findIndex((cell) => /^(navigation )?(items|pages|resources)$/.test(cell) || cell === "child items");
-    if (groupIndex >= 0 && itemIndex >= 0) continue;
-    if (groupIndex < 0 && itemIndex < 0 && cells.length > 2) continue;
-    const title = cells[0];
-    const items = splitItems(cells[1]);
-    if (title && items.length) groups.push({ title, items });
+    const itemIndex = header.findIndex((cell) => /^(navigation )?(item|items|page|pages|resource|resources)$/.test(cell) || cell === "child items");
+    if (groupIndex >= 0 && itemIndex >= 0) {
+      for (const row of table.rows) {
+        const title = row[groupIndex];
+        const items = splitResourceNames(row[itemIndex]);
+        if (title && items.length) groups.push({ title, items });
+      }
+      continue;
+    }
+    if (table.header.length === 2) {
+      for (const row of table.rows) {
+        const title = row[0];
+        const items = splitResourceNames(row[1]);
+        if (title && items.length) groups.push({ title, items });
+      }
+    }
   }
   return groups;
 }
@@ -180,20 +192,40 @@ function isPlaceholderResourceName(value) {
   const text = safeString(value).trim();
   if (!text) return true;
   if (/^<.*>$/.test(text)) return true;
-  if (/^(name|resource name|planned resource name|n\/a|na|none|tbd|yes\/no)$/i.test(text)) return true;
+  if (/^(name|resource name|planned resource name|n\/a|na|none|not applicable|applicable|tbd|yes\/no|yes|no|true|false|group|item|visible|hidden)$/i.test(text)) return true;
+  if (/^(empty|standard|native|default|optional|required|not required|not planned|no .+ planned)$/i.test(text)) return true;
   return false;
+}
+
+function isAggregateOrDetailResourceName(value) {
+  const text = safeString(value).trim();
+  if (!text) return true;
+  return [
+    /\bforms? for all lists\b/i,
+    /\bstandard (list|data list|form|view) experience\b/i,
+    /\boperational views?\b/i,
+    /\brole[-\s]specific .*views?\b/i,
+    /\b(workload|operations?) dashboards?\b/i,
+    /\bgrouped app navigation\b/i,
+    /\bplaceholder app groups?\b/i,
+    /\bpermission intent\b/i,
+    /\bfollow-up lifecycle workflows?\b/i,
+    /\blifecycle automations?\b/i,
+    /\blifecycle notifications?\b/i,
+    /\bcurrent requester intent\b/i,
+  ].some((pattern) => pattern.test(text));
 }
 
 function bucketForResourceType(value) {
   const type = safeString(value).toLowerCase();
-  if (/\b(form report|report)\b/.test(type)) return "reports";
-  if (/\b(workflow|automation|form action)\b/.test(type)) return "workflows";
-  if (/\b(dashboard|page|workspace|view)\b/.test(type)) return "pages";
-  if (/\bapproval form\b|\bform\b/.test(type) && !/\breport\b/.test(type)) return "approvalForms";
-  if (/\b(document librar|data list|list)\b/.test(type)) return "dataLists";
-  if (/\bai agent\b|\bagent\b/.test(type)) return "agents";
-  if (/\bcopilot\b/.test(type)) return "copilots";
-  if (/\btool\b/.test(type)) return "tools";
+  if (/\b(form reports?|reports?)\b/.test(type)) return "reports";
+  if (/\b(workflows?|automations?|form actions?)\b/.test(type)) return "workflows";
+  if (/\b(dashboards?|pages?|workspaces?)\b/.test(type) && !/\bviews?\b/.test(type)) return "pages";
+  if (/\bapproval forms?\b|\bforms?\b/.test(type) && !/\breports?\b/.test(type)) return "approvalForms";
+  if (/\b(document libraries|document library|data lists?|lists?)\b/.test(type)) return "dataLists";
+  if (/\bai agents?\b|\bagents?\b/.test(type)) return "agents";
+  if (/\bcopilots?\b/.test(type)) return "copilots";
+  if (/\btools?\b/.test(type)) return "tools";
   if (/\bknowledge\b/.test(type)) return "knowledgeResources";
   if (/\bintegration\b/.test(type)) return "integrations";
   if (/\bconnection|connector\b/.test(type)) return "connections";
@@ -236,8 +268,13 @@ function markdownTables(text) {
 
 function addMarkdownResource(resources, bucket, title) {
   if (!bucket || isPlaceholderResourceName(title)) return;
+  if (isAggregateOrDetailResourceName(title)) return;
   resources[bucket] = resources[bucket] || [];
   resources[bucket].push({ title: safeString(title).trim() });
+}
+
+function addMarkdownResources(resources, bucket, titleCell) {
+  for (const title of splitResourceNames(titleCell)) addMarkdownResource(resources, bucket, title);
 }
 
 function extractMarkdownResourceDeclarations(text) {
@@ -247,11 +284,12 @@ function extractMarkdownResourceDeclarations(text) {
     const resourceTypeIndex = header.findIndex((cell) => cell === "yeeflow resource type" || cell === "resource type");
     const resourceNameIndex = header.findIndex((cell) => cell === "planned resource name" || cell === "resource name");
     if (resourceTypeIndex >= 0 && resourceNameIndex >= 0) {
-      for (const row of table.rows) addMarkdownResource(resources, bucketForResourceType(row[resourceTypeIndex]), row[resourceNameIndex]);
+      for (const row of table.rows) addMarkdownResources(resources, bucketForResourceType(row[resourceTypeIndex]), row[resourceNameIndex]);
       continue;
     }
     const directColumns = [
       ["form report name", "reports"],
+      ["workflow name", "workflows"],
       ["schedule workflow name", "workflows"],
       ["ai agent name", "agents"],
       ["copilot name", "copilots"],
@@ -268,7 +306,7 @@ function extractMarkdownResourceDeclarations(text) {
     for (const [column, bucket] of directColumns) {
       const index = header.indexOf(column);
       if (index < 0) continue;
-      for (const row of table.rows) addMarkdownResource(resources, bucket, row[index]);
+      for (const row of table.rows) addMarkdownResources(resources, bucket, row[index]);
     }
   }
   const lines = text.split(/\r?\n/);
@@ -344,12 +382,6 @@ function parsePlan(planPath) {
   if (parsed) return normalizePlan(parsed, { path: planPath, sourceType: "json" });
   const navGroups = extractMarkdownNavigation(text);
   const resources = extractMarkdownResourceDeclarations(text);
-  for (const group of navGroups) {
-    const target = /settings/i.test(group.title) ? "adminResources"
-      : /operations/i.test(group.title) ? "workflows"
-        : "pages";
-    resources[target] = uniqueStrings([...(resources[target] || []).map((item) => item.title), ...group.items]).map((title) => ({ title }));
-  }
   return normalizePlan({
     resources,
     navigation: {
