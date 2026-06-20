@@ -4,6 +4,8 @@ Use this template after the Functional Specification, Yeeflow App Plan, Business
 
 This document is the application-level UI contract. Generate it before Yeeflow UI Section Template selection, Page Implementation Blueprints, optional canonical design images, or optional HTML previews. Every selected UI pattern, Page Implementation Blueprint, optional Design Image Manifest row, and optional HTML preview must reference this document.
 
+The Yeeflow Root Token Reference is the default design-token foundation for this document. Generate and approve this document from `docs/standards/yeeflow-root-token-reference.md`, `docs/standards/yeeflow-root-token-reference.normalized.json`, the Yeeflow Application Design System, and the approved App Plan before selecting UI templates or drafting Page Implementation Blueprints.
+
 ## 1. Design System Status
 
 - Status: draft / reviewed / approved for pattern selection / approved for blueprint
@@ -17,6 +19,9 @@ This document is the application-level UI contract. Generate it before Yeeflow U
 - UI pattern library source: `docs/templates/yeeflow-ui-section-template-library.normalized.json`
 - UI pattern library narrative source: `docs/templates/yeeflow-ui-section-template-library.md`
 - UI pattern standard source: `docs/standards/yeeflow-ui-pattern-library-generation-standard.md`
+- Root token reference source: `docs/standards/yeeflow-root-token-reference.md`
+- Root token registry source: `docs/standards/yeeflow-root-token-reference.normalized.json`
+- Generated after Root Token Reference review: yes/no
 
 ## 2. Selected Yeeflow Application Layout
 
@@ -48,6 +53,116 @@ Dashboard pages must reflect the selected official layout, including header/navi
 For `application-layout-1-vertical-nav`, canonical chrome must follow `docs/standards/yeeflow-application-layout-design-rules.md`: full-width dark top app header, persistent dark left vertical navigation connected to/below the header, content safe area to the right of the left navigation and below the header, page title/actions inside the content safe area, no header hamburger, no bottom Collapse control, no arbitrary product sidebar, no detached left rail, no custom SaaS shell, no extra top navigation, and no mixed dark/light nav panels across pages.
 
 For the other official layouts, reject obvious wrong chrome: Layout 2 must not use a persistent left sidebar; Layout 3 must keep navigation on the header and must not add a second nav bar or left nav; Layout 4 must not invent sidebars, nav tabs, replacement app shell navigation, or other visible app navigation.
+
+## 2A. Root Token Selection And Customization
+
+Declare all default token decisions before UI Pattern Library selection. Preserve token names through the selected templates, Page Implementation Blueprint, and generated Yeeflow resource properties wherever Yeeflow supports token-compatible values.
+
+- Selected Primary color family:
+  - normal/default:
+  - hover:
+  - active:
+  - light:
+  - light-hover:
+  - light-active:
+  - dark:
+  - dark-hover:
+  - dark-active:
+  - darker:
+- Selected Secondary color family:
+  - normal/default:
+  - hover:
+  - active:
+  - light:
+  - light-hover:
+  - light-active:
+  - dark:
+  - dark-hover:
+  - dark-active:
+  - darker:
+- Selected Neutral color family:
+  - normal/default:
+  - hover:
+  - active:
+  - light:
+  - light-hover:
+  - light-active:
+  - dark:
+  - dark-hover:
+  - dark-active:
+  - darker:
+- Status color usage rules:
+  - Success:
+  - Warning:
+  - Danger:
+- Page background token:
+- Text token:
+- Border/divider token:
+- Card/surface token:
+- Primary action token:
+  - normal/default:
+  - hover:
+  - active:
+- Secondary action token:
+  - normal/default:
+  - hover:
+  - active:
+- Success/warning/danger state usage:
+- Typography scale mapping by surface area:
+  - Application/page title:
+  - Section title:
+  - Card title:
+  - Body text:
+  - Table/list text:
+  - Form label:
+  - Form helper text:
+  - Button text:
+  - Badge/chip text:
+- Spacing scale mapping:
+  - Page padding:
+  - Section padding:
+  - Card padding:
+  - Form field gap:
+  - Table row/cell spacing:
+  - Button padding/gap:
+  - Grid/flex gap:
+  - Mobile/responsive spacing:
+- Border/gap/padding mapping:
+  - Border width mapping:
+  - Divider mapping:
+  - Section/card gap mapping:
+  - Form gap mapping:
+- Token customization policy:
+  - Primary, Secondary, Neutral, and typography choices may be customized per application.
+  - Customization must preserve the same token structure and state coverage as the Yeeflow Root Token Reference.
+  - Arbitrary one-off color, font-size, line-height, font-weight, spacing, gap, padding, or border values are not allowed when a Yeeflow root token exists.
+  - App-specific custom tokens require `runtime-proof-required`, `export-learning-required`, `deferred`, or `explicit-user-approved-custom-token`.
+- Control/property proof boundary:
+  - Product CSS token reference only:
+  - Export-proven token-compatible property paths:
+  - Runtime-proven token-compatible property paths:
+  - Inferred token-compatible property paths:
+  - Unsupported/custom style values and proof label:
+
+## 2B. FontAwesome Icon Usage Baseline
+
+Generated Yeeflow application UI icons must use Yeeflow-supported FontAwesome icon classes. Do not invent SVG icons, emoji icons, image icons, or arbitrary custom icon names as normal generated business-app UI.
+
+- Icon source: FontAwesome.
+- Preferred icon style family when known: `fa-regular` / `fa-solid`.
+- Icon size rule:
+- Icon color token rule:
+- Navigation icon usage:
+- Dashboard section header icon usage:
+- Action icon usage:
+- Status badge/chip icon usage:
+- Empty state icon usage:
+- Document/file region icon usage:
+- Approval/task action icon usage:
+- Icon fallback rule: if the exact FontAwesome class is uncertain, mark the icon `runtime-proof-required`, `export-learning-required`, or `deferred`; do not invent a class name.
+- Icon-only action accessibility rule: every icon-only action needs semantic purpose plus label or tooltip intent.
+
+Do not use hover/active color tokens as normal resting colors. Do not use normal/default tokens for hover/active states without an explicit exception label. Do not use Success, Warning, or Danger as the main application Primary palette without an explicit business reason.
 
 ## 3. Modern Visual Quality Standard
 
@@ -91,15 +206,17 @@ Minimum acceptance criteria:
 
 ## 3A. HTML Preview Design Tokens And UI Pattern Templates
 
-For complex business applications, the Application Design System must define reusable tokens and approved Yeeflow UI Section Templates first. HTML previews are optional high-fidelity review/prototype evidence when explicitly requested, and use `docs/standards/ui-surface-contract-template.md` and `docs/standards/html-preview-design-standard.md` only for that optional evidence flow.
+For complex business applications, the Application Design System must define reusable Yeeflow Root Token Reference decisions and approved Yeeflow UI Section Templates first. HTML previews are optional high-fidelity review/prototype evidence when explicitly requested, and use `docs/standards/ui-surface-contract-template.md` and `docs/standards/html-preview-design-standard.md` only for that optional evidence flow.
 
-The default implementation path is App Plan -> Application Design System -> selected Yeeflow UI Section Templates -> Page Implementation Blueprint -> Yeeflow resources. The Application Design System must define tokens, layout rules, component patterns, responsive rules, and visual quality standards that allow selected templates and blueprints to prove the same design-stage gates previously checked through images or HTML. It must not permit arbitrary SaaS shells, generic form scaffolds, placeholder lower-page regions, weak visual hierarchy, text overflow, element overlap, mobile layout pressure, or template reuse without purposeful surface differences.
+The default implementation path is App Plan -> Yeeflow Root Token Reference -> Application Design System -> selected Yeeflow UI Section Templates -> Page Implementation Blueprint -> Yeeflow resources. The Application Design System must define token names, token meanings, layout rules, component patterns, responsive rules, and visual quality standards that allow selected templates and blueprints to prove the same design-stage gates previously checked through images or HTML. It must not permit arbitrary SaaS shells, generic form scaffolds, placeholder lower-page regions, weak visual hierarchy, text overflow, element overlap, mobile layout pressure, raw visual guesses, or template reuse without purposeful surface differences.
 
+- Yeeflow Root Token Reference:
 - Yeeflow design token namespace:
 - Typography token/class map:
 - Spacing token/class map:
 - Color token/class map:
 - Border/radius/shadow token/class map:
+- Token customization policy and proof label:
 - Card and section component patterns:
 - Form section component patterns:
 - Data table and Sub List component patterns:
@@ -108,6 +225,7 @@ The default implementation path is App Plan -> Application Design System -> sele
 - Badge/chip/status component patterns:
 - Dashboard KPI/analytics component patterns:
 - Mobile responsive component patterns:
+- FontAwesome icon component patterns:
 - Approved UI pattern templates by surface type:
   - Dashboard page:
   - Approval Submission form:
@@ -124,9 +242,9 @@ Optional HTML previews must use these tokens and approved pattern templates. HTM
 
 Select surface-level templates from `docs/templates/yeeflow-ui-section-template-library.normalized.json`.
 
-| Surface ID | Surface type | Source App Plan resource | Selected `templateId` values | Template category | Proof status | Required controls mapped | Required fields/bindings mapped | Required actions mapped or deferred | Ready for Blueprint |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  | runtime-proven / export-proven / inferred / needs-golden-proof |  |  |  | yes/no |
+| Surface ID | Surface type | Source App Plan resource | Selected `templateId` values | Template category | Token set inherited from Application Design System | Icons required / semantic purpose / FontAwesome class | Proof status | Required controls mapped | Required fields/bindings mapped | Required actions mapped or deferred | Ready for Blueprint |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  | primary / secondary / neutral / status / typography / spacing | yes/no; purpose; `fa-regular fa-file` / deferred | runtime-proven / export-proven / inferred / needs-golden-proof |  |  |  | yes/no |
 
 Selection rules:
 
@@ -136,6 +254,7 @@ Selection rules:
 - Data List and Document Library New/Edit forms use form-body templates for primary editable fields; primary fields must not move into generic lower regions.
 - View/Detail, related-record, Sub List, Collection, Kanban, and Timeline regions must select templates matching their source list, row/current-item context, and actions.
 - Every selected template must preserve `patternProofStatus`.
+- Patterns that require icons must declare semantic icon purpose, recommended FontAwesome class when known, tokenized icon color/size, and fallback proof label when uncertain.
 
 Run `scripts/validate-ui-pattern-selection.mjs` before Page Implementation Blueprint work when a machine-readable pattern-selection artifact exists.
 

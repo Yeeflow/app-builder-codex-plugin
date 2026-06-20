@@ -269,15 +269,15 @@ Traceability fails when business objects, relationships, approvals, forms, workf
 
 ## 8. Pattern-Library UI Generation
 
-After the Functional Specification review, App Plan review, Business Clarification Gate for generation, Generation Readiness Review, and traceability gate pass, create the Application Design System and select Yeeflow UI Section Templates before Page Implementation Blueprints or resource/package generation.
+After the Functional Specification review, App Plan review, Business Clarification Gate for generation, Generation Readiness Review, and traceability gate pass, review the Yeeflow Root Token Reference, create the Application Design System, and select Yeeflow UI Section Templates before Page Implementation Blueprints or resource/package generation.
 
 This stage must produce:
 
-- an Application Design System document using `docs/standards/application-design-system-template.md`
+- an Application Design System document using `docs/standards/application-design-system-template.md`, `docs/standards/yeeflow-root-token-reference.md`, and `docs/standards/yeeflow-root-token-reference.normalized.json`
 - a pattern-selection artifact using `docs/templates/yeeflow-ui-section-template-library.normalized.json`
 - a validation/review report showing readiness for Page Implementation Blueprints
 
-Generate the Application Design System before template selection. Every selected template, optional visual artifact, and Page Implementation Blueprint must reference the selected Application Design System. If the design system is missing, incomplete, generated after template selection, or not referenced by selected surfaces, stop before Page Implementation Blueprints.
+Root Token Reference review is required before Application Design System approval. The Application Design System must select Primary, Secondary, Neutral, status, typography, spacing, border/divider, action, and responsive spacing tokens before UI Pattern Library selection. Generate the Application Design System before template selection. Every selected template, optional visual artifact, and Page Implementation Blueprint must reference the selected Application Design System and preserve token intent. If the design system is missing, incomplete, generated after template selection, lacks root-token decisions, or is not referenced by selected surfaces, stop before Page Implementation Blueprints.
 
 The Application Design System must use exact official Yeeflow layout fields before any template selection, optional design image, or Page Implementation Blueprint is accepted:
 
@@ -304,7 +304,9 @@ Dashboard pages must reflect the selected Yeeflow Application Layout, including 
 
 Layout 1 vertical navigation must follow `docs/standards/yeeflow-application-layout-design-rules.md`: full-width dark top app header, persistent dark left vertical navigation connected to/below the header, content safe area to the right of the left nav and below the header, page title/action area inside the content safe area, no header hamburger, no bottom Collapse control, no arbitrary product sidebar, no detached left rail, no custom SaaS shell, no extra top navigation, and no mixed dark/light nav panels across pages. Layout 2 must not use a persistent left sidebar. Layout 3 must keep navigation on the header and must not add a second nav bar or left nav. Layout 4 must not invent sidebars, nav tabs, or replacement app shell navigation.
 
-Every selected UI surface must map to one or more approved `templateId` values from the normalized registry. The selected templates must account for realistic business rows, cards, field labels, dates, statuses, owners, documents, tasks, action regions, relevant states, lower-page regions, and page end in the Page Implementation Blueprint.
+Every selected UI surface must map to one or more approved `templateId` values from the normalized registry. The selected templates must account for realistic business rows, cards, field labels, dates, statuses, owners, documents, tasks, action regions, relevant states, lower-page regions, and page end in the Page Implementation Blueprint. Every selected pattern must declare the inherited token set from the Application Design System. Page Implementation Blueprints must preserve token names for page background, section/card background, border/divider, typography, action buttons, status badges/chips, table/list/card spacing, grid/flex gaps, form field gaps, and mobile/responsive spacing; raw CSS values or visual guesses are not a substitute for token intent.
+
+Every selected pattern that needs icons must use Yeeflow-supported FontAwesome classes and declare semantic icon purpose. Generated app UI must not use invented SVG icons, emoji icons, image icons, or arbitrary custom icon names. Page Implementation Blueprints must map icon controls as Yeeflow control type `icon` with FontAwesome class, color token, size token or supported size property, action binding when clickable, and accessible label/tooltip intent for icon-only actions. If the exact FontAwesome class is uncertain, mark `runtime-proof-required`, `export-learning-required`, or `deferred`.
 
 Structural pattern coverage is not enough. The pattern-selection artifact must include `patternProofStatus`, selected template categories, required control mapping status, required field/binding/action mapping status, an anti-pattern check, and `readyForBlueprint` for each surface. `readyForBlueprint: true` is allowed only when template selection, category fit, required mappings, layout rules, and modern visual quality intent all pass. Reject generic scaffold pages, title-only or helper-text-heavy lower sections, placeholder chart regions without labels/context, arbitrary custom SaaS shells, weak KPI/Summary cards, unintentional Data Analytics regions, and pages without realistic business data examples or clear action priority.
 
@@ -327,30 +329,33 @@ The design stage must include mobile/responsive planning through either separate
 Run:
 
 ```bash
+node scripts/validate-yeeflow-root-token-usage.mjs --design-system <application-design-system.md>
 node scripts/validate-ui-pattern-selection.mjs --selection <pattern-selection.json>
+node scripts/validate-yeeflow-root-token-usage.mjs --pattern-selection <pattern-selection.json>
 ```
 
-This validator proves pattern-selection readiness for Page Implementation Blueprints only. It does not prove package validity, control/property serialization, signing/API acceptance, install/upgrade success, or runtime behavior.
+These validators prove root-token and pattern-selection readiness for Page Implementation Blueprints only. They do not prove package validity, control/property serialization, signing/API acceptance, install/upgrade success, runtime CSS rendering, or visual proof.
 
 ## 9. Optional HTML-first UI Surface Contract Workflow
 
 Use the HTML-first high-fidelity UI Surface Contract workflow only when the user explicitly asks for HTML previews, screenshots, or prototype evidence. It runs after pattern selection is structurally ready and before Page Implementation Blueprints.
 
-This workflow inherits and enforces all pattern-library gates. It must not replace or bypass official Yeeflow dashboard layout/chrome, no-app-chrome form surfaces, full-page/page-end completeness, modern visual quality, surface responsibility, App Plan field/action coverage, forbidden-region checks, semantic consistency, lower-page visual concreteness, visual usability, text overflow/overlap/spacing/mobile-pressure checks, clipping checks, or template reuse risk. All optional HTML evidence must preserve the selected Application Design System and selected Yeeflow UI templates before screenshots and Page Implementation Blueprints.
+This workflow inherits and enforces all root-token and pattern-library gates. It must not replace or bypass official Yeeflow dashboard layout/chrome, no-app-chrome form surfaces, full-page/page-end completeness, modern visual quality, surface responsibility, App Plan field/action coverage, forbidden-region checks, semantic consistency, lower-page visual concreteness, visual usability, text overflow/overlap/spacing/mobile-pressure checks, clipping checks, or template reuse risk. All optional HTML evidence must preserve the selected Root Token Reference decisions, Application Design System, and selected Yeeflow UI templates before screenshots and Page Implementation Blueprints.
 
 Required order:
 
-1. Application Design System.
-2. Yeeflow UI Section Template / Pattern Selection.
-3. UI Surface Contracts using `docs/standards/ui-surface-contract-template.md`.
-4. High-fidelity HTML previews generated from the UI Surface Contracts, Application Design System, and selected templates.
-5. DOM/layout/visual-quality validation.
-6. HTML-to-Yeeflow control mapping validation using `docs/standards/html-to-yeeflow-control-mapping-registry.md`.
-7. Desktop/mobile screenshot evidence captured from HTML previews.
-8. Page Implementation Blueprints generated from the App Plan, selected templates, UI Surface Contract, Control Mapping Registry, and validated HTML mapping metadata.
-9. Blueprint-to-UI Surface Contract and HTML mapping parity comparison.
+1. Yeeflow Root Token Reference.
+2. Application Design System.
+3. Yeeflow UI Section Template / Pattern Selection.
+4. UI Surface Contracts using `docs/standards/ui-surface-contract-template.md`.
+5. High-fidelity HTML previews generated from the UI Surface Contracts, Application Design System, and selected templates.
+6. DOM/layout/visual-quality validation.
+7. HTML-to-Yeeflow control mapping validation using `docs/standards/html-to-yeeflow-control-mapping-registry.md`.
+8. Desktop/mobile screenshot evidence captured from HTML previews.
+9. Page Implementation Blueprints generated from the App Plan, selected templates, UI Surface Contract, Control Mapping Registry, and validated HTML mapping metadata.
+10. Blueprint-to-UI Surface Contract and HTML mapping parity comparison.
 
-PNG screenshots are evidence generated from validated HTML previews, not the primary implementation contract. HTML preview is not a low-fidelity scaffold; it must be a modern, polished, design-system-driven prototype equal to or better than generated static design images. It must use Application Design System tokens/classes, approved UI pattern templates, required DOM fields/actions, forbidden-region exclusion, responsive/mobile stack behavior, and text wrapping/truncation/container evidence.
+PNG screenshots are evidence generated from validated HTML previews, not the primary implementation contract. HTML preview is not a low-fidelity scaffold; it must be a modern, polished, design-system-driven prototype equal to or better than generated static design images. It must use Application Design System root tokens/classes, approved UI pattern templates, required DOM fields/actions, forbidden-region exclusion, responsive/mobile stack behavior, and text wrapping/truncation/container evidence. HTML/PNG evidence cannot override token decisions.
 
 HTML previews for complex business applications must also be control-mapped. Every implementation-relevant HTML element must declare stable Yeeflow mapping metadata such as `data-blueprint-id`, `data-yeeflow-control`, field/action/source-list bindings, row/current-item context, parent binding, and style/layout/responsive tokens. Page Implementation Blueprints must be generated from the UI Surface Contract plus the Control Mapping Registry plus HTML mapping metadata, not by visually guessing from HTML. Unsupported mappings block generation unless explicitly marked `export-learning-required`, `runtime-proof-required`, or `deferred` with reason, fallback, and proof impact. Style conversion must use design-system style tokens and supported Yeeflow property mappings, not arbitrary CSS copying.
 
@@ -369,7 +374,7 @@ The overlap heuristic for HTML preview validation must check meaningful sibling 
 
 ## 10. Page Implementation Blueprints
 
-Create Page Implementation Blueprints only after the Application Design System and UI pattern selection pass. When optional PNG/HTML evidence is explicitly requested, Blueprints must also consume the approved UI Surface Contract, Control Mapping Registry, validated HTML mapping metadata, screenshot evidence, canonical design images where used, and Design Image Manifest as review evidence. By default, Blueprints consume the approved App Plan, Application Design System, and selected Yeeflow UI templates as the implementation contract. Blueprints must preserve template IDs, proof status, control type, field binding, action contract, source list, row/current item context, parent binding, and style/layout/responsive token intent. Run `scripts/validate-blueprint-ui-pattern-conformance.mjs` before resource generation.
+Create Page Implementation Blueprints only after the Application Design System, root-token validation, and UI pattern selection pass. When optional PNG/HTML evidence is explicitly requested, Blueprints must also consume the approved UI Surface Contract, Control Mapping Registry, validated HTML mapping metadata, screenshot evidence, canonical design images where used, and Design Image Manifest as review evidence. By default, Blueprints consume the approved App Plan, Application Design System, and selected Yeeflow UI templates as the implementation contract. Blueprints must preserve template IDs, proof status, control type, field binding, action contract, source list, row/current item context, parent binding, and style/layout/responsive token intent. Yeeflow resources should use token-compatible property values where supported, and resource parity should report any token-to-property fallback separately from runtime proof. Run `scripts/validate-blueprint-ui-pattern-conformance.mjs` and `scripts/validate-yeeflow-root-token-usage.mjs --blueprint <page-implementation-blueprint.json>` before resource generation. HTML/PNG evidence cannot override root-token decisions.
 
 ## 10. Decide Safe Build Scope
 

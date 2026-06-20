@@ -4,6 +4,11 @@ This standard defines the default UI generation source for Yeeflow applications.
 
 `docs/templates/yeeflow-ui-section-template-library.normalized.json`
 
+The default design-token foundation is the plugin-contained Yeeflow Root Token Reference:
+
+- `docs/standards/yeeflow-root-token-reference.md`
+- `docs/standards/yeeflow-root-token-reference.normalized.json`
+
 Generated PNG design images and HTML previews are optional review evidence unless the user explicitly asks for visual artifacts, screenshots, or high-fidelity prototypes. They must not override the approved Functional Specification, Yeeflow App Plan, Application Design System, selected UI Section Templates, or Page Implementation Blueprint.
 
 ## Mandatory Default Flow
@@ -12,6 +17,7 @@ Generated PNG design images and HTML previews are optional review evidence unles
 Functional Specification
 -> Yeeflow App Plan
 -> Business Clarification + Generation Readiness
+-> Yeeflow Root Token Reference
 -> Application Design System
 -> Yeeflow UI Section Template / Pattern Selection
 -> Page Implementation Blueprint
@@ -22,7 +28,7 @@ Functional Specification
 -> package/sign/install/runtime only when explicitly approved
 ```
 
-The Application Design System selects the application-level layout, token/style rules, surface responsibilities, and control/property proof boundary. Pattern selection then maps each UI surface to one or more `templateId` values from the normalized template registry. Page Implementation Blueprints are generated from the App Plan, Application Design System, and selected templates.
+The Application Design System selects the application-level layout, root token family choices, surface responsibilities, and control/property proof boundary. Pattern selection then maps each UI surface to one or more `templateId` values from the normalized template registry and declares the token intent each pattern inherits. Page Implementation Blueprints are generated from the App Plan, Application Design System, and selected templates while preserving token names.
 
 ## Surface-To-Template Selection
 
@@ -48,12 +54,18 @@ Every selected surface must declare:
 - `surfaceId`
 - `surfaceType`
 - selected `templateId` or `selectedTemplateIds`
+- inherited `tokenSet` / `tokenIntent` from the Application Design System
+- icon requirements for selected patterns, including semantic purpose, recommended FontAwesome class when known, tokenized icon color/size, and fallback proof label
 - `patternProofStatus`: `runtime-proven`, `export-proven`, `inferred`, or `needs-golden-proof`
 - control mapping for every template `requiredControls`
 - child-control mapping for every template `requiredChildControls`
 - field and data-binding mapping for every template `requiredFields` and `requiredDataBindings`
 - action mapping for required action rules, or explicit `inactiveActions` / `deferredActions`
-- proof boundary for unsupported fields, bindings, style tokens, or action behavior
+- proof boundary for unsupported fields, bindings, style tokens, custom tokens, or action behavior
+
+Token intent must include, as relevant to the selected pattern, page background, section/card background, border/divider, typography, action buttons, status badges/chips, table/list/card spacing, grid/flex gaps, form field gaps, and mobile/responsive spacing. Pattern selection must preserve Yeeflow root token names such as `--c--primary`, `--fs--base`, `--lh--base`, `--fw--regular`, and `--sp--s200`; resolved CSS values alone are insufficient.
+
+Icon intent must use Yeeflow-supported FontAwesome classes. For navigation, dashboard section headers, actions, status badges, empty states, document/file regions, and approval/task actions, selected patterns should declare whether an icon is required, what the icon means, and the recommended class such as `fa-regular fa-file` or `fa-solid fa-check` when known. If the exact icon class is uncertain, mark it `runtime-proof-required`, `export-learning-required`, or `deferred`; do not invent custom icon names.
 
 Deferred items must include reason, fallback, proof impact, and required follow-up. A deferred item may allow local planning to continue, but it must not be reported as runtime-proven or resource-generation-ready unless the chosen fallback is complete.
 
@@ -66,6 +78,10 @@ These are hard blockers:
 - placing Data List or Document Library primary editable fields in regions named `Primary form fields`, `Main form fields`, `Editable fields`, `Document metadata fields`, or similar
 - converting HTML-only concepts such as `div`, `span`, DOM sections, CSS classes, or screenshot regions into Yeeflow controls
 - treating HTML previews, PNG screenshots, SVG boards, or visual mockups as higher authority than the App Plan, Application Design System, selected templates, or Page Implementation Blueprint
+- replacing Application Design System token intent with arbitrary hex colors, raw font sizes, raw line heights, raw font weights, raw spacing, or raw CSS visual guesses when matching Yeeflow root tokens exist
+- using hover/active tokens as normal resting colors, using normal/default tokens for hover/active states without explanation, or using success/warning/danger as the main Primary palette without explicit business reason
+- using emoji, inline SVG, image icons, or arbitrary non-FontAwesome icon names as normal generated UI icons
+- creating icon-only actions without semantic purpose and label/tooltip intent
 - claiming UI quality from schema validation, signing, package API acceptance, or runtime navigation alone
 
 ## Blueprint Requirements
@@ -76,17 +92,23 @@ Blueprints must preserve the selected template contract:
 - control hierarchy matches the template's required parent/child structure
 - fields and data bindings map to real planned lists, forms, fields, variables, Summary/KPI metadata, Collection/Kanban item templates, Sub List rows, or explicit deferrals
 - actions bind to real Yeeflow form/page/action metadata or are explicitly inactive/deferred
-- style intent maps through the Application Design System token/property boundary
+- style intent maps through the Application Design System token/property boundary and preserves root token names
 - unsupported style/property/control shapes are marked `export-learning-required`, `runtime-proof-required`, or `deferred`
+- token mappings cover page background, section/card background, border/divider, typography, action buttons, status badges/chips, table/list/card spacing, grid/flex gaps, form field gaps, and mobile/responsive spacing
+- custom non-token values carry `runtime-proof-required`, `export-learning-required`, `deferred`, or `explicit-user-approved-custom-token`
+- every generated icon control uses Yeeflow control type `icon`, a FontAwesome class, semantic purpose, color token, size token or supported size property, action binding when clickable, and accessible/semantic label or tooltip intent for icon-only actions
 
 Run:
 
 ```bash
+node scripts/validate-yeeflow-root-token-usage.mjs --design-system <application-design-system.md>
 node scripts/validate-ui-pattern-selection.mjs --selection <pattern-selection.json>
+node scripts/validate-yeeflow-root-token-usage.mjs --pattern-selection <pattern-selection.json>
 node scripts/validate-blueprint-ui-pattern-conformance.mjs --blueprint <page-implementation-blueprint.json> --pattern-selection <pattern-selection.json>
+node scripts/validate-yeeflow-root-token-usage.mjs --blueprint <page-implementation-blueprint.json>
 ```
 
-`readyForResourceGeneration: true` is forbidden when either validator reports errors.
+`readyForResourceGeneration: true` is forbidden when pattern selection, root-token usage, or blueprint pattern conformance reports errors.
 
 ## Proof Boundaries
 

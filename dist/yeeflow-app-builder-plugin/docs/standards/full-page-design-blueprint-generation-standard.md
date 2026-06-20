@@ -1,40 +1,45 @@
 # Full-Page Design Blueprint Generation Standard
 
-Full-application Yeeflow generation is a staged evidence workflow. The default UI implementation source is the approved Yeeflow App Plan plus Application Design System plus selected Yeeflow UI Section Templates from the plugin-contained pattern library. Optional PNG design images and HTML previews can support visual review, but generated Yeeflow controls, decoded resources, bindings, interactions, and runtime proof must trace back to a complete pattern-backed Page Implementation Blueprint.
+Full-application Yeeflow generation is a staged evidence workflow. The default UI implementation source is the approved Yeeflow App Plan plus Yeeflow Root Token Reference plus Application Design System plus selected Yeeflow UI Section Templates from the plugin-contained pattern library. Optional PNG design images and HTML previews can support visual review, but generated Yeeflow controls, decoded resources, bindings, interactions, and runtime proof must trace back to a complete token-preserving, pattern-backed Page Implementation Blueprint.
 
 ## Mandatory Stage Order
 
 1. Functional Specification.
 2. Yeeflow App Plan.
 3. Business Clarification Gate approved for generation and Generation Readiness final check.
-4. Application Design System.
-5. Yeeflow UI Section Template / Pattern Selection from `docs/templates/yeeflow-ui-section-template-library.normalized.json`.
-6. Page Implementation Blueprint.
-7. Blueprint Pattern Conformance Validation.
-8. Yeeflow control/property contract validation.
-9. Resource generation.
-10. Decoded resource parity validation.
-11. Local hard gates.
-12. Package/sign/install/import/upgrade only after explicit write approval.
-13. Runtime/browser proof only after Chrome/runtime evidence exists.
+4. Yeeflow Root Token Reference from `docs/standards/yeeflow-root-token-reference.normalized.json`.
+5. Application Design System.
+6. Yeeflow UI Section Template / Pattern Selection from `docs/templates/yeeflow-ui-section-template-library.normalized.json`.
+7. Page Implementation Blueprint.
+8. Blueprint Pattern Conformance Validation.
+9. Yeeflow control/property contract validation.
+10. Resource generation.
+11. Decoded resource parity validation.
+12. Local hard gates.
+13. Package/sign/install/import/upgrade only after explicit write approval.
+14. Runtime/browser proof only after Chrome/runtime evidence exists.
 
 Do not start a later stage when the prior stage lacks completion evidence. Schema validation, signing, install, upgrade, decoded CSS, decoded controls, or ID stability do not prove UI fidelity or runtime behavior. Runtime proof cannot claim success until Chrome/runtime evidence exists.
 
 ## Default Pattern-Library UI Generation
 
-The Application Design System and Yeeflow UI Section Template Library create the default UI implementation contract from the approved Functional Specification and Yeeflow App Plan. This stage must not generate `.yap` or `.yapk` packages, sign packages, install/import/upgrade apps, or run live Yeeflow writes.
+The Yeeflow Root Token Reference, Application Design System, and Yeeflow UI Section Template Library create the default UI implementation contract from the approved Functional Specification and Yeeflow App Plan. This stage must not generate `.yap` or `.yapk` packages, sign packages, install/import/upgrade apps, or run live Yeeflow writes.
 
 This stage must produce:
 
-- an Application Design System document using `docs/standards/application-design-system-template.md`
+- an Application Design System document using `docs/standards/application-design-system-template.md` and `docs/standards/yeeflow-root-token-reference.normalized.json`
 - a pattern-selection artifact for all required UI surfaces using `docs/templates/yeeflow-ui-section-template-library.normalized.json`
 - a validation/review report showing readiness for the Page Implementation Blueprint stage
 
-Generate the Application Design System before template selection. Every selected surface-level template and Page Implementation Blueprint must reference the selected Application Design System. If the design system is missing, incomplete, generated after template selection, or not referenced by selected surfaces, the pattern-selection stage fails and must not proceed to Page Implementation Blueprints.
+Generate the Application Design System from the Yeeflow Root Token Reference before template selection. Every selected surface-level template and Page Implementation Blueprint must reference the selected Application Design System and preserve token names. If the design system is missing, incomplete, generated after template selection, lacks root-token decisions, or is not referenced by selected surfaces, the pattern-selection stage fails and must not proceed to Page Implementation Blueprints.
 
 Every surface must select one or more `templateId` values from the normalized registry. Template categories must match the surface type: dashboard pages use dashboard patterns; Approval Submission/Task surfaces use approval-form-workspace or form/detail templates; Approval Print pages use print/read-only form patterns; Data List and Document Library New/Edit forms use form-body templates for primary editable fields; related-record, Sub List, Collection, Kanban, and Timeline sections use item-template or collection-control patterns. Templates without a `category` are allowed only when their ID is recognized as a collection-control template such as `collection_control_*`.
 
 Every selected template must preserve `patternProofStatus`: `runtime-proven`, `export-proven`, `inferred`, or `needs-golden-proof`. Required controls, child controls, fields, data bindings, and actions must map to blueprint controls or be explicitly deferred/inactive with reason, fallback, proof impact, and required follow-up.
+
+Every selected pattern must also declare token intent inherited from the Application Design System. Pattern selection and Blueprints must preserve token names for page background, section/card background, border/divider, typography, action buttons, status badges/chips, table/list/card spacing, grid/flex gaps, form field gaps, and mobile/responsive spacing. Raw CSS values, arbitrary hex colors, raw font sizes, raw line heights, raw font weights, and raw spacing values cannot replace Yeeflow root token names when matching tokens exist.
+
+Every selected pattern that uses icons must declare FontAwesome icon intent inherited from the Application Design System. Icon intent includes whether the selected pattern requires icons, semantic icon purpose, recommended FontAwesome class when known, tokenized icon color/size, and fallback proof label when uncertain. Emoji icons, inline SVG icons, image icons, and arbitrary custom icon names are forbidden as normal generated UI icons.
 
 Forbidden misuse blocks blueprint/resource readiness:
 
@@ -48,6 +53,8 @@ Run:
 
 ```bash
 node scripts/validate-ui-pattern-selection.mjs --selection <pattern-selection.json>
+node scripts/validate-yeeflow-root-token-usage.mjs --design-system <application-design-system.md>
+node scripts/validate-yeeflow-root-token-usage.mjs --pattern-selection <pattern-selection.json>
 ```
 
 This validator proves pattern-selection readiness only. It does not prove resource serialization, decoded parity, package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
@@ -155,10 +162,29 @@ Before generating Yeeflow resources, every page requires a blueprint with:
 
 - page purpose and selected Yeeflow layout/chrome
 - selected Yeeflow UI Section Template IDs and proof status
+- Yeeflow Root Token Reference and Application Design System token mapping
 - full section list
 - pattern-to-control mapping for every required control and visible element
 - control hierarchy, control type, `id`, `nv_label`, and parent/child relationships
 - exact Yeeflow property paths for width, height, gap, margin, padding, border, background, shadow, and typography
+- page background token
+- section/card background token
+- border/divider token
+- typography token mapping for title, body, label, helper, button, badge, table/list, and mobile variants
+- action button normal/hover/active token mapping
+- status badge/chip success/warning/danger token mapping
+- table/list/card spacing token mapping
+- grid/flex gap token mapping
+- form field gap token mapping
+- mobile/responsive spacing token mapping
+- icon control mapping:
+  - Yeeflow control type: `icon`
+  - FontAwesome class, for example `fa-regular fa-file` or `fa-solid fa-check`
+  - semantic purpose
+  - color token
+  - size token or supported size property
+  - action binding if clickable
+  - accessible/semantic label or tooltip intent for icon-only actions
 - data source/list/field bindings
 - Summary/KPI aggregation bindings
 - Data Filter variables and target consumption
@@ -172,9 +198,10 @@ Run:
 
 ```bash
 node scripts/validate-blueprint-ui-pattern-conformance.mjs --blueprint page-implementation-blueprint.json --pattern-selection pattern-selection.json
+node scripts/validate-yeeflow-root-token-usage.mjs --blueprint page-implementation-blueprint.json
 ```
 
-`readyForResourceGeneration: true` is blocked when required controls, child controls, fields, bindings, actions, template category, template existence, forbidden misuse, or proof status fail.
+`readyForResourceGeneration: true` is blocked when required controls, child controls, fields, bindings, actions, template category, template existence, forbidden misuse, proof status, token mapping, token-name preservation, or custom-value proof labels fail.
 
 ## Resource Parity
 
@@ -185,12 +212,15 @@ Run:
 ```bash
 node scripts/validate-full-page-design-artifacts.mjs --manifest design-image-manifest.json
 node scripts/validate-ui-pattern-selection.mjs --selection pattern-selection.json
+node scripts/validate-yeeflow-root-token-usage.mjs --design-system application-design-system.md
+node scripts/validate-yeeflow-root-token-usage.mjs --pattern-selection pattern-selection.json
 node scripts/validate-ui-surface-contracts.mjs --contracts ui-surface-contracts --app-plan app-plan.md --design-system application-design-system.md
 node scripts/validate-html-preview-layout.mjs --contracts ui-surface-contracts --html html-previews --screenshots screenshots --design-system application-design-system.md
 node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts ui-surface-contracts --blueprints page-implementation-blueprints --design-system application-design-system.md
 node scripts/inspect-full-page-design-artifacts.mjs --manifest design-image-manifest.json
 node scripts/inspect-page-implementation-blueprint.mjs --blueprint page-implementation-blueprint.json
 node scripts/validate-blueprint-ui-pattern-conformance.mjs --blueprint page-implementation-blueprint.json --pattern-selection pattern-selection.json
+node scripts/validate-yeeflow-root-token-usage.mjs --blueprint page-implementation-blueprint.json
 node scripts/compare-blueprint-to-decoded-resource.mjs --blueprint page-implementation-blueprint.json --resource decoded-resource.json
 ```
 

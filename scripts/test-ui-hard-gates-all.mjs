@@ -146,6 +146,15 @@ const childTests = [
     ],
   },
   {
+    name: "Yeeflow Root Token Reference design-system gates regression suite",
+    command: ["scripts/test-yeeflow-root-token-reference-design-system-gates.mjs"],
+    validators: [
+      "validate-yeeflow-root-token-usage",
+      "Yeeflow Root Token Reference normalized registry",
+      "Application Design System token mapping gates",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [
