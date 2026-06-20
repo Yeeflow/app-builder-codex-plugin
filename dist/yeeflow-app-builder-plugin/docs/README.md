@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.73`
+- Version: `0.6.74`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.73` releases HTML-first New/Edit form body discipline gates. New/Edit primary fields must stay in form body field groups and control mappings; generic lower regions such as `Primary form fields`, `Main form fields`, `Editable fields`, and `Document metadata fields` fail for New/Edit surfaces; duplicate primary actions fail unless row/item/Sub List scoped; fake lower-region cards made from field/action names fail; editable field labels cannot be rendered as values without explicit placeholder semantics; and invalid UI Surface Contracts are rejected before HTML/Blueprint parity can incorrectly pass. These gates prove design, HTML, and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+Current release `0.6.74` combines the UI Pattern Library driven generation flow from PR #115 with the Yeeflow Root Token Reference and FontAwesome icon baseline gates from PR #116. Pattern Library selection is the default UI generation source after the App Plan and Application Design System, while PNG/HTML artifacts are optional review evidence. Application Design Systems must declare root-token color, typography, spacing, border/gap, and action-state choices; patterns and Blueprints must preserve token intent; and FontAwesome is the default icon source for generated Yeeflow UI icons. Arbitrary hex/px values and custom icon names are blocked unless explicitly proof-labeled or deferred.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 

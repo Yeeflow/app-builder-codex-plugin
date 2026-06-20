@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.6.74
+
+- Release the UI Pattern Library driven generation flow from PR #115 and the Yeeflow Root Token Reference plus FontAwesome baseline gates from PR #116.
+- Make the plugin-contained Yeeflow UI Section Template Library the default UI generation source after the App Plan and Application Design System.
+- Reclassify generated PNG design images and HTML previews as optional review evidence, not default implementation sources.
+- Add pattern-selection and Blueprint pattern-conformance validators for template IDs, template categories, required controls, child controls, bindings, actions, proof status, forbidden misuse, and `readyForResourceGeneration` blocking.
+- Add the Yeeflow Root Token Reference extracted from product CSS `:root` definitions as the default design-token foundation.
+- Require Application Design Systems to declare Primary, Secondary, Neutral, status, typography, spacing, border/gap, action-state, and customization token choices.
+- Require selected patterns and Page Implementation Blueprints to preserve token intent instead of replacing it with arbitrary CSS or raw visual guesses.
+- Add root-token validation for arbitrary hex colors, px font sizes, line heights, font weights, spacing, border width, hover/active misuse, custom non-token proof labels, and dropped token names.
+- Establish FontAwesome as the default icon source for generated Yeeflow UI icons and block emoji, inline SVG/image icons, arbitrary icon names, and unlabeled icon-only actions unless explicitly proof-labeled or deferred.
+- Preserve the proof boundary: these gates prove design-system, pattern, token, icon, and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
+
 ## 0.6.73
 
 - Release HTML-first New/Edit form body discipline gates from PR #113.
