@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.76`
+- Version: `0.6.77`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.76` releases the residual strict App Plan conformance parser-noise fix. The validator now ignores non-resource table values, placeholder/detail/status/applicability cells, navigation group labels, navigation order headers, and values such as `Group` or `Not applicable`; splits comma-separated concrete resource cells without splitting names such as `Rooms and Areas`; and preserves strict failures for real missing resources, extra generated resources, navigation group/item mismatches, and partial resource-name mismatches. This gate proves App Plan-to-package conformance parsing only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
+Current release `0.6.77` releases Final / Authorized Generation Mode API-issued ID gates. Yeeflow App Builder now distinguishes Draft / Offline Mode from Final / Authorized Generation Mode before resource generation. Draft mode remains the default no-live-API path with local draft IDs and local unsigned draft packages only. Final mode requires explicit live Yeeflow API authorization and a target workspace, allocates API-issued IDs before resource generation, uses those IDs directly during initial generation, and blocks local-first-then-remap as the primary final path. The new generation mode validator checks authorization, workspace, ID allocation timing, resource ID provenance, and reference/binding consistency. These gates prove generation mode and ID timing only, not package validity, signing/API acceptance, install/import/upgrade success, visual proof, or runtime behavior.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.76
+Version: 0.6.77
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.76
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.77
 ```
 
 ## What Is Included

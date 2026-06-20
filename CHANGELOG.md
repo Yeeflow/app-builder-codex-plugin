@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.77
+
+- Release Final / Authorized Generation Mode API-issued ID gates from PR #122.
+- Keep Draft / Offline Mode as the default no-live-API path with local draft IDs and local unsigned draft packages only.
+- Require explicit live Yeeflow API authorization and target workspace metadata before Final / Authorized Generation Mode resource generation.
+- Require API-issued IDs to be allocated before resource generation and used directly during initial generation.
+- Block local-first-then-remap as the primary generated-final path and validate references, lookups, workflows, navigation, dashboards, forms, and resource bindings against API-issued IDs.
+- Add generation mode validation through `scripts/validate-generation-mode-id-provenance.mjs` and focused regression coverage in `scripts/test-final-generation-api-issued-id-mode.mjs`.
+- Preserve the proof boundary: these gates prove generation mode and ID timing only, not package validity, signing/API acceptance, install/import/upgrade success, visual proof, or runtime behavior.
+
 ## 0.6.76
 
 - Release the residual strict App Plan conformance parser-noise fix from PR #120.
