@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.74`
+- Version: `0.6.75`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.74` combines the UI Pattern Library driven generation flow from PR #115 with the Yeeflow Root Token Reference and FontAwesome icon baseline gates from PR #116. Pattern Library selection is the default UI generation source after the App Plan and Application Design System, while PNG/HTML artifacts are optional review evidence. Application Design Systems must declare root-token color, typography, spacing, border/gap, and action-state choices; patterns and Blueprints must preserve token intent; and FontAwesome is the default icon source for generated Yeeflow UI icons. Arbitrary hex/px values and custom icon names are blocked unless explicitly proof-labeled or deferred.
+Current release `0.6.75` fixes strict App Plan conformance Markdown over-parsing. The validator now treats only canonical App Plan resource declarations as planned resources, ignores field/control/action rows, task-form rows, assumptions, validation notes, deferred/runtime-proof sections, template headings, and explanatory prose, and preserves strict failures for real missing, extra, or partially mismatched resources.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.74`
+- Version: `0.6.75`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.74` combines the UI Pattern Library driven generation flow from PR #115 with the Yeeflow Root Token Reference and FontAwesome icon baseline gates from PR #116. Pattern Library selection is now the default UI generation source after the App Plan and Application Design System; generated PNGs and HTML previews remain optional review evidence, not default implementation sources. The release adds pattern-selection and Blueprint conformance validators, requires Application Design Systems to declare color, typography, spacing, border/gap token choices from the product CSS `:root` token reference, preserves token intent through patterns and Blueprints, and treats FontAwesome as the default icon source for Yeeflow UI icons. Arbitrary hex/px values and custom icon names are blocked unless explicitly proof-labeled or deferred.
+Current release `0.6.75` releases the strict App Plan conformance Markdown over-parsing fix. The validator now treats only canonical App Plan resource declarations as planned resources, ignores field/control/action rows, task-form rows, assumptions, validation notes, deferred/runtime-proof sections, template headings, and explanatory prose, and preserves strict failures for real missing resources, extra generated resources, and partial resource-name mismatches. This gate proves App Plan-to-package conformance parsing only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.74
+Version: 0.6.75
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.74
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.75
 ```
 
 ## What Is Included
