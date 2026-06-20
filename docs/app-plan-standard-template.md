@@ -19,3 +19,5 @@ The canonical flow is:
 The App Plan is a Yeeflow resource generation contract organized by Yeeflow resource generation order. It is not a generic project plan, script plan, page design document, or free-form checklist.
 
 Dashboard golden-reference and Dashboard section-template selection belong in the Stage 3 Page Function Plan. The App Plan should declare Dashboard resources and stable Page Function Plan references only.
+
+Approval submission/task/print surfaces and custom Data list/Document library forms must also declare stable Page Function Plan references in the canonical App Plan, while their page-level fields, controls, layout, related regions, actions, and responsive behavior belong in the Stage 3 Page Function Plan.

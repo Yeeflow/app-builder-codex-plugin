@@ -2,7 +2,7 @@
 
 Use this template as Stage 4 / Step 4 for every Yeeflow application build, after the Functional Specification, Yeeflow App Plan, and Page Function Plan are reviewed and before page/resource generation.
 
-The Application Design System defines the visual and interaction rules that guide later page design, page implementation blueprints, Yeeflow resource generation, decoded resource-vs-blueprint parity, package generation, signing, install/import/upgrade, and runtime proof. It should guide supported Yeeflow page design without inventing unsupported properties.
+The Application Design System defines the visual and interaction rules that guide later page design, page implementation blueprints, Yeeflow resource generation, decoded resource-vs-blueprint parity, package generation, signing, install/import/upgrade, and runtime proof. It should guide supported Yeeflow page design without inventing unsupported properties. It does not replace the Page Function Plan: the Page Function Plan remains the page/function/control contract for Dashboard pages, Approval submission/task/print forms, Data list forms, and Document library forms.
 
 ## 1. Design System Status
 
@@ -109,5 +109,7 @@ The Application Design System defines the visual and interaction rules that guid
 Rules:
 
 - Use this design system to keep all generated pages consistent while preserving each page's distinct business purpose.
+- Consume the Page Function Plan as the canonical source for page surfaces, Dashboard template/golden-reference selections, form fields, related regions, actions, bindings, desktop/mobile behavior, and App Plan traceability.
+- Do not infer Dashboard sections, form fields, related regions, or page actions from the App Plan alone when a Page Function Plan exists.
 - Do not introduce later rollback-excluded systems unless already present in the active baseline.
 - Do not invent unsupported Yeeflow properties. Unknown style or layout behavior must be marked `runtime-proof-required`, `export-learning-required`, or `deferred`.

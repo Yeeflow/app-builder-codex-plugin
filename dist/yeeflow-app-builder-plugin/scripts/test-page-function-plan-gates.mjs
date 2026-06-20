@@ -42,25 +42,26 @@ function appPlan(overrides = {}) {
     dashboards: [{ name: "Operations Dashboard", pageFunctionPlanRef: "PFP-DASH-OPERATIONS", fields: ["Title"], actions: ["Open Request"] }],
     approvalForms: [{
       name: "Purchase Approval",
+      submissionPageFunctionPlanRef: "PFP-APPROVAL-PURCHASE-SUBMISSION",
       fields: ["Title", "Amount", "Requester", "Justification", "Manager Comment"],
       actions: ["Save as draft", "Submit", "Approve", "Reject", "Print"],
-      taskForms: [{ name: "Manager Review", actions: ["Approve", "Reject"] }],
-      printPages: [{ name: "Purchase Approval Print" }],
+      taskForms: [{ name: "Manager Review", pageFunctionPlanRef: "PFP-APPROVAL-PURCHASE-MANAGER-REVIEW", actions: ["Approve", "Reject"] }],
+      printPages: [{ name: "Purchase Approval Print", pageFunctionPlanRef: "PFP-APPROVAL-PURCHASE-PRINT" }],
     }],
     formReports: [{ name: "Purchase Approval Report", approvalForm: "Purchase Approval" }],
     dataLists: [{
       name: "Purchase Requests",
       fields: ["Title", "Amount", "Status", "Requester", "Created Date", "Manager Comment"],
       forms: [
-        { name: "New Purchase Request", type: "New", fields: ["Title", "Amount", "Justification"], actions: ["Save", "Cancel"] },
-        { name: "Edit Purchase Request", type: "Edit", fields: ["Title", "Amount", "Justification"], actions: ["Save", "Cancel"] },
-        { name: "View Purchase Request", type: "View", fields: ["Title", "Amount", "Status", "Requester"], actions: ["Open Request"] },
+        { name: "New Purchase Request", type: "New", pageFunctionPlanRef: "PFP-LIST-PURCHASE-REQUESTS-NEW", fields: ["Title", "Amount", "Justification"], actions: ["Save", "Cancel"] },
+        { name: "Edit Purchase Request", type: "Edit", pageFunctionPlanRef: "PFP-LIST-PURCHASE-REQUESTS-EDIT", fields: ["Title", "Amount", "Justification"], actions: ["Save", "Cancel"] },
+        { name: "View Purchase Request", type: "View", pageFunctionPlanRef: "PFP-LIST-PURCHASE-REQUESTS-VIEW", fields: ["Title", "Amount", "Status", "Requester"], actions: ["Open Request"] },
       ],
     }],
     documentLibraries: [{
       name: "Purchase Documents",
       fields: ["Title", "Status", "Created Date"],
-      forms: [{ name: "View Purchase Document", type: "View", fields: ["Title", "Status"], actions: ["Open Document"] }],
+      forms: [{ name: "View Purchase Document", type: "View", pageFunctionPlanRef: "PFP-DOC-PURCHASE-DOCUMENTS-VIEW", fields: ["Title", "Status"], actions: ["Open Document"] }],
     }],
   };
   const merged = { ...plan, ...overrides };
@@ -125,27 +126,33 @@ function pagePlan(overrides = {}) {
       }],
     }],
     approvalForms: [{
+      pageFunctionPlanId: "PFP-APPROVAL-PURCHASE",
+      appPlanApprovalRef: "Purchase Approval",
       name: "Purchase Approval",
       submissionForm: {
+        pageFunctionPlanId: "PFP-APPROVAL-PURCHASE-SUBMISSION",
         desktopBehavior: "Sectioned request form.",
         mobileBehavior: "Single-column stacked fields with action bar at bottom.",
         actions: ["Save as draft", "Submit"],
         fields: [
-          { name: "Title", controlType: "Text", field: "Title" },
-          { name: "Amount", controlType: "Dynamic field", field: "Amount" },
-          { name: "Justification", controlType: "Text", field: "Justification" },
+          { name: "Title", controlType: "Text", field: "Title", editable: true, required: true, defaultValue: "N/A", dynamicBehavior: "N/A", validationBehavior: "Required text" },
+          { name: "Amount", controlType: "Dynamic field", field: "Amount", editable: true, required: true, defaultValue: "0", dynamicBehavior: "N/A", validationBehavior: "Must be positive" },
+          { name: "Justification", controlType: "Text", field: "Justification", editable: true, required: true, defaultValue: "N/A", dynamicBehavior: "N/A", validationBehavior: "Required explanation" },
         ],
       },
       taskForms: [{
+        pageFunctionPlanId: "PFP-APPROVAL-PURCHASE-MANAGER-REVIEW",
         name: "Manager Review",
         differencesFromSubmission: "Adds manager comment and decision buttons; request fields are read-only.",
         desktopBehavior: "Same section rhythm as submission with decision panel.",
         mobileBehavior: "Request summary first, decision controls second.",
         actions: ["Approve", "Reject"],
-        fields: [{ name: "Manager Comment", controlType: "Text", field: "Manager Comment" }],
+        fields: [{ name: "Manager Comment", controlType: "Text", field: "Manager Comment", editable: true }],
       }],
       printPages: [{
+        pageFunctionPlanId: "PFP-APPROVAL-PURCHASE-PRINT",
         name: "Purchase Approval Print",
+        printLayoutIntent: "Printable single-column evidence layout with signature area.",
         desktopBehavior: "Printable single-column evidence layout.",
         mobileBehavior: "Print page remains readable in one column.",
         content: [{ name: "Title", controlType: "Text", field: "Title" }],
@@ -153,8 +160,10 @@ function pagePlan(overrides = {}) {
     }],
     dataListForms: [{
       resourceName: "Purchase Requests",
+      appPlanResourceRef: "Purchase Requests",
       forms: [
         {
+          pageFunctionPlanId: "PFP-LIST-PURCHASE-REQUESTS-NEW",
           name: "New Purchase Request",
           type: "New",
           desktopBehavior: "Compact two-column editable form.",
@@ -163,6 +172,7 @@ function pagePlan(overrides = {}) {
           actions: ["Save", "Cancel"],
         },
         {
+          pageFunctionPlanId: "PFP-LIST-PURCHASE-REQUESTS-EDIT",
           name: "Edit Purchase Request",
           type: "Edit",
           desktopBehavior: "Compact two-column editable form.",
@@ -171,6 +181,7 @@ function pagePlan(overrides = {}) {
           actions: ["Save", "Cancel"],
         },
         {
+          pageFunctionPlanId: "PFP-LIST-PURCHASE-REQUESTS-VIEW",
           name: "View Purchase Request",
           type: "View",
           desktopBehavior: "Summary header with related document region.",
@@ -192,9 +203,13 @@ function pagePlan(overrides = {}) {
     }],
     documentLibraryForms: [{
       resourceName: "Purchase Documents",
+      appPlanResourceRef: "Purchase Documents",
       forms: [{
+        pageFunctionPlanId: "PFP-DOC-PURCHASE-DOCUMENTS-VIEW",
         name: "View Purchase Document",
         type: "View",
+        documentMetadataBehavior: "Show Title, Status, and Created Date metadata in a side panel.",
+        documentViewBehavior: "Open document preview or view behavior using supported Document embed/view surface when available.",
         desktopBehavior: "Document preview with metadata side panel.",
         mobileBehavior: "Metadata stacks above document preview.",
         fields: [{ name: "Title", controlType: "Text", field: "Title" }, { name: "Status", controlType: "Dynamic field", field: "Status" }],
@@ -417,6 +432,26 @@ try {
   expectCode(output.report, "TRACEABILITY_DATA_LIST_FORM_MISSING");
   results.push({ case: "missing data list form entry fails", status: "pass" });
 
+  const missingApprovalRefs = appPlan();
+  delete missingApprovalRefs.approvalForms[0].submissionPageFunctionPlanRef;
+  delete missingApprovalRefs.approvalForms[0].taskForms[0].pageFunctionPlanRef;
+  delete missingApprovalRefs.approvalForms[0].printPages[0].pageFunctionPlanRef;
+  output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", writeJson(tempDir, "missing-approval-page-function-refs", missingApprovalRefs), "--page-function-plan", planFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "TRACEABILITY_APPROVAL_SUBMISSION_PAGE_FUNCTION_REF_MISSING");
+  expectCode(output.report, "TRACEABILITY_APPROVAL_TASK_PAGE_FUNCTION_REF_MISSING");
+  expectCode(output.report, "TRACEABILITY_APPROVAL_PRINT_PAGE_FUNCTION_REF_MISSING");
+  results.push({ case: "App Plan approval surfaces without Page Function Plan refs fail", status: "pass" });
+
+  const missingListRefs = appPlan();
+  delete missingListRefs.dataLists[0].forms[0].pageFunctionPlanRef;
+  delete missingListRefs.documentLibraries[0].forms[0].pageFunctionPlanRef;
+  output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", writeJson(tempDir, "missing-list-page-function-refs", missingListRefs), "--page-function-plan", planFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "TRACEABILITY_DATA_LIST_FORM_PAGE_FUNCTION_REF_MISSING");
+  expectCode(output.report, "TRACEABILITY_DOCUMENT_LIBRARY_FORM_PAGE_FUNCTION_REF_MISSING");
+  results.push({ case: "App Plan list and document forms without Page Function Plan refs fail", status: "pass" });
+
   output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", appFile, "--page-function-plan", planFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "Form Report is correctly not required as UI surface", status: "pass" });
@@ -427,6 +462,57 @@ try {
   assert.equal(output.report.status, "fail");
   expectCode(output.report, "PAGE_FUNCTION_NEW_EDIT_UNRELATED_REGION");
   results.push({ case: "New/Edit dashboard-style related region fails", status: "pass" });
+
+  const missingSubmissionContract = pagePlan();
+  delete missingSubmissionContract.approvalForms[0].submissionForm.fields[0].editable;
+  delete missingSubmissionContract.approvalForms[0].submissionForm.fields[0].validationBehavior;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-submission-field-contract", missingSubmissionContract)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_APPROVAL_SUBMISSION_FIELD_STATE_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_APPROVAL_SUBMISSION_FIELD_BEHAVIOR_MISSING");
+  results.push({ case: "approval submission field without state and behavior contract fails", status: "pass" });
+
+  const badTaskActions = pagePlan();
+  badTaskActions.approvalForms[0].taskForms[0].actions = ["Comment"];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-task-actions", badTaskActions)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_APPROVAL_TASK_ACTIONS_MISSING");
+  results.push({ case: "approval task form without task-specific actions fails", status: "pass" });
+
+  const badPrintPage = pagePlan();
+  badPrintPage.approvalForms[0].printPages[0].content.push({ name: "Approve Button", controlType: "Button", field: "Title" });
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-print-page", badPrintPage)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_APPROVAL_PRINT_INTERACTIVE_CONTROL");
+  results.push({ case: "approval print page with unsupported interactive control fails", status: "pass" });
+
+  const badNewEditActions = pagePlan();
+  badNewEditActions.dataListForms[0].forms[0].actions = ["Save"];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-new-edit-actions", badNewEditActions)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_NEW_EDIT_SAVE_CANCEL_MISSING");
+  results.push({ case: "New/Edit form without Save/Cancel actions fails", status: "pass" });
+
+  const badDocumentBehavior = pagePlan();
+  delete badDocumentBehavior.documentLibraryForms[0].forms[0].documentMetadataBehavior;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-document-behavior", badDocumentBehavior)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DOCUMENT_LIBRARY_BEHAVIOR_MISSING");
+  results.push({ case: "Document library form without metadata/view behavior fails", status: "pass" });
+
+  const fieldOutsideCurrentListApp = appPlan({
+    documentLibraries: [{
+      name: "Purchase Documents",
+      fields: ["Title", "Status", "Created Date", "Document Category"],
+      forms: [{ name: "View Purchase Document", type: "View", pageFunctionPlanRef: "PFP-DOC-PURCHASE-DOCUMENTS-VIEW", fields: ["Title", "Status", "Document Category"], actions: ["Open Document"] }],
+    }],
+  });
+  const fieldOutsideCurrentListPlan = pagePlan();
+  fieldOutsideCurrentListPlan.dataListForms[0].forms[0].fields.push({ name: "Document Category", controlType: "Text", field: "Document Category" });
+  output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", writeJson(tempDir, "field-outside-current-list-app", fieldOutsideCurrentListApp), "--page-function-plan", writeJson(tempDir, "field-outside-current-list-plan", fieldOutsideCurrentListPlan)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "TRACEABILITY_NEW_EDIT_FIELD_OUTSIDE_CURRENT_RESOURCE");
+  results.push({ case: "New/Edit form field outside current list/library fails", status: "pass" });
 
   output = run("scripts/validate-page-function-plan.mjs", [planFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));

@@ -2,7 +2,7 @@
 
 Use this template as Stage 3 / Step 3 for every Yeeflow application build, after the Functional Specification and Yeeflow App Plan are reviewed and before Application Design System, page design, page/resource generation, implementation blueprints, package generation, signing, install/import/upgrade, or runtime proof.
 
-The Page Function Plan is the page-level function contract. It defines what each UI-required page does, what content appears, which supported Yeeflow controls are intended, which App Plan resources and fields are used, and how desktop/mobile behavior should work. Form Reports are not required canonical UI design surfaces in this plan.
+The Page Function Plan is the canonical page-level implementation contract after the Yeeflow App Plan. It defines what each UI-required page does, what content appears, which supported Yeeflow controls are intended, which App Plan resources and fields are used, and how desktop/mobile behavior should work. Form Reports are not required canonical UI design surfaces in this plan.
 
 Dashboard layout/template selection is part of the Page Function Plan implementation contract. Dashboard page/resource generation must consume the selected `pageFunctionPlanId`, `appPlanDashboardRef`, `dashboardPagePattern`, `dashboardGoldenReference`, and `dashboardSectionTemplates[]`; prose-only template mentions are not enough.
 
@@ -31,10 +31,11 @@ Rules:
 
 - Reference App Plan resources by stable names only: dashboard page name, approval form name, submission/task/print form name, data list or document library name, form name, source list/library, field names, actions, workflow/form action references, and source bindings.
 - Every Dashboard page in the App Plan requires an entry.
-- Every Approval form Submission form requires an entry.
-- Every planned Task form requires an entry.
-- Every planned Print page requires an entry when required by the App Plan.
-- Every planned custom Data list or Document library form requires an entry.
+- Every Approval form Submission form requires an entry with a stable Submission form pageFunctionPlanId and App Plan approval reference.
+- Every planned Task form requires an entry with a stable Task form pageFunctionPlanId and App Plan task/form action reference.
+- Every planned Print page requires an entry with a stable Print page pageFunctionPlanId when required by the App Plan.
+- Every planned custom Data list or Document library form requires an entry with a stable Form pageFunctionPlanId and App Plan list/library/form reference.
+- Every Page Function Plan entry must map back to one App Plan resource or surface. Page Function Plan entries must not reference resources, fields, controls, actions, templates, or golden references outside the App Plan and plugin-supported capabilities.
 - Form Reports are not required as canonical UI design surfaces, but may be referenced as data/reporting resources when relevant.
 
 ## 3. Yeeflow Application Layout Guidance
@@ -176,6 +177,9 @@ Repeat this subsection for each Approval form planned in the App Plan.
 - Business purpose:
 - Submitter role:
 - Workflow/action references:
+- Submission form pageFunctionPlanId:
+- Task form pageFunctionPlanId values:
+- Print page pageFunctionPlanId values:
 - Submission form required: Yes
 - Task forms planned: zero to many
 - Print pages planned: zero to many
@@ -190,6 +194,8 @@ Submission form rules:
 
 - Buttons must include Save as draft and Submit.
 - Fields, controls, editable/read-only state, required/default/dynamic/validation behavior, sub lists, and action buttons must be explicit.
+- Every field row must declare editable/read-only state and required, default, dynamic, and validation behavior; use `N/A` when a behavior is intentionally not applicable.
+- Sub lists, form actions, summaries, and dynamic behavior must reference App Plan-supported fields/actions/resources.
 - Do not include unrelated dashboard, audit, route-preview, or logic-only regions unless explicitly required by the App Plan.
 
 #### Task Forms
@@ -216,6 +222,7 @@ Print page rules:
 - Define print-specific content and layout.
 - Include signature/evidence sections when required.
 - Do not include interactive controls unless explicitly supported.
+- Print page content must be print-specific and must not contain unsupported Button, Data Filter, Collection, Data table, Kanban, Sub List, Tabs, chart, or other interactive controls.
 
 ## 6. Data List and Document Library Form Page Functions
 
@@ -228,16 +235,20 @@ Repeat this subsection for every Data list or Document library that has planned 
 - Resource type: Data list / Document library
 - Forms planned:
 - Document metadata/upload/view behavior when applicable:
+- Form pageFunctionPlanId values:
+- App Plan resource reference:
 
 #### Forms
 
-| Form Name | Form Type | Business Purpose | Used By / Opened From | Fields / Metadata | Supported Yeeflow Controls | Actions | Related Regions | Opening Behavior | Desktop Layout Intent | Mobile Layout Intent | App Plan Trace |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Form> | New/Edit/View/Detail/Custom/Print | <Purpose> | <Page/control/workflow> | <Fields> | <Controls> | Save/Cancel/View/Open/approved action | None / <Related region names> | page / popup / slide / full-screen / supported behavior | <Layout> | <Mobile behavior> | <Resource/field/action names> |
+| Form pageFunctionPlanId | Form Name | Form Type | Business Purpose | Used By / Opened From | Fields / Metadata | Supported Yeeflow Controls | Actions | Related Regions | Opening Behavior | Desktop Layout Intent | Mobile Layout Intent | App Plan Trace |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| PFP-<ID> | <Form> | New/Edit/View/Detail/Custom/Print | <Purpose> | <Page/control/workflow> | <Fields> | <Controls> | Save/Cancel/View/Open/approved action | None / <Related region names> | page / popup / slide / full-screen / supported behavior | <Layout> | <Mobile behavior> | <Resource/field/action names> |
 
 New/Edit rules:
 
 - New/Edit forms should normally include only editable fields from the current list/library plus Save/Cancel or equivalent actions.
+- New/Edit forms must include only fields from the current list/library unless an App Plan-supported exception is explicitly declared and justified.
+- New/Edit forms must include Save/Cancel or equivalent actions.
 - Add/Edit may share the same form when appropriate.
 - New/Edit forms must not include unrelated Collection, Data analytics, audit, dashboard, timeline, or linked-record regions unless explicitly planned and justified.
 
@@ -245,7 +256,7 @@ View/detail rules:
 
 - View forms may differ and may include related Collections, Data tables, filters, analytics, timelines, or linked records when planned.
 - Forms used as popup/detail pages from Collection, Data table, Kanban, or other controls must be explicitly listed.
-- Document library forms follow the same rules and include document metadata, upload, preview, or view behavior where applicable.
+- Document library forms follow the same rules and must include Document metadata, upload, preview, and view behavior where applicable.
 
 #### Related Regions
 
@@ -294,8 +305,12 @@ Rules:
 | Every planned task form has a Page Function Plan entry | pass/fail | |
 | Every required print page has a Page Function Plan entry | pass/fail | |
 | Every custom Data list / Document library form has a Page Function Plan entry | pass/fail | |
+| Every Approval/Data list/Document library surface has a stable Page Function Plan ID and App Plan reference | pass/fail | |
 | Form Reports are not required as UI design surfaces | pass/fail | |
 | Page Function Plan references only App Plan resources, fields, controls, and actions | pass/fail | |
+| New/Edit forms include only current list/library fields and Save/Cancel actions unless App Plan-supported exception is declared | pass/fail | |
+| Approval submission/task/print surfaces include state/action/print-specific behavior | pass/fail | |
+| Document library forms include metadata/upload/view behavior where applicable | pass/fail | |
 | New/Edit forms avoid unrelated dashboard-style regions unless planned and justified | pass/fail | |
 | View forms with related regions specify source, binding, fields, filters, actions, and opening behavior | pass/fail | |
 | Desktop/mobile behavior is defined for every UI page | pass/fail | |

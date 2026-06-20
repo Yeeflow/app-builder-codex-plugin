@@ -143,6 +143,9 @@ Repeat this subsection for each Approval form.
 - Depends on Data lists / Document libraries:
 - Form reports required: Yes/No
 - Assignment task required: Yes/No
+- Submission pageFunctionPlanRef:
+- Task form pageFunctionPlanRef values:
+- Print page pageFunctionPlanRef values:
 - Page Function Plan trace:
 - Generation blocker if missing: Yes/No
 
@@ -181,6 +184,8 @@ Required when the approval workflow contains Assignment task nodes.
 | Task Form Name | Used By Workflow Node | Purpose | One Shared Form or Multiple Forms | Notes |
 | --- | --- | --- | --- | --- |
 | <Task form> | <Node> | <Purpose> | Shared/Specific | <Notes> |
+
+Each planned task form must include a stable `pageFunctionPlanRef` that points to its Stage 3 Page Function Plan entry.
 
 ##### Task Form Fields
 
@@ -267,9 +272,9 @@ Return to the Data lists and Document libraries from Section 4 and plan their cu
 
 ### 10.x <Data List or Document Library Name>
 
-| Form Name | Form Type | Purpose | Used By | Layout Pattern | Actions Required | Page Function Plan Trace | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| <Form> | New/Edit/View/Detail/Custom/Print | <Purpose> | <Users/pages> | <Layout> | Yes/No | <Page Function ID / section> | <Notes> |
+| Form Name | Form Type | Purpose | Used By | Layout Pattern | Actions Required | pageFunctionPlanRef | Page Function Plan Trace | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Form> | New/Edit/View/Detail/Custom/Print | <Purpose> | <Users/pages> | <Layout> | Yes/No | PFP-<ID> | <Page Function ID / section> | <Notes> |
 
 #### Form Fields
 
@@ -294,6 +299,9 @@ Required whenever a Sub List control appears on a New/Edit/View/Detail/Custom/Pr
 Rules:
 
 - Every list that users create or edit records in should have a runtime-safe Add/New form plan.
+- Every planned custom Data list or Document library form must include a stable `pageFunctionPlanRef` that points to its Stage 3 Page Function Plan entry.
+- New/Edit forms must be planned as current-list/current-library field-editing surfaces with Save/Cancel actions unless the App Plan explicitly declares and justifies a supported exception.
+- Document library forms must identify document metadata, upload/edit, preview, and view behavior where applicable.
 - Query data and Set data list actions must identify target application/list/fields.
 - Data List custom form root padding must follow the active plugin standard.
 - Distinguish business labels from exact Yeeflow implementation types. Slash-combined or vague implementation wording is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
@@ -401,6 +409,7 @@ Rules:
 - The App Plan defines which dashboard pages, approval forms, custom data list/document library forms, resources, fields, workflows, views, navigation, roles, and permissions exist.
 - The Page Function Plan defines page-level function, content, controls, data source, fields, actions, layout intent, mobile behavior, and App Plan traceability.
 - Every Dashboard page in the App Plan must include `pageFunctionPlanRef`, `dashboardFunctionRef`, or an equivalent stable Page Function Plan reference ID.
+- Every Approval submission form, planned Approval task form, required Approval print page, planned custom Data list form, and planned custom Document library form in the App Plan must include `pageFunctionPlanRef` or an equivalent stable Page Function Plan reference ID.
 - The App Plan must not embed Dashboard golden-reference selection, Dashboard section template IDs, or full Dashboard section/control detail.
 - Page Function Plan entries must reference App Plan resources by stable names: dashboard page name, approval form name, submission/task/print form name, data list or document library name, form name, source list/library, field names, actions, and workflow/form action references.
 - Form Reports are not required as Page Function Plan UI design surfaces.

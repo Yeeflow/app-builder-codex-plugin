@@ -35,6 +35,9 @@ Functional Specification
 - Added Dashboard-only high-fidelity/Event Portfolio gates based on plugin-contained Marketing Event/Event Portfolio lessons for KPI/Summary binding, Data Filter consumers, Collection grid-table requirements, rich table treatment, action metadata, KPI formatting, semantic `nv_label`, and runtime proof boundary.
 - Promoted `event_portfolio_dashboard_golden_reference` as an explicit Dashboard golden-reference family in the plugin-contained template library and Page Function Plan contract.
 - Clarified document responsibility split: Functional Specification describes business page needs only, App Plan declares Dashboard resources plus stable Page Function Plan refs only, and Page Function Plan owns Dashboard implementation intent including `dashboardGoldenReference`.
+- Consolidated the Page Function Plan as the canonical page-level implementation contract for Dashboard pages, Approval submission/task/print surfaces, custom Data list forms, and custom Document library forms.
+- Added non-dashboard surface gates for Approval field state/behavior, task decisions, print-specific noninteractive pages, New/Edit current-resource field scope, Save/Cancel actions, View related-region contracts, and Document library metadata/upload/view behavior.
+- Extended App Plan to Page Function Plan traceability so App Plan Approval/Data list/Document library surfaces must carry stable Page Function Plan references and Page Function Plan entries must map back to App Plan resources.
 - Registered the new validators/tests in focused planning gates, aggregate UI hard gates, and YAPK cache artifact mirror checks.
 - Updated `skills/installed/yeeflow-application-builder/SKILL.md` so the lifecycle requires Page Function Plan and Application Design System before generation.
 - Mirrored changed standards, scripts, tests, and skill files into `dist/yeeflow-app-builder-plugin/...`.
@@ -81,6 +84,15 @@ Dashboard-specific contract:
 - App Plan Dashboard entries now require `pageFunctionPlanRef`, `dashboardFunctionRef`, or an equivalent stable reference ID. Page Function Plan Dashboard entries require `pageFunctionPlanId` and `appPlanDashboardRef`.
 - Dashboard/resource generation must consume the Page Function Plan entry when it exists and must not infer sections only from the App Plan resource list.
 
+Non-dashboard surface contract:
+
+- Approval submissions require a structured submission `pageFunctionPlanId`, App Plan approval reference, fields/controls, editable/read-only state, required/default/dynamic/validation behavior, sub lists where needed, and Save as draft/Submit actions.
+- Approval task forms require structured task `pageFunctionPlanId`, task-specific actions such as Approve/Reject or Complete, explicit differences from the submission form, and field editable/read-only state.
+- Approval print pages require structured print page `pageFunctionPlanId`, print-specific content/layout/evidence intent, and no unsupported interactive controls.
+- Data list New/Edit forms require structured form `pageFunctionPlanId`, current-list fields only, and Save/Cancel or equivalent actions unless an App Plan-supported exception is explicit.
+- View/detail/custom forms may include related regions only when source list/library, parent/current-item binding, displayed fields, filters, actions, and opening behavior are specified.
+- Document library forms require structured form `pageFunctionPlanId` plus document metadata and view behavior; upload/edit forms must also define upload behavior.
+
 ## Regression Coverage
 
 `scripts/test-page-function-plan-gates.mjs` covers:
@@ -89,8 +101,15 @@ Dashboard-specific contract:
 - Missing dashboard page function entry.
 - Missing approval submission/task/print entry.
 - Missing data list form entry.
+- Missing App Plan Approval/Data list/Document library Page Function Plan references.
 - Form Report correctly not required as a UI surface.
 - New/Edit form incorrectly containing Collection/Data analytics/audit/dashboard regions.
+- Approval submission field missing state/behavior contract.
+- Approval task form missing task-specific actions.
+- Approval print page with unsupported interactive controls.
+- New/Edit form missing Save/Cancel actions.
+- New/Edit form using a field from another list/library.
+- Document library form missing metadata/view behavior.
 - View form correctly containing related Data table regions with source, binding, fields, filters, actions, and opening behavior.
 - Page Function Plan referencing unsupported controls or fields not in App Plan.
 - Valid Dashboard template selection using `kpi_card_row` plus `data_table_section`.

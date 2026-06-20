@@ -208,6 +208,52 @@ function appPlanDashboardRef(page) {
   ).trim();
 }
 
+function appPlanSurfaceRef(surface) {
+  return safeString(
+    surface.appPlanApprovalRef
+      || surface.appPlanResourceRef
+      || surface.appPlanResourceName
+      || surface.appPlanListRef
+      || surface.appPlanLibraryRef
+      || surface.resourceName
+      || surface.approvalFormName,
+  ).trim();
+}
+
+function fieldName(field) {
+  return safeString(field.field || field.name || field.fieldName || field.displayName).trim();
+}
+
+function hasFieldState(field) {
+  return hasTextValue(field.editable)
+    || hasTextValue(field.readOnly)
+    || hasTextValue(field.fieldState)
+    || hasTextValue(field.state)
+    || hasTextValue(field.editableReadOnlyState);
+}
+
+function hasFieldBehaviorContract(field) {
+  return Object.prototype.hasOwnProperty.call(field, "required")
+    && Object.prototype.hasOwnProperty.call(field, "defaultValue")
+    && (Object.prototype.hasOwnProperty.call(field, "dynamicBehavior") || Object.prototype.hasOwnProperty.call(field, "dynamicDisplay"))
+    && (Object.prototype.hasOwnProperty.call(field, "validationBehavior") || Object.prototype.hasOwnProperty.call(field, "validation"));
+}
+
+function hasSaveCancelActions(actionsValue) {
+  const actions = asArray(actionsValue).map(normalizeName);
+  return actions.some((action) => /\bsave\b/.test(action)) && actions.some((action) => /\bcancel\b/.test(action));
+}
+
+function hasTaskDecisionActions(actionsValue) {
+  const actionText = asArray(actionsValue).map(normalizeName).join(" ");
+  return /\bapprove\b/.test(actionText) && /\breject\b/.test(actionText)
+    || /\bcomplete\b/.test(actionText);
+}
+
+function isInteractivePrintControl(control) {
+  return /^(Button|Data Filter|Collection|Data table|Kanban|Sub List|Tabs|Line chart|Pie chart|Pivot table)$/i.test(safeString(control).trim());
+}
+
 function dashboardClaimsEventPortfolioGolden(dashboard) {
   const selected = selectedDashboardGoldenReference(dashboard);
   if (EVENT_PORTFOLIO_GOLDEN_REFERENCES.has(selected)) return true;
@@ -575,6 +621,12 @@ function markdownFindings(text) {
     [/KPI Formatting Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_KPI_FORMATTING_FIELD_MISSING"],
     [/`nv_label` \/ Designer Traceability/i, "PAGE_FUNCTION_PLAN_DASHBOARD_NV_LABEL_FIELD_MISSING"],
     [/Runtime Proof Boundary/i, "PAGE_FUNCTION_PLAN_DASHBOARD_RUNTIME_PROOF_FIELD_MISSING"],
+    [/Page Function Plan is the canonical page-level implementation contract/i, "PAGE_FUNCTION_PLAN_CANONICAL_CONTRACT_MISSING"],
+    [/Submission form pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_APPROVAL_SUBMISSION_ID_FIELD_MISSING"],
+    [/Task form pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_APPROVAL_TASK_ID_FIELD_MISSING"],
+    [/Print page pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_APPROVAL_PRINT_ID_FIELD_MISSING"],
+    [/Form pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_DATA_FORM_ID_FIELD_MISSING"],
+    [/Document metadata, upload, preview, and view behavior/i, "PAGE_FUNCTION_PLAN_DOCUMENT_BEHAVIOR_FIELD_MISSING"],
   ];
   for (const [pattern, code] of required) {
     if (!pattern.test(text)) {
@@ -841,9 +893,15 @@ function validateDashboardTemplateSelection(plan, findings) {
 
 function validateApprovalForms(plan, findings) {
   for (const approval of asArray(plan.approvalForms)) {
+    if (!pageFunctionId(approval) && !appPlanSurfaceRef(approval)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_APP_PLAN_REF_MISSING", approvalForm: approval.name, message: "Approval Page Function Plan entries must map back to an App Plan approval form using a stable App Plan reference." });
+    }
     if (!approval.submissionForm) {
       findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_SUBMISSION_MISSING", approvalForm: approval.name, message: "Approval form is missing a submission form page function." });
       continue;
+    }
+    if (!pageFunctionId(approval.submissionForm)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_SUBMISSION_PAGE_FUNCTION_ID_MISSING", approvalForm: approval.name, message: "Approval submission forms must include a structured pageFunctionPlanId." });
     }
     const actions = asArray(approval.submissionForm.actions).map(normalizeName);
     for (const requiredAction of ["save as draft", "submit"]) {
@@ -857,6 +915,18 @@ function validateApprovalForms(plan, findings) {
         });
       }
     }
+    const submissionFields = asArray(approval.submissionForm.fields);
+    if (!submissionFields.length) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_SUBMISSION_FIELDS_MISSING", approvalForm: approval.name, message: "Approval submission forms must define fields and controls." });
+    }
+    for (const field of submissionFields) {
+      if (!hasFieldState(field)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_SUBMISSION_FIELD_STATE_MISSING", approvalForm: approval.name, field: fieldName(field), message: "Approval submission fields must declare editable/read-only state." });
+      }
+      if (!hasFieldBehaviorContract(field)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_SUBMISSION_FIELD_BEHAVIOR_MISSING", approvalForm: approval.name, field: fieldName(field), message: "Approval submission fields must declare required, default, dynamic, and validation behavior, using N/A when not applicable." });
+      }
+    }
     const unrelated = asArray(approval.submissionForm.regions).find((region) => DASHBOARD_STYLE_REGION.test(`${region.name || ""} ${region.regionType || ""}`) && !region.explicitlyPlanned);
     if (unrelated) {
       findings.push({
@@ -868,19 +938,50 @@ function validateApprovalForms(plan, findings) {
       });
     }
     for (const task of asArray(approval.taskForms)) {
-      if (!asArray(task.actions).length) {
-        findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_TASK_ACTIONS_MISSING", approvalForm: approval.name, taskForm: task.name, message: "Task forms must define buttons/actions matching the task type." });
+      if (!pageFunctionId(task)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_TASK_PAGE_FUNCTION_ID_MISSING", approvalForm: approval.name, taskForm: task.name, message: "Approval task forms must include a structured pageFunctionPlanId." });
+      }
+      if (!hasTaskDecisionActions(task.actions)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_TASK_ACTIONS_MISSING", approvalForm: approval.name, taskForm: task.name, message: "Task forms must define task-specific buttons/actions such as Approve/Reject or Complete." });
       }
       if (!safeString(task.differencesFromSubmission).trim()) {
         findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_TASK_DIFFERENCE_UNEXPLAINED", approvalForm: approval.name, taskForm: task.name, message: "Task form differences from the submission form must be explicit." });
+      }
+      for (const field of asArray(task.fields)) {
+        if (!hasFieldState(field)) {
+          findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_TASK_FIELD_STATE_MISSING", approvalForm: approval.name, taskForm: task.name, field: fieldName(field), message: "Approval task form fields must declare editable/read-only state." });
+        }
+      }
+    }
+    for (const page of asArray(approval.printPages)) {
+      if (!pageFunctionId(page)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_PRINT_PAGE_FUNCTION_ID_MISSING", approvalForm: approval.name, printPage: page.name, message: "Approval print pages must include a structured pageFunctionPlanId." });
+      }
+      if (!hasTextValue(page.content)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_PRINT_CONTENT_MISSING", approvalForm: approval.name, printPage: page.name, message: "Approval print pages must define print-specific content." });
+      }
+      if (!hasTextValue(page.printLayoutIntent) && !hasTextValue(page.desktopBehavior) && !hasTextValue(page.layoutIntent)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_PRINT_LAYOUT_MISSING", approvalForm: approval.name, printPage: page.name, message: "Approval print pages must define print-specific layout intent." });
+      }
+      for (const item of asArray(page.content)) {
+        if (isInteractivePrintControl(item.controlType) && !item.explicitlySupported) {
+          findings.push({ level: "error", code: "PAGE_FUNCTION_APPROVAL_PRINT_INTERACTIVE_CONTROL", approvalForm: approval.name, printPage: page.name, control: item.controlType, message: "Approval print pages must not include unsupported interactive controls." });
+        }
       }
     }
   }
 }
 
 function validateDataForms(plan, findings) {
-  for (const resource of [...asArray(plan.dataListForms), ...asArray(plan.documentLibraryForms)]) {
+  for (const [resourceType, resources] of [["Data list", asArray(plan.dataListForms)], ["Document library", asArray(plan.documentLibraryForms)]]) {
+    for (const resource of resources) {
+    if (!appPlanSurfaceRef(resource)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_FORM_RESOURCE_APP_PLAN_REF_MISSING", resource: resource.resourceName, resourceType, message: "Data list and Document library form groups must map back to an App Plan resource." });
+    }
     for (const form of asArray(resource.forms)) {
+      if (!pageFunctionId(form)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_FORM_PAGE_FUNCTION_ID_MISSING", resource: resource.resourceName, form: form.name, resourceType, message: "Every planned Data list or Document library form must include a structured pageFunctionPlanId." });
+      }
       const formType = normalizeName(form.type);
       const relatedRegions = asArray(form.relatedRegions);
       if (/^(new|edit|add|add\/edit|new\/edit)$/.test(formType) && relatedRegions.length) {
@@ -895,6 +996,15 @@ function validateDataForms(plan, findings) {
             message: "New/Edit forms must not include unrelated Collection/Data analytics/audit/dashboard regions unless explicitly planned and justified.",
           });
         }
+      }
+      if (/^(new|edit|add|add\/edit|new\/edit)$/.test(formType) && !hasSaveCancelActions(form.actions)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_NEW_EDIT_SAVE_CANCEL_MISSING",
+          resource: resource.resourceName,
+          form: form.name,
+          message: "New/Edit forms must include Save/Cancel or equivalent actions.",
+        });
       }
       if (/^(view|detail|custom)$/.test(formType)) {
         for (const region of relatedRegions) {
@@ -921,6 +1031,27 @@ function validateDataForms(plan, findings) {
           }
         }
       }
+      if (resourceType === "Document library") {
+        if (!hasTextValue(form.documentMetadataBehavior) || !hasTextValue(form.documentViewBehavior)) {
+          findings.push({
+            level: "error",
+            code: "PAGE_FUNCTION_DOCUMENT_LIBRARY_BEHAVIOR_MISSING",
+            resource: resource.resourceName,
+            form: form.name,
+            message: "Document library forms must define document metadata and view behavior; upload/edit forms must also define upload behavior when applicable.",
+          });
+        }
+        if (/^(new|edit|add|add\/edit|new\/edit)$/.test(formType) && !hasTextValue(form.documentUploadBehavior)) {
+          findings.push({
+            level: "error",
+            code: "PAGE_FUNCTION_DOCUMENT_LIBRARY_UPLOAD_BEHAVIOR_MISSING",
+            resource: resource.resourceName,
+            form: form.name,
+            message: "Document library New/Edit forms must define document upload/edit behavior.",
+          });
+        }
+      }
+    }
     }
   }
 }

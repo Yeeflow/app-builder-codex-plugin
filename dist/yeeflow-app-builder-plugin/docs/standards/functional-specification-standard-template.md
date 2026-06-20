@@ -243,7 +243,7 @@ Describe the expected user experience without selecting exact Yeeflow controls y
 
 ### Business Page Requirements
 
-Capture user-facing page needs from the business point of view. This section prepares the Page Function Plan, but must not select Yeeflow controls, internal property paths, package structures, or implementation-only details.
+Capture user-facing page needs from the business point of view. This section prepares the Page Function Plan, but must not select Yeeflow controls, dashboard template IDs, Dashboard golden reference IDs, internal property paths, package structures, or implementation-only details.
 
 | Page / Surface | Needed By Roles | Business Task Solved | Information Users Need To See | Operations / Actions Users Need | Filtering / Grouping / Sorting / Priority Needs | Mobile Required | Visibility / Access Requirements | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -258,6 +258,8 @@ Rules:
 - State role-specific visibility or access needs when a page should be hidden, read-only, or limited.
 - Keep this section business-oriented. Do not over-specify exact Yeeflow controls, Dashboard template or golden-reference IDs, layout JSON, package metadata, IDs, or property paths here.
 - Dashboard implementation pattern, golden-reference, section-template, control-by-region, and runtime-proof-boundary decisions belong in the Page Function Plan, not the Functional Specification.
+- Approval submission/task/print form implementation detail, Data list/Document library form controls, related regions, field editability matrices, and page-level action metadata belong in the Page Function Plan, not the Functional Specification.
+- The Functional Specification describes which roles need which pages, what business task each page solves, what information/actions/filtering/grouping/sorting/mobile/access needs exist, and which page needs must later trace into App Plan resources and Page Function Plan entries.
 
 ## 19. Business Decision Gates
 
