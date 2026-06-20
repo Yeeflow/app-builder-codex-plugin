@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.7.1
+
+- Release the generated-final local-draft placeholder hard gate from PR #127.
+- Require generated-final package generation to use an ID-first model: planning and blueprint stages may use logical refs, local-preview/local-draft packages remain local-only, and generated-final packages are built fresh from approved logical refs plus a complete API-issued ID map.
+- Block generated-final validation and signing readiness when recursive decoded package/resource JSON contains unresolved `local-draft`, `localDraft`, `local-draft-*`, `sourceMarker: local-draft-no-api`, generator draft sentinels, or unmapped logical references.
+- Extend generated-final checks across nested runtime-bearing fields including ListID, PageID, ProcKey, LayoutID, FormActionID, table links, Collection/Kanban/Timeline bindings, Data Filter bindings, Button/Container actions, sub list bindings, workflow targets, navigation targets, page version markers, and theme/local marker payloads.
+- Keep local draft mode available for local-only structural validation while explicitly marking it not eligible for signing/install.
+- Add focused regression coverage, aggregate hard-gate registration, source/dist mirrors, and training documentation for the ID-first generated-final lifecycle and recursive placeholder absence proof.
+
 ## 0.7.0
 
 - Release the Page Function Plan and Application Design System planning stage from PR #125.
