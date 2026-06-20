@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.76
+
+- Release the residual strict App Plan conformance parser-noise fix from PR #120.
+- Ignore non-resource table values, placeholder/detail/status/applicability cells, navigation group labels, navigation order headers, and values such as `Group` or `Not applicable` when parsing Markdown App Plans.
+- Split comma-separated concrete resource cells into individual planned resources without splitting names containing `and`, such as `Rooms and Areas`.
+- Preserve strict failures for real missing resources, extra generated resources, navigation group/item mismatches, and partial resource-name mismatches.
+- Preserve the proof boundary: this gate proves App Plan-to-package conformance parsing only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
+
 ## 0.6.75
 
 - Release the strict App Plan conformance Markdown over-parsing fix from PR #118.

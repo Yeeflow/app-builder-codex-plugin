@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.75`
+- Version: `0.6.76`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.75` releases the strict App Plan conformance Markdown over-parsing fix. The validator now treats only canonical App Plan resource declarations as planned resources, ignores field/control/action rows, task-form rows, assumptions, validation notes, deferred/runtime-proof sections, template headings, and explanatory prose, and preserves strict failures for real missing resources, extra generated resources, and partial resource-name mismatches. This gate proves App Plan-to-package conformance parsing only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
+Current release `0.6.76` releases the residual strict App Plan conformance parser-noise fix. The validator now ignores non-resource table values, placeholder/detail/status/applicability cells, navigation group labels, navigation order headers, and values such as `Group` or `Not applicable`; splits comma-separated concrete resource cells without splitting names such as `Rooms and Areas`; and preserves strict failures for real missing resources, extra generated resources, navigation group/item mismatches, and partial resource-name mismatches. This gate proves App Plan-to-package conformance parsing only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.75
+Version: 0.6.76
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.75
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.76
 ```
 
 ## What Is Included
