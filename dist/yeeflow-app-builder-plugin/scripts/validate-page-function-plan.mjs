@@ -45,6 +45,31 @@ const SUPPORTED_APPLICATION_LAYOUTS = new Set([
   "application-layout-3-header-nav",
   "application-layout-4-no-nav",
 ]);
+const SUPPORTED_CLICK_ACTIONS = new Map([
+  ["1", "form_action_binding"],
+  ["2", "link"],
+  ["5", "add_list_item"],
+  ["6", "open_dashboard"],
+  ["8", "open_approval_form"],
+]);
+const CLICK_ACTION_NAME_TO_CODE = new Map([
+  ["action", "1"],
+  ["form action", "1"],
+  ["form_action_binding", "1"],
+  ["form action binding", "1"],
+  ["link", "2"],
+  ["add list item", "5"],
+  ["add_list_item", "5"],
+  ["open dashboard", "6"],
+  ["open_dashboard", "6"],
+  ["open approval form", "8"],
+  ["open_approval_form", "8"],
+]);
+const CLICK_ACTION_CONTROL_TYPES = new Set(["container", "button", "action_button"]);
+const SUPPORTED_OPEN_MODES = new Set(["", "default", "modal", "slide", "target", "new"]);
+const SUPPORTED_MODAL_SIZES = new Set(["0", "1", "2", "3", "9"]);
+const CLICK_IMPLYING_LABEL = /\b(open|add|new|create|start|submit|approve|reject|complete|send|cancel|save|view|detail|details|launch|go to|navigate|drill|upload|download|link)\b/i;
+const BUILT_IN_FORM_ACTION_LABEL = /^(save|cancel|save as draft|submit|approve|reject|complete|print)$/i;
 const ALLOWED_GENERATED_CHROME_PROPERTY_PATHS = new Set([
   "LayoutView.attrs.appearance.bgc",
   "LayoutView.attrs.appearance.color",
@@ -98,7 +123,7 @@ const DASHBOARD_STYLE_REGION = /\b(Collection|Data analytics|Analytics|Summary|K
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
-    "  node scripts/validate-page-function-plan.mjs <page-function-plan.md|json> [--application-design-system <ads.json>] [--json]",
+    "  node scripts/validate-page-function-plan.mjs <page-function-plan.md|json> [--application-design-system <ads.json>] [--app-plan <app-plan.json>] [--json]",
     "",
     "Validates Page Function Plan structure and page-level guardrails. No API calls are made.",
   ].join("\n");
@@ -136,6 +161,15 @@ function readPlan(file) {
 function argValue(name) {
   const index = process.argv.indexOf(name);
   return index === -1 ? "" : process.argv[index + 1] || "";
+}
+
+function argValuesToSkip() {
+  const skip = new Set(["--json", "--application-design-system", "--app-plan"]);
+  for (const option of ["--application-design-system", "--app-plan"]) {
+    const value = argValue(option);
+    if (value) skip.add(value);
+  }
+  return skip;
 }
 
 function readDashboardTemplateLibrary() {
@@ -277,6 +311,89 @@ function appPlanDashboardRef(page) {
   ).trim();
 }
 
+function appPlanIndexes(appPlan = null, plan = null) {
+  const dashboards = new Set();
+  const approvals = new Set();
+  const lists = new Set();
+  const libraries = new Set();
+  const fields = new Set();
+  const variables = new Set();
+  const layouts = new Set();
+  const formActions = new Set();
+
+  const addName = (set, value) => {
+    const name = safeString(value).trim();
+    if (name) set.add(normalizeName(name));
+  };
+  const addMany = (set, values) => {
+    for (const value of asArray(values)) {
+      if (typeof value === "string") addName(set, value);
+      else if (value && typeof value === "object") addName(set, value.name || value.field || value.fieldName || value.id || value.layoutId || value.LayoutID || value.actionId || value.actionName);
+    }
+  };
+  const collectResource = (resource, targetSet) => {
+    addName(targetSet, resource.name || resource.resourceName || resource.appPlanResourceRef);
+    addMany(fields, resource.fields);
+    addMany(variables, resource.variables);
+    for (const form of asArray(resource.forms)) {
+      addName(layouts, form.name);
+      addName(layouts, form.layoutName || form.layoutId || form.LayoutID);
+      addMany(formActions, form.actions);
+      addMany(formActions, form.formActions);
+    }
+  };
+
+  if (appPlan && typeof appPlan === "object") {
+    for (const dashboard of asArray(appPlan.dashboards)) {
+      addName(dashboards, dashboard.name);
+      addName(layouts, dashboard.layoutName || dashboard.LayoutID || dashboard.PageID || dashboard.pageId);
+      addMany(fields, dashboard.fields);
+      addMany(formActions, dashboard.actions);
+    }
+    for (const approval of asArray(appPlan.approvalForms)) {
+      addName(approvals, approval.name);
+      addName(approvals, approval.procKey || approval.ProcKey || approval.key);
+      addMany(fields, approval.fields);
+      addMany(variables, approval.variables);
+      addMany(formActions, approval.actions);
+      addMany(formActions, approval.formActions);
+      for (const task of asArray(approval.taskForms)) addMany(formActions, task.actions);
+    }
+    for (const resource of asArray(appPlan.dataLists)) collectResource(resource, lists);
+    for (const resource of asArray(appPlan.documentLibraries)) collectResource(resource, libraries);
+  }
+
+  if (plan && typeof plan === "object") {
+    for (const dashboard of asArray(plan.dashboards)) {
+      addName(dashboards, dashboard.name);
+      addName(dashboards, dashboard.appPlanDashboardRef);
+      addMany(fields, dashboard.fields);
+      addMany(variables, dashboard.variables);
+      for (const region of asArray(dashboard.regions)) addMany(fields, region.fields);
+    }
+    for (const approval of asArray(plan.approvalForms)) {
+      addName(approvals, approval.name);
+      addName(approvals, approval.appPlanApprovalRef);
+      addMany(formActions, approval.actions);
+      addMany(formActions, approval.formActions);
+      for (const field of asArray(approval.submissionForm?.fields)) addName(fields, field.field || field.name);
+      addMany(formActions, approval.submissionForm?.actions);
+      addMany(formActions, approval.submissionForm?.formActions);
+      for (const task of asArray(approval.taskForms)) {
+        for (const field of asArray(task.fields)) addName(fields, field.field || field.name);
+        addMany(formActions, task.actions);
+      }
+    }
+    for (const resource of [...asArray(plan.dataListForms), ...asArray(plan.documentLibraryForms)]) {
+      collectResource(resource, asArray(plan.documentLibraryForms).includes(resource) ? libraries : lists);
+      for (const form of asArray(resource.forms)) {
+        for (const field of asArray(form.fields)) addName(fields, field.field || field.name);
+      }
+    }
+  }
+  return { dashboards, approvals, lists, libraries, fields, variables, layouts, formActions };
+}
+
 function applicationDesignSystemLayout(ads) {
   if (!ads || typeof ads !== "object") return "";
   const selected = ads.selectedApplicationLayout;
@@ -328,6 +445,234 @@ function hasTaskDecisionActions(actionsValue) {
   const actionText = asArray(actionsValue).map(normalizeName).join(" ");
   return /\bapprove\b/.test(actionText) && /\breject\b/.test(actionText)
     || /\bcomplete\b/.test(actionText);
+}
+
+function actionLabel(action) {
+  return safeString(action.controlLabel || action.label || action.name || action.actionLabel || action.buttonLabel).trim();
+}
+
+function actionTypeCode(action) {
+  const code = safeString(action.actionTypeCode || action["action-type"] || action.actionTypeId || action.executeTypeCode).trim();
+  if (code) return code;
+  const name = normalizeName(action.actionType || action.executeType || action.actionName);
+  return CLICK_ACTION_NAME_TO_CODE.get(name) || "";
+}
+
+function actionControlType(action) {
+  return normalizeName(action.controlType || action.type || action.control);
+}
+
+function isDeferredAction(action) {
+  return hasStructuredIntent(action.proofStatus || action.fallback || action.deferredReason || action.fallbackDeferredReason, /\b(deferred|runtime-proof-required|export-learning-required|unsupported|cannot generate safely|fallback)\b/i);
+}
+
+function actionTargetName(action) {
+  return safeString(action.targetResourceName || action.targetName || action.targetDashboardPage || action.targetApprovalForm || action.targetList || action.targetLibrary || action.targetResource).trim();
+}
+
+function actionTargetType(action) {
+  return normalizeName(action.targetResourceType || action.targetType || action.resourceType);
+}
+
+function identifiers(action) {
+  return action.requiredTargetIdentifiers || action.targetIdentifiers || action.identifiers || {};
+}
+
+function identifierValue(action, key) {
+  const ids = identifiers(action);
+  return safeString(action[key] || action[key.toLowerCase()] || ids[key] || ids[key.toLowerCase()]).trim();
+}
+
+function structuredActions(value) {
+  return [
+    ...asArray(value?.interactiveActions),
+    ...asArray(value?.clickActions),
+    ...asArray(value?.actionBindings),
+    ...asArray(value?.actionButtons),
+    ...asArray(value?.containerButtonActions),
+    ...asArray(value?.actions).filter((action) => action && typeof action === "object"),
+  ];
+}
+
+function stringActions(value) {
+  return asArray(value?.actions).filter((action) => typeof action === "string").map((action) => action.trim()).filter(Boolean);
+}
+
+function actionRefs(value) {
+  return new Set(structuredActions(value).map((action) => normalizeName(actionLabel(action))).filter(Boolean));
+}
+
+function isBuiltInSurfaceAction(label, surfaceType) {
+  if (!BUILT_IN_FORM_ACTION_LABEL.test(label)) return false;
+  return /approval|data-form|form/.test(surfaceType);
+}
+
+function actionSurfaceRecords(plan) {
+  const records = [];
+  for (const dashboard of asArray(plan.dashboards)) {
+    records.push({ surfaceType: "dashboard", surfaceName: dashboard.name, value: dashboard });
+    for (const section of asArray(dashboard.dashboardSectionTemplates)) records.push({ surfaceType: "dashboard-section", surfaceName: `${dashboard.name}:${section.regionName || section.sectionName}`, value: section });
+    for (const region of asArray(dashboard.regions)) records.push({ surfaceType: "dashboard-region", surfaceName: `${dashboard.name}:${region.name}`, value: region });
+  }
+  for (const approval of asArray(plan.approvalForms)) {
+    records.push({ surfaceType: "approval-submission", surfaceName: `${approval.name}:submission`, value: approval.submissionForm || {} });
+    for (const task of asArray(approval.taskForms)) records.push({ surfaceType: "approval-task", surfaceName: `${approval.name}:${task.name}`, value: task });
+  }
+  for (const resource of [...asArray(plan.dataListForms), ...asArray(plan.documentLibraryForms)]) {
+    for (const form of asArray(resource.forms)) {
+      records.push({ surfaceType: "data-form", surfaceName: `${resource.resourceName}:${form.name}`, value: form });
+      for (const region of asArray(form.relatedRegions)) records.push({ surfaceType: "data-form-related-region", surfaceName: `${resource.resourceName}:${form.name}:${region.name}`, value: region });
+    }
+  }
+  return records;
+}
+
+function visibleInteractiveControls(value) {
+  return [
+    ...asArray(value?.interactiveControls),
+    ...asArray(value?.controls),
+    ...asArray(value?.actionControls),
+    ...asArray(value?.buttons),
+  ].filter((control) => CLICK_ACTION_CONTROL_TYPES.has(normalizeName(control.controlType || control.type || control.control)));
+}
+
+function referenceNames(value) {
+  return [
+    ...asArray(value?.passValues),
+    ...asArray(value?.passvalues),
+    ...asArray(value?.queryParams),
+    ...asArray(value?.setVars),
+  ].map((entry) => {
+    if (typeof entry === "string") return entry;
+    return safeString(entry.field || entry.fieldName || entry.Name || entry.name || entry.variable || entry.variableName);
+  }).filter(Boolean);
+}
+
+function validateActionReferences(action, indexes, findings, context) {
+  for (const ref of referenceNames(action)) {
+    const normalized = normalizeName(ref);
+    if (normalized && !indexes.fields.has(normalized) && !indexes.variables.has(normalized) && !isDeferredAction(action)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_CLICK_ACTION_REFERENCE_UNKNOWN",
+        ...context,
+        reference: ref,
+        message: "Click action passValues/queryParams/setVars must reference fields or variables present in the App Plan/Page Function Plan, or be explicitly deferred.",
+      });
+    }
+  }
+}
+
+function validateClickAction(action, indexes, findings, context) {
+  const label = actionLabel(action);
+  const controlType = actionControlType(action);
+  const code = actionTypeCode(action);
+  const targetType = actionTargetType(action);
+  const targetName = actionTargetName(action);
+  const deferred = isDeferredAction(action);
+
+  for (const [field, codeName, message] of [
+    [label, "PAGE_FUNCTION_CLICK_ACTION_LABEL_MISSING", "Interactive Container/Button action must include a control label."],
+    [controlType, "PAGE_FUNCTION_CLICK_ACTION_CONTROL_TYPE_MISSING", "Interactive action must declare control type: Container, Button, or action_button."],
+    [safeString(action.interactionPurpose).trim(), "PAGE_FUNCTION_CLICK_ACTION_PURPOSE_MISSING", "Interactive action must include interaction purpose."],
+    [code, "PAGE_FUNCTION_CLICK_ACTION_TYPE_MISSING", "Interactive action must include action type and action-type code."],
+    [targetType, "PAGE_FUNCTION_CLICK_ACTION_TARGET_TYPE_MISSING", "Interactive action must include target resource type."],
+    [targetName, "PAGE_FUNCTION_CLICK_ACTION_TARGET_NAME_MISSING", "Interactive action must include target resource name."],
+    [safeString(action.proofStatus).trim(), "PAGE_FUNCTION_CLICK_ACTION_PROOF_STATUS_MISSING", "Interactive action must include proof status."],
+  ]) {
+    if (!field && !deferred) findings.push({ level: "error", code: codeName, ...context, actionLabel: label, message });
+  }
+
+  if (controlType && !CLICK_ACTION_CONTROL_TYPES.has(controlType)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_CLICK_ACTION_CONTROL_TYPE_UNSUPPORTED",
+      ...context,
+      actionLabel: label,
+      controlType,
+      message: "Click actions are supported here only for Container, Button, and action_button controls.",
+    });
+  }
+  if (code && !SUPPORTED_CLICK_ACTIONS.has(code)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_CLICK_ACTION_TYPE_UNSUPPORTED",
+      ...context,
+      actionLabel: label,
+      actionTypeCode: code,
+      message: "Click action type must use a plugin-known Container/Button action mapping.",
+    });
+  }
+  const openMode = normalizeName(action.openMode || action.op || action.openBehavior);
+  if (openMode && !SUPPORTED_OPEN_MODES.has(openMode)) {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_OPEN_MODE_UNSUPPORTED", ...context, actionLabel: label, openMode, message: "Click action open mode must be default, modal, slide, target, or new." });
+  }
+  const modalSize = safeString(action.modalSize || action.modalsize).trim();
+  if (modalSize && !SUPPORTED_MODAL_SIZES.has(modalSize) && !hasTextValue(action.customSize || action.cusize)) {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_MODAL_SIZE_UNSUPPORTED", ...context, actionLabel: label, modalSize, message: "Click action modal size must use export-proven size 0, 1, 2, 3, or 9, or declare custom size." });
+  }
+
+  if (code === "2") {
+    if (!hasTextValue(action.url) && !hasTextValue(action.link) && !hasTextValue(action.urlExpression) && !deferred) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_LINK_TARGET_MISSING", ...context, actionLabel: label, message: "Link actions must include a URL, link, or URL expression target." });
+    }
+  } else if (code === "5") {
+    if (!/(data list|document library|list|library)/i.test(targetType) && !deferred) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_ADD_TARGET_TYPE_INVALID", ...context, actionLabel: label, targetType, message: "Add list item actions must target a Data list or Document library." });
+    }
+    if (!identifierValue(action, "ListID") && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_ADD_LIST_ID_MISSING", ...context, actionLabel: label, message: "Add list item actions must include target ListID." });
+    if (!identifierValue(action, "LayoutID") && !hasTextValue(action.layout) && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_ADD_LAYOUT_MISSING", ...context, actionLabel: label, message: "Add list item actions must include target form LayoutID/layout when required." });
+    if (targetName && !indexes.lists.has(normalizeName(targetName)) && !indexes.libraries.has(normalizeName(targetName)) && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_TARGET_RESOURCE_UNKNOWN", ...context, actionLabel: label, targetName, message: "Add list item target list/library must exist in the App Plan/Page Function Plan." });
+  } else if (code === "6") {
+    if (!identifierValue(action, "PageID") && !identifierValue(action, "LayoutID") && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_DASHBOARD_PAGE_ID_MISSING", ...context, actionLabel: label, message: "Open dashboard actions must include target PageID or LayoutID." });
+    if (targetName && !indexes.dashboards.has(normalizeName(targetName)) && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_TARGET_DASHBOARD_UNKNOWN", ...context, actionLabel: label, targetName, message: "Open dashboard target must map to a planned Dashboard page." });
+  } else if (code === "8") {
+    if (!identifierValue(action, "ProcKey") && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_APPROVAL_PROCKEY_MISSING", ...context, actionLabel: label, message: "Open approval form actions must include target ProcKey." });
+    if (targetName && !indexes.approvals.has(normalizeName(targetName)) && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_TARGET_APPROVAL_UNKNOWN", ...context, actionLabel: label, targetName, message: "Open approval form target must map to a planned Approval form." });
+  } else if (code === "1") {
+    const actionRef = safeString(action.formActionId || action.formActionName || action.formActionRef || action.controlAction || action.control_action).trim();
+    if (!actionRef && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_FORM_ACTION_REF_MISSING", ...context, actionLabel: label, message: "Form action binding must reference a supported form action." });
+    if (actionRef && !indexes.formActions.has(normalizeName(actionRef)) && !deferred) findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_FORM_ACTION_UNKNOWN", ...context, actionLabel: label, formActionRef: actionRef, message: "Form action binding references a missing form action." });
+  }
+  validateActionReferences(action, indexes, findings, context);
+}
+
+function validateInteractiveActions(plan, appPlan, findings) {
+  const indexes = appPlanIndexes(appPlan, plan);
+  for (const record of actionSurfaceRecords(plan)) {
+    const structured = structuredActions(record.value);
+    const structuredLabels = actionRefs(record.value);
+    for (const action of structured) {
+      validateClickAction(action, indexes, findings, { surfaceType: record.surfaceType, surface: record.surfaceName });
+    }
+    for (const label of stringActions(record.value)) {
+      if (!CLICK_IMPLYING_LABEL.test(label) || isBuiltInSurfaceAction(label, record.surfaceType)) continue;
+      if (!structuredLabels.has(normalizeName(label)) && !hasTextValue(record.value.noActionReason) && !hasTextValue(record.value.fallback)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_CLICK_ACTION_PROSE_ONLY",
+          surfaceType: record.surfaceType,
+          surface: record.surfaceName,
+          actionLabel: label,
+          message: "Action labels that imply click behavior must be backed by structured interactiveActions/clickActions/actionBindings metadata, not prose or string-only actions.",
+        });
+      }
+    }
+    for (const control of visibleInteractiveControls(record.value)) {
+      const label = actionLabel(control);
+      if (control.nonInteractive || control.interactive === false) {
+        if (!hasTextValue(control.nonInteractiveReason)) {
+          findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_NONINTERACTIVE_REASON_MISSING", surfaceType: record.surfaceType, surface: record.surfaceName, controlLabel: label, message: "Intentionally static Container/Button controls must be marked nonInteractive with a reason." });
+        }
+        continue;
+      }
+      const controlAction = control.action || control.clickAction || control.actionBinding;
+      const ref = normalizeName(control.actionRef || control.actionLabel || label);
+      if (!hasTextValue(controlAction) && !structuredLabels.has(ref)) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_CLICK_ACTION_BINDING_MISSING", surfaceType: record.surfaceType, surface: record.surfaceName, controlLabel: label, message: "Visible interactive Container/Button controls must have structured action binding metadata or be marked nonInteractive with a reason." });
+      }
+    }
+  }
 }
 
 function isInteractivePrintControl(control) {
@@ -707,6 +1052,13 @@ function markdownFindings(text) {
     [/Print page pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_APPROVAL_PRINT_ID_FIELD_MISSING"],
     [/Form pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_DATA_FORM_ID_FIELD_MISSING"],
     [/Document metadata, upload, preview, and view behavior/i, "PAGE_FUNCTION_PLAN_DOCUMENT_BEHAVIOR_FIELD_MISSING"],
+    [/interactiveActions\[\]/i, "PAGE_FUNCTION_PLAN_INTERACTIVE_ACTIONS_FIELD_MISSING"],
+    [/action-type: "2"[\s\S]*Link/i, "PAGE_FUNCTION_PLAN_LINK_ACTION_TYPE_RULE_MISSING"],
+    [/action-type: "5"[\s\S]*Add list item/i, "PAGE_FUNCTION_PLAN_ADD_LIST_ACTION_TYPE_RULE_MISSING"],
+    [/action-type: "6"[\s\S]*Open dashboard/i, "PAGE_FUNCTION_PLAN_OPEN_DASHBOARD_ACTION_TYPE_RULE_MISSING"],
+    [/action-type: "8"[\s\S]*Open approval form/i, "PAGE_FUNCTION_PLAN_OPEN_APPROVAL_ACTION_TYPE_RULE_MISSING"],
+    [/action-type: "1"[\s\S]*Form action binding/i, "PAGE_FUNCTION_PLAN_FORM_ACTION_BINDING_RULE_MISSING"],
+    [/visible action-looking Containers or Buttons without action metadata/i, "PAGE_FUNCTION_PLAN_FAKE_BUTTON_GENERATION_RULE_MISSING"],
   ];
   for (const [pattern, code] of required) {
     if (!pattern.test(text)) {
@@ -1218,7 +1570,7 @@ function validateApplicationLayoutInheritance(plan, applicationDesignSystem, fin
   }
 }
 
-function validateJson(plan, applicationDesignSystem = null) {
+function validateJson(plan, applicationDesignSystem = null, appPlan = null) {
   const findings = [];
   if (!safeString(plan.applicationName).trim()) findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_NAME_MISSING", message: "applicationName is required." });
   if (!safeString(plan.applicationLayout).trim()) findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_LAYOUT_MISSING", message: "applicationLayout is required." });
@@ -1229,6 +1581,7 @@ function validateJson(plan, applicationDesignSystem = null) {
   validateSupportedControls(plan, findings);
   validateApprovalForms(plan, findings);
   validateDataForms(plan, findings);
+  validateInteractiveActions(plan, appPlan, findings);
   validateResponsive(plan, findings);
   validateApplicationLayoutInheritance(plan, applicationDesignSystem, findings);
   return findings;
@@ -1238,7 +1591,9 @@ function main() {
   if (process.argv.includes("--help") || process.argv.includes("-h")) usage(0);
   const json = process.argv.includes("--json");
   const adsPath = argValue("--application-design-system");
-  const file = process.argv.slice(2).find((arg) => arg !== "--json" && arg !== "--application-design-system" && arg !== adsPath);
+  const appPlanPath = argValue("--app-plan");
+  const skip = argValuesToSkip();
+  const file = process.argv.slice(2).find((arg) => !skip.has(arg));
   if (!file) usage();
   if (!fs.existsSync(file)) {
     console.log(JSON.stringify({ status: "fail", file: path.resolve(file), errors: 1, findings: [{ level: "error", code: "PAGE_FUNCTION_PLAN_FILE_MISSING", message: "Page Function Plan file does not exist." }] }, null, 2));
@@ -1254,7 +1609,16 @@ function main() {
     const adsInput = readPlan(adsPath);
     applicationDesignSystem = adsInput.plan;
   }
-  const findings = input.type === "json" ? validateJson(input.plan, applicationDesignSystem) : markdownFindings(input.text);
+  let appPlan = null;
+  if (appPlanPath) {
+    if (!fs.existsSync(appPlanPath)) {
+      console.log(JSON.stringify({ status: "fail", file: path.resolve(file), errors: 1, findings: [{ level: "error", code: "PAGE_FUNCTION_APP_PLAN_FILE_MISSING", message: "App Plan file does not exist." }] }, null, 2));
+      process.exit(1);
+    }
+    const appPlanInput = readPlan(appPlanPath);
+    appPlan = appPlanInput.plan;
+  }
+  const findings = input.type === "json" ? validateJson(input.plan, applicationDesignSystem, appPlan) : markdownFindings(input.text);
   const errors = findings.filter((finding) => finding.level === "error").length;
   const report = { status: errors ? "fail" : "pass", file: path.resolve(file), inputType: input.type, errors, warnings: 0, findings };
   if (json) console.log(JSON.stringify(report, null, 2));

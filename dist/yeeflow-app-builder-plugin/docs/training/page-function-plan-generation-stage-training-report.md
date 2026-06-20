@@ -38,6 +38,7 @@ Functional Specification
 - Promoted `event_portfolio_dashboard_golden_reference` as an explicit Dashboard golden-reference family in the plugin-contained template library and Page Function Plan contract.
 - Clarified document responsibility split: Functional Specification describes business page needs only, App Plan declares Dashboard resources plus stable Page Function Plan refs only, and Page Function Plan owns Dashboard implementation intent including `dashboardGoldenReference`.
 - Consolidated the Page Function Plan as the canonical page-level implementation contract for Dashboard pages, Approval submission/task/print surfaces, custom Data list forms, and custom Document library forms.
+- Added Page Function Plan `interactiveActions[]` / click-action gates for visible interactive `Container`, `Button`, and `action_button` controls using plugin-known Container/Button action mappings and runtime proof boundaries.
 - Added Application Design System layout-selection gates requiring exactly one supported Yeeflow Application Layout and structured app chrome fields before generation.
 - Added Application Design System `applicationChrome` gates for app-wide Yeeflow header, navigator menu, content-area tokens, design intent, supported generated shell property paths, export-learning/runtime-proof/deferred boundaries, and Dashboard chrome inheritance.
 - Added non-dashboard surface gates for Approval field state/behavior, task decisions, print-specific noninteractive pages, New/Edit current-resource field scope, Save/Cancel actions, View related-region contracts, and Document library metadata/upload/view behavior.
@@ -69,9 +70,19 @@ Required page-level content:
 - Displayed fields.
 - Filters, grouping, sorting, and priority.
 - Actions.
+- Structured interactive click actions for visible interactive `Container`, `Button`, and `action_button` controls.
 - Empty/loading/error state intent where applicable.
 - Desktop and mobile layout behavior.
 - App Plan traceability by stable resource, field, form, action, workflow, source list, and library names.
+
+Interactive Container/Button action contract:
+
+- Page Function Plan keeps `actions` as stable business action names and defines generated action metadata in `interactiveActions[]`, `clickActions[]`, `actionBindings[]`, or equivalent structured fields.
+- Supported action mappings are `action-type: "2"` Link, `action-type: "5"` Add list item, `action-type: "6"` Open dashboard, `action-type: "8"` Open approval form, and `action-type: "1"` Form action binding only where host/form-action shape is supported or explicitly proof/deferred.
+- Each planned interactive action requires control label, control type, interaction purpose, action type/code, target resource type/name, target identifiers such as `ListID`, `PageID`, `ProcKey`, `LayoutID`, or form action ID, open mode, size when needed, passValues/queryParams/setVars when needed, proof status, and fallback/deferred reason when unsafe.
+- Visible interactive Containers/Buttons/action_buttons without action metadata fail unless marked `nonInteractive` with a reason.
+- Action labels implying click behavior fail when they exist only in prose/string actions and not structured fields.
+- Resource generation must consume these Page Function Plan action definitions and must not generate visible fake buttons; unsafe actions must be deferred or rendered as non-interactive text.
 
 Dashboard-specific contract:
 
@@ -133,6 +144,16 @@ Application Design System layout contract:
 - Dashboard Page Function Plan overriding the app-level layout without explicit deferred/proof boundary.
 - Dashboard Page Function Plan overriding app-wide chrome without explicit deferred/proof boundary.
 - Dashboard Page Function Plan attempting to cause unsupported generated app shell/chrome properties even with a deferred proof boundary.
+- Valid Dashboard quick actions using Open dashboard, Add list item, and Open approval form with structured target metadata.
+- Visible interactive Container/Button without action binding.
+- Action label implying click behavior without structured action metadata.
+- Intentionally static action-looking controls marked `nonInteractive` with a reason.
+- Add list item missing target list/layout.
+- Open dashboard missing target Dashboard/PageID.
+- Open approval form missing target Approval/ProcKey.
+- Form action binding referencing a missing form action.
+- Invented action type/open mode.
+- Click action passValues/queryParams/setVars referencing fields or variables outside the App Plan/Page Function Plan.
 - Form Report correctly not required as a UI surface.
 - New/Edit form incorrectly containing Collection/Data analytics/audit/dashboard regions.
 - Approval submission field missing state/behavior contract.

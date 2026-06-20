@@ -37,6 +37,90 @@ function expectCode(report, code) {
   );
 }
 
+function openRequestAction(overrides = {}) {
+  return {
+    controlLabel: "Open Request",
+    controlType: "Button",
+    interactionPurpose: "Open the request work queue dashboard from the current row/action context.",
+    actionType: "Open dashboard",
+    actionTypeCode: "6",
+    targetResourceType: "Dashboard page",
+    targetResourceName: "Operations Dashboard",
+    requiredTargetIdentifiers: { PageID: "PAGE-OPERATIONS-DASHBOARD", LayoutID: "PAGE-OPERATIONS-DASHBOARD" },
+    openMode: "slide",
+    proofStatus: "export-proven Container/Button action-type 6 with runtime-proof-required target verification.",
+    ...overrides,
+  };
+}
+
+function addPurchaseRequestAction(overrides = {}) {
+  return {
+    controlLabel: "Create Purchase Request",
+    controlType: "Container",
+    interactionPurpose: "Quick-create a purchase request from the Dashboard.",
+    actionType: "Add list item",
+    actionTypeCode: "5",
+    targetResourceType: "Data list",
+    targetResourceName: "Purchase Requests",
+    requiredTargetIdentifiers: { ListID: "LIST-PURCHASE-REQUESTS", LayoutID: "LAYOUT-PURCHASE-REQUESTS-NEW" },
+    openMode: "modal",
+    modalSize: "2",
+    passValues: [{ field: "Title", value: "Draft request" }],
+    proofStatus: "export-proven Container/Button action-type 5.",
+    ...overrides,
+  };
+}
+
+function openApprovalAction(overrides = {}) {
+  return {
+    controlLabel: "Start Purchase Approval",
+    controlType: "Button",
+    interactionPurpose: "Start the Purchase Approval workflow from the Dashboard.",
+    actionType: "Open approval form",
+    actionTypeCode: "8",
+    targetResourceType: "Approval form",
+    targetResourceName: "Purchase Approval",
+    requiredTargetIdentifiers: { ProcKey: "PURCHASE_APPROVAL" },
+    openMode: "slide",
+    modalSize: "2",
+    setVars: [{ variable: "Title", value: "New approval request" }],
+    proofStatus: "export-proven Container/Button action-type 8; approval pageUrl readiness remains generated-package validation.",
+    ...overrides,
+  };
+}
+
+function openDocumentAction(overrides = {}) {
+  return {
+    controlLabel: "Open Document",
+    controlType: "Button",
+    interactionPurpose: "Open the current document preview/deep link.",
+    actionType: "Link",
+    actionTypeCode: "2",
+    targetResourceType: "Link",
+    targetResourceName: "Document preview URL",
+    urlExpression: "Document preview URL expression",
+    openMode: "new",
+    proofStatus: "export-proven Container/Button action-type 2; URL remains redacted.",
+    ...overrides,
+  };
+}
+
+function attachStructuredOpenRequest(value) {
+  if (!value || typeof value !== "object") return value;
+  const labels = (value.actions || []).filter((action) => typeof action === "string");
+  if (labels.includes("Open Request")) {
+    value.interactiveActions = value.interactiveActions || [];
+    if (!value.interactiveActions.some((action) => actionLabelForTest(action) === "Open Request")) {
+      value.interactiveActions.push(openRequestAction());
+    }
+  }
+  return value;
+}
+
+function actionLabelForTest(action) {
+  return String(action?.controlLabel || action?.label || action?.name || "").trim();
+}
+
 function appPlan(overrides = {}) {
   const plan = {
     dashboards: [{ name: "Operations Dashboard", pageFunctionPlanRef: "PFP-DASH-OPERATIONS", fields: ["Title"], actions: ["Open Request"] }],
@@ -111,9 +195,10 @@ function pagePlan(overrides = {}) {
           grouping: [],
           sorting: ["Created Date descending"],
           actions: ["Open Request"],
-          requiredControls: ["data-list"],
-          proofStatus: "runtime-proven",
-          whyTemplateFits: "A data table section fits a scannable record queue.",
+          interactiveActions: [openRequestAction(), addPurchaseRequestAction(), openApprovalAction()],
+      requiredControls: ["data-list"],
+      proofStatus: "runtime-proven",
+      whyTemplateFits: "A data table section fits a scannable record queue.",
         },
       ],
       regions: [{
@@ -123,6 +208,7 @@ function pagePlan(overrides = {}) {
         fields: ["Title", "Amount", "Status"],
         filters: ["Status is not Completed"],
         actions: ["Open Request"],
+        interactiveActions: [openRequestAction()],
       }],
     }],
     approvalForms: [{
@@ -188,6 +274,7 @@ function pagePlan(overrides = {}) {
           mobileBehavior: "Summary first, related documents below.",
           fields: [{ name: "Title", controlType: "Text", field: "Title" }, { name: "Status", controlType: "Dynamic field", field: "Status" }],
           actions: ["Open Request"],
+          interactiveActions: [openRequestAction()],
           relatedRegions: [{
             name: "Related Documents",
             regionType: "Data table",
@@ -196,6 +283,7 @@ function pagePlan(overrides = {}) {
             fields: ["Title", "Status"],
             filters: ["Current purchase request"],
             actions: ["Open Document"],
+            interactiveActions: [openDocumentAction()],
             openingBehavior: "Open document view form in slide panel",
           }],
         },
@@ -214,6 +302,7 @@ function pagePlan(overrides = {}) {
         mobileBehavior: "Metadata stacks above document preview.",
         fields: [{ name: "Title", controlType: "Text", field: "Title" }, { name: "Status", controlType: "Dynamic field", field: "Status" }],
         actions: ["Open Document"],
+        interactiveActions: [openDocumentAction()],
       }],
     }],
   };
@@ -224,6 +313,17 @@ function pagePlan(overrides = {}) {
     dashboardGoldenReference: "none",
     ...dashboard,
   }));
+  for (const dashboard of merged.dashboards) {
+    attachStructuredOpenRequest(dashboard);
+    for (const entry of dashboard.dashboardSectionTemplates || []) attachStructuredOpenRequest(entry);
+    for (const region of dashboard.regions || []) attachStructuredOpenRequest(region);
+  }
+  for (const resource of [...(merged.dataListForms || []), ...(merged.documentLibraryForms || [])]) {
+    for (const form of resource.forms || []) {
+      attachStructuredOpenRequest(form);
+      for (const region of form.relatedRegions || []) attachStructuredOpenRequest(region);
+    }
+  }
   return merged;
 }
 
@@ -517,6 +617,93 @@ try {
   output = run("scripts/validate-page-function-plan.mjs", [planFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "View form related Data table region with source/binding/actions passes", status: "pass" });
+
+  const validQuickActions = pagePlan();
+  validQuickActions.dashboards[0].dashboardSectionTemplates[1].interactiveActions = [
+    openRequestAction(),
+    addPurchaseRequestAction(),
+    openApprovalAction(),
+  ];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "valid-dashboard-quick-actions", validQuickActions), "--app-plan", appFile]);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "valid Dashboard quick actions with Open dashboard/Add list item/Open approval form pass", status: "pass" });
+
+  const missingVisibleBinding = pagePlan();
+  missingVisibleBinding.dashboards[0].dashboardSectionTemplates[1].interactiveControls = [{ controlLabel: "Unplanned Action", controlType: "Container" }];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-visible-container-binding", missingVisibleBinding)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_BINDING_MISSING");
+  results.push({ case: "visible interactive Container without action binding fails", status: "pass" });
+
+  const intentionallyStatic = pagePlan();
+  intentionallyStatic.dashboards[0].dashboardSectionTemplates[1].interactiveControls = [{ controlLabel: "Static KPI Legend", controlType: "Button", nonInteractive: true, nonInteractiveReason: "Visual label only; rendered as non-clickable text if generation cannot bind safely." }];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "static-interactive-looking-control", intentionallyStatic)]);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "intentionally static action-looking control with nonInteractive reason passes", status: "pass" });
+
+  const proseOnlyAction = pagePlan();
+  proseOnlyAction.dashboards[0].dashboardSectionTemplates[1].interactiveActions = [];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "prose-only-click-action", proseOnlyAction)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_PROSE_ONLY");
+  results.push({ case: "action label implying click without structured metadata fails", status: "pass" });
+
+  const badAddAction = pagePlan();
+  badAddAction.dashboards[0].dashboardSectionTemplates[1].interactiveActions = [addPurchaseRequestAction({ requiredTargetIdentifiers: { ListID: "" }, layout: "" })];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-add-list-action", badAddAction), "--app-plan", appFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_ADD_LIST_ID_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_ADD_LAYOUT_MISSING");
+  results.push({ case: "Add list item missing target list/layout fails", status: "pass" });
+
+  const badDashboardAction = pagePlan();
+  badDashboardAction.dashboards[0].dashboardSectionTemplates[1].interactiveActions = [openRequestAction({ targetResourceName: "", requiredTargetIdentifiers: {}, proofStatus: "planned" })];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-open-dashboard-action", badDashboardAction), "--app-plan", appFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_TARGET_NAME_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_DASHBOARD_PAGE_ID_MISSING");
+  results.push({ case: "Open dashboard missing target Dashboard/PageID fails", status: "pass" });
+
+  const badApprovalAction = pagePlan();
+  badApprovalAction.dashboards[0].dashboardSectionTemplates[1].interactiveActions = [openApprovalAction({ targetResourceName: "", requiredTargetIdentifiers: {}, proofStatus: "planned" })];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-open-approval-action", badApprovalAction), "--app-plan", appFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_TARGET_NAME_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_APPROVAL_PROCKEY_MISSING");
+  results.push({ case: "Open approval form missing target Approval/ProcKey fails", status: "pass" });
+
+  const badFormAction = pagePlan();
+  badFormAction.approvalForms[0].submissionForm.interactiveActions = [{
+    controlLabel: "Custom Validate",
+    controlType: "Button",
+    interactionPurpose: "Run custom validation before submit.",
+    actionType: "Form action binding",
+    actionTypeCode: "1",
+    targetResourceType: "Form action",
+    targetResourceName: "Missing Custom Validate",
+    formActionName: "Missing Custom Validate",
+    openMode: "default",
+    proofStatus: "planned",
+  }];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-form-action-binding", badFormAction), "--app-plan", appFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_FORM_ACTION_UNKNOWN");
+  results.push({ case: "Form action binding referencing missing form action fails", status: "pass" });
+
+  const badTypeAndMode = pagePlan();
+  badTypeAndMode.dashboards[0].dashboardSectionTemplates[1].interactiveActions = [openRequestAction({ actionType: "Teleport", actionTypeCode: "77", openMode: "drawer" })];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-action-type-mode", badTypeAndMode)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_TYPE_UNSUPPORTED");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_OPEN_MODE_UNSUPPORTED");
+  results.push({ case: "invented action type and open mode fail", status: "pass" });
+
+  const badReference = pagePlan();
+  badReference.dashboards[0].dashboardSectionTemplates[1].interactiveActions = [addPurchaseRequestAction({ passValues: [{ field: "Unknown Field", value: "X" }] })];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-action-reference", badReference), "--app-plan", appFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_REFERENCE_UNKNOWN");
+  results.push({ case: "click action passValues referencing unknown App Plan field fails", status: "pass" });
 
   output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "valid-kanban-dashboard", pagePlan({
     dashboards: [{

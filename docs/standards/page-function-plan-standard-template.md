@@ -38,6 +38,90 @@ Rules:
 - Every Page Function Plan entry must map back to one App Plan resource or surface. Page Function Plan entries must not reference resources, fields, controls, actions, templates, or golden references outside the App Plan and plugin-supported capabilities.
 - Form Reports are not required as canonical UI design surfaces, but may be referenced as data/reporting resources when relevant.
 
+## 2A. Interactive Container/Button Click Action Plan
+
+The Page Function Plan must explicitly define click actions for every visible interactive `Container`, `Button`, or `action_button` control. This includes Dashboard quick actions, action-looking cards, row buttons inside Collection/Data table/Kanban regions, Data list or Document library View related-region buttons, and supported Approval submission/task buttons beyond built-in Save/Submit/Approve/Reject/Complete behavior.
+
+Use the plugin-contained Container/Button action references:
+
+- `docs/studies/container-button-action-settings.md`
+- `docs/studies/container-button-action-runtime-proof.md`
+- `scripts/inspect-container-button-actions.mjs`
+- `docs/studies/normalized/container-button-actions/`
+
+Supported action mappings:
+
+| action-type code | Action name | Use |
+| --- | --- | --- |
+| `action-type: "2"` | Link | URL, help page, external/internal link, or redacted deep-link expression |
+| `action-type: "5"` | Add list item | Quick-create item in a Data list or Document library |
+| `action-type: "6"` | Open dashboard | Open a planned Dashboard page |
+| `action-type: "8"` | Open approval form | Start/open a planned Approval form by `ProcKey` |
+| `action-type: "1"` | Form action binding / Action | Supported form action binding only where the host/form-action shape is plugin-supported, export-proven, or explicitly proof/deferred |
+
+Structured field:
+
+```json
+{
+  "interactiveActions": [
+    {
+      "controlLabel": "Create Purchase Request",
+      "controlType": "Container",
+      "interactionPurpose": "Quick-create a purchase request from the operations dashboard.",
+      "actionType": "Add list item",
+      "actionTypeCode": "5",
+      "targetResourceType": "Data list",
+      "targetResourceName": "Purchase Requests",
+      "requiredTargetIdentifiers": {
+        "ListID": "<App Plan/API-issued ListID>",
+        "LayoutID": "<target New form LayoutID when required>"
+      },
+      "openMode": "modal",
+      "modalSize": "2",
+      "customSize": null,
+      "passValues": [
+        {
+          "field": "Requester",
+          "value": "Current user"
+        }
+      ],
+      "queryParams": [],
+      "setVars": [],
+      "proofStatus": "export-proven Container/Button action-type 5; runtime-proof-required after generation",
+      "fallbackDeferredReason": ""
+    }
+  ]
+}
+```
+
+Required fields for every planned interactive action:
+
+- `controlLabel`
+- `controlType`: `Container`, `Button`, or `action_button`
+- `interactionPurpose`
+- `actionType` and `actionTypeCode`
+- `targetResourceType`
+- `targetResourceName`
+- `requiredTargetIdentifiers`, such as `ListID`, `PageID`, `ProcKey`, `LayoutID`, or form action ID
+- `openMode`: default, modal, slide, target, or new
+- `modalSize` / `customSize` when needed
+- `passValues`, `queryParams`, or `setVars` when needed
+- `proofStatus`
+- `fallbackDeferredReason` when the action cannot be generated safely
+
+Rules:
+
+- Keep `actions` as stable business action names for App Plan traceability. Put the generated Container/Button implementation contract in `interactiveActions[]`, `clickActions[]`, `actionBindings[]`, or equivalent structured fields.
+- A visible interactive `Container`, `Button`, or `action_button` must have structured action metadata or be marked `nonInteractive` with `nonInteractiveReason`.
+- An action label that implies click behavior, such as Open, Add, Create, Start, Submit, Approve, Reject, Complete, View, Launch, Upload, or Download, must be backed by structured action metadata. Prose-only action descriptions are not enough.
+- Add list item actions must target a Data list or Document library and include target list/library identity plus layout when required.
+- Open dashboard actions must target a planned Dashboard page and include `PageID` or `LayoutID`.
+- Open approval form actions must target a planned Approval form and include `ProcKey`.
+- Form action binding must reference a supported form action ID/name or be explicitly proof/deferred.
+- Open modes must use the plugin-known values: default, modal, slide, target, or new.
+- `passValues`, `queryParams`, and `setVars` must reference App Plan fields or variables, or be explicitly proof/deferred.
+- If a safe action cannot be generated, the control must be deferred or rendered as non-interactive text. Do not generate visible action-looking Containers or Buttons without action metadata.
+
 ## 3. Yeeflow Application Layout Guidance
 
 - Selected Yeeflow Application Layout: application-layout-1-vertical-nav / application-layout-2-horizontal-nav / application-layout-3-header-nav / application-layout-4-no-nav
