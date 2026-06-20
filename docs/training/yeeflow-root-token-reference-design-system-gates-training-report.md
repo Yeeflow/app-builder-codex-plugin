@@ -30,6 +30,7 @@ Implementation selectors outside `:root` were intentionally excluded. Cropper.js
 - Updated the UI Pattern Library generation standard so selected patterns declare inherited token intent and Page Implementation Blueprints preserve token names rather than raw CSS guesses.
 - Updated the full-page blueprint standard so blueprints carry token mapping for backgrounds, typography, actions, status badges/chips, spacing, gaps, fields, and responsive behavior.
 - Updated the Yeeflow application-builder skill and lifecycle reference so Root Token Reference review is required before Application Design System approval and HTML/PNG evidence cannot override token decisions.
+- Added a concise Yeeflow FontAwesome icon usage baseline so generated UI icons use Yeeflow-supported FontAwesome classes instead of invented SVG, emoji, image, or arbitrary custom icon names.
 
 ## Executable Gates
 
@@ -44,6 +45,8 @@ Updated:
 - `scripts/test-yapk-hard-gate-cache-artifacts.mjs`
 
 The validator checks missing root-token declarations, missing Primary/Secondary/Neutral selection, missing status rules, missing typography/spacing/border/gap mapping, raw token-equivalent values, hover/active state misuse, status colors used as the main Primary palette without business reason, dropped token names in blueprints, and missing proof/deferred labels for custom non-token values.
+
+The focused test also covers FontAwesome icon usage: valid tokenized FontAwesome icon controls pass, while emoji icons, inline SVG/image icons, arbitrary icon names, and clickable icon-only actions without label/tooltip intent fail.
 
 Allowed exception labels are:
 

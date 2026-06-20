@@ -144,6 +144,24 @@ Declare all default token decisions before UI Pattern Library selection. Preserv
   - Inferred token-compatible property paths:
   - Unsupported/custom style values and proof label:
 
+## 2B. FontAwesome Icon Usage Baseline
+
+Generated Yeeflow application UI icons must use Yeeflow-supported FontAwesome icon classes. Do not invent SVG icons, emoji icons, image icons, or arbitrary custom icon names as normal generated business-app UI.
+
+- Icon source: FontAwesome.
+- Preferred icon style family when known: `fa-regular` / `fa-solid`.
+- Icon size rule:
+- Icon color token rule:
+- Navigation icon usage:
+- Dashboard section header icon usage:
+- Action icon usage:
+- Status badge/chip icon usage:
+- Empty state icon usage:
+- Document/file region icon usage:
+- Approval/task action icon usage:
+- Icon fallback rule: if the exact FontAwesome class is uncertain, mark the icon `runtime-proof-required`, `export-learning-required`, or `deferred`; do not invent a class name.
+- Icon-only action accessibility rule: every icon-only action needs semantic purpose plus label or tooltip intent.
+
 Do not use hover/active color tokens as normal resting colors. Do not use normal/default tokens for hover/active states without an explicit exception label. Do not use Success, Warning, or Danger as the main application Primary palette without an explicit business reason.
 
 ## 3. Modern Visual Quality Standard
@@ -207,6 +225,7 @@ The default implementation path is App Plan -> Yeeflow Root Token Reference -> A
 - Badge/chip/status component patterns:
 - Dashboard KPI/analytics component patterns:
 - Mobile responsive component patterns:
+- FontAwesome icon component patterns:
 - Approved UI pattern templates by surface type:
   - Dashboard page:
   - Approval Submission form:
@@ -223,9 +242,9 @@ Optional HTML previews must use these tokens and approved pattern templates. HTM
 
 Select surface-level templates from `docs/templates/yeeflow-ui-section-template-library.normalized.json`.
 
-| Surface ID | Surface type | Source App Plan resource | Selected `templateId` values | Template category | Token set inherited from Application Design System | Proof status | Required controls mapped | Required fields/bindings mapped | Required actions mapped or deferred | Ready for Blueprint |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-|  |  |  |  |  | primary / secondary / neutral / status / typography / spacing | runtime-proven / export-proven / inferred / needs-golden-proof |  |  |  | yes/no |
+| Surface ID | Surface type | Source App Plan resource | Selected `templateId` values | Template category | Token set inherited from Application Design System | Icons required / semantic purpose / FontAwesome class | Proof status | Required controls mapped | Required fields/bindings mapped | Required actions mapped or deferred | Ready for Blueprint |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  | primary / secondary / neutral / status / typography / spacing | yes/no; purpose; `fa-regular fa-file` / deferred | runtime-proven / export-proven / inferred / needs-golden-proof |  |  |  | yes/no |
 
 Selection rules:
 
@@ -235,6 +254,7 @@ Selection rules:
 - Data List and Document Library New/Edit forms use form-body templates for primary editable fields; primary fields must not move into generic lower regions.
 - View/Detail, related-record, Sub List, Collection, Kanban, and Timeline regions must select templates matching their source list, row/current-item context, and actions.
 - Every selected template must preserve `patternProofStatus`.
+- Patterns that require icons must declare semantic icon purpose, recommended FontAwesome class when known, tokenized icon color/size, and fallback proof label when uncertain.
 
 Run `scripts/validate-ui-pattern-selection.mjs` before Page Implementation Blueprint work when a machine-readable pattern-selection artifact exists.
 

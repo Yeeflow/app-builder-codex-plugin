@@ -55,6 +55,7 @@ Every selected surface must declare:
 - `surfaceType`
 - selected `templateId` or `selectedTemplateIds`
 - inherited `tokenSet` / `tokenIntent` from the Application Design System
+- icon requirements for selected patterns, including semantic purpose, recommended FontAwesome class when known, tokenized icon color/size, and fallback proof label
 - `patternProofStatus`: `runtime-proven`, `export-proven`, `inferred`, or `needs-golden-proof`
 - control mapping for every template `requiredControls`
 - child-control mapping for every template `requiredChildControls`
@@ -63,6 +64,8 @@ Every selected surface must declare:
 - proof boundary for unsupported fields, bindings, style tokens, custom tokens, or action behavior
 
 Token intent must include, as relevant to the selected pattern, page background, section/card background, border/divider, typography, action buttons, status badges/chips, table/list/card spacing, grid/flex gaps, form field gaps, and mobile/responsive spacing. Pattern selection must preserve Yeeflow root token names such as `--c--primary`, `--fs--base`, `--lh--base`, `--fw--regular`, and `--sp--s200`; resolved CSS values alone are insufficient.
+
+Icon intent must use Yeeflow-supported FontAwesome classes. For navigation, dashboard section headers, actions, status badges, empty states, document/file regions, and approval/task actions, selected patterns should declare whether an icon is required, what the icon means, and the recommended class such as `fa-regular fa-file` or `fa-solid fa-check` when known. If the exact icon class is uncertain, mark it `runtime-proof-required`, `export-learning-required`, or `deferred`; do not invent custom icon names.
 
 Deferred items must include reason, fallback, proof impact, and required follow-up. A deferred item may allow local planning to continue, but it must not be reported as runtime-proven or resource-generation-ready unless the chosen fallback is complete.
 
@@ -77,6 +80,8 @@ These are hard blockers:
 - treating HTML previews, PNG screenshots, SVG boards, or visual mockups as higher authority than the App Plan, Application Design System, selected templates, or Page Implementation Blueprint
 - replacing Application Design System token intent with arbitrary hex colors, raw font sizes, raw line heights, raw font weights, raw spacing, or raw CSS visual guesses when matching Yeeflow root tokens exist
 - using hover/active tokens as normal resting colors, using normal/default tokens for hover/active states without explanation, or using success/warning/danger as the main Primary palette without explicit business reason
+- using emoji, inline SVG, image icons, or arbitrary non-FontAwesome icon names as normal generated UI icons
+- creating icon-only actions without semantic purpose and label/tooltip intent
 - claiming UI quality from schema validation, signing, package API acceptance, or runtime navigation alone
 
 ## Blueprint Requirements
@@ -91,6 +96,7 @@ Blueprints must preserve the selected template contract:
 - unsupported style/property/control shapes are marked `export-learning-required`, `runtime-proof-required`, or `deferred`
 - token mappings cover page background, section/card background, border/divider, typography, action buttons, status badges/chips, table/list/card spacing, grid/flex gaps, form field gaps, and mobile/responsive spacing
 - custom non-token values carry `runtime-proof-required`, `export-learning-required`, `deferred`, or `explicit-user-approved-custom-token`
+- every generated icon control uses Yeeflow control type `icon`, a FontAwesome class, semantic purpose, color token, size token or supported size property, action binding when clickable, and accessible/semantic label or tooltip intent for icon-only actions
 
 Run:
 

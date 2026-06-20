@@ -39,6 +39,8 @@ Every selected template must preserve `patternProofStatus`: `runtime-proven`, `e
 
 Every selected pattern must also declare token intent inherited from the Application Design System. Pattern selection and Blueprints must preserve token names for page background, section/card background, border/divider, typography, action buttons, status badges/chips, table/list/card spacing, grid/flex gaps, form field gaps, and mobile/responsive spacing. Raw CSS values, arbitrary hex colors, raw font sizes, raw line heights, raw font weights, and raw spacing values cannot replace Yeeflow root token names when matching tokens exist.
 
+Every selected pattern that uses icons must declare FontAwesome icon intent inherited from the Application Design System. Icon intent includes whether the selected pattern requires icons, semantic icon purpose, recommended FontAwesome class when known, tokenized icon color/size, and fallback proof label when uncertain. Emoji icons, inline SVG icons, image icons, and arbitrary custom icon names are forbidden as normal generated UI icons.
+
 Forbidden misuse blocks blueprint/resource readiness:
 
 - dashboard KPI/card templates as New/Edit form body
@@ -175,6 +177,14 @@ Before generating Yeeflow resources, every page requires a blueprint with:
 - grid/flex gap token mapping
 - form field gap token mapping
 - mobile/responsive spacing token mapping
+- icon control mapping:
+  - Yeeflow control type: `icon`
+  - FontAwesome class, for example `fa-regular fa-file` or `fa-solid fa-check`
+  - semantic purpose
+  - color token
+  - size token or supported size property
+  - action binding if clickable
+  - accessible/semantic label or tooltip intent for icon-only actions
 - data source/list/field bindings
 - Summary/KPI aggregation bindings
 - Data Filter variables and target consumption

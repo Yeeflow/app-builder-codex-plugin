@@ -146,6 +146,25 @@ function checkDesignSystemRequiredSections(input, findings) {
   if (!/secondary\s+action[\s\S]{0,240}hover[\s\S]{0,240}active/i.test(text)) {
     addFinding(findings, input, "error", "ROOT_TOKEN_ACTION_STATE_MAPPING_MISSING", "Missing secondary action hover/active token mapping.");
   }
+  requirePattern(input, findings, "FONT_AWESOME_ICON_SOURCE_MISSING", "Missing FontAwesome icon source declaration.", [
+    /icon\s+source\s*:\s*FontAwesome/i,
+    /FontAwesome\s+icon/i,
+  ]);
+  requirePattern(input, findings, "FONT_AWESOME_ICON_STYLE_FAMILY_MISSING", "Missing preferred FontAwesome style family.", [
+    /preferred\s+icon\s+style\s+family/i,
+    /\bfa-(?:regular|solid)\b/i,
+  ]);
+  requirePattern(input, findings, "FONT_AWESOME_ICON_SIZE_RULE_MISSING", "Missing icon size rule.", [
+    /icon\s+size\s+rule/i,
+    /icon[\s\S]{0,80}(?:size|--fs--|--sp--)/i,
+  ]);
+  requirePattern(input, findings, "FONT_AWESOME_ICON_COLOR_TOKEN_RULE_MISSING", "Missing icon color token rule.", [
+    /icon\s+color\s+token\s+rule/i,
+    /icon[\s\S]{0,80}--c--/i,
+  ]);
+  requirePattern(input, findings, "FONT_AWESOME_ICON_SURFACE_USAGE_MISSING", "Missing icon usage by surface type.", [
+    /navigation[\s\S]{0,260}dashboard[\s\S]{0,260}actions[\s\S]{0,260}status[\s\S]{0,260}empty\s+states[\s\S]{0,260}document[\s\S]{0,260}approval/i,
+  ]);
 }
 
 function checkPatternOrBlueprintTokenSection(input, findings) {
@@ -298,6 +317,109 @@ function checkBlueprintTokenNames(input, findings) {
   }
 }
 
+function isFontAwesomeClass(value) {
+  return /\bfa-(?:regular|solid|light|brands|duotone|thin)\b/i.test(value) && /\bfa-[a-z0-9-]+\b/i.test(value.replace(/\bfa-(?:regular|solid|light|brands|duotone|thin)\b/i, ""));
+}
+
+function objectText(value) {
+  return JSON.stringify(value);
+}
+
+function collectObjects(value, objects = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) collectObjects(item, objects);
+  } else if (value && typeof value === "object") {
+    objects.push(value);
+    for (const item of Object.values(value)) collectObjects(item, objects);
+  }
+  return objects;
+}
+
+function getStringField(object, names) {
+  for (const name of names) {
+    if (typeof object[name] === "string" && object[name].trim()) {
+      return object[name];
+    }
+  }
+  return "";
+}
+
+function hasAnyField(object, names) {
+  return names.some((name) => object[name] !== undefined && object[name] !== null && String(object[name]).trim() !== "");
+}
+
+function looksLikeIconObject(object) {
+  const controlType = String(object.controlType || object.type || object.kind || object.yeeflowControl || "").toLowerCase();
+  return controlType === "icon" || ["iconClass", "fontAwesomeClass", "faClass", "recommendedFontAwesomeClass"].some((key) => object[key]);
+}
+
+function checkIconUsage(input, findings) {
+  const iconContext = /\b(icon|icon-only|fontawesome|font-awesome|badge|navigation|empty state|empty-state|document|file|approval|task action)\b/i;
+  const emojiPattern = /[\p{Extended_Pictographic}]/u;
+
+  for (const { line, lineNumber } of inputLines(input)) {
+    if (hasException(line) || !iconContext.test(line)) {
+      continue;
+    }
+    if (emojiPattern.test(line)) {
+      addFinding(findings, input, "error", "FONT_AWESOME_EMOJI_ICON_FORBIDDEN", "Emoji icons must not be used as normal generated UI icons.", { lineNumber });
+    }
+    if (/(<svg\b|<\/svg>|\.svg\b|<img\b|image\s*icon|imageIcon|iconImage|\.png\b|\.jpg\b|\.jpeg\b)/i.test(line)) {
+      addFinding(findings, input, "error", "FONT_AWESOME_INLINE_SVG_IMAGE_ICON_FORBIDDEN", "Inline SVG/image icons are forbidden unless explicitly proof-labeled.", { lineNumber });
+    }
+    const arbitraryIconMatch = line.match(/\b(?:iconClass|fontAwesomeClass|faClass|recommendedIcon|recommendedFontAwesomeClass|iconName)\s*[:=]\s*["'`]?([A-Za-z][\w-]*(?:\s+[A-Za-z][\w-]*)?)/i);
+    if (arbitraryIconMatch && !isFontAwesomeClass(arbitraryIconMatch[1])) {
+      addFinding(findings, input, "error", "FONT_AWESOME_ARBITRARY_ICON_NAME", "Icon class must look like a FontAwesome class, for example fa-regular fa-file.", {
+        lineNumber,
+        value: arbitraryIconMatch[1],
+      });
+    }
+    if (/\bicon-only\s+action\b/i.test(line) && !/(semantic\s+purpose|purpose).*(label|tooltip)|(label|tooltip).*(semantic\s+purpose|purpose)/i.test(line)) {
+      addFinding(findings, input, "error", "FONT_AWESOME_ICON_ONLY_ACTION_LABEL_MISSING", "Icon-only actions require semantic purpose plus label or tooltip intent.", { lineNumber });
+    }
+  }
+
+  if (!input.parsed) {
+    return;
+  }
+
+  for (const object of collectObjects(input.parsed)) {
+    if (!looksLikeIconObject(object) || hasException(objectText(object))) {
+      continue;
+    }
+    const className = getStringField(object, ["fontAwesomeClass", "iconClass", "faClass", "recommendedFontAwesomeClass", "className"]);
+    if (!className || !isFontAwesomeClass(className)) {
+      addFinding(findings, input, "error", "FONT_AWESOME_ARBITRARY_ICON_NAME", "Icon control must include a FontAwesome class such as fa-regular fa-file.", {
+        controlId: object.id || object.key || object.name,
+        value: className || null,
+      });
+    }
+    if (!hasAnyField(object, ["semanticPurpose", "purpose", "nv_label", "label", "semanticLabel"])) {
+      addFinding(findings, input, "error", "FONT_AWESOME_ICON_PURPOSE_MISSING", "Icon control must include semantic purpose.", {
+        controlId: object.id || object.key || object.name,
+      });
+    }
+    const color = getStringField(object, ["colorToken", "iconColorToken", "color", "styleToken"]);
+    if (!/--c--[a-z0-9-]+/i.test(color)) {
+      addFinding(findings, input, "error", "FONT_AWESOME_ICON_COLOR_TOKEN_MISSING", "Icon control must include a color token.", {
+        controlId: object.id || object.key || object.name,
+      });
+    }
+    const size = getStringField(object, ["sizeToken", "iconSizeToken", "size", "fontSize", "supportedSizeProperty"]);
+    if (!/(--fs--[a-z0-9-]+|--sp--[a-z0-9-]+|\b(?:xs|s|base|l|h[1-6])\b|\b\d{1,2}\b)/i.test(size)) {
+      addFinding(findings, input, "error", "FONT_AWESOME_ICON_SIZE_RULE_MISSING", "Icon control must include a size token or supported size property.", {
+        controlId: object.id || object.key || object.name,
+      });
+    }
+    const clickable = object.clickable === true || hasAnyField(object, ["actionBinding", "action", "actionType", "onClick"]);
+    if (clickable && !hasAnyField(object, ["accessibleLabel", "tooltipIntent", "tooltip", "ariaLabel", "label", "nv_label", "semanticLabel"])) {
+      addFinding(findings, input, "error", "FONT_AWESOME_ICON_ONLY_ACTION_LABEL_MISSING", "Clickable icon-only actions require label or tooltip intent.", {
+        controlId: object.id || object.key || object.name,
+      });
+    }
+  }
+}
+
 function validate(inputs, registryContext) {
   const findings = [];
   for (const input of inputs) {
@@ -307,6 +429,7 @@ function validate(inputs, registryContext) {
     checkPatternOrBlueprintTokenSection(input, findings);
     checkRawTokenValues(input, findings, registryContext);
     checkBlueprintTokenNames(input, findings);
+    checkIconUsage(input, findings);
   }
   return findings;
 }

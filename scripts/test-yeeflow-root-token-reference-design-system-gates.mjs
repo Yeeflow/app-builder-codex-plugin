@@ -58,6 +58,16 @@ function validDesignSystem(extra = "") {
 - Arbitrary one-off color/style values are not allowed when a Yeeflow root token exists.
 - App-specific custom tokens require runtime-proof-required, export-learning-required, deferred, or explicit-user-approved-custom-token.
 
+## FontAwesome Icon Usage Baseline
+
+- Icon source: FontAwesome.
+- Preferred icon style family: fa-regular for document/navigation icons and fa-solid for primary action/status icons.
+- Icon size rule: icon controls use --fs--base or supported size property.
+- Icon color token rule: icons use --c--text, --c--primary, --c--success, --c--warning, --c--danger, or --c--neutral.
+- Icon usage by surface type: navigation uses fa-regular fa-folder, dashboard section headers use fa-regular fa-chart-bar, actions use fa-solid fa-plus, status badges use fa-solid fa-check, empty states use fa-regular fa-file, document/file regions use fa-regular fa-file, and approval/task actions use fa-solid fa-check.
+- Icon fallback rule: uncertain icons are runtime-proof-required, export-learning-required, or deferred.
+- Icon-only action accessibility rule: every icon-only action includes semantic purpose plus label or tooltip intent.
+
 ${extra}
 `;
 }
@@ -191,6 +201,83 @@ expectFail(
     2,
   ),
   "ROOT_TOKEN_MAPPING_SECTION_MISSING",
+);
+
+expectPass(
+  "valid-fontawesome-icon-blueprint",
+  "blueprint",
+  JSON.stringify(
+    {
+      readyForResourceGeneration: false,
+      rootTokenMapping: {
+        color: "--c--primary",
+        spacing: "--sp--s100",
+      },
+      controls: [
+        {
+          id: "download-icon",
+          controlType: "icon",
+          fontAwesomeClass: "fa-regular fa-file",
+          semanticPurpose: "Document file indicator",
+          colorToken: "--c--primary",
+          sizeToken: "--fs--base",
+          clickable: true,
+          actionBinding: "openDocument",
+          tooltipIntent: "Open document",
+        },
+      ],
+    },
+    null,
+    2,
+  ),
+);
+
+expectFail(
+  "emoji-icon-forbidden",
+  "design-system",
+  validDesignSystem("- Action icon: ✅ for approve."),
+  "FONT_AWESOME_EMOJI_ICON_FORBIDDEN",
+);
+
+expectFail(
+  "inline-svg-icon-forbidden",
+  "design-system",
+  validDesignSystem("- Empty state icon: <svg><path /></svg>."),
+  "FONT_AWESOME_INLINE_SVG_IMAGE_ICON_FORBIDDEN",
+);
+
+expectFail(
+  "arbitrary-icon-name-forbidden",
+  "design-system",
+  validDesignSystem("- Document iconClass: customDocumentIcon."),
+  "FONT_AWESOME_ARBITRARY_ICON_NAME",
+);
+
+expectFail(
+  "icon-only-action-missing-label",
+  "blueprint",
+  JSON.stringify(
+    {
+      rootTokenMapping: {
+        color: "--c--primary",
+      },
+      controls: [
+        {
+          id: "approve-icon",
+          controlType: "icon",
+          fontAwesomeClass: "fa-solid fa-check",
+          semanticPurpose: "Approve task",
+          colorToken: "--c--success",
+          sizeToken: "--fs--base",
+          clickable: true,
+          actionBinding: "approveTask",
+        },
+      ],
+    },
+    null,
+    2,
+  ),
+  "FONT_AWESOME_ICON_ONLY_ACTION_LABEL_MISSING",
 );
 
 expectPass(
