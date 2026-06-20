@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.75
+
+- Release the strict App Plan conformance Markdown over-parsing fix from PR #118.
+- Parse planned resources only from canonical App Plan declarations such as requirement-to-resource rows, Resource Generation Order rows, recognized resource tables, and numbered Data List / Approval Form subsections.
+- Stop treating field/control/action rows, task-form rows, implementation notes, assumptions, validation notes, deferred/runtime-proof sections, template headings, or explanatory prose as standalone generated resources.
+- Preserve strict failures for real missing resources, extra generated resources, and partial resource-name mismatches.
+- Preserve the proof boundary: this gate proves App Plan-to-package conformance parsing only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
+
 ## 0.6.74
 
 - Release the UI Pattern Library driven generation flow from PR #115 and the Yeeflow Root Token Reference plus FontAwesome baseline gates from PR #116.
