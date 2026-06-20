@@ -24,6 +24,22 @@ Use `.yapk` when:
 - the user is using Application Settings -> Version management -> Upgrade application
 - the package must map onto an existing app instead of creating a new clone
 
+## Generation Mode Decision
+
+Before resource generation, choose the generation mode from `docs/standards/final-generation-api-issued-id-mode-standard.md`.
+
+Draft / Offline Mode is the default safe mode. It does not call live Yeeflow APIs, uses local draft IDs, produces local unsigned draft packages only, and must remain blocked for generated-final signing, install, import, upgrade, and handoff because API-issued ID provenance is absent.
+
+Final / Authorized Generation Mode is allowed only after explicit user authorization for live Yeeflow API usage and a target workspace. In this mode, call `GET /utils/generate/ids?count=<n>` before resource generation and use API-issued IDs directly in the initial generated resources. Do not generate local IDs first and replace them later as the primary finalization path. Generated resources, references, lookups, workflows, navigation, dashboards, forms, and resource bindings must preserve API-issued ID provenance from initial generation through package validation.
+
+Run:
+
+```bash
+node scripts/validate-generation-mode-id-provenance.mjs --report dist/<app-name>-generation-mode-id-provenance.json
+```
+
+Generated-final readiness, signing readiness, signing, install/import/upgrade, and runtime proof are blocked until the selected mode and ID provenance gates pass.
+
 ## `.yap` New Application Rules
 
 For generated new-app packages:
@@ -31,7 +47,8 @@ For generated new-app packages:
 - treat `schemas/yap-schema.json` as the base structural schema only; schema pass is necessary but not sufficient
 - also apply `docs/standards/yap-generation-contract.md` and `docs/standards/yap-export-shaped-application-generation-standard.md`
 - generate from an export-like baseline/reference shape; if no safe baseline exists, refuse import-qualified claims
-- generate fresh local IDs
+- in Draft / Offline Mode, generate fresh local IDs for unsigned local draft work only
+- in Final / Authorized Generation Mode, use API-issued IDs allocated before generation; do not use local-first replacement as the normal generated-final path
 - use Yeeflow-compatible long numeric-string local IDs and preserve export-observed string IDs for `pageurls` and workflow `childshapes`
 - allocate data-list `FieldID` values from a global app-level field ID allocator; do not reset the field ID range per list
 - preserve the parent data-list `ListID` on every field; changing `FieldID` must not change `field.ListID`
@@ -87,16 +104,18 @@ For existing-app upgrade packages:
 
 ## Generated-Final `.yapk` Hard Gates
 
-For generated-final `.yapk` application output, generation must stop before signing, install, upgrade-check, or handoff unless both hard gates pass:
+For generated-final `.yapk` application output, generation must stop before signing, install, upgrade-check, or handoff unless the generation mode gate and both hard gates pass:
 
+- Final / Authorized Generation Mode Gate: explicit live API authorization and target workspace are recorded; Yeeflow ID API allocation happened before resource generation; resources did not start with local IDs and then remap as the primary path; references and bindings preserve API-issued IDs.
 - API-Issued Content ID Provenance Gate: every numeric generated application content ID is allocated through `GET /utils/generate/ids?count=<n>` and recorded in `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`.
 - Navigation Runtime Metadata Gate: every runtime navigation group includes API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; every child includes `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`; targets resolve to `Pages[].LayoutID`, `Forms[].Key`, or `Childs[].List.ListID`.
 
-Local ID fallback is forbidden for generated-final output, including local sequential counters, local `id()` helpers, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds.
+Local ID fallback is forbidden for generated-final output, including local sequential counters, local `id()` helpers, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, deterministic local-only seeds, and local-first IDs later replaced by API IDs as the primary path.
 
 Required validators:
 
 ```bash
+node scripts/validate-generation-mode-id-provenance.mjs --report dist/<app-name>-generation-mode-id-provenance.json
 node scripts/validate-yapk-id-provenance.mjs --package dist/<app>.yapk --manifest dist/<app>-id-provenance-report.json
 node scripts/validate-yapk-navigation-runtime-metadata.mjs --package dist/<app>.yapk --id-provenance dist/<app>-id-provenance-report.json
 node scripts/validate-yapk-upgrade-id-stability.mjs --previous-package dist/<app>-previous.yapk --previous-manifest dist/<app>-previous-id-lineage.json --new-package dist/<app>.yapk --new-manifest dist/<app>-id-lineage.json
