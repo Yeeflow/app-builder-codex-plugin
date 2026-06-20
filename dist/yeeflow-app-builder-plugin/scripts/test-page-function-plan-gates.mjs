@@ -236,6 +236,94 @@ function addEventPortfolioFidelity(plan) {
   return plan;
 }
 
+function eventPortfolioGoldenPlan(overrides = {}) {
+  const plan = pagePlan({
+    dashboards: [{
+      name: "Operations Dashboard",
+      pagePurpose: "Event Portfolio golden reference dashboard for portfolio status and request operations.",
+      businessTaskSolved: "Managers filter portfolio requests, review KPI health, scan rich status rows, and open request details.",
+      dashboardPagePattern: "standard_dashboard_page_shell",
+      dashboardGoldenReference: "event_portfolio_dashboard_golden_reference",
+      dashboardFidelityProfile: "High-quality Event Portfolio golden-reference dashboard",
+      marketingEventFidelityReference: "docs/studies/marketing-event-v045-design-runtime-fidelity-study.md; docs/standards/yeeflow-ui-control-property-fidelity.md",
+      sourceDataLists: ["Purchase Requests"],
+      dataFilterControls: [
+        { name: "Status Filter", controlType: "Data Filter", filterVariable: "__filter_status", targetConsumers: ["Portfolio KPI Row", "Portfolio Status Grid"] },
+        { name: "Period Filter", controlType: "Data Filter", filterVariable: "__filter_period", targetConsumers: ["Portfolio KPI Row", "Portfolio Status Grid"] },
+      ],
+      runtimeProofBoundary: "Runtime browser/screenshot proof required; signing, install, and API success are not UI proof.",
+      designerTraceabilityRequirements: "Semantic nv_label values required for event portfolio filters, KPI cards, grid-table rows, and actions.",
+      desktopBehavior: "Filter/action row above Summary-backed KPI cards and rich Collection grid-table.",
+      mobileBehavior: "Filters remain compact, KPI cards stack first, and grid-table rows stack with status, progress, owner, and detail action priority.",
+      dashboardSectionTemplates: [
+        {
+          templateId: "kpi_card_row",
+          regionName: "Portfolio KPI Row",
+          businessPurpose: "KPI summary metric cards for request portfolio totals, amounts, and completion state.",
+          source: "Purchase Requests",
+          displayedFields: ["Title", "Amount", "Status", "Progress Rate"],
+          filters: ["Status Filter", "Period Filter"],
+          grouping: ["Status"],
+          sorting: ["Created Date descending"],
+          actions: [],
+          requiredControls: ["container", "summary", "text"],
+          proofStatus: "runtime-proof-required",
+          whyTemplateFits: "Summary-backed KPI cards are required by the Event Portfolio golden reference.",
+          marketingEventFidelityReference: "docs/standards/dashboard-summary-card-generation-standard.md",
+          kpiSummaryBindingRequirements: {
+            source: "Purchase Requests",
+            summaryControl: "Hidden Summary controls bind Amount, Status, and Progress Rate metrics",
+            metricFields: ["Amount", "Status", "Progress Rate"],
+            filters: ["__filter_status", "__filter_period"],
+            visibleBinding: "Visible KPI Text binds to Summary temp variables",
+          },
+          dataFilterRequirements: "Real Data Filter controls write __filter_status and __filter_period variables consumed by Summary cards and Collection grid-table.",
+          kpiFormattingRequirements: "Use formatNumber with compact K/M/B and fixed decimals/percent formatting; visible values bind to Summary variables.",
+          designerTraceabilityRequirements: "Semantic nv_label for each KPI card and hidden Summary host.",
+          runtimeProofBoundary: "Runtime screenshot proof required for visible KPI card values and hidden Summary boundary.",
+        },
+        {
+          templateId: "collection_card_board",
+          regionName: "Portfolio Status Grid",
+          businessPurpose: "Collection grid-table portfolio operational table for request status review.",
+          source: "Purchase Requests",
+          displayedFields: ["Title", "Amount", "Status", "Progress Rate", "Requester"],
+          filters: ["Status Filter", "Period Filter"],
+          grouping: ["Status"],
+          sorting: ["Created Date descending"],
+          actions: ["Open Request"],
+          requiredControls: ["collection", "container", "dynamic-field", "dynamic-user", "progress"],
+          proofStatus: "runtime-proof-required",
+          whyTemplateFits: "Event Portfolio rows require a rich Collection grid-table with row-context detail actions.",
+          marketingEventFidelityReference: "docs/generated-dashboard-ui-quality-gates.md; docs/reference/yeeflow-control-property-extensions.json",
+          dataFilterRequirements: "Real Data Filter variables are consumed by the Collection grid-table data binding.",
+          collectionGridTableRequirements: {
+            source: "Purchase Requests",
+            fields: ["Title", "Amount", "Status", "Progress Rate", "Requester"],
+            rowContext: "Current Collection row Purchase Request",
+            detailOpenAction: "Open Request detail in slide panel",
+          },
+          dynamicControlRequirements: "Use Dynamic field controls for Title/Amount/Status, Progress control for Progress Rate, and Dynamic user/person treatment for Requester inside the Collection item template.",
+          itemTemplateDynamicControls: ["Dynamic field: Title", "Dynamic field: Status", "Progress: Progress Rate", "Dynamic user: Requester"],
+          richTableTreatmentRequirements: "Status fields render as badges, Progress Rate renders as Progress controls, Requester renders with Dynamic user/person/avatar treatment, with table header hierarchy, row density, and polished spacing.",
+          actionMetadataRequirements: "Open Request uses real Yeeflow action metadata with actionType open/detail, target View Purchase Request form, and current row context.",
+          designerTraceabilityRequirements: "Semantic nv_label for grid-table header, row cells, status badge, progress, person, and Open Request action.",
+          runtimeProofBoundary: "Runtime screenshot proof required for rich row treatments and action metadata boundary.",
+        },
+      ],
+      regions: [{
+        name: "Portfolio Status Grid",
+        controlType: "Collection",
+        source: "Purchase Requests",
+        fields: ["Title", "Amount", "Status", "Progress Rate", "Requester"],
+        filters: ["Status is not Completed"],
+        actions: ["Open Request"],
+      }],
+    }],
+  });
+  return { ...plan, ...overrides };
+}
+
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "page-function-plan-gates-"));
 const results = [];
 
@@ -478,6 +566,57 @@ try {
   assert.equal(output.report.status, "fail");
   expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_COLLECTION_GRID_TABLE_REQUIREMENTS_MISSING");
   results.push({ case: "Collection grid-table missing source/row-context/open-action requirements fails", status: "pass" });
+
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "valid-event-portfolio-golden-reference", eventPortfolioGoldenPlan())]);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "valid Event Portfolio Dashboard golden reference passes", status: "pass" });
+
+  const staticKpiOnly = eventPortfolioGoldenPlan();
+  staticKpiOnly.dashboards[0].dashboardSectionTemplates = [staticKpiOnly.dashboards[0].dashboardSectionTemplates[0]];
+  staticKpiOnly.dashboards[0].dashboardSectionTemplates[0].kpiSummaryBindingRequirements = "Static KPI cards only; no Summary binding.";
+  staticKpiOnly.dashboards[0].notes = "Use generic cards and static KPI values.";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "event-portfolio-static-kpi-only", staticKpiOnly)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_STATIC_OR_SCAFFOLD");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_COLLECTION_GRID_TABLE_MISSING");
+  results.push({ case: "invalid Event Portfolio golden reference with static KPI cards only fails", status: "pass" });
+
+  const plainDataTable = eventPortfolioGoldenPlan();
+  plainDataTable.dashboards[0].dashboardSectionTemplates[1].templateId = "data_table_section";
+  plainDataTable.dashboards[0].dashboardSectionTemplates[1].requiredControls = ["data-list"];
+  plainDataTable.dashboards[0].dashboardSectionTemplates[1].businessPurpose = "Plain table record list for portfolio status.";
+  plainDataTable.dashboards[0].dashboardSectionTemplates[1].whyTemplateFits = "A plain table lists records.";
+  delete plainDataTable.dashboards[0].dashboardSectionTemplates[1].collectionGridTableRequirements;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "event-portfolio-plain-data-table", plainDataTable)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_COLLECTION_GRID_TABLE_MISSING");
+  results.push({ case: "invalid Event Portfolio golden reference with plain Data table fails", status: "pass" });
+
+  const missingDynamicControls = eventPortfolioGoldenPlan();
+  delete missingDynamicControls.dashboards[0].dashboardSectionTemplates[1].dynamicControlRequirements;
+  delete missingDynamicControls.dashboards[0].dashboardSectionTemplates[1].itemTemplateDynamicControls;
+  missingDynamicControls.dashboards[0].dashboardSectionTemplates[1].requiredControls = ["collection", "container", "text"];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "event-portfolio-missing-dynamic-controls", missingDynamicControls)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_DYNAMIC_CONTROLS_MISSING");
+  results.push({ case: "invalid Event Portfolio golden reference missing Dynamic controls fails", status: "pass" });
+
+  const fakeActions = eventPortfolioGoldenPlan();
+  fakeActions.dashboards[0].dashboardSectionTemplates[1].actions = ["Fake Open Button"];
+  fakeActions.dashboards[0].dashboardSectionTemplates[1].actionMetadataRequirements = "Visual only without target or row context.";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "event-portfolio-fake-actions", fakeActions)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_ACTION_METADATA_MISSING");
+  results.push({ case: "invalid Event Portfolio golden reference with unbound/fake actions fails", status: "pass" });
+
+  const missingProofBoundary = eventPortfolioGoldenPlan();
+  delete missingProofBoundary.dashboards[0].runtimeProofBoundary;
+  delete missingProofBoundary.dashboards[0].dashboardSectionTemplates[0].runtimeProofBoundary;
+  delete missingProofBoundary.dashboards[0].dashboardSectionTemplates[1].runtimeProofBoundary;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "event-portfolio-missing-proof-boundary", missingProofBoundary)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_PROOF_BOUNDARY_MISSING");
+  results.push({ case: "invalid Event Portfolio golden reference without proof boundary fails", status: "pass" });
 
   const unknownTemplate = pagePlan();
   unknownTemplate.dashboards[0].dashboardSectionTemplates[0].templateId = "executive_magic_template";

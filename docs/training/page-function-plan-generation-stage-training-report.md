@@ -33,6 +33,7 @@ Functional Specification
 - Added `scripts/test-page-function-plan-gates.mjs`.
 - Added Dashboard-only Page Function Plan template-selection gates that load the plugin-contained Dashboard template library and require `dashboardPagePattern` plus structured `dashboardSectionTemplates[]`.
 - Added Dashboard-only high-fidelity/Event Portfolio gates based on plugin-contained Marketing Event/Event Portfolio lessons for KPI/Summary binding, Data Filter consumers, Collection grid-table requirements, rich table treatment, action metadata, KPI formatting, semantic `nv_label`, and runtime proof boundary.
+- Promoted `event_portfolio_dashboard_golden_reference` as an explicit Dashboard golden-reference family in the plugin-contained template library and Page Function Plan contract.
 - Registered the new validators/tests in focused planning gates, aggregate UI hard gates, and YAPK cache artifact mirror checks.
 - Updated `skills/installed/yeeflow-application-builder/SKILL.md` so the lifecycle requires Page Function Plan and Application Design System before generation.
 - Mirrored changed standards, scripts, tests, and skill files into `dist/yeeflow-app-builder-plugin/...`.
@@ -73,6 +74,9 @@ Dashboard-specific contract:
 - `three_column_workspace_shell` is allowed only for meaningful left/main/right workspace pages, not simple dashboards.
 - High-quality, Marketing Event, Event Portfolio, portfolio/status, operational-table, rich table, and runtime-fidelity Dashboard sections must declare applicable plugin-contained fidelity references and the implementation details page/resource generation must preserve.
 - Event Portfolio-style portfolio/status/operational tables require rich table/card treatment, badge/progress/person/avatar treatment where applicable, header hierarchy, row density, real Yeeflow action metadata, Collection grid-table source/field/row-context/detail-open requirements when used, and a runtime proof boundary.
+- Dashboards can select `dashboardGoldenReference: event_portfolio_dashboard_golden_reference` for high-quality portfolio, operations, status, pipeline, event, project, vendor, contract, service, or request management pages.
+- The Event Portfolio golden reference requires Data Filters, KPI cards, Summary/KPI binding or fallback boundary, Collection grid-table structure, Dynamic controls inside item templates, status/progress/person treatments where fields require them, real action metadata, source/fields/filters/grouping/sorting, semantic `nv_label`, and runtime proof boundary.
+- The Event Portfolio golden reference is based only on plugin-contained, redacted, synthetic, or already committed Marketing Event / Event Portfolio training materials. It excludes private raw artifacts, raw package payloads, tenant/app/list IDs, screenshots, raw API responses, and private runtime evidence.
 
 ## Regression Coverage
 
@@ -96,6 +100,12 @@ Dashboard-specific contract:
 - Missing Data Filter/action metadata plan.
 - Missing rich table treatment.
 - Missing Collection grid-table source, row-context, and detail/open-action requirements.
+- Valid Event Portfolio Dashboard golden-reference selection.
+- Event Portfolio golden-reference selection with static KPI cards only.
+- Event Portfolio golden-reference selection with a plain Data table instead of Collection grid-table.
+- Event Portfolio golden-reference selection missing Dynamic controls.
+- Event Portfolio golden-reference selection with unbound/fake actions.
+- Event Portfolio golden-reference selection without runtime proof boundary.
 
 ## Proof Boundary
 

@@ -66,6 +66,7 @@ Repeat this subsection for each Dashboard page planned in the App Plan.
 - Business task solved by the page:
 - Primary business workflow:
 - dashboardPagePattern: `standard_dashboard_page_shell` / `three_column_workspace_shell` / documented dashboard shell equivalent
+- dashboardGoldenReference: none / `event_portfolio_dashboard_golden_reference`
 - Navigation placement:
 - Empty/loading/error state intent:
 - Desktop layout behavior:
@@ -78,6 +79,7 @@ Use only Dashboard templates that exist in `docs/templates/yeeflow-ui-section-te
 Known Dashboard section templates include:
 
 - `dashboard_header_action_bar`
+- `event_portfolio_dashboard_golden_reference` as a full Dashboard golden-reference family, selected through `dashboardGoldenReference`
 - `kpi_card_row`
 - `progress_summary_card`
 - `business_alert_card`
@@ -90,9 +92,30 @@ Known Dashboard section templates include:
 
 `standard_dashboard_page_shell` is the documented standard Dashboard page shell equivalent and may be used as `dashboardPagePattern`. `multi_column_form_workspace_shell` is not a normal Dashboard default; use it only where the plugin standards explicitly call for a form workspace surface, not for ordinary dashboards.
 
+Use `dashboardGoldenReference: event_portfolio_dashboard_golden_reference` when the Dashboard needs a high-quality portfolio, operations, status, pipeline, event, project, vendor, contract, service, or request management page. This golden reference is based only on plugin-contained, redacted, synthetic, or already committed Marketing Event / Event Portfolio training materials. Do not reference private raw Marketing Event artifacts, raw package payloads, tenant/app/list IDs, screenshots, raw API responses, or private runtime evidence.
+
 | templateId | Region / Section Name | Business Purpose | Source List / Report / Resource | Displayed Fields | Filters | Grouping | Sorting | Actions | Required Controls | Proof Status / Fallback | Why This Template Fits | App Plan Trace |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `kpi_card_row` | <KPI section> | <Metric purpose> | <Source> | <Fields> | <Filters> | <Grouping> | <Sorting> | <Actions or none> | <Controls> | export-proven/runtime-proven/runtime-proof-required/deferred + fallback | <Fit reason> | <Resource/field/action names> |
+
+#### Event Portfolio Dashboard Golden Reference
+
+Complete this subsection when `dashboardGoldenReference` is `event_portfolio_dashboard_golden_reference`.
+
+| Required Piece | Page Function Plan Requirement | App Plan Trace |
+| --- | --- | --- |
+| Page purpose | <Portfolio/operations/status/pipeline/event/project/vendor/contract/service/request management purpose> | <Dashboard page name> |
+| Source data lists | <Primary and supporting lists/resources> | <List/resource names> |
+| Data Filter controls | <Filter controls, filter variables, default values, and target consumers> | <Fields/resources consumed> |
+| KPI cards | <KPI card definitions, metric fields, labels, state copy, and visual hierarchy> | <Source list/fields> |
+| Summary/KPI binding | <Summary control source, pivot/report/list binding, hidden source/temp variable/visible card binding or explicit fallback boundary> | <Resource/field/action names> |
+| Grid-table Collection | <Collection section with source list, displayed fields, item context, row layout, detail/open behavior> | <Source list/form/action names> |
+| Dynamic item controls | <Dynamic field/Dynamic user/Progress controls inside Collection item templates> | <Field names> |
+| Status/progress/person treatment | <Status badges, progress controls, owner/person/avatar treatment where fields require them> | <Field names> |
+| Table polish | <Header hierarchy, row density, spacing, and responsive stacking> | <Section trace> |
+| Actions | <Detail/open/add/update actions with real Yeeflow action metadata and row context> | <Action/form/page names> |
+| Designer traceability | <Semantic `nv_label` requirements for page sections, filters, KPI cards, rows, and actions> | <Section/control trace> |
+| Runtime proof boundary | <Runtime/browser/screenshot proof required; signing/install/API success alone is not UI proof> | <Proof artifact expectations> |
 
 #### Dashboard Fidelity Requirements
 
@@ -109,6 +132,7 @@ Template-selection rules:
 - Each `dashboardSectionTemplates[]` entry must include `templateId`, region/section name, business purpose, source list/report/resource, displayed fields, filters, grouping, sorting, actions, required controls, proof status or fallback, why the selected template fits, and App Plan traceability.
 - Template selection is not only visual guidance. It is part of the Page Function Plan implementation contract and must be consumed by downstream page/resource generation.
 - Dashboard template/fidelity selection is also a downstream implementation contract: page/resource generation must preserve the selected template IDs, data bindings, filter/action metadata, rich table treatment, KPI formatting, semantic `nv_label`, and runtime proof boundary.
+- If `event_portfolio_dashboard_golden_reference` is selected, downstream generation must preserve the whole golden-reference contract: Data Filters, KPI cards, Summary/KPI binding or fallback boundary, Collection grid-table structure, Dynamic controls in item templates, badge/progress/person treatments, real action metadata, table hierarchy/density/spacing, semantic `nv_label`, and runtime proof boundary.
 - KPI/summary metrics should use `kpi_card_row` or another existing KPI/Summary template.
 - Work queues can use `collection_card_board`, `data_table_section`, `kanban_status_board`, or `three_column_workspace_shell` when appropriate.
 - Quick actions can use `quick_links_icon_list`.
@@ -121,6 +145,7 @@ Template-selection rules:
 - Filtered Dashboard sections must define real Data Filter controls, filter variables, and downstream consumers such as Summary, Collection, Data table, chart, or list regions.
 - Event Portfolio-style portfolio/status/operational tables must require rich table/card treatment instead of plain scaffold tables: status badges where appropriate, progress controls for progress fields, Dynamic user/person or avatar/person treatment for owner fields where supported, table header hierarchy, row density, and real action metadata for action-looking controls.
 - Collection grid-table style is allowed only when the source list, displayed fields, row context, detail/open actions, and opening behavior are specified.
+- Event Portfolio golden-reference fidelity cannot be satisfied by generic cards, static KPI values, plain Data tables, scaffold sections, placeholder controls, or action-looking visuals without real Yeeflow action metadata.
 
 #### Required Regions and Controls
 

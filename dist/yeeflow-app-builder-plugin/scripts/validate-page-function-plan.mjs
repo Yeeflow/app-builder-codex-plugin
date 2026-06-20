@@ -57,6 +57,12 @@ const COLLECTION_GRID_TABLE_TEMPLATES = new Set(["collection_card_board"]);
 const FILTER_ACTION_TEMPLATES = new Set(["dashboard_header_action_bar", "quick_links_icon_list"]);
 const HIGH_FIDELITY_DASHBOARD = /\b(marketing event|event portfolio|high-quality|high quality|high-fidelity|runtime fidelity|portfolio\/status|portfolio status|operational table|rich table|rich card|rich grid-table|grid-table fidelity)\b/i;
 const TRUEISH = /\b(true|yes|required|must|enabled|planned|specified|semantic|real|bound|runtime|format|compact|fixed|badge|progress|avatar|person|metadata|nv_label)\b/i;
+const EVENT_PORTFOLIO_GOLDEN_REFERENCES = new Set([
+  "event_portfolio_dashboard_golden_reference",
+  "portfolio_operational_dashboard_golden_reference",
+]);
+const EVENT_PORTFOLIO_GOLDEN_CLAIM = /\b(event portfolio|portfolio operational|portfolio\/status|portfolio status|golden reference)\b/i;
+const STATIC_OR_SCAFFOLD_DASHBOARD = /\b(static kpi|static numeric|plain table|scaffold|placeholder|generic card|fake action|unbound action|placeholder control|plain scaffold)\b/i;
 
 const TEMPLATE_PURPOSE_RULES = [
   { templateId: "kpi_card_row", pattern: /\b(kpi|metric|summary|count|total|aggregate|sla|risk total|workload)\b/i },
@@ -176,6 +182,21 @@ function dashboardRequestsHighFidelity(dashboard, entry) {
   return HIGH_FIDELITY_DASHBOARD.test(text);
 }
 
+function selectedDashboardGoldenReference(dashboard) {
+  return safeString(
+    dashboard.dashboardGoldenReference
+      || dashboard.dashboardGoldenReferenceId
+      || dashboard.goldenReference
+      || dashboard.goldenReferenceId,
+  ).trim();
+}
+
+function dashboardClaimsEventPortfolioGolden(dashboard) {
+  const selected = selectedDashboardGoldenReference(dashboard);
+  if (EVENT_PORTFOLIO_GOLDEN_REFERENCES.has(selected)) return true;
+  return !selected && /\bgolden reference\b/i.test(flattenText(dashboard)) && EVENT_PORTFOLIO_GOLDEN_CLAIM.test(flattenText(dashboard));
+}
+
 function entryHasFilters(entry) {
   return hasTextValue(entry.filters) || hasTextValue(entry.dataFilterRequirements);
 }
@@ -279,7 +300,14 @@ function validateDashboardFidelityRequirements(dashboard, entry, templateId, fin
   }
 
   const asksCollectionGridTable = COLLECTION_GRID_TABLE_TEMPLATES.has(templateId)
-    || /\b(collection grid-table|grid-table|portfolio table|operational table)\b/i.test(flattenText(entry));
+    || /\b(collection grid-table|grid-table|portfolio table|operational table)\b/i.test(flattenText({
+      templateId,
+      regionName: entry.regionName,
+      sectionName: entry.sectionName,
+      businessPurpose: entry.businessPurpose,
+      collectionGridTableRequirements: entry.collectionGridTableRequirements,
+      richTableTreatmentRequirements: entry.richTableTreatmentRequirements,
+    }));
   if (asksCollectionGridTable && !hasStructuredIntent(entry.collectionGridTableRequirements, /\b(source|fields|row context|detail|open|action|binding|collection|grid-table)\b/i)) {
     findings.push({
       level: "error",
@@ -288,6 +316,211 @@ function validateDashboardFidelityRequirements(dashboard, entry, templateId, fin
       section,
       templateId,
       message: "Collection grid-table style requires source list, fields, row context, and detail/open actions.",
+    });
+  }
+}
+
+function validateEventPortfolioGoldenReference(dashboard, sectionTemplates, findings) {
+  const selected = selectedDashboardGoldenReference(dashboard);
+  const selectedKnownReference = EVENT_PORTFOLIO_GOLDEN_REFERENCES.has(selected);
+  const claimsGoldenReference = dashboardClaimsEventPortfolioGolden(dashboard);
+
+  if (selected && !selectedKnownReference) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_UNKNOWN",
+      dashboard: dashboard.name,
+      value: selected,
+      message: "Dashboard golden reference must be a plugin-contained golden reference ID.",
+    });
+    return;
+  }
+
+  if (claimsGoldenReference && !selectedKnownReference) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_PROSE_ONLY",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference fidelity must be selected in structured dashboardGoldenReference, not prose only.",
+    });
+    return;
+  }
+
+  if (!selectedKnownReference) return;
+
+  const dashboardText = flattenText(dashboard);
+  if (STATIC_OR_SCAFFOLD_DASHBOARD.test(dashboardText)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_STATIC_OR_SCAFFOLD",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference dashboards cannot be satisfied by static KPI values, generic cards, plain scaffold tables, placeholder controls, or fake/unbound actions.",
+    });
+  }
+
+  if (!hasTextValue(dashboard.pagePurpose) && !hasTextValue(dashboard.businessTaskSolved)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_PURPOSE_MISSING",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference dashboards must declare the dashboard page purpose or business task solved.",
+    });
+  }
+
+  const sources = new Set(sectionTemplates.flatMap((entry) => [
+    ...asArray(entry.source),
+    ...asArray(entry.sourceList),
+    safeString(entry.source),
+    safeString(entry.sourceList),
+    safeString(entry.sourceResource),
+    safeString(entry.sourceListOrResource),
+  ].map((value) => safeString(value).trim()).filter(Boolean)));
+  if (!hasTextValue(dashboard.sourceDataLists) && !hasTextValue(dashboard.sourceLists) && sources.size === 0) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_SOURCE_LISTS_MISSING",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference dashboards must declare source data lists/resources.",
+    });
+  }
+
+  const hasFilterPlan = hasStructuredIntent(dashboard.dataFilterControls || dashboard.dataFilterRequirements, /\b(data filter|filter variable|consumer|target|summary|collection|table|list)\b/i)
+    || sectionTemplates.some((entry) => hasStructuredIntent(entry.dataFilterRequirements, /\b(data filter|filter variable|consumer|target|summary|collection|table|list)\b/i));
+  if (!hasFilterPlan) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_FILTERS_MISSING",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference dashboards must define Data Filter controls, filter variables, and target consumers.",
+    });
+  }
+
+  const kpiSections = sectionTemplates.filter((entry) => KPI_SUMMARY_TEMPLATES.has(safeString(entry.templateId).trim()));
+  if (!kpiSections.length) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_KPI_CARDS_MISSING",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference dashboards must include KPI card definitions using KPI/Summary templates.",
+    });
+  }
+  for (const entry of kpiSections) {
+    if (!hasStructuredIntent(entry.kpiSummaryBindingRequirements, /\b(summary|source|field|metric|filter|temp|variable|visible|binding|fallback)\b/i)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_KPI_BINDING_MISSING",
+        dashboard: dashboard.name,
+        section: entry.sectionName || entry.regionName,
+        templateId: entry.templateId,
+        message: "Event Portfolio golden-reference KPI cards must define Summary/KPI binding or an explicit fallback boundary.",
+      });
+    }
+  }
+
+  const collectionGridSections = sectionTemplates.filter((entry) => safeString(entry.templateId).trim() === "collection_card_board"
+    && hasStructuredIntent(entry.collectionGridTableRequirements, /\b(source|fields|row context|detail|open|action|collection|grid-table)\b/i));
+  if (!collectionGridSections.length) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_COLLECTION_GRID_TABLE_MISSING",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference dashboards require a grid-table style Collection section, not a plain Data table.",
+    });
+  }
+
+  for (const entry of collectionGridSections) {
+    const context = {
+      dashboard: dashboard.name,
+      section: entry.sectionName || entry.regionName,
+      templateId: entry.templateId,
+    };
+    if (!hasStructuredIntent(entry.dynamicControlRequirements || entry.itemTemplateDynamicControls || entry.requiredControls, /\b(dynamic field|dynamic-field|dynamic user|dynamic-user|progress|current item|item context)\b/i)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_DYNAMIC_CONTROLS_MISSING",
+        ...context,
+        message: "Event Portfolio golden-reference Collection grid-tables must define Dynamic controls inside item templates.",
+      });
+    }
+    const fieldsText = flattenText(entry.displayedFields || entry.fields);
+    const treatmentText = flattenText(entry.richTableTreatmentRequirements);
+    if (/\b(status|state|stage)\b/i.test(fieldsText) && !/\b(badge|badges|status badge|status badges)\b/i.test(treatmentText)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_STATUS_BADGE_MISSING",
+        ...context,
+        message: "Status fields in Event Portfolio golden-reference grid-tables must declare badge treatment.",
+      });
+    }
+    if (/\b(progress|rate|percent|percentage|completion)\b/i.test(fieldsText) && !/\b(progress|progress control|bar)\b/i.test(treatmentText)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_PROGRESS_TREATMENT_MISSING",
+        ...context,
+        message: "Progress/rate fields in Event Portfolio golden-reference grid-tables must declare Progress treatment.",
+      });
+    }
+    if (/\b(owner|person|user|requester|assignee|manager)\b/i.test(fieldsText) && !/\b(dynamic user|avatar|person)\b/i.test(treatmentText)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_PERSON_TREATMENT_MISSING",
+        ...context,
+        message: "Owner/person fields in Event Portfolio golden-reference grid-tables must declare Dynamic user/person/avatar treatment where supported.",
+      });
+    }
+    if (!/\b(header|hierarchy)\b/i.test(treatmentText) || !/\b(row density|density|spacing)\b/i.test(treatmentText)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_TABLE_POLISH_MISSING",
+        ...context,
+        message: "Event Portfolio golden-reference grid-tables must declare table header hierarchy, row density, and spacing treatment.",
+      });
+    }
+    if (!hasTextValue(entry.actions) || !hasStructuredIntent(entry.actionMetadataRequirements, /\b(real Yeeflow action metadata|action metadata|actionType|Yeeflow action)\b/i)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_ACTION_METADATA_MISSING",
+        ...context,
+        message: "Event Portfolio golden-reference grid-table actions must include real Yeeflow action metadata and row context.",
+      });
+    }
+  }
+
+  for (const entry of sectionTemplates) {
+    const context = { dashboard: dashboard.name, section: entry.sectionName || entry.regionName, templateId: entry.templateId };
+    for (const [key, code] of [
+      ["filters", "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_SECTION_FILTERS_MISSING"],
+      ["grouping", "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_SECTION_GROUPING_MISSING"],
+      ["sorting", "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_SECTION_SORTING_MISSING"],
+    ]) {
+      if (!hasTextValue(entry[key]) && !hasTextValue(entry[`no${key[0].toUpperCase()}${key.slice(1)}Reason`])) {
+        findings.push({
+          level: "error",
+          code,
+          ...context,
+          message: "Event Portfolio golden-reference sections must declare source list, fields, filters, grouping, sorting, and any no-op reason.",
+        });
+      }
+    }
+  }
+
+  if (!hasStructuredIntent(dashboard.designerTraceabilityRequirements || dashboard.nvLabelRequirements, /\b(nv_label|semantic|designer|traceability)\b/i)
+    && !sectionTemplates.some((entry) => hasStructuredIntent(entry.designerTraceabilityRequirements || entry.nvLabelRequirements, /\b(nv_label|semantic|designer|traceability)\b/i))) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_NV_LABEL_MISSING",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference dashboards must declare nv_label/designer traceability requirements.",
+    });
+  }
+
+  if (!hasStructuredIntent(dashboard.runtimeProofBoundary, /\b(runtime proof|runtime-proof|browser|screenshot|evidence|boundary|required)\b/i)
+    && !sectionTemplates.some((entry) => hasStructuredIntent(entry.runtimeProofBoundary, /\b(runtime proof|runtime-proof|browser|screenshot|evidence|boundary|required)\b/i))) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_PROOF_BOUNDARY_MISSING",
+      dashboard: dashboard.name,
+      message: "Event Portfolio golden-reference dashboards must declare the runtime proof boundary.",
     });
   }
 }
@@ -308,6 +541,8 @@ function markdownFindings(text) {
     [/New\/Edit forms should normally include only editable fields/i, "PAGE_FUNCTION_PLAN_NEW_EDIT_RULE_MISSING"],
     [/source list\/library, parent\/current-item binding, display fields, filters, actions, and opening behavior/i, "PAGE_FUNCTION_PLAN_RELATED_REGION_RULE_MISSING"],
     [/dashboardPagePattern/i, "PAGE_FUNCTION_PLAN_DASHBOARD_PAGE_PATTERN_FIELD_MISSING"],
+    [/dashboardGoldenReference/i, "PAGE_FUNCTION_PLAN_DASHBOARD_GOLDEN_REFERENCE_FIELD_MISSING"],
+    [/event_portfolio_dashboard_golden_reference/i, "PAGE_FUNCTION_PLAN_EVENT_PORTFOLIO_GOLDEN_REFERENCE_MISSING"],
     [/dashboardSectionTemplates\[\]/i, "PAGE_FUNCTION_PLAN_DASHBOARD_SECTION_TEMPLATES_FIELD_MISSING"],
     [/templateId[\s\S]*Region \/ Section[\s\S]*Why This Template Fits/i, "PAGE_FUNCTION_PLAN_DASHBOARD_TEMPLATE_SELECTION_TABLE_MISSING"],
     [/Template selection is part of the Page Function Plan implementation contract/i, "PAGE_FUNCTION_PLAN_DASHBOARD_TEMPLATE_CONTRACT_MISSING"],
@@ -525,6 +760,8 @@ function validateDashboardTemplateSelection(plan, findings) {
       }
       validateDashboardFidelityRequirements(dashboard, entry, templateId, findings);
     }
+
+    validateEventPortfolioGoldenReference(dashboard, sectionTemplates, findings);
 
     if (hasThreeColumn) {
       const panels = dashboard.threeColumnPanels || {};
