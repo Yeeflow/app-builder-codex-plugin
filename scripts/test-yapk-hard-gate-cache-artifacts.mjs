@@ -83,6 +83,7 @@ const requiredDocs = [
   "docs/standards/app-plan-standard-template.md",
   "docs/standards/page-function-plan-standard-template.md",
   "docs/standards/dashboard-event-portfolio-golden-reference-standard.md",
+  "docs/standards/dashboard-golden-reference-selection-standard.md",
   "docs/standards/application-design-system-template.md",
   "docs/standards/yeeflow-application-layout-design-rules.md",
   "docs/standards/runtime-proof-boundary-standard.md",

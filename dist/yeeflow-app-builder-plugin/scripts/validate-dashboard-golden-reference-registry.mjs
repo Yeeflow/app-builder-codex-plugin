@@ -30,9 +30,9 @@ const EVENT_SPECIFIC_FIELDS = [
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
-    "  node scripts/validate-dashboard-golden-reference-registry.mjs [--registry <registry.json>] [--dashboard-trace <trace.json>] [--json]",
+    "  node scripts/validate-dashboard-golden-reference-registry.mjs [--registry <registry.json>] [--dashboard-selection <selection.json>] [--dashboard-blueprint <blueprint.json>] [--dashboard-resource <resource-trace.json>] [--dashboard-trace <trace.json>] [--json]",
     "",
-    "Validates the default Event Portfolio Dashboard golden reference registry and optional generated dashboard trace contracts. No API calls are made.",
+    "Validates the default Event Portfolio Dashboard golden reference registry, selection artifacts, blueprint traces, and generated resource traces. No API calls are made.",
   ].join("\n");
   (exitCode === 0 ? console.log : console.error)(text);
   process.exit(exitCode);
@@ -238,15 +238,192 @@ function validateTrace(trace, registry) {
   return findings;
 }
 
+function normalizeSelectionToTrace(selection) {
+  const selectedSectionRefs = asArray(selection.selectedSectionGoldenReferenceIds || selection.sectionGoldenReferenceIds);
+  const mappings = asArray(selection.regionMappings || selection.pfpRegionMappings || selection.mappings);
+  return {
+    dashboardName: selection.dashboardPageName || selection.dashboardName,
+    appDomain: selection.appDomain || selection.businessDomain,
+    dashboardGoldenReference: selection.selectedPageGoldenReferenceId || selection.dashboardGoldenReference,
+    referencesUsed: [
+      selection.pageShellRef,
+      selection.headerAreaRef,
+      selection.filterAreaRef,
+      selection.kpiAreaRef,
+      selection.contentSectionRef,
+      selection.gridTableRegionRef,
+      ...selectedSectionRefs,
+      ...mappings.map((entry) => entry.goldenReferenceSectionId || entry.selectedGoldenReferenceId),
+    ].filter(Boolean),
+    structure: selection.structure,
+    requirements: selection.requirements,
+    appPlanFields: selection.appPlanFields || selection.currentAppPlanFields,
+    filterBindings: selection.filters || selection.filterBindings,
+    kpiMetrics: selection.metrics || selection.kpiMetrics || selection.summaryMetrics,
+    gridTableCollection: selection.gridTableCollection || mappings.find((entry) => entry.goldenReferenceSectionId === "dashboard_collection_grid_table_event_portfolio_ref"),
+    mappedFields: selection.mappedFields || mappings.flatMap((entry) => asArray(entry.displayFields || entry.fields)),
+    itemTemplateDynamicControls: selection.dynamicControls || selection.itemTemplateDynamicControls || mappings.flatMap((entry) => asArray(entry.dynamicControls || entry.itemTemplateDynamicControls)),
+    rowActions: selection.actions || selection.rowActions || mappings.flatMap((entry) => asArray(entry.actions || entry.rowActions)),
+  };
+}
+
+function validateSelection(selection, registry) {
+  const findings = validateTrace(normalizeSelectionToTrace(selection), registry);
+  for (const [value, code, message] of [
+    [selection.dashboardPageId || selection.dashboardPageName || selection.dashboardName, "DASHBOARD_SELECTION_PAGE_ID_NAME_MISSING", "Dashboard Golden Reference Selection must declare dashboard page id/name."],
+    [selection.sourcePageFunctionPlanId || selection.pageFunctionPlanId || selection.pfpPageId, "DASHBOARD_SELECTION_PFP_REF_MISSING", "Dashboard Golden Reference Selection must declare source Page Function Plan page id."],
+    [selection.selectedPageGoldenReferenceId || selection.dashboardGoldenReference, "DASHBOARD_SELECTION_PAGE_REFERENCE_MISSING", "Dashboard Golden Reference Selection must declare selected page-level golden reference id."],
+    [selection.selectedSectionGoldenReferenceIds || selection.sectionGoldenReferenceIds, "DASHBOARD_SELECTION_SECTION_REFERENCES_MISSING", "Dashboard Golden Reference Selection must declare selected section-level golden reference ids."],
+    [selection.regionMappings || selection.pfpRegionMappings || selection.mappings, "DASHBOARD_SELECTION_REGION_MAPPINGS_MISSING", "Dashboard Golden Reference Selection must map each Page Function Plan business region to a golden reference section."],
+  ]) {
+    if (!hasText(value)) push(findings, code, message);
+  }
+
+  const selected = safeString(selection.selectedPageGoldenReferenceId || selection.dashboardGoldenReference).trim();
+  if (selected && selected !== DEFAULT_REFERENCE) {
+    push(findings, "DASHBOARD_SELECTION_UNKNOWN_PAGE_REFERENCE", "Dashboard Golden Reference Selection must use a plugin-contained page-level golden reference id.", { selected });
+  }
+
+  const selectedSections = new Set(asArray(selection.selectedSectionGoldenReferenceIds || selection.sectionGoldenReferenceIds).map((id) => safeString(id).trim()).filter(Boolean));
+  const requirements = selection.requirements || {};
+  for (const [id, code, required] of [
+    ["dashboard_header_band_event_portfolio_ref", "DASHBOARD_SELECTION_HEADER_REF_MISSING", true],
+    ["dashboard_content_section_event_portfolio_ref", "DASHBOARD_SELECTION_CONTENT_SECTION_REF_MISSING", true],
+    ["dashboard_filter_group_event_portfolio_ref", "DASHBOARD_SELECTION_FILTER_GROUP_REF_MISSING", requirements.filtersRequired !== false],
+    ["dashboard_kpi_cards_event_portfolio_ref", "DASHBOARD_SELECTION_KPI_REF_MISSING", requirements.summaryMetricsRequired !== false],
+    ["dashboard_collection_grid_table_event_portfolio_ref", "DASHBOARD_SELECTION_GRID_TABLE_REF_MISSING", requirements.portfolioRegionRequired !== false],
+  ]) {
+    if (required && !selectedSections.has(id)) {
+      push(findings, code, `Dashboard Golden Reference Selection selectedSectionGoldenReferenceIds[] must include ${id}.`, { referenceId: id });
+    }
+  }
+
+  const mappings = asArray(selection.regionMappings || selection.pfpRegionMappings || selection.mappings);
+  for (const mapping of mappings) {
+    const context = { region: mapping.pfpRegionId || mapping.pfpRegionName || mapping.regionName };
+    for (const [value, code, message] of [
+      [mapping.pfpRegionId || mapping.pfpRegionName || mapping.regionName, "DASHBOARD_SELECTION_MAPPING_REGION_MISSING", "Each mapping must identify the Page Function Plan business region."],
+      [mapping.goldenReferenceSectionId || mapping.selectedGoldenReferenceId, "DASHBOARD_SELECTION_MAPPING_REFERENCE_MISSING", "Each mapping must identify the selected section-level golden reference id."],
+      [mapping.sourceDataList || mapping.sourceList, "DASHBOARD_SELECTION_MAPPING_SOURCE_LIST_MISSING", "Each mapping must preserve the source data list."],
+      [mapping.fields || mapping.displayFields || mapping.sourceFields, "DASHBOARD_SELECTION_MAPPING_FIELDS_MISSING", "Each mapping must preserve source/display fields."],
+    ]) {
+      if (!hasText(value)) push(findings, code, message, context);
+    }
+    if (!hasText(mapping.filters) && !hasText(mapping.metrics) && !hasText(mapping.actions) && !hasText(mapping.displayFields)) {
+      push(findings, "DASHBOARD_SELECTION_MAPPING_FUNCTION_DETAIL_MISSING", "Each mapping must preserve filters, metrics, actions, or display fields from the Page Function Plan.", context);
+    }
+  }
+  return findings;
+}
+
+function selectionId(selection) {
+  return safeString(selection.selectionId || selection.dashboardGoldenReferenceSelectionId || selection.id).trim();
+}
+
+function validateBlueprint(blueprint, selection, registry) {
+  const findings = selection ? validateSelection(selection, registry) : validateRegistry(registry);
+  if (!selection) {
+    push(findings, "DASHBOARD_BLUEPRINT_SELECTION_ARTIFACT_MISSING", "Dashboard blueprint validation requires a Dashboard Golden Reference Selection artifact.");
+    return findings;
+  }
+  const blueprintSelectionRef = safeString(blueprint.dashboardGoldenReferenceSelectionRef || blueprint.goldenReferenceSelectionId || blueprint.selectionId).trim();
+  if (!blueprintSelectionRef) {
+    push(findings, "DASHBOARD_BLUEPRINT_SELECTION_REF_MISSING", "Every Dashboard blueprint must reference the selected Dashboard Golden Reference Selection.");
+  } else if (selectionId(selection) && blueprintSelectionRef !== selectionId(selection)) {
+    push(findings, "DASHBOARD_BLUEPRINT_SELECTION_REF_MISMATCH", "Dashboard blueprint selection reference must match the Dashboard Golden Reference Selection artifact.", { blueprintSelectionRef, selectionId: selectionId(selection) });
+  }
+
+  const sections = asArray(blueprint.sections || blueprint.dashboardSections);
+  if (!sections.length) {
+    push(findings, "DASHBOARD_BLUEPRINT_SECTIONS_MISSING", "Dashboard blueprint must include dashboard sections.");
+  }
+  for (const section of sections) {
+    const reference = safeString(section.derivedFromGoldenReference || section.goldenReferenceSectionId).trim();
+    const context = { section: section.sectionId || section.name || section.regionName };
+    if (!reference) {
+      push(findings, "DASHBOARD_BLUEPRINT_SECTION_REFERENCE_MISSING", "Every dashboard blueprint section must declare derivedFromGoldenReference.", context);
+    }
+    for (const [value, code, message] of [
+      [section.sourceDataList || section.sourceList, "DASHBOARD_BLUEPRINT_SECTION_SOURCE_LIST_MISSING", "Blueprint section must preserve source data list from selection."],
+      [section.fields || section.displayFields || section.sourceFields, "DASHBOARD_BLUEPRINT_SECTION_FIELDS_MISSING", "Blueprint section must preserve fields from selection."],
+    ]) {
+      if (!hasText(value)) push(findings, code, message, context);
+    }
+    if (!hasText(section.filters) && !hasText(section.metrics) && !hasText(section.actions) && !hasText(section.displayFields)) {
+      push(findings, "DASHBOARD_BLUEPRINT_SECTION_FUNCTION_DETAIL_MISSING", "Blueprint section must preserve filters, metrics, actions, or display fields from selection.", context);
+    }
+  }
+
+  return findings;
+}
+
+function validateResource(resource, selection, registry) {
+  const findings = selection ? validateSelection(selection, registry) : validateRegistry(registry);
+  if (!selection) {
+    push(findings, "DASHBOARD_RESOURCE_SELECTION_ARTIFACT_MISSING", "Generated Dashboard resource conformance requires a Dashboard Golden Reference Selection artifact.");
+    return findings;
+  }
+  const resourceSelectionRef = safeString(resource.dashboardGoldenReferenceSelectionRef || resource.goldenReferenceSelectionId || resource.selectionId).trim();
+  if (!resourceSelectionRef) {
+    push(findings, "DASHBOARD_RESOURCE_SELECTION_REF_MISSING", "Generated Dashboard resources must preserve a reference to the Dashboard Golden Reference Selection.");
+  } else if (selectionId(selection) && resourceSelectionRef !== selectionId(selection)) {
+    push(findings, "DASHBOARD_RESOURCE_SELECTION_REF_MISMATCH", "Generated Dashboard resource selection reference must match the Dashboard Golden Reference Selection artifact.", { resourceSelectionRef, selectionId: selectionId(selection) });
+  }
+
+  const trace = normalizeSelectionToTrace({
+    ...selection,
+    structure: resource.structure || selection.structure,
+    selectedSectionGoldenReferenceIds: resource.referencesUsed || selection.selectedSectionGoldenReferenceIds,
+    mappedFields: resource.mappedFields || selection.mappedFields,
+    itemTemplateDynamicControls: resource.dynamicControls || resource.itemTemplateDynamicControls || selection.itemTemplateDynamicControls,
+    rowActions: resource.actions || resource.rowActions || selection.rowActions,
+  });
+  findings.push(...validateTrace(trace, registry).filter((finding) => !findings.some((existing) => existing.code === finding.code && existing.message === finding.message)));
+
+  const major = new Set([
+    ...asArray(resource.majorSections),
+    ...asArray(resource.structuralRegions),
+    ...asArray(resource.generatedSections).map((section) => section.id || section.name || section.regionId),
+  ].map((value) => safeString(value).trim()).filter(Boolean));
+  for (const [id, code] of [
+    ["Main", "DASHBOARD_RESOURCE_MAIN_CONTAINER_MISSING"],
+    ["Content", "DASHBOARD_RESOURCE_CONTENT_CONTAINER_MISSING"],
+    ["event_portfolio_header_band", "DASHBOARD_RESOURCE_HEADER_BAND_MISSING"],
+    ["event_portfolio_pipeline_section", "DASHBOARD_RESOURCE_CONTENT_SECTION_MISSING"],
+  ]) {
+    if (!major.has(id)) push(findings, code, `Generated Dashboard resource must include structural region ${id}.`, { structuralRegion: id });
+  }
+  const requirements = selection.requirements || {};
+  if (requirements.filtersRequired !== false && !major.has("event_portfolio_filter_group")) push(findings, "DASHBOARD_RESOURCE_FILTER_GROUP_MISSING", "Generated Dashboard resource must include filter group when filters are required.");
+  if (requirements.summaryMetricsRequired !== false && !major.has("kpi_cards_wrapper") && !major.has("event_portfolio_kpi_row")) push(findings, "DASHBOARD_RESOURCE_KPI_CARDS_WRAPPER_MISSING", "Generated Dashboard resource must include KPI cards wrapper when summary metrics are required.");
+  if (requirements.portfolioRegionRequired !== false && !major.has("Event Pipeline Grid-Table") && !major.has("Event Pipeline Grid Table") && !major.has("event_pipeline_grid_table_collection")) push(findings, "DASHBOARD_RESOURCE_GRID_TABLE_COLLECTION_MISSING", "Generated Dashboard resource must include grid-table Collection region when a portfolio/work queue/list region is required.");
+
+  const sections = asArray(resource.generatedSections || resource.sections);
+  for (const section of sections) {
+    if (!hasText(section.derivedFromGoldenReference || section.goldenReferenceSectionId)) {
+      push(findings, "DASHBOARD_RESOURCE_SECTION_PROVENANCE_MISSING", "Generated Dashboard major sections must preserve inspectable golden-reference provenance.", { section: section.id || section.name });
+    }
+  }
+
+  return findings;
+}
+
 const json = process.argv.includes("--json");
 if (process.argv.includes("--help")) usage(0);
 const registryPath = argValue("--registry") || DEFAULT_REGISTRY;
 const tracePath = argValue("--dashboard-trace");
+const selectionPath = argValue("--dashboard-selection");
+const blueprintPath = argValue("--dashboard-blueprint");
+const resourcePath = argValue("--dashboard-resource");
 
 let findings = [];
 try {
   const registry = readJson(registryPath);
-  findings = tracePath ? validateTrace(readJson(tracePath), registry) : validateRegistry(registry);
+  const selection = selectionPath ? readJson(selectionPath) : null;
+  if (resourcePath) findings = validateResource(readJson(resourcePath), selection, registry);
+  else if (blueprintPath) findings = validateBlueprint(readJson(blueprintPath), selection, registry);
+  else if (selectionPath) findings = validateSelection(selection, registry);
+  else findings = tracePath ? validateTrace(readJson(tracePath), registry) : validateRegistry(registry);
 } catch (error) {
   findings.push({ level: "error", code: "DASHBOARD_GOLDEN_REFERENCE_VALIDATOR_EXCEPTION", message: error.message });
 }
@@ -255,6 +432,9 @@ const report = {
   status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
   registryPath,
   dashboardTracePath: tracePath || null,
+  dashboardSelectionPath: selectionPath || null,
+  dashboardBlueprintPath: blueprintPath || null,
+  dashboardResourcePath: resourcePath || null,
   findings,
 };
 

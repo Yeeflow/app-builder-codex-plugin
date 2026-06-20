@@ -49,9 +49,13 @@ Dashboard Golden Reference selection happens downstream, after Page Function Pla
 The tests prove:
 
 - the golden reference registry is present and valid
+- Dashboard Golden Reference Selection is a required artifact between Page Function Plan and blueprint generation
+- Dashboard blueprints reference the selection and each major section declares `derivedFromGoldenReference`
+- generated Dashboard resource traces preserve inspectable provenance/structure for the selected reference
 - Facility Maintenance dashboard requirements can map into the default Event Portfolio structure using facility-specific fields
 - missing `Main` / `Content`, header band, filter group, KPI cards, grid-table Collection, Dynamic controls, or row actions fail
 - copying event-specific fields into unrelated apps fails
+- package readiness fails when selection, blueprint provenance, generated resource traceability, required default regions, or field mapping are missing
 
 ## Preserved Hard Gates
 

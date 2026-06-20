@@ -36,11 +36,11 @@ Use another plugin-contained pattern only when the page function clearly require
 | `dashboard_content_section_event_portfolio_ref` | `event_portfolio_pipeline_section` | Major dashboard content section with section title/subtitle, local filters/actions, and main data region. |
 | `dashboard_collection_grid_table_event_portfolio_ref` | `Event Pipeline Grid-Table` / `Event Pipeline Grid Table` | Grid-table style Collection region with custom header grid, Collection row grid, Dynamic controls, status/progress/person treatment, and row actions. |
 
-## Generation Contract
+## Required Selection Stage
 
 The Page Function Plan remains a business/page-function contract. It describes the page purpose, users, business questions, data sources, fields, filters, metrics, main and secondary regions, actions, sorting/grouping, and mobile behavior. It does not prescribe low-level Yeeflow control nesting or property paths.
 
-Dashboard Golden Reference selection happens after the Page Function Plan is approved and before full-page design, blueprint, and resource generation. Dashboard generation should use `event_portfolio_dashboard_golden_reference` as the default construction style unless the Page Function Plan and plugin standards point to a different documented pattern.
+Dashboard Golden Reference Selection is a required stage after the Page Function Plan is approved and before blueprint/resource generation. Dashboard generation should use `event_portfolio_dashboard_golden_reference` as the default construction style unless the Page Function Plan and plugin standards point to a different documented pattern.
 
 When this default is used, generated dashboard blueprints/resources must trace:
 
@@ -50,6 +50,8 @@ When this default is used, generated dashboard blueprints/resources must trace:
 - KPI area to `dashboard_kpi_cards_event_portfolio_ref` when summary metrics are required
 - main content section to `dashboard_content_section_event_portfolio_ref`
 - grid-table Collection region to `dashboard_collection_grid_table_event_portfolio_ref` when a portfolio, work queue, list, or primary operational region is required
+
+Every Dashboard blueprint must reference the selected Dashboard Golden Reference Selection artifact. Every major blueprint section must declare `derivedFromGoldenReference`. Generated resources must preserve inspectable structure or provenance metadata proving the selected reference was used. Package readiness must fail when the selection, blueprint provenance, generated resource traceability, or required structural regions are missing.
 
 ## Required Adaptation
 

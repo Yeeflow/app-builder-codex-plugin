@@ -158,7 +158,7 @@ Rules:
 
 - Design intent must stay business-level.
 - Do not specify exact Container nesting, CSS, pixel sizes, raw Yeeflow property paths, resource JSON, unsupported control properties, or exact visual layout implementation.
-- Dashboard Pattern Library / Golden Reference selection happens after this business contract and must use plugin-contained dashboard standards and existing hard gates. The default dashboard construction style is `event_portfolio_dashboard_golden_reference` with reference details in `docs/reference/dashboard-golden-reference-registry.normalized.json`, but the Page Function Plan should still describe only business/page-function needs: metrics, data regions, filters, fields, actions, sorting/grouping, and mobile behavior.
+- Dashboard Pattern Library / Golden Reference selection happens after this business contract and must use plugin-contained dashboard standards and existing hard gates. The required Dashboard Golden Reference Selection artifact maps this business contract to selected page/section reference IDs before blueprint generation. The default dashboard construction style is `event_portfolio_dashboard_golden_reference` with reference details in `docs/reference/dashboard-golden-reference-registry.normalized.json`, but the Page Function Plan should still describe only business/page-function needs: metrics, data regions, filters, fields, actions, sorting/grouping, and mobile behavior.
 
 ### 3.x.10 Responsibility Boundary
 

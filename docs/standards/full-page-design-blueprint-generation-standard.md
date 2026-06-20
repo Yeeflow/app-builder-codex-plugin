@@ -45,6 +45,8 @@ Before generating Yeeflow resources, every page requires a blueprint with:
 
 Default Dashboard pages should use `event_portfolio_dashboard_golden_reference` unless the page function clearly requires another plugin-contained pattern. The blueprint must trace the page shell, header area, filter area, KPI area, main content section, and grid-table Collection region to the selected golden reference IDs where applicable, and must adapt fields/actions/labels to the current App Plan instead of copying Marketing Event-specific source fields.
 
+Every Dashboard blueprint must reference the Dashboard Golden Reference Selection artifact created after Page Function Plan approval. Each major Dashboard section must declare `derivedFromGoldenReference` and preserve the source data list, fields, filters, metrics, actions, and dynamic-control intent from the selection. Blueprint validation must fail if the selection is missing or section provenance is absent.
+
 Every property path must be validated against `docs/reference/yeeflow-control-configurations.normalized.json` or `docs/reference/yeeflow-control-property-extensions.json`. Container `attrs.style` rules and non-Container `attrs.common` rules remain separate.
 
 ## Resource Parity
