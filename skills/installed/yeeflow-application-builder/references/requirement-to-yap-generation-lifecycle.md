@@ -28,6 +28,19 @@ Before generation, confirm package target and scope:
 - Existing application upgrade requires an official baseline `.yapk` from Yeeflow Version management, identity preservation, and ID stability.
 - Existing application upgrades must not use fresh-ID clone generation rules unless the user explicitly asks for a cloned app.
 
+## Generation Mode Gate
+
+Before Yeeflow resource generation, choose one mode:
+
+- Draft / Offline Mode
+- Final / Authorized Generation Mode
+
+Draft / Offline Mode is the default. It must not call live Yeeflow APIs, uses local draft IDs, produces local unsigned draft packages only, and cannot proceed to generated-final signing/install readiness because API-issued ID provenance is absent.
+
+Final / Authorized Generation Mode is allowed only after explicit user authorization for live Yeeflow API usage and the target workspace. In this mode, call `GET /utils/generate/ids?count=<n>` before resource generation and use API-issued IDs directly in generated resources. Do not generate local IDs first and then remap them as the primary final path. References, lookups, workflows, navigation, dashboards, forms, and resource bindings must preserve API-issued IDs from initial generation.
+
+Run `scripts/validate-generation-mode-id-provenance.mjs --report <generation-mode-id-provenance.json>` before generated-final readiness, signing readiness, signing, install/import/upgrade, or runtime proof.
+
 ## 1. Requirement Intake
 
 Read all uploaded requirement files, screenshots, sample forms, sample exports, Markdown files, Word documents, PDFs, JSON files, and user notes.
@@ -234,6 +247,7 @@ Before generation, confirm:
 - generated resource inventory matches required scope
 - runtime-unproven features are marked as focused proof items or documented limitations
 - plugin capability and standards compliance has no invented unsupported shapes
+- generation mode is selected; Final / Authorized Generation Mode has explicit live API authorization and target workspace, or Draft / Offline Mode is marked local unsigned draft only
 
 Stop if any required business decision gate remains unanswered or either review gate is failed.
 

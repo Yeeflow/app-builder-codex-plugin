@@ -7,6 +7,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 
 const hardGateScripts = [
+  "scripts/validate-generation-mode-id-provenance.mjs",
   "scripts/validate-yapk-id-provenance.mjs",
   "scripts/validate-yapk-navigation-runtime-metadata.mjs",
   "scripts/validate-yapk-upgrade-id-stability.mjs",
@@ -47,6 +48,7 @@ const hardGateScripts = [
   "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/inspect-yeeflow-control-configurations.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
+  "scripts/test-final-generation-api-issued-id-mode.mjs",
   "scripts/test-yapk-id-navigation-hard-gates.mjs",
   "scripts/test-yapk-upgrade-id-stability.mjs",
   "scripts/test-dashboard-grid-table-collections.mjs",
@@ -97,6 +99,7 @@ const requiredDocs = [
   "docs/standards/html-preview-design-standard.md",
   "docs/standards/html-to-yeeflow-control-mapping-standard.md",
   "docs/standards/html-to-yeeflow-control-mapping-registry.md",
+  "docs/standards/final-generation-api-issued-id-mode-standard.md",
   "docs/standards/yeeflow-ui-pattern-library-generation-standard.md",
   "docs/standards/yeeflow-root-token-reference.md",
   "docs/standards/yeeflow-root-token-reference.normalized.json",
