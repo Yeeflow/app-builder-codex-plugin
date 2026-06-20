@@ -72,8 +72,41 @@ function pagePlan(overrides = {}) {
     applicationLayout: "application-layout-1-vertical-nav",
     dashboards: [{
       name: "Operations Dashboard",
+      pagePurpose: "Operations overview dashboard for request queues and KPIs.",
+      businessTaskSolved: "Help managers see workload metrics and open pending requests.",
+      dashboardPagePattern: "standard_dashboard_page_shell",
       desktopBehavior: "Two-column operations dashboard with KPI row and queue.",
       mobileBehavior: "Stacks KPI cards first, then request queue.",
+      dashboardSectionTemplates: [
+        {
+          templateId: "kpi_card_row",
+          regionName: "Operations KPI Row",
+          businessPurpose: "KPI metrics for open request counts and total amount.",
+          source: "Purchase Requests",
+          displayedFields: ["Title", "Amount", "Status"],
+          filters: ["Current fiscal period"],
+          grouping: ["Status"],
+          sorting: ["Created Date descending"],
+          actions: [],
+          requiredControls: ["container", "grid", "text", "summary"],
+          proofStatus: "export-proven",
+          whyTemplateFits: "KPI metrics need the export-proven KPI/Summary card row.",
+        },
+        {
+          templateId: "data_table_section",
+          regionName: "Request Queue",
+          businessPurpose: "Record table work queue for pending purchase requests.",
+          source: "Purchase Requests",
+          displayedFields: ["Title", "Amount", "Status"],
+          filters: ["Status is not Completed"],
+          grouping: [],
+          sorting: ["Created Date descending"],
+          actions: ["Open Request"],
+          requiredControls: ["data-list"],
+          proofStatus: "runtime-proven",
+          whyTemplateFits: "A data table section fits a scannable record queue.",
+        },
+      ],
       regions: [{
         name: "Request Queue",
         controlType: "Collection",
@@ -172,6 +205,7 @@ try {
   let output = run("scripts/validate-page-function-plan.mjs", [planFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "complete valid Page Function Plan passes", status: "pass" });
+  results.push({ case: "valid dashboard using kpi_card_row plus data_table_section passes", status: "pass" });
 
   const appFile = writeJson(tempDir, "valid-app-plan", appPlan());
   output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", appFile, "--page-function-plan", planFile]);
@@ -209,6 +243,151 @@ try {
   output = run("scripts/validate-page-function-plan.mjs", [planFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "View form related Data table region with source/binding/actions passes", status: "pass" });
+
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "valid-kanban-dashboard", pagePlan({
+    dashboards: [{
+      name: "Operations Dashboard",
+      pagePurpose: "Status board dashboard for triage queues.",
+      businessTaskSolved: "Managers triage requests by status lane.",
+      dashboardPagePattern: "standard_dashboard_page_shell",
+      desktopBehavior: "Kanban board with actions.",
+      mobileBehavior: "Stacks lanes into vertical status groups.",
+      dashboardSectionTemplates: [{
+        templateId: "kanban_status_board",
+        regionName: "Request Status Board",
+        businessPurpose: "Kanban status board for request triage.",
+        source: "Purchase Requests",
+        displayedFields: ["Title", "Status", "Requester"],
+        filters: ["Status is not Completed"],
+        grouping: ["Status"],
+        sorting: ["Created Date descending"],
+        actions: ["Open Request"],
+        requiredControls: ["kanban", "container", "text", "dynamic-field"],
+        proofStatus: "runtime-proven",
+        whyTemplateFits: "Status lanes are the intended use for kanban_status_board.",
+      }],
+      regions: [{
+        name: "Request Status Board",
+        controlType: "Kanban",
+        source: "Purchase Requests",
+        fields: ["Title", "Status", "Requester"],
+        filters: ["Status is not Completed"],
+        actions: ["Open Request"],
+      }],
+    }],
+  }))]);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "valid dashboard using kanban_status_board passes", status: "pass" });
+
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "valid-three-column-dashboard", pagePlan({
+    dashboards: [{
+      name: "Operations Dashboard",
+      pagePurpose: "Three column review queue workspace for request triage.",
+      businessTaskSolved: "Managers work a list-detail review queue with context and actions.",
+      dashboardPagePattern: "three_column_workspace_shell",
+      desktopBehavior: "Left filters, main request queue, right selected request detail.",
+      mobileBehavior: "Panels stack as filters, queue, then detail.",
+      threeColumnPanels: {
+        left: { purpose: "Queue filters", source: "Purchase Requests", content: ["Status filters", "Requester filters"] },
+        main: { purpose: "Request queue", source: "Purchase Requests", content: ["Request cards", "Open Request action"] },
+        right: { purpose: "Selected request detail", source: "Purchase Requests", content: ["Amount", "Requester", "Manager Comment"] },
+      },
+      dashboardSectionTemplates: [{
+        templateId: "three_column_workspace_shell",
+        regionName: "Manager Review Workspace",
+        businessPurpose: "Three column workspace for list-detail triage.",
+        source: "Purchase Requests",
+        displayedFields: ["Title", "Amount", "Status", "Requester"],
+        filters: ["Status is not Completed"],
+        grouping: ["Status"],
+        sorting: ["Created Date descending"],
+        actions: ["Open Request"],
+        requiredControls: ["container", "heading", "icon"],
+        proofStatus: "export-proven",
+        whyTemplateFits: "The page needs left context, main work queue, and right detail panels.",
+      }],
+      regions: [{
+        name: "Manager Review Workspace",
+        controlType: "Container",
+        source: "Purchase Requests",
+        fields: ["Title", "Amount", "Status", "Requester"],
+        filters: ["Status is not Completed"],
+        actions: ["Open Request"],
+      }],
+    }],
+  }))]);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "valid three_column_workspace_shell with meaningful panels passes", status: "pass" });
+
+  const unknownTemplate = pagePlan();
+  unknownTemplate.dashboards[0].dashboardSectionTemplates[0].templateId = "executive_magic_template";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "unknown-template", unknownTemplate)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEMPLATE_GENERIC_OR_UNKNOWN");
+  results.push({ case: "invalid dashboard with unknown templateId fails", status: "pass" });
+
+  const noSectionTemplates = pagePlan();
+  noSectionTemplates.dashboards[0].dashboardSectionTemplates = [];
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "no-section-templates", noSectionTemplates)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_SECTION_TEMPLATES_MISSING");
+  results.push({ case: "invalid dashboard with no section templates fails", status: "pass" });
+
+  const incompatibleTemplate = pagePlan();
+  incompatibleTemplate.dashboards[0].dashboardSectionTemplates[0].templateId = "business_alert_card";
+  incompatibleTemplate.dashboards[0].dashboardSectionTemplates[0].businessPurpose = "KPI metric row for totals";
+  incompatibleTemplate.dashboards[0].dashboardSectionTemplates[0].whyTemplateFits = "This is a metric row";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "incompatible-template", incompatibleTemplate)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEMPLATE_PURPOSE_INCOMPATIBLE");
+  results.push({ case: "invalid dashboard with incompatible template purpose fails", status: "pass" });
+
+  const badThreeColumn = pagePlan({
+    dashboards: [{
+      name: "Operations Dashboard",
+      pagePurpose: "Simple dashboard overview.",
+      businessTaskSolved: "Show a few metrics.",
+      dashboardPagePattern: "three_column_workspace_shell",
+      desktopBehavior: "Three columns.",
+      mobileBehavior: "Stacked.",
+      dashboardSectionTemplates: [{
+        templateId: "three_column_workspace_shell",
+        regionName: "Simple Overview",
+        businessPurpose: "Three column workspace shell.",
+        source: "Purchase Requests",
+        displayedFields: ["Title", "Status"],
+        filters: ["All"],
+        grouping: [],
+        sorting: ["Created Date descending"],
+        actions: ["Open Request"],
+        requiredControls: ["container", "heading", "icon"],
+        proofStatus: "export-proven",
+        whyTemplateFits: "Uses three columns.",
+      }],
+      regions: [{
+        name: "Simple Overview",
+        controlType: "Container",
+        source: "Purchase Requests",
+        fields: ["Title", "Status"],
+        filters: ["All"],
+        actions: ["Open Request"],
+      }],
+    }],
+  });
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "bad-three-column", badThreeColumn)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_THREE_COLUMN_LEFT_PANEL_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_THREE_COLUMN_SIMPLE_DASHBOARD_INVALID");
+  results.push({ case: "invalid three_column_workspace_shell without meaningful panels fails", status: "pass" });
+
+  const proseOnly = pagePlan();
+  proseOnly.dashboards[0].dashboardPagePattern = "";
+  proseOnly.dashboards[0].dashboardSectionTemplates = [];
+  proseOnly.dashboards[0].notes = "Use kpi_card_row and data_table_section templates.";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "prose-only-template", proseOnly)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEMPLATE_PROSE_ONLY");
+  results.push({ case: "invalid prose-only template mention without structured fields fails", status: "pass" });
 
   const badRefs = pagePlan();
   badRefs.dashboards[0].regions[0].controlType = "Magic Board";

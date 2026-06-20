@@ -31,6 +31,7 @@ Functional Specification
 - Added `scripts/validate-page-function-plan.mjs`.
 - Added `scripts/validate-app-plan-page-function-traceability.mjs`.
 - Added `scripts/test-page-function-plan-gates.mjs`.
+- Added Dashboard-only Page Function Plan template-selection gates that load the plugin-contained Dashboard template library and require `dashboardPagePattern` plus structured `dashboardSectionTemplates[]`.
 - Registered the new validators/tests in focused planning gates, aggregate UI hard gates, and YAPK cache artifact mirror checks.
 - Updated `skills/installed/yeeflow-application-builder/SKILL.md` so the lifecycle requires Page Function Plan and Application Design System before generation.
 - Mirrored changed standards, scripts, tests, and skill files into `dist/yeeflow-app-builder-plugin/...`.
@@ -62,6 +63,14 @@ Required page-level content:
 - Desktop and mobile layout behavior.
 - App Plan traceability by stable resource, field, form, action, workflow, source list, and library names.
 
+Dashboard-specific contract:
+
+- Every Dashboard page declares `dashboardPagePattern`.
+- Every Dashboard page declares structured `dashboardSectionTemplates[]`.
+- Dashboard section `templateId` values must exist in `docs/templates/yeeflow-ui-section-template-library.normalized.json` or documented Dashboard standards.
+- Template selection is consumed by downstream page/resource generation, not treated as prose-only visual guidance.
+- `three_column_workspace_shell` is allowed only for meaningful left/main/right workspace pages, not simple dashboards.
+
 ## Regression Coverage
 
 `scripts/test-page-function-plan-gates.mjs` covers:
@@ -74,6 +83,10 @@ Required page-level content:
 - New/Edit form incorrectly containing Collection/Data analytics/audit/dashboard regions.
 - View form correctly containing related Data table regions with source, binding, fields, filters, actions, and opening behavior.
 - Page Function Plan referencing unsupported controls or fields not in App Plan.
+- Valid Dashboard template selection using `kpi_card_row` plus `data_table_section`.
+- Valid Dashboard template selection using `kanban_status_board`.
+- Valid `three_column_workspace_shell` Dashboard with meaningful left/main/right panel content.
+- Unknown, missing, prose-only, or incompatible Dashboard template selections.
 
 ## Proof Boundary
 

@@ -32,6 +32,38 @@ const SUPPORTED_CONTROLS = new Set([
   "Vertical timeline",
 ]);
 
+const DOCUMENTED_DASHBOARD_PAGE_PATTERNS = new Set([
+  "standard_dashboard_page_shell",
+  "standard_dashboard_shell",
+  "documented_standard_dashboard_page_shell",
+  "three_column_workspace_shell",
+]);
+
+const TEMPLATE_LIBRARY_PATHS = [
+  path.join(process.cwd(), "docs/templates/yeeflow-ui-section-template-library.normalized.json"),
+  path.join(process.cwd(), "dist/yeeflow-app-builder-plugin/docs/templates/yeeflow-ui-section-template-library.normalized.json"),
+];
+
+const ACTION_REQUIRED_TEMPLATES = new Set([
+  "dashboard_header_action_bar",
+  "kanban_status_board",
+  "collection_card_board",
+  "quick_links_icon_list",
+]);
+
+const TEMPLATE_PURPOSE_RULES = [
+  { templateId: "kpi_card_row", pattern: /\b(kpi|metric|summary|count|total|aggregate|sla|risk total|workload)\b/i },
+  { templateId: "progress_summary_card", pattern: /\b(progress|completion|score|percentage|percent|risk score)\b/i },
+  { templateId: "business_alert_card", pattern: /\b(alert|warning|risk|expiry|expired|compliance|blocking|exception)\b/i },
+  { templateId: "data_table_section", pattern: /\b(table|grid|record list|list|queue|search|scan|register|work queue)\b/i },
+  { templateId: "kanban_status_board", pattern: /\b(kanban|status|board|lane|triage|queue|stage|workflow)\b/i },
+  { templateId: "collection_card_board", pattern: /\b(card|collection|review queue|queue|related record|grouped list|browse)\b/i },
+  { templateId: "quick_links_icon_list", pattern: /\b(quick link|shortcut|navigation|launch|open|action)\b/i },
+  { templateId: "recent_activity_timeline", pattern: /\b(activity|history|timeline|milestone|event|audit|chronological)\b/i },
+  { templateId: "dashboard_header_action_bar", pattern: /\b(header|title|subtitle|action bar|page action|entry point)\b/i },
+  { templateId: "three_column_workspace_shell", pattern: /\b(three column|workspace|inbox|triage|service desk|crm|renewal|review queue|task center|list-detail|left|right|main)\b/i },
+];
+
 const DEFERRED = /\b(runtime-proof-required|export-learning-required|deferred)\b/i;
 const DASHBOARD_STYLE_REGION = /\b(Collection|Data analytics|Analytics|Summary|KPI|Data table|Kanban|Timeline|audit|dashboard|chart)\b/i;
 
@@ -73,6 +105,26 @@ function readPlan(file) {
   return { type: "markdown", text, plan: null };
 }
 
+function readDashboardTemplateLibrary() {
+  for (const file of TEMPLATE_LIBRARY_PATHS) {
+    if (!fs.existsSync(file)) continue;
+    const parsed = JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
+    const templates = asArray(parsed.templates);
+    const byId = new Map();
+    for (const template of templates) {
+      const id = safeString(template.templateId || template.id).trim();
+      if (id) byId.set(id, template);
+    }
+    return byId;
+  }
+  return new Map();
+}
+
+function hasTextValue(value) {
+  if (Array.isArray(value)) return value.some((item) => safeString(item).trim());
+  return Boolean(safeString(value).trim());
+}
+
 function markdownFindings(text) {
   const findings = [];
   const required = [
@@ -88,6 +140,10 @@ function markdownFindings(text) {
     [/Save as draft[\s\S]*Submit/i, "PAGE_FUNCTION_PLAN_APPROVAL_SUBMIT_BUTTONS_MISSING"],
     [/New\/Edit forms should normally include only editable fields/i, "PAGE_FUNCTION_PLAN_NEW_EDIT_RULE_MISSING"],
     [/source list\/library, parent\/current-item binding, display fields, filters, actions, and opening behavior/i, "PAGE_FUNCTION_PLAN_RELATED_REGION_RULE_MISSING"],
+    [/dashboardPagePattern/i, "PAGE_FUNCTION_PLAN_DASHBOARD_PAGE_PATTERN_FIELD_MISSING"],
+    [/dashboardSectionTemplates\[\]/i, "PAGE_FUNCTION_PLAN_DASHBOARD_SECTION_TEMPLATES_FIELD_MISSING"],
+    [/templateId[\s\S]*Region \/ Section[\s\S]*Why This Template Fits/i, "PAGE_FUNCTION_PLAN_DASHBOARD_TEMPLATE_SELECTION_TABLE_MISSING"],
+    [/Template selection is part of the Page Function Plan implementation contract/i, "PAGE_FUNCTION_PLAN_DASHBOARD_TEMPLATE_CONTRACT_MISSING"],
   ];
   for (const [pattern, code] of required) {
     if (!pattern.test(text)) {
@@ -134,6 +190,192 @@ function validateSupportedControls(plan, findings) {
         value: control,
         message: `Unsupported Page Function Plan control "${control}" is not in the plugin-supported control allowlist or marked runtime-proof/deferred.`,
       });
+    }
+  }
+}
+
+function validateDashboardTemplateSelection(plan, findings) {
+  const templateLibrary = readDashboardTemplateLibrary();
+  const dashboardTemplateIds = new Set(
+    [...templateLibrary.values()]
+      .filter((template) => normalizeName(template.category) === "dashboard")
+      .map((template) => safeString(template.templateId || template.id).trim()),
+  );
+
+  for (const dashboard of asArray(plan.dashboards)) {
+    const pagePattern = safeString(dashboard.dashboardPagePattern).trim();
+    if (!pagePattern) {
+      const prose = safeString(dashboard.pagePurpose || dashboard.primaryBusinessWorkflow || dashboard.notes || dashboard.description);
+      findings.push({
+        level: "error",
+        code: /template|pattern|shell/i.test(prose)
+          ? "PAGE_FUNCTION_DASHBOARD_TEMPLATE_PROSE_ONLY"
+          : "PAGE_FUNCTION_DASHBOARD_PAGE_PATTERN_MISSING",
+        dashboard: dashboard.name,
+        message: "Dashboard pages must declare structured dashboardPagePattern; prose-only template mentions do not satisfy the gate.",
+      });
+    } else if (!DOCUMENTED_DASHBOARD_PAGE_PATTERNS.has(pagePattern) && !dashboardTemplateIds.has(pagePattern)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_PAGE_PATTERN_UNKNOWN",
+        dashboard: dashboard.name,
+        value: pagePattern,
+        message: "Dashboard page pattern must be a documented dashboard shell/pattern from plugin-contained standards or templates.",
+      });
+    }
+
+    const sectionTemplates = asArray(dashboard.dashboardSectionTemplates);
+    if (!sectionTemplates.length) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_SECTION_TEMPLATES_MISSING",
+        dashboard: dashboard.name,
+        message: "Dashboard pages must declare structured dashboardSectionTemplates[].",
+      });
+      if (/\b(kpi_card_row|data_table_section|kanban_status_board|collection_card_board|quick_links_icon_list|business_alert_card|recent_activity_timeline|three_column_workspace_shell)\b/i.test(JSON.stringify(dashboard))) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_PROSE_ONLY",
+          dashboard: dashboard.name,
+          message: "Dashboard template selection mentioned outside structured dashboardSectionTemplates[] is not enough.",
+        });
+      }
+      continue;
+    }
+
+    const hasThreeColumn = sectionTemplates.some((entry) => safeString(entry.templateId).trim() === "three_column_workspace_shell")
+      || pagePattern === "three_column_workspace_shell";
+
+    for (const entry of sectionTemplates) {
+      const templateId = safeString(entry.templateId).trim();
+      if (!templateId) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_ID_MISSING", dashboard: dashboard.name, section: entry.sectionName || entry.regionName, message: "Each dashboardSectionTemplates[] entry must include templateId." });
+        continue;
+      }
+      const template = templateLibrary.get(templateId);
+      if (!template || !dashboardTemplateIds.has(templateId)) {
+        findings.push({
+          level: "error",
+          code: /template|layout|pattern|section/i.test(templateId)
+            ? "PAGE_FUNCTION_DASHBOARD_TEMPLATE_GENERIC_OR_UNKNOWN"
+            : "PAGE_FUNCTION_DASHBOARD_TEMPLATE_UNKNOWN",
+          dashboard: dashboard.name,
+          section: entry.sectionName || entry.regionName,
+          templateId,
+          message: "Dashboard section templateId must exist as a Dashboard template in the plugin-contained template library.",
+        });
+        continue;
+      }
+
+      const purposeText = [
+        entry.regionName,
+        entry.sectionName,
+        entry.businessPurpose,
+        entry.purpose,
+        entry.whyTemplateFits,
+      ].map(safeString).join(" ");
+      const purposeRule = TEMPLATE_PURPOSE_RULES.find((rule) => rule.templateId === templateId);
+      if (purposeRule && !purposeRule.pattern.test(purposeText)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_PURPOSE_INCOMPATIBLE",
+          dashboard: dashboard.name,
+          section: entry.sectionName || entry.regionName,
+          templateId,
+          message: "Selected dashboard template does not match the stated region purpose.",
+        });
+      }
+
+      if (!hasTextValue(entry.source) && !hasTextValue(entry.sourceList) && !hasTextValue(entry.sourceResource) && !hasTextValue(entry.sourceListOrResource)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_SOURCE_MISSING",
+          dashboard: dashboard.name,
+          section: entry.sectionName || entry.regionName,
+          templateId,
+          message: "Each dashboardSectionTemplates[] entry must include source list/report/resource.",
+        });
+      }
+      if (!hasTextValue(entry.displayedFields) && !hasTextValue(entry.fields)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_FIELDS_MISSING",
+          dashboard: dashboard.name,
+          section: entry.sectionName || entry.regionName,
+          templateId,
+          message: "Each dashboardSectionTemplates[] entry must include displayed fields.",
+        });
+      }
+      if (ACTION_REQUIRED_TEMPLATES.has(templateId) && !hasTextValue(entry.actions) && !hasTextValue(entry.noActionReason) && !hasTextValue(entry.fallback)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_ACTIONS_MISSING",
+          dashboard: dashboard.name,
+          section: entry.sectionName || entry.regionName,
+          templateId,
+          message: "Selected dashboard template requires actions, action bindings, or an explicit no-action/fallback reason.",
+        });
+      }
+      if (!hasTextValue(entry.requiredControls)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_REQUIRED_CONTROLS_MISSING",
+          dashboard: dashboard.name,
+          section: entry.sectionName || entry.regionName,
+          templateId,
+          message: "Each dashboardSectionTemplates[] entry must list required controls consumed by generation.",
+        });
+      }
+      if (!hasTextValue(entry.proofStatus) && !hasTextValue(entry.fallback)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_PROOF_STATUS_MISSING",
+          dashboard: dashboard.name,
+          section: entry.sectionName || entry.regionName,
+          templateId,
+          message: "Each dashboardSectionTemplates[] entry must include proof status or fallback.",
+        });
+      }
+      if (!hasTextValue(entry.whyTemplateFits)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_TEMPLATE_FIT_REASON_MISSING",
+          dashboard: dashboard.name,
+          section: entry.sectionName || entry.regionName,
+          templateId,
+          message: "Each selected dashboard template must explain why it fits the page purpose.",
+        });
+      }
+    }
+
+    if (hasThreeColumn) {
+      const panels = dashboard.threeColumnPanels || {};
+      for (const [panel, code] of [
+        ["left", "PAGE_FUNCTION_THREE_COLUMN_LEFT_PANEL_MISSING"],
+        ["main", "PAGE_FUNCTION_THREE_COLUMN_MAIN_PANEL_MISSING"],
+        ["right", "PAGE_FUNCTION_THREE_COLUMN_RIGHT_PANEL_MISSING"],
+      ]) {
+        const value = panels[panel];
+        const meaningful = typeof value === "object"
+          ? hasTextValue(value.purpose) && hasTextValue(value.source) && hasTextValue(value.content)
+          : hasTextValue(value);
+        if (!meaningful) {
+          findings.push({
+            level: "error",
+            code,
+            dashboard: dashboard.name,
+            message: "three_column_workspace_shell requires meaningful left/main/right panel purpose, source, and content.",
+          });
+        }
+      }
+      if (!/\b(inbox|triage|review|queue|workspace|task center|service desk|crm|renewal|list-detail)\b/i.test(`${dashboard.pagePurpose || ""} ${dashboard.primaryBusinessWorkflow || ""} ${dashboard.businessTaskSolved || ""}`)) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_THREE_COLUMN_SIMPLE_DASHBOARD_INVALID",
+          dashboard: dashboard.name,
+          message: "three_column_workspace_shell must not be selected for a simple dashboard without meaningful workspace/list-detail purpose.",
+        });
+      }
     }
   }
 }
@@ -250,6 +492,7 @@ function validateJson(plan) {
   const findings = [];
   if (!safeString(plan.applicationName).trim()) findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_NAME_MISSING", message: "applicationName is required." });
   if (!safeString(plan.applicationLayout).trim()) findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_LAYOUT_MISSING", message: "applicationLayout is required." });
+  validateDashboardTemplateSelection(plan, findings);
   validateSupportedControls(plan, findings);
   validateApprovalForms(plan, findings);
   validateDataForms(plan, findings);
