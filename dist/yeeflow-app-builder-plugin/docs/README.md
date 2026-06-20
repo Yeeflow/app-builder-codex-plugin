@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.7.2`
+- Version: `0.7.3`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.7.2` releases the Page Function Plan business/page-function contract refinement from PR #130. Page Function Plans now emphasize page purpose, primary users, business questions, data source and field usage, filter source-list/field mapping, summary metric source/calculation requirements, main and secondary data region requirements, action intent, and mobile behavior. Validation rejects vague dashboard entries and low-level implementation/property instructions while preserving downstream Dashboard Pattern Library, Application Design System, action, Text/control, UI, and YAPK hard gates.
+Current release `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, with structured page and section reference IDs, Blueprint/resource conformance and provenance checks, Facility Maintenance mapping regression coverage, safeguards against copying Event fields into unrelated apps, and package-readiness gates for dashboard golden-reference conformance.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
