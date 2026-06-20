@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.75`
+- Version: `0.6.76`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.75` fixes strict App Plan conformance Markdown over-parsing. The validator now treats only canonical App Plan resource declarations as planned resources, ignores field/control/action rows, task-form rows, assumptions, validation notes, deferred/runtime-proof sections, template headings, and explanatory prose, and preserves strict failures for real missing, extra, or partially mismatched resources.
+Current release `0.6.76` fixes residual strict App Plan conformance parser noise. The validator now ignores non-resource table values, placeholders, status/applicability cells, navigation group/header labels, `Group`, `Not applicable`, and aggregate planning metadata while preserving strict failures for real missing, extra, navigation, or partially mismatched resources.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 

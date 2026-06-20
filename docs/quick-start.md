@@ -12,9 +12,9 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.75`.
+Expected plugin: `Yeeflow App Builder` version `0.6.76`.
 
-Version `0.6.75` releases the strict App Plan conformance Markdown over-parsing fix. The validator now treats only canonical App Plan resource declarations as planned resources, ignores field/control/action rows, task-form rows, assumptions, validation notes, deferred/runtime-proof sections, template headings, and explanatory prose, and preserves strict failures for real missing resources, extra generated resources, and partial resource-name mismatches. This gate proves App Plan-to-package conformance parsing only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
+Version `0.6.76` releases the residual strict App Plan conformance parser-noise fix. The validator now ignores non-resource table values, placeholder/detail/status/applicability cells, navigation group labels, navigation order headers, and values such as `Group` or `Not applicable`; splits comma-separated concrete resource cells without splitting names such as `Rooms and Areas`; and preserves strict failures for real missing resources, extra generated resources, navigation group/item mismatches, and partial resource-name mismatches. This gate proves App Plan-to-package conformance parsing only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
 
 Version `0.6.56` releases Supplier runtime/design fidelity gates and validation-layer proof gates. Runtime proof must use the installed application `ListSetID` and runtime URL, never install-log IDs. Design implementation must map design sections, KPI counts, page background/chrome, Data Filter bindings, Collection detail links, analytics controls, progress/status treatments, Summary/KPI bindings, and canonical one-PNG-per-page artifacts through explicit design manifest mapping. Reports must keep `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` separate; schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, and the control-binding graph must be complete. Root padding gates from `0.6.55` remain baseline behavior, approval-form root padding remains deferred because evidence is mixed, and no pixel-perfect or live runtime proof claim is made before the matching runtime/browser evidence exists.
 
@@ -31,7 +31,7 @@ Run OAuth login before API access. OAuth uses Authorization Code with PKCE S256,
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.75
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.76
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```
