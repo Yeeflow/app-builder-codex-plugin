@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.7.2`
+`0.7.3`
+
+Version `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation. The selection records page and section reference IDs, maps Page Function Plan business regions to golden-reference sections, preserves App Plan source lists, fields, filters, metrics, actions, and display fields, and feeds Blueprint/resource conformance and provenance checks. Focused regressions cover Facility Maintenance mapping, missing selections, missing `derivedFromGoldenReference`, copied Event fields in unrelated apps, missing grid-table/KPI references, generated-resource provenance, and package-readiness gates for dashboard golden-reference conformance.
 
 Version `0.7.2` releases the Page Function Plan business/page-function contract refinement from PR #130. Page Function Plans now require page purpose, primary users, business questions, data source and field usage, filter source-list/field mapping, summary metric source/calculation requirements, main and secondary data region requirements, action intent, and mobile behavior. The validator rejects vague dashboard entries and low-level implementation/property instructions while preserving downstream Dashboard Pattern Library / Golden Reference, Application Design System, action, Text/control, UI, and YAPK hard gates. These gates run before page/resource generation and do not replace package validation, signing/API acceptance, install/upgrade proof, or runtime/browser proof.
 

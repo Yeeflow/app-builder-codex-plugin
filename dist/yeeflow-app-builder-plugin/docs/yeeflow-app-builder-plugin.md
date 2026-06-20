@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.7.2
+- Version: 0.7.3
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, published section reference IDs, Blueprint/resource conformance and provenance checks, Facility Maintenance mapping regression coverage, safeguards against copying Event fields into unrelated apps, and package-readiness gates for dashboard golden-reference conformance.
 
 Version `0.7.2` releases the Page Function Plan business/page-function contract refinement from PR #130. Page Function Plans now require page purpose, primary users, business questions, data source and field usage, filter source-list/field mapping, summary metric source/calculation requirements, main and secondary data region requirements, action intent, and mobile behavior. The validator rejects vague dashboard entries and low-level implementation/property instructions while preserving downstream Dashboard Pattern Library / Golden Reference, Application Design System, action, Text/control, UI, and YAPK hard gates.
 

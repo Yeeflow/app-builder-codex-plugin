@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.7.3
+
+- Release the Event Portfolio dashboard default Golden Reference registry from PR #132.
+- Add the required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, including structured dashboard page identity, source Page Function Plan page ID, selected page and section reference IDs, Page Function Plan region mappings, source lists, fields, filters, metrics, actions, and App Plan field mappings.
+- Publish Dashboard section reference IDs: `event_portfolio_dashboard_golden_reference`, `dashboard_default_shell_event_portfolio_ref`, `dashboard_header_band_event_portfolio_ref`, `dashboard_filter_group_event_portfolio_ref`, `dashboard_kpi_cards_event_portfolio_ref`, `dashboard_content_section_event_portfolio_ref`, and `dashboard_collection_grid_table_event_portfolio_ref`.
+- Add Blueprint/resource conformance and provenance checks requiring Dashboard blueprints to reference the Golden Reference Selection, every major section to declare `derivedFromGoldenReference`, and generated resources to preserve inspectable golden-reference provenance.
+- Add Facility Maintenance mapping regression coverage proving non-event dashboard requirements can map into the default reference with app-specific lists, fields, filters, metrics, and actions.
+- Add safeguards that fail when Event Portfolio fields are copied into unrelated apps instead of mapped to the current App Plan.
+- Register package-readiness gates for dashboard golden-reference conformance in focused tests, aggregate UI hard gates, and YAPK cache artifact checks.
+
 ## 0.7.2
 
 - Release the Page Function Plan business/page-function contract refinement from PR #130.

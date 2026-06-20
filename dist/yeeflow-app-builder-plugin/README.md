@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.7.2`
+- Version: `0.7.3`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.7.2` releases the Page Function Plan business/page-function contract refinement from PR #130. Page Function Plans now emphasize page purpose, primary users, business questions, data source and field usage, filter source-list/field mapping, summary metric source/calculation requirements, main and secondary data region requirements, action intent, and mobile behavior. Validation rejects vague dashboard entries and low-level implementation/property instructions while preserving downstream Dashboard Pattern Library, Application Design System, action, Text/control, UI, and YAPK hard gates.
+Current release `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, with structured page and section reference IDs, Blueprint/resource conformance and provenance checks, Facility Maintenance mapping regression coverage, safeguards against copying Event fields into unrelated apps, and package-readiness gates for dashboard golden-reference conformance.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.7.2
+Version: 0.7.3
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.7.2
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.7.3
 ```
 
 ## What Is Included
