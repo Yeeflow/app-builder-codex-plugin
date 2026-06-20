@@ -42,6 +42,8 @@ const REQUIRED_PATTERNS = [
   ["READINESS_FOR_APP_PLAN", /Readiness for App Plan/i],
 ];
 
+const DASHBOARD_IMPLEMENTATION_IDS = /\b(dashboardGoldenReference|dashboardPagePattern|dashboardSectionTemplates|templateId|event_portfolio_dashboard_golden_reference|portfolio_operational_dashboard_golden_reference|kpi_card_row|collection_card_board|data_table_section|kanban_status_board|three_column_workspace_shell)\b/i;
+
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
@@ -113,6 +115,14 @@ function validate(file) {
         message: `Missing required Functional Specification text for ${code}.`,
       });
     }
+  }
+
+  if (DASHBOARD_IMPLEMENTATION_IDS.test(text)) {
+    findings.push({
+      level: "error",
+      code: "FUNCTIONAL_SPEC_DASHBOARD_IMPLEMENTATION_DETAIL_FORBIDDEN",
+      message: "Functional Specification must describe Dashboard needs from a business perspective and must not select Dashboard template IDs, golden reference IDs, or Page Function Plan implementation fields.",
+    });
   }
 
   const sectionSix = text.split(REQUIRED_HEADINGS[6])[0].split(REQUIRED_HEADINGS[5])[1] || "";

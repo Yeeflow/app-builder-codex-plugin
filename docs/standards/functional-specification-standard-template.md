@@ -256,7 +256,8 @@ Rules:
 - Identify data that must be filtered, grouped, sorted, prioritized, searched, or summarized.
 - State whether mobile support is required and which content/actions are highest priority on mobile.
 - State role-specific visibility or access needs when a page should be hidden, read-only, or limited.
-- Keep this section business-oriented. Do not over-specify exact Yeeflow controls, layout JSON, package metadata, IDs, or property paths here.
+- Keep this section business-oriented. Do not over-specify exact Yeeflow controls, Dashboard template or golden-reference IDs, layout JSON, package metadata, IDs, or property paths here.
+- Dashboard implementation pattern, golden-reference, section-template, control-by-region, and runtime-proof-boundary decisions belong in the Page Function Plan, not the Functional Specification.
 
 ## 19. Business Decision Gates
 

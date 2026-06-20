@@ -191,6 +191,23 @@ function selectedDashboardGoldenReference(dashboard) {
   ).trim();
 }
 
+function pageFunctionId(page) {
+  return safeString(
+    page.pageFunctionPlanId
+      || page.pageFunctionId
+      || page.id
+      || page.pfpId,
+  ).trim();
+}
+
+function appPlanDashboardRef(page) {
+  return safeString(
+    page.appPlanDashboardRef
+      || page.appPlanDashboardName
+      || page.appPlanResourceName,
+  ).trim();
+}
+
 function dashboardClaimsEventPortfolioGolden(dashboard) {
   const selected = selectedDashboardGoldenReference(dashboard);
   if (EVENT_PORTFOLIO_GOLDEN_REFERENCES.has(selected)) return true;
@@ -325,7 +342,7 @@ function validateEventPortfolioGoldenReference(dashboard, sectionTemplates, find
   const selectedKnownReference = EVENT_PORTFOLIO_GOLDEN_REFERENCES.has(selected);
   const claimsGoldenReference = dashboardClaimsEventPortfolioGolden(dashboard);
 
-  if (selected && !selectedKnownReference) {
+  if (selected && normalizeName(selected) !== "none" && !selectedKnownReference) {
     findings.push({
       level: "error",
       code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_UNKNOWN",
@@ -541,6 +558,8 @@ function markdownFindings(text) {
     [/New\/Edit forms should normally include only editable fields/i, "PAGE_FUNCTION_PLAN_NEW_EDIT_RULE_MISSING"],
     [/source list\/library, parent\/current-item binding, display fields, filters, actions, and opening behavior/i, "PAGE_FUNCTION_PLAN_RELATED_REGION_RULE_MISSING"],
     [/dashboardPagePattern/i, "PAGE_FUNCTION_PLAN_DASHBOARD_PAGE_PATTERN_FIELD_MISSING"],
+    [/pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_DASHBOARD_PAGE_FUNCTION_ID_FIELD_MISSING"],
+    [/appPlanDashboardRef/i, "PAGE_FUNCTION_PLAN_DASHBOARD_APP_PLAN_REF_FIELD_MISSING"],
     [/dashboardGoldenReference/i, "PAGE_FUNCTION_PLAN_DASHBOARD_GOLDEN_REFERENCE_FIELD_MISSING"],
     [/event_portfolio_dashboard_golden_reference/i, "PAGE_FUNCTION_PLAN_EVENT_PORTFOLIO_GOLDEN_REFERENCE_MISSING"],
     [/dashboardSectionTemplates\[\]/i, "PAGE_FUNCTION_PLAN_DASHBOARD_SECTION_TEMPLATES_FIELD_MISSING"],
@@ -615,6 +634,31 @@ function validateDashboardTemplateSelection(plan, findings) {
   );
 
   for (const dashboard of asArray(plan.dashboards)) {
+    if (!pageFunctionId(dashboard)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_PAGE_FUNCTION_ID_MISSING",
+        dashboard: dashboard.name,
+        message: "Dashboard Page Function Plan entries must declare structured pageFunctionPlanId.",
+      });
+    }
+    if (!appPlanDashboardRef(dashboard)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_APP_PLAN_REF_MISSING",
+        dashboard: dashboard.name,
+        message: "Dashboard Page Function Plan entries must declare structured appPlanDashboardRef.",
+      });
+    }
+    if (!("dashboardGoldenReference" in dashboard) && !("dashboardGoldenReferenceId" in dashboard) && !("goldenReference" in dashboard) && !("goldenReferenceId" in dashboard)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_FIELD_MISSING",
+        dashboard: dashboard.name,
+        message: "Dashboard Page Function Plan entries must declare structured dashboardGoldenReference; use none when no golden reference is selected.",
+      });
+    }
+
     const pagePattern = safeString(dashboard.dashboardPagePattern).trim();
     if (!pagePattern) {
       const prose = safeString(dashboard.pagePurpose || dashboard.primaryBusinessWorkflow || dashboard.notes || dashboard.description);
@@ -907,6 +951,9 @@ function validateJson(plan) {
   const findings = [];
   if (!safeString(plan.applicationName).trim()) findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_NAME_MISSING", message: "applicationName is required." });
   if (!safeString(plan.applicationLayout).trim()) findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_LAYOUT_MISSING", message: "applicationLayout is required." });
+  if ("dashboardGoldenReference" in plan || "dashboardGoldenReferenceId" in plan || "goldenReference" in plan || "goldenReferenceId" in plan) {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_OUTSIDE_DASHBOARD_ENTRY", message: "Dashboard golden reference must be declared inside the structured Dashboard Page Function Plan entry." });
+  }
   validateDashboardTemplateSelection(plan, findings);
   validateSupportedControls(plan, findings);
   validateApprovalForms(plan, findings);

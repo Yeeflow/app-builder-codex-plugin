@@ -4,7 +4,9 @@ Use this template as Stage 3 / Step 3 for every Yeeflow application build, after
 
 The Page Function Plan is the page-level function contract. It defines what each UI-required page does, what content appears, which supported Yeeflow controls are intended, which App Plan resources and fields are used, and how desktop/mobile behavior should work. Form Reports are not required canonical UI design surfaces in this plan.
 
-Dashboard layout/template selection is part of the Page Function Plan implementation contract. Dashboard page/resource generation must consume the selected `dashboardPagePattern` and `dashboardSectionTemplates[]`; prose-only template mentions are not enough.
+Dashboard layout/template selection is part of the Page Function Plan implementation contract. Dashboard page/resource generation must consume the selected `pageFunctionPlanId`, `appPlanDashboardRef`, `dashboardPagePattern`, `dashboardGoldenReference`, and `dashboardSectionTemplates[]`; prose-only template mentions are not enough.
+
+Dashboard golden-reference usage belongs in this Page Function Plan only. The Functional Specification should describe the business page need, and the Yeeflow App Plan should declare the Dashboard resource and reference this Page Function Plan entry without embedding the Dashboard implementation detail.
 
 Dashboard sections that declare high-quality, Marketing Event, Event Portfolio, portfolio/status, operational-table, rich table, or runtime-fidelity intent must also declare the fidelity requirements that page/resource generation must preserve. Use only plugin-contained standards, studies, template libraries, and redacted/synthetic references; do not depend on private Marketing Event artifacts.
 
@@ -59,8 +61,8 @@ Repeat this subsection for each Dashboard page planned in the App Plan.
 
 ### 4.x <Dashboard Page Name>
 
-- Page Function ID:
-- App Plan dashboard page name:
+- pageFunctionPlanId:
+- appPlanDashboardRef:
 - Page purpose:
 - Target users/roles:
 - Business task solved by the page:
@@ -128,11 +130,14 @@ Complete this subsection for each Dashboard section that declares high-quality, 
 Template-selection rules:
 
 - Every Dashboard page must declare a structured `dashboardPagePattern`.
+- Every Dashboard page must declare a structured `dashboardGoldenReference`; use `none` when no golden reference is selected.
 - Every Dashboard page must declare structured `dashboardSectionTemplates[]`.
+- Every Dashboard page must declare `pageFunctionPlanId` and `appPlanDashboardRef` so App Plan to Page Function Plan traceability is bidirectional.
 - Each `dashboardSectionTemplates[]` entry must include `templateId`, region/section name, business purpose, source list/report/resource, displayed fields, filters, grouping, sorting, actions, required controls, proof status or fallback, why the selected template fits, and App Plan traceability.
 - Template selection is not only visual guidance. It is part of the Page Function Plan implementation contract and must be consumed by downstream page/resource generation.
 - Dashboard template/fidelity selection is also a downstream implementation contract: page/resource generation must preserve the selected template IDs, data bindings, filter/action metadata, rich table treatment, KPI formatting, semantic `nv_label`, and runtime proof boundary.
 - If `event_portfolio_dashboard_golden_reference` is selected, downstream generation must preserve the whole golden-reference contract: Data Filters, KPI cards, Summary/KPI binding or fallback boundary, Collection grid-table structure, Dynamic controls in item templates, badge/progress/person treatments, real action metadata, table hierarchy/density/spacing, semantic `nv_label`, and runtime proof boundary.
+- Do not allow dashboard/resource generation to infer sections only from the App Plan resource list when a Page Function Plan exists.
 - KPI/summary metrics should use `kpi_card_row` or another existing KPI/Summary template.
 - Work queues can use `collection_card_board`, `data_table_section`, `kanban_status_board`, or `three_column_workspace_shell` when appropriate.
 - Quick actions can use `quick_links_icon_list`.
@@ -278,7 +283,9 @@ Rules:
 | Check | Status | Notes |
 | --- | --- | --- |
 | Every App Plan dashboard has a Page Function Plan entry | pass/fail | |
+| Every Dashboard page has structured pageFunctionPlanId and appPlanDashboardRef | pass/fail | |
 | Every Dashboard page has structured dashboardPagePattern | pass/fail | |
+| Every Dashboard page has structured dashboardGoldenReference | pass/fail | |
 | Every Dashboard page has structured dashboardSectionTemplates[] | pass/fail | |
 | Every Dashboard section templateId exists in plugin-contained Dashboard templates or documented Dashboard standards | pass/fail | |
 | Dashboard section templates match the region purpose and include source, displayed fields, actions where required, required controls, proof status/fallback, and fit reason | pass/fail | |

@@ -38,8 +38,8 @@ function expectCode(report, code) {
 }
 
 function appPlan(overrides = {}) {
-  return {
-    dashboards: [{ name: "Operations Dashboard", fields: ["Title"], actions: ["Open Request"] }],
+  const plan = {
+    dashboards: [{ name: "Operations Dashboard", pageFunctionPlanRef: "PFP-DASH-OPERATIONS", fields: ["Title"], actions: ["Open Request"] }],
     approvalForms: [{
       name: "Purchase Approval",
       fields: ["Title", "Amount", "Requester", "Justification", "Manager Comment"],
@@ -62,19 +62,27 @@ function appPlan(overrides = {}) {
       fields: ["Title", "Status", "Created Date"],
       forms: [{ name: "View Purchase Document", type: "View", fields: ["Title", "Status"], actions: ["Open Document"] }],
     }],
-    ...overrides,
   };
+  const merged = { ...plan, ...overrides };
+  merged.dashboards = (merged.dashboards || []).map((dashboard) => ({
+    pageFunctionPlanRef: `PFP-DASH-${String(dashboard.name || "DASHBOARD").toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+    ...dashboard,
+  }));
+  return merged;
 }
 
 function pagePlan(overrides = {}) {
-  return {
+  const plan = {
     applicationName: "Purchase Operations",
     applicationLayout: "application-layout-1-vertical-nav",
     dashboards: [{
+      pageFunctionPlanId: "PFP-DASH-OPERATIONS",
+      appPlanDashboardRef: "Operations Dashboard",
       name: "Operations Dashboard",
       pagePurpose: "Operations overview dashboard for request queues and KPIs.",
       businessTaskSolved: "Help managers see workload metrics and open pending requests.",
       dashboardPagePattern: "standard_dashboard_page_shell",
+      dashboardGoldenReference: "none",
       desktopBehavior: "Two-column operations dashboard with KPI row and queue.",
       mobileBehavior: "Stacks KPI cards first, then request queue.",
       dashboardSectionTemplates: [
@@ -193,8 +201,15 @@ function pagePlan(overrides = {}) {
         actions: ["Open Document"],
       }],
     }],
-    ...overrides,
   };
+  const merged = { ...plan, ...overrides };
+  merged.dashboards = (merged.dashboards || []).map((dashboard) => ({
+    pageFunctionPlanId: `PFP-DASH-${String(dashboard.name || "DASHBOARD").toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+    appPlanDashboardRef: dashboard.name,
+    dashboardGoldenReference: "none",
+    ...dashboard,
+  }));
+  return merged;
 }
 
 function addEventPortfolioFidelity(plan) {
@@ -338,6 +353,52 @@ try {
   output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", appFile, "--page-function-plan", planFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "complete App Plan to Page Function Plan traceability passes", status: "pass" });
+
+  const missingDashboardPfpRef = appPlan();
+  delete missingDashboardPfpRef.dashboards[0].pageFunctionPlanRef;
+  output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", writeJson(tempDir, "missing-dashboard-pfp-ref-app-plan", missingDashboardPfpRef), "--page-function-plan", planFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "TRACEABILITY_DASHBOARD_PAGE_FUNCTION_REF_MISSING");
+  results.push({ case: "App Plan dashboard without Page Function Plan ref fails", status: "pass" });
+
+  const extraDashboardPage = pagePlan();
+  extraDashboardPage.dashboards.push({
+    name: "Unplanned Dashboard",
+    pageFunctionPlanId: "PFP-DASH-UNPLANNED",
+    appPlanDashboardRef: "Unplanned Dashboard",
+    pagePurpose: "Unplanned page.",
+    businessTaskSolved: "No matching App Plan resource.",
+    dashboardPagePattern: "standard_dashboard_page_shell",
+    dashboardGoldenReference: "none",
+    desktopBehavior: "Standard dashboard.",
+    mobileBehavior: "Stack sections.",
+    dashboardSectionTemplates: [{
+      templateId: "kpi_card_row",
+      regionName: "Unplanned KPI Row",
+      businessPurpose: "KPI metrics for unplanned dashboard.",
+      source: "Purchase Requests",
+      displayedFields: ["Title"],
+      filters: ["All"],
+      grouping: ["Status"],
+      sorting: ["Created Date descending"],
+      actions: [],
+      requiredControls: ["container", "summary", "text"],
+      proofStatus: "runtime-proof-required",
+      whyTemplateFits: "KPI row.",
+    }],
+    regions: [],
+  });
+  output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", appFile, "--page-function-plan", writeJson(tempDir, "extra-dashboard-page-function", extraDashboardPage)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "TRACEABILITY_PAGE_FUNCTION_DASHBOARD_NOT_IN_APP_PLAN");
+  results.push({ case: "Page Function Plan dashboard not mapped to App Plan dashboard fails", status: "pass" });
+
+  const goldenInAppPlan = appPlan();
+  goldenInAppPlan.dashboards[0].dashboardGoldenReference = "event_portfolio_dashboard_golden_reference";
+  output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", writeJson(tempDir, "golden-in-app-plan", goldenInAppPlan), "--page-function-plan", planFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "TRACEABILITY_DASHBOARD_GOLDEN_REFERENCE_IN_APP_PLAN");
+  results.push({ case: "Dashboard golden reference declared in App Plan fails", status: "pass" });
 
   output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", appFile, "--page-function-plan", writeJson(tempDir, "missing-dashboard", pagePlan({ dashboards: [] }))]);
   assert.equal(output.report.status, "fail");
@@ -687,6 +748,20 @@ try {
   assert.equal(output.report.status, "fail");
   expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEMPLATE_PROSE_ONLY");
   results.push({ case: "invalid prose-only template mention without structured fields fails", status: "pass" });
+
+  const proseOnlyGolden = pagePlan();
+  proseOnlyGolden.dashboards[0].dashboardGoldenReference = "";
+  proseOnlyGolden.dashboards[0].notes = "Use the Event Portfolio dashboard golden reference.";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "prose-only-golden-reference", proseOnlyGolden)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_PROSE_ONLY");
+  results.push({ case: "invalid prose-only Dashboard golden reference mention fails", status: "pass" });
+
+  const goldenOutsideDashboardEntry = pagePlan({ dashboardGoldenReference: "event_portfolio_dashboard_golden_reference" });
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "golden-outside-dashboard-entry", goldenOutsideDashboardEntry)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_OUTSIDE_DASHBOARD_ENTRY");
+  results.push({ case: "Dashboard golden reference outside structured Dashboard entry fails", status: "pass" });
 
   const badRefs = pagePlan();
   badRefs.dashboards[0].regions[0].controlType = "Magic Board";

@@ -352,83 +352,22 @@ Repeat for each Dashboard page.
 - Page name:
 - Description:
 - Business purpose:
-- Layout pattern:
 - Navigation placement:
 - Depends on:
 - Temp variables required:
 - Page/form actions required:
-- Page Function Plan trace:
+- pageFunctionPlanRef:
+- dashboardFunctionRef:
 - Runtime proof required:
 
-#### Sections and Controls
-
-| Section Order | Section Name | Purpose | Yeeflow Controls | Data Source | Fields Displayed | Filters | Actions | Control Relationships | Style/Layout Notes | Proof Level |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | <Section> | <Purpose> | <Controls> | <List/form> | <Fields> | <Filters> | <Actions> | <Relationships> | <Notes> | <Proof> |
-
 Rules:
 
-- Controls must come from active plugin control knowledge, template library, or export-proven references.
-- Summary/KPI cards must be data-bound using plugin-supported controls and bindings. Static text may be used only when explicitly marked fallback, `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof/generation impact.
-- Collection, Kanban, Timeline, Data Filter, Data table, Summary, chart, action button, and dynamic controls must include source, field, and action bindings.
-- Grid-table Collection pattern requires header `flex_grid` plus Collection wrapped together with zero gap.
-- Dashboard root padding and header hiding must follow active plugin hard gates.
-- Every visible control in a design-backed page must map to a Yeeflow control and style contract before generation.
-
-#### Record Display Control Selection
-
-Required for every Dashboard/Page section that displays Data List records.
-
-| Section | Data Source | Display Need | Selected Control | Selection Reason | Detail/Open Behavior | Proof Boundary |
-| --- | --- | --- | --- | --- | --- | --- |
-| <Section> | <Data List> | <Cards/table/status board/activity history/roadmap/etc.> | Data table / Collection / Kanban / Vertical timeline / Horizontal timeline | <Reason> | <Open/edit/detail behavior> | <Local/runtime proof boundary> |
-
-Rules:
-
-- Allowed selected controls are Data table, Collection, Kanban, Vertical timeline, and Horizontal timeline.
-- Prefer Collection over Data table when both can satisfy the requirement, unless a dense native table/grid is specifically required.
-- Use Kanban for status, lane, queue, or work-board patterns.
-- Use Vertical Timeline for activity, history, audit, event feed, and chronological log patterns.
-- Use Horizontal Timeline for roadmap, phase, lifecycle, and milestone progression patterns.
-- Use Data table only when a true tabular data grid is required.
-- The reason for the selected control must be stated.
-
-#### Item Template Dynamic Controls
-
-Required for every Collection, Kanban, Vertical Timeline, or Horizontal Timeline control.
-
-| Host Control | Source List | Item Template Region | Business Label | Exact Yeeflow Dynamic Control Type | Bound Field | Support Source | Proof Label | Fallback / Deferred Reason | Display Purpose | Empty/Fallback Behavior | Style/Badge/Format Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Collection/Kanban/Timeline> | <List> | <Header/body/footer/card/lane item> | <Business label> | dynamic-field / dynamic-user / dynamic-image / dynamic-file / dynamic-date / supported display control | <Field> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Purpose> | <Fallback> | <Style notes> |
-
-Rules:
-
-- Allowed Dynamic control types must come from plugin-known/export-proven controls, such as dynamic-field, dynamic-user, dynamic-image, dynamic-file, dynamic-date or a supported date display field/control if documented.
-- `Exact Yeeflow Dynamic Control Type` must contain the exact supported Dynamic control/control type. Business labels may be friendly, but final implementation columns must not use ambiguous phrases such as `Lookup/read-only dynamic field` unless marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
-- Status or badge display is allowed only when backed by supported Yeeflow controls or template styling.
-- Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls must not have empty item templates.
-- Every visible item-template value must map to a Dynamic control and a real source field.
-- User/person displays must bind to User/person fields.
-- Status, priority, and condition displays must bind to supported Choice fields or supported display fields.
-- Unsupported Dynamic control types or property paths must be marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
-
-#### Collection and Kanban Item Actions
-
-Required for Collection and Kanban controls.
-
-| Host Control | Action Name | Trigger Control | Exact Yeeflow Action Type | Support Source | Proof Label | Fallback / Deferred Reason | Current Item Context | Temp Variables | Steps | Data Read | Data Write | Runtime Proof Boundary |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Collection/Kanban> | No Collection/Kanban item actions required / <Action> | <Button/icon/card/menu> | <Supported action type> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Current item context> | <Variables> | <Steps> | <Data read> | <Target app/list/fields> | Runtime action execution is separate proof |
-
-Rules:
-
-- Collection/Kanban actions must use plugin-known/export-proven action shapes.
-- Each action must state how current item context is passed.
-- Steps must identify Query data, Set data list, open detail, update row, local variable, or other supported action types.
-- Vague action wording such as `Open detail/slide panel where supported` or `Update row/status where supported` is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
-- If an action writes data, state target application, list, and fields.
-- Runtime execution proof is separate from package validation.
-- If no custom actions are required, explicitly write: `No Collection/Kanban item actions required`.
+- Every Dashboard page declared in the App Plan must include `pageFunctionPlanRef`, `dashboardFunctionRef`, or an equivalent stable reference ID that points to the matching Stage 3 Page Function Plan entry.
+- The App Plan declares that the Dashboard page exists as a Yeeflow resource, where it appears in navigation, which resources it depends on, and which high-level actions or temp variables are needed.
+- The App Plan must not embed full Dashboard section/control/template details.
+- Do not put Page Function Plan Dashboard implementation fields, concrete Dashboard template IDs, or golden reference IDs in the App Plan.
+- Dashboard page implementation intent belongs in the Page Function Plan.
+- When a Page Function Plan exists, downstream Dashboard generation must consume the Page Function Plan entry and must not infer sections only from the App Plan resource list.
 
 ## 15. Application Navigation Plan
 
@@ -449,9 +388,9 @@ Runtime navigation rules:
 
 Use this section to reference the Stage 3 Page Function Plan without embedding all page details in the App Plan.
 
-| App Plan Resource Type | App Plan Resource Name | Surface / Form Name | Source List or Library | Fields / Actions Referenced | Page Function Plan Entry | Required Before Generation | Notes |
+| App Plan Resource Type | App Plan Resource Name | Surface / Form Name | Source List or Library | Fields / Actions Referenced | pageFunctionPlanRef / dashboardFunctionRef | Required Before Generation | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Dashboard page | <Dashboard page name> | <Dashboard page name> | <Source list/library> | <Fields/actions> | PFP-<ID> / Section <x> | Yes | <Notes> |
+| Dashboard page | <Dashboard page name> | <Dashboard page name> | <Source list/library> | <Fields/actions> | PFP-<ID> | Yes | <Notes> |
 | Approval form | <Approval form name> | Submission form | <Approval form/list> | Save as draft, Submit, <fields> | PFP-<ID> / Section <x> | Yes | <Notes> |
 | Approval form | <Approval form name> | <Task form name> | <Approval form/list> | Approve/Reject/Complete, <fields> | PFP-<ID> / Section <x> | Yes when planned | <Notes> |
 | Approval form | <Approval form name> | <Print page name> | <Approval form/list> | <fields/evidence> | PFP-<ID> / Section <x> | Yes when required | <Notes> |
@@ -461,6 +400,8 @@ Rules:
 
 - The App Plan defines which dashboard pages, approval forms, custom data list/document library forms, resources, fields, workflows, views, navigation, roles, and permissions exist.
 - The Page Function Plan defines page-level function, content, controls, data source, fields, actions, layout intent, mobile behavior, and App Plan traceability.
+- Every Dashboard page in the App Plan must include `pageFunctionPlanRef`, `dashboardFunctionRef`, or an equivalent stable Page Function Plan reference ID.
+- The App Plan must not embed Dashboard golden-reference selection, Dashboard section template IDs, or full Dashboard section/control detail.
 - Page Function Plan entries must reference App Plan resources by stable names: dashboard page name, approval form name, submission/task/print form name, data list or document library name, form name, source list/library, field names, actions, and workflow/form action references.
 - Form Reports are not required as Page Function Plan UI design surfaces.
 

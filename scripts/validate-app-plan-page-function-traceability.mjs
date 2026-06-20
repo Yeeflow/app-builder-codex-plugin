@@ -113,7 +113,43 @@ function collectAppPlan(appPlan) {
 }
 
 function findByName(items, name) {
-  return asArray(items).find((item) => norm(item.name) === norm(name) || norm(item.resourceName) === norm(name));
+  return asArray(items).find((item) =>
+    norm(item.name) === norm(name)
+    || norm(item.resourceName) === norm(name)
+    || norm(item.appPlanDashboardRef) === norm(name)
+    || norm(item.appPlanResourceName) === norm(name),
+  );
+}
+
+function dashboardPageFunctionRef(dashboard) {
+  return safeString(
+    dashboard.pageFunctionPlanRef
+      || dashboard.dashboardFunctionRef
+      || dashboard.pageFunctionRef
+      || dashboard.pfpRef,
+  ).trim();
+}
+
+function pageFunctionId(page) {
+  return safeString(
+    page.pageFunctionPlanId
+      || page.pageFunctionId
+      || page.id
+      || page.pfpId,
+  ).trim();
+}
+
+function appPlanDashboardRef(page) {
+  return safeString(
+    page.appPlanDashboardRef
+      || page.appPlanDashboardName
+      || page.appPlanResourceName
+      || page.name,
+  ).trim();
+}
+
+function containsDashboardGoldenReference(value) {
+  return /\b(dashboardGoldenReference|event_portfolio_dashboard_golden_reference|portfolio_operational_dashboard_golden_reference|dashboard golden reference)\b/i.test(JSON.stringify(value || {}));
 }
 
 function formNames(resource) {
@@ -131,8 +167,35 @@ function collectPageRefs(pagePlan) {
 
 function validateCoverage(app, pages, findings) {
   for (const dashboard of app.dashboards) {
-    if (!findByName(pages.dashboards, dashboard.name)) {
+    const ref = dashboardPageFunctionRef(dashboard);
+    if (!ref) {
+      findings.push({ level: "error", code: "TRACEABILITY_DASHBOARD_PAGE_FUNCTION_REF_MISSING", resource: dashboard.name, message: "Every App Plan dashboard page must reference a Page Function Plan entry using pageFunctionPlanRef, dashboardFunctionRef, or equivalent stable reference ID." });
+    }
+    const pageDashboard = findByName(pages.dashboards, dashboard.name);
+    if (!pageDashboard) {
       findings.push({ level: "error", code: "TRACEABILITY_DASHBOARD_PAGE_FUNCTION_MISSING", resource: dashboard.name, message: "Every App Plan dashboard page must have a Page Function Plan entry." });
+    } else {
+      const pfpId = pageFunctionId(pageDashboard);
+      if (!pfpId) {
+        findings.push({ level: "error", code: "TRACEABILITY_DASHBOARD_PAGE_FUNCTION_ID_MISSING", resource: dashboard.name, message: "Every Page Function Plan dashboard entry must include pageFunctionPlanId or equivalent stable ID." });
+      }
+      if (ref && pfpId && norm(ref) !== norm(pfpId)) {
+        findings.push({ level: "error", code: "TRACEABILITY_DASHBOARD_PAGE_FUNCTION_REF_MISMATCH", resource: dashboard.name, pageFunctionPlanRef: ref, pageFunctionPlanId: pfpId, message: "App Plan dashboard pageFunctionPlanRef must match the Page Function Plan dashboard pageFunctionPlanId." });
+      }
+      const appRef = appPlanDashboardRef(pageDashboard);
+      if (!appRef || norm(appRef) !== norm(dashboard.name)) {
+        findings.push({ level: "error", code: "TRACEABILITY_DASHBOARD_APP_PLAN_REF_MISMATCH", resource: dashboard.name, pageFunctionPlanEntry: pageDashboard.name, appPlanDashboardRef: appRef, message: "Page Function Plan dashboard entry must map back to the App Plan Dashboard page by stable name." });
+      }
+    }
+    if (containsDashboardGoldenReference(dashboard)) {
+      findings.push({ level: "error", code: "TRACEABILITY_DASHBOARD_GOLDEN_REFERENCE_IN_APP_PLAN", resource: dashboard.name, message: "Dashboard golden reference selection belongs only in the structured Page Function Plan dashboard entry, not in the App Plan." });
+    }
+  }
+
+  for (const pageDashboard of pages.dashboards) {
+    const appRef = appPlanDashboardRef(pageDashboard);
+    if (!app.dashboards.some((dashboard) => norm(dashboard.name) === norm(appRef))) {
+      findings.push({ level: "error", code: "TRACEABILITY_PAGE_FUNCTION_DASHBOARD_NOT_IN_APP_PLAN", pageFunctionPlanEntry: pageDashboard.name, appPlanDashboardRef: appRef, message: "Page Function Plan dashboard entry must map back to an App Plan Dashboard page." });
     }
   }
 

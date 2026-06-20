@@ -34,6 +34,7 @@ Functional Specification
 - Added Dashboard-only Page Function Plan template-selection gates that load the plugin-contained Dashboard template library and require `dashboardPagePattern` plus structured `dashboardSectionTemplates[]`.
 - Added Dashboard-only high-fidelity/Event Portfolio gates based on plugin-contained Marketing Event/Event Portfolio lessons for KPI/Summary binding, Data Filter consumers, Collection grid-table requirements, rich table treatment, action metadata, KPI formatting, semantic `nv_label`, and runtime proof boundary.
 - Promoted `event_portfolio_dashboard_golden_reference` as an explicit Dashboard golden-reference family in the plugin-contained template library and Page Function Plan contract.
+- Clarified document responsibility split: Functional Specification describes business page needs only, App Plan declares Dashboard resources plus stable Page Function Plan refs only, and Page Function Plan owns Dashboard implementation intent including `dashboardGoldenReference`.
 - Registered the new validators/tests in focused planning gates, aggregate UI hard gates, and YAPK cache artifact mirror checks.
 - Updated `skills/installed/yeeflow-application-builder/SKILL.md` so the lifecycle requires Page Function Plan and Application Design System before generation.
 - Mirrored changed standards, scripts, tests, and skill files into `dist/yeeflow-app-builder-plugin/...`.
@@ -77,6 +78,8 @@ Dashboard-specific contract:
 - Dashboards can select `dashboardGoldenReference: event_portfolio_dashboard_golden_reference` for high-quality portfolio, operations, status, pipeline, event, project, vendor, contract, service, or request management pages.
 - The Event Portfolio golden reference requires Data Filters, KPI cards, Summary/KPI binding or fallback boundary, Collection grid-table structure, Dynamic controls inside item templates, status/progress/person treatments where fields require them, real action metadata, source/fields/filters/grouping/sorting, semantic `nv_label`, and runtime proof boundary.
 - The Event Portfolio golden reference is based only on plugin-contained, redacted, synthetic, or already committed Marketing Event / Event Portfolio training materials. It excludes private raw artifacts, raw package payloads, tenant/app/list IDs, screenshots, raw API responses, and private runtime evidence.
+- App Plan Dashboard entries now require `pageFunctionPlanRef`, `dashboardFunctionRef`, or an equivalent stable reference ID. Page Function Plan Dashboard entries require `pageFunctionPlanId` and `appPlanDashboardRef`.
+- Dashboard/resource generation must consume the Page Function Plan entry when it exists and must not infer sections only from the App Plan resource list.
 
 ## Regression Coverage
 
@@ -106,6 +109,10 @@ Dashboard-specific contract:
 - Event Portfolio golden-reference selection missing Dynamic controls.
 - Event Portfolio golden-reference selection with unbound/fake actions.
 - Event Portfolio golden-reference selection without runtime proof boundary.
+- App Plan Dashboard without a Page Function Plan reference.
+- Page Function Plan Dashboard that does not map back to an App Plan Dashboard.
+- Dashboard golden reference declared outside the structured Page Function Plan Dashboard entry.
+- Dashboard golden reference mentioned only in prose.
 
 ## Proof Boundary
 
