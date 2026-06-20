@@ -1,18 +1,22 @@
 # Application Design System Template
 
-Use this template during the Full-page Canonical Design Artifacts stage after the Functional Specification, Yeeflow App Plan, Business Clarification Gate for generation, Generation Readiness final check, and traceability gates pass.
+Use this template after the Functional Specification, Yeeflow App Plan, Business Clarification Gate for generation, Generation Readiness final check, and traceability gates pass.
 
-This document is the application-level visual contract. Generate it before any canonical design image. Every canonical design artifact and every Design Image Manifest row must reference this document.
+This document is the application-level UI contract. Generate it before Yeeflow UI Section Template selection, Page Implementation Blueprints, optional canonical design images, or optional HTML previews. Every selected UI pattern, Page Implementation Blueprint, optional Design Image Manifest row, and optional HTML preview must reference this document.
 
 ## 1. Design System Status
 
-- Status: draft / reviewed / approved for canonical design images
+- Status: draft / reviewed / approved for pattern selection / approved for blueprint
 - Application name:
 - Plugin version:
 - Source Functional Specification:
 - Source Yeeflow App Plan:
-- Generated before canonical images: yes/no
-- Ready for canonical image generation: yes/no
+- Generated before UI pattern selection: yes/no
+- Ready for UI pattern selection: yes/no
+- Ready for Page Implementation Blueprint: yes/no
+- UI pattern library source: `docs/templates/yeeflow-ui-section-template-library.normalized.json`
+- UI pattern library narrative source: `docs/templates/yeeflow-ui-section-template-library.md`
+- UI pattern standard source: `docs/standards/yeeflow-ui-pattern-library-generation-standard.md`
 
 ## 2. Selected Yeeflow Application Layout
 
@@ -87,11 +91,11 @@ Minimum acceptance criteria:
 
 ## 3A. HTML Preview Design Tokens And UI Pattern Templates
 
-For complex business applications, the Application Design System must define the HTML-first preview contract used by `docs/standards/ui-surface-contract-template.md` and `docs/standards/html-preview-design-standard.md`.
+For complex business applications, the Application Design System must define reusable tokens and approved Yeeflow UI Section Templates first. HTML previews are optional high-fidelity review/prototype evidence when explicitly requested, and use `docs/standards/ui-surface-contract-template.md` and `docs/standards/html-preview-design-standard.md` only for that optional evidence flow.
 
-The HTML-first workflow inherits every Full-page Canonical Design Artifact gate. The Application Design System must define tokens, layout rules, component patterns, responsive rules, and visual quality standards that allow UI Surface Contracts and HTML previews to prove the same design-stage gates previously required from canonical design images. It must not permit arbitrary SaaS shells, generic form scaffolds, placeholder lower-page regions, weak visual hierarchy, text overflow, element overlap, mobile layout pressure, or template reuse without purposeful surface differences.
+The default implementation path is App Plan -> Application Design System -> selected Yeeflow UI Section Templates -> Page Implementation Blueprint -> Yeeflow resources. The Application Design System must define tokens, layout rules, component patterns, responsive rules, and visual quality standards that allow selected templates and blueprints to prove the same design-stage gates previously checked through images or HTML. It must not permit arbitrary SaaS shells, generic form scaffolds, placeholder lower-page regions, weak visual hierarchy, text overflow, element overlap, mobile layout pressure, or template reuse without purposeful surface differences.
 
-- HTML design token namespace:
+- Yeeflow design token namespace:
 - Typography token/class map:
 - Spacing token/class map:
 - Color token/class map:
@@ -114,7 +118,40 @@ The HTML-first workflow inherits every Full-page Canonical Design Artifact gate.
   - Document Library New/Edit form:
   - Document Library View form:
 
-HTML previews must use these tokens and approved pattern templates. HTML preview is not a low-fidelity scaffold; it must be a modern, polished, design-system-driven prototype equal to or better than static generated design images. Screenshots are evidence generated from validated HTML, not the primary implementation contract.
+Optional HTML previews must use these tokens and approved pattern templates. HTML preview is not a low-fidelity scaffold; it must be a modern, polished, design-system-driven prototype equal to or better than static generated design images. Screenshots are evidence generated from validated HTML, not the primary implementation contract.
+
+## 3B. Yeeflow UI Section Template Selection
+
+Select surface-level templates from `docs/templates/yeeflow-ui-section-template-library.normalized.json`.
+
+| Surface ID | Surface type | Source App Plan resource | Selected `templateId` values | Template category | Proof status | Required controls mapped | Required fields/bindings mapped | Required actions mapped or deferred | Ready for Blueprint |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|  |  |  |  |  | runtime-proven / export-proven / inferred / needs-golden-proof |  |  |  | yes/no |
+
+Selection rules:
+
+- Dashboard pages may use dashboard, item-template, and collection-control templates.
+- Approval Submission and Task forms may use approval-form-workspace, data-list-form, item-template, and collection-control templates when the App Plan maps those regions.
+- Approval Print pages use read-only data-list-form and item-template print patterns.
+- Data List and Document Library New/Edit forms use form-body templates for primary editable fields; primary fields must not move into generic lower regions.
+- View/Detail, related-record, Sub List, Collection, Kanban, and Timeline regions must select templates matching their source list, row/current-item context, and actions.
+- Every selected template must preserve `patternProofStatus`.
+
+Run `scripts/validate-ui-pattern-selection.mjs` before Page Implementation Blueprint work when a machine-readable pattern-selection artifact exists.
+
+## 3C. Control And Property Proof Boundary
+
+Declare which control/property shapes are safe for generation:
+
+- Product-catalog-backed control/property paths:
+- Extension-registry-backed patterns:
+- Export-proven only patterns:
+- Runtime-proven patterns:
+- Inferred patterns:
+- Needs golden proof before generated-final use:
+- Deferred controls/properties/actions:
+- Fallback behavior:
+- Proof impact:
 
 ## 4. Form And Detail Semantic Quality Standard
 

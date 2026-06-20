@@ -137,6 +137,15 @@ const childTests = [
     ],
   },
   {
+    name: "UI pattern library driven generation flow regression suite",
+    command: ["scripts/test-ui-pattern-library-driven-generation-flow.mjs"],
+    validators: [
+      "validate-ui-pattern-selection",
+      "validate-blueprint-ui-pattern-conformance",
+      "Yeeflow UI Section Template Library normalized registry",
+    ],
+  },
+  {
     name: "UI control property fidelity regression suite",
     command: ["scripts/test-ui-control-property-fidelity.mjs"],
     validators: [

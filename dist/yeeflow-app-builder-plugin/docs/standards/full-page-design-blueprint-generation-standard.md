@@ -1,36 +1,69 @@
 # Full-Page Design Blueprint Generation Standard
 
-Full-application Yeeflow generation is a staged evidence workflow. A visually polished canonical image is not enough: the generated Yeeflow controls, decoded resources, bindings, interactions, and runtime proof must trace back to a complete design and blueprint contract.
+Full-application Yeeflow generation is a staged evidence workflow. The default UI implementation source is the approved Yeeflow App Plan plus Application Design System plus selected Yeeflow UI Section Templates from the plugin-contained pattern library. Optional PNG design images and HTML previews can support visual review, but generated Yeeflow controls, decoded resources, bindings, interactions, and runtime proof must trace back to a complete pattern-backed Page Implementation Blueprint.
 
 ## Mandatory Stage Order
 
 1. Functional Specification.
 2. Yeeflow App Plan.
 3. Business Clarification Gate approved for generation and Generation Readiness final check.
-4. Full-page Canonical Design Artifacts stage.
-5. UI Surface Contract and high-fidelity HTML Preview workflow for complex business applications.
+4. Application Design System.
+5. Yeeflow UI Section Template / Pattern Selection from `docs/templates/yeeflow-ui-section-template-library.normalized.json`.
 6. Page Implementation Blueprint.
-7. Yeeflow control/property contract validation.
-8. Resource generation.
-9. Decoded resource parity validation.
-10. Local hard gates.
-11. Package/sign/upgrade only after explicit write approval.
-12. Runtime/browser proof only after Chrome/runtime evidence exists.
+7. Blueprint Pattern Conformance Validation.
+8. Yeeflow control/property contract validation.
+9. Resource generation.
+10. Decoded resource parity validation.
+11. Local hard gates.
+12. Package/sign/install/import/upgrade only after explicit write approval.
+13. Runtime/browser proof only after Chrome/runtime evidence exists.
 
 Do not start a later stage when the prior stage lacks completion evidence. Schema validation, signing, install, upgrade, decoded CSS, decoded controls, or ID stability do not prove UI fidelity or runtime behavior. Runtime proof cannot claim success until Chrome/runtime evidence exists.
 
-## Full-Page Canonical Design Artifacts
+## Default Pattern-Library UI Generation
 
-The Full-page Canonical Design Artifacts stage creates the application-level visual contract from the approved Functional Specification and Yeeflow App Plan. It must not generate `.yap` or `.yapk` packages, sign packages, install/import/upgrade apps, or run live Yeeflow writes.
+The Application Design System and Yeeflow UI Section Template Library create the default UI implementation contract from the approved Functional Specification and Yeeflow App Plan. This stage must not generate `.yap` or `.yapk` packages, sign packages, install/import/upgrade apps, or run live Yeeflow writes.
 
 This stage must produce:
 
 - an Application Design System document using `docs/standards/application-design-system-template.md`
-- full-page canonical design images for all required UI surfaces
+- a pattern-selection artifact for all required UI surfaces using `docs/templates/yeeflow-ui-section-template-library.normalized.json`
+- a validation/review report showing readiness for the Page Implementation Blueprint stage
+
+Generate the Application Design System before template selection. Every selected surface-level template and Page Implementation Blueprint must reference the selected Application Design System. If the design system is missing, incomplete, generated after template selection, or not referenced by selected surfaces, the pattern-selection stage fails and must not proceed to Page Implementation Blueprints.
+
+Every surface must select one or more `templateId` values from the normalized registry. Template categories must match the surface type: dashboard pages use dashboard patterns; Approval Submission/Task surfaces use approval-form-workspace or form/detail templates; Approval Print pages use print/read-only form patterns; Data List and Document Library New/Edit forms use form-body templates for primary editable fields; related-record, Sub List, Collection, Kanban, and Timeline sections use item-template or collection-control patterns. Templates without a `category` are allowed only when their ID is recognized as a collection-control template such as `collection_control_*`.
+
+Every selected template must preserve `patternProofStatus`: `runtime-proven`, `export-proven`, `inferred`, or `needs-golden-proof`. Required controls, child controls, fields, data bindings, and actions must map to blueprint controls or be explicitly deferred/inactive with reason, fallback, proof impact, and required follow-up.
+
+Forbidden misuse blocks blueprint/resource readiness:
+
+- dashboard KPI/card templates as New/Edit form body
+- generic lower-region templates for primary editable fields
+- lower regions named `Primary form fields`, `Main form fields`, `Editable fields`, `Document metadata fields`, or similar
+- HTML-only concepts such as DOM nodes, CSS classes, screenshots, or preview-only sections represented as Yeeflow controls
+- generated PNG or HTML evidence overriding the App Plan, Application Design System, selected templates, or Page Implementation Blueprint
+
+Run:
+
+```bash
+node scripts/validate-ui-pattern-selection.mjs --selection <pattern-selection.json>
+```
+
+This validator proves pattern-selection readiness only. It does not prove resource serialization, decoded parity, package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+
+## Optional Full-Page Canonical Design Artifacts
+
+The Full-page Canonical Design Artifacts stage is optional visual review evidence unless the user explicitly requests generated PNG design artifacts. It must not generate `.yap` or `.yapk` packages, sign packages, install/import/upgrade apps, or run live Yeeflow writes.
+
+This stage must produce:
+
+- an Application Design System document using `docs/standards/application-design-system-template.md`
+- full-page canonical design images for requested UI surfaces
 - a Design Image Manifest using `docs/standards/design-image-manifest-template.md`
 - a validation/review report showing readiness for the Page Implementation Blueprint stage
 
-Generate the Application Design System before any canonical design image. Every canonical design artifact and every Design Image Manifest row must reference the selected Application Design System. If the design system is missing, incomplete, generated after images, or not referenced by the manifest rows, the design artifact stage fails and must not proceed to Page Implementation Blueprints.
+Generate the Application Design System before any optional canonical design image. Every canonical design artifact and every Design Image Manifest row must reference the selected Application Design System and selected UI templates. If the design system or pattern selection is missing, incomplete, generated after images, or not referenced by the manifest rows, the design artifact stage fails and must not proceed to Page Implementation Blueprints.
 
 Structural design coverage is not enough. The design artifact stage must also pass layout fidelity and modern visual quality gates before Page Implementation Blueprints:
 
@@ -40,15 +73,16 @@ Structural design coverage is not enough. The design artifact stage must also pa
 - Dashboard manifest rows must include `applicationLayoutType`, `applicationChromeStyleId`, `includeHeaderNavigation: true`, `layoutFidelityStatus`, and a selected layout/chrome compliance declaration.
 - Approval form and Data List form surfaces are complete form pages and do not require application header/navigation; they may use `form-surface-no-app-chrome` as a non-dashboard surface marker.
 - Every artifact must include `visualQualityStatus`, a modern visual quality checklist, and an anti-pattern check.
-- `readyForBlueprint: true` is forbidden unless layout fidelity passes, modern visual quality passes, visual usability/text overflow/overlap/spacing/mobile usability pass or have reviewed risk evidence, and anti-pattern checks pass.
+- `readyForBlueprint: true` is forbidden unless pattern selection passes, layout fidelity passes, modern visual quality passes, visual usability/text overflow/overlap/spacing/mobile usability pass or have reviewed risk evidence, and anti-pattern checks pass.
 
-## HTML-First UI Surface Contract Workflow
+## Optional HTML-First UI Surface Contract Workflow
 
-PNG-first canonical images remain supported as visual evidence, but they are insufficient as the sole implementation contract for complex business apps. When an application includes approval forms, data list custom forms, document library forms, dashboards, or non-trivial responsive UI, the recommended hard-gated path is:
+HTML previews remain supported as optional high-fidelity review/prototype evidence when explicitly requested. They are not required for normal application generation and must not override the approved App Plan, Application Design System, selected Yeeflow UI patterns, or Page Implementation Blueprint. When the user requests HTML evidence, the hard-gated path is:
 
 ```text
 App Plan
 -> Application Design System
+-> Yeeflow UI Section Template / Pattern Selection
 -> UI Surface Contract
 -> High-fidelity HTML Preview
 -> DOM/Layout/Visual Quality Validation
@@ -57,13 +91,13 @@ App Plan
 -> Blueprint-to-Contract comparison
 ```
 
-The UI Surface Contract is the primary implementation contract for fields, actions, surface responsibility, allowed/forbidden regions, related regions, responsive behavior, and intended Yeeflow control mapping. Use `docs/standards/ui-surface-contract-template.md` and validate with:
+The UI Surface Contract is a review/prototype contract for fields, actions, surface responsibility, allowed/forbidden regions, related regions, responsive behavior, and intended Yeeflow control mapping. It supports but does not replace the selected template and Page Implementation Blueprint. Use `docs/standards/ui-surface-contract-template.md` and validate with:
 
 ```bash
 node scripts/validate-ui-surface-contracts.mjs --contracts <dir-or-json> --app-plan <app-plan.md> --design-system <application-design-system.md>
 ```
 
-The high-fidelity HTML preview is the primary visual preview source. It must be generated from the UI Surface Contract, reference the Application Design System, use design-system tokens/classes, use approved UI pattern templates, render desktop and mobile variants, include required DOM sections/fields/actions, exclude forbidden regions, and meet modern visual quality expectations. HTML preview is not a low-fidelity scaffold, plain field dump, generic admin table, or arbitrary unstyled form. Use `docs/standards/html-preview-design-standard.md` and validate with:
+The high-fidelity HTML preview is an optional visual preview source. It must be generated from the UI Surface Contract, reference the Application Design System, use design-system tokens/classes, use approved UI pattern templates, render desktop and mobile variants, include required DOM sections/fields/actions, exclude forbidden regions, and meet modern visual quality expectations. HTML preview is not a low-fidelity scaffold, plain field dump, generic admin table, or arbitrary unstyled form. Use `docs/standards/html-preview-design-standard.md` and validate with:
 
 ```bash
 node scripts/validate-html-preview-layout.mjs --contracts <dir-or-json> --html <dir> --screenshots <dir> --design-system <application-design-system.md>
@@ -71,27 +105,27 @@ node scripts/validate-html-preview-layout.mjs --contracts <dir-or-json> --html <
 
 Screenshots are evidence generated from validated HTML previews, not the source of truth. SVG is allowed only for icons, small visual assets, charts, or optional supplemental visuals, not as the primary app UI source for complex form/dashboard surfaces.
 
-Generate Page Implementation Blueprints only from the approved UI Surface Contract plus validated HTML structure. Then compare every blueprint back to the contract and design-system style intent:
+Generate Page Implementation Blueprints from the approved App Plan, Application Design System, selected Yeeflow UI patterns, and, when explicitly requested, the approved UI Surface Contract plus validated HTML mapping metadata. Then compare every blueprint back to the contract and design-system style intent:
 
 ```bash
 node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts <dir-or-json> --blueprints <dir-or-json> --design-system <application-design-system.md>
 ```
 
-`readyForBlueprint: true` requires UI Surface Contract validation, HTML/DOM layout validation, HTML visual quality validation, screenshot evidence, and blueprint-to-contract comparison when using the HTML-first workflow. Do not proceed to Yeeflow resource/package generation if blueprint-to-contract parity fails. Contract validation, HTML/DOM validation, screenshot evidence, blueprint parity, package schema validation, signing/API acceptance, install/upgrade success, and runtime proof are separate proof layers.
+`readyForBlueprint: true` requires UI pattern selection and blueprint pattern conformance by default. When using the optional HTML-first workflow, it also requires UI Surface Contract validation, HTML/DOM layout validation, HTML visual quality validation, screenshot evidence, and blueprint-to-contract comparison. Do not proceed to Yeeflow resource/package generation if blueprint-to-contract parity fails. Pattern validation, contract validation, HTML/DOM validation, screenshot evidence, blueprint parity, package schema validation, signing/API acceptance, install/upgrade success, and runtime proof are separate proof layers.
 
-The HTML-first workflow inherits every Full-page Canonical Design Artifact gate. It does not replace the existing requirements for official application layout, dashboard chrome, no-app-chrome form surfaces, full-page/page-end completeness, modern visual quality, surface responsibility, App Plan field/action coverage, forbidden-region checks, semantic consistency, lower-page visual concreteness, visual usability, text overflow/overlap/spacing/mobile-pressure checks, clipping checks, and template reuse risk. Page Implementation Blueprints may start only when both the UI Surface Contract and the HTML preview prove those inherited gates.
+The HTML-first workflow inherits every pattern-library and optional visual-evidence gate. It does not replace the existing requirements for official application layout, dashboard chrome, no-app-chrome form surfaces, full-page/page-end completeness, modern visual quality, surface responsibility, App Plan field/action coverage, forbidden-region checks, semantic consistency, lower-page visual concreteness, visual usability, text overflow/overlap/spacing/mobile-pressure checks, clipping checks, and template reuse risk. Page Implementation Blueprints may start only when the selected template contract passes and the optional UI Surface Contract/HTML preview prove their additional review gates.
 
-## Canonical Page Design Images
+## Optional Canonical Page Design Images
 
-Each page must have one canonical PNG at `assets/generated-ui/<app-slug>/NN-<page-slug>.design.png`. The canonical page image must be a full-page implementation artifact, not a first-viewport mockup. It must show all planned sections, major controls, tables, forms, cards, filters, actions, lower-page regions, and page end. A viewport-only screenshot or cropped top-page mockup fails unless the page truly has no below-fold content.
+PNG canonical page design images remain supported when the user explicitly requests visual review artifacts. They are optional visual review evidence, not a default implementation source. When requested, each page should have one canonical PNG at `assets/generated-ui/<app-slug>/NN-<page-slug>.design.png`. The canonical page image must be a full-page review artifact, not a first-viewport mockup. It must show all planned sections, major controls, tables, forms, cards, filters, actions, lower-page regions, and page end. A viewport-only screenshot or cropped top-page mockup fails unless the page truly has no below-fold content.
 
 SVG files and combined design boards may support review, but they cannot replace the canonical per-page PNG. The design manifest must map page order, page title, page slug, canonical PNG path, optional source file, selected Yeeflow layout/chrome, and expected viewport.
 
-Required design coverage includes Dashboard pages, Approval Submission forms, planned Approval Task forms, planned Approval Print pages, and planned Data List Add/Edit, View, Detail, or other custom forms. Dashboard pages must include the selected application layout shell with header/navigation/content behavior where applicable. Approval forms and Data List custom forms are complete form pages and do not need the application header/navigation shell.
+When the optional visual evidence flow is requested, design coverage includes Dashboard pages, Approval Submission forms, planned Approval Task forms, planned Approval Print pages, and planned Data List Add/Edit, View, Detail, or other custom forms. Dashboard pages must include the selected application layout shell with header/navigation/content behavior where applicable. Approval forms and Data List custom forms are complete form pages and do not need the application header/navigation shell.
 
 Form Reports are not part of the Full-page Canonical Design Images coverage requirement. Form Reports remain standalone Yeeflow resources and should be planned, generated, and validated in their own Form Report flow. Do not mix Form Report design coverage into Dashboard page design coverage.
 
-Canonical design artifacts must show realistic business structure from the approved App Plan, including meaningful rows, cards, status badges, field labels, dates, owners, documents, tasks, action regions, and relevant empty/error/loading states. They must include either mobile canonical images for key pages or responsive behavior documented in the Application Design System and Design Image Manifest.
+Optional canonical design artifacts must show realistic business structure from the approved App Plan and selected UI templates, including meaningful rows, cards, status badges, field labels, dates, owners, documents, tasks, action regions, and relevant empty/error/loading states. They must include either mobile canonical images for key pages or responsive behavior documented in the Application Design System and Design Image Manifest.
 
 Modern visual quality is part of blueprint readiness. Canonical images must show strong visual hierarchy, professional spacing and density, polished cards/sections, purposeful dashboard composition, meaningful KPI/Summary card design, intentional Data Analytics regions with labels/context, Collection/Kanban/Data table regions with realistic hierarchy and item detail, distinct but consistent page-specific layouts, clear action placement, and readable responsive/mobile behavior. Reject generic scaffold pages, title-only or helper-text-heavy lower sections, placeholder chart graphics without labels/context, and design-stage explanation text inside the UI unless it is actual product content.
 
@@ -120,8 +154,9 @@ Canonical design artifacts must also pass visual usability before Page Implement
 Before generating Yeeflow resources, every page requires a blueprint with:
 
 - page purpose and selected Yeeflow layout/chrome
+- selected Yeeflow UI Section Template IDs and proof status
 - full section list
-- design-to-control mapping for every visible element
+- pattern-to-control mapping for every required control and visible element
 - control hierarchy, control type, `id`, `nv_label`, and parent/child relationships
 - exact Yeeflow property paths for width, height, gap, margin, padding, border, background, shadow, and typography
 - data source/list/field bindings
@@ -133,6 +168,14 @@ Before generating Yeeflow resources, every page requires a blueprint with:
 
 Every property path must be validated against `docs/reference/yeeflow-control-configurations.normalized.json` or `docs/reference/yeeflow-control-property-extensions.json`. Container `attrs.style` rules and non-Container `attrs.common` rules remain separate.
 
+Run:
+
+```bash
+node scripts/validate-blueprint-ui-pattern-conformance.mjs --blueprint page-implementation-blueprint.json --pattern-selection pattern-selection.json
+```
+
+`readyForResourceGeneration: true` is blocked when required controls, child controls, fields, bindings, actions, template category, template existence, forbidden misuse, or proof status fail.
+
 ## Resource Parity
 
 After generation, inspect decoded JSON and compare it to the blueprint. All sections and mapped controls must exist, hierarchy and types must match, `nv_label` values must remain semantic, required properties and bindings must exist, action metadata must be present, visible text must not show raw variables, and collection/detail/form links must resolve.
@@ -141,11 +184,13 @@ Run:
 
 ```bash
 node scripts/validate-full-page-design-artifacts.mjs --manifest design-image-manifest.json
+node scripts/validate-ui-pattern-selection.mjs --selection pattern-selection.json
 node scripts/validate-ui-surface-contracts.mjs --contracts ui-surface-contracts --app-plan app-plan.md --design-system application-design-system.md
 node scripts/validate-html-preview-layout.mjs --contracts ui-surface-contracts --html html-previews --screenshots screenshots --design-system application-design-system.md
 node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts ui-surface-contracts --blueprints page-implementation-blueprints --design-system application-design-system.md
 node scripts/inspect-full-page-design-artifacts.mjs --manifest design-image-manifest.json
 node scripts/inspect-page-implementation-blueprint.mjs --blueprint page-implementation-blueprint.json
+node scripts/validate-blueprint-ui-pattern-conformance.mjs --blueprint page-implementation-blueprint.json --pattern-selection pattern-selection.json
 node scripts/compare-blueprint-to-decoded-resource.mjs --blueprint page-implementation-blueprint.json --resource decoded-resource.json
 ```
 
