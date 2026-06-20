@@ -197,6 +197,45 @@ function pagePlan(overrides = {}) {
   };
 }
 
+function addEventPortfolioFidelity(plan) {
+  const dashboard = plan.dashboards[0];
+  dashboard.dashboardFidelityProfile = "High-quality Event Portfolio runtime-fidelity dashboard";
+  dashboard.marketingEventFidelityReference = "docs/studies/marketing-event-v045-design-runtime-fidelity-study.md; docs/standards/yeeflow-ui-control-property-fidelity.md";
+  dashboard.runtimeProofBoundary = "Runtime browser/screenshot proof required; signing, install, and API success are not UI proof.";
+  dashboard.designerTraceabilityRequirements = "Use semantic nv_label values for generated Dashboard containers, KPI cards, filters, rows, and action-looking controls.";
+
+  for (const entry of dashboard.dashboardSectionTemplates) {
+    entry.marketingEventFidelityReference = "docs/studies/marketing-event-v045-design-runtime-fidelity-study.md";
+    entry.runtimeProofBoundary = "Requires runtime/browser screenshot proof after generation.";
+    entry.designerTraceabilityRequirements = "Semantic nv_label must trace the generated section and key controls.";
+    if (entry.templateId === "kpi_card_row" || entry.templateId === "progress_summary_card") {
+      entry.kpiSummaryBindingRequirements = {
+        source: entry.source,
+        summaryControl: "Hidden Summary control bound to Purchase Requests",
+        metricFields: ["Amount", "Status"],
+        filters: entry.filters,
+        visibleBinding: "Visible KPI card reads formatted Summary/temp-variable values",
+      };
+      entry.kpiFormattingRequirements = "Use formatNumber with compact K/M/B and fixed decimals/currency rules; no raw variable values.";
+      entry.dataFilterRequirements = "Status period Data Filter writes filter variables consumed by Summary and queue sections.";
+    }
+    if (entry.templateId === "data_table_section" || entry.templateId === "collection_card_board" || entry.templateId === "kanban_status_board") {
+      entry.dataFilterRequirements = "Real Data Filter controls write filter variables consumed by the table/Collection/Kanban target.";
+      entry.richTableTreatmentRequirements = "Status fields render as badges, progress fields as Progress controls, owners as Dynamic user/person/avatar treatment, with header hierarchy and dense rows.";
+      entry.actionMetadataRequirements = "Open Request uses real Yeeflow action metadata with row context and target detail/open behavior.";
+    }
+    if (entry.templateId === "collection_card_board") {
+      entry.collectionGridTableRequirements = {
+        source: entry.source,
+        fields: entry.displayedFields,
+        rowContext: "Current Collection row Purchase Request",
+        detailOpenAction: "Open Request detail in slide panel",
+      };
+    }
+  }
+  return plan;
+}
+
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "page-function-plan-gates-"));
 const results = [];
 
@@ -318,6 +357,127 @@ try {
   }))]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "valid three_column_workspace_shell with meaningful panels passes", status: "pass" });
+
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "valid-event-portfolio-fidelity", addEventPortfolioFidelity(pagePlan({
+    dashboards: [{
+      name: "Operations Dashboard",
+      pagePurpose: "High-quality Event Portfolio operational table dashboard for request portfolio status.",
+      businessTaskSolved: "Managers review portfolio status metrics, filtered work, and actionable request rows.",
+      dashboardPagePattern: "standard_dashboard_page_shell",
+      desktopBehavior: "KPI row above a rich Collection grid-table.",
+      mobileBehavior: "KPI cards stack first, filters remain compact, and portfolio rows stack with priority fields.",
+      dashboardSectionTemplates: [
+        {
+          templateId: "kpi_card_row",
+          regionName: "Portfolio KPI Row",
+          businessPurpose: "KPI summary metrics for portfolio request totals and amounts.",
+          source: "Purchase Requests",
+          displayedFields: ["Amount", "Status"],
+          filters: ["Current fiscal period", "Status filter"],
+          grouping: ["Status"],
+          sorting: ["Created Date descending"],
+          actions: [],
+          requiredControls: ["container", "summary", "text"],
+          proofStatus: "runtime-proof-required",
+          whyTemplateFits: "The section needs a Summary-backed KPI card row.",
+        },
+        {
+          templateId: "collection_card_board",
+          regionName: "Portfolio Status Grid",
+          businessPurpose: "Collection grid-table portfolio operational table with rich status rows.",
+          source: "Purchase Requests",
+          displayedFields: ["Title", "Amount", "Status", "Requester"],
+          filters: ["Status is not Completed"],
+          grouping: ["Status"],
+          sorting: ["Created Date descending"],
+          actions: ["Open Request"],
+          requiredControls: ["collection", "container", "dynamic-field", "progress", "dynamic-user"],
+          proofStatus: "runtime-proof-required",
+          whyTemplateFits: "A Collection grid-table supports rich row treatment with row-context actions.",
+        },
+      ],
+      regions: [{
+        name: "Portfolio Status Grid",
+        controlType: "Collection",
+        source: "Purchase Requests",
+        fields: ["Title", "Amount", "Status", "Requester"],
+        filters: ["Status is not Completed"],
+        actions: ["Open Request"],
+      }],
+    }],
+  })))]);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "valid Event Portfolio-style dashboard fidelity requirements pass", status: "pass" });
+
+  const missingFidelityRef = addEventPortfolioFidelity(pagePlan());
+  delete missingFidelityRef.dashboards[0].marketingEventFidelityReference;
+  delete missingFidelityRef.dashboards[0].dashboardSectionTemplates[0].marketingEventFidelityReference;
+  delete missingFidelityRef.dashboards[0].dashboardSectionTemplates[1].marketingEventFidelityReference;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-dashboard-fidelity-reference", missingFidelityRef)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_FIDELITY_REFERENCE_MISSING");
+  results.push({ case: "high-quality dashboard missing fidelity reference fails", status: "pass" });
+
+  const missingKpiBinding = addEventPortfolioFidelity(pagePlan());
+  delete missingKpiBinding.dashboards[0].dashboardSectionTemplates[0].kpiSummaryBindingRequirements;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-kpi-summary-binding", missingKpiBinding)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_KPI_SUMMARY_BINDING_MISSING");
+  results.push({ case: "high-quality KPI section missing Summary binding plan fails", status: "pass" });
+
+  const missingFilterAction = addEventPortfolioFidelity(pagePlan());
+  delete missingFilterAction.dashboards[0].dashboardSectionTemplates[1].dataFilterRequirements;
+  delete missingFilterAction.dashboards[0].dashboardSectionTemplates[1].actionMetadataRequirements;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-filter-action-plan", missingFilterAction)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_DATA_FILTER_REQUIREMENTS_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_ACTION_METADATA_MISSING");
+  results.push({ case: "high-quality Dashboard missing filter/action plan fails", status: "pass" });
+
+  const missingRichTable = addEventPortfolioFidelity(pagePlan());
+  delete missingRichTable.dashboards[0].dashboardSectionTemplates[1].richTableTreatmentRequirements;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-rich-table-treatment", missingRichTable)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_RICH_TABLE_TREATMENT_MISSING");
+  results.push({ case: "Event Portfolio-style operational table missing rich treatment fails", status: "pass" });
+
+  const missingCollectionGrid = addEventPortfolioFidelity(pagePlan({
+    dashboards: [{
+      name: "Operations Dashboard",
+      pagePurpose: "High-quality Event Portfolio operational table dashboard.",
+      businessTaskSolved: "Managers review request portfolio rows.",
+      dashboardPagePattern: "standard_dashboard_page_shell",
+      desktopBehavior: "Collection grid-table.",
+      mobileBehavior: "Rows stack with priority fields.",
+      dashboardSectionTemplates: [{
+        templateId: "collection_card_board",
+        regionName: "Portfolio Status Grid",
+        businessPurpose: "Collection grid-table portfolio operational table.",
+        source: "Purchase Requests",
+        displayedFields: ["Title", "Status", "Requester"],
+        filters: ["Status is not Completed"],
+        grouping: ["Status"],
+        sorting: ["Created Date descending"],
+        actions: ["Open Request"],
+        requiredControls: ["collection", "container", "dynamic-user"],
+        proofStatus: "runtime-proof-required",
+        whyTemplateFits: "Collection grid-table supports row-context actions.",
+      }],
+      regions: [{
+        name: "Portfolio Status Grid",
+        controlType: "Collection",
+        source: "Purchase Requests",
+        fields: ["Title", "Status", "Requester"],
+        filters: ["Status is not Completed"],
+        actions: ["Open Request"],
+      }],
+    }],
+  }));
+  delete missingCollectionGrid.dashboards[0].dashboardSectionTemplates[0].collectionGridTableRequirements;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-collection-grid-requirements", missingCollectionGrid)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_COLLECTION_GRID_TABLE_REQUIREMENTS_MISSING");
+  results.push({ case: "Collection grid-table missing source/row-context/open-action requirements fails", status: "pass" });
 
   const unknownTemplate = pagePlan();
   unknownTemplate.dashboards[0].dashboardSectionTemplates[0].templateId = "executive_magic_template";

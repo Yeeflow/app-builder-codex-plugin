@@ -32,6 +32,7 @@ Functional Specification
 - Added `scripts/validate-app-plan-page-function-traceability.mjs`.
 - Added `scripts/test-page-function-plan-gates.mjs`.
 - Added Dashboard-only Page Function Plan template-selection gates that load the plugin-contained Dashboard template library and require `dashboardPagePattern` plus structured `dashboardSectionTemplates[]`.
+- Added Dashboard-only high-fidelity/Event Portfolio gates based on plugin-contained Marketing Event/Event Portfolio lessons for KPI/Summary binding, Data Filter consumers, Collection grid-table requirements, rich table treatment, action metadata, KPI formatting, semantic `nv_label`, and runtime proof boundary.
 - Registered the new validators/tests in focused planning gates, aggregate UI hard gates, and YAPK cache artifact mirror checks.
 - Updated `skills/installed/yeeflow-application-builder/SKILL.md` so the lifecycle requires Page Function Plan and Application Design System before generation.
 - Mirrored changed standards, scripts, tests, and skill files into `dist/yeeflow-app-builder-plugin/...`.
@@ -70,6 +71,8 @@ Dashboard-specific contract:
 - Dashboard section `templateId` values must exist in `docs/templates/yeeflow-ui-section-template-library.normalized.json` or documented Dashboard standards.
 - Template selection is consumed by downstream page/resource generation, not treated as prose-only visual guidance.
 - `three_column_workspace_shell` is allowed only for meaningful left/main/right workspace pages, not simple dashboards.
+- High-quality, Marketing Event, Event Portfolio, portfolio/status, operational-table, rich table, and runtime-fidelity Dashboard sections must declare applicable plugin-contained fidelity references and the implementation details page/resource generation must preserve.
+- Event Portfolio-style portfolio/status/operational tables require rich table/card treatment, badge/progress/person/avatar treatment where applicable, header hierarchy, row density, real Yeeflow action metadata, Collection grid-table source/field/row-context/detail-open requirements when used, and a runtime proof boundary.
 
 ## Regression Coverage
 
@@ -87,6 +90,12 @@ Dashboard-specific contract:
 - Valid Dashboard template selection using `kanban_status_board`.
 - Valid `three_column_workspace_shell` Dashboard with meaningful left/main/right panel content.
 - Unknown, missing, prose-only, or incompatible Dashboard template selections.
+- Valid Event Portfolio-style Dashboard fidelity requirements.
+- Missing high-fidelity/Event Portfolio fidelity reference.
+- Missing KPI/Summary binding plan.
+- Missing Data Filter/action metadata plan.
+- Missing rich table treatment.
+- Missing Collection grid-table source, row-context, and detail/open-action requirements.
 
 ## Proof Boundary
 

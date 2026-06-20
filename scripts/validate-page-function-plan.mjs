@@ -51,6 +51,13 @@ const ACTION_REQUIRED_TEMPLATES = new Set([
   "quick_links_icon_list",
 ]);
 
+const KPI_SUMMARY_TEMPLATES = new Set(["kpi_card_row", "progress_summary_card"]);
+const RICH_TABLE_TEMPLATES = new Set(["data_table_section", "collection_card_board", "kanban_status_board"]);
+const COLLECTION_GRID_TABLE_TEMPLATES = new Set(["collection_card_board"]);
+const FILTER_ACTION_TEMPLATES = new Set(["dashboard_header_action_bar", "quick_links_icon_list"]);
+const HIGH_FIDELITY_DASHBOARD = /\b(marketing event|event portfolio|high-quality|high quality|high-fidelity|runtime fidelity|portfolio\/status|portfolio status|operational table|rich table|rich card|rich grid-table|grid-table fidelity)\b/i;
+const TRUEISH = /\b(true|yes|required|must|enabled|planned|specified|semantic|real|bound|runtime|format|compact|fixed|badge|progress|avatar|person|metadata|nv_label)\b/i;
+
 const TEMPLATE_PURPOSE_RULES = [
   { templateId: "kpi_card_row", pattern: /\b(kpi|metric|summary|count|total|aggregate|sla|risk total|workload)\b/i },
   { templateId: "progress_summary_card", pattern: /\b(progress|completion|score|percentage|percent|risk score)\b/i },
@@ -125,6 +132,166 @@ function hasTextValue(value) {
   return Boolean(safeString(value).trim());
 }
 
+function flattenText(value) {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.map(flattenText).join(" ");
+  if (typeof value === "object") return Object.values(value).map(flattenText).join(" ");
+  return "";
+}
+
+function hasStructuredIntent(value, pattern = TRUEISH) {
+  return pattern.test(flattenText(value));
+}
+
+function hasFidelityReference(dashboard, entry) {
+  return hasTextValue(entry.marketingEventFidelityReference)
+    || hasTextValue(entry.eventPortfolioFidelityReference)
+    || hasTextValue(entry.fidelityReference)
+    || hasTextValue(dashboard.marketingEventFidelityReference)
+    || hasTextValue(dashboard.eventPortfolioFidelityReference)
+    || hasTextValue(dashboard.dashboardFidelityReference);
+}
+
+function dashboardRequestsHighFidelity(dashboard, entry) {
+  const text = flattenText({
+    dashboardFidelityProfile: dashboard.dashboardFidelityProfile,
+    qualityProfile: dashboard.qualityProfile,
+    qualityClaim: dashboard.qualityClaim,
+    eventPortfolioStyle: dashboard.eventPortfolioStyle,
+    highQualityUi: dashboard.highQualityUi,
+    marketingEventFidelityReference: dashboard.marketingEventFidelityReference,
+    eventPortfolioFidelityReference: dashboard.eventPortfolioFidelityReference,
+    pagePurpose: dashboard.pagePurpose,
+    businessTaskSolved: dashboard.businessTaskSolved,
+    primaryBusinessWorkflow: dashboard.primaryBusinessWorkflow,
+    sectionFidelityProfile: entry.fidelityProfile,
+    sectionQualityProfile: entry.qualityProfile,
+    sectionQualityClaim: entry.qualityClaim,
+    sectionEventPortfolioStyle: entry.eventPortfolioStyle,
+    sectionBusinessPurpose: entry.businessPurpose,
+    sectionTreatment: entry.richTableTreatmentRequirements,
+    sectionFidelityReference: entry.marketingEventFidelityReference || entry.eventPortfolioFidelityReference || entry.fidelityReference,
+  });
+  return HIGH_FIDELITY_DASHBOARD.test(text);
+}
+
+function entryHasFilters(entry) {
+  return hasTextValue(entry.filters) || hasTextValue(entry.dataFilterRequirements);
+}
+
+function entryHasActions(entry) {
+  return hasTextValue(entry.actions) || hasTextValue(entry.actionMetadataRequirements);
+}
+
+function validateDashboardFidelityRequirements(dashboard, entry, templateId, findings) {
+  const highFidelity = dashboardRequestsHighFidelity(dashboard, entry);
+  if (!highFidelity) return;
+
+  const section = entry.sectionName || entry.regionName;
+  if (!hasFidelityReference(dashboard, entry)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_FIDELITY_REFERENCE_MISSING",
+      dashboard: dashboard.name,
+      section,
+      templateId,
+      message: "High-quality/Event Portfolio-style Dashboard sections must reference plugin-contained Marketing Event/Event Portfolio fidelity lessons or standards.",
+    });
+  }
+
+  if (!hasStructuredIntent(entry.runtimeProofBoundary || dashboard.runtimeProofBoundary, /\b(runtime proof|runtime-proof|screenshot|browser|install is not proof|boundary|required|deferred|evidence)\b/i)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_RUNTIME_PROOF_BOUNDARY_MISSING",
+      dashboard: dashboard.name,
+      section,
+      templateId,
+      message: "High-quality/Event Portfolio-style Dashboard sections must declare the runtime proof boundary.",
+    });
+  }
+
+  if (!hasStructuredIntent(entry.designerTraceabilityRequirements || entry.nvLabelRequirements || dashboard.designerTraceabilityRequirements, /\b(nv_label|semantic|designer|traceability|label)\b/i)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_NV_LABEL_REQUIREMENTS_MISSING",
+      dashboard: dashboard.name,
+      section,
+      templateId,
+      message: "High-quality/Event Portfolio-style Dashboard sections must declare semantic nv_label/designer traceability requirements.",
+    });
+  }
+
+  if (KPI_SUMMARY_TEMPLATES.has(templateId)) {
+    if (!hasStructuredIntent(entry.kpiSummaryBindingRequirements, /\b(summary|pivot|temp|variable|source|field|metric|filter|hidden|binding|report|list)\b/i)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_KPI_SUMMARY_BINDING_MISSING",
+        dashboard: dashboard.name,
+        section,
+        templateId,
+        message: "High-quality KPI/Summary sections must declare Summary binding, source, fields/metrics, filters, and visible KPI binding requirements.",
+      });
+    }
+    if (!hasStructuredIntent(entry.kpiFormattingRequirements, /\b(formatNumber|compact|K\/M\/B|fixed|decimal|currency|percent|raw value|format)\b/i)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_KPI_FORMATTING_MISSING",
+        dashboard: dashboard.name,
+        section,
+        templateId,
+        message: "High-quality KPI/Summary sections must declare KPI formatting requirements.",
+      });
+    }
+  }
+
+  if (entryHasFilters(entry) && !hasStructuredIntent(entry.dataFilterRequirements, /\b(data filter|filter variable|consumer|summary|collection|table|list|dropdown|target|runtime)\b/i)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_DATA_FILTER_REQUIREMENTS_MISSING",
+      dashboard: dashboard.name,
+      section,
+      templateId,
+      message: "High-quality filtered Dashboard sections must declare real Data Filter controls, filter variables, and target consumers.",
+    });
+  }
+
+  if (entryHasActions(entry) && !hasStructuredIntent(entry.actionMetadataRequirements, /\b(action metadata|actionType|target|list|open|detail|add|row context|metadata|Yeeflow)\b/i)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_ACTION_METADATA_MISSING",
+      dashboard: dashboard.name,
+      section,
+      templateId,
+      message: "High-quality Dashboard actions must declare real Yeeflow action metadata instead of only action-looking visuals.",
+    });
+  }
+
+  if (RICH_TABLE_TEMPLATES.has(templateId) && !hasStructuredIntent(entry.richTableTreatmentRequirements, /\b(badge|progress|avatar|person|dynamic user|header|row density|rich|status)\b/i)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_RICH_TABLE_TREATMENT_MISSING",
+      dashboard: dashboard.name,
+      section,
+      templateId,
+      message: "Event Portfolio-style status/operational tables must declare rich table/card treatment: badges, progress, person/avatar treatment, header hierarchy, and row density where applicable.",
+    });
+  }
+
+  const asksCollectionGridTable = COLLECTION_GRID_TABLE_TEMPLATES.has(templateId)
+    || /\b(collection grid-table|grid-table|portfolio table|operational table)\b/i.test(flattenText(entry));
+  if (asksCollectionGridTable && !hasStructuredIntent(entry.collectionGridTableRequirements, /\b(source|fields|row context|detail|open|action|binding|collection|grid-table)\b/i)) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_COLLECTION_GRID_TABLE_REQUIREMENTS_MISSING",
+      dashboard: dashboard.name,
+      section,
+      templateId,
+      message: "Collection grid-table style requires source list, fields, row context, and detail/open actions.",
+    });
+  }
+}
+
 function markdownFindings(text) {
   const findings = [];
   const required = [
@@ -144,6 +311,16 @@ function markdownFindings(text) {
     [/dashboardSectionTemplates\[\]/i, "PAGE_FUNCTION_PLAN_DASHBOARD_SECTION_TEMPLATES_FIELD_MISSING"],
     [/templateId[\s\S]*Region \/ Section[\s\S]*Why This Template Fits/i, "PAGE_FUNCTION_PLAN_DASHBOARD_TEMPLATE_SELECTION_TABLE_MISSING"],
     [/Template selection is part of the Page Function Plan implementation contract/i, "PAGE_FUNCTION_PLAN_DASHBOARD_TEMPLATE_CONTRACT_MISSING"],
+    [/Dashboard Fidelity Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_FIDELITY_SECTION_MISSING"],
+    [/Marketing Event \/ Event Portfolio Fidelity Reference/i, "PAGE_FUNCTION_PLAN_DASHBOARD_FIDELITY_REFERENCE_FIELD_MISSING"],
+    [/KPI \/ Summary Binding Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_KPI_BINDING_FIELD_MISSING"],
+    [/Data Filter Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_FILTER_FIELD_MISSING"],
+    [/Collection Grid-Table Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_COLLECTION_GRID_FIELD_MISSING"],
+    [/Badge \/ Progress \/ Avatar \/ Person Treatment/i, "PAGE_FUNCTION_PLAN_DASHBOARD_RICH_TREATMENT_FIELD_MISSING"],
+    [/Action Metadata Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_ACTION_METADATA_FIELD_MISSING"],
+    [/KPI Formatting Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_KPI_FORMATTING_FIELD_MISSING"],
+    [/`nv_label` \/ Designer Traceability/i, "PAGE_FUNCTION_PLAN_DASHBOARD_NV_LABEL_FIELD_MISSING"],
+    [/Runtime Proof Boundary/i, "PAGE_FUNCTION_PLAN_DASHBOARD_RUNTIME_PROOF_FIELD_MISSING"],
   ];
   for (const [pattern, code] of required) {
     if (!pattern.test(text)) {
@@ -346,6 +523,7 @@ function validateDashboardTemplateSelection(plan, findings) {
           message: "Each selected dashboard template must explain why it fits the page purpose.",
         });
       }
+      validateDashboardFidelityRequirements(dashboard, entry, templateId, findings);
     }
 
     if (hasThreeColumn) {

@@ -6,6 +6,8 @@ The Page Function Plan is the page-level function contract. It defines what each
 
 Dashboard layout/template selection is part of the Page Function Plan implementation contract. Dashboard page/resource generation must consume the selected `dashboardPagePattern` and `dashboardSectionTemplates[]`; prose-only template mentions are not enough.
 
+Dashboard sections that declare high-quality, Marketing Event, Event Portfolio, portfolio/status, operational-table, rich table, or runtime-fidelity intent must also declare the fidelity requirements that page/resource generation must preserve. Use only plugin-contained standards, studies, template libraries, and redacted/synthetic references; do not depend on private Marketing Event artifacts.
+
 ## 1. Plan Status
 
 - Application name:
@@ -92,12 +94,21 @@ Known Dashboard section templates include:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `kpi_card_row` | <KPI section> | <Metric purpose> | <Source> | <Fields> | <Filters> | <Grouping> | <Sorting> | <Actions or none> | <Controls> | export-proven/runtime-proven/runtime-proof-required/deferred + fallback | <Fit reason> | <Resource/field/action names> |
 
+#### Dashboard Fidelity Requirements
+
+Complete this subsection for each Dashboard section that declares high-quality, Marketing Event, Event Portfolio, portfolio/status, operational-table, rich table, Collection grid-table, or runtime-fidelity intent.
+
+| Region / Section Name | templateId | Marketing Event / Event Portfolio Fidelity Reference | KPI / Summary Binding Requirements | Data Filter Requirements | Collection Grid-Table Requirements | Badge / Progress / Avatar / Person Treatment | Action Metadata Requirements | KPI Formatting Requirements | `nv_label` / Designer Traceability | Runtime Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Region> | <Existing Dashboard template ID> | <Plugin-contained standard/study/reference path or none> | <Summary control source, pivot/report/list binding, hidden source/temp variable/visible KPI binding> | <Real Data Filter controls, filter variables, target consumers> | <Source list, displayed fields, row context, detail/open action, opening behavior> | <Status badges, progress controls, Dynamic user/person/avatar treatment, table header hierarchy, row density> | <Real Yeeflow action metadata, action type, target list/resource, row context, open/add/detail behavior> | <formatNumber/compact K/M/B/fixed decimals/currency/percent rules> | <Semantic `nv_label` and designer traceability expectations> | <What runtime/browser/screenshot proof is required; note that signing/install/API success alone is not UI proof> |
+
 Template-selection rules:
 
 - Every Dashboard page must declare a structured `dashboardPagePattern`.
 - Every Dashboard page must declare structured `dashboardSectionTemplates[]`.
 - Each `dashboardSectionTemplates[]` entry must include `templateId`, region/section name, business purpose, source list/report/resource, displayed fields, filters, grouping, sorting, actions, required controls, proof status or fallback, why the selected template fits, and App Plan traceability.
 - Template selection is not only visual guidance. It is part of the Page Function Plan implementation contract and must be consumed by downstream page/resource generation.
+- Dashboard template/fidelity selection is also a downstream implementation contract: page/resource generation must preserve the selected template IDs, data bindings, filter/action metadata, rich table treatment, KPI formatting, semantic `nv_label`, and runtime proof boundary.
 - KPI/summary metrics should use `kpi_card_row` or another existing KPI/Summary template.
 - Work queues can use `collection_card_board`, `data_table_section`, `kanban_status_board`, or `three_column_workspace_shell` when appropriate.
 - Quick actions can use `quick_links_icon_list`.
@@ -105,6 +116,11 @@ Template-selection rules:
 - Activity/history can use `recent_activity_timeline`.
 - `three_column_workspace_shell` requires meaningful left/main/right panel content and must not be selected for a simple dashboard.
 - If a selected template is not fully runtime-proven for the generated use, include proof status, fallback, and required follow-up.
+- High-quality/Event Portfolio-style Dashboard sections must cite applicable plugin-contained fidelity lessons such as `docs/studies/marketing-event-v045-design-runtime-fidelity-study.md`, `docs/standards/yeeflow-ui-control-property-fidelity.md`, `docs/standards/dashboard-summary-card-generation-standard.md`, `docs/standards/dashboard-runtime-binding-standard.md`, `docs/generated-dashboard-ui-quality-gates.md`, or `docs/reference/yeeflow-control-property-extensions.json`.
+- KPI/Summary Dashboard sections must define source list/report/resource, Summary binding, metric fields, filters, temp-variable or visible-card binding intent, and formatting rules.
+- Filtered Dashboard sections must define real Data Filter controls, filter variables, and downstream consumers such as Summary, Collection, Data table, chart, or list regions.
+- Event Portfolio-style portfolio/status/operational tables must require rich table/card treatment instead of plain scaffold tables: status badges where appropriate, progress controls for progress fields, Dynamic user/person or avatar/person treatment for owner fields where supported, table header hierarchy, row density, and real action metadata for action-looking controls.
+- Collection grid-table style is allowed only when the source list, displayed fields, row context, detail/open actions, and opening behavior are specified.
 
 #### Required Regions and Controls
 
