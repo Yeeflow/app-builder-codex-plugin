@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.64`
+- Version: `0.7.0`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show duplicated Functional Specification/App Plan gate findings separately from the unique unresolved business decisions that the user must answer or explicitly approve for generation.
+Current release `0.7.0` releases the Page Function Plan and Application Design System planning stage. It expands Functional Specification page-needs requirements, adds the Page Function Plan standard/template, adds App Plan to Page Function Plan traceability, requires Dashboard page pattern/template selection, promotes plugin-contained Marketing Event / Event Portfolio dashboard golden-reference guidance, adds Application Design System layout selection for the four supported Yeeflow application layouts, documents supported Header/Navigator styling guidance without inventing unsupported generated properties, adds Container/Button action mapping requirements, adds Dashboard Text control style contracts, and includes related validators and regression tests.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 

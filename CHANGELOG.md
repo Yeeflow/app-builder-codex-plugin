@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.7.0
+
+- Release the Page Function Plan and Application Design System planning stage from PR #125.
+- Expand the Functional Specification standard with business-oriented page-needs requirements for roles, page purpose, required information, actions, filtering/grouping/sorting, mobile support, and access needs.
+- Add the Page Function Plan standard/template as the canonical page-level implementation contract after the Yeeflow App Plan, covering Dashboard pages, Approval submission/task/print forms, custom Data list forms, and custom Document library forms while excluding Form Reports as required UI design surfaces.
+- Add App Plan to Page Function Plan traceability so App Plan dashboard/form/list/library surfaces reference Page Function Plan entries, and Page Function Plan entries map back to stable App Plan resources.
+- Require Dashboard page pattern/template selection with plugin-contained Dashboard templates, including Dashboard section template mappings for source data, fields, filters, grouping, sorting, controls, actions, proof status, and fallback.
+- Promote plugin-contained Marketing Event / Event Portfolio lessons into Event Portfolio dashboard golden-reference guidance for portfolio/status/operations dashboards, including KPI/Summary binding, Data Filters, Collection grid-table treatment, dynamic controls, badges/progress/person treatment, action metadata, `nv_label`, and runtime proof boundaries.
+- Add Application Design System layout selection for the four supported Yeeflow application layouts and app-wide Header/Navigator chrome guidance that separates design intent from supported generated property paths.
+- Add Container/Button click action mapping requirements for Link, Add list item, Open dashboard, Open approval form, and supported/deferred form action bindings.
+- Add Dashboard Text control style contracts for important text roles, native Text/heading shape, typography/color tokens, dynamic bindings, width behavior, and meaningful `nv_label`.
+- Add related validators and regression coverage for Functional Spec/App Plan/Page Function Plan/ADS gates, Dashboard template/golden-reference rules, app chrome safety, action planning, Dashboard Text styling, full-page blueprint/resource parity, aggregate UI hard gates, and YAPK cache artifacts.
+
 ## 0.6.64
 
 - Release Business Clarification unique unresolved gate summary reporting from PR #95.

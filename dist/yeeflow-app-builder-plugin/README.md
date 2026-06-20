@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.64`
+- Version: `0.7.0`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting from PR #95. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show that duplicated gates across the Functional Specification and Yeeflow App Plan are ten raw findings but five unique unresolved business decisions. Planning/generation mode behavior is unchanged: planning mode can pass with warnings for `default-applied-for-planning`, while generation mode remains blocked until gates are answered or explicitly approved for generation.
+Current release `0.7.0` releases the Page Function Plan and Application Design System planning stage from PR #125. It expands Functional Specification page-needs requirements, adds the Page Function Plan standard/template, adds App Plan to Page Function Plan traceability, requires Dashboard page pattern/template selection, promotes plugin-contained Marketing Event / Event Portfolio dashboard golden-reference guidance, adds Application Design System layout selection for the four supported Yeeflow application layouts, documents supported Header/Navigator styling guidance without inventing unsupported generated properties, adds Container/Button action mapping requirements, adds Dashboard Text control style contracts, and includes related validators and regression tests.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.64
+Version: 0.7.0
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.64
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.7.0
 ```
 
 ## What Is Included
