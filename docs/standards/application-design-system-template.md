@@ -1,6 +1,6 @@
 # <Application Name> - Application Design System
 
-Use this template as Stage 4 / Step 4 for every Yeeflow application build, after the Functional Specification, Yeeflow App Plan, and Page Function Plan are reviewed and before page/resource generation.
+Use this template after the Functional Specification, Yeeflow App Plan, Page Function Plan, and Dashboard Golden Reference selection are reviewed and before page/resource generation.
 
 The Application Design System defines the visual and interaction rules that guide later page design, page implementation blueprints, Yeeflow resource generation, decoded resource-vs-blueprint parity, package generation, signing, install/import/upgrade, and runtime proof. It should guide supported Yeeflow page design without inventing unsupported properties. It does not replace the Page Function Plan: the Page Function Plan remains the business/page-function contract for Dashboard pages, Approval submission/task/print forms, Data list forms, and Document library forms. Concrete control, layout, binding, style, and resource JSON decisions belong to the Dashboard Pattern Library / Golden Reference, implementation blueprints, verified Yeeflow standards, and resource generator.
 

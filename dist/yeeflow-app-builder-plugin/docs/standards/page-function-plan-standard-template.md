@@ -1,6 +1,6 @@
 # <Application Name> - Page Function Plan
 
-Use this template as Stage 3 / Step 3 for every Yeeflow application build, after the Functional Specification and Yeeflow App Plan are reviewed and before the Application Design System, Dashboard Pattern Library / Golden Reference selection, page design, implementation blueprints, page/resource generation, package generation, signing, install/import/upgrade, or runtime proof.
+Use this template as Stage 3 / Step 3 for every Yeeflow application build, after the Functional Specification and Yeeflow App Plan are reviewed and before Dashboard Pattern Library / Golden Reference selection, Application Design System, page design, implementation blueprints, page/resource generation, package generation, signing, install/import/upgrade, or runtime proof.
 
 The Page Function Plan is a business/page-function contract. It explains what each page must accomplish, what data it uses, which fields must be displayed or summarized, which filters/sorts/grouping are required, which actions users need, and what mobile behavior is expected.
 
@@ -12,7 +12,7 @@ Responsibility split:
 - Yeeflow App Plan: resource contract, data lists, fields, workflows, forms, actions, dashboards, permissions, and stable Page Function Plan references.
 - Page Function Plan: page-level business requirements, data-region requirements, field usage, filters, actions, sorting/grouping, mobile behavior, and App Plan traceability.
 - Application Design System: selected application layout, visual system, tokens, header/navigation style, density, typography, and cross-page consistency.
-- Dashboard Pattern Library / Golden Reference: dashboard layout and section pattern selection, including Event Portfolio-style references where appropriate.
+- Dashboard Pattern Library / Golden Reference: dashboard layout and section pattern selection, including the default Event Portfolio dashboard structure where appropriate.
 - Resource generator: actual Yeeflow controls, verified plugin-supported properties, resource JSON, implementation blueprints, and existing UI/YAPK hard gates.
 
 Form Reports are not required canonical UI design surfaces and should not require Page Function Plan entries unless explicitly planned as a navigable/custom UI surface.
@@ -158,7 +158,7 @@ Rules:
 
 - Design intent must stay business-level.
 - Do not specify exact Container nesting, CSS, pixel sizes, raw Yeeflow property paths, resource JSON, unsupported control properties, or exact visual layout implementation.
-- Dashboard Pattern Library / Golden Reference selection happens after this business contract and must use plugin-contained dashboard standards and existing hard gates.
+- Dashboard Pattern Library / Golden Reference selection happens after this business contract and must use plugin-contained dashboard standards and existing hard gates. The default dashboard construction style is `event_portfolio_dashboard_golden_reference` with reference details in `docs/reference/dashboard-golden-reference-registry.normalized.json`, but the Page Function Plan should still describe only business/page-function needs: metrics, data regions, filters, fields, actions, sorting/grouping, and mobile behavior.
 
 ### 3.x.10 Responsibility Boundary
 
@@ -232,4 +232,4 @@ Before page/resource generation:
 - Page Function Plan metrics include source fields, calculation logic, scope, and formatting expectation.
 - Page Function Plan main data regions include source list, display fields, sorting/grouping, actions, role behavior, and mobile behavior.
 - Page Function Plan contains no low-level Yeeflow property paths, exact Container/Grid/Text/Button nesting, CSS implementation, arbitrary custom controls, or resource JSON instructions.
-- Application Design System, Dashboard Pattern Library / Golden Reference, implementation blueprints, and UI/YAPK hard gates remain responsible for implementation choices after this business contract is approved.
+- Application Design System, Dashboard Pattern Library / Golden Reference, implementation blueprints, and UI/YAPK hard gates remain responsible for implementation choices after this business contract is approved. Dashboard generation maps approved business/page-function requirements into the default Event Portfolio golden reference structure when appropriate; it must not clone Marketing Event-specific fields or sample data into unrelated apps.

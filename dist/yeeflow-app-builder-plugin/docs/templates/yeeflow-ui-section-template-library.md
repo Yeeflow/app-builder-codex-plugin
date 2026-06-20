@@ -4,6 +4,8 @@ This library defines reusable Yeeflow UI section templates for full application 
 
 Machine-readable registry: `docs/templates/yeeflow-ui-section-template-library.normalized.json`
 
+Default Dashboard Golden Reference registry: `docs/reference/dashboard-golden-reference-registry.normalized.json`
+
 ## Template Contract
 
 Each template includes:
@@ -30,6 +32,23 @@ All generated dashboard templates must be placed inside the export-proven page s
 - Layout-only Grid controls must have display caption/display label disabled.
 - Every control must have a meaningful Navigator label; default labels such as `Container`, `Grid`, `Text`, `Button`, `Summary`, `Dynamic field`, `Kanban`, and `Collection` are invalid for generated-final output.
 - Dynamic controls must remain inside row-context item templates such as Kanban, Collection, or Timeline.
+
+### Default Event Portfolio Dashboard Golden Reference
+
+Use `event_portfolio_dashboard_golden_reference` as the default Dashboard Golden Reference family for polished portfolio, operations, status, pipeline, project, vendor, contract, service, request, facility, and work-queue dashboards unless the page function clearly requires another plugin-contained pattern.
+
+This default is a reusable structural/style reference, not a Marketing Event page clone. It is derived from the Event Portfolio structure but generated dashboards must map data lists, fields, filters, metrics, labels, actions, sorting/grouping, and mobile behavior to the current App Plan and Page Function Plan. Do not copy Marketing Event-specific field names or sample values into unrelated apps.
+
+The default family is composed of:
+
+- `dashboard_default_shell_event_portfolio_ref` for the `Main` > `Content` dashboard shell.
+- `dashboard_header_band_event_portfolio_ref` for page title, subtitle/description, filter/action row, and page-level actions.
+- `dashboard_filter_group_event_portfolio_ref` for real data-bound filter controls and wrappers.
+- `dashboard_kpi_cards_event_portfolio_ref` for Summary/KPI cards, icon block, metric label/value, trend/helper text, note, and binding/fallback boundary.
+- `dashboard_content_section_event_portfolio_ref` for the major page content section.
+- `dashboard_collection_grid_table_event_portfolio_ref` for grid-table style Collection regions with custom header grid, Collection row grid, Dynamic controls, status/progress/person treatment, and row actions.
+
+Downstream dashboard design, blueprint, and resource generation must trace to these reference IDs when claiming the default golden reference. The Page Function Plan remains business/page-function-only and should not prescribe the underlying Container/Grid/Text/Button property shapes.
 
 ### `dashboard_header_action_bar`
 

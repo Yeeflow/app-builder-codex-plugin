@@ -36,6 +36,14 @@ const childTests = [
     ],
   },
   {
+    name: "Dashboard default Event Portfolio golden reference regression suite",
+    command: ["scripts/test-dashboard-default-golden-reference-gates.mjs"],
+    validators: [
+      "validate-dashboard-golden-reference-registry",
+      "Event Portfolio default Dashboard golden reference trace",
+    ],
+  },
+  {
     name: "UI/Summary/KPI runtime hard-gate regression suite",
     command: ["scripts/test-ui-summary-kpi-runtime-hard-gates.mjs"],
     validators: [
