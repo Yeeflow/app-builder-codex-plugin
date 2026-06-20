@@ -85,6 +85,27 @@ function validateControlContract(control, registry, findings, pageSlug) {
   if (control.requiresAction && !isObject(control.action)) {
     addFinding(findings, "error", "CONTROL_INTERACTION_CONTRACT_INCOMPLETE", "Action-looking controls need Yeeflow action metadata in the blueprint.", { page: pageSlug, control: id });
   }
+  validateTextControlContract(control, findings, pageSlug, id, type);
+}
+
+function validateTextControlContract(control, findings, pageSlug, id, type) {
+  if (type === "text") {
+    addFinding(findings, "error", "PAGE_BLUEPRINT_TEXT_CONTROL_UNSUPPORTED_TYPE", "Generated Dashboard Text controls must use the native heading/Text control pattern, not unsupported type:\"text\".", { page: pageSlug, control: id });
+    return;
+  }
+  if (type !== "heading") return;
+  const style = control.textStyleContract || control.textStyle || {};
+  const role = scalar(style.textRole || control.textRole || control.role);
+  const properties = new Set(asArray(control.properties || control.propertyPaths).map((property) => scalar(property.path || property.propertyPath || property)));
+  const hasTy = properties.has("attrs.heads.ty") || style.typographyPreset || style.typographyToken;
+  const hasColor = properties.has("attrs.heads.color") || style.textColorToken || style.colorToken;
+  const hasContent = properties.has("attrs.headc.title.value") || properties.has("attrs.headc.title.variable") || style.contentSource;
+  const hasWidth = properties.has("attrs.common.positioning.widthtype") || style.widthBehavior;
+  if (!role) addFinding(findings, "error", "PAGE_BLUEPRINT_TEXT_ROLE_MISSING", "Blueprint Text controls must declare their Dashboard text role.", { page: pageSlug, control: id });
+  if (!hasTy) addFinding(findings, "error", "PAGE_BLUEPRINT_TEXT_TYPOGRAPHY_MISSING", "Blueprint Text controls must declare attrs.heads.ty or a proven typography style contract.", { page: pageSlug, control: id });
+  if (!hasColor) addFinding(findings, "error", "PAGE_BLUEPRINT_TEXT_COLOR_MISSING", "Blueprint Text controls must declare attrs.heads.color or a proven color style contract.", { page: pageSlug, control: id });
+  if (!hasContent) addFinding(findings, "error", "PAGE_BLUEPRINT_TEXT_CONTENT_MISSING", "Blueprint Text controls must declare static or dynamic title content path.", { page: pageSlug, control: id });
+  if (!hasWidth) addFinding(findings, "error", "PAGE_BLUEPRINT_TEXT_WIDTH_BEHAVIOR_MISSING", "Blueprint Text controls must declare inline/full-width behavior.", { page: pageSlug, control: id });
 }
 
 function validateBlueprintStepEvidence(workflow, findings) {
@@ -118,6 +139,11 @@ function loadPropertyRegistry(normalizedRegistry, extensionRegistry) {
 }
 
 function isPropertyVerified(type, propertyPath, registry) {
+  if (normalizeType(type) === "heading" && [
+    "attrs.heads.ty",
+    "attrs.heads.color",
+    "attrs.common.positioning.widthtype",
+  ].includes(propertyPath)) return true;
   const catalog = registry.catalogByType.get(normalizeType(type));
   return Boolean(catalog?.has(propertyPath) || registry.extensionPaths.has(propertyPath));
 }

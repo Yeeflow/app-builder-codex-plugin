@@ -105,6 +105,56 @@ function openDocumentAction(overrides = {}) {
   };
 }
 
+function textStyle(role, overrides = {}) {
+  const presets = {
+    "page title": { typographyPreset: "h4-medium", color: "var(--c--text)", weight: "semi-bold page title" },
+    "section title": { typographyPreset: "h5-medium", color: "var(--c--text)", weight: "semi-bold section title" },
+    "kpi label": { typographyPreset: "xs-medium", color: "var(--c--neutral-dark-hover)", weight: "medium KPI label" },
+    "kpi value": { typographyPreset: "h5-medium", color: "var(--c--text)", weight: "semi-bold KPI value" },
+    "helper text": { typographyPreset: "xs-medium", color: "var(--c--neutral-dark-hover)", weight: "regular helper text" },
+    "table header": { typographyPreset: "xs-medium", color: "var(--c--text)", weight: "medium table header" },
+    "collection header": { typographyPreset: "xs-medium", color: "var(--c--text)", weight: "medium collection header" },
+    "table cell text": { typographyPreset: "xs-medium", color: "var(--c--text-normal)", weight: "regular table cell" },
+    "collection cell text": { typographyPreset: "xs-medium", color: "var(--c--text-normal)", weight: "regular collection cell" },
+    "badge text": { typographyPreset: "xs-medium", color: "var(--c--text)", weight: "medium badge text" },
+    "action label": { typographyPreset: "xs-medium", color: "var(--c--primary)", weight: "medium action label" },
+    "empty-state text": { typographyPreset: "xs-medium", color: "var(--c--neutral-dark-hover)", weight: "regular empty state" },
+    "note text": { typographyPreset: "xs-medium", color: "var(--c--neutral-dark-hover)", weight: "regular note text" },
+    "description text": { typographyPreset: "xs-medium", color: "var(--c--neutral-dark-hover)", weight: "regular description text" },
+  };
+  const preset = presets[role] || presets["section title"];
+  const dynamic = /kpi value|table cell|collection cell|badge/.test(role);
+  return {
+    textRole: role,
+    businessPurpose: `${role} communicates the dashboard hierarchy and business content.`,
+    contentSource: dynamic ? "field value" : "static text",
+    expectedControlShape: "native Text control as type heading / label Text",
+    typographyPreset: preset.typographyPreset,
+    textColorToken: preset.color,
+    fontWeightStyle: preset.weight,
+    widthBehavior: "inline width using attrs.common.positioning.widthtype [null, \"2\"]",
+    nv_label: `${role} text`,
+    dynamicBindingDetails: dynamic ? `${role} binds to planned source field or Summary/temp variable through attrs.headc.title.variable[]` : "N/A for static text",
+    ...overrides,
+  };
+}
+
+function textStylesForTemplate(templateId) {
+  if (templateId === "kpi_card_row" || templateId === "progress_summary_card") {
+    return [textStyle("section title"), textStyle("kpi label"), textStyle("kpi value"), textStyle("helper text")];
+  }
+  if (templateId === "data_table_section") {
+    return [textStyle("section title"), textStyle("table header"), textStyle("table cell text"), textStyle("action label"), textStyle("empty-state text")];
+  }
+  if (templateId === "collection_card_board" || templateId === "kanban_status_board") {
+    return [textStyle("section title"), textStyle("collection header"), textStyle("collection cell text"), textStyle("badge text"), textStyle("action label")];
+  }
+  if (templateId === "dashboard_header_action_bar" || templateId === "quick_links_icon_list") {
+    return [textStyle("page title"), textStyle("description text"), textStyle("action label")];
+  }
+  return [textStyle("section title"), textStyle("helper text")];
+}
+
 function attachStructuredOpenRequest(value) {
   if (!value || typeof value !== "object") return value;
   const labels = (value.actions || []).filter((action) => typeof action === "string");
@@ -114,6 +164,12 @@ function attachStructuredOpenRequest(value) {
       value.interactiveActions.push(openRequestAction());
     }
   }
+  return value;
+}
+
+function attachTextStyleContract(value) {
+  if (!value || typeof value !== "object") return value;
+  if (!value.textStyleContract) value.textStyleContract = textStylesForTemplate(value.templateId || "");
   return value;
 }
 
@@ -315,7 +371,10 @@ function pagePlan(overrides = {}) {
   }));
   for (const dashboard of merged.dashboards) {
     attachStructuredOpenRequest(dashboard);
-    for (const entry of dashboard.dashboardSectionTemplates || []) attachStructuredOpenRequest(entry);
+    for (const entry of dashboard.dashboardSectionTemplates || []) {
+      attachStructuredOpenRequest(entry);
+      attachTextStyleContract(entry);
+    }
     for (const region of dashboard.regions || []) attachStructuredOpenRequest(region);
   }
   for (const resource of [...(merged.dataListForms || []), ...(merged.documentLibraryForms || [])]) {
@@ -704,6 +763,61 @@ try {
   assert.equal(output.report.status, "fail");
   expectCode(output.report, "PAGE_FUNCTION_CLICK_ACTION_REFERENCE_UNKNOWN");
   results.push({ case: "click action passValues referencing unknown App Plan field fails", status: "pass" });
+
+  const missingTextContract = pagePlan();
+  delete missingTextContract.dashboards[0].dashboardSectionTemplates[0].textStyleContract;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-text-style-contract", missingTextContract)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_STYLE_CONTRACT_MISSING");
+  results.push({ case: "Dashboard section using visible Text without textStyleContract fails", status: "pass" });
+
+  const missingTypography = pagePlan();
+  delete missingTypography.dashboards[0].dashboardSectionTemplates[0].textStyleContract[0].typographyPreset;
+  delete missingTypography.dashboards[0].dashboardSectionTemplates[0].textStyleContract[0].textColorToken;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "missing-text-typography-color", missingTypography)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_TYPOGRAPHY_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_COLOR_MISSING");
+  results.push({ case: "important Dashboard Text without typography/color intent fails", status: "pass" });
+
+  const unsupportedTextShape = pagePlan();
+  unsupportedTextShape.dashboards[0].dashboardSectionTemplates[0].textStyleContract[0].expectedControlShape = "unsupported ad hoc type: \"text\"";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "unsupported-text-control-shape", unsupportedTextShape)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_AD_HOC_TYPE_UNSUPPORTED");
+  results.push({ case: "Dashboard Text planning with unsupported ad hoc type text fails", status: "pass" });
+
+  const unsupportedTextColor = pagePlan();
+  unsupportedTextColor.dashboards[0].dashboardSectionTemplates[0].textStyleContract[0].textColorToken = "[null, \"var(--c--text)\"]";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "unsupported-text-color-shape", unsupportedTextColor)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_COLOR_SHAPE_UNSUPPORTED");
+  results.push({ case: "Dashboard Text color using unsupported pair shape fails", status: "pass" });
+
+  const placeholderText = pagePlan();
+  placeholderText.dashboards[0].dashboardSectionTemplates[0].textStyleContract[0].staticText = "Here is the title";
+  placeholderText.dashboards[0].dashboardSectionTemplates[0].textStyleContract[0].nv_label = "Title";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "placeholder-text-style", placeholderText)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_PLACEHOLDER_GENERIC");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_NV_LABEL_MISSING");
+  results.push({ case: "Dashboard Text placeholders and generic nv_label fail", status: "pass" });
+
+  const dynamicTextMissingBinding = pagePlan();
+  delete dynamicTextMissingBinding.dashboards[0].dashboardSectionTemplates[0].textStyleContract.find((entry) => entry.textRole === "kpi value").dynamicBindingDetails;
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "dynamic-text-missing-binding", dynamicTextMissingBinding)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_DYNAMIC_BINDING_MISSING");
+  results.push({ case: "Dynamic Dashboard Text without binding details fails", status: "pass" });
+
+  const indistinguishableKpiText = pagePlan();
+  const kpiLabel = indistinguishableKpiText.dashboards[0].dashboardSectionTemplates[0].textStyleContract.find((entry) => entry.textRole === "kpi label");
+  kpiLabel.typographyPreset = "h5-medium";
+  kpiLabel.textColorToken = "var(--c--text)";
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "indistinguishable-kpi-text", indistinguishableKpiText)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_TEXT_ROLES_INDISTINGUISHABLE");
+  results.push({ case: "Dashboard KPI label/value visually indistinguishable without role-specific style fails", status: "pass" });
 
   output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "valid-kanban-dashboard", pagePlan({
     dashboards: [{

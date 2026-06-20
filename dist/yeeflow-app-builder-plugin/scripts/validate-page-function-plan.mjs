@@ -70,6 +70,38 @@ const SUPPORTED_OPEN_MODES = new Set(["", "default", "modal", "slide", "target",
 const SUPPORTED_MODAL_SIZES = new Set(["0", "1", "2", "3", "9"]);
 const CLICK_IMPLYING_LABEL = /\b(open|add|new|create|start|submit|approve|reject|complete|send|cancel|save|view|detail|details|launch|go to|navigate|drill|upload|download|link)\b/i;
 const BUILT_IN_FORM_ACTION_LABEL = /^(save|cancel|save as draft|submit|approve|reject|complete|print)$/i;
+const TEXT_USING_DASHBOARD_TEMPLATES = new Set([
+  "dashboard_header_action_bar",
+  "kpi_card_row",
+  "progress_summary_card",
+  "business_alert_card",
+  "data_table_section",
+  "kanban_status_board",
+  "collection_card_board",
+  "quick_links_icon_list",
+  "recent_activity_timeline",
+  "three_column_workspace_shell",
+]);
+const IMPORTANT_TEXT_ROLES = new Set([
+  "page title",
+  "section title",
+  "kpi label",
+  "kpi value",
+  "helper text",
+  "table header",
+  "collection header",
+  "table cell text",
+  "collection cell text",
+  "badge text",
+  "action label",
+  "empty-state text",
+  "note text",
+  "description text",
+]);
+const TEXT_PLACEHOLDER = /^(title|here is the title|description|placeholder|lorem ipsum|text|label|value|untitled)$/i;
+const TEXT_COLOR_TOKEN = /^var\(--c--[a-z0-9-]+\)$/i;
+const TEXT_TY_PRESET = /^(xs-medium|h[1-6]-medium|h[1-6]-regular|h[1-6]-semi-bold|h[1-6]-bold|body|caption|title|subtitle)$/i;
+const TEXT_PROOF_BOUNDARY = /\b(export-learning-required|runtime-proof-required|deferred|proof boundary|not export-proven|not runtime-proven)\b/i;
 const ALLOWED_GENERATED_CHROME_PROPERTY_PATHS = new Set([
   "LayoutView.attrs.appearance.bgc",
   "LayoutView.attrs.appearance.color",
@@ -637,6 +669,141 @@ function validateClickAction(action, indexes, findings, context) {
   validateActionReferences(action, indexes, findings, context);
 }
 
+function textStyleEntries(section) {
+  return [
+    ...asArray(section.textStyleContract),
+    ...asArray(section.textStyleContracts),
+    ...asArray(section.textRoles),
+    ...asArray(section.textControls),
+  ];
+}
+
+function textRole(entry) {
+  return normalizeName(entry.textRole || entry.role || entry.businessPurpose || entry.name);
+}
+
+function typographyValue(entry) {
+  const value = entry.typographyPreset || entry.typographyToken || entry.ty || entry["attrs.heads.ty"];
+  if (Array.isArray(value)) return safeString(value[1] || value[0]).trim();
+  if (value && typeof value === "object") return flattenText(value);
+  return safeString(value).trim();
+}
+
+function colorValue(entry) {
+  return safeString(entry.textColorToken || entry.colorToken || entry.textColor || entry.color || entry["attrs.heads.color"]).trim();
+}
+
+function textContentSource(entry) {
+  return normalizeName(entry.contentSource || entry.source || entry.sourceType);
+}
+
+function isDynamicTextEntry(entry) {
+  return /\b(field value|variable binding|calculated value|runtime value|dynamic|summary|temp variable)\b/i.test(textContentSource(entry))
+    || hasTextValue(entry.dynamicBindingDetails)
+    || hasTextValue(entry.binding);
+}
+
+function sectionUsesVisibleText(section) {
+  if (textStyleEntries(section).length) return true;
+  if (TEXT_USING_DASHBOARD_TEMPLATES.has(safeString(section.templateId).trim())) return true;
+  const controls = flattenText(section.requiredControls || section.controls || section.controlTypes || section.requiredControlTypes);
+  return /\b(text|heading|dynamic field|summary|button|action_button|collection|data table|kanban)\b/i.test(controls);
+}
+
+function validateTextStyleContract(dashboard, section, findings) {
+  if (!sectionUsesVisibleText(section)) return;
+  const entries = textStyleEntries(section);
+  const context = {
+    dashboard: dashboard.name,
+    section: section.regionName || section.sectionName,
+    templateId: section.templateId,
+  };
+  if (!entries.length) {
+    findings.push({
+      level: "error",
+      code: "PAGE_FUNCTION_DASHBOARD_TEXT_STYLE_CONTRACT_MISSING",
+      ...context,
+      message: "Dashboard sections using visible Text controls must declare textStyleContract[] for important text roles.",
+    });
+    return;
+  }
+
+  const roleStyles = new Map();
+  for (const entry of entries) {
+    const role = textRole(entry);
+    const label = safeString(entry.nv_label || entry.nvLabel || entry.label || entry.controlLabel || role).trim();
+    const ty = typographyValue(entry);
+    const color = colorValue(entry);
+    const controlShape = normalizeName(entry.expectedControlShape || entry.controlShape || entry.controlType || entry.yeeflowControlShape);
+    const contentSource = textContentSource(entry);
+    const width = safeString(entry.widthBehavior || entry.width || entry.widthType || entry["attrs.common.positioning.widthtype"]).trim();
+    const proofText = flattenText(entry);
+
+    if (!role || !IMPORTANT_TEXT_ROLES.has(role)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_ROLE_MISSING", ...context, textRole: role, message: "Each textStyleContract entry must identify an important Dashboard text role." });
+    }
+    if (!contentSource) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_CONTENT_SOURCE_MISSING", ...context, textRole: role, message: "Each textStyleContract entry must declare content source: static text, field value, variable binding, calculated value, or runtime value." });
+    }
+    if (controlShape && !/\b(heading|text)\b/i.test(controlShape) || !controlShape) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_CONTROL_SHAPE_UNSUPPORTED", ...context, textRole: role, controlShape, message: "Dashboard Text controls must use the plugin-supported native Text/heading control pattern." });
+    }
+    if (/type\s*:\s*"?text"?|ad hoc|text-editor/i.test(controlShape)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_AD_HOC_TYPE_UNSUPPORTED", ...context, textRole: role, controlShape, message: "Do not plan unsupported ad hoc type:\"text\" or text-editor shapes for Dashboard Text controls." });
+    }
+    if (!ty) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_TYPOGRAPHY_MISSING", ...context, textRole: role, message: "Important Dashboard Text roles must declare attrs.heads.ty typography preset/token or a proof/deferred boundary." });
+    } else if (!TEXT_TY_PRESET.test(ty) && !TEXT_PROOF_BOUNDARY.test(proofText)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_TYPOGRAPHY_UNSUPPORTED", ...context, textRole: role, typography: ty, message: "Text typography must use plugin-supported presets/tokens or be marked export-learning-required/runtime-proof-required/deferred." });
+    }
+    if (!color) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_COLOR_MISSING", ...context, textRole: role, message: "Important Dashboard Text roles must declare attrs.heads.color text color token." });
+    } else if (!TEXT_COLOR_TOKEN.test(color) && !TEXT_PROOF_BOUNDARY.test(proofText)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_COLOR_UNSUPPORTED", ...context, textRole: role, color, message: "Text color must use a proven plain string Yeeflow color token or be marked proof/deferred." });
+    }
+    if (/\[.*var\(--c--/i.test(color) || /\[null/i.test(color)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_COLOR_SHAPE_UNSUPPORTED", ...context, textRole: role, color, message: "Text color must use the proven plain string color format, not a pair/array shape." });
+    }
+    if (!hasTextValue(entry.fontWeightStyle || entry.fontWeight || entry.fontStyle || entry.styleIntent) && !TEXT_PROOF_BOUNDARY.test(proofText)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_FONT_STYLE_MISSING", ...context, textRole: role, message: "Text style contract must declare font weight/style intent where supported or mark proof/deferred." });
+    }
+    if (!width) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_WIDTH_BEHAVIOR_MISSING", ...context, textRole: role, message: "Text style contract must declare inline/full-width behavior." });
+    }
+    if (!label || TEXT_PLACEHOLDER.test(label)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_NV_LABEL_MISSING", ...context, textRole: role, nv_label: label, message: "Text controls must declare meaningful nv_label values." });
+    }
+    const staticValue = safeString(entry.staticText || entry.exampleText || entry.text || entry.content).trim();
+    if (staticValue && TEXT_PLACEHOLDER.test(staticValue)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_PLACEHOLDER_GENERIC", ...context, textRole: role, text: staticValue, message: "Dashboard Text roles must not use generic placeholders such as Title, Here is the title, or Description." });
+    }
+    if (isDynamicTextEntry(entry) && !hasTextValue(entry.dynamicBindingDetails) && !hasTextValue(entry.binding)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_TEXT_DYNAMIC_BINDING_MISSING", ...context, textRole: role, message: "Dynamic Text content must declare binding details such as field, variable, Summary/temp variable, calculated expression, or runtime value source." });
+    }
+    if (role && ty && color) roleStyles.set(role, `${ty}|${color}`);
+  }
+
+  const roles = new Set(entries.map(textRole).filter(Boolean));
+  const expectedRoleGroups = [
+    ["kpi label", "kpi value"],
+    ["section title", "helper text"],
+    ["table header", "table cell text"],
+    ["collection header", "collection cell text"],
+  ];
+  for (const group of expectedRoleGroups) {
+    const present = group.filter((role) => roles.has(role));
+    if (present.length > 1 && new Set(present.map((role) => roleStyles.get(role))).size < present.length) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_TEXT_ROLES_INDISTINGUISHABLE",
+        ...context,
+        roles: present,
+        message: "KPI, section, helper, and table/collection text roles must have role-specific typography/color/style intent.",
+      });
+    }
+  }
+}
+
 function validateInteractiveActions(plan, appPlan, findings) {
   const indexes = appPlanIndexes(appPlan, plan);
   for (const record of actionSurfaceRecords(plan)) {
@@ -1059,6 +1226,10 @@ function markdownFindings(text) {
     [/action-type: "8"[\s\S]*Open approval form/i, "PAGE_FUNCTION_PLAN_OPEN_APPROVAL_ACTION_TYPE_RULE_MISSING"],
     [/action-type: "1"[\s\S]*Form action binding/i, "PAGE_FUNCTION_PLAN_FORM_ACTION_BINDING_RULE_MISSING"],
     [/visible action-looking Containers or Buttons without action metadata/i, "PAGE_FUNCTION_PLAN_FAKE_BUTTON_GENERATION_RULE_MISSING"],
+    [/textStyleContract\[\]/i, "PAGE_FUNCTION_PLAN_TEXT_STYLE_CONTRACT_FIELD_MISSING"],
+    [/attrs\.heads\.ty/i, "PAGE_FUNCTION_PLAN_TEXT_TYPOGRAPHY_RULE_MISSING"],
+    [/attrs\.heads\.color/i, "PAGE_FUNCTION_PLAN_TEXT_COLOR_RULE_MISSING"],
+    [/attrs\.headc\.title\.variable/i, "PAGE_FUNCTION_PLAN_TEXT_DYNAMIC_BINDING_RULE_MISSING"],
   ];
   for (const [pattern, code] of required) {
     if (!pattern.test(text)) {
@@ -1286,6 +1457,7 @@ function validateDashboardTemplateSelection(plan, findings) {
           message: "Each selected dashboard template must explain why it fits the page purpose.",
         });
       }
+      validateTextStyleContract(dashboard, entry, findings);
       validateDashboardFidelityRequirements(dashboard, entry, templateId, findings);
     }
 

@@ -39,6 +39,7 @@ Functional Specification
 - Clarified document responsibility split: Functional Specification describes business page needs only, App Plan declares Dashboard resources plus stable Page Function Plan refs only, and Page Function Plan owns Dashboard implementation intent including `dashboardGoldenReference`.
 - Consolidated the Page Function Plan as the canonical page-level implementation contract for Dashboard pages, Approval submission/task/print surfaces, custom Data list forms, and custom Document library forms.
 - Added Page Function Plan `interactiveActions[]` / click-action gates for visible interactive `Container`, `Button`, and `action_button` controls using plugin-known Container/Button action mappings and runtime proof boundaries.
+- Added Dashboard Text control style gates requiring structured `textStyleContract[]` entries for page titles, section titles, KPI labels/values, helper text, table/collection text, badge text, action labels, empty-state text, and notes before page blueprint/resource generation.
 - Added Application Design System layout-selection gates requiring exactly one supported Yeeflow Application Layout and structured app chrome fields before generation.
 - Added Application Design System `applicationChrome` gates for app-wide Yeeflow header, navigator menu, content-area tokens, design intent, supported generated shell property paths, export-learning/runtime-proof/deferred boundaries, and Dashboard chrome inheritance.
 - Added non-dashboard surface gates for Approval field state/behavior, task decisions, print-specific noninteractive pages, New/Edit current-resource field scope, Save/Cancel actions, View related-region contracts, and Document library metadata/upload/view behavior.
@@ -98,6 +99,8 @@ Dashboard-specific contract:
 - The Event Portfolio golden reference is based only on plugin-contained, redacted, synthetic, or already committed Marketing Event / Event Portfolio training materials. It excludes private raw artifacts, raw package payloads, tenant/app/list IDs, screenshots, raw API responses, and private runtime evidence.
 - App Plan Dashboard entries now require `pageFunctionPlanRef`, `dashboardFunctionRef`, or an equivalent stable reference ID. Page Function Plan Dashboard entries require `pageFunctionPlanId` and `appPlanDashboardRef`.
 - Dashboard/resource generation must consume the Page Function Plan entry when it exists and must not infer sections only from the App Plan resource list.
+- Dashboard sections that use visible Text controls must declare structured `textStyleContract[]` entries with text role, business purpose, content source, static text or dynamic binding details, native heading/Text control shape, typography token, text color token, supported weight/style or proof boundary, width behavior, semantic `nv_label`, and proof/deferred status.
+- Dashboard Text generation must use the plugin-supported native `heading` / label `Text` pattern, `attrs.headc.title.value` or `attrs.headc.title.variable[]`, `attrs.heads.ty`, string-token `attrs.heads.color`, and supported width behavior. It must not emit unsupported ad hoc `type: "text"` controls, placeholder copy, static mock values for dynamic content, unsupported color shapes, or visually indistinguishable important text roles.
 
 Non-dashboard surface contract:
 
@@ -154,6 +157,14 @@ Application Design System layout contract:
 - Form action binding referencing a missing form action.
 - Invented action type/open mode.
 - Click action passValues/queryParams/setVars referencing fields or variables outside the App Plan/Page Function Plan.
+- Valid Dashboard Text style contracts using native heading/Text shape, tokenized typography/color, dynamic binding details, width behavior, and meaningful `nv_label`.
+- Dashboard section using visible Text without `textStyleContract[]`.
+- Important Dashboard Text missing typography/color intent.
+- Dashboard Text planning with unsupported ad hoc `type: "text"`.
+- Dashboard Text color using unsupported pair/array shape.
+- Dashboard Text using placeholder copy or generic `nv_label`.
+- Dynamic Dashboard Text missing binding details.
+- KPI label/value or table/section text roles visually indistinguishable because role-specific style intent is missing.
 - Form Report correctly not required as a UI surface.
 - New/Edit form incorrectly containing Collection/Data analytics/audit/dashboard regions.
 - Approval submission field missing state/behavior contract.

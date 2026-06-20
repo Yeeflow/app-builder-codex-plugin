@@ -214,6 +214,25 @@ Complete this subsection for each Dashboard section that declares high-quality, 
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Region> | <Existing Dashboard template ID> | <Plugin-contained standard/study/reference path or none> | <Summary control source, pivot/report/list binding, hidden source/temp variable/visible KPI binding> | <Real Data Filter controls, filter variables, target consumers> | <Source list, displayed fields, row context, detail/open action, opening behavior> | <Status badges, progress controls, Dynamic user/person/avatar treatment, table header hierarchy, row density> | <Real Yeeflow action metadata, action type, target list/resource, row context, open/add/detail behavior> | <formatNumber/compact K/M/B/fixed decimals/currency/percent rules> | <Semantic `nv_label` and designer traceability expectations> | <What runtime/browser/screenshot proof is required; note that signing/install/API success alone is not UI proof> |
 
+#### Dashboard Text Style Contract
+
+Every Dashboard page section that uses visible Text controls must declare a structured `textStyleContract[]`. This applies to important text roles including page title, section title, KPI label, KPI value, helper text, table/collection headers, table/collection cell text, badge text, action labels, empty-state text, and note/description text.
+
+Use the plugin-supported Text/heading control pattern from `docs/yeeflow-text-control-generation-standards.md`, `docs/yeeflow-text-control-pattern-study.md`, `docs/yeeflow-application-style-token-standards.md`, and `docs/yeeflow-root-style-token-reference.md`. Generated Dashboard Text controls must use native `type: "heading"` / label `Text`, `attrs.headc.title.value` for static text or `attrs.headc.title.variable[]` for dynamic text, `attrs.heads.ty = [null, "<typography-token>"]`, `attrs.heads.color = "var(--c--...)"`, supported width behavior such as `attrs.common.positioning.widthtype`, and a meaningful `nv_label`. Do not plan or generate unsupported ad hoc `type: "text"` controls, `attrs.heads.ty` as a plain string, or `attrs.heads.color` as an array/pair shape.
+
+| Region / Section Name | Text Role | Business Purpose | Content Source | Static Text / Binding Details | Expected Yeeflow Control Shape | Typography Preset / Token | Text Color Token | Font Weight / Style | Width Behavior | `nv_label` | Proof Status / Deferred Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Region> | page title / section title / KPI label / KPI value / helper text / table header / table cell / badge text / action label / empty-state text / note text | <Why this text matters to the business task> | static text / field value / variable binding / calculated value / runtime value | <Literal text or binding path/source field/variable/formula> | heading/Text native pattern; no `type: "text"` | <e.g. `h4-medium`, `h5-medium`, `body`, or proof-deferred token> | <e.g. `var(--c--text)`, `var(--c--primary)`, `var(--c--text-normal)`> | <Supported weight/style or `export-learning-required` / `runtime-proof-required` / deferred> | inline / full-width / responsive fit rule | <Semantic label, not `Text`, `Title`, or `Description`> | runtime-proven / export-proven / runtime-proof-required / export-learning-required / deferred + fallback |
+
+Text-style rules:
+
+- `textStyleContract[]` must be structured data on the Dashboard section or selected section template entry. Prose-only style mentions are not enough.
+- Text roles must not use generic placeholders such as `Title`, `Here is the title`, `Description`, or `Text`. Static copy must be business-specific. Dynamic content must use binding details instead of static placeholder values.
+- KPI labels and values, section titles and helper text, table/collection headers and cells, badge text, and action labels must have role-specific typography/color intent so important Dashboard text is visually distinguishable.
+- Dynamic Text content must declare the source field, variable, calculated value, Summary/KPI binding, or runtime value plus binding path. Do not render dynamic values as static mock text.
+- Text color must use the proven plugin-supported string token shape. Raw hex values, arrays, object/pair color shapes, or unproven property paths must be marked `export-learning-required`, `runtime-proof-required`, or deferred instead of treated as generated property proof.
+- Resource generation must consume the Page Function Plan `textStyleContract[]` and the later page blueprint/resource contract must preserve the same Text role, `attrs.heads.ty`, `attrs.heads.color`, title value/variable binding, width behavior, and semantic `nv_label`.
+
 Template-selection rules:
 
 - Every Dashboard page must declare a structured `dashboardPagePattern`.
@@ -224,6 +243,7 @@ Template-selection rules:
 - Each `dashboardSectionTemplates[]` entry must include `templateId`, region/section name, business purpose, source list/report/resource, displayed fields, filters, grouping, sorting, actions, required controls, proof status or fallback, why the selected template fits, and App Plan traceability.
 - Template selection is not only visual guidance. It is part of the Page Function Plan implementation contract and must be consumed by downstream page/resource generation.
 - Dashboard template/fidelity selection is also a downstream implementation contract: page/resource generation must preserve the selected template IDs, data bindings, filter/action metadata, rich table treatment, KPI formatting, semantic `nv_label`, and runtime proof boundary.
+- Dashboard Text styling is also a downstream implementation contract: page/resource generation must preserve `textStyleContract[]`, use the plugin-supported native heading/Text shape, reject unsupported `type: "text"` shapes, preserve dynamic bindings, and avoid generic placeholders.
 - If `event_portfolio_dashboard_golden_reference` is selected, downstream generation must preserve the whole golden-reference contract: Data Filters, KPI cards, Summary/KPI binding or fallback boundary, Collection grid-table structure, Dynamic controls in item templates, badge/progress/person treatments, real action metadata, table hierarchy/density/spacing, semantic `nv_label`, and runtime proof boundary.
 - Do not allow dashboard/resource generation to infer sections only from the App Plan resource list when a Page Function Plan exists.
 - KPI/summary metrics should use `kpi_card_row` or another existing KPI/Summary template.
@@ -388,6 +408,9 @@ Rules:
 | Every Dashboard section templateId exists in plugin-contained Dashboard templates or documented Dashboard standards | pass/fail | |
 | Dashboard section templates match the region purpose and include source, displayed fields, actions where required, required controls, proof status/fallback, and fit reason | pass/fail | |
 | three_column_workspace_shell is used only for meaningful left/main/right workspace pages | pass/fail | |
+| Dashboard sections with visible Text controls declare structured `textStyleContract[]` entries for important text roles | pass/fail | |
+| Dashboard Text contracts use the plugin-supported heading/Text pattern, `attrs.heads.ty`, string-token `attrs.heads.color`, title value/variable binding, width behavior, and meaningful `nv_label` | pass/fail | |
+| Dashboard Text contracts reject unsupported `type: "text"` shapes, generic placeholders, static mock values for dynamic content, unsupported color shapes, and indistinguishable KPI/table/section text roles | pass/fail | |
 | Every Approval submission form has a Page Function Plan entry | pass/fail | |
 | Every planned task form has a Page Function Plan entry | pass/fail | |
 | Every required print page has a Page Function Plan entry | pass/fail | |
