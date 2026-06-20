@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.77`
+- Version: `0.6.64`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.77` adds Final / Authorized Generation Mode API-issued ID gates. Draft / Offline Mode remains the default no-live-API path with local unsigned draft output only, while Final / Authorized Generation Mode requires explicit live API authorization, a target workspace, and API-issued IDs allocated before resource generation.
+Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show duplicated Functional Specification/App Plan gate findings separately from the unique unresolved business decisions that the user must answer or explicitly approve for generation.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 

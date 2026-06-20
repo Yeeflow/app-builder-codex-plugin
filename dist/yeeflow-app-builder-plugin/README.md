@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.6.73`
+- Version: `0.6.64`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.73` releases HTML-first New/Edit form body discipline gates. New/Edit primary fields must stay in form body field groups and control mappings; generic lower regions such as `Primary form fields`, `Main form fields`, `Editable fields`, and `Document metadata fields` fail for New/Edit surfaces; duplicate primary actions fail unless row/item/Sub List scoped; fake lower-region cards made from field/action names fail; editable field labels cannot be rendered as values without explicit placeholder semantics; and invalid UI Surface Contracts are rejected before HTML/Blueprint parity can incorrectly pass. These gates prove design, HTML, and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting from PR #95. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show that duplicated gates across the Functional Specification and Yeeflow App Plan are ten raw findings but five unique unresolved business decisions. Planning/generation mode behavior is unchanged: planning mode can pass with warnings for `default-applied-for-planning`, while generation mode remains blocked until gates are answered or explicitly approved for generation.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.6.73
+Version: 0.6.64
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.73
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.64
 ```
 
 ## What Is Included

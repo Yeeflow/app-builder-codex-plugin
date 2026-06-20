@@ -145,15 +145,6 @@ function splitItems(text) {
   );
 }
 
-function splitResourceNames(text) {
-  return uniqueStrings(
-    safeString(text)
-      .split(/[,;|]/g)
-      .map((item) => item.replace(/^[\s\-*0-9.)]+/, "").trim())
-      .filter(Boolean),
-  );
-}
-
 function coercePlannedItems(value) {
   return asArray(value).flatMap((item) => {
     if (typeof item === "string") return [{ title: item }];
@@ -164,159 +155,32 @@ function coercePlannedItems(value) {
 
 function extractMarkdownNavigation(text) {
   const groups = [];
-  const section = extractMarkdownSection(text, /application navigation|navigation/i);
-  for (const table of markdownTables(section || "")) {
-    const header = table.header.map((cell) => normalizeName(cell));
-    const groupIndex = header.findIndex((cell) => /^(navigation )?group$/.test(cell) || cell === "group name");
-    const itemIndex = header.findIndex((cell) => /^(navigation )?(item|items|page|pages|resource|resources)$/.test(cell) || cell === "child items");
-    if (groupIndex >= 0 && itemIndex >= 0) {
-      for (const row of table.rows) {
-        const title = row[groupIndex];
-        const items = splitResourceNames(row[itemIndex]);
-        if (title && items.length) groups.push({ title, items });
-      }
-      continue;
-    }
-    if (table.header.length === 2) {
-      for (const row of table.rows) {
-        const title = row[0];
-        const items = splitResourceNames(row[1]);
-        if (title && items.length) groups.push({ title, items });
-      }
-    }
+  const lines = text.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) continue;
+    const cells = trimmed.slice(1, -1).split("|").map((cell) => cell.trim());
+    if (cells.length < 2) continue;
+    if (/^-+$/.test(cells[0].replace(/\s+/g, "")) || /navigation group/i.test(cells[0])) continue;
+    const title = cells[0];
+    const items = splitItems(cells[1]);
+    if (title && items.length) groups.push({ title, items });
   }
   return groups;
 }
 
-function isPlaceholderResourceName(value) {
-  const text = safeString(value).trim();
-  if (!text) return true;
-  if (/^<.*>$/.test(text)) return true;
-  if (/^(name|resource name|planned resource name|n\/a|na|none|not applicable|applicable|tbd|yes\/no|yes|no|true|false|group|item|visible|hidden)$/i.test(text)) return true;
-  if (/^(empty|standard|native|default|optional|required|not required|not planned|no .+ planned)$/i.test(text)) return true;
-  return false;
-}
-
-function isAggregateOrDetailResourceName(value) {
-  const text = safeString(value).trim();
-  if (!text) return true;
-  return [
-    /\bforms? for all lists\b/i,
-    /\bstandard (list|data list|form|view) experience\b/i,
-    /\boperational views?\b/i,
-    /\brole[-\s]specific .*views?\b/i,
-    /\b(workload|operations?) dashboards?\b/i,
-    /\bgrouped app navigation\b/i,
-    /\bplaceholder app groups?\b/i,
-    /\bpermission intent\b/i,
-    /\bfollow-up lifecycle workflows?\b/i,
-    /\blifecycle automations?\b/i,
-    /\blifecycle notifications?\b/i,
-    /\bcurrent requester intent\b/i,
-  ].some((pattern) => pattern.test(text));
-}
-
-function bucketForResourceType(value) {
-  const type = safeString(value).toLowerCase();
-  if (/\b(form reports?|reports?)\b/.test(type)) return "reports";
-  if (/\b(workflows?|automations?|form actions?)\b/.test(type)) return "workflows";
-  if (/\b(dashboards?|pages?|workspaces?)\b/.test(type) && !/\bviews?\b/.test(type)) return "pages";
-  if (/\bapproval forms?\b|\bforms?\b/.test(type) && !/\breports?\b/.test(type)) return "approvalForms";
-  if (/\b(document libraries|document library|data lists?|lists?)\b/.test(type)) return "dataLists";
-  if (/\bai agents?\b|\bagents?\b/.test(type)) return "agents";
-  if (/\bcopilots?\b/.test(type)) return "copilots";
-  if (/\btools?\b/.test(type)) return "tools";
-  if (/\bknowledge\b/.test(type)) return "knowledgeResources";
-  if (/\bintegration\b/.test(type)) return "integrations";
-  if (/\bconnection|connector\b/.test(type)) return "connections";
-  if (/\bpermission|security|role|access\b/.test(type)) return "permissions";
-  if (/\badmin|setting|category|tag|attribute|audit\b/.test(type)) return "adminResources";
-  if (/\bteam|group\b/.test(type)) return "teams";
-  return "";
-}
-
-function splitMarkdownTableCells(line) {
-  const trimmed = line.trim();
-  if (!trimmed.startsWith("|") || !trimmed.endsWith("|")) return null;
-  return trimmed.slice(1, -1).split("|").map((cell) => cell.trim());
-}
-
-function isMarkdownSeparatorRow(cells) {
-  return cells.every((cell) => /^:?-{3,}:?$/.test(cell.replace(/\s+/g, "")));
-}
-
-function markdownTables(text) {
+function extractMarkdownResourceSection(text, headingPattern) {
   const lines = text.split(/\r?\n/);
-  const tables = [];
-  for (let index = 0; index < lines.length; index += 1) {
-    const header = splitMarkdownTableCells(lines[index]);
-    const separator = splitMarkdownTableCells(lines[index + 1] || "");
-    if (!header || !separator || !isMarkdownSeparatorRow(separator)) continue;
-    const rows = [];
-    index += 2;
-    while (index < lines.length) {
-      const cells = splitMarkdownTableCells(lines[index]);
-      if (!cells) break;
-      rows.push(cells);
-      index += 1;
-    }
-    index -= 1;
-    tables.push({ header, rows });
-  }
-  return tables;
-}
-
-function addMarkdownResource(resources, bucket, title) {
-  if (!bucket || isPlaceholderResourceName(title)) return;
-  if (isAggregateOrDetailResourceName(title)) return;
-  resources[bucket] = resources[bucket] || [];
-  resources[bucket].push({ title: safeString(title).trim() });
-}
-
-function addMarkdownResources(resources, bucket, titleCell) {
-  for (const title of splitResourceNames(titleCell)) addMarkdownResource(resources, bucket, title);
-}
-
-function extractMarkdownResourceDeclarations(text) {
-  const resources = Object.fromEntries(RESOURCE_BUCKETS.map((bucket) => [bucket, []]));
-  for (const table of markdownTables(text)) {
-    const header = table.header.map((cell) => normalizeName(cell));
-    const resourceTypeIndex = header.findIndex((cell) => cell === "yeeflow resource type" || cell === "resource type");
-    const resourceNameIndex = header.findIndex((cell) => cell === "planned resource name" || cell === "resource name");
-    if (resourceTypeIndex >= 0 && resourceNameIndex >= 0) {
-      for (const row of table.rows) addMarkdownResources(resources, bucketForResourceType(row[resourceTypeIndex]), row[resourceNameIndex]);
-      continue;
-    }
-    const directColumns = [
-      ["form report name", "reports"],
-      ["workflow name", "workflows"],
-      ["schedule workflow name", "workflows"],
-      ["ai agent name", "agents"],
-      ["copilot name", "copilots"],
-      ["tool name", "tools"],
-      ["knowledge resource name", "knowledgeResources"],
-      ["integration name", "integrations"],
-      ["connection name", "connections"],
-      ["permission resource name", "permissions"],
-      ["admin resource name", "adminResources"],
-      ["team name", "teams"],
-      ["dashboard page name", "pages"],
-      ["page name", "pages"],
-    ];
-    for (const [column, bucket] of directColumns) {
-      const index = header.indexOf(column);
-      if (index < 0) continue;
-      for (const row of table.rows) addMarkdownResources(resources, bucket, row[index]);
+  const items = [];
+  let active = false;
+  for (const line of lines) {
+    if (/^#{1,6}\s+/.test(line)) active = headingPattern.test(line);
+    else if (active && /^\s*(?:[-*]|\d+[.)])\s+/.test(line)) {
+      const value = line.replace(/^\s*(?:[-*]|\d+[.)])\s+/, "").replace(/\s+-\s+.*$/, "").trim();
+      if (value) items.push(value);
     }
   }
-  const lines = text.split(/\r?\n/);
-  for (let index = 0; index < lines.length; index += 1) {
-    const match = lines[index].match(/^###\s+(4|5)\.(?:x|\d+)\s+(.+?)\s*$/i);
-    if (!match) continue;
-    const bucket = match[1] === "4" ? "dataLists" : "approvalForms";
-    addMarkdownResource(resources, bucket, match[2]);
-  }
-  return Object.fromEntries(Object.entries(resources).map(([bucket, items]) => [bucket, uniqueStrings(items.map((item) => item.title)).map((title) => ({ title }))]));
+  return uniqueStrings(items).map((title) => ({ title }));
 }
 
 function extractMarkdownSection(text, headingPattern) {
@@ -381,7 +245,22 @@ function parsePlan(planPath) {
   const parsed = parseMaybeJson(text);
   if (parsed) return normalizePlan(parsed, { path: planPath, sourceType: "json" });
   const navGroups = extractMarkdownNavigation(text);
-  const resources = extractMarkdownResourceDeclarations(text);
+  const resources = {
+    dataLists: extractMarkdownResourceSection(text, /data lists?|tables?|resources?/i),
+    approvalForms: extractMarkdownResourceSection(text, /forms?|approvals?/i),
+    workflows: extractMarkdownResourceSection(text, /workflows?|operations?/i),
+    pages: extractMarkdownResourceSection(text, /dashboards?|pages?|workspace/i),
+    reports: extractMarkdownResourceSection(text, /reports?/i),
+    integrations: extractMarkdownResourceSection(text, /integrations?|connections?/i),
+    permissions: extractMarkdownResourceSection(text, /permissions?|security/i),
+    adminResources: extractMarkdownResourceSection(text, /settings|admin/i),
+  };
+  for (const group of navGroups) {
+    const target = /settings/i.test(group.title) ? "adminResources"
+      : /operations/i.test(group.title) ? "workflows"
+        : "pages";
+    resources[target] = uniqueStrings([...(resources[target] || []).map((item) => item.title), ...group.items]).map((title) => ({ title }));
+  }
   return normalizePlan({
     resources,
     navigation: {
@@ -750,33 +629,6 @@ function classifyGenerationContract(plan, decodedPackage, findings) {
   return { present: true, sections: contract.sections || {}, missingSections, source: contract.source || plan.sourceType };
 }
 
-function classifyStrictResourceDrift(resourceCoverage, mode, findings) {
-  if (mode !== "strict") return;
-  const nonResourceWorkflowMarkers = new Set(["multiassignmenttask", "assignmenttask", "startnoneevent", "endrejectevent"]);
-  for (const [bucket, coverage] of Object.entries(resourceCoverage)) {
-    for (const item of coverage.planned || []) {
-      if (item.status !== STATUS.PARTIAL) continue;
-      findings.push({
-        level: "error",
-        code: `PLAN_${bucket.toUpperCase()}_MISMATCH`,
-        message: `Planned ${titleCaseBucket(bucket)} item only partially matches the generated package in strict mode.`,
-        detail: { bucket, title: item.title, generatedTitle: item.generatedTitle },
-        source: "plan-conformance",
-      });
-    }
-    for (const item of coverage.extra || []) {
-      if (bucket === "workflows" && nonResourceWorkflowMarkers.has(normalizeName(item.title))) continue;
-      findings.push({
-        level: "error",
-        code: `PLAN_${bucket.toUpperCase()}_EXTRA_UNPLANNED`,
-        message: `Generated ${titleCaseBucket(bucket)} item is not declared by the approved app plan in strict mode.`,
-        detail: { bucket, title: item.title },
-        source: "plan-conformance",
-      });
-    }
-  }
-}
-
 function buildRecommendations(findings, navigation) {
   const recommendations = [];
   if (findings.some((finding) => finding.code === "PLAN_GENERATION_CONTRACT_MISSING")) {
@@ -812,7 +664,6 @@ function main() {
   const findings = [];
   const generationContract = classifyGenerationContract(plan, decodedPackage, findings);
   const resourceResult = classifyPlannedResources(plan, inventory, findings);
-  classifyStrictResourceDrift(resourceResult.coverage, args.mode, findings);
   const navigation = classifyNavigation(plan, inventory, { mode: args.mode, groupedNavigationExportProven: args.groupedNavigationExportProven }, findings);
   const counts = {
     plannedFeatureCount: resourceResult.counts.plannedCount,
