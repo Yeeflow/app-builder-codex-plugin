@@ -12,6 +12,20 @@
     "meaningful_navigator_labels_required",
     "dynamic_controls_only_inside_item_templates"
   ],
+  "defaultDashboardGoldenReference": {
+    "goldenReferenceId": "event_portfolio_dashboard_golden_reference",
+    "registryPath": "docs/reference/dashboard-golden-reference-registry.normalized.json",
+    "description": "Default reusable Dashboard construction style for polished operations, portfolio, status, pipeline, request, facility, service, project, vendor, and contract dashboards.",
+    "requiredReferenceIds": [
+      "dashboard_default_shell_event_portfolio_ref",
+      "dashboard_header_band_event_portfolio_ref",
+      "dashboard_filter_group_event_portfolio_ref",
+      "dashboard_kpi_cards_event_portfolio_ref",
+      "dashboard_content_section_event_portfolio_ref",
+      "dashboard_collection_grid_table_event_portfolio_ref"
+    ],
+    "boundary": "Use as structural/style guidance only. Map source lists, fields, filters, metrics, labels, actions, and mobile behavior to the current App Plan and Page Function Plan; do not copy Marketing Event-specific field names or sample data into unrelated apps."
+  },
   "templates": [
     {
       "templateId": "dashboard_header_action_bar",
