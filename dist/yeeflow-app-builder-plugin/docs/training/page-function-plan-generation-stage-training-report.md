@@ -39,7 +39,7 @@ Functional Specification
 - Clarified document responsibility split: Functional Specification describes business page needs only, App Plan declares Dashboard resources plus stable Page Function Plan refs only, and Page Function Plan owns Dashboard implementation intent including `dashboardGoldenReference`.
 - Consolidated the Page Function Plan as the canonical page-level implementation contract for Dashboard pages, Approval submission/task/print surfaces, custom Data list forms, and custom Document library forms.
 - Added Application Design System layout-selection gates requiring exactly one supported Yeeflow Application Layout and structured app chrome fields before generation.
-- Added Application Design System `applicationChrome` gates for app-wide Yeeflow header, navigator menu, content-area tokens, known shell property mappings, hover/active proof boundaries, and Dashboard chrome inheritance.
+- Added Application Design System `applicationChrome` gates for app-wide Yeeflow header, navigator menu, content-area tokens, design intent, supported generated shell property paths, export-learning/runtime-proof/deferred boundaries, and Dashboard chrome inheritance.
 - Added non-dashboard surface gates for Approval field state/behavior, task decisions, print-specific noninteractive pages, New/Edit current-resource field scope, Save/Cancel actions, View related-region contracts, and Document library metadata/upload/view behavior.
 - Extended App Plan to Page Function Plan traceability so App Plan Approval/Data list/Document library surfaces must carry stable Page Function Plan references and Page Function Plan entries must map back to App Plan resources.
 - Registered the new validators/tests in focused planning gates, aggregate UI hard gates, and YAPK cache artifact mirror checks.
@@ -102,8 +102,11 @@ Application Design System layout contract:
 - The Application Design System must select exactly one supported `applicationLayoutType`: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, or `application-layout-4-no-nav`.
 - It must declare structured `selectedApplicationLayout`, `applicationChromeStyleId`, `headerMode`, `navigationMode`, `navigationPanelMode`, `contentSafeArea`, `dashboardChromeRules`, and `formSurfaceChromeRules`.
 - It must declare structured `applicationChrome.header`, `applicationChrome.navigatorMenu`, and `applicationChrome.contentArea` settings using Yeeflow theme tokens or plugin-known style values where possible.
+- It must separate `applicationChrome.designIntent`, `applicationChrome.supportedGeneratedProperties`, `applicationChrome.exportLearningRequired`, `applicationChrome.runtimeProofRequired`, and `applicationChrome.deferredProperties`.
 - It must document mapping intent to known Yeeflow shell properties: `LayoutView.attrs.appearance.bgc`, `LayoutView.attrs.appearance.color`, `LayoutView.attrs["navigator-menu"].bgc`, `LayoutView.attrs["navigator-menu"].color`, and `LayoutView.attrs["navigator-menu"].position`.
-- Hover and active navigator state styling must be marked `export-learning-required` or `runtime-proof-required` when exact export-proven property paths are not available.
+- Resource generation may only write the supported generated shell properties currently proven in the plugin: `LayoutView.attrs.appearance.bgc`, `LayoutView.attrs.appearance.color`, `LayoutView.attrs["navigator-menu"].bgc`, `LayoutView.attrs["navigator-menu"].color`, and `LayoutView.attrs["navigator-menu"].position`.
+- Hover, active, selected, title typography, icon, and other unproven chrome styling must remain design intent and be marked `export-learning-required`, `runtime-proof-required`, or deferred when exact export-proven property paths are not available.
+- A design intent field is not generated property proof, and validation fails if desired chrome styling is treated as a generated Yeeflow property path.
 - Dashboard/application pages inherit the app-level selected layout and must include header/navigation/content-safe-area expectations.
 - Dashboard/application pages inherit app-wide `applicationChrome`; per-page Dashboard chrome overrides fail unless explicitly unsupported/deferred with proof boundary.
 - Approval forms and Data list / Document library forms are form surfaces and must not invent app header/navigation unless explicitly plugin-supported or deferred with proof boundary.
@@ -125,9 +128,11 @@ Application Design System layout contract:
 - Application Design System using raw hex values without proof-boundary justification.
 - Application Design System inventing hover/active navigator property paths.
 - Application Design System marking hover/active details `export-learning-required` when exact paths are not proven.
+- Application Design System treating design intent fields as generated property proof.
 - Dashboard Page Function Plan inheriting the Application Design System layout.
 - Dashboard Page Function Plan overriding the app-level layout without explicit deferred/proof boundary.
 - Dashboard Page Function Plan overriding app-wide chrome without explicit deferred/proof boundary.
+- Dashboard Page Function Plan attempting to cause unsupported generated app shell/chrome properties even with a deferred proof boundary.
 - Form Report correctly not required as a UI surface.
 - New/Edit form incorrectly containing Collection/Data analytics/audit/dashboard regions.
 - Approval submission field missing state/behavior contract.

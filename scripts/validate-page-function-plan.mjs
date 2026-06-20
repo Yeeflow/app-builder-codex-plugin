@@ -45,6 +45,14 @@ const SUPPORTED_APPLICATION_LAYOUTS = new Set([
   "application-layout-3-header-nav",
   "application-layout-4-no-nav",
 ]);
+const ALLOWED_GENERATED_CHROME_PROPERTY_PATHS = new Set([
+  "LayoutView.attrs.appearance.bgc",
+  "LayoutView.attrs.appearance.color",
+  "LayoutView.attrs[\"navigator-menu\"].bgc",
+  "LayoutView.attrs[\"navigator-menu\"].color",
+  "LayoutView.attrs[\"navigator-menu\"].position",
+]);
+const RAW_YEEFLOW_PROPERTY_PATH = /\bLayoutView\.attrs(?:\[[^\]]+\]|\.[A-Za-z0-9_-]+)+(?:\.[A-Za-z0-9_-]+)*\b/g;
 
 const TEMPLATE_LIBRARY_PATHS = [
   path.join(process.cwd(), "docs/templates/yeeflow-ui-section-template-library.normalized.json"),
@@ -160,6 +168,55 @@ function flattenText(value) {
 
 function hasStructuredIntent(value, pattern = TRUEISH) {
   return pattern.test(flattenText(value));
+}
+
+function propertyPathFromEntry(entry) {
+  if (typeof entry === "string") return entry.trim();
+  if (!entry || typeof entry !== "object") return "";
+  return safeString(entry.path || entry.propertyPath || entry.targetPath || entry.generatedPropertyPath || entry.yeeflowPropertyPath || entry.field).trim();
+}
+
+function generatedChromePropertyPaths(value) {
+  if (!value || typeof value !== "object") return [];
+  return [
+    ...asArray(value.supportedGeneratedProperties),
+    ...asArray(value.generatedProperties),
+    ...asArray(value.resourceGenerationProperties),
+    ...asArray(value.propertyMappings),
+  ].map(propertyPathFromEntry).filter(Boolean);
+}
+
+function validateUnsupportedGeneratedChromeProperties(dashboard, chromeOverride, findings) {
+  for (const propertyPath of generatedChromePropertyPaths(chromeOverride)) {
+    if (!ALLOWED_GENERATED_CHROME_PROPERTY_PATHS.has(propertyPath)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_UNSUPPORTED_CHROME_PROPERTY",
+        dashboard: dashboard.name,
+        propertyPath,
+        message: "Dashboard Page Function Plan entries may not cause unsupported app shell/chrome properties to be generated; only plugin-known/export-proven shell paths are allowed.",
+      });
+    }
+  }
+  const generatedBuckets = {
+    supportedGeneratedProperties: chromeOverride?.supportedGeneratedProperties,
+    generatedProperties: chromeOverride?.generatedProperties,
+    resourceGenerationProperties: chromeOverride?.resourceGenerationProperties,
+    propertyMappings: chromeOverride?.propertyMappings,
+  };
+  const text = flattenText(generatedBuckets);
+  for (const match of text.matchAll(RAW_YEEFLOW_PROPERTY_PATH)) {
+    const propertyPath = match[0];
+    if (!ALLOWED_GENERATED_CHROME_PROPERTY_PATHS.has(propertyPath)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_UNSUPPORTED_RAW_CHROME_PROPERTY_PATH",
+        dashboard: dashboard.name,
+        propertyPath,
+        message: "Unsupported raw Yeeflow chrome paths must not appear in Dashboard generated-property or mapping fields.",
+      });
+    }
+  }
 }
 
 function hasFidelityReference(dashboard, entry) {
@@ -1147,6 +1204,7 @@ function validateApplicationLayoutInheritance(plan, applicationDesignSystem, fin
       || dashboard.navigatorMenuChrome
       || dashboard.dashboardChromeSettings;
     if (hasTextValue(chromeOverride)) {
+      validateUnsupportedGeneratedChromeProperties(dashboard, chromeOverride, findings);
       const deferred = hasStructuredIntent(dashboard.unsupportedChromeException || dashboard.chromeException || dashboard.deferredReason || dashboard.runtimeProofBoundary, /\b(unsupported|deferred|runtime-proof|required|proof boundary|exception|plugin-supported)\b/i);
       if (!deferred) {
         findings.push({

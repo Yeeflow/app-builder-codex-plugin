@@ -17,13 +17,15 @@ const THEME_TOKEN = /^var\(--(?:c|fs|fw|sp)--[a-z0-9-]+\)$/i;
 const SUPPORTED_COLOR_NAMES = new Set(["transparent", "none", "inherit", "currentColor"]);
 const SUPPORTED_TYPOGRAPHY = /^(h[1-6](?:-(?:regular|medium|semi-bold|bold))?|body|caption|title|subtitle|var\(--fs--[a-z0-9-]+\)|var\(--fw--[a-z0-9-]+\)|normal|regular|medium|semi-bold|bold|[1-9][0-9]?(?:px|rem)?)$/i;
 const PROOF_REQUIRED = /\b(export-learning-required|runtime-proof-required|deferred|proof boundary|not export-proven|not runtime-proven)\b/i;
-const KNOWN_SHELL_PROPERTY_PATHS = new Set([
+const ALLOWED_GENERATED_CHROME_PROPERTY_PATHS = new Set([
   "LayoutView.attrs.appearance.bgc",
   "LayoutView.attrs.appearance.color",
   "LayoutView.attrs[\"navigator-menu\"].bgc",
   "LayoutView.attrs[\"navigator-menu\"].color",
   "LayoutView.attrs[\"navigator-menu\"].position",
 ]);
+const RAW_YEEFLOW_PROPERTY_PATH = /\bLayoutView\.attrs(?:\[[^\]]+\]|\.[A-Za-z0-9_-]+)+(?:\.[A-Za-z0-9_-]+)*\b/g;
+const DESIGN_INTENT_PROPERTY = /^(?:applicationChrome\.)?(?:header|navigatorMenu|contentArea)\.(?:backgroundColor|textColor|iconColor|titleTypography|titleFontSize|titleFontWeight|titleStyle|hoverBackgroundColor|hoverTextColor|activeBackgroundColor|activeTextColor|selectedItemStyle|groupLabelStyle)$/i;
 
 const CHROME_FIELDS = {
   header: [
@@ -140,6 +142,59 @@ function explicitJustification(value, context = {}) {
   }));
 }
 
+function propertyPathFromEntry(entry) {
+  if (typeof entry === "string") return entry.trim();
+  if (!entry || typeof entry !== "object") return "";
+  return safeString(entry.path || entry.propertyPath || entry.targetPath || entry.generatedPropertyPath || entry.yeeflowPropertyPath || entry.field).trim();
+}
+
+function propertyList(...values) {
+  return values.flatMap((value) => asArray(value).map(propertyPathFromEntry).filter(Boolean));
+}
+
+function proofBucketText(chrome) {
+  return flattenText({
+    exportLearningRequired: chrome.exportLearningRequired,
+    runtimeProofRequired: chrome.runtimeProofRequired,
+    deferredProperties: chrome.deferredProperties,
+  });
+}
+
+function validateGeneratedChromeProperty(propertyPath, findings, context = {}) {
+  if (!propertyPath) return;
+  if (ALLOWED_GENERATED_CHROME_PROPERTY_PATHS.has(propertyPath)) return;
+  if (DESIGN_INTENT_PROPERTY.test(propertyPath)) {
+    findings.push({
+      level: "error",
+      code: "APPLICATION_DESIGN_SYSTEM_DESIGN_INTENT_AS_GENERATED_PROPERTY",
+      propertyPath,
+      message: "Application chrome design intent fields are not generated Yeeflow property proof; only export-proven shell paths may appear in supportedGeneratedProperties.",
+    });
+    return;
+  }
+  findings.push({
+    level: "error",
+    code: "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_GENERATED_CHROME_PROPERTY",
+    propertyPath,
+    message: "Application Design System may only list plugin-known/export-proven shell paths as generated chrome properties.",
+  });
+}
+
+function validateRawChromePropertyText(value, findings, context = {}) {
+  const text = flattenText(value);
+  for (const match of text.matchAll(RAW_YEEFLOW_PROPERTY_PATH)) {
+    const propertyPath = match[0];
+    if (ALLOWED_GENERATED_CHROME_PROPERTY_PATHS.has(propertyPath)) continue;
+    if (context.allowProofBucket) continue;
+    findings.push({
+      level: "error",
+      code: "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_RAW_CHROME_PROPERTY_PATH",
+      propertyPath,
+      message: "Unsupported Yeeflow app shell property paths must not be treated as generated ADS properties; keep unproven hover/active/title/icon/menu styling in exportLearningRequired, runtimeProofRequired, or deferredProperties.",
+    });
+  }
+}
+
 function validateColorToken(value, context, findings) {
   const color = safeString(value).trim();
   if (!color) return;
@@ -219,7 +274,39 @@ function validateApplicationChrome(plan, findings) {
     ...asArray(chrome.header?.propertyMappings),
     ...asArray(chrome.navigatorMenu?.propertyMappings),
     ...asArray(chrome.contentArea?.propertyMappings),
-  ].map((entry) => typeof entry === "string" ? entry : safeString(entry.path || entry.propertyPath || entry.targetPath)).filter(Boolean);
+  ].map(propertyPathFromEntry).filter(Boolean);
+
+  const supportedGeneratedProperties = propertyList(
+    chrome.supportedGeneratedProperties,
+    chrome.generatedProperties,
+    chrome.resourceGenerationProperties,
+  );
+
+  const requiredBuckets = [
+    "designIntent",
+    "supportedGeneratedProperties",
+    "exportLearningRequired",
+    "runtimeProofRequired",
+    "deferredProperties",
+  ];
+  for (const field of requiredBuckets) {
+    if (!Object.prototype.hasOwnProperty.call(chrome, field)) {
+      findings.push({
+        level: "error",
+        code: `APPLICATION_DESIGN_SYSTEM_${field.replace(/[A-Z]/g, (letter) => `_${letter}`).toUpperCase()}_MISSING`,
+        field: `applicationChrome.${field}`,
+        message: `applicationChrome.${field} is required so design intent, generated properties, learning boundaries, runtime proof, and deferred properties stay separate.`,
+      });
+    }
+  }
+  if (!hasTextValue(chrome.designIntent)) {
+    findings.push({
+      level: "error",
+      code: "APPLICATION_DESIGN_SYSTEM_DESIGN_INTENT_MISSING",
+      field: "applicationChrome.designIntent",
+      message: "applicationChrome.designIntent must describe desired header, navigator, and content-area styling separately from generated property proof.",
+    });
+  }
 
   for (const requiredPath of [
     "LayoutView.attrs.appearance.bgc",
@@ -227,7 +314,7 @@ function validateApplicationChrome(plan, findings) {
     "LayoutView.attrs[\"navigator-menu\"].bgc",
     "LayoutView.attrs[\"navigator-menu\"].color",
   ]) {
-    if (!propertyPaths.includes(requiredPath)) {
+    if (!propertyPaths.includes(requiredPath) && !supportedGeneratedProperties.includes(requiredPath)) {
       findings.push({
         level: "error",
         code: "APPLICATION_DESIGN_SYSTEM_CHROME_PROPERTY_MAPPING_MISSING",
@@ -238,15 +325,31 @@ function validateApplicationChrome(plan, findings) {
   }
 
   for (const propertyPath of propertyPaths) {
-    if (/hover|active|selected/i.test(propertyPath) && !KNOWN_SHELL_PROPERTY_PATHS.has(propertyPath) && !explicitJustification(propertyPath, chrome.navigatorMenu)) {
+    if (!ALLOWED_GENERATED_CHROME_PROPERTY_PATHS.has(propertyPath) && !explicitJustification(propertyPath, { ...chrome, proofStatus: proofBucketText(chrome) })) {
       findings.push({
         level: "error",
-        code: "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_HOVER_ACTIVE_PROPERTY_PATH",
+        code: /hover|active|selected/i.test(propertyPath)
+          ? "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_HOVER_ACTIVE_PROPERTY_PATH"
+          : "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_CHROME_PROPERTY_MAPPING",
         propertyPath,
-        message: "Hover/active navigator property paths are not export-proven here; mark export-learning-required or runtime-proof-required instead of inventing unsupported paths.",
+        message: "Application chrome property mappings may only contain plugin-known/export-proven shell paths; unproven styling belongs in exportLearningRequired, runtimeProofRequired, or deferredProperties.",
       });
     }
   }
+
+  for (const propertyPath of supportedGeneratedProperties) {
+    validateGeneratedChromeProperty(propertyPath, findings);
+  }
+  validateRawChromePropertyText(chrome.supportedGeneratedProperties, findings);
+  validateRawChromePropertyText(chrome.generatedProperties, findings);
+  validateRawChromePropertyText(chrome.resourceGenerationProperties, findings);
+  validateRawChromePropertyText(chrome.propertyMappings, findings);
+  validateRawChromePropertyText(chrome.header?.propertyMappings, findings);
+  validateRawChromePropertyText(chrome.navigatorMenu?.propertyMappings, findings);
+  validateRawChromePropertyText(chrome.contentArea?.propertyMappings, findings);
+  validateRawChromePropertyText(chrome.exportLearningRequired, findings, { allowProofBucket: true });
+  validateRawChromePropertyText(chrome.runtimeProofRequired, findings, { allowProofBucket: true });
+  validateRawChromePropertyText(chrome.deferredProperties, findings, { allowProofBucket: true });
 
   const layout = layoutCandidates(plan)[0] || "";
   if (layout === "application-layout-1-vertical-nav" && plan.applicationChromeStyleId === "layout-1-dark-header-dark-vertical-nav" && !explicitJustification(chrome, chrome)) {
@@ -340,12 +443,18 @@ function validateMarkdown(text) {
     [/dashboardChromeRules/i, "APPLICATION_DESIGN_SYSTEM_DASHBOARD_CHROME_RULES_FIELD_MISSING"],
     [/formSurfaceChromeRules/i, "APPLICATION_DESIGN_SYSTEM_FORM_SURFACE_CHROME_RULES_FIELD_MISSING"],
     [/applicationChrome/i, "APPLICATION_DESIGN_SYSTEM_APPLICATION_CHROME_FIELD_MISSING"],
+    [/designIntent/i, "APPLICATION_DESIGN_SYSTEM_DESIGN_INTENT_FIELD_MISSING"],
+    [/supportedGeneratedProperties/i, "APPLICATION_DESIGN_SYSTEM_SUPPORTED_GENERATED_PROPERTIES_FIELD_MISSING"],
+    [/exportLearningRequired/i, "APPLICATION_DESIGN_SYSTEM_EXPORT_LEARNING_REQUIRED_FIELD_MISSING"],
+    [/runtimeProofRequired/i, "APPLICATION_DESIGN_SYSTEM_RUNTIME_PROOF_REQUIRED_FIELD_MISSING"],
+    [/deferredProperties/i, "APPLICATION_DESIGN_SYSTEM_DEFERRED_PROPERTIES_FIELD_MISSING"],
     [/header\.backgroundColor/i, "APPLICATION_DESIGN_SYSTEM_HEADER_BACKGROUND_FIELD_MISSING"],
     [/navigatorMenu\.backgroundColor/i, "APPLICATION_DESIGN_SYSTEM_NAVIGATOR_BACKGROUND_FIELD_MISSING"],
     [/contentArea\.backgroundColor/i, "APPLICATION_DESIGN_SYSTEM_CONTENT_BACKGROUND_FIELD_MISSING"],
     [/LayoutView\.attrs\.appearance\.bgc/i, "APPLICATION_DESIGN_SYSTEM_APPEARANCE_BGC_MAPPING_MISSING"],
     [/LayoutView\.attrs\["navigator-menu"\]\.bgc/i, "APPLICATION_DESIGN_SYSTEM_NAVIGATOR_BGC_MAPPING_MISSING"],
     [/hover[\s\S]*active[\s\S]*export-learning-required/i, "APPLICATION_DESIGN_SYSTEM_HOVER_ACTIVE_PROOF_RULE_MISSING"],
+    [/design intent[\s\S]*not generated property proof/i, "APPLICATION_DESIGN_SYSTEM_DESIGN_INTENT_PROOF_BOUNDARY_MISSING"],
     [/application-layout-1-vertical-nav[\s\S]*application-layout-2-horizontal-nav[\s\S]*application-layout-3-header-nav[\s\S]*application-layout-4-no-nav/i, "APPLICATION_DESIGN_SYSTEM_SUPPORTED_LAYOUTS_MISSING"],
     [/exactly one/i, "APPLICATION_DESIGN_SYSTEM_EXACTLY_ONE_LAYOUT_RULE_MISSING"],
     [/arbitrary sidebars[\s\S]*custom nav bars[\s\S]*floating nav/i, "APPLICATION_DESIGN_SYSTEM_FORBIDDEN_CHROME_RULE_MISSING"],

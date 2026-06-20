@@ -52,6 +52,11 @@ function ads(overrides = {}) {
     dashboardChromeRules: "Dashboard/application pages use the selected header, left navigation panel, and content safe area.",
     formSurfaceChromeRules: "Approval forms and Data list / Document library forms are full form surfaces with no app chrome unless explicitly supported by plugin standards.",
     applicationChrome: {
+      designIntent: {
+        header: "Dark official Yeeflow header with readable title and icon contrast; title typography remains design intent until export-proven.",
+        navigatorMenu: "Dark vertical navigator with tokenized default colors; hover, active, selected, group label, icon, and title styling are desired design intent unless export-proven.",
+        contentArea: "Neutral application content background using Yeeflow theme tokens.",
+      },
       header: {
         backgroundColor: "var(--c--primary-light)",
         textColor: "var(--c--primary)",
@@ -76,6 +81,21 @@ function ads(overrides = {}) {
       contentArea: {
         backgroundColor: "var(--c--background)",
       },
+      supportedGeneratedProperties: [
+        { path: "LayoutView.attrs.appearance.bgc", value: "var(--c--primary-light)", proofStatus: "plugin-known" },
+        { path: "LayoutView.attrs.appearance.color", value: "var(--c--primary)", proofStatus: "plugin-known" },
+        { path: "LayoutView.attrs[\"navigator-menu\"].bgc", value: "var(--c--primary)", proofStatus: "plugin-known" },
+        { path: "LayoutView.attrs[\"navigator-menu\"].color", value: "var(--c--primary-light)", proofStatus: "plugin-known" },
+        { path: "LayoutView.attrs[\"navigator-menu\"].position", value: "left", proofStatus: "plugin-known" },
+      ],
+      exportLearningRequired: [
+        { designIntent: "navigatorMenu.hoverBackgroundColor", reason: "Exact hover property path is not export-proven." },
+        { designIntent: "header.titleTypography", reason: "Exact shell title typography property path is not export-proven." },
+      ],
+      runtimeProofRequired: [
+        { designIntent: "navigatorMenu.activeTextColor", reason: "Computed active-state styling needs runtime proof before generated-resource claims." },
+      ],
+      deferredProperties: [],
       propertyMappings: [
         "LayoutView.attrs.appearance.bgc",
         "LayoutView.attrs.appearance.color",
@@ -195,15 +215,15 @@ try {
     applicationChrome: {
       ...ads().applicationChrome,
       navigatorMenu: { ...ads().applicationChrome.navigatorMenu, proofStatus: "planned" },
-      propertyMappings: [
-        ...ads().applicationChrome.propertyMappings,
-        "LayoutView.attrs[\"navigator-menu\"].hoverBackgroundColor",
-        "LayoutView.attrs[\"navigator-menu\"].activeTextColor",
+      supportedGeneratedProperties: [
+        ...ads().applicationChrome.supportedGeneratedProperties,
+        { path: "LayoutView.attrs[\"navigator-menu\"].hoverBackgroundColor", value: "var(--c--primary-light)" },
+        { path: "LayoutView.attrs[\"navigator-menu\"].activeTextColor", value: "var(--c--primary)" },
       ],
     },
   }))]);
   assert.equal(output.report.status, "fail");
-  expectCode(output.report, "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_HOVER_ACTIVE_PROPERTY_PATH");
+  expectCode(output.report, "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_GENERATED_CHROME_PROPERTY");
   results.push({ case: "invalid ADS using invented hover/active property paths fails", status: "pass" });
 
   output = run("scripts/validate-application-design-system.mjs", [writeJson("hover-active-export-learning", ads({
@@ -213,14 +233,27 @@ try {
         ...ads().applicationChrome.navigatorMenu,
         proofStatus: "export-learning-required for hover/active property paths; runtime-proof-required before final chrome claim.",
       },
-      propertyMappings: [
-        ...ads().applicationChrome.propertyMappings,
-        "LayoutView.attrs[\"navigator-menu\"].hoverBackgroundColor",
+      exportLearningRequired: [
+        ...ads().applicationChrome.exportLearningRequired,
+        { desiredPropertyPath: "LayoutView.attrs[\"navigator-menu\"].hoverBackgroundColor", reason: "export-learning-required before this can become a supported generated property." },
       ],
     },
   }))]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "valid ADS marking hover/active details export-learning-required passes", status: "pass" });
+
+  output = run("scripts/validate-application-design-system.mjs", [writeJson("design-intent-as-generated-property", ads({
+    applicationChrome: {
+      ...ads().applicationChrome,
+      supportedGeneratedProperties: [
+        ...ads().applicationChrome.supportedGeneratedProperties,
+        "navigatorMenu.activeTextColor",
+      ],
+    },
+  }))]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "APPLICATION_DESIGN_SYSTEM_DESIGN_INTENT_AS_GENERATED_PROPERTY");
+  results.push({ case: "invalid ADS treating design intent as generated property proof fails", status: "pass" });
 
   const adsFile = writeJson("layout-source-ads", ads());
   output = run("scripts/validate-page-function-plan.mjs", [writeJson("valid-pfp-layout-inheritance", pageFunctionPlan()), "--application-design-system", adsFile]);
@@ -250,6 +283,22 @@ try {
   assert.equal(output.report.status, "fail");
   expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_CHROME_OVERRIDE_UNSUPPORTED");
   results.push({ case: "invalid Dashboard page overriding app-level chrome fails", status: "pass" });
+
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson("bad-dashboard-generated-chrome-property", pageFunctionPlan({
+    dashboards: [{
+      ...pageFunctionPlan().dashboards[0],
+      applicationChrome: {
+        supportedGeneratedProperties: [
+          { path: "LayoutView.attrs[\"navigator-menu\"].activeTextColor", value: "var(--c--primary)" },
+        ],
+      },
+      unsupportedChromeException: "unsupported/deferred exception with runtime-proof-required boundary.",
+      runtimeProofBoundary: "runtime-proof-required before generation.",
+    }],
+  })), "--application-design-system", adsFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_UNSUPPORTED_CHROME_PROPERTY");
+  results.push({ case: "invalid Dashboard page causing unsupported chrome property generation fails", status: "pass" });
 
   output = run("scripts/validate-page-function-plan.mjs", [writeJson("deferred-dashboard-layout-override", pageFunctionPlan({
     dashboards: [{

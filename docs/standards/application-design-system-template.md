@@ -52,7 +52,7 @@ Structured fields:
 | contentSafeArea | <Where Dashboard/application page content must sit relative to header/navigation chrome> |
 | dashboardChromeRules | <Header/navigation/content-safe-area expectations for Dashboard and application pages> |
 | formSurfaceChromeRules | <Approval forms and Data list / Document library forms are full form surfaces and do not include application header/navigation unless explicitly supported> |
-| applicationChrome | <Structured app-wide Yeeflow shell color, typography, navigator, content-area, and property-mapping settings> |
+| applicationChrome | <Structured app-wide Yeeflow shell color, typography, navigator, content-area, design-intent, generated-property, learning-boundary, runtime-proof, and deferred-property settings> |
 
 | Area | Decision | Guidance | App Plan / Page Function Plan Trace |
 | --- | --- | --- | --- |
@@ -80,6 +80,11 @@ Use structured `applicationChrome` settings to define the official Yeeflow app-w
 ```json
 {
   "applicationChrome": {
+    "designIntent": {
+      "header": "Official Yeeflow header visual intent, including desired title/icon treatment. Title typography remains design intent unless an export-proven shell property path exists.",
+      "navigatorMenu": "Official Yeeflow navigator visual intent, including default, hover, active, selected, group-label, and icon treatment. Unproven hover/active/selected/title/icon paths stay out of generated properties.",
+      "contentArea": "Dashboard/application content background and safe-area intent."
+    },
     "header": {
       "backgroundColor": "var(--c--primary-light)",
       "textColor": "var(--c--primary)",
@@ -103,6 +108,50 @@ Use structured `applicationChrome` settings to define the official Yeeflow app-w
     "contentArea": {
       "backgroundColor": "var(--c--background)"
     },
+    "supportedGeneratedProperties": [
+      {
+        "path": "LayoutView.attrs.appearance.bgc",
+        "value": "var(--c--primary-light)",
+        "proofStatus": "plugin-known"
+      },
+      {
+        "path": "LayoutView.attrs.appearance.color",
+        "value": "var(--c--primary)",
+        "proofStatus": "plugin-known"
+      },
+      {
+        "path": "LayoutView.attrs[\"navigator-menu\"].bgc",
+        "value": "var(--c--primary)",
+        "proofStatus": "plugin-known"
+      },
+      {
+        "path": "LayoutView.attrs[\"navigator-menu\"].color",
+        "value": "var(--c--primary-light)",
+        "proofStatus": "plugin-known"
+      },
+      {
+        "path": "LayoutView.attrs[\"navigator-menu\"].position",
+        "value": "left",
+        "proofStatus": "plugin-known"
+      }
+    ],
+    "exportLearningRequired": [
+      {
+        "designIntent": "navigatorMenu.hoverBackgroundColor",
+        "reason": "Exact hover property path is not export-proven."
+      },
+      {
+        "designIntent": "header.titleTypography",
+        "reason": "Exact shell title typography property path is not export-proven."
+      }
+    ],
+    "runtimeProofRequired": [
+      {
+        "designIntent": "navigatorMenu.activeTextColor",
+        "reason": "Computed active-state styling requires runtime proof before generated-resource claims."
+      }
+    ],
+    "deferredProperties": [],
     "propertyMappings": [
       "LayoutView.attrs.appearance.bgc",
       "LayoutView.attrs.appearance.color",
@@ -140,6 +189,14 @@ Required `applicationChrome.contentArea` fields:
 
 - `contentArea.backgroundColor`
 
+Required chrome boundary fields:
+
+- `designIntent`: desired app chrome appearance for header, navigator menu, and content area.
+- `supportedGeneratedProperties`: only plugin-known/export-proven Yeeflow shell property paths that resource generation may write.
+- `exportLearningRequired`: desired chrome styling whose exact export property path is not proven.
+- `runtimeProofRequired`: desired chrome styling that needs runtime/browser proof before generation claims.
+- `deferredProperties`: desired chrome styling intentionally deferred from resource generation.
+
 Mapping intent:
 
 - Header background maps to known Yeeflow shell property `LayoutView.attrs.appearance.bgc`.
@@ -148,6 +205,14 @@ Mapping intent:
 - Navigator menu text/icon color maps to known Yeeflow shell property `LayoutView.attrs["navigator-menu"].color`.
 - Navigator menu position maps to known Yeeflow shell property `LayoutView.attrs["navigator-menu"].position`.
 - Exact hover and active navigator state property paths are runtime-sensitive. If export-proven property paths are not available, mark hover/active fields as `export-learning-required` or `runtime-proof-required`; do not invent unsupported property paths.
+
+Generated-property boundary:
+
+- Resource generation may only write app shell/chrome property paths listed in `supportedGeneratedProperties`.
+- The currently allowed generated chrome paths are `LayoutView.attrs.appearance.bgc`, `LayoutView.attrs.appearance.color`, `LayoutView.attrs["navigator-menu"].bgc`, `LayoutView.attrs["navigator-menu"].color`, and `LayoutView.attrs["navigator-menu"].position`.
+- Do not generate arbitrary Header, Navigator, hover, active, selected, title typography, icon, menu style, or custom chrome property paths unless they are present in plugin-contained standards, normalized references, or export-proven property registries.
+- Design intent fields such as `header.titleTypography`, `navigatorMenu.hoverBackgroundColor`, `navigatorMenu.activeTextColor`, `navigatorMenu.selectedItemStyle`, and `navigatorMenu.groupLabelStyle` are not generated property proof.
+- Unproven hover/active/title/icon/menu styling must stay in `designIntent`, `exportLearningRequired`, `runtimeProofRequired`, or `deferredProperties` and must not be emitted into generated Yeeflow resources.
 
 Token rules:
 
