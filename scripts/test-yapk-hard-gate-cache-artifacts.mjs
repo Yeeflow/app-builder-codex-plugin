@@ -8,6 +8,7 @@ const ROOT = process.cwd();
 
 const hardGateScripts = [
   "scripts/validate-yapk-id-provenance.mjs",
+  "scripts/validate-generated-final-draft-placeholders.mjs",
   "scripts/validate-yapk-navigation-runtime-metadata.mjs",
   "scripts/validate-yapk-upgrade-id-stability.mjs",
   "scripts/validate-dashboard-grid-table-collections.mjs",
@@ -41,6 +42,7 @@ const hardGateScripts = [
   "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/inspect-yeeflow-control-configurations.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
+  "scripts/test-generated-final-draft-placeholder-gates.mjs",
   "scripts/test-yapk-id-navigation-hard-gates.mjs",
   "scripts/test-yapk-upgrade-id-stability.mjs",
   "scripts/test-dashboard-grid-table-collections.mjs",
