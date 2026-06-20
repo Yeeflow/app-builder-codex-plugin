@@ -255,13 +255,15 @@ ${extraRow}| Approval | Review safety-critical work | Approval form | Maintenanc
 }
 
 function facilityDecoded({ dataLists, pages, forms, reports } = {}) {
-  return decodedApp({
+  const app = decodedApp({
     flat: false,
     dataLists: dataLists || ["Facilities", "Technicians", "Maintenance Requests", "Vendor Follow-ups"],
     pages: pages || ["Maintenance Dashboard"],
     forms: forms || ["Maintenance Request Approval"],
     reports: reports || ["Maintenance Request Print"],
   });
+  app.Item.ListModel.LayoutView = layoutViewGrouped([{ title: "Workspace", items: ["Maintenance Dashboard"] }]);
+  return app;
 }
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "app-plan-conformance-"));

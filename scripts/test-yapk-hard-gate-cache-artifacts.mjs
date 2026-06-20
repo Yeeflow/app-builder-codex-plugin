@@ -36,6 +36,7 @@ const hardGateScripts = [
   "scripts/validate-app-plan-conformance.mjs",
   "scripts/test-functional-specification-and-app-plan-gates.mjs",
   "scripts/test-app-plan-conformance-guardrails.mjs",
+  "scripts/test-app-plan-conformance-residual-noise-gates.mjs",
   "scripts/validate-business-clarification-gate.mjs",
   "scripts/validate-generation-readiness-review.mjs",
   "scripts/validate-functional-spec-to-app-plan-traceability.mjs",
