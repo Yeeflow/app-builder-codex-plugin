@@ -70,6 +70,12 @@ for (const sourcePath of hardGateScripts) {
   );
 }
 
+assert.equal(
+  fs.readFileSync(path.join(ROOT, "dist/yeeflow-app-builder-plugin/validate-yapk-package.js"), "utf8"),
+  fs.readFileSync(path.join(ROOT, "validate-yapk-package.js"), "utf8"),
+  "dist/yeeflow-app-builder-plugin/validate-yapk-package.js mirrors validate-yapk-package.js root entrypoint",
+);
+
 const requiredDocs = [
   "docs/standards/functional-specification-standard-template.md",
   "docs/standards/app-plan-standard-template.md",
