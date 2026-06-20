@@ -49,6 +49,10 @@ try {
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "canonical App Plan template passes", status: "pass" });
 
+  output = run("scripts/validate-page-function-plan.mjs", "docs/standards/page-function-plan-standard-template.md");
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "canonical Page Function Plan template passes", status: "pass" });
+
   const badSpec = writeFixture(tempDir, "bad-spec.md", `
 # Broken - Functional Specification
 
@@ -79,6 +83,7 @@ No objects here.
   output = run("scripts/validate-functional-specification.mjs", badSpec);
   assert.equal(output.report.status, "fail");
   expectFinding(output.report, "FUNCTIONAL_SPEC_REQUIRED_HEADING_MISSING");
+  expectFinding(output.report, "FUNCTIONAL_SPEC_BUSINESS_PAGE_REQUIREMENTS_MISSING");
   results.push({ case: "Functional Specification missing relationships section fails", status: "pass" });
 
   const badPlan = writeFixture(tempDir, "bad-plan.md", `

@@ -11,6 +11,14 @@ const templatePath = path.join(ROOT, "docs", "examples", "runtime-evidence.redac
 
 const childTests = [
   {
+    name: "Page Function Plan regression suite",
+    command: ["scripts/test-page-function-plan-gates.mjs"],
+    validators: [
+      "validate-page-function-plan",
+      "validate-app-plan-page-function-traceability",
+    ],
+  },
+  {
     name: "UI/Summary/KPI runtime hard-gate regression suite",
     command: ["scripts/test-ui-summary-kpi-runtime-hard-gates.mjs"],
     validators: [

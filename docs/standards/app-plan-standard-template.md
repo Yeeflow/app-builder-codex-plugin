@@ -1,6 +1,6 @@
 # <Application Name> - Yeeflow App Plan
 
-Use this template as Stage 2 / Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct generation order.
+Use this template as Stage 2 / Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct resource generation order. Page-level function, content, layout intent, responsive behavior, and control-by-region detail belong in the Stage 3 Page Function Plan.
 
 This document is the implementation contract for package generation after user approval. It must use only Yeeflow resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes supported by the active `@yeeflow-app-builder` plugin knowledge base, skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references.
 
@@ -9,6 +9,9 @@ This document is the implementation contract for package generation after user a
 - Application name:
 - Functional specification path:
 - Functional specification status:
+- Page Function Plan path:
+- Page Function Plan status:
+- Application Design System path:
 - Planning plugin:
 - Plugin version:
 - Source artifacts:
@@ -36,6 +39,7 @@ Rules:
 
 - Every core business requirement must map to a Yeeflow resource, a supported configuration, or an explicitly deferred item.
 - Functional Specification to App Plan traceability is executable with `scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>`.
+- App Plan to Page Function Plan traceability is executable with `scripts/validate-app-plan-page-function-traceability.mjs --app-plan <app-plan.json> --page-function-plan <page-function-plan.json>`.
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
 - Do not include resources only to make the plan look complete. Every generated resource must serve a runtime purpose.
 - Do not invent unsupported controls, Dynamic controls, field types, workflow node types, variable types, action shapes, property paths, bindings, or configuration shapes.
@@ -72,6 +76,7 @@ Rules:
 - Lookup target lists and display fields must exist before dependent Lookup fields are generated.
 - Approval forms that use list lookups, sublists, summaries, Query data, or Set data list actions must depend on those lists.
 - Dashboards must depend on the lists, views, forms, actions, and variables they display or trigger.
+- The Page Function Plan is not a generated Yeeflow resource. It is the required Stage 3 page-level contract before Application Design System, page design, page/resource generation, implementation blueprints, package generation, signing, install/import/upgrade, or runtime proof.
 
 ## 4. Data Lists and Document Libraries Plan
 
@@ -138,6 +143,7 @@ Repeat this subsection for each Approval form.
 - Depends on Data lists / Document libraries:
 - Form reports required: Yes/No
 - Assignment task required: Yes/No
+- Page Function Plan trace:
 - Generation blocker if missing: Yes/No
 
 #### Submission Form Fields
@@ -224,6 +230,7 @@ Rules:
 
 - If a report needs Sublist data, plan a report structure that supports Sublist display.
 - If an Approval form does not need a Form report, state the reason.
+- Form Reports are not required Page Function Plan UI design surfaces unless the App Plan explicitly requires a print-like UI surface outside the normal Form Report resource.
 
 ## 7. Schedule Workflows Plan
 
@@ -260,9 +267,9 @@ Return to the Data lists and Document libraries from Section 4 and plan their cu
 
 ### 10.x <Data List or Document Library Name>
 
-| Form Name | Form Type | Purpose | Used By | Layout Pattern | Actions Required | Notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| <Form> | New/Edit/View/Detail/Custom/Print | <Purpose> | <Users/pages> | <Layout> | Yes/No | <Notes> |
+| Form Name | Form Type | Purpose | Used By | Layout Pattern | Actions Required | Page Function Plan Trace | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Form> | New/Edit/View/Detail/Custom/Print | <Purpose> | <Users/pages> | <Layout> | Yes/No | <Page Function ID / section> | <Notes> |
 
 #### Form Fields
 
@@ -350,6 +357,7 @@ Repeat for each Dashboard page.
 - Depends on:
 - Temp variables required:
 - Page/form actions required:
+- Page Function Plan trace:
 - Runtime proof required:
 
 #### Sections and Controls
@@ -437,6 +445,25 @@ Runtime navigation rules:
 - Do not use runtime group `children` or `Childs`.
 - Every intended resource must be reachable through navigation or explicitly hidden/deferred.
 
+## 15A. Page Function Plan Traceability References
+
+Use this section to reference the Stage 3 Page Function Plan without embedding all page details in the App Plan.
+
+| App Plan Resource Type | App Plan Resource Name | Surface / Form Name | Source List or Library | Fields / Actions Referenced | Page Function Plan Entry | Required Before Generation | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Dashboard page | <Dashboard page name> | <Dashboard page name> | <Source list/library> | <Fields/actions> | PFP-<ID> / Section <x> | Yes | <Notes> |
+| Approval form | <Approval form name> | Submission form | <Approval form/list> | Save as draft, Submit, <fields> | PFP-<ID> / Section <x> | Yes | <Notes> |
+| Approval form | <Approval form name> | <Task form name> | <Approval form/list> | Approve/Reject/Complete, <fields> | PFP-<ID> / Section <x> | Yes when planned | <Notes> |
+| Approval form | <Approval form name> | <Print page name> | <Approval form/list> | <fields/evidence> | PFP-<ID> / Section <x> | Yes when required | <Notes> |
+| Data list / Document library | <List/library name> | <New/Edit/View/Detail/Custom form> | <List/library name> | <fields/actions> | PFP-<ID> / Section <x> | Yes when planned | <Notes> |
+
+Rules:
+
+- The App Plan defines which dashboard pages, approval forms, custom data list/document library forms, resources, fields, workflows, views, navigation, roles, and permissions exist.
+- The Page Function Plan defines page-level function, content, controls, data source, fields, actions, layout intent, mobile behavior, and App Plan traceability.
+- Page Function Plan entries must reference App Plan resources by stable names: dashboard page name, approval form name, submission/task/print form name, data list or document library name, form name, source list/library, field names, actions, and workflow/form action references.
+- Form Reports are not required as Page Function Plan UI design surfaces.
+
 ## 16. Target Users, Roles, Groups, and Permissions
 
 | Role | User Group | Resource/Page/Form | View | Create | Edit | Delete/Archive | Approve | Admin | Notes |
@@ -484,7 +511,9 @@ Rules:
 | App Plan approved | Yes | Approved by user | Generation |
 | Business Clarification Gate | Yes | Planning mode may pass `default-applied-for-planning`; generation mode requires answered, not applicable, deferred with reason/fallback/proof impact, or `user-default-approved-for-generation`; `validate-business-clarification-gate.mjs --mode generation` passes before generation | Generation |
 | Functional Spec to App Plan traceability | Yes | `validate-functional-spec-to-app-plan-traceability.mjs` passes | Generation |
+| Page Function Plan traceability | Yes | `validate-app-plan-page-function-traceability.mjs` passes for every dashboard, approval submission/task/print form, and custom Data list / Document library form; Form Reports are not required UI surfaces | Design/generation |
 | Generation Readiness Review | Yes | `validate-generation-readiness-review.mjs` passes | Design/generation |
+| Application Design System approved | Yes | Stage 4 design system selects one Yeeflow application layout and defines page density, spacing, typography, button/action, form, dashboard/table/list, mobile, and consistency rules | Design/generation |
 | Plugin capability compliance | Yes | No invented unsupported shapes; any unsupported resource/control/action/property shape is marked `export-learning-required`, `runtime-proof-required`, or `deferred` | Generation |
 | Schema validation | Yes | Package schema passes | Signing |
 | API-issued ID provenance | For generated-final `.yapk` | All generated IDs API-issued and reported | Signing/install |
@@ -513,6 +542,8 @@ Rules:
 | Business clarification | Decision gates | `validate-business-clarification-gate.mjs` | pass/fail | Planning readiness only |
 | Generation readiness | 13 resource areas and review gates | `validate-generation-readiness-review.mjs` | pass/fail | Planning readiness only |
 | Functional Spec to App Plan traceability | Requirement categories vs planned resources | `validate-functional-spec-to-app-plan-traceability.mjs` | pass/fail | Planning traceability only |
+| App Plan to Page Function Plan traceability | UI surfaces vs page function entries | `validate-app-plan-page-function-traceability.mjs` | pass/fail | Page planning traceability only |
+| Page Function Plan structure | Page function entries, controls, fields, actions, responsive behavior | `validate-page-function-plan.mjs` | pass/fail | Page planning readiness only |
 | Package schema | `.yapk`/`.yap` schema | <Validator> | pass/fail | Local proof |
 | Control/property fidelity | Controls and bindings | <Validator> | pass/fail | Local proof |
 | Runtime UI | Browser load/screenshots | <Runtime test> | pass/fail | Runtime proof |
@@ -541,6 +572,8 @@ Report wording requirement:
 - Functional Specification structure: pass/fail
 - App Plan resource order: pass/fail
 - Functional Spec to App Plan traceability: pass/fail
+- Page Function Plan structure: pass/fail
+- App Plan to Page Function Plan traceability: pass/fail
 - Generation Readiness structural check: pass/fail
 - Business Clarification Gate for planning: pass/fail
 - Business Clarification Gate for generation: pass/fail
@@ -572,6 +605,7 @@ Boundary rule:
 
 - Signing/install/upgrade acceptance does not prove runtime UI fidelity, workflow execution, notification delivery, AI execution, permission enforcement, or external integration behavior.
 - Business Clarification Gate, Generation Readiness Review, and Functional Spec to App Plan traceability prove planning readiness only. They must pass before full-page canonical design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, but they do not prove generated package validity or runtime behavior.
+- Page Function Plan validation and App Plan to Page Function Plan traceability prove page-planning readiness only. They must pass before Application Design System, full-page canonical design images, page implementation blueprints, page/resource generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, but they do not prove generated package validity, visual fidelity, or runtime behavior.
 
 ## 21. Assumptions
 
@@ -600,4 +634,4 @@ Include:
 
 Use this prompt after the plan is approved:
 
-`Use @yeeflow-app-builder to generate <Application Name> from <app plan path>. Treat the approved Functional Specification and App Plan as the implementation contract. Generate the complete planned application unless an item is explicitly deferred. Use .yapk by default unless .yap is explicitly requested. Follow the resource generation order in the App Plan. Use only plugin-supported Yeeflow resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes. Validate schema, ID provenance, navigation runtime metadata, approval forms, form reports, schedule workflows, AI/Copilot resources, custom data list forms, Sub List actions, data-list workflows, notifications, views, dashboard control selection, item-template Dynamic controls, Collection/Kanban actions, grid-table Collection patterns, root padding, graph, UI quality, app-plan conformance, package wrapper/signing readiness, and source/dist consistency. Do not run live Yeeflow API calls, write operations, install/import/upgrade, or runtime tests unless explicitly authorized. Report local validation, signing status, API acceptance, runtime proof, deferred items, and known risks separately.`
+`Use @yeeflow-app-builder to generate <Application Name> from <app plan path>, <page function plan path>, and <application design system path>. Treat the approved Functional Specification, App Plan, Page Function Plan, and Application Design System as the implementation contract. Generate the complete planned application unless an item is explicitly deferred. Use .yapk by default unless .yap is explicitly requested. Follow the resource generation order in the App Plan and the page-level function contract in the Page Function Plan. Use only plugin-supported Yeeflow resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes. Validate schema, ID provenance, navigation runtime metadata, approval forms, form reports, schedule workflows, AI/Copilot resources, custom data list forms, Sub List actions, data-list workflows, notifications, views, Page Function Plan traceability, dashboard control selection, item-template Dynamic controls, Collection/Kanban actions, grid-table Collection patterns, root padding, graph, UI quality, app-plan conformance, package wrapper/signing readiness, and source/dist consistency. Do not run live Yeeflow API calls, write operations, install/import/upgrade, or runtime tests unless explicitly authorized. Report local validation, signing status, API acceptance, runtime proof, deferred items, and known risks separately.`

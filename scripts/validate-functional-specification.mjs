@@ -35,6 +35,9 @@ const REQUIRED_PATTERNS = [
   ["BUSINESS_OBJECTS", /Business Objects and Data Concepts/i],
   ["BUSINESS_RELATIONSHIPS", /Business Relationships and Dependency Rules/i],
   ["BUSINESS_DECISION_GATES", /Business Decision Gates/i],
+  ["BUSINESS_PAGE_REQUIREMENTS", /Business Page Requirements/i],
+  ["PAGE_REQUIREMENTS_ROLE_TASK_INFO_ACTIONS", /Needed By Roles[\s\S]*Business Task Solved[\s\S]*Information Users Need To See[\s\S]*Operations \/ Actions Users Need/i],
+  ["PAGE_REQUIREMENTS_FILTERING_MOBILE_ACCESS", /Filtering \/ Grouping \/ Sorting \/ Priority Needs[\s\S]*Mobile Required[\s\S]*Visibility \/ Access Requirements/i],
   ["COMPLETENESS_REVIEW", /Functional Specification Completeness Review/i],
   ["READINESS_FOR_APP_PLAN", /Readiness for App Plan/i],
 ];
