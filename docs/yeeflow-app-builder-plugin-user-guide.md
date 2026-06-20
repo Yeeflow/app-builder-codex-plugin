@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.7.0`
+`0.7.1`
+
+Version `0.7.1` releases the generated-final local-draft placeholder hard gate. Generated-final package generation is now ID-first: planning and blueprint stages may use logical refs, local-preview/local-draft packages remain local-only, and generated-final artifacts are built fresh from approved logical refs plus a complete API-issued ID map. Recursive generated-final validation blocks unresolved draft markers, unmapped logical references, nested runtime-bearing placeholder fields, and signing readiness when final artifacts are not fully resolved. These gates run before signing/install readiness and do not replace package validation, API acceptance, install/upgrade proof, or runtime/browser proof.
 
 Version `0.7.0` releases the Page Function Plan and Application Design System planning stage. It expands Functional Specification page-needs requirements from a business perspective, adds the Page Function Plan standard/template as the page-level implementation contract after the Yeeflow App Plan, adds App Plan to Page Function Plan traceability, requires Dashboard page pattern/template selection, and promotes plugin-contained Marketing Event / Event Portfolio dashboard golden-reference guidance. It also adds Application Design System layout selection for the four supported Yeeflow application layouts, supported Header/Navigator styling guidance that separates design intent from proven generated properties, Container/Button action mapping requirements, Dashboard Text control style contracts, and related validators/tests. These gates run before page/resource generation and do not replace package validation, signing/API acceptance, install/upgrade proof, or runtime/browser proof.
 
