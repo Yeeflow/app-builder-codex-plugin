@@ -70,6 +70,8 @@ Repeat this subsection for each Dashboard page planned in the App Plan.
 - Primary business workflow:
 - dashboardPagePattern: `standard_dashboard_page_shell` / `three_column_workspace_shell` / documented dashboard shell equivalent
 - dashboardGoldenReference: none / `event_portfolio_dashboard_golden_reference`
+- applicationDesignSystemLayoutRef:
+- applicationLayoutInheritance: inherit selected Application Design System layout / unsupported-deferred exception with proof boundary
 - Navigation placement:
 - Empty/loading/error state intent:
 - Desktop layout behavior:
@@ -134,6 +136,7 @@ Template-selection rules:
 - Every Dashboard page must declare a structured `dashboardGoldenReference`; use `none` when no golden reference is selected.
 - Every Dashboard page must declare structured `dashboardSectionTemplates[]`.
 - Every Dashboard page must declare `pageFunctionPlanId` and `appPlanDashboardRef` so App Plan to Page Function Plan traceability is bidirectional.
+- Dashboard pages inherit the app-level `selectedApplicationLayout` / `applicationLayoutType` from the Application Design System. Do not select a different application layout per Dashboard page unless the exception is explicitly marked unsupported/deferred with proof boundary.
 - Each `dashboardSectionTemplates[]` entry must include `templateId`, region/section name, business purpose, source list/report/resource, displayed fields, filters, grouping, sorting, actions, required controls, proof status or fallback, why the selected template fits, and App Plan traceability.
 - Template selection is not only visual guidance. It is part of the Page Function Plan implementation contract and must be consumed by downstream page/resource generation.
 - Dashboard template/fidelity selection is also a downstream implementation contract: page/resource generation must preserve the selected template IDs, data bindings, filter/action metadata, rich table treatment, KPI formatting, semantic `nv_label`, and runtime proof boundary.

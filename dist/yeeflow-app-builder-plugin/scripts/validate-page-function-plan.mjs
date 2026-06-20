@@ -39,6 +39,13 @@ const DOCUMENTED_DASHBOARD_PAGE_PATTERNS = new Set([
   "three_column_workspace_shell",
 ]);
 
+const SUPPORTED_APPLICATION_LAYOUTS = new Set([
+  "application-layout-1-vertical-nav",
+  "application-layout-2-horizontal-nav",
+  "application-layout-3-header-nav",
+  "application-layout-4-no-nav",
+]);
+
 const TEMPLATE_LIBRARY_PATHS = [
   path.join(process.cwd(), "docs/templates/yeeflow-ui-section-template-library.normalized.json"),
   path.join(process.cwd(), "dist/yeeflow-app-builder-plugin/docs/templates/yeeflow-ui-section-template-library.normalized.json"),
@@ -83,7 +90,7 @@ const DASHBOARD_STYLE_REGION = /\b(Collection|Data analytics|Analytics|Summary|K
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
-    "  node scripts/validate-page-function-plan.mjs <page-function-plan.md|json> [--json]",
+    "  node scripts/validate-page-function-plan.mjs <page-function-plan.md|json> [--application-design-system <ads.json>] [--json]",
     "",
     "Validates Page Function Plan structure and page-level guardrails. No API calls are made.",
   ].join("\n");
@@ -116,6 +123,11 @@ function readPlan(file) {
   const parsed = parseMaybeJson(text);
   if (parsed) return { type: "json", text, plan: parsed };
   return { type: "markdown", text, plan: null };
+}
+
+function argValue(name) {
+  const index = process.argv.indexOf(name);
+  return index === -1 ? "" : process.argv[index + 1] || "";
 }
 
 function readDashboardTemplateLibrary() {
@@ -206,6 +218,17 @@ function appPlanDashboardRef(page) {
       || page.appPlanDashboardName
       || page.appPlanResourceName,
   ).trim();
+}
+
+function applicationDesignSystemLayout(ads) {
+  if (!ads || typeof ads !== "object") return "";
+  const selected = ads.selectedApplicationLayout;
+  if (typeof selected === "string" && selected.trim()) return selected.trim();
+  if (selected && typeof selected === "object") {
+    const nested = safeString(selected.applicationLayoutType || selected.id || selected.value).trim();
+    if (nested) return nested;
+  }
+  return safeString(ads.applicationLayoutType).trim();
 }
 
 function appPlanSurfaceRef(surface) {
@@ -1078,7 +1101,50 @@ function validateResponsive(plan, findings) {
   }
 }
 
-function validateJson(plan) {
+function validateApplicationLayoutInheritance(plan, applicationDesignSystem, findings) {
+  if (!applicationDesignSystem) return;
+  const selectedLayout = applicationDesignSystemLayout(applicationDesignSystem);
+  if (!selectedLayout) {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_DESIGN_SYSTEM_LAYOUT_MISSING", message: "Application Design System must declare a selected application layout before Page Function Plan layout inheritance can be validated." });
+    return;
+  }
+  if (!SUPPORTED_APPLICATION_LAYOUTS.has(selectedLayout)) {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_DESIGN_SYSTEM_LAYOUT_UNSUPPORTED", value: selectedLayout, message: "Application Design System selected application layout must be plugin-supported." });
+    return;
+  }
+
+  for (const dashboard of asArray(plan.dashboards)) {
+    const declared = safeString(
+      dashboard.applicationLayoutType
+        || dashboard.selectedApplicationLayout
+        || dashboard.applicationLayout,
+    ).trim();
+    if (declared && declared !== selectedLayout) {
+      const deferred = hasStructuredIntent(dashboard.unsupportedLayoutException || dashboard.layoutException || dashboard.deferredReason || dashboard.runtimeProofBoundary, /\b(unsupported|deferred|runtime-proof|required|proof boundary|exception)\b/i);
+      if (!deferred) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_LAYOUT_OVERRIDE_UNSUPPORTED",
+          dashboard: dashboard.name,
+          selectedApplicationLayout: selectedLayout,
+          dashboardLayout: declared,
+          message: "Dashboard Page Function Plan entries must inherit the Application Design System layout and must not select a different per-page application layout unless explicitly marked unsupported/deferred with proof boundary.",
+        });
+      }
+    }
+    if (!hasTextValue(dashboard.applicationLayoutInheritance) && !hasTextValue(dashboard.applicationDesignSystemLayoutRef) && !declared) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_DASHBOARD_LAYOUT_INHERITANCE_MISSING",
+        dashboard: dashboard.name,
+        selectedApplicationLayout: selectedLayout,
+        message: "Dashboard Page Function Plan entries must reference or inherit the selected Application Design System layout.",
+      });
+    }
+  }
+}
+
+function validateJson(plan, applicationDesignSystem = null) {
   const findings = [];
   if (!safeString(plan.applicationName).trim()) findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_NAME_MISSING", message: "applicationName is required." });
   if (!safeString(plan.applicationLayout).trim()) findings.push({ level: "error", code: "PAGE_FUNCTION_APPLICATION_LAYOUT_MISSING", message: "applicationLayout is required." });
@@ -1090,20 +1156,31 @@ function validateJson(plan) {
   validateApprovalForms(plan, findings);
   validateDataForms(plan, findings);
   validateResponsive(plan, findings);
+  validateApplicationLayoutInheritance(plan, applicationDesignSystem, findings);
   return findings;
 }
 
 function main() {
   if (process.argv.includes("--help") || process.argv.includes("-h")) usage(0);
   const json = process.argv.includes("--json");
-  const file = process.argv.slice(2).find((arg) => arg !== "--json");
+  const adsPath = argValue("--application-design-system");
+  const file = process.argv.slice(2).find((arg) => arg !== "--json" && arg !== "--application-design-system" && arg !== adsPath);
   if (!file) usage();
   if (!fs.existsSync(file)) {
     console.log(JSON.stringify({ status: "fail", file: path.resolve(file), errors: 1, findings: [{ level: "error", code: "PAGE_FUNCTION_PLAN_FILE_MISSING", message: "Page Function Plan file does not exist." }] }, null, 2));
     process.exit(1);
   }
   const input = readPlan(file);
-  const findings = input.type === "json" ? validateJson(input.plan) : markdownFindings(input.text);
+  let applicationDesignSystem = null;
+  if (adsPath) {
+    if (!fs.existsSync(adsPath)) {
+      console.log(JSON.stringify({ status: "fail", file: path.resolve(file), errors: 1, findings: [{ level: "error", code: "PAGE_FUNCTION_APPLICATION_DESIGN_SYSTEM_FILE_MISSING", message: "Application Design System file does not exist." }] }, null, 2));
+      process.exit(1);
+    }
+    const adsInput = readPlan(adsPath);
+    applicationDesignSystem = adsInput.plan;
+  }
+  const findings = input.type === "json" ? validateJson(input.plan, applicationDesignSystem) : markdownFindings(input.text);
   const errors = findings.filter((finding) => finding.level === "error").length;
   const report = { status: errors ? "fail" : "pass", file: path.resolve(file), inputType: input.type, errors, warnings: 0, findings };
   if (json) console.log(JSON.stringify(report, null, 2));

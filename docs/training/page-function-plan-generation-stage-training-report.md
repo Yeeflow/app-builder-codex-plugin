@@ -29,13 +29,16 @@ Functional Specification
 - Added `docs/standards/application-design-system-template.md`.
 - Updated `docs/standards/app-plan-standard-template.md` so the App Plan references Page Function Plan entries without embedding page-level details.
 - Added `scripts/validate-page-function-plan.mjs`.
+- Added `scripts/validate-application-design-system.mjs`.
 - Added `scripts/validate-app-plan-page-function-traceability.mjs`.
 - Added `scripts/test-page-function-plan-gates.mjs`.
+- Added `scripts/test-application-design-system-gates.mjs`.
 - Added Dashboard-only Page Function Plan template-selection gates that load the plugin-contained Dashboard template library and require `dashboardPagePattern` plus structured `dashboardSectionTemplates[]`.
 - Added Dashboard-only high-fidelity/Event Portfolio gates based on plugin-contained Marketing Event/Event Portfolio lessons for KPI/Summary binding, Data Filter consumers, Collection grid-table requirements, rich table treatment, action metadata, KPI formatting, semantic `nv_label`, and runtime proof boundary.
 - Promoted `event_portfolio_dashboard_golden_reference` as an explicit Dashboard golden-reference family in the plugin-contained template library and Page Function Plan contract.
 - Clarified document responsibility split: Functional Specification describes business page needs only, App Plan declares Dashboard resources plus stable Page Function Plan refs only, and Page Function Plan owns Dashboard implementation intent including `dashboardGoldenReference`.
 - Consolidated the Page Function Plan as the canonical page-level implementation contract for Dashboard pages, Approval submission/task/print surfaces, custom Data list forms, and custom Document library forms.
+- Added Application Design System layout-selection gates requiring exactly one supported Yeeflow Application Layout and structured app chrome fields before generation.
 - Added non-dashboard surface gates for Approval field state/behavior, task decisions, print-specific noninteractive pages, New/Edit current-resource field scope, Save/Cancel actions, View related-region contracts, and Document library metadata/upload/view behavior.
 - Extended App Plan to Page Function Plan traceability so App Plan Approval/Data list/Document library surfaces must carry stable Page Function Plan references and Page Function Plan entries must map back to App Plan resources.
 - Registered the new validators/tests in focused planning gates, aggregate UI hard gates, and YAPK cache artifact mirror checks.
@@ -93,6 +96,15 @@ Non-dashboard surface contract:
 - View/detail/custom forms may include related regions only when source list/library, parent/current-item binding, displayed fields, filters, actions, and opening behavior are specified.
 - Document library forms require structured form `pageFunctionPlanId` plus document metadata and view behavior; upload/edit forms must also define upload behavior.
 
+Application Design System layout contract:
+
+- The Application Design System must select exactly one supported `applicationLayoutType`: `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, or `application-layout-4-no-nav`.
+- It must declare structured `selectedApplicationLayout`, `applicationChromeStyleId`, `headerMode`, `navigationMode`, `navigationPanelMode`, `contentSafeArea`, `dashboardChromeRules`, and `formSurfaceChromeRules`.
+- Dashboard/application pages inherit the app-level selected layout and must include header/navigation/content-safe-area expectations.
+- Approval forms and Data list / Document library forms are form surfaces and must not invent app header/navigation unless explicitly plugin-supported or deferred with proof boundary.
+- Arbitrary sidebars, custom nav bars, floating navigation, custom top bars, and unsupported app shells fail validation.
+- Page Function Plan validation can consume an Application Design System file and fail Dashboard entries that override the app-level layout without an explicit unsupported/deferred proof boundary.
+
 ## Regression Coverage
 
 `scripts/test-page-function-plan-gates.mjs` covers:
@@ -102,6 +114,10 @@ Non-dashboard surface contract:
 - Missing approval submission/task/print entry.
 - Missing data list form entry.
 - Missing App Plan Approval/Data list/Document library Page Function Plan references.
+- Valid Application Design System selecting exactly one supported layout.
+- Application Design System with no layout, multiple layouts, invented layout name, or arbitrary chrome.
+- Dashboard Page Function Plan inheriting the Application Design System layout.
+- Dashboard Page Function Plan overriding the app-level layout without explicit deferred/proof boundary.
 - Form Report correctly not required as a UI surface.
 - New/Edit form incorrectly containing Collection/Data analytics/audit/dashboard regions.
 - Approval submission field missing state/behavior contract.

@@ -11,6 +11,9 @@ The Application Design System defines the visual and interaction rules that guid
 - Yeeflow App Plan path:
 - Page Function Plan path:
 - Selected Yeeflow Application Layout:
+- selectedApplicationLayout:
+- applicationLayoutType:
+- applicationChromeStyleId:
 - Planning plugin:
 - Plugin version:
 - Current status: draft / pending review / approved
@@ -27,12 +30,47 @@ The Application Design System defines the visual and interaction rules that guid
 
 ## 3. Selected Yeeflow Application Layout
 
+Every Application Design System must select exactly one Yeeflow Application Layout for the current app.
+
+Supported layout values:
+
+- `application-layout-1-vertical-nav`
+- `application-layout-2-horizontal-nav`
+- `application-layout-3-header-nav`
+- `application-layout-4-no-nav`
+
+Structured fields:
+
+| Field | Required Value / Intent |
+| --- | --- |
+| selectedApplicationLayout | <One selected supported layout ID or object containing the selected layout ID> |
+| applicationLayoutType | `application-layout-1-vertical-nav` / `application-layout-2-horizontal-nav` / `application-layout-3-header-nav` / `application-layout-4-no-nav` |
+| applicationChromeStyleId | <One app-level chrome style ID for the selected layout> |
+| headerMode | <Selected layout header behavior> |
+| navigationMode | vertical-nav / horizontal-nav / header-nav / no-nav |
+| navigationPanelMode | left-panel / horizontal-menu / header-menu / none |
+| contentSafeArea | <Where Dashboard/application page content must sit relative to header/navigation chrome> |
+| dashboardChromeRules | <Header/navigation/content-safe-area expectations for Dashboard and application pages> |
+| formSurfaceChromeRules | <Approval forms and Data list / Document library forms are full form surfaces and do not include application header/navigation unless explicitly supported> |
+
 | Area | Decision | Guidance | App Plan / Page Function Plan Trace |
 | --- | --- | --- | --- |
-| Application layout | application-layout-1-vertical-nav / application-layout-2-horizontal-nav / application-layout-3-header-nav / application-layout-4-no-nav | <Reason and use> | <Trace> |
-| Header | <Behavior> | <Consistency rule> | <Trace> |
-| Navigation panel | <Behavior> | <Consistency rule> | <Trace> |
-| Form surfaces | <Behavior> | Approval/data-list forms are full form surfaces unless plugin standards require app chrome | <Trace> |
+| Application layout | <applicationLayoutType> | <Reason and use> | <Trace> |
+| Header | <headerMode> | <Consistency rule> | <Trace> |
+| Navigation mode | <navigationMode> | <Consistency rule> | <Trace> |
+| Navigation panel | <navigationPanelMode> | <Consistency rule> | <Trace> |
+| Content safe area | <contentSafeArea> | <Content region rule> | <Trace> |
+| Dashboard chrome | <dashboardChromeRules> | Dashboard/application pages follow selected app header/navigation expectations | <Dashboard Page Function Plan IDs> |
+| Form surfaces | <formSurfaceChromeRules> | Approval/data-list/document-library forms are full form surfaces unless plugin standards explicitly support app chrome | <Form Page Function Plan IDs> |
+
+Rules:
+
+- Select exactly one `applicationLayoutType`.
+- The selected value must be one of the four supported Yeeflow layouts above.
+- Do not invent arbitrary sidebars, custom nav bars, floating nav, custom top bars, unsupported app shells, or page-specific application chrome outside the selected Yeeflow layout.
+- Dashboard/application pages must follow the selected layout and include header/navigation/content-safe-area expectations.
+- Approval forms and Data list / Document library forms are form surfaces and should not include app header/navigation unless explicitly supported by plugin standards.
+- Page Function Plan Dashboard entries must reference or inherit the selected Application Design System layout. They must not select a different application layout per Dashboard page unless the exception is explicitly marked unsupported/deferred with proof boundary.
 
 ## 4. Page Density and Spacing Principles
 
