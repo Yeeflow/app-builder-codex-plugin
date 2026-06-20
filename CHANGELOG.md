@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.7.2
+
+- Release the Page Function Plan business/page-function contract refinement from PR #130.
+- Require Page Function Plan Dashboard entries to state page purpose, primary users, concrete business questions, data sources, field usage, filters, summary metrics, main and secondary data regions, action intent, and mobile behavior.
+- Require data source and field usage details to map source lists/libraries, required fields, metric usage, display usage, filter usage, sort/group usage, and action usage.
+- Require Page Filters to identify source list, field, affected regions, default/selection behavior, filter logic, and mobile behavior.
+- Require Summary Metrics to identify source fields, calculation logic, default filter scope, business meaning, and formatting expectations.
+- Reject vague Dashboard Page Function Plan entries such as “show dashboard data”, “add filters”, “display list”, or “show summary cards” when they lack business purpose, fields, filter logic, or mappings.
+- Reject low-level implementation/property instructions in Page Function Plan business sections, including exact Container/Grid/Text/Button nesting, Yeeflow property paths, CSS, arbitrary custom controls, or generated resource JSON.
+- Preserve downstream Dashboard Pattern Library / Golden Reference, Application Design System, Container/Button action, Dashboard Text/control, aggregate UI, and YAPK hard gates as the implementation and resource-generation safeguards after PFP.
+
 ## 0.7.1
 
 - Release the generated-final local-draft placeholder hard gate from PR #127.

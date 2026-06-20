@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.7.1`
+- Version: `0.7.2`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.7.1` releases the generated-final local-draft placeholder hard gate from PR #127. Generated-final packages must now use an ID-first model: local-preview/local-draft packages remain local-only, while generated-final packages are built fresh from approved logical refs plus a complete API-issued ID map. Recursive generated-final validation blocks unresolved draft markers, unmapped logical references, nested runtime-bearing placeholder fields, and signing readiness when final artifacts are not fully resolved.
+Current release `0.7.2` releases the Page Function Plan business/page-function contract refinement from PR #130. Page Function Plans now emphasize page purpose, primary users, business questions, data source and field usage, filter source-list/field mapping, summary metric source/calculation requirements, main and secondary data region requirements, action intent, and mobile behavior. Validation rejects vague dashboard entries and low-level implementation/property instructions while preserving downstream Dashboard Pattern Library, Application Design System, action, Text/control, UI, and YAPK hard gates.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.7.1
+Version: 0.7.2
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.7.1
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.7.2
 ```
 
 ## What Is Included

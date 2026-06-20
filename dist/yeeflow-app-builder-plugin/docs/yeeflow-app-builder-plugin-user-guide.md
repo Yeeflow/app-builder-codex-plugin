@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.7.1`
+`0.7.2`
+
+Version `0.7.2` releases the Page Function Plan business/page-function contract refinement from PR #130. Page Function Plans now require page purpose, primary users, business questions, data source and field usage, filter source-list/field mapping, summary metric source/calculation requirements, main and secondary data region requirements, action intent, and mobile behavior. The validator rejects vague dashboard entries and low-level implementation/property instructions while preserving downstream Dashboard Pattern Library / Golden Reference, Application Design System, action, Text/control, UI, and YAPK hard gates. These gates run before page/resource generation and do not replace package validation, signing/API acceptance, install/upgrade proof, or runtime/browser proof.
 
 Version `0.7.1` releases the generated-final local-draft placeholder hard gate. Generated-final package generation is now ID-first: planning and blueprint stages may use logical refs, local-preview/local-draft packages remain local-only, and generated-final artifacts are built fresh from approved logical refs plus a complete API-issued ID map. Recursive generated-final validation blocks unresolved draft markers, unmapped logical references, nested runtime-bearing placeholder fields, and signing readiness when final artifacts are not fully resolved. These gates run before signing/install readiness and do not replace package validation, API acceptance, install/upgrade proof, or runtime/browser proof.
 
