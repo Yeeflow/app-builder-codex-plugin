@@ -1141,6 +1141,22 @@ function validateApplicationLayoutInheritance(plan, applicationDesignSystem, fin
         message: "Dashboard Page Function Plan entries must reference or inherit the selected Application Design System layout.",
       });
     }
+    const chromeOverride = dashboard.applicationChrome
+      || dashboard.appChrome
+      || dashboard.headerChrome
+      || dashboard.navigatorMenuChrome
+      || dashboard.dashboardChromeSettings;
+    if (hasTextValue(chromeOverride)) {
+      const deferred = hasStructuredIntent(dashboard.unsupportedChromeException || dashboard.chromeException || dashboard.deferredReason || dashboard.runtimeProofBoundary, /\b(unsupported|deferred|runtime-proof|required|proof boundary|exception|plugin-supported)\b/i);
+      if (!deferred) {
+        findings.push({
+          level: "error",
+          code: "PAGE_FUNCTION_DASHBOARD_CHROME_OVERRIDE_UNSUPPORTED",
+          dashboard: dashboard.name,
+          message: "Dashboard Page Function Plan entries must inherit Application Design System applicationChrome settings and must not override app-level chrome per page unless explicitly marked unsupported/deferred with proof boundary.",
+        });
+      }
+    }
   }
 }
 

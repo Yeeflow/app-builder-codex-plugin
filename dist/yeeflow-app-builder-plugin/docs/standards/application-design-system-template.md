@@ -52,6 +52,7 @@ Structured fields:
 | contentSafeArea | <Where Dashboard/application page content must sit relative to header/navigation chrome> |
 | dashboardChromeRules | <Header/navigation/content-safe-area expectations for Dashboard and application pages> |
 | formSurfaceChromeRules | <Approval forms and Data list / Document library forms are full form surfaces and do not include application header/navigation unless explicitly supported> |
+| applicationChrome | <Structured app-wide Yeeflow shell color, typography, navigator, content-area, and property-mapping settings> |
 
 | Area | Decision | Guidance | App Plan / Page Function Plan Trace |
 | --- | --- | --- | --- |
@@ -71,6 +72,95 @@ Rules:
 - Dashboard/application pages must follow the selected layout and include header/navigation/content-safe-area expectations.
 - Approval forms and Data list / Document library forms are form surfaces and should not include app header/navigation unless explicitly supported by plugin standards.
 - Page Function Plan Dashboard entries must reference or inherit the selected Application Design System layout. They must not select a different application layout per Dashboard page unless the exception is explicitly marked unsupported/deferred with proof boundary.
+
+### 3A. Application Chrome Settings
+
+Use structured `applicationChrome` settings to define the official Yeeflow app-wide header and navigator menu styling for Dashboard/application pages.
+
+```json
+{
+  "applicationChrome": {
+    "header": {
+      "backgroundColor": "var(--c--primary-light)",
+      "textColor": "var(--c--primary)",
+      "iconColor": "var(--c--primary)",
+      "titleTypography": "h5-medium",
+      "titleFontSize": "var(--fs--h5)",
+      "titleFontWeight": "var(--fw--semi-bold)",
+      "titleStyle": "medium"
+    },
+    "navigatorMenu": {
+      "backgroundColor": "var(--c--primary)",
+      "textColor": "var(--c--primary-light)",
+      "iconColor": "var(--c--primary-light)",
+      "hoverBackgroundColor": "export-learning-required",
+      "hoverTextColor": "export-learning-required",
+      "activeBackgroundColor": "runtime-proof-required",
+      "activeTextColor": "runtime-proof-required",
+      "selectedItemStyle": "runtime-proof-required until exact active-state property path is export-proven",
+      "groupLabelStyle": "var(--c--text-normal)"
+    },
+    "contentArea": {
+      "backgroundColor": "var(--c--background)"
+    },
+    "propertyMappings": [
+      "LayoutView.attrs.appearance.bgc",
+      "LayoutView.attrs.appearance.color",
+      "LayoutView.attrs[\"navigator-menu\"].bgc",
+      "LayoutView.attrs[\"navigator-menu\"].color",
+      "LayoutView.attrs[\"navigator-menu\"].position"
+    ]
+  }
+}
+```
+
+Required `applicationChrome.header` fields:
+
+- `header.backgroundColor`
+- `header.textColor`
+- `header.iconColor`
+- `header.titleTypography`
+- `header.titleFontSize`
+- `header.titleFontWeight`
+- `header.titleStyle`
+
+Required `applicationChrome.navigatorMenu` fields:
+
+- `navigatorMenu.backgroundColor`
+- `navigatorMenu.textColor`
+- `navigatorMenu.iconColor`
+- `navigatorMenu.hoverBackgroundColor`
+- `navigatorMenu.hoverTextColor`
+- `navigatorMenu.activeBackgroundColor`
+- `navigatorMenu.activeTextColor`
+- `navigatorMenu.selectedItemStyle`
+- `navigatorMenu.groupLabelStyle`
+
+Required `applicationChrome.contentArea` fields:
+
+- `contentArea.backgroundColor`
+
+Mapping intent:
+
+- Header background maps to known Yeeflow shell property `LayoutView.attrs.appearance.bgc`.
+- Header text/icon color maps to known Yeeflow shell property `LayoutView.attrs.appearance.color`.
+- Navigator menu background maps to known Yeeflow shell property `LayoutView.attrs["navigator-menu"].bgc`.
+- Navigator menu text/icon color maps to known Yeeflow shell property `LayoutView.attrs["navigator-menu"].color`.
+- Navigator menu position maps to known Yeeflow shell property `LayoutView.attrs["navigator-menu"].position`.
+- Exact hover and active navigator state property paths are runtime-sensitive. If export-proven property paths are not available, mark hover/active fields as `export-learning-required` or `runtime-proof-required`; do not invent unsupported property paths.
+
+Token rules:
+
+- Prefer Yeeflow theme tokens and plugin-known style values such as `var(--c--primary-light)`, `var(--c--primary)`, `var(--c--background)`, `var(--c--text)`, and `var(--c--text-normal)`.
+- Use supported typography/token values such as `var(--fs--h5)`, `var(--fw--semi-bold)`, or documented heading style values.
+- Raw hex values should not be used for app chrome settings unless explicitly justified with a proof boundary.
+- For the standard generated shell, use the documented inverse pairing: header background `var(--c--primary-light)`, header text/icon `var(--c--primary)`, navigator background `var(--c--primary)`, and navigator text/icon `var(--c--primary-light)`.
+
+Chrome rules:
+
+- Dashboard/application pages inherit app-wide `applicationChrome` settings.
+- Page Function Plan Dashboard entries must not override `applicationChrome` per page unless explicitly marked as an unsupported/deferred exception with proof boundary.
+- Approval forms and Data list / Document library forms remain form surfaces and do not include app header/navigation chrome unless explicitly plugin-supported.
 
 ## 4. Page Density and Spacing Principles
 

@@ -51,6 +51,39 @@ function ads(overrides = {}) {
     contentSafeArea: "Dashboard content sits below the header and to the right of the left navigation panel.",
     dashboardChromeRules: "Dashboard/application pages use the selected header, left navigation panel, and content safe area.",
     formSurfaceChromeRules: "Approval forms and Data list / Document library forms are full form surfaces with no app chrome unless explicitly supported by plugin standards.",
+    applicationChrome: {
+      header: {
+        backgroundColor: "var(--c--primary-light)",
+        textColor: "var(--c--primary)",
+        iconColor: "var(--c--primary)",
+        titleTypography: "h5-medium",
+        titleFontSize: "var(--fs--h5)",
+        titleFontWeight: "var(--fw--semi-bold)",
+        titleStyle: "medium",
+      },
+      navigatorMenu: {
+        backgroundColor: "var(--c--primary)",
+        textColor: "var(--c--primary-light)",
+        iconColor: "var(--c--primary-light)",
+        hoverBackgroundColor: "var(--c--primary-light)",
+        hoverTextColor: "var(--c--primary)",
+        activeBackgroundColor: "var(--c--primary-light)",
+        activeTextColor: "var(--c--primary)",
+        selectedItemStyle: "runtime-proof-required until exact active-state property path is export-proven",
+        groupLabelStyle: "var(--c--text-normal)",
+        proofStatus: "runtime-proof-required for hover/active computed style.",
+      },
+      contentArea: {
+        backgroundColor: "var(--c--background)",
+      },
+      propertyMappings: [
+        "LayoutView.attrs.appearance.bgc",
+        "LayoutView.attrs.appearance.color",
+        "LayoutView.attrs[\"navigator-menu\"].bgc",
+        "LayoutView.attrs[\"navigator-menu\"].color",
+        "LayoutView.attrs[\"navigator-menu\"].position",
+      ],
+    },
     ...overrides,
   };
 }
@@ -134,6 +167,61 @@ try {
   expectCode(output.report, "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_CHROME");
   results.push({ case: "invalid ADS with arbitrary chrome fails", status: "pass" });
 
+  const missingHeaderChrome = ads();
+  delete missingHeaderChrome.applicationChrome.header;
+  output = run("scripts/validate-application-design-system.mjs", [writeJson("missing-header-chrome", missingHeaderChrome)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "APPLICATION_DESIGN_SYSTEM_HEADER_CHROME_MISSING");
+  results.push({ case: "invalid ADS missing header settings fails", status: "pass" });
+
+  const missingNavigatorChrome = ads();
+  delete missingNavigatorChrome.applicationChrome.navigatorMenu;
+  output = run("scripts/validate-application-design-system.mjs", [writeJson("missing-navigator-chrome", missingNavigatorChrome)]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "APPLICATION_DESIGN_SYSTEM_NAVIGATOR_MENU_CHROME_MISSING");
+  results.push({ case: "invalid ADS missing navigator settings fails", status: "pass" });
+
+  output = run("scripts/validate-application-design-system.mjs", [writeJson("raw-hex-chrome", ads({
+    applicationChrome: {
+      ...ads().applicationChrome,
+      header: { ...ads().applicationChrome.header, backgroundColor: "#004488" },
+    },
+  }))]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "APPLICATION_DESIGN_SYSTEM_RAW_HEX_CHROME_VALUE");
+  results.push({ case: "invalid ADS raw hex chrome value without justification fails", status: "pass" });
+
+  output = run("scripts/validate-application-design-system.mjs", [writeJson("invented-hover-active-path", ads({
+    applicationChrome: {
+      ...ads().applicationChrome,
+      navigatorMenu: { ...ads().applicationChrome.navigatorMenu, proofStatus: "planned" },
+      propertyMappings: [
+        ...ads().applicationChrome.propertyMappings,
+        "LayoutView.attrs[\"navigator-menu\"].hoverBackgroundColor",
+        "LayoutView.attrs[\"navigator-menu\"].activeTextColor",
+      ],
+    },
+  }))]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "APPLICATION_DESIGN_SYSTEM_UNSUPPORTED_HOVER_ACTIVE_PROPERTY_PATH");
+  results.push({ case: "invalid ADS using invented hover/active property paths fails", status: "pass" });
+
+  output = run("scripts/validate-application-design-system.mjs", [writeJson("hover-active-export-learning", ads({
+    applicationChrome: {
+      ...ads().applicationChrome,
+      navigatorMenu: {
+        ...ads().applicationChrome.navigatorMenu,
+        proofStatus: "export-learning-required for hover/active property paths; runtime-proof-required before final chrome claim.",
+      },
+      propertyMappings: [
+        ...ads().applicationChrome.propertyMappings,
+        "LayoutView.attrs[\"navigator-menu\"].hoverBackgroundColor",
+      ],
+    },
+  }))]);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "valid ADS marking hover/active details export-learning-required passes", status: "pass" });
+
   const adsFile = writeJson("layout-source-ads", ads());
   output = run("scripts/validate-page-function-plan.mjs", [writeJson("valid-pfp-layout-inheritance", pageFunctionPlan()), "--application-design-system", adsFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
@@ -150,6 +238,18 @@ try {
   assert.equal(output.report.status, "fail");
   expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_LAYOUT_OVERRIDE_UNSUPPORTED");
   results.push({ case: "invalid Dashboard Page Function Plan overriding ADS layout fails", status: "pass" });
+
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson("bad-dashboard-chrome-override", pageFunctionPlan({
+    dashboards: [{
+      ...pageFunctionPlan().dashboards[0],
+      applicationChrome: {
+        header: { backgroundColor: "var(--c--danger)" },
+      },
+    }],
+  })), "--application-design-system", adsFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_DASHBOARD_CHROME_OVERRIDE_UNSUPPORTED");
+  results.push({ case: "invalid Dashboard page overriding app-level chrome fails", status: "pass" });
 
   output = run("scripts/validate-page-function-plan.mjs", [writeJson("deferred-dashboard-layout-override", pageFunctionPlan({
     dashboards: [{
