@@ -11,6 +11,15 @@ const templatePath = path.join(ROOT, "docs", "examples", "runtime-evidence.redac
 
 const childTests = [
   {
+    name: "Generated-final draft placeholder hard-gate regression suite",
+    command: ["scripts/test-generated-final-draft-placeholder-gates.mjs"],
+    validators: [
+      "validate-generated-final-draft-placeholders",
+      "validate-yapk-package generated-final placeholder scan",
+      "yapk-first-generation-preflight placeholder gate",
+    ],
+  },
+  {
     name: "Application Design System layout contract regression suite",
     command: ["scripts/test-application-design-system-gates.mjs"],
     validators: [

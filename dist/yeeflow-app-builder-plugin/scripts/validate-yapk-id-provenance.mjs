@@ -70,6 +70,9 @@ export function validateYapkIdProvenance({ package: packagePath, manifest: manif
     if (allocation.source && allocation.source !== "api-generated") {
       findings.push(error("ID_PROVENANCE_ALLOCATION_SOURCE_NOT_API_GENERATED", "Allocation source must be api-generated.", { allocation }));
     }
+    if (allocation.source === "api-generated" && /(^|\.|\])TenantID$/.test(String(allocation.path || ""))) {
+      findings.push(warning("TENANT_METADATA_API_ID_ALLOCATION_REVIEW_REQUIRED", "TenantID is tenant metadata, not an app content resource ID. Do not API-generate wrapper or tenant metadata IDs unless plugin-contained export/API evidence proves this is correct.", { allocation }));
+    }
   }
   for (const id of duplicateIds) {
     findings.push(error("ID_PROVENANCE_DUPLICATE_ALLOCATED_ID", "Manifest contains duplicate allocated IDs.", { id }));
@@ -217,6 +220,10 @@ function fail(code, message, details = {}) {
 
 function error(code, message, details = {}) {
   return { level: "error", code, message, ...details };
+}
+
+function warning(code, message, details = {}) {
+  return { level: "warning", code, message, ...details };
 }
 
 function parseArgs(argv) {
