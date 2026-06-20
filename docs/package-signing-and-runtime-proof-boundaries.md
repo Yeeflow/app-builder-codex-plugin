@@ -5,7 +5,6 @@ Generated package reports must keep proof scopes separate.
 ## Proof Scopes
 
 - Schema validation proves local package shape only.
-- Generation mode validation proves only that the package was classified as Draft / Offline Mode or Final / Authorized Generation Mode and that final-mode ID allocation evidence exists before resource generation.
 - ID provenance validation proves generated numeric content IDs are covered by an API-issued ID manifest only.
 - Upgrade ID stability validation proves existing YAPK semantic resources preserved their previous IDs and only new resources consumed newly API-issued IDs.
 - Navigation runtime metadata validation proves decoded navigation group/item metadata is complete and target-resolvable only.
@@ -15,7 +14,7 @@ Generated package reports must keep proof scopes separate.
 - API install/import/upgrade acceptance proves API acceptance only.
 - Runtime UI proof requires inspecting the installed app.
 
-Do not describe a package as upload-ready, install-ready, upgrade-ready, generated-final, or handoff-ready solely because local validators pass. Draft / Offline Mode output is local unsigned draft output only and is blocked from generated-final signing/install claims because API-issued ID provenance is absent. Do not describe API acceptance as runtime UI proof. Do not use signing, install acceptance, upgrade-check acceptance, or upgrade acceptance as evidence for generation mode authorization, ID provenance, upgrade ID continuity, navigation runtime metadata completeness, or dashboard runtime/designer visual fidelity.
+Do not describe a package as upload-ready, install-ready, upgrade-ready, or handoff-ready solely because local validators pass. Do not describe API acceptance as runtime UI proof. Do not use signing, install acceptance, upgrade-check acceptance, or upgrade acceptance as evidence for ID provenance, upgrade ID continuity, navigation runtime metadata completeness, or dashboard runtime/designer visual fidelity.
 
 ## Signing Requirements
 
@@ -31,7 +30,6 @@ When credentials are available, a generated package should be API-signed and ver
 Generation reports should include:
 
 - schema validation: pass/fail and validator names
-- generation mode validation: draft-offline, final-authorized, passed, failed, or blocked, with generation mode report path
 - ID provenance validation: pending, passed, failed, or not applicable, with manifest path
 - upgrade ID stability validation: pending, passed, failed, or not applicable, with previous/new package and lineage manifest paths
 - navigation runtime metadata validation: pending, passed, failed, or not applicable, with validator result

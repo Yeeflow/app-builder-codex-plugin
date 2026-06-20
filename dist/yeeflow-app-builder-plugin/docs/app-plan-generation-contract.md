@@ -36,19 +36,6 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 - Planning-only task: Yes/No
 - Package handoff requires API signing when credentials are available: Yes/No
 
-### Generation Mode Gate
-- Selected generation mode: Draft / Offline Mode or Final / Authorized Generation Mode
-- Draft / Offline Mode uses local draft IDs and produces local unsigned draft packages only: Yes/No
-- Draft / Offline Mode may call live Yeeflow APIs: No
-- Draft / Offline Mode may claim generated-final signing/install readiness: No
-- Final / Authorized Generation Mode requires explicit live Yeeflow API authorization: Yes/No
-- Final / Authorized Generation Mode target workspace:
-- Final / Authorized Generation Mode must call `GET /utils/generate/ids?count=<n>` before resource generation: Yes
-- Final / Authorized Generation Mode uses API-issued IDs directly during initial generation: Yes
-- Local IDs generated first and remapped later as the primary final path allowed: No
-- Required proof artifact: `dist/<app-name>-generation-mode-id-provenance.json`
-- Generation must stop before generated-final readiness, signing, install, import, upgrade, or runtime proof when generation mode validation fails: Yes
-
 ### YAPK Signing Gate
 - Required when generating `.yapk` and OAuth/API-key access is available: Yes/No
 - Required endpoints: `POST /utils/apppackage/setsign`, `POST /utils/apppackage/verifysign`
@@ -59,7 +46,7 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 ### API-Issued Content ID Provenance Gate
 - Required for generated-final `.yapk`: Yes
 - Required API: `GET /utils/generate/ids?count=<n>`
-- Local sequential counters, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, deterministic local-only seeds, and local-first remapped IDs allowed for generated-final output: No
+- Local sequential counters, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds allowed: No
 - Required proof artifact: `dist/<app-name>-id-provenance-report.json`
 - Source marker required: `api-generated`
 - Non-API numeric generated content IDs allowed: No
@@ -163,7 +150,6 @@ Northpeak reference note: `northpeak-resource-operations-plan.md` is the style r
 
 ### Proof Boundary Contract
 - App plan approval status:
-- Generation mode validation status:
 - Local schema validation status:
 - ID provenance proof status:
 - Navigation runtime metadata proof status:

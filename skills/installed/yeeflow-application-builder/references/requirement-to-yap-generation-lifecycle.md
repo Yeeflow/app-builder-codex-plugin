@@ -28,19 +28,6 @@ Before generation, confirm package target and scope:
 - Existing application upgrade requires an official baseline `.yapk` from Yeeflow Version management, identity preservation, and ID stability.
 - Existing application upgrades must not use fresh-ID clone generation rules unless the user explicitly asks for a cloned app.
 
-## Generation Mode Gate
-
-Before Yeeflow resource generation, choose one mode:
-
-- Draft / Offline Mode
-- Final / Authorized Generation Mode
-
-Draft / Offline Mode is the default. It must not call live Yeeflow APIs, uses local draft IDs, produces local unsigned draft packages only, and cannot proceed to generated-final signing/install readiness because API-issued ID provenance is absent.
-
-Final / Authorized Generation Mode is allowed only after explicit user authorization for live Yeeflow API usage and the target workspace. In this mode, call `GET /utils/generate/ids?count=<n>` before resource generation and use API-issued IDs directly in generated resources. Do not generate local IDs first and then remap them as the primary final path. References, lookups, workflows, navigation, dashboards, forms, and resource bindings must preserve API-issued IDs from initial generation.
-
-Run `scripts/validate-generation-mode-id-provenance.mjs --report <generation-mode-id-provenance.json>` before generated-final readiness, signing readiness, signing, install/import/upgrade, or runtime proof.
-
 ## 1. Requirement Intake
 
 Read all uploaded requirement files, screenshots, sample forms, sample exports, Markdown files, Word documents, PDFs, JSON files, and user notes.
@@ -144,7 +131,7 @@ All fields, controls, Dynamic controls, variables, workflow nodes, form actions,
 
 ## 5. App Plan Review Gate
 
-Review the App Plan before the Full-page Canonical Design Artifacts stage, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
+Review the App Plan before any full-page design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
 
 The review must confirm:
 
@@ -163,7 +150,7 @@ The review must confirm:
 - field/control/Dynamic control/workflow/action/schedule/resource/property types are plugin-supported or marked for learning/proof/deferment
 - Generation Contract and Hard Gates, Validation Plan, Proof Boundary, Assumptions, Deferred or Runtime-Proof Items, and Recommended Next Prompt are present
 
-If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, full-page canonical design artifacts, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
+If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
 
 ## 6. Business Clarification Gate
 
@@ -247,7 +234,6 @@ Before generation, confirm:
 - generated resource inventory matches required scope
 - runtime-unproven features are marked as focused proof items or documented limitations
 - plugin capability and standards compliance has no invented unsupported shapes
-- generation mode is selected; Final / Authorized Generation Mode has explicit live API authorization and target workspace, or Draft / Offline Mode is marked local unsigned draft only
 
 Stop if any required business decision gate remains unanswered or either review gate is failed.
 
@@ -273,7 +259,7 @@ If Generation Readiness structural check passes but generation-mode Business Cla
 
 When the same unresolved business decision gate appears in both the Functional Specification and App Plan, use the Business Clarification validator's deduplicated summary for user-facing reporting. Show raw finding count, unique unresolved gate count, unique gate keys, and occurrence locations when helpful. Do not make users infer five decisions from ten duplicated raw findings.
 
-Before the Full-page Canonical Design Artifacts stage, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, also run:
+Before design images, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof, also run:
 
 ```bash
 node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>
@@ -281,116 +267,7 @@ node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <funct
 
 Traceability fails when business objects, relationships, approvals, forms, workflows, reporting, documents, AI/Copilot, integrations, permissions, or UI/experience requirements in the Functional Specification are not mapped to Yeeflow resources, planning sections, or explicit deferred/not-applicable coverage in the App Plan. Deferred items must include a reason, fallback, proof impact, or follow-up. This validator proves planning traceability only; it does not prove generated package conformance or runtime behavior.
 
-## 8. Pattern-Library UI Generation
-
-After the Functional Specification review, App Plan review, Business Clarification Gate for generation, Generation Readiness Review, and traceability gate pass, review the Yeeflow Root Token Reference, create the Application Design System, and select Yeeflow UI Section Templates before Page Implementation Blueprints or resource/package generation.
-
-This stage must produce:
-
-- an Application Design System document using `docs/standards/application-design-system-template.md`, `docs/standards/yeeflow-root-token-reference.md`, and `docs/standards/yeeflow-root-token-reference.normalized.json`
-- a pattern-selection artifact using `docs/templates/yeeflow-ui-section-template-library.normalized.json`
-- a validation/review report showing readiness for Page Implementation Blueprints
-
-Root Token Reference review is required before Application Design System approval. The Application Design System must select Primary, Secondary, Neutral, status, typography, spacing, border/divider, action, and responsive spacing tokens before UI Pattern Library selection. Generate the Application Design System before template selection. Every selected template, optional visual artifact, and Page Implementation Blueprint must reference the selected Application Design System and preserve token intent. If the design system is missing, incomplete, generated after template selection, lacks root-token decisions, or is not referenced by selected surfaces, stop before Page Implementation Blueprints.
-
-The Application Design System must use exact official Yeeflow layout fields before any template selection, optional design image, or Page Implementation Blueprint is accepted:
-
-- `applicationLayoutType`
-- `applicationLayoutName`
-- `applicationChromeStyleId`
-- `headerMode`
-- `navMode`
-- `navBackgroundMode`
-- `contentSafeArea`
-- `layoutRuleSource: docs/standards/yeeflow-application-layout-design-rules.md`
-
-Allowed `applicationLayoutType` values are exactly `application-layout-1-vertical-nav`, `application-layout-2-horizontal-nav`, `application-layout-3-header-nav`, and `application-layout-4-no-nav`. Free-form layout names such as `left navigation with compact header and content shell`, `custom sidebar`, `SaaS shell`, `compact header`, or arbitrary custom layout descriptions are not generation-ready and must fail the design-stage gate.
-
-Required pattern-selection coverage:
-
-- Dashboard pages, including operational home pages, workbench/queue pages, detail/workspace pages, reporting pages, KPI/Summary, Data Analytics, Data table, Collection, Kanban, Timeline, filters, action areas, and detail panels when planned
-- Approval forms decomposed into one Submission form, planned Task forms, and planned Print pages
-- Data List Add/Edit, View, Detail, and other custom forms when planned
-
-Form Reports are excluded from required UI pattern surface coverage unless the App Plan explicitly requests a Form Report UI review. They remain standalone Yeeflow resources and must not be mixed into Dashboard design coverage.
-
-Dashboard pages must reflect the selected Yeeflow Application Layout, including header/navigation/content shell where applicable. Dashboard manifest rows must include `applicationLayoutType`, `applicationChromeStyleId`, `includeHeaderNavigation: true`, `layoutFidelityStatus`, and a selected layout/chrome compliance declaration. Approval forms and Data List forms are complete form pages and do not need application header/navigation; use `form-surface-no-app-chrome` where a form row needs an explicit non-dashboard surface marker. All design artifacts must share the Application Design System's visual language, typography, spacing, color, card/container treatment, table style, form style, action style, badges, KPI/Summary style, Data Analytics style, and Collection/Kanban/Timeline item-card style.
-
-Layout 1 vertical navigation must follow `docs/standards/yeeflow-application-layout-design-rules.md`: full-width dark top app header, persistent dark left vertical navigation connected to/below the header, content safe area to the right of the left nav and below the header, page title/action area inside the content safe area, no header hamburger, no bottom Collapse control, no arbitrary product sidebar, no detached left rail, no custom SaaS shell, no extra top navigation, and no mixed dark/light nav panels across pages. Layout 2 must not use a persistent left sidebar. Layout 3 must keep navigation on the header and must not add a second nav bar or left nav. Layout 4 must not invent sidebars, nav tabs, or replacement app shell navigation.
-
-Every selected UI surface must map to one or more approved `templateId` values from the normalized registry. The selected templates must account for realistic business rows, cards, field labels, dates, statuses, owners, documents, tasks, action regions, relevant states, lower-page regions, and page end in the Page Implementation Blueprint. Every selected pattern must declare the inherited token set from the Application Design System. Page Implementation Blueprints must preserve token names for page background, section/card background, border/divider, typography, action buttons, status badges/chips, table/list/card spacing, grid/flex gaps, form field gaps, and mobile/responsive spacing; raw CSS values or visual guesses are not a substitute for token intent.
-
-Every selected pattern that needs icons must use Yeeflow-supported FontAwesome classes and declare semantic icon purpose. Generated app UI must not use invented SVG icons, emoji icons, image icons, or arbitrary custom icon names. Page Implementation Blueprints must map icon controls as Yeeflow control type `icon` with FontAwesome class, color token, size token or supported size property, action binding when clickable, and accessible label/tooltip intent for icon-only actions. If the exact FontAwesome class is uncertain, mark `runtime-proof-required`, `export-learning-required`, or `deferred`.
-
-Structural pattern coverage is not enough. The pattern-selection artifact must include `patternProofStatus`, selected template categories, required control mapping status, required field/binding/action mapping status, an anti-pattern check, and `readyForBlueprint` for each surface. `readyForBlueprint: true` is allowed only when template selection, category fit, required mappings, layout rules, and modern visual quality intent all pass. Reject generic scaffold pages, title-only or helper-text-heavy lower sections, placeholder chart regions without labels/context, arbitrary custom SaaS shells, weak KPI/Summary cards, unintentional Data Analytics regions, and pages without realistic business data examples or clear action priority.
-
-Form/detail semantic quality is required for Approval Submission forms, Approval Task forms, Approval Print pages, Data List Add/Edit forms, Data List View forms, Data List Detail forms, and other custom form/detail surfaces. Manifest rows for these surfaces must declare `primaryBusinessObject`, `semanticFieldExamples`, `fieldValueSemanticsStatus`, `businessRegionEvidence`, `lowerPageBusinessRegions`, `formPurposeDifferentiators`, `templateReuseRiskStatus`, and `pageSpecificQualityEvidence`. Field labels and values must match business meaning; status values in title/name fields, task/status labels in owner/person fields, document filenames in date fields, person/vendor names in status fields, review comments in document/evidence fields, and status labels in related-record fields block blueprint readiness. Lower-page form/detail regions must contain planned business records, workflow or approval history, document evidence, related tasks/contracts/vendors/reminders, reviewer comments, audit/activity trails, validation messages, linked records, or print footer/signature blocks. Blank lower-page space, `Page end`, generic notes, and design-stage explanation text do not satisfy full-page coverage.
-
-Lower-page form/detail regions must also be pattern-concrete before Page Implementation Blueprints. The selected template and blueprint contract must map rendered rows, Collection cards, timeline events, checklist rows, document table/cards, activity feed rows, signature rows, read-only field groups, or another Yeeflow-control-shaped UI representation for each lower-page business region. Manifest-only source notes and field lists are not enough: `Source: Contract Documents`, `Document name, type, status`, or `Show signed contract evidence` can support a region but cannot be the region's only implementation content. Each region must declare `visualPattern`, `selectedTemplateId`, `plannedYeeflowControl`, `renderedExampleCount` or empty-state fallback, `renderedExampleSummary`, `displayedBusinessFields`, `actionsShown`, `visualConcretenessStatus`, `antiPlaceholderStatus`, and `blueprintMappingHint`. Intentional empty states must map to an empty-state component with reason and next action. `readyForBlueprint: true` is blocked when lower-page pattern concreteness fails or needs human review without explicit reason, fallback, and proof impact.
-
-Lower-page form/detail regions must also be semantically consistent. A region's source list/data source, purpose, displayed business fields, displayed implementation fields, actions, behavior, proof impact, and blueprint mapping hint must describe the same business object or a documented related-record relationship. Linked Contracts sourced from Contracts must not use Renewal Task fields/actions or point the blueprint mapping to Renewal Tasks; Renewal Task, Document, Approval History/Route, Audit Activity, Print Signature Block, and Checklist regions must use their corresponding field/action semantics. If `displayedBusinessFields` and `displayedFields` differ, the manifest must include `fieldAliasMap`, `semanticFieldMapping`, or explicit proof/deferred details.
-
-Every blueprint-ready canonical design artifact must also satisfy surface responsibility and App Plan field/action coverage. Manifest rows must declare `appPlanResourceRef`, `sourceResourceType`, `sourceListOrFormName`, `surfaceResponsibility`, `plannedFieldCoverage`, `requiredFieldsShown`, `missingPlannedFields`, `fieldCoverageStatus`, `plannedActions`, `actionsShown`, `missingRequiredActions`, `actionCoverageStatus`, `forbiddenRegionsPresent`, `forbiddenRegionStatus`, `surfaceResponsibilityStatus`, and `appPlanTraceabilityStatus`. Surface type determines allowed controls, required fields, and required actions: Approval Submission forms capture planned request fields, Sub Lists, Save as draft, and Submit; Approval Task forms expose task decision/completion actions; Approval Print pages are read-only print-oriented surfaces; Data List New/Edit forms cover current-list add/edit fields and Save/Cancel or Save/Submit actions; Data List View/Detail forms show current-record display fields and explicitly planned related regions; Document Library forms cover file upload/preview/open/download and document metadata. Do not invent generic lower-page regions to fill page height. Logic-only validation checklists, route previews, audit activity, workflow history, and routing rules must not become visible UI unless the App Plan explicitly maps them to that surface.
-
-For Data List and Document Library New/Edit surfaces, primary editable fields are the form body. They must be modeled as field groups and control mappings from selected form-body templates, not as `allowedRegions`, `relatedRegions`, or lower-page grids/cards/tables named `Primary form fields`, `Main form fields`, `Editable fields`, `Document metadata fields`, or similar. Do not duplicate primary Save/Cancel, Save/Submit, Upload/Save, Submit, Approve/Reject, or Complete action bars unless the App Plan explicitly requires a row/item/Sub List action with row/current-item context. Do not generate fake cards from field names or action names. Editable controls must distinguish label, placeholder, sample value, default value, empty value, and read-only current value; a field label must not be rendered as the field value. A parity pass against an invalid UI Surface Contract or HTML preview is not readiness: pattern selection, contract validation, HTML validation, HTML-to-Yeeflow control mapping validation, Blueprint pattern conformance, Blueprint parity, resource-vs-blueprint parity, package schema, signing/API acceptance, and runtime proof remain separate layers.
-
-Every blueprint-ready canonical design artifact must pass visual usability gates as well as structural coverage. Manifest rows must declare `visualUsabilityStatus`, `textOverflowStatus`, `overlapStatus`, `spacingStatus`, `mobileUsabilityStatus`, `responsiveLayoutEvidence`, `textWrappingStrategy`, `containerBoundaryEvidence`, and `visualUsabilityFindings`. Text overflow, long labels outside containers, badge/button/table cell overflow, card/timeline/form field collisions, element overlap, bad spacing, clipped page-edge content, and mobile layout pressure block Page Implementation Blueprints unless explicitly deferred with reason, fallback, and proof impact. These checks prove design artifact readiness only, not Yeeflow package validity, signing/API acceptance, install/upgrade success, or runtime rendering.
-
-Similar forms may share style, but they must not all be identical generic scaffolds when the business purpose differs. The manifest must declare purposeful functional differences such as editable versus read-only fields, decision controls, reviewer comments, workflow/history panels, related-record sections, print footer/signature blocks, or action row differences. `readyForBlueprint: true` is blocked when field/value semantic quality fails, lower-page business regions are missing or generic, page-specific quality evidence is missing or generic-only, or `templateReuseRiskStatus` is `fail`/`human_review_required` without reason, fallback, and proof impact.
-
-The design stage must include mobile/responsive planning through either separate mobile canonical images for key pages or responsive rules documented in the Application Design System and Design Image Manifest. Responsive planning must cover stacking, grid column changes, table scroll or card-list fallback, Collection/Kanban/Timeline behavior, form fields becoming single-column, action behavior, navigation/header behavior, hidden/shown secondary fields, and desktop/mobile content consistency.
-
-Run:
-
-```bash
-node scripts/validate-yeeflow-root-token-usage.mjs --design-system <application-design-system.md>
-node scripts/validate-ui-pattern-selection.mjs --selection <pattern-selection.json>
-node scripts/validate-yeeflow-root-token-usage.mjs --pattern-selection <pattern-selection.json>
-```
-
-These validators prove root-token and pattern-selection readiness for Page Implementation Blueprints only. They do not prove package validity, control/property serialization, signing/API acceptance, install/upgrade success, runtime CSS rendering, or visual proof.
-
-## 9. Optional HTML-first UI Surface Contract Workflow
-
-Use the HTML-first high-fidelity UI Surface Contract workflow only when the user explicitly asks for HTML previews, screenshots, or prototype evidence. It runs after pattern selection is structurally ready and before Page Implementation Blueprints.
-
-This workflow inherits and enforces all root-token and pattern-library gates. It must not replace or bypass official Yeeflow dashboard layout/chrome, no-app-chrome form surfaces, full-page/page-end completeness, modern visual quality, surface responsibility, App Plan field/action coverage, forbidden-region checks, semantic consistency, lower-page visual concreteness, visual usability, text overflow/overlap/spacing/mobile-pressure checks, clipping checks, or template reuse risk. All optional HTML evidence must preserve the selected Root Token Reference decisions, Application Design System, and selected Yeeflow UI templates before screenshots and Page Implementation Blueprints.
-
-Required order:
-
-1. Yeeflow Root Token Reference.
-2. Application Design System.
-3. Yeeflow UI Section Template / Pattern Selection.
-4. UI Surface Contracts using `docs/standards/ui-surface-contract-template.md`.
-5. High-fidelity HTML previews generated from the UI Surface Contracts, Application Design System, and selected templates.
-6. DOM/layout/visual-quality validation.
-7. HTML-to-Yeeflow control mapping validation using `docs/standards/html-to-yeeflow-control-mapping-registry.md`.
-8. Desktop/mobile screenshot evidence captured from HTML previews.
-9. Page Implementation Blueprints generated from the App Plan, selected templates, UI Surface Contract, Control Mapping Registry, and validated HTML mapping metadata.
-10. Blueprint-to-UI Surface Contract and HTML mapping parity comparison.
-
-PNG screenshots are evidence generated from validated HTML previews, not the primary implementation contract. HTML preview is not a low-fidelity scaffold; it must be a modern, polished, design-system-driven prototype equal to or better than generated static design images. It must use Application Design System root tokens/classes, approved UI pattern templates, required DOM fields/actions, forbidden-region exclusion, responsive/mobile stack behavior, and text wrapping/truncation/container evidence. HTML/PNG evidence cannot override token decisions.
-
-HTML previews for complex business applications must also be control-mapped. Every implementation-relevant HTML element must declare stable Yeeflow mapping metadata such as `data-blueprint-id`, `data-yeeflow-control`, field/action/source-list bindings, row/current-item context, parent binding, and style/layout/responsive tokens. Page Implementation Blueprints must be generated from the UI Surface Contract plus the Control Mapping Registry plus HTML mapping metadata, not by visually guessing from HTML. Unsupported mappings block generation unless explicitly marked `export-learning-required`, `runtime-proof-required`, or `deferred` with reason, fallback, and proof impact. Style conversion must use design-system style tokens and supported Yeeflow property mappings, not arbitrary CSS copying.
-
-Run:
-
-```sh
-node scripts/validate-ui-surface-contracts.mjs --contracts <dir-or-json> --app-plan <app-plan.md> --design-system <application-design-system.md>
-node scripts/validate-html-preview-layout.mjs --contracts <dir-or-json> --html <dir> --screenshots <dir> --design-system <application-design-system.md>
-node scripts/validate-html-to-yeeflow-control-mapping.mjs --contracts <dir-or-json> --html <dir> --registry docs/standards/html-to-yeeflow-control-mapping-registry.md
-node scripts/compare-blueprint-to-ui-surface-contract.mjs --contracts <dir-or-json> --html <dir> --blueprints <dir-or-json> --registry docs/standards/html-to-yeeflow-control-mapping-registry.md --design-system <application-design-system.md>
-```
-
-Do not proceed to Page Implementation Blueprints if pattern selection, UI Surface Contract, HTML preview, visual quality, screenshot evidence, layout validation, or HTML-to-Yeeflow control mapping validation fails. Do not proceed to Yeeflow resource/package generation if blueprint pattern conformance or optional blueprint-to-contract/HTML mapping parity fails. Pattern validation, contract validation, HTML/DOM validation, HTML control mapping validation, screenshot evidence, blueprint parity, resource-vs-blueprint parity, package schema, signing/API acceptance, install/upgrade success, and runtime proof are separate proof layers.
-
-The overlap heuristic for HTML preview validation must check meaningful sibling collisions and must not count parent-child containment as overlap.
-
-## 10. Page Implementation Blueprints
-
-Create Page Implementation Blueprints only after the Application Design System, root-token validation, and UI pattern selection pass. When optional PNG/HTML evidence is explicitly requested, Blueprints must also consume the approved UI Surface Contract, Control Mapping Registry, validated HTML mapping metadata, screenshot evidence, canonical design images where used, and Design Image Manifest as review evidence. By default, Blueprints consume the approved App Plan, Application Design System, and selected Yeeflow UI templates as the implementation contract. Blueprints must preserve template IDs, proof status, control type, field binding, action contract, source list, row/current item context, parent binding, and style/layout/responsive token intent. Yeeflow resources should use token-compatible property values where supported, and resource parity should report any token-to-property fallback separately from runtime proof. Run `scripts/validate-blueprint-ui-pattern-conformance.mjs` and `scripts/validate-yeeflow-root-token-usage.mjs --blueprint <page-implementation-blueprint.json>` before resource generation. HTML/PNG evidence cannot override root-token decisions.
-
-## 10. Decide Safe Build Scope
+## 8. Decide Safe Build Scope
 
 Choose the safest build scope that satisfies the reviewed Functional Specification and App Plan.
 
@@ -403,7 +280,7 @@ Default scope is the complete functional application described by the approved A
 
 Do not defer core business capabilities silently.
 
-## 11. Resource/Package Generation
+## 9. Resource/Package Generation
 
 Generate resources in the App Plan order:
 
@@ -434,15 +311,13 @@ Use only current proven generation rules:
 
 Do not generate with temporary custom scripts that invent resource/control/action shapes outside the plugin standards. If a generator helper is needed, it must consume the reviewed Functional Specification, reviewed App Plan, plugin templates, validators, and export-proven references.
 
-## 12. Local Validation
+## 10. Local Validation
 
 Run the relevant safe local checks for the generated artifact and proof boundaries. At minimum, validate schema, graph/resource structure, Functional Specification/App Plan conformance, ID provenance for generated-final `.yapk`, navigation runtime metadata, approval forms, Form Reports, schedule workflows, AI/Copilot resources, custom data list forms, data-list workflows, notifications, views, dashboard controls, grid-table Collection patterns, root padding, plan-to-package conformance, and source/dist consistency as applicable.
 
-For strict App Plan conformance against Markdown plans, treat only canonical App Plan resource declarations as planned resources: requirement-to-resource rows, concrete Resource Generation Order rows, recognized resource tables, and numbered Data List / Approval Form resource subsections. Do not treat field/control/action rows, task forms, implementation notes, assumptions, validation notes, deferred/runtime-proof sections, template headings, navigation group labels, navigation order headers, status/applicability values, placeholder values such as `Not applicable`, aggregate category summaries, or explanatory prose as generated resources. A strict failure must correspond to a real declared resource missing from the package, an extra generated resource not declared by the App Plan, a navigation group/item mismatch, a partial resource-name mismatch, or another explicit contract violation.
-
 Do not sign, install, import, upgrade, or run live Yeeflow writes unless explicitly authorized.
 
-## 13. Runtime Import/Testing Only When Requested Or Authorized
+## 11. Runtime Import/Testing Only When Requested Or Authorized
 
 Runtime proof is a separate layer from local validation, package schema validation, signing, API acceptance, and browser/design proof. Run runtime import/testing only when the user requests or authorizes it.
 
@@ -456,7 +331,7 @@ Document generated artifacts, validation results, proof boundaries, deferred ite
 
 ## 14. Skill Updates Only If Reusable Knowledge Is Learned
 
-Update skills, standards, validators, or references only when the run produces reusable Yeeflow knowledge. Keep tenant-specific details, raw API responses, raw package `Resource`, raw `Sign`, tenant URLs, full workspace IDs, raw user IDs, and nonpublic visual evidence out of docs.
+Update skills, standards, validators, or references only when the run produces reusable Yeeflow knowledge. Keep tenant-specific details, raw API responses, raw package `Resource`, raw `Sign`, tenant URLs, full workspace IDs, raw user IDs, and private screenshots out of docs.
 
 ## 15. Git Commit/Push And Final Package Output
 
