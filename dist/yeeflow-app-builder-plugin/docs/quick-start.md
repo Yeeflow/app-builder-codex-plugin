@@ -12,9 +12,9 @@ Sparse paths:
   dist/yeeflow-app-builder-plugin
 ```
 
-Expected plugin: `Yeeflow App Builder` version `0.6.73`.
+Expected plugin: `Yeeflow App Builder` version `0.6.74`.
 
-Version `0.6.73` releases HTML-first New/Edit form body discipline gates. New/Edit primary fields must stay in form body field groups and control mappings; generic lower regions such as `Primary form fields`, `Main form fields`, `Editable fields`, and `Document metadata fields` fail for New/Edit surfaces; duplicate primary actions fail unless row/item/Sub List scoped; fake lower-region cards made from field/action names fail; editable field labels cannot be rendered as values without explicit placeholder semantics; and invalid UI Surface Contracts are rejected before HTML/Blueprint parity can incorrectly pass. These gates prove design, HTML, and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+Version `0.6.74` releases the combined UI Pattern Library, Yeeflow Root Token Reference, and FontAwesome icon baseline gates from PR #115 and PR #116. Pattern Library selection is the default UI generation source after the App Plan and Application Design System, while generated PNGs and HTML previews are optional review evidence. Application Design Systems must declare color, typography, spacing, border/gap, and action-state token choices from the product CSS `:root` token reference; selected patterns and Page Implementation Blueprints must preserve token intent; and FontAwesome is the default icon source for generated Yeeflow UI icons. Arbitrary hex/px values and custom icon names are blocked unless explicitly proof-labeled or deferred. These gates prove design-system, pattern, token, icon, and blueprint readiness only, not package validity, signing/API acceptance, install/upgrade success, visual proof, or runtime behavior.
 
 Version `0.6.56` releases Supplier runtime/design fidelity gates and validation-layer proof gates. Runtime proof must use the installed application `ListSetID` and runtime URL, never install-log IDs. Design implementation must map design sections, KPI counts, page background/chrome, Data Filter bindings, Collection detail links, analytics controls, progress/status treatments, Summary/KPI bindings, and canonical one-PNG-per-page artifacts through explicit design manifest mapping. Reports must keep `schemaValidation`, `appPlanConformance`, `designContractValidation`, `controlBindingValidation`, `exactMetadataShapeValidation`, `idStabilityValidation`, `signVerify`, `installOrUpgrade`, `runtimeBrowserProof`, and `pixelComparison` separate; schema pass is not UI proof, API/sign/install acceptance is not runtime/browser proof, proof layers must not be collapsed, decoded `ListSetID` must be tied to runtime URL proof, and the control-binding graph must be complete. Root padding gates from `0.6.55` remain baseline behavior, approval-form root padding remains deferred because evidence is mixed, and no pixel-perfect or live runtime proof claim is made before the matching runtime/browser evidence exists.
 
@@ -31,7 +31,7 @@ Run OAuth login before API access. OAuth uses Authorization Code with PKCE S256,
 ## Validate Locally
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.73
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.6.74
 node scripts/test-yeeflow-oauth-auth.mjs
 node scripts/test-yeeflow-api-capabilities.mjs
 ```
