@@ -30,6 +30,8 @@ try {
   testResourceMissingRequiredPropertyFails();
   testResourceMissingActionFails();
   testResourceMissingBindingFails();
+  testBlueprintTextControlDiscipline();
+  testResourceTextControlDiscipline();
   testCompleteDesignBlueprintResourceParityPasses();
   testWorkflowCannotProceedWithIncompletePriorStep();
   testCliSmoke();
@@ -130,6 +132,35 @@ function testResourceMissingBindingFails() {
   delete table.binding;
   delete table.attrs.data;
   expectFail("resource missing binding fails", compareBlueprintToDecodedResource({ blueprint: writeJson("blueprint-missing-binding.json", goodBlueprint()), resource: writeJson("resource-missing-binding.json", resource) }), "RESOURCE_BINDING_MISSING");
+}
+
+function testBlueprintTextControlDiscipline() {
+  const badType = goodTextBlueprint();
+  badType.pages[0].controls[0].type = "text";
+  expectFail("blueprint Text control using unsupported type text fails", inspectPageImplementationBlueprint({ blueprint: writeJson("blueprint-text-unsupported-type.json", badType) }), "PAGE_BLUEPRINT_TEXT_CONTROL_UNSUPPORTED_TYPE");
+
+  const missingStyle = goodTextBlueprint();
+  missingStyle.pages[0].controls[0].properties = [{ path: "attrs.headc.title.value" }];
+  delete missingStyle.pages[0].controls[0].textStyleContract.typographyPreset;
+  delete missingStyle.pages[0].controls[0].textStyleContract.textColorToken;
+  expectFail("blueprint Text control missing typography/color contract fails", inspectPageImplementationBlueprint({ blueprint: writeJson("blueprint-text-missing-style.json", missingStyle) }), "PAGE_BLUEPRINT_TEXT_TYPOGRAPHY_MISSING");
+  cases.push("blueprint Text control missing color contract fails");
+}
+
+function testResourceTextControlDiscipline() {
+  const badColor = goodTextResource();
+  badColor.pages[0].resource.children[0].attrs.heads.color = [null, "var(--c--text)"];
+  expectFail("resource Text control unsupported color shape fails", compareBlueprintToDecodedResource({ blueprint: writeJson("text-blueprint-color.json", goodTextBlueprint()), resource: writeJson("text-resource-bad-color.json", badColor) }), "RESOURCE_TEXT_COLOR_SHAPE_UNSUPPORTED");
+
+  const badDynamic = goodTextResource();
+  const value = badDynamic.pages[0].resource.children[1].attrs.headc.title;
+  delete value.variable;
+  value.value = "0";
+  expectFail("resource dynamic Text rendered as static placeholder fails", compareBlueprintToDecodedResource({ blueprint: writeJson("text-blueprint-dynamic.json", goodTextBlueprint()), resource: writeJson("text-resource-static-dynamic.json", badDynamic) }), "RESOURCE_TEXT_DYNAMIC_BINDING_MISSING");
+
+  const badType = goodTextResource();
+  badType.pages[0].resource.children[0].type = "text";
+  expectFail("resource ad hoc type text control fails", compareBlueprintToDecodedResource({ blueprint: writeJson("text-blueprint-type.json", goodTextBlueprint()), resource: writeJson("text-resource-type-text.json", badType) }), "RESOURCE_TEXT_CONTROL_UNSUPPORTED_TYPE");
 }
 
 function testCompleteDesignBlueprintResourceParityPasses() {
@@ -293,6 +324,108 @@ function goodResource() {
         },
       },
     ],
+    workflow: {
+      resourceBlueprintParityValidation: { status: "pass", evidence: "compare-blueprint-to-decoded-resource" },
+      packageSignUpgrade: { status: "not-started" },
+    },
+  };
+}
+
+function goodTextBlueprint() {
+  return {
+    pages: [{
+      pageSlug: "case-triage-dashboard",
+      purpose: "Text styling contract for dashboard labels and KPI values.",
+      layout: "application-layout-2-horizontal-nav",
+      sections: ["Case KPIs"],
+      runtimeProofPlan: "Verify Text style and dynamic KPI binding after generation.",
+      controls: [
+        {
+          id: "case_kpi_title",
+          type: "heading",
+          nv_label: "Case KPI section title text",
+          parentId: "case_triage_root",
+          textRole: "section title",
+          textStyleContract: {
+            textRole: "section title",
+            contentSource: "static text",
+            typographyPreset: "h5-medium",
+            textColorToken: "var(--c--text)",
+            widthBehavior: "inline width",
+          },
+          properties: [
+            { path: "attrs.headc.title.value" },
+            { path: "attrs.heads.ty" },
+            { path: "attrs.heads.color" },
+            { path: "attrs.common.positioning.widthtype" },
+          ],
+        },
+        {
+          id: "open_case_count_value",
+          type: "heading",
+          nv_label: "Open case count KPI value text",
+          parentId: "case_triage_root",
+          textRole: "kpi value",
+          textStyleContract: {
+            textRole: "kpi value",
+            contentSource: "variable binding",
+            typographyPreset: "h5-medium",
+            textColorToken: "var(--c--text)",
+            widthBehavior: "inline width",
+          },
+          requiresBinding: true,
+          binding: { tempVariable: "__temp_open_case_count" },
+          properties: [
+            { path: "attrs.headc.title.variable" },
+            { path: "attrs.heads.ty" },
+            { path: "attrs.heads.color" },
+            { path: "attrs.common.positioning.widthtype" },
+          ],
+        },
+      ],
+    }],
+    workflow: {
+      fullPageDesignImages: { status: "complete", artifact: "design.png" },
+      blueprintValidation: { status: "pass", evidence: "inspect-page-implementation-blueprint" },
+      resourceGeneration: { status: "not-started" },
+    },
+  };
+}
+
+function goodTextResource() {
+  return {
+    parityValidationRun: true,
+    pages: [{
+      pageSlug: "case-triage-dashboard",
+      resource: {
+        id: "case_triage_root",
+        type: "container",
+        nv_label: "case_triage_root",
+        children: [
+          {
+            id: "case_kpi_title",
+            type: "heading",
+            nv_label: "Case KPI section title text",
+            attrs: {
+              headc: { title: { value: "Case KPIs", variable: null } },
+              heads: { ty: [null, "h5-medium"], color: "var(--c--text)" },
+              common: { positioning: { widthtype: [null, "2"] } },
+            },
+          },
+          {
+            id: "open_case_count_value",
+            type: "heading",
+            nv_label: "Open case count KPI value text",
+            binding: { tempVariable: "__temp_open_case_count" },
+            attrs: {
+              headc: { title: { variable: [{ exprType: "variable", valueType: "text", id: "__temp_open_case_count", type: "expr" }] } },
+              heads: { ty: [null, "h5-medium"], color: "var(--c--text)" },
+              common: { positioning: { widthtype: [null, "2"] } },
+            },
+          },
+        ],
+      },
+    }],
     workflow: {
       resourceBlueprintParityValidation: { status: "pass", evidence: "compare-blueprint-to-decoded-resource" },
       packageSignUpgrade: { status: "not-started" },

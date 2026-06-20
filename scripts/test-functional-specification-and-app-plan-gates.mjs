@@ -49,6 +49,10 @@ try {
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "canonical App Plan template passes", status: "pass" });
 
+  output = run("scripts/validate-page-function-plan.mjs", "docs/standards/page-function-plan-standard-template.md");
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "canonical Page Function Plan template passes", status: "pass" });
+
   const badSpec = writeFixture(tempDir, "bad-spec.md", `
 # Broken - Functional Specification
 
@@ -79,7 +83,48 @@ No objects here.
   output = run("scripts/validate-functional-specification.mjs", badSpec);
   assert.equal(output.report.status, "fail");
   expectFinding(output.report, "FUNCTIONAL_SPEC_REQUIRED_HEADING_MISSING");
+  expectFinding(output.report, "FUNCTIONAL_SPEC_BUSINESS_PAGE_REQUIREMENTS_MISSING");
   results.push({ case: "Functional Specification missing relationships section fails", status: "pass" });
+
+  const specWithDashboardImplementation = writeFixture(tempDir, "spec-with-dashboard-implementation.md", `
+# Bad Dashboard Implementation Detail - Functional Specification
+
+## 1. Specification Status
+## 2. Source Input Summary
+## 3. Requirement Interpretation Method
+Requirement detail level: brief / moderate / detailed / document-backed / screenshot-backed
+## 4. Business Purpose
+## 5. Target Users and Business Roles
+## 6. Business Objects and Data Concepts
+Business Object: Request.
+## 7. Business Relationships and Dependency Rules
+Relationship: Request to owner.
+## 8. Business Process Overview
+## 9. Status Lifecycles
+## 10. Approval and Review Requirements
+## 11. Data Entry and Form Requirements
+## 12. Workflow, Automation, and Action Requirements
+## 13. Reporting, Dashboard, and Analytics Requirements
+Dashboard should use event_portfolio_dashboard_golden_reference.
+## 14. Document and Attachment Requirements
+## 15. AI, Copilot, and Intelligent Assistance Requirements
+## 16. Integration Requirements
+## 17. Permissions and Access Requirements
+## 18. UI and Experience Requirements
+### Business Page Requirements
+| Page / Surface | Needed By Roles | Business Task Solved | Information Users Need To See | Operations / Actions Users Need | Filtering / Grouping / Sorting / Priority Needs | Mobile Required | Visibility / Access Requirements | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Dashboard | Manager | Review requests | KPIs | Open request | Status filter | Yes | Manager only | |
+## 19. Business Decision Gates
+## 20. Assumptions
+## 21. Risks, Constraints, and Unknowns
+## 22. Functional Specification Completeness Review
+## 23. Readiness for App Plan
+`);
+  output = run("scripts/validate-functional-specification.mjs", specWithDashboardImplementation);
+  assert.equal(output.report.status, "fail");
+  expectFinding(output.report, "FUNCTIONAL_SPEC_DASHBOARD_IMPLEMENTATION_DETAIL_FORBIDDEN");
+  results.push({ case: "Functional Specification with Dashboard template/golden ID fails", status: "pass" });
 
   const badPlan = writeFixture(tempDir, "bad-plan.md", `
 # Broken - Yeeflow App Plan
@@ -116,6 +161,16 @@ Form report is a Dashboard summary.
   expectFinding(output.report, "APP_PLAN_RESOURCE_ORDER_ITEM_MISSING");
   expectFinding(output.report, "APP_PLAN_DATALIST_PLACEHOLDER_MISSING");
   results.push({ case: "App Plan missing standard resource order and placeholders fails", status: "pass" });
+
+  const planWithGoldenReference = writeFixture(tempDir, "app-plan-with-golden-reference.md", `
+# Bad Dashboard Golden Reference - Yeeflow App Plan
+
+${fs.readFileSync(path.join(ROOT, "docs/standards/app-plan-standard-template.md"), "utf8").replace("pageFunctionPlanRef:", "pageFunctionPlanRef:\n- dashboardGoldenReference: event_portfolio_dashboard_golden_reference")}
+`);
+  output = run("scripts/validate-app-plan-resource-order.mjs", planWithGoldenReference);
+  assert.equal(output.report.status, "fail");
+  expectFinding(output.report, "APP_PLAN_DASHBOARD_GOLDEN_REFERENCE_FORBIDDEN");
+  results.push({ case: "App Plan with Dashboard golden reference fails", status: "pass" });
 
   console.log(JSON.stringify({ status: "pass", results }, null, 2));
 } finally {

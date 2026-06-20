@@ -150,7 +150,37 @@ The review must confirm:
 - field/control/Dynamic control/workflow/action/schedule/resource/property types are plugin-supported or marked for learning/proof/deferment
 - Generation Contract and Hard Gates, Validation Plan, Proof Boundary, Assumptions, Deferred or Runtime-Proof Items, and Recommended Next Prompt are present
 
-If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
+If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks Page Function Plan, Application Design System, business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
+
+## Page Function Plan And Application Design System Gates
+
+Create the Page Function Plan after the reviewed App Plan and before Application Design System, full-page canonical design images, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof. Use:
+
+`docs/standards/page-function-plan-standard-template.md`
+
+The Page Function Plan is the canonical page-level implementation contract after the App Plan. It must cover every UI-required Dashboard page, Approval submission form, planned Approval task form, required Approval print page, and planned custom Data list or Document library form. Form Reports are not required canonical UI design surfaces unless explicitly planned as navigable/custom UI pages. Every App Plan Dashboard page, Approval surface, and custom list/library form must reference one Page Function Plan entry, and every Page Function Plan entry must map back to one App Plan resource/surface.
+
+Dashboard Page Function Plan entries must declare structured `pageFunctionPlanId`, `appPlanDashboardRef`, `dashboardPagePattern`, `dashboardGoldenReference`, and `dashboardSectionTemplates[]`. Dashboard section templates must come from plugin-contained templates or documented Dashboard standards, and downstream dashboard generation must consume them instead of inferring sections from the App Plan resource list. Event Portfolio-style dashboards may select `dashboardGoldenReference: event_portfolio_dashboard_golden_reference` only in the structured Page Function Plan Dashboard entry and must include Data Filters, KPI cards, Summary/KPI binding or fallback boundary, Collection grid-table sections, Dynamic controls, badge/progress/person treatments, real action metadata, semantic `nv_label`, and runtime proof boundary.
+
+Dashboard sections with visible Text controls must declare structured `textStyleContract[]` entries for important roles such as page title, section title, KPI label, KPI value, helper text, table/collection headers, table/collection cell text, badge text, action labels, empty-state text, and notes. Each entry must include business purpose, content source, static text or dynamic binding details, native heading/Text control shape, typography token, string-token text color, supported weight/style or proof boundary, width behavior, semantic `nv_label`, and proof status. Resource generation must preserve the plugin-supported Text shape (`type: "heading"`, title value/variable binding, `attrs.heads.ty`, string `attrs.heads.color`, supported width behavior) and must not generate unsupported `type: "text"` controls, placeholder copy, static mock KPI/runtime values, unsupported color shapes, or visually indistinguishable important text roles.
+
+The Page Function Plan must define structured click action metadata for every visible interactive `Container`, `Button`, or `action_button`. Use only plugin-known action mappings, include target identifiers and open mode, and defer or render as non-interactive text when a safe action cannot be generated.
+
+Create the Application Design System after the Page Function Plan and before page/resource generation, using:
+
+`docs/standards/application-design-system-template.md`
+
+The Application Design System must select exactly one supported Yeeflow application layout, define app-wide chrome design intent, distinguish proven generated shell properties from export-learning/runtime-proof/deferred properties, and make Dashboard/application pages inherit the selected layout and chrome. Approval forms and custom list/library forms are form surfaces and must not invent app header/navigation.
+
+Run the executable checks when the artifacts are available:
+
+```bash
+node scripts/validate-page-function-plan.mjs <page-function-plan.md|json> --json
+node scripts/validate-app-plan-page-function-traceability.mjs --app-plan <app-plan.json> --page-function-plan <page-function-plan.json>
+node scripts/validate-application-design-system.mjs <application-design-system.md|json> --json
+```
+
+A failed Page Function Plan, App Plan to Page Function Plan traceability gate, or Application Design System gate blocks full-page design images, page implementation blueprints, resource/package generation, signing, install/import/upgrade, and runtime proof.
 
 ## 6. Business Clarification Gate
 

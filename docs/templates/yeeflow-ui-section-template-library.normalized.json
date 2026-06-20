@@ -874,6 +874,115 @@
       ]
     },
     {
+      "templateId": "event_portfolio_dashboard_golden_reference",
+      "category": "dashboard",
+      "purpose": "High-quality portfolio, operations, status, pipeline, event, project, vendor, contract, service, or request management Dashboard golden reference.",
+      "whenToUse": "Use when a generated Dashboard needs Marketing Event / Event Portfolio-style filter rows, Summary-backed KPI cards, rich Collection grid-table rows, Dynamic controls, badge/progress/person treatments, and real row-context actions.",
+      "sourceBoundary": "Based only on plugin-contained, redacted, synthetic, or already committed Marketing Event / Event Portfolio training materials. Do not depend on private raw Marketing Event artifacts, raw package payloads, tenant/app/list IDs, screenshots, raw API responses, or private runtime evidence.",
+      "requiredControls": [
+        "container",
+        "data-filter",
+        "summary",
+        "collection",
+        "dynamic-field",
+        "dynamic-user",
+        "progress",
+        "heading",
+        "text",
+        "button"
+      ],
+      "requiredChildControls": [
+        "filter_action_row",
+        "kpi_card_row",
+        "summary_binding_host_or_fallback",
+        "visible_formatted_kpi_values",
+        "collection_grid_table_header",
+        "collection_item_template_dynamic_controls",
+        "status_badge_treatment",
+        "progress_treatment_where_applicable",
+        "person_avatar_treatment_where_applicable",
+        "detail_open_action_controls"
+      ],
+      "requiredDataBindings": [
+        "source_data_lists",
+        "filter_variables",
+        "filter_target_consumers",
+        "summary_kpi_source_and_metric_bindings_or_fallback_boundary",
+        "collection_source_list",
+        "collection_current_item_context",
+        "row_detail_action_metadata"
+      ],
+      "requiredFields": [
+        "title_or_name",
+        "status_or_stage",
+        "owner_or_person_when_applicable",
+        "progress_or_rate_when_applicable",
+        "priority_risk_date_amount_or_domain_portfolio_fields"
+      ],
+      "layoutRules": [
+        "standard_dashboard_page_shell",
+        "filter_action_row",
+        "kpi_card_row",
+        "collection_grid_table",
+        "table_header_hierarchy",
+        "row_density",
+        "responsive_stacking",
+        "mobile_priority_content"
+      ],
+      "styleRules": [
+        "rich_dashboard_composition",
+        "card_table_hierarchy",
+        "status_badges",
+        "progress_bars",
+        "avatar_person_treatment",
+        "polished_spacing",
+        "semantic_nv_label",
+        "no_generic_scaffold_sections"
+      ],
+      "actionRules": [
+        "detail_open_add_update_actions_require_real_yeeflow_action_metadata",
+        "row_actions_require_current_item_context",
+        "action_looking_controls_without_metadata_are_invalid"
+      ],
+      "validationRules": [
+        "page_purpose_present",
+        "source_data_lists_present",
+        "data_filters_present",
+        "filter_variables_and_consumers_present",
+        "kpi_cards_present",
+        "summary_kpi_binding_or_fallback_boundary_present",
+        "collection_grid_table_present",
+        "dynamic_controls_inside_collection_item_template_present",
+        "status_badge_treatment_present_when_status_fields_exist",
+        "progress_treatment_present_when_progress_fields_exist",
+        "person_treatment_present_when_owner_person_fields_exist",
+        "header_hierarchy_row_density_spacing_present",
+        "valid_action_metadata_present",
+        "source_fields_filters_grouping_sorting_present",
+        "nv_label_designer_traceability_present",
+        "runtime_proof_boundary_present",
+        "no_static_kpi_only_cards",
+        "no_plain_data_table_substitute",
+        "no_fake_or_unbound_actions",
+        "no_placeholder_controls"
+      ],
+      "allowedFallback": "Use standard Dashboard section templates without this golden reference when Collection grid-table or runtime-fidelity requirements cannot be planned. If Summary/KPI runtime binding cannot be safely generated, document the fallback boundary explicitly and do not claim dynamic KPI proof.",
+      "proofStatus": "training-golden-reference",
+      "sourceReferences": [
+        "skills/yeeflow-ui-generation-hard-gates/SKILL.md",
+        "docs/studies/marketing-event-v045-design-runtime-fidelity-study.md",
+        "docs/standards/yeeflow-ui-control-property-fidelity.md",
+        "docs/standards/dashboard-summary-card-generation-standard.md",
+        "docs/standards/dashboard-runtime-binding-standard.md",
+        "docs/generated-dashboard-ui-quality-gates.md",
+        "docs/reference/yeeflow-control-property-extensions.json"
+      ],
+      "limitations": [
+        "generated-app runtime proof remains package-specific",
+        "private raw Marketing Event artifacts are intentionally excluded"
+      ]
+    },
+    {
       "templateId": "detail_view_header_summary",
       "category": "data-list-form",
       "purpose": "Record detail summary header.",
