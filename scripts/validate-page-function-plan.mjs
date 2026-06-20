@@ -135,6 +135,9 @@ const EVENT_PORTFOLIO_GOLDEN_REFERENCES = new Set([
 ]);
 const EVENT_PORTFOLIO_GOLDEN_CLAIM = /\b(event portfolio|portfolio operational|portfolio\/status|portfolio status|golden reference)\b/i;
 const STATIC_OR_SCAFFOLD_DASHBOARD = /\b(static kpi|static numeric|plain table|scaffold|placeholder|generic card|fake action|unbound action|placeholder control|plain scaffold)\b/i;
+const VAGUE_PAGE_FUNCTION_PHRASE = /^(show dashboard data|add filters|display list|show summary cards|show data|show list|dashboard data|summary cards|list data|show records)$/i;
+const LOW_LEVEL_IMPLEMENTATION_INSTRUCTION = /\b(attrs\.|LayoutView\.|Resource\.|DefResource|JSON|resource json|container nesting|exact container|exact grid|css|customcss|style\.|headc|heads|widthtype|padding|margin|border-radius|box-shadow|pixel|px\b|action-type\s*:|type\s*:\s*["']?(container|grid|text|button)|unsupported property|raw property path)\b/i;
+const BUSINESS_DESIGN_INTENT = /\b(operations command center|portfolio monitoring|triage workbench|approval workspace|document review|reference list|service desk|work queue|management dashboard|monitoring|review)\b/i;
 
 const TEMPLATE_PURPOSE_RULES = [
   { templateId: "kpi_card_row", pattern: /\b(kpi|metric|summary|count|total|aggregate|sla|risk total|workload)\b/i },
@@ -234,6 +237,11 @@ function flattenText(value) {
 
 function hasStructuredIntent(value, pattern = TRUEISH) {
   return pattern.test(flattenText(value));
+}
+
+function hasBusinessText(value) {
+  const text = flattenText(value).trim();
+  return Boolean(text) && !VAGUE_PAGE_FUNCTION_PHRASE.test(text);
 }
 
 function propertyPathFromEntry(entry) {
@@ -402,6 +410,11 @@ function appPlanIndexes(appPlan = null, plan = null) {
       addMany(fields, dashboard.fields);
       addMany(variables, dashboard.variables);
       for (const region of asArray(dashboard.regions)) addMany(fields, region.fields);
+      for (const source of asArray(dashboard.dataSources || dashboard.dataSourceFieldUsage || dashboard.dataSourcesAndFieldUsage)) addMany(fields, entryFields(source));
+      for (const filter of asArray(dashboard.pageFilters || dashboard.filters)) addMany(fields, entryFields(filter));
+      for (const metric of asArray(dashboard.summaryMetrics || dashboard.metrics)) addMany(fields, entryFields(metric));
+      addMany(fields, entryFields(dashboard.mainDataRegion || dashboard.primaryDataRegion));
+      for (const region of asArray(dashboard.secondaryDataRegions)) addMany(fields, entryFields(region));
     }
     for (const approval of asArray(plan.approvalForms)) {
       addName(approvals, approval.name);
@@ -1186,50 +1199,44 @@ function markdownFindings(text) {
     [/^#\s+.+?\s+-\s+Page Function Plan\s*$/m, "PAGE_FUNCTION_PLAN_TITLE_MISSING"],
     [/## 1\. Plan Status/i, "PAGE_FUNCTION_PLAN_STATUS_SECTION_MISSING"],
     [/## 2\. App Plan Traceability Summary/i, "PAGE_FUNCTION_PLAN_TRACEABILITY_SECTION_MISSING"],
-    [/## 3\. Yeeflow Application Layout Guidance/i, "PAGE_FUNCTION_PLAN_LAYOUT_SECTION_MISSING"],
-    [/## 4\. Dashboard Page Functions/i, "PAGE_FUNCTION_PLAN_DASHBOARD_SECTION_MISSING"],
-    [/## 5\. Approval Form Page Functions/i, "PAGE_FUNCTION_PLAN_APPROVAL_SECTION_MISSING"],
-    [/## 6\. Data List and Document Library Form Page Functions/i, "PAGE_FUNCTION_PLAN_DATA_FORM_SECTION_MISSING"],
-    [/## 7\. Full-Page and Responsive Requirements/i, "PAGE_FUNCTION_PLAN_RESPONSIVE_SECTION_MISSING"],
+    [/## 3\. Page Function Entries/i, "PAGE_FUNCTION_PLAN_PAGE_FUNCTION_ENTRIES_SECTION_MISSING"],
+    [/### 3\.x Page Overview/i, "PAGE_FUNCTION_PLAN_PAGE_OVERVIEW_SECTION_MISSING"],
+    [/### 3\.x\.1 Primary Users/i, "PAGE_FUNCTION_PLAN_PRIMARY_USERS_SECTION_MISSING"],
+    [/### 3\.x\.2 Business Questions/i, "PAGE_FUNCTION_PLAN_BUSINESS_QUESTIONS_SECTION_MISSING"],
+    [/### 3\.x\.3 Data Sources And Field Usage/i, "PAGE_FUNCTION_PLAN_DATA_SOURCE_FIELD_USAGE_SECTION_MISSING"],
+    [/### 3\.x\.4 Page Filters/i, "PAGE_FUNCTION_PLAN_PAGE_FILTERS_SECTION_MISSING"],
+    [/### 3\.x\.5 Summary Metrics/i, "PAGE_FUNCTION_PLAN_SUMMARY_METRICS_SECTION_MISSING"],
+    [/### 3\.x\.6 Main Data Region/i, "PAGE_FUNCTION_PLAN_MAIN_DATA_REGION_SECTION_MISSING"],
+    [/### 3\.x\.7 Secondary Data Regions/i, "PAGE_FUNCTION_PLAN_SECONDARY_REGIONS_SECTION_MISSING"],
+    [/### 3\.x\.8 Mobile Support/i, "PAGE_FUNCTION_PLAN_MOBILE_SUPPORT_SECTION_MISSING"],
+    [/### 3\.x\.9 Design Intent/i, "PAGE_FUNCTION_PLAN_DESIGN_INTENT_SECTION_MISSING"],
+    [/### 3\.x\.10 Responsibility Boundary/i, "PAGE_FUNCTION_PLAN_RESPONSIBILITY_BOUNDARY_SECTION_MISSING"],
+    [/## 4\. Approval Form Page Requirements/i, "PAGE_FUNCTION_PLAN_APPROVAL_SECTION_MISSING"],
+    [/## 5\. Data List And Document Library Form Requirements/i, "PAGE_FUNCTION_PLAN_DATA_FORM_SECTION_MISSING"],
+    [/## 6\. Full-Page And Responsive Requirements/i, "PAGE_FUNCTION_PLAN_RESPONSIVE_SECTION_MISSING"],
     [/Form Reports are not required/i, "PAGE_FUNCTION_PLAN_FORM_REPORT_EXCLUSION_MISSING"],
+    [/business\/page-function contract/i, "PAGE_FUNCTION_PLAN_BUSINESS_CONTRACT_MISSING"],
+    [/It is not a Yeeflow resource JSON blueprint/i, "PAGE_FUNCTION_PLAN_NOT_BLUEPRINT_BOUNDARY_MISSING"],
+    [/Functional Specification: high-level business and user page needs/i, "PAGE_FUNCTION_PLAN_FUNCTIONAL_SPEC_RESPONSIBILITY_MISSING"],
+    [/Yeeflow App Plan: resource contract/i, "PAGE_FUNCTION_PLAN_APP_PLAN_RESPONSIBILITY_MISSING"],
+    [/Application Design System: selected application layout/i, "PAGE_FUNCTION_PLAN_ADS_RESPONSIBILITY_MISSING"],
+    [/Dashboard Pattern Library \/ Golden Reference: dashboard layout and section pattern selection/i, "PAGE_FUNCTION_PLAN_PATTERN_LIBRARY_RESPONSIBILITY_MISSING"],
+    [/Resource generator: actual Yeeflow controls/i, "PAGE_FUNCTION_PLAN_GENERATOR_RESPONSIBILITY_MISSING"],
+    [/Source Data List Name[\s\S]*Metric Usage[\s\S]*Action Usage/i, "PAGE_FUNCTION_PLAN_DATA_SOURCE_FIELD_USAGE_TABLE_MISSING"],
+    [/Filter Name[\s\S]*Source Data List[\s\S]*Filter Logic[\s\S]*Mobile Behavior/i, "PAGE_FUNCTION_PLAN_PAGE_FILTER_TABLE_MISSING"],
+    [/Metric Name[\s\S]*Source Fields[\s\S]*Calculation Logic[\s\S]*Formatting Expectation/i, "PAGE_FUNCTION_PLAN_SUMMARY_METRIC_TABLE_MISSING"],
+    [/Region Name[\s\S]*Display Fields[\s\S]*Default Sorting[\s\S]*Required Actions[\s\S]*Mobile Behavior/i, "PAGE_FUNCTION_PLAN_MAIN_REGION_TABLE_MISSING"],
+    [/Do not use generic phrases such as "show dashboard data", "display list", or "show summary cards"/i, "PAGE_FUNCTION_PLAN_VAGUE_PHRASE_RULE_MISSING"],
+    [/Do not specify exact Container nesting, CSS, pixel sizes, raw Yeeflow property paths, resource JSON/i, "PAGE_FUNCTION_PLAN_LOW_LEVEL_IMPL_RULE_MISSING"],
     [/Save as draft[\s\S]*Submit/i, "PAGE_FUNCTION_PLAN_APPROVAL_SUBMIT_BUTTONS_MISSING"],
     [/New\/Edit forms should normally include only editable fields/i, "PAGE_FUNCTION_PLAN_NEW_EDIT_RULE_MISSING"],
-    [/source list\/library, parent\/current-item binding, display fields, filters, actions, and opening behavior/i, "PAGE_FUNCTION_PLAN_RELATED_REGION_RULE_MISSING"],
-    [/dashboardPagePattern/i, "PAGE_FUNCTION_PLAN_DASHBOARD_PAGE_PATTERN_FIELD_MISSING"],
+    [/source list\/library, current item binding, displayed fields, filters, and actions are explicit/i, "PAGE_FUNCTION_PLAN_RELATED_REGION_RULE_MISSING"],
     [/pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_DASHBOARD_PAGE_FUNCTION_ID_FIELD_MISSING"],
-    [/appPlanDashboardRef/i, "PAGE_FUNCTION_PLAN_DASHBOARD_APP_PLAN_REF_FIELD_MISSING"],
-    [/dashboardGoldenReference/i, "PAGE_FUNCTION_PLAN_DASHBOARD_GOLDEN_REFERENCE_FIELD_MISSING"],
-    [/event_portfolio_dashboard_golden_reference/i, "PAGE_FUNCTION_PLAN_EVENT_PORTFOLIO_GOLDEN_REFERENCE_MISSING"],
-    [/dashboardSectionTemplates\[\]/i, "PAGE_FUNCTION_PLAN_DASHBOARD_SECTION_TEMPLATES_FIELD_MISSING"],
-    [/templateId[\s\S]*Region \/ Section[\s\S]*Why This Template Fits/i, "PAGE_FUNCTION_PLAN_DASHBOARD_TEMPLATE_SELECTION_TABLE_MISSING"],
-    [/Template selection is part of the Page Function Plan implementation contract/i, "PAGE_FUNCTION_PLAN_DASHBOARD_TEMPLATE_CONTRACT_MISSING"],
-    [/Dashboard Fidelity Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_FIDELITY_SECTION_MISSING"],
-    [/Marketing Event \/ Event Portfolio Fidelity Reference/i, "PAGE_FUNCTION_PLAN_DASHBOARD_FIDELITY_REFERENCE_FIELD_MISSING"],
-    [/KPI \/ Summary Binding Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_KPI_BINDING_FIELD_MISSING"],
-    [/Data Filter Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_FILTER_FIELD_MISSING"],
-    [/Collection Grid-Table Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_COLLECTION_GRID_FIELD_MISSING"],
-    [/Badge \/ Progress \/ Avatar \/ Person Treatment/i, "PAGE_FUNCTION_PLAN_DASHBOARD_RICH_TREATMENT_FIELD_MISSING"],
-    [/Action Metadata Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_ACTION_METADATA_FIELD_MISSING"],
-    [/KPI Formatting Requirements/i, "PAGE_FUNCTION_PLAN_DASHBOARD_KPI_FORMATTING_FIELD_MISSING"],
-    [/`nv_label` \/ Designer Traceability/i, "PAGE_FUNCTION_PLAN_DASHBOARD_NV_LABEL_FIELD_MISSING"],
-    [/Runtime Proof Boundary/i, "PAGE_FUNCTION_PLAN_DASHBOARD_RUNTIME_PROOF_FIELD_MISSING"],
-    [/Page Function Plan is the canonical page-level implementation contract/i, "PAGE_FUNCTION_PLAN_CANONICAL_CONTRACT_MISSING"],
+    [/appPlanResourceRef/i, "PAGE_FUNCTION_PLAN_APP_PLAN_RESOURCE_REF_FIELD_MISSING"],
     [/Submission form pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_APPROVAL_SUBMISSION_ID_FIELD_MISSING"],
     [/Task form pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_APPROVAL_TASK_ID_FIELD_MISSING"],
     [/Print page pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_APPROVAL_PRINT_ID_FIELD_MISSING"],
-    [/Form pageFunctionPlanId/i, "PAGE_FUNCTION_PLAN_DATA_FORM_ID_FIELD_MISSING"],
-    [/Document metadata, upload, preview, and view behavior/i, "PAGE_FUNCTION_PLAN_DOCUMENT_BEHAVIOR_FIELD_MISSING"],
-    [/interactiveActions\[\]/i, "PAGE_FUNCTION_PLAN_INTERACTIVE_ACTIONS_FIELD_MISSING"],
-    [/action-type: "2"[\s\S]*Link/i, "PAGE_FUNCTION_PLAN_LINK_ACTION_TYPE_RULE_MISSING"],
-    [/action-type: "5"[\s\S]*Add list item/i, "PAGE_FUNCTION_PLAN_ADD_LIST_ACTION_TYPE_RULE_MISSING"],
-    [/action-type: "6"[\s\S]*Open dashboard/i, "PAGE_FUNCTION_PLAN_OPEN_DASHBOARD_ACTION_TYPE_RULE_MISSING"],
-    [/action-type: "8"[\s\S]*Open approval form/i, "PAGE_FUNCTION_PLAN_OPEN_APPROVAL_ACTION_TYPE_RULE_MISSING"],
-    [/action-type: "1"[\s\S]*Form action binding/i, "PAGE_FUNCTION_PLAN_FORM_ACTION_BINDING_RULE_MISSING"],
-    [/visible action-looking Containers or Buttons without action metadata/i, "PAGE_FUNCTION_PLAN_FAKE_BUTTON_GENERATION_RULE_MISSING"],
-    [/textStyleContract\[\]/i, "PAGE_FUNCTION_PLAN_TEXT_STYLE_CONTRACT_FIELD_MISSING"],
-    [/attrs\.heads\.ty/i, "PAGE_FUNCTION_PLAN_TEXT_TYPOGRAPHY_RULE_MISSING"],
-    [/attrs\.heads\.color/i, "PAGE_FUNCTION_PLAN_TEXT_COLOR_RULE_MISSING"],
-    [/attrs\.headc\.title\.variable/i, "PAGE_FUNCTION_PLAN_TEXT_DYNAMIC_BINDING_RULE_MISSING"],
+    [/Document library forms must include document metadata, upload\/edit behavior, preview\/open behavior, and view behavior/i, "PAGE_FUNCTION_PLAN_DOCUMENT_BEHAVIOR_FIELD_MISSING"],
   ];
   for (const [pattern, code] of required) {
     if (!pattern.test(text)) {
@@ -1276,6 +1283,225 @@ function validateSupportedControls(plan, findings) {
         value: control,
         message: `Unsupported Page Function Plan control "${control}" is not in the plugin-supported control allowlist or marked runtime-proof/deferred.`,
       });
+    }
+  }
+}
+
+function sourceName(value) {
+  if (typeof value === "string") return value.trim();
+  if (!value || typeof value !== "object") return "";
+  return safeString(
+    value.sourceDataListName
+      || value.sourceDataList
+      || value.sourceList
+      || value.source
+      || value.sourceLibrary
+      || value.sourceResource
+      || value.name,
+  ).trim();
+}
+
+function entryFields(value) {
+  if (!value || typeof value !== "object") return [];
+  return [
+    ...asArray(value.requiredFields),
+    ...asArray(value.sourceFields),
+    ...asArray(value.displayFields),
+    ...asArray(value.displayedFields),
+    ...asArray(value.fields),
+    value.fieldName,
+    value.field,
+  ].map((field) => {
+    if (typeof field === "string") return field.trim();
+    if (field && typeof field === "object") return safeString(field.name || field.field || field.fieldName || field.displayName).trim();
+    return "";
+  }).filter(Boolean);
+}
+
+function sourceExistsInAppPlan(source, indexes) {
+  const normalized = normalizeName(source);
+  if (!normalized) return false;
+  return indexes.lists.has(normalized) || indexes.libraries.has(normalized);
+}
+
+function fieldExistsInAppPlan(field, indexes) {
+  const normalized = normalizeName(field);
+  if (!normalized) return false;
+  return indexes.fields.has(normalized);
+}
+
+function dashboardBusinessSections(dashboard) {
+  return {
+    pageOverview: dashboard.pageOverview,
+    primaryUsers: dashboard.primaryUsers,
+    businessQuestions: dashboard.businessQuestions,
+    dataSources: dashboard.dataSources || dashboard.dataSourceFieldUsage || dashboard.dataSourcesAndFieldUsage,
+    pageFilters: dashboard.pageFilters || dashboard.filters,
+    summaryMetrics: dashboard.summaryMetrics || dashboard.metrics,
+    mainDataRegion: dashboard.mainDataRegion || dashboard.primaryDataRegion,
+    secondaryDataRegions: dashboard.secondaryDataRegions,
+    mobileSupport: dashboard.mobileSupport,
+    designIntent: dashboard.designIntent,
+  };
+}
+
+function validateBusinessSectionLowLevelInstructions(dashboard, findings) {
+  const sections = dashboardBusinessSections(dashboard);
+  for (const [sectionName, sectionValue] of Object.entries(sections)) {
+    const text = flattenText(sectionValue);
+    if (LOW_LEVEL_IMPLEMENTATION_INSTRUCTION.test(text)) {
+      findings.push({
+        level: "error",
+        code: "PAGE_FUNCTION_LOW_LEVEL_IMPLEMENTATION_INSTRUCTION",
+        dashboard: dashboard.name,
+        section: sectionName,
+        message: "Page Function Plan business sections must not prescribe low-level Yeeflow control nesting, property paths, CSS, resource JSON, or exact generated control shapes.",
+      });
+    }
+  }
+}
+
+function validateBusinessSourceAndFields(items, indexes, findings, context) {
+  for (const item of asArray(items)) {
+    const source = sourceName(item);
+    if (!source) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_BUSINESS_SOURCE_MISSING", ...context, message: "Business/page-function entries must identify a source data list or document library." });
+    } else if ((indexes.lists.size || indexes.libraries.size) && !sourceExistsInAppPlan(source, indexes) && !DEFERRED.test(flattenText(item))) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_BUSINESS_SOURCE_NOT_IN_APP_PLAN", ...context, source, message: "Page Function Plan source data list/library must exist in the App Plan or be explicitly proof/deferred." });
+    }
+    const fields = entryFields(item);
+    if (!fields.length) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_BUSINESS_FIELDS_MISSING", ...context, source, message: "Business/page-function entries must identify App Plan field names used by the page." });
+    }
+    for (const field of fields) {
+      if (indexes.fields.size && !fieldExistsInAppPlan(field, indexes) && !DEFERRED.test(flattenText(item))) {
+        findings.push({ level: "error", code: "PAGE_FUNCTION_BUSINESS_FIELD_NOT_IN_APP_PLAN", ...context, source, field, message: "Page Function Plan field usage must map to App Plan fields or be explicitly proof/deferred." });
+      }
+    }
+  }
+}
+
+function validatePageFilters(dashboard, filters, indexes, findings) {
+  if (!asArray(filters).length) {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_PAGE_FILTERS_MISSING", dashboard: dashboard.name, message: "Dashboard Page Function Plan entries must define Page Filters with source list, field, filter logic, affected regions, and mobile behavior." });
+    return;
+  }
+  for (const filter of asArray(filters)) {
+    const context = { dashboard: dashboard.name, filter: filter?.filterName || filter?.name };
+    validateBusinessSourceAndFields([filter], indexes, findings, context);
+    for (const [value, code, message] of [
+      [filter?.businessPurpose || filter?.purpose, "PAGE_FUNCTION_FILTER_PURPOSE_MISSING", "Each Page Filter must state its business purpose."],
+      [filter?.appliesToRegions || filter?.appliesTo, "PAGE_FUNCTION_FILTER_APPLIES_TO_MISSING", "Each Page Filter must state which regions it affects."],
+      [filter?.filterLogic || filter?.logic, "PAGE_FUNCTION_FILTER_LOGIC_MISSING", "Each Page Filter must state its business filter logic."],
+      [filter?.mobileBehavior, "PAGE_FUNCTION_FILTER_MOBILE_BEHAVIOR_MISSING", "Each Page Filter must state conceptual mobile behavior."],
+    ]) {
+      if (!hasBusinessText(value)) findings.push({ level: "error", code, ...context, message });
+    }
+  }
+}
+
+function validateSummaryMetrics(dashboard, metrics, indexes, findings) {
+  if (!asArray(metrics).length) {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_SUMMARY_METRICS_MISSING", dashboard: dashboard.name, message: "Dashboard Page Function Plan entries must define Summary Metrics with source fields and calculation logic." });
+    return;
+  }
+  for (const metric of asArray(metrics)) {
+    const context = { dashboard: dashboard.name, metric: metric?.metricName || metric?.name };
+    validateBusinessSourceAndFields([metric], indexes, findings, context);
+    for (const [value, code, message] of [
+      [metric?.businessMeaning || metric?.meaning, "PAGE_FUNCTION_METRIC_BUSINESS_MEANING_MISSING", "Each Summary Metric must state its business meaning."],
+      [metric?.calculationLogic || metric?.calculation, "PAGE_FUNCTION_METRIC_CALCULATION_MISSING", "Each Summary Metric must state calculation logic."],
+      [metric?.defaultFilterScope || metric?.scope, "PAGE_FUNCTION_METRIC_SCOPE_MISSING", "Each Summary Metric must state default filter scope."],
+      [metric?.formattingExpectation || metric?.format, "PAGE_FUNCTION_METRIC_FORMATTING_MISSING", "Each Summary Metric must state business-level formatting expectation."],
+    ]) {
+      if (!hasBusinessText(value)) findings.push({ level: "error", code, ...context, message });
+    }
+  }
+}
+
+function validateMainDataRegion(dashboard, region, indexes, findings) {
+  if (!region || typeof region !== "object") {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_MAIN_DATA_REGION_MISSING", dashboard: dashboard.name, message: "Dashboard Page Function Plan entries must define a Main Data Region." });
+    return;
+  }
+  const context = { dashboard: dashboard.name, region: region.regionName || region.name };
+  validateBusinessSourceAndFields([region], indexes, findings, context);
+  for (const [value, code, message] of [
+    [region.regionName || region.name, "PAGE_FUNCTION_MAIN_REGION_NAME_MISSING", "Main Data Region must have a region name."],
+    [region.businessPurpose || region.purpose, "PAGE_FUNCTION_MAIN_REGION_PURPOSE_MISSING", "Main Data Region must state business purpose."],
+    [region.defaultSorting || region.sorting || region.defaultSort, "PAGE_FUNCTION_MAIN_REGION_SORTING_MISSING", "Main Data Region must state default sorting."],
+    [region.requiredActions || region.actions || region.actionIntent, "PAGE_FUNCTION_MAIN_REGION_ACTION_INTENT_MISSING", "Main Data Region must state required business action intent."],
+    [region.rolePermissionBehavior || region.permissions, "PAGE_FUNCTION_MAIN_REGION_ROLE_BEHAVIOR_MISSING", "Main Data Region must state role/permission behavior."],
+    [region.mobileBehavior, "PAGE_FUNCTION_MAIN_REGION_MOBILE_BEHAVIOR_MISSING", "Main Data Region must state mobile behavior."],
+  ]) {
+    if (!hasBusinessText(value)) findings.push({ level: "error", code, ...context, message });
+  }
+}
+
+function validateMobileSupport(dashboard, mobileSupport, findings) {
+  const context = { dashboard: dashboard.name };
+  if (!mobileSupport || typeof mobileSupport !== "object") {
+    findings.push({ level: "error", code: "PAGE_FUNCTION_MOBILE_SUPPORT_MISSING", ...context, message: "Page Function Plan entries must include Mobile Support content priority, filter adaptation, action access, and visible indicators." });
+    return;
+  }
+  for (const [value, code, message] of [
+    [mobileSupport.visibleContent || mobileSupport.contentVisibleFirst || mobileSupport.contentThatRemainsVisible, "PAGE_FUNCTION_MOBILE_VISIBLE_CONTENT_MISSING", "Mobile Support must state what content remains visible first."],
+    [mobileSupport.filtersAdaptation || mobileSupport.filterAdaptation || mobileSupport.filters, "PAGE_FUNCTION_MOBILE_FILTERS_MISSING", "Mobile Support must state how filters adapt conceptually."],
+    [mobileSupport.accessibleActions || mobileSupport.actions, "PAGE_FUNCTION_MOBILE_ACTIONS_MISSING", "Mobile Support must state which actions remain accessible."],
+    [mobileSupport.visibleIndicators || mobileSupport.indicators, "PAGE_FUNCTION_MOBILE_INDICATORS_MISSING", "Mobile Support must state which indicators/metrics remain visible."],
+  ]) {
+    if (!hasBusinessText(value)) findings.push({ level: "error", code, ...context, message });
+  }
+}
+
+function validateDashboardBusinessFunctionRequirements(plan, appPlan, findings) {
+  const indexes = appPlanIndexes(appPlan, appPlan ? null : plan);
+  for (const dashboard of asArray(plan.dashboards)) {
+    validateBusinessSectionLowLevelInstructions(dashboard, findings);
+
+    const businessPurpose = dashboard.businessPurpose || dashboard.pagePurpose || dashboard.pageOverview?.businessPurpose;
+    const businessQuestion = dashboard.businessQuestion || dashboard.whatBusinessQuestionThePageHelpsAnswer || dashboard.pageOverview?.businessQuestion;
+    if (!hasBusinessText(businessPurpose)) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_PAGE_BUSINESS_PURPOSE_MISSING", dashboard: dashboard.name, message: "Each Dashboard Page Function Plan entry must state a concrete business purpose." });
+    }
+    if (!hasBusinessText(businessQuestion) && !asArray(dashboard.businessQuestions).length) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_BUSINESS_QUESTIONS_MISSING", dashboard: dashboard.name, message: "Each Dashboard Page Function Plan entry must state concrete business questions the page answers." });
+    }
+    if (asArray(dashboard.businessQuestions).length) {
+      for (const question of asArray(dashboard.businessQuestions)) {
+        if (!hasBusinessText(question.question || question)) {
+          findings.push({ level: "error", code: "PAGE_FUNCTION_BUSINESS_QUESTION_VAGUE", dashboard: dashboard.name, message: "Business Questions must be concrete and must not use vague placeholder phrases." });
+        }
+      }
+    }
+
+    const dataSources = dashboard.dataSources || dashboard.dataSourceFieldUsage || dashboard.dataSourcesAndFieldUsage;
+    if (!asArray(dataSources).length) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DATA_SOURCE_FIELD_USAGE_MISSING", dashboard: dashboard.name, message: "Dashboard Page Function Plan entries must define Data Sources and Field Usage." });
+    } else {
+      validateBusinessSourceAndFields(dataSources, indexes, findings, { dashboard: dashboard.name, section: "Data Sources And Field Usage" });
+      for (const source of asArray(dataSources)) {
+        for (const [value, code, message] of [
+          [source.whereUsed || source.whereItIsUsed, "PAGE_FUNCTION_DATA_SOURCE_WHERE_USED_MISSING", "Each data source must state where it is used."],
+          [source.metricUsage, "PAGE_FUNCTION_DATA_SOURCE_METRIC_USAGE_MISSING", "Each data source must state metric usage or N/A."],
+          [source.displayUsage, "PAGE_FUNCTION_DATA_SOURCE_DISPLAY_USAGE_MISSING", "Each data source must state display usage or N/A."],
+          [source.filterUsage, "PAGE_FUNCTION_DATA_SOURCE_FILTER_USAGE_MISSING", "Each data source must state filter usage or N/A."],
+          [source.sortGroupUsage || source.sortGroupingUsage, "PAGE_FUNCTION_DATA_SOURCE_SORT_GROUP_USAGE_MISSING", "Each data source must state sort/group usage or N/A."],
+          [source.actionUsage, "PAGE_FUNCTION_DATA_SOURCE_ACTION_USAGE_MISSING", "Each data source must state action usage or N/A."],
+        ]) {
+          if (!hasBusinessText(value)) findings.push({ level: "error", code, dashboard: dashboard.name, source: sourceName(source), message });
+        }
+      }
+    }
+
+    validatePageFilters(dashboard, dashboard.pageFilters || dashboard.filters, indexes, findings);
+    validateSummaryMetrics(dashboard, dashboard.summaryMetrics || dashboard.metrics, indexes, findings);
+    validateMainDataRegion(dashboard, dashboard.mainDataRegion || dashboard.primaryDataRegion, indexes, findings);
+    validateMobileSupport(dashboard, dashboard.mobileSupport, findings);
+
+    const designIntent = dashboard.designIntent || dashboard.businessDesignIntent;
+    if (!hasBusinessText(designIntent) || !BUSINESS_DESIGN_INTENT.test(flattenText(designIntent))) {
+      findings.push({ level: "error", code: "PAGE_FUNCTION_DESIGN_INTENT_BUSINESS_LEVEL_MISSING", dashboard: dashboard.name, message: "Design Intent must be business-level, such as operations command center, portfolio monitoring, triage workbench, approval workspace, document review, or reference list." });
     }
   }
 }
@@ -1749,6 +1975,7 @@ function validateJson(plan, applicationDesignSystem = null, appPlan = null) {
   if ("dashboardGoldenReference" in plan || "dashboardGoldenReferenceId" in plan || "goldenReference" in plan || "goldenReferenceId" in plan) {
     findings.push({ level: "error", code: "PAGE_FUNCTION_DASHBOARD_GOLDEN_REFERENCE_OUTSIDE_DASHBOARD_ENTRY", message: "Dashboard golden reference must be declared inside the structured Dashboard Page Function Plan entry." });
   }
+  validateDashboardBusinessFunctionRequirements(plan, appPlan, findings);
   validateDashboardTemplateSelection(plan, findings);
   validateSupportedControls(plan, findings);
   validateApprovalForms(plan, findings);

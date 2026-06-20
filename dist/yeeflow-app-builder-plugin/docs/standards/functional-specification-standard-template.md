@@ -257,9 +257,10 @@ Rules:
 - State whether mobile support is required and which content/actions are highest priority on mobile.
 - State role-specific visibility or access needs when a page should be hidden, read-only, or limited.
 - Keep this section business-oriented. Do not over-specify exact Yeeflow controls, Dashboard template or golden-reference IDs, layout JSON, package metadata, IDs, or property paths here.
-- Dashboard implementation pattern, golden-reference, section-template, control-by-region, and runtime-proof-boundary decisions belong in the Page Function Plan, not the Functional Specification.
-- Approval submission/task/print form implementation detail, Data list/Document library form controls, related regions, field editability matrices, and page-level action metadata belong in the Page Function Plan, not the Functional Specification.
-- The Functional Specification describes which roles need which pages, what business task each page solves, what information/actions/filtering/grouping/sorting/mobile/access needs exist, and which page needs must later trace into App Plan resources and Page Function Plan entries.
+- Dashboard pattern, golden-reference, section-template, control-by-region, property, and runtime-proof-boundary decisions do not belong in the Functional Specification.
+- Approval submission/task/print form implementation detail, Data list/Document library form controls, related regions, field editability matrices, and generated action metadata do not belong in the Functional Specification.
+- The Functional Specification describes which roles need which pages, what business task each page solves, what information/actions/filtering/grouping/sorting/mobile/access needs exist, and which page needs must later trace into App Plan resources and business/page-function Page Function Plan entries.
+- The Page Function Plan refines these business page needs into page-level business questions, data source and field usage, filters, metrics, regions, action intent, and mobile behavior. It must not prescribe low-level Yeeflow controls, property paths, arbitrary custom controls, CSS, or generated resource JSON.
 
 ## 19. Business Decision Gates
 

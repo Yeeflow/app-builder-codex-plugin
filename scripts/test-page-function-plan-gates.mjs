@@ -212,6 +212,79 @@ function appPlan(overrides = {}) {
   return merged;
 }
 
+function dashboardBusinessDefaults(name = "Operations Dashboard") {
+  return {
+    businessPurpose: `Help users monitor ${name} workload, status, and next actions from one page.`,
+    businessQuestion: `Which ${name} records need attention now and what should users do next?`,
+    businessQuestions: [{
+      question: `Which ${name} records need attention now?`,
+      whyItMatters: "Users need a focused page that prioritizes active work and operational risk.",
+      sourceDataNeeded: "Purchase Requests Title, Amount, Status, Requester, and Created Date.",
+      pageRegion: "Request Queue",
+    }],
+    dataSources: [{
+      sourceDataListName: "Purchase Requests",
+      whereItIsUsed: "Summary metrics, filters, and main request queue.",
+      requiredFields: ["Title", "Amount", "Status", "Requester", "Created Date"],
+      metricUsage: "Count open requests and summarize Amount by Status.",
+      displayUsage: "Show Title, Amount, Status, Requester, and Created Date in the main region.",
+      filterUsage: "Status and Created Date support page filtering.",
+      sortGroupUsage: "Sort by Created Date descending and group by Status when needed.",
+      actionUsage: "Open Request actions use current request row context.",
+    }],
+    pageFilters: [{
+      filterName: "Request Status",
+      businessPurpose: "Let users focus on active status buckets.",
+      sourceDataList: "Purchase Requests",
+      fieldName: "Status",
+      fieldTypeFromAppPlan: "Choice",
+      appliesToRegions: ["Request Queue"],
+      defaultValue: "Active",
+      selectionBehavior: "Multi-select status values.",
+      filterLogic: "Include records whose Status matches the selected values.",
+      mobileBehavior: "Collapse into a compact selector above the main region.",
+    }],
+    summaryMetrics: [{
+      metricName: "Open Request Count",
+      businessMeaning: "Number of requests still requiring attention.",
+      sourceDataList: "Purchase Requests",
+      sourceFields: ["Status"],
+      calculationLogic: "Count records where Status is Pending or In Review.",
+      defaultFilterScope: "Current visible Status filter.",
+      formattingExpectation: "Whole number count.",
+    }],
+    mainDataRegion: {
+      regionName: "Request Queue",
+      businessPurpose: "Primary queue for request review and follow-up.",
+      sourceDataList: "Purchase Requests",
+      displayFields: ["Title", "Amount", "Status", "Requester", "Created Date"],
+      defaultSorting: "Created Date descending.",
+      groupingIfNeeded: "Group by Status for status-bucket review.",
+      requiredActions: ["Open Request"],
+      rolePermissionBehavior: "Managers can review all records; requesters see their permitted records.",
+      mobileBehavior: "Prioritize Title, Status, Amount, and Open Request.",
+    },
+    secondaryDataRegions: [{
+      regionName: "Recent Activity",
+      purpose: "Support the main queue with recent status movement.",
+      sourceDataList: "Purchase Requests",
+      displayFields: ["Title", "Status", "Created Date"],
+      metricGroupingLogic: "Group recent activity by Status where useful.",
+      actionsIfApplicable: "Open Request where row context is available.",
+    }],
+    mobileSupport: {
+      visibleContent: "Summary metrics, Status filter, and Request Queue remain visible first.",
+      filtersAdaptation: "Filters collapse into compact selectors.",
+      accessibleActions: "Open Request remains accessible from each row.",
+      visibleIndicators: "Status and Amount remain visible in each row.",
+    },
+    designIntent: {
+      businessLevelVisualIntent: "operations command center",
+      desiredUserImpression: "Focused and scan-friendly.",
+    },
+  };
+}
+
 function pagePlan(overrides = {}) {
   const plan = {
     applicationName: "Purchase Operations",
@@ -221,6 +294,103 @@ function pagePlan(overrides = {}) {
       appPlanDashboardRef: "Operations Dashboard",
       name: "Operations Dashboard",
       pagePurpose: "Operations overview dashboard for request queues and KPIs.",
+      businessPurpose: "Help operations managers monitor purchase request workload, risk, and pending decisions from one page.",
+      businessQuestion: "Which purchase requests need attention now, what is the current workload, and which records should be opened next?",
+      businessQuestions: [
+        {
+          question: "How many purchase requests are still open and how much spend is pending?",
+          whyItMatters: "Managers need to understand queue size and financial exposure before assigning work.",
+          sourceDataNeeded: "Purchase Requests Title, Amount, Status, and Created Date.",
+          pageRegion: "Operations KPI Row",
+        },
+        {
+          question: "Which pending purchase requests should be reviewed first?",
+          whyItMatters: "The work queue should prioritize recent pending records and let managers open details quickly.",
+          sourceDataNeeded: "Purchase Requests Title, Amount, Status, Requester, and Created Date.",
+          pageRegion: "Request Queue",
+        },
+      ],
+      dataSources: [
+        {
+          sourceDataListName: "Purchase Requests",
+          whereItIsUsed: "KPI metrics, status filter, and request queue.",
+          requiredFields: ["Title", "Amount", "Status", "Requester", "Created Date"],
+          metricUsage: "Count open requests and sum pending Amount by Status.",
+          displayUsage: "Show Title, Amount, Status, Requester, and Created Date in the main request queue.",
+          filterUsage: "Status and Created Date drive the page filters.",
+          sortGroupUsage: "Sort by Created Date descending and group by Status when users need status buckets.",
+          actionUsage: "Open Request actions use the current request record context.",
+        },
+      ],
+      pageFilters: [
+        {
+          filterName: "Request Status",
+          businessPurpose: "Let managers focus on pending, approved, rejected, or completed requests.",
+          sourceDataList: "Purchase Requests",
+          fieldName: "Status",
+          fieldTypeFromAppPlan: "Choice",
+          appliesToRegions: ["Operations KPI Row", "Request Queue"],
+          defaultValue: "Pending and In Review",
+          selectionBehavior: "Multi-select status values.",
+          filterLogic: "Include requests whose Status is one of the selected values.",
+          mobileBehavior: "Collapse into a compact status selector above KPI and queue content.",
+        },
+      ],
+      summaryMetrics: [
+        {
+          metricName: "Open Request Count",
+          businessMeaning: "Number of purchase requests that still require action.",
+          sourceDataList: "Purchase Requests",
+          sourceFields: ["Status"],
+          calculationLogic: "Count records where Status is Pending or In Review.",
+          defaultFilterScope: "Current visible Status filter.",
+          formattingExpectation: "Whole number count.",
+        },
+        {
+          metricName: "Pending Amount",
+          businessMeaning: "Total amount waiting for approval or follow-up.",
+          sourceDataList: "Purchase Requests",
+          sourceFields: ["Amount", "Status"],
+          calculationLogic: "Sum Amount for records where Status is Pending or In Review.",
+          defaultFilterScope: "Current visible Status filter.",
+          formattingExpectation: "Currency amount.",
+        },
+      ],
+      mainDataRegion: {
+        regionName: "Request Queue",
+        businessPurpose: "Primary work queue for pending purchase request review.",
+        sourceDataList: "Purchase Requests",
+        displayFields: ["Title", "Amount", "Status", "Requester", "Created Date"],
+        defaultSorting: "Created Date descending.",
+        groupingIfNeeded: "Group by Status when managers switch to status review mode.",
+        requiredActions: ["Open Request"],
+        rolePermissionBehavior: "Managers can open all requests; requesters see only their own records when scoped by permissions.",
+        mobileBehavior: "Show Title, Status, Amount, and Open Request first; secondary fields stack below.",
+      },
+      secondaryDataRegions: [
+        {
+          regionName: "Recent Activity",
+          purpose: "Show recent request status movement for context.",
+          sourceDataList: "Purchase Requests",
+          displayFields: ["Title", "Status", "Created Date"],
+          metricGroupingLogic: "Group recent records by Status for quick review.",
+          actionsIfApplicable: "Open Request where row context is available.",
+          mobilePriority: "Lower priority below the main request queue.",
+        },
+      ],
+      mobileSupport: {
+        visibleContent: "Open Request Count, Pending Amount, Request Status filter, and Request Queue remain visible first.",
+        filtersAdaptation: "Status filter collapses into a compact selector.",
+        accessibleActions: "Open Request and Create Purchase Request remain accessible.",
+        visibleIndicators: "Status and Amount indicators remain visible in each row.",
+        lowerPriorityContent: "Recent Activity moves below the main queue.",
+      },
+      designIntent: {
+        businessLevelVisualIntent: "operations command center",
+        desiredUserImpression: "Focused, scan-friendly operations triage for managers.",
+        densityExpectation: "compact",
+        emphasisPriorities: "Pending workload, risk amount, and next action.",
+      },
       businessTaskSolved: "Help managers see workload metrics and open pending requests.",
       dashboardPagePattern: "standard_dashboard_page_shell",
       dashboardGoldenReference: "none",
@@ -364,6 +534,7 @@ function pagePlan(overrides = {}) {
   };
   const merged = { ...plan, ...overrides };
   merged.dashboards = (merged.dashboards || []).map((dashboard) => ({
+    ...dashboardBusinessDefaults(dashboard.name || "Operations Dashboard"),
     pageFunctionPlanId: `PFP-DASH-${String(dashboard.name || "DASHBOARD").toUpperCase().replace(/[^A-Z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
     appPlanDashboardRef: dashboard.name,
     dashboardGoldenReference: "none",
@@ -517,13 +688,85 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "page-function-plan-gates-
 const results = [];
 
 try {
+  const appFile = writeJson(tempDir, "valid-app-plan", appPlan());
   let planFile = writeJson(tempDir, "valid-page-plan", pagePlan());
   let output = run("scripts/validate-page-function-plan.mjs", [planFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "complete valid Page Function Plan passes", status: "pass" });
   results.push({ case: "valid dashboard using kpi_card_row plus data_table_section passes", status: "pass" });
+  results.push({ case: "Facility Operations-style business/page-function PFP with data sources, fields, filters, metrics, regions, actions, and mobile behavior passes", status: "pass" });
 
-  const appFile = writeJson(tempDir, "valid-app-plan", appPlan());
+  const vagueBusinessPlan = pagePlan();
+  vagueBusinessPlan.dashboards[0].businessPurpose = "show dashboard data";
+  vagueBusinessPlan.dashboards[0].businessQuestions = [{ question: "show dashboard data" }];
+  vagueBusinessPlan.dashboards[0].dataSources = [{
+    sourceDataListName: "Purchase Requests",
+    whereItIsUsed: "show dashboard data",
+    requiredFields: [],
+    metricUsage: "show summary cards",
+    displayUsage: "display list",
+    filterUsage: "add filters",
+    sortGroupUsage: "display list",
+    actionUsage: "show data",
+  }];
+  vagueBusinessPlan.dashboards[0].pageFilters = [{
+    filterName: "Filters",
+    sourceDataList: "Purchase Requests",
+    fieldName: "",
+    businessPurpose: "add filters",
+    appliesToRegions: "",
+    filterLogic: "",
+    mobileBehavior: "",
+  }];
+  vagueBusinessPlan.dashboards[0].summaryMetrics = [{
+    metricName: "Summary Cards",
+    sourceDataList: "Purchase Requests",
+    sourceFields: [],
+    businessMeaning: "show summary cards",
+    calculationLogic: "",
+    defaultFilterScope: "",
+    formattingExpectation: "",
+  }];
+  vagueBusinessPlan.dashboards[0].mainDataRegion = {
+    regionName: "List",
+    businessPurpose: "display list",
+    sourceDataList: "Purchase Requests",
+    displayFields: [],
+    defaultSorting: "",
+    requiredActions: "",
+    rolePermissionBehavior: "",
+    mobileBehavior: "",
+  };
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "vague-business-page-function-plan", vagueBusinessPlan), "--app-plan", appFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_PAGE_BUSINESS_PURPOSE_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_BUSINESS_FIELDS_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_FILTER_LOGIC_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_METRIC_CALCULATION_MISSING");
+  expectCode(output.report, "PAGE_FUNCTION_MAIN_REGION_ACTION_INTENT_MISSING");
+  results.push({ case: "vague Dashboard PFP without fields/filter mappings fails", status: "pass" });
+
+  const lowLevelBusinessPlan = pagePlan();
+  lowLevelBusinessPlan.dashboards[0].designIntent = {
+    businessLevelVisualIntent: "operations command center",
+    implementationInstruction: "Use exact Container nesting with attrs.container.padding 12px, customcss, and resource JSON children.",
+  };
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "low-level-business-page-function-plan", lowLevelBusinessPlan), "--app-plan", appFile]);
+  assert.equal(output.report.status, "fail");
+  expectCode(output.report, "PAGE_FUNCTION_LOW_LEVEL_IMPLEMENTATION_INSTRUCTION");
+  results.push({ case: "PFP that dictates low-level control JSON/properties fails", status: "pass" });
+
+  const businessDesignIntentOnly = pagePlan();
+  businessDesignIntentOnly.dashboards[0].designIntent = {
+    businessLevelVisualIntent: "operations command center",
+    desiredUserImpression: "Facility operations managers should feel they are in a focused triage workbench.",
+    densityExpectation: "compact",
+    emphasisPriorities: "Urgent requests, overdue work, and action readiness.",
+  };
+  output = run("scripts/validate-page-function-plan.mjs", [writeJson(tempDir, "business-design-intent-only", businessDesignIntentOnly), "--app-plan", appFile]);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "PFP business-level design intent without implementation prescription passes", status: "pass" });
+
   output = run("scripts/validate-app-plan-page-function-traceability.mjs", ["--app-plan", appFile, "--page-function-plan", planFile]);
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "complete App Plan to Page Function Plan traceability passes", status: "pass" });
