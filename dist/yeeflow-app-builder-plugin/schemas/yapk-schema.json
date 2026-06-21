@@ -120,6 +120,16 @@
             "$ref": "#/$defs/DataReportInfo"
           }
         },
+        "PortalInfo": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/AnyObject"
+            }
+          ]
+        },
         "Groups": {
           "type": "array",
           "items": {
@@ -470,6 +480,9 @@
           "type": "boolean"
         },
         "IsUnique": {
+          "type": "boolean"
+        },
+        "IsIndex": {
           "type": "boolean"
         },
         "Ext1": {

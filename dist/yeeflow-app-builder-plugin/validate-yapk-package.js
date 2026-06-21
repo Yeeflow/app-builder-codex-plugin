@@ -893,7 +893,7 @@ function pageContentWidthIsFull(page) {
 }
 
 function controlName(control) {
-  return String(control?.name || control?.label || control?.title || control?.attrs?.nv_label || control?.attrs?.headc?.title?.value || "");
+  return String(control?.name || control?.label || control?.title || control?.attrs?.headc?.title?.value || "");
 }
 
 function isDefaultControlName(control) {
@@ -1008,8 +1008,8 @@ function validateNativeTextControls(decoded, errors) {
       let parsed;
       try { parsed = JSON.parse(resource.Resource); } catch { continue; }
       walkControls(parsed, (control) => {
-        const title = control?.label || control?.name || control?.title || control?.attrs?.headc?.title?.value || "";
-        const looksLikeText = String(title).toLowerCase() === "text" || control?.attrs?.headc?.title;
+        const explicitType = String(control?.type || "").toLowerCase();
+        const looksLikeText = explicitType === "heading" || explicitType === "text" || explicitType === "text-editor";
         const pointer = `Pages[${pageIndex}].LayoutInResources[${resourceIndex}].Resource`;
         if (control?.type === "text") add(errors, "NATIVE_TEXT_CONTROL_TYPE_INVALID", "Generated dashboards/forms must not emit ad hoc type:\"text\" controls; use native heading/Text shape.", { path: pointer });
         if (!looksLikeText) return;

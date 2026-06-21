@@ -262,9 +262,14 @@ function validateReportIdentity(reportPath, decoded, findings) {
   try { parsed = JSON.parse(text); } catch {}
   if (parsed) {
     const canonicalId = valueAt(parsed, ["canonicalApplication", "listSetId"]) || valueAt(parsed, ["canonicalApplication", "ListSetID"]);
-    const installId = valueAt(parsed, ["installApiReturn", "id"]) || valueAt(parsed, ["installApiReturn", "ID"]) || valueAt(parsed, ["installApiReturn", "listSetId"]) || valueAt(parsed, ["installApiReturn", "ListSetID"]);
+    const installOperationId = valueAt(parsed, ["installApiReturn", "id"]) || valueAt(parsed, ["installApiReturn", "ID"]);
+    const installListSetId = valueAt(parsed, ["installApiReturn", "listSetId"]) || valueAt(parsed, ["installApiReturn", "ListSetID"]) || valueAt(parsed, ["installApiReturn", "Data", "ListSetID"]) || valueAt(parsed, ["installApiReturn", "Data", "listSetId"]);
+    const installId = installOperationId || installListSetId;
     if (decodedListSetId && String(canonicalId || "") !== decodedListSetId) {
       findings.push(error("DASH_CANONICAL_APP_LISTSETID_MISMATCH", "Report canonicalApplication.listSetId must equal decoded package $.ListSet.ListID.", { report: resolved, canonicalListSetId: canonicalId ?? null, decodedListSetId }));
+    }
+    if (installListSetId && decodedListSetId && String(installListSetId) !== decodedListSetId) {
+      findings.push(error("DASH_INSTALL_API_LISTSETID_MISMATCH", "Install API reported ListSetID differs from decoded package root $.ListSet.ListID; keep install response identity separate from canonical runtime URL.", { report: resolved, installApiListSetId: String(installListSetId), decodedListSetId }));
     }
     if (installId && canonicalId && String(installId) === String(canonicalId) && decodedListSetId && String(installId) !== decodedListSetId) {
       findings.push(error("DASH_INSTALL_OPERATION_ID_USED_AS_CANONICAL", "Install/import API returned IDs must be labeled operation evidence only, not canonical application identity.", { report: resolved, installApiReturnId: String(installId), decodedListSetId }));
