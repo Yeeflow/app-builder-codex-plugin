@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.0`
+- Version: `0.8.1`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.0` releases the Functional Specification, App Plan Dashboard Pages Plan, application icon, and dashboard generation hardening cycle. It requires richer Functional Specification business logic and Dashboard business requirements, keeps Functional Specification and Yeeflow App Plan as primary Markdown planning artifacts with JSON companions only, preserves the overall App Plan template while enhancing only Dashboard Pages Plan legal Yeeflow control-type planning, prevents low-level implementation leakage in planning documents, enforces FontAwesome-only application icons, and adds generation-time dashboard hard gates for filters, Containers, KPI native icons, Summary field selection/runtime binding, and canonical application URL reporting.
+Current release `0.8.1` fixes the `0.8.0` App Plan planning schema/validator consistency issue. The primary App Plan remains `yeeflow-app-plan.md` with the `Yeeflow App Plan` resource-order schema; template, resource-order, generation-readiness, traceability, standards, and lifecycle guidance now agree on that contract. Functional Specification generation keeps the standardized Markdown template and must emit every required canonical section. Dashboard Pages Plan keeps legal Yeeflow control-type planning and low-level implementation leakage prevention, while guardrail wording such as unsupported-shape blockers no longer triggers false positives.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.0
+Version: 0.8.1
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.0
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.1
 ```
 
 ## What Is Included

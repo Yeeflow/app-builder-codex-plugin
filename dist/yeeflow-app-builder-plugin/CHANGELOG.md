@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+## 0.8.1
+
+- Fix App Plan planning schema/validator consistency introduced around the `0.8.0` planning-quality release.
+- Keep `yeeflow-app-plan.md` as the single primary Markdown App Plan artifact with the canonical `# <Application Name> - Yeeflow App Plan` resource-order schema.
+- Make `validate-app-plan-template.mjs` validate the same canonical resource-order App Plan contract as `validate-app-plan-resource-order.mjs` instead of requiring a competing `Yeeflow Application Plan` schema.
+- Clarify Functional Specification generation so `functional-specification.md` must emit every required canonical section in the standardized Markdown template, including not-applicable sections with rationale.
+- Preserve the overall App Plan template structure and continue enhancing only Dashboard Pages Plan with legal Yeeflow control-type planning.
+- Keep prevention of low-level implementation leakage in Functional Specification, App Plan, and Page Function Plan planning surfaces.
+- Prevent negative guardrail wording such as unsupported-shape blockers from being misclassified as planned unsupported controls.
+- Add focused Office Asset Loan style schema consistency regressions proving the Functional Specification, App Plan template validator, resource-order validator, Dashboard Pages Plan checks, implementation-leakage checks, and guardrail-wording checks agree.
+
+## 0.8.0
+
+- Release richer Functional Specification business logic requirements, including business process, roles, rules, data lifecycle, reporting, audit, and clarification gates.
+- Standardize the primary Markdown Functional Specification template and require `functional-specification.md` as the human-readable source, with JSON allowed only as companion trace/projection artifacts.
+- Add Functional Spec Dashboard business requirements for business questions, source objects, metrics, metric logic, regions, display fields, filters, actions, mobile needs, and exceptions.
+- Preserve the overall App Plan template structure while enhancing only the Dashboard Pages Plan section.
+- Require `yeeflow-app-plan.md` as the primary Markdown App Plan artifact and keep companion JSON projections secondary.
+- Add detailed Dashboard Pages Plan mapping from Functional Spec dashboard requirements to legal Yeeflow control-type categories, including Summary/KPI, Data Filter, Collection, Data table, Kanban, timelines, Text/Heading, Button/action, Container, Grid/flex grid, and proof/deferred handling for unproven analytics.
+- Prevent low-level implementation leakage in Functional Specification, App Plan, and Page Function Plan planning surfaces, including runtime IDs, `ListID`, `PageID`, `FormID`, `LayoutID`, `ProcKey`, `actionTypeCode`, JSON property paths, generated payloads, and fake placeholder IDs.
+- Require generated application wrapper icons to use FontAwesome icon JSON strings and reject image URL, emoji, SVG, missing-field, or domain-inappropriate application icons.
+- Add dashboard generation-time hard gates for filter display/value/style metadata, coded Container width/layout values, native KPI Icon controls, Summary field-selection/runtime binding consistency, and canonical application URL/app identity reporting from decoded `ListSet.ListID`.
+
 ## 0.6.64
 
 - Release Business Clarification unique unresolved gate summary reporting from PR #95.
