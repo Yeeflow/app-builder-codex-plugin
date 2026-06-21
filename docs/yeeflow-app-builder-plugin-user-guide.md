@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.7.3`
+`0.7.4`
+
+Version `0.7.4` releases signing-readiness TenantID and setsign contract gates from PR #134. Generated-final YAPK signing readiness now requires wrapper TenantID to be real OAuth tenant metadata, blocks missing, empty, placeholder, local-draft, and `0` TenantID values before `setsign`, keeps wrapper TenantID out of generated app content ID provenance, parses both top-level JSON string and supported object-field `setsign` signatures, redacts saved signing request/response evidence, and adds focused TenantID/signature parser regression coverage plus first-generation preflight and YAPK cache hard-gate registration.
 
 Version `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation. The selection records page and section reference IDs, maps Page Function Plan business regions to golden-reference sections, preserves App Plan source lists, fields, filters, metrics, actions, and display fields, and feeds Blueprint/resource conformance and provenance checks. Focused regressions cover Facility Maintenance mapping, missing selections, missing `derivedFromGoldenReference`, copied Event fields in unrelated apps, missing grid-table/KPI references, generated-resource provenance, and package-readiness gates for dashboard golden-reference conformance.
 

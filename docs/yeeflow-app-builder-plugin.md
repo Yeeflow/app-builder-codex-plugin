@@ -8,12 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.7.3
+- Version: 0.7.4
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
+
+Version `0.7.4` releases signing-readiness TenantID and setsign contract gates from PR #134. Generated-final YAPK signing readiness now requires wrapper TenantID to be real OAuth tenant metadata, blocks missing, empty, placeholder, local-draft, and `0` TenantID values before `setsign`, keeps wrapper TenantID out of generated app content ID provenance, parses both top-level JSON string and supported object-field `setsign` signatures, redacts saved signing request/response evidence, and adds focused TenantID/signature parser regression coverage plus first-generation preflight and YAPK cache hard-gate registration.
 
 Version `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, published section reference IDs, Blueprint/resource conformance and provenance checks, Facility Maintenance mapping regression coverage, safeguards against copying Event fields into unrelated apps, and package-readiness gates for dashboard golden-reference conformance.
 

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.7.3`
+- Version: `0.7.4`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, with structured page and section reference IDs, Blueprint/resource conformance and provenance checks, Facility Maintenance mapping regression coverage, safeguards against copying Event fields into unrelated apps, and package-readiness gates for dashboard golden-reference conformance.
+Current release `0.7.4` adds signing-readiness TenantID and setsign contract gates from PR #134. Generated-final YAPK signing readiness now validates wrapper TenantID as tenant metadata from OAuth context, blocks missing, empty, placeholder, local-draft, or `0` TenantID values before setsign, keeps wrapper TenantID out of generated app content ID provenance, parses top-level JSON string and object-field setsign signatures, redacts signing evidence, and adds focused regression coverage plus preflight/cache hard-gate registration.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.7.3
+Version: 0.7.4
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.7.3
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.7.4
 ```
 
 ## What Is Included
