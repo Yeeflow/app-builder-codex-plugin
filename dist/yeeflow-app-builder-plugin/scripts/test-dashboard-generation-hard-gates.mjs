@@ -133,6 +133,64 @@ function decoded(flags = {}) {
   };
 }
 
+function decodedShellDashboard() {
+  return {
+    ListSet: { ListID: LIST_SET_ID, Title: "Facility Maintenance", LayoutView: JSON.stringify({ sort: [] }) },
+    Pages: [{
+      Type: 103,
+      Title: "Facility Operations Dashboard",
+      LayoutID: "dashboard-layout",
+      LayoutInResources: [{
+        ID: "dashboard-layout",
+        RefId: "dashboard-layout",
+        Resource: JSON.stringify({
+          type: "page",
+          children: [{
+            type: "container",
+            name: "Main",
+            attrs: { style: style([null, "2"]) },
+            children: [{ type: "container", name: "Content", attrs: { style: style([null, "2"]) }, children: [] }],
+          }],
+        }),
+      }],
+    }],
+    Childs: [],
+    Forms: [],
+    FormNewReports: [],
+    DataReports: [],
+  };
+}
+
+function appPlanWithDashboard() {
+  return `# Facility Maintenance - Yeeflow App Plan
+
+## 14. Dashboard Pages Plan
+### 14.1 Facility Operations Dashboard
+- Page name: Facility Operations Dashboard
+
+#### Dashboard Sections
+| Section Order | Section Name | Business Purpose | Source Data List or Business Object | Required Fields or Metrics | Selected Yeeflow Control Type Category | Why This Control Type Is Appropriate | User Actions Needed | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | KPI strip | Monitor open work | Maintenance Requests | Open Requests | Summary / KPI card | KPI card gives operators a count | Open filtered list | validator-backed |
+| 2 | Work queue | Review requests | Maintenance Requests | Title, Priority, Status | Collection | Work queue card region is required | Open detail | validator-backed |
+
+#### Dashboard Filters
+| Filter Name | Source Data List | Filter Field | Applies-to Dashboard Sections | Selected Yeeflow Filter/Control Type If Known | Default Business Scope | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Priority Filter | Maintenance Requests | Priority | KPI strip, Work queue | Data Filter | Active work | validator-backed |
+
+#### Summary Metrics
+| Metric Name | Source Data List | Source Field(s) | Calculation Logic | Selected Yeeflow Control Type Category | Display Format Intent | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Open Requests | Maintenance Requests | ListDataID | Count open records | Summary / KPI card | count | validator-backed |
+
+#### Record Display Control Selection
+| Section | Data Source | Display Need | Selected Record Display Control | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- |
+| Work queue | Maintenance Requests | Request cards | Collection | Portfolio queue display | Open detail | validator-backed |
+`;
+}
+
 function writePackage(dir, name, data) {
   const file = path.join(dir, `${name}.yapk`);
   fs.writeFileSync(file, `${JSON.stringify({ Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(data), "utf8")).toString("base64") })}\n`);
@@ -142,6 +200,12 @@ function writePackage(dir, name, data) {
 function writeReport(dir, name, body) {
   const file = path.join(dir, name);
   fs.writeFileSync(file, typeof body === "string" ? body : `${JSON.stringify(body, null, 2)}\n`);
+  return file;
+}
+
+function writeText(dir, name, body) {
+  const file = path.join(dir, name);
+  fs.writeFileSync(file, body);
   return file;
 }
 
@@ -166,6 +230,12 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dashboard-generation-hard
 try {
   const valid = writePackage(tempDir, "valid", decoded());
   expectPass("complete dashboard generation hard gates", ["--package", valid]);
+
+  expectCode(
+    "plan-aware dashboard hard gate rejects shell-only dashboard",
+    ["--package", writePackage(tempDir, "shell-dashboard", decodedShellDashboard()), "--plan", writeText(tempDir, "app-plan.md", appPlanWithDashboard())],
+    "GENERATED_FINAL_DASHBOARD_SHELL_ONLY",
+  );
 
   expectCode("filter has data field but no display_f", ["--package", writePackage(tempDir, "filter-no-display", decoded({ filterPatch: { display_f: "" } }))], "DASH_FILTER_DISPLAY_FIELD_MISSING");
   expectCode("filter has no value_f", ["--package", writePackage(tempDir, "filter-no-value", decoded({ filterPatch: { value_f: "" } }))], "DASH_FILTER_VALUE_FIELD_MISSING");

@@ -46,6 +46,7 @@ If a named validator is unavailable, report it as unavailable and use the closes
 - Inspect package wrapper and decoded resources for app, list, form, workflow, dashboard, and file/resource materialization.
 - Check for prefix or `pr<id>x` corruption where encoded IDs, field names, or resource references were accidentally rewritten.
 - Confirm compressed or embedded resources can be decoded or round-tripped when the repo has tooling for it.
+- When an approved App Plan exists, run `scripts/validate-generated-final-resource-completeness.mjs --plan <yeeflow-app-plan.md> --package <app.yapk|decoded.json>` before signing readiness. Fail generated-final packages that omit non-deferred planned resources, including approval forms with `Forms: []`, planned Form Reports with empty `FormNewReports[]`, planned Data Reports with empty `DataReports[]`, planned dashboards with empty `Content.children`, and planned navigation groups/items reduced to a generic/default group.
 
 ## 7. Decide Import Safety
 

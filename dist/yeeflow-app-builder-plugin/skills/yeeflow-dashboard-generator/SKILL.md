@@ -75,6 +75,8 @@ Official v0.6.19 adds dashboard runtime-binding guardrails from real generated-a
 
 Dashboard filters must bind to stable page `filterVars[]` entries such as `filter_{PageName}_{FilterName}` and each declared filter variable must be consumed by Summary `Conditions[]`, Collection/Data table `attrs.data.filter[]`, or a proven chart/pivot condition. Consumer fields must resolve on the consumer source list. Lookup-backed filters should compare record ids/ListDataID-style values, not display labels. Run `scripts/validate-runtime-binding-lessons.mjs` for focused dashboard binding audits before handoff.
 
+Generated-final dashboard materialization completeness: when an approved App Plan declares dashboard KPI/Summary metrics, filters, Collection/Data table/Kanban/Timeline regions, or dynamic item-template display needs, the generated Type 103 dashboard must contain corresponding non-empty controls. A `Main > Content` shell with `Content.children = []`, or a container-only dashboard with no business controls, is not a generated-final dashboard. Run `scripts/validate-dashboard-generation-hard-gates.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>` and `scripts/validate-generated-final-resource-completeness.mjs --plan <yeeflow-app-plan.md> --package <app.yapk|decoded.json>` before signing readiness.
+
 
 ## Application Navigation References
 
