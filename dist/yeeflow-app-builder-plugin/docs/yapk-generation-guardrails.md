@@ -58,13 +58,25 @@ Signing, signature verification, package upload, install/import, upgrade-check, 
 
 A generated `.yapk` package must not be called upload-ready, install-ready, or handoff-ready while `Sign` is empty, placeholder-like, or an all-zero 32-byte value.
 
+Generated-final signing readiness also requires valid wrapper tenant metadata. `wrapper.TenantID` must be populated from the resolved OAuth tenant context before signing. `TenantID = "0"`, missing/empty `TenantID`, local draft placeholders, tenant placeholders, and mismatches against the resolved OAuth tenant context are signing blockers. `wrapper.TenantID` is tenant metadata and must not be included in the API-issued app content ID provenance manifest.
+
+Run before `setsign`:
+
+```bash
+node scripts/validate-yapk-signing-readiness.mjs --package <app.yapk> --expected-tenant-id <oauth-tenant-id>
+```
+
 When API-key or OAuth access is available, the generation workflow must:
 
 1. Validate decoded `AppPackageInfo` content.
-2. Call `POST /utils/apppackage/setsign`.
-3. Confirm the returned signature has the expected 32-byte shape.
-4. Call `POST /utils/apppackage/verifysign`.
-5. Report signing proof separately from schema validation and runtime proof.
+2. Validate signing readiness, including wrapper `TenantID` metadata.
+3. Save redacted pre-`setsign` request metadata, including endpoint, method, content type, body mode, package path, filename, byte size, TenantID, wrapper keys, Sign presence, auth mode, and redacted tenant/workspace context.
+4. Call `POST /utils/apppackage/setsign`.
+5. Parse `setsign` responses that return either a top-level JSON string signature or a supported object field signature.
+6. Save redacted response metadata without printing the raw signature.
+7. Confirm the returned signature has the expected 32-byte shape.
+8. Call `POST /utils/apppackage/verifysign`.
+9. Report signing proof separately from schema validation and runtime proof.
 
 Local schema validation alone is not upload/install readiness.
 

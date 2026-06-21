@@ -52,6 +52,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("api-issued-content-id-provenance", ["scripts/validate-yapk-id-provenance.mjs", "--package", resolvedPackage, "--manifest", idProvenance]));
   gates.push(runGate("generated-final-draft-placeholders", ["scripts/validate-generated-final-draft-placeholders.mjs", "--package", resolvedPackage, "--mode", "generated-final"]));
   gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
+  gates.push(runGate("signing-readiness-tenantid", ["scripts/validate-yapk-signing-readiness.mjs", "--package", resolvedPackage]));
   gates.push(runGate("dashboard-grid-table-collections", ["scripts/validate-dashboard-grid-table-collections.mjs", "--package", resolvedPackage]));
   if (options.upgrade || options.previousPackage || options.previousManifest || options.newManifest) {
     gates.push(runUpgradeIdStabilityGate({
@@ -79,7 +80,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     idProvenance: summarizePath(idProvenance),
     failedGate: failed?.gate || null,
     gates,
-    proofBoundary: "Local preflight only. ID provenance, recursive generated-final draft-placeholder absence, upgrade ID stability, navigation metadata, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity, placeholder replacement completeness, or workspace targeting correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
+    proofBoundary: "Local preflight only. ID provenance, recursive generated-final draft-placeholder absence, navigation metadata, signing-readiness TenantID metadata, dashboard grid-table Collection validation, upgrade ID stability when applicable, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity, placeholder replacement completeness, tenant metadata correctness, or workspace targeting correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
   };
 }
 
