@@ -13,6 +13,8 @@ Use `yeeflow-ui-generation-hard-gates` whenever application generation touches d
 
 ## Generated-Final YAPK ID And Navigation Hard Gates
 
+Generated-final `.yap` and `.yapk` application wrappers must use FontAwesome icon mode only. The top-level `IconUrl` must be a JSON string with `b`, `i`, and `c`, where `i` is a FontAwesome class string such as `fa-solid fa-screwdriver-wrench`, `fa-regular fa-calendar-check`, `fa-solid fa-laptop`, or `fa-solid fa-boxes-stacked`, and `b`/`c` are valid colors. Do not use image URLs, `https://img.yeeflow.com/...`, SVG, emoji, blank/null, or non-FontAwesome application icons. Choose an icon that matches the business domain and record the rationale in the App Plan or generation report without generated package IDs. Run `scripts/validate-application-icon.js --package <file.yap|file.yapk>` before signing, import/install, upgrade-check, upgrade, or handoff.
+
 Generated-final `.yapk` output must use API-issued numeric content IDs from `GET /utils/generate/ids?count=<n>` and must emit a redacted `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`, path-to-purpose mappings, duplicate checks, unused-ID accounting, generator provenance metadata, and no non-API IDs. Local ID generation, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds are forbidden for generated-final `.yapk`. Runtime navigation groups must include API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; children must include `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`, with dashboards/pages as `Type: 103` plus `LayoutID`, approval forms as `Type: 105`, and data lists as `Type: 1`. Run `scripts/validate-yapk-id-provenance.mjs` and `scripts/validate-yapk-navigation-runtime-metadata.mjs`; stop before signing, install, upgrade-check, or handoff if either gate fails. `setsign`/`verifysign` and install acceptance do not prove ID provenance or navigation runtime metadata completeness.
 
 YAPK upgrade ID stability hard gate: upgrade/new-version `.yapk` output must preserve IDs for existing semantic resources from the previous package/lineage manifest. Only newly added resources may consume newly API-issued IDs, removed IDs must not be reused, replacing all IDs is a hard failure, and `scripts/validate-yapk-upgrade-id-stability.mjs` must pass before signing, upgrade-check, upgrade apply, install-like writes, or handoff. Missing previous package/manifest fails closed; signing/install/upgrade acceptance is not ID-continuity proof.
@@ -70,7 +72,7 @@ Product clarification for v0.6.9 and v0.6.18: `FormReports` is the legacy workfl
 
 ## v0.6.8 First-Generation YAPK Smoke Gate
 
-Account Health smoke testing showed that first-generation YAPK packages must pass the runtime-hardening gates before signing. Run `scripts/yapk-first-generation-preflight.mjs --package <file.yapk> --json` before `setsign`, install dry-run, upgrade check, upgrade apply, or handoff. The preflight runs canonical schema validation, decoded `AppPackageInfo` validation, data-list system schema validation, dashboard shell/Data table/Text-control validation through the YAPK validator, ID safety checks, and redacted output checks.
+Account Health smoke testing showed that first-generation YAPK packages must pass the runtime-hardening gates before signing. Run `scripts/yapk-first-generation-preflight.mjs --package <file.yapk> --json` before `setsign`, install dry-run, upgrade check, upgrade apply, or handoff. The preflight runs canonical schema validation, FontAwesome application icon validation, decoded `AppPackageInfo` validation, data-list system schema validation, dashboard shell/Data table/Text-control validation through the YAPK validator, ID safety checks, and redacted output checks.
 
 Generated YAPK sample data must live in `Childs[].List.Items`, and every generated sample field value must serialize as a string. Do not emit schema-forbidden `AppID` properties inside decoded `AppPackageInfo` objects such as `ListSet`, `Pages[]`, `Childs[].List`, `Childs[].Fields[]`, or `Childs[].Layouts[]`; keep wrapper `AppID = 41` and only use app references inside documented embedded dashboard control data where the runtime requires them. Root `ListSet.LayoutView` must be a JSON string when present; dashboard pages keep `LayoutView: null`; generated child `List.LayoutView` remains null unless export-proven custom form routing is complete. FieldName suffix and storage family mismatches are generated-final blockers.
 
@@ -547,7 +549,7 @@ Business labels such as `Request No.`, `Name`, `Equipment Name`, or `Center / De
 
 For generated packages, the root app shell is mandatory. Use the v5 baseline rules:
 
-- top-level wrapper `Title`, `Description`, and non-null `IconUrl`
+- top-level wrapper `Title`, `Description`, and FontAwesome JSON-string `IconUrl`
 - `Resource.MainListType = 1024`
 - root `Data.Item.ListModel.Type = 1024`
 - root `CustomType = ""`
@@ -841,7 +843,7 @@ Focused runtime proof in `docs/studies/data-list-public-form-runtime-proof.md` c
 <!-- yap-schema-standard-learning:start -->
 ## YAP Schema Standard Guardrails
 
-Before packaging any generated `.yap`, ensure the wrapper has schema-required `Title`, `Description`, `IconUrl`, `IsListSet`, and `[______gizp______]`-prefixed `Resource`. The decoded resource must contain `Data` as a JSON string whose `ListExportInfo.Item` exists.
+Before packaging any generated `.yap`, ensure the wrapper has schema-required `Title`, `Description`, FontAwesome JSON-string `IconUrl`, `IsListSet`, and `[______gizp______]`-prefixed `Resource`. The decoded resource must contain `Data` as a JSON string whose `ListExportInfo.Item` exists.
 
 Every generated `ListExportItem`, including root `Item` and every `Childs[]` resource, must emit `Defs` and `Layouts` as arrays. Never emit `null`; use `[]` for empty definitions or layouts. Generated packages must pass `scripts/inspect-yap-schema-standard.mjs` and `validate-yap-package.js` before import attempts.
 

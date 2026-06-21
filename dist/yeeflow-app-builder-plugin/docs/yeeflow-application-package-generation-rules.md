@@ -8,6 +8,26 @@ YAP schema: `schemas/yap-schema.json`
 
 These filenames are stable references for package generation, validation, and inspection. When the product schema changes, replace the file contents while keeping these paths unchanged. Keep package rules separate: YAPK uses `AppExportPackageInfo`, Brotli `AppPackageInfo`, `Childs[].Fields`, and `PortalInfo: null`; YAP uses the YAP wrapper, `[______gizp______]` gzip `ListExportResult`, `Defs`, and `SimplePortal: null`.
 
+## Application Icon Rule
+
+Generated Yeeflow application packages must use FontAwesome icon mode for the top-level wrapper `IconUrl`. Image-based application icons are forbidden for generated-final `.yap` and `.yapk` output.
+
+`IconUrl` must be a JSON string with this shape:
+
+```json
+{"b":"#E6F0FF","i":"fa-solid fa-screwdriver-wrench","c":"#0065FF"}
+```
+
+Required icon fields:
+
+- `b`: icon background color.
+- `i`: FontAwesome class string with a style class and icon class, such as `fa-solid fa-screwdriver-wrench`, `fa-regular fa-calendar-check`, `fa-solid fa-laptop`, or `fa-solid fa-boxes-stacked`.
+- `c`: icon foreground color.
+
+The selected icon must match the generated application business domain. Use documented mapping or rationale in the App Plan or generation report, for example Facility Maintenance -> `fa-solid fa-screwdriver-wrench`, Leave/Calendar -> `fa-regular fa-calendar-check`, IT Hardware -> `fa-solid fa-laptop`, Inventory/Assets -> `fa-solid fa-boxes-stacked`, Procurement -> `fa-solid fa-cart-shopping`, Customer/Account Health -> `fa-solid fa-chart-line`, or Document Library -> `fa-regular fa-file-lines`. The App Plan may record the selected icon rationale, but it must not include generated package IDs.
+
+`IconUrl` must not be empty, null, a plain image URL, an `https://img.yeeflow.com/...` URL, a data image, SVG markup, emoji, or any non-FontAwesome token. Package validation and signing readiness must block image-icon packages.
+
 ## Package Type Decision
 
 Ask whether the user wants a new application or an upgrade to an existing application.
@@ -89,6 +109,7 @@ For existing-app upgrade packages:
 
 For generated-final `.yapk` application output, generation must stop before signing, install, upgrade-check, or handoff unless both hard gates pass:
 
+- Application FontAwesome Icon Gate: top-level wrapper `IconUrl` must pass `node scripts/validate-application-icon.js --package dist/<app>.yapk` and use the required JSON string shape with `b`, `i`, and `c`. Image URL icons, missing fields, non-FontAwesome values, and domain-mismatched icons without an approved rationale fail before signing.
 - API-Issued Content ID Provenance Gate: every numeric generated application content ID is allocated through `GET /utils/generate/ids?count=<n>` and recorded in `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`.
 - Navigation Runtime Metadata Gate: every runtime navigation group includes API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; every child includes `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`; targets resolve to `Pages[].LayoutID`, `Forms[].Key`, or `Childs[].List.ListID`.
 
@@ -98,6 +119,7 @@ Required validators:
 
 ```bash
 node scripts/validate-yapk-id-provenance.mjs --package dist/<app>.yapk --manifest dist/<app>-id-provenance-report.json
+node scripts/validate-application-icon.js --package dist/<app>.yapk
 node scripts/validate-yapk-navigation-runtime-metadata.mjs --package dist/<app>.yapk --id-provenance dist/<app>-id-provenance-report.json
 node scripts/validate-yapk-upgrade-id-stability.mjs --previous-package dist/<app>-previous.yapk --previous-manifest dist/<app>-previous-id-lineage.json --new-package dist/<app>.yapk --new-manifest dist/<app>-id-lineage.json
 node scripts/inspect-yapk-upgrade-app-identity.mjs --package dist/<app>.yapk --lineage dist/<app>-lineage.json

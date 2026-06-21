@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 const { validateWorkflowActionShapes } = require("./workflow-action-config-validator");
+const { validatePackageWrapperIcon } = require("./scripts/lib/application-icon-validation.cjs");
 const {
   isGeneratedValueControl,
   loadControlFieldSchemas,
@@ -875,6 +876,10 @@ function validateYapWrapperSchema(wrapper, report) {
       issue(report, "error", "YAP_WRAPPER_REQUIRED_PROPERTY_MISSING", "YAP wrapper is missing a product-schema-required property.", { path: `$.${key}`, key });
     }
   }
+  const iconSeverity = report.mode === "generator" && report.stage === "final" ? "error" : "warning";
+  for (const finding of validatePackageWrapperIcon(wrapper).findings) {
+    issue(report, iconSeverity, finding.code, finding.message, finding);
+  }
   if (typeof wrapper.Resource !== "string") {
     issue(report, "error", "YAP_RESOURCE_NOT_STRING", "YAP wrapper Resource must be a string.");
   } else if (!wrapper.Resource.startsWith(GZIP_PREFIX)) {
@@ -1578,9 +1583,6 @@ function validateRootAppShell(data, wrapper, replaceIds, listsById, fieldsByList
   if (!root) return;
   if (wrapper && (!safeString(wrapper.Title) || wrapper.Description === undefined)) {
     issue(report, report.mode === "generator" && report.stage === "final" ? "error" : "warning", "WRAPPER_TITLE_DESCRIPTION_INCOMPLETE", "Generated .yap wrapper should include import dialog Title and Description fields.", { titlePresent: Boolean(safeString(wrapper.Title)), descriptionPresent: wrapper.Description !== undefined });
-  }
-  if (wrapper && !safeString(wrapper.IconUrl)) {
-    issue(report, report.mode === "generator" && report.stage === "final" ? "error" : "warning", "WRAPPER_ICONURL_MISSING", "Generated .yap wrapper should include a non-empty IconUrl; real app exports do not use null here.");
   }
   if (safeString(root.CustomType)) {
     issue(report, report.mode === "generator" && report.stage === "final" ? "error" : "warning", "ROOT_CUSTOMTYPE_NOT_EMPTY", "Root app/ListSet CustomType should be empty; child lists use ListSite_<ListSetID>.", { customType: root.CustomType });

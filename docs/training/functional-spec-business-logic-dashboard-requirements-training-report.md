@@ -40,6 +40,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 - Generation lifecycle docs now state that generation must use the Markdown Functional Specification and Markdown App Plan as the source contracts first, with JSON projections derived from them only for validation, traceability, or tests.
 - Approval/form, workflow/notification, reporting/audit, and business clarification gates now have explicit required business details.
 - Functional Specification rejects low-level implementation leakage such as Yeeflow control types, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, and exact generated resource IDs.
+- Generated Yeeflow application wrappers now require FontAwesome icon mode for top-level `IconUrl`: a JSON string containing `b`, `i`, and `c`. Image URLs, `https://img.yeeflow.com/...`, SVG, emoji, blank/null, missing fields, and non-FontAwesome icon tokens fail validation. App Plan or generation report output should include selected icon rationale without generated package IDs.
 
 ## Files Updated
 
@@ -55,6 +56,17 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `scripts/test-planning-artifact-format-gates.mjs`
 - `scripts/test-planning-markdown-template-standardization-gates.mjs`
 - `scripts/test-functional-specification-and-app-plan-gates.mjs`
+- `scripts/lib/application-icon-validation.cjs`
+- `scripts/validate-application-icon.js`
+- `scripts/test-application-icon-gates.mjs`
+- `validate-yapk-package.js`
+- `validate-yap-package.js`
+- `scripts/yapk-first-generation-preflight.mjs`
+- `docs/yeeflow-application-package-generation-rules.md`
+- `docs/build-yap-wrapper.md`
+- `docs/standards/yap-generation-contract.md`
+- `skills/installed/yeeflow-application-generator/SKILL.md`
+- `skills/installed/yeeflow-package-validator/SKILL.md`
 - `scripts/test-clarification-readiness-traceability-gates.mjs`
 - `scripts/test-app-plan-control-action-property-gates.mjs`
 - matching committed `dist/yeeflow-app-builder-plugin` mirrors for standards, validators, tests, and lifecycle reference.
@@ -82,6 +94,12 @@ Generated Functional Specification documents could satisfy the structural gate w
 - Fail: App Plan missing detailed Dashboard Pages Plan.
 - Fail: App Plan Dashboard planning without legal Yeeflow control type categories.
 - Fail: App Plan containing runtime IDs/action codes/property paths.
+- Pass: wrapper `IconUrl` is a JSON string with `b`, `i`, and `c`.
+- Pass: Facility Maintenance wrapper icon uses a documented domain-appropriate FontAwesome class.
+- Fail: wrapper `IconUrl` is an image URL.
+- Fail: wrapper `IconUrl` is missing `b`, `i`, or `c`.
+- Fail: wrapper `IconUrl` uses emoji, SVG, invented, or non-FontAwesome icon content.
+- Fail: domain-specific icon validation detects a mismatched icon class.
 
 ## Validation Summary
 
@@ -102,6 +120,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `node scripts/test-yapk-id-navigation-hard-gates.mjs`: passed.
 - `node scripts/test-yapk-hard-gate-cache-artifacts.mjs`: passed.
 - `node scripts/test-yapk-v3-runtime-hardening.mjs`: passed.
+- `node scripts/test-application-icon-gates.mjs`: passed.
 - Metadata inspection: no training version bump was made; the local training checkout still reports `0.6.64`, while the requested release baseline for the post-merge release path is `0.7.4`.
 - Source/dist mirror checks for changed committed mirrors: passed.
 - `node scripts/audit-release-safety.mjs`: passed with zero blocking findings.
@@ -135,3 +154,4 @@ Release notes for `0.8.0` should mention:
 - Dashboard legal Yeeflow control-type planning
 - prevention of low-level implementation leakage in Functional Spec/App Plan
 - Markdown primary planning artifacts with JSON companions only
+- FontAwesome-only generated application icons with image icon packages blocked before signing/readiness

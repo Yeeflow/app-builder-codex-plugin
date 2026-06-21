@@ -33,7 +33,7 @@ Options:
 
 - `--title`: required top-level wrapper title.
 - `--description`: optional top-level wrapper description.
-- `--icon-url`: optional top-level wrapper icon; if omitted, the builder uses the root `ListModel.IconUrl` when present.
+- `--icon-url`: required for generated-final application packages. Use FontAwesome icon JSON string mode only, for example `{"b":"#E6F0FF","i":"fa-solid fa-screwdriver-wrench","c":"#0065FF"}`. If omitted during compatibility wrapping, the builder may use the root `ListModel.IconUrl` only when it already has this FontAwesome JSON shape.
 - `--validation-mode generator`: strict mode for generated app packages.
 - `--validation-mode compatibility`: tolerant mode for round-tripping real historical exports.
 
@@ -83,7 +83,7 @@ The generated `.yap` wrapper uses:
 {
   "Title": "Test App",
   "Description": "Round-trip rebuilt application package",
-  "IconUrl": "<icon-url-or-root-listmodel-icon>",
+  "IconUrl": "{\"b\":\"#E6F0FF\",\"i\":\"fa-solid fa-screwdriver-wrench\",\"c\":\"#0065FF\"}",
   "IsListSet": true,
   "Resource": "[______gizp______]<base64-gzip-resource-json>"
 }
@@ -185,4 +185,4 @@ For the first Department Access Management `.yap` generation test, this builder 
 
 ## v5 Baseline Note
 
-The `Department Access Management_v5` test showed that wrapper `IconUrl` cannot be treated as optional for generated app packages. Earlier generated packages with missing or null top-level icon metadata produced incomplete import-dialog behavior. The builder should preserve or set a non-null icon for generator/final packages.
+The `Department Access Management_v5` test showed that wrapper `IconUrl` cannot be treated as optional for generated app packages. Earlier generated packages with missing or null top-level icon metadata produced incomplete import-dialog behavior. The builder must set a FontAwesome icon JSON string for generator/final packages and must not use image URLs, `https://img.yeeflow.com/...`, SVG, emoji, or other image-based application icons.

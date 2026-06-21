@@ -11,6 +11,7 @@ import { runYapkFirstGenerationPreflight } from "./yapk-first-generation-preflig
 import { collectNumericContentIds } from "./validate-yapk-id-provenance.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const ACCOUNT_HEALTH_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-chart-line", c: "#0065FF" });
 
 function id(offset) {
   return String(1700000000012345n + BigInt(offset));
@@ -239,7 +240,7 @@ function wrapper(decoded = decodedAccountHealth()) {
     ListID: decoded.ListSet.ListID,
     Title: "Account Health Smoke",
     Description: "First-generation Account Health YAPK smoke fixture.",
-    IconUrl: "",
+    IconUrl: ACCOUNT_HEALTH_ICON,
     Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64"),
     Notes: "Synthetic regression fixture; not a generated app artifact.",
     Author: "regression",

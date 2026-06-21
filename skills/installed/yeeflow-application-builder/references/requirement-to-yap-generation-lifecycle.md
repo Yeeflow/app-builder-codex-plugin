@@ -27,6 +27,7 @@ Before generation, confirm package target and scope:
 - `.yap` is used only when explicitly requested or when a documented fallback/debug scope requires YAP.
 - Existing application upgrade requires an official baseline `.yapk` from Yeeflow Version management, identity preservation, and ID stability.
 - Existing application upgrades must not use fresh-ID clone generation rules unless the user explicitly asks for a cloned app.
+- Generated application wrappers must use FontAwesome icon mode only. The top-level `IconUrl` must be a JSON string containing `b`, `i`, and `c`; image URLs, `https://img.yeeflow.com/...`, SVG, emoji, and blank/null icons are forbidden. The App Plan or generation report should include the selected domain-matched icon rationale without generated package IDs.
 
 ## 1. Requirement Intake
 
@@ -50,6 +51,7 @@ Extract:
 - form report needs
 - data list custom forms
 - dashboards/pages
+- selected application icon rationale at business/control-category level; do not include generated package IDs
 - dashboard business questions, metrics, source fields, calculation logic, filters, data regions, display fields, sorting/grouping, user actions, mobile support, and alerts
 - data list views
 - workflows and automations

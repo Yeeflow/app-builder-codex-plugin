@@ -47,6 +47,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   }
 
   gates.push(runGate("canonical-schema", ["scripts/validate-standard-package-schema.mjs", resolvedPackage]));
+  gates.push(runGate("application-fontawesome-icon", ["scripts/validate-application-icon.js", "--package", resolvedPackage]));
   gates.push(runGate("decoded-app-package-runtime", ["validate-yapk-package.js", resolvedPackage]));
   gates.push(runGate("data-list-system-schema", ["scripts/validate-data-list-system-schema.mjs", resolvedPackage, "--strict-generated-list", "--json"]));
   gates.push(runGate("api-issued-content-id-provenance", ["scripts/validate-yapk-id-provenance.mjs", "--package", resolvedPackage, "--manifest", idProvenance]));
