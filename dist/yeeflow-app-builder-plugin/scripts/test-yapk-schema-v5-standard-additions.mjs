@@ -105,7 +105,7 @@ function wrapper(decoded) {
     ListID: id(1),
     Title: "Schema V5 Standard Additions",
     Description: "",
-    IconUrl: "",
+    IconUrl: JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" }),
     Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64"),
     Notes: "",
     Author: "regression",

@@ -29,6 +29,26 @@ node scripts/validate-yapk-id-provenance.mjs --package <app.yapk> --manifest <ap
 
 Local `id()` helpers, hardcoded generated IDs, copied sample/export IDs, local counters, random values, timestamps, UUID fallback, and deterministic local-only seeds are generated-final blockers.
 
+Wrapper `TenantID` is tenant metadata, not generated application content. Validate that it is a safe numeric tenant metadata value, but do not require it to appear in content ID allocations and do not count its absence from the ID provenance manifest as a generated-content failure. Continue requiring API-issued provenance for actual generated app resources such as root, list, page, form, report, and navigation IDs.
+
+## Generated-Final Export-Shape Materialization Gate
+
+Generated-final `.yapk` packages must be export-shaped enough for signing, install/materialization, designer opening, navigation, and browser runtime proof. Count-based resources, shell-only dashboards, and structurally approximate placeholders are not acceptable. Run:
+
+```bash
+node scripts/validate-generated-yapk-export-shape.mjs --package <app.yapk>
+```
+
+This gate runs inside `scripts/yapk-first-generation-preflight.mjs` before signing readiness. It validates generated package content only; do not move these requirements into the Functional Specification or Yeeflow App Plan.
+
+Approval form `DefResource` must use the canonical approval package encoding: base64 bytes whose decoded payload begins with `::brotli::`, followed by Brotli-compressed JSON. The decoded definition must preserve export-style process metadata, request/task page registrations, embedded `formdef.children`, unique designer control IDs, workflow graph IDs, incoming/outgoing links, task URL references, graph positions, variables, and form key/defkey consistency. Minimal approval placeholders fail, and a package cannot pass by deleting required approval forms.
+
+`FormNewReports` and `DataReports`, when emitted, must be export-shaped resources with source/report identity and selected fields in settings. Count-only placeholders fail. If a report is intentionally not produced for first install, the App Plan and generation report must explicitly mark it deferred with reason, user impact, fallback, and follow-up proof.
+
+Dashboard pages must materialize visible business sections and controls bound to included package resources. Hidden Summary hosts, navigator labels, wrapper Containers, or synthetic-only controls do not count as visible dashboard proof. Summary/chart controls must fail unless the complete runtime-proven model contract is present. When Summary/chart proof is unavailable, generate visual-safe filters, tables, and Collections instead of risky chart approximations.
+
+Native Title fields must preserve export-aligned metadata including `FieldName: "Title"`, `InternalName: "Title"`, `Status: 0`, `IsSystem: true`, and `IsIndex: true`.
+
 ## Signing Gate
 
 A generated `.yapk` package must not be called upload-ready, install-ready, or handoff-ready while `Sign` is empty, placeholder-like, or an all-zero 32-byte value.
@@ -110,6 +130,8 @@ Before package signing or package automation, check presence without printing va
 Missing OAuth or target workspace selection should block automation before request shaping. `.env.local` may be absent or empty for normal OAuth plus workspace discovery. Never print or commit `.env.local`, token files, cert/key files, tenant URLs, workspace IDs, raw API responses, decoded payloads, or generated runtime packages.
 
 After successful live install/import, final reports must include selected workspace name/category/redacted ID preview, result status, safe `ListSetID` if resolved, and application access link only when the OAuth/session tenant URL and ListSetID are both safe. Use `<tenant-url>/#/list-set/41/<listset-id>`. If the link cannot be safely built, report `Application link: unavailable; ListSetID or tenant URL was not safely resolved.` Signing/signature verification and API install/import acceptance are not browser runtime proof.
+
+Canonical runtime URLs must be derived from decoded package root `$.ListSet.ListID` unless the install API response is proven to return the true app root. If the install API response reports a different ListSetID, report it separately as install operation evidence and treat the mismatch as a runtime-proof blocker. Preserve sanitized install error details for `540017` without raw secrets, tokens, tenant-private payloads, raw `Resource`, or raw `Sign`.
 
 ## Final Runtime Checklist
 

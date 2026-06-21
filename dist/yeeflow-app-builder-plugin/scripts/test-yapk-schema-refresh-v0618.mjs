@@ -33,6 +33,8 @@ assert.deepEqual(canonical.$defs.ListFieldInfo["x-fieldIndexRangeByFieldType"], 
   Decimal: { min: 1, max: 200 },
   Datetime: { min: 1, max: 200 },
 });
+assert.deepEqual(canonical.$defs.AppPackageInfo.properties.PortalInfo.oneOf.map((item) => item.type || item.$ref), ["null", "#/$defs/AnyObject"]);
+assert.equal(canonical.$defs.ListFieldInfo.properties.IsIndex.type, "boolean");
 assert.ok(canonical["x-rules"]?.GlobalPackageIdGeneration, "GlobalPackageIdGeneration rule must exist");
 assert.ok(canonical["x-conditionalConstraints"]?.byAppID, "byAppID conditional constraints must exist");
 assert.equal(Object.prototype.hasOwnProperty.call(canonical, "x-yeeflow-standard-additions"), false);
@@ -49,6 +51,18 @@ try {
   const validDatetime = fullDecoded();
   const validDatetimeFile = writePackage("valid-datetime", validDatetime);
   expectPass("valid Datetime package", validDatetimeFile);
+
+  const portalNull = fullDecoded();
+  portalNull.PortalInfo = null;
+  expectPass("PortalInfo:null package", writePackage("portal-null", portalNull));
+
+  const portalObject = fullDecoded();
+  portalObject.PortalInfo = {};
+  expectFailure("empty PortalInfo object rejected", writePackage("portal-empty-object", portalObject), [], "YAPK_PORTALINFO_EMPTY_OBJECT_INVALID");
+
+  const portalArray = fullDecoded();
+  portalArray.PortalInfo = [];
+  expectFailure("PortalInfo array rejected", writePackage("portal-array", portalArray), [], "YAPK_PORTALINFO_ARRAY_INVALID");
 
   const legacyDateTime = fullDecoded();
   legacyDateTime.Childs[0].Fields[1].FieldName = "DateTime1";
@@ -179,10 +193,11 @@ function field(fieldName, fieldType, index, type, system, listId) {
     Type: type,
     FieldIndex: index,
     IsSystem: system,
+    IsIndex: system,
     IsUnique: false,
     IsSort: false,
     Category: system ? 0 : 1,
-    Status: 1,
+    Status: system ? 0 : 1,
     DefaultValue: "",
     Rules: "{}",
   };

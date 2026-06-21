@@ -76,7 +76,6 @@ function writePackage(dir, name, decoded) {
 
 function manifest(decoded, overrides = {}) {
   const ids = [
-    ["wrapper.TenantID", id(101), "wrapper tenant ID"],
     ["wrapper.ListID", decoded.ListSet.ListID, "root list set ID"],
     ["decoded.Pages[0].LayoutID", decoded.Pages[0].LayoutID, "dashboard layout ID"],
     ["decoded.Childs[0].List.ListID", decoded.Childs[0].List.ListID, "data list ID"],
@@ -157,7 +156,7 @@ try {
   expectCode("hardcoded IDs", run(["scripts/validate-yapk-id-provenance.mjs", "--package", hardcodedPackage, "--manifest", validManifest]), "ID_PROVENANCE_PACKAGE_ID_NOT_IN_MANIFEST");
   cases.push({ case: "hardcoded IDs fail", status: "pass" });
 
-  const duplicateManifest = manifest(validDecoded, { allocations: [...manifest(validDecoded).allocations, { id: id(101), path: "decoded.Somewhere", purpose: "duplicate", source: "api-generated" }] });
+  const duplicateManifest = manifest(validDecoded, { allocations: [...manifest(validDecoded).allocations, { id: validDecoded.Pages[0].LayoutID, path: "decoded.Somewhere", purpose: "duplicate", source: "api-generated" }] });
   const duplicateManifestFile = writeManifest(tempDir, "duplicate", duplicateManifest);
   expectCode("duplicate manifest IDs", run(["scripts/validate-yapk-id-provenance.mjs", "--package", validPackage, "--manifest", duplicateManifestFile]), "ID_PROVENANCE_DUPLICATE_ALLOCATED_ID");
   cases.push({ case: "duplicate manifest IDs fail", status: "pass" });

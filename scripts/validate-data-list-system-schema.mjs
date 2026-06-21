@@ -523,6 +523,12 @@ function validateChild(child, issues, context, args) {
     if (titleField.IsSystem !== true) {
       addIssue(issues, "error", "NATIVE_TITLE_NOT_SYSTEM", child.title, "Native Title field must be marked IsSystem true.");
     }
+    if (Number(titleField.Status) !== 0) {
+      addIssue(issues, "error", "NATIVE_TITLE_STATUS_INVALID", child.title, "Native Title field must preserve export-aligned Status: 0 metadata.");
+    }
+    if (titleField.IsIndex !== true) {
+      addIssue(issues, "error", "NATIVE_TITLE_ISINDEX_MISSING", child.title, "Native Title field must preserve export-aligned IsIndex:true metadata.");
+    }
     if (titleField.Type !== "input" || titleField.FieldType !== "Text") {
       addIssue(issues, "error", "NATIVE_TITLE_TYPE_INVALID", child.title, "Native Title field must use Type input and FieldType Text.");
     }

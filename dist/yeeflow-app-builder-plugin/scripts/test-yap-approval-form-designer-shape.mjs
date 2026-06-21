@@ -323,7 +323,7 @@ function makeFixture() {
   return {
     Title: "Export Shaped Fixture",
     Description: "Sanitized export-shaped generated-final YAP fixture.",
-    IconUrl: "service-desk",
+    IconUrl: JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" }),
     IsListSet: true,
     Resource: `${GZIP_PREFIX}${zlib.gzipSync(Buffer.from(json(resource), "utf8")).toString("base64")}`,
   };

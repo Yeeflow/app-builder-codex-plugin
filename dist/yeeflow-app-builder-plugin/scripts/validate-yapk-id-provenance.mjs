@@ -8,6 +8,7 @@ import { isObject, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
 const NUMERIC_RE = /^\d+$/;
 const ID_KEY_RE = /(^|\.)(ID|Id|Key|PackageId|TenantID|ListID|LayoutID|FieldID|RefId|DefResourceID|DeployedDefID|FormKey|FlowKey)$/;
 const ENUM_KEYS = new Set(["AppID", "Type", "Status", "Flags", "FieldIndex", "Category", "Order", "Mobile", "ListType"]);
+const TENANT_METADATA_PATHS = new Set(["wrapper.TenantID"]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -76,6 +77,12 @@ export function validateYapkIdProvenance({ package: packagePath, manifest: manif
   }
 
   const packageIds = collectNumericContentIds({ wrapper, decoded });
+  const tenantMetadata = collectTenantMetadataIds({ wrapper, decoded });
+  for (const item of tenantMetadata) {
+    if (!NUMERIC_RE.test(item.id)) {
+      findings.push(error("ID_PROVENANCE_TENANT_ID_INVALID", "Wrapper TenantID is tenant metadata and must be a numeric metadata value.", item));
+    }
+  }
   const pathResolvedIds = new Set();
   for (const item of packageIds) {
     if (!idsToAllocations.has(item.id)) {
@@ -124,6 +131,7 @@ export function validateYapkIdProvenance({ package: packagePath, manifest: manif
     sourceMarker: source || null,
     packageNumericContentIdCount: packageIds.length,
     allocationCount: allocations.length,
+    tenantMetadataIds: tenantMetadata,
     duplicateCount: duplicateIds.size,
     findings,
   };
@@ -135,6 +143,7 @@ export function collectNumericContentIds({ wrapper, decoded }) {
     walk(root, (value, pointer) => {
       const key = pointer.split(".").pop()?.replace(/\[\d+\]$/, "") || "";
       if (ENUM_KEYS.has(key)) return;
+      if (rootName === "wrapper" && TENANT_METADATA_PATHS.has(`${rootName}${pointer.slice(1)}`)) return;
       if (!isIdentifierPath(pointer)) return;
       if (typeof value === "number" && Number.isInteger(value) && value > 999999) ids.push({ id: String(value), path: `${rootName}${pointer.slice(1)}` });
       else if (typeof value === "string" && NUMERIC_RE.test(value) && value.length >= 7) ids.push({ id: value, path: `${rootName}${pointer.slice(1)}` });
@@ -143,6 +152,11 @@ export function collectNumericContentIds({ wrapper, decoded }) {
   visit("wrapper", wrapper);
   visit("decoded", decoded);
   return dedupeByPathAndId(ids);
+}
+
+function collectTenantMetadataIds({ wrapper }) {
+  const id = wrapper?.TenantID === undefined || wrapper?.TenantID === null ? "" : String(wrapper.TenantID);
+  return id ? [{ id, path: "wrapper.TenantID", role: "tenant-metadata" }] : [];
 }
 
 function isIdentifierPath(pointer) {
@@ -182,6 +196,7 @@ function normalizeAllocations(manifest) {
 }
 
 function valueAtPathMatches(roots, declaredPath, expected) {
+  if (TENANT_METADATA_PATHS.has(declaredPath)) return true;
   const normalized = declaredPath.replace(/^\$/, "decoded");
   const rootName = normalized.startsWith("wrapper") ? "wrapper" : normalized.startsWith("decoded") ? "decoded" : null;
   if (!rootName) return true;
