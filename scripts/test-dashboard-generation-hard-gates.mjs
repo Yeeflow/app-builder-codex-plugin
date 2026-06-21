@@ -105,12 +105,20 @@ function pageResource(flags = {}) {
     exts: flags.exts === undefined ? [{ i: SUMMARY_ID, category: "___Pivot___", key: "summary", attr: { ListID: LIST_ID, settings: { values: extValues } } }] : flags.exts,
     filterVars: [],
     actions: [],
+    derivedFromGoldenReference: "event_portfolio_dashboard_golden_reference",
+    plannedRegions: { filters: true, kpis: true, gridTable: true },
     children: [
       { type: "container", name: "Main", attrs: { style: flags.mainStyle || style([null, "2"]) }, children: [
-        filterControl(flags.filterPatch || {}),
-        kpiCard(flags.kpiMode || "valid", flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR),
-        summary,
-        flags.visibleVariable === false ? visibleKpiText({ id: "otherVar", name: "otherVar" }) : visibleKpiText(),
+        { type: "container", name: "Content", attrs: { style: style([null, "2"]) }, children: [
+          { type: "container", name: "Header Band", attrs: { derivedFromGoldenReference: "event_portfolio_header_band", style: style([null, "2"]) }, children: [{ type: "heading", name: "Dashboard Title", attrs: { headc: { title: { value: "Facility Operations Dashboard" } } } }] },
+          { type: "container", name: "Filter Group", attrs: { derivedFromGoldenReference: "event_portfolio_filter_group", style: style([null, "2"]) }, children: [filterControl(flags.filterPatch || {})] },
+          { type: "container", name: "Cards Wrapper", attrs: { derivedFromGoldenReference: "kpi_cards_wrapper", style: style([null, "2"]) }, children: [kpiCard(flags.kpiMode || "valid", flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR)] },
+          summary,
+          flags.visibleVariable === false ? visibleKpiText({ id: "otherVar", name: "otherVar" }) : visibleKpiText(),
+          { type: "container", name: "Pipeline Section", attrs: { derivedFromGoldenReference: "event_portfolio_pipeline_section", style: style([null, "2"]) }, children: [
+            { type: "collection", name: "Facility Work Queue Grid", attrs: { derivedFromGoldenReference: "Event Pipeline Grid-Table", data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } } }, children: [{ type: "heading", name: "Request Title", attrs: { headc: { title: { value: "Request" } } } }] },
+          ] },
+        ] },
       ] },
     ],
   };
