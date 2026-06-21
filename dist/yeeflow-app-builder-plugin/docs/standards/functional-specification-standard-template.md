@@ -8,6 +8,8 @@ Do not include low-level Yeeflow implementation details in the Functional Specif
 
 Primary artifact rule: generate this document as the primary human-readable Markdown file named `functional-specification.md`. Machine-readable JSON may exist only as a companion/projection artifact for validation, traceability, or tests, such as `functional-specification.trace.json`; JSON must not replace this Markdown document. The Markdown file must contain the full rich business logic and dashboard business requirements, not just a link to JSON.
 
+Canonical section rule: emit every numbered section in this template, in this exact order and with these section names. Do not merge, rename, skip, or compress later sections even when a requirement is not applicable; write a concrete not-applicable rationale, assumption, or deferred decision in the required section instead.
+
 ## 1. Specification Status
 
 Document metadata:

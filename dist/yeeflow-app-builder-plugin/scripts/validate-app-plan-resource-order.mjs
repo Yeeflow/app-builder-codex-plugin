@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const REQUIRED_HEADINGS = [
   "## 1. Plan Status",
@@ -281,6 +282,10 @@ function policyDashboardText(text) {
     .replace(/```[\s\S]*?```/g, "");
 }
 
+function isNegativeGuardrailLine(line) {
+  return /\b(do not|don't|must not|never|forbid|forbidden|reject|rejected|fail|fails|block|blocks|blocked|blocking|blocker|blockers|not generation-ready|must be marked|marked as|unless marked|without runtime proof|proof-required|deferred)\b/i.test(line);
+}
+
 function validateResourceOrder(text, findings) {
   const orderSection = text.split(REQUIRED_HEADINGS[3])[0].split(REQUIRED_HEADINGS[2])[1] || "";
   let previous = -1;
@@ -398,6 +403,7 @@ function validateDashboardPagesPlan(text, findings) {
     const trimmed = line.trim();
     if (!trimmed || /^\|?\s*:?-{3,}:?\s*\|?/.test(trimmed)) continue;
     if (/No custom (actions|Sub List actions|required)|No Collection\/Kanban item actions required/i.test(trimmed)) continue;
+    if (isNegativeGuardrailLine(trimmed)) continue;
     const unsupported = DASHBOARD_UNSUPPORTED_CONTROL_HINTS.find((pattern) => pattern.test(trimmed));
     if (unsupported && !DASHBOARD_PROOF_LABEL.test(trimmed)) {
       findings.push({
@@ -430,7 +436,7 @@ function validateDashboardPagesPlan(text, findings) {
   }
 }
 
-function validate(file) {
+export function validate(file) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const headings = headingLineIndexes(text);
   const findings = [];
@@ -521,4 +527,5 @@ function main() {
   if (report.errors) process.exitCode = 1;
 }
 
-main();
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isDirectRun) main();
