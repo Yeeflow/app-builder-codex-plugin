@@ -14,8 +14,6 @@ Generation, signing, install, upgrade-check, and handoff must stop if ID provena
 
 For upgrade/new-version output, generation, signing, install-like writes, upgrade-check, upgrade apply, and handoff must also stop if upgrade ID stability validation fails.
 
-Wrapper tenant/user metadata is not generated application content. `wrapper.TenantID`, `wrapper.CreatedBy`, and `wrapper.ModifiedBy` must not be treated as API-issued app content IDs and must not be required in the generated content ID manifest. `TenantID` has its own signing-readiness validation against OAuth/tenant context.
-
 ## Forbidden Sources
 
 Generated-final `.yapk` content IDs must not come from:
@@ -38,8 +36,6 @@ dist/<app-name>-id-provenance-report.json
 ```
 
 The report must include total requested IDs, total received IDs, allocation count, unused count, duplicate check, path-to-purpose mapping, `sourceMarker: "api-generated"`, generator provenance metadata, and an empty non-API ID list.
-
-Do not include wrapper tenant/user metadata paths such as `wrapper.TenantID`, `wrapper.CreatedBy`, or `wrapper.ModifiedBy` as generated content allocations.
 
 ## Validator
 

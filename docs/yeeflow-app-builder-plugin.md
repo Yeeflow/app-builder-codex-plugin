@@ -8,20 +8,14 @@ Yeeflow App Builder is a skills-only Codex plugin for planning, generating, vali
 - Marketplace ID: yeeflow
 - Plugin ID: yeeflow-app-builder
 - Display name: Yeeflow App Builder
-- Version: 0.7.4
+- Version: 0.6.64
 - Dist root: dist/yeeflow-app-builder-plugin
 
 ## Capabilities
 
 The plugin includes Yeeflow package validators, canonical schema references at `schemas/yapk-schema.json` and `schemas/yap-schema.json`, application/form/list/dashboard generation guidance, Browser OAuth helper scripts, safe Yeeflow REST API capability-map tooling, package automation dry-run helpers, runtime-proof boundary guidance, and release hygiene documentation.
 
-Version `0.7.4` releases signing-readiness TenantID and setsign contract gates from PR #134. Generated-final YAPK signing readiness now requires wrapper TenantID to be real OAuth tenant metadata, blocks missing, empty, placeholder, local-draft, and `0` TenantID values before `setsign`, keeps wrapper TenantID out of generated app content ID provenance, parses both top-level JSON string and supported object-field `setsign` signatures, redacts saved signing request/response evidence, and adds focused TenantID/signature parser regression coverage plus first-generation preflight and YAPK cache hard-gate registration.
-
-Version `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, published section reference IDs, Blueprint/resource conformance and provenance checks, Facility Maintenance mapping regression coverage, safeguards against copying Event fields into unrelated apps, and package-readiness gates for dashboard golden-reference conformance.
-
-Version `0.7.2` releases the Page Function Plan business/page-function contract refinement from PR #130. Page Function Plans now require page purpose, primary users, business questions, data source and field usage, filter source-list/field mapping, summary metric source/calculation requirements, main and secondary data region requirements, action intent, and mobile behavior. The validator rejects vague dashboard entries and low-level implementation/property instructions while preserving downstream Dashboard Pattern Library / Golden Reference, Application Design System, action, Text/control, UI, and YAPK hard gates.
-
-Version `0.7.1` releases the generated-final local-draft placeholder hard gate. Generated-final package generation is now ID-first: local-preview/local-draft packages remain local-only, generated-final artifacts are built fresh from approved logical refs plus a complete API-issued ID map, and recursive validation blocks unresolved draft markers, unmapped logical references, nested runtime-bearing placeholder fields, and signing readiness when final artifacts are not fully resolved.
+Version `0.6.64` releases Business Clarification unique unresolved gate summary reporting. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show duplicated Functional Specification/App Plan gate findings separately from the unique unresolved business decisions that the user must answer or explicitly approve for generation.
 
 Version `0.6.59` releases the Stage 1 Functional Specification and Stage 2 Yeeflow App Plan flow gates. New application generation must first produce and review the standardized Functional Specification at `docs/standards/functional-specification-standard-template.md`, then produce and review the Yeeflow resource-order App Plan at `docs/standards/app-plan-standard-template.md`; `docs/app-plan-standard-template.md` remains a compatibility entrypoint. The release adds `scripts/validate-functional-specification.mjs`, `scripts/validate-app-plan-resource-order.mjs`, and regression coverage in `scripts/test-functional-specification-and-app-plan-gates.mjs`. Form Report is explicitly planned as a standalone Yeeflow resource based on Approval Form, not Dashboard or Data List view planning. Placeholder planning is required for Data List fields, Approval Form Submission fields, Task Form fields, and Custom Data List Form fields. The Functional Specification and App Plan gates must pass before full-page canonical design images, page implementation blueprints, resource generation, decoded resource-vs-blueprint parity, package/sign/upgrade, or runtime proof.
 

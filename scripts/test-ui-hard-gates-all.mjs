@@ -11,39 +11,6 @@ const templatePath = path.join(ROOT, "docs", "examples", "runtime-evidence.redac
 
 const childTests = [
   {
-    name: "Generated-final draft placeholder hard-gate regression suite",
-    command: ["scripts/test-generated-final-draft-placeholder-gates.mjs"],
-    validators: [
-      "validate-generated-final-draft-placeholders",
-      "validate-yapk-package generated-final placeholder scan",
-      "yapk-first-generation-preflight placeholder gate",
-    ],
-  },
-  {
-    name: "Application Design System layout contract regression suite",
-    command: ["scripts/test-application-design-system-gates.mjs"],
-    validators: [
-      "validate-application-design-system",
-      "validate-page-function-plan application layout inheritance",
-    ],
-  },
-  {
-    name: "Page Function Plan regression suite",
-    command: ["scripts/test-page-function-plan-gates.mjs"],
-    validators: [
-      "validate-page-function-plan",
-      "validate-app-plan-page-function-traceability",
-    ],
-  },
-  {
-    name: "Dashboard default Event Portfolio golden reference regression suite",
-    command: ["scripts/test-dashboard-default-golden-reference-gates.mjs"],
-    validators: [
-      "validate-dashboard-golden-reference-registry",
-      "Event Portfolio default Dashboard golden reference trace",
-    ],
-  },
-  {
     name: "UI/Summary/KPI runtime hard-gate regression suite",
     command: ["scripts/test-ui-summary-kpi-runtime-hard-gates.mjs"],
     validators: [

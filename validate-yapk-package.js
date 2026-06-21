@@ -64,10 +64,6 @@ const FIELD_NAME_SUFFIX_RE = /(\d+)$/;
 const UTC_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 const NUMERIC_STRING_RE = /^\d+$/;
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
-const DRAFT_PLACEHOLDER_RE = /(?:^|[^A-Za-z0-9])local-draft(?:-[A-Za-z0-9_.:-]+)?(?:$|[^A-Za-z0-9])|localDraft|sourceMarker:\s*local-draft-no-api/i;
-const DRAFT_PLACEHOLDER_KEY_RE = /^(?:localDraft|local_draft|local-draft|sourceMarker)$/i;
-const UNRESOLVED_LOGICAL_REF_RE = /(?:^|[^A-Za-z0-9])(?:logical-ref|logicalRef|unresolved-logical-ref|appPlanRef|pageFunctionPlanRef|blueprintRef):[A-Za-z0-9_.:/-]+/i;
-const UNRESOLVED_LOGICAL_REF_KEY_RE = /^(?:logicalRef|logical_ref|logical-ref|unresolvedLogicalRef|appPlanRef|pageFunctionPlanRef|blueprintRef)$/i;
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
 const API_ISSUED_INTEGER_RE = /^\d{16,}$/;
 const LOCAL_FALLBACK_ID_RE = /^(local|temp|tmp|mock|placeholder|fallback|generated|test|demo)[-_]/i;
@@ -610,9 +606,6 @@ function validateAppPackage(decoded, errors, warnings, appId) {
   if (decoded.PortalInfo !== undefined && decoded.PortalInfo !== null && !Array.isArray(decoded.PortalInfo) && !isObject(decoded.PortalInfo)) {
     add(errors, "YAPK_PORTALINFO_INVALID", "PortalInfo must be null for no portal or a portal object when a portal is included.", { path: "PortalInfo", actualType: typeof decoded.PortalInfo });
   }
-  if (!Object.prototype.hasOwnProperty.call(decoded, "PortalInfo")) {
-    add(warnings, "YAPK_PORTALINFO_NULL_RECOMMENDED", "No-portal generated YAPK packages should emit PortalInfo: null. Omission is currently warning-level until more import evidence makes it a hard generated-final blocker.", { path: "PortalInfo" });
-  }
   if (isObject(decoded.ListSet) && Number(decoded.ListSet.Flags) !== 1) {
     add(errors, "YAPK_LISTMODEL_FLAGS_MISSING_OR_INVALID", "Generated AppPackageInfo root app/list-set resource requires ListSet.Flags = 1 before signing.", { path: "ListSet.Flags", value: decoded.ListSet.Flags });
   }
@@ -644,7 +637,6 @@ function validateAppPackage(decoded, errors, warnings, appId) {
   validateDashboardDataTables(decoded, errors);
   validateNativeTextControls(decoded, errors);
   validateUnsupportedSummarySurfaces(decoded, errors);
-  validateGeneratedFinalDraftPlaceholders(decoded, errors);
   const placeholders = [];
   walk(decoded, (value, pointer) => {
     if (typeof value === "string" && PLACEHOLDER_RE.test(value)) placeholders.push({ path: pointer, placeholder: value });
@@ -659,93 +651,6 @@ function validateAppPackage(decoded, errors, warnings, appId) {
     add(errors, "YAPK_CONTENT_VALIDATION_FAILED_BEFORE_SIGNING", "Do not run setsign for generated YAPK content until decoded AppPackageInfo/package validation, graph validation, workflow publish-readiness checks, and placeholder scans pass.");
   }
   return { decodedKeys: Object.keys(decoded), counts };
-}
-
-function validateGeneratedFinalDraftPlaceholders(decoded, errors) {
-  const matches = [];
-  const logicalRefs = [];
-  scanGeneratedFinalSentinels(decoded, "decoded", matches, new Set(), { keyRe: DRAFT_PLACEHOLDER_KEY_RE, valueRe: DRAFT_PLACEHOLDER_RE, kindPrefix: "draft" });
-  scanGeneratedFinalSentinels(decoded, "decoded", logicalRefs, new Set(), { keyRe: UNRESOLVED_LOGICAL_REF_KEY_RE, valueRe: UNRESOLVED_LOGICAL_REF_RE, kindPrefix: "logical-ref" });
-  for (const match of matches.slice(0, 100)) {
-    add(errors, "GENERATED_FINAL_DRAFT_PLACEHOLDER", "Generated-final packages must not contain unresolved local draft placeholders after API ID allocation.", match);
-  }
-  for (const match of logicalRefs.slice(0, 100)) {
-    add(errors, "GENERATED_FINAL_UNRESOLVED_LOGICAL_REF", "Generated-final packages must be built ID-first from a complete logicalRef-to-apiIssuedId map and must not contain unresolved logical references.", match);
-  }
-  if (matches.length > 100) {
-    add(errors, "GENERATED_FINAL_DRAFT_PLACEHOLDER_TRUNCATED", "Additional unresolved local draft placeholders remain after the first 100 findings.", { additionalCount: matches.length - 100 });
-  }
-  if (logicalRefs.length > 100) {
-    add(errors, "GENERATED_FINAL_UNRESOLVED_LOGICAL_REF_TRUNCATED", "Additional unresolved logical references remain after the first 100 findings.", { additionalCount: logicalRefs.length - 100 });
-  }
-}
-
-function scanGeneratedFinalSentinels(value, pointer, matches, seenParsed, options) {
-  if (Array.isArray(value)) {
-    value.forEach((item, index) => scanGeneratedFinalSentinels(item, `${pointer}[${index}]`, matches, seenParsed, options));
-    return;
-  }
-  if (isObject(value)) {
-    for (const [key, child] of Object.entries(value)) {
-      const childPath = `${pointer}.${key}`;
-      if (options.keyRe.test(key) && child !== undefined && child !== null && child !== "" && (child === true || child === "true" || options.valueRe.test(String(child ?? "")) || options.kindPrefix === "logical-ref")) {
-        matches.push({ path: childPath, kind: `${options.kindPrefix}-key`, key, value: redactDraftValue(child) });
-      }
-      scanGeneratedFinalSentinels(child, childPath, matches, seenParsed, options);
-    }
-    return;
-  }
-  if (typeof value !== "string") return;
-  if (options.valueRe.test(value)) {
-    matches.push({ path: pointer, kind: `${options.kindPrefix}-string`, value: redactDraftValue(value) });
-  }
-  for (const parsed of parseRuntimeBearingString(value, pointer)) {
-    const dedupeKey = `${parsed.path}:${parsed.kind}:${safeJsonPreview(parsed.value)}`;
-    if (seenParsed.has(dedupeKey)) continue;
-    seenParsed.add(dedupeKey);
-    scanGeneratedFinalSentinels(parsed.value, parsed.path, matches, seenParsed, options);
-  }
-}
-
-function parseRuntimeBearingString(value, pointer) {
-  const out = [];
-  const trimmed = value.trim();
-  if (/^[\[{]/.test(trimmed)) {
-    try {
-      out.push({ kind: "json-string", path: `${pointer}<json>`, value: JSON.parse(trimmed) });
-    } catch {
-      // Runtime-bearing strings are often JSON, but not all strings are parseable.
-    }
-  }
-  const approvalDef = decodeApprovalDefResourceForDraftScan(value);
-  if (approvalDef) out.push({ kind: "approval-defresource", path: `${pointer}<defresource-json>`, value: approvalDef });
-  return out;
-}
-
-function decodeApprovalDefResourceForDraftScan(value) {
-  if (typeof value !== "string" || !/^Ojpicm90bGk6O[A-Za-z0-9+/]*={0,2}$/.test(value)) return null;
-  try {
-    const bytes = Buffer.from(value, "base64");
-    const prefix = Buffer.from("::brotli::", "utf8");
-    if (bytes.length <= prefix.length || !bytes.subarray(0, prefix.length).equals(prefix)) return null;
-    return JSON.parse(zlib.brotliDecompressSync(bytes.subarray(prefix.length)).toString("utf8"));
-  } catch {
-    return null;
-  }
-}
-
-function redactDraftValue(value) {
-  if (typeof value === "boolean" || typeof value === "number" || value === null) return value;
-  const text = String(value);
-  return text.length > 160 ? `${text.slice(0, 157)}...` : text;
-}
-
-function safeJsonPreview(value) {
-  try {
-    return JSON.stringify(value).slice(0, 240);
-  } catch {
-    return String(value).slice(0, 240);
-  }
 }
 
 function validateRootLayoutView(listSet, errors) {
