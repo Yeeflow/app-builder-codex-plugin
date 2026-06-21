@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.3`
+- Version: `0.8.4`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.3` adds generated-final YAPK export-shape and runtime materialization gates from PR #143. Approval `DefResource` metadata must be export-shaped with canonical Brotli encoding and workflow/page registrations; FormNewReports/DataReports count-only placeholders are rejected; dashboard pages must prove visible runtime-safe business sections bound to included resources; `PortalInfo: null` is accepted for no-portal packages; native Title metadata, TenantID provenance boundaries, and runtime URL mismatch reporting are enforced.
+Current release `0.8.4` adds existing-app YAPK upgrade scope, lineage, and Version Management gates from PR #145. Upgrade packages must declare scope, block unrelated-resource mutations, preserve existing IDs and layout semantic-key disambiguation, keep default view layout/query fields consistent, enforce report scope and duplicate-report checks, treat API status `0` as submitted rather than final success, require Version Management `Succeed` proof with error-log capture, keep runtime change proof separate, and validate approval `DefResource` upgrade-scope/export-shape readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.3
+Version: 0.8.4
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.3
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.4
 ```
 
 ## What Is Included
