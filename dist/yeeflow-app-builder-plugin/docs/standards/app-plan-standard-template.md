@@ -1,6 +1,6 @@
 # <Application Name> - Yeeflow App Plan
 
-Use this template as Stage 2 / Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct generation order.
+Use this template as Stage 2 / Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification, which is the business source of truth for process, rules, data, roles, dashboard content, reporting, and audit needs. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct generation order.
 
 This document is the implementation contract for package generation after user approval. It must use only Yeeflow resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes supported by the active `@yeeflow-app-builder` plugin knowledge base, skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references.
 
@@ -35,6 +35,7 @@ Map each major requirement from the Functional Specification to Yeeflow resource
 Rules:
 
 - Every core business requirement must map to a Yeeflow resource, a supported configuration, or an explicitly deferred item.
+- App Plan dashboard planning must trace back to the Functional Specification's business-level dashboard questions, source business objects/data lists, summary metrics, source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts.
 - Functional Specification to App Plan traceability is executable with `scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>`.
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
 - Do not include resources only to make the plan look complete. Every generated resource must serve a runtime purpose.
@@ -351,6 +352,7 @@ Repeat for each Dashboard page.
 - Temp variables required:
 - Page/form actions required:
 - Runtime proof required:
+- Functional Specification dashboard source: business questions, source business objects/data lists, summary metrics, metric source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts from Stage 1.
 
 #### Sections and Controls
 
@@ -360,6 +362,7 @@ Repeat for each Dashboard page.
 
 Rules:
 
+- Each dashboard section must trace to a business-level Dashboard Page Requirement from the Functional Specification. Do not invent dashboard metrics, filters, regions, or actions that are not in the Functional Specification unless they are explicitly added as an App Plan assumption or clarification gate.
 - Controls must come from active plugin control knowledge, template library, or export-proven references.
 - Summary/KPI cards must be data-bound using plugin-supported controls and bindings. Static text may be used only when explicitly marked fallback, `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof/generation impact.
 - Collection, Kanban, Timeline, Data Filter, Data table, Summary, chart, action button, and dynamic controls must include source, field, and action bindings.

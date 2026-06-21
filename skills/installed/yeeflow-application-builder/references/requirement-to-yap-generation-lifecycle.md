@@ -35,16 +35,22 @@ Read all uploaded requirement files, screenshots, sample forms, sample exports, 
 Extract:
 
 - business purpose
+- business problem, target users, operational scope, and expected outcome
 - source materials
 - user roles
+- role responsibilities, record visibility, actions, owned decisions, and dashboard/page needs
 - app modules
 - business objects
 - data concepts
+- business object field meanings, business-level field type expectations, lifecycle/status fields, audit fields, reporting/dashboard fields, and lookup/reference relationships
 - data lists and document libraries
 - approval/review needs
+- business process start triggers, intake, review/approval, assignment/fulfillment, status tracking, completion/closure, exceptions, and audit/history needs
+- business rules for status lifecycle, approvals, assignments, SLA/overdue behavior, validation, documents, notifications, escalations, completion, cancellation/rejection/rework, and permissions
 - form report needs
 - data list custom forms
 - dashboards/pages
+- dashboard business questions, metrics, source fields, calculation logic, filters, data regions, display fields, sorting/grouping, user actions, mobile support, and alerts
 - data list views
 - workflows and automations
 - notifications
@@ -66,7 +72,9 @@ Create a Functional Specification using:
 
 `docs/standards/functional-specification-standard-template.md`
 
-The Functional Specification is the business requirement document. It must describe what the business needs before selecting exact Yeeflow resources or package shapes.
+The Functional Specification is the business requirement document. It must describe what the business needs before selecting exact Yeeflow resources or package shapes. It must be rich enough for reliable App Plan and Page Function Plan generation: business context, user roles, process steps, decision points, exception cases, status lifecycle, explicit business rules, data lifecycle, approval/form needs, workflows, notifications, dashboard content requirements, operational reporting, audit evidence, assumptions, and business clarification gates.
+
+Keep low-level Yeeflow implementation details out of the Functional Specification. Do not include Yeeflow control types, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, exact generated IDs, package JSON, or resource implementation shapes. Those belong in the App Plan, Page Function Plan, Blueprint, resource generation, and validation stages.
 
 For brief requirements:
 
@@ -91,15 +99,20 @@ Business-critical uncertainty must be recorded in Business Decision Gates and Ri
 
 Review the Functional Specification before creating the App Plan. The review must confirm:
 
-- required 23 sections are present
+- required 24 sections are present
 - requirement interpretation method is explicit
-- business purpose is clear
-- target roles are identified
-- business objects and data concepts are present or explicitly not applicable
+- business context covers the business problem, target users, operational scope, and expected outcome
+- user roles identify responsibilities, record visibility, actions, owned decisions, and dashboards/pages needed
+- business objects and data requirements are present or explicitly not applicable, including required fields, field meanings, business-level field type expectations, relationships, lifecycle/status fields, audit fields, and reporting/dashboard fields
 - relationships and dependency rules are present or explicitly not applicable
-- process, status lifecycle, approval/review, forms, workflow/action, reporting/dashboard, document/attachment, AI, integration, permissions, UI, assumptions, and risks are covered
-- business decision gates are answered, `user-default-approved-for-generation`, not applicable, deferred with reason/fallback/proof impact, or listed as blockers
+- core process steps cover start trigger, submission/intake, review/approval, assignment/fulfillment, status tracking, completion/closure, exception handling, and audit/history needs
+- business rules cover status lifecycle, approvals, assignments, SLA/overdue behavior, validation, required documents/rich data, notifications, escalations, completion, cancellation/rejection/rework, and permissions when applicable
+- approval/review, forms, workflow/notification, dashboard, reporting/audit, document/attachment, AI, integration, permissions, UI, assumptions, and risks are covered
+- dashboard page requirements include business questions, source business objects/data lists, summary metrics, metric source fields and calculation logic, data regions, display fields, filters with source fields/default scope/applies-to regions, sorting/grouping, user actions, mobile support, and alerts
+- business clarification gates are answered, `user-default-approved-for-generation`, not applicable, deferred with reason/fallback/proof impact, or listed as blockers
 - Readiness for App Plan is marked Yes only when the specification is consistent and complete enough
+- no vague standalone language such as "show dashboard", "track status", "manage requests", or "send notifications" appears without business rules, fields, roles, or conditions
+- no low-level Yeeflow IDs, control types, actionTypeCode values, JSON property paths, or generated resource IDs leak into the Functional Specification
 
 If inconsistent, incomplete, or incorrect content is found, revise and validate again. A failed Functional Specification review gate blocks the Yeeflow App Plan stage.
 
@@ -109,7 +122,7 @@ Create the Yeeflow App Plan only from the reviewed Functional Specification, usi
 
 `docs/standards/app-plan-standard-template.md`
 
-The App Plan is not a free-form plan, generic project plan, or ad hoc script plan. It is the Yeeflow resource generation contract and must convert business requirements into Yeeflow-supported resources in this standard order:
+The reviewed Functional Specification is the business source of truth for the App Plan. The App Plan is not a free-form plan, generic project plan, or ad hoc script plan. It is the Yeeflow resource generation contract and must convert business requirements into Yeeflow-supported resources in this standard order:
 
 1. Data lists and Document libraries
 2. Approval forms
@@ -142,6 +155,7 @@ The review must confirm:
 - Form Reports are standalone and based on Approval Forms
 - Schedule workflows, AI Agents, Copilots, Custom Data List forms, Data List workflows, Notifications, Views, Dashboards, Navigation, and Permissions are planned or explicitly not applicable
 - Dashboard planning is separate from Form Report planning
+- Dashboard planning must trace to the Functional Specification's dashboard business questions, metric source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts
 - Dashboard controls come from plugin-known controls, template library, validators, or export-proven references
 - Dashboard/Page sections that display Data List records state selected display control and reason: Data table, Collection, Kanban, Vertical Timeline, or Horizontal Timeline
 - Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls include item-template Dynamic control planning with bound fields
