@@ -87,40 +87,23 @@ For existing-app upgrade packages:
 
 ## Generated-Final `.yapk` Hard Gates
 
-Planning and Blueprint stages may use stable logical references, and an optional local preview/local-draft package may be generated for local-only structural validation. That local draft package must never be promoted into generated-final by patching or replacing IDs.
-
-Generated-final `.yapk` generation is ID-first:
-
-1. Resolve all logical resource references from the approved App Plan, Page Function Plan, and Blueprints.
-2. Allocate every required Yeeflow API-issued ID before generated-final resource creation.
-3. Build a complete `logicalRef -> apiIssuedId` map.
-4. Generate the generated-final package directly from that ID map.
-
-All runtime-bearing references must be written with final API-issued IDs at generation time, including resource IDs, Data list IDs, Approval form IDs / ProcKeys, Dashboard page IDs, Layout IDs, Form IDs, FormAction IDs, `ListID`, `PageID`, `ProcKey`, `LayoutID`, table links, Collection/Kanban/Timeline bindings, Data Filter bindings, Button/Container action targets, Sub list bindings, workflow/notification/navigation targets, and page resource version fields where required.
-
-For generated-final `.yapk` application output, generation must stop before signing, install, upgrade-check, or handoff unless all generated-final hard gates pass:
+For generated-final `.yapk` application output, generation must stop before signing, install, upgrade-check, or handoff unless both hard gates pass:
 
 - API-Issued Content ID Provenance Gate: every numeric generated application content ID is allocated through `GET /utils/generate/ids?count=<n>` and recorded in `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`.
 - Navigation Runtime Metadata Gate: every runtime navigation group includes API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; every child includes `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`; targets resolve to `Pages[].LayoutID`, `Forms[].Key`, or `Childs[].List.ListID`.
-- Recursive Generated-Final Draft Placeholder and Logical Ref Gate: no `local-draft`, `localDraft`, `local-draft-*`, `sourceMarker: local-draft-no-api`, equivalent draft sentinel, or unresolved logical reference may remain anywhere in wrapper metadata, decoded `AppPackageInfo`, parsed page resources, form `Ext`/`DefResource`, control bindings, links, action targets, workflow/navigation metadata, theme payloads, arrays, or version fields.
-- Signing-Readiness TenantID Gate: wrapper `TenantID` is tenant metadata, not generated app content ID. It must be present, non-empty, not `"0"`, not local/draft/placeholder-like, and must match the resolved OAuth tenant context when available before `setsign`.
 
 Local ID fallback is forbidden for generated-final output, including local sequential counters, local `id()` helpers, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds.
-
-API-issued ID provenance is not enough by itself. Finalization must replace nested runtime-bearing references such as `exts.ListID`, filter/control `binding`, `attrs.table.link`, `attrs.data.page.PageID`, `attrs.control_action`, page resource `ver`, Collection/Kanban/Timeline `children`, theme `Ext`, and encoded approval/workflow payloads before any signing or install/import readiness claim.
 
 Required validators:
 
 ```bash
 node scripts/validate-yapk-id-provenance.mjs --package dist/<app>.yapk --manifest dist/<app>-id-provenance-report.json
-node scripts/validate-generated-final-draft-placeholders.mjs --package dist/<app>.yapk --mode generated-final
 node scripts/validate-yapk-navigation-runtime-metadata.mjs --package dist/<app>.yapk --id-provenance dist/<app>-id-provenance-report.json
-node scripts/validate-yapk-signing-readiness.mjs --package dist/<app>.yapk --expected-tenant-id <oauth-tenant-id>
 node scripts/validate-yapk-upgrade-id-stability.mjs --previous-package dist/<app>-previous.yapk --previous-manifest dist/<app>-previous-id-lineage.json --new-package dist/<app>.yapk --new-manifest dist/<app>-id-lineage.json
 node scripts/inspect-yapk-upgrade-app-identity.mjs --package dist/<app>.yapk --lineage dist/<app>-lineage.json
 ```
 
-`validate-yapk-upgrade-id-stability.mjs` and `inspect-yapk-upgrade-app-identity.mjs` are required for upgrade/new-version output, not first-generation output. `setsign` / `verifysign` prove wrapper/resource signature only. Package API install/upgrade acceptance proves action acceptance only. Neither proves ID provenance, TenantID correctness before signing, upgrade ID continuity, ListSetID/app identity stability, navigation runtime metadata completeness, or runtime UI materialization.
+`validate-yapk-upgrade-id-stability.mjs` and `inspect-yapk-upgrade-app-identity.mjs` are required for upgrade/new-version output, not first-generation output. `setsign` / `verifysign` prove wrapper/resource signature only. Package API install/upgrade acceptance proves action acceptance only. Neither proves ID provenance, upgrade ID continuity, ListSetID/app identity stability, navigation runtime metadata completeness, or runtime UI materialization.
 
 For UI-heavy packages, also apply `docs/standards/ui-summary-kpi-runtime-hard-gates.md`. High-quality UI requires a page-by-page implementation contract, export-proven control/style shapes, and runtime screenshot evidence. Summary/KPI controls require designer-shaped metadata and runtime evidence. Dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape with UUID Summary IDs, matching `Resource.ReportIds[]`, matching `Resource.exts[]`, dashboard `Resource.tempVars[]`, designer-shaped `attrs.save_var`, visible `attrs.headc.title.variable[]`, complete field metadata, before/after mutation proof, and refreshed/recalculated runtime evidence. Other shapes remain unproven unless focused runtime proof exists, and fallback KPI values must be explicitly labeled as fallback.
 

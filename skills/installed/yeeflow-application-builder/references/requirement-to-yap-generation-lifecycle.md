@@ -150,37 +150,7 @@ The review must confirm:
 - field/control/Dynamic control/workflow/action/schedule/resource/property types are plugin-supported or marked for learning/proof/deferment
 - Generation Contract and Hard Gates, Validation Plan, Proof Boundary, Assumptions, Deferred or Runtime-Proof Items, and Recommended Next Prompt are present
 
-If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks Page Function Plan, Application Design System, business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
-
-## Page Function Plan And Application Design System Gates
-
-Create the Page Function Plan after the reviewed App Plan and before Dashboard Golden Reference selection, Application Design System, full-page canonical design images, page implementation blueprints, resource/package generation, decoded resource-vs-blueprint parity, signing, install/import/upgrade, or runtime proof. Use:
-
-`docs/standards/page-function-plan-standard-template.md`
-
-The Page Function Plan is the canonical page-level implementation contract after the App Plan. It must cover every UI-required Dashboard page, Approval submission form, planned Approval task form, required Approval print page, and planned custom Data list or Document library form. Form Reports are not required canonical UI design surfaces unless explicitly planned as navigable/custom UI pages. Every App Plan Dashboard page, Approval surface, and custom list/library form must reference one Page Function Plan entry, and every Page Function Plan entry must map back to one App Plan resource/surface.
-
-The Page Function Plan remains a business/page-function contract. It must describe Dashboard purpose, users, business questions, data sources, field usage, filters, metrics, main and secondary regions, actions, sorting/grouping, and mobile behavior, without dictating low-level Yeeflow Container/Grid/Text/Button shapes or resource JSON. Dashboard Golden Reference Selection happens after the PFP business contract and before blueprint generation. Generate one structured selection artifact per Dashboard page with dashboard page id/name, source Page Function Plan id, selected page/section golden reference IDs, mapping from each PFP business region to a reference section, source data list, fields, filters, metrics, actions, and App Plan field mappings. Use `event_portfolio_dashboard_golden_reference` as the default Dashboard construction style for polished operations, portfolio, pipeline, request, facility, service, project, vendor, and contract dashboards unless another plugin-contained pattern is clearly more appropriate. Downstream dashboard blueprints must reference the selection and each major section must declare `derivedFromGoldenReference`. Generated dashboard resources must preserve inspectable provenance/structure and required default regions: `Main`, `Content`, header band, filter group when required, KPI cards wrapper when required, content section, and grid-table Collection when a portfolio/work queue/list region is required. Dashboard generation must adapt all lists, fields, labels, metrics, filters, and actions to the current App Plan rather than copying Marketing Event-specific content. Package readiness fails when golden-reference selection, blueprint provenance, resource traceability, required reference sections, or App Plan field mapping are missing.
-
-Dashboard sections with visible Text controls must declare structured `textStyleContract[]` entries for important roles such as page title, section title, KPI label, KPI value, helper text, table/collection headers, table/collection cell text, badge text, action labels, empty-state text, and notes. Each entry must include business purpose, content source, static text or dynamic binding details, native heading/Text control shape, typography token, string-token text color, supported weight/style or proof boundary, width behavior, semantic `nv_label`, and proof status. Resource generation must preserve the plugin-supported Text shape (`type: "heading"`, title value/variable binding, `attrs.heads.ty`, string `attrs.heads.color`, supported width behavior) and must not generate unsupported `type: "text"` controls, placeholder copy, static mock KPI/runtime values, unsupported color shapes, or visually indistinguishable important text roles.
-
-The Page Function Plan must define structured click action metadata for every visible interactive `Container`, `Button`, or `action_button`. Use only plugin-known action mappings, include target identifiers and open mode, and defer or render as non-interactive text when a safe action cannot be generated.
-
-Create the Application Design System after the Page Function Plan and before page/resource generation, using:
-
-`docs/standards/application-design-system-template.md`
-
-The Application Design System must select exactly one supported Yeeflow application layout, define app-wide chrome design intent, distinguish proven generated shell properties from export-learning/runtime-proof/deferred properties, and make Dashboard/application pages inherit the selected layout and chrome. Approval forms and custom list/library forms are form surfaces and must not invent app header/navigation.
-
-Run the executable checks when the artifacts are available:
-
-```bash
-node scripts/validate-page-function-plan.mjs <page-function-plan.md|json> --json
-node scripts/validate-app-plan-page-function-traceability.mjs --app-plan <app-plan.json> --page-function-plan <page-function-plan.json>
-node scripts/validate-application-design-system.mjs <application-design-system.md|json> --json
-```
-
-A failed Page Function Plan, App Plan to Page Function Plan traceability gate, or Application Design System gate blocks full-page design images, page implementation blueprints, resource/package generation, signing, install/import/upgrade, and runtime proof.
+If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
 
 ## 6. Business Clarification Gate
 

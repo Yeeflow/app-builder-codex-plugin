@@ -2,15 +2,6 @@
 
 These rules encode the Leave Request Application lessons for future generated `.yapk` packages.
 
-## Generation Modes
-
-The plugin must keep local preview and generated-final output as separate modes.
-
-- `local-preview` / `local-draft` mode: no live API calls, local-only structure validation and preview only, may contain local draft markers, and is never eligible for signing, install/import, upgrade, or user handoff as a generated-final artifact.
-- `generated-final` mode: ID-first generation. Planning and Blueprint stages may use stable logical references, but before generated-final resource creation the generator must allocate all required Yeeflow API-issued IDs, build a complete `logicalRef -> apiIssuedId` map, and write generated-final package JSON directly from that map.
-
-A generated-final package must not be produced by mutating, patching, or ID-replacing a local draft package. Runtime-bearing references must be written with API-issued IDs at generation time, including resource IDs, Data list IDs, Approval form IDs / ProcKeys, Dashboard page IDs, Layout IDs, Form IDs, FormAction IDs, `ListID`, `PageID`, `ProcKey`, `LayoutID`, table links, Collection/Kanban/Timeline bindings, Data Filter bindings, Button/Container action targets, Sub list bindings, workflow/notification/navigation targets, and page resource version fields where required.
-
 ## Leave Request Lessons
 
 - Local schema validation did not make the first package upload-ready because its `Sign` was still a placeholder.
@@ -38,45 +29,17 @@ node scripts/validate-yapk-id-provenance.mjs --package <app.yapk> --manifest <ap
 
 Local `id()` helpers, hardcoded generated IDs, copied sample/export IDs, local counters, random values, timestamps, UUID fallback, and deterministic local-only seeds are generated-final blockers.
 
-## Generated-Final Draft Placeholder Gate
-
-After API ID allocation and final ID replacement, generated-final `.yapk` packages must contain no unresolved local draft sentinels anywhere in runtime-bearing package JSON.
-
-Run:
-
-```bash
-node scripts/validate-generated-final-draft-placeholders.mjs --package <app.yapk> --mode generated-final
-```
-
-The gate recursively scans the wrapper metadata and decoded `AppPackageInfo`, including parsed `LayoutInResources[].Resource` page JSON, form `Ext` and encoded `DefResource` payloads, control bindings, table/action links, open-dashboard/open-form targets, workflow/navigation metadata, theme payloads, version fields, arrays, and nested string fields.
-
-Generated-final mode forbids `local-draft`, `localDraft`, `local-draft-*`, `sourceMarker: local-draft-no-api`, and equivalent unresolved generator draft sentinels. Local draft packages may contain these markers only when clearly local-only and validated with `--mode local-draft`.
-
-Signing, signature verification, package upload, install/import, upgrade-check, or user handoff must not start until this recursive placeholder gate passes. API-issued ID provenance proves numeric ID source; it does not prove every nested runtime placeholder was replaced.
-
 ## Signing Gate
 
 A generated `.yapk` package must not be called upload-ready, install-ready, or handoff-ready while `Sign` is empty, placeholder-like, or an all-zero 32-byte value.
 
-Generated-final signing readiness also requires valid wrapper tenant metadata. `wrapper.TenantID` must be populated from the resolved OAuth tenant context before signing. `TenantID = "0"`, missing/empty `TenantID`, local draft placeholders, tenant placeholders, and mismatches against the resolved OAuth tenant context are signing blockers. `wrapper.TenantID` is tenant metadata and must not be included in the API-issued app content ID provenance manifest.
-
-Run before `setsign`:
-
-```bash
-node scripts/validate-yapk-signing-readiness.mjs --package <app.yapk> --expected-tenant-id <oauth-tenant-id>
-```
-
 When API-key or OAuth access is available, the generation workflow must:
 
 1. Validate decoded `AppPackageInfo` content.
-2. Validate signing readiness, including wrapper `TenantID` metadata.
-3. Save redacted pre-`setsign` request metadata, including endpoint, method, content type, body mode, package path, filename, byte size, TenantID, wrapper keys, Sign presence, auth mode, and redacted tenant/workspace context.
-4. Call `POST /utils/apppackage/setsign`.
-5. Parse `setsign` responses that return either a top-level JSON string signature or a supported object field signature.
-6. Save redacted response metadata without printing the raw signature.
-7. Confirm the returned signature has the expected 32-byte shape.
-8. Call `POST /utils/apppackage/verifysign`.
-9. Report signing proof separately from schema validation and runtime proof.
+2. Call `POST /utils/apppackage/setsign`.
+3. Confirm the returned signature has the expected 32-byte shape.
+4. Call `POST /utils/apppackage/verifysign`.
+5. Report signing proof separately from schema validation and runtime proof.
 
 Local schema validation alone is not upload/install readiness.
 

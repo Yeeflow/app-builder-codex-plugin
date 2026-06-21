@@ -33,23 +33,12 @@ The form should be organized around business operations, not only field order. C
 - Review sections by role
 - Form Bottom
 
-## Dashboard Text Style Gate
-
-Dashboard Text controls must follow the Page Function Plan `textStyleContract[]` and the learned native Text control standard:
-
-- use the native `heading` / label `Text` control pattern, not unsupported ad hoc `type: "text"`
-- declare role-specific style intent for page title, section title, KPI label, KPI value, helper text, table/collection text, badge text, action labels, empty-state text, and notes
-- preserve `attrs.heads.ty`, string-token `attrs.heads.color`, title static value or dynamic variable binding, width behavior, and meaningful `nv_label`
-- bind dynamic KPI/runtime text through the planned source instead of rendering static placeholder text
-- mark unproven typography/color/style properties as `export-learning-required`, `runtime-proof-required`, or deferred rather than generating invented Yeeflow paths
-
 ## Validation Signals
 
 Warn or fail readiness when:
 
 - normal fields are direct children of section containers instead of grid controls
 - Text controls are block-width by default without reason
-- dashboard Text controls omit Page Function Plan `textStyleContract[]`, use placeholder copy, omit role-specific typography/color intent, or use unsupported `type: "text"` / unsupported color shapes
 - Action Panel or Flow History are outside Form bottom
 - `Main` carries page background styling
 - section containers lack meaningful `nv_label`

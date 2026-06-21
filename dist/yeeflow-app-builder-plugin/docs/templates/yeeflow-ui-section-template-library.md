@@ -4,8 +4,6 @@ This library defines reusable Yeeflow UI section templates for full application 
 
 Machine-readable registry: `docs/templates/yeeflow-ui-section-template-library.normalized.json`
 
-Default Dashboard Golden Reference registry: `docs/reference/dashboard-golden-reference-registry.normalized.json`
-
 ## Template Contract
 
 Each template includes:
@@ -32,23 +30,6 @@ All generated dashboard templates must be placed inside the export-proven page s
 - Layout-only Grid controls must have display caption/display label disabled.
 - Every control must have a meaningful Navigator label; default labels such as `Container`, `Grid`, `Text`, `Button`, `Summary`, `Dynamic field`, `Kanban`, and `Collection` are invalid for generated-final output.
 - Dynamic controls must remain inside row-context item templates such as Kanban, Collection, or Timeline.
-
-### Default Event Portfolio Dashboard Golden Reference
-
-Use `event_portfolio_dashboard_golden_reference` as the default Dashboard Golden Reference family for polished portfolio, operations, status, pipeline, project, vendor, contract, service, request, facility, and work-queue dashboards unless the page function clearly requires another plugin-contained pattern.
-
-This default is a reusable structural/style reference, not a Marketing Event page clone. It is derived from the Event Portfolio structure but generated dashboards must map data lists, fields, filters, metrics, labels, actions, sorting/grouping, and mobile behavior to the current App Plan and Page Function Plan. Do not copy Marketing Event-specific field names or sample values into unrelated apps.
-
-The default family is composed of:
-
-- `dashboard_default_shell_event_portfolio_ref` for the `Main` > `Content` dashboard shell.
-- `dashboard_header_band_event_portfolio_ref` for page title, subtitle/description, filter/action row, and page-level actions.
-- `dashboard_filter_group_event_portfolio_ref` for real data-bound filter controls and wrappers.
-- `dashboard_kpi_cards_event_portfolio_ref` for Summary/KPI cards, icon block, metric label/value, trend/helper text, note, and binding/fallback boundary.
-- `dashboard_content_section_event_portfolio_ref` for the major page content section.
-- `dashboard_collection_grid_table_event_portfolio_ref` for grid-table style Collection regions with custom header grid, Collection row grid, Dynamic controls, status/progress/person treatment, and row actions.
-
-Downstream dashboard design, blueprint, and resource generation must trace to these reference IDs when claiming the default golden reference. The Page Function Plan remains business/page-function-only and should not prescribe the underlying Container/Grid/Text/Button property shapes.
 
 ### `dashboard_header_action_bar`
 
@@ -249,22 +230,6 @@ Downstream dashboard design, blueprint, and resource generation must trace to th
 - Validation rules: item template fields present; source list resolves.
 - Allowed fallback: Collection with timeline-style item template.
 - Proof status: render-proven for timeline controls; needs golden proof for polished app activity feed.
-
-### `event_portfolio_dashboard_golden_reference`
-
-- Purpose: Provide a high-quality portfolio/operations/status/pipeline Dashboard golden reference based on plugin-contained Marketing Event / Event Portfolio fidelity lessons.
-- Use when: A Dashboard needs polished portfolio, operations, status, pipeline, event, project, vendor, contract, service, or request management composition with filters, KPI cards, rich Collection grid-table rows, and row-context actions.
-- Source boundary: This reference uses only plugin-contained, redacted, synthetic, or already committed Marketing Event / Event Portfolio training materials. It must not depend on private raw Marketing Event artifacts, raw package payloads, tenant/app/list IDs, screenshots, raw API responses, or private runtime evidence.
-- Required controls: Container, Data Filter, Summary, Collection, Dynamic field, Dynamic user where owner/person fields exist, Progress where progress/rate fields exist, Text/Heading, Button or action-capable Container.
-- Required child controls: filter/action row, KPI card row, hidden Summary binding host or explicit fallback, visible formatted KPI value controls, Collection grid-table header, Collection item template with Dynamic controls, status badge treatment, progress/person treatments where applicable, detail/open action controls.
-- Required data bindings: source data lists, filter variables, target consumers for filters, Summary/KPI source and metric bindings or fallback boundary, Collection source list, Collection current-item context, row/detail action metadata.
-- Required fields: title/name, status/state/stage, owner/person/requester where applicable, progress/rate/completion where applicable, priority/risk/date/amount or domain-specific portfolio fields.
-- Layout rules: dashboard shell, filter/action row, KPI card row, Collection grid-table, table header hierarchy, dense but readable rows, responsive stacking, mobile priority content.
-- Style rules: rich dashboard composition, card/table hierarchy, status badges, progress bars, avatar/person treatment, polished spacing, semantic `nv_label`, no generic/scaffold dashboard sections.
-- Required actions: detail/open/add/update actions only when backed by real Yeeflow action metadata, source target, and row context.
-- Validation rules: Data Filters present, KPI cards present, Summary/KPI binding or fallback boundary present, Collection grid-table present, Dynamic controls present inside item templates, badges/progress/person treatments declared when fields require them, valid action metadata present, source/fields/filters/grouping/sorting present, `nv_label`/designer traceability present, runtime proof boundary present, no static KPI-only cards, no plain Data table substitute, no fake/unbound actions, no placeholder controls.
-- Allowed fallback: Use standard Dashboard section templates without this golden reference when Collection grid-table or runtime-fidelity requirements cannot be planned. If Summary/KPI runtime binding cannot be safely generated, document the fallback boundary explicitly and do not claim dynamic KPI proof.
-- Proof status: training-golden-reference from plugin-contained redacted Marketing Event / Event Portfolio lessons; generated-app runtime proof remains package-specific.
 
 ## Data List Form Templates
 

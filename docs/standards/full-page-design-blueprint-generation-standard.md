@@ -6,17 +6,14 @@ Full-application Yeeflow generation is a staged evidence workflow. A visually po
 
 1. Functional spec.
 2. App plan.
-3. Page Function Plan as the business/page-function contract.
-4. Dashboard Golden Reference selection, using `event_portfolio_dashboard_golden_reference` as the default Dashboard construction style when appropriate.
-5. Application Design System.
-6. Full-page canonical design images.
-7. Page implementation blueprint.
-8. Yeeflow control/property contract validation.
-9. Resource generation.
-10. Decoded resource parity validation.
-11. Local hard gates.
-12. Package/sign/upgrade only after explicit write approval.
-13. Runtime/browser proof only after Chrome/runtime evidence exists.
+3. Full-page canonical design images.
+4. Page implementation blueprint.
+5. Yeeflow control/property contract validation.
+6. Resource generation.
+7. Decoded resource parity validation.
+8. Local hard gates.
+9. Package/sign/upgrade only after explicit write approval.
+10. Runtime/browser proof only after Chrome/runtime evidence exists.
 
 Do not start a later stage when the prior stage lacks completion evidence. Schema validation, signing, install, upgrade, decoded CSS, decoded controls, or ID stability do not prove UI fidelity or runtime behavior. Runtime proof cannot claim success until Chrome/runtime evidence exists.
 
@@ -31,7 +28,6 @@ SVG files and combined design boards may support review, but they cannot replace
 Before generating Yeeflow resources, every page requires a blueprint with:
 
 - page purpose and selected Yeeflow layout/chrome
-- selected Dashboard Golden Reference and per-section reference trace when the page is a Dashboard
 - full section list
 - design-to-control mapping for every visible element
 - control hierarchy, control type, `id`, `nv_label`, and parent/child relationships
@@ -42,10 +38,6 @@ Before generating Yeeflow resources, every page requires a blueprint with:
 - Collection/table columns and row detail links
 - Dynamic user/person, progress/status/badge, and action metadata
 - runtime proof plan
-
-Default Dashboard pages should use `event_portfolio_dashboard_golden_reference` unless the page function clearly requires another plugin-contained pattern. The blueprint must trace the page shell, header area, filter area, KPI area, main content section, and grid-table Collection region to the selected golden reference IDs where applicable, and must adapt fields/actions/labels to the current App Plan instead of copying Marketing Event-specific source fields.
-
-Every Dashboard blueprint must reference the Dashboard Golden Reference Selection artifact created after Page Function Plan approval. Each major Dashboard section must declare `derivedFromGoldenReference` and preserve the source data list, fields, filters, metrics, actions, and dynamic-control intent from the selection. Blueprint validation must fail if the selection is missing or section provenance is absent.
 
 Every property path must be validated against `docs/reference/yeeflow-control-configurations.normalized.json` or `docs/reference/yeeflow-control-property-extensions.json`. Container `attrs.style` rules and non-Container `attrs.common` rules remain separate.
 

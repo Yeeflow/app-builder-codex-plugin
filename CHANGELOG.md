@@ -2,49 +2,6 @@
 
 ## Unreleased
 
-## 0.7.3
-
-- Release the Event Portfolio dashboard default Golden Reference registry from PR #132.
-- Add the required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, including structured dashboard page identity, source Page Function Plan page ID, selected page and section reference IDs, Page Function Plan region mappings, source lists, fields, filters, metrics, actions, and App Plan field mappings.
-- Publish Dashboard section reference IDs: `event_portfolio_dashboard_golden_reference`, `dashboard_default_shell_event_portfolio_ref`, `dashboard_header_band_event_portfolio_ref`, `dashboard_filter_group_event_portfolio_ref`, `dashboard_kpi_cards_event_portfolio_ref`, `dashboard_content_section_event_portfolio_ref`, and `dashboard_collection_grid_table_event_portfolio_ref`.
-- Add Blueprint/resource conformance and provenance checks requiring Dashboard blueprints to reference the Golden Reference Selection, every major section to declare `derivedFromGoldenReference`, and generated resources to preserve inspectable golden-reference provenance.
-- Add Facility Maintenance mapping regression coverage proving non-event dashboard requirements can map into the default reference with app-specific lists, fields, filters, metrics, and actions.
-- Add safeguards that fail when Event Portfolio fields are copied into unrelated apps instead of mapped to the current App Plan.
-- Register package-readiness gates for dashboard golden-reference conformance in focused tests, aggregate UI hard gates, and YAPK cache artifact checks.
-
-## 0.7.2
-
-- Release the Page Function Plan business/page-function contract refinement from PR #130.
-- Require Page Function Plan Dashboard entries to state page purpose, primary users, concrete business questions, data sources, field usage, filters, summary metrics, main and secondary data regions, action intent, and mobile behavior.
-- Require data source and field usage details to map source lists/libraries, required fields, metric usage, display usage, filter usage, sort/group usage, and action usage.
-- Require Page Filters to identify source list, field, affected regions, default/selection behavior, filter logic, and mobile behavior.
-- Require Summary Metrics to identify source fields, calculation logic, default filter scope, business meaning, and formatting expectations.
-- Reject vague Dashboard Page Function Plan entries such as “show dashboard data”, “add filters”, “display list”, or “show summary cards” when they lack business purpose, fields, filter logic, or mappings.
-- Reject low-level implementation/property instructions in Page Function Plan business sections, including exact Container/Grid/Text/Button nesting, Yeeflow property paths, CSS, arbitrary custom controls, or generated resource JSON.
-- Preserve downstream Dashboard Pattern Library / Golden Reference, Application Design System, Container/Button action, Dashboard Text/control, aggregate UI, and YAPK hard gates as the implementation and resource-generation safeguards after PFP.
-
-## 0.7.1
-
-- Release the generated-final local-draft placeholder hard gate from PR #127.
-- Require generated-final package generation to use an ID-first model: planning and blueprint stages may use logical refs, local-preview/local-draft packages remain local-only, and generated-final packages are built fresh from approved logical refs plus a complete API-issued ID map.
-- Block generated-final validation and signing readiness when recursive decoded package/resource JSON contains unresolved `local-draft`, `localDraft`, `local-draft-*`, `sourceMarker: local-draft-no-api`, generator draft sentinels, or unmapped logical references.
-- Extend generated-final checks across nested runtime-bearing fields including ListID, PageID, ProcKey, LayoutID, FormActionID, table links, Collection/Kanban/Timeline bindings, Data Filter bindings, Button/Container actions, sub list bindings, workflow targets, navigation targets, page version markers, and theme/local marker payloads.
-- Keep local draft mode available for local-only structural validation while explicitly marking it not eligible for signing/install.
-- Add focused regression coverage, aggregate hard-gate registration, source/dist mirrors, and training documentation for the ID-first generated-final lifecycle and recursive placeholder absence proof.
-
-## 0.7.0
-
-- Release the Page Function Plan and Application Design System planning stage from PR #125.
-- Expand the Functional Specification standard with business-oriented page-needs requirements for roles, page purpose, required information, actions, filtering/grouping/sorting, mobile support, and access needs.
-- Add the Page Function Plan standard/template as the canonical page-level implementation contract after the Yeeflow App Plan, covering Dashboard pages, Approval submission/task/print forms, custom Data list forms, and custom Document library forms while excluding Form Reports as required UI design surfaces.
-- Add App Plan to Page Function Plan traceability so App Plan dashboard/form/list/library surfaces reference Page Function Plan entries, and Page Function Plan entries map back to stable App Plan resources.
-- Require Dashboard page pattern/template selection with plugin-contained Dashboard templates, including Dashboard section template mappings for source data, fields, filters, grouping, sorting, controls, actions, proof status, and fallback.
-- Promote plugin-contained Marketing Event / Event Portfolio lessons into Event Portfolio dashboard golden-reference guidance for portfolio/status/operations dashboards, including KPI/Summary binding, Data Filters, Collection grid-table treatment, dynamic controls, badges/progress/person treatment, action metadata, `nv_label`, and runtime proof boundaries.
-- Add Application Design System layout selection for the four supported Yeeflow application layouts and app-wide Header/Navigator chrome guidance that separates design intent from supported generated property paths.
-- Add Container/Button click action mapping requirements for Link, Add list item, Open dashboard, Open approval form, and supported/deferred form action bindings.
-- Add Dashboard Text control style contracts for important text roles, native Text/heading shape, typography/color tokens, dynamic bindings, width behavior, and meaningful `nv_label`.
-- Add related validators and regression coverage for Functional Spec/App Plan/Page Function Plan/ADS gates, Dashboard template/golden-reference rules, app chrome safety, action planning, Dashboard Text styling, full-page blueprint/resource parity, aggregate UI hard gates, and YAPK cache artifacts.
-
 ## 0.6.64
 
 - Release Business Clarification unique unresolved gate summary reporting from PR #95.

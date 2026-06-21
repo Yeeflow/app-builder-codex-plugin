@@ -8,9 +8,6 @@ const ROOT = process.cwd();
 
 const hardGateScripts = [
   "scripts/validate-yapk-id-provenance.mjs",
-  "scripts/lib/yapk-signing-readiness-utils.mjs",
-  "scripts/validate-yapk-signing-readiness.mjs",
-  "scripts/validate-generated-final-draft-placeholders.mjs",
   "scripts/validate-yapk-navigation-runtime-metadata.mjs",
   "scripts/validate-yapk-upgrade-id-stability.mjs",
   "scripts/validate-dashboard-grid-table-collections.mjs",
@@ -28,14 +25,7 @@ const hardGateScripts = [
   "scripts/compare-blueprint-to-decoded-resource.mjs",
   "scripts/validate-functional-specification.mjs",
   "scripts/validate-app-plan-resource-order.mjs",
-  "scripts/validate-page-function-plan.mjs",
-  "scripts/validate-dashboard-golden-reference-registry.mjs",
-  "scripts/validate-application-design-system.mjs",
-  "scripts/validate-app-plan-page-function-traceability.mjs",
   "scripts/test-functional-specification-and-app-plan-gates.mjs",
-  "scripts/test-page-function-plan-gates.mjs",
-  "scripts/test-dashboard-default-golden-reference-gates.mjs",
-  "scripts/test-application-design-system-gates.mjs",
   "scripts/validate-business-clarification-gate.mjs",
   "scripts/validate-generation-readiness-review.mjs",
   "scripts/validate-functional-spec-to-app-plan-traceability.mjs",
@@ -46,8 +36,6 @@ const hardGateScripts = [
   "scripts/inspect-ui-control-property-fidelity.mjs",
   "scripts/inspect-yeeflow-control-configurations.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
-  "scripts/test-generated-final-draft-placeholder-gates.mjs",
-  "scripts/test-yapk-signing-readiness-tenantid-gates.mjs",
   "scripts/test-yapk-id-navigation-hard-gates.mjs",
   "scripts/test-yapk-upgrade-id-stability.mjs",
   "scripts/test-dashboard-grid-table-collections.mjs",
@@ -75,19 +63,9 @@ for (const sourcePath of hardGateScripts) {
   );
 }
 
-assert.equal(
-  fs.readFileSync(path.join(ROOT, "dist/yeeflow-app-builder-plugin/validate-yapk-package.js"), "utf8"),
-  fs.readFileSync(path.join(ROOT, "validate-yapk-package.js"), "utf8"),
-  "dist/yeeflow-app-builder-plugin/validate-yapk-package.js mirrors validate-yapk-package.js root entrypoint",
-);
-
 const requiredDocs = [
   "docs/standards/functional-specification-standard-template.md",
   "docs/standards/app-plan-standard-template.md",
-  "docs/standards/page-function-plan-standard-template.md",
-  "docs/standards/dashboard-event-portfolio-golden-reference-standard.md",
-  "docs/standards/dashboard-golden-reference-selection-standard.md",
-  "docs/standards/application-design-system-template.md",
   "docs/standards/yeeflow-application-layout-design-rules.md",
   "docs/standards/runtime-proof-boundary-standard.md",
   "docs/standards/full-page-design-blueprint-generation-standard.md",
@@ -95,9 +73,7 @@ const requiredDocs = [
   "docs/standards/yeeflow-control-property-knowledge-base.md",
   "docs/reference/yeeflow-control-configurations.normalized.json",
   "docs/reference/yeeflow-control-property-extensions.json",
-  "docs/reference/dashboard-golden-reference-registry.normalized.json",
   "docs/studies/marketing-event-v045-design-runtime-fidelity-study.md",
-  "docs/training/signing-readiness-tenantid-and-setsign-contract-gates-training-report.md",
 ];
 
 for (const sourcePath of requiredDocs) {
