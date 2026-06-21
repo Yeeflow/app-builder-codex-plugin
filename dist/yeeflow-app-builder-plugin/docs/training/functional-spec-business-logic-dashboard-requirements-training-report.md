@@ -3,9 +3,18 @@
 ## Scope
 
 - Training branch: `codex/functional-spec-business-logic-dashboard-requirements`
-- Baseline: rollback stable `yeeflow-app-builder@yeeflow 0.6.64`
+- Requested training baseline: current stable `yeeflow-app-builder@yeeflow 0.7.4`
 - Training topic: strengthen Functional Specification quality before App Plan generation.
-- Version bump: none.
+- Training version bump: none.
+- Post-merge release target: `0.8.0`; do not use `0.7.5`.
+- Post-merge release branch: `codex/release-0.8.0-functional-spec-app-plan-dashboard-template-quality`
+
+Version verification note:
+
+- This training PR does not change plugin version metadata.
+- Current local checkout, installed plugin list, `origin/main`, and `origin/stable` still report `0.6.64` after rollback PR #136.
+- The `0.7.4` release branch exists as `origin/codex/release-0.7.4-signing-readiness-tenantid-and-setsign`.
+- Before opening the separate `0.8.0` release bump PR, verify the intended stable baseline ref is the user-approved `0.7.4` line.
 
 ## Problem
 
@@ -93,7 +102,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `node scripts/test-yapk-id-navigation-hard-gates.mjs`: passed.
 - `node scripts/test-yapk-hard-gate-cache-artifacts.mjs`: passed.
 - `node scripts/test-yapk-v3-runtime-hardening.mjs`: passed.
-- Metadata inspection: `dist/yeeflow-app-builder-plugin/.codex-plugin/plugin.json` remains `0.6.64`.
+- Metadata inspection: no training version bump was made; the local training checkout still reports `0.6.64`, while the requested release baseline for the post-merge release path is `0.7.4`.
 - Source/dist mirror checks for changed committed mirrors: passed.
 - `node scripts/audit-release-safety.mjs`: passed with zero blocking findings.
 - Changed-file private/forbidden artifact scan: passed with only expected policy/proof-boundary wording.
@@ -105,6 +114,24 @@ These gates prove Functional Specification document quality and planning traceab
 ## Safety Confirmation
 
 - No version bump was made.
+- No `0.7.5` release target was prepared.
 - No stable movement, tags, releases, or plugin archives were created.
 - No live Yeeflow writes, signing, install, import, or upgrade were performed.
 - Existing duplicate-suffixed untracked files were left untouched.
+
+## Post-Merge 0.8.0 Release Notes Draft
+
+Release branch after training merge:
+
+`codex/release-0.8.0-functional-spec-app-plan-dashboard-template-quality`
+
+Release notes for `0.8.0` should mention:
+
+- richer Functional Specification business logic requirements
+- standardized Functional Specification Markdown template
+- Functional Spec Dashboard business requirements
+- preserved App Plan template structure
+- enhanced Dashboard Pages Plan only
+- Dashboard legal Yeeflow control-type planning
+- prevention of low-level implementation leakage in Functional Spec/App Plan
+- Markdown primary planning artifacts with JSON companions only
