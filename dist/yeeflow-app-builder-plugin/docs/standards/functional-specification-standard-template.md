@@ -6,6 +6,8 @@ This document focuses on business requirements and expected application behavior
 
 Do not include low-level Yeeflow implementation details in the Functional Specification. Exclude Yeeflow control types, exact resource IDs, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, package JSON fragments, and exact generated IDs. When those details are needed, defer them to the App Plan, Page Function Plan, Blueprint, or resource generation stage.
 
+Primary artifact rule: generate this document as the primary human-readable Markdown file named `functional-specification.md`. Machine-readable JSON may exist only as a companion/projection artifact for validation, traceability, or tests, such as `functional-specification.trace.json`; JSON must not replace this Markdown document. The Markdown file must contain the full rich business logic and dashboard business requirements, not just a link to JSON.
+
 ## 1. Specification Status
 
 - Application name:

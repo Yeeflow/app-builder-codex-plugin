@@ -22,6 +22,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 - App Plan Dashboard Pages Plan now converts those Functional Specification dashboard requirements into Yeeflow-supported control-type planning without changing the overall App Plan structure.
 - Each Dashboard page App Plan entry now requires page identity, source Functional Specification dashboard requirement reference, source data lists/business objects, navigation placement, Page Function Plan reference when applicable, section-level control type categories, filter planning, summary metric planning, action categories, record-display control selection, and item-template dynamic display needs.
 - Dashboard App Plan validation rejects dashboard-only placeholders, invented or unsupported dashboard control types unless proof/deferred-labeled, and low-level IDs/action codes/property paths/fake placeholder IDs in the Dashboard Pages Plan.
+- Planning artifact format now requires `functional-specification.md` and `yeeflow-app-plan.md` as the primary human-readable Markdown artifacts. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, and must reference the Markdown source.
 - Approval/form, workflow/notification, reporting/audit, and business clarification gates now have explicit required business details.
 - Functional Specification rejects low-level implementation leakage such as Yeeflow control types, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, and exact generated resource IDs.
 
@@ -33,8 +34,10 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `scripts/validate-functional-specification.mjs`
 - `scripts/validate-functional-spec-to-app-plan-traceability.mjs`
 - `scripts/validate-app-plan-resource-order.mjs`
+- `scripts/validate-planning-artifact-formats.mjs`
 - `scripts/test-functional-specification-quality-gates.mjs`
 - `scripts/test-app-plan-dashboard-pages-plan-gates.mjs`
+- `scripts/test-planning-artifact-format-gates.mjs`
 - `scripts/test-functional-specification-and-app-plan-gates.mjs`
 - `scripts/test-clarification-readiness-traceability-gates.mjs`
 - `scripts/test-app-plan-control-action-property-gates.mjs`
@@ -51,6 +54,11 @@ Generated Functional Specification documents could satisfy the structural gate w
 - Fail: App Plan Dashboard page using an invented control type without proof/deferred label.
 - Fail: App Plan Dashboard page containing ListID/PageID/actionTypeCode/property paths.
 - Pass: App Plan Dashboard page choosing Collection for a portfolio/work queue region without exact runtime properties.
+- Pass: `functional-specification.md` and `yeeflow-app-plan.md` with consistent companion trace JSON.
+- Fail: Functional Specification generated only as JSON without `functional-specification.md`.
+- Fail: Yeeflow App Plan generated only as JSON without `yeeflow-app-plan.md`.
+- Fail: skeletal Markdown that only links to JSON.
+- Fail: companion JSON projection that points to the wrong Markdown source or stale source hash.
 
 ## Validation Summary
 
@@ -60,6 +68,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `node scripts/test-functional-specification-quality-gates.mjs`: passed.
 - `node scripts/test-functional-specification-and-app-plan-gates.mjs`: passed.
 - `node scripts/test-app-plan-dashboard-pages-plan-gates.mjs`: passed.
+- `node scripts/test-planning-artifact-format-gates.mjs`: passed.
 - `node scripts/test-clarification-readiness-traceability-gates.mjs`: passed.
 - `node scripts/test-business-clarification-and-app-plan-precision-gates.mjs`: passed.
 - `node scripts/test-planning-default-approval-and-exact-type-gates.mjs`: passed.

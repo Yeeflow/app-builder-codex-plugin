@@ -76,6 +76,8 @@ The Functional Specification is the business requirement document. It must descr
 
 Keep low-level Yeeflow implementation details out of the Functional Specification. Do not include Yeeflow control types, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, exact generated IDs, package JSON, or resource implementation shapes. Those belong in the App Plan, Page Function Plan, Blueprint, resource generation, and validation stages.
 
+The primary artifact must be a human-readable Markdown file named `functional-specification.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `functional-specification.trace.json`; JSON must not replace `functional-specification.md`.
+
 For brief requirements:
 
 - infer and supplement a complete business requirement document with explicit assumptions
@@ -123,6 +125,8 @@ Create the Yeeflow App Plan only from the reviewed Functional Specification, usi
 `docs/standards/app-plan-standard-template.md`
 
 The reviewed Functional Specification is the business source of truth for the App Plan. The App Plan is not a free-form plan, generic project plan, or ad hoc script plan. It is the Yeeflow resource generation contract and must convert business requirements into Yeeflow-supported resources in this standard order:
+
+The primary artifact must be a human-readable Markdown file named `yeeflow-app-plan.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `app-plan.trace.json`; JSON must not replace `yeeflow-app-plan.md`.
 
 1. Data lists and Document libraries
 2. Approval forms
@@ -286,6 +290,14 @@ node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <funct
 ```
 
 Traceability fails when business objects, relationships, approvals, forms, workflows, reporting, documents, AI/Copilot, integrations, permissions, or UI/experience requirements in the Functional Specification are not mapped to Yeeflow resources, planning sections, or explicit deferred/not-applicable coverage in the App Plan. Deferred items must include a reason, fallback, proof impact, or follow-up. This validator proves planning traceability only; it does not prove generated package conformance or runtime behavior.
+
+When planning artifacts are saved in an output directory, also run:
+
+```bash
+node scripts/validate-planning-artifact-formats.mjs --dir <artifact-dir>
+```
+
+This gate fails if `functional-specification.md` or `yeeflow-app-plan.md` is missing, if either primary Markdown document is empty, skeletal, or only links to JSON, if Functional Specification or App Plan is generated only as JSON, or if companion JSON projections such as `functional-specification.trace.json`, `app-plan.trace.json`, or `page-function-plan.trace.json` do not reference the Markdown source they project from. It proves artifact format discipline only; it does not prove business correctness, package validity, or runtime behavior.
 
 ## 8. Decide Safe Build Scope
 
