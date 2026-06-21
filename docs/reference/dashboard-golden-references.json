@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "defaultDashboardGoldenReferenceId": "event_portfolio_dashboard_golden_reference",
+  "references": [
+    {
+      "id": "event_portfolio_dashboard_golden_reference",
+      "name": "Marketing Event Management - Event Portfolio Dashboard",
+      "source": "Dashboard_Page_layout_ref1.json",
+      "defaultFor": [
+        "standard operational dashboards",
+        "portfolio dashboards",
+        "work queue dashboards",
+        "pipeline dashboards",
+        "register/list dashboards"
+      ],
+      "rootStructure": [
+        "Main",
+        "Content"
+      ],
+      "description": "Default dashboard construction pattern extracted from the Marketing Event Management Event Portfolio dashboard. Future apps must map their own business fields, metrics, filters, actions, and list sources into this structure instead of copying Marketing Event fields.",
+      "subRegions": [
+        {
+          "id": "event_portfolio_header_band",
+          "name": "Page header band",
+          "requiredWhen": "always",
+          "controlPattern": "container header band with title/subtitle and right-aligned filters/actions",
+          "styleIntent": "clean header band, clear page title, compact contextual actions"
+        },
+        {
+          "id": "event_portfolio_filter_group",
+          "name": "Filter controls group",
+          "requiredWhen": "filters are planned",
+          "controlPattern": "horizontal filter/action row with Data Filter controls and action buttons",
+          "styleIntent": "single-line scan-friendly filters with action grouping"
+        },
+        {
+          "id": "kpi_cards_wrapper",
+          "name": "KPI cards wrapper",
+          "requiredWhen": "KPIs or summary metrics are planned",
+          "controlPattern": "row/wrap grid of KPI cards with native FontAwesome icon tiles and live metric text",
+          "styleIntent": "consistent card surfaces, icon tile, metric label/value/trend/helper text"
+        },
+        {
+          "id": "event_portfolio_pipeline_section",
+          "name": "Primary pipeline/content section",
+          "requiredWhen": "dashboard has a primary list, queue, pipeline, or portfolio region",
+          "controlPattern": "section container with header, section actions, and record display region",
+          "styleIntent": "section header with actions above the table/collection region"
+        },
+        {
+          "id": "Event Pipeline Grid-Table",
+          "name": "Grid-table Collection region",
+          "requiredWhen": "tabular pipeline, queue, portfolio, register, or list display is planned",
+          "controlPattern": "Collection paired with a flex-grid header to render a grid-table display",
+          "styleIntent": "aligned header cells, collection item grid, no empty shell-only region"
+        }
+      ],
+      "businessMappingContract": {
+        "dataListSourceMapping": "required",
+        "kpiMetricMapping": "required when KPIs are planned",
+        "filterFieldMapping": "required when filters are planned",
+        "gridTableFieldMapping": "required when tabular/list regions are planned",
+        "actionMapping": "required when actions are planned"
+      },
+      "forbiddenCopiedMarketingEventTerms": [
+        "Event",
+        "Stage",
+        "Region",
+        "Registration",
+        "Budget"
+      ],
+      "iconRule": "Dashboard icons must use native FontAwesome icon controls/classes. Do not use image, SVG, emoji, or Heading/Text icon substitutes for normal dashboard UI.",
+      "styleAdaptationRule": "Adapt colors, tokens, typography, and icons to the current Application Design System while preserving the structural pattern."
+    }
+  ]
+}

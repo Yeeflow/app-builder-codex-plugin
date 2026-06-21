@@ -62,6 +62,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("dashboard-golden-reference-conformance", [
+    "scripts/validate-dashboard-golden-reference-conformance.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   if (plan) {
     gates.push(runGate("generated-final-resource-completeness", ["scripts/validate-generated-final-resource-completeness.mjs", "--plan", plan, "--package", resolvedPackage]));
   }
