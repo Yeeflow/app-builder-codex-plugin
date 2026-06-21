@@ -46,6 +46,10 @@ const RESOURCE_ORDER = [
 ];
 
 const REQUIRED_PATTERNS = [
+  ["DOCUMENT_METADATA", /Document metadata/i],
+  ["SOURCE_FUNCTIONAL_SPECIFICATION_REFERENCE", /Source Functional Specification reference/i],
+  ["GENERATION_READINESS_SUMMARY", /Generation readiness summary/i],
+  ["YEEFLOW_RESOURCE_INVENTORY", /Yeeflow resource inventory/i],
   ["RESOURCE_GENERATION_ORDER", /Resource Generation Order/i],
   ["DATALIST_PLACEHOLDER", /Data Lists and Document Libraries Plan[\s\S]*Placeholder/i],
   ["APPROVAL_SUBMISSION_PLACEHOLDER", /Submission Form Fields[\s\S]*Placeholder/i],
@@ -59,7 +63,11 @@ const REQUIRED_PATTERNS = [
   ["PROOF_BOUNDARY", /Proof Boundary/i],
   ["ASSUMPTIONS", /Assumptions/i],
   ["DEFERRED_RUNTIME_PROOF", /Deferred or Runtime-Proof Items/i],
+  ["REPORTS_DEFERRED_RESOURCES", /Reports\/deferred resources/i],
   ["RECOMMENDED_NEXT_PROMPT", /Recommended Next Prompt/i],
+  ["APP_PLAN_TO_FUNCTIONAL_SPEC_TRACEABILITY", /App Plan to Functional Spec traceability/i],
+  ["APP_PLAN_TO_PAGE_FUNCTION_PLAN_TRACEABILITY", /App Plan to Page Function Plan traceability/i],
+  ["VALIDATION_CHECKLIST", /Validation checklist/i],
   ["DO_NOT_INVENT_UNSUPPORTED_SHAPES", /Do not invent unsupported|Do not plan invented/i],
   ["UNKNOWN_CAPABILITY_LABELS", /export-learning-required[\s\S]*runtime-proof-required[\s\S]*deferred/i],
   ["RECORD_DISPLAY_CONTROL_SELECTION", /Record Display Control Selection/i],
@@ -73,6 +81,89 @@ const REQUIRED_PATTERNS = [
     "PLUGIN_SUPPORTED_TYPE_PROPERTY_RULE",
     /resource types[\s\S]*field types[\s\S]*variable types[\s\S]*controls[\s\S]*Dynamic controls[\s\S]*workflow nodes[\s\S]*form actions[\s\S]*Collection\/Kanban actions[\s\S]*Sub List actions[\s\S]*property paths[\s\S]*(configuration shapes|bindings)/i,
   ],
+];
+
+const REQUIRED_TABLE_SCHEMAS = [
+  {
+    section: "Requirement-to-Yeeflow Resource Mapping Summary",
+    code: "RESOURCE_INVENTORY_TABLE_SCHEMA_MISSING",
+    headers: ["Requirement Area", "Business Requirement", "Yeeflow Resource Type", "Planned Resource Name", "Required", "Notes"],
+  },
+  {
+    section: "Resource Generation Order",
+    code: "RESOURCE_GENERATION_ORDER_TABLE_SCHEMA_MISSING",
+    headers: ["Order", "Resource Type", "Resource Name", "Depends On", "Reason for Order", "Blocking If Missing"],
+  },
+  {
+    section: "Data Lists and Document Libraries Plan",
+    code: "DATA_LIST_FIELDS_TABLE_SCHEMA_MISSING",
+    headers: ["Field Order", "Business Label", "Display Name", "Internal ID / Field Key", "Exact Yeeflow Field Type", "Exact Yeeflow Control Type", "Support Source", "Proof Label", "Fallback / Deferred Reason"],
+  },
+  {
+    section: "Approval Forms Plan",
+    code: "APPROVAL_SUBMISSION_FIELDS_TABLE_SCHEMA_MISSING",
+    headers: ["Field Order", "Business Label", "Field Name", "Field ID / Variable ID", "Exact Yeeflow Variable Type", "Exact Yeeflow Control Type", "Support Source", "Proof Label", "Fallback / Deferred Reason"],
+  },
+  {
+    section: "Custom Data List Forms Plan",
+    code: "CUSTOM_DATA_LIST_FORMS_TABLE_SCHEMA_MISSING",
+    headers: ["Form Name", "Form Type", "Purpose", "Used By", "Layout Pattern", "Actions Required", "Notes"],
+  },
+  {
+    section: "Dashboard Pages Plan",
+    code: "DASHBOARD_PAGE_IDENTITY_TABLE_SCHEMA_MISSING",
+    headers: ["Dashboard Page Name", "Business Purpose", "Functional Spec Dashboard Requirement Reference", "Source Data Lists/Business Objects", "Navigation Placement", "Page Function Plan Reference"],
+  },
+  {
+    section: "Dashboard Pages Plan",
+    code: "DASHBOARD_SECTIONS_TABLE_SCHEMA_MISSING",
+    headers: ["Section Order", "Section Name", "Business Purpose", "Source Data List or Business Object", "Required Fields or Metrics", "Selected Yeeflow Control Type Category", "Why This Control Type Is Appropriate", "User Actions Needed", "Proof Boundary or Deferred Note"],
+  },
+  {
+    section: "Dashboard Pages Plan",
+    code: "DASHBOARD_FILTERS_TABLE_SCHEMA_MISSING",
+    headers: ["Filter Name", "Source Data List", "Filter Field", "Applies-to Dashboard Sections", "Selected Yeeflow Filter/Control Type If Known", "Default Business Scope", "Proof Boundary or Deferred Note"],
+  },
+  {
+    section: "Dashboard Pages Plan",
+    code: "SUMMARY_METRICS_TABLE_SCHEMA_MISSING",
+    headers: ["Metric Name", "Source Data List", "Source Field(s)", "Calculation Logic", "Selected Yeeflow Control Type Category", "Display Format Intent", "Proof Boundary or Deferred Note"],
+  },
+  {
+    section: "Dashboard Pages Plan",
+    code: "DASHBOARD_ACTIONS_TABLE_SCHEMA_MISSING",
+    headers: ["Action Name", "Business Purpose", "Source/Target Business Object", "Expected User Outcome", "Supported Yeeflow Action Category When Known", "Proof Boundary or Deferred Note"],
+  },
+  {
+    section: "Dashboard Pages Plan",
+    code: "RECORD_DISPLAY_CONTROL_SELECTION_TABLE_SCHEMA_MISSING",
+    headers: ["Section", "Data Source", "Display Need", "Selected Record Display Control", "Selection Reason", "Detail/Open Behavior", "Proof Boundary"],
+  },
+  {
+    section: "Dashboard Pages Plan",
+    code: "ITEM_TEMPLATE_DYNAMIC_CONTROLS_TABLE_SCHEMA_MISSING",
+    headers: ["Host Control", "Source List", "Business Label", "Source Field", "Expected Dynamic Display Control Category", "Display Purpose", "Proof Boundary or Deferred Note"],
+  },
+  {
+    section: "Application Navigation Plan",
+    code: "NAVIGATION_TABLE_SCHEMA_MISSING",
+    headers: ["Navigation Order", "Group", "Item", "Yeeflow Resource Type", "Target Resource", "Visible", "Icon", "Notes"],
+  },
+  {
+    section: "Target Users, Roles, Groups, and Permissions",
+    code: "ROLES_PERMISSIONS_TABLE_SCHEMA_MISSING",
+    headers: ["Role", "User Group", "Resource/Page/Form", "View", "Create", "Edit", "Delete/Archive", "Approve", "Admin", "Notes"],
+  },
+  {
+    section: "Validation Plan",
+    code: "VALIDATION_CHECKLIST_TABLE_SCHEMA_MISSING",
+    headers: ["Validation Layer", "Scope", "Tool/Method", "Expected Result", "Proof Boundary"],
+  },
+  {
+    section: "Deferred or Runtime-Proof Items",
+    code: "DEFERRED_ITEMS_TABLE_SCHEMA_MISSING",
+    headers: ["Item", "Category", "Reason", "User Impact", "Fallback", "Required Proof or Follow-up"],
+  },
 ];
 
 const DASHBOARD_ALLOWED_CONTROL_CATEGORIES = [
@@ -173,6 +264,43 @@ function sectionBody(sections, title) {
   return sections.find((section) => section.normalizedTitle === wanted || section.normalizedTitle.includes(wanted))?.body ?? "";
 }
 
+function normalizeHeaderCell(value) {
+  return value.toLowerCase().replace(/`/g, "").replace(/\s+/g, " ").trim();
+}
+
+function tableHeaderRows(sectionText) {
+  return sectionText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|") && line.endsWith("|"))
+    .filter((line) => !/^\|\s*:?-{3,}:?/.test(line));
+}
+
+function tableHeaderIncludes(sectionText, expectedHeaders) {
+  const normalizedExpected = expectedHeaders.map(normalizeHeaderCell);
+  return tableHeaderRows(sectionText).some((row) => {
+    const cells = row
+      .split("|")
+      .slice(1, -1)
+      .map(normalizeHeaderCell);
+    return normalizedExpected.every((expected) => cells.includes(expected));
+  });
+}
+
+function validateRequiredTableSchemas(sections, findings) {
+  for (const schema of REQUIRED_TABLE_SCHEMAS) {
+    const body = sectionBody(sections, schema.section);
+    if (!tableHeaderIncludes(body, schema.headers)) {
+      findings.push({
+        level: "error",
+        code: `APP_PLAN_${schema.code}`,
+        message: `${schema.section} must use the canonical template schema and include: ${schema.headers.join(", ")}.`,
+        section: schema.section,
+      });
+    }
+  }
+}
+
 function splitTableRows(sectionText) {
   return sectionText
     .split(/\r?\n/)
@@ -180,6 +308,14 @@ function splitTableRows(sectionText) {
     .filter((line) => line.startsWith("|") && line.endsWith("|"))
     .filter((line) => !/^\|\s*:?-{3,}:?/.test(line))
     .filter((line) => !/<[^>]+>/.test(line));
+}
+
+function rawTableRows(sectionText) {
+  return sectionText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|") && line.endsWith("|"))
+    .filter((line) => !/^\|\s*:?-{3,}:?/.test(line));
 }
 
 function hasAllowedDashboardControlCategory(text) {
@@ -290,8 +426,10 @@ function validateDashboardPagesPlan(text, findings) {
   }
 
   const dashboardRows = splitTableRows(dashboard);
+  const dashboardSectionsBlock = dashboard.split(/#### Dashboard Filters/i)[0].split(/#### Dashboard Sections/i)[1] || "";
+  const hasSectionControlRow = rawTableRows(dashboardSectionsBlock).some((row) => hasAllowedDashboardControlCategory(row));
   const hasConcreteSectionRow = dashboardRows.some((row) => /Summary|KPI|Data Filter|Collection|Data table|Kanban|Timeline|Text|Heading|Button|Container|Grid|Chart|Data analytics/i.test(row) && /\|[^|]{3,}\|/.test(row))
-    || (/Selected Yeeflow Control Type Category/i.test(dashboard) && hasAllowedDashboardControlCategory(dashboard));
+    || hasSectionControlRow;
   if (!hasConcreteSectionRow) {
     findings.push({
       level: "error",
@@ -300,7 +438,7 @@ function validateDashboardPagesPlan(text, findings) {
     });
   }
 
-  if (/\bdashboard\b/i.test(dashboard) && !hasAllowedDashboardControlCategory(dashboard)) {
+  if (/\bdashboard\b/i.test(dashboard) && !hasSectionControlRow) {
     findings.push({
       level: "error",
       code: "APP_PLAN_DASHBOARD_CONTROL_TYPE_PLANNING_MISSING",
@@ -387,6 +525,7 @@ function validate(file) {
   validateResourceOrder(text, findings);
   validateControlActionPlanning(text, findings);
   validateDashboardPagesPlan(text, findings);
+  validateRequiredTableSchemas(extractSections(text), findings);
 
   for (const [code, pattern] of REQUIRED_PATTERNS) {
     if (!pattern.test(text)) {

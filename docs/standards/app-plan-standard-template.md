@@ -8,8 +8,11 @@ Primary artifact rule: generate this plan as the primary human-readable Markdown
 
 ## 1. Plan Status
 
+Document metadata:
+
 - Application name:
 - Functional specification path:
+- Source Functional Specification reference:
 - Functional specification status:
 - Planning plugin:
 - Plugin version:
@@ -20,9 +23,18 @@ Primary artifact rule: generate this plan as the primary human-readable Markdown
 - Approval status:
 - Known blockers:
 
+Generation readiness summary:
+
+- Functional Specification approved or ready for App Plan:
+- App Plan ready for user approval:
+- Business clarification gates closed or explicitly defaulted for planning:
+- Generation blocked until user approval:
+
 ## 2. Requirement-to-Yeeflow Resource Mapping Summary
 
 Map each major requirement from the Functional Specification to Yeeflow resources.
+
+Yeeflow resource inventory:
 
 | Requirement Area | Business Requirement | Yeeflow Resource Type | Planned Resource Name | Required | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -37,6 +49,8 @@ Map each major requirement from the Functional Specification to Yeeflow resource
 Rules:
 
 - Every core business requirement must map to a Yeeflow resource, a supported configuration, or an explicitly deferred item.
+- App Plan to Functional Spec traceability must identify the Functional Specification section, dashboard requirement, business object, rule, workflow, approval, report, permission, or clarification gate that each planned resource satisfies.
+- App Plan to Page Function Plan traceability must identify the planned Page Function Plan reference for dashboard pages and custom page/function surfaces when applicable; write `not applicable` when no Page Function Plan is needed yet.
 - App Plan dashboard planning must trace back to the Functional Specification's business-level dashboard questions, source business objects/data lists, summary metrics, source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts.
 - Functional Specification to App Plan traceability is executable with `scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>`.
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
@@ -357,6 +371,12 @@ Repeat for each Dashboard page.
 - Runtime proof required:
 - Functional Specification dashboard source: business questions, source business objects/data lists, summary metrics, metric source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts from Stage 1.
 
+Dashboard page identity:
+
+| Dashboard Page Name | Business Purpose | Functional Spec Dashboard Requirement Reference | Source Data Lists/Business Objects | Navigation Placement | Page Function Plan Reference |
+| --- | --- | --- | --- | --- | --- |
+| <Dashboard> | <Purpose> | <Functional Spec section/requirement> | <Lists/objects> | <Navigation group/item> | <Page Function Plan path or not applicable> |
+
 #### Dashboard Sections
 
 | Section Order | Section Name | Business Purpose | Source Data List or Business Object | Required Fields or Metrics | Selected Yeeflow Control Type Category | Why This Control Type Is Appropriate | User Actions Needed | Proof Boundary or Deferred Note |
@@ -532,6 +552,8 @@ Rules:
 
 ## 19. Validation Plan
 
+Validation checklist:
+
 | Validation Layer | Scope | Tool/Method | Expected Result | Proof Boundary |
 | --- | --- | --- | --- | --- |
 | App-plan conformance | Resources vs plan | <Validator/manual> | pass/fail | Local proof |
@@ -608,6 +630,8 @@ Boundary rule:
 - Package/output assumptions:
 
 ## 22. Deferred or Runtime-Proof Items
+
+Reports/deferred resources:
 
 | Item | Category | Reason | User Impact | Fallback | Required Proof or Follow-up |
 | --- | --- | --- | --- | --- | --- |

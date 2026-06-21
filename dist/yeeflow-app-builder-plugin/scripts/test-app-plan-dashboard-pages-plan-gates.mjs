@@ -42,12 +42,25 @@ function planWithDashboard(dashboardPlan) {
 # Facility Maintenance Request Management - Yeeflow App Plan
 
 ## 1. Plan Status
+Document metadata:
+
+- Application name: Facility Maintenance Request Management
+- Source Functional Specification reference: functional-specification.md#13-dashboard-page-requirements
 - Functional Specification review gate passed: Yes
 - App Plan review gate passed: Yes
 - Business decision gates answered/user-default-approved-for-generation or no blockers: Yes
 - No invented unsupported shapes: Yes
 
+Generation readiness summary:
+
+- Functional Specification approved or ready for App Plan: Yes
+- App Plan ready for user approval: Yes
+- Business clarification gates closed or explicitly defaulted for planning: Yes
+- Generation blocked until user approval: Yes
+
 ## 2. Requirement-to-Yeeflow Resource Mapping Summary
+Yeeflow resource inventory:
+
 | Requirement Area | Business Requirement | Yeeflow Resource Type | Planned Resource Name | Required | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Data management | Maintenance requests | Data list | Maintenance Requests | Yes | Select one exact Yeeflow resource type |
@@ -60,42 +73,46 @@ function planWithDashboard(dashboardPlan) {
 
 Rules:
 - Every core business requirement must map to a Yeeflow resource, a supported configuration, or an explicitly deferred item.
+- App Plan to Functional Spec traceability maps dashboard, data, approval, workflow, and reporting rows back to Functional Specification sections.
+- App Plan to Page Function Plan traceability records the Page Function Plan reference for dashboard pages when applicable.
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
 - Do not invent unsupported controls, Dynamic controls, field types, workflow node types, variable types, action shapes, property paths, bindings, or configuration shapes.
 - Unknown capability labels: export-learning-required, runtime-proof-required, deferred.
 
 ## 3. Resource Generation Order
-1. Data lists and Document libraries
-2. Approval forms
-3. Form reports
-4. Schedule workflows
-5. AI Agents
-6. Copilots
-7. Custom Data List forms
-8. Data List workflows
-9. Notifications
-10. Data List views
-11. Dashboard pages
-12. Application navigation
-13. Target users, roles, groups, and permissions
+| Order | Resource Type | Resource Name | Depends On | Reason for Order | Blocking If Missing |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Data lists and Document libraries | Maintenance Requests | None | Lookup and dashboard source must exist first | Yes |
+| 2 | Approval forms | Maintenance Intake Review | Maintenance Requests | Approval needs request fields | Yes |
+| 3 | Form reports | Maintenance Intake Report | Maintenance Intake Review | Report depends on approval form | No |
+| 4 | Schedule workflows | Not applicable | None | No schedule workflow needed | No |
+| 5 | AI Agents | Not applicable | None | No AI Agent needed | No |
+| 6 | Copilots | Not applicable | None | No Copilot needed | No |
+| 7 | Custom Data List forms | Request Detail | Maintenance Requests | Users need create/edit/detail forms | Yes |
+| 8 | Data List workflows | Assignment workflow | Maintenance Requests | Assignment events depend on list | Yes |
+| 9 | Notifications | Assignment notice | Assignment workflow | Notification depends on workflow | Yes |
+| 10 | Data List views | Active Requests | Maintenance Requests | View depends on fields | Yes |
+| 11 | Dashboard pages | Facility Operations Dashboard | Maintenance Requests | Dashboard depends on lists and views | Yes |
+| 12 | Application navigation | Operations navigation | Dashboard and list views | Navigation links resources | Yes |
+| 13 | Target users, roles, groups, and permissions | Facility roles | Resources | Permissions depend on resources | Yes |
 
 ## 4. Data Lists and Document Libraries Plan
 ### 4.1 Maintenance Requests
 #### Fields
-| Field Order | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Placeholder |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Request Title | Title | Title | input control | Enter request title |
+| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Request title | Request Title | Title | Title | input control | plugin-known field/control type | validator-backed | N/A | Yes | No | | Enter request title | required | | | | | Native title field |
 
 ## 5. Approval Forms Plan
 ### 5.1 Maintenance Intake Review
 #### Submission Form Fields
-| Field | Placeholder |
-| --- | --- |
-| Request Title | Enter request title |
+| Field Order | Business Label | Field Name | Field ID / Variable ID | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Request title | Request Title | RequestTitle | Text | input control | plugin-known variable/control type | validator-backed | N/A | Maintenance Requests.Title | No | Yes | | Enter request title | none | required | | | | | Request title |
 #### Task Form Fields
-| Field | Placeholder |
-| --- | --- |
-| Review Decision | Select decision |
+| Field Order | Business Label | Field Name | Field ID / Variable ID | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Review decision | Review Decision | ReviewDecision | Choice | radio control | plugin-known variable/control type | validator-backed | N/A | workflow decision | No | Yes | | Select decision | none | required | | | | | Coordinator decision |
 #### Sub List List Actions
 No custom Sub List actions required.
 
@@ -115,7 +132,9 @@ No AI Agent required; not applicable.
 No Copilot required; not applicable.
 
 ## 10. Custom Data List Forms Plan
-Placeholder planning included for request detail form.
+| Form Name | Form Type | Purpose | Used By | Layout Pattern | Actions Required | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| Request Detail | Detail | Review and update request records | Coordinator, Technician | Standard detail form | Yes | Placeholder planning included for request detail form. |
 
 ## 11. Data List Workflows Plan
 Assignment notification workflow with trigger, action, and proof boundary.
@@ -135,9 +154,9 @@ ${dashboardPlan}
 | 1 | Operations | Facility Operations Dashboard | Dashboard | Facility Operations Dashboard | Yes | dashboard | Main dashboard |
 
 ## 16. Target Users, Roles, Groups, and Permissions
-| Role | Resource/Page/Form | View | Create | Edit | Approve |
-| --- | --- | --- | --- | --- | --- |
-| Coordinator | Dashboard | Yes | No | No | Yes |
+| Role | User Group | Resource/Page/Form | View | Create | Edit | Delete/Archive | Approve | Admin | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Coordinator | Facility Coordinators | Dashboard | Yes | No | No | No | Yes | No | Reviews operations dashboard |
 
 ## 17. Plugin Capability and Standards Compliance
 All App Plan resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes come from active plugin-known skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references.
@@ -149,7 +168,11 @@ All App Plan resource types, field types, variable types, controls, Dynamic cont
 - No invented unsupported shapes: Yes
 
 ## 19. Validation Plan
-Run planning validators and local package validators.
+Validation checklist:
+
+| Validation Layer | Scope | Tool/Method | Expected Result | Proof Boundary |
+| --- | --- | --- | --- | --- |
+| App-plan conformance | Dashboard and resource order | validate-app-plan-resource-order.mjs | pass | Planning proof |
 
 ## 20. Proof Boundary
 Planning readiness only; runtime proof is separate.
@@ -158,9 +181,11 @@ Planning readiness only; runtime proof is separate.
 Facility coordinator owns dashboard review.
 
 ## 22. Deferred or Runtime-Proof Items
-| Item | Category | Reason | Fallback | Proof Impact |
-| --- | --- | --- | --- | --- |
-| Notification delivery | runtime-proof-required | Delivery requires tenant proof | Manual follow-up | Runtime proof later |
+Reports/deferred resources:
+
+| Item | Category | Reason | User Impact | Fallback | Required Proof or Follow-up |
+| --- | --- | --- | --- | --- | --- |
+| Notification delivery | runtime-proof-required | Delivery requires tenant proof | Delivery not proven locally | Manual follow-up | Runtime proof later |
 
 ## 23. Recommended Next Prompt
 Generate the app from this approved plan after gates pass.
@@ -179,6 +204,12 @@ const validDashboard = `
 - Temp variables required: Metrics for open, overdue, completion rate.
 - Page/form actions required: open detail, add data list item.
 - Runtime proof required: Summary/KPI and action execution proof are separate.
+
+Dashboard page identity:
+
+| Dashboard Page Name | Business Purpose | Functional Spec Dashboard Requirement Reference | Source Data Lists/Business Objects | Navigation Placement | Page Function Plan Reference |
+| --- | --- | --- | --- | --- | --- |
+| Facility Operations Dashboard | Monitor request workload, SLA risk, and technician activity. | FS-13 Facility Operations Dashboard | Maintenance Requests, Work Assignments, Locations | Operations group | To be created after App Plan approval |
 
 #### Dashboard Sections
 | Section Order | Section Name | Business Purpose | Source Data List or Business Object | Required Fields or Metrics | Selected Yeeflow Control Type Category | Why This Control Type Is Appropriate | User Actions Needed | Proof Boundary or Deferred Note |

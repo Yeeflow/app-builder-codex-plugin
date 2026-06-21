@@ -32,15 +32,20 @@ const REQUIRED_HEADINGS = [
 
 const REQUIRED_PATTERNS = [
   ["REQUIREMENT_INTERPRETATION_METHOD", /Requirement Interpretation Method/i],
+  ["DOCUMENT_METADATA", /Document metadata/i],
   ["INPUT_DETAIL_CLASSIFICATION", /brief.*detailed.*document-backed.*screenshot-backed|Requirement detail level:/is],
   ["BUSINESS_CONTEXT", /Business Context/i],
+  ["GOALS_AND_NON_GOALS", /Goals and non-goals|Business goals[\s\S]*Non-goals/i],
   ["ROLE_RESPONSIBILITIES", /User Roles and Responsibilities/i],
   ["BUSINESS_OBJECTS", /Business Objects and Data Requirements/i],
   ["BUSINESS_RELATIONSHIPS", /Business Relationships and Dependency Rules/i],
   ["BUSINESS_RULES", /Business Rules and Status Lifecycles/i],
   ["DASHBOARD_PAGE_REQUIREMENTS", /Dashboard Page Requirements/i],
   ["REPORTING_AUDIT_REQUIREMENTS", /Reporting and Audit Requirements/i],
+  ["PERMISSIONS_VISIBILITY_RULES", /Permissions and visibility rules|Permissions and Access Requirements/i],
   ["BUSINESS_CLARIFICATION_GATES", /Business Clarification Gates/i],
+  ["ASSUMPTIONS_DEFAULTS_DEFERRED", /Assumptions, defaults, and deferred decisions|Defaults applied for planning[\s\S]*Deferred business decisions/i],
+  ["VALIDATION_CHECKLIST", /Functional Specification validation checklist|Functional Specification Completeness Review/i],
   ["COMPLETENESS_REVIEW", /Functional Specification Completeness Review/i],
   ["READINESS_FOR_APP_PLAN", /Readiness for App Plan/i],
 ];
@@ -95,6 +100,85 @@ const SECTION_RULES = [
     title: "Business Clarification Gates",
     code: "BUSINESS_CLARIFICATION_GATE_DETAILS_INCOMPLETE",
     terms: ["decision key", "question", "options", "recommended default", "why it matters", "approval status"],
+  },
+];
+
+const REQUIRED_TABLE_SCHEMAS = [
+  {
+    section: "User Roles and Responsibilities",
+    code: "ROLE_RESPONSIBILITIES_TABLE_SCHEMA_MISSING",
+    headers: ["Role", "What They Need To Do", "Records They Can See", "Actions They Can Perform", "Decisions They Own", "Dashboards/Pages They Need"],
+  },
+  {
+    section: "Business Objects and Data Requirements",
+    code: "BUSINESS_OBJECT_DATA_TABLE_SCHEMA_MISSING",
+    headers: ["Business Object", "Business Purpose", "Required Fields", "Field Meaning", "Field Type Expectation", "Lookup/Reference Relationships", "Lifecycle/Status Fields", "Audit Fields", "Reporting/Dashboard Fields"],
+  },
+  {
+    section: "Core Business Process",
+    code: "CORE_BUSINESS_PROCESS_REQUIRED_BLOCKS_MISSING",
+    headers: ["Start trigger", "Submission/intake", "Review/approval", "Assignment/fulfillment", "Status tracking", "Completion/closure", "Exception handling", "Audit/history needs"],
+    listOnly: true,
+  },
+  {
+    section: "Business Rules and Status Lifecycles",
+    code: "STATUS_LIFECYCLE_TABLE_SCHEMA_MISSING",
+    headers: ["Lifecycle Name", "Applies To", "Status Values", "Initial Status", "Final Statuses", "Transition Rules"],
+  },
+  {
+    section: "Business Rules and Status Lifecycles",
+    code: "BUSINESS_RULES_TABLE_SCHEMA_MISSING",
+    headers: ["Rule Area", "Business Rule", "Applies To", "Condition", "Required Data/Fields", "Responsible Role", "Exception/Rework Behavior", "Reporting Impact"],
+  },
+  {
+    section: "Approval and Review Requirements",
+    code: "APPROVAL_REVIEW_TABLE_SCHEMA_MISSING",
+    headers: ["Approval/Review Process", "Trigger", "Submitter", "Reviewers/Approvers", "Decisions", "Required Task Work"],
+  },
+  {
+    section: "Workflow and Notification Requirements",
+    code: "WORKFLOW_NOTIFICATION_TABLE_SCHEMA_MISSING",
+    headers: ["Workflow/Notification", "Trigger Condition", "Business Condition", "Actor/Recipient", "Action/Result", "Timing/SLA", "Notification Content Intent"],
+  },
+  {
+    section: "Dashboard Page Requirements",
+    code: "DASHBOARD_IDENTITY_TABLE_SCHEMA_MISSING",
+    headers: ["Dashboard Name", "Primary Users", "Business Purpose", "Business Questions It Must Answer", "Source Business Objects/Data Lists", "Mobile Support Requirement", "Business Exceptions/Alerts To Highlight"],
+  },
+  {
+    section: "Dashboard Page Requirements",
+    code: "DASHBOARD_METRICS_TABLE_SCHEMA_MISSING",
+    headers: ["Dashboard", "Metric", "Source Object/List", "Source Fields", "Calculation Logic", "Default Scope", "Alert/Threshold Logic"],
+  },
+  {
+    section: "Dashboard Page Requirements",
+    code: "DASHBOARD_DATA_REGIONS_TABLE_SCHEMA_MISSING",
+    headers: ["Dashboard", "Data Region", "Business Purpose", "Source Object/List", "Display Fields", "User Actions Needed", "Sorting/Grouping Requirements"],
+  },
+  {
+    section: "Dashboard Page Requirements",
+    code: "DASHBOARD_FILTERS_TABLE_SCHEMA_MISSING",
+    headers: ["Dashboard", "Filter", "Source Object/List", "Source Field", "Default Scope", "Applies To Regions"],
+  },
+  {
+    section: "Reporting and Audit Requirements",
+    code: "REPORTING_AUDIT_TABLE_SCHEMA_MISSING",
+    headers: ["Report/Page/KPI", "Business Question", "Users", "Data Needed", "Filters", "Actions"],
+  },
+  {
+    section: "Permissions and Access Requirements",
+    code: "PERMISSIONS_VISIBILITY_TABLE_SCHEMA_MISSING",
+    headers: ["Role", "Resource/Process", "View", "Create", "Edit", "Delete/Archive", "Approve", "Admin"],
+  },
+  {
+    section: "Business Clarification Gates",
+    code: "BUSINESS_CLARIFICATION_GATES_TABLE_SCHEMA_MISSING",
+    headers: ["Decision Key", "Question", "Options", "Recommended Default", "Why It Matters", "Required Before App Plan?", "Approval Status"],
+  },
+  {
+    section: "Functional Specification Completeness Review",
+    code: "FUNCTIONAL_SPEC_VALIDATION_CHECKLIST_TABLE_SCHEMA_MISSING",
+    headers: ["Review Item", "Status", "Notes"],
   },
 ];
 
@@ -166,6 +250,46 @@ function sectionBody(sections, title) {
 function hasTerm(sectionText, term) {
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\\\//g, "[/ ]");
   return new RegExp(escaped, "i").test(sectionText);
+}
+
+function normalizeHeaderCell(value) {
+  return value.toLowerCase().replace(/`/g, "").replace(/\s+/g, " ").trim();
+}
+
+function tableHeaderRows(sectionText) {
+  return sectionText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|") && line.endsWith("|"))
+    .filter((line) => !/^\|\s*:?-{3,}:?/.test(line));
+}
+
+function tableHeaderIncludes(sectionText, expectedHeaders) {
+  const normalizedExpected = expectedHeaders.map(normalizeHeaderCell);
+  return tableHeaderRows(sectionText).some((row) => {
+    const cells = row
+      .split("|")
+      .slice(1, -1)
+      .map(normalizeHeaderCell);
+    return normalizedExpected.every((expected) => cells.includes(expected));
+  });
+}
+
+function validateRequiredTableSchemas(sections, findings) {
+  for (const schema of REQUIRED_TABLE_SCHEMAS) {
+    const body = sectionBody(sections, schema.section);
+    const missing = schema.headers.filter((header) => !hasTerm(body, header));
+    const valid = schema.listOnly ? missing.length === 0 : tableHeaderIncludes(body, schema.headers);
+    if (!valid) {
+      findings.push({
+        level: "error",
+        code: `FUNCTIONAL_SPEC_${schema.code}`,
+        message: `${schema.section} must use the canonical template schema and include: ${schema.headers.join(", ")}.`,
+        section: schema.section,
+        missing,
+      });
+    }
+  }
 }
 
 function strippedForPolicyChecks(text) {
@@ -243,6 +367,8 @@ function validate(file) {
       });
     }
   }
+
+  validateRequiredTableSchemas(sections, findings);
 
   const sectionSix = sectionBody(sections, "Business Objects and Data Requirements");
   if (!/Business Object|not applicable|N\/A/i.test(sectionSix)) {

@@ -10,6 +10,8 @@ Primary artifact rule: generate this document as the primary human-readable Mark
 
 ## 1. Specification Status
 
+Document metadata:
+
 - Application name:
 - Request source:
 - Source materials:
@@ -43,11 +45,15 @@ State how the requirements were interpreted.
 
 ## 4. Business Context
 
+Goals and non-goals:
+
 - Business problem:
 - Target users:
 - Operational scope:
 - Expected outcome:
 - Business goal:
+- Business goals:
+- Non-goals:
 - What the application manages:
 - Primary business value:
 - Success criteria:
@@ -277,6 +283,8 @@ Rules:
 
 ## 18. Permissions and Access Requirements
 
+Permissions and visibility rules:
+
 | Role | Resource/Process | View | Create | Edit | Delete/Archive | Approve | Admin | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Role> | <Resource> | Yes/No | Yes/No | Yes/No | Yes/No | Yes/No | Yes/No | <Notes> |
@@ -322,6 +330,8 @@ Final planning-output rule:
 
 ## 21. Assumptions
 
+Assumptions, defaults, and deferred decisions:
+
 - Business assumptions:
 - Data assumptions:
 - Role assumptions:
@@ -329,6 +339,8 @@ Final planning-output rule:
 - Reporting assumptions:
 - UI assumptions:
 - Integration assumptions:
+- Defaults applied for planning:
+- Deferred business decisions:
 
 ## 22. Risks, Constraints, and Unknowns
 
@@ -337,6 +349,8 @@ Final planning-output rule:
 | <Area> | <Risk> | <Impact> | <Handling> | Yes/No |
 
 ## 23. Functional Specification Completeness Review
+
+Functional Specification validation checklist:
 
 | Review Item | Status | Notes |
 | --- | --- | --- |

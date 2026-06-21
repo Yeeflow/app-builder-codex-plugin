@@ -42,6 +42,8 @@ function richFacilitySpec(extraDashboardText = "") {
 # Facility Maintenance Request Management - Functional Specification
 
 ## 1. Specification Status
+Document metadata:
+
 - Application name: Facility Maintenance Request Management
 - Requirement detail level: detailed
 - Current status: ready for review
@@ -53,11 +55,15 @@ function richFacilitySpec(extraDashboardText = "") {
 - The request is detailed and reorganized into a business requirement document before planning.
 
 ## 4. Business Context
+Goals and non-goals:
+
 - Business problem: Facility issues are reported inconsistently and overdue repairs are not visible.
 - Target users: Employees, facility coordinators, technicians, department managers, and operations leaders.
 - Operational scope: intake, triage, assignment, fulfillment, closure, exception handling, reporting, and audit evidence for workplace maintenance.
 - Expected outcome: requests are prioritized, assigned, completed, and reviewed with clear service accountability.
 - Business goal: reduce overdue work and improve facility service transparency.
+- Business goals: improve SLA visibility, reduce unresolved issues, and provide auditable maintenance decisions.
+- Non-goals: vendor contract management, inventory purchasing, and building access control.
 - What the application manages: maintenance requests, assets, work assignments, completion evidence, and service history.
 - Primary business value: faster issue resolution and reliable operational reporting.
 - Success criteria: every request has an owner, status, priority, due date, location, and closure outcome.
@@ -209,6 +215,8 @@ ${extraDashboardText}
 | closureAuthority | Who can close completed requests? | requester only; coordinator only; either requester or coordinator | either requester or coordinator | Changes completion rules and rework behavior | Yes | default-applied-for-planning |
 
 ## 21. Assumptions
+Assumptions, defaults, and deferred decisions:
+
 - Business assumptions: Facility coordinator owns triage.
 - Data assumptions: location and priority are mandatory.
 - Role assumptions: technicians only see assigned work.
@@ -216,6 +224,8 @@ ${extraDashboardText}
 - Reporting assumptions: dashboard defaults to current month.
 - UI assumptions: mobile support is required for intake and technician updates.
 - Integration assumptions: no external integration is required.
+- Defaults applied for planning: SLA and closure authority defaults are applied for planning only.
+- Deferred business decisions: exact local SLA calendar and final closure authority require approval before generation.
 
 ## 22. Risks, Constraints, and Unknowns
 | Area | Risk/Unknown | Impact | Proposed Handling | Requires User Confirmation |

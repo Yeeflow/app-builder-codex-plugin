@@ -76,7 +76,7 @@ The Functional Specification is the business requirement document. It must descr
 
 Keep low-level Yeeflow implementation details out of the Functional Specification. Do not include Yeeflow control types, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, exact generated IDs, package JSON, or resource implementation shapes. Those belong in the App Plan, Page Function Plan, Blueprint, resource generation, and validation stages.
 
-The primary artifact must be a human-readable Markdown file named `functional-specification.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `functional-specification.trace.json`; JSON must not replace `functional-specification.md`.
+The primary artifact must be a human-readable Markdown file named `functional-specification.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `functional-specification.trace.json`; JSON must not replace `functional-specification.md`. Any companion JSON projection must be derived from the Markdown Functional Specification and remain consistent with it.
 
 For brief requirements:
 
@@ -126,7 +126,9 @@ Create the Yeeflow App Plan only from the reviewed Functional Specification, usi
 
 The reviewed Functional Specification is the business source of truth for the App Plan. The App Plan is not a free-form plan, generic project plan, or ad hoc script plan. It is the Yeeflow resource generation contract and must convert business requirements into Yeeflow-supported resources in this standard order:
 
-The primary artifact must be a human-readable Markdown file named `yeeflow-app-plan.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `app-plan.trace.json`; JSON must not replace `yeeflow-app-plan.md`.
+The primary artifact must be a human-readable Markdown file named `yeeflow-app-plan.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `app-plan.trace.json`; JSON must not replace `yeeflow-app-plan.md`. Any companion JSON projection must be derived from the Markdown App Plan and remain consistent with it.
+
+Generation must be based on the reviewed Markdown Functional Specification and Markdown Yeeflow App Plan first. Companion JSON may support validators, traceability, or tests, but it must not replace, override, or silently narrow the Markdown planning contracts.
 
 1. Data lists and Document libraries
 2. Approval forms
@@ -298,6 +300,8 @@ node scripts/validate-planning-artifact-formats.mjs --dir <artifact-dir>
 ```
 
 This gate fails if `functional-specification.md` or `yeeflow-app-plan.md` is missing, if either primary Markdown document is empty, skeletal, or only links to JSON, if Functional Specification or App Plan is generated only as JSON, or if companion JSON projections such as `functional-specification.trace.json`, `app-plan.trace.json`, or `page-function-plan.trace.json` do not reference the Markdown source they project from. It proves artifact format discipline only; it does not prove business correctness, package validity, or runtime behavior.
+
+After this gate passes, downstream Page Function Plan, Blueprint, resource generation, and package validation must use the Markdown planning contracts as the business and resource source of truth. JSON projections can be read as validator-friendly indexes, not as replacement specifications.
 
 ## 8. Decide Safe Build Scope
 
