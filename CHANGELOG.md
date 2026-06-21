@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.8.1
+
+- Fix App Plan planning schema/validator consistency introduced around the `0.8.0` planning-quality release.
+- Keep `yeeflow-app-plan.md` as the single primary Markdown App Plan artifact with the canonical `# <Application Name> - Yeeflow App Plan` resource-order schema.
+- Make `validate-app-plan-template.mjs` validate the same canonical resource-order App Plan contract as `validate-app-plan-resource-order.mjs` instead of requiring a competing `Yeeflow Application Plan` schema.
+- Clarify Functional Specification generation so `functional-specification.md` must emit every required canonical section in the standardized Markdown template, including not-applicable sections with rationale.
+- Preserve the overall App Plan template structure and continue enhancing only Dashboard Pages Plan with legal Yeeflow control-type planning.
+- Keep prevention of low-level implementation leakage in Functional Specification, App Plan, and Page Function Plan planning surfaces.
+- Prevent negative guardrail wording such as unsupported-shape blockers from being misclassified as planned unsupported controls.
+- Add focused Office Asset Loan style schema consistency regressions proving the Functional Specification, App Plan template validator, resource-order validator, Dashboard Pages Plan checks, implementation-leakage checks, and guardrail-wording checks agree.
+
 ## 0.8.0
 
 - Release richer Functional Specification business logic requirements, including business process, roles, rules, data lifecycle, reporting, audit, and clarification gates.
