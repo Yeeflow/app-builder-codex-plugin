@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.8.3
+
+- Release generated-final YAPK export-shape and runtime materialization gates from PR #143.
+- Add approval `DefResource` export-shape checks for canonical `::brotli::` Brotli/base64 encoding, process metadata, page registrations, form/task page metadata, workflow graph IDs, positions, variables, links, task URLs, and key/defkey consistency.
+- Reject minimal approval placeholders and count-only FormNewReports/DataReports placeholders unless explicitly deferred with App Plan impact.
+- Strengthen Dashboard runtime-safe materialization checks so synthetic-only controls, hidden Summary hosts, unsafe Summary/chart models, and empty business sections do not satisfy App Plan resources.
+- Support `PortalInfo: null` for no-portal YAPK packages while continuing to reject `{}` and `[]`.
+- Enforce native Title export metadata, including `Status: 0`, `IsSystem: true`, and `IsIndex: true`.
+- Clarify TenantID as wrapper tenant metadata rather than generated app content ID provenance.
+- Report runtime URL mismatches separately when install/API-reported IDs differ from the decoded package root `ListSet.ListID`.
+
 ## 0.8.2
 
 - Add generated-final resource completeness gates that compare decoded packages against the approved App Plan before signing readiness.
