@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
+import { validateGeneratedFinalResourceCompleteness } from "./validate-generated-final-resource-completeness.mjs";
 
 const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"]);
 const RECORD_DISPLAY_FIELD = "ListDataID";
@@ -41,10 +42,17 @@ export function validateDashboardGenerationHardGates(options = {}) {
   }
 
   if (options.report) validateReportIdentity(options.report, decoded, findings);
+  if (options.plan && options.package) {
+    const completeness = validateGeneratedFinalResourceCompleteness({ plan: options.plan, package: options.package });
+    for (const finding of completeness.findings || []) {
+      if (/^GENERATED_FINAL_DASHBOARD_/.test(finding.code || "")) findings.push(finding);
+    }
+  }
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
     package: packagePath,
+    appPlan: options.plan ? path.resolve(options.plan) : null,
     report: options.report ? path.resolve(options.report) : null,
     canonicalApplication: decoded?.ListSet?.ListID ? { listSetId: String(decoded.ListSet.ListID) } : null,
     findings,
@@ -396,6 +404,7 @@ function parseArgs(argv) {
     const token = argv[i];
     if (token === "--help") args.help = true;
     else if (token === "--package") args.package = argv[++i];
+    else if (token === "--plan") args.plan = argv[++i];
     else if (token === "--report") args.report = argv[++i];
     else throw new Error(`Unexpected argument: ${token}`);
   }
@@ -404,7 +413,7 @@ function parseArgs(argv) {
 
 function printUsage() {
   console.log(`Usage:
-  node scripts/validate-dashboard-generation-hard-gates.mjs --package <file.yapk> [--report <final-report.json|md>]
+  node scripts/validate-dashboard-generation-hard-gates.mjs --package <file.yapk> [--plan <yeeflow-app-plan.md>] [--report <final-report.json|md>]
   node scripts/validate-dashboard-generation-hard-gates.mjs --report <final-report.json|md>`);
 }
 

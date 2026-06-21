@@ -14,6 +14,7 @@ if (isMainModule()) {
     process.exit(args.help ? 0 : 1);
   }
   const result = runYapkFirstGenerationPreflight(args.package, {
+    plan: args.plan,
     idProvenance: args.idProvenance,
     upgrade: args.upgrade,
     previousPackage: args.previousPackage,
@@ -27,6 +28,7 @@ if (isMainModule()) {
 
 export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   const resolvedPackage = path.resolve(options.cwd || ROOT, packagePath);
+  const plan = options.plan ? path.resolve(options.cwd || ROOT, options.plan) : "";
   const idProvenance = options.idProvenance ? path.resolve(options.cwd || ROOT, options.idProvenance) : defaultIdProvenancePath(resolvedPackage);
   const gates = [];
   if (!resolvedPackage.endsWith(".yapk")) {
@@ -53,7 +55,15 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("api-issued-content-id-provenance", ["scripts/validate-yapk-id-provenance.mjs", "--package", resolvedPackage, "--manifest", idProvenance]));
   gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
   gates.push(runGate("dashboard-grid-table-collections", ["scripts/validate-dashboard-grid-table-collections.mjs", "--package", resolvedPackage]));
-  gates.push(runGate("dashboard-generation-hard-gates", ["scripts/validate-dashboard-generation-hard-gates.mjs", "--package", resolvedPackage]));
+  gates.push(runGate("dashboard-generation-hard-gates", [
+    "scripts/validate-dashboard-generation-hard-gates.mjs",
+    "--package",
+    resolvedPackage,
+    ...(plan ? ["--plan", plan] : []),
+  ]));
+  if (plan) {
+    gates.push(runGate("generated-final-resource-completeness", ["scripts/validate-generated-final-resource-completeness.mjs", "--plan", plan, "--package", resolvedPackage]));
+  }
   if (options.upgrade || options.previousPackage || options.previousManifest || options.newManifest) {
     gates.push(runUpgradeIdStabilityGate({
       resolvedPackage,
@@ -77,6 +87,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   return {
     ok: !failed,
     package: summarizePath(resolvedPackage),
+    plan: plan ? summarizePath(plan) : null,
     idProvenance: summarizePath(idProvenance),
     failedGate: failed?.gate || null,
     gates,
@@ -156,6 +167,9 @@ function parseArgs(argv) {
     else if (token === "--id-provenance") {
       args.idProvenance = argv[i + 1];
       i += 1;
+    } else if (token === "--plan") {
+      args.plan = argv[i + 1];
+      i += 1;
     } else if (token === "--previous-package") {
       args.previousPackage = argv[i + 1];
       i += 1;
@@ -181,6 +195,7 @@ function parseArgs(argv) {
 function printUsage() {
   console.log(`Usage:
   node scripts/yapk-first-generation-preflight.mjs --package <file.yapk> [--id-provenance <report.json>] [--json]
+  node scripts/yapk-first-generation-preflight.mjs --package <file.yapk> --plan <yeeflow-app-plan.md> [--id-provenance <report.json>] [--json]
   node scripts/yapk-first-generation-preflight.mjs --package <new.yapk> --upgrade \\
     --previous-package <previous.yapk> \\
     --previous-manifest <previous-id-lineage.json> \\

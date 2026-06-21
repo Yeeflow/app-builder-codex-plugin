@@ -37,6 +37,14 @@ Plan conformance validation must compare planned and generated:
 - permissions, security, settings, and admin resources
 - navigation groups and navigation child items
 
+Generated-final resource completeness validation must also compare the approved App Plan to the decoded package surface before signing readiness. A package must fail when the App Plan declares resources but the decoded generated-final package omits them, including data lists, approval forms, custom data list/document library forms, dashboard pages, FormNewReports, DataReports, workflows, notifications, navigation groups/items, and roles/permissions where planned.
+
+Approval forms are complete only when planned approval forms materialize under decoded `Forms[]`; a plan that requires approval forms or explicitly forbids `Forms: []` must fail if `Forms` is empty. Planned form reports must materialize under `FormNewReports[]`; planned Data Reports must materialize under `DataReports[]`.
+
+Dashboard pages are complete only when planned business regions materialize as generated dashboard controls. A Type 103 dashboard that contains only `Main > Content` with `Content.children = []`, or only container shell controls, must fail when the App Plan declares KPI/Summary metrics, filters, Collection/Data table/Kanban/Timeline regions, or dynamic item-template display needs.
+
+Navigation is complete only when planned groups/items are represented in decoded navigation and planned resources are reachable. A package with only a generic/default group, such as `Workspace`, must fail when the App Plan declares groups such as Requests, Monitoring, Administration, or Exceptions.
+
 Every planned item must be classified as one of:
 
 - `implemented`
@@ -96,3 +104,17 @@ node scripts/validate-app-plan-conformance.mjs --plan <plan.md|plan.json> --pack
 ```
 
 Use `--mode strict` when the user asked for the full approved application or when release/test artifacts must prove plan fidelity. In default mode, missing planned resources are errors; grouped navigation can be a warning only when grouped navigation export shape is not yet proven and the implementation report says so explicitly.
+
+Before signing readiness for generated-final packages created from an approved App Plan, also run:
+
+```bash
+node scripts/validate-generated-final-resource-completeness.mjs --plan <yeeflow-app-plan.md> --package <app.yapk|decoded.json>
+```
+
+For first-generation `.yapk` preflight with an approved plan, pass the plan to the aggregate gate:
+
+```bash
+node scripts/yapk-first-generation-preflight.mjs --package <app.yapk> --plan <yeeflow-app-plan.md> --json
+```
+
+Findings from the generated-final completeness gate must include actionable App Plan references and decoded package paths. This gate is strict for real missing resources but allows omissions only when the App Plan explicitly marks the item deferred with reason, fallback/user impact, and required follow-up/proof.
