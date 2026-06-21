@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.4`
+`0.8.5`
+
+Version `0.8.5` releases Dashboard Golden Reference enforcement from PR #147. It registers the Event Portfolio dashboard as the default golden reference with reusable header, filter, KPI, content, and grid-table region references; adds dashboard golden-reference conformance validation; registers the conformance gate in dashboard hard gates and YAPK preflight; enforces generated dashboard provenance; blocks copying Event-specific fields into unrelated apps; and documents the dashboard golden-reference selection and consumption lifecycle.
 
 Version `0.8.4` releases existing-app YAPK upgrade scope, lineage, and Version Management gates. Upgrade packages must declare intended scope, block unrelated-resource mutations, preserve existing IDs, disambiguate layout semantic keys, keep default view layout/query fields consistent, enforce report scope and duplicate-report checks, validate wrapper identity, classify API status `0` as submitted rather than final success, require Version Management final `Succeed` proof with error-log capture, separate runtime change proof, and validate approval `DefResource` upgrade-scope/export-shape readiness.
 
