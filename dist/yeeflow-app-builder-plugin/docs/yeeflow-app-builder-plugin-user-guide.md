@@ -20,7 +20,11 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.2`
+`0.8.4`
+
+Version `0.8.4` releases existing-app YAPK upgrade scope, lineage, and Version Management gates. Upgrade packages must declare intended scope, block unrelated-resource mutations, preserve existing IDs, disambiguate layout semantic keys, keep default view layout/query fields consistent, enforce report scope and duplicate-report checks, validate wrapper identity, classify API status `0` as submitted rather than final success, require Version Management final `Succeed` proof with error-log capture, separate runtime change proof, and validate approval `DefResource` upgrade-scope/export-shape readiness.
+
+Version `0.8.3` adds generated-final YAPK export-shape and runtime materialization gates from PR #143. Approval `DefResource` metadata must be export-shaped with canonical `::brotli::` Brotli/base64 encoding and workflow/page registrations; FormNewReports/DataReports count-only placeholders are rejected; dashboard pages must prove visible runtime-safe business sections bound to included resources; `PortalInfo: null` is accepted for no-portal packages; native Title metadata, TenantID provenance boundaries, and runtime URL mismatch reporting are enforced.
 
 Version `0.8.2` adds generated-final resource completeness gates against the approved App Plan before signing readiness. Generated packages must materialize planned approval forms, custom forms, FormNewReports, DataReports, dashboard KPI/filter/Summary/Collection/Data table regions, navigation groups/items, data lists, and other non-deferred resources. Shell-only dashboards, generic-only navigation, and partial generated-final package surfaces fail unless the App Plan explicitly defers the item with reason, fallback/user impact, and follow-up proof.
 

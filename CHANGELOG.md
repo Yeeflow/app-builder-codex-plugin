@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.8.4
+
+- Release existing-app YAPK upgrade scope, lineage, and Version Management gates from PR #145.
+- Require upgrade packages to declare intended scope and block unrelated-resource mutations for field-only/list-only upgrades.
+- Add upgrade report scope and duplicate report checks for `FormNewReports` and `DataReports`.
+- Strengthen upgrade ID preservation with layout semantic-key disambiguation.
+- Enforce default view `LayoutView.layout[]` and `LayoutView.query[]` consistency for visible field additions.
+- Add upgrade wrapper identity checks for Version Management-compatible package metadata.
+- Classify upgrade API status `0` as submitted/accepted, not final success.
+- Require Version Management final `Succeed` row proof, failed-row error-log capture, and separate runtime change proof.
+- Add approval `DefResource` upgrade-scope and export-shape readiness checks.
+
 ## 0.8.3
 
 - Release generated-final YAPK export-shape and runtime materialization gates from PR #143.
