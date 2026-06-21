@@ -27,6 +27,7 @@ Before generation, confirm package target and scope:
 - `.yap` is used only when explicitly requested or when a documented fallback/debug scope requires YAP.
 - Existing application upgrade requires an official baseline `.yapk` from Yeeflow Version management, identity preservation, and ID stability.
 - Existing application upgrades must not use fresh-ID clone generation rules unless the user explicitly asks for a cloned app.
+- Generated application wrappers must use FontAwesome icon mode only. The top-level `IconUrl` must be a JSON string containing `b`, `i`, and `c`; image URLs, `https://img.yeeflow.com/...`, SVG, emoji, and blank/null icons are forbidden. The App Plan or generation report should include the selected domain-matched icon rationale without generated package IDs.
 
 ## 1. Requirement Intake
 
@@ -35,16 +36,23 @@ Read all uploaded requirement files, screenshots, sample forms, sample exports, 
 Extract:
 
 - business purpose
+- business problem, target users, operational scope, and expected outcome
 - source materials
 - user roles
+- role responsibilities, record visibility, actions, owned decisions, and dashboard/page needs
 - app modules
 - business objects
 - data concepts
+- business object field meanings, business-level field type expectations, lifecycle/status fields, audit fields, reporting/dashboard fields, and lookup/reference relationships
 - data lists and document libraries
 - approval/review needs
+- business process start triggers, intake, review/approval, assignment/fulfillment, status tracking, completion/closure, exceptions, and audit/history needs
+- business rules for status lifecycle, approvals, assignments, SLA/overdue behavior, validation, documents, notifications, escalations, completion, cancellation/rejection/rework, and permissions
 - form report needs
 - data list custom forms
 - dashboards/pages
+- selected application icon rationale at business/control-category level; do not include generated package IDs
+- dashboard business questions, metrics, source fields, calculation logic, filters, data regions, display fields, sorting/grouping, user actions, mobile support, and alerts
 - data list views
 - workflows and automations
 - notifications
@@ -66,7 +74,11 @@ Create a Functional Specification using:
 
 `docs/standards/functional-specification-standard-template.md`
 
-The Functional Specification is the business requirement document. It must describe what the business needs before selecting exact Yeeflow resources or package shapes.
+The Functional Specification is the business requirement document. It must describe what the business needs before selecting exact Yeeflow resources or package shapes. It must be rich enough for reliable App Plan and Page Function Plan generation: business context, user roles, process steps, decision points, exception cases, status lifecycle, explicit business rules, data lifecycle, approval/form needs, workflows, notifications, dashboard content requirements, operational reporting, audit evidence, assumptions, and business clarification gates.
+
+Keep low-level Yeeflow implementation details out of the Functional Specification. Do not include Yeeflow control types, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, exact generated IDs, package JSON, or resource implementation shapes. Those belong in the App Plan, Page Function Plan, Blueprint, resource generation, and validation stages.
+
+The primary artifact must be a human-readable Markdown file named `functional-specification.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `functional-specification.trace.json`; JSON must not replace `functional-specification.md`. Any companion JSON projection must be derived from the Markdown Functional Specification and remain consistent with it.
 
 For brief requirements:
 
@@ -91,15 +103,20 @@ Business-critical uncertainty must be recorded in Business Decision Gates and Ri
 
 Review the Functional Specification before creating the App Plan. The review must confirm:
 
-- required 23 sections are present
+- required 24 sections are present
 - requirement interpretation method is explicit
-- business purpose is clear
-- target roles are identified
-- business objects and data concepts are present or explicitly not applicable
+- business context covers the business problem, target users, operational scope, and expected outcome
+- user roles identify responsibilities, record visibility, actions, owned decisions, and dashboards/pages needed
+- business objects and data requirements are present or explicitly not applicable, including required fields, field meanings, business-level field type expectations, relationships, lifecycle/status fields, audit fields, and reporting/dashboard fields
 - relationships and dependency rules are present or explicitly not applicable
-- process, status lifecycle, approval/review, forms, workflow/action, reporting/dashboard, document/attachment, AI, integration, permissions, UI, assumptions, and risks are covered
-- business decision gates are answered, `user-default-approved-for-generation`, not applicable, deferred with reason/fallback/proof impact, or listed as blockers
+- core process steps cover start trigger, submission/intake, review/approval, assignment/fulfillment, status tracking, completion/closure, exception handling, and audit/history needs
+- business rules cover status lifecycle, approvals, assignments, SLA/overdue behavior, validation, required documents/rich data, notifications, escalations, completion, cancellation/rejection/rework, and permissions when applicable
+- approval/review, forms, workflow/notification, dashboard, reporting/audit, document/attachment, AI, integration, permissions, UI, assumptions, and risks are covered
+- dashboard page requirements include business questions, source business objects/data lists, summary metrics, metric source fields and calculation logic, data regions, display fields, filters with source fields/default scope/applies-to regions, sorting/grouping, user actions, mobile support, and alerts
+- business clarification gates are answered, `user-default-approved-for-generation`, not applicable, deferred with reason/fallback/proof impact, or listed as blockers
 - Readiness for App Plan is marked Yes only when the specification is consistent and complete enough
+- no vague standalone language such as "show dashboard", "track status", "manage requests", or "send notifications" appears without business rules, fields, roles, or conditions
+- no low-level Yeeflow IDs, control types, actionTypeCode values, JSON property paths, or generated resource IDs leak into the Functional Specification
 
 If inconsistent, incomplete, or incorrect content is found, revise and validate again. A failed Functional Specification review gate blocks the Yeeflow App Plan stage.
 
@@ -109,7 +126,11 @@ Create the Yeeflow App Plan only from the reviewed Functional Specification, usi
 
 `docs/standards/app-plan-standard-template.md`
 
-The App Plan is not a free-form plan, generic project plan, or ad hoc script plan. It is the Yeeflow resource generation contract and must convert business requirements into Yeeflow-supported resources in this standard order:
+The reviewed Functional Specification is the business source of truth for the App Plan. The App Plan is not a free-form plan, generic project plan, or ad hoc script plan. It is the Yeeflow resource generation contract and must convert business requirements into Yeeflow-supported resources in this standard order:
+
+The primary artifact must be a human-readable Markdown file named `yeeflow-app-plan.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `app-plan.trace.json`; JSON must not replace `yeeflow-app-plan.md`. Any companion JSON projection must be derived from the Markdown App Plan and remain consistent with it.
+
+Generation must be based on the reviewed Markdown Functional Specification and Markdown Yeeflow App Plan first. Companion JSON may support validators, traceability, or tests, but it must not replace, override, or silently narrow the Markdown planning contracts.
 
 1. Data lists and Document libraries
 2. Approval forms
@@ -142,7 +163,14 @@ The review must confirm:
 - Form Reports are standalone and based on Approval Forms
 - Schedule workflows, AI Agents, Copilots, Custom Data List forms, Data List workflows, Notifications, Views, Dashboards, Navigation, and Permissions are planned or explicitly not applicable
 - Dashboard planning is separate from Form Report planning
-- Dashboard controls come from plugin-known controls, template library, validators, or export-proven references
+- Dashboard planning must trace to the Functional Specification's dashboard business questions, metric source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts
+- Dashboard planning must convert Functional Specification dashboard business requirements into Yeeflow-supported resource/control-type planning at App Plan level
+- Each Dashboard page plan must include page identity, source Functional Specification dashboard requirement reference, source data lists/business objects, navigation placement, and Page Function Plan reference if applicable
+- Each dashboard section must state business purpose, source data list or business object, required fields or metrics, selected Yeeflow control type category, why the control type is appropriate, user actions, and proof boundary or deferred note
+- Dashboard controls come from plugin-known controls, template library, validators, or export-proven references, including Summary/KPI card, Data Filter, Collection, Data table, Kanban, Vertical Timeline, Horizontal Timeline, Text/Heading, Button/action button, Container, Grid/flex grid, and Chart/Data analytics only when supported or marked proof-required/deferred
+- Record-display sections must choose Collection, Data table, Kanban, Vertical Timeline, or Horizontal Timeline with a reason; prefer Collection for portfolio/card/grid-table regions, Data table for dense tabular records, Kanban for lane/status workflows, Vertical Timeline for audit/activity/history, and Horizontal Timeline for lifecycle/phase/milestone views
+- Dashboard filters, summary metrics, actions, and item-template dynamic display needs must be planned at business/control-type level
+- Dashboard App Plan entries must not include concrete generated IDs, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, Yeeflow JSON property paths, exact Container nesting, exact style values, runtime binding payloads, implementation-level layout JSON, or fake placeholder IDs such as LIST-* or LAYOUT-*
 - Dashboard/Page sections that display Data List records state selected display control and reason: Data table, Collection, Kanban, Vertical Timeline, or Horizontal Timeline
 - Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls include item-template Dynamic control planning with bound fields
 - Collection and Kanban controls include item actions or explicitly state `No Collection/Kanban item actions required`
@@ -267,6 +295,16 @@ node scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <funct
 
 Traceability fails when business objects, relationships, approvals, forms, workflows, reporting, documents, AI/Copilot, integrations, permissions, or UI/experience requirements in the Functional Specification are not mapped to Yeeflow resources, planning sections, or explicit deferred/not-applicable coverage in the App Plan. Deferred items must include a reason, fallback, proof impact, or follow-up. This validator proves planning traceability only; it does not prove generated package conformance or runtime behavior.
 
+When planning artifacts are saved in an output directory, also run:
+
+```bash
+node scripts/validate-planning-artifact-formats.mjs --dir <artifact-dir>
+```
+
+This gate fails if `functional-specification.md` or `yeeflow-app-plan.md` is missing, if either primary Markdown document is empty, skeletal, or only links to JSON, if Functional Specification or App Plan is generated only as JSON, or if companion JSON projections such as `functional-specification.trace.json`, `app-plan.trace.json`, or `page-function-plan.trace.json` do not reference the Markdown source they project from. It proves artifact format discipline only; it does not prove business correctness, package validity, or runtime behavior.
+
+After this gate passes, downstream Page Function Plan, Blueprint, resource generation, and package validation must use the Markdown planning contracts as the business and resource source of truth. JSON projections can be read as validator-friendly indexes, not as replacement specifications.
+
 ## 8. Decide Safe Build Scope
 
 Choose the safest build scope that satisfies the reviewed Functional Specification and App Plan.
@@ -313,7 +351,9 @@ Do not generate with temporary custom scripts that invent resource/control/actio
 
 ## 10. Local Validation
 
-Run the relevant safe local checks for the generated artifact and proof boundaries. At minimum, validate schema, graph/resource structure, Functional Specification/App Plan conformance, ID provenance for generated-final `.yapk`, navigation runtime metadata, approval forms, Form Reports, schedule workflows, AI/Copilot resources, custom data list forms, data-list workflows, notifications, views, dashboard controls, grid-table Collection patterns, root padding, plan-to-package conformance, and source/dist consistency as applicable.
+Run the relevant safe local checks for the generated artifact and proof boundaries. At minimum, validate schema, graph/resource structure, Functional Specification/App Plan conformance, ID provenance for generated-final `.yapk`, navigation runtime metadata, approval forms, Form Reports, schedule workflows, AI/Copilot resources, custom data list forms, data-list workflows, notifications, views, dashboard controls, dashboard generation hard gates, grid-table Collection patterns, root padding, plan-to-package conformance, and source/dist consistency as applicable.
+
+Dashboard generation hard gates are generator/package/reporting rules only. Do not add them to the Functional Specification or App Plan, and do not require business users to specify control-property details. Before signing readiness, signing, install/import, upgrade, or final success reporting, run `scripts/validate-dashboard-generation-hard-gates.mjs` for generated dashboard packages and include the final/install/upgrade report when available. Canonical runtime URLs must use decoded package `$.ListSet.ListID`; install/import API returned IDs are operation evidence unless separately proven by product/API docs.
 
 Do not sign, install, import, upgrade, or run live Yeeflow writes unless explicitly authorized.
 

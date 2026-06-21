@@ -7,6 +7,7 @@ import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
+const HARD_GATE_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-regular fa-calendar-check", c: "#0065FF" });
 
 function id(offset) {
   return String(1900000000000000n + BigInt(offset));
@@ -57,7 +58,7 @@ function wrapper(decoded) {
     ListID: decoded.ListSet.ListID,
     Title: "Hard Gate Test",
     Description: "",
-    IconUrl: "",
+    IconUrl: HARD_GATE_ICON,
     Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64"),
     Notes: "",
     Author: "test",

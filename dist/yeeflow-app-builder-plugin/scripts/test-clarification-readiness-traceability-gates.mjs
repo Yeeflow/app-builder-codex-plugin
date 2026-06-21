@@ -27,7 +27,7 @@ function run(args) {
 
 function expectPass(name, args, results) {
   const { result, report } = run(args);
-  assert.equal(result.status, 0, `${name} should exit 0: ${result.stderr}`);
+  assert.equal(result.status, 0, `${name} should exit 0: ${result.stderr}\n${JSON.stringify(report.findings, null, 2)}`);
   assert.equal(report.status, "pass", `${name} should pass: ${JSON.stringify(report.findings, null, 2)}`);
   results.push({ case: name, status: "pass" });
 }
@@ -153,16 +153,16 @@ function traceSpec(overrides = {}) {
   return `
 # Example - Functional Specification
 
-## 6. Business Objects and Data Concepts
+## 6. Business Objects and Data Requirements
 ${body.objects}
 
 ## 7. Business Relationships and Dependency Rules
 No relationships required.
 
-## 8. Business Process Overview
+## 8. Core Business Process
 1. Requester submits a request.
 
-## 9. Status Lifecycles
+## 9. Business Rules and Status Lifecycles
 No complex lifecycle required.
 
 ## 10. Approval and Review Requirements
@@ -171,25 +171,28 @@ ${body.approvals}
 ## 11. Data Entry and Form Requirements
 No additional data entry beyond request form required.
 
-## 12. Workflow, Automation, and Action Requirements
+## 12. Workflow and Notification Requirements
 ${body.workflows}
 
-## 13. Reporting, Dashboard, and Analytics Requirements
+## 13. Dashboard Page Requirements
 ${body.reporting}
 
-## 14. Document and Attachment Requirements
+## 14. Reporting and Audit Requirements
+No audit reports required; not applicable.
+
+## 15. Document and Attachment Requirements
 No attachments required.
 
-## 15. AI, Copilot, and Intelligent Assistance Requirements
+## 16. AI, Copilot, and Intelligent Assistance Requirements
 No AI Agent or Copilot requirement identified.
 
-## 16. Integration Requirements
+## 17. Integration Requirements
 No integrations required.
 
-## 17. Permissions and Access Requirements
+## 18. Permissions and Access Requirements
 ${body.permissions}
 
-## 18. UI and Experience Requirements
+## 19. UI and Experience Requirements
 Dashboard page and navigation are required.
 `;
 }
@@ -201,7 +204,7 @@ function tracePlan(overrides = {}) {
     approvals: "Approval form: Request Approval with submission fields and approval workflow.",
     reports: "Form Report: Request Approval Report based on Request Approval.",
     workflows: "Notification workflow: Notify approval. Reason: delivery proof is runtime-proof-required with fallback to manual notification.",
-    dashboards: "Dashboard page: Operations Dashboard with Summary controls bound to Requests.",
+    dashboards: "Dashboard page: Operations Dashboard with Summary controls and Collection record display bound to Requests.",
     views: "Active Requests view.",
     permissions: "Roles and permissions: Requester can view/create Requests; Manager can approve.",
     deferred: "| Item | Category | Reason | User Impact | Fallback | Required Proof or Follow-up |\n| --- | --- | --- | --- | --- | --- |\n| Notification delivery | runtime-proof-required | Delivery requires tenant mail proof | Users may need manual follow-up | Manual email | Runtime proof after install |",

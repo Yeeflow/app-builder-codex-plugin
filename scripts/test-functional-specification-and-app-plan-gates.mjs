@@ -55,26 +55,27 @@ try {
 ## 1. Specification Status
 ## 2. Source Input Summary
 ## 3. Requirement Interpretation Method
-## 4. Business Purpose
-## 5. Target Users and Business Roles
-## 6. Business Objects and Data Concepts
+## 4. Business Context
+## 5. User Roles and Responsibilities
+## 6. Business Objects and Data Requirements
 No objects here.
-## 8. Business Process Overview
-## 9. Status Lifecycles
+## 8. Core Business Process
+## 9. Business Rules and Status Lifecycles
 ## 10. Approval and Review Requirements
 ## 11. Data Entry and Form Requirements
-## 12. Workflow, Automation, and Action Requirements
-## 13. Reporting, Dashboard, and Analytics Requirements
-## 14. Document and Attachment Requirements
-## 15. AI, Copilot, and Intelligent Assistance Requirements
-## 16. Integration Requirements
-## 17. Permissions and Access Requirements
-## 18. UI and Experience Requirements
-## 19. Business Decision Gates
-## 20. Assumptions
-## 21. Risks, Constraints, and Unknowns
-## 22. Functional Specification Completeness Review
-## 23. Readiness for App Plan
+## 12. Workflow and Notification Requirements
+## 13. Dashboard Page Requirements
+## 14. Reporting and Audit Requirements
+## 15. Document and Attachment Requirements
+## 16. AI, Copilot, and Intelligent Assistance Requirements
+## 17. Integration Requirements
+## 18. Permissions and Access Requirements
+## 19. UI and Experience Requirements
+## 20. Business Clarification Gates
+## 21. Assumptions
+## 22. Risks, Constraints, and Unknowns
+## 23. Functional Specification Completeness Review
+## 24. Readiness for App Plan
 `);
   output = run("scripts/validate-functional-specification.mjs", badSpec);
   assert.equal(output.report.status, "fail");

@@ -3,6 +3,7 @@
 const fs = require("fs");
 const { spawnSync } = require("child_process");
 const zlib = require("zlib");
+const { validatePackageWrapperIcon } = require("./scripts/lib/application-icon-validation.cjs");
 
 const WRAPPER_REQUIRED = [
   "PackageId",
@@ -1076,6 +1077,7 @@ function validate(file, baselineFile = null) {
   const wrapper = readWrapper(file);
   if (!isObject(wrapper)) add(errors, "YAPK_WRAPPER_NOT_OBJECT", "Top-level package must be a JSON object.");
   for (const key of WRAPPER_REQUIRED) if (!(key in wrapper)) add(errors, "YAPK_REQUIRED_KEY_MISSING", `Missing required key ${key}.`);
+  for (const finding of validatePackageWrapperIcon(wrapper).findings) add(errors, finding.code, finding.message, finding);
   if (typeof wrapper.TenantID !== "string" || !NUMERIC_STRING_RE.test(wrapper.TenantID || "")) add(errors, "YAPK_TENANT_ID_INVALID", "Generated YAPK TenantID must be a LongAsString numeric string.");
   if (typeof wrapper.ListID !== "string" || !NUMERIC_STRING_RE.test(wrapper.ListID || "")) add(errors, "YAPK_LIST_ID_INVALID", "Generated YAPK top-level ListID must be a LongAsString numeric string.");
   if (!["30", "41"].includes(String(wrapper.AppID))) add(errors, "YAPK_APPID_UNSUPPORTED", "Generated YAPK wrapper AppID must be one of the product schema supported values: 30 or 41.", { value: wrapper.AppID ?? null });

@@ -149,7 +149,7 @@ function traceSpec(overrides = {}) {
   return `
 # Example - Functional Specification
 
-## 6. Business Objects and Data Concepts
+## 6. Business Objects and Data Requirements
 | Business Object | Description |
 | --- | --- |
 | Request | Employee request record |
@@ -163,16 +163,19 @@ Managers approve submitted requests.
 ## 11. Data Entry and Form Requirements
 ${body.forms}
 
-## 12. Workflow, Automation, and Action Requirements
+## 12. Workflow and Notification Requirements
 ${body.workflows}
 
-## 13. Reporting, Dashboard, and Analytics Requirements
+## 13. Dashboard Page Requirements
 ${body.reporting}
 
-## 17. Permissions and Access Requirements
+## 14. Reporting and Audit Requirements
+Audit history and operations reporting are required.
+
+## 18. Permissions and Access Requirements
 ${body.permissions}
 
-## 18. UI and Experience Requirements
+## 19. UI and Experience Requirements
 ${body.ui}
 `;
 }
@@ -181,7 +184,7 @@ function tracePlan(overrides = {}) {
   const body = {
     dashboards: `${baseAreas.dashboards}
 #### Additional Board
-Kanban is selected for status board lanes. Vertical Timeline is selected for activity history.`,
+Kanban is selected for status board lanes. Vertical Timeline is selected for activity history and audit reporting.`,
     approvals: `${baseAreas.approvalForms}
 Sub List planning covers repeated line items and row-level operations.`,
     customForms: baseAreas.customForms,

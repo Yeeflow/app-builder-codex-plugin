@@ -13,6 +13,8 @@ User input may be brief, detailed, document-backed, screenshot-backed, or mixed.
 
 The Yeeflow App Plan must be generated only from the reviewed Functional Specification and must follow `docs/standards/app-plan-standard-template.md`. The App Plan converts business requirements into Yeeflow-supported resources and defines the resource generation order. It is the Yeeflow resource generation contract, not a free-form project plan, generic project plan, or ad hoc script plan.
 
+The primary planning contracts are the human-readable Markdown files `functional-specification.md` and `yeeflow-app-plan.md`. JSON files are companion projections only and must be derived from the Markdown source for validation, traceability, or tests. Resource generation must consume the reviewed Markdown Functional Specification and Markdown App Plan first; companion JSON must not become the source of truth.
+
 The App Plan must follow this Yeeflow resource generation order:
 
 1. Data lists and Document libraries
@@ -137,7 +139,9 @@ For any generated YAP package, rebuild `Resource.ReplaceIds` from the final deco
 
 ## Plan-First Full-Scope Generation
 
-For application-generation requests, create a Functional Specification Markdown file and then a Yeeflow App Plan Markdown file before building a `.yap` or `.yapk` package unless the user explicitly asks only for study/review. Save safe Functional Specifications and App Plans under `docs/generated-app-plans/` when suitable for git. If an artifact contains tenant-specific, private, or runtime-generated details that should not be committed, save it outside git and clearly report the path.
+For application-generation requests, create `functional-specification.md` as the primary human-readable Functional Specification Markdown file and then `yeeflow-app-plan.md` as the primary human-readable Yeeflow App Plan Markdown file before building a `.yap` or `.yapk` package unless the user explicitly asks only for study/review. JSON files may exist only as companion/projection artifacts for validators, traceability, or tests, such as `functional-specification.trace.json`, `app-plan.trace.json`, or `page-function-plan.trace.json`; JSON must not replace the primary Markdown documents. Save safe Functional Specifications and App Plans under `docs/generated-app-plans/` when suitable for git. If an artifact contains tenant-specific, private, or runtime-generated details that should not be committed, save it outside git and clearly report the path. Run `scripts/validate-planning-artifact-formats.mjs --dir <artifact-dir>` when a planning artifact directory is produced.
+
+Generation must be based on the reviewed Markdown planning contracts first. Companion JSON projections may accelerate validators or traceability checks, but they must be consistent with and derived from `functional-specification.md` and `yeeflow-app-plan.md`; they must not replace, override, or silently narrow those Markdown documents.
 
 Every Functional Specification must follow `docs/standards/functional-specification-standard-template.md`. Every full App Plan must follow the canonical `docs/standards/app-plan-standard-template.md`. `docs/app-plan-standard-template.md` is only a compatibility entrypoint for older scripts/docs and must not be treated as a competing standard. The App Plan must be organized by Yeeflow resource generation order and must include concrete resource, field, control, workflow, action, proof-boundary, and validation details. It must explicitly choose how Data List records are displayed on pages, plan item-template Dynamic controls for Collection/Kanban/Timeline controls, plan Collection/Kanban item actions or an explicit no-action decision, and plan Sub List list actions or an explicit no-action decision when Sub List controls appear. Do not produce app plans that are only brief object lists.
 

@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const RUNTIME_HARDENING_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-chart-line", c: "#0065FF" });
 
 function clone(value) {
   return structuredClone(value);
@@ -165,7 +166,7 @@ function baseWrapper(decoded = baseDecoded()) {
     ListID: id(1),
     Title: "Runtime Hardening Test",
     Description: "",
-    IconUrl: "",
+    IconUrl: RUNTIME_HARDENING_ICON,
     Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64"),
     Notes: "",
     Author: "regression",

@@ -1,8 +1,10 @@
 # <Application Name> - Yeeflow App Plan
 
-Use this template as Stage 2 / Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct generation order.
+Use this template as Stage 2 / Step 2 for every Yeeflow application build. This plan must be created from the approved Functional Specification, which is the business source of truth for process, rules, data, roles, dashboard content, reporting, and audit needs. Its purpose is to convert business requirements into Yeeflow-standard resources and define the correct generation order.
 
 This document is the implementation contract for package generation after user approval. It must use only Yeeflow resource types, field types, variable types, controls, Dynamic controls, workflow nodes, form actions, Collection/Kanban actions, Sub List actions, property paths, bindings, and configuration shapes supported by the active `@yeeflow-app-builder` plugin knowledge base, skills, standards, validators, template library, control/property knowledge base, extension registry, or export-proven references.
+
+Primary artifact rule: generate this plan as the primary human-readable Markdown file named `yeeflow-app-plan.md`. Machine-readable JSON may exist only as a companion/projection artifact for validation, traceability, or tests, such as `app-plan.trace.json`; JSON must not replace this Markdown document. The Markdown file must contain the Yeeflow resource plan and detailed Dashboard Pages Plan with legal Yeeflow control-type planning, not just a link to JSON.
 
 ## 1. Plan Status
 
@@ -35,6 +37,7 @@ Map each major requirement from the Functional Specification to Yeeflow resource
 Rules:
 
 - Every core business requirement must map to a Yeeflow resource, a supported configuration, or an explicitly deferred item.
+- App Plan dashboard planning must trace back to the Functional Specification's business-level dashboard questions, source business objects/data lists, summary metrics, source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts.
 - Functional Specification to App Plan traceability is executable with `scripts/validate-functional-spec-to-app-plan-traceability.mjs --spec <functional-spec.md> --plan <app-plan.md>`.
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
 - Do not include resources only to make the plan look complete. Every generated resource must serve a runtime purpose.
@@ -343,35 +346,65 @@ Repeat for each Dashboard page.
 ### 14.x <Dashboard Page Name>
 
 - Page name:
-- Description:
 - Business purpose:
-- Layout pattern:
+- Source Functional Specification dashboard requirement reference:
+- Source data lists/business objects:
 - Navigation placement:
+- Page Function Plan reference if applicable:
 - Depends on:
 - Temp variables required:
 - Page/form actions required:
 - Runtime proof required:
+- Functional Specification dashboard source: business questions, source business objects/data lists, summary metrics, metric source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts from Stage 1.
 
-#### Sections and Controls
+Dashboard page identity:
 
-| Section Order | Section Name | Purpose | Yeeflow Controls | Data Source | Fields Displayed | Filters | Actions | Control Relationships | Style/Layout Notes | Proof Level |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | <Section> | <Purpose> | <Controls> | <List/form> | <Fields> | <Filters> | <Actions> | <Relationships> | <Notes> | <Proof> |
+| Dashboard Page Name | Business Purpose | Functional Spec Dashboard Requirement Reference | Source Data Lists/Business Objects | Navigation Placement | Page Function Plan Reference |
+| --- | --- | --- | --- | --- | --- |
+| <Dashboard> | <Purpose> | <Functional Spec section/requirement> | <Lists/objects> | <Navigation group/item> | <Page Function Plan path or not applicable> |
+
+#### Dashboard Sections
+
+| Section Order | Section Name | Business Purpose | Source Data List or Business Object | Required Fields or Metrics | Selected Yeeflow Control Type Category | Why This Control Type Is Appropriate | User Actions Needed | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | <Section> | <Purpose> | <List/object> | <Fields/metrics> | Summary / KPI card, Data Filter, Collection, Data table, Kanban, Vertical Timeline, Horizontal Timeline, Text / Heading, Button / action button, Container, Grid / flex grid, Chart / Data analytics if supported/proof-required | <Reason> | <Actions> | <Proof/deferred note> |
 
 Rules:
 
-- Controls must come from active plugin control knowledge, template library, or export-proven references.
+- Each dashboard section must trace to a business-level Dashboard Page Requirement from the Functional Specification. Do not invent dashboard metrics, filters, regions, or actions that are not in the Functional Specification unless they are explicitly added as an App Plan assumption or clarification gate.
+- Dashboard sections must map business requirements to legal Yeeflow control type categories. Allowed categories include Summary / KPI card, Data Filter, Collection, Data table, Kanban, Vertical Timeline, Horizontal Timeline, Text / Heading, Button / action button, Container, Grid / flex grid where needed for structured display, and Chart / Data analytics only if plugin-supported or marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
+- Unsupported or invented dashboard control type categories are not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof/generation impact.
 - Summary/KPI cards must be data-bound using plugin-supported controls and bindings. Static text may be used only when explicitly marked fallback, `runtime-proof-required`, `export-learning-required`, or `deferred` with reason, fallback, and proof/generation impact.
-- Collection, Kanban, Timeline, Data Filter, Data table, Summary, chart, action button, and dynamic controls must include source, field, and action bindings.
-- Grid-table Collection pattern requires header `flex_grid` plus Collection wrapped together with zero gap.
-- Dashboard root padding and header hiding must follow active plugin hard gates.
-- Every visible control in a design-backed page must map to a Yeeflow control and style contract before generation.
+- Collection, Kanban, Timeline, Data Filter, Data table, Summary/KPI, chart/data analytics, action button, Text/Heading, Container, and Grid/flex grid planning must include source data, fields/metrics, actions, and proof boundary at business/control-type level.
+- Do not include concrete generated IDs, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, Yeeflow JSON property paths, exact Container nesting, exact style values, runtime binding payloads, implementation-level layout JSON, or fake placeholder IDs such as `LIST-*` or `LAYOUT-*`. Those belong to Blueprint/resource generation and validation.
+
+#### Dashboard Filters
+
+| Filter Name | Source Data List | Filter Field | Applies-to Dashboard Sections | Selected Yeeflow Filter/Control Type If Known | Default Business Scope | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| <Filter> | <List> | <Field> | <Sections> | Data Filter / Text search / choice/date filter / runtime-proof-required / export-learning-required / deferred | <Default scope> | <Proof/deferred note> |
+
+#### Summary Metrics
+
+| Metric Name | Source Data List | Source Field(s) | Calculation Logic | Selected Yeeflow Control Type Category | Display Format Intent | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| <Metric> | <List> | <Fields> | <Business calculation> | Summary / KPI card | count / percentage / currency / duration / number | <Proof/deferred note> |
+
+#### Dashboard Actions
+
+| Action Name | Business Purpose | Source/Target Business Object | Expected User Outcome | Supported Yeeflow Action Category When Known | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- |
+| <Action> | <Purpose> | <Object> | <Outcome> | open dashboard/form, open detail, add data list item, run form action, runtime-proof-required, export-learning-required, deferred | <Proof/deferred note> |
+
+Rules:
+
+- Dashboard action planning may name supported action categories, but must not include concrete `actionTypeCode`, ListID, PageID, FormID, LayoutID, ProcKey, runtime payload fields, or implementation JSON.
 
 #### Record Display Control Selection
 
 Required for every Dashboard/Page section that displays Data List records.
 
-| Section | Data Source | Display Need | Selected Control | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| Section | Data Source | Display Need | Selected Record Display Control | Selection Reason | Detail/Open Behavior | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- |
 | <Section> | <Data List> | <Cards/table/status board/activity history/roadmap/etc.> | Data table / Collection / Kanban / Vertical timeline / Horizontal timeline | <Reason> | <Open/edit/detail behavior> | <Local/runtime proof boundary> |
 
@@ -389,15 +422,15 @@ Rules:
 
 Required for every Collection, Kanban, Vertical Timeline, or Horizontal Timeline control.
 
-| Host Control | Source List | Item Template Region | Business Label | Exact Yeeflow Dynamic Control Type | Bound Field | Support Source | Proof Label | Fallback / Deferred Reason | Display Purpose | Empty/Fallback Behavior | Style/Badge/Format Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Collection/Kanban/Timeline> | <List> | <Header/body/footer/card/lane item> | <Business label> | dynamic-field / dynamic-user / dynamic-image / dynamic-file / dynamic-date / supported display control | <Field> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Purpose> | <Fallback> | <Style notes> |
+| Host Control | Source List | Business Label | Source Field | Expected Dynamic Display Control Category | Display Purpose | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| <Collection/Kanban/Timeline> | <List> | <Business label> | <Field> | dynamic field / dynamic user / dynamic image / dynamic file / dynamic date / supported display category | <Purpose> | <Proof/deferred note> |
 
 Rules:
 
-- Allowed Dynamic control types must come from plugin-known/export-proven controls, such as dynamic-field, dynamic-user, dynamic-image, dynamic-file, dynamic-date or a supported date display field/control if documented.
-- `Exact Yeeflow Dynamic Control Type` must contain the exact supported Dynamic control/control type. Business labels may be friendly, but final implementation columns must not use ambiguous phrases such as `Lookup/read-only dynamic field` unless marked `export-learning-required`, `runtime-proof-required`, or `deferred`.
-- Status or badge display is allowed only when backed by supported Yeeflow controls or template styling.
+- Dynamic display needs stay at business/control-type category level in the App Plan. Low-level control properties and runtime binding payloads belong to Page Function Plan, Blueprint, resource generation, and validation.
+- Allowed Dynamic display categories must come from plugin-known/export-proven controls, such as dynamic field, dynamic user, dynamic image, dynamic file, dynamic date, or a supported display category if documented.
+- Status or badge display is allowed only when backed by supported Yeeflow controls/categories or marked for proof/deferment.
 - Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls must not have empty item templates.
 - Every visible item-template value must map to a Dynamic control and a real source field.
 - User/person displays must bind to User/person fields.
@@ -408,17 +441,15 @@ Rules:
 
 Required for Collection and Kanban controls.
 
-| Host Control | Action Name | Trigger Control | Exact Yeeflow Action Type | Support Source | Proof Label | Fallback / Deferred Reason | Current Item Context | Temp Variables | Steps | Data Read | Data Write | Runtime Proof Boundary |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Collection/Kanban> | No Collection/Kanban item actions required / <Action> | <Button/icon/card/menu> | <Supported action type> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Current item context> | <Variables> | <Steps> | <Data read> | <Target app/list/fields> | Runtime action execution is separate proof |
+| Host Control | Action Name | Business Purpose | Source/Target Business Object | Expected User Outcome | Supported Yeeflow Action Category When Known | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| <Collection/Kanban> | No Collection/Kanban item actions required / <Action> | <Purpose> | <Object> | <Outcome> | open detail, add data list item, open dashboard/form, run form action, runtime-proof-required, export-learning-required, deferred | Runtime action execution is separate proof |
 
 Rules:
 
-- Collection/Kanban actions must use plugin-known/export-proven action shapes.
-- Each action must state how current item context is passed.
-- Steps must identify Query data, Set data list, open detail, update row, local variable, or other supported action types.
+- Collection/Kanban actions must use plugin-known/export-proven action categories or be marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
 - Vague action wording such as `Open detail/slide panel where supported` or `Update row/status where supported` is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
-- If an action writes data, state target application, list, and fields.
+- If an action writes data, state the source/target business object and expected user outcome at business level. Concrete runtime payload fields belong later.
 - Runtime execution proof is separate from package validation.
 - If no custom actions are required, explicitly write: `No Collection/Kanban item actions required`.
 
