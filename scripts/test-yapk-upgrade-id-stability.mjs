@@ -60,7 +60,7 @@ function lineage(decoded, overrides = {}) {
     obj("data-list:tasks", "data-list", "decoded.Childs[0].List.ListID", decoded.Childs[0].List.ListID),
     obj("field:tasks:title", "field", "decoded.Childs[0].Fields[0].FieldID", decoded.Childs[0].Fields[0].FieldID),
     obj("field:tasks:status", "field", "decoded.Childs[0].Fields[1].FieldID", decoded.Childs[0].Fields[1].FieldID),
-    obj("layout:tasks:detail", "layout", "decoded.Childs[0].Layouts[0].LayoutID", decoded.Childs[0].Layouts[0].LayoutID),
+    obj("layout:Tasks:Task Detail:0:0", "layout", "decoded.Childs[0].Layouts[0].LayoutID", decoded.Childs[0].Layouts[0].LayoutID),
     obj("dashboard:task-dashboard", "dashboard", "decoded.Pages[0].LayoutID", decoded.Pages[0].LayoutID),
     obj("approval-form:task-approval", "approval-form", "decoded.Forms[0].Key", decoded.Forms[0].Key),
     obj("approval-process:task-approval", "approval-process", "decoded.Forms[0].FlowKey", decoded.Forms[0].FlowKey),

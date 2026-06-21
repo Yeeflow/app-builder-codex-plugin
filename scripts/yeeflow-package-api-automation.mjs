@@ -724,7 +724,7 @@ function classifyApiResult({ httpStatus, apiStatus, message, upgradeCheck }) {
   }
   if (Number(apiStatus) === 0) {
     if (upgradeCheck === true) return { resultClass: "upgrade_check_passed", messageClass: "none" };
-    if (upgradeCheck === false) return { resultClass: "upgrade_applied", messageClass: "none" };
+    if (upgradeCheck === false) return { resultClass: "upgrade_submitted", messageClass: "none" };
     return { resultClass: "success", messageClass: "none" };
   }
   if (isAlreadyInstalledMessage(message)) {
@@ -734,7 +734,7 @@ function classifyApiResult({ httpStatus, apiStatus, message, upgradeCheck }) {
     return { resultClass: "api_rejected", messageClass: classifyMessage(message) };
   }
   if (upgradeCheck === true) return { resultClass: "upgrade_check_passed", messageClass: classifyMessage(message) };
-  if (upgradeCheck === false) return { resultClass: "upgrade_applied", messageClass: classifyMessage(message) };
+  if (upgradeCheck === false) return { resultClass: "upgrade_submitted", messageClass: classifyMessage(message) };
   return { resultClass: "success", messageClass: classifyMessage(message) };
 }
 
