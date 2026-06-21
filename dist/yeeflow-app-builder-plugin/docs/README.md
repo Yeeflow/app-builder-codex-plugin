@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.6.64`
+- Version: `0.8.5`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.6.64` releases Business Clarification unique unresolved gate summary reporting. The Business Clarification validator keeps raw findings for diagnostics while adding `rawFindingCount`, `uniqueUnresolvedGateCount`, `uniqueUnresolvedGateKeys`, and `gateOccurrences` to JSON output. Planning reports can now show duplicated Functional Specification/App Plan gate findings separately from the unique unresolved business decisions that the user must answer or explicitly approve for generation.
+Current release `0.8.5` releases Dashboard Golden Reference enforcement from PR #147. It registers the Event Portfolio dashboard as the default golden reference with reusable header, filter, KPI, content, and grid-table region references; adds dashboard golden-reference conformance validation; registers the conformance gate in dashboard hard gates and YAPK preflight; enforces generated dashboard provenance; blocks copying Event-specific fields into unrelated apps; and documents the dashboard golden-reference selection and consumption lifecycle.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
