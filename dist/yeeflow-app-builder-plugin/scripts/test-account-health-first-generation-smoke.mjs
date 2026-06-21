@@ -113,6 +113,16 @@ function textControl(text) {
   };
 }
 
+function containerStyle() {
+  return {
+    direction: [null, "column"],
+    gap: [null, 12],
+    widthtype: [null, "2"],
+    align_items: [null, "stretch"],
+    justify_content: [null, "flex-start"],
+  };
+}
+
 function dashboardPage(listId, rootId) {
   return {
     title: "Account Health",
@@ -127,11 +137,13 @@ function dashboardPage(listId, rootId) {
         id: "Main",
         name: "Main",
         type: "container",
+        attrs: { style: containerStyle() },
         children: [
           {
             id: "Content",
             name: "Content",
             type: "container",
+            attrs: { style: containerStyle() },
             children: [
               textControl("Account Health Overview"),
               {

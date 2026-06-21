@@ -351,7 +351,9 @@ Do not generate with temporary custom scripts that invent resource/control/actio
 
 ## 10. Local Validation
 
-Run the relevant safe local checks for the generated artifact and proof boundaries. At minimum, validate schema, graph/resource structure, Functional Specification/App Plan conformance, ID provenance for generated-final `.yapk`, navigation runtime metadata, approval forms, Form Reports, schedule workflows, AI/Copilot resources, custom data list forms, data-list workflows, notifications, views, dashboard controls, grid-table Collection patterns, root padding, plan-to-package conformance, and source/dist consistency as applicable.
+Run the relevant safe local checks for the generated artifact and proof boundaries. At minimum, validate schema, graph/resource structure, Functional Specification/App Plan conformance, ID provenance for generated-final `.yapk`, navigation runtime metadata, approval forms, Form Reports, schedule workflows, AI/Copilot resources, custom data list forms, data-list workflows, notifications, views, dashboard controls, dashboard generation hard gates, grid-table Collection patterns, root padding, plan-to-package conformance, and source/dist consistency as applicable.
+
+Dashboard generation hard gates are generator/package/reporting rules only. Do not add them to the Functional Specification or App Plan, and do not require business users to specify control-property details. Before signing readiness, signing, install/import, upgrade, or final success reporting, run `scripts/validate-dashboard-generation-hard-gates.mjs` for generated dashboard packages and include the final/install/upgrade report when available. Canonical runtime URLs must use decoded package `$.ListSet.ListID`; install/import API returned IDs are operation evidence unless separately proven by product/API docs.
 
 Do not sign, install, import, upgrade, or run live Yeeflow writes unless explicitly authorized.
 

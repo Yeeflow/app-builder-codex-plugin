@@ -29,6 +29,17 @@ const childTests = [
     validators: ["yeeflow-ui-generation-hard-gates skill wording"],
   },
   {
+    name: "Dashboard generation resource/report hard-gate regression suite",
+    command: ["scripts/test-dashboard-generation-hard-gates.mjs"],
+    validators: [
+      "validate-dashboard-generation-hard-gates",
+      "filter field/value/style metadata",
+      "Container coded width/layout keys",
+      "KPI native Icon structure",
+      "Summary field selection and canonical app URL reporting",
+    ],
+  },
+  {
     name: "Yeeflow application layout design rule regression suite",
     command: ["scripts/test-application-layout-design-rules.mjs"],
     validators: [

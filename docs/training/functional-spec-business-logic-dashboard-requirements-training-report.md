@@ -41,6 +41,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 - Approval/form, workflow/notification, reporting/audit, and business clarification gates now have explicit required business details.
 - Functional Specification rejects low-level implementation leakage such as Yeeflow control types, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, and exact generated resource IDs.
 - Generated Yeeflow application wrappers now require FontAwesome icon mode for top-level `IconUrl`: a JSON string containing `b`, `i`, and `c`. Image URLs, `https://img.yeeflow.com/...`, SVG, emoji, blank/null, missing fields, and non-FontAwesome icon tokens fail validation. App Plan or generation report output should include selected icon rationale without generated package IDs.
+- Dashboard generation hard gates from the Facility Maintenance dashboard review now apply only during dashboard resource generation, package validation, pre-signing readiness, and final reporting. They are explicitly not Functional Specification or App Plan requirements. The combined gate rejects missing filter field/value/style metadata, raw or missing Container width/layout serialization, KPI Heading/Text icon placeholders, incomplete Summary field selection/runtime binding metadata, and canonical application URLs that use install/import operation IDs instead of decoded package `$.ListSet.ListID`.
 
 ## Files Updated
 
@@ -59,6 +60,8 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `scripts/lib/application-icon-validation.cjs`
 - `scripts/validate-application-icon.js`
 - `scripts/test-application-icon-gates.mjs`
+- `scripts/validate-dashboard-generation-hard-gates.mjs`
+- `scripts/test-dashboard-generation-hard-gates.mjs`
 - `validate-yapk-package.js`
 - `validate-yap-package.js`
 - `scripts/yapk-first-generation-preflight.mjs`
@@ -100,6 +103,13 @@ Generated Functional Specification documents could satisfy the structural gate w
 - Fail: wrapper `IconUrl` is missing `b`, `i`, or `c`.
 - Fail: wrapper `IconUrl` uses emoji, SVG, invented, or non-FontAwesome icon content.
 - Fail: domain-specific icon validation detects a mismatched icon class.
+- Pass: generated dashboard package with filter display/value/style metadata, coded Container layout, native KPI Icon, Summary field selection, ReportIds/tempVars, and visible KPI binding passes the generation hard gate.
+- Fail: select/radio/checkbox filter has `attrs.data.field` but missing `display_f`, missing `value_f`, or missing label/dropdown style metadata.
+- Fail: dashboard Container uses raw widthtype strings or omits direction/gap/align/justify layout keys.
+- Fail: KPI card icon slot uses Heading/Text or has no native `type:"icon"` descendant.
+- Fail: Summary has save_var but no matching `Resource.exts[]` field selection, bad COUNT field, bad numeric aggregate field, or visible KPI binding mismatch.
+- Pass: final report uses decoded package ListSetID for canonical app URL and separately records install API return ID.
+- Fail: final report URL uses install API returned ID or merges canonical application identity with install operation ID.
 
 ## Validation Summary
 
@@ -121,6 +131,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `node scripts/test-yapk-hard-gate-cache-artifacts.mjs`: passed.
 - `node scripts/test-yapk-v3-runtime-hardening.mjs`: passed.
 - `node scripts/test-application-icon-gates.mjs`: passed.
+- `node scripts/test-dashboard-generation-hard-gates.mjs`: passed.
 - Metadata inspection: no training version bump was made; the local training checkout still reports `0.6.64`, while the requested release baseline for the post-merge release path is `0.7.4`.
 - Source/dist mirror checks for changed committed mirrors: passed.
 - `node scripts/audit-release-safety.mjs`: passed with zero blocking findings.
@@ -128,7 +139,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 
 ## Proof Boundaries
 
-These gates prove Functional Specification document quality and planning traceability only. They do not prove generated package validity, signing/API acceptance, install/import/upgrade success, runtime rendering, workflow delivery, notification delivery, permission enforcement, or business correctness.
+The Functional Specification and App Plan gates prove document quality and planning traceability only. The new FontAwesome icon and dashboard generation hard gates prove local wrapper/resource/reporting conformance for their scoped checks only. They do not prove signing/API acceptance, install/import/upgrade success, runtime rendering, workflow delivery, notification delivery, permission enforcement, or business correctness.
 
 ## Safety Confirmation
 
