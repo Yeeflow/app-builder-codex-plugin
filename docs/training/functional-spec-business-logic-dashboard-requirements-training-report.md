@@ -19,6 +19,9 @@ Generated Functional Specification documents could satisfy the structural gate w
 - Business rules now require explicit coverage for status lifecycle, approval, assignment, SLA/overdue behavior, validation, document/rich data, notification, escalation, completion, cancellation/rejection/rework, and permission rules when applicable.
 - Data requirements now require business purpose, required fields, field meaning, business-level field type expectations, lookup/reference relationships, lifecycle/status fields, audit fields, and reporting/dashboard fields for each major business object.
 - Dashboard page requirements now require business questions, source business objects/data lists, summary metrics, metric source fields, calculation logic, data regions, display fields, filters with source object/field/default scope/applies-to regions, sorting/grouping, user actions, mobile support, and alerts.
+- App Plan Dashboard Pages Plan now converts those Functional Specification dashboard requirements into Yeeflow-supported control-type planning without changing the overall App Plan structure.
+- Each Dashboard page App Plan entry now requires page identity, source Functional Specification dashboard requirement reference, source data lists/business objects, navigation placement, Page Function Plan reference when applicable, section-level control type categories, filter planning, summary metric planning, action categories, record-display control selection, and item-template dynamic display needs.
+- Dashboard App Plan validation rejects dashboard-only placeholders, invented or unsupported dashboard control types unless proof/deferred-labeled, and low-level IDs/action codes/property paths/fake placeholder IDs in the Dashboard Pages Plan.
 - Approval/form, workflow/notification, reporting/audit, and business clarification gates now have explicit required business details.
 - Functional Specification rejects low-level implementation leakage such as Yeeflow control types, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, JSON property paths, and exact generated resource IDs.
 
@@ -29,7 +32,9 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `skills/installed/yeeflow-application-builder/references/requirement-to-yap-generation-lifecycle.md`
 - `scripts/validate-functional-specification.mjs`
 - `scripts/validate-functional-spec-to-app-plan-traceability.mjs`
+- `scripts/validate-app-plan-resource-order.mjs`
 - `scripts/test-functional-specification-quality-gates.mjs`
+- `scripts/test-app-plan-dashboard-pages-plan-gates.mjs`
 - `scripts/test-functional-specification-and-app-plan-gates.mjs`
 - `scripts/test-clarification-readiness-traceability-gates.mjs`
 - `scripts/test-app-plan-control-action-property-gates.mjs`
@@ -41,6 +46,11 @@ Generated Functional Specification documents could satisfy the structural gate w
 - Fail: shallow Functional Specification with only a generic app summary and vague phrases.
 - Fail: dashboard requirement without required metrics, fields, filters, and data regions.
 - Fail: Functional Specification containing low-level implementation IDs, actionTypeCode values, and control-type leakage.
+- Pass: App Plan Dashboard page with business sections mapped to Summary/KPI, Data Filter, Collection/Data table, Text/Heading, and Button/action categories.
+- Fail: App Plan Dashboard page with no section-level control-type planning.
+- Fail: App Plan Dashboard page using an invented control type without proof/deferred label.
+- Fail: App Plan Dashboard page containing ListID/PageID/actionTypeCode/property paths.
+- Pass: App Plan Dashboard page choosing Collection for a portfolio/work queue region without exact runtime properties.
 
 ## Validation Summary
 
@@ -49,6 +59,7 @@ Generated Functional Specification documents could satisfy the structural gate w
 - `node scripts/validate-functional-specification.mjs docs/standards/functional-specification-standard-template.md --json`: passed.
 - `node scripts/test-functional-specification-quality-gates.mjs`: passed.
 - `node scripts/test-functional-specification-and-app-plan-gates.mjs`: passed.
+- `node scripts/test-app-plan-dashboard-pages-plan-gates.mjs`: passed.
 - `node scripts/test-clarification-readiness-traceability-gates.mjs`: passed.
 - `node scripts/test-business-clarification-and-app-plan-precision-gates.mjs`: passed.
 - `node scripts/test-planning-default-approval-and-exact-type-gates.mjs`: passed.

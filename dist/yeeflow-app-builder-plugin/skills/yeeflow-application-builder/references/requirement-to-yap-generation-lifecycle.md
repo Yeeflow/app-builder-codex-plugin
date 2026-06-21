@@ -156,7 +156,13 @@ The review must confirm:
 - Schedule workflows, AI Agents, Copilots, Custom Data List forms, Data List workflows, Notifications, Views, Dashboards, Navigation, and Permissions are planned or explicitly not applicable
 - Dashboard planning is separate from Form Report planning
 - Dashboard planning must trace to the Functional Specification's dashboard business questions, metric source fields, calculation logic, data regions, display fields, filters, sorting/grouping, user actions, mobile support, and alerts
-- Dashboard controls come from plugin-known controls, template library, validators, or export-proven references
+- Dashboard planning must convert Functional Specification dashboard business requirements into Yeeflow-supported resource/control-type planning at App Plan level
+- Each Dashboard page plan must include page identity, source Functional Specification dashboard requirement reference, source data lists/business objects, navigation placement, and Page Function Plan reference if applicable
+- Each dashboard section must state business purpose, source data list or business object, required fields or metrics, selected Yeeflow control type category, why the control type is appropriate, user actions, and proof boundary or deferred note
+- Dashboard controls come from plugin-known controls, template library, validators, or export-proven references, including Summary/KPI card, Data Filter, Collection, Data table, Kanban, Vertical Timeline, Horizontal Timeline, Text/Heading, Button/action button, Container, Grid/flex grid, and Chart/Data analytics only when supported or marked proof-required/deferred
+- Record-display sections must choose Collection, Data table, Kanban, Vertical Timeline, or Horizontal Timeline with a reason; prefer Collection for portfolio/card/grid-table regions, Data table for dense tabular records, Kanban for lane/status workflows, Vertical Timeline for audit/activity/history, and Horizontal Timeline for lifecycle/phase/milestone views
+- Dashboard filters, summary metrics, actions, and item-template dynamic display needs must be planned at business/control-type level
+- Dashboard App Plan entries must not include concrete generated IDs, ListID/PageID/FormID/LayoutID/ProcKey values, actionTypeCode values, Yeeflow JSON property paths, exact Container nesting, exact style values, runtime binding payloads, implementation-level layout JSON, or fake placeholder IDs such as LIST-* or LAYOUT-*
 - Dashboard/Page sections that display Data List records state selected display control and reason: Data table, Collection, Kanban, Vertical Timeline, or Horizontal Timeline
 - Collection, Kanban, Vertical Timeline, and Horizontal Timeline controls include item-template Dynamic control planning with bound fields
 - Collection and Kanban controls include item actions or explicitly state `No Collection/Kanban item actions required`

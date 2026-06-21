@@ -63,6 +63,9 @@ const REQUIRED_PATTERNS = [
   ["DO_NOT_INVENT_UNSUPPORTED_SHAPES", /Do not invent unsupported|Do not plan invented/i],
   ["UNKNOWN_CAPABILITY_LABELS", /export-learning-required[\s\S]*runtime-proof-required[\s\S]*deferred/i],
   ["RECORD_DISPLAY_CONTROL_SELECTION", /Record Display Control Selection/i],
+  ["DASHBOARD_FILTERS", /Dashboard Filters/i],
+  ["SUMMARY_METRICS", /Summary Metrics/i],
+  ["DASHBOARD_ACTIONS", /Dashboard Actions/i],
   ["ITEM_TEMPLATE_DYNAMIC_CONTROLS", /Item Template Dynamic Controls/i],
   ["COLLECTION_KANBAN_ACTIONS", /Collection (and|\/) Kanban Item Actions|Collection\/Kanban item actions/i],
   ["SUB_LIST_ACTIONS", /Sub List List Actions|No custom Sub List actions required/i],
@@ -70,6 +73,54 @@ const REQUIRED_PATTERNS = [
     "PLUGIN_SUPPORTED_TYPE_PROPERTY_RULE",
     /resource types[\s\S]*field types[\s\S]*variable types[\s\S]*controls[\s\S]*Dynamic controls[\s\S]*workflow nodes[\s\S]*form actions[\s\S]*Collection\/Kanban actions[\s\S]*Sub List actions[\s\S]*property paths[\s\S]*(configuration shapes|bindings)/i,
   ],
+];
+
+const DASHBOARD_ALLOWED_CONTROL_CATEGORIES = [
+  /Summary\s*\/\s*KPI card/i,
+  /\bSummary\b/i,
+  /\bKPI card\b/i,
+  /\bData Filter\b/i,
+  /\bCollection\b/i,
+  /\bData table\b/i,
+  /\bKanban\b/i,
+  /\bVertical Timeline\b/i,
+  /\bVertical timeline\b/i,
+  /\bHorizontal Timeline\b/i,
+  /\bHorizontal timeline\b/i,
+  /\bText\s*\/\s*Heading\b/i,
+  /\bText\b/i,
+  /\bHeading\b/i,
+  /\bButton\s*\/\s*action button\b/i,
+  /\bButton\b/i,
+  /\baction button\b/i,
+  /\bContainer\b/i,
+  /\bGrid\s*\/\s*flex grid\b/i,
+  /\bGrid\b/i,
+  /\bflex grid\b/i,
+  /\bChart\s*\/\s*Data analytics\b/i,
+  /\bChart\b/i,
+  /\bData analytics\b/i,
+];
+
+const DASHBOARD_PROOF_LABEL = /\b(runtime-proof-required|export-learning-required|deferred)\b/i;
+const DASHBOARD_UNSUPPORTED_CONTROL_HINTS = [
+  /\bmega\s*widget\b/i,
+  /\bmagic\s*dashboard\b/i,
+  /\bsuper\s*chart\b/i,
+  /\bworkflow\s*matrix\b/i,
+  /\bAI\s*control\b/i,
+  /\bcustom\s*react\b/i,
+  /\bunsupported\s*control\b/i,
+  /\binvented\s*control\b/i,
+];
+
+const DASHBOARD_FORBIDDEN_IMPLEMENTATION_PATTERNS = [
+  ["APP_PLAN_DASHBOARD_LOW_LEVEL_ID_LEAK", /\b(?:ListID|PageID|FormID|LayoutID|ProcKey)\s*[:=]\s*[A-Za-z0-9_-]+|\b(?:ListID|PageID|FormID|LayoutID|ProcKey)\b(?!\/)/i],
+  ["APP_PLAN_DASHBOARD_ACTIONTYPECODE_LEAK", /\bactionTypeCode\s*[:=]\s*["']?\d+["']?/i],
+  ["APP_PLAN_DASHBOARD_JSON_PROPERTY_PATH_LEAK", /\b(?:attrs|Resource|Pages|Data|Childs|LayoutInResources|Ext2)\.[A-Za-z0-9_.[\]]+/i],
+  ["APP_PLAN_DASHBOARD_FAKE_PLACEHOLDER_ID_LEAK", /\b(?:LIST|PAGE|FORM|LAYOUT|PROC)-[A-Za-z0-9_-]+\b/i],
+  ["APP_PLAN_DASHBOARD_EXACT_RESOURCE_ID_LEAK", /\b\d{16,}\b/],
+  ["APP_PLAN_DASHBOARD_LAYOUT_JSON_LEAK", /"type"\s*:\s*"?(?:container|collection|summary|data-table|kanban|text|heading)"?|^\s*[{[]\s*$/im],
 ];
 
 function usage(exitCode = 1) {
@@ -94,6 +145,57 @@ function headingLineIndexes(text) {
     if (/^#{1,6}\s+/.test(line)) map.set(normalizeHeading(line), index + 1);
   });
   return map;
+}
+
+function extractSections(text) {
+  const lines = text.split(/\r?\n/);
+  const sections = [];
+  for (let index = 0; index < lines.length; index++) {
+    const match = lines[index].match(/^(#{1,6})\s+(.+?)\s*$/);
+    if (!match) continue;
+    const level = match[1].length;
+    let end = lines.length;
+    for (let next = index + 1; next < lines.length; next++) {
+      const nextMatch = lines[next].match(/^(#{1,6})\s+(.+?)\s*$/);
+      if (nextMatch && nextMatch[1].length <= level) {
+        end = next;
+        break;
+      }
+    }
+    const title = match[2].trim().replace(/^\d+\.\s*/, "");
+    sections.push({ title, normalizedTitle: title.toLowerCase(), body: lines.slice(index + 1, end).join("\n") });
+  }
+  return sections;
+}
+
+function sectionBody(sections, title) {
+  const wanted = title.toLowerCase();
+  return sections.find((section) => section.normalizedTitle === wanted || section.normalizedTitle.includes(wanted))?.body ?? "";
+}
+
+function splitTableRows(sectionText) {
+  return sectionText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|") && line.endsWith("|"))
+    .filter((line) => !/^\|\s*:?-{3,}:?/.test(line))
+    .filter((line) => !/<[^>]+>/.test(line));
+}
+
+function hasAllowedDashboardControlCategory(text) {
+  return DASHBOARD_ALLOWED_CONTROL_CATEGORIES.some((pattern) => pattern.test(text));
+}
+
+function lineLooksLikeDashboardControlPlanning(line) {
+  return /\b(control type|control category|Selected Yeeflow|Summary|KPI|Data Filter|Collection|Data table|Kanban|Timeline|Text|Heading|Button|Container|Grid|Chart|Data analytics|widget|control)\b/i.test(line);
+}
+
+function policyDashboardText(text) {
+  return text
+    .split(/\r?\n/)
+    .filter((line) => !/\b(do not include|must not include|belongs? to|belong to|those belong|without specifying|for example|such as)\b/i.test(line))
+    .join("\n")
+    .replace(/```[\s\S]*?```/g, "");
 }
 
 function validateResourceOrder(text, findings) {
@@ -146,6 +248,103 @@ function validateControlActionPlanning(text, findings) {
   }
 }
 
+function validateDashboardPagesPlan(text, findings) {
+  const sections = extractSections(text);
+  const dashboard = sectionBody(sections, "Dashboard Pages Plan");
+  if (!dashboard.trim()) return;
+
+  const requiredIdentityPatterns = [
+    ["APP_PLAN_DASHBOARD_PAGE_IDENTITY_NAME_MISSING", /Page name:/i],
+    ["APP_PLAN_DASHBOARD_PAGE_IDENTITY_PURPOSE_MISSING", /Business purpose:/i],
+    ["APP_PLAN_DASHBOARD_SOURCE_SPEC_REFERENCE_MISSING", /Source Functional Specification dashboard requirement reference:/i],
+    ["APP_PLAN_DASHBOARD_SOURCE_DATA_MISSING", /Source data lists\/business objects:/i],
+    ["APP_PLAN_DASHBOARD_NAVIGATION_PLACEMENT_MISSING", /Navigation placement:/i],
+    ["APP_PLAN_DASHBOARD_PAGE_FUNCTION_REFERENCE_MISSING", /Page Function Plan reference if applicable:/i],
+  ];
+  for (const [code, pattern] of requiredIdentityPatterns) {
+    if (!pattern.test(dashboard)) {
+      findings.push({
+        level: "error",
+        code,
+        message: "Dashboard Pages Plan entries must include page identity, source requirement, source data, navigation, and Page Function Plan reference fields.",
+      });
+    }
+  }
+
+  const requiredSubsections = [
+    ["APP_PLAN_DASHBOARD_SECTIONS_MISSING", /#### Dashboard Sections/i],
+    ["APP_PLAN_DASHBOARD_FILTERS_MISSING", /#### Dashboard Filters/i],
+    ["APP_PLAN_DASHBOARD_SUMMARY_METRICS_MISSING", /#### Summary Metrics/i],
+    ["APP_PLAN_DASHBOARD_ACTIONS_MISSING", /#### Dashboard Actions/i],
+    ["APP_PLAN_DASHBOARD_RECORD_DISPLAY_SELECTION_MISSING", /#### Record Display Control Selection/i],
+    ["APP_PLAN_DASHBOARD_DYNAMIC_CONTROLS_MISSING", /#### Item Template Dynamic Controls/i],
+  ];
+  for (const [code, pattern] of requiredSubsections) {
+    if (!pattern.test(dashboard)) {
+      findings.push({
+        level: "error",
+        code,
+        message: "Dashboard Pages Plan must include section-level controls, filters, metrics, actions, record display selection, and dynamic display planning.",
+      });
+    }
+  }
+
+  const dashboardRows = splitTableRows(dashboard);
+  const hasConcreteSectionRow = dashboardRows.some((row) => /Summary|KPI|Data Filter|Collection|Data table|Kanban|Timeline|Text|Heading|Button|Container|Grid|Chart|Data analytics/i.test(row) && /\|[^|]{3,}\|/.test(row))
+    || (/Selected Yeeflow Control Type Category/i.test(dashboard) && hasAllowedDashboardControlCategory(dashboard));
+  if (!hasConcreteSectionRow) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_DASHBOARD_CONTROL_TYPE_PLANNING_MISSING",
+      message: "Dashboard Pages Plan must map dashboard sections to legal Yeeflow control type categories; saying only 'dashboard' is not enough.",
+    });
+  }
+
+  if (/\bdashboard\b/i.test(dashboard) && !hasAllowedDashboardControlCategory(dashboard)) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_DASHBOARD_CONTROL_TYPE_PLANNING_MISSING",
+      message: "Dashboard Pages Plan mentions a dashboard but does not choose supported Yeeflow control type categories.",
+    });
+  }
+
+  const policyText = policyDashboardText(dashboard);
+  for (const line of policyText.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || /^\|?\s*:?-{3,}:?\s*\|?/.test(trimmed)) continue;
+    if (/No custom (actions|Sub List actions|required)|No Collection\/Kanban item actions required/i.test(trimmed)) continue;
+    const unsupported = DASHBOARD_UNSUPPORTED_CONTROL_HINTS.find((pattern) => pattern.test(trimmed));
+    if (unsupported && !DASHBOARD_PROOF_LABEL.test(trimmed)) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_DASHBOARD_UNSUPPORTED_CONTROL_TYPE",
+        message: "Dashboard Pages Plan uses an unsupported or invented control type without runtime-proof-required, export-learning-required, or deferred.",
+        line: trimmed,
+      });
+    }
+    if (lineLooksLikeDashboardControlPlanning(trimmed) && /\b(?:custom|invented|unsupported|magic|mega|super)\b/i.test(trimmed) && !DASHBOARD_PROOF_LABEL.test(trimmed)) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_DASHBOARD_UNSUPPORTED_CONTROL_TYPE",
+        message: "Dashboard Pages Plan uses an unsupported or invented control type without runtime-proof-required, export-learning-required, or deferred.",
+        line: trimmed,
+      });
+    }
+  }
+
+  for (const [code, pattern] of DASHBOARD_FORBIDDEN_IMPLEMENTATION_PATTERNS) {
+    const match = policyText.match(pattern);
+    if (match) {
+      findings.push({
+        level: "error",
+        code,
+        message: "Dashboard Pages Plan contains implementation-level IDs, action codes, property paths, fake placeholder IDs, or layout JSON that belong to Blueprint/resource generation.",
+        value: match[0],
+      });
+    }
+  }
+}
+
 function validate(file) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const headings = headingLineIndexes(text);
@@ -187,6 +386,7 @@ function validate(file) {
 
   validateResourceOrder(text, findings);
   validateControlActionPlanning(text, findings);
+  validateDashboardPagesPlan(text, findings);
 
   for (const [code, pattern] of REQUIRED_PATTERNS) {
     if (!pattern.test(text)) {
