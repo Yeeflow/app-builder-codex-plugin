@@ -535,6 +535,11 @@ function validateDefaultViews(pkg, path, errors) {
   const queryItems = Array.isArray(view?.query) ? view.query : [];
   const layoutFields = layoutItems.map(viewFieldName);
   const queryFields = queryItems.map(viewFieldName);
+  const queryByFieldName = new Map();
+  for (const queryItem of queryItems) {
+    const name = viewFieldName(queryItem);
+    if (name && !queryByFieldName.has(name)) queryByFieldName.set(name, queryItem);
+  }
   const fields = new Set(asArray(pkg.Fields).map((field) => String(field.FieldName || "")).filter(Boolean));
   if (ext1?.Url !== "default") add(errors, "DEFAULT_VIEW_EXT1_URL_MISSING", "Default Type 0 data view must set Ext1.Url to default.", { path: `${path}.Layouts.default.Ext1` });
   if (!layoutFields.length) add(errors, "DEFAULT_VIEW_DISPLAY_FIELDS_MISSING", "Default data views must include visible columns.", { path: `${path}.Layouts.default.LayoutView.layout` });
@@ -546,6 +551,17 @@ function validateDefaultViews(pkg, path, errors) {
     const fieldName = viewFieldName(item);
     if (fieldName && !fields.has(fieldName) && !SYSTEM_DASHBOARD_FIELDS.has(fieldName)) add(errors, "DEFAULT_VIEW_DISPLAY_FIELD_NOT_FOUND", "Default view visible fields must resolve to list fields.", { path: `${path}.Layouts.default.LayoutView.layout[${index}]`, field: fieldName });
     if (fieldName && !queryFields.includes(fieldName)) add(errors, "DEFAULT_VIEW_QUERY_FIELDS_MISSING", "Default view query must include every visible display field.", { path: `${path}.Layouts.default.LayoutView.query`, field: fieldName });
+    const queryItem = queryByFieldName.get(fieldName);
+    const layoutFieldId = viewFieldId(item);
+    const queryFieldId = viewFieldId(queryItem);
+    if (fieldName && queryItem && layoutFieldId && queryFieldId && layoutFieldId !== queryFieldId) {
+      add(errors, "DEFAULT_VIEW_QUERY_FIELD_ID_MISMATCH", "Default view query field must match the visible layout column FieldID for the same FieldName.", {
+        path: `${path}.Layouts.default.LayoutView.query`,
+        field: fieldName,
+        layoutFieldId,
+        queryFieldId,
+      });
+    }
   }
   for (const field of SYSTEM_DASHBOARD_FIELDS) {
     if (!queryFields.includes(field)) add(errors, "DEFAULT_VIEW_SYSTEM_QUERY_FIELD_MISSING", "Default data views must include required system query fields.", { path: `${path}.Layouts.default.LayoutView.query`, field });
@@ -554,6 +570,10 @@ function validateDefaultViews(pkg, path, errors) {
 
 function viewFieldName(item) {
   return String(item?.field || item?.Field || item?.FieldName || "");
+}
+
+function viewFieldId(item) {
+  return item === undefined || item === null ? "" : String(item?.FieldID || item?.FieldId || item?.fieldId || item?.Field || "");
 }
 
 function validateNoRule(form, path, errors, counts) {
@@ -893,7 +913,7 @@ function pageContentWidthIsFull(page) {
 }
 
 function controlName(control) {
-  return String(control?.name || control?.label || control?.title || control?.attrs?.nv_label || control?.attrs?.headc?.title?.value || "");
+  return String(control?.name || control?.label || control?.title || control?.attrs?.headc?.title?.value || "");
 }
 
 function isDefaultControlName(control) {
@@ -1008,8 +1028,8 @@ function validateNativeTextControls(decoded, errors) {
       let parsed;
       try { parsed = JSON.parse(resource.Resource); } catch { continue; }
       walkControls(parsed, (control) => {
-        const title = control?.label || control?.name || control?.title || control?.attrs?.headc?.title?.value || "";
-        const looksLikeText = String(title).toLowerCase() === "text" || control?.attrs?.headc?.title;
+        const explicitType = String(control?.type || "").toLowerCase();
+        const looksLikeText = explicitType === "heading" || explicitType === "text" || explicitType === "text-editor";
         const pointer = `Pages[${pageIndex}].LayoutInResources[${resourceIndex}].Resource`;
         if (control?.type === "text") add(errors, "NATIVE_TEXT_CONTROL_TYPE_INVALID", "Generated dashboards/forms must not emit ad hoc type:\"text\" controls; use native heading/Text shape.", { path: pointer });
         if (!looksLikeText) return;

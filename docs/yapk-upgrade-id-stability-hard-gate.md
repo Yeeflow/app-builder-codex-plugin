@@ -44,6 +44,7 @@ The validator fails on:
 
 - missing previous/new package or lineage manifest
 - duplicate or missing semantic keys
+- layout semantic keys that do not include list title, layout title, layout type, and index or an equivalent disambiguator
 - existing semantic object ID changes
 - removed ID reuse
 - new object ID not recorded as API-issued
@@ -61,4 +62,43 @@ For YAP workflows, apply the same stable-ID principle to persisted schema IDs wh
 
 ## Proof Boundary
 
-Signing, signature verification, install acceptance, upgrade-check acceptance, and upgrade acceptance do not prove ID continuity. Runtime browser proof is also separate: after upgrade, verify the installed app opens and the intended dashboards, lists, forms, workflows, AI Agents, Copilots, and navigation still resolve correctly.
+Signing, signature verification, install acceptance, upgrade-check acceptance, and upgrade apply acceptance do not prove ID continuity or final upgrade success. `upgrade-check-yapk` and `upgrade-apply-yapk` API status `0` means submitted/accepted only. Final upgrade success requires Version Management row status `Succeed` plus separate browser/runtime proof for the intended changed surface.
+
+## Upgrade Scope, Reports, And Version Management
+
+Before signing, upgrade-check, upgrade apply, or handoff, existing-app upgrade generation must also run the scope/report/status gates:
+
+```bash
+node scripts/validate-yapk-upgrade-scope.mjs \
+  --previous-package dist/<app>-previous.yapk \
+  --new-package dist/<app>-upgrade.yapk \
+  --scope dist/<app>-upgrade-scope.json
+
+node scripts/validate-yapk-upgrade-report-scope.mjs \
+  --previous-package dist/<app>-previous.yapk \
+  --new-package dist/<app>-upgrade.yapk \
+  --scope dist/<app>-upgrade-scope.json \
+  --report-proof dist/<app>-report-scope-proof.json
+
+node scripts/inspect-yapk-upgrade-version-row.mjs \
+  --evidence validation/<app>-version-management-proof.json \
+  --package-id <submitted PackageId>
+```
+
+The upgrade scope JSON must declare:
+
+- intended upgrade type, such as `field-only`, `list-only`, `dashboard`, `approval`, `report`, `workflow`, or `navigation`
+- target resource type and target list/page/form/report/workflow
+- allowed changes
+- disallowed unrelated changes
+- generated content IDs, when wrapper identity checks need to distinguish content IDs from tenant metadata
+
+Field-only and list-only upgrades must fail when they mutate dashboards, approval forms, workflows, navigation, `FormNewReports`, or `DataReports` unless those resource types are explicitly declared in scope. If reports are intentionally included, each report must be proven new or update-safe; duplicate existing reports fail before live upgrade.
+
+Upgrade wrapper identity should be Version Management-compatible: UUID-like `PackageId`, real tenant `TenantID`, stable root app/list IDs, and real author metadata where available. Generated numeric content IDs must not be used as upgrade `PackageId` or tenant identity.
+
+When a visible field is added to a default data-list view, `LayoutView.layout[]` and `LayoutView.query[]` must both include the field, and the `FieldName`/`FieldID` values must match.
+
+Approval forms are out of scope for field-only/list-only upgrades unless explicitly declared. If an upgrade package includes approval `DefResource`, it must be export-shaped and designer-safe: canonical `::brotli::` Brotli/base64 encoding, UUID page IDs, complete page registrations, `Main`/`Content` containers, page-scoped unique designer control IDs, workflow panel/history metadata, graph positions, task URL aliases, assignee configuration, and explicit Approved/Rejected outgoing paths.
+
+Version Management proof must locate the submitted `PackageId` row and require final status `Succeed`. `Failed`, `Pending` timeout, missing row, or ambiguous rows fail. Failed rows must capture sanitized exact `View error log` text. After `Succeed`, runtime proof must open the affected surface and prove the intended change, such as the new data-list field label.

@@ -37,7 +37,7 @@ assert.equal(canonical.$defs.AppPackageInfo.required.includes("FormNewReports"),
 assert.equal(canonical.$defs.AppPackageInfo.required.includes("Forms"), false);
 assert.equal(canonical.$defs.AppPackageInfo.required.includes("DataReports"), false);
 assert.equal(Boolean(canonical.$defs.AppPackageInfo.properties.FormReports), false, "canonical product schema stays unmodified");
-assert.equal(Boolean(canonical.$defs.AppPackageInfo.properties.PortalInfo), false, "canonical product schema must not keep removed PortalInfo property");
+assert.deepEqual(canonical.$defs.AppPackageInfo.properties.PortalInfo.oneOf.map((item) => item.type || item.$ref), ["null", "#/$defs/AnyObject"]);
 assert.equal(Boolean(canonical["x-yeeflow-standard-additions"]), false, "canonical YAPK schema must not contain Codex additions");
 assert.ok(overlay["x-yeeflow-standard-additions"], "Codex additions are preserved in the overlay");
 assert.ok(effective["x-yeeflow-standard-additions"], "effective YAPK schema exposes Codex additions");

@@ -241,9 +241,22 @@ function buildUniqueKeyMap(objects, findings, side) {
       }));
       continue;
     }
+    if (String(object.objectType || "").toLowerCase() === "layout" && !hasDisambiguatedLayoutKey(object.semanticKey)) {
+      findings.push(error("UPGRADE_LAYOUT_SEMANTIC_KEY_UNDISAMBIGUATED", "Layout semantic keys must include list title, layout title, layout type, and index or equivalent disambiguator.", {
+        side,
+        semanticKey: object.semanticKey,
+      }));
+      continue;
+    }
     map.set(object.semanticKey, object);
   }
   return map;
+}
+
+function hasDisambiguatedLayoutKey(semanticKey) {
+  const parts = String(semanticKey || "").split(":").filter(Boolean);
+  if (parts.length >= 5) return true;
+  return /layout(type|Type|_type|Index|index|#|\[[0-9]+\])/.test(String(semanticKey || ""));
 }
 
 function buildIdToKeyMap(objects) {
