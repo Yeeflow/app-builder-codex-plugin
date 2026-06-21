@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.2
+
+- Add generated-final resource completeness gates that compare decoded packages against the approved App Plan before signing readiness.
+- Fail planned approval-form applications that generate `Forms: []`, planned Form Reports with empty `FormNewReports[]`, and planned Data Reports with empty `DataReports[]`.
+- Fail shell-only dashboards when the App Plan declares KPI/Summary metrics, filters, Collection/Data table/Kanban/Timeline regions, or dynamic item-template display needs but generated Type 103 dashboard content is empty.
+- Fail generic/default-only navigation when the App Plan declares concrete navigation groups/items and planned resources are not reachable.
+- Wire the completeness gate into first-generation YAPK preflight when `--plan <yeeflow-app-plan.md>` is supplied and make dashboard generation hard gates plan-aware for dashboard materialization.
+- Keep omissions allowed only for App Plan items explicitly marked deferred with reason, fallback/user impact, and follow-up proof.
+
 ## 0.8.1
 
 - Fix App Plan planning schema/validator consistency introduced around the `0.8.0` planning-quality release.

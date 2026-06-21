@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.1`
+`0.8.2`
+
+Version `0.8.2` adds generated-final resource completeness gates against the approved App Plan before signing readiness. Generated packages must materialize planned approval forms, custom forms, FormNewReports, DataReports, dashboard KPI/filter/Summary/Collection/Data table regions, navigation groups/items, data lists, and other non-deferred resources. Shell-only dashboards, generic-only navigation, and partial generated-final package surfaces fail unless the App Plan explicitly defers the item with reason, fallback/user impact, and follow-up proof.
 
 Version `0.8.1` fixes App Plan schema/validator consistency after the `0.8.0` planning-quality release. The primary App Plan remains `yeeflow-app-plan.md` using the canonical `Yeeflow App Plan` resource-order Markdown contract, and both the template validator and resource-order validator now enforce that same schema. Functional Specification generation must emit every canonical Markdown section from the standardized template, Dashboard Pages Plan legal Yeeflow control-type planning remains in force, low-level implementation leakage remains blocked, and negative guardrail wording such as unsupported-shape blocker text no longer causes false unsupported-control findings.
 

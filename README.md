@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.1`
+- Version: `0.8.2`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.1` fixes the `0.8.0` App Plan planning schema/validator consistency issue. The primary App Plan remains `yeeflow-app-plan.md` with the `Yeeflow App Plan` resource-order schema; template, resource-order, generation-readiness, traceability, standards, and lifecycle guidance now agree on that contract. Functional Specification generation keeps the standardized Markdown template and must emit every required canonical section. Dashboard Pages Plan keeps legal Yeeflow control-type planning and low-level implementation leakage prevention, while guardrail wording such as unsupported-shape blockers no longer triggers false positives.
+Current release `0.8.2` adds generated-final resource completeness gates against the approved App Plan before signing readiness. Generated packages must materialize planned forms, FormNewReports, DataReports, dashboard KPI/filter/Summary/Collection/Data table regions, navigation groups/items, data lists, and other non-deferred resources; shell-only dashboards, generic-only navigation, and partial generated-final surfaces are blocked unless explicitly deferred in the App Plan with reason and follow-up proof.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.1
+Version: 0.8.2
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.1
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.2
 ```
 
 ## What Is Included
@@ -59,7 +59,7 @@ Use the plugin to plan, generate, inspect, validate, and harden Yeeflow applicat
 - Package API automation with dry-run defaults and explicit confirmation gates.
 - YAP/YAPK/YDL/YWF validators and wrapper helpers.
 - Application plan conformance, navigation checks, runtime-binding lessons, and release hygiene.
-- Generated-final YAPK hard gates for API-issued ID provenance and complete navigation runtime metadata.
+- Generated-final YAPK hard gates for API-issued ID provenance, complete navigation runtime metadata, and App Plan resource completeness.
 - Dashboard grid-table Collection hard gate for dashboard record-list wrapper structure, detail links, title/header metadata, and runtime/designer proof boundaries.
 - UI/Summary/KPI runtime hard gates for page-by-page UI contracts, export-proven style shapes, Summary metadata, visible KPI evidence or labeled fallback, grid-table quality, and upgrade ListSetID/app identity stability.
 - Supplier runtime/design fidelity gates and validation-layer proof gates for installed `ListSetID` runtime URL proof, design section/KPI/page chrome mapping, real Data Filter and Collection bindings, analytics/progress/Summary/KPI fidelity, canonical one-PNG-per-page design artifacts, and separated proof layers from schema validation through runtime browser proof and pixel comparison.
