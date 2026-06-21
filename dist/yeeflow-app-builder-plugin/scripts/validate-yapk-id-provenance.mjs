@@ -8,6 +8,7 @@ import { isObject, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
 const NUMERIC_RE = /^\d+$/;
 const ID_KEY_RE = /(^|\.)(ID|Id|Key|PackageId|TenantID|ListID|LayoutID|FieldID|RefId|DefResourceID|DeployedDefID|FormKey|FlowKey)$/;
 const ENUM_KEYS = new Set(["AppID", "Type", "Status", "Flags", "FieldIndex", "Category", "Order", "Mobile", "ListType"]);
+const WRAPPER_METADATA_ID_PATH_RE = /^wrapper\.(TenantID|CreatedBy|ModifiedBy)$/;
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -136,11 +137,13 @@ export function collectNumericContentIds({ wrapper, decoded }) {
   const ids = [];
   const visit = (rootName, root) => {
     walk(root, (value, pointer) => {
+      const fullPath = `${rootName}${pointer.slice(1)}`;
+      if (rootName === "wrapper" && WRAPPER_METADATA_ID_PATH_RE.test(fullPath)) return;
       const key = pointer.split(".").pop()?.replace(/\[\d+\]$/, "") || "";
       if (ENUM_KEYS.has(key)) return;
       if (!isIdentifierPath(pointer)) return;
-      if (typeof value === "number" && Number.isInteger(value) && value > 999999) ids.push({ id: String(value), path: `${rootName}${pointer.slice(1)}` });
-      else if (typeof value === "string" && NUMERIC_RE.test(value) && value.length >= 7) ids.push({ id: value, path: `${rootName}${pointer.slice(1)}` });
+      if (typeof value === "number" && Number.isInteger(value) && value > 999999) ids.push({ id: String(value), path: fullPath });
+      else if (typeof value === "string" && NUMERIC_RE.test(value) && value.length >= 7) ids.push({ id: value, path: fullPath });
     });
   };
   visit("wrapper", wrapper);

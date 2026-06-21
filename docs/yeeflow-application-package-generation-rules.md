@@ -103,6 +103,7 @@ For generated-final `.yapk` application output, generation must stop before sign
 - API-Issued Content ID Provenance Gate: every numeric generated application content ID is allocated through `GET /utils/generate/ids?count=<n>` and recorded in `dist/<app-name>-id-provenance-report.json` with `sourceMarker: "api-generated"`.
 - Navigation Runtime Metadata Gate: every runtime navigation group includes API-issued `ID`, `AppID`, `ListSetID`, `Type: "classes"`, `Title`, `Icon`, and `list[]`; every child includes `AppID`, `Title`, `ListID`, `ListSetID`, and `Type`; targets resolve to `Pages[].LayoutID`, `Forms[].Key`, or `Childs[].List.ListID`.
 - Recursive Generated-Final Draft Placeholder and Logical Ref Gate: no `local-draft`, `localDraft`, `local-draft-*`, `sourceMarker: local-draft-no-api`, equivalent draft sentinel, or unresolved logical reference may remain anywhere in wrapper metadata, decoded `AppPackageInfo`, parsed page resources, form `Ext`/`DefResource`, control bindings, links, action targets, workflow/navigation metadata, theme payloads, arrays, or version fields.
+- Signing-Readiness TenantID Gate: wrapper `TenantID` is tenant metadata, not generated app content ID. It must be present, non-empty, not `"0"`, not local/draft/placeholder-like, and must match the resolved OAuth tenant context when available before `setsign`.
 
 Local ID fallback is forbidden for generated-final output, including local sequential counters, local `id()` helpers, hardcoded generated IDs, copied sample/export IDs, random values, timestamps, UUID fallback, and deterministic local-only seeds.
 
@@ -114,11 +115,12 @@ Required validators:
 node scripts/validate-yapk-id-provenance.mjs --package dist/<app>.yapk --manifest dist/<app>-id-provenance-report.json
 node scripts/validate-generated-final-draft-placeholders.mjs --package dist/<app>.yapk --mode generated-final
 node scripts/validate-yapk-navigation-runtime-metadata.mjs --package dist/<app>.yapk --id-provenance dist/<app>-id-provenance-report.json
+node scripts/validate-yapk-signing-readiness.mjs --package dist/<app>.yapk --expected-tenant-id <oauth-tenant-id>
 node scripts/validate-yapk-upgrade-id-stability.mjs --previous-package dist/<app>-previous.yapk --previous-manifest dist/<app>-previous-id-lineage.json --new-package dist/<app>.yapk --new-manifest dist/<app>-id-lineage.json
 node scripts/inspect-yapk-upgrade-app-identity.mjs --package dist/<app>.yapk --lineage dist/<app>-lineage.json
 ```
 
-`validate-yapk-upgrade-id-stability.mjs` and `inspect-yapk-upgrade-app-identity.mjs` are required for upgrade/new-version output, not first-generation output. `setsign` / `verifysign` prove wrapper/resource signature only. Package API install/upgrade acceptance proves action acceptance only. Neither proves ID provenance, upgrade ID continuity, ListSetID/app identity stability, navigation runtime metadata completeness, or runtime UI materialization.
+`validate-yapk-upgrade-id-stability.mjs` and `inspect-yapk-upgrade-app-identity.mjs` are required for upgrade/new-version output, not first-generation output. `setsign` / `verifysign` prove wrapper/resource signature only. Package API install/upgrade acceptance proves action acceptance only. Neither proves ID provenance, TenantID correctness before signing, upgrade ID continuity, ListSetID/app identity stability, navigation runtime metadata completeness, or runtime UI materialization.
 
 For UI-heavy packages, also apply `docs/standards/ui-summary-kpi-runtime-hard-gates.md`. High-quality UI requires a page-by-page implementation contract, export-proven control/style shapes, and runtime screenshot evidence. Summary/KPI controls require designer-shaped metadata and runtime evidence. Dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape with UUID Summary IDs, matching `Resource.ReportIds[]`, matching `Resource.exts[]`, dashboard `Resource.tempVars[]`, designer-shaped `attrs.save_var`, visible `attrs.headc.title.variable[]`, complete field metadata, before/after mutation proof, and refreshed/recalculated runtime evidence. Other shapes remain unproven unless focused runtime proof exists, and fallback KPI values must be explicitly labeled as fallback.
 

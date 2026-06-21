@@ -8,6 +8,8 @@ const ROOT = process.cwd();
 
 const hardGateScripts = [
   "scripts/validate-yapk-id-provenance.mjs",
+  "scripts/lib/yapk-signing-readiness-utils.mjs",
+  "scripts/validate-yapk-signing-readiness.mjs",
   "scripts/validate-generated-final-draft-placeholders.mjs",
   "scripts/validate-yapk-navigation-runtime-metadata.mjs",
   "scripts/validate-yapk-upgrade-id-stability.mjs",
@@ -45,6 +47,7 @@ const hardGateScripts = [
   "scripts/inspect-yeeflow-control-configurations.mjs",
   "scripts/yapk-first-generation-preflight.mjs",
   "scripts/test-generated-final-draft-placeholder-gates.mjs",
+  "scripts/test-yapk-signing-readiness-tenantid-gates.mjs",
   "scripts/test-yapk-id-navigation-hard-gates.mjs",
   "scripts/test-yapk-upgrade-id-stability.mjs",
   "scripts/test-dashboard-grid-table-collections.mjs",
@@ -94,6 +97,7 @@ const requiredDocs = [
   "docs/reference/yeeflow-control-property-extensions.json",
   "docs/reference/dashboard-golden-reference-registry.normalized.json",
   "docs/studies/marketing-event-v045-design-runtime-fidelity-study.md",
+  "docs/training/signing-readiness-tenantid-and-setsign-contract-gates-training-report.md",
 ];
 
 for (const sourcePath of requiredDocs) {
