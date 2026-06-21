@@ -6,10 +6,10 @@ Current install identity:
 
 - Marketplace: Yeeflow
 - Plugin: Yeeflow App Builder
-- Version: `0.7.3`
+- Version: `0.7.4`
 - Dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.7.3` releases the Event Portfolio dashboard default Golden Reference registry from PR #132. Dashboard generation now includes a required Dashboard Golden Reference Selection stage between Page Function Plan and Blueprint generation, with structured page and section reference IDs, Blueprint/resource conformance and provenance checks, Facility Maintenance mapping regression coverage, safeguards against copying Event fields into unrelated apps, and package-readiness gates for dashboard golden-reference conformance.
+Current release `0.7.4` adds signing-readiness TenantID and setsign contract gates from PR #134. Generated-final YAPK signing readiness now validates wrapper TenantID as tenant metadata from OAuth context, blocks missing, empty, placeholder, local-draft, or `0` TenantID values before setsign, keeps wrapper TenantID out of generated app content ID provenance, parses top-level JSON string and object-field setsign signatures, redacts signing evidence, and adds focused regression coverage plus preflight/cache hard-gate registration.
 
 Full-application UI generation also requires the full-page design blueprint workflow: validate full-page canonical design PNGs, validate page implementation blueprints, and compare decoded resources back to the blueprint before package/sign/upgrade. See `docs/standards/full-page-design-blueprint-generation-standard.md`.
 
