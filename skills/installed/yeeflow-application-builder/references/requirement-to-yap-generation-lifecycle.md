@@ -80,6 +80,8 @@ Keep low-level Yeeflow implementation details out of the Functional Specificatio
 
 The primary artifact must be a human-readable Markdown file named `functional-specification.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `functional-specification.trace.json`; JSON must not replace `functional-specification.md`. Any companion JSON projection must be derived from the Markdown Functional Specification and remain consistent with it.
 
+The generator must emit every numbered section from `docs/standards/functional-specification-standard-template.md`, in order and with the canonical names. Do not merge, rename, skip, or compress required sections; when something is not applicable, keep the section and write a concrete not-applicable rationale, assumption, or deferred decision.
+
 For brief requirements:
 
 - infer and supplement a complete business requirement document with explicit assumptions
@@ -129,6 +131,8 @@ Create the Yeeflow App Plan only from the reviewed Functional Specification, usi
 The reviewed Functional Specification is the business source of truth for the App Plan. The App Plan is not a free-form plan, generic project plan, or ad hoc script plan. It is the Yeeflow resource generation contract and must convert business requirements into Yeeflow-supported resources in this standard order:
 
 The primary artifact must be a human-readable Markdown file named `yeeflow-app-plan.md`. JSON is allowed only as a companion/projection artifact for validators, traceability, or tests, such as `app-plan.trace.json`; JSON must not replace `yeeflow-app-plan.md`. Any companion JSON projection must be derived from the Markdown App Plan and remain consistent with it.
+
+The canonical primary App Plan title/schema is `# <Application Name> - Yeeflow App Plan` using the resource-order sections from `docs/standards/app-plan-standard-template.md`. Do not generate or require a conflicting primary `Yeeflow Application Plan` schema. If a compatibility validator or companion artifact is used, it must validate or derive from the same `yeeflow-app-plan.md` Markdown contract.
 
 Generation must be based on the reviewed Markdown Functional Specification and Markdown Yeeflow App Plan first. Companion JSON may support validators, traceability, or tests, but it must not replace, override, or silently narrow the Markdown planning contracts.
 
@@ -268,10 +272,12 @@ Stop if any required business decision gate remains unanswered or either review 
 When an App Plan Markdown artifact exists, run:
 
 ```bash
+node scripts/validate-app-plan-template.mjs <app-plan.md>
+node scripts/validate-app-plan-resource-order.mjs <app-plan.md>
 node scripts/validate-generation-readiness-review.mjs --plan <app-plan.md>
 ```
 
-The review fails when any of the 13 Yeeflow resource areas is missing, empty, placeholder-only, or lacks concrete planned resources or explicit not-applicable/deferred/runtime-proof status. It also checks that Functional Specification review, App Plan review, business decision closure, and unsupported-shape gates are documented as passed. This validator proves planning readiness only; it does not prove package generation, schema validity, signing/API acceptance, install/upgrade success, or runtime behavior.
+`validate-app-plan-template.mjs` is a compatibility entrypoint for the same canonical resource-order `yeeflow-app-plan.md` contract enforced by `validate-app-plan-resource-order.mjs`; both must accept the same primary Markdown artifact. The generation-readiness review fails when any of the 13 Yeeflow resource areas is missing, empty, placeholder-only, or lacks concrete planned resources or explicit not-applicable/deferred/runtime-proof status. It also checks that Functional Specification review, App Plan review, business decision closure, and unsupported-shape gates are documented as passed. These validators prove planning readiness only; they do not prove package generation, schema validity, signing/API acceptance, install/upgrade success, or runtime behavior.
 
 Validation reports must distinguish structural planning checks from overall generation readiness:
 

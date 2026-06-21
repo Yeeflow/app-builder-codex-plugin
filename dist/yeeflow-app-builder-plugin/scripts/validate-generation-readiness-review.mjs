@@ -59,6 +59,10 @@ const COMBINED_EXACT_HEADER = /\bExact\b.*\b(?:Field Type|Variable Type|Type)\s*
 const EXACT_IMPLEMENTATION_HEADER = /\b(exact yeeflow|implementation type|implementation control|implementation action|selected resource type|selected control|action type|field type|variable type|control type|dynamic control type|property path|binding)\b/i;
 const BUSINESS_LABEL_HEADER = /\b(business label|display label|business requirement|display need|selection reason|notes?|description|purpose|fallback|deferred reason|proof label|proof boundary|support source|why)\b/i;
 
+function isNegativeGuardrailLine(line) {
+  return /\b(do not|don't|must not|never|forbid|forbidden|reject|rejected|fail|fails|block|blocks|blocked|blocking|blocker|blockers|not generation-ready|must be marked|marked as|unless marked|without runtime proof|proof-required|deferred)\b/i.test(line);
+}
+
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
@@ -403,7 +407,7 @@ function validateControlActionPropertyGates(text, sections) {
 
   for (const [index, line] of text.split(/\r?\n/).entries()) {
     if (!/\b(unsupported|unconfirmed|invented)\b/i.test(line)) continue;
-    if (/do not|must not|must be marked|mark(ed)? it as|marked/i.test(line)) continue;
+    if (isNegativeGuardrailLine(line)) continue;
     if (DEFERRED.test(line)) continue;
     if (!/\b(control|type|property|path|action|binding|shape|configuration)\b/i.test(line)) continue;
     findings.push({
