@@ -87,6 +87,34 @@ Use 60/40 sections when one side is primary and the other side is supporting con
 
 Omit optional `Operations` containers unless real actions exist.
 
+## Controlled Business Slots And Repeatable Modules
+
+Generated Dashboard pages must preserve the v1.1 template shell and non-business layout containers as structural equivalents of the registered template. Business-specific text, bindings, filters, KPI values, FontAwesome icons, actions, and Collection/table fields may change only inside approved business-content containers.
+
+Allowed business-content containers:
+
+- `event_portfolio_pipeline_title_group`
+- `Operations`
+- `section_content_area`
+- `section_title_header`
+- `event_portfolio_kpi_planned_events`
+- `event_portfolio_kpi_approved_budget`
+- `event_portfolio_kpi_registration_rate`
+- `event_portfolio_kpi_lead_follow_up`
+
+Allowed repeatable/removable template modules:
+
+- `content_card_wrapper`
+- `2_columns_section`
+- `3_columns_section`
+- `2_columns_60/40_section`
+- `kpi_cards_kpi_row`
+- `event_portfolio_kpi_planned_events`
+
+Unneeded repeatable modules may be removed. New layout modules may only be added by copying one of the allowed repeatable/removable template modules. Copied modules must preserve template structure, hierarchy, control types, width, padding, direction, gap, background, and required children.
+
+Do not invent new dashboard layout modules. Non-business template containers must remain structurally equivalent to the template. KPI cards may be added only by copying `event_portfolio_kpi_planned_events` and replacing the allowed KPI business content.
+
 ## Actions
 
 `Operations` containers may exist only when they contain real configured Yeeflow action controls. Placeholder operation chips, visual-only buttons, and action-looking containers without action configuration are forbidden.

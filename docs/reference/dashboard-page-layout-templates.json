@@ -8827,7 +8827,33 @@
             }
           ]
         }
-      }
+      },
+      "allowedBusinessContentContainers": [
+        "event_portfolio_pipeline_title_group",
+        "Operations",
+        "section_content_area",
+        "section_title_header",
+        "event_portfolio_kpi_planned_events",
+        "event_portfolio_kpi_approved_budget",
+        "event_portfolio_kpi_registration_rate",
+        "event_portfolio_kpi_lead_follow_up"
+      ],
+      "allowedRepeatableRemovableModules": [
+        "content_card_wrapper",
+        "2_columns_section",
+        "3_columns_section",
+        "2_columns_60/40_section",
+        "kpi_cards_kpi_row",
+        "event_portfolio_kpi_planned_events"
+      ],
+      "controlledSlotRules": [
+        "Business text, bindings, filters, KPI values, FontAwesome icons, actions, and Collection/table fields may only change inside allowed business-content containers.",
+        "New dashboard layout modules may only be added by copying one of the allowed repeatable/removable modules.",
+        "Copied modules must preserve template structure, hierarchy, control types, width, padding, direction, gap, background, and required children.",
+        "Non-business template containers must remain structurally equivalent to the v1.1 template.",
+        "Operations containers must be omitted when no real actions exist.",
+        "Additional KPI cards must copy event_portfolio_kpi_planned_events and replace only allowed KPI business content."
+      ]
     }
   ]
 }
