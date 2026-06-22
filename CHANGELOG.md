@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.8.7
+
+- Release Dashboard Page Layouts v1.1 template adoption from PR #151.
+- Register Dashboard Page Layouts v1.1 as the required page shell for newly generated Dashboard pages.
+- Enforce the standard dashboard page structure, including page background, `Main > Content`, page title/header, content cards, 1/2/3-column sections, 60/40 section, and KPI wrapper.
+- Use the v1.1 page shell together with Event Portfolio component/region golden references.
+- Add Full-width structural container checks and section title/content area checks.
+- Allow `Operations` containers only when real configured actions exist.
+- Require canonical runtime route proof.
+- Preserve dashboard-only upgrade scope by blocking unrelated resource changes and preserving Dashboard `LayoutID` values.
+
 ## 0.8.6
 
 - Release Dashboard Golden Reference export-shape parity from PR #149.

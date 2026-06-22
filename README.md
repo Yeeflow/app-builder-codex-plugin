@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.6`
+- Version: `0.8.7`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.6` adds Dashboard Golden Reference export-shape parity from PR #149: updated Event Portfolio Dashboard Golden Reference source, strict `_ak_c` / `_ak_c_opt` export-shape parity, reference quality lint, Full-width section/KPI card enforcement, root Content zero-padding, high-level Container layout enforcement with approved table-internal `flex_grid` exceptions, stronger filter contract and static consumer linkage checks, runtime filter before/after data-change proof, `dynamic-user` enforcement for user/identity fields, and rejection of provenance-only simplified dashboard shells.
+Current release `0.8.7` adds Dashboard Page Layouts v1.1 template adoption from PR #151: Dashboard Page Layouts v1.1 is registered as the required page shell, standard dashboard page structure is enforced with page background, `Main > Content`, page title/header, content cards, 1/2/3-column sections, 60/40 section, and KPI wrapper, the v1.1 shell is used together with Event Portfolio component/region golden references, Full-width structural containers and section title/content areas are checked, Operations containers are allowed only when real actions exist, canonical runtime route proof is required, and dashboard-only upgrade scope preservation is enforced.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.6
+Version: 0.8.7
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.6
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.7
 ```
 
 ## What Is Included
