@@ -8,9 +8,11 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk } from "./lib/yapk-d
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-golden-references.json");
 const DEFAULT_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
+const DASHBOARD_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"]);
 const GRID_TYPES = new Set(["grid", "flex_grid"]);
 const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|employee|person|people|accountid|account id)\b/i;
+const V11_ROOT_CONTENT_CHILD_IDS = new Set(["page_title_section", "content_card_wrapper", "kpi_metrics_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -191,6 +193,9 @@ function validatePackage(packagePath, context) {
     if (childRegions.length === 0) {
       context.findings.push(error("DASH_GOLDEN_SHELL_ONLY", "Generated dashboard only has Main > Content and no meaningful child regions.", { page: page.title }));
     }
+    if (isDashboardPageLayoutsV11(page.resource)) {
+      validateNoCompetingGoldenShellAtV11Root(page, context.findings);
+    }
     validateExportShapeParity(page, context);
     validateUserFieldControls(page, context.findings);
     const resourceIndex = buildTreeIndex(findFirstByIdentity(page.resource, "Main") || page.resource);
@@ -205,6 +210,7 @@ function validateExportShapeParity(page, context) {
   const reference = context.defaultReference;
   const referenceIndex = buildReferenceIndex(reference);
   const resourceIndex = buildTreeIndex(findFirstByIdentity(page.resource, "Main") || page.resource);
+  const isV11 = isDashboardPageLayoutsV11(page.resource);
   const requiredIds = requiredRegionsFromPlan(page.resource, reference);
   const missing = [];
 
@@ -219,7 +225,7 @@ function validateExportShapeParity(page, context) {
     if (generatedEntry.control?.type !== referenceEntry.control?.type) {
       context.findings.push(error("DASH_GOLDEN_EXPORT_CONTROL_TYPE_MISMATCH", "Generated dashboard region must preserve golden-reference control type.", { page: page.title, regionId, expected: referenceEntry.control?.type, actual: generatedEntry.control?.type }));
     }
-    if (generatedEntry.depth !== referenceEntry.depth) {
+    if (!isV11 && generatedEntry.depth !== referenceEntry.depth) {
       context.findings.push(error("DASH_GOLDEN_EXPORT_NESTING_DEPTH_MISMATCH", "Generated dashboard region must preserve golden-reference nesting depth.", { page: page.title, regionId, expectedDepth: referenceEntry.depth, actualDepth: generatedEntry.depth }));
     }
   }
@@ -228,8 +234,8 @@ function validateExportShapeParity(page, context) {
     context.findings.push(error("DASH_GOLDEN_EXPORT_SHAPE_SIMPLIFIED", "Generated dashboard has provenance markers but not the required export-shaped Golden Reference structure.", { page: page.title, missingRegions: missing }));
   }
 
-  validateRegionOrder(page, reference, resourceIndex, context.findings);
-  validateResourceLayoutContracts(page, reference, resourceIndex, context.findings);
+  if (!isV11) validateRegionOrder(page, reference, resourceIndex, context.findings);
+  validateResourceLayoutContracts(page, reference, resourceIndex, context.findings, { isDashboardPageLayoutsV11: isV11 });
   validateFilterContractsAndStaticLinks(page, reference, resourceIndex, context.findings);
 }
 
@@ -245,13 +251,15 @@ function validateRegionOrder(page, reference, resourceIndex, findings) {
   }
 }
 
-function validateResourceLayoutContracts(page, reference, resourceIndex, findings) {
+function validateResourceLayoutContracts(page, reference, resourceIndex, findings, options = {}) {
   const approvedFlex = new Set(asArray(reference.allowedGridTableInternalFlexGridIds).map(String));
-  for (const entry of resourceIndex.controls) {
-    const keys = identityCandidates(entry.control);
-    const regionId = keys.find((candidate) => approvedFlex.has(candidate)) || keys[0] || entry.pointer;
-    if (GRID_TYPES.has(entry.control?.type) && !keys.some((candidate) => approvedFlex.has(candidate))) {
-      findings.push(error("DASH_GOLDEN_RESOURCE_HIGH_LEVEL_GRID", "Generated high-level dashboard layout regions must use container, not grid/flex_grid; only registered grid-table internal rows may use grid/flex_grid.", { page: page.title, regionId, type: entry.control.type, pointer: entry.pointer }));
+  if (!options.isDashboardPageLayoutsV11) {
+    for (const entry of resourceIndex.controls) {
+      const keys = identityCandidates(entry.control);
+      const regionId = keys.find((candidate) => approvedFlex.has(candidate)) || keys[0] || entry.pointer;
+      if (GRID_TYPES.has(entry.control?.type) && !keys.some((candidate) => approvedFlex.has(candidate))) {
+        findings.push(error("DASH_GOLDEN_RESOURCE_HIGH_LEVEL_GRID", "Generated high-level dashboard layout regions must use container, not grid/flex_grid; only registered grid-table internal rows may use grid/flex_grid.", { page: page.title, regionId, type: entry.control.type, pointer: entry.pointer }));
+      }
     }
   }
   for (const regionId of asArray(reference.highLevelContainerRegionIds)) {
@@ -262,13 +270,13 @@ function validateResourceLayoutContracts(page, reference, resourceIndex, finding
   }
   for (const regionId of asArray(reference.requiredFullWidthRegionIds)) {
     const entry = resourceIndex.byKey.get(regionId);
-    if (entry && !isFullWidth(entry.control)) {
+    if (entry && !isGeneratedFullWidth(entry.control)) {
       findings.push(error("DASH_GOLDEN_RESOURCE_REQUIRED_FULL_WIDTH", "Generated dashboard required region must be Full width.", { page: page.title, regionId, width: entry.control?.width || null, widthtype: entry.control?.attrs?.style?.widthtype || null }));
     }
   }
   const kpiRow = resourceIndex.byKey.get(reference.kpiCardParentRegionId || "event_portfolio_kpi_row");
   for (const child of asArray(kpiRow?.control?.children).filter((item) => item?.type === "container")) {
-    if (!isFullWidth(child)) {
+    if (!isGeneratedFullWidth(child)) {
       findings.push(error("DASH_GOLDEN_RESOURCE_KPI_CARD_FULL_WIDTH", "Generated KPI cards under event_portfolio_kpi_row must be Full width.", { page: page.title, regionId: firstIdentity(child) || null }));
     }
   }
@@ -404,13 +412,13 @@ function collectControls(node, out, pointer, depth = 0, orderRef = { count: 0 })
 
 function hasMainContent(resource) {
   const main = findFirstByIdentity(resource, "Main");
-  const content = asArray(main?.children).find((child) => identityCandidates(child).includes("Content"));
+  const content = asArray(main?.children).find((child) => hasIdentity(child, "Content"));
   return Boolean(main && content);
 }
 
 function meaningfulContentChildren(resource) {
   const main = findFirstByIdentity(resource, "Main");
-  const content = asArray(main?.children).find((child) => identityCandidates(child).includes("Content"));
+  const content = asArray(main?.children).find((child) => hasIdentity(child, "Content"));
   return asArray(content?.children).filter((child) => isObject(child) && child.type);
 }
 
@@ -418,7 +426,7 @@ function findFirstByIdentity(root, expected) {
   let found = null;
   const visit = (node) => {
     if (found || !isObject(node)) return;
-    if (identityCandidates(node).includes(expected)) {
+    if (hasIdentity(node, expected)) {
       found = node;
       return;
     }
@@ -426,6 +434,38 @@ function findFirstByIdentity(root, expected) {
   };
   visit(root);
   return found;
+}
+
+function isDashboardPageLayoutsV11(resource) {
+  if (hasIdentity(resource, DASHBOARD_LAYOUT_TEMPLATE_ID)) return true;
+  const main = findFirstByIdentity(resource, "Main");
+  const content = asArray(main?.children).find((child) => hasIdentity(child, "Content"));
+  return asArray(content?.children).some((child) => hasAnyIdentity(child, V11_ROOT_CONTENT_CHILD_IDS));
+}
+
+function validateNoCompetingGoldenShellAtV11Root(page, findings) {
+  const main = findFirstByIdentity(page.resource, "Main");
+  const content = asArray(main?.children).find((child) => hasIdentity(child, "Content"));
+  for (const child of asArray(content?.children)) {
+    if (!isObject(child)) continue;
+    if (hasIdentity(child, "Main") || hasIdentity(child, DEFAULT_REFERENCE_ID)) {
+      findings.push(error("DASH_GOLDEN_COMPETING_ROOT_SHELL", "Dashboard Page Layouts v1.1 is the page shell; Event Portfolio Golden Reference must be consumed as component regions inside v1.1 sections, not copied as a competing root shell.", { page: page.title, control: firstIdentity(child) || null }));
+      continue;
+    }
+    const hasGoldenComponentIdentity = identityCandidates(child).some((candidate) => /^event_portfolio_|^kpi_cards_wrapper$|^Event Pipeline Grid-Table$/.test(candidate));
+    if (hasGoldenComponentIdentity && !hasAnyIdentity(child, V11_ROOT_CONTENT_CHILD_IDS)) {
+      findings.push(error("DASH_GOLDEN_COMPETING_ROOT_SHELL", "Event Portfolio component regions at the v1.1 Content root must be wrapped by a registered v1.1 section/module identity.", { page: page.title, control: firstIdentity(child) || null }));
+    }
+  }
+}
+
+function hasAnyIdentity(control, ids) {
+  return [...ids].some((id) => hasIdentity(control, id));
+}
+
+function hasIdentity(control, expected) {
+  const normalizedExpected = normalizeIdentity(expected);
+  return identityCandidates(control).some((candidate) => normalizeIdentity(candidate) === normalizedExpected);
 }
 
 function identityCandidates(control) {
@@ -532,7 +572,7 @@ function regionMissingCode(id, layer) {
 }
 
 function hasRef(control, refId) {
-  return identityCandidates(control).includes(refId);
+  return hasIdentity(control, refId);
 }
 
 function hasCollectionInsideRegion(index, regionId) {
@@ -551,7 +591,11 @@ function hasCollectionInsideRegion(index, regionId) {
 }
 
 function isFullWidth(control) {
-  return String(control?.width || "") === "full" && isFullWidthType(control?.attrs?.style?.widthtype);
+  return String(control?.width || "").toLowerCase() === "full" && isFullWidthType(control?.attrs?.style?.widthtype);
+}
+
+function isGeneratedFullWidth(control) {
+  return String(control?.width || "").toLowerCase() === "full" || isFullWidthType(control?.attrs?.style?.widthtype);
 }
 
 function isFullWidthType(value) {
@@ -601,6 +645,10 @@ function normalizeObservedValues(value) {
 
 function normalizeText(value) {
   return String(value).trim().toLowerCase();
+}
+
+function normalizeIdentity(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
 function readJson(file, findings, code) {

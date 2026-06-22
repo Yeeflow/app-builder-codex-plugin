@@ -4,7 +4,7 @@
 
 Dashboard Page Layouts v1.1 is the canonical page-level Dashboard template for newly generated Yeeflow Dashboard pages. Generators must copy and normalize the export-shaped template shell first, then remove, duplicate, or adapt sections according to business requirements.
 
-This page shell is separate from component golden references. The Event Portfolio Dashboard Golden Reference remains the component/region reference for KPI cards, filter groups, grid-table Collections, and visual dashboard patterns. Component references may be placed inside v1.1 `section_content_area` regions, but they must not break the v1.1 page skeleton.
+This page shell is separate from component golden references. The Event Portfolio Dashboard Golden Reference remains the component/region reference for KPI cards, filter groups, grid-table Collections, and visual dashboard patterns. Component references may be placed inside approved v1.1 business-content containers and `section_content_area` regions, but they must not replace or compete with the v1.1 page skeleton.
 
 ## Registry
 
@@ -91,6 +91,8 @@ Omit optional `Operations` containers unless real actions exist.
 
 Generated Dashboard pages must preserve the v1.1 template shell and non-business layout containers as structural equivalents of the registered template. Business-specific text, bindings, filters, KPI values, FontAwesome icons, actions, and Collection/table fields may change only inside approved business-content containers.
 
+Generator normalization is allowed for page-shell compatibility: `Main` / `Content` labels may be normalized, root/page background may be refreshed to the required `#f4f7fb`, root and Content padding may be normalized to zero, Full width may use the supported v1.1 export-coded shape, `actions: []` may be emitted or omitted when no actions exist, and meaningful navigator/control names may replace generic `Container` / `Grid` labels. These normalizations must not be used to invent layout modules, move business controls outside approved slots, or remove required v1.1 structure.
+
 Allowed business-content containers:
 
 - `event_portfolio_pipeline_title_group`
@@ -114,6 +116,8 @@ Allowed repeatable/removable template modules:
 Unneeded repeatable modules may be removed. New layout modules may only be added by copying one of the allowed repeatable/removable template modules. Copied modules must preserve template structure, hierarchy, control types, width, padding, direction, gap, background, and required children.
 
 Do not invent new dashboard layout modules. Non-business template containers must remain structurally equivalent to the template. KPI cards may be added only by copying `event_portfolio_kpi_planned_events` and replacing the allowed KPI business content.
+
+Business controls such as Collections, Data Filters, KPI values, action buttons, and data-bound display controls must not be placed directly under root `Content`. They must be inside approved v1.1 slots, normally `section_content_area` or registered KPI/action slots.
 
 ## Actions
 
@@ -182,4 +186,4 @@ Generated packages must also pass:
 node scripts/validate-dashboard-generation-hard-gates.mjs --package <app.yapk>
 ```
 
-The dashboard generation hard gate invokes Dashboard Page Layouts v1.1 validation together with Event Portfolio Golden Reference conformance.
+The dashboard generation hard gate invokes Dashboard Page Layouts v1.1 validation together with Event Portfolio Golden Reference conformance. When a resource declares or matches Dashboard Page Layouts v1.1, validators treat v1.1 as the page shell and Event Portfolio as component/region content inside approved v1.1 slots. Event Portfolio root depth/order is not required at the page root, but a copied Event Portfolio root shell under v1.1 `Content`, invented modules, and business controls directly under root `Content` are hard failures.
