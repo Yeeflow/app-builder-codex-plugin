@@ -52,7 +52,7 @@ Focused cases:
 
 The 0.8.8 candidate package from the evidence run:
 
-`<evidence-run>/dist/dashboard-v1.1-candidate.yapk`
+`<sanitized evidence candidate package path>`
 
 now passes:
 
