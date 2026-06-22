@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.8`
+`0.8.9`
+
+Version `0.8.9` releases Dashboard Page Layouts v1.1 validator alignment from PR #155. Aggregate dashboard and YAPK validators now treat v1.1 as the page shell, keep Event Portfolio Golden Reference checks as component/region checks inside approved v1.1 slots, reuse v1.1 identity detection for `Main`, `Content`, actions, and navigator/control labels, allow required generator normalization, and continue blocking competing Event Portfolio root shells, invented layout modules, and business content outside approved section content.
 
 Version `0.8.8` releases Dashboard Page Layouts v1.1 controlled-slot and repeatable-module enforcement from PR #153. Generated dashboards must preserve the v1.1 template shell, business-specific content may change only inside registered allowed business-content containers, new layout sections may only be added by copying registered repeatable/removable modules, added KPI cards must copy the approved `event_portfolio_kpi_planned_events` pattern, invented dashboard layout modules are rejected, and visual-only `Operations` placeholders remain blocked.
 

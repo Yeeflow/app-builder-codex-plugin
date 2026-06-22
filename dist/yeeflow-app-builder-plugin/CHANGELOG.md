@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.9
+
+- Release Dashboard Page Layouts v1.1 validator alignment from PR #155.
+- Align aggregate dashboard and YAPK validators so Dashboard Page Layouts v1.1 is treated as the page shell.
+- Keep Event Portfolio Golden Reference checks as component/region checks inside approved v1.1 business-content slots and section content areas, rather than as a competing page-root contract.
+- Reuse v1.1-style identity detection for `Main`, `Content`, actions, and navigator/control labels across `id`, `name`, `label`, `nv_label`, `nav_label`, attrs variants, and case-insensitive values.
+- Allow required generator normalization for Main/Content labels, background, padding, Full-width settings, empty `actions: []`, meaningful navigator/control names, and `Operations` removal when no real actions exist.
+- Continue failing competing Event Portfolio root shells, invented dashboard layout modules, and business Collection/table content placed directly under root `Content` instead of approved section content.
+
 ## 0.8.8
 
 - Release Dashboard Page Layouts v1.1 controlled-slot and repeatable-module enforcement from PR #153.
