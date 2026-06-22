@@ -350,9 +350,12 @@ function collectDescendants(control, pointer) {
 }
 
 function isKpiCard(control) {
-  const text = `${control?.name || ""} ${control?.label || ""} ${control?.id || ""} ${control?.attrs?.nv_label || ""}`;
+  const text = `${control?.name || ""} ${control?.label || ""} ${control?.id || ""} ${control?.nv_label || ""} ${control?.attrs?.nv_label || ""}`;
   if (/kpi icon container|icon container/i.test(text)) return false;
-  return control?.type === "container" && /\bkpi\b|metric card|summary card/i.test(text);
+  return control?.type === "container" && (
+    /\bKPI Card\b|metric card|summary card/i.test(text)
+    || /event_portfolio_kpi_(planned_events|approved_budget|registration_rate|lead_follow_up)\b/.test(text)
+  );
 }
 
 function isTextLike(control) {

@@ -2,7 +2,7 @@
 
 Generated Dashboard pages must use the Event Portfolio dashboard structure as the default golden reference unless a deliberate alternative is selected and justified before blueprint/resource generation.
 
-The default reference is `event_portfolio_dashboard_golden_reference`. It is extracted from the Marketing Event Management `Event Portfolio` dashboard and normalized as reusable structure, style intent, and control-pattern guidance. It must not copy Marketing Event business fields into other apps.
+The default reference is `event_portfolio_dashboard_golden_reference`. It is extracted from the Marketing Event Management `Event Portfolio` dashboard and stored as an updated Yeeflow export-shaped `_ak_c` / `_ak_c_opt` control tree. Generation must clone and normalize this export tree before domain mapping. It must not satisfy the requirement with semantic shells, provenance-only markers, or simplified reconstructed structures, and it must not copy Marketing Event business fields into other apps.
 
 ## Required Stage
 
@@ -58,3 +58,46 @@ Dashboard resources that only create `Main > Content` with no meaningful child r
 The Page Function Plan remains business-requirement oriented. It describes metrics, filters, data sources, display fields, actions, mobile needs, and exceptions. It must not contain low-level control properties.
 
 The Dashboard Golden Reference Selection maps those business requirements into the reference structure. Blueprint/resource generation consumes the selection artifact.
+
+## Export-Shape Parity
+
+Generated dashboard resources must preserve the required export-shaped structure from the selected reference:
+
+| Contract | Requirement |
+| --- | --- |
+| Root tree | Preserve `Main > Content` from the `_ak_c` tree. |
+| Region order | Preserve required region order from the registry. |
+| Control type | Required high-level regions must keep the reference control type. |
+| Nesting depth | Required regions must stay at the same dashboard tree depth after normalizing the page wrapper. |
+| Width and padding | Required sections and KPI cards must be Full width; the root Content area must use zero padding. |
+| Filter contract | Data filters must preserve separate label/placeholder text, `attrs.data.field`, `display_f`, `value_f`, and `apply_t` when the reference uses it. |
+| Grid internals | `grid` / `flex_grid` is allowed only for registered grid-table internal row/header nodes. |
+| User fields | User or identity fields must render with `dynamic-user`, not `dynamic-field`. |
+
+Registered reusable regions are:
+
+| Region ID | Purpose |
+| --- | --- |
+| `event_portfolio_header_band` | Header band |
+| `event_portfolio_filter_group` | Filter/action controls group |
+| `kpi_cards_wrapper` | KPI wrapper |
+| `event_portfolio_kpi_row` | KPI card row |
+| `event_portfolio_pipeline_section` | Primary content section |
+| `Event Pipeline Grid-Table` | Primary grid-table Collection container |
+| `event_portfolio_campaign_readiness_section` | Secondary readiness/content section |
+| `campaign_readiness_grid_table_container` | Secondary grid-table container |
+
+The only approved remaining `flex_grid` nodes in the default reference are grid-table internals:
+
+| Node ID | Classification |
+| --- | --- |
+| `event_pipeline_grid_table_header_grid` | Primary grid-table header row |
+| `event_pipeline_grid_table_item_grid` | Primary grid-table item row |
+| `campaign_readiness_header_grid` | Secondary grid-table header row |
+| `campaign_readiness_item_grid` | Secondary grid-table item row |
+
+## Filter Proof Boundary
+
+Static package validation proves only that filter controls preserve the export-shaped contract and expose query/linkage tokens to Collection or KPI consumers. It does not prove that the installed dashboard filters data at runtime.
+
+Before claiming runtime filter linkage success, browser/runtime proof must capture before values/table rows, select a filter option, capture after values/table rows, and show table and/or KPI data changing consistently. If the selected filter UI changes but rendered dashboard data does not change, the runtime filter linkage proof fails.

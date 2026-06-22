@@ -8,9 +8,9 @@ import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const LIST_SET_ID = "2068351910552752128";
-const INSTALL_OPERATION_ID = "2068351910552752999";
-const LIST_ID = "2068351910552753001";
+const LIST_SET_ID = "1908351910552752128";
+const INSTALL_OPERATION_ID = "1908351910552752999";
+const LIST_ID = "1908351910552753001";
 const SUMMARY_ID = "43c38762-5133-430f-af09-faeec1be3bc0";
 const SAVE_VAR = { id: "openRequests", name: "openRequests" };
 
@@ -86,13 +86,120 @@ function kpiCard(mode = "valid", variable = SAVE_VAR) {
   return {
     type: "container",
     name: "KPI Card - Open Requests",
-    attrs: { style: style([null, "2"]) },
+    width: "full",
+    attrs: { style: style([null, "1"]) },
     children: [iconContainer, visibleKpiText(variable)],
   };
 }
 
+function registryReferenceRoot() {
+  const registry = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/dashboard-golden-references.json"), "utf8"));
+  return JSON.parse(JSON.stringify(registry.references[0].exportShape._ak_c));
+}
+
+function ids(node) {
+  return [node?.id, node?.name, node?.nv_label, node?.attrs?.nv_label, node?.attrs?.derivedFromGoldenReference].filter(Boolean).map(String);
+}
+
+function visit(node, fn) {
+  if (!node || typeof node !== "object") return;
+  fn(node);
+  for (const child of node.children || []) visit(child, fn);
+}
+
+function find(node, id) {
+  let found = null;
+  visit(node, (current) => {
+    if (!found && ids(current).includes(id)) found = current;
+  });
+  return found;
+}
+
+function domainString(value) {
+  const replacements = new Map([
+    ["Event", "Request"],
+    ["Stage", "Priority"],
+    ["Region", "Location"],
+    ["Registration", "Completion"],
+    ["Budget", "Cost"],
+    ["Events", "Maintenance Requests"],
+    ["Event Type", "Request Type"],
+  ]);
+  return replacements.get(value) || value.replaceAll("Event Portfolio", "Facility Operations").replaceAll("Campaign", "Readiness");
+}
+
+function adaptReferenceDomain(root) {
+  const rewrite = (current) => {
+    if (Array.isArray(current)) return current.forEach(rewrite);
+    if (!current || typeof current !== "object") return;
+    for (const [key, value] of Object.entries(current)) {
+      if (typeof value === "string" && !["id", "key", "nv_label", "nav_label", "binding", "derivedFromGoldenReference", "goldenReferenceId"].includes(key)) current[key] = domainString(value);
+      else rewrite(value);
+    }
+    if (current?.attrs?.data?.list) {
+      current.attrs.data.list = { ListID: LIST_ID, Title: "Maintenance Requests" };
+      current.attrs.data.filter = current.attrs.data.filter || [];
+    }
+  };
+  rewrite(root);
+}
+
+function normalizeContainers(root) {
+  visit(root, (node) => {
+    if (node.type !== "container") return;
+    node.attrs = node.attrs || {};
+    node.attrs.style = { ...style([null, "1"]), ...(node.attrs.style || {}) };
+    if (!Array.isArray(node.attrs.style.widthtype)) node.attrs.style.widthtype = [null, "1"];
+  });
+  const main = find(root, "Main");
+  const content = find(root, "Content");
+  for (const node of [main, content].filter(Boolean)) {
+    node.attrs = node.attrs || {};
+    node.attrs.container = node.attrs.container || {};
+    node.attrs.container.padding = { top: 0, right: 0, bottom: 0, left: 0 };
+    node.attrs.style = { ...style([null, "1"]), ...(node.attrs.style || {}), padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] };
+  }
+}
+
+function firstSummary(root) {
+  let summary = null;
+  visit(root, (node) => {
+    if (!summary && node.type === "summary") summary = node;
+  });
+  return summary;
+}
+
 function pageResource(flags = {}) {
-  const summary = summaryControl(flags.summaryPatch || {});
+  const root = registryReferenceRoot();
+  adaptReferenceDomain(root);
+  normalizeContainers(root);
+  const summary = firstSummary(root);
+  Object.assign(summary, summaryControl(flags.summaryPatch || {}));
+  const hiddenSummaryHost = find(root, "event_portfolio_hidden_metric_data_sources");
+  if (hiddenSummaryHost) hiddenSummaryHost.children = [summary];
+  const filter = find(root, "event_portfolio_region_filter");
+  if (filter) Object.assign(filter.attrs, { data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, field: "Text1", filter: [] }, display_f: "Text1", value_f: "ListDataID", lablay: [null, "top"], lab: { value: "Priority", ty: [null, "xs-light"] }, placeholder: "Select priority...", edit: { pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, 6] } } }, ...(flags.filterPatch || {}) });
+  const filterTokens = [];
+  visit(root, (node) => {
+    if (!["select-filter", "radio-filter", "checkbox-filter"].includes(node.type)) return;
+    node.attrs = {
+      ...(node.attrs || {}),
+      data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, field: "Text1", filter: [] },
+      display_f: "Text1",
+      value_f: "ListDataID",
+      lablay: [null, "top"],
+      lab: { value: "Priority", ty: [null, "xs-light"] },
+      placeholder: "Select priority...",
+      edit: { pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, 6] } } },
+    };
+    filterTokens.push(node.binding, "Text1", "ListDataID");
+  });
+  if (filter) Object.assign(filter.attrs, flags.filterPatch || {});
+  const kpiRow = find(root, "event_portfolio_kpi_row");
+  if (kpiRow) kpiRow.children = [kpiCard(flags.kpiMode || "valid", flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR)];
+  const grid = find(root, "Event Pipeline Grid-Table");
+  if (grid) grid.children = [{ type: "collection", name: "Facility Work Queue Grid", nv_label: "event_pipeline_grid_table_collection", attrs: { data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } }, filterBindings: filterTokens.filter(Boolean) }, children: [{ type: "heading", name: "Request Title", attrs: { headc: { title: { value: "Request" } } } }] }];
+  if (flags.mainStyle) find(root, "Main").attrs.style = flags.mainStyle;
   const extValues = flags.extValues === undefined
     ? [{ fieldName: "ListDataID", func: "COUNT", id: "ListDataID" }]
     : flags.extValues;
@@ -107,20 +214,7 @@ function pageResource(flags = {}) {
     actions: [],
     derivedFromGoldenReference: "event_portfolio_dashboard_golden_reference",
     plannedRegions: { filters: true, kpis: true, gridTable: true },
-    children: [
-      { type: "container", name: "Main", attrs: { style: flags.mainStyle || style([null, "2"]) }, children: [
-        { type: "container", name: "Content", attrs: { style: style([null, "2"]) }, children: [
-          { type: "container", name: "Header Band", attrs: { derivedFromGoldenReference: "event_portfolio_header_band", style: style([null, "2"]) }, children: [{ type: "heading", name: "Dashboard Title", attrs: { headc: { title: { value: "Facility Operations Dashboard" } } } }] },
-          { type: "container", name: "Filter Group", attrs: { derivedFromGoldenReference: "event_portfolio_filter_group", style: style([null, "2"]) }, children: [filterControl(flags.filterPatch || {})] },
-          { type: "container", name: "Cards Wrapper", attrs: { derivedFromGoldenReference: "kpi_cards_wrapper", style: style([null, "2"]) }, children: [kpiCard(flags.kpiMode || "valid", flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR)] },
-          summary,
-          flags.visibleVariable === false ? visibleKpiText({ id: "otherVar", name: "otherVar" }) : visibleKpiText(),
-          { type: "container", name: "Pipeline Section", attrs: { derivedFromGoldenReference: "event_portfolio_pipeline_section", style: style([null, "2"]) }, children: [
-            { type: "collection", name: "Facility Work Queue Grid", attrs: { derivedFromGoldenReference: "Event Pipeline Grid-Table", data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } } }, children: [{ type: "heading", name: "Request Title", attrs: { headc: { title: { value: "Request" } } } }] },
-          ] },
-        ] },
-      ] },
-    ],
+    children: [root],
   };
 }
 
