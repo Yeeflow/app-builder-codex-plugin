@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.8.8
+
+- Release Dashboard Page Layouts v1.1 controlled-slot and repeatable-module enforcement from PR #153.
+- Register explicit allowed business-content containers for dashboard business text, bindings, filters, KPI values, FontAwesome icons, actions, and Collection/table fields.
+- Register explicit repeatable/removable modules for content cards, 2-column, 3-column, 60/40 sections, KPI rows, and KPI cards.
+- Reject invented dashboard layout modules outside approved business-content containers.
+- Require copied layout modules to preserve template structure, hierarchy, control types, width, padding, direction, gap, background, and required children.
+- Require added KPI cards to copy the approved `event_portfolio_kpi_planned_events` card pattern.
+- Keep `Operations` omitted unless real configured actions exist, and continue blocking visual-only action placeholders.
+
 ## 0.8.7
 
 - Release Dashboard Page Layouts v1.1 template adoption from PR #151.
