@@ -40,6 +40,7 @@ export function validateGeneratedFinalResourceCompleteness(options = {}) {
 
   if (plan && decoded) {
     const inventory = collectInventory(decoded);
+    validatePlanParserDidNotFailOpen(plan, findings);
     validateResourceCompleteness(plan, inventory, findings);
     validateFormsCompleteness(plan, inventory, findings);
     validateDashboardMaterialization(plan, inventory, findings);
@@ -55,6 +56,24 @@ export function validateGeneratedFinalResourceCompleteness(options = {}) {
     errors,
     findings,
   };
+}
+
+function validatePlanParserDidNotFailOpen(plan, findings) {
+  const counts = summarizePlan(plan);
+  const parsedResourceCount = counts.dataLists
+    + counts.approvalForms
+    + counts.formReports
+    + counts.customForms
+    + counts.dashboards
+    + counts.navigationGroups;
+  const looksLikeResourcePlan = /##\s+\d+\.\s+(?:Data Lists|Approval Forms|Form Reports|Custom Data List Forms|Dashboard Pages|Application Navigation) Plan/i.test(plan.text)
+    || /\b(?:data list|document library|approval form|dashboard|navigation group|FormNewReports|DataReports|workflow)\b/i.test(plan.text);
+  if (plan.text.trim().length > 200 && looksLikeResourcePlan && parsedResourceCount === 0) {
+    findings.push(error("GENERATED_FINAL_APP_PLAN_RESOURCE_PARSE_EMPTY", "Non-empty App Plan appears to declare Yeeflow resources, but the completeness parser found zero planned resources. This is a parser/generation contract failure and must not pass open.", {
+      appPlanReference: { section: "Yeeflow App Plan resource sections" },
+      parsed: counts,
+    }));
+  }
 }
 
 function parseArgs(argv) {

@@ -738,6 +738,14 @@ function nonZeroApiId(value) {
 function inspectYapkStandardAdditions(decoded) {
   const errors = [];
   if (!isObject(decoded)) return errors;
+  for (const [childIndex, child] of asArray(decoded.Childs).entries()) {
+    if (isObject(child) && Object.prototype.hasOwnProperty.call(child, "ListDatas")) {
+      errors.push({ scope: "decodedResource", path: `$.Childs[${childIndex}].ListDatas`, code: "YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", message: "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].ListDatas; create a companion seed artifact and seed only after explicit live-write approval." });
+    }
+    if (isObject(child?.List) && Object.prototype.hasOwnProperty.call(child.List, "ListDatas")) {
+      errors.push({ scope: "decodedResource", path: `$.Childs[${childIndex}].List.ListDatas`, code: "YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", message: "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].List.ListDatas." });
+    }
+  }
   if (decoded.FormReports !== undefined && !Array.isArray(decoded.FormReports)) {
     errors.push({ scope: "decodedResource", path: "$.FormReports", code: "FORMREPORTS_LEGACY_INVALID", message: "Legacy AppPackageInfo.FormReports may be present for old packages, but it must be an array when present and is not required for generated YAPK apps." });
   }

@@ -12,6 +12,8 @@ const TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const GOLDEN_ID = "event_portfolio_dashboard_golden_reference";
 const APP_ID = "1909200000000000001";
 const LIST_ID = "1909200000000000100";
+const SUMMARY_ID = "summary-open-loans";
+const SAVE_VAR = { id: "openLoans", name: "openLoans" };
 
 function templateRegistry() {
   return JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json"), "utf8"));
@@ -32,6 +34,7 @@ function baseV11Resource() {
   removeOperations(resource);
   adaptBusinessText(resource);
   ensureCollectionInsideSection(resource);
+  ensureSummaryBackedKpis(resource);
   return resource;
 }
 
@@ -82,9 +85,30 @@ function adaptBusinessText(node) {
 }
 
 function ensureCollectionInsideSection(resource) {
-  const section = find(resource, "section_content_area");
+  const section = findBusinessSectionContentArea(resource);
+  section.children = [collectionControl()];
+}
+
+function ensureSummaryBackedKpis(resource) {
+  resource.ReportIds = [SUMMARY_ID];
+  resource.tempVars = [SAVE_VAR];
+  resource.exts = [{
+    i: SUMMARY_ID,
+    category: "___Pivot___",
+    key: "summary",
+    attr: {
+      ListID: LIST_ID,
+      settings: { values: [{ fieldName: "ListDataID", func: "COUNT", id: "ListDataID" }] },
+    },
+  }];
+  const section = findBusinessSectionContentArea(resource);
   section.children = section.children || [];
-  section.children.push(collectionControl());
+  section.children.push(summaryControl());
+  const kpiCard = find(resource, "event_portfolio_kpi_planned_events");
+  if (kpiCard) {
+    kpiCard.children = kpiCard.children || [];
+    kpiCard.children.push(visibleKpiValue());
+  }
 }
 
 function collectionControl() {
@@ -95,6 +119,30 @@ function collectionControl() {
     attrs: {
       data: { list: { AppID: 41, ListID: LIST_ID, Type: 1, Title: "Loan Requests", ListSetID: APP_ID } },
       filterBindings: ["LoanStatus"],
+    },
+  };
+}
+
+function summaryControl() {
+  return {
+    type: "summary",
+    id: SUMMARY_ID,
+    name: "Summary - Open Loans",
+    runtimeModelProven: true,
+    attrs: {
+      data: { list: { AppID: 41, ListID: LIST_ID, Type: 1, Title: "Loan Requests", ListSetID: APP_ID } },
+      save_var: SAVE_VAR,
+    },
+  };
+}
+
+function visibleKpiValue() {
+  return {
+    type: "heading",
+    name: "Open Loans KPI Value",
+    attrs: {
+      headc: { title: { variable: [SAVE_VAR] } },
+      heads: { ty: [null, "h2"], color: "#071638" },
     },
   };
 }
@@ -110,7 +158,7 @@ function decoded(resource = baseV11Resource()) {
       Ext2: "{\"src\":true}",
       LayoutInResources: [{ ID: "dashboard-layout-1", RefId: "dashboard-layout-1", Resource: JSON.stringify(resource) }],
     }],
-    Childs: [{ List: { ListID: LIST_ID, Title: "Loan Requests" }, Fields: [{ FieldName: "Title" }] }],
+    Childs: [{ List: { ListID: LIST_ID, Title: "Loan Requests" }, Fields: [{ FieldName: "Title" }, { FieldName: "ListDataID", FieldID: "ListDataID", FieldType: "Text" }] }],
     Forms: [],
     FormNewReports: [],
     DataReports: [],
@@ -171,6 +219,23 @@ function find(node, expected) {
     if (!found && hasIdentity(current, expected)) found = current;
   });
   return found;
+}
+
+function findBusinessSectionContentArea(resource) {
+  let found = null;
+  visitWithAncestors(resource, [], (current, ancestors) => {
+    if (found || !hasIdentity(current, "section_content_area")) return;
+    if (ancestors.some((ancestor) => hasIdentity(ancestor, "page_title_section"))) return;
+    found = current;
+  });
+  assert.ok(found, "Expected a non-title section_content_area in the v1.1 template fixture.");
+  return found;
+}
+
+function visitWithAncestors(node, ancestors, fn) {
+  if (!node || typeof node !== "object") return;
+  fn(node, ancestors);
+  for (const child of node.children || []) visitWithAncestors(child, [...ancestors, node], fn);
 }
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dashboard-v11-validator-alignment-"));

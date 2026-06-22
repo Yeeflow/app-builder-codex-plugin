@@ -39,6 +39,7 @@ export function validateGeneratedYapkExportShape(options = {}) {
   validateReports(decoded, findings);
   validateDashboards(decoded, findings);
   validateNativeTitleMetadata(decoded, findings);
+  validateNoEmbeddedListDatas(decoded, findings);
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
@@ -218,12 +219,39 @@ function validateDashboards(decoded, findings) {
     const controls = page.controls;
     const visibleBusinessControls = controls.filter((entry) => isVisibleBusinessControl(entry.control));
     const boundControls = visibleBusinessControls.filter((entry) => isBoundBusinessControl(entry.control, listIndex));
+    const summaryControls = controls.filter((entry) => String(entry.control?.type || "") === "summary");
+    const kpiControls = controls.filter((entry) => isKpiLikeControl(entry.control));
     if (!visibleBusinessControls.length) findings.push(error("DASHBOARD_VISIBLE_BUSINESS_CONTENT_MISSING", "Dashboard pages must contain visible business sections and controls; hidden hosts and shells are not content proof.", { page: page.title, path: page.pointer }));
     if (!boundControls.length) findings.push(error("DASHBOARD_BOUND_BUSINESS_CONTROL_MISSING", "Dashboard visible content must include controls bound to included data lists/resources.", { page: page.title, path: page.pointer }));
+    if (kpiControls.length && !summaryControls.length) {
+      findings.push(error("DASHBOARD_KPI_SUMMARY_CONTROL_MISSING", "Dynamic KPI cards must be backed by Summary controls; static KPI-looking text is not generated-final dashboard proof.", {
+        page: page.title,
+        path: page.pointer,
+        kpiCount: kpiControls.length,
+      }));
+    }
     for (const entry of controls) {
       validateTextControlContent(entry, page, findings);
       if (String(entry.control?.type || "") === "summary") validateSummaryRuntimeContract(entry, page, listIndex, findings);
       if (CHART_TYPES.has(String(entry.control?.type || ""))) validateChartRuntimeContract(entry, page, listIndex, findings);
+    }
+  }
+}
+
+function validateNoEmbeddedListDatas(decoded, findings) {
+  for (const [childIndex, child] of asArray(decoded?.Childs).entries()) {
+    for (const [key, value] of Object.entries(child || {})) {
+      if (/^ListDatas$/i.test(key)) {
+        findings.push(error("YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].ListDatas; generate a companion seed file/script and require explicit live seeding approval.", {
+          path: `$.Childs[${childIndex}].${key}`,
+          rowCount: Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : null,
+        }));
+      }
+    }
+    if (child?.List && isObject(child.List) && Object.prototype.hasOwnProperty.call(child.List, "ListDatas")) {
+      findings.push(error("YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].List.ListDatas; sample data belongs in a separate seed artifact.", {
+        path: `$.Childs[${childIndex}].List.ListDatas`,
+      }));
     }
   }
 }
@@ -262,6 +290,11 @@ function isBoundBusinessControl(control, listIndex) {
   if (isHidden(control)) return false;
   if (RECORD_DISPLAY_TYPES.has(type) || FILTER_TYPES.has(type)) return resolvesIncludedList(control, listIndex);
   return hasResourceBinding(control) && resolvesIncludedList(control, listIndex);
+}
+
+function isKpiLikeControl(control) {
+  const text = `${control?.id || ""} ${control?.name || ""} ${control?.label || ""} ${control?.attrs?.nv_label || ""} ${control?.attrs?.nav_label || ""}`.toLowerCase();
+  return String(control?.type || "") === "container" && /\bkpi\b|metric card|summary card|event_portfolio_kpi_/.test(text);
 }
 
 function validateTextControlContent(entry, page, findings) {

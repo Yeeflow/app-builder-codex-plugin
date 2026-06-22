@@ -78,6 +78,12 @@ Generated dashboard resources must preserve the required export-shaped structure
 | Grid internals | `grid` / `flex_grid` is allowed only for registered grid-table internal row/header nodes. |
 | User fields | User or identity fields must render with `dynamic-user`, not `dynamic-field`. |
 
+The `Event Pipeline Grid-Table` reference means a real Collection subtree, not a simplified Data table or static lookalike. When a dashboard page needs a record queue, pipeline, worklist, portfolio, or active-item table, generation must use the reference Collection structure inside an approved v1.1 slot and bind it to app-specific lists/fields.
+
+`kpi_cards_wrapper` and KPI card copies must not become static metric mockups. If KPI cards display live counts, sums, rates, or status metrics, they must have complete Summary runtime metadata and visible value bindings. A hidden Summary host alone is not proof of visible KPI materialization.
+
+Filter regions must preserve both UI contract and data contract: labels and placeholders stay separate, source field/display/value metadata resolves to included lists/fields, and filter selections are consumed by Collection/table/KPI query/filter metadata. A filter that changes UI state but has no consumer binding is a generated-final failure and a runtime-proof failure if installed data does not change.
+
 Registered reusable regions are:
 
 | Region ID | Purpose |

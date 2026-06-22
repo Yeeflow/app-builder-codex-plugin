@@ -40,6 +40,18 @@ const childTests = [
     ],
   },
   {
+    name: "YAPK dashboard runtime materialization and preflight regression suite",
+    command: ["scripts/test-yapk-dashboard-runtime-materialization-preflight-gates.mjs"],
+    validators: [
+      "validate-generated-yapk-export-shape",
+      "validate-dashboard-generation-hard-gates",
+      "validate-generated-final-resource-completeness",
+      "validate-standard-package-schema",
+      "validate-yapk-package",
+      "Dashboard business-bound runtime materialization",
+    ],
+  },
+  {
     name: "Yeeflow application layout design rule regression suite",
     command: ["scripts/test-application-layout-design-rules.mjs"],
     validators: [

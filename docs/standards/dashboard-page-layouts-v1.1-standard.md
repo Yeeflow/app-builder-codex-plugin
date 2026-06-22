@@ -119,6 +119,8 @@ Do not invent new dashboard layout modules. Non-business template containers mus
 
 Business controls such as Collections, Data Filters, KPI values, action buttons, and data-bound display controls must not be placed directly under root `Content`. They must be inside approved v1.1 slots, normally `section_content_area` or registered KPI/action slots.
 
+`page_title_section` is reserved for page title/header content. It must not contain Collection, Data table, Summary, chart, KPI-card, record-list, or other business/data controls. Put those controls in `section_content_area`, KPI card slots, or approved action slots.
+
 ## Actions
 
 `Operations` containers may exist only when they contain real configured Yeeflow action controls. Placeholder operation chips, visual-only buttons, and action-looking containers without action configuration are forbidden.
@@ -143,11 +145,17 @@ Unrelated template terms such as generic placeholders, Marketing Event labels, c
 
 Data Filters must bind to valid variables, fields, and legal operators.
 
+Data Filters must also be consumed. Each generated filter must have at least one downstream Collection/table/KPI consumer that references the selected field or filter token. Bare scalar operator/value placeholders such as `0` are invalid in generated-final packages because they do not prove a legal runtime filter condition.
+
 Collection grid/table controls must point to real app lists and fields.
+
+Each primary grid-table Collection must live in its own independent `content_card_wrapper` or approved grid-table wrapper copied from the template/reference. Multiple unrelated grid-table Collections in one wrapper are not considered a valid v1.1 dashboard section because runtime layout and filtering become ambiguous.
 
 User and identity fields must render with Dynamic user controls, not generic Dynamic field controls.
 
 Summary, chart, pivot, and other model controls may be used only when their runtime model contract is export-proven. If runtime proof is unavailable, use safer visible KPI/card/table patterns.
+
+Visible KPI cards that claim live metrics must use Summary-backed values. Required package proof includes Summary controls, `ReportIds`, `tempVars`, `exts`, `attrs.save_var`, and visible KPI text bound to the same saved variable. Static KPI text is allowed only when explicitly labeled as static/fallback and must not be claimed as a live KPI.
 
 Data Filter static package validation and runtime filter linkage proof remain separate. Runtime proof must show before/after table or KPI data changes.
 

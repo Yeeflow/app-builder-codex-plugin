@@ -41,3 +41,11 @@ The current product-team canonical YAP schema is `schemas/yap-schema.json` with 
 The current product-team canonical YAPK schema is `schemas/yapk-schema.json` with `$id` `https://akmii.local/schemas/listset-package-info.schema.json` and title `AppExportPackageInfo`. Its `Resource` rule is a Base64 string containing Brotli-compressed JSON for the decoded `AppPackageInfo`.
 
 `schemas/yapk-schema.json` must remain clean of `x-yeeflow-standard-additions`. `schemas/yapk-schema-codex.json` must retain those additions, and the effective schema loader must expose them by composing the canonical schema and overlay.
+
+## Generated-Final Seed Data Boundary
+
+Generated-final `.yapk` packages must not embed sample rows or seed records in decoded `Childs[].ListDatas` or `Childs[].List.ListDatas`.
+
+The package is responsible for application structure: lists, fields, pages, forms, reports, workflows, navigation, metadata, and export-shaped runtime resources. Sample data is an optional post-install concern and must be emitted only as a separate seed artifact or script with explicit live-write approval.
+
+Validators must treat embedded `ListDatas` in generated-final YAPK packages as a hard failure, even if a future canonical schema permits the property, because app install/import acceptance and sample-data mutation are separate proof layers.
