@@ -6,6 +6,7 @@ import { pathToFileURL } from "node:url";
 import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
 import { validateGeneratedFinalResourceCompleteness } from "./validate-generated-final-resource-completeness.mjs";
 import { validateDashboardGoldenReferenceConformance } from "./validate-dashboard-golden-reference-conformance.mjs";
+import { validateDashboardPageLayoutTemplate } from "./validate-dashboard-page-layout-template.mjs";
 
 const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"]);
 const RECORD_DISPLAY_FIELD = "ListDataID";
@@ -52,6 +53,8 @@ export function validateDashboardGenerationHardGates(options = {}) {
   if (options.package) {
     const golden = validateDashboardGoldenReferenceConformance({ package: options.package });
     findings.push(...asArray(golden.findings));
+    const pageLayout = validateDashboardPageLayoutTemplate({ package: options.package });
+    findings.push(...asArray(pageLayout.findings));
   }
 
   return {

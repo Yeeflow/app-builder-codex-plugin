@@ -1,6 +1,8 @@
 # Dashboard Golden Reference Standard
 
-Generated Dashboard pages must use the Event Portfolio dashboard structure as the default golden reference unless a deliberate alternative is selected and justified before blueprint/resource generation.
+Generated Dashboard pages must use Dashboard Page Layouts v1.1 as the canonical page-level shell, then use the Event Portfolio dashboard structure as the default component/region golden reference unless a deliberate alternative is selected and justified before blueprint/resource generation.
+
+Dashboard Page Layouts v1.1 is registered in `docs/reference/dashboard-page-layout-templates.json` and standardized in `docs/standards/dashboard-page-layouts-v1.1-standard.md`. Generation must copy and normalize that export-shaped page shell first, preserving the page root, `main > content`, page background, zero root padding, and section card skeleton. Event Portfolio component regions are mapped into v1.1 `section_content_area` regions without breaking the v1.1 skeleton.
 
 The default reference is `event_portfolio_dashboard_golden_reference`. It is extracted from the Marketing Event Management `Event Portfolio` dashboard and stored as an updated Yeeflow export-shaped `_ak_c` / `_ak_c_opt` control tree. Generation must clone and normalize this export tree before domain mapping. It must not satisfy the requirement with semantic shells, provenance-only markers, or simplified reconstructed structures, and it must not copy Marketing Event business fields into other apps.
 
