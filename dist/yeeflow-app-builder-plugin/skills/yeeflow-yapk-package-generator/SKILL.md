@@ -335,6 +335,10 @@ When using the signing APIs:
 - never print or persist raw API responses, `Resource`, or `Sign`
 - treat a successful `setsign`/`verifysign` on an unchanged Resource as wrapper/signing proof only
 
+Generated-final YAPK packages must be preflight-clean before signing. When an approved App Plan exists, run `scripts/yapk-first-generation-preflight.mjs --package <file.yapk> --plan <yeeflow-app-plan.md> --json` and stop before `setsign` if any canonical schema, export-shape, resource completeness, ID provenance, navigation, app icon, dashboard materialization, or redacted-output gate fails. API status `0` means submitted/accepted only; final success requires Version Management `Succeed` evidence plus separate runtime proof.
+
+Do not embed sample rows in generated-final package decoded `Childs[].ListDatas` or `Childs[].List.ListDatas`. Emit sample data only as a separate seed artifact/script and run live seeding only with explicit user approval.
+
 Sub List Dynamic Runtime Proof V1.2 note: the user-corrected `Sub List Dynamic Runtime Proof-V1.1.yapk` is the baseline for grid/header fixes. Generate V1.2 from that YAPK rather than the older `.yap`: tolerant-decode the V1.1 Resource, remove the stale standalone V1 header grid, wrap body-grid field controls in containers, re-encode with finalized standard Brotli, update wrapper PackageId/Version/Date/Notes, then run `setsign` and `verifysign`. The generated V1.2 package signed and verified; do not claim runtime proof until V1.2 is upgraded/imported and manually tested.
 
 Sub List Dynamic Runtime Proof V1.4 note: V1.3 rendering was user-confirmed for the Purchase Request Dynamic Sub List, but the row menu only had Duplicate/Delete. V1.4 is generated from V1.3 by mutating only the Purchase Request form row menu to Duplicate, Insert before, Insert after, Move up, and Move down, preserving visible Delete in the last column. Sign and verify the wrapper as usual, but keep Insert/Move runtime behavior pending until user testing confirms it.

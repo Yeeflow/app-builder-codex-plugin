@@ -74,9 +74,48 @@ function validateDecodedDashboards(decoded, findings) {
       if (FILTER_TYPES.has(String(entry.control?.type || ""))) validateFilter(entry, page, listIndex, findings);
       if (String(entry.control?.type || "") === "container") validateContainer(entry, page, findings);
     }
+    validateDashboardBusinessRuntime(page, listIndex, findings);
     validateKpiCards(page, findings);
     validateSummaryBindings(page, listIndex, findings);
   }
+}
+
+function validateDashboardBusinessRuntime(page, listIndex, findings) {
+  const collections = page.controls.filter((entry) => String(entry.control?.type || "") === "collection");
+  const dataTables = page.controls.filter((entry) => ["data-table", "datatable", "data-list"].includes(String(entry.control?.type || "")));
+  const filters = page.controls.filter((entry) => FILTER_TYPES.has(String(entry.control?.type || "")));
+  const kpiCards = page.controls.filter((entry) => isKpiCard(entry.control));
+  const summaries = page.controls.filter((entry) => String(entry.control?.type || "") === "summary");
+
+  for (const entry of dataTables) {
+    findings.push(error("DASH_RECORD_REGION_COLLECTION_REQUIRED", "Dashboard record-list regions must use Collection/grid-table structures unless a plan explicitly exempts the page; Data table/data-list lookalikes are not the default golden dashboard record pattern.", {
+      page: page.title,
+      path: entry.pointer,
+      type: entry.control?.type,
+    }));
+  }
+
+  if (kpiCards.length && !summaries.length) {
+    findings.push(error("DASH_KPI_SUMMARY_CONTROL_REQUIRED", "Visible KPI cards require Summary controls, ReportIds, tempVars, exts, and visible value bindings; static KPI cards cannot pass generated-final dashboard quality gates.", {
+      page: page.title,
+      path: page.pointer,
+      kpiCount: kpiCards.length,
+    }));
+  }
+
+  for (const filter of filters) {
+    if (!collections.some((collection) => filterConsumedByCollection(filter, collection))) {
+      findings.push(error("DASH_FILTER_COLLECTION_BINDING_MISSING", "Every dashboard filter must be consumed by at least one Collection query/filter contract; visual filter controls alone do not prove runtime linkage.", {
+        page: page.title,
+        path: filter.pointer,
+        filterName: filter.control?.name || filter.control?.id || filter.control?.attrs?.nv_label || null,
+      }));
+    }
+  }
+
+  validatePageTitleSectionPurity(page, findings);
+  validateIndependentContentCardWrappers(page, collections, findings);
+  validateDynamicUserFieldTypes(page, listIndex, findings);
 }
 
 function validateFilter(entry, page, listIndex, findings) {
@@ -100,6 +139,17 @@ function validateFilter(entry, page, listIndex, findings) {
   if (!Array.isArray(data?.filter)) {
     findings.push(error("DASH_FILTER_DATA_FILTER_MISSING", "Dashboard filter attrs.data.filter[] must be present for generated filter bindings.", { page: page.title, path: `${pointer}.attrs.data.filter`, type: control.type }));
   }
+  const filterItems = asArray(data?.filter);
+  for (const [filterIndex, filterItem] of filterItems.entries()) {
+    if (!isObject(filterItem)) {
+      findings.push(error("DASH_FILTER_DATA_FILTER_ITEM_INVALID", "Dashboard filter attrs.data.filter[] items must be export-shaped objects, not scalar placeholders.", { page: page.title, path: `${pointer}.attrs.data.filter[${filterIndex}]`, value: filterItem }));
+      continue;
+    }
+    const serialized = JSON.stringify(filterItem);
+    if (/"(?:operator|op|compare|compareType|condition)"\s*:\s*0\b/.test(serialized) || /"value"\s*:\s*0\b/.test(serialized)) {
+      findings.push(error("DASH_FILTER_OPERATOR_VALUE_PLACEHOLDER", "Dashboard filter operator/value metadata must use legal designer condition shapes, not bare 0 placeholders.", { page: page.title, path: `${pointer}.attrs.data.filter[${filterIndex}]`, filterItem }));
+    }
+  }
   if (!present(attrs.lablay)) {
     findings.push(error("DASH_FILTER_LABEL_LAYOUT_MISSING", "Dashboard filters must set attrs.lablay for designed label-over-dropdown layout.", { page: page.title, path: `${pointer}.attrs.lablay` }));
   }
@@ -111,6 +161,91 @@ function validateFilter(entry, page, listIndex, findings) {
   }
   if (!present(attrs.edit?.normal?.border?.radius)) {
     findings.push(error("DASH_FILTER_RADIUS_MISSING", "Dashboard filters must set attrs.edit.normal.border.radius using a Yeeflow-supported radius shape.", { page: page.title, path: `${pointer}.attrs.edit.normal.border.radius` }));
+  }
+}
+
+function filterConsumedByCollection(filterEntry, collectionEntry) {
+  const filter = filterEntry.control || {};
+  const collection = collectionEntry.control || {};
+  const field = String(filter?.attrs?.data?.field || "");
+  const binding = String(filter?.binding || filter?.attrs?.binding || filter?.attrs?.filterVar || filter?.attrs?.filterVariable || filter?.id || filter?.name || "");
+  const tokens = [field, binding, filter?.attrs?.display_f, filter?.attrs?.value_f].filter(Boolean).map(String);
+  const data = collection?.attrs?.data || {};
+  const haystack = JSON.stringify([
+    data.filter,
+    data.filters,
+    data.query,
+    data.conditions,
+    data.wheres,
+    data.filterBindings,
+    collection?.filterBindings,
+    collection?.attrs?.filterBindings,
+  ]);
+  return tokens.some((token) => token && haystack.includes(token));
+}
+
+function validatePageTitleSectionPurity(page, findings) {
+  for (const entry of page.controls.filter((item) => matchesSemanticId(item.control, "page_title_section"))) {
+    const descendants = collectDescendants(entry.control, entry.pointer);
+    for (const descendant of descendants) {
+      const type = String(descendant.control?.type || "");
+      if (["collection", "data-table", "datatable", "data-list", "summary", "chart", "pie-chart", "bar-chart", "line-chart", "pivot-table", "kanban", "vertical-timeline", "horizontal-timeline"].includes(type) || isKpiCard(descendant.control)) {
+        findings.push(error("DASH_PAGE_TITLE_SECTION_BUSINESS_CONTROL_FORBIDDEN", "page_title_section is title/header only and must not contain record Collections, Data tables, Summary/chart controls, KPI cards, or repeated-record controls.", {
+          page: page.title,
+          path: descendant.pointer,
+          type,
+        }));
+      }
+    }
+  }
+}
+
+function validateIndependentContentCardWrappers(page, collections, findings) {
+  for (const collection of collections) {
+    const ancestors = findAncestors(page.resource, collection.control);
+    const contentWrappers = ancestors.filter((node) => matchesSemanticId(node, "content_card_wrapper"));
+    const approvedGridWrappers = ancestors.filter((node) => matchesSemanticId(node, "Event Pipeline Grid-Table") || matchesSemanticId(node, "campaign_readiness_grid_table_container"));
+    const candidateWrappers = contentWrappers.length ? contentWrappers : approvedGridWrappers;
+    if (!candidateWrappers.length) {
+      findings.push(error("DASH_COLLECTION_CONTENT_CARD_WRAPPER_MISSING", "Every dashboard grid-table Collection must live inside its own independent content_card_wrapper.", {
+        page: page.title,
+        path: collection.pointer,
+      }));
+      continue;
+    }
+    const nearestWrapper = candidateWrappers[candidateWrappers.length - 1];
+    const collectionCount = countControls(nearestWrapper, (node) => String(node?.type || "") === "collection");
+    if (collectionCount !== 1) {
+      findings.push(error("DASH_CONTENT_CARD_WRAPPER_COLLECTION_COUNT_INVALID", "Each content_card_wrapper must contain exactly one primary grid-table Collection.", {
+        page: page.title,
+        path: collection.pointer,
+        collectionCount,
+      }));
+    }
+  }
+}
+
+function validateDynamicUserFieldTypes(page, listIndex, findings) {
+  for (const entry of page.controls) {
+    const type = String(entry.control?.type || "");
+    if (!["dynamic-user", "dynamic-field"].includes(type)) continue;
+    const field = resolveBoundField(entry.control, listIndex);
+    if (!field) continue;
+    const userField = isUserField(field);
+    if (userField && type !== "dynamic-user") {
+      findings.push(error("DASH_DYNAMIC_USER_FIELD_TYPE_REQUIRED", "User/identity source fields must render with dynamic-user, not generic dynamic-field.", {
+        page: page.title,
+        path: entry.pointer,
+        field: field.FieldName || field.InternalName || field.DisplayName || null,
+      }));
+    }
+    if (!userField && type === "dynamic-user") {
+      findings.push(error("DASH_DYNAMIC_USER_BOUND_TO_NON_USER_FIELD", "dynamic-user controls must not bind to non-user fields.", {
+        page: page.title,
+        path: entry.pointer,
+        field: field.FieldName || field.InternalName || field.DisplayName || null,
+      }));
+    }
   }
 }
 
@@ -372,6 +507,82 @@ function looksLikeIconPlaceholder(control) {
 
 function fieldResolves(list, field) {
   return list.fieldsByName.has(String(field)) || list.fieldsById.has(String(field));
+}
+
+function matchesSemanticId(control, id) {
+  const values = [
+    control?.id,
+    control?.ID,
+    control?.name,
+    control?.Name,
+    control?.label,
+    control?.Label,
+    control?.nv_label,
+    control?.nav_label,
+    control?.attrs?.nv_label,
+    control?.attrs?.nav_label,
+    control?.attrs?.derivedFromGoldenReference,
+    control?.derivedFromGoldenReference,
+  ].filter(Boolean).map(String);
+  return values.some((value) => value === id || value.includes(id));
+}
+
+function findAncestors(root, target) {
+  const out = [];
+  const stack = [];
+  let found = false;
+  function visit(node) {
+    if (found || !isObject(node)) return;
+    if (node === target) {
+      out.push(...stack);
+      found = true;
+      return;
+    }
+    stack.push(node);
+    for (const key of ["children", "columns", "controls"]) asArray(node[key]).forEach(visit);
+    stack.pop();
+  }
+  visit(root);
+  return out;
+}
+
+function countControls(root, predicate) {
+  let count = 0;
+  function visit(node) {
+    if (!isObject(node)) return;
+    if (predicate(node)) count += 1;
+    for (const key of ["children", "columns", "controls"]) asArray(node[key]).forEach(visit);
+  }
+  visit(root);
+  return count;
+}
+
+function resolveBoundField(control, listIndex) {
+  const fieldName = String(
+    control?.attrs?.data?.field
+    || control?.attrs?.field
+    || control?.attrs?.fieldName
+    || control?.attrs?.FieldName
+    || control?.field
+    || control?.fieldName
+    || control?.FieldName
+    || "",
+  );
+  const listId = String(control?.attrs?.data?.list?.ListID || control?.attrs?.data?.listId || control?.attrs?.list?.ListID || "");
+  if (listId && listIndex.byId.has(listId)) {
+    const list = listIndex.byId.get(listId);
+    return list.fieldsByName.get(fieldName) || list.fieldsById.get(fieldName) || null;
+  }
+  for (const list of listIndex.byId.values()) {
+    const field = list.fieldsByName.get(fieldName) || list.fieldsById.get(fieldName);
+    if (field) return field;
+  }
+  return null;
+}
+
+function isUserField(field) {
+  const text = `${field?.Type || ""} ${field?.FieldType || ""} ${field?.ControlType || ""} ${field?.DisplayName || ""}`.toLowerCase();
+  return /\b(identity-picker|user|person|people|owner|requester|assignee|createdby|modifiedby)\b/.test(text);
 }
 
 function isNumericField(field) {

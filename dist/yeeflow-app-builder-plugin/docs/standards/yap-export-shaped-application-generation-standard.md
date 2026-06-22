@@ -75,6 +75,14 @@ Before handoff/import, run YAP schema validation, YAP generation contract valida
 
 For generated-final YAPK handoff, run `scripts/yapk-first-generation-preflight.mjs`; it includes `scripts/validate-generated-yapk-export-shape.mjs` before signing readiness. The export-shape gate rejects count-only `FormNewReports`/`DataReports`, dashboard pages without visible resource-bound business controls, Summary/chart controls without the complete runtime-proven model contract, hidden Summary hosts counted as visible content, and native Title fields missing export-aligned `Status: 0`, `IsSystem: true`, and `IsIndex: true`.
 
+Generated-final YAPK packages must be preflight-clean before `setsign`. Treat `scripts/yapk-first-generation-preflight.mjs --package <file.yapk> --plan <yeeflow-app-plan.md> --json` as the signing-readiness entrypoint when a plan exists. Do not sign a package that fails canonical schema validation, decoded export-shape validation, generated-final resource completeness, ID provenance, app icon, navigation metadata, dashboard materialization, or redacted-output checks. Signing can prove only package wrapper integrity; it cannot repair app content.
+
+Generated-final YAPK packages must not embed business seed rows in `Childs[].ListDatas` or `Childs[].List.ListDatas`. Sample/demo data belongs in a separate seed artifact and may be inserted only through an explicitly approved live seeding step after install/runtime scope is clear. Keeping seed rows outside the package prevents import failures and keeps schema validation focused on application structure.
+
+Dashboard KPI cards must be backed by real Summary controls when dynamic metrics are claimed. A KPI card is not generated-final materialized if it is only static text, a styled number, or a hidden Summary host. The package-side contract must include the Summary control, `Resource.ReportIds[]`, `Resource.exts[]`, `Resource.tempVars[]`, `attrs.save_var`, and a visible text binding to the same saved temp variable.
+
+Dashboard filters must be consumed by at least one Collection/table/KPI consumer. Filter controls with bare scalar operator/value placeholders such as `0`, or filters that expose UI state without a matching consumer query/filter binding, are not generated-final ready. Static package validation proves the linkage contract only; browser/runtime proof is still required before claiming data changes after a filter selection.
+
 For approval forms, validate three separate gates: import-qualified means the package is export-shaped and locally import-ready; designer-qualified means the form opens in designer, intended text renders, and selecting one control selects only that control; runtime-qualified means the opened app/form behaves correctly in the target runtime.
 
 ## M. Proof Language Rule

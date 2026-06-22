@@ -512,6 +512,18 @@ Use Vertical Timeline for activity feeds, histories, lifecycle logs, and vertica
 Focused runtime proof: `generate-kanban-collection-timeline-runtime-proof.mjs` emits a minimal dashboard app with one source Data List, Kanban, Collection, `timeline-v`, `timeline-h`, and Dynamic field/user/image/file controls all bound with source `3`. `/Users/Renger/Downloads/kanban-collection-timeline-runtime-proof.v1.yap` imported successfully, opened `Dynamic Controls Runtime Dashboard`, rendered Kanban/Collection/Vertical Timeline/Horizontal Timeline, rendered Dynamic field values, and kept Dynamic user/image/file controls stable with empty values. Its synthetic rows populate text/status/date/progress; user/image/file fields require safe runtime values before claiming non-empty display, preview, or download behavior.
 <!-- kanban-collection-dynamic-controls-learning:end -->
 
+## Dashboard v1.1 Generated-Final Materialization
+
+When generating Dashboard Page Layouts v1.1 pages, use the v1.1 page shell and place Event Portfolio golden-reference components only inside approved slots. Do not put business/data controls directly under root `Content`, and keep `page_title_section` limited to title/header content.
+
+Record queues, pipelines, worklists, and portfolio tables must use the golden-reference Collection subtree, not simplified Data table/static lookalikes. Each primary grid-table Collection needs an independent `content_card_wrapper` or approved grid-table wrapper copied from the template/reference.
+
+KPI cards that display live metrics must be backed by Summary controls with matching layout `ReportIds`, `exts`, `tempVars`, `attrs.save_var`, and visible KPI text bound to the same saved variable. Static/fallback KPI text is allowed only when explicitly labeled as fallback and must not be claimed as dynamic runtime proof.
+
+Filters must bind to valid list fields and be consumed by Collection/table/KPI query or filter metadata. A filter with UI options but no consumer linkage, or one using scalar placeholder operator/value metadata such as `0`, is not generated-final ready.
+
+User/identity source fields must render with Dynamic user controls. Non-user fields must not be rendered with Dynamic user merely for styling.
+
 <!-- advanced-controls-learning:start -->
 ## Advanced Yeeflow Controls Learning
 

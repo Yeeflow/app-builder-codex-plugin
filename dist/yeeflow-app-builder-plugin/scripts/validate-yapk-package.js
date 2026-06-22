@@ -310,11 +310,27 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
   }
   counts.fields += asArray(pkg.Fields).length;
   counts.layouts += asArray(pkg.Layouts).length;
+  validateNoEmbeddedListDatas(pkg, path, errors);
   for (const [index, field] of asArray(pkg.Fields).entries()) validateField(field, `${path}.Fields[${index}]`, errors, warnings);
   validateNativeTitle(pkg.Fields, path, errors);
   validateDefaultViews(pkg, path, errors);
   validateChoiceSampleRows(pkg, path, errors);
   if ("Defs" in pkg) add(errors, "YAPK_CHILDS_USES_DEFS", "YAPK Childs items must use Fields, not YAP Defs.", { path: `${path}.Defs` });
+}
+
+function validateNoEmbeddedListDatas(pkg, path, errors) {
+  for (const key of Object.keys(pkg || {})) {
+    if (/^ListDatas$/i.test(key)) {
+      const value = pkg[key];
+      add(errors, "YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].ListDatas. Generate a companion seed JSON/script and require explicit live seeding approval instead.", {
+        path: `${path}.${key}`,
+        rowCount: Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : null,
+      });
+    }
+  }
+  if (isObject(pkg.List) && Object.prototype.hasOwnProperty.call(pkg.List, "ListDatas")) {
+    add(errors, "YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].List.ListDatas.", { path: `${path}.List.ListDatas` });
+  }
 }
 
 function storageFamilyForFieldName(fieldName) {
