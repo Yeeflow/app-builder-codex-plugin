@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.10
+
+- Release YAPK Dashboard runtime materialization and preflight gates from PR #157.
+- Fail generated-final KPI cards that claim live metrics without Summary controls, `ReportIds`, `exts`, `tempVars`, `attrs.save_var`, and visible KPI value bindings.
+- Fail unconsumed dashboard filters, placeholder filter operator/value metadata such as bare `0`, business/data controls inside `page_title_section`, simplified grid-table/Data table lookalikes, shared primary Collection wrappers, and Dynamic user field-family mismatches.
+- Fail generated-final YAPK packages that embed sample rows under `Childs[].ListDatas` or `Childs[].List.ListDatas`; sample data must be emitted as a separate seed artifact and live-seeded only with explicit approval.
+- Fail App Plan resource-completeness validation when a non-empty resource-like plan parses to zero resources, preventing parser fail-open signing readiness.
+- Register the focused runtime-materialization regression suite in aggregate UI and YAPK cache hard gates.
+
 ## 0.8.9
 
 - Release Dashboard Page Layouts v1.1 validator alignment from PR #155.

@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.9`
+`0.8.10`
+
+Version `0.8.10` releases YAPK Dashboard runtime materialization and preflight gates from PR #157. Generated-final validation now fails KPI cards without Summary/ReportIds/exts/tempVars/save_var/visible bindings, unconsumed dashboard filters or placeholder filter conditions, business controls inside `page_title_section`, simplified grid-table/Data table lookalikes, shared Collection wrappers, Dynamic user field-family mismatches, embedded `ListDatas` sample rows, and App Plan parser fail-open cases before signing.
 
 Version `0.8.9` releases Dashboard Page Layouts v1.1 validator alignment from PR #155. Aggregate dashboard and YAPK validators now treat v1.1 as the page shell, keep Event Portfolio Golden Reference checks as component/region checks inside approved v1.1 slots, reuse v1.1 identity detection for `Main`, `Content`, actions, and navigator/control labels, allow required generator normalization, and continue blocking competing Event Portfolio root shells, invented layout modules, and business content outside approved section content.
 
