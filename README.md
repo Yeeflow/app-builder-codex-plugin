@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.7`
+- Version: `0.8.8`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.7` adds Dashboard Page Layouts v1.1 template adoption from PR #151: Dashboard Page Layouts v1.1 is registered as the required page shell, standard dashboard page structure is enforced with page background, `Main > Content`, page title/header, content cards, 1/2/3-column sections, 60/40 section, and KPI wrapper, the v1.1 shell is used together with Event Portfolio component/region golden references, Full-width structural containers and section title/content areas are checked, Operations containers are allowed only when real actions exist, canonical runtime route proof is required, and dashboard-only upgrade scope preservation is enforced.
+Current release `0.8.8` adds Dashboard Page Layouts v1.1 controlled-slot and repeatable-module enforcement from PR #153: generated dashboards must preserve the v1.1 template shell, business-specific content may change only inside registered allowed business-content containers, new layout sections may only be added by copying registered repeatable/removable modules, additional KPI cards must copy the approved planned-events KPI card pattern, invented dashboard layout modules are rejected, and visual-only `Operations` placeholders remain blocked.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.7
+Version: 0.8.8
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.7
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.8
 ```
 
 ## What Is Included

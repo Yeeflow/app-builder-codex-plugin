@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.7`
+`0.8.8`
+
+Version `0.8.8` releases Dashboard Page Layouts v1.1 controlled-slot and repeatable-module enforcement from PR #153. Generated dashboards must preserve the v1.1 template shell, business-specific content may change only inside registered allowed business-content containers, new layout sections may only be added by copying registered repeatable/removable modules, added KPI cards must copy the approved `event_portfolio_kpi_planned_events` pattern, invented dashboard layout modules are rejected, and visual-only `Operations` placeholders remain blocked.
 
 Version `0.8.7` releases Dashboard Page Layouts v1.1 template adoption from PR #151. Dashboard Page Layouts v1.1 is registered as the required page shell for newly generated Dashboard pages. The standard dashboard page structure now covers page background, `Main > Content`, page title/header, content cards, 1/2/3-column sections, 60/40 section, and KPI wrapper. The v1.1 shell works together with Event Portfolio component/region golden references, while Full-width structural containers, section title/content areas, real-action-only `Operations` containers, canonical runtime route proof, and dashboard-only upgrade scope preservation are enforced.
 
