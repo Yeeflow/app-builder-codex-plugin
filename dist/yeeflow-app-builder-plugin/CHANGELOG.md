@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.8.6
+
+- Release Dashboard Golden Reference export-shape parity from PR #149.
+- Update the Event Portfolio Dashboard Golden Reference source and enforce strict `_ak_c` / `_ak_c_opt` export-shape parity.
+- Add golden-reference quality lint for required regions, Full-width sections/KPI cards, root Content zero-padding, and high-level Container layout.
+- Keep the approved table-internal `flex_grid` exceptions explicit.
+- Strengthen filter label/placeholder and field/display/value/apply contract gates plus static filter consumer linkage checks.
+- Add runtime filter before/after data-change proof gating before claiming filter linkage success.
+- Enforce `dynamic-user` rendering for user/identity fields.
+- Reject provenance-only simplified dashboard shells.
+
 ## 0.8.4
 
 - Release existing-app YAPK upgrade scope, lineage, and Version Management gates from PR #145.
