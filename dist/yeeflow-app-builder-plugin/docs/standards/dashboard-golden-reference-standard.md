@@ -2,7 +2,7 @@
 
 Generated Dashboard pages must use Dashboard Page Layouts v1.1 as the canonical page-level shell, then use the Event Portfolio dashboard structure as the default component/region golden reference unless a deliberate alternative is selected and justified before blueprint/resource generation.
 
-Dashboard Page Layouts v1.1 is registered in `docs/reference/dashboard-page-layout-templates.json` and standardized in `docs/standards/dashboard-page-layouts-v1.1-standard.md`. Generation must copy and normalize that export-shaped page shell first, preserving the page root, `main > content`, page background, zero root padding, and section card skeleton. Event Portfolio component regions are mapped into v1.1 `section_content_area` regions without breaking the v1.1 skeleton.
+Dashboard Page Layouts v1.1 is registered in `docs/reference/dashboard-page-layout-templates.json` and standardized in `docs/standards/dashboard-page-layouts-v1.1-standard.md`. Generation must copy and normalize that export-shaped page shell first, preserving the page root, `main > content`, page background, zero root padding, and section card skeleton. Event Portfolio component regions are mapped into approved v1.1 business-content containers and `section_content_area` regions without breaking the v1.1 skeleton.
 
 The default reference is `event_portfolio_dashboard_golden_reference`. It is extracted from the Marketing Event Management `Event Portfolio` dashboard and stored as an updated Yeeflow export-shaped `_ak_c` / `_ak_c_opt` control tree. Generation must clone and normalize this export tree before domain mapping. It must not satisfy the requirement with semantic shells, provenance-only markers, or simplified reconstructed structures, and it must not copy Marketing Event business fields into other apps.
 
@@ -61,16 +61,18 @@ The Page Function Plan remains business-requirement oriented. It describes metri
 
 The Dashboard Golden Reference Selection maps those business requirements into the reference structure. Blueprint/resource generation consumes the selection artifact.
 
+When a generated dashboard declares or matches Dashboard Page Layouts v1.1, the Event Portfolio reference is validated as component/region content inside the v1.1 page shell. Validators must not require the Event Portfolio `Main > Content` root-depth/order contract directly at the page root in that case. They must still reject Event Portfolio copied as a competing root shell, provenance-only simplified structures, invented layout modules, and business/data controls placed directly under root `Content` instead of approved v1.1 slots.
+
 ## Export-Shape Parity
 
 Generated dashboard resources must preserve the required export-shaped structure from the selected reference:
 
 | Contract | Requirement |
 | --- | --- |
-| Root tree | Preserve `Main > Content` from the `_ak_c` tree. |
-| Region order | Preserve required region order from the registry. |
+| Root tree | Preserve `Main > Content` from the selected page shell. For v1.1 dashboards, the page shell provides this root and Event Portfolio regions live inside approved slots. |
+| Region order | Preserve required region order from the registry for non-v1.1 Event Portfolio root generation; v1.1 dashboards preserve v1.1 section/module ordering and validate Event Portfolio component regions within that shell. |
 | Control type | Required high-level regions must keep the reference control type. |
-| Nesting depth | Required regions must stay at the same dashboard tree depth after normalizing the page wrapper. |
+| Nesting depth | Required regions must stay at the same dashboard tree depth after normalizing the page wrapper, except v1.1 dashboards where approved section slots introduce the page-shell depth and component regions are checked for presence/type within the shell. |
 | Width and padding | Required sections and KPI cards must be Full width; the root Content area must use zero padding. |
 | Filter contract | Data filters must preserve separate label/placeholder text, `attrs.data.field`, `display_f`, `value_f`, and `apply_t` when the reference uses it. |
 | Grid internals | `grid` / `flex_grid` is allowed only for registered grid-table internal row/header nodes. |

@@ -850,20 +850,20 @@ function validateDashboardShells(decoded, errors) {
 
 function validateDashboardResourceShape(parsed, path, errors) {
   if (!isObject(parsed)) return;
-  if (parsed.id === "Main" || parsed.name === "Main") {
+  if (hasIdentity(parsed, "Main")) {
     add(errors, "DASHBOARD_RESOURCE_WRAPPER_MISSING", "Dashboard Resource must be the full page wrapper with children/attrs/title/ver/filterVars/tempVars/exts/actions, not the direct Main container.", { path });
   }
-  const missing = DEFAULT_DASHBOARD_RESOURCE_KEYS.filter((key) => !(key in parsed));
+  const missing = DEFAULT_DASHBOARD_RESOURCE_KEYS.filter((key) => key === "actions" ? false : !(key in parsed));
   if (missing.length) add(errors, "DASHBOARD_RESOURCE_REQUIRED_KEYS_MISSING", "Dashboard Resource wrapper is missing required export-style keys.", { path, missing });
   const topChildren = asArray(parsed.children);
   const hasRootWorkspaceShell = hasRootThreeColumnWorkspaceShell(parsed);
-  const main = topChildren.find((child) => child?.id === "Main" || child?.name === "Main");
+  const main = topChildren.find((child) => hasIdentity(child, "Main"));
   if (!main && !hasRootWorkspaceShell) {
     add(errors, "DASHBOARD_MAIN_CONTENT_NOT_IN_CHILDREN", "Dashboard Main container must be a top-level child of standard dashboard pages; three-column workspace dashboards must use a root three_column_workspace_shell instead.", { path });
     return;
   }
   if (main) {
-    const content = asArray(main.children).find((child) => child?.id === "Content" || child?.name === "Content");
+    const content = asArray(main.children).find((child) => hasIdentity(child, "Content"));
     if (!content) add(errors, "DASHBOARD_MAIN_CONTENT_NOT_IN_CHILDREN", "Dashboard Content container must be inside the top-level Main container for standard dashboard pages.", { path });
   }
   const pagePadding = parsed.attrs?.container?.padding ?? parsed.attrs?.style?.padding ?? parsed.attrs?.padding;
@@ -913,11 +913,28 @@ function pageContentWidthIsFull(page) {
 }
 
 function controlName(control) {
-  return String(control?.name || control?.label || control?.title || control?.attrs?.headc?.title?.value || "");
+  const candidates = [
+    control?.nv_label,
+    control?.nav_label,
+    control?.attrs?.nv_label,
+    control?.attrs?.nav_label,
+    control?.name,
+    control?.Name,
+    control?.label,
+    control?.Label,
+    control?.title,
+    control?.Title,
+    control?.attrs?.name,
+    control?.attrs?.label,
+    control?.attrs?.headc?.title?.value,
+  ].filter((value) => value !== undefined && value !== null && String(value).trim() !== "").map(String);
+  return candidates.find((value) => !DEFAULT_CONTROL_NAME_RE.test(value)) || candidates[0] || "";
 }
 
+const DEFAULT_CONTROL_NAME_RE = /^(Container|Grid|Text|Dynamic field|Dynamic user|Kanban|Collection|Button|Summary|Icon|Text Editor)(\s*\d+)?$/i;
+
 function isDefaultControlName(control) {
-  return /^(Container|Grid|Text|Dynamic field|Dynamic user|Kanban|Collection|Button|Summary|Icon|Text Editor)(\s*\d+)?$/i.test(controlName(control));
+  return DEFAULT_CONTROL_NAME_RE.test(controlName(control));
 }
 
 function isSummaryControl(control) {
@@ -967,9 +984,56 @@ function validateDashboardSummaryPattern(parsed, path, errors, title) {
 
 function hasMainContent(node) {
   if (!node || typeof node !== "object") return false;
-  if (node.id === "Main" && Array.isArray(node.children) && node.children.some((child) => child?.id === "Content" || child?.name === "Content")) return true;
-  if (node.name === "Main" && Array.isArray(node.children) && node.children.some((child) => child?.name === "Content" || child?.id === "Content")) return true;
+  if (hasIdentity(node, "Main") && Array.isArray(node.children) && node.children.some((child) => hasIdentity(child, "Content"))) return true;
   return asArray(node.children).some(hasMainContent);
+}
+
+function identityCandidates(control) {
+  return [
+    control?.id,
+    control?.ID,
+    control?.key,
+    control?.Key,
+    control?.name,
+    control?.Name,
+    control?.label,
+    control?.Label,
+    control?.title,
+    control?.Title,
+    control?.nv_label,
+    control?.nvLabel,
+    control?.nav_label,
+    control?.navLabel,
+    control?.derivedFromDashboardPageLayoutTemplate,
+    control?.derivedFromGoldenReference,
+    control?.goldenReferenceId,
+    control?.attrs?.id,
+    control?.attrs?.ID,
+    control?.attrs?.key,
+    control?.attrs?.Key,
+    control?.attrs?.name,
+    control?.attrs?.Name,
+    control?.attrs?.label,
+    control?.attrs?.Label,
+    control?.attrs?.title,
+    control?.attrs?.Title,
+    control?.attrs?.nv_label,
+    control?.attrs?.nvLabel,
+    control?.attrs?.nav_label,
+    control?.attrs?.navLabel,
+    control?.attrs?.derivedFromDashboardPageLayoutTemplate,
+    control?.attrs?.derivedFromGoldenReference,
+    control?.attrs?.goldenReferenceId,
+  ].filter((value) => value !== undefined && value !== null && String(value).trim() !== "").map(String);
+}
+
+function hasIdentity(control, expected) {
+  const normalizedExpected = normalizeIdentity(expected);
+  return identityCandidates(control).some((candidate) => normalizeIdentity(candidate) === normalizedExpected);
+}
+
+function normalizeIdentity(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
 function fieldsByList(decoded) {

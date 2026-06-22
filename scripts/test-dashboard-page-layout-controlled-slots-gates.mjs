@@ -175,7 +175,7 @@ try {
   const nonSlotTextMutation = templateResource();
   find(nonSlotTextMutation, "page_title_section").attrs ??= {};
   find(nonSlotTextMutation, "page_title_section").attrs.label = "Unauthorized page title mutation";
-  expectCode("business text outside allowed business-content container fails", ["--package", writePackage(tempDir, "non-slot-text", decoded(nonSlotTextMutation))], "DASH_LAYOUT_TEMPLATE_STRUCTURE_MUTATION");
+  expectCode("business text outside allowed business-content container fails", ["--package", writePackage(tempDir, "non-slot-text", decoded(nonSlotTextMutation))], "DASH_LAYOUT_BUSINESS_TEXT_OUTSIDE_ALLOWED_SLOT");
 
   const brokenKpiCopy = templateResource();
   const brokenKpi = clone(find(brokenKpiCopy, "event_portfolio_kpi_planned_events"));

@@ -227,7 +227,16 @@ function validateControlledSlotsAndRepeatableModules(resource, findings, context
       validateSpecialModuleChildren(control, findings, context.page);
       continue;
     }
-    const knownIdentity = ids.some((id) => templateIndex.identitySet.has(id));
+    const knownIdentity = ids.some((id) => templateIndex.identitySet.has(id) || templateIndex.identitySet.has(normalizeIdentity(id)));
+    if (!knownIdentity && isBusinessContentControl(control)) {
+      findings.push(error("DASH_LAYOUT_BUSINESS_CONTROL_OUTSIDE_ALLOWED_SLOT", "Dashboard business controls such as Collections, filters, KPI values, and actions must be placed inside approved v1.1 business-content containers.", { page: context.page, pointer: entry.pointer, identities: ids.slice(0, 6), type: control.type || null }));
+      continue;
+    }
+    const outsideSlotText = unexpectedBusinessTextOutsideSlot(control);
+    if (outsideSlotText.length) {
+      findings.push(error("DASH_LAYOUT_BUSINESS_TEXT_OUTSIDE_ALLOWED_SLOT", "Business text changes must stay inside approved v1.1 business-content containers; structural template labels may only use module/control identities.", { page: context.page, pointer: entry.pointer, control: firstIdentity(control) || null, text: outsideSlotText.slice(0, 5) }));
+      continue;
+    }
     if (!knownIdentity && looksLikeLayoutModule(control)) {
       findings.push(error("DASH_LAYOUT_INVENTED_LAYOUT_MODULE", "Generated dashboards must not invent new dashboard layout modules outside approved business-content containers. Add layout by copying an allowed repeatable/removable module.", { page: context.page, pointer: entry.pointer, identities: ids.slice(0, 6), type: control.type || null }));
       continue;
@@ -243,8 +252,12 @@ function buildTemplateStructureIndex(templateResource) {
     const control = entry.control;
     for (const id of identityCandidates(control)) {
       identitySet.add(id);
+      identitySet.add(normalizeIdentity(id));
       if (!rootSignaturesByIdentity.has(id)) rootSignaturesByIdentity.set(id, new Set());
       rootSignaturesByIdentity.get(id).add(JSON.stringify(rootStructureSignature(control)));
+      const normalizedId = normalizeIdentity(id);
+      if (!rootSignaturesByIdentity.has(normalizedId)) rootSignaturesByIdentity.set(normalizedId, new Set());
+      rootSignaturesByIdentity.get(normalizedId).add(JSON.stringify(rootStructureSignature(control)));
     }
   }
   return { identitySet, rootSignaturesByIdentity };
@@ -253,7 +266,7 @@ function buildTemplateStructureIndex(templateResource) {
 function validateTemplateRootStructure(control, templateIndex, findings, page) {
   const ids = identityCandidates(control);
   const signature = JSON.stringify(rootStructureSignature(control));
-  const matched = ids.some((id) => templateIndex.rootSignaturesByIdentity.get(id)?.has(signature));
+  const matched = ids.some((id) => templateIndex.rootSignaturesByIdentity.get(id)?.has(signature) || templateIndex.rootSignaturesByIdentity.get(normalizeIdentity(id))?.has(signature));
   if (!matched) {
     findings.push(error("DASH_LAYOUT_TEMPLATE_STRUCTURE_MUTATION", "Non-business template containers and copied modules must preserve template control type, width, padding, direction, gap, and background structure.", { page, control: firstIdentity(control) || null, type: control.type || null }));
   }
@@ -289,15 +302,21 @@ function flattenControls(root) {
 }
 
 function rootStructureSignature(control) {
+  const isMainOrContent = hasIdentity(control, "main") || hasIdentity(control, "content");
   return {
     type: control?.type || null,
-    widthtype: control?.attrs?.style?.widthtype ?? null,
-    padding: control?.attrs?.container?.padding ?? control?.attrs?.common?.padding ?? null,
+    widthtype: normalizeWidthMode(control),
+    padding: isMainOrContent ? "normalized" : control?.attrs?.container?.padding ?? control?.attrs?.common?.padding ?? null,
     direction: control?.attrs?.style?.direction ?? control?.attrs?.container?.direction ?? null,
     gap: control?.attrs?.style?.gap ?? control?.attrs?.container?.gap ?? null,
-    background: control?.attrs?.background ?? control?.attrs?.style?.background ?? control?.attrs?.common?.background ?? null,
-    businessText: ownVisibleTextSignature(control),
+    background: isMainOrContent ? "normalized" : control?.attrs?.background ?? control?.attrs?.style?.background ?? control?.attrs?.common?.background ?? null,
   };
+}
+
+function normalizeWidthMode(control) {
+  if (isFullWidth(control) || String(control?.width || "").toLowerCase() === "full") return "full";
+  const widthtype = control?.attrs?.style?.widthtype ?? null;
+  return widthtype === undefined ? null : widthtype;
 }
 
 function ownVisibleTextSignature(control) {
@@ -329,6 +348,25 @@ function hasAnyIdentity(control, ids) {
 function looksLikeLayoutModule(control) {
   if (!["container", "grid", "flex_grid", "ak-flex-grid", "section", "row", "column"].includes(String(control?.type || ""))) return false;
   return identityCandidates(control).some((id) => !looksLikeUuid(id));
+}
+
+function isBusinessContentControl(control) {
+  const type = String(control?.type || "").toLowerCase();
+  if (["collection", "data-list", "kanban", "summary", "select-filter", "radio-filter", "checkbox-filter", "button", "icon"].includes(type)) return true;
+  return hasActionConfiguration(control);
+}
+
+function unexpectedBusinessTextOutsideSlot(control) {
+  const structural = new Set(structuralIdentityCandidates(control).map(normalizeIdentity));
+  const allowedGeneric = /^(container|grid|text|dynamic field|dynamic user|kanban|collection|button|summary|icon|text editor)$/i;
+  return ownVisibleTextSignature(control).filter((text) => {
+    const normalized = normalizeIdentity(text);
+    if (!normalized) return false;
+    if (allowedGeneric.test(text)) return false;
+    if (structural.has(normalized)) return false;
+    if (looksLikeUuid(text)) return false;
+    return true;
+  });
 }
 
 function looksLikeUuid(value) {
@@ -478,7 +516,8 @@ function findAllByIdentity(root, expected) {
 }
 
 function hasIdentity(control, expected) {
-  return identityCandidates(control).includes(expected);
+  const normalizedExpected = normalizeIdentity(expected);
+  return identityCandidates(control).some((candidate) => normalizeIdentity(candidate) === normalizedExpected);
 }
 
 function identityCandidates(control) {
@@ -491,6 +530,24 @@ function identityCandidates(control) {
     control?.label,
     control?.title,
     control?.Title,
+    control?.nv_label,
+    control?.nav_label,
+    control?.derivedFromDashboardPageLayoutTemplate,
+    control?.attrs?.id,
+    control?.attrs?.name,
+    control?.attrs?.nv_label,
+    control?.attrs?.nav_label,
+    control?.attrs?.derivedFromDashboardPageLayoutTemplate,
+  ].filter(present).map(String);
+}
+
+function structuralIdentityCandidates(control) {
+  return [
+    control?.id,
+    control?.ID,
+    control?.key,
+    control?.name,
+    control?.Name,
     control?.nv_label,
     control?.nav_label,
     control?.derivedFromDashboardPageLayoutTemplate,
@@ -579,6 +636,10 @@ function countVisibleText(value) {
 }
 
 function normalizeColor(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase();
 }
 

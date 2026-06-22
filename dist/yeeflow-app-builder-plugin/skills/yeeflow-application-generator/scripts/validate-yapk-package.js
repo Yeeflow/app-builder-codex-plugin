@@ -3,6 +3,7 @@
 const fs = require("fs");
 const { spawnSync } = require("child_process");
 const zlib = require("zlib");
+const { validatePackageWrapperIcon } = require("./scripts/lib/application-icon-validation.cjs");
 
 const WRAPPER_REQUIRED = [
   "PackageId",
@@ -310,27 +311,10 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
   counts.fields += asArray(pkg.Fields).length;
   counts.layouts += asArray(pkg.Layouts).length;
   for (const [index, field] of asArray(pkg.Fields).entries()) validateField(field, `${path}.Fields[${index}]`, errors, warnings);
-  validateDataListCustomFormRootContentPadding(pkg, path, errors);
   validateNativeTitle(pkg.Fields, path, errors);
   validateDefaultViews(pkg, path, errors);
   validateChoiceSampleRows(pkg, path, errors);
   if ("Defs" in pkg) add(errors, "YAPK_CHILDS_USES_DEFS", "YAPK Childs items must use Fields, not YAP Defs.", { path: `${path}.Defs` });
-}
-
-function validateDataListCustomFormRootContentPadding(pkg, path, errors) {
-  for (const [layoutIndex, layout] of asArray(pkg.Layouts).entries()) {
-    if (String(layout?.Type ?? "") !== "1") continue;
-    for (const [resourceIndex, resource] of asArray(layout.LayoutInResources).entries()) {
-      const parsed = parseMaybeJson(resource?.Resource);
-      if (!parsed) continue;
-      if (!isDashboardRootContentPaddingShape(parsed.attrs?.container)) {
-        add(errors, "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID", "Data-list custom form root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", {
-          path: `${path}.Layouts[${layoutIndex}].LayoutInResources[${resourceIndex}].Resource.attrs.container`,
-          layout: layout.Title || null,
-        });
-      }
-    }
-  }
 }
 
 function storageFamilyForFieldName(fieldName) {
@@ -551,6 +535,11 @@ function validateDefaultViews(pkg, path, errors) {
   const queryItems = Array.isArray(view?.query) ? view.query : [];
   const layoutFields = layoutItems.map(viewFieldName);
   const queryFields = queryItems.map(viewFieldName);
+  const queryByFieldName = new Map();
+  for (const queryItem of queryItems) {
+    const name = viewFieldName(queryItem);
+    if (name && !queryByFieldName.has(name)) queryByFieldName.set(name, queryItem);
+  }
   const fields = new Set(asArray(pkg.Fields).map((field) => String(field.FieldName || "")).filter(Boolean));
   if (ext1?.Url !== "default") add(errors, "DEFAULT_VIEW_EXT1_URL_MISSING", "Default Type 0 data view must set Ext1.Url to default.", { path: `${path}.Layouts.default.Ext1` });
   if (!layoutFields.length) add(errors, "DEFAULT_VIEW_DISPLAY_FIELDS_MISSING", "Default data views must include visible columns.", { path: `${path}.Layouts.default.LayoutView.layout` });
@@ -562,6 +551,17 @@ function validateDefaultViews(pkg, path, errors) {
     const fieldName = viewFieldName(item);
     if (fieldName && !fields.has(fieldName) && !SYSTEM_DASHBOARD_FIELDS.has(fieldName)) add(errors, "DEFAULT_VIEW_DISPLAY_FIELD_NOT_FOUND", "Default view visible fields must resolve to list fields.", { path: `${path}.Layouts.default.LayoutView.layout[${index}]`, field: fieldName });
     if (fieldName && !queryFields.includes(fieldName)) add(errors, "DEFAULT_VIEW_QUERY_FIELDS_MISSING", "Default view query must include every visible display field.", { path: `${path}.Layouts.default.LayoutView.query`, field: fieldName });
+    const queryItem = queryByFieldName.get(fieldName);
+    const layoutFieldId = viewFieldId(item);
+    const queryFieldId = viewFieldId(queryItem);
+    if (fieldName && queryItem && layoutFieldId && queryFieldId && layoutFieldId !== queryFieldId) {
+      add(errors, "DEFAULT_VIEW_QUERY_FIELD_ID_MISMATCH", "Default view query field must match the visible layout column FieldID for the same FieldName.", {
+        path: `${path}.Layouts.default.LayoutView.query`,
+        field: fieldName,
+        layoutFieldId,
+        queryFieldId,
+      });
+    }
   }
   for (const field of SYSTEM_DASHBOARD_FIELDS) {
     if (!queryFields.includes(field)) add(errors, "DEFAULT_VIEW_SYSTEM_QUERY_FIELD_MISSING", "Default data views must include required system query fields.", { path: `${path}.Layouts.default.LayoutView.query`, field });
@@ -570,6 +570,10 @@ function validateDefaultViews(pkg, path, errors) {
 
 function viewFieldName(item) {
   return String(item?.field || item?.Field || item?.FieldName || "");
+}
+
+function viewFieldId(item) {
+  return item === undefined || item === null ? "" : String(item?.FieldID || item?.FieldId || item?.fieldId || item?.Field || "");
 }
 
 function validateNoRule(form, path, errors, counts) {
@@ -846,25 +850,24 @@ function validateDashboardShells(decoded, errors) {
 
 function validateDashboardResourceShape(parsed, path, errors) {
   if (!isObject(parsed)) return;
-  if (parsed.id === "Main" || parsed.name === "Main") {
+  if (hasIdentity(parsed, "Main")) {
     add(errors, "DASHBOARD_RESOURCE_WRAPPER_MISSING", "Dashboard Resource must be the full page wrapper with children/attrs/title/ver/filterVars/tempVars/exts/actions, not the direct Main container.", { path });
   }
-  const missing = DEFAULT_DASHBOARD_RESOURCE_KEYS.filter((key) => !(key in parsed));
+  const missing = DEFAULT_DASHBOARD_RESOURCE_KEYS.filter((key) => key === "actions" ? false : !(key in parsed));
   if (missing.length) add(errors, "DASHBOARD_RESOURCE_REQUIRED_KEYS_MISSING", "Dashboard Resource wrapper is missing required export-style keys.", { path, missing });
   const topChildren = asArray(parsed.children);
   const hasRootWorkspaceShell = hasRootThreeColumnWorkspaceShell(parsed);
-  const main = topChildren.find((child) => child?.id === "Main" || child?.name === "Main");
+  const main = topChildren.find((child) => hasIdentity(child, "Main"));
   if (!main && !hasRootWorkspaceShell) {
     add(errors, "DASHBOARD_MAIN_CONTENT_NOT_IN_CHILDREN", "Dashboard Main container must be a top-level child of standard dashboard pages; three-column workspace dashboards must use a root three_column_workspace_shell instead.", { path });
     return;
   }
   if (main) {
-    const content = asArray(main.children).find((child) => child?.id === "Content" || child?.name === "Content");
+    const content = asArray(main.children).find((child) => hasIdentity(child, "Content"));
     if (!content) add(errors, "DASHBOARD_MAIN_CONTENT_NOT_IN_CHILDREN", "Dashboard Content container must be inside the top-level Main container for standard dashboard pages.", { path });
   }
-  if (!isDashboardRootContentPaddingShape(parsed.attrs?.container)) {
-    add(errors, "DASHBOARD_ROOT_CONTENT_PADDING_INVALID", "Dashboard page root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", { path: `${path}.attrs.container` });
-  }
+  const pagePadding = parsed.attrs?.container?.padding ?? parsed.attrs?.style?.padding ?? parsed.attrs?.padding;
+  if (!isZeroPadding(pagePadding)) add(errors, "DASHBOARD_PAGE_PADDING_MISSING", "Dashboard page content-area padding should be explicitly zero; spacing belongs in Main > Content for Style 1 dashboards or in the root shell for Style 2 workspace dashboards.", { path: `${path}.attrs.container.padding` });
   if (hasRootWorkspaceShell && !pageContentWidthIsFull(parsed)) {
     add(errors, "THREE_COLUMN_PAGE_WIDTH_NOT_FULL", "Three-column workspace dashboard pages must set content width to Full Width.", { path: `${path}.attrs.contentWidth` });
   }
@@ -876,16 +879,11 @@ function validateDashboardResourceShape(parsed, path, errors) {
   });
 }
 
-function isDashboardRootContentPaddingShape(container) {
-  if (!isObject(container) || container.cw !== "2") return false;
-  const padding = container.padding;
-  if (!Array.isArray(padding) || padding.length !== 2 || padding[0] !== null || !isObject(padding[1])) return false;
-  const keys = Object.keys(padding[1]).sort().join(",");
-  return keys === "bottom,left,right,top"
-    && padding[1].top === "--sp--s0"
-    && padding[1].right === "--sp--s0"
-    && padding[1].bottom === "--sp--s0"
-    && padding[1].left === "--sp--s0";
+function isZeroPadding(value) {
+  if (value === 0 || value === "0" || value === "0px" || value === "--sp--s0") return true;
+  if (Array.isArray(value)) return value.every((item) => item === null || isZeroPadding(item));
+  if (isObject(value)) return Object.values(value).every(isZeroPadding);
+  return false;
 }
 
 function hasRootThreeColumnWorkspaceShell(page) {
@@ -915,11 +913,28 @@ function pageContentWidthIsFull(page) {
 }
 
 function controlName(control) {
-  return String(control?.name || control?.label || control?.title || control?.attrs?.nv_label || control?.attrs?.headc?.title?.value || "");
+  const candidates = [
+    control?.nv_label,
+    control?.nav_label,
+    control?.attrs?.nv_label,
+    control?.attrs?.nav_label,
+    control?.name,
+    control?.Name,
+    control?.label,
+    control?.Label,
+    control?.title,
+    control?.Title,
+    control?.attrs?.name,
+    control?.attrs?.label,
+    control?.attrs?.headc?.title?.value,
+  ].filter((value) => value !== undefined && value !== null && String(value).trim() !== "").map(String);
+  return candidates.find((value) => !DEFAULT_CONTROL_NAME_RE.test(value)) || candidates[0] || "";
 }
 
+const DEFAULT_CONTROL_NAME_RE = /^(Container|Grid|Text|Dynamic field|Dynamic user|Kanban|Collection|Button|Summary|Icon|Text Editor)(\s*\d+)?$/i;
+
 function isDefaultControlName(control) {
-  return /^(Container|Grid|Text|Dynamic field|Dynamic user|Kanban|Collection|Button|Summary|Icon|Text Editor)(\s*\d+)?$/i.test(controlName(control));
+  return DEFAULT_CONTROL_NAME_RE.test(controlName(control));
 }
 
 function isSummaryControl(control) {
@@ -969,9 +984,56 @@ function validateDashboardSummaryPattern(parsed, path, errors, title) {
 
 function hasMainContent(node) {
   if (!node || typeof node !== "object") return false;
-  if (node.id === "Main" && Array.isArray(node.children) && node.children.some((child) => child?.id === "Content" || child?.name === "Content")) return true;
-  if (node.name === "Main" && Array.isArray(node.children) && node.children.some((child) => child?.name === "Content" || child?.id === "Content")) return true;
+  if (hasIdentity(node, "Main") && Array.isArray(node.children) && node.children.some((child) => hasIdentity(child, "Content"))) return true;
   return asArray(node.children).some(hasMainContent);
+}
+
+function identityCandidates(control) {
+  return [
+    control?.id,
+    control?.ID,
+    control?.key,
+    control?.Key,
+    control?.name,
+    control?.Name,
+    control?.label,
+    control?.Label,
+    control?.title,
+    control?.Title,
+    control?.nv_label,
+    control?.nvLabel,
+    control?.nav_label,
+    control?.navLabel,
+    control?.derivedFromDashboardPageLayoutTemplate,
+    control?.derivedFromGoldenReference,
+    control?.goldenReferenceId,
+    control?.attrs?.id,
+    control?.attrs?.ID,
+    control?.attrs?.key,
+    control?.attrs?.Key,
+    control?.attrs?.name,
+    control?.attrs?.Name,
+    control?.attrs?.label,
+    control?.attrs?.Label,
+    control?.attrs?.title,
+    control?.attrs?.Title,
+    control?.attrs?.nv_label,
+    control?.attrs?.nvLabel,
+    control?.attrs?.nav_label,
+    control?.attrs?.navLabel,
+    control?.attrs?.derivedFromDashboardPageLayoutTemplate,
+    control?.attrs?.derivedFromGoldenReference,
+    control?.attrs?.goldenReferenceId,
+  ].filter((value) => value !== undefined && value !== null && String(value).trim() !== "").map(String);
+}
+
+function hasIdentity(control, expected) {
+  const normalizedExpected = normalizeIdentity(expected);
+  return identityCandidates(control).some((candidate) => normalizeIdentity(candidate) === normalizedExpected);
+}
+
+function normalizeIdentity(value) {
+  return String(value || "").trim().toLowerCase();
 }
 
 function fieldsByList(decoded) {
@@ -1030,8 +1092,8 @@ function validateNativeTextControls(decoded, errors) {
       let parsed;
       try { parsed = JSON.parse(resource.Resource); } catch { continue; }
       walkControls(parsed, (control) => {
-        const title = control?.label || control?.name || control?.title || control?.attrs?.headc?.title?.value || "";
-        const looksLikeText = String(title).toLowerCase() === "text" || control?.attrs?.headc?.title;
+        const explicitType = String(control?.type || "").toLowerCase();
+        const looksLikeText = explicitType === "heading" || explicitType === "text" || explicitType === "text-editor";
         const pointer = `Pages[${pageIndex}].LayoutInResources[${resourceIndex}].Resource`;
         if (control?.type === "text") add(errors, "NATIVE_TEXT_CONTROL_TYPE_INVALID", "Generated dashboards/forms must not emit ad hoc type:\"text\" controls; use native heading/Text shape.", { path: pointer });
         if (!looksLikeText) return;
@@ -1099,6 +1161,7 @@ function validate(file, baselineFile = null) {
   const wrapper = readWrapper(file);
   if (!isObject(wrapper)) add(errors, "YAPK_WRAPPER_NOT_OBJECT", "Top-level package must be a JSON object.");
   for (const key of WRAPPER_REQUIRED) if (!(key in wrapper)) add(errors, "YAPK_REQUIRED_KEY_MISSING", `Missing required key ${key}.`);
+  for (const finding of validatePackageWrapperIcon(wrapper).findings) add(errors, finding.code, finding.message, finding);
   if (typeof wrapper.TenantID !== "string" || !NUMERIC_STRING_RE.test(wrapper.TenantID || "")) add(errors, "YAPK_TENANT_ID_INVALID", "Generated YAPK TenantID must be a LongAsString numeric string.");
   if (typeof wrapper.ListID !== "string" || !NUMERIC_STRING_RE.test(wrapper.ListID || "")) add(errors, "YAPK_LIST_ID_INVALID", "Generated YAPK top-level ListID must be a LongAsString numeric string.");
   if (!["30", "41"].includes(String(wrapper.AppID))) add(errors, "YAPK_APPID_UNSUPPORTED", "Generated YAPK wrapper AppID must be one of the product schema supported values: 30 or 41.", { value: wrapper.AppID ?? null });

@@ -48,6 +48,7 @@ const hardGateScripts = [
   "scripts/test-application-icon-gates.mjs",
   "scripts/test-dashboard-generation-hard-gates.mjs",
   "scripts/test-dashboard-golden-reference-conformance.mjs",
+  "scripts/test-dashboard-v11-validator-alignment-gates.mjs",
   "scripts/test-dashboard-page-layout-controlled-slots-gates.mjs",
   "scripts/test-dashboard-page-layout-template-gates.mjs",
   "scripts/test-generated-final-resource-completeness-gates.mjs",
