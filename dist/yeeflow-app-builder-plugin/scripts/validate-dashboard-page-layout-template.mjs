@@ -22,6 +22,24 @@ const REQUIRED_FULL_WIDTH_IDS = [
   "3_columns_section",
   "2_columns_60/40_section",
 ];
+const ALLOWED_BUSINESS_CONTENT_CONTAINERS = [
+  "event_portfolio_pipeline_title_group",
+  "Operations",
+  "section_content_area",
+  "section_title_header",
+  "event_portfolio_kpi_planned_events",
+  "event_portfolio_kpi_approved_budget",
+  "event_portfolio_kpi_registration_rate",
+  "event_portfolio_kpi_lead_follow_up",
+];
+const ALLOWED_REPEATABLE_MODULES = [
+  "content_card_wrapper",
+  "2_columns_section",
+  "3_columns_section",
+  "2_columns_60/40_section",
+  "kpi_cards_kpi_row",
+  "event_portfolio_kpi_planned_events",
+];
 const TEMPLATE_TERMS = [
   "Template KPI",
   "Template Section",
@@ -79,7 +97,8 @@ function validateRegistry(registry, template, findings) {
     findings.push(error("DASH_LAYOUT_TEMPLATE_RESOURCE_MISSING", "Dashboard Page Layouts v1.1 registry must preserve the parsedResource export-shaped page shell."));
     return;
   }
-  validatePageShell(resource, findings, { layer: "TEMPLATE", page: template.name || TEMPLATE_ID, requireDerivedMarker: false, allowTemplateOperations: true });
+  validatePageShell(resource, findings, { layer: "TEMPLATE", page: template.name || TEMPLATE_ID, requireDerivedMarker: false, allowTemplateOperations: true, template });
+  validateRegistryControlledSlotLists(template, findings);
   for (const sectionType of ["page title/header section", "1-column content card", "2-column section", "3-column section", "60/40 2-column section", "KPI metrics wrapper"]) {
     if (!asArray(template.standardSectionTypes).includes(sectionType)) {
       findings.push(error("DASH_LAYOUT_TEMPLATE_SECTION_TYPE_MISSING", "Dashboard Page Layouts v1.1 registry must document every standard section type.", { sectionType }));
@@ -101,9 +120,22 @@ function validatePackage(packagePath, template, findings) {
   }
   const listIndex = buildListIndex(decoded);
   for (const page of collectDashboardPages(decoded)) {
-    validatePageShell(page.resource, findings, { layer: "RESOURCE", page: page.title, requireDerivedMarker: true, allowTemplateOperations: false });
+    validatePageShell(page.resource, findings, { layer: "RESOURCE", page: page.title, requireDerivedMarker: true, allowTemplateOperations: false, template });
     validateBusinessMapping(page.resource, findings, page.title);
     validateDataControls(page, listIndex, findings);
+  }
+}
+
+function validateRegistryControlledSlotLists(template, findings) {
+  for (const id of ALLOWED_BUSINESS_CONTENT_CONTAINERS) {
+    if (!asArray(template.allowedBusinessContentContainers).includes(id)) {
+      findings.push(error("DASH_LAYOUT_TEMPLATE_BUSINESS_SLOT_MISSING", "Dashboard Page Layouts v1.1 registry must document every allowed business-content container.", { containerId: id }));
+    }
+  }
+  for (const id of ALLOWED_REPEATABLE_MODULES) {
+    if (!asArray(template.allowedRepeatableRemovableModules).includes(id)) {
+      findings.push(error("DASH_LAYOUT_TEMPLATE_REPEATABLE_MODULE_MISSING", "Dashboard Page Layouts v1.1 registry must document every repeatable/removable module.", { moduleId: id }));
+    }
   }
 }
 
@@ -156,6 +188,7 @@ function validatePageShell(resource, findings, context) {
     }
   }
   if (!context.allowTemplateOperations) validateOperations(resource, findings, context.page);
+  validateControlledSlotsAndRepeatableModules(resource, findings, context);
 }
 
 function validateOperations(resource, findings, page) {
@@ -170,6 +203,136 @@ function validateOperations(resource, findings, page) {
       findings.push(error("DASH_LAYOUT_VISUAL_ACTION_WITHOUT_BINDING", "Visual button/action-looking controls must include valid Yeeflow action configuration.", { page, control: firstIdentity(visualOnly) || null }));
     }
   }
+}
+
+function validateControlledSlotsAndRepeatableModules(resource, findings, context) {
+  const templateResource = context.template?.template?.parsedResource;
+  if (!isObject(templateResource)) return;
+  if (!findFirstByIdentity(resource, "content_card_wrapper") && !findFirstByIdentity(resource, "page_title_section")) return;
+  const templateIndex = buildTemplateStructureIndex(templateResource);
+  const generatedControls = flattenControls(resource);
+
+  for (const entry of generatedControls) {
+    const control = entry.control;
+    if (entry.insideBusinessSlot) continue;
+    const ids = identityCandidates(control);
+    if (!ids.length) continue;
+    if (isAllowedBusinessSlot(control)) {
+      validateTemplateRootStructure(control, templateIndex, findings, context.page);
+      validateSpecialModuleChildren(control, findings, context.page);
+      continue;
+    }
+    if (hasAnyIdentity(control, ALLOWED_REPEATABLE_MODULES)) {
+      validateTemplateRootStructure(control, templateIndex, findings, context.page);
+      validateSpecialModuleChildren(control, findings, context.page);
+      continue;
+    }
+    const knownIdentity = ids.some((id) => templateIndex.identitySet.has(id));
+    if (!knownIdentity && looksLikeLayoutModule(control)) {
+      findings.push(error("DASH_LAYOUT_INVENTED_LAYOUT_MODULE", "Generated dashboards must not invent new dashboard layout modules outside approved business-content containers. Add layout by copying an allowed repeatable/removable module.", { page: context.page, pointer: entry.pointer, identities: ids.slice(0, 6), type: control.type || null }));
+      continue;
+    }
+    if (knownIdentity) validateTemplateRootStructure(control, templateIndex, findings, context.page);
+  }
+}
+
+function buildTemplateStructureIndex(templateResource) {
+  const identitySet = new Set();
+  const rootSignaturesByIdentity = new Map();
+  for (const entry of flattenControls(templateResource)) {
+    const control = entry.control;
+    for (const id of identityCandidates(control)) {
+      identitySet.add(id);
+      if (!rootSignaturesByIdentity.has(id)) rootSignaturesByIdentity.set(id, new Set());
+      rootSignaturesByIdentity.get(id).add(JSON.stringify(rootStructureSignature(control)));
+    }
+  }
+  return { identitySet, rootSignaturesByIdentity };
+}
+
+function validateTemplateRootStructure(control, templateIndex, findings, page) {
+  const ids = identityCandidates(control);
+  const signature = JSON.stringify(rootStructureSignature(control));
+  const matched = ids.some((id) => templateIndex.rootSignaturesByIdentity.get(id)?.has(signature));
+  if (!matched) {
+    findings.push(error("DASH_LAYOUT_TEMPLATE_STRUCTURE_MUTATION", "Non-business template containers and copied modules must preserve template control type, width, padding, direction, gap, and background structure.", { page, control: firstIdentity(control) || null, type: control.type || null }));
+  }
+}
+
+function validateSpecialModuleChildren(control, findings, page) {
+  if (hasIdentity(control, "content_card_wrapper")) {
+    for (const required of ["section_title_area", "section_content_area"]) {
+      if (!findFirstByIdentity(control, required)) {
+        findings.push(error("DASH_LAYOUT_REPEATABLE_MODULE_REQUIRED_CHILD_MISSING", "Copied content_card_wrapper modules must preserve required section_title_area and section_content_area children.", { page, module: firstIdentity(control), requiredChild: required }));
+      }
+    }
+  }
+  if (hasIdentity(control, "event_portfolio_kpi_planned_events")) {
+    for (const required of ["event_portfolio_kpi_planned_events_top_row", "event_portfolio_kpi_planned_events_icon_block", "event_portfolio_kpi_planned_events_icon_native", "event_portfolio_kpi_planned_events_title_stack"]) {
+      if (!findFirstByIdentity(control, required)) {
+        findings.push(error("DASH_LAYOUT_KPI_COPY_REQUIRED_CHILD_MISSING", "Copied KPI cards must preserve the planned-events KPI card structure and required children.", { page, module: firstIdentity(control), requiredChild: required }));
+      }
+    }
+  }
+}
+
+function flattenControls(root) {
+  const out = [];
+  const visit = (node, pointer = "$", insideBusinessSlot = false) => {
+    if (!isObject(node)) return;
+    const currentIsBusinessSlot = isAllowedBusinessSlot(node);
+    if (node.type) out.push({ control: node, pointer, insideBusinessSlot });
+    asArray(node.children).forEach((child, index) => visit(child, `${pointer}.children[${index}]`, insideBusinessSlot || currentIsBusinessSlot));
+  };
+  visit(root);
+  return out;
+}
+
+function rootStructureSignature(control) {
+  return {
+    type: control?.type || null,
+    widthtype: control?.attrs?.style?.widthtype ?? null,
+    padding: control?.attrs?.container?.padding ?? control?.attrs?.common?.padding ?? null,
+    direction: control?.attrs?.style?.direction ?? control?.attrs?.container?.direction ?? null,
+    gap: control?.attrs?.style?.gap ?? control?.attrs?.container?.gap ?? null,
+    background: control?.attrs?.background ?? control?.attrs?.style?.background ?? control?.attrs?.common?.background ?? null,
+    businessText: ownVisibleTextSignature(control),
+  };
+}
+
+function ownVisibleTextSignature(control) {
+  const out = [];
+  const visibleKeys = new Set(["value", "text", "title", "Title", "label", "displayLabel", "placeholder"]);
+  const visit = (node, key = "") => {
+    if (Array.isArray(node)) return node.forEach((item) => visit(item, key));
+    if (!isObject(node)) {
+      if (typeof node === "string" && visibleKeys.has(key)) out.push(node);
+      return;
+    }
+    for (const [childKey, child] of Object.entries(node)) {
+      if (childKey === "children") continue;
+      visit(child, childKey);
+    }
+  };
+  visit({ attrs: control?.attrs, title: control?.title, label: control?.label });
+  return out.sort();
+}
+
+function isAllowedBusinessSlot(control) {
+  return hasAnyIdentity(control, ALLOWED_BUSINESS_CONTENT_CONTAINERS);
+}
+
+function hasAnyIdentity(control, ids) {
+  return ids.some((id) => hasIdentity(control, id));
+}
+
+function looksLikeLayoutModule(control) {
+  if (!["container", "grid", "flex_grid", "ak-flex-grid", "section", "row", "column"].includes(String(control?.type || ""))) return false;
+  return identityCandidates(control).some((id) => !looksLikeUuid(id));
+}
+
+function looksLikeUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(value || ""));
 }
 
 function validateBusinessMapping(resource, findings, page) {
