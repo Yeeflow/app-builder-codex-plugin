@@ -53,6 +53,7 @@ function summaryControl(patch = {}) {
     type: "summary",
     id: SUMMARY_ID,
     name: "Summary - Open Requests",
+    runtimeModelProven: true,
     attrs: {
       data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } },
       save_var: SAVE_VAR,
@@ -125,7 +126,10 @@ function domainString(value) {
     ["Events", "Maintenance Requests"],
     ["Event Type", "Request Type"],
   ]);
-  return replacements.get(value) || value.replaceAll("Event Portfolio", "Facility Operations").replaceAll("Campaign", "Readiness");
+  return replacements.get(value) || value
+    .replaceAll("Event Portfolio", "Facility Operations")
+    .replaceAll("Campaign", "Readiness")
+    .replaceAll("campaign", "readiness");
 }
 
 function adaptReferenceDomain(root) {
@@ -157,8 +161,17 @@ function normalizeContainers(root) {
     node.attrs = node.attrs || {};
     node.attrs.container = node.attrs.container || {};
     node.attrs.container.padding = { top: 0, right: 0, bottom: 0, left: 0 };
-    node.attrs.style = { ...style([null, "1"]), ...(node.attrs.style || {}), padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] };
+    node.attrs.style = { ...style([null, "1"]), ...(node.attrs.style || {}), direction: [null, "column"], background: "#f4f7fb", padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] };
   }
+}
+
+function removeOperations(root) {
+  const prune = (node) => {
+    if (!node || typeof node !== "object" || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => !ids(child).includes("Operations"));
+    node.children.forEach(prune);
+  };
+  prune(root);
 }
 
 function firstSummary(root) {
@@ -173,6 +186,7 @@ function pageResource(flags = {}) {
   const root = registryReferenceRoot();
   adaptReferenceDomain(root);
   normalizeContainers(root);
+  removeOperations(root);
   const summary = firstSummary(root);
   Object.assign(summary, summaryControl(flags.summaryPatch || {}));
   const hiddenSummaryHost = find(root, "event_portfolio_hidden_metric_data_sources");
@@ -206,7 +220,12 @@ function pageResource(flags = {}) {
   return {
     title: "Facility Operations Dashboard",
     ver: "1.0.0",
-    attrs: {},
+    derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-v1.1",
+    attrs: {
+      hideHeaderAll: true,
+      container: { padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] },
+      background: { type: "classic", classic: { color: "#f4f7fb" } },
+    },
     ReportIds: flags.reportIds === undefined ? [SUMMARY_ID] : flags.reportIds,
     tempVars: flags.tempVars === undefined ? [SAVE_VAR] : flags.tempVars,
     exts: flags.exts === undefined ? [{ i: SUMMARY_ID, category: "___Pivot___", key: "summary", attr: { ListID: LIST_ID, settings: { values: extValues } } }] : flags.exts,

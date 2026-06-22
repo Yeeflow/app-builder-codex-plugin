@@ -29,7 +29,7 @@ Before generation, confirm package target and scope:
 - Existing application upgrades must not use fresh-ID clone generation rules unless the user explicitly asks for a cloned app.
 - Generated application wrappers must use FontAwesome icon mode only. The top-level `IconUrl` must be a JSON string containing `b`, `i`, and `c`; image URLs, `https://img.yeeflow.com/...`, SVG, emoji, and blank/null icons are forbidden. The App Plan or generation report should include the selected domain-matched icon rationale without generated package IDs.
 
-Generated-final YAPK packages must be export-shaped, not structurally approximate placeholders. Approval forms, reports, dashboards, navigation, native Title metadata, and runtime URL reporting are validated after resource generation and before signing readiness. These are generator/package hard gates and must not be exposed as Functional Specification or App Plan requirements for business users.
+Generated-final YAPK packages must be export-shaped, not structurally approximate placeholders. Approval forms, reports, dashboards, navigation, native Title metadata, and runtime URL reporting are validated after resource generation and before signing readiness. Dashboard pages use Dashboard Page Layouts v1.1 as the page shell and Event Portfolio Golden Reference as the component/region reference; generation must copy and normalize the v1.1 shell before mapping business-specific sections, KPI cards, filters, grid-table Collections, and actions. These are generator/package hard gates and must not be exposed as Functional Specification or App Plan requirements for business users.
 
 ## 1. Requirement Intake
 
