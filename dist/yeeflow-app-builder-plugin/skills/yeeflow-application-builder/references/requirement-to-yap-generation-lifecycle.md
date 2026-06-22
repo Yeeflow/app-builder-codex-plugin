@@ -186,7 +186,7 @@ The review must confirm:
 
 If the App Plan review fails, revise and validate again. A failed App Plan review gate blocks business clarification closure, generation-readiness review, design image generation, page blueprinting, resource/package generation, signing, install/import/upgrade, and runtime proof.
 
-After App Plan/Page Function Plan approval and before dashboard blueprint/resource generation, create a Dashboard Golden Reference Selection artifact for each dashboard page. The default selection for standard operational dashboards is `event_portfolio_dashboard_golden_reference`; map the page's business questions, source lists, KPI metrics, filter fields, grid/table fields, and actions into the reference shell and sub-regions. Use an alternative reference only with an explicit reason and expected validation impact.
+After App Plan/Page Function Plan approval and before dashboard blueprint/resource generation, create a Dashboard Golden Reference Selection artifact for each dashboard page. The default selection for standard operational dashboards is `event_portfolio_dashboard_golden_reference`; map the page's business questions, source lists, KPI metrics, filter fields, grid/table fields, and actions into the export-shaped `_ak_c` / `_ak_c_opt` reference shell and sub-regions. Blueprint/resource generation must clone and normalize the selected export tree before domain mapping. Use an alternative reference only with an explicit reason and expected validation impact.
 
 ## 6. Business Clarification Gate
 
@@ -367,7 +367,7 @@ When a package is generated from an approved App Plan, run `scripts/validate-gen
 
 Dashboard generation hard gates are generator/package/reporting rules only. Do not add them to the Functional Specification or App Plan, and do not require business users to specify control-property details. Before signing readiness, signing, install/import, upgrade, or final success reporting, run `scripts/validate-dashboard-generation-hard-gates.mjs` for generated dashboard packages, include `--plan <yeeflow-app-plan.md>` when an approved plan exists, and include the final/install/upgrade report when available. Canonical runtime URLs must use decoded package `$.ListSet.ListID`; install/import API returned IDs are operation evidence unless separately proven by product/API docs.
 
-Dashboard Golden Reference conformance is also a generator/package hard gate. Run `scripts/validate-dashboard-golden-reference-conformance.mjs` on the selection, blueprint, and generated package whenever dashboard pages are generated. The gate verifies the selected golden reference, sub-region provenance, non-empty business regions, app-specific field mappings, and rejection of copied Marketing Event fields in unrelated apps.
+Dashboard Golden Reference conformance is also a generator/package hard gate. Run `scripts/validate-dashboard-golden-reference-conformance.mjs` on the registry/reference quality, selection, blueprint, generated package, and runtime filter proof whenever dashboard pages are generated and filter linkage is claimed. The gate verifies the selected golden reference, export-shape parity, sub-region provenance, non-empty business regions, app-specific field mappings, static filter contracts, runtime filter proof separation, `dynamic-user` user-field rendering, and rejection of copied Marketing Event fields in unrelated apps.
 
 Do not sign, install, import, upgrade, or run live Yeeflow writes unless explicitly authorized.
 

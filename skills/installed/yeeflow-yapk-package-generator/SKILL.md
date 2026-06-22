@@ -31,7 +31,7 @@ Data-list custom form root content-area padding uses the same hard gate: every g
 
 Dashboard record-list sections that require the grid-table visual/runtime pattern must use grid-table style `collection` controls, not dashboard `data-list` controls, unless the user explicitly requests Data table. Pair each Collection with a header `flex_grid` in one wrapper container, set both `attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`, and stop before signing, install, upgrade-check, or handoff if `scripts/validate-dashboard-grid-table-collections.mjs` fails. Planned row-click details require `attrs.data.link`, `attrs.data.opentype = "slide"`, `attrs.data.modalsize = 2`, and a concrete Type `1` custom detail layout with schema-compatible `LayoutView`; hide duplicate dashboard headers with `attrs.hideHeaderAll = true`, use visible title typography such as `attrs.heads.ty = [null, "h5-medium"]`, include Text style metadata, and never let helper metadata leak into encoded package objects. Signing/install acceptance does not prove dashboard runtime/designer visual fidelity.
 
-Dashboard resource generation must consume a Dashboard Golden Reference Selection artifact before blueprint/resource output. Default operational dashboards use `event_portfolio_dashboard_golden_reference` and preserve machine-checkable provenance for `event_portfolio_header_band`, `event_portfolio_filter_group`, `kpi_cards_wrapper`, `event_portfolio_pipeline_section`, and `Event Pipeline Grid-Table`; generated resources must map app-specific lists/fields/metrics/actions instead of copying Marketing Event field names. Stop before signing, install, upgrade-check, or handoff if `scripts/validate-dashboard-golden-reference-conformance.mjs` fails.
+Dashboard resource generation must consume a Dashboard Golden Reference Selection artifact before blueprint/resource output. Default operational dashboards use `event_portfolio_dashboard_golden_reference` and must clone/normalize its export-shaped `_ak_c` / `_ak_c_opt` tree before domain mapping. Preserve machine-checkable provenance and export-shape parity for `event_portfolio_header_band`, `event_portfolio_filter_group`, `kpi_cards_wrapper`, `event_portfolio_kpi_row`, `event_portfolio_pipeline_section`, `Event Pipeline Grid-Table`, `event_portfolio_campaign_readiness_section`, and `campaign_readiness_grid_table_container`; generated resources must map app-specific lists/fields/metrics/actions instead of copying Marketing Event field names. Only the registered grid-table internal flex grids may remain grid/flex_grid at layout level. Static filter contract validation does not prove runtime linkage; browser proof must show selected filter values changing table/KPI data before reporting runtime filter success. Stop before signing, install, upgrade-check, or handoff if `scripts/validate-dashboard-golden-reference-conformance.mjs` fails.
 
 High-quality dashboard/UI upgrades must also satisfy `docs/standards/ui-summary-kpi-runtime-hard-gates.md`: page-by-page UI implementation contract, export-proven style shapes, Summary/KPI designer-shaped metadata, visible KPI runtime evidence or explicitly labeled fallback, runtime screenshot evidence before UI-quality claims, and Collection grid-table quality when planned. Dynamic visible KPI binding is proven only for the exact UUID Summary v1.0.1 shape with before/after mutation proof and refreshed/recalculated runtime evidence; other shapes remain unproven unless focused runtime proof exists.
 
@@ -277,7 +277,7 @@ For `Projects Center_1-v1..0.yapk`, the safe result is:
 - requested data-list add: completed locally
 - finalized standard Brotli re-encode: completed
 - `setsign`/`verifysign`: passed
-- generated package: `/Users/Renger/Downloads/Projects Center_1-v1.1-yapk-runtime-test.yapk`
+- generated package: `<local manual-test package path>`
 - runtime upgrade/list/form materialization: user-proven
 - record creation: failed with `Add failed`
 
@@ -287,7 +287,7 @@ The v1.2 add-fix package adjusted save-path-sensitive list metadata:
 - date field `FieldName`: `Datetime4`
 - date field `FieldType`: `Datetime`
 - layout references updated to `Datetime4`
-- generated package: `/Users/Renger/Downloads/Projects Center_1-v1.2-yapk-runtime-add-fix.yapk`
+- generated package: `<local manual-test package path>`
 - `setsign`/`verifysign`: passed
 - runtime add-item retest: pending
 
@@ -300,7 +300,7 @@ User runtime result for v1.2:
 The v1.3 table-code-only package keeps the upgrade-valid date field shape and changes only:
 
 - generated list `TableCode`: `flowcraft`
-- generated package: `/Users/Renger/Downloads/Projects Center_1-v1.3-yapk-runtime-tablecode-fix.yapk`
+- generated package: `<local manual-test package path>`
 - `setsign`/`verifysign`: passed
 - inspector/validator: passed
 - runtime result: upgrade succeeded, but add-item save still failed
@@ -308,7 +308,7 @@ The v1.3 table-code-only package keeps the upgrade-valid date field shape and ch
 
 The v1.4 text-only isolation package removes the `Test Date` field to test whether the save failure is caused by Datetime control materialization:
 
-- generated package: `/Users/Renger/Downloads/Projects Center_1-v1.4-yapk-runtime-text-only.yapk`
+- generated package: `<local manual-test package path>`
 - fields: `Name`, `Test Status`, `Test Notes`
 - `setsign`/`verifysign`: passed
 - inspector/validator: passed

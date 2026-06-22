@@ -88,6 +88,7 @@ const requiredDocs = [
   "docs/yapk-upgrade-id-stability-hard-gate.md",
   "docs/training/yapk-upgrade-scope-lineage-version-management-gates-training-report.md",
   "docs/training/dashboard-golden-reference-enforcement-training-report.md",
+  "docs/training/dashboard-golden-reference-export-shape-parity-training-report.md",
   "docs/reference/dashboard-golden-references.json",
   "docs/reference/yeeflow-control-configurations.normalized.json",
   "docs/reference/yeeflow-control-property-extensions.json",
