@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.6`
+`0.8.7`
+
+Version `0.8.7` releases Dashboard Page Layouts v1.1 template adoption from PR #151. Dashboard Page Layouts v1.1 is registered as the required page shell for newly generated Dashboard pages. The standard dashboard page structure now covers page background, `Main > Content`, page title/header, content cards, 1/2/3-column sections, 60/40 section, and KPI wrapper. The v1.1 shell works together with Event Portfolio component/region golden references, while Full-width structural containers, section title/content areas, real-action-only `Operations` containers, canonical runtime route proof, and dashboard-only upgrade scope preservation are enforced.
 
 Version `0.8.6` releases Dashboard Golden Reference export-shape parity from PR #149. It updates the Event Portfolio Dashboard Golden Reference source, enforces strict `_ak_c` / `_ak_c_opt` export-shape parity, adds golden-reference quality lint, requires Full-width sections and KPI cards, checks root Content zero padding, enforces high-level Container layout with approved table-internal `flex_grid` exceptions, strengthens filter label/placeholder and field/display/value/apply contract gates, adds static filter consumer linkage checks, adds runtime filter before/after data-change proof, enforces `dynamic-user` rendering for user/identity fields, and rejects provenance-only simplified dashboard shells.
 
