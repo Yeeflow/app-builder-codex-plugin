@@ -52,7 +52,7 @@ Focused cases:
 
 The 0.8.8 candidate package from the evidence run:
 
-`/Users/rengerhu/Documents/Plugin Test2/office-asset-loan-management-20260622-0.8.8-dashboard-regeneration-plugin-only-20260622-191904/dist/dashboard-v1.1-candidate.yapk`
+`<evidence-run>/dist/dashboard-v1.1-candidate.yapk`
 
 now passes:
 
