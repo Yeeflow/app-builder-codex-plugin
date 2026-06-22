@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.5`
+`0.8.6`
+
+Version `0.8.6` releases Dashboard Golden Reference export-shape parity from PR #149. It updates the Event Portfolio Dashboard Golden Reference source, enforces strict `_ak_c` / `_ak_c_opt` export-shape parity, adds golden-reference quality lint, requires Full-width sections and KPI cards, checks root Content zero padding, enforces high-level Container layout with approved table-internal `flex_grid` exceptions, strengthens filter label/placeholder and field/display/value/apply contract gates, adds static filter consumer linkage checks, adds runtime filter before/after data-change proof, enforces `dynamic-user` rendering for user/identity fields, and rejects provenance-only simplified dashboard shells.
 
 Version `0.8.5` releases Dashboard Golden Reference enforcement from PR #147. It registers the Event Portfolio dashboard as the default golden reference with reusable header, filter, KPI, content, and grid-table region references; adds dashboard golden-reference conformance validation; registers the conformance gate in dashboard hard gates and YAPK preflight; enforces generated dashboard provenance; blocks copying Event-specific fields into unrelated apps; and documents the dashboard golden-reference selection and consumption lifecycle.
 
