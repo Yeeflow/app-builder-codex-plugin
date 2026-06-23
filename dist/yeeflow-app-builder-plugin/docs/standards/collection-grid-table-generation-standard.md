@@ -138,6 +138,8 @@ Generated-final validation must fail:
 
 Use multiselect only when requested and when actions can be generated with this export-proven shape.
 
+Projects Center / Project Tasks is the export-proven source reference for the multiselect grid-table shape; it is not a business-domain restriction. The same template may be selected for any Dashboard dataset that needs dense table scanning plus multi-row selection and batch operations.
+
 Required:
 
 - leading checkbox column

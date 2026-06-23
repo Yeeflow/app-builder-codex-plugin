@@ -754,7 +754,7 @@ Validation checks:
 
 Proof boundaries:
 
-- Generate only when the Projects Center-style multiselect table is requested.
+- Generate when a Dashboard dataset needs dense table scanning, multi-row selection, selected count/state, and batch operations. Projects Center / Project Tasks is the export-proven source reference, not a business-domain restriction.
 - Do not infer card-style absolute top-right selection behavior from this table pattern.
 
 ## collection_control_grid_table_with_search
