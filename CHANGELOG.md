@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.13
+
+- Release Dashboard Collection template slot decision gates from PR #163.
+- Require App Plan Dashboard dataset regions that use Collection to select exactly one approved presentation reference using registry guidance: source resource type, when-to-use, when-not-to-use, and required business signals.
+- Treat all approved Dashboard Collection templates as component-level dataset regions inside Dashboard Page Layouts v1.1, normally under `section_content_area`, not as page shells.
+- Fail generated Dashboard Collections placed directly under root `Content`, copied source shells, page headers, or structural wrappers.
+- Continue blocking invented/simplified Collection templates and source-reference leakage from Event Portfolio, Projects Center, Project Tasks, or other proof apps.
+- Register the new training report in YAPK cache artifact checks.
+
 ## 0.8.12
 
 - Release Dashboard root binding, v1.1 Content padding, and runtime proof gates from PR #161.
