@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.17`
+`0.8.18`
+
+Version `0.8.18` releases Dashboard filter module synthesis gates from PR #173. Generated Dashboard filters must be copied from approved Dashboard Page Layouts v1.1 / Event Portfolio filter modules, placed only inside approved business-content slots such as `section_content_area`, mapped to app-specific list/field/display/value metadata, and linked to downstream Collection/KPI consumers. Ad hoc filter bars, copied filter groups directly under root `Content`, invented filter layout modules, missing filter field/style metadata, and obsolete forced-zero v1.1 `Content` padding are generated-final blockers.
 
 Version `0.8.17` releases validator semantic tolerance and Dashboard dataset line-scope fixes from PR #171. Dashboard dataset presentation validation now reads only canonical dataset/reference table rows and ignores prose, Form Report explanations, identity tables, and validator command lists. App Plan resource-order validation accepts equivalent business wording for required intent, such as Submission fields, Task page fields, independent approval-based Form reports, and no Sub List actions needed, without weakening schema or ordering gates.
 

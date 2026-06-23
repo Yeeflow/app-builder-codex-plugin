@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.17`
+- Version: `0.8.18`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.17` releases validator semantic tolerance and Dashboard dataset line-scope fixes from PR #171: Dashboard dataset presentation validation now reads only canonical dataset/reference table rows instead of prose or validator commands, and App Plan resource-order validation accepts equivalent business wording for required planning intent without weakening schema or ordering gates.
+Current release `0.8.18` releases Dashboard filter module synthesis gates from PR #173: generated Dashboard filters must copy approved Dashboard Page Layouts v1.1 / Event Portfolio filter modules into approved business-content slots, preserve app-specific field/style/consumer bindings, reject ad hoc filter bars or invented filter modules, and preserve canonical v1.1 Content padding.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.17
+Version: 0.8.18
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.17
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.18
 ```
 
 ## What Is Included

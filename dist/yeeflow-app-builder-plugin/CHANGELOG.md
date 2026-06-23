@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.18
+
+- Release Dashboard filter module synthesis gates from PR #173.
+- Require generated Dashboard filters to be copied from approved Dashboard Page Layouts v1.1 / Event Portfolio filter modules and placed only inside approved business-content slots such as `section_content_area`.
+- Preserve app-specific `attrs.data.field`, `display_f`, `value_f`, labels, placeholders, typography, placeholder color, supported border radius, and Collection/KPI consumer linkage before generated-final preflight can pass.
+- Add focused regressions for missing filter field/style metadata, copied filter groups placed directly under root `Content`, invented ad hoc filter modules, and obsolete forced-zero v1.1 `Content` padding.
+
 ## 0.8.17
 
 - Release validator semantic tolerance and Dashboard dataset line-scope fixes from PR #171.
