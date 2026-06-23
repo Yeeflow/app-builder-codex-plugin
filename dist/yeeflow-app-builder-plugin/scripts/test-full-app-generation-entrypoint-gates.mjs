@@ -42,6 +42,24 @@ try {
   });
   expectCode("full-app entrypoint requires generated-final yapk output contract", ["--registry", missingOutput, "--root", ROOT], "FULL_APP_GENERATOR_ENTRYPOINT_OUTPUT_CONTRACT_INVALID");
 
+  const missingCallable = mutateRegistry("missing-callable.json", (registry) => {
+    delete registry.entrypoints[0].callable;
+    delete registry.entrypoints[0].callableAs;
+    delete registry.entrypoints[0].invocationContract;
+  });
+  expectCode("full-app entrypoint requires callable Codex skill contract", ["--registry", missingCallable, "--root", ROOT], "FULL_APP_GENERATOR_CALLABLE_CONTRACT_MISSING");
+
+  const weakContinuation = mutateRegistry("weak-continuation.json", (registry) => {
+    registry.entrypoints[0].invocationContract.mustProceedAfterPlanningPass = false;
+    registry.entrypoints[0].invocationContract.planningPassContinuation = "Stop after planning if no CLI exists.";
+  });
+  expectCode("full-app entrypoint cannot stop after planning solely because no standalone CLI exists", ["--registry", weakContinuation, "--root", ROOT], "FULL_APP_GENERATOR_PLANNING_CONTINUATION_INVALID");
+
+  const missingCallableInputs = mutateRegistry("missing-callable-inputs.json", (registry) => {
+    registry.entrypoints[0].invocationContract.requiredInputs = ["yeeflow-app-plan.md"];
+  });
+  expectCode("callable full-app contract repeats Markdown inputs", ["--registry", missingCallableInputs, "--root", ROOT], "FULL_APP_GENERATOR_CALLABLE_INPUTS_INVALID");
+
   console.log(JSON.stringify({ status: "pass", cases: results }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });

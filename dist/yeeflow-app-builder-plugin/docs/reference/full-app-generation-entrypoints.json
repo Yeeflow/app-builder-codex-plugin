@@ -8,6 +8,24 @@
       "path": "skills/installed/yeeflow-application-builder/SKILL.md",
       "bundledPath": "skills/yeeflow-application-builder/SKILL.md",
       "displayName": "Yeeflow Application Builder",
+      "callable": true,
+      "callableAs": "codex-skill-entrypoint",
+      "invocationContract": {
+        "executionMode": "codex-skill-callable",
+        "entrySkill": "yeeflow-application-builder",
+        "requiredInputs": [
+          "functional-specification.md",
+          "yeeflow-app-plan.md"
+        ],
+        "mustProceedAfterPlanningPass": true,
+        "planningPassContinuation": "When planning gates pass and business defaults are user-default-approved-for-generation, continue with this skill entrypoint to generate the generated-final .yapk. Do not stop solely because no standalone CLI exists.",
+        "hardStops": [
+          "business defaults are not user-default-approved-for-generation",
+          "OAuth or workspace discovery is required and unavailable for API-issued IDs",
+          "required generated-final validators fail",
+          "user explicitly requested planning-only or no package generation"
+        ]
+      },
       "inputs": [
         "functional-specification.md",
         "yeeflow-app-plan.md"
@@ -47,6 +65,23 @@
       "path": "skills/installed/yeeflow-application-generator/SKILL.md",
       "bundledPath": "skills/yeeflow-application-generator/SKILL.md",
       "displayName": "Yeeflow Application Generator",
+      "callable": true,
+      "callableAs": "codex-skill-entrypoint",
+      "invocationContract": {
+        "executionMode": "codex-skill-callable",
+        "entrySkill": "yeeflow-application-generator",
+        "requiredInputs": [
+          "functional-specification.md",
+          "yeeflow-app-plan.md"
+        ],
+        "mustProceedAfterPlanningPass": true,
+        "planningPassContinuation": "Use this supporting skill under the top-level builder flow to continue from approved planning contracts into generated-final package creation. Do not stop solely because no standalone CLI exists.",
+        "hardStops": [
+          "business defaults are not user-default-approved-for-generation",
+          "required generated-final validators fail",
+          "user explicitly requested planning-only or no package generation"
+        ]
+      },
       "inputs": [
         "functional-specification.md",
         "yeeflow-app-plan.md"

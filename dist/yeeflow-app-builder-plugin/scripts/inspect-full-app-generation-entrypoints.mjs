@@ -79,10 +79,48 @@ function validateEntrypoint(entrypoint, root, findings) {
   if (!Array.isArray(entrypoint.requiredGeneratedFinalGates) || entrypoint.requiredGeneratedFinalGates.length < 2) {
     findings.push(error("FULL_APP_GENERATOR_FINAL_GATES_MISSING", "Full-app generator entrypoint must declare required generated-final gates.", { id }));
   }
+  validateCallableContract(entrypoint, id, kind, findings);
   if (candidatePaths.some((candidate) => /runtime-proof|delivery-workflow|package-api-automation|vendor-onboarding/i.test(candidate)) && kind.includes("full-app")) {
     findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_MISCLASSIFIED_HELPER", "Runtime-proof, delivery, package API, and sample-specific helpers must not be classified as generic full-app generators.", { id, path: entryPath, candidatePaths, kind }));
   }
   return { id, kind, path: entryPath, bundledPath: bundledPath || null, resolvedPath: resolvedPath || null, defaultPackageType: entrypoint.defaultPackageType || null };
+}
+
+function validateCallableContract(entrypoint, id, kind, findings) {
+  if (!kind.includes("full-app")) return;
+  const callable = entrypoint.callable === true;
+  const callableAs = String(entrypoint.callableAs || "").trim();
+  const contract = entrypoint.invocationContract;
+  if (!callable || callableAs !== "codex-skill-entrypoint" || !contract || typeof contract !== "object" || Array.isArray(contract)) {
+    findings.push(error("FULL_APP_GENERATOR_CALLABLE_CONTRACT_MISSING", "Full-app generator entrypoints must be explicitly callable as Codex skill entrypoints, not only descriptive registry records.", {
+      id,
+      callable: entrypoint.callable,
+      callableAs: entrypoint.callableAs || null,
+    }));
+    return;
+  }
+
+  const executionMode = String(contract.executionMode || "").trim();
+  const entrySkill = String(contract.entrySkill || "").trim();
+  const requiredInputs = Array.isArray(contract.requiredInputs) ? contract.requiredInputs : [];
+  const continuation = String(contract.planningPassContinuation || "").trim();
+  if (executionMode !== "codex-skill-callable" || !entrySkill) {
+    findings.push(error("FULL_APP_GENERATOR_CALLABLE_CONTRACT_INVALID", "Callable full-app generation entrypoints must declare executionMode codex-skill-callable and an entrySkill.", { id, executionMode, entrySkill }));
+  }
+  if (!requiredInputs.includes("functional-specification.md") || !requiredInputs.includes("yeeflow-app-plan.md")) {
+    findings.push(error("FULL_APP_GENERATOR_CALLABLE_INPUTS_INVALID", "Callable full-app generation contract must repeat the Functional Specification and App Plan Markdown inputs.", { id, requiredInputs }));
+  }
+  if (contract.mustProceedAfterPlanningPass !== true || !/generated-final/i.test(continuation) || !/do not stop/i.test(continuation) || !/standalone CLI/i.test(continuation)) {
+    findings.push(error("FULL_APP_GENERATOR_PLANNING_CONTINUATION_INVALID", "Callable full-app generation contract must require continuation after planning pass and forbid stopping solely because no standalone CLI exists.", {
+      id,
+      mustProceedAfterPlanningPass: contract.mustProceedAfterPlanningPass || null,
+      planningPassContinuation: continuation || null,
+    }));
+  }
+  const hardStops = Array.isArray(contract.hardStops) ? contract.hardStops.map((item) => String(item || "")) : [];
+  if (!hardStops.some((item) => /business defaults/i.test(item)) || !hardStops.some((item) => /validators fail/i.test(item) || /validators/i.test(item))) {
+    findings.push(error("FULL_APP_GENERATOR_HARD_STOPS_INCOMPLETE", "Callable full-app generation contract must name real hard stops such as unapproved business defaults and generated-final validator failures.", { id, hardStops }));
+  }
 }
 
 function validateNonFullAppEntrypoints(entries, root, findings) {
