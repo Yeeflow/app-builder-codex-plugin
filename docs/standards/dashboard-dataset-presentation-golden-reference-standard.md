@@ -55,6 +55,28 @@ Validator scope rule: this gate parses canonical Dashboard record-display / data
 - If more than one reference seems possible, the App Plan must pick exactly one for that dataset region and state why the other options were not chosen at business level. Do not defer the choice to resource generation.
 - Template IDs must be parsed as exact tokens. `collection_control_grid_table_with_multiselect` and `collection_control_grid_table_with_search` are distinct approved templates and must not be counted as also selecting `collection_control_grid_table`.
 
+## Card Multiselect Toolbar Template
+
+`collection_control_card_with_multiselect_toolbar` is backed by the full export-shaped template artifact at `docs/reference/collection-control-card-with-multiselect-toolbar.template.json`. Generation must copy `card_with_multiselect_toolbar_wrapper` and all descendants as the component root. It is not enough to create a generic card Collection, add checkbox icons, or add a separate toolbar.
+
+Only these regions are editable:
+
+- `card_col_title_wrapper`
+- `op_normal`
+- `op_multipleselected`
+- `card_col_item`
+- `card_col_item_operations`
+
+Everything else is locked by default. `card_col_item_multi_select` must remain unchanged, including its checked/unchecked icon controls and selection/action wiring. The Collection root `attrs.actions[]`, selected item/count temp variables, page-level `actions`, `formAction`, `filterVars`, and filter dependencies are part of the template contract and must be copied or intentionally remapped through generator-safe logic.
+
+Recommended editable behavior:
+
+- `op_normal` should retain the Search filter and Add item button unless a validated business rule removes one of them. Search placeholder text and Add button text may be changed.
+- `op_multipleselected` should retain a Delete selected items action. `btn_set_items` is optional, and additional batch buttons may be added only when each button has a valid action binding.
+- `card_col_item` maps item content to fields from the selected source resource. User fields use `dynamic-user`; image fields use `dynamic-image`; file or attachment fields use `dynamic-file`; all other fields use `dynamic-field`.
+- `card_col_item` should include one subject-style Dynamic field based on the source `Survey Program name` control and preserve its Large/Semi bold visual role.
+- `card_col_item_operations` is optional and may contain per-item actions such as Edit or Delete, but every action control must bind to a valid action.
+
 ## Generation Rules
 
 - Dashboard Page Layouts v1.1 is the page shell. All approved Dashboard Collection presentation references are component-level dataset regions that must be placed inside approved v1.1 business-content slots, normally `section_content_area`.
@@ -67,6 +89,7 @@ Validator scope rule: this gate parses canonical Dashboard record-display / data
 - Do not create generic repeated cards, fake grid tables, simplified Data table lookalikes, or ad hoc Collection item templates.
 - Grid-table references must preserve header `flex_grid`, Collection body, repeated item `flex_grid`, matching columns, mobile item-grid behavior, and valid source list bindings.
 - Multiselect references must preserve selected state, selected count, checkbox icons, bulk toolbar/actions, `ListDataID`, and `__ctx_coll` current-item context.
+- `collection_control_card_with_multiselect_toolbar` must preserve the full `card_with_multiselect_toolbar_wrapper` subtree, all non-editable style/layout/typography properties, page-level dependencies, Collection root actions, and the locked `card_col_item_multi_select` control.
 - Search references must preserve `search-filter` or equivalent search control plus Collection `attrs.data.fulltext[]` linkage.
 - Event Pipeline Grid-Table must preserve the reference subtree inside Dashboard Page Layouts v1.1 slots and replace Marketing Event fields with app-specific fields. The same slot-only/component-only rule applies to every approved Collection presentation reference.
 

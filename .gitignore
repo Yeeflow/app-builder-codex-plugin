@@ -104,6 +104,7 @@ yeeflow-data-list-generator/
 !yeeflow-expression-function-knowledge-base.normalized.json
 !yeeflow-expression-operators.normalized.json
 !dashboard-dataset-presentation-golden-references.json
+!collection-control-card-with-multiselect-toolbar.template.json
 !yeeflow-expression-first-generation-test-spec.json
 !docs/studies/normalized/*.normalized.json
 !docs/studies/normalized/**/*.normalized.json

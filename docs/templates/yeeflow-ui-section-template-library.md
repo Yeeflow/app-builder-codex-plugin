@@ -610,6 +610,12 @@ Purpose: extend item-action cards with bulk selection state, selected count, and
 
 Pattern scope: `card_style_only`.
 
+Full template artifact:
+
+- `docs/reference/collection-control-card-with-multiselect-toolbar.template.json`
+- Source export: Company Overview v1.3, Dashboard page `Collection card multiple select`, root component `card_with_multiselect_toolbar_wrapper`.
+- Generation must copy the root wrapper and all descendants, not reconstruct a simplified card Collection.
+
 Applicable formats:
 
 - YAP: proven for dashboard, approval form, and data-list form.
@@ -628,6 +634,13 @@ Not for:
 
 Required multiselect structure:
 
+- `card_with_multiselect_toolbar_wrapper` root container and descendants
+- `card_col_title_wrapper`
+- `op_normal`
+- `op_multipleselected`
+- `card_col_item`
+- optional `card_col_item_operations`
+- locked `card_col_item_multi_select`
 - selected ids temp variable
 - selected count temp variable
 - selected item count text above the Collection
@@ -644,8 +657,37 @@ Absolute positioning:
 - numeric `horoffset` and `veroffset`
 - optional z-index must be numeric if present
 
+Editable regions:
+
+- `card_col_title_wrapper`
+- `op_normal`
+- `op_multipleselected`
+- `card_col_item`
+- `card_col_item_operations`
+
+Locked regions:
+
+- `card_with_multiselect_toolbar_wrapper` root structure outside editable descendants
+- `card_col_item_multi_select`
+- Collection root `attrs.actions[]`
+- page-level `filterVars`, `tempVars`, `actions`, `filter`, and `formAction` dependencies
+
+Dynamic field mapping:
+
+- user fields use Dynamic user controls
+- image fields use Dynamic image controls
+- file or attachment fields use Dynamic file controls
+- all other fields use Dynamic field controls
+- include one subject-style Dynamic field based on the source `Survey Program name` control
+
 Validation checks:
 
+- `DASH_DATASET_CARD_MULTISELECT_WRAPPER_MISSING` absent
+- `DASH_DATASET_CARD_MULTISELECT_SLOT_MISSING` absent
+- `DASH_DATASET_CARD_MULTISELECT_CONTROL_MUTATED` absent
+- `DASH_DATASET_CARD_MULTISELECT_COLLECTION_ACTIONS_MISSING` absent
+- `DASH_DATASET_CARD_MULTISELECT_BUTTON_ACTION_MISSING` absent
+- `DASH_DATASET_CARD_MULTISELECT_SELECTED_VARIABLE_MISSING` absent
 - `COLLECTION_MULTISELECT_STATE_MISSING` absent
 - `COLLECTION_MULTISELECT_ACTION_INVALID` absent
 - `COLLECTION_MULTISELECT_TOOLBAR_MISSING` absent

@@ -16,7 +16,11 @@
       "displayName": "Responsive Card Collection",
       "sourceReference": "Collection control card-style responsive grid standard and template library",
       "category": "collection-card",
-      "suitableSourceResourceTypes": ["Data List", "Form Report", "Document Library metadata list"],
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Form Report",
+        "Document Library metadata list"
+      ],
       "whenToUse": [
         "Users need to browse business records as cards.",
         "The dataset has a small to medium field set with visual status, owner, date, or summary metadata.",
@@ -27,17 +31,31 @@
         "Bulk row operations are required.",
         "The requirement asks for table headers, column alignment, or grid-table scanning."
       ],
-      "requiredBusinessSignals": ["card browsing", "record cards", "asset cards", "request cards", "portfolio cards"],
+      "requiredBusinessSignals": [
+        "card browsing",
+        "record cards",
+        "asset cards",
+        "request cards",
+        "portfolio cards"
+      ],
       "requiredAppPlanDeclaration": "Select collection_control_responsive_card_grid for the Dashboard dataset region and explain the card-browsing business reason.",
-      "generationProof": ["Collection root", "responsive card layout", "item template with current item bindings", "legal data source"],
+      "generationProof": [
+        "Collection root",
+        "responsive card layout",
+        "item template with current item bindings",
+        "legal data source"
+      ],
       "proofBoundary": "Export-proven card pattern only; not proof for grid-table, row-list, grouped, nested, gallery, timeline, or Kanban layouts."
     },
     {
       "templateId": "collection_control_card_with_multiselect_toolbar",
       "displayName": "Responsive Card Collection With Multiselect Toolbar",
-      "sourceReference": "Collection card multiselect template and Collection/Kanban action runtime proof",
+      "sourceReference": "Company Overview v1.3 / Collection card multiple select / card_with_multiselect_toolbar_wrapper",
       "category": "collection-card-multiselect",
-      "suitableSourceResourceTypes": ["Data List", "Form Report"],
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Form Report"
+      ],
       "whenToUse": [
         "Users need card browsing plus multi-record selection.",
         "The business action is batch update, batch close, batch archive, batch approve, or batch delete on card records."
@@ -47,17 +65,52 @@
         "Bulk operations cannot be expressed with the export-proven Collection action shape.",
         "Only a read-only dashboard card list is needed."
       ],
-      "requiredBusinessSignals": ["multi-select cards", "bulk card action", "selected count", "batch operation"],
+      "requiredBusinessSignals": [
+        "multi-select cards",
+        "bulk card action",
+        "selected count",
+        "batch operation"
+      ],
       "requiredAppPlanDeclaration": "Select collection_control_card_with_multiselect_toolbar and identify the batch operation business need.",
-      "generationProof": ["selected item state", "selected count", "bulk toolbar", "Collection actions", "current item context"],
-      "proofBoundary": "Do not infer grid-table checkbox-column behavior from this card pattern."
+      "generationProof": [
+        "selected item state",
+        "selected count",
+        "bulk toolbar",
+        "Collection actions",
+        "current item context"
+      ],
+      "proofBoundary": "Do not infer grid-table checkbox-column behavior from this card pattern.",
+      "fullTemplateReference": "docs/reference/collection-control-card-with-multiselect-toolbar.template.json",
+      "exportShapeContract": [
+        "copy card_with_multiselect_toolbar_wrapper and all descendants",
+        "preserve card_col_item_multi_select unchanged",
+        "preserve Collection root attrs.actions and multiselect action settings",
+        "include page-level filterVars, tempVars, actions, filter, and formAction dependencies",
+        "allow edits only in card_col_title_wrapper, op_normal, op_multipleselected, card_col_item, and card_col_item_operations"
+      ],
+      "editableRegions": [
+        "card_col_title_wrapper",
+        "op_normal",
+        "op_multipleselected",
+        "card_col_item",
+        "card_col_item_operations"
+      ],
+      "lockedRegions": [
+        "card_with_multiselect_toolbar_wrapper",
+        "card_col_item_multi_select",
+        "card_col_body"
+      ]
     },
     {
       "templateId": "collection_control_grid_table",
       "displayName": "Collection Grid-Table",
       "sourceReference": "Projects Center dashboard/page Collection grid-table export study",
       "category": "collection-grid-table",
-      "suitableSourceResourceTypes": ["Data List", "Form Report", "Document Library metadata list"],
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Form Report",
+        "Document Library metadata list"
+      ],
       "whenToUse": [
         "Users need dense row/column scanning.",
         "The dataset has several comparable fields such as status, owner, due date, priority, progress, or category.",
@@ -67,9 +120,23 @@
         "Only simple tabular data is required and Data table is explicitly requested.",
         "The data should be shown as cards, Kanban, timeline, grouped, nested, or gallery."
       ],
-      "requiredBusinessSignals": ["grid-table", "work queue", "task list", "record list", "dense table", "operational table"],
+      "requiredBusinessSignals": [
+        "grid-table",
+        "work queue",
+        "task list",
+        "record list",
+        "dense table",
+        "operational table"
+      ],
       "requiredAppPlanDeclaration": "Select collection_control_grid_table for the Dashboard dataset region and explain the dense scanning need.",
-      "generationProof": ["header flex_grid", "Collection body", "item flex_grid", "matching columns", "responsive mobile item grid", "valid source list"],
+      "generationProof": [
+        "header flex_grid",
+        "Collection body",
+        "item flex_grid",
+        "matching columns",
+        "responsive mobile item grid",
+        "valid source list"
+      ],
       "proofBoundary": "Export-proven dashboard/page grid-table pattern only."
     },
     {
@@ -77,7 +144,11 @@
       "displayName": "Collection Grid-Table With Multiselect",
       "sourceReference": "Projects Center / Project Tasks export-proven source reference",
       "category": "collection-grid-table-multiselect",
-      "suitableSourceResourceTypes": ["Data List", "Form Report", "Document Library metadata list"],
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Form Report",
+        "Document Library metadata list"
+      ],
       "whenToUse": [
         "Users need dense table scanning plus multi-row selection.",
         "The business process needs batch assign, batch close, batch approve, batch status update, batch reminder, batch archive, batch export, or batch delete."
@@ -87,9 +158,23 @@
         "Users need card selection rather than table selection.",
         "Batch operations cannot be represented with export-proven Collection actions."
       ],
-      "requiredBusinessSignals": ["multi-row selection", "bulk action", "batch operation", "selected count", "checkbox column"],
+      "requiredBusinessSignals": [
+        "multi-row selection",
+        "bulk action",
+        "batch operation",
+        "selected count",
+        "checkbox column"
+      ],
       "requiredAppPlanDeclaration": "Select collection_control_grid_table_with_multiselect and name the concrete batch operation. Projects Center / Project Tasks is the source proof only, not a business-domain restriction.",
-      "generationProof": ["leading 46px checkbox column", "checked and unchecked icon controls", "selected ids/count temp variables", "bulk toolbar", "Collection root attrs.actions[] with type coll", "ListDataID", "__ctx_coll"],
+      "generationProof": [
+        "leading 46px checkbox column",
+        "checked and unchecked icon controls",
+        "selected ids/count temp variables",
+        "bulk toolbar",
+        "Collection root attrs.actions[] with type coll",
+        "ListDataID",
+        "__ctx_coll"
+      ],
       "proofBoundary": "May be used for any matching Dashboard dataset, not only Project Tasks; runtime execution still needs focused proof."
     },
     {
@@ -97,7 +182,11 @@
       "displayName": "Collection Grid-Table With Search",
       "sourceReference": "Projects Center grid-table search/fulltext export study",
       "category": "collection-grid-table-search",
-      "suitableSourceResourceTypes": ["Data List", "Form Report", "Document Library metadata list"],
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Form Report",
+        "Document Library metadata list"
+      ],
       "whenToUse": [
         "Users need dense row/column scanning and free-text search.",
         "The dashboard region is a document library, request history, audit list, or operational table with many records."
@@ -107,9 +196,20 @@
         "Only fixed dropdown filters are required.",
         "The region should be a card list."
       ],
-      "requiredBusinessSignals": ["search", "fulltext", "quick find", "document lookup", "history search"],
+      "requiredBusinessSignals": [
+        "search",
+        "fulltext",
+        "quick find",
+        "document lookup",
+        "history search"
+      ],
       "requiredAppPlanDeclaration": "Select collection_control_grid_table_with_search and name the fields/search purpose.",
-      "generationProof": ["grid-table structure", "search-filter", "Collection attrs.data.fulltext[]", "valid searchable fields"],
+      "generationProof": [
+        "grid-table structure",
+        "search-filter",
+        "Collection attrs.data.fulltext[]",
+        "valid searchable fields"
+      ],
       "proofBoundary": "Search linkage is structural proof; runtime before/after search proof remains separate."
     },
     {
@@ -117,7 +217,11 @@
       "displayName": "Event Portfolio Operational Grid-Table",
       "sourceReference": "Marketing Event Management Event Portfolio Dashboard Golden Reference",
       "category": "dashboard-golden-grid-table",
-      "suitableSourceResourceTypes": ["Data List", "Form Report", "Document Library metadata list"],
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Form Report",
+        "Document Library metadata list"
+      ],
       "whenToUse": [
         "The Dashboard needs a high-fidelity primary operations list.",
         "Rows need rich status badge, progress, owner/person, health, budget/date, or similar visual cells.",
@@ -128,9 +232,21 @@
         "The business asks for cards or bulk checkbox selection.",
         "The region does not need the richer Event Portfolio visual treatment."
       ],
-      "requiredBusinessSignals": ["primary operations list", "pipeline", "portfolio", "work queue", "health/status/progress table"],
+      "requiredBusinessSignals": [
+        "primary operations list",
+        "pipeline",
+        "portfolio",
+        "work queue",
+        "health/status/progress table"
+      ],
       "requiredAppPlanDeclaration": "Select Event Pipeline Grid-Table and map business fields to the reference columns without copying Marketing Event fields.",
-      "generationProof": ["Event Pipeline Grid-Table subtree", "Collection region", "header/item grid internals", "domain field mapping", "no Marketing Event leakage"],
+      "generationProof": [
+        "Event Pipeline Grid-Table subtree",
+        "Collection region",
+        "header/item grid internals",
+        "domain field mapping",
+        "no Marketing Event leakage"
+      ],
       "proofBoundary": "Use as component region inside Dashboard Page Layouts v1.1 slots; do not copy the Event Portfolio root shell."
     }
   ]

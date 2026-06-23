@@ -7,6 +7,7 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk } from "./lib/yapk-d
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-dataset-presentation-golden-references.json");
+const CARD_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json");
 
 const APPROVED_IDS = new Set([
   "collection_control_responsive_card_grid",
@@ -86,7 +87,42 @@ function validateRegistry(registry, findings) {
       }
     }
   }
+  validateCardMultiselectTemplateArtifact(registry, findings);
   return { approvedIds: ids.size ? ids : APPROVED_IDS, references };
+}
+
+function validateCardMultiselectTemplateArtifact(registry, findings) {
+  const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_card_with_multiselect_toolbar");
+  const referencePath = String(entry?.fullTemplateReference || "").trim();
+  if (referencePath !== "docs/reference/collection-control-card-with-multiselect-toolbar.template.json") {
+    findings.push(error("DASH_DATASET_CARD_MULTISELECT_TEMPLATE_REFERENCE_MISSING", "collection_control_card_with_multiselect_toolbar must point to the full export-shaped template artifact.", {
+      expected: "docs/reference/collection-control-card-with-multiselect-toolbar.template.json",
+      actual: referencePath || null,
+    }));
+    return;
+  }
+  const template = readJson(CARD_MULTISELECT_TEMPLATE_PATH, findings, "DASH_DATASET_CARD_MULTISELECT_TEMPLATE_FILE_MISSING");
+  if (!template) return;
+  if (template.templateId !== "collection_control_card_with_multiselect_toolbar") {
+    findings.push(error("DASH_DATASET_CARD_MULTISELECT_TEMPLATE_ID_INVALID", "Card multiselect template artifact has an unexpected templateId.", { actual: template.templateId }));
+  }
+  if (template.templateResource?.rootContainer?.nv_label !== "card_with_multiselect_toolbar_wrapper") {
+    findings.push(error("DASH_DATASET_CARD_MULTISELECT_TEMPLATE_ROOT_INVALID", "Card multiselect template artifact must use card_with_multiselect_toolbar_wrapper as the root container.", {
+      actual: template.templateResource?.rootContainer?.nv_label || null,
+    }));
+  }
+  for (const label of ["card_col_title_wrapper", "op_normal", "op_multipleselected", "card_col_item", "card_col_item_operations", "card_col_item_multi_select", "btn_set_items"]) {
+    if (!template.extractionIndex?.slotPointers?.[label]) {
+      findings.push(error("DASH_DATASET_CARD_MULTISELECT_TEMPLATE_SLOT_MISSING", "Card multiselect template artifact is missing a required slot pointer.", { slot: label }));
+    }
+  }
+  for (const key of ["filterVars", "tempVars", "actions", "filter", "formAction"]) {
+    const value = template.pageLevelDependencies?.[key];
+    const count = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : 0;
+    if (count < 1) {
+      findings.push(error("DASH_DATASET_CARD_MULTISELECT_TEMPLATE_DEPENDENCY_MISSING", "Card multiselect template artifact is missing required page-level dependency data.", { dependency: key }));
+    }
+  }
 }
 
 function validateAppPlan(appPlanPath, registryInfo, findings) {
@@ -402,6 +438,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings) {
   if (provenance.templateId === "collection_control_grid_table_with_search") validateSearch(entry, page, findings);
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
+  if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
 }
 
@@ -588,6 +625,95 @@ function validateCard(entry, page, findings) {
   }
 }
 
+function validateCardMultiselect(entry, page, findings) {
+  const wrapper = findNearestAncestorByIdentity(entry, "card_with_multiselect_toolbar_wrapper");
+  if (!wrapper) {
+    findings.push(error("DASH_DATASET_CARD_MULTISELECT_WRAPPER_MISSING", "collection_control_card_with_multiselect_toolbar must be generated from the full card_with_multiselect_toolbar_wrapper subtree, not a simplified Collection/card control.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+
+  const requiredSlots = [
+    "card_col_title_wrapper",
+    "op_normal",
+    "op_multipleselected",
+    "card_col_item",
+    "card_col_item_multi_select",
+  ];
+  for (const slot of requiredSlots) {
+    if (!findDescendantByIdentity(wrapper, slot)) {
+      findings.push(error("DASH_DATASET_CARD_MULTISELECT_SLOT_MISSING", "collection_control_card_with_multiselect_toolbar is missing a required export-shaped slot.", { page: page.title, path: entry.pointer, slot }));
+    }
+  }
+
+  const multiSelect = findDescendantByIdentity(wrapper, "card_col_item_multi_select");
+  const multiSelectIcons = asArray(multiSelect?.children).filter((child) => String(child?.type || "") === "icon");
+  if (multiSelect && multiSelectIcons.length < 2) {
+    findings.push(error("DASH_DATASET_CARD_MULTISELECT_CONTROL_MUTATED", "card_col_item_multi_select must remain unchanged with checked and unchecked icon controls.", { page: page.title, path: entry.pointer, iconCount: multiSelectIcons.length }));
+  }
+
+  const collectionActions = asArray(entry.control?.attrs?.actions);
+  if (!collectionActions.length) {
+    findings.push(error("DASH_DATASET_CARD_MULTISELECT_COLLECTION_ACTIONS_MISSING", "collection_control_card_with_multiselect_toolbar must preserve Collection root attrs.actions[] for card selection and item/bulk behavior.", { page: page.title, path: `${entry.pointer}.attrs.actions` }));
+  }
+
+  const opNormal = findDescendantByIdentity(wrapper, "op_normal");
+  const normalButtons = findDescendants(opNormal, (node) => String(node?.type || "") === "action_button");
+  for (const button of normalButtons) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_CARD_MULTISELECT_BUTTON_ACTION_MISSING", "Every op_normal action_button must bind to a valid action; Search/Add labels may be remapped, but action wiring cannot be omitted.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+
+  const opMulti = findDescendantByIdentity(wrapper, "op_multipleselected");
+  const batchButtons = findDescendants(opMulti, (node) => String(node?.type || "") === "action_button");
+  for (const button of batchButtons) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_CARD_MULTISELECT_BUTTON_ACTION_MISSING", "Every card multiselect toolbar action_button must bind to a valid action.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+
+  const itemOperations = findDescendantByIdentity(wrapper, "card_col_item_operations");
+  const itemOperationButtons = findDescendants(itemOperations, (node) => String(node?.type || "") === "action_button");
+  for (const button of itemOperationButtons) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_CARD_MULTISELECT_BUTTON_ACTION_MISSING", "Every card_col_item_operations action_button must bind to a valid item action.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+
+  const cardItem = findDescendantByIdentity(wrapper, "card_col_item");
+  const itemControls = findDescendants(cardItem, (node) => String(node?.type || "").startsWith("dynamic-"));
+  if (!itemControls.some((node) => String(node?.type || "") === "dynamic-field" && /survey program name|subject|title/i.test(identityCandidates(node).join(" ")))) {
+    findings.push(error("DASH_DATASET_CARD_MULTISELECT_SUBJECT_FIELD_MISSING", "card_col_item should include one subject-style Dynamic field based on the Survey Program name template control.", { page: page.title, path: entry.pointer }));
+  }
+  if (!itemControls.some((node) => String(node?.type || "") === "dynamic-user")) {
+    findings.push(error("DASH_DATASET_CARD_MULTISELECT_DYNAMIC_USER_MISSING", "card_col_item should preserve the Dynamic user control pattern for user/person fields when adapting the template.", { page: page.title, path: entry.pointer }));
+  }
+
+  validateCardMultiselectPageDependencies(page, entry, findings);
+}
+
+function validateCardMultiselectPageDependencies(page, entry, findings) {
+  const dependencyChecks = [
+    ["filterVars", "DASH_DATASET_CARD_MULTISELECT_FILTERVARS_MISSING"],
+    ["tempVars", "DASH_DATASET_CARD_MULTISELECT_TEMPVARS_MISSING"],
+    ["actions", "DASH_DATASET_CARD_MULTISELECT_PAGE_ACTIONS_MISSING"],
+    ["formAction", "DASH_DATASET_CARD_MULTISELECT_FORM_ACTION_MISSING"],
+  ];
+  for (const [key, code] of dependencyChecks) {
+    const value = page.resource?.[key];
+    const count = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : 0;
+    if (count < 1) {
+      findings.push(error(code, "collection_control_card_with_multiselect_toolbar requires page-level dependencies from the source template.", { page: page.title, path: entry.pointer, dependency: key }));
+    }
+  }
+  const pageText = JSON.stringify(page.resource || {});
+  for (const requiredToken of ["var_SelectedItems", "var_SelectedItemsAmount"]) {
+    if (!pageText.includes(requiredToken)) {
+      findings.push(error("DASH_DATASET_CARD_MULTISELECT_SELECTED_VARIABLE_MISSING", "Card multiselect template requires selected item variables from the source template.", { page: page.title, path: entry.pointer, requiredToken }));
+    }
+  }
+}
+
 function validateEventPipeline(entry, page, findings) {
   const ancestorIds = new Set(entry.ancestors.flatMap(identityCandidates));
   if (!ancestorIds.has("Event Pipeline Grid-Table")) {
@@ -653,6 +779,38 @@ function identityCandidates(node) {
     node.attrs?.nv_label,
     node.attrs?.nav_label,
   ].map((value) => String(value || "").trim()).filter(Boolean);
+}
+
+function findNearestAncestorByIdentity(entry, identity) {
+  const normalized = normalizeIdentity(identity);
+  return entry.ancestors.slice().reverse().find((ancestor) => identityCandidates(ancestor).map(normalizeIdentity).includes(normalized)) || null;
+}
+
+function findDescendantByIdentity(root, identity) {
+  const normalized = normalizeIdentity(identity);
+  return findDescendants(root, (node) => identityCandidates(node).map(normalizeIdentity).includes(normalized))[0] || null;
+}
+
+function findDescendants(root, predicate) {
+  const matches = [];
+  function visit(node) {
+    if (!isObject(node)) return;
+    if (predicate(node)) matches.push(node);
+    asArray(node.children).forEach(visit);
+  }
+  visit(root);
+  return matches;
+}
+
+function hasActionBinding(node) {
+  const candidates = [
+    node?.attrs?.control_action,
+    node?.attrs?.action,
+    node?.attrs?.data?.action,
+    node?.control_action,
+    node?.action,
+  ];
+  return candidates.some((candidate) => String(candidate || "").trim());
 }
 
 function normalizeIdentity(value) {
