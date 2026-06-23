@@ -567,7 +567,28 @@ try {
 
   expectCode("filter has data field but no display_f", ["--package", writePackage(tempDir, "filter-no-display", decoded({ filterPatch: { display_f: "" } }))], "DASH_FILTER_DISPLAY_FIELD_MISSING");
   expectCode("filter has no value_f", ["--package", writePackage(tempDir, "filter-no-value", decoded({ filterPatch: { value_f: "" } }))], "DASH_FILTER_VALUE_FIELD_MISSING");
+  expectCode("filter copied without app-specific attrs.data.field fails", ["--package", writePackage(tempDir, "filter-no-field", decoded({ filterPatch: { data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, filter: [] } } }))], "DASH_FILTER_FIELD_UNRESOLVED|DASH_GOLDEN_RESOURCE_FILTER_DATA_FIELD_MISSING|DASH_LAYOUT_DATA_FILTER_FIELD_MISSING");
   expectCode("filter lacks label/dropdown style metadata", ["--package", writePackage(tempDir, "filter-no-style", decoded({ filterPatch: { lablay: undefined, lab: {}, edit: {} } }))], "DASH_FILTER_LABEL_LAYOUT_MISSING|DASH_FILTER_PLACEHOLDER_COLOR_MISSING|DASH_FILTER_RADIUS_MISSING");
+
+  const adHocRootFilterGroup = validV11Resource();
+  find(adHocRootFilterGroup, "Content").children.push(eventPortfolioFilterGroup());
+  expectCode("Event Portfolio filter group copied directly under v1.1 Content fails", ["--package", writePackage(tempDir, "root-filter-group", decodedWithResource(adHocRootFilterGroup))], "DASH_GOLDEN_COMPETING_ROOT_SHELL|DASH_LAYOUT_BUSINESS_CONTROL_OUTSIDE_ALLOWED_SLOT");
+
+  const inventedRootFilterModule = validV11Resource();
+  find(inventedRootFilterModule, "Content").children.push({
+    type: "container",
+    name: "asset_loan_filter_bar",
+    attrs: { style: { widthtype: [null, "1"], direction: [null, "row"], gap: [null, 12], align_items: [null, "center"], justify_content: [null, "flex-start"] } },
+    children: [filterControl({ binding: "priorityFilter", placeholder: "Select priority...", lab: { value: "Priority", ty: [null, "xs-light"] } })],
+  });
+  expectCode("invented ad hoc filter layout module under root Content fails", ["--package", writePackage(tempDir, "invented-root-filter", decodedWithResource(inventedRootFilterModule))], "DASH_LAYOUT_INVENTED_LAYOUT_MODULE|DASH_LAYOUT_BUSINESS_CONTROL_OUTSIDE_ALLOWED_SLOT");
+
+  const obsoleteContentPadding = validV11Resource();
+  const obsoleteContent = find(obsoleteContentPadding, "Content");
+  obsoleteContent.attrs = obsoleteContent.attrs || {};
+  obsoleteContent.attrs.container = { ...(obsoleteContent.attrs.container || {}), padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] };
+  obsoleteContent.attrs.common = { ...(obsoleteContent.attrs.common || {}), padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] };
+  expectCode("obsolete forced-zero v1.1 Content padding fails", ["--package", writePackage(tempDir, "obsolete-content-padding", decodedWithResource(obsoleteContentPadding))], "DASH_LAYOUT_RESOURCE_CONTENT_PADDING_MISMATCH");
 
   expectCode("container raw widthtype string fails", ["--package", writePackage(tempDir, "container-raw-width", decoded({ mainStyle: { ...style("full") } }))], "DASH_CONTAINER_WIDTHTYPE_RAW_STRING");
   expectCode("container missing layout keys fails", ["--package", writePackage(tempDir, "container-missing-layout", decoded({ mainStyle: { widthtype: [null, "2"] } }))], "DASH_CONTAINER_DIRECTION_MISSING|DASH_CONTAINER_GAP_MISSING|DASH_CONTAINER_ALIGN_ITEMS_MISSING|DASH_CONTAINER_JUSTIFY_CONTENT_MISSING");

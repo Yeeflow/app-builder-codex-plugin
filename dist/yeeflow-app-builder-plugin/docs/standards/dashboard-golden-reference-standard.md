@@ -84,6 +84,8 @@ The `Event Pipeline Grid-Table` reference means a real Collection subtree, not a
 
 Filter regions must preserve both UI contract and data contract: labels and placeholders stay separate, source field/display/value metadata resolves to included lists/fields, and filter selections are consumed by Collection/table/KPI query/filter metadata. A filter that changes UI state but has no consumer binding is a generated-final failure and a runtime-proof failure if installed data does not change.
 
+When Dashboard Page Layouts v1.1 is the page shell, generated filters must be synthesized by copying an approved Event Portfolio/v1.1 filter module into an approved v1.1 business-content slot, normally `section_content_area`, and then mapping it to the app's list and field. Do not create a from-scratch filter bar, do not place `event_portfolio_filter_group` directly under root `Content`, and do not invent a filter layout module that is absent from the v1.1 repeatable/removable module registry. The generator must preserve label typography, placeholder color, supported radius, placeholder text, `attrs.data.field`, `display_f`, `value_f`, and consumer linkage before the package can pass generated-final preflight.
+
 Registered reusable regions are:
 
 | Region ID | Purpose |
