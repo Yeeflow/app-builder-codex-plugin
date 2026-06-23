@@ -20,7 +20,10 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.11`
+`0.8.12`
+
+Version `0.8.12` releases Dashboard root binding, v1.1 Content padding, and runtime proof gates from PR #161. Generated-final Dashboard Type 103 pages must bind `Pages[].ListID` to the decoded package root `ListSet.ListID` while keeping `LayoutID` as the page layout resource ID. Dashboard Page Layouts v1.1 `Content` padding must match the canonical template instead of obsolete forced-zero normalization. Package API automation now derives canonical runtime URLs from the decoded package root, preserves sanitized server messages, and classifies already-installed fresh-install responses as upgrade-check / upgrade-apply follow-up rather than final install success.
+
 
 Version `0.8.11` releases Dashboard dataset presentation Golden References from PR #159. Dashboard Collection dataset regions must now choose one approved presentation reference: responsive card grid, card multiselect toolbar, grid-table, grid-table with multiselect, grid-table with search, or Event Pipeline Grid-Table. App Plans must name the selected reference and business rationale without runtime IDs or low-level payload properties, and generated-final validation now blocks missing provenance, unknown templates, simplified grid-table structures, missing multiselect action contracts, and missing search/fulltext linkage before signing.
 
