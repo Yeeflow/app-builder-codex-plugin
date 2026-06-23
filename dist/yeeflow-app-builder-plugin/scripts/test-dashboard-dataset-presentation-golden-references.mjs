@@ -31,6 +31,28 @@ try {
 `);
   expectPass("App Plan with approved dataset presentation references passes", ["--app-plan", validPlan]);
 
+  const noWorkaroundPlan = write("no-workaround-plan.md", `# Yeeflow App Plan
+
+## 6. Form Reports Plan
+
+Form reports are independent approval-based resources and are separate from Dashboard page planning.
+
+## 14. Dashboard Pages Plan
+
+Dashboard validator commands used during validation:
+
+- Run scripts/validate-dashboard-dataset-presentation-golden-references.mjs --app-plan yeeflow-app-plan.md
+- The dashboard page may also include form report status text in a non-dataset note.
+
+#### Record Display Control Selection
+
+| Section | Data Source | Display Need | Selected Record Display Control | Selected Collection Presentation Reference | Required Business Fields | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Active loans | Loan Requests Data List | Dense operational row scanning | Collection | collection_control_grid_table | Loan title, requester, due date, status | Dense row/column scanning for an operational work queue | Open selected loan | Local package proof plus runtime proof |
+| Static summary | Loan Requests Data List | Summary table only | Data table | not applicable | Status totals | Native table is enough | None | Local package proof |
+`);
+  expectPass("App Plan ignores non-dataset prose and validator commands without workaround text", ["--app-plan", noWorkaroundPlan]);
+
   const missingPlan = write("missing-plan.md", `# Yeeflow App Plan
 
 ## Dashboard Pages Plan

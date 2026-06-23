@@ -92,6 +92,21 @@ try {
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "complete App Plan Markdown using standardized template passes", status: "pass" });
 
+  const semanticEquivalentPlan = appPlanTemplate
+    .replaceAll("#### Submission Form Fields", "#### Submission fields")
+    .replaceAll("##### Task Form Fields", "##### Task page fields")
+    .replace(
+      "Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.",
+      "Form reports are independent approval-based resources created from a specific Approval form and are separate from Dashboard/page planning and Data List view planning.",
+    )
+    .replaceAll("Do not invent unsupported", "Unsupported shapes should not be generated as")
+    .replaceAll("#### Sub List List Actions", "#### Sub List actions")
+    .replaceAll("No custom Sub List actions required", "No Sub List actions are needed");
+  file = writeFixture(tempDir, "app-plan-semantic-equivalent-required-wording.md", semanticEquivalentPlan);
+  output = runValidator("scripts/validate-app-plan-resource-order.mjs", file);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "App Plan semantic equivalents for required wording pass", status: "pass" });
+
   const noDashboardPlan = replaceSection(
     appPlanTemplate,
     "## 14. Dashboard Pages Plan",

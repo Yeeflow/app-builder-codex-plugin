@@ -49,19 +49,19 @@ const RESOURCE_ORDER = [
 const REQUIRED_PATTERNS = [
   ["RESOURCE_GENERATION_ORDER", /Resource Generation Order/i],
   ["DATALIST_PLACEHOLDER", /Data Lists and Document Libraries Plan[\s\S]*Placeholder/i],
-  ["APPROVAL_SUBMISSION_PLACEHOLDER", /Submission Form Fields[\s\S]*Placeholder/i],
-  ["TASK_FORM_PLACEHOLDER", /Task Form Fields[\s\S]*Placeholder/i],
+  ["APPROVAL_SUBMISSION_PLACEHOLDER", /(?:Submission Form Fields|Submission fields|Submitter-entered fields|Request intake fields)[\s\S]*(?:Placeholder|input hint|entry hint|prompt text)/i],
+  ["TASK_FORM_PLACEHOLDER", /(?:Task Form Fields|Task page fields|Task fields|Assignee task fields)[\s\S]*(?:Placeholder|input hint|entry hint|prompt text)/i],
   ["CUSTOM_FORM_PLACEHOLDER", /Custom Data List Forms Plan[\s\S]*Placeholder/i],
   ["FORM_REPORTS", /Form Reports Plan/i],
-  ["FORM_REPORT_STANDALONE", /Form report is a standalone Yeeflow resource type|Form Report is an independent Yeeflow resource/i],
-  ["FORM_REPORT_APPROVAL_BASED", /based on (one )?specific Approval Form|based on their related Approval forms/i],
-  ["FORM_REPORT_DASHBOARD_SEPARATE", /Do not (merge|mix).*Form report.*Dashboard|not a Dashboard/i],
+  ["FORM_REPORT_STANDALONE", /Form report is a standalone Yeeflow resource type|Form Report is an independent Yeeflow resource|Form reports? (?:are|is) independent approval-based resources?/i],
+  ["FORM_REPORT_APPROVAL_BASED", /based on (one )?specific Approval Form|based on their related Approval forms|approval-based resources?|created from a specific Approval form/i],
+  ["FORM_REPORT_DASHBOARD_SEPARATE", /Do not (merge|mix).*Form report.*Dashboard|not a Dashboard|Form reports?[\s\S]{0,200}separate from (?:Dashboard\/page|Dashboard page|workbench page|page|list view) planning/i],
   ["PLUGIN_CAPABILITY_COMPLIANCE", /Plugin Capability and Standards Compliance/i],
   ["PROOF_BOUNDARY", /Proof Boundary/i],
   ["ASSUMPTIONS", /Assumptions/i],
   ["DEFERRED_RUNTIME_PROOF", /Deferred or Runtime-Proof Items/i],
   ["RECOMMENDED_NEXT_PROMPT", /Recommended Next Prompt/i],
-  ["DO_NOT_INVENT_UNSUPPORTED_SHAPES", /Do not invent unsupported|Do not plan invented/i],
+  ["DO_NOT_INVENT_UNSUPPORTED_SHAPES", /Do not invent unsupported|Do not plan invented|Unsupported[\s\S]{0,160}should not be generated/i],
   ["UNKNOWN_CAPABILITY_LABELS", /export-learning-required[\s\S]*runtime-proof-required[\s\S]*deferred/i],
   ["RECORD_DISPLAY_CONTROL_SELECTION", /Record Display Control Selection/i],
   ["DASHBOARD_FILTERS", /Dashboard Filters/i],
@@ -69,7 +69,7 @@ const REQUIRED_PATTERNS = [
   ["DASHBOARD_ACTIONS", /Dashboard Actions/i],
   ["ITEM_TEMPLATE_DYNAMIC_CONTROLS", /Item Template Dynamic Controls/i],
   ["COLLECTION_KANBAN_ACTIONS", /Collection (and|\/) Kanban Item Actions|Collection\/Kanban item actions/i],
-  ["SUB_LIST_ACTIONS", /Sub List List Actions|No custom Sub List actions required/i],
+  ["SUB_LIST_ACTIONS", /Sub List List Actions|No custom Sub List actions required|No Sub List actions are needed|Sub List actions are not required/i],
   [
     "PLUGIN_SUPPORTED_TYPE_PROPERTY_RULE",
     /resource types[\s\S]*field types[\s\S]*variable types[\s\S]*controls[\s\S]*Dynamic controls[\s\S]*workflow nodes[\s\S]*form actions[\s\S]*Collection\/Kanban actions[\s\S]*Sub List actions[\s\S]*property paths[\s\S]*(configuration shapes|bindings)/i,
@@ -327,7 +327,7 @@ function validateControlActionPlanning(text, findings) {
     });
   }
 
-  if (/\bSub List\b/i.test(text) && !/(Sub List List Actions|No custom Sub List actions required)/i.test(text)) {
+  if (/\bSub List\b/i.test(text) && !/(Sub List List Actions|No custom Sub List actions required|No Sub List actions are needed|Sub List actions are not required)/i.test(text)) {
     findings.push({
       level: "error",
       code: "APP_PLAN_SUB_LIST_ACTION_DECISION_MISSING",

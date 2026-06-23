@@ -40,6 +40,8 @@ Every Dashboard dataset region that plans to use Collection must declare:
 
 App Plan must not include generated IDs, `ListID`, `LayoutID`, `PageID`, `actionTypeCode`, raw JSON property paths, fake placeholder IDs, or low-level payload properties.
 
+Validator scope rule: this gate parses canonical Dashboard record-display / dataset-presentation tables only. It must not treat prose, negative guardrails, Form Report explanations, validation command lists, identity tables, or other non-dataset rows as Dashboard dataset regions. App Plans must not need workaround text such as `no dashboard dataset` to avoid false positives.
+
 ## Selection Rules
 
 - Choose `collection_control_responsive_card_grid` for browsing records as cards.

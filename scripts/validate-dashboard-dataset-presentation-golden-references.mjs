@@ -98,7 +98,7 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
   if (!dashboardDatasetLines.length) return;
 
   const approvedIds = registryInfo.approvedIds;
-  const invented = [...text.matchAll(/\b(collection_control_[A-Za-z0-9_-]+|Event\s+Pipeline\s+Grid-Table)\b/g)]
+  const invented = [...dashboardDatasetLines.join("\n").matchAll(/\b(collection_control_[A-Za-z0-9_-]+|Event\s+Pipeline\s+Grid-Table)\b/g)]
     .map((match) => match[1])
     .filter((id) => !approvedIds.has(id));
   for (const id of invented) {
@@ -130,20 +130,87 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
 }
 
 function collectDashboardDatasetPlanLines(text) {
-  const lines = String(text || "").split(/\r?\n/);
-  const matches = [];
-  let inDashboardPlan = false;
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (/^#{1,6}\s+/.test(trimmed)) {
-      inDashboardPlan = /dashboard\s+pages?\s+plan|dashboard\s+dataset|dashboard\s+record|dashboard\s+collection/i.test(trimmed);
+  const dashboard = extractDashboardPagesPlanSection(text);
+  if (!dashboard.trim()) return [];
+
+  const rows = [];
+  for (const table of markdownTables(dashboard)) {
+    const headers = table.headers.map(normalizeTableCell);
+    const selectedReferenceIndex = headers.findIndex((header) => header === "selected collection presentation reference");
+    const genericControlIndex = headers.findIndex((header) => header === "control" || header === "selected control");
+    const selectedControlIndex = headers.findIndex((header) => header === "selected record display control");
+    const dashboardPageIndex = headers.findIndex((header) => header === "dashboard page" || header === "dashboard page name");
+    const datasetRegionIndex = headers.findIndex((header) => header === "dataset region" || header === "section");
+    const sourceIndex = headers.findIndex((header) => header === "source resource" || header === "data source");
+
+    const canonicalDatasetReferenceTable =
+      datasetRegionIndex !== -1
+      && sourceIndex !== -1
+      && (dashboardPageIndex !== -1 || selectedControlIndex !== -1 || genericControlIndex !== -1);
+
+    if (!canonicalDatasetReferenceTable) continue;
+
+    for (const row of table.rows) {
+      const selectedControl = row.cells[selectedControlIndex] || row.cells[genericControlIndex] || "";
+      if ((selectedControlIndex !== -1 || genericControlIndex !== -1) && !/\bcollection\b/i.test(selectedControl)) continue;
+      if (selectedReferenceIndex === -1 && !/\bcollection\b/i.test(selectedControl)) continue;
+      rows.push(row.raw);
     }
-    const normalized = trimmed.toLowerCase();
-    const hasDatasetSignal = /(collection|dataset|data list|form report|document library|grid-table|grid table|card grid|selected collection presentation reference)/.test(normalized);
-    const hasDashboardSignal = /dashboard/.test(normalized);
-    if ((inDashboardPlan && hasDatasetSignal) || (hasDashboardSignal && hasDatasetSignal)) matches.push(line);
   }
-  return matches;
+  return rows;
+}
+
+function extractDashboardPagesPlanSection(text) {
+  const lines = String(text || "").split(/\r?\n/);
+  const start = lines.findIndex((line) => /^#{1,6}\s+(?:\d+\.\s*)?Dashboard Pages Plan\s*$/i.test(line.trim()));
+  if (start === -1) return "";
+  let end = lines.length;
+  const startLevel = (lines[start].match(/^#+/) || [""])[0].length;
+  for (let index = start + 1; index < lines.length; index += 1) {
+    const match = lines[index].match(/^(#{1,6})\s+(.+?)\s*$/);
+    if (match && match[1].length <= startLevel) {
+      end = index;
+      break;
+    }
+  }
+  return lines.slice(start + 1, end).join("\n");
+}
+
+function markdownTables(sectionText) {
+  const tables = [];
+  const lines = String(sectionText || "").split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    const header = lines[index].trim();
+    const separator = String(lines[index + 1] || "").trim();
+    if (!isMarkdownTableRow(header) || !/^\|(?:\s*:?-{3,}:?\s*\|)+\s*$/.test(separator)) continue;
+    const headers = splitMarkdownRow(header);
+    const rows = [];
+    index += 2;
+    while (index < lines.length && isMarkdownTableRow(lines[index].trim())) {
+      const raw = lines[index];
+      rows.push({ raw, cells: splitMarkdownRow(raw) });
+      index += 1;
+    }
+    index -= 1;
+    tables.push({ headers, rows });
+  }
+  return tables;
+}
+
+function isMarkdownTableRow(line) {
+  return String(line || "").trim().startsWith("|") && String(line || "").trim().endsWith("|");
+}
+
+function splitMarkdownRow(row) {
+  return String(row || "")
+    .trim()
+    .split("|")
+    .slice(1, -1)
+    .map((cell) => cell.trim());
+}
+
+function normalizeTableCell(value) {
+  return String(value || "").toLowerCase().replace(/`/g, "").replace(/\s+/g, " ").trim();
 }
 
 function extractApprovedTemplateIds(line, approvedIds) {

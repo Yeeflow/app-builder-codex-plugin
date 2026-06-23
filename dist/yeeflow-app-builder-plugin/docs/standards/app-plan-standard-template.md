@@ -44,6 +44,7 @@ Rules:
 - Form report is a standalone Yeeflow resource type created from a specific Approval form. Do not merge Form report planning with Dashboard page planning or Data List view planning.
 - Do not include resources only to make the plan look complete. Every generated resource must serve a runtime purpose.
 - Do not invent unsupported controls, Dynamic controls, field types, workflow node types, variable types, action shapes, property paths, bindings, or configuration shapes.
+- Validator wording tolerance: the App Plan should follow this canonical template, but validators must also accept equivalent business wording for the same required intent, such as `Submission fields`, `Task page fields`, `Form reports are independent approval-based resources`, `Form reports are separate from Dashboard/page planning`, `Unsupported shapes should not be generated`, and `No Sub List actions are needed`. Equivalent wording does not relax resource-order, schema, or generation-readiness requirements.
 
 ## 3. Resource Generation Order
 
