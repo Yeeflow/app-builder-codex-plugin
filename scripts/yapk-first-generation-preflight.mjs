@@ -56,6 +56,12 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
   gates.push(runGate("generated-yapk-export-shape-materialization", ["scripts/validate-generated-yapk-export-shape.mjs", "--package", resolvedPackage]));
   gates.push(runGate("dashboard-grid-table-collections", ["scripts/validate-dashboard-grid-table-collections.mjs", "--package", resolvedPackage]));
+  gates.push(runGate("dashboard-dataset-presentation-golden-references", [
+    "scripts/validate-dashboard-dataset-presentation-golden-references.mjs",
+    "--package",
+    resolvedPackage,
+    ...(plan ? ["--app-plan", plan] : []),
+  ]));
   gates.push(runGate("dashboard-generation-hard-gates", [
     "scripts/validate-dashboard-generation-hard-gates.mjs",
     "--package",
@@ -97,7 +103,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     idProvenance: summarizePath(idProvenance),
     failedGate: failed?.gate || null,
     gates,
-    proofBoundary: "Local preflight only. ID provenance, upgrade ID stability, navigation metadata, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity or workspace targeting correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
+    proofBoundary: "Local preflight only. ID provenance, upgrade ID stability, navigation metadata, dashboard dataset presentation reference conformance, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity or workspace targeting correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
   };
 }
 

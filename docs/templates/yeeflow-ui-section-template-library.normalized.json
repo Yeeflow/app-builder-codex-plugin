@@ -1945,7 +1945,7 @@
         "COLLECTION_GRID_TABLE_BULK_ACTION_REFERENCE_INVALID absent"
       ],
       "proofBoundaries": [
-        "generate only for the Projects Center-style multiselect table",
+        "generate when a Dashboard dataset needs dense table scanning, multi-row selection, selected count/state, and batch operations; Projects Center / Project Tasks is the export-proven source reference, not a business-domain restriction",
         "do not infer card-style top-right selection behavior"
       ]
     },

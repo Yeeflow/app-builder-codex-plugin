@@ -406,14 +406,16 @@ Rules:
 
 Required for every Dashboard/Page section that displays Data List records.
 
-| Section | Data Source | Display Need | Selected Record Display Control | Selection Reason | Detail/Open Behavior | Proof Boundary |
-| --- | --- | --- | --- | --- | --- | --- |
-| <Section> | <Data List> | <Cards/table/status board/activity history/roadmap/etc.> | Data table / Collection / Kanban / Vertical timeline / Horizontal timeline | <Reason> | <Open/edit/detail behavior> | <Local/runtime proof boundary> |
+| Section | Data Source | Display Need | Selected Record Display Control | Selected Collection Presentation Reference | Required Business Fields | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Section> | <Data List/Form Report/Document Library metadata list> | <Cards/table/status board/activity history/roadmap/etc.> | Data table / Collection / Kanban / Vertical timeline / Horizontal timeline | <approved Dashboard Collection reference ID or not applicable> | <Business fields only, no runtime IDs> | <Reason> | <Open/edit/detail behavior> | <Local/runtime proof boundary> |
 
 Rules:
 
 - Allowed selected controls are Data table, Collection, Kanban, Vertical timeline, and Horizontal timeline.
 - Prefer Collection over Data table when both can satisfy the requirement, unless a dense native table/grid is specifically required.
+- When the selected record display control is Collection, the Selected Collection Presentation Reference must be one of `collection_control_responsive_card_grid`, `collection_control_card_with_multiselect_toolbar`, `collection_control_grid_table`, `collection_control_grid_table_with_multiselect`, `collection_control_grid_table_with_search`, or `Event Pipeline Grid-Table` from `docs/reference/dashboard-dataset-presentation-golden-references.json`.
+- For Collection rows, state the required business fields and selection rationale. Do not include generated `ListID`, `LayoutID`, `PageID`, action type codes, JSON property paths, placeholder IDs, or runtime payload fields in this App Plan table.
 - Use Kanban for status, lane, queue, or work-board patterns.
 - Use Vertical Timeline for activity, history, audit, event feed, and chronological log patterns.
 - Use Horizontal Timeline for roadmap, phase, lifecycle, and milestone progression patterns.

@@ -7,6 +7,7 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/
 import { validateGeneratedFinalResourceCompleteness } from "./validate-generated-final-resource-completeness.mjs";
 import { validateDashboardGoldenReferenceConformance } from "./validate-dashboard-golden-reference-conformance.mjs";
 import { validateDashboardPageLayoutTemplate } from "./validate-dashboard-page-layout-template.mjs";
+import { validateDashboardDatasetPresentationGoldenReferences } from "./validate-dashboard-dataset-presentation-golden-references.mjs";
 
 const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"]);
 const RECORD_DISPLAY_FIELD = "ListDataID";
@@ -55,6 +56,8 @@ export function validateDashboardGenerationHardGates(options = {}) {
     findings.push(...asArray(golden.findings));
     const pageLayout = validateDashboardPageLayoutTemplate({ package: options.package });
     findings.push(...asArray(pageLayout.findings));
+    const datasetPresentation = validateDashboardDatasetPresentationGoldenReferences({ package: options.package, appPlan: options.plan });
+    findings.push(...asArray(datasetPresentation.findings));
   }
 
   return {

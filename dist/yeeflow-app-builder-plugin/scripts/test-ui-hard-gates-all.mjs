@@ -40,6 +40,15 @@ const childTests = [
     ],
   },
   {
+    name: "Dashboard dataset presentation golden-reference regression suite",
+    command: ["scripts/test-dashboard-dataset-presentation-golden-references.mjs"],
+    validators: [
+      "validate-dashboard-dataset-presentation-golden-references",
+      "approved Dashboard Collection presentation template selection",
+      "App Plan dataset presentation reference enforcement",
+    ],
+  },
+  {
     name: "YAPK dashboard runtime materialization and preflight regression suite",
     command: ["scripts/test-yapk-dashboard-runtime-materialization-preflight-gates.mjs"],
     validators: [

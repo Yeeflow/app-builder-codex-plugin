@@ -208,11 +208,59 @@ function pageResource(flags = {}) {
     };
     filterTokens.push(node.binding, "Text1", "ListDataID");
   });
+  visit(root, (node) => {
+    if (node.type !== "collection") return;
+    const identity = ids(node).join(" ");
+    const inferredTemplate = /event_pipeline|Facility Work Queue Grid/i.test(identity)
+      ? "Event Pipeline Grid-Table"
+      : "collection_control_grid_table";
+    node.attrs = {
+      ...(node.attrs || {}),
+      datasetPresentationTemplateId: node?.attrs?.datasetPresentationTemplateId || inferredTemplate,
+    };
+  });
   if (filter) Object.assign(filter.attrs, flags.filterPatch || {});
   const kpiRow = find(root, "event_portfolio_kpi_row");
   if (kpiRow) kpiRow.children = [kpiCard(flags.kpiMode || "valid", flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR)];
   const grid = find(root, "Event Pipeline Grid-Table");
-  if (grid) grid.children = [{ type: "collection", name: "Facility Work Queue Grid", nv_label: "event_pipeline_grid_table_collection", attrs: { data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } }, filterBindings: filterTokens.filter(Boolean) }, children: [{ type: "heading", name: "Request Title", attrs: { headc: { title: { value: "Request" } } } }] }];
+  if (grid) {
+    const columns = [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
+    grid.children = [
+      {
+        type: "flex_grid",
+        id: "event_pipeline_grid_table_header_grid",
+        name: "event_pipeline_grid_table_header_grid",
+        displayLabel: [null, false],
+        attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } }, common: { hide: [null, false, false, true] } },
+        children: ["Request", "Priority", "Owner", "Status"].map((label) => ({ type: "heading", name: label, attrs: { headc: { title: { value: label } } } })),
+      },
+      {
+        type: "collection",
+        name: "Facility Work Queue Grid",
+        nv_label: "event_pipeline_grid_table_collection",
+        attrs: {
+          datasetPresentationTemplateId: "Event Pipeline Grid-Table",
+          data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } },
+          filterBindings: filterTokens.filter(Boolean),
+        },
+        children: [
+          {
+            type: "flex_grid",
+            id: "event_pipeline_grid_table_item_grid",
+            name: "event_pipeline_grid_table_item_grid",
+            displayLabel: [null, false],
+            attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } } },
+            children: [
+              { type: "dynamic-field", name: "Request Title", attrs: { source: "3", "obj-f": "Title" } },
+              { type: "dynamic-field", name: "Priority", attrs: { source: "3", "obj-f": "Text1" } },
+              { type: "dynamic-user", name: "Owner", attrs: { source: "3", "obj-f": "User1" } },
+              { type: "dynamic-field", name: "Status", attrs: { source: "3", "obj-f": "Text2" } },
+            ],
+          },
+        ],
+      },
+    ];
+  }
   if (flags.mainStyle) find(root, "Main").attrs.style = flags.mainStyle;
   const extValues = flags.extValues === undefined
     ? [{ fieldName: "ListDataID", func: "COUNT", id: "ListDataID" }]

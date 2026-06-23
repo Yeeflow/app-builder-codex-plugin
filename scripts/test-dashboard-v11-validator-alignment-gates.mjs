@@ -86,7 +86,7 @@ function adaptBusinessText(node) {
 
 function ensureCollectionInsideSection(resource) {
   const section = findBusinessSectionContentArea(resource);
-  section.children = [collectionControl()];
+  section.children = [gridHeader(), collectionControl()];
 }
 
 function ensureSummaryBackedKpis(resource) {
@@ -117,9 +117,39 @@ function collectionControl() {
     name: "Asset Loan Work Queue",
     nv_label: "Asset Loan Work Queue",
     attrs: {
+      datasetPresentationTemplateId: "collection_control_grid_table",
       data: { list: { AppID: 41, ListID: LIST_ID, Type: 1, Title: "Loan Requests", ListSetID: APP_ID } },
       filterBindings: ["LoanStatus"],
     },
+    children: [gridItem()],
+  };
+}
+
+function gridHeader() {
+  const columns = [[2, "fr"], [1, "fr"], [1, "fr"]];
+  return {
+    type: "flex_grid",
+    id: "loan_work_queue_header_grid",
+    name: "loan_work_queue_header_grid",
+    displayLabel: [null, false],
+    attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } }, common: { hide: [null, false, false, true] } },
+    children: ["Loan", "Status", "Owner"].map((label) => ({ type: "heading", name: label, attrs: { headc: { title: { value: label } } } })),
+  };
+}
+
+function gridItem() {
+  const columns = [[2, "fr"], [1, "fr"], [1, "fr"]];
+  return {
+    type: "flex_grid",
+    id: "loan_work_queue_item_grid",
+    name: "loan_work_queue_item_grid",
+    displayLabel: [null, false],
+    attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } } },
+    children: [
+      { type: "dynamic-field", name: "Loan Title", attrs: { source: "3", "obj-f": "Title" } },
+      { type: "dynamic-field", name: "Loan Status", attrs: { source: "3", "obj-f": "Text1" } },
+      { type: "dynamic-user", name: "Owner", attrs: { source: "3", "obj-f": "User1" } },
+    ],
   };
 }
 

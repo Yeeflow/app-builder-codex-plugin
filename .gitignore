@@ -103,6 +103,7 @@ yeeflow-data-list-generator/
 !yeeflow-expression-functions.normalized.json
 !yeeflow-expression-function-knowledge-base.normalized.json
 !yeeflow-expression-operators.normalized.json
+!dashboard-dataset-presentation-golden-references.json
 !yeeflow-expression-first-generation-test-spec.json
 !docs/studies/normalized/*.normalized.json
 !docs/studies/normalized/**/*.normalized.json
