@@ -103,6 +103,7 @@ const requiredDocs = [
   "docs/training/dashboard-golden-reference-enforcement-training-report.md",
   "docs/training/dashboard-golden-reference-export-shape-parity-training-report.md",
   "docs/training/dashboard-dataset-presentation-golden-references-training-report.md",
+  "docs/training/dashboard-collection-template-slot-decision-gates-training-report.md",
   "docs/training/dashboard-root-binding-padding-runtime-proof-gates-training-report.md",
   "docs/training/dashboard-page-layouts-v1.1-template-adoption-training-report.md",
   "docs/training/dashboard-v1.1-controlled-slots-repeatable-modules-training-report.md",

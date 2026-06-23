@@ -5,7 +5,7 @@ Dashboard pages often need to present Data List, Form Report, Document Library, 
 This standard keeps business planning separate from low-level Yeeflow payload generation:
 
 - Functional Specification describes the business dataset need: users, records, fields, filters, search, sorting/grouping, batch operations, actions, mobile support, and runtime proof needs.
-- App Plan maps each Dashboard dataset region to one approved presentation reference ID and explains why.
+- App Plan maps each Dashboard dataset region to exactly one approved presentation reference ID and explains why by using the registry's `whenToUse`, `whenNotToUse`, `requiredBusinessSignals`, and `suitableSourceResourceTypes` guidance.
 - Resource generation copies/adapts the selected export-proven template and binds it to real app resources.
 - Validators reject simplified, invented, or partially recreated Collection layouts before signing.
 
@@ -48,15 +48,21 @@ App Plan must not include generated IDs, `ListID`, `LayoutID`, `PageID`, `action
 - Choose `collection_control_grid_table_with_multiselect` for dense operational records with multi-row selection and batch operations. Projects Center / Project Tasks is the export-proven source reference only, not a business-domain restriction.
 - Choose `collection_control_grid_table_with_search` when the dense table also requires free-text search/fulltext filtering.
 - Choose `Event Pipeline Grid-Table` for the primary high-fidelity Dashboard work queue, pipeline, or portfolio table.
+- Do not choose a template just because it is visually attractive. The selected template must match the business signals: card browsing, dense row/column scanning, free-text search, multiselect/bulk operation, or high-fidelity primary operations table.
+- If more than one reference seems possible, the App Plan must pick exactly one for that dataset region and state why the other options were not chosen at business level. Do not defer the choice to resource generation.
 
 ## Generation Rules
 
+- Dashboard Page Layouts v1.1 is the page shell. All approved Dashboard Collection presentation references are component-level dataset regions that must be placed inside approved v1.1 business-content slots, normally `section_content_area`.
+- Do not place Collection presentation templates directly under page root, `Main`, root `Content`, `page_title_section`, header/title areas, structural layout wrappers, or a copied source-app page shell.
+- Do not copy the source application page shell for any Collection reference. Event Portfolio, Projects Center, Project Tasks, and card-grid source exports are proof sources only; they are not generated page shells for another app.
+- Do not copy source-example business fields, labels, data sources, IDs, ListID, LayoutID, PageID, or domain text. Replace them with current-app business fields and generated IDs during resource generation.
 - Generated Dashboard Collection controls must carry or inherit approved template provenance through a clear field such as `datasetPresentationTemplateId`, `datasetPresentationReferenceId`, `derivedFromDatasetPresentationTemplate`, or the approved Golden Reference region identity.
 - Do not create generic repeated cards, fake grid tables, simplified Data table lookalikes, or ad hoc Collection item templates.
 - Grid-table references must preserve header `flex_grid`, Collection body, repeated item `flex_grid`, matching columns, mobile item-grid behavior, and valid source list bindings.
 - Multiselect references must preserve selected state, selected count, checkbox icons, bulk toolbar/actions, `ListDataID`, and `__ctx_coll` current-item context.
 - Search references must preserve `search-filter` or equivalent search control plus Collection `attrs.data.fulltext[]` linkage.
-- Event Pipeline Grid-Table must preserve the reference subtree inside Dashboard Page Layouts v1.1 slots and replace Marketing Event fields with app-specific fields.
+- Event Pipeline Grid-Table must preserve the reference subtree inside Dashboard Page Layouts v1.1 slots and replace Marketing Event fields with app-specific fields. The same slot-only/component-only rule applies to every approved Collection presentation reference.
 
 ## Validation
 
