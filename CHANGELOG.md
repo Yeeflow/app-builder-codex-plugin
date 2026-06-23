@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.16
+
+- Release full-app skill-callable generation entrypoint contract from PR #169.
+- Mark the `yeeflow-application-builder` and `yeeflow-application-generator` full-app generation skills as first-class callable Codex skill entrypoints.
+- Add machine-readable `invocationContract` metadata so clean-room runs continue from approved `functional-specification.md` and `yeeflow-app-plan.md` into generated-final `.yapk` creation instead of stopping solely because no standalone CLI exists.
+- Extend `inspect-full-app-generation-entrypoints.mjs` and its regression suite to fail descriptive-only entrypoint records, weak planning-pass continuation contracts, and callable contracts missing required Markdown inputs.
+- Keep delivery, package API, runtime-proof, and sample-specific helper scripts explicitly forbidden as generic full-app generators.
+
 ## 0.8.15
 
 - Release full-app entrypoint cache-path alignment from PR #167.
