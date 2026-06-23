@@ -5,6 +5,10 @@ description: Standardize Yeeflow package validation before import or runtime tes
 
 # Yeeflow Package Validator
 
+## Full-App Generation Entrypoint Boundary
+
+When validating a plugin-only clean-room generation attempt, run `scripts/inspect-full-app-generation-entrypoints.mjs` before concluding that no full-app generation path exists. The registry at `docs/reference/full-app-generation-entrypoints.json` distinguishes skill-orchestrated full-app generation from validation scripts, delivery-decision helpers, package API helpers, runtime-proof demos, and sample-specific generators. Package validators must not claim package generation capability on their own, and they must not accept helper scripts as generic Functional Spec + App Plan to YAPK generators.
+
 ## UI Generation Hard-Gate Skill
 
 Phase 3B adds workflow-level enforcement. Final reports for high-quality UI work must include contract, scope, runtime evidence, and structure-comparison artifact paths as applicable. Run `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` before claiming high-quality UI or design fidelity. Generation from design/mockup requires a UI contract. UI upgrades require a scope manifest. Runtime UI quality claims require runtime evidence. Design fidelity claims require structure comparison. Dynamic KPI proof requires before/after mutation evidence. Install/sign/upgrade success is not visual proof.

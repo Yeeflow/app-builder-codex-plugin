@@ -5,6 +5,10 @@ description: generate, inspect, validate, package, debug, and improve small yeef
 
 # Yeeflow Application Generator
 
+## Full-App Generation Entrypoint Boundary
+
+For plugin-only clean-room generation, inspect `docs/reference/full-app-generation-entrypoints.json` with `scripts/inspect-full-app-generation-entrypoints.mjs` before claiming that the plugin has no full-app generation path. Full application generation is a skill-orchestrated capability through `yeeflow-application-builder` and `yeeflow-application-generator`; it is not equivalent to a delivery-decision helper, package API helper, runtime-proof demo generator, or sample-specific generator. Do not treat `scripts/yeeflow-application-delivery-workflow.mjs`, `scripts/yeeflow-package-api-automation.mjs`, `generate-*-runtime-proof.mjs`, or `generate-vendor-onboarding-yapk-schema-v2.mjs` as generic Functional Spec + App Plan to full-app YAPK generators. If a run requires a standalone CLI, state that boundary and do not invent a package.
+
 ## UI Generation Hard-Gate Skill
 
 Phase 3B adds workflow-level enforcement. Final reports for high-quality UI work must include contract, scope, runtime evidence, and structure-comparison artifact paths as applicable. Run `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` before claiming high-quality UI or design fidelity. Generation from design/mockup requires a UI contract. UI upgrades require a scope manifest. Runtime UI quality claims require runtime evidence. Design fidelity claims require structure comparison. Dynamic KPI proof requires before/after mutation evidence. Install/sign/upgrade success is not visual proof.

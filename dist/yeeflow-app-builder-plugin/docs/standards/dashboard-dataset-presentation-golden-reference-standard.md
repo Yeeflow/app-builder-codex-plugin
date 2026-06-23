@@ -50,6 +50,7 @@ App Plan must not include generated IDs, `ListID`, `LayoutID`, `PageID`, `action
 - Choose `Event Pipeline Grid-Table` for the primary high-fidelity Dashboard work queue, pipeline, or portfolio table.
 - Do not choose a template just because it is visually attractive. The selected template must match the business signals: card browsing, dense row/column scanning, free-text search, multiselect/bulk operation, or high-fidelity primary operations table.
 - If more than one reference seems possible, the App Plan must pick exactly one for that dataset region and state why the other options were not chosen at business level. Do not defer the choice to resource generation.
+- Template IDs must be parsed as exact tokens. `collection_control_grid_table_with_multiselect` and `collection_control_grid_table_with_search` are distinct approved templates and must not be counted as also selecting `collection_control_grid_table`.
 
 ## Generation Rules
 

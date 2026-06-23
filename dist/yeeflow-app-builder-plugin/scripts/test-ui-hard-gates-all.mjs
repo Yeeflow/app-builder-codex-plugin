@@ -49,6 +49,15 @@ const childTests = [
     ],
   },
   {
+    name: "Full-app generation entrypoint contract regression suite",
+    command: ["scripts/test-full-app-generation-entrypoint-gates.mjs"],
+    validators: [
+      "inspect-full-app-generation-entrypoints",
+      "full-app generation entrypoint registry",
+      "proof/demo helper misclassification guard",
+    ],
+  },
+  {
     name: "Dashboard install/runtime root binding and v1.1 padding regression suite",
     command: ["scripts/test-dashboard-install-runtime-root-binding-gates.mjs"],
     validators: [

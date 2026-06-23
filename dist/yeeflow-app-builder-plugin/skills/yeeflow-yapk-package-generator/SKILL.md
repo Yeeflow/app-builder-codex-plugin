@@ -154,6 +154,8 @@ The YAP Service Desk v8 smoke lessons are shared layout guidance for YAPK page/f
 
 Use this skill for Yeeflow `.yapk` version-management packages for existing application upgrades.
 
+For new full-application generation, first inspect `docs/reference/full-app-generation-entrypoints.json` with `scripts/inspect-full-app-generation-entrypoints.mjs` when the run is plugin-only or clean-room. This skill validates and packages generated `.yapk` content, but package validation and API automation are not themselves generic full-app generators. Do not use delivery helpers, package API helpers, runtime-proof generators, or sample-specific generators as substitutes for the skill-orchestrated full-app generation entrypoint.
+
 ## YAPK From Scratch Hardening
 
 YAPK-from-scratch generation is allowed only after the inner application content passes package/app/workflow publish-readiness validation. Generate and validate `AppPackageInfo` first, then Brotli/base64/sign only after content validators, graph validators, workflow publish-readiness checks, and placeholder scans pass.
