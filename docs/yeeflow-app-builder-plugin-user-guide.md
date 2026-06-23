@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.21`
+`0.8.22`
+
+Version `0.8.22` releases the full export-shaped `collection_control_grid_table_with_multiselect` template from PR #181. The plugin now carries the Projects Center v1.6 / All Tasks - multiple select wrapper template, preserves `grid_table_col_multiselect_wrapper`, locked `grid_table_col_item_select`, Collection root actions, page-level temp/filter/form action dependencies, matching header/item grid column definitions, and allows edits only in approved business regions.
 
 Version `0.8.21` releases the full export-shaped `collection_control_card_with_multiselect_toolbar` template from PR #179. The plugin now carries the Company Overview v1.3 / Collection card multiple select wrapper template, preserves `card_with_multiselect_toolbar_wrapper`, locked `card_col_item_multi_select`, Collection root actions, page-level temp/filter/form action dependencies, and allows edits only in approved business regions.
 

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.22
+
+- Release the full export-shaped `collection_control_grid_table_with_multiselect` template from PR #181.
+- Add the sanitized Projects Center v1.6 / All Tasks - multiple select wrapper template as a tracked reference artifact.
+- Require generated dashboards to preserve `grid_table_col_multiselect_wrapper`, locked `grid_table_col_item_select`, Collection root actions, selected-state variables, page-level filter/temp/action/formAction dependencies, and approved editable regions.
+- Enforce matching `grid_table_col_header` and `grid_col_item` column counts, widths, and compatible grid properties, and block simplified grid-table multiselect approximations before signing readiness.
+
 ## 0.8.21
 
 - Release the full export-shaped `collection_control_card_with_multiselect_toolbar` template from PR #179.

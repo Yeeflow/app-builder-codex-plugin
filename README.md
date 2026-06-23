@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.21`
+- Version: `0.8.22`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.21` releases the full export-shaped `collection_control_card_with_multiselect_toolbar` template from PR #179: the plugin now carries the Company Overview v1.3 / Collection card multiple select wrapper template, preserves card_with_multiselect_toolbar_wrapper and locked selection/action wiring, allows edits only in approved regions, and blocks simplified card multiselect approximations before generated-final signing readiness.
+Current release `0.8.22` releases the full export-shaped `collection_control_grid_table_with_multiselect` template from PR #181: the plugin now carries the Projects Center v1.6 / All Tasks - multiple select wrapper template, preserves grid_table_col_multiselect_wrapper and locked selection/action wiring, keeps header/item grid columns aligned, includes required page-level dependencies, allows edits only in approved regions, and blocks simplified grid-table multiselect approximations before generated-final signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.21
+Version: 0.8.22
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.21
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.22
 ```
 
 ## What Is Included
