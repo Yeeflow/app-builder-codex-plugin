@@ -122,6 +122,22 @@ Business controls such as Collections, Data Filters, KPI values, action buttons,
 
 Dashboard Collection presentation templates from `docs/reference/dashboard-dataset-presentation-golden-references.json` are component-level dataset regions, not page shells. Any approved Collection template (`collection_control_responsive_card_grid`, `collection_control_card_with_multiselect_toolbar`, `collection_control_grid_table`, `collection_control_grid_table_with_multiselect`, `collection_control_grid_table_with_search`, or `Event Pipeline Grid-Table`) must be inserted into an approved business-content slot such as `section_content_area`. Do not copy the source app's root shell, page header, root `Content`, structural layout wrappers, source business fields, source IDs, or source labels.
 
+Dashboard filter modules follow the same component rule. When a Dashboard filter is planned, copy an approved v1.1/Event Portfolio filter module into an approved business-content slot such as `section_content_area`, then map it to the app-specific data source and field. Do not create an ad hoc filter container, copy `event_portfolio_filter_group` directly under root `Content`, or invent a new layout module for filters.
+
+Every generated Dashboard filter must preserve the reference UI contract and receive app-specific data binding:
+
+- `attrs.data.list` resolves to an included app list
+- `attrs.data.field` resolves to the planned filter field on that list
+- `attrs.data.filter[]` is present and export-shaped
+- `display_f` and `value_f` are present
+- label and placeholder remain separate
+- `attrs.lablay` and `attrs.lab.ty` are present
+- `attrs.edit.pcolor` is present
+- `attrs.edit.normal.border.radius` uses a supported Yeeflow radius shape
+- the relevant Collection/table/KPI consumer references the filter field, variable, display field, or value field
+
+Filter module synthesis is a generation-stage responsibility. Functional Specification and App Plan documents may describe business filter needs and selected Yeeflow filter/control categories, but they must not carry runtime IDs, copied control JSON, or low-level style/property payloads.
+
 `page_title_section` is reserved for page title/header content. It must not contain Collection, Data table, Summary, chart, KPI-card, record-list, or other business/data controls. Put those controls in `section_content_area`, KPI card slots, or approved action slots.
 
 ## Actions
