@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.16`
+- Version: `0.8.17`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.16` releases the full-app skill-callable generation entrypoint contract from PR #169: the registry now marks `yeeflow-application-builder` and `yeeflow-application-generator` as first-class callable Codex skill entrypoints, requires a machine-readable invocation contract, and prevents clean-room runs from stopping after approved planning solely because no standalone CLI exists.
+Current release `0.8.17` releases validator semantic tolerance and Dashboard dataset line-scope fixes from PR #171: Dashboard dataset presentation validation now reads only canonical dataset/reference table rows instead of prose or validator commands, and App Plan resource-order validation accepts equivalent business wording for required planning intent without weakening schema or ordering gates.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.16
+Version: 0.8.17
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.16
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.17
 ```
 
 ## What Is Included

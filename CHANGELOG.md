@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.17
+
+- Release validator semantic tolerance and Dashboard dataset line-scope fixes from PR #171.
+- Narrow Dashboard dataset presentation App Plan validation to canonical dataset/reference table rows, avoiding false positives from prose, Form Report explanations, identity tables, and validator command lists.
+- Allow semantic-equivalent App Plan wording for required planning intent while preserving canonical resource-order, schema, and low-level implementation leakage gates.
+- Add focused regressions for the 0.8.16 dashboard dataset no-workaround probe and literal-phrase semantic-equivalent probe.
+
 ## 0.8.16
 
 - Release full-app skill-callable generation entrypoint contract from PR #169.

@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.16`
+`0.8.17`
+
+Version `0.8.17` releases validator semantic tolerance and Dashboard dataset line-scope fixes from PR #171. Dashboard dataset presentation validation now reads only canonical dataset/reference table rows and ignores prose, Form Report explanations, identity tables, and validator command lists. App Plan resource-order validation accepts equivalent business wording for required intent, such as Submission fields, Task page fields, independent approval-based Form reports, and no Sub List actions needed, without weakening schema or ordering gates.
 
 Version `0.8.16` releases the full-app skill-callable generation entrypoint contract from PR #169. The full-app entrypoint registry now marks `yeeflow-application-builder` and `yeeflow-application-generator` as first-class callable Codex skill entrypoints, requires a machine-readable invocation contract, and prevents clean-room runs from stopping after approved planning solely because no standalone CLI exists.
 
