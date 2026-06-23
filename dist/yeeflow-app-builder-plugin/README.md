@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.18`
+- Version: `0.8.19`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.18` releases Dashboard filter module synthesis gates from PR #173: generated Dashboard filters must copy approved Dashboard Page Layouts v1.1 / Event Portfolio filter modules into approved business-content slots, preserve app-specific field/style/consumer bindings, reject ad hoc filter bars or invented filter modules, and preserve canonical v1.1 Content padding.
+Current release `0.8.19` releases Dashboard Golden Reference property fidelity gates from PR #175: generated Dashboard modules must preserve child-control typography and filter appearance contracts from Dashboard Page Layouts v1.1 / Event Portfolio references, including title, subtitle, KPI, grid-table header, select-filter label layout, placeholder color, radius, and fixed-width positioning.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.18
+Version: 0.8.19
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.18
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.19
 ```
 
 ## What Is Included
