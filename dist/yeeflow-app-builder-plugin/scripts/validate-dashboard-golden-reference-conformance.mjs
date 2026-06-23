@@ -13,6 +13,33 @@ const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"
 const GRID_TYPES = new Set(["grid", "flex_grid"]);
 const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|employee|person|people|accountid|account id)\b/i;
 const V11_ROOT_CONTENT_CHILD_IDS = new Set(["page_title_section", "content_card_wrapper", "kpi_metrics_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+const GOLDEN_TYPOGRAPHY_TOKENS = new Map([
+  ["event_portfolio_title", "h2-bold"],
+  ["event_portfolio_subtitle", "body-medium"],
+  ["event_portfolio_pipeline_title", "h4-bold"],
+  ["event_portfolio_pipeline_subtitle", "caption-regular"],
+  ["event_portfolio_kpi_planned_events_label", "s-medium"],
+  ["event_portfolio_kpi_planned_events_value", "h2-bold"],
+  ["event_portfolio_kpi_planned_events_trend", "caption-regular"],
+  ["event_portfolio_kpi_planned_events_note", "caption-regular"],
+  ["event_portfolio_kpi_approved_budget_label", "s-medium"],
+  ["event_portfolio_kpi_approved_budget_value", "h2-bold"],
+  ["event_portfolio_kpi_approved_budget_trend", "caption-regular"],
+  ["event_portfolio_kpi_approved_budget_note", "caption-regular"],
+  ["event_portfolio_kpi_registration_rate_label", "s-medium"],
+  ["event_portfolio_kpi_registration_rate_value", "h2-bold"],
+  ["event_portfolio_kpi_registration_rate_trend", "caption-regular"],
+  ["event_portfolio_kpi_registration_rate_note", "caption-regular"],
+  ["event_portfolio_kpi_lead_follow_up_label", "s-medium"],
+  ["event_portfolio_kpi_lead_follow_up_value", "h2-bold"],
+  ["event_portfolio_kpi_lead_follow_up_trend", "caption-regular"],
+  ["event_portfolio_kpi_lead_follow_up_note", "caption-regular"],
+]);
+const GRID_TABLE_HEADER_GRID_IDS = new Set(["event_pipeline_grid_table_header_grid", "campaign_readiness_header_grid"]);
+const GRID_TABLE_HEADER_TOKEN = "caption-medium";
+const FILTER_LABEL_TOKEN = "xs-light";
+const FILTER_LABEL_LAYOUT = "top";
+const FILTER_FIXED_WIDTH = 200;
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -121,7 +148,9 @@ function validateReferenceQuality(reference, referenceIndex, findings) {
 
   for (const entry of referenceIndex.controls.filter((item) => FILTER_TYPES.has(item.control?.type))) {
     validateFilterContract(entry.control, findings, "DASH_GOLDEN_REFERENCE", { pointer: entry.pointer });
+    validateFilterPropertyFidelity(entry.control, findings, "DASH_GOLDEN_REFERENCE", { pointer: entry.pointer });
   }
+  validateTypographyPropertyFidelity({ title: "Dashboard Golden Reference" }, referenceIndex, findings, "DASH_GOLDEN_REFERENCE");
 }
 
 function validateSelection(selection, context) {
@@ -237,6 +266,7 @@ function validateExportShapeParity(page, context) {
   if (!isV11) validateRegionOrder(page, reference, resourceIndex, context.findings);
   validateResourceLayoutContracts(page, reference, resourceIndex, context.findings, { isDashboardPageLayoutsV11: isV11 });
   validateFilterContractsAndStaticLinks(page, reference, resourceIndex, context.findings);
+  validateTypographyPropertyFidelity(page, resourceIndex, context.findings, "DASH_GOLDEN_RESOURCE");
 }
 
 function validateRegionOrder(page, reference, resourceIndex, findings) {
@@ -291,6 +321,7 @@ function validateFilterContractsAndStaticLinks(page, reference, resourceIndex, f
   const filterEntries = resourceIndex.controls.filter((entry) => FILTER_TYPES.has(entry.control?.type));
   for (const entry of filterEntries) {
     validateFilterContract(entry.control, findings, "DASH_GOLDEN_RESOURCE", { page: page.title, pointer: entry.pointer });
+    validateFilterPropertyFidelity(entry.control, findings, "DASH_GOLDEN_RESOURCE", { page: page.title, pointer: entry.pointer });
   }
   if (!planned(page.resource, "filters") || filterEntries.length === 0) return;
   const consumers = resourceIndex.controls.filter((entry) => ["collection", "summary"].includes(entry.control?.type));
@@ -300,6 +331,106 @@ function validateFilterContractsAndStaticLinks(page, reference, resourceIndex, f
     if (tokens.length > 0 && !tokens.some((token) => consumerText.includes(token))) {
       findings.push(error("DASH_GOLDEN_FILTER_STATIC_LINK_MISSING", "Generated filter controls must have static query/variable linkage to Collection/KPI consumers; static proof does not replace runtime linkage proof.", { page: page.title, filter: firstIdentity(entry.control) || entry.pointer, tokens }));
     }
+  }
+}
+
+function validateTypographyPropertyFidelity(page, index, findings, prefix) {
+  for (const [regionId, expectedToken] of GOLDEN_TYPOGRAPHY_TOKENS) {
+    const entry = index.byKey.get(regionId);
+    if (!entry) continue;
+    const actualToken = typographyToken(entry.control);
+    if (actualToken !== expectedToken) {
+      findings.push(error(`${prefix}_TYPOGRAPHY_TOKEN_DRIFT`, "Dashboard Golden Reference typography token must be preserved for the semantic control role.", {
+        page: page.title,
+        control: regionId,
+        expected: { "attrs.heads.ty": [null, expectedToken] },
+        actual: { "attrs.heads.ty": entry.control?.attrs?.heads?.ty ?? null },
+        pointer: entry.pointer,
+      }));
+    }
+  }
+
+  for (const gridId of GRID_TABLE_HEADER_GRID_IDS) {
+    const headerGrid = index.byKey.get(gridId);
+    if (!headerGrid) continue;
+    for (const heading of headingDescendants(headerGrid.control)) {
+      const actualToken = typographyToken(heading);
+      if (actualToken !== GRID_TABLE_HEADER_TOKEN) {
+        findings.push(error(`${prefix}_GRID_TABLE_HEADER_TYPOGRAPHY_TOKEN_DRIFT`, "Grid-table column header typography must preserve the Event Portfolio header token.", {
+          page: page.title,
+          grid: gridId,
+          control: firstIdentity(heading) || heading.name || null,
+          expected: { "attrs.heads.ty": [null, GRID_TABLE_HEADER_TOKEN] },
+          actual: { "attrs.heads.ty": heading?.attrs?.heads?.ty ?? null },
+          pointer: headerGrid.pointer,
+        }));
+      }
+    }
+  }
+
+  for (const entry of index.controls) {
+    if (entry.control?.type !== "heading") continue;
+    if (!/column header/i.test(identityCandidates(entry.control).concat(entry.control?.name || "", entry.control?.label || "").join(" "))) continue;
+    const actualToken = typographyToken(entry.control);
+    if (actualToken !== GRID_TABLE_HEADER_TOKEN) {
+      findings.push(error(`${prefix}_GRID_TABLE_HEADER_TYPOGRAPHY_TOKEN_DRIFT`, "Grid-table column header typography must preserve the Event Portfolio header token.", {
+        page: page.title,
+        control: firstIdentity(entry.control) || entry.control.name || null,
+        expected: { "attrs.heads.ty": [null, GRID_TABLE_HEADER_TOKEN] },
+        actual: { "attrs.heads.ty": entry.control?.attrs?.heads?.ty ?? null },
+        pointer: entry.pointer,
+      }));
+    }
+  }
+}
+
+function validateFilterPropertyFidelity(control, findings, prefix, extra = {}) {
+  const filter = firstIdentity(control) || null;
+  const labelToken = typographyToken({ attrs: { heads: { ty: control?.attrs?.lab?.ty } } });
+  if (labelToken !== FILTER_LABEL_TOKEN) {
+    findings.push(error(`${prefix}_FILTER_LABEL_TYPOGRAPHY_DRIFT`, "Dashboard select/filter label typography must preserve the Golden Reference xs-light token.", {
+      ...extra,
+      filter,
+      expected: { "attrs.lab.ty": [null, FILTER_LABEL_TOKEN] },
+      actual: { "attrs.lab.ty": control?.attrs?.lab?.ty ?? null },
+    }));
+  }
+  if (!isTupleValue(control?.attrs?.lablay, FILTER_LABEL_LAYOUT)) {
+    findings.push(error(`${prefix}_FILTER_LABEL_LAYOUT_DRIFT`, "Dashboard filter label layout must preserve the export-shaped tuple form so Designer does not parse it as an invalid scalar layout.", {
+      ...extra,
+      filter,
+      expected: { "attrs.lablay": [null, FILTER_LABEL_LAYOUT] },
+      actual: { "attrs.lablay": control?.attrs?.lablay ?? null },
+    }));
+  }
+  if (!present(control?.attrs?.edit?.placeholder?.color)) {
+    findings.push(error(`${prefix}_FILTER_PLACEHOLDER_COLOR_MISSING`, "Dashboard filter placeholder color must be preserved from the Golden Reference module.", {
+      ...extra,
+      filter,
+      expectedPath: "attrs.edit.placeholder.color",
+    }));
+  }
+  if (!isSupportedRadius(control?.attrs?.edit?.normal?.border?.radius)) {
+    findings.push(error(`${prefix}_FILTER_RADIUS_MISSING`, "Dashboard filter border radius must preserve a supported export-shaped Yeeflow radius value.", {
+      ...extra,
+      filter,
+      expectedPath: "attrs.edit.normal.border.radius",
+      actual: control?.attrs?.edit?.normal?.border?.radius ?? null,
+    }));
+  }
+  if (!isFixedWidthPositioning(control?.attrs?.common?.positioning)) {
+    findings.push(error(`${prefix}_FILTER_WIDTH_POSITIONING_MISSING`, "Dashboard filter fixed-width positioning must preserve the Golden Reference custom-width contract.", {
+      ...extra,
+      filter,
+      expected: {
+        "attrs.common.positioning.widthtype": [null, "3"],
+        "attrs.common.positioning.width": [null, FILTER_FIXED_WIDTH],
+      },
+      actual: {
+        "attrs.common.positioning.widthtype": control?.attrs?.common?.positioning?.widthtype ?? null,
+        "attrs.common.positioning.width": control?.attrs?.common?.positioning?.width ?? null,
+      },
+    }));
   }
 }
 
@@ -408,6 +539,17 @@ function collectControls(node, out, pointer, depth = 0, orderRef = { count: 0 })
   if (!isObject(node)) return;
   if (node.type) out.push({ control: node, pointer, depth, order: orderRef.count++ });
   for (const key of ["children", "columns", "controls"]) asArray(node[key]).forEach((child, index) => collectControls(child, out, `${pointer}.${key}[${index}]`, depth + 1, orderRef));
+}
+
+function headingDescendants(root) {
+  const headings = [];
+  const visit = (node) => {
+    if (!isObject(node)) return;
+    if (node.type === "heading") headings.push(node);
+    for (const child of asArray(node.children)) visit(child);
+  };
+  visit(root);
+  return headings;
 }
 
 function hasMainContent(resource) {
@@ -630,6 +772,37 @@ function isZeroPaddingValue(value) {
   if (typeof value === "string") return value === "0" || value === "--sp--s0";
   if (isObject(value)) return ["top", "right", "bottom", "left"].every((key) => isZeroPaddingValue(value[key] ?? 0));
   return false;
+}
+
+function typographyToken(control) {
+  const ty = control?.attrs?.heads?.ty;
+  if (Array.isArray(ty)) return ty[1] === undefined ? null : String(ty[1]);
+  if (present(ty)) return String(ty);
+  return null;
+}
+
+function isTupleValue(value, expected) {
+  return Array.isArray(value) && value[0] === null && String(value[1]) === String(expected);
+}
+
+function isSupportedRadius(value) {
+  if (!Array.isArray(value) || value[0] !== null || value[1] === undefined || value[1] === null) return false;
+  if (typeof value[1] === "number") return true;
+  if (typeof value[1] === "string") return value[1].trim() !== "";
+  if (isObject(value[1])) return ["top", "right", "bottom", "left"].every((key) => present(value[1][key]));
+  return false;
+}
+
+function isFixedWidthPositioning(positioning) {
+  if (!isObject(positioning)) return false;
+  const widthtype = positioning.widthtype;
+  const width = positioning.width;
+  return Array.isArray(widthtype)
+    && widthtype[0] === null
+    && String(widthtype[1]) === "3"
+    && Array.isArray(width)
+    && width[0] === null
+    && Number(width[1]) === FILTER_FIXED_WIDTH;
 }
 
 function filterLabel(control) {

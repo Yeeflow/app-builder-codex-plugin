@@ -244,16 +244,36 @@ try {
   const missingDataFieldRegistry = registry();
   delete find(missingDataFieldRegistry.references[0].exportShape._ak_c, "event_portfolio_region_filter").attrs.data.field;
   expectCode("radio-filter missing attrs.data.field", ["--registry", writeJson(tempDir, "missing-data-field-registry.json", missingDataFieldRegistry)], "DASH_GOLDEN_REFERENCE_FILTER_DATA_FIELD_MISSING");
+  const titleTypographyDrift = registry();
+  find(titleTypographyDrift.references[0].exportShape._ak_c, "event_portfolio_title").attrs.heads.ty = [null, "h5-medium"];
+  expectCode("reference title typography token drift", ["--registry", writeJson(tempDir, "title-typography-drift-registry.json", titleTypographyDrift)], "DASH_GOLDEN_REFERENCE_TYPOGRAPHY_TOKEN_DRIFT");
+
+  const filterScalarLablayRegistry = registry();
+  find(filterScalarLablayRegistry.references[0].exportShape._ak_c, "event_portfolio_status_filter").attrs.lablay = "top";
+  expectCode("filter scalar lablay rejected", ["--registry", writeJson(tempDir, "filter-scalar-lablay-registry.json", filterScalarLablayRegistry)], "DASH_GOLDEN_REFERENCE_FILTER_LABEL_LAYOUT_DRIFT");
+
+  const filterMissingPlaceholderColorRegistry = registry();
+  delete find(filterMissingPlaceholderColorRegistry.references[0].exportShape._ak_c, "event_portfolio_status_filter").attrs.edit.placeholder;
+  expectCode("filter placeholder color missing", ["--registry", writeJson(tempDir, "filter-placeholder-color-registry.json", filterMissingPlaceholderColorRegistry)], "DASH_GOLDEN_REFERENCE_FILTER_PLACEHOLDER_COLOR_MISSING");
+
+  const filterMissingFixedWidthRegistry = registry();
+  delete find(filterMissingFixedWidthRegistry.references[0].exportShape._ak_c, "event_portfolio_status_filter").attrs.common.positioning.width;
+  expectCode("filter fixed width positioning missing", ["--registry", writeJson(tempDir, "filter-fixed-width-registry.json", filterMissingFixedWidthRegistry)], "DASH_GOLDEN_REFERENCE_FILTER_WIDTH_POSITIONING_MISSING");
 
   expectCode("provenance markers with simplified reconstructed structure", ["--package", writePackage(tempDir, "semantic-shell", decoded(semanticShellResource()))], "DASH_GOLDEN_EXPORT_SHAPE_SIMPLIFIED");
   expectCode("unrelated generated app copies Event-specific fields", ["--package", writePackage(tempDir, "marketing-leak", decoded({ ...dashboardResource(), goldenReferenceSelection: selection({ gridTableFieldMapping: [{ displayLabel: "Region", sourceField: "Budget" }] }) }))], "DASH_GOLDEN_MARKETING_FIELD_LEAKAGE");
   expectCode("user field rendered as dynamic-field", ["--package", writePackage(tempDir, "user-dynamic-field", decoded(dashboardResource((root) => { const user = find(root, "event_pipeline_grid_table_item_grid_row_6"); user.children[0].type = "dynamic-field"; user.children[0].name = "Borrower"; user.children[0].attrs = { field: "Borrower", fieldType: "User" }; })))], "DASH_GOLDEN_USER_FIELD_DYNAMIC_FIELD");
   expectPass("user field rendered as dynamic-user", ["--package", writePackage(tempDir, "user-dynamic-user", decoded())]);
+  expectCode("generated dashboard title typography drift rejected", ["--package", writePackage(tempDir, "generated-title-typography-drift", decoded(dashboardResource((root) => { find(root, "event_portfolio_title").attrs.heads.ty = [null, "h5-medium"]; })))], "DASH_GOLDEN_RESOURCE_TYPOGRAPHY_TOKEN_DRIFT");
+  expectCode("generated dashboard KPI value typography drift rejected", ["--package", writePackage(tempDir, "generated-kpi-typography-drift", decoded(dashboardResource((root) => { find(root, "event_portfolio_kpi_planned_events_value").attrs.heads.ty = [null, "h5-medium"]; })))], "DASH_GOLDEN_RESOURCE_TYPOGRAPHY_TOKEN_DRIFT");
+  expectCode("generated grid-table header typography drift rejected", ["--package", writePackage(tempDir, "generated-grid-header-typography-drift", decoded(dashboardResource((root) => { find(root, "Event Column Header").attrs.heads.ty = [null, "h5-medium"]; })))], "DASH_GOLDEN_RESOURCE_GRID_TABLE_HEADER_TYPOGRAPHY_TOKEN_DRIFT");
+  expectCode("generated filter scalar lablay rejected", ["--package", writePackage(tempDir, "generated-filter-scalar-lablay", decoded(dashboardResource((root) => { find(root, "event_portfolio_status_filter").attrs.lablay = "top"; })))], "DASH_GOLDEN_RESOURCE_FILTER_LABEL_LAYOUT_DRIFT");
+  expectCode("generated filter fixed width missing rejected", ["--package", writePackage(tempDir, "generated-filter-width-missing", decoded(dashboardResource((root) => { delete find(root, "event_portfolio_status_filter").attrs.common.positioning.width; })))], "DASH_GOLDEN_RESOURCE_FILTER_WIDTH_POSITIONING_MISSING");
 
   expectCode("runtime filter proof selected value but no table or KPI change", ["--runtime-filter-proof", writeJson(tempDir, "runtime-no-change.json", { selectedFilterValue: "Singapore", before: { tableRows: [["Laptop", "Open"]], kpiValues: ["4"] }, after: { tableRows: [["Laptop", "Open"]], kpiValues: ["4"] }, screenshots: ["before.png", "after.png"] })], "DASH_FILTER_RUNTIME_DATA_UNCHANGED");
   expectPass("runtime filter proof shows before and after data change", ["--runtime-filter-proof", writeJson(tempDir, "runtime-change.json", { selectedFilterValue: "Singapore", before: { tableRows: [["Laptop", "Open"]], kpiValues: ["4"] }, after: { tableRows: [["Monitor", "Open"]], kpiValues: ["1"] }, screenshots: ["before.png", "after.png"] })]);
 
-  console.log(JSON.stringify({ status: "pass", cases: 14 }, null, 2));
+  console.log(JSON.stringify({ status: "pass", cases: 23 }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

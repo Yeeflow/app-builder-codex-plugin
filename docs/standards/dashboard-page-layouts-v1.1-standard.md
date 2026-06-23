@@ -131,12 +131,17 @@ Every generated Dashboard filter must preserve the reference UI contract and rec
 - `attrs.data.filter[]` is present and export-shaped
 - `display_f` and `value_f` are present
 - label and placeholder remain separate
-- `attrs.lablay` and `attrs.lab.ty` are present
-- `attrs.edit.pcolor` is present
+- `attrs.lab.ty = [null, "xs-light"]`
+- `attrs.lablay = [null, "top"]`; scalar `"top"` is invalid
+- `attrs.edit.placeholder.color` and `attrs.edit.pcolor` are present
 - `attrs.edit.normal.border.radius` uses a supported Yeeflow radius shape
+- `attrs.common.positioning.widthtype` preserves the custom-width tuple beginning with `[null, "3"]`
+- `attrs.common.positioning.width = [null, 200]`
 - the relevant Collection/table/KPI consumer references the filter field, variable, display field, or value field
 
 Filter module synthesis is a generation-stage responsibility. Functional Specification and App Plan documents may describe business filter needs and selected Yeeflow filter/control categories, but they must not carry runtime IDs, copied control JSON, or low-level style/property payloads.
+
+Golden Reference component regions inside v1.1 slots must preserve child-control property fidelity. Page titles, subtitles, section titles/subtitles, KPI labels/values/trends/notes, filter labels, and grid-table column headers keep their role-specific typography tokens from the approved reference. The generator may replace business text and data bindings, but it must not normalize all headings to a generic token such as `h5-medium`.
 
 `page_title_section` is reserved for page title/header content. It must not contain Collection, Data table, Summary, chart, KPI-card, record-list, or other business/data controls. Put those controls in `section_content_area`, KPI card slots, or approved action slots.
 
