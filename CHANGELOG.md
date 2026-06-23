@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.14
+
+- Release full-app generation entrypoint and Collection template exact-match gates from PR #165.
+- Register skill-orchestrated full-app generation entrypoints so clean-room generation can continue from `functional-specification.md` and `yeeflow-app-plan.md` without misclassifying proof, delivery, package API, runtime-proof, or sample helper scripts as full-app generators.
+- Require Dashboard Collection template validation to use exact template-token matching instead of substring matching, so `collection_control_grid_table_with_multiselect` and `collection_control_grid_table_with_search` no longer collide with the base `collection_control_grid_table` template.
+- Keep all approved Dashboard Collection presentation templates as component-level dataset regions inside Dashboard Page Layouts v1.1 slots, with generated-final package and UI hard gates still enforcing provenance, slot placement, and no simplified/invented Collection structures.
+
 ## 0.8.13
 
 - Release Dashboard Collection template slot decision gates from PR #163.

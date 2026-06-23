@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.13`
+`0.8.14`
+
+Version `0.8.14` releases full-app generation entrypoint and Collection template exact-match gates from PR #165. Clean-room generation must inspect the full-app entrypoint registry before claiming no generator path from `functional-specification.md` and `yeeflow-app-plan.md`; proof, delivery, package API, runtime-proof, and sample helper scripts are explicitly not full-app generators. Dashboard Collection template validation now uses exact template-token matching so multiselect/search grid-table references do not collide with the base grid-table template, while generated Dashboard Collections still must use approved presentation templates inside Dashboard Page Layouts v1.1 slots.
 
 Version `0.8.13` releases Dashboard Collection template slot decision gates from PR #163. Dashboard dataset regions that use Collection must choose exactly one approved presentation reference from the registry using source resource type, when-to-use, when-not-to-use, and required business signals as the App Plan rationale. Generated Dashboard Collections are component-level dataset regions inside Dashboard Page Layouts v1.1, normally under `section_content_area`; copied source shells, page headers, root `Content` placement, invented or simplified Collection templates, and source-reference field/label/ID leakage remain blockers.
 
