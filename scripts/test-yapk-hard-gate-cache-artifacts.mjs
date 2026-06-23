@@ -106,6 +106,7 @@ const requiredDocs = [
   "docs/training/dashboard-golden-reference-enforcement-training-report.md",
   "docs/training/dashboard-golden-reference-export-shape-parity-training-report.md",
   "docs/training/dashboard-dataset-presentation-golden-references-training-report.md",
+  "docs/training/dashboard-collection-template-materialization-conformance-training-report.md",
   "docs/training/dashboard-collection-template-slot-decision-gates-training-report.md",
   "docs/training/full-app-generation-entrypoint-and-collection-template-exact-match-training-report.md",
   "docs/training/full-app-entrypoint-cache-path-alignment-training-report.md",

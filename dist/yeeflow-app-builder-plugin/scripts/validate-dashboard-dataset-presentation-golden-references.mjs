@@ -52,6 +52,7 @@ export function validateDashboardDatasetPresentationGoldenReferences(options = {
 
   if (options.appPlan) validateAppPlan(path.resolve(options.appPlan), registryInfo, findings);
   if (options.package) validatePackage(path.resolve(options.package), registryInfo, findings);
+  if (options.appPlan && options.package) validateAppPlanToPackageConformance(path.resolve(options.appPlan), path.resolve(options.package), registryInfo, findings);
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
@@ -124,6 +125,109 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
         selectedTemplateId: selected[0],
         requiredBusinessSignals: asArray(reference?.requiredBusinessSignals),
         whenToUse: asArray(reference?.whenToUse),
+      }));
+    }
+  }
+}
+
+function collectDashboardDatasetPlanRecords(text, approvedIds) {
+  const dashboard = extractDashboardPagesPlanSection(text);
+  if (!dashboard.trim()) return [];
+
+  const records = [];
+  for (const table of markdownTables(dashboard)) {
+    const headers = table.headers.map(normalizeTableCell);
+    const selectedReferenceIndex = headers.findIndex((header) => header === "selected collection presentation reference");
+    const genericControlIndex = headers.findIndex((header) => header === "control" || header === "selected control");
+    const selectedControlIndex = headers.findIndex((header) => header === "selected record display control");
+    const dashboardPageIndex = headers.findIndex((header) => header === "dashboard page" || header === "dashboard page name");
+    const datasetRegionIndex = headers.findIndex((header) => header === "dataset region" || header === "section");
+    const sourceIndex = headers.findIndex((header) => header === "source resource" || header === "data source");
+
+    const canonicalDatasetReferenceTable =
+      datasetRegionIndex !== -1
+      && sourceIndex !== -1
+      && (dashboardPageIndex !== -1 || selectedControlIndex !== -1 || genericControlIndex !== -1);
+
+    if (!canonicalDatasetReferenceTable) continue;
+
+    for (const row of table.rows) {
+      if (isMarkdownTableHeaderOrSeparator(row.raw)) continue;
+      if (/not applicable|n\/a|deferred|no dashboard dataset/i.test(row.raw)) continue;
+      const selectedControl = row.cells[selectedControlIndex] || row.cells[genericControlIndex] || "";
+      if ((selectedControlIndex !== -1 || genericControlIndex !== -1) && !/\bcollection\b/i.test(selectedControl)) continue;
+      if (selectedReferenceIndex === -1 && !/\bcollection\b/i.test(selectedControl)) continue;
+      const selected = extractApprovedTemplateIds(row.raw, approvedIds);
+      if (selected.length !== 1) continue;
+      records.push({
+        dashboardPage: row.cells[dashboardPageIndex] || "",
+        datasetRegion: row.cells[datasetRegionIndex] || "",
+        sourceResource: row.cells[sourceIndex] || "",
+        selectedTemplateId: selected[0],
+        raw: row.raw,
+      });
+    }
+  }
+  return records;
+}
+
+function validateAppPlanToPackageConformance(appPlanPath, packagePath, registryInfo, findings) {
+  if (!fs.existsSync(appPlanPath) || !fs.existsSync(packagePath)) return;
+  const appPlanText = fs.readFileSync(appPlanPath, "utf8");
+  const plannedRecords = collectDashboardDatasetPlanRecords(appPlanText, registryInfo.approvedIds);
+  if (!plannedRecords.length) return;
+
+  let decoded;
+  try {
+    ({ decoded } = readDecodedYapk(packagePath));
+  } catch {
+    return;
+  }
+
+  const generatedRecords = collectDashboardCollectionRecords(decoded, registryInfo.approvedIds);
+  const plannedTemplates = new Set(plannedRecords.map((record) => record.selectedTemplateId));
+  const generatedTemplates = new Set(generatedRecords.map((record) => record.templateId).filter(Boolean));
+
+  for (const plannedTemplateId of plannedTemplates) {
+    if (!generatedRecords.some((record) => record.templateId === plannedTemplateId)) {
+      findings.push(error("DASH_DATASET_APP_PLAN_TEMPLATE_NOT_MATERIALIZED", "App Plan selected a Dashboard Collection presentation template that was not materialized in any generated Dashboard Collection.", {
+        selectedTemplateId: plannedTemplateId,
+        plannedRegions: plannedRecords.filter((record) => record.selectedTemplateId === plannedTemplateId).map(planRecordSummary),
+        generatedTemplateIds: [...generatedTemplates],
+      }));
+    }
+  }
+
+  if (plannedTemplates.size > 1 && generatedTemplates.size === 1) {
+    findings.push(error("DASH_DATASET_TEMPLATE_DIVERSITY_COLLAPSED", "App Plan selected multiple Dashboard Collection presentation templates but the generated package materialized only one effective template.", {
+      plannedTemplateIds: [...plannedTemplates],
+      generatedTemplateIds: [...generatedTemplates],
+    }));
+  }
+
+  for (const planned of plannedRecords) {
+    const pageRecords = generatedRecords.filter((record) => dashboardPageMatches(planned.dashboardPage, record.pageTitle));
+    const regionRecords = pageRecords.filter((record) => datasetRegionMatches(planned.datasetRegion, record));
+    if (!regionRecords.length) {
+      findings.push(error("DASH_DATASET_COLLECTION_REGION_MISSING", "App Plan Dashboard Collection region has no matching generated Collection region in the package.", {
+        ...planRecordSummary(planned),
+        generatedRegionsOnPage: pageRecords.map((record) => ({ region: record.regionIdentity, templateId: record.templateId, path: record.path })),
+      }));
+      continue;
+    }
+
+    const explicitMatches = regionRecords.filter((record) => record.explicitTemplateId);
+    if (!explicitMatches.length) {
+      findings.push(error("DASH_DATASET_COLLECTION_EXPLICIT_PROVENANCE_MISSING", "Generated Dashboard Collection region matched the App Plan region but lacks explicit Collection-root dataset presentation provenance.", {
+        ...planRecordSummary(planned),
+        generatedRegions: regionRecords.map((record) => ({ templateId: record.templateId, path: record.path })),
+      }));
+    }
+
+    if (!regionRecords.some((record) => record.templateId === planned.selectedTemplateId)) {
+      findings.push(error("DASH_DATASET_REGION_TEMPLATE_MISMATCH", "Generated Dashboard Collection region uses a different effective template than the App Plan selected for that region.", {
+        ...planRecordSummary(planned),
+        generatedTemplates: regionRecords.map((record) => ({ templateId: record.templateId, explicitTemplateId: record.explicitTemplateId, path: record.path })),
       }));
     }
   }
@@ -301,6 +405,29 @@ function validateCollectionEntry(entry, page, approvedIds, findings) {
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
 }
 
+function collectDashboardCollectionRecords(decoded, approvedIds) {
+  const records = [];
+  for (const page of collectDashboardPages(decoded)) {
+    const collections = page.controls.filter((entry) => String(entry.control?.type || "") === "collection");
+    for (const entry of collections) {
+      const provenance = resolveTemplateId(entry, page);
+      const explicitTemplateId = resolveExplicitCollectionTemplateId(entry, approvedIds);
+      records.push({
+        pageTitle: page.title,
+        regionIdentity: resolveDatasetRegionIdentity(entry),
+        path: entry.pointer,
+        templateId: provenance.templateId,
+        explicitTemplateId,
+        identities: [
+          ...identityCandidates(entry.control),
+          ...entry.ancestors.flatMap(identityCandidates),
+        ].map(normalizeIdentity).filter(Boolean),
+      });
+    }
+  }
+  return records;
+}
+
 function validateCollectionSlot(entry, page, findings) {
   const ancestorIdentities = new Set(entry.ancestors.flatMap(identityCandidates).map(normalizeIdentity));
   if ([...COLLECTION_ALLOWED_SLOT_IDS].some((id) => ancestorIdentities.has(normalizeIdentity(id)))) return;
@@ -336,6 +463,79 @@ function resolveTemplateId(entry, page) {
     return { templateId: candidate };
   }
   return { templateId: "" };
+}
+
+function resolveExplicitCollectionTemplateId(entry, approvedIds) {
+  if (!isObject(entry?.control)) return "";
+  const candidates = [
+    entry.control.datasetPresentationTemplateId,
+    entry.control.datasetPresentationReferenceId,
+    entry.control.derivedFromDatasetPresentationTemplate,
+    entry.control.derivedFromDatasetPresentationReference,
+    entry.control.selectedDatasetPresentationTemplateId,
+    entry.control.attrs?.datasetPresentationTemplateId,
+    entry.control.attrs?.datasetPresentationReferenceId,
+    entry.control.attrs?.derivedFromDatasetPresentationTemplate,
+    entry.control.attrs?.derivedFromDatasetPresentationReference,
+    entry.control.attrs?.templateId,
+    entry.control.attrs?.data?.datasetPresentationTemplateId,
+    entry.control.attrs?.data?.datasetPresentationReferenceId,
+  ].map((item) => String(item || "").trim()).filter(Boolean);
+  for (const candidate of candidates) {
+    if (/^event pipeline grid-table$/i.test(candidate)) return "Event Pipeline Grid-Table";
+    if (approvedIds.has(candidate)) return candidate;
+  }
+  return "";
+}
+
+function resolveDatasetRegionIdentity(entry) {
+  const candidates = [
+    entry.control?.datasetRegion,
+    entry.control?.datasetRegionName,
+    entry.control?.appPlanDatasetRegion,
+    entry.control?.attrs?.datasetRegion,
+    entry.control?.attrs?.datasetRegionName,
+    entry.control?.attrs?.appPlanDatasetRegion,
+    entry.control?.attrs?.data?.datasetRegion,
+    entry.control?.attrs?.data?.appPlanDatasetRegion,
+    ...entry.ancestors.flatMap((node) => [
+      node?.datasetRegion,
+      node?.datasetRegionName,
+      node?.appPlanDatasetRegion,
+      node?.attrs?.datasetRegion,
+      node?.attrs?.datasetRegionName,
+      node?.attrs?.appPlanDatasetRegion,
+      ...identityCandidates(node),
+    ]),
+    ...identityCandidates(entry.control),
+  ];
+  return candidates.map((item) => String(item || "").trim()).find(Boolean) || "";
+}
+
+function dashboardPageMatches(expected, actual) {
+  const expectedNorm = normalizeIdentity(expected);
+  const actualNorm = normalizeIdentity(actual);
+  if (!expectedNorm || !actualNorm) return false;
+  return expectedNorm === actualNorm || expectedNorm.includes(actualNorm) || actualNorm.includes(expectedNorm);
+}
+
+function datasetRegionMatches(expected, generatedRecord) {
+  const expectedNorm = normalizeIdentity(expected);
+  if (!expectedNorm) return false;
+  const candidates = [
+    generatedRecord.regionIdentity,
+    ...generatedRecord.identities,
+  ].map(normalizeIdentity).filter(Boolean);
+  return candidates.some((candidate) => candidate === expectedNorm || candidate.includes(expectedNorm) || expectedNorm.includes(candidate));
+}
+
+function planRecordSummary(record) {
+  return {
+    dashboardPage: record.dashboardPage,
+    datasetRegion: record.datasetRegion,
+    sourceResource: record.sourceResource,
+    selectedTemplateId: record.selectedTemplateId,
+  };
 }
 
 function validateGridTable(entry, page, templateId, findings) {

@@ -8,6 +8,7 @@ This standard keeps business planning separate from low-level Yeeflow payload ge
 - App Plan maps each Dashboard dataset region to exactly one approved presentation reference ID and explains why by using the registry's `whenToUse`, `whenNotToUse`, `requiredBusinessSignals`, and `suitableSourceResourceTypes` guidance.
 - Resource generation copies/adapts the selected export-proven template and binds it to real app resources.
 - Validators reject simplified, invented, or partially recreated Collection layouts before signing.
+- Generated-final validation compares each App Plan Dashboard dataset region to the generated Dashboard package. The selected Collection presentation reference is an implementation contract for that exact page/region, not advisory prose.
 
 ## Approved References
 
@@ -61,6 +62,8 @@ Validator scope rule: this gate parses canonical Dashboard record-display / data
 - Do not copy the source application page shell for any Collection reference. Event Portfolio, Projects Center, Project Tasks, and card-grid source exports are proof sources only; they are not generated page shells for another app.
 - Do not copy source-example business fields, labels, data sources, IDs, ListID, LayoutID, PageID, or domain text. Replace them with current-app business fields and generated IDs during resource generation.
 - Generated Dashboard Collection controls must carry or inherit approved template provenance through a clear field such as `datasetPresentationTemplateId`, `datasetPresentationReferenceId`, `derivedFromDatasetPresentationTemplate`, or the approved Golden Reference region identity.
+- For App Plan-declared Dashboard dataset regions, the generated Collection root must carry explicit template provenance. Ancestor-only inference is not enough for plan-to-package conformance because it can hide template collapse.
+- Generation must dispatch each Dashboard dataset region by the App Plan's selected template ID. Do not route all Dashboard Collections through `Event Pipeline Grid-Table`, generic grid-table, card fallback, or any other single default builder unless that exact template was selected for that exact region.
 - Do not create generic repeated cards, fake grid tables, simplified Data table lookalikes, or ad hoc Collection item templates.
 - Grid-table references must preserve header `flex_grid`, Collection body, repeated item `flex_grid`, matching columns, mobile item-grid behavior, and valid source list bindings.
 - Multiselect references must preserve selected state, selected count, checkbox icons, bulk toolbar/actions, `ListDataID`, and `__ctx_coll` current-item context.
@@ -75,5 +78,14 @@ Run `scripts/validate-dashboard-dataset-presentation-golden-references.mjs` for:
 - App Plan selected reference IDs
 - generated package Collection template provenance
 - generated package Collection structural conformance
+- App Plan-to-package region-level template conformance when both `--app-plan` and `--package` are provided
 
 This gate is included in first-generation YAPK preflight and dashboard hard gates. A package that fails this gate is not eligible for signing, install/import, upgrade, runtime proof, or handoff.
+
+When an App Plan is available, generated-final packages must fail if:
+
+- a template selected in the App Plan is not materialized in the generated package (`DASH_DATASET_APP_PLAN_TEMPLATE_NOT_MATERIALIZED`)
+- a generated Dashboard Collection region uses a different template than the App Plan selected (`DASH_DATASET_REGION_TEMPLATE_MISMATCH`)
+- multiple planned templates collapse to one effective generated template (`DASH_DATASET_TEMPLATE_DIVERSITY_COLLAPSED`)
+- a planned Dashboard Collection region has no generated Collection region (`DASH_DATASET_COLLECTION_REGION_MISSING`)
+- a matched generated Collection region lacks explicit Collection-root template provenance (`DASH_DATASET_COLLECTION_EXPLICIT_PROVENANCE_MISSING`)
