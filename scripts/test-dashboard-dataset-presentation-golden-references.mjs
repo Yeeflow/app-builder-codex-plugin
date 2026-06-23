@@ -149,6 +149,24 @@ Dashboard validator commands used during validation:
   bulk.attrs.actions = [];
   expectCode("multiselect Collection without bulk action contract fails", ["--package", writePackage("bad-multiselect", badMultiselectPages)], "DASH_DATASET_MULTISELECT_ACTION_CONTRACT_INVALID");
 
+  const simplifiedGridMultiselectPages = validPages();
+  const simplifiedBulkCollection = findControl(simplifiedGridMultiselectPages[3], "bulk_reminders_collection");
+  simplifiedGridMultiselectPages[3].children[0].children[0].children[0].children[1].children = [simplifiedBulkCollection];
+  expectCode("grid-table multiselect without export-shaped wrapper fails", ["--package", writePackage("simplified-grid-multiselect", simplifiedGridMultiselectPages)], "DASH_DATASET_GRID_MULTISELECT_WRAPPER_MISSING");
+
+  const badGridMultiselectColumnsPages = validPages();
+  const badItemGrid = findControl(badGridMultiselectColumnsPages[3], "grid_col_item");
+  badItemGrid.attrs.columns["1"].list = [[46, "px"], [3, "fr"], [1, "fr"]];
+  expectCode("grid-table multiselect header/item column mismatch fails", ["--package", writePackage("bad-grid-multiselect-columns", badGridMultiselectColumnsPages)], "DASH_DATASET_GRID_MULTISELECT_HEADER_ITEM_COLUMN_MISMATCH");
+
+  const missingGridDepsPages = validPages();
+  delete missingGridDepsPages[3].tempVars;
+  expectCode("grid-table multiselect without page-level dependencies fails", ["--package", writePackage("grid-multiselect-missing-deps", missingGridDepsPages)], "DASH_DATASET_GRID_MULTISELECT_TEMPVARS_MISSING");
+
+  const missingGridButtonActionPages = validPages();
+  findControl(missingGridButtonActionPages[3], "grid_bulk_add_button").attrs.control_action = "";
+  expectCode("grid-table multiselect Add button without action fails", ["--package", writePackage("grid-multiselect-missing-button-action", missingGridButtonActionPages)], "DASH_DATASET_GRID_MULTISELECT_BUTTON_ACTION_MISSING");
+
   const simplifiedCardMultiselectPages = validPages();
   const cardBulk = findControl(simplifiedCardMultiselectPages[4], "card_bulk_collection");
   const cardWrapper = findControl(simplifiedCardMultiselectPages[4], "card_with_multiselect_toolbar_wrapper");
@@ -242,8 +260,8 @@ function validPages() {
     ]),
     page("Bulk Reminder Dashboard", [
       heading("selected_count", [{ exprType: "variable", valueType: "string", id: "__temp_var_SelectedItemsAmount", type: "expr", name: "var_SelectedItemsAmount" }, { type: "str", value: " Items are selected." }]),
-      gridTableSection("bulk_reminders", "collection_control_grid_table_with_multiselect", { multiselect: true }),
-    ]),
+      gridMultiselectSection("bulk_reminders"),
+    ], gridMultiselectPageDeps()),
     page("Card Bulk Dashboard", [
       cardMultiselectSection(),
     ], cardMultiselectPageDeps()),
@@ -293,6 +311,89 @@ function cardMultiselectPageDeps() {
     filter: [{ id: "filter_keywords" }],
     formAction: [{ id: "form_refresh_after_bulk" }],
   };
+}
+
+function gridMultiselectPageDeps() {
+  return {
+    filterVars: [{ idx: "grid-filter-keywords-idx", id: "filter_keywords" }],
+    tempVars: [
+      { idx: "grid-selected-items-idx", id: "var_SelectedItems" },
+      { idx: "grid-selected-items-count-idx", id: "var_SelectedItemsAmount" },
+    ],
+    actions: [
+      { id: "grid_page_bulk_delete", name: "Delete selected items", steps: [{ type: "setdatalist", attrs: { type: "remove" } }] },
+      { id: "grid_page_bulk_complete", name: "Mark selected items completed", steps: [{ type: "setdatalist", attrs: { type: "edit" } }] },
+      { id: "grid_page_add_item", name: "Add item", steps: [{ type: "listitem", attrs: { op_type: "add" } }] },
+    ],
+    filter: [{ id: "filter_keywords" }],
+    formAction: [{ id: "grid_form_refresh_after_bulk" }],
+  };
+}
+
+function gridMultiselectSection(prefix) {
+  const columns = [[46, "px"], [2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
+  return container("grid_table_col_multiselect_wrapper", [
+    container("grid_table_col_caption", [
+      container("grid_table_col_title_wrapper", [
+        heading("grid_table_col_title", "Bulk reminders"),
+      ]),
+      container("grid_table_col_operations", [
+        container("op_normal", [
+          { id: "grid_bulk_search", type: "search-filter", label: "Search tasks", attrs: { placeholder: "Search tasks" } },
+          { id: "grid_bulk_add_button", type: "action_button", label: "Add item", attrs: { control_action: "grid_page_add_item" }, nv_label: "Add new item" },
+        ]),
+        container("op_multipleselected", [
+          container("selected_items_amount_wrapper", [
+            heading("grid_selected_items_amount", [{ exprType: "variable", id: "__temp_var_SelectedItemsAmount", name: "var_SelectedItemsAmount" }, { type: "str", value: " selected" }]),
+          ]),
+          container("multiple_operations_wrapper", [
+            { id: "btn_set_items", type: "action_button", label: "Mark as completed", attrs: { control_action: "grid_page_bulk_complete" }, nv_label: "btn_set_items" },
+            { id: "btn_delete_items", type: "action_button", label: "Delete selected items", attrs: { control_action: "grid_page_bulk_delete" }, nv_label: "btn_delete_items" },
+          ]),
+        ]),
+      ]),
+    ]),
+    container("grid_table_col_table_wrapper", [
+      gridHeader("grid_table_col_header", columns),
+      collection(`${prefix}_collection`, "collection_control_grid_table_with_multiselect", {
+        children: [gridItem("grid_col_item", columns, [
+          container("grid_table_col_item_select", [
+            { id: "grid_item_unchecked", type: "icon", attrs: { icon: "fa-regular fa-square" } },
+            { id: "grid_item_checked", type: "icon", attrs: { icon: "fa-regular fa-square-check" } },
+          ]),
+          dynamic(`${prefix}_title`, "dynamic-field", "Title"),
+          dynamic(`${prefix}_owner`, "dynamic-user", "User1"),
+          dynamic(`${prefix}_status`, "dynamic-field", "Text1"),
+          { id: `${prefix}_progress`, type: "progress", attrs: { bar: { per: { variable: [{ exprType: "variable_ctx", id: "Decimal2", ctx: "__ctx_coll" }] } } } },
+        ])],
+        attrs: {
+          data: { list: { ListID: "list_loans" } },
+          datasetRegion: "Bulk reminders",
+          appPlanDatasetRegion: "Bulk reminders",
+          layout: { col: [null, 1], hover: { enable: true } },
+          pagination: { p: { enabled: true } },
+          actions: [
+            {
+              id: `${prefix}_select_items`,
+              type: "coll",
+              steps: [
+                { type: "setvar", attrs: { variable: "__temp_var_SelectedItems", value: [{ exprType: "variable_ctx", id: "ListDataID", ctx: "__ctx_coll" }] } },
+                { type: "setvar", attrs: { variable: "__temp_var_SelectedItemsAmount", value: [{ exprType: "variable", id: "__temp_var_SelectedItemsAmount", name: "var_SelectedItemsAmount" }] } },
+              ],
+            },
+            {
+              id: `${prefix}_delete_item`,
+              type: "coll",
+              steps: [
+                { type: "confirm", attrs: { confirm_qs: "Delete item?", confirm_rs: "yes" } },
+                { type: "setdatalist", attrs: { wheres: [{ left: "ListDataID", right: [{ exprType: "variable_ctx", id: "ListDataID", ctx: "__ctx_coll" }] }] } },
+              ],
+            },
+          ],
+        },
+      }),
+    ]),
+  ]);
 }
 
 function cardMultiselectSection() {

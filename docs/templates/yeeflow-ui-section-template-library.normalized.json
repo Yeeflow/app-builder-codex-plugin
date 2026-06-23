@@ -1968,6 +1968,28 @@
       "proofBoundaries": [
         "generate when a Dashboard dataset needs dense table scanning, multi-row selection, selected count/state, and batch operations; Projects Center / Project Tasks is the export-proven source reference, not a business-domain restriction",
         "do not infer card-style top-right selection behavior"
+      ],
+      "fullTemplateReference": "docs/reference/collection-control-grid-table-with-multiselect.template.json",
+      "sourceReference": "Projects Center_1 v1.6 / All Tasks - multiple select / grid_table_col_multiselect_wrapper",
+      "exportShapeContract": [
+        "copy grid_table_col_multiselect_wrapper and all descendants",
+        "preserve grid_table_col_item_select unchanged",
+        "preserve Collection root attrs.actions and multiselect action settings",
+        "include page-level filterVars, tempVars, actions, filter, and formAction dependencies",
+        "allow edits only in grid_table_col_title_wrapper, op_normal, op_multipleselected, grid_table_col_header, and grid_col_item",
+        "keep grid_table_col_header and grid_col_item columns identical"
+      ],
+      "editableRegions": [
+        "grid_table_col_title_wrapper",
+        "op_normal",
+        "op_multipleselected",
+        "grid_table_col_header",
+        "grid_col_item"
+      ],
+      "lockedRegions": [
+        "grid_table_col_multiselect_wrapper",
+        "grid_table_col_item_select",
+        "grid_table_col_body"
       ]
     },
     {
