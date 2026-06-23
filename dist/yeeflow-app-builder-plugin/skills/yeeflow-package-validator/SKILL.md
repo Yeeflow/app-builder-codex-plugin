@@ -19,6 +19,8 @@ Dashboard/app page root content-area padding is a hard gate: every generated or 
 
 Generated Dashboard pages must also pass Dashboard Page Layouts v1.1 validation in addition to Event Portfolio Golden Reference conformance. The page-level gate enforces the copied v1.1 shell, `main > content`, `#f4f7fb` page background, zero root page padding, canonical v1.1 `Content` container padding, Full width structural containers, section title/content areas, real Operations actions, controlled business-content slots, registered repeatable/removable modules only, canonical runtime route proof, and dashboard-only upgrade scope boundaries. Do not force v1.1 `Content` padding to zero.
 
+Dashboard Collection dataset presentation validation is a signing-readiness gate. For `collection_control_card_with_multiselect_toolbar`, validation must require the full export-shaped template from `docs/reference/collection-control-card-with-multiselect-toolbar.template.json`: `card_with_multiselect_toolbar_wrapper` subtree, locked `card_col_item_multi_select`, Collection root actions, selected-state temp variables, page actions, form actions, filter variables, and only the allowed editable regions. Do not accept simplified card/multiselect approximations as generated-final package content.
+
 Data-list custom form root content-area padding uses the same hard gate: every generated or upgraded New, Edit, View, Detail, or custom form under `Data.Childs[].Layouts[].LayoutInResources[].Resource` or `Childs[].Layouts[].LayoutInResources[].Resource` must parse to a root with `attrs.container.cw = "2"` and the same `--sp--s0` token-array padding. Scalar zero, numeric object zero, `attrs.common.padding`, or `attrs.style.padding` alone remain compatibility fallbacks only and do not satisfy generated-final validation. Normalize existing data-list custom form roots to this shape before signing, installing, importing, or upgrading. Inner form sections, cards, grids, controls, and content wrappers may keep intentional spacing.
 
 ## Generated-Final YAPK ID And Navigation Hard Gates
@@ -263,7 +265,7 @@ Load [yap-materialization-rules.md](references/yap-materialization-rules.md) whe
 - unique `FieldName`, `InternalName`, and `DisplayName` inside each list
 - `FieldName` storage prefixes aligned with `FieldType`, so generated seed rows and Add new item use runtime-compatible list field storage
 - no remapping of `TenantID`, `CreatedBy`, or `ModifiedBy`
-- no numeric-looking generated ID exceeds signed `System.Int64` range (`9223372036854775807`), especially `LayoutID`
+- no numeric-looking generated ID exceeds the signed `System.Int64` maximum, especially `LayoutID`
 - generated app-contained AI Agent/Copilot resources use numeric `Publisher`, normally `0`, rather than `null`
 - data-list workflow DefResource includes designer-open metadata: pageurls array, variables.basic/listref/filter arrays, flowPage array, graphposition, graphzoom, graphver, childshape id/resourceid, node position, and SequenceFlow source/target id/resourceid
 - generated data-list Add Item triggers keep `FlowMappings.Setting.NewTrigger = true`, `FlowMappings.FieldName = null`, and `Data.Forms[].Settings = null`

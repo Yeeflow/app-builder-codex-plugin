@@ -1833,6 +1833,27 @@
         "generate only when selected state and bulk actions are export-proven",
         "YAPK multiselect proven only for the decoded card pattern",
         "Collection + Grid table-style pattern is separate"
+      ],
+      "fullTemplateReference": "docs/reference/collection-control-card-with-multiselect-toolbar.template.json",
+      "sourceReference": "Company Overview v1.3 / Collection card multiple select / card_with_multiselect_toolbar_wrapper",
+      "exportShapeContract": [
+        "copy card_with_multiselect_toolbar_wrapper and all descendants",
+        "preserve card_col_item_multi_select unchanged",
+        "preserve Collection root attrs.actions and multiselect action settings",
+        "include page-level filterVars, tempVars, actions, filter, and formAction dependencies",
+        "allow edits only in card_col_title_wrapper, op_normal, op_multipleselected, card_col_item, and card_col_item_operations"
+      ],
+      "editableRegions": [
+        "card_col_title_wrapper",
+        "op_normal",
+        "op_multipleselected",
+        "card_col_item",
+        "card_col_item_operations"
+      ],
+      "lockedRegions": [
+        "card_with_multiselect_toolbar_wrapper",
+        "card_col_item_multi_select",
+        "card_col_body"
       ]
     },
     {

@@ -27,6 +27,7 @@ try {
 | Operations | Active loans | Loan Requests Data List | Dense work queue scan | collection_control_grid_table | Dense row/column scanning for an operational work queue |
 | Operations | Search documents | Document Library | Search document metadata | collection_control_grid_table_with_search | Fulltext document lookup |
 | Operations | Bulk reminders | Loan Requests Data List | Batch send reminders | collection_control_grid_table_with_multiselect | Multi-row selection and batch reminder |
+| Operations | Bulk card close | Loan Requests Data List | Batch close selected card records | collection_control_card_with_multiselect_toolbar | Multi-select cards with selected count and batch operation |
 | Operations | Primary work queue | Loan Requests Data List | Primary operational pipeline | Event Pipeline Grid-Table | High-fidelity work queue |
 `);
   expectPass("App Plan with approved dataset presentation references passes", ["--app-plan", validPlan]);
@@ -104,6 +105,7 @@ Dashboard validator commands used during validation:
 | Active Loans Dashboard | Active loans | Loan Requests Data List | Dense operational row scanning | Collection | collection_control_grid_table | Dense row/column scanning for an operational work queue |
 | Document Search Dashboard | Document search | Document Library | Search document metadata | Collection | collection_control_grid_table_with_search | Fulltext document lookup |
 | Bulk Reminder Dashboard | Bulk reminders | Loan Requests Data List | Batch send reminders | Collection | collection_control_grid_table_with_multiselect | Multi-row selection and batch reminder |
+| Card Bulk Dashboard | Bulk cards | Loan Requests Data List | Batch close selected card records | Collection | collection_control_card_with_multiselect_toolbar | Multi-select cards with selected count and batch operation |
 | Primary Pipeline Dashboard | Event pipeline | Loan Requests Data List | Primary operational pipeline | Collection | Event Pipeline Grid-Table | High-fidelity work queue |
 `);
   expectPass("App Plan-to-package region template conformance passes", ["--app-plan", conformancePlan, "--package", writePackage("valid-plan-package-conformance", validPages())]);
@@ -147,6 +149,25 @@ Dashboard validator commands used during validation:
   bulk.attrs.actions = [];
   expectCode("multiselect Collection without bulk action contract fails", ["--package", writePackage("bad-multiselect", badMultiselectPages)], "DASH_DATASET_MULTISELECT_ACTION_CONTRACT_INVALID");
 
+  const simplifiedCardMultiselectPages = validPages();
+  const cardBulk = findControl(simplifiedCardMultiselectPages[4], "card_bulk_collection");
+  const cardWrapper = findControl(simplifiedCardMultiselectPages[4], "card_with_multiselect_toolbar_wrapper");
+  cardWrapper.children = [cardBulk];
+  expectCode("card multiselect without export-shaped slots fails", ["--package", writePackage("simplified-card-multiselect", simplifiedCardMultiselectPages)], "DASH_DATASET_CARD_MULTISELECT_SLOT_MISSING");
+
+  const missingCardDepsPages = validPages();
+  delete missingCardDepsPages[4].tempVars;
+  expectCode("card multiselect without page-level dependencies fails", ["--package", writePackage("card-multiselect-missing-deps", missingCardDepsPages)], "DASH_DATASET_CARD_MULTISELECT_TEMPVARS_MISSING");
+
+  const missingCardActionPages = validPages();
+  findControl(missingCardActionPages[4], "card_bulk_add_button").attrs.control_action = "";
+  expectCode("card multiselect Add button without action fails", ["--package", writePackage("card-multiselect-missing-action", missingCardActionPages)], "DASH_DATASET_CARD_MULTISELECT_BUTTON_ACTION_MISSING");
+
+  const noItemOperationsPages = validPages();
+  const cardItem = findControl(noItemOperationsPages[4], "card_col_item");
+  cardItem.children = cardItem.children.filter((child) => child.id !== "card_col_item_operations");
+  expectPass("card multiselect item operations region may be removed", ["--package", writePackage("card-multiselect-no-item-operations", noItemOperationsPages)]);
+
   console.log(JSON.stringify({ status: "pass", cases: results }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
@@ -177,7 +198,7 @@ function write(name, text) {
 
 function writePackage(name, pages) {
   const decoded = {
-    ListSet: { ListID: "2069000000000000001", Title: "Dataset Presentation Test" },
+    ListSet: { ListID: "synthetic-listset", Title: "Dataset Presentation Test" },
     Childs: [
       {
         ListID: "list_assets",
@@ -191,7 +212,7 @@ function writePackage(name, pages) {
       },
     ],
     Pages: pages.map((resource, index) => ({
-      ID: `20690000000000010${index}`,
+      ID: `synthetic-page-${index}`,
       Type: 103,
       Title: resource.title,
       LayoutInResources: [{ Resource: JSON.stringify(resource) }],
@@ -223,6 +244,9 @@ function validPages() {
       heading("selected_count", [{ exprType: "variable", valueType: "string", id: "__temp_var_SelectedItemsAmount", type: "expr", name: "var_SelectedItemsAmount" }, { type: "str", value: " Items are selected." }]),
       gridTableSection("bulk_reminders", "collection_control_grid_table_with_multiselect", { multiselect: true }),
     ]),
+    page("Card Bulk Dashboard", [
+      cardMultiselectSection(),
+    ], cardMultiselectPageDeps()),
     page("Primary Pipeline Dashboard", [
       container("Event Pipeline Grid-Table", [
         gridHeader("event_pipeline_grid_table_header_grid", [[2, "fr"], [1, "fr"], [1, "fr"]]),
@@ -235,12 +259,13 @@ function validPages() {
   ];
 }
 
-function page(title, children) {
+function page(title, children, extras = {}) {
   return {
     id: `${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_page`,
     type: "page",
     title,
     derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-v1.1",
+    ...extras,
     children: [
       container("Main", [
         container("Content", [
@@ -252,6 +277,80 @@ function page(title, children) {
       ]),
     ],
   };
+}
+
+function cardMultiselectPageDeps() {
+  return {
+    filterVars: [{ idx: "filter-keywords-idx", id: "filter_keywords" }],
+    tempVars: [
+      { idx: "selected-items-idx", id: "var_SelectedItems" },
+      { idx: "selected-items-count-idx", id: "var_SelectedItemsAmount" },
+    ],
+    actions: [
+      { id: "page_bulk_delete", name: "Delete selected items", steps: [{ type: "setdatalist", attrs: { type: "remove" } }] },
+      { id: "page_bulk_complete", name: "Mark selected items completed", steps: [{ type: "setdatalist", attrs: { type: "edit" } }] },
+    ],
+    filter: [{ id: "filter_keywords" }],
+    formAction: [{ id: "form_refresh_after_bulk" }],
+  };
+}
+
+function cardMultiselectSection() {
+  return container("card_with_multiselect_toolbar_wrapper", [
+    container("card_col_caption", [
+      container("card_col_title_wrapper", [
+        heading("card_col_title", "Active Loan Cards"),
+      ]),
+      container("card_col_operations", [
+        container("op_normal", [
+          { id: "card_bulk_search", type: "search-filter", label: "Search cards", attrs: { placeholder: "Search cards" } },
+          { id: "card_bulk_add_button", type: "action_button", label: "Add item", attrs: { control_action: "page_add_item" }, nv_label: "Add new item" },
+        ]),
+        container("op_multipleselected", [
+          container("selected_items_amount_wrapper", [
+            heading("selected_items_amount", [{ exprType: "variable", id: "__temp_var_SelectedItemsAmount", name: "var_SelectedItemsAmount" }, { type: "str", value: " selected" }]),
+          ]),
+          container("multiple_operations_wrapper", [
+            { id: "btn_set_items", type: "action_button", label: "Mark as completed", attrs: { control_action: "page_bulk_complete" }, nv_label: "btn_set_items" },
+            { id: "btn_delete_items", type: "action_button", label: "Delete selected items", attrs: { control_action: "page_bulk_delete" }, nv_label: "btn_delete_items" },
+          ]),
+        ]),
+      ]),
+    ]),
+    collection("card_bulk_collection", "collection_control_card_with_multiselect_toolbar", {
+      children: [
+        container("card_col_item", [
+          { id: "card_item_image", type: "dynamic-image", attrs: { source: "3", "obj-f": "Image1" } },
+          { id: "card_item_subject", type: "dynamic-field", nv_label: "Survey Program name", attrs: { source: "3", "obj-f": "Title", typography: "large-semi-bold" } },
+          container("card_col_item_multi_select", [
+            { id: "card_item_unchecked", type: "icon", attrs: { icon: "fa-regular fa-square" } },
+            { id: "card_item_checked", type: "icon", attrs: { icon: "fa-regular fa-square-check" } },
+          ]),
+          { id: "card_item_owner", type: "dynamic-user", attrs: { source: "3", "obj-f": "User1" } },
+          { id: "card_item_file", type: "dynamic-file", attrs: { source: "3", "obj-f": "File1" } },
+          container("card_col_item_operations", [
+            { id: "card_item_edit", type: "action_button", label: "Edit", attrs: { control_action: "item_edit_action" } },
+          ]),
+        ]),
+      ],
+      attrs: {
+        data: { list: { ListID: "list_loans" } },
+        datasetRegion: "Bulk cards",
+        appPlanDatasetRegion: "Bulk cards",
+        layout: { col: [null, 3, 2, 1] },
+        actions: [
+          {
+            id: "card_bulk_coll_action",
+            type: "coll",
+            steps: [
+              { type: "setvar", attrs: { variable: "__temp_var_SelectedItems", value: [{ exprType: "variable_ctx", id: "ListDataID", ctx: "__ctx_coll" }] } },
+              { type: "setdatalist", attrs: { wheres: [{ left: "ListDataID", right: [{ exprType: "variable_ctx", id: "ListDataID", ctx: "__ctx_coll" }] }] } },
+            ],
+          },
+        ],
+      },
+    }),
+  ]);
 }
 
 function gridTableSection(prefix, templateId, options = {}) {
