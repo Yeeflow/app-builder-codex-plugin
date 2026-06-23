@@ -42,7 +42,8 @@ function filterControl(patch = {}) {
       value_f: "ListDataID",
       lablay: [null, "top"],
       lab: { ty: [null, "xs-light"] },
-      edit: { pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, 6] } } },
+      common: { positioning: { widthtype: [null, "3"], width: [null, 200], widthu: [null, "px"] } },
+      edit: { placeholder: { color: "#5f6b7a" }, pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, { top: 8, right: 8, bottom: 8, left: 8 }] } } },
       ...patch,
     },
   };
@@ -67,7 +68,7 @@ function visibleKpiText(variable = SAVE_VAR) {
     type: "heading",
     name: "Open Requests Value",
     label: "Text",
-    attrs: { headc: { title: { variable: [variable] } }, heads: { ty: [null, "h2"], color: "#071638" }, style: { width: "auto" } },
+    attrs: { headc: { title: { variable: [variable] } }, heads: { ty: [null, "h2-bold"], color: "#071638" }, style: { width: "auto" } },
   };
 }
 
@@ -199,7 +200,7 @@ function pageResource(flags = {}) {
   Object.assign(summary, summaryControl(flags.summaryPatch || {}));
   const businessSection = findBusinessSectionContentArea(root);
   const filter = find(root, "event_portfolio_region_filter") || find(root, "event_portfolio_pipeline_status_filter");
-  if (filter) Object.assign(filter.attrs, { data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, field: "Text1", filter: [] }, display_f: "Text1", value_f: "ListDataID", lablay: [null, "top"], lab: { value: "Priority", ty: [null, "xs-light"] }, placeholder: "Select priority...", edit: { pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, 6] } } }, ...(flags.filterPatch || {}) });
+  if (filter) Object.assign(filter.attrs, { data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, field: "Text1", filter: [] }, display_f: "Text1", value_f: "ListDataID", lablay: [null, "top"], lab: { value: "Priority", ty: [null, "xs-light"] }, placeholder: "Select priority...", common: { positioning: { widthtype: [null, "3"], width: [null, 200], widthu: [null, "px"] } }, edit: { placeholder: { color: "#5f6b7a" }, pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, { top: 8, right: 8, bottom: 8, left: 8 }] } } }, ...(flags.filterPatch || {}) });
   const filterTokens = [];
   visit(root, (node) => {
     if (!["select-filter", "radio-filter", "checkbox-filter"].includes(node.type)) return;
@@ -211,7 +212,8 @@ function pageResource(flags = {}) {
       lablay: [null, "top"],
       lab: { value: "Priority", ty: [null, "xs-light"] },
       placeholder: "Select priority...",
-      edit: { pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, 6] } } },
+      common: { positioning: { widthtype: [null, "3"], width: [null, 200], widthu: [null, "px"] } },
+      edit: { placeholder: { color: "#5f6b7a" }, pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, { top: 8, right: 8, bottom: 8, left: 8 }] } } },
     };
     filterTokens.push(node.binding, "Text1", "ListDataID");
   });
@@ -238,7 +240,7 @@ function pageResource(flags = {}) {
       name: "event_pipeline_grid_table_header_grid",
       displayLabel: [null, false],
       attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } }, common: { hide: [null, false, false, true] } },
-      children: ["Request", "Priority", "Owner", "Status"].map((label) => ({ type: "heading", name: label, attrs: { headc: { title: { value: label } } } })),
+      children: ["Request", "Priority", "Owner", "Status"].map((label) => ({ type: "heading", name: label, attrs: { headc: { title: { value: label } }, heads: { ty: [null, "caption-medium"] } } })),
     },
     {
       type: "collection",
@@ -354,7 +356,7 @@ function validV11Resource(flags = {}) {
   if (kpiValue) {
     kpiValue.attrs = kpiValue.attrs || {};
     kpiValue.attrs.headc = { title: { variable: [flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR] } };
-    kpiValue.attrs.heads = { ty: [null, "h2"], color: "#071638" };
+    kpiValue.attrs.heads = { ty: [null, "h2-bold"], color: "#071638" };
   }
   applyKpiMode(root, flags.kpiMode || "valid");
   const filter = find(root, "event_portfolio_pipeline_status_filter") || find(root, "event_portfolio_region_filter");
@@ -368,7 +370,8 @@ function validV11Resource(flags = {}) {
       lablay: [null, "top"],
       lab: { value: "Priority", ty: [null, "xs-light"] },
       placeholder: "Select priority...",
-      edit: { pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, 6] } } },
+      common: { positioning: { widthtype: [null, "3"], width: [null, 200], widthu: [null, "px"] } },
+      edit: { placeholder: { color: "#5f6b7a" }, pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, { top: 8, right: 8, bottom: 8, left: 8 }] } } },
       ...(flags.filterPatch || {}),
     };
   }
@@ -406,7 +409,7 @@ function eventPipelineGridTableRegion() {
         name: "event_pipeline_grid_table_header_grid",
         displayLabel: [null, false],
         attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } }, common: { hide: [null, false, false, true] } },
-        children: ["Request", "Priority", "Owner", "Status"].map((label) => ({ type: "heading", name: label, attrs: { headc: { title: { value: label } } } })),
+        children: ["Request", "Priority", "Owner", "Status"].map((label) => ({ type: "heading", name: label, attrs: { headc: { title: { value: label } }, heads: { ty: [null, "caption-medium"] } } })),
       },
       {
         type: "collection",

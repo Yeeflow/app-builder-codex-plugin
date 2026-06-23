@@ -75,6 +75,7 @@ Generated dashboard resources must preserve the required export-shaped structure
 | Nesting depth | Required regions must stay at the same dashboard tree depth after normalizing the page wrapper, except v1.1 dashboards where approved section slots introduce the page-shell depth and component regions are checked for presence/type within the shell. |
 | Width and padding | Required sections and KPI cards must be Full width; the root Content area must use zero padding. |
 | Filter contract | Data filters must preserve separate label/placeholder text, `attrs.data.field`, `display_f`, `value_f`, and `apply_t` when the reference uses it. |
+| Child-control property fidelity | Golden Reference child controls must preserve role-specific typography and filter appearance properties. The generator may replace business text, fields, data sources, actions, and labels, but it must not collapse all heading/text controls to a generic token such as `h5-medium`. |
 | Grid internals | `grid` / `flex_grid` is allowed only for registered grid-table internal row/header nodes. |
 | User fields | User or identity fields must render with `dynamic-user`, not `dynamic-field`. |
 
@@ -85,6 +86,25 @@ The `Event Pipeline Grid-Table` reference means a real Collection subtree, not a
 Filter regions must preserve both UI contract and data contract: labels and placeholders stay separate, source field/display/value metadata resolves to included lists/fields, and filter selections are consumed by Collection/table/KPI query/filter metadata. A filter that changes UI state but has no consumer binding is a generated-final failure and a runtime-proof failure if installed data does not change.
 
 When Dashboard Page Layouts v1.1 is the page shell, generated filters must be synthesized by copying an approved Event Portfolio/v1.1 filter module into an approved v1.1 business-content slot, normally `section_content_area`, and then mapping it to the app's list and field. Do not create a from-scratch filter bar, do not place `event_portfolio_filter_group` directly under root `Content`, and do not invent a filter layout module that is absent from the v1.1 repeatable/removable module registry. The generator must preserve label typography, placeholder color, supported radius, placeholder text, `attrs.data.field`, `display_f`, `value_f`, and consumer linkage before the package can pass generated-final preflight.
+
+Golden Reference module-level fidelity is mandatory. The following child-control style contracts are generated-final hard gates:
+
+| Semantic role | Required token / shape |
+| --- | --- |
+| `event_portfolio_title` | `attrs.heads.ty = [null, "h2-bold"]` |
+| `event_portfolio_subtitle` | `attrs.heads.ty = [null, "body-medium"]` |
+| `event_portfolio_pipeline_title` | `attrs.heads.ty = [null, "h4-bold"]` |
+| KPI card label | `attrs.heads.ty = [null, "s-medium"]` |
+| KPI card value | `attrs.heads.ty = [null, "h2-bold"]` |
+| KPI trend and note | `attrs.heads.ty = [null, "caption-regular"]` |
+| Section subtitle | `attrs.heads.ty = [null, "caption-regular"]` |
+| Grid-table column header | `attrs.heads.ty = [null, "caption-medium"]` |
+| Select/filter label | `attrs.lab.ty = [null, "xs-light"]` |
+| Select/filter label layout | `attrs.lablay = [null, "top"]`; scalar `"top"` is invalid because Designer may parse it as an invalid layout value. |
+| Select/filter fixed width | `attrs.common.positioning.widthtype` must start with `[null, "3"]` and `attrs.common.positioning.width = [null, 200]`. |
+| Select/filter placeholder and border | `attrs.edit.placeholder.color` and export-shaped `attrs.edit.normal.border.radius` must be present. |
+
+Generated dashboards that preserve structure/provenance but lose these child-control properties are considered Golden Reference fidelity failures and must stop before signing.
 
 Registered reusable regions are:
 
