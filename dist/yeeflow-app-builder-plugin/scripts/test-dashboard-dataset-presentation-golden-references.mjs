@@ -24,7 +24,7 @@ try {
 | Dashboard Page | Dataset Region | Source Resource | Business Purpose | Selected Collection Presentation Reference | Selection Rationale |
 | --- | --- | --- | --- | --- | --- |
 | Operations | Asset cards | Assets Data List | Browse available assets as cards | collection_control_responsive_card_grid | Card browsing is better for asset overview |
-| Operations | Active loans | Loan Requests Data List | Dense work queue scan | collection_control_grid_table | Row/column scanning |
+| Operations | Active loans | Loan Requests Data List | Dense work queue scan | collection_control_grid_table | Dense row/column scanning for an operational work queue |
 | Operations | Search documents | Document Library | Search document metadata | collection_control_grid_table_with_search | Fulltext document lookup |
 | Operations | Bulk reminders | Loan Requests Data List | Batch send reminders | collection_control_grid_table_with_multiselect | Multi-row selection and batch reminder |
 | Operations | Primary work queue | Loan Requests Data List | Primary operational pipeline | Event Pipeline Grid-Table | High-fidelity work queue |
@@ -51,7 +51,31 @@ try {
 `);
   expectCode("App Plan invented Collection reference fails", ["--app-plan", inventedPlan], "DASH_DATASET_APP_PLAN_REFERENCE_UNKNOWN");
 
+  const mismatchPlan = write("mismatch-plan.md", `# Yeeflow App Plan
+
+## Dashboard Pages Plan
+
+| Dashboard Page | Dataset Region | Source Resource | Business Purpose | Selected Collection Presentation Reference | Selection Rationale |
+| --- | --- | --- | --- | --- | --- |
+| Operations Dashboard | Active loans | Loan Requests Data List | Dashboard Collection work queue | collection_control_responsive_card_grid | Dense table scanning with row and column comparison |
+`);
+  expectCode("App Plan selected template must match business signals", ["--app-plan", mismatchPlan], "DASH_DATASET_APP_PLAN_SELECTION_RATIONALE_MISMATCH");
+
+  const multiplePlan = write("multiple-plan.md", `# Yeeflow App Plan
+
+## Dashboard Pages Plan
+
+| Dashboard Page | Dataset Region | Source Resource | Business Purpose | Selected Collection Presentation Reference | Selection Rationale |
+| --- | --- | --- | --- | --- | --- |
+| Operations Dashboard | Active loans | Loan Requests Data List | Dashboard Collection work queue | collection_control_grid_table and collection_control_grid_table_with_search | Dense scanning and search |
+`);
+  expectCode("App Plan selects exactly one Collection presentation reference", ["--app-plan", multiplePlan], "DASH_DATASET_APP_PLAN_REFERENCE_NOT_EXACTLY_ONE");
+
   expectPass("synthetic app using all approved Dashboard Collection references passes", ["--package", writePackage("valid-all", validPages())]);
+
+  const outsideSlotPages = validPages();
+  outsideSlotPages[1].children[0].children[0].children = [gridTableSection("active_loans", "collection_control_grid_table")];
+  expectCode("Collection template outside v1.1 section content slot fails", ["--package", writePackage("outside-slot", outsideSlotPages)], "DASH_DATASET_COLLECTION_OUTSIDE_V11_SLOT");
 
   const noProvenancePages = validPages();
   findControl(noProvenancePages[0], "asset_cards_collection").attrs.datasetPresentationTemplateId = "";
@@ -164,9 +188,15 @@ function page(title, children) {
     id: `${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_page`,
     type: "page",
     title,
+    derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-v1.1",
     children: [
       container("Main", [
-        container("Content", children),
+        container("Content", [
+          container("content_card_wrapper", [
+            container("section_title_header", [heading(`${title}_section_heading`, title)]),
+            container("section_content_area", children),
+          ]),
+        ]),
       ]),
     ],
   };

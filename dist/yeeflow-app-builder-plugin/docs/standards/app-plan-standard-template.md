@@ -415,7 +415,9 @@ Rules:
 - Allowed selected controls are Data table, Collection, Kanban, Vertical timeline, and Horizontal timeline.
 - Prefer Collection over Data table when both can satisfy the requirement, unless a dense native table/grid is specifically required.
 - When the selected record display control is Collection, the Selected Collection Presentation Reference must be one of `collection_control_responsive_card_grid`, `collection_control_card_with_multiselect_toolbar`, `collection_control_grid_table`, `collection_control_grid_table_with_multiselect`, `collection_control_grid_table_with_search`, or `Event Pipeline Grid-Table` from `docs/reference/dashboard-dataset-presentation-golden-references.json`.
-- For Collection rows, state the required business fields and selection rationale. Do not include generated `ListID`, `LayoutID`, `PageID`, action type codes, JSON property paths, placeholder IDs, or runtime payload fields in this App Plan table.
+- For Collection rows, state the required business fields and selection rationale. The rationale must use the selected template's `whenToUse`, `whenNotToUse`, `requiredBusinessSignals`, and `suitableSourceResourceTypes` guidance, such as card browsing, dense row/column scanning, free-text search, multiselect/bulk operation, or high-fidelity primary operations table.
+- Select exactly one approved Collection presentation reference per Dashboard dataset region. Do not list multiple possible templates for the same region and do not leave the template choice to generation.
+- App Plan selection is a business decision only. It must not include generated `ListID`, `LayoutID`, `PageID`, action type codes, JSON property paths, placeholder IDs, or runtime payload fields in this App Plan table.
 - Use Kanban for status, lane, queue, or work-board patterns.
 - Use Vertical Timeline for activity, history, audit, event feed, and chronological log patterns.
 - Use Horizontal Timeline for roadmap, phase, lifecycle, and milestone progression patterns.

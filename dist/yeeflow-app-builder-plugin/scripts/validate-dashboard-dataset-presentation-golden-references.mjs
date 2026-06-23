@@ -29,6 +29,10 @@ const MULTISELECT_IDS = new Set([
   "collection_control_grid_table_with_multiselect",
 ]);
 
+const COLLECTION_ALLOWED_SLOT_IDS = new Set([
+  "section_content_area",
+]);
+
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || (!args.registry && !args.appPlan && !args.package)) {
@@ -44,24 +48,25 @@ export function validateDashboardDatasetPresentationGoldenReferences(options = {
   const findings = [];
   const registryPath = path.resolve(options.registry || REGISTRY_PATH);
   const registry = readJson(registryPath, findings, "DASH_DATASET_PRESENTATION_REGISTRY_MISSING");
-  const approvedIds = validateRegistry(registry, findings);
+  const registryInfo = validateRegistry(registry, findings);
 
-  if (options.appPlan) validateAppPlan(path.resolve(options.appPlan), approvedIds, findings);
-  if (options.package) validatePackage(path.resolve(options.package), approvedIds, findings);
+  if (options.appPlan) validateAppPlan(path.resolve(options.appPlan), registryInfo, findings);
+  if (options.package) validatePackage(path.resolve(options.package), registryInfo, findings);
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
     registry: registryPath,
     appPlan: options.appPlan ? path.resolve(options.appPlan) : null,
     package: options.package ? path.resolve(options.package) : null,
-    approvedTemplateIds: [...approvedIds],
+    approvedTemplateIds: [...registryInfo.approvedIds],
     findings,
   };
 }
 
 function validateRegistry(registry, findings) {
-  if (!registry) return APPROVED_IDS;
+  if (!registry) return { approvedIds: APPROVED_IDS, references: new Map() };
   const ids = new Set(asArray(registry.references).map((item) => String(item?.templateId || item?.referenceId || "")).filter(Boolean));
+  const references = new Map();
   for (const requiredId of APPROVED_IDS) {
     if (!ids.has(requiredId)) {
       findings.push(error("DASH_DATASET_PRESENTATION_REFERENCE_MISSING", "Dashboard dataset presentation registry is missing a required approved reference.", { referenceId: requiredId }));
@@ -73,16 +78,17 @@ function validateRegistry(registry, findings) {
       findings.push(error("DASH_DATASET_PRESENTATION_REFERENCE_ID_MISSING", "Each Dashboard dataset presentation reference must include templateId.", { entry }));
       continue;
     }
-    for (const key of ["displayName", "whenToUse", "whenNotToUse", "requiredAppPlanDeclaration", "generationProof", "proofBoundary"]) {
+    references.set(id, entry);
+    for (const key of ["displayName", "suitableSourceResourceTypes", "whenToUse", "whenNotToUse", "requiredBusinessSignals", "requiredAppPlanDeclaration", "generationProof", "proofBoundary"]) {
       if (entry[key] === undefined || (Array.isArray(entry[key]) && entry[key].length === 0) || String(entry[key] || "").trim() === "") {
         findings.push(error("DASH_DATASET_PRESENTATION_REFERENCE_INCOMPLETE", "Dashboard dataset presentation reference is missing required guidance.", { referenceId: id, missing: key }));
       }
     }
   }
-  return ids.size ? ids : APPROVED_IDS;
+  return { approvedIds: ids.size ? ids : APPROVED_IDS, references };
 }
 
-function validateAppPlan(appPlanPath, approvedIds, findings) {
+function validateAppPlan(appPlanPath, registryInfo, findings) {
   if (!fs.existsSync(appPlanPath)) {
     findings.push(error("DASH_DATASET_APP_PLAN_MISSING", "App Plan file is missing.", { appPlan: appPlanPath }));
     return;
@@ -94,7 +100,7 @@ function validateAppPlan(appPlanPath, approvedIds, findings) {
   });
   if (!dashboardDatasetLines.length) return;
 
-  const approvedMentioned = [...approvedIds].filter((id) => text.includes(id));
+  const approvedIds = registryInfo.approvedIds;
   const invented = [...text.matchAll(/\b(collection_control_[A-Za-z0-9_-]+|Event\s+Pipeline\s+Grid-Table)\b/g)]
     .map((match) => match[1])
     .filter((id) => !approvedIds.has(id));
@@ -105,10 +111,50 @@ function validateAppPlan(appPlanPath, approvedIds, findings) {
   for (const line of dashboardDatasetLines) {
     if (isMarkdownTableHeaderOrSeparator(line)) continue;
     if (/not applicable|n\/a|deferred|no dashboard dataset/i.test(line)) continue;
-    if (!approvedMentioned.some((id) => line.includes(id))) {
+    const selected = [...approvedIds].filter((id) => line.includes(id));
+    if (!selected.length) {
       findings.push(error("DASH_DATASET_APP_PLAN_REFERENCE_MISSING", "Dashboard Collection dataset regions in App Plan must select one approved dataset presentation reference.", { line: line.trim().slice(0, 500), approvedTemplateIds: [...approvedIds] }));
+      continue;
+    }
+    if (selected.length > 1) {
+      findings.push(error("DASH_DATASET_APP_PLAN_REFERENCE_NOT_EXACTLY_ONE", "Each Dashboard Collection dataset region in App Plan must select exactly one approved dataset presentation reference.", { line: line.trim().slice(0, 500), selectedTemplateIds: selected }));
+      continue;
+    }
+    const reference = registryInfo.references.get(selected[0]);
+    if (!lineMatchesReferenceGuidance(line, selected[0], reference)) {
+      findings.push(error("DASH_DATASET_APP_PLAN_SELECTION_RATIONALE_MISMATCH", "Selected Dashboard Collection presentation reference must be justified by the registry's whenToUse / requiredBusinessSignals guidance.", {
+        line: line.trim().slice(0, 500),
+        selectedTemplateId: selected[0],
+        requiredBusinessSignals: asArray(reference?.requiredBusinessSignals),
+        whenToUse: asArray(reference?.whenToUse),
+      }));
     }
   }
+}
+
+function lineMatchesReferenceGuidance(line, templateId, reference) {
+  let normalized = normalizeForMatch(line);
+  normalized = normalized.replaceAll(normalizeForMatch(templateId), " ");
+  for (const approvedId of APPROVED_IDS) normalized = normalized.replaceAll(normalizeForMatch(approvedId), " ");
+  normalized = normalized.replace(/\s+/g, " ").trim();
+  const signals = [
+    ...asArray(reference?.requiredBusinessSignals),
+    ...asArray(reference?.whenToUse),
+  ].map(normalizeForMatch).filter(Boolean);
+  if (signals.some((signal) => signal && normalized.includes(signal))) return true;
+  const fallbackSignals = {
+    collection_control_responsive_card_grid: ["card", "browse", "overview", "portfolio", "asset"],
+    collection_control_card_with_multiselect_toolbar: ["card", "multi-select", "multiselect", "bulk", "batch", "selected"],
+    collection_control_grid_table: ["dense", "row", "column", "work queue", "task list", "record list", "operational table", "scan"],
+    collection_control_grid_table_with_multiselect: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection"],
+    collection_control_grid_table_with_search: ["search", "fulltext", "quick find", "lookup"],
+    "Event Pipeline Grid-Table": ["primary", "high-fidelity", "pipeline", "portfolio", "work queue", "health", "status", "progress"],
+  };
+  return asArray(fallbackSignals[templateId]).some((signal) => normalized.includes(normalizeForMatch(signal)));
+}
+
+function normalizeForMatch(value) {
+  return String(value || "").toLowerCase().replace(/[_/]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function isMarkdownTableHeaderOrSeparator(line) {
@@ -119,7 +165,7 @@ function isMarkdownTableHeaderOrSeparator(line) {
     && /dashboard page|dataset region|source resource|business purpose/i.test(trimmed);
 }
 
-function validatePackage(packagePath, approvedIds, findings) {
+function validatePackage(packagePath, registryInfo, findings) {
   if (!fs.existsSync(packagePath)) {
     findings.push(error("DASH_DATASET_PACKAGE_MISSING", "Package file is missing.", { package: packagePath }));
     return;
@@ -135,12 +181,13 @@ function validatePackage(packagePath, approvedIds, findings) {
   for (const page of collectDashboardPages(decoded)) {
     const collections = page.controls.filter((entry) => String(entry.control?.type || "") === "collection");
     for (const entry of collections) {
-      validateCollectionEntry(entry, page, approvedIds, findings);
+      validateCollectionEntry(entry, page, registryInfo.approvedIds, findings);
     }
   }
 }
 
 function validateCollectionEntry(entry, page, approvedIds, findings) {
+  validateCollectionSlot(entry, page, findings);
   const provenance = resolveTemplateId(entry, page);
   if (!provenance.templateId) {
     findings.push(error("DASH_DATASET_COLLECTION_TEMPLATE_PROVENANCE_MISSING", "Every generated Dashboard Collection must carry or inherit approved dataset presentation template provenance.", { page: page.title, path: entry.pointer, approvedTemplateIds: [...approvedIds] }));
@@ -156,6 +203,16 @@ function validateCollectionEntry(entry, page, approvedIds, findings) {
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
+}
+
+function validateCollectionSlot(entry, page, findings) {
+  const ancestorIdentities = new Set(entry.ancestors.flatMap(identityCandidates).map(normalizeIdentity));
+  if ([...COLLECTION_ALLOWED_SLOT_IDS].some((id) => ancestorIdentities.has(normalizeIdentity(id)))) return;
+  findings.push(error("DASH_DATASET_COLLECTION_OUTSIDE_V11_SLOT", "Dashboard Collection presentation templates are component-level references and must be placed inside an approved Dashboard Page Layouts v1.1 business-content slot such as section_content_area, not directly under page root, Main, Content, page title/header, or a copied source-app shell.", {
+    page: page.title,
+    path: entry.pointer,
+    approvedSlotIds: [...COLLECTION_ALLOWED_SLOT_IDS],
+  }));
 }
 
 function resolveTemplateId(entry, page) {
@@ -300,6 +357,10 @@ function identityCandidates(node) {
     node.attrs?.nv_label,
     node.attrs?.nav_label,
   ].map((value) => String(value || "").trim()).filter(Boolean);
+}
+
+function normalizeIdentity(value) {
+  return String(value || "").trim().toLowerCase().replace(/[\s_/-]+/g, "_");
 }
 
 function gridColumnWidths(grid, deviceKey) {
