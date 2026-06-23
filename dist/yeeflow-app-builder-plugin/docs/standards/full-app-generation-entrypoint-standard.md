@@ -11,6 +11,7 @@ Valid full-app generation entrypoints must:
 - accept the primary Markdown contracts `functional-specification.md` and `yeeflow-app-plan.md`;
 - default new application delivery to `.yapk` unless the user explicitly requests `.yap`;
 - declare required planning gates and generated-final package gates;
+- declare `bundledPath` when the source checkout path and installed plugin payload path differ;
 - produce generated-final package artifacts before signing/install/runtime proof is claimed;
 - be clearly distinguished from proof/demo, delivery-decision, package API, and sample-specific helpers.
 
@@ -22,6 +23,11 @@ The current full-app generation entrypoints are skill-orchestrated:
 - `skill:yeeflow-application-generator`
 
 These are valid plugin capabilities even though they are not standalone one-command CLIs. A clean-room validation run must inspect the registry before declaring that the plugin has no full-app generation path.
+
+The registry must validate from both layouts used by this repository:
+
+- source checkout layout: `skills/installed/<skill-name>/SKILL.md`
+- installed plugin payload layout: `skills/<skill-name>/SKILL.md`
 
 ## Non-Full-App Helpers
 

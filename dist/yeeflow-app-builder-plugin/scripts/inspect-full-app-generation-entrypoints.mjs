@@ -57,11 +57,15 @@ function validateEntrypoint(entrypoint, root, findings) {
   const id = String(entrypoint.id || "").trim();
   const kind = String(entrypoint.kind || "").trim();
   const entryPath = String(entrypoint.path || "").trim();
+  const bundledPath = String(entrypoint.bundledPath || "").trim();
+  const sourcePath = String(entrypoint.sourcePath || "").trim();
+  const candidatePaths = unique([entryPath, bundledPath, sourcePath].filter(Boolean));
+  const resolvedPath = candidatePaths.find((candidate) => fs.existsSync(path.join(root, candidate))) || "";
   if (!id) findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_ID_MISSING", "Entrypoint is missing id.", { entrypoint }));
   if (!kind) findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_KIND_MISSING", "Entrypoint is missing kind.", { id }));
   if (!entryPath) findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_PATH_MISSING", "Entrypoint is missing path.", { id }));
-  if (entryPath && !fs.existsSync(path.join(root, entryPath))) {
-    findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_PATH_NOT_FOUND", "Entrypoint path does not exist in the plugin payload.", { id, path: entryPath }));
+  if (entryPath && !resolvedPath) {
+    findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_PATH_NOT_FOUND", "Entrypoint path does not exist in the current plugin root. Use path for source checkouts and bundledPath for installed plugin payloads when the layouts differ.", { id, path: entryPath, candidatePaths }));
   }
   if (!Array.isArray(entrypoint.inputs) || !entrypoint.inputs.includes("functional-specification.md") || !entrypoint.inputs.includes("yeeflow-app-plan.md")) {
     findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_INPUT_CONTRACT_INVALID", "Full-app generator entrypoint must declare functional-specification.md and yeeflow-app-plan.md inputs.", { id, inputs: entrypoint.inputs || [] }));
@@ -75,10 +79,10 @@ function validateEntrypoint(entrypoint, root, findings) {
   if (!Array.isArray(entrypoint.requiredGeneratedFinalGates) || entrypoint.requiredGeneratedFinalGates.length < 2) {
     findings.push(error("FULL_APP_GENERATOR_FINAL_GATES_MISSING", "Full-app generator entrypoint must declare required generated-final gates.", { id }));
   }
-  if (/runtime-proof|delivery-workflow|package-api-automation|vendor-onboarding/i.test(entryPath) && kind.includes("full-app")) {
-    findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_MISCLASSIFIED_HELPER", "Runtime-proof, delivery, package API, and sample-specific helpers must not be classified as generic full-app generators.", { id, path: entryPath, kind }));
+  if (candidatePaths.some((candidate) => /runtime-proof|delivery-workflow|package-api-automation|vendor-onboarding/i.test(candidate)) && kind.includes("full-app")) {
+    findings.push(error("FULL_APP_GENERATOR_ENTRYPOINT_MISCLASSIFIED_HELPER", "Runtime-proof, delivery, package API, and sample-specific helpers must not be classified as generic full-app generators.", { id, path: entryPath, candidatePaths, kind }));
   }
-  return { id, kind, path: entryPath, defaultPackageType: entrypoint.defaultPackageType || null };
+  return { id, kind, path: entryPath, bundledPath: bundledPath || null, resolvedPath: resolvedPath || null, defaultPackageType: entrypoint.defaultPackageType || null };
 }
 
 function validateNonFullAppEntrypoints(entries, root, findings) {
@@ -116,6 +120,10 @@ function readJson(file, findings) {
 
 function error(code, message, details = {}) {
   return { level: "error", code, message, ...details };
+}
+
+function unique(values) {
+  return [...new Set(values)];
 }
 
 function parseArgs(argv) {

@@ -6,6 +6,7 @@
       "id": "skill:yeeflow-application-builder",
       "kind": "skill-orchestrated-full-app-generator",
       "path": "skills/installed/yeeflow-application-builder/SKILL.md",
+      "bundledPath": "skills/yeeflow-application-builder/SKILL.md",
       "displayName": "Yeeflow Application Builder",
       "inputs": [
         "functional-specification.md",
@@ -44,6 +45,7 @@
       "id": "skill:yeeflow-application-generator",
       "kind": "skill-orchestrated-full-app-generator",
       "path": "skills/installed/yeeflow-application-generator/SKILL.md",
+      "bundledPath": "skills/yeeflow-application-generator/SKILL.md",
       "displayName": "Yeeflow Application Generator",
       "inputs": [
         "functional-specification.md",
