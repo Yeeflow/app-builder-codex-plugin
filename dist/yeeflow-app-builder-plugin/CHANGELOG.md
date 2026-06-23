@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.15
+
+- Release full-app entrypoint cache-path alignment from PR #167.
+- Allow the full-app entrypoint registry to validate both source checkout skill paths and installed plugin payload skill paths.
+- Add `bundledPath` coverage for `yeeflow-application-builder` and `yeeflow-application-generator`, so active plugin cache validation resolves `skills/<skill-name>/SKILL.md` instead of failing on source-only `skills/installed/<skill-name>/SKILL.md`.
+- Add installed-cache-layout regression coverage for `inspect-full-app-generation-entrypoints.mjs`.
+
 ## 0.8.14
 
 - Release full-app generation entrypoint and Collection template exact-match gates from PR #165.
