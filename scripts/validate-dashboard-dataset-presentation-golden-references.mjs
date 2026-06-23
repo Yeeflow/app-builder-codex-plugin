@@ -94,10 +94,7 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
     return;
   }
   const text = fs.readFileSync(appPlanPath, "utf8");
-  const dashboardDatasetLines = text.split(/\r?\n/).filter((line) => {
-    const normalized = line.toLowerCase();
-    return /dashboard/.test(normalized) && /(collection|dataset|data list|form report|document library|grid-table|grid table|card grid)/.test(normalized);
-  });
+  const dashboardDatasetLines = collectDashboardDatasetPlanLines(text);
   if (!dashboardDatasetLines.length) return;
 
   const approvedIds = registryInfo.approvedIds;
@@ -111,7 +108,7 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
   for (const line of dashboardDatasetLines) {
     if (isMarkdownTableHeaderOrSeparator(line)) continue;
     if (/not applicable|n\/a|deferred|no dashboard dataset/i.test(line)) continue;
-    const selected = [...approvedIds].filter((id) => line.includes(id));
+    const selected = extractApprovedTemplateIds(line, approvedIds);
     if (!selected.length) {
       findings.push(error("DASH_DATASET_APP_PLAN_REFERENCE_MISSING", "Dashboard Collection dataset regions in App Plan must select one approved dataset presentation reference.", { line: line.trim().slice(0, 500), approvedTemplateIds: [...approvedIds] }));
       continue;
@@ -130,6 +127,38 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
       }));
     }
   }
+}
+
+function collectDashboardDatasetPlanLines(text) {
+  const lines = String(text || "").split(/\r?\n/);
+  const matches = [];
+  let inDashboardPlan = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (/^#{1,6}\s+/.test(trimmed)) {
+      inDashboardPlan = /dashboard\s+pages?\s+plan|dashboard\s+dataset|dashboard\s+record|dashboard\s+collection/i.test(trimmed);
+    }
+    const normalized = trimmed.toLowerCase();
+    const hasDatasetSignal = /(collection|dataset|data list|form report|document library|grid-table|grid table|card grid|selected collection presentation reference)/.test(normalized);
+    const hasDashboardSignal = /dashboard/.test(normalized);
+    if ((inDashboardPlan && hasDatasetSignal) || (hasDashboardSignal && hasDatasetSignal)) matches.push(line);
+  }
+  return matches;
+}
+
+function extractApprovedTemplateIds(line, approvedIds) {
+  return [...approvedIds].filter((id) => containsExactTemplateId(line, id));
+}
+
+function containsExactTemplateId(line, templateId) {
+  const text = String(line || "");
+  if (!text || !templateId) return false;
+  const escaped = escapeRegExp(templateId);
+  return new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(text);
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function lineMatchesReferenceGuidance(line, templateId, reference) {

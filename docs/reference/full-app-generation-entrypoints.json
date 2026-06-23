@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "1.0",
+  "purpose": "Declare the plugin-supported full-application generation entrypoints and distinguish them from validation, delivery, API, proof, and sample generator helpers.",
+  "entrypoints": [
+    {
+      "id": "skill:yeeflow-application-builder",
+      "kind": "skill-orchestrated-full-app-generator",
+      "path": "skills/installed/yeeflow-application-builder/SKILL.md",
+      "displayName": "Yeeflow Application Builder",
+      "inputs": [
+        "functional-specification.md",
+        "yeeflow-app-plan.md"
+      ],
+      "primaryMarkdownContracts": [
+        "functional-specification.md",
+        "yeeflow-app-plan.md"
+      ],
+      "defaultPackageType": "yapk",
+      "supportedOutputs": [
+        "generated-final .yapk",
+        "validation reports",
+        "ID provenance report",
+        "signing/install/runtime proof reports when explicitly authorized"
+      ],
+      "requiredPlanningGates": [
+        "validate-functional-specification.mjs",
+        "validate-app-plan-template.mjs",
+        "validate-app-plan-resource-order.mjs",
+        "validate-business-clarification-gate.mjs --mode generation",
+        "validate-generation-readiness-review.mjs",
+        "validate-functional-spec-to-app-plan-traceability.mjs"
+      ],
+      "requiredGeneratedFinalGates": [
+        "yapk-first-generation-preflight.mjs",
+        "validate-dashboard-dataset-presentation-golden-references.mjs",
+        "validate-generated-final-resource-completeness.mjs",
+        "validate-yapk-id-provenance.mjs",
+        "validate-yapk-navigation-runtime-metadata.mjs",
+        "validate-yapk-package.js"
+      ],
+      "proofBoundary": "This is a Codex skill-orchestrated generator entrypoint, not a standalone CLI. It may create packages through the active plugin skills and scripts, but success requires generated-final package artifacts plus the required validators. Delivery helpers, runtime-proof generators, and sample-specific scripts do not satisfy this entrypoint."
+    },
+    {
+      "id": "skill:yeeflow-application-generator",
+      "kind": "skill-orchestrated-full-app-generator",
+      "path": "skills/installed/yeeflow-application-generator/SKILL.md",
+      "displayName": "Yeeflow Application Generator",
+      "inputs": [
+        "functional-specification.md",
+        "yeeflow-app-plan.md"
+      ],
+      "primaryMarkdownContracts": [
+        "functional-specification.md",
+        "yeeflow-app-plan.md"
+      ],
+      "defaultPackageType": "yapk",
+      "supportedOutputs": [
+        "generated-final .yapk",
+        "validation reports",
+        "ID provenance report"
+      ],
+      "requiredPlanningGates": [
+        "validate-functional-specification.mjs",
+        "validate-app-plan-template.mjs",
+        "validate-app-plan-resource-order.mjs"
+      ],
+      "requiredGeneratedFinalGates": [
+        "yapk-first-generation-preflight.mjs",
+        "validate-yapk-package.js"
+      ],
+      "proofBoundary": "This skill can participate in full app package generation under the top-level application builder flow. It is not a replacement for generated-final validators, signing proof, install proof, or runtime proof."
+    }
+  ],
+  "nonFullAppEntrypoints": [
+    {
+      "path": "scripts/yeeflow-application-delivery-workflow.mjs",
+      "reason": "Delivery decision helper only; it does not generate resources or packages."
+    },
+    {
+      "path": "scripts/yeeflow-package-api-automation.mjs",
+      "reason": "Package API upload/import/install/upgrade helper only; it requires an existing package."
+    },
+    {
+      "pattern": "generate-*-runtime-proof.mjs",
+      "reason": "Focused proof/demo generators only; they are not generic Functional Spec + App Plan to full-app YAPK generators."
+    },
+    {
+      "path": "generate-vendor-onboarding-yapk-schema-v2.mjs",
+      "reason": "Sample-specific generator; not a generic full-app generator."
+    }
+  ]
+}

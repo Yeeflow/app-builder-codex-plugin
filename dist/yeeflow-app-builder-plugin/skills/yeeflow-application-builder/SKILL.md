@@ -15,6 +15,8 @@ The Yeeflow App Plan must be generated only from the reviewed Functional Specifi
 
 The primary planning contracts are the human-readable Markdown files `functional-specification.md` and `yeeflow-app-plan.md`. JSON files are companion projections only and must be derived from the Markdown source for validation, traceability, or tests. Resource generation must consume the reviewed Markdown Functional Specification and Markdown App Plan first; companion JSON must not become the source of truth.
 
+Before a plugin-only clean-room run claims that no full-app generation path exists, inspect `docs/reference/full-app-generation-entrypoints.json` with `scripts/inspect-full-app-generation-entrypoints.mjs`. Full application generation is currently skill-orchestrated through `yeeflow-application-builder` and `yeeflow-application-generator`; it is not proven by a standalone one-command CLI. Do not classify `scripts/yeeflow-application-delivery-workflow.mjs`, `scripts/yeeflow-package-api-automation.mjs`, focused `generate-*-runtime-proof.mjs` scripts, or sample-specific generators as generic full-app generators. If the user explicitly requires a standalone CLI, report that boundary instead of inventing or misusing a helper.
+
 The App Plan must follow this Yeeflow resource generation order:
 
 1. Data lists and Document libraries
