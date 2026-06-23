@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.20`
+`0.8.21`
+
+Version `0.8.21` releases the full export-shaped `collection_control_card_with_multiselect_toolbar` template from PR #179. The plugin now carries the Company Overview v1.3 / Collection card multiple select wrapper template, preserves `card_with_multiselect_toolbar_wrapper`, locked `card_col_item_multi_select`, Collection root actions, page-level temp/filter/form action dependencies, and allows edits only in approved business regions.
 
 Version `0.8.20` releases Dashboard Collection template materialization conformance gates from PR #177. Generated-final validation now compares each App Plan Dashboard dataset region with the generated Dashboard Collection region, fails missing planned regions, template mismatches, collapsed template diversity, App Plan-selected templates not materialized, and missing explicit Collection-root template provenance.
 
