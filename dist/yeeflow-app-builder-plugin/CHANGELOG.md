@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.19
+
+- Release Dashboard Golden Reference property fidelity gates from PR #175.
+- Enforce module-level typography fidelity for dashboard title, subtitle, KPI label/value/trend/note, section subtitle, and grid-table column headers.
+- Enforce select-filter appearance fidelity, including xs-light label typography, tuple-shaped top label layout, placeholder color, supported border radius, and fixed-width positioning.
+- Add focused regressions proving structure/provenance-only dashboards fail before signing when child-control properties drift.
+
 ## 0.8.18
 
 - Release Dashboard filter module synthesis gates from PR #173.
