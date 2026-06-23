@@ -32,6 +32,7 @@ Every generated Dashboard page must preserve:
 - `main` as Full width column layout
 - `content` as Full width column layout
 - no conflicting `content` background that breaks full-page background continuity
+- `content` container padding preserved from the canonical v1.1 template
 - selected non-empty business section containers only
 
 ## Standard Sections
@@ -91,7 +92,7 @@ Omit optional `Operations` containers unless real actions exist.
 
 Generated Dashboard pages must preserve the v1.1 template shell and non-business layout containers as structural equivalents of the registered template. Business-specific text, bindings, filters, KPI values, FontAwesome icons, actions, and Collection/table fields may change only inside approved business-content containers.
 
-Generator normalization is allowed for page-shell compatibility: `Main` / `Content` labels may be normalized, root/page background may be refreshed to the required `#f4f7fb`, root and Content padding may be normalized to zero, Full width may use the supported v1.1 export-coded shape, `actions: []` may be emitted or omitted when no actions exist, and meaningful navigator/control names may replace generic `Container` / `Grid` labels. These normalizations must not be used to invent layout modules, move business controls outside approved slots, or remove required v1.1 structure.
+Generator normalization is allowed for page-shell compatibility: `Main` / `Content` labels may be normalized, root/page background may be refreshed to the required `#f4f7fb`, root page padding may be normalized to zero, Full width may use the supported v1.1 export-coded shape, `actions: []` may be emitted or omitted when no actions exist, and meaningful navigator/control names may replace generic `Container` / `Grid` labels. Content container padding must not be normalized to zero; preserve the canonical v1.1 template padding so the page shell spacing remains stable. These normalizations must not be used to invent layout modules, move business controls outside approved slots, or remove required v1.1 structure.
 
 Allowed business-content containers:
 
@@ -170,6 +171,17 @@ https://codex.yeeflow.com/#/list-set/41/{ListSetID}/{LayoutID}
 Do not use guessed `/p/{LayoutID}` routes.
 
 Runtime proof fails if the page opens with Access Denied, model-load errors, chart configuration errors, or placeholder-only dashboard content.
+
+## Package Root Binding
+
+When copying Dashboard pages from a baseline, export, golden reference, or generated staging package into a final `.yapk`, every Type `103` page record must be rebound to the target app root:
+
+- `decoded.Pages[].ListID` must equal `decoded.ListSet.ListID`.
+- `decoded.Pages[].LayoutID` remains the unique Dashboard layout resource ID.
+- `decoded.Pages[].LayoutInResources[]` must include the page `LayoutID` resource.
+- Navigation Type `103` items may use `ListID`/`LayoutID` as the page `LayoutID`, but the `Pages[]` record itself must stay rooted to the app.
+
+Do not keep a source/baseline Dashboard page `ListID` after ID remap. A package with copied Dashboard resources and mismatched `Pages[].ListID` can pass shell checks yet fail to surface Dashboard pages in the installed app.
 
 ## Dashboard-Only Upgrade Scope
 

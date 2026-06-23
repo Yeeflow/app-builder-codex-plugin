@@ -98,8 +98,14 @@ function registryReferenceRoot() {
   return JSON.parse(JSON.stringify(registry.references[0].exportShape._ak_c));
 }
 
+function dashboardV11TemplateRoot() {
+  const registry = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json"), "utf8"));
+  const template = (registry.templates || []).find((entry) => entry.id === "dashboard-page-layouts-v1.1") || registry.templates?.[0];
+  return JSON.parse(JSON.stringify(template.template.parsedResource));
+}
+
 function ids(node) {
-  return [node?.id, node?.name, node?.nv_label, node?.attrs?.nv_label, node?.attrs?.derivedFromGoldenReference].filter(Boolean).map(String);
+  return [node?.id, node?.name, node?.nv_label, node?.nav_label, node?.derivedFromDashboardPageLayoutTemplate, node?.derivedFromGoldenReference, node?.attrs?.id, node?.attrs?.name, node?.attrs?.nv_label, node?.attrs?.nav_label, node?.attrs?.derivedFromDashboardPageLayoutTemplate, node?.attrs?.derivedFromGoldenReference].filter(Boolean).map(String);
 }
 
 function visit(node, fn) {
@@ -159,9 +165,8 @@ function normalizeContainers(root) {
   const content = find(root, "Content");
   for (const node of [main, content].filter(Boolean)) {
     node.attrs = node.attrs || {};
-    node.attrs.container = node.attrs.container || {};
-    node.attrs.container.padding = { top: 0, right: 0, bottom: 0, left: 0 };
-    node.attrs.style = { ...style([null, "1"]), ...(node.attrs.style || {}), direction: [null, "column"], background: "#f4f7fb", padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] };
+    node.attrs.style = { ...style([null, "1"]), ...(node.attrs.style || {}), direction: [null, "column"], background: "#f4f7fb" };
+    delete node.attrs.style.padding;
   }
 }
 
@@ -183,15 +188,17 @@ function firstSummary(root) {
 }
 
 function pageResource(flags = {}) {
-  const root = registryReferenceRoot();
+  const root = dashboardV11TemplateRoot();
+  root.derivedFromDashboardPageLayoutTemplate = "dashboard-page-layouts-v1.1";
+  root.derivedFromGoldenReference = "event_portfolio_dashboard_golden_reference";
+  root.goldenReferenceId = "event_portfolio_dashboard_golden_reference";
   adaptReferenceDomain(root);
   normalizeContainers(root);
   removeOperations(root);
-  const summary = firstSummary(root);
+  const summary = firstSummary(root) || summaryControl(flags.summaryPatch || {});
   Object.assign(summary, summaryControl(flags.summaryPatch || {}));
-  const hiddenSummaryHost = find(root, "event_portfolio_hidden_metric_data_sources");
-  if (hiddenSummaryHost) hiddenSummaryHost.children = [summary];
-  const filter = find(root, "event_portfolio_region_filter");
+  const businessSection = findBusinessSectionContentArea(root);
+  const filter = find(root, "event_portfolio_region_filter") || find(root, "event_portfolio_pipeline_status_filter");
   if (filter) Object.assign(filter.attrs, { data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, field: "Text1", filter: [] }, display_f: "Text1", value_f: "ListDataID", lablay: [null, "top"], lab: { value: "Priority", ty: [null, "xs-light"] }, placeholder: "Select priority...", edit: { pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, 6] } } }, ...(flags.filterPatch || {}) });
   const filterTokens = [];
   visit(root, (node) => {
@@ -220,12 +227,179 @@ function pageResource(flags = {}) {
     };
   });
   if (filter) Object.assign(filter.attrs, flags.filterPatch || {});
-  const kpiRow = find(root, "event_portfolio_kpi_row");
+  const kpiRow = find(root, "event_portfolio_kpi_row") || find(root, "kpi_cards_kpi_row");
   if (kpiRow) kpiRow.children = [kpiCard(flags.kpiMode || "valid", flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR)];
-  const grid = find(root, "Event Pipeline Grid-Table");
-  if (grid) {
-    const columns = [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
-    grid.children = [
+  const columns = [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
+  businessSection.children = [
+    summary,
+    {
+      type: "flex_grid",
+      id: "event_pipeline_grid_table_header_grid",
+      name: "event_pipeline_grid_table_header_grid",
+      displayLabel: [null, false],
+      attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } }, common: { hide: [null, false, false, true] } },
+      children: ["Request", "Priority", "Owner", "Status"].map((label) => ({ type: "heading", name: label, attrs: { headc: { title: { value: label } } } })),
+    },
+    {
+      type: "collection",
+      name: "Facility Work Queue Grid",
+      nv_label: "event_pipeline_grid_table_collection",
+      derivedFromGoldenReference: "Event Pipeline Grid-Table",
+      attrs: {
+        datasetPresentationTemplateId: "Event Pipeline Grid-Table",
+        data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } },
+        filterBindings: filterTokens.filter(Boolean),
+      },
+      children: [
+        {
+          type: "flex_grid",
+          id: "event_pipeline_grid_table_item_grid",
+          name: "event_pipeline_grid_table_item_grid",
+          displayLabel: [null, false],
+          attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } } },
+          children: [
+            { type: "dynamic-field", name: "Request Title", attrs: { source: "3", "obj-f": "Title" } },
+            { type: "dynamic-field", name: "Priority", attrs: { source: "3", "obj-f": "Text1" } },
+            { type: "dynamic-user", name: "Owner", attrs: { source: "3", "obj-f": "User1" } },
+            { type: "dynamic-field", name: "Status", attrs: { source: "3", "obj-f": "Text2" } },
+          ],
+        },
+      ],
+    },
+  ];
+  if (flags.mainStyle) find(root, "Main").attrs.style = flags.mainStyle;
+  const extValues = flags.extValues === undefined
+    ? [{ fieldName: "ListDataID", func: "COUNT", id: "ListDataID" }]
+    : flags.extValues;
+  return Object.assign(root, {
+    title: "Facility Operations Dashboard",
+    ver: "1.0.0",
+    derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-v1.1",
+    attrs: {
+      hideHeaderAll: true,
+      container: { padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] },
+      background: { type: "classic", classic: { color: "#f4f7fb" } },
+    },
+    ReportIds: flags.reportIds === undefined ? [SUMMARY_ID] : flags.reportIds,
+    tempVars: flags.tempVars === undefined ? [SAVE_VAR] : flags.tempVars,
+    exts: flags.exts === undefined ? [{ i: SUMMARY_ID, category: "___Pivot___", key: "summary", attr: { ListID: LIST_ID, settings: { values: extValues } } }] : flags.exts,
+    filterVars: [],
+    actions: [],
+    derivedFromGoldenReference: "event_portfolio_dashboard_golden_reference",
+    plannedRegions: { filters: true, kpis: true, gridTable: true },
+  });
+}
+
+function findBusinessSectionContentArea(root) {
+  let found = null;
+  visitWithAncestors(root, [], (node, ancestors) => {
+    if (found || !ids(node).includes("section_content_area")) return;
+    if (ancestors.some((ancestor) => ids(ancestor).includes("page_title_section"))) return;
+    found = node;
+  });
+  assert.ok(found, "Expected v1.1 template to contain a business section_content_area.");
+  return found;
+}
+
+function visitWithAncestors(node, ancestors, fn) {
+  if (!node || typeof node !== "object") return;
+  fn(node, ancestors);
+  for (const child of node.children || []) visitWithAncestors(child, [...ancestors, node], fn);
+}
+
+function decoded(flags = {}) {
+  return decodedWithResource(validV11Resource(flags));
+}
+
+function decodedWithResource(resource) {
+  return {
+    ListSet: { ListID: LIST_SET_ID, Title: "Facility Maintenance" },
+    Pages: [{ Type: 103, Title: "Facility Operations Dashboard", LayoutID: "dashboard-layout", LayoutInResources: [{ ID: "dashboard-layout", RefId: "dashboard-layout", Resource: JSON.stringify(resource) }] }],
+    Childs: [{
+      List: { ListID: LIST_ID, Title: "Maintenance Requests" },
+      Fields: [
+        field("ListDataID", "Text", "input"),
+        field("Title", "Text", "input"),
+        field("Text1", "Text", "select"),
+        field("Decimal1", "Decimal", "input_number", "field-decimal-1"),
+      ],
+      Layouts: [],
+    }],
+  };
+}
+
+function validV11Resource(flags = {}) {
+  const root = dashboardV11TemplateRoot();
+  root.derivedFromDashboardPageLayoutTemplate = "dashboard-page-layouts-v1.1";
+  root.derivedFromGoldenReference = "event_portfolio_dashboard_golden_reference";
+  root.goldenReferenceId = "event_portfolio_dashboard_golden_reference";
+  const extValues = flags.extValues === undefined
+    ? [{ fieldName: "ListDataID", func: "COUNT", id: "ListDataID" }]
+    : flags.extValues;
+  root.ReportIds = flags.reportIds === undefined ? [SUMMARY_ID] : flags.reportIds;
+  root.tempVars = flags.tempVars === undefined ? [SAVE_VAR] : flags.tempVars;
+  root.exts = flags.exts === undefined ? [{ i: SUMMARY_ID, category: "___Pivot___", key: "summary", attr: { ListID: LIST_ID, settings: { values: extValues } } }] : flags.exts;
+  root.filterVars = [{ id: "priorityFilter", name: "priorityFilter", field: "Text1" }];
+  root.actions = [];
+  root.plannedRegions = { filters: true, kpis: true, gridTable: true };
+  removeOperations(root);
+  const businessSection = findBusinessSectionContentArea(root);
+  businessSection.children = [eventPortfolioFilterGroup(flags.filterPatch || {}), summaryControl(flags.summaryPatch || {}), eventPipelineGridTableRegion()];
+  const kpiValue = find(root, "event_portfolio_kpi_planned_events_value");
+  const kpiWrapper = find(root, "kpi_metrics_wrapper") || find(root, "kpi_cards_wrapper");
+  if (kpiWrapper) {
+    kpiWrapper.derivedFromGoldenReference = "event_portfolio_kpi_row";
+    kpiWrapper.width = "full";
+  }
+  if (kpiValue) {
+    kpiValue.attrs = kpiValue.attrs || {};
+    kpiValue.attrs.headc = { title: { variable: [flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR] } };
+    kpiValue.attrs.heads = { ty: [null, "h2"], color: "#071638" };
+  }
+  applyKpiMode(root, flags.kpiMode || "valid");
+  const filter = find(root, "event_portfolio_pipeline_status_filter") || find(root, "event_portfolio_region_filter");
+  if (filter) setNearestContainerReference(root, filter, "event_portfolio_filter_group");
+  if (filter) {
+    filter.attrs = {
+      ...(filter.attrs || {}),
+      data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, field: "Text1", filter: [] },
+      display_f: "Text1",
+      value_f: "ListDataID",
+      lablay: [null, "top"],
+      lab: { value: "Priority", ty: [null, "xs-light"] },
+      placeholder: "Select priority...",
+      edit: { pcolor: "var(--c--neutral-dark-hover)", normal: { border: { radius: [null, 6] } } },
+      ...(flags.filterPatch || {}),
+    };
+  }
+  const main = find(root, "Main") || find(root, "main");
+  if (flags.mainStyle && main) main.attrs.style = flags.mainStyle;
+  return root;
+}
+
+function applyKpiMode(root, mode) {
+  if (mode === "valid") return;
+  const iconBlock = find(root, "event_portfolio_kpi_planned_events_icon_block");
+  if (!iconBlock) return;
+  if (mode === "no-icon") {
+    iconBlock.children = [];
+    return;
+  }
+  if (mode === "text-icon") {
+    iconBlock.children = [{ type: "heading", name: "Icon Text", attrs: { headc: { title: { value: "fa-solid fa-clock" } }, heads: { ty: [null, "h5"], color: "#0065FF" } } }];
+  }
+}
+
+function eventPipelineGridTableRegion() {
+  const columns = [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
+  return {
+    type: "container",
+    id: "Event Pipeline Grid-Table",
+    name: "Event Pipeline Grid-Table",
+    width: "full",
+    derivedFromGoldenReference: "Event Pipeline Grid-Table",
+    attrs: { style: { widthtype: [null, "1"], direction: [null, "column"], gap: [null, 8], align_items: [null, "stretch"], justify_content: [null, "flex-start"] } },
+    children: [
       {
         type: "flex_grid",
         id: "event_pipeline_grid_table_header_grid",
@@ -241,7 +415,7 @@ function pageResource(flags = {}) {
         attrs: {
           datasetPresentationTemplateId: "Event Pipeline Grid-Table",
           data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } },
-          filterBindings: filterTokens.filter(Boolean),
+          filterBindings: ["Text1", "ListDataID"],
         },
         children: [
           {
@@ -259,47 +433,32 @@ function pageResource(flags = {}) {
           },
         ],
       },
-    ];
-  }
-  if (flags.mainStyle) find(root, "Main").attrs.style = flags.mainStyle;
-  const extValues = flags.extValues === undefined
-    ? [{ fieldName: "ListDataID", func: "COUNT", id: "ListDataID" }]
-    : flags.extValues;
-  return {
-    title: "Facility Operations Dashboard",
-    ver: "1.0.0",
-    derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-v1.1",
-    attrs: {
-      hideHeaderAll: true,
-      container: { padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] },
-      background: { type: "classic", classic: { color: "#f4f7fb" } },
-    },
-    ReportIds: flags.reportIds === undefined ? [SUMMARY_ID] : flags.reportIds,
-    tempVars: flags.tempVars === undefined ? [SAVE_VAR] : flags.tempVars,
-    exts: flags.exts === undefined ? [{ i: SUMMARY_ID, category: "___Pivot___", key: "summary", attr: { ListID: LIST_ID, settings: { values: extValues } } }] : flags.exts,
-    filterVars: [],
-    actions: [],
-    derivedFromGoldenReference: "event_portfolio_dashboard_golden_reference",
-    plannedRegions: { filters: true, kpis: true, gridTable: true },
-    children: [root],
+    ],
   };
 }
 
-function decoded(flags = {}) {
+function eventPortfolioFilterGroup(filterPatch = {}) {
   return {
-    ListSet: { ListID: LIST_SET_ID, Title: "Facility Maintenance" },
-    Pages: [{ Type: 103, Title: "Facility Operations Dashboard", LayoutID: "dashboard-layout", LayoutInResources: [{ ID: "dashboard-layout", RefId: "dashboard-layout", Resource: JSON.stringify(pageResource(flags)) }] }],
-    Childs: [{
-      List: { ListID: LIST_ID, Title: "Maintenance Requests" },
-      Fields: [
-        field("ListDataID", "Text", "input"),
-        field("Title", "Text", "input"),
-        field("Text1", "Text", "select"),
-        field("Decimal1", "Decimal", "input_number", "field-decimal-1"),
-      ],
-      Layouts: [],
-    }],
+    type: "container",
+    id: "event_portfolio_filter_group",
+    name: "event_portfolio_filter_group",
+    width: "full",
+    derivedFromGoldenReference: "event_portfolio_filter_group",
+    attrs: { style: { widthtype: [null, "1"], direction: [null, "row"], gap: [null, 12], align_items: [null, "center"], justify_content: [null, "flex-start"] } },
+    children: [filterControl({ filterVar: "priorityFilter", lab: { value: "Priority", ty: [null, "xs-light"] }, placeholder: "Select priority...", ...filterPatch })],
   };
+}
+
+function setNearestContainerReference(root, target, referenceId) {
+  let best = null;
+  visitWithAncestors(root, [], (node, ancestors) => {
+    if (node !== target) return;
+    best = [...ancestors].reverse().find((ancestor) => ancestor?.type === "container" && !["Main", "Content"].some((id) => ids(ancestor).includes(id)));
+  });
+  if (best) {
+    best.derivedFromGoldenReference = referenceId;
+    best.width = "full";
+  }
 }
 
 function decodedShellDashboard() {
@@ -397,7 +556,7 @@ function expectCode(label, args, code) {
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dashboard-generation-hard-gates-"));
 
 try {
-  const valid = writePackage(tempDir, "valid", decoded());
+  const valid = writePackage(tempDir, "valid", decodedWithResource(validV11Resource()));
   expectPass("complete dashboard generation hard gates", ["--package", valid]);
 
   expectCode(

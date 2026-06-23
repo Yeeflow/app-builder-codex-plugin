@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
+const path = require("path");
 const { spawnSync } = require("child_process");
 const zlib = require("zlib");
 const { validatePackageWrapperIcon } = require("./scripts/lib/application-icon-validation.cjs");
@@ -73,6 +74,7 @@ const CHOICE_FIELD_TYPES = new Set(["select", "radio", "checkbox", "tag"]);
 const MULTI_CHOICE_FIELD_TYPES = new Set(["checkbox", "tag"]);
 const GENERIC_CHOICE_RE = /^(option|choice|item|value|select|test|sample|demo)\s*\d*$/i;
 const DEFAULT_DASHBOARD_RESOURCE_KEYS = ["children", "attrs", "title", "ver", "filterVars", "tempVars", "exts", "actions"];
+const DASHBOARD_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const STORAGE_FAMILY_BY_PREFIX = new Map([
   ["Text", "Text"],
   ["Decimal", "Decimal"],
@@ -830,9 +832,13 @@ function parseExt2(value) {
 
 function validateDashboardShells(decoded, errors) {
   const pageLayoutIds = new Set(asArray(decoded.Pages).map((page) => String(page?.LayoutID || "")).filter(Boolean));
+  const rootListSetId = String(decoded?.ListSet?.ListID || "");
   for (const [pageIndex, page] of asArray(decoded.Pages).entries()) {
     const path = `Pages[${pageIndex}]`;
     if (Number(page.Type) !== 103) add(errors, "DASHBOARD_TYPE_103_REQUIRED", "Generated dashboards must use current dashboard Type 103.", { path: `${path}.Type`, value: page.Type ?? null });
+    if (rootListSetId && String(page.ListID || "") !== rootListSetId) {
+      add(errors, "YAPK_DASHBOARD_PAGE_ROOT_BINDING_INVALID", "Dashboard/App page records must be rooted to decoded.ListSet.ListID; LayoutID remains the page layout resource ID.", { path: `${path}.ListID`, title: page.Title || null, expected: rootListSetId, actual: page.ListID ?? null, layoutId: page.LayoutID ?? null });
+    }
     if (page.LayoutView !== null && page.LayoutView !== undefined) add(errors, "DASHBOARD_LAYOUTVIEW_MUST_BE_NULL", "Current dashboard pages must keep LayoutView null and store JSON in LayoutInResources[0].Resource.", { path: `${path}.LayoutView` });
     const ext2 = parseExt2(page.Ext2);
     if (!ext2 || ext2.src !== true) add(errors, "DASHBOARD_EXT2_SRC_MARKER_MISSING", "Current dashboard pages require Ext2 containing {\"src\":true}.", { path: `${path}.Ext2` });
@@ -874,16 +880,18 @@ function validateDashboardResourceShape(parsed, path, errors) {
   const topChildren = asArray(parsed.children);
   const hasRootWorkspaceShell = hasRootThreeColumnWorkspaceShell(parsed);
   const main = topChildren.find((child) => hasIdentity(child, "Main"));
+  let content = null;
   if (!main && !hasRootWorkspaceShell) {
     add(errors, "DASHBOARD_MAIN_CONTENT_NOT_IN_CHILDREN", "Dashboard Main container must be a top-level child of standard dashboard pages; three-column workspace dashboards must use a root three_column_workspace_shell instead.", { path });
     return;
   }
   if (main) {
-    const content = asArray(main.children).find((child) => hasIdentity(child, "Content"));
+    content = asArray(main.children).find((child) => hasIdentity(child, "Content"));
     if (!content) add(errors, "DASHBOARD_MAIN_CONTENT_NOT_IN_CHILDREN", "Dashboard Content container must be inside the top-level Main container for standard dashboard pages.", { path });
   }
   const pagePadding = parsed.attrs?.container?.padding ?? parsed.attrs?.style?.padding ?? parsed.attrs?.padding;
   if (!isZeroPadding(pagePadding)) add(errors, "DASHBOARD_PAGE_PADDING_MISSING", "Dashboard page content-area padding should be explicitly zero; spacing belongs in Main > Content for Style 1 dashboards or in the root shell for Style 2 workspace dashboards.", { path: `${path}.attrs.container.padding` });
+  if (content && dashboardUsesV11Template(parsed)) validateDashboardV11ContentPadding(content, `${path}.Main.Content`, errors);
   if (hasRootWorkspaceShell && !pageContentWidthIsFull(parsed)) {
     add(errors, "THREE_COLUMN_PAGE_WIDTH_NOT_FULL", "Three-column workspace dashboard pages must set content width to Full Width.", { path: `${path}.attrs.contentWidth` });
   }
@@ -900,6 +908,72 @@ function isZeroPadding(value) {
   if (Array.isArray(value)) return value.every((item) => item === null || isZeroPadding(item));
   if (isObject(value)) return Object.values(value).every(isZeroPadding);
   return false;
+}
+
+let cachedDashboardV11ContentPadding = undefined;
+
+function dashboardUsesV11Template(resource) {
+  return identityCandidates(resource).some((candidate) => String(candidate) === DASHBOARD_LAYOUT_TEMPLATE_ID);
+}
+
+function getDashboardV11ContentPaddingContract() {
+  if (cachedDashboardV11ContentPadding !== undefined) return cachedDashboardV11ContentPadding;
+  cachedDashboardV11ContentPadding = null;
+  try {
+    const registryPath = path.join(__dirname, "docs/reference/dashboard-page-layout-templates.json");
+    const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+    const template = asArray(registry.templates).find((item) => item?.id === DASHBOARD_LAYOUT_TEMPLATE_ID) || asArray(registry.templates)[0];
+    const content = findFirstByIdentity(template?.template?.parsedResource, "content") || findFirstByIdentity(template?.template?.parsedResource, "Content");
+    cachedDashboardV11ContentPadding = content ? {
+      container: content.attrs?.container?.padding,
+      common: content.attrs?.common?.padding,
+      style: content.attrs?.style?.padding,
+    } : null;
+  } catch {
+    cachedDashboardV11ContentPadding = null;
+  }
+  return cachedDashboardV11ContentPadding;
+}
+
+function findFirstByIdentity(root, expected) {
+  let found = null;
+  const visit = (node) => {
+    if (!node || typeof node !== "object" || found) return;
+    if (hasIdentity(node, expected)) {
+      found = node;
+      return;
+    }
+    for (const child of asArray(node.children)) visit(child);
+  };
+  visit(root);
+  return found;
+}
+
+function validateDashboardV11ContentPadding(content, pointer, errors) {
+  const expected = getDashboardV11ContentPaddingContract();
+  if (!expected) return;
+  const actual = {
+    container: content.attrs?.container?.padding,
+    common: content.attrs?.common?.padding,
+    style: content.attrs?.style?.padding,
+  };
+  for (const key of ["container", "common", "style"]) {
+    if (expected[key] === undefined && actual[key] === undefined) continue;
+    if (!deepEqualNormalizedPadding(actual[key], expected[key])) {
+      add(errors, "DASHBOARD_V11_CONTENT_PADDING_MISMATCH", "Dashboard Page Layouts v1.1 Content container padding must preserve the canonical template; do not force Content padding to 0.", { path: `${pointer}.attrs.${key}.padding`, expected: expected[key] ?? null, actual: actual[key] ?? null });
+    }
+  }
+}
+
+function deepEqualNormalizedPadding(actual, expected) {
+  if (actual === undefined && expected === undefined) return true;
+  return stableJson(actual ?? null) === stableJson(expected ?? null);
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  if (isObject(value)) return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(",")}}`;
+  return JSON.stringify(value);
 }
 
 function hasRootThreeColumnWorkspaceShell(page) {

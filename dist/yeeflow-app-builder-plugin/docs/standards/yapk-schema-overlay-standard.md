@@ -49,3 +49,15 @@ Generated-final `.yapk` packages must not embed sample rows or seed records in d
 The package is responsible for application structure: lists, fields, pages, forms, reports, workflows, navigation, metadata, and export-shaped runtime resources. Sample data is an optional post-install concern and must be emitted only as a separate seed artifact or script with explicit live-write approval.
 
 Validators must treat embedded `ListDatas` in generated-final YAPK packages as a hard failure, even if a future canonical schema permits the property, because app install/import acceptance and sample-data mutation are separate proof layers.
+
+## Dashboard Page Root Binding And Runtime URL Boundary
+
+Generated YAPK dashboard pages must preserve root materialization binding. Every decoded `Pages[]` item with `Type: 103` must have `ListID` equal to decoded `ListSet.ListID`; `LayoutID` remains the page layout resource ID and must resolve to a `LayoutInResources[]` resource. When copying dashboard pages from an export, golden reference, baseline, or staged package into a generated-final package, never retain the source page `ListID`. Rebind it to the target package root after ID remap.
+
+`YAPK_DASHBOARD_PAGE_ROOT_BINDING_INVALID` is a signing-readiness blocker because mismatched dashboard page roots can make installed apps appear to have no dashboard pages even when `Pages[]`, `LayoutID`, and navigation entries exist.
+
+Dashboard pages using Dashboard Page Layouts v1.1 must preserve canonical v1.1 `Content` padding. Root page padding remains zero for full-page background continuity, but the `Content` container must not be forced to zero by older normalization rules. `DASHBOARD_V11_CONTENT_PADDING_MISMATCH` is a generated-final blocker.
+
+After install/import, runtime proof must derive the canonical application URL from wrapper `ListID` / decoded `ListSet.ListID` when package-root proof is available. Do not treat install response `Data.ID` as an application `ListSetID` unless the response explicitly names it as `ListSetID`, `ListSetId`, or `listSetId`. Reports must preserve wrapper root ID, decoded root ID, any explicit API-returned app root ID, whether they match, and the selected canonical URL. API status `0` is API submission/acceptance only; final proof still requires Version Management `Succeed` and browser/runtime evidence against the decoded package root URL.
+
+Package API reports must preserve sanitized non-secret server messages for non-zero API status. If `/listset/package/install` returns status `540017`, classify it as already installed in the tenant, stop fresh-install retries, resolve the installed app identity, and continue through upgrade-check / upgrade-apply flow with upgrade lineage proof.

@@ -157,6 +157,12 @@ try {
   find(conflictingContentBackground, "content").attrs.background = { type: "classic", classic: { color: "#ffffff" } };
   expectCode("content container conflicting background fails", ["--package", writePackage(tempDir, "content-background", decoded(conflictingContentBackground))], "DASH_LAYOUT_RESOURCE_CONTENT_BACKGROUND_CONFLICT");
 
+  const forcedZeroContentPadding = templateResource();
+  const forcedZeroContent = find(forcedZeroContentPadding, "content");
+  forcedZeroContent.attrs.container = { padding: { top: 0, right: 0, bottom: 0, left: 0 } };
+  forcedZeroContent.attrs.common = { padding: [null, { top: 0, right: 0, bottom: 0, left: 0 }] };
+  expectCode("content container forced zero padding fails", ["--package", writePackage(tempDir, "content-forced-zero-padding", decoded(forcedZeroContentPadding))], "DASH_LAYOUT_RESOURCE_CONTENT_PADDING_MISMATCH");
+
   const missingWidth = templateResource();
   delete find(missingWidth, "content_card_wrapper").attrs.style.widthtype;
   expectCode("section wrapper missing Full width fails", ["--package", writePackage(tempDir, "missing-width", decoded(missingWidth))], "DASH_LAYOUT_RESOURCE_FULL_WIDTH_MISSING");

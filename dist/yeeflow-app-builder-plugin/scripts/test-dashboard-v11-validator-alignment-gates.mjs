@@ -53,8 +53,6 @@ function normalizeShell(resource) {
     node.attrs.style.direction = node.attrs.style.direction || [null, "column"];
   }
   if (content) {
-    content.attrs.container = content.attrs.container || {};
-    content.attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }];
     delete content.attrs.background;
   }
 }

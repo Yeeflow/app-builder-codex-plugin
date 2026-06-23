@@ -282,7 +282,7 @@ function validateResourceLayoutContracts(page, reference, resourceIndex, finding
   }
   const main = findFirstByIdentity(page.resource, "Main");
   const content = findFirstByIdentity(page.resource, "Content");
-  if (hasNonzeroPadding(content) || (!hasZeroPadding(main) && !hasZeroPadding(content))) {
+  if (!usesDashboardV11Shell(page.resource) && (hasNonzeroPadding(content) || (!hasZeroPadding(main) && !hasZeroPadding(content)))) {
     findings.push(error("DASH_GOLDEN_RESOURCE_ROOT_CONTENT_PADDING", "Generated dashboard root Content area padding must be zero.", { page: page.title, mainPadding: getPadding(main) || null, contentPadding: getPadding(content) || null }));
   }
 }
@@ -480,6 +480,7 @@ function identityCandidates(control) {
     control?.Title,
     control?.nv_label,
     control?.nav_label,
+    control?.derivedFromDashboardPageLayoutTemplate,
     control?.derivedFromGoldenReference,
     control?.goldenReferenceId,
     control?.referenceId,
@@ -487,6 +488,7 @@ function identityCandidates(control) {
     control?.attrs?.name,
     control?.attrs?.nv_label,
     control?.attrs?.nav_label,
+    control?.attrs?.derivedFromDashboardPageLayoutTemplate,
     control?.attrs?.derivedFromGoldenReference,
     control?.attrs?.goldenReferenceId,
   ].filter(present).map(String);
@@ -600,6 +602,10 @@ function isGeneratedFullWidth(control) {
 
 function isFullWidthType(value) {
   return Array.isArray(value) && value[0] === null && (String(value[1]) === "1" || String(value[1]) === "2");
+}
+
+function usesDashboardV11Shell(resource) {
+  return identityCandidates(resource).some((candidate) => String(candidate) === DASHBOARD_LAYOUT_TEMPLATE_ID);
 }
 
 function getPadding(control) {

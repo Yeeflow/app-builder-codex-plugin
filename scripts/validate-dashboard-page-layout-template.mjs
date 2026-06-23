@@ -168,6 +168,7 @@ function validatePageShell(resource, findings, context) {
   if (hasConflictingBackground(content)) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_BACKGROUND_CONFLICT`, "Dashboard content container must not override the full-page #f4f7fb background continuity.", { page: context.page, actual: content.attrs?.background || content.attrs?.style?.background || null }));
   }
+  validateContentPaddingContract(content, findings, context);
   for (const id of REQUIRED_FULL_WIDTH_IDS) {
     for (const entry of findAllByIdentity(resource, id)) {
       if (!isFullWidth(entry)) {
@@ -311,6 +312,34 @@ function rootStructureSignature(control) {
     gap: control?.attrs?.style?.gap ?? control?.attrs?.container?.gap ?? null,
     background: isMainOrContent ? "normalized" : control?.attrs?.background ?? control?.attrs?.style?.background ?? control?.attrs?.common?.background ?? null,
   };
+}
+
+function validateContentPaddingContract(content, findings, context) {
+  const templateContent = findFirstByIdentity(context.template?.template?.parsedResource, "content")
+    || findFirstByIdentity(context.template?.template?.parsedResource, "Content");
+  if (!templateContent) return;
+  const expected = paddingSlots(templateContent);
+  const actual = paddingSlots(content);
+  for (const key of ["container", "common", "style"]) {
+    if (expected[key] === undefined && actual[key] === undefined) continue;
+    if (stableJson(actual[key] ?? null) !== stableJson(expected[key] ?? null)) {
+      findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_PADDING_MISMATCH`, "Dashboard Page Layouts v1.1 Content container padding must preserve the canonical template; obsolete forced-zero normalization is forbidden.", { page: context.page, slot: key, expected: expected[key] ?? null, actual: actual[key] ?? null }));
+    }
+  }
+}
+
+function paddingSlots(control) {
+  return {
+    container: control?.attrs?.container?.padding,
+    common: control?.attrs?.common?.padding,
+    style: control?.attrs?.style?.padding,
+  };
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  if (isObject(value)) return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(",")}}`;
+  return JSON.stringify(value);
 }
 
 function normalizeWidthMode(control) {

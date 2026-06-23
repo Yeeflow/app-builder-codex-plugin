@@ -17,6 +17,7 @@ import {
   summarizeWorkspaceList,
 } from "./lib/yeeflow-workspace-selection.mjs";
 import { validateYapkUpgradeIdStability } from "./validate-yapk-upgrade-id-stability.mjs";
+import { readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 
 const OPERATIONS = new Set(["upload", "import-yap", "install-yapk", "upgrade-check-yapk", "upgrade-apply-yapk", "upgrade-yapk"]);
 const YAPK_UPGRADE_OPERATIONS = new Set(["upgrade-check-yapk", "upgrade-apply-yapk", "upgrade-yapk"]);
@@ -311,6 +312,7 @@ async function executeOperation(options, env, resolvedPackagePath) {
     operation: options.operation,
     selectedWorkspace: await resolveSelectedWorkspaceSummary(options),
     upgradeIdStability,
+    packageRootProof: options.operation === "install-yapk" ? buildPackageRootProof(resolvedPackagePath) : null,
   });
 }
 
@@ -407,6 +409,7 @@ async function postJson(env, endpoint, body, redactBody, auth, context = {}) {
       operation: context.operation,
       responseSummary: summary,
       auth,
+      packageRootProof: context.packageRootProof,
     });
   }
   return result;
@@ -439,6 +442,8 @@ async function summarizeResponse(response, label, context = {}) {
       responseKeys: parsed && typeof parsed === "object" ? Object.keys(parsed).slice(0, 20) : [],
       apiStatus: parsed?.Status ?? parsed?.status ?? null,
       messageClass: classification.messageClass,
+      sanitizedMessage: sanitizeServerMessage(parsed?.Message ?? parsed?.message ?? ""),
+      suggestedNextOperation: classification.suggestedNextOperation || null,
       messagePresent: Boolean(parsed?.Message ?? parsed?.message),
     };
   }
@@ -457,6 +462,8 @@ async function summarizeResponse(response, label, context = {}) {
     responseKeys: parsed && typeof parsed === "object" ? Object.keys(parsed).slice(0, 20) : [],
     apiStatus: parsed?.Status ?? parsed?.status ?? null,
     messageClass: classification.messageClass,
+    sanitizedMessage: sanitizeServerMessage(parsed?.Message ?? parsed?.message ?? ""),
+    suggestedNextOperation: classification.suggestedNextOperation || null,
     messagePresent: Boolean(parsed?.Message ?? parsed?.message),
     totalCount: parsed?.TotalCount ?? parsed?.totalCount ?? null,
     textPresent: Boolean(text),
@@ -475,8 +482,11 @@ async function summarizeResponse(response, label, context = {}) {
 
 export { buildApplicationAccessReport, classifyApiResult, extractApplicationListSetId, extractPackageFile, summarizeResponse };
 
-function buildApplicationAccessReport({ operation = "", responseSummary = {}, auth = {} } = {}) {
-  const listSetId = sanitizeListSetId(responseSummary.applicationListSetId);
+function buildApplicationAccessReport({ operation = "", responseSummary = {}, auth = {}, packageRootProof = null } = {}) {
+  const apiListSetId = sanitizeListSetId(responseSummary.applicationListSetId);
+  const packageRootListSetId = sanitizeListSetId(packageRootProof?.decodedListSetId);
+  const wrapperListId = sanitizeListSetId(packageRootProof?.wrapperListId);
+  const listSetId = operation === "install-yapk" && packageRootListSetId ? packageRootListSetId : apiListSetId;
   const tenantUrl = auth?.mode === "oauth" && auth?.env?.tenantUrlSource === "oauth-token-claim"
     ? sanitizeTenantUrl(auth.env.tenantUrl)
     : "";
@@ -487,6 +497,10 @@ function buildApplicationAccessReport({ operation = "", responseSummary = {}, au
       status: "unavailable",
       operation,
       listSetId: listSetId || null,
+      apiReturnedApplicationListSetId: apiListSetId || null,
+      packageRootListSetId: packageRootListSetId || null,
+      wrapperListId: wrapperListId || null,
+      canonicalUrlSource: packageRootListSetId ? "decoded-package-root" : "unavailable",
       tenantUrlSource: auth?.env?.tenantUrlSource || "missing",
       link: null,
       message: unavailableMessage,
@@ -498,6 +512,11 @@ function buildApplicationAccessReport({ operation = "", responseSummary = {}, au
     status: "available",
     operation,
     listSetId,
+    apiReturnedApplicationListSetId: apiListSetId || null,
+    packageRootListSetId: packageRootListSetId || null,
+    wrapperListId: wrapperListId || null,
+    canonicalUrlSource: packageRootListSetId ? "decoded-package-root" : "api-explicit-listsetid",
+    apiRootMatchesPackageRoot: apiListSetId && packageRootListSetId ? apiListSetId === packageRootListSetId : null,
     tenantUrlSource: auth.env.tenantUrlSource,
     link,
     message: `Application link: ${link}`,
@@ -547,10 +566,21 @@ function extractApplicationListSetId(parsed, { label = "" } = {}) {
     parsed?.listsetId,
   );
   if (explicit) return sanitizeListSetId(explicit);
-  if (String(label || "").includes("/listset/package/install")) {
-    return sanitizeListSetId(data?.ID ?? data?.Id ?? data?.id);
-  }
   return "";
+}
+
+function buildPackageRootProof(packagePath) {
+  try {
+    if (!packagePath || !String(packagePath).endsWith(".yapk")) return null;
+    const { wrapper, decoded } = readDecodedYapk(packagePath);
+    return {
+      wrapperListId: wrapper?.ListID ? String(wrapper.ListID) : "",
+      decodedListSetId: decoded?.ListSet?.ListID ? String(decoded.ListSet.ListID) : "",
+      rootIdsMatch: Boolean(wrapper?.ListID && decoded?.ListSet?.ListID) ? String(wrapper.ListID) === String(decoded.ListSet.ListID) : null,
+    };
+  } catch {
+    return null;
+  }
 }
 
 function buildImportBody(options, resolvedPackagePath) {
@@ -727,8 +757,8 @@ function classifyApiResult({ httpStatus, apiStatus, message, upgradeCheck }) {
     if (upgradeCheck === false) return { resultClass: "upgrade_submitted", messageClass: "none" };
     return { resultClass: "success", messageClass: "none" };
   }
-  if (isAlreadyInstalledMessage(message)) {
-    return { resultClass: "already_installed", messageClass: "already_installed" };
+  if (Number(apiStatus) === 540017 || isAlreadyInstalledMessage(message)) {
+    return { resultClass: "already_installed_in_tenant", messageClass: "already_installed", suggestedNextOperation: "upgrade-check-yapk / upgrade-apply-yapk" };
   }
   if (apiStatus !== null && apiStatus !== undefined) {
     return { resultClass: "api_rejected", messageClass: classifyMessage(message) };
@@ -740,7 +770,7 @@ function classifyApiResult({ httpStatus, apiStatus, message, upgradeCheck }) {
 
 function classifyMessage(message) {
   if (isAlreadyInstalledMessage(message)) return "already_installed";
-  return String(message || "").trim() ? "present_redacted" : "none";
+  return String(message || "").trim() ? "present_sanitized" : "none";
 }
 
 function isAlreadyInstalledMessage(message) {
@@ -756,6 +786,16 @@ function isAlreadyInstalledMessage(message) {
     "已安装",
     "重复",
   ].some((keyword) => text.includes(keyword.toLowerCase()));
+}
+
+function sanitizeServerMessage(message) {
+  let text = String(message || "").trim();
+  if (!text) return "";
+  text = text.replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, "Bearer [redacted]");
+  text = text.replace(/(access[_-]?token|refresh[_-]?token|authorization|auth[_-]?header)\s*[:=]\s*[^,;\s]+/gi, "$1=[redacted]");
+  text = text.replace(/[A-Za-z0-9+/]{80,}={0,2}/g, "[redacted-large-token]");
+  text = text.replace(/\b\d{16,}\b/g, "[redacted-id]");
+  return text.slice(0, 500);
 }
 
 function isMainModule() {
