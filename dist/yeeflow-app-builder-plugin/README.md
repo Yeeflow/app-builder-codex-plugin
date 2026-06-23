@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.14`
+- Version: `0.8.15`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.14` releases full-app generation entrypoint and Collection template exact-match gates from PR #165: clean-room generation must inspect the full-app entrypoint registry before claiming no generator path, and Dashboard Collection template validation must use exact template-token matching so multiselect/search grid-table references do not collide with the base grid-table template.
+Current release `0.8.15` releases full-app entrypoint cache-path alignment from PR #167: the entrypoint registry now validates both source checkout skill paths and installed plugin payload skill paths, so active plugin cache validation resolves bundled `skills/<skill-name>/SKILL.md` paths instead of failing on source-only `skills/installed/<skill-name>/SKILL.md`.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.14
+Version: 0.8.15
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.14
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.15
 ```
 
 ## What Is Included

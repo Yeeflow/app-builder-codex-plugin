@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.14`
+`0.8.15`
+
+Version `0.8.15` releases full-app entrypoint cache-path alignment from PR #167. The full-app entrypoint registry now supports both source checkout paths such as `skills/installed/<skill-name>/SKILL.md` and installed plugin payload paths such as `skills/<skill-name>/SKILL.md`; clean-room validation from the active plugin cache must pass the same entrypoint gate instead of stopping before package generation because of source-only skill paths.
 
 Version `0.8.14` releases full-app generation entrypoint and Collection template exact-match gates from PR #165. Clean-room generation must inspect the full-app entrypoint registry before claiming no generator path from `functional-specification.md` and `yeeflow-app-plan.md`; proof, delivery, package API, runtime-proof, and sample helper scripts are explicitly not full-app generators. Dashboard Collection template validation now uses exact template-token matching so multiselect/search grid-table references do not collide with the base grid-table template, while generated Dashboard Collections still must use approved presentation templates inside Dashboard Page Layouts v1.1 slots.
 
