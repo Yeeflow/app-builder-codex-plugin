@@ -90,8 +90,33 @@ Recommended editable behavior:
 - Grid-table references must preserve header `flex_grid`, Collection body, repeated item `flex_grid`, matching columns, mobile item-grid behavior, and valid source list bindings.
 - Multiselect references must preserve selected state, selected count, checkbox icons, bulk toolbar/actions, `ListDataID`, and `__ctx_coll` current-item context.
 - `collection_control_card_with_multiselect_toolbar` must preserve the full `card_with_multiselect_toolbar_wrapper` subtree, all non-editable style/layout/typography properties, page-level dependencies, Collection root actions, and the locked `card_col_item_multi_select` control.
+- `collection_control_grid_table_with_multiselect` must preserve the full `grid_table_col_multiselect_wrapper` subtree, all non-editable style/layout/typography properties, page-level dependencies, Collection root actions, the locked `grid_table_col_item_select` control, and matched `grid_table_col_header` / `grid_col_item` column definitions.
 - Search references must preserve `search-filter` or equivalent search control plus Collection `attrs.data.fulltext[]` linkage.
 - Event Pipeline Grid-Table must preserve the reference subtree inside Dashboard Page Layouts v1.1 slots and replace Marketing Event fields with app-specific fields. The same slot-only/component-only rule applies to every approved Collection presentation reference.
+
+## Grid-Table Multiselect Template
+
+`collection_control_grid_table_with_multiselect` is backed by the full export-shaped template artifact at `docs/reference/collection-control-grid-table-with-multiselect.template.json`. The source is Projects Center_1 v1.6, Dashboard page `All Tasks - multiple select`, component root `grid_table_col_multiselect_wrapper`. Projects Center / Project Tasks is the export-proven source reference only; the template can be selected for any Dashboard dataset that needs dense table scanning plus multi-row selection and batch operations.
+
+Generation must copy `grid_table_col_multiselect_wrapper` and all descendants as the component root. It is not enough to create a generic grid-table Collection, add a checkbox column, or add a separate toolbar.
+
+Only these regions are editable:
+
+- `grid_table_col_title_wrapper`
+- `op_normal`
+- `op_multipleselected`
+- `grid_table_col_header`
+- `grid_col_item`
+
+Everything else is locked by default. `grid_table_col_item_select` must remain unchanged, including its checked/unchecked icon controls and selection/action wiring. The Collection root `attrs.actions[]`, selected item/count temp variables, page-level `actions`, `formAction`, `filterVars`, and filter dependencies are part of the template contract and must be copied or intentionally remapped through generator-safe logic.
+
+Recommended editable behavior:
+
+- `op_normal` should retain the Search filter and Add item button unless a validated business rule removes one of them. Search placeholder text and Add button text may be changed.
+- `op_multipleselected` should retain a Delete selected items action. `btn_set_items` is optional, and additional batch buttons may be added only when each button has a valid action binding.
+- `grid_table_col_header` maps visible column labels to the selected source resource. `grid_col_item` maps repeated row content to fields from the same source resource.
+- User fields use `dynamic-user`; image fields use `dynamic-image`; file or attachment fields use `dynamic-file`; all other fields use `dynamic-field`.
+- `grid_table_col_header` and `grid_col_item` must always have the same column count, column widths, and compatible grid properties after business mapping.
 
 ## Validation
 

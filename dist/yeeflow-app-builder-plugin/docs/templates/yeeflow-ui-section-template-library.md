@@ -777,8 +777,36 @@ Applicable surfaces:
 
 - dashboard/page resource
 
+Full template artifact:
+
+- `docs/reference/collection-control-grid-table-with-multiselect.template.json`
+- Source export: Projects Center_1 v1.6, Dashboard page `All Tasks - multiple select`, root component `grid_table_col_multiselect_wrapper`.
+- Generation must copy the root wrapper and all descendants, not reconstruct a simplified grid-table Collection with checkbox-like controls.
+
+Editable regions:
+
+- `grid_table_col_title_wrapper`
+- `op_normal`
+- `op_multipleselected`
+- `grid_table_col_header`
+- `grid_col_item`
+
+Locked regions:
+
+- `grid_table_col_multiselect_wrapper` root structure outside editable descendants
+- `grid_table_col_item_select`
+- Collection root `attrs.actions[]`
+- page-level `filterVars`, `tempVars`, `actions`, `filter`, and `formAction` dependencies
+
 Required multiselect structure:
 
+- `grid_table_col_multiselect_wrapper` root container and descendants
+- `grid_table_col_title_wrapper`
+- `op_normal`
+- `op_multipleselected`
+- `grid_table_col_header`
+- `grid_col_item`
+- locked `grid_table_col_item_select`
 - leading 46px checkbox column
 - item checkbox cell with checked and unchecked icon controls
 - selected ids/count temp variables
@@ -787,17 +815,42 @@ Required multiselect structure:
 - action steps limited to `setvar`, `listitem`, `confirm`, `setdatalist`, and `otheraction`
 - current item context through `ListDataID` and `ctx: "__ctx_coll"`
 
+Column mapping rules:
+
+- `grid_table_col_header` and `grid_col_item` are the only field/column mapping regions.
+- The header and repeated item grids must always keep the same column count.
+- Each matching column must keep the same width and compatible grid properties.
+- User fields use Dynamic user controls.
+- Image fields use Dynamic image controls.
+- File or attachment fields use Dynamic file controls.
+- Other fields use Dynamic field controls.
+
+Operation rules:
+
+- `op_normal` should retain the Search filter and Add item button unless a validated business rule removes one of them.
+- Search placeholder text and Add item button text may be changed.
+- `op_multipleselected` should retain Delete selected items.
+- `btn_set_items` is optional.
+- Additional batch buttons may be added only when each button has a valid action binding.
+
 Validation checks:
 
 - `COLLECTION_GRID_TABLE_CHECKBOX_COLUMN_MISSING` absent
 - `COLLECTION_GRID_TABLE_SELECTION_STATE_MISSING` absent
 - `COLLECTION_GRID_TABLE_MULTISELECT_ACTION_INVALID` absent
 - `COLLECTION_GRID_TABLE_BULK_ACTION_REFERENCE_INVALID` absent
+- `DASH_DATASET_GRID_MULTISELECT_WRAPPER_MISSING` absent
+- `DASH_DATASET_GRID_MULTISELECT_SLOT_MISSING` absent
+- `DASH_DATASET_GRID_MULTISELECT_CONTROL_MUTATED` absent
+- `DASH_DATASET_GRID_MULTISELECT_COLLECTION_ACTIONS_MISSING` absent
+- `DASH_DATASET_GRID_MULTISELECT_HEADER_ITEM_COLUMN_MISMATCH` absent
+- `DASH_DATASET_GRID_MULTISELECT_PAGE_ACTIONS_MISSING` absent
 
 Proof boundaries:
 
 - Generate when a Dashboard dataset needs dense table scanning, multi-row selection, selected count/state, and batch operations. Projects Center / Project Tasks is the export-proven source reference, not a business-domain restriction.
 - Do not infer card-style absolute top-right selection behavior from this table pattern.
+- Do not infer this full export-shaped contract from the base `collection_control_grid_table`; select and materialize this template only when the App Plan selected `collection_control_grid_table_with_multiselect`.
 
 ## collection_control_grid_table_with_search
 

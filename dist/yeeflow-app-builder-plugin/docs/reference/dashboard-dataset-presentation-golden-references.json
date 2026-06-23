@@ -142,7 +142,7 @@
     {
       "templateId": "collection_control_grid_table_with_multiselect",
       "displayName": "Collection Grid-Table With Multiselect",
-      "sourceReference": "Projects Center / Project Tasks export-proven source reference",
+      "sourceReference": "Projects Center_1 v1.6 / All Tasks - multiple select / grid_table_col_multiselect_wrapper",
       "category": "collection-grid-table-multiselect",
       "suitableSourceResourceTypes": [
         "Data List",
@@ -175,7 +175,28 @@
         "ListDataID",
         "__ctx_coll"
       ],
-      "proofBoundary": "May be used for any matching Dashboard dataset, not only Project Tasks; runtime execution still needs focused proof."
+      "proofBoundary": "May be used for any matching Dashboard dataset, not only Project Tasks; runtime execution still needs focused proof. Must use the full export-shaped grid_table_col_multiselect_wrapper template, not a simplified grid-table with ad hoc checkbox icons.",
+      "fullTemplateReference": "docs/reference/collection-control-grid-table-with-multiselect.template.json",
+      "exportShapeContract": [
+        "copy grid_table_col_multiselect_wrapper and all descendants",
+        "preserve grid_table_col_item_select unchanged",
+        "preserve Collection root attrs.actions and multiselect action settings",
+        "include page-level filterVars, tempVars, actions, filter, and formAction dependencies",
+        "allow edits only in grid_table_col_title_wrapper, op_normal, op_multipleselected, grid_table_col_header, and grid_col_item",
+        "keep grid_table_col_header and grid_col_item column count, widths, and compatible grid properties identical"
+      ],
+      "editableRegions": [
+        "grid_table_col_title_wrapper",
+        "op_normal",
+        "op_multipleselected",
+        "grid_table_col_header",
+        "grid_col_item"
+      ],
+      "lockedRegions": [
+        "grid_table_col_multiselect_wrapper",
+        "grid_table_col_item_select",
+        "grid_table_col_body"
+      ]
     },
     {
       "templateId": "collection_control_grid_table_with_search",

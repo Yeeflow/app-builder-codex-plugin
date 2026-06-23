@@ -8,6 +8,7 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk } from "./lib/yapk-d
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-dataset-presentation-golden-references.json");
 const CARD_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json");
+const GRID_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json");
 
 const APPROVED_IDS = new Set([
   "collection_control_responsive_card_grid",
@@ -88,6 +89,7 @@ function validateRegistry(registry, findings) {
     }
   }
   validateCardMultiselectTemplateArtifact(registry, findings);
+  validateGridMultiselectTemplateArtifact(registry, findings);
   return { approvedIds: ids.size ? ids : APPROVED_IDS, references };
 }
 
@@ -122,6 +124,48 @@ function validateCardMultiselectTemplateArtifact(registry, findings) {
     if (count < 1) {
       findings.push(error("DASH_DATASET_CARD_MULTISELECT_TEMPLATE_DEPENDENCY_MISSING", "Card multiselect template artifact is missing required page-level dependency data.", { dependency: key }));
     }
+  }
+}
+
+function validateGridMultiselectTemplateArtifact(registry, findings) {
+  const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_grid_table_with_multiselect");
+  const referencePath = String(entry?.fullTemplateReference || "").trim();
+  if (referencePath !== "docs/reference/collection-control-grid-table-with-multiselect.template.json") {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_REFERENCE_MISSING", "collection_control_grid_table_with_multiselect must point to the full export-shaped template artifact.", {
+      expected: "docs/reference/collection-control-grid-table-with-multiselect.template.json",
+      actual: referencePath || null,
+    }));
+    return;
+  }
+  const template = readJson(GRID_MULTISELECT_TEMPLATE_PATH, findings, "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_FILE_MISSING");
+  if (!template) return;
+  if (template.templateId !== "collection_control_grid_table_with_multiselect") {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_ID_INVALID", "Grid-table multiselect template artifact has an unexpected templateId.", { actual: template.templateId }));
+  }
+  if (template.templateResource?.rootContainer?.nv_label !== "grid_table_col_multiselect_wrapper") {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_ROOT_INVALID", "Grid-table multiselect template artifact must use grid_table_col_multiselect_wrapper as the root container.", {
+      actual: template.templateResource?.rootContainer?.nv_label || null,
+    }));
+  }
+  for (const label of ["grid_table_col_title_wrapper", "op_normal", "op_multipleselected", "grid_table_col_header", "grid_col_item", "grid_table_col_item_select", "btn_set_items"]) {
+    if (!template.extractionIndex?.slotPointers?.[label]) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_SLOT_MISSING", "Grid-table multiselect template artifact is missing a required slot pointer.", { slot: label }));
+    }
+  }
+  for (const key of ["filterVars", "tempVars", "actions", "filter", "formAction"]) {
+    const value = template.pageLevelDependencies?.[key];
+    const count = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : 0;
+    if (count < 1) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_DEPENDENCY_MISSING", "Grid-table multiselect template artifact is missing required page-level dependency data.", { dependency: key }));
+    }
+  }
+  const headerColumns = asArray(template.templateResource?.headerColumns);
+  const itemColumns = asArray(template.templateResource?.itemColumns);
+  if (!headerColumns.length || headerColumns.length !== itemColumns.length) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_COLUMN_COUNT_INVALID", "Grid-table multiselect template artifact must record matching header/item column counts.", {
+      headerColumnCount: headerColumns.length,
+      itemColumnCount: itemColumns.length,
+    }));
   }
 }
 
@@ -439,6 +483,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings) {
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
   if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
+  if (provenance.templateId === "collection_control_grid_table_with_multiselect") validateGridMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
 }
 
@@ -710,6 +755,97 @@ function validateCardMultiselectPageDependencies(page, entry, findings) {
   for (const requiredToken of ["var_SelectedItems", "var_SelectedItemsAmount"]) {
     if (!pageText.includes(requiredToken)) {
       findings.push(error("DASH_DATASET_CARD_MULTISELECT_SELECTED_VARIABLE_MISSING", "Card multiselect template requires selected item variables from the source template.", { page: page.title, path: entry.pointer, requiredToken }));
+    }
+  }
+}
+
+function validateGridMultiselect(entry, page, findings) {
+  const wrapper = findNearestAncestorByIdentity(entry, "grid_table_col_multiselect_wrapper");
+  if (!wrapper) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_WRAPPER_MISSING", "collection_control_grid_table_with_multiselect must be generated from the full grid_table_col_multiselect_wrapper subtree, not a simplified grid-table or checkbox-column control.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+
+  const requiredSlots = [
+    "grid_table_col_title_wrapper",
+    "op_normal",
+    "op_multipleselected",
+    "grid_table_col_header",
+    "grid_col_item",
+    "grid_table_col_item_select",
+  ];
+  for (const slot of requiredSlots) {
+    if (!findDescendantByIdentity(wrapper, slot)) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_SLOT_MISSING", "collection_control_grid_table_with_multiselect is missing a required export-shaped slot.", { page: page.title, path: entry.pointer, slot }));
+    }
+  }
+
+  const selection = findDescendantByIdentity(wrapper, "grid_table_col_item_select");
+  const selectionIcons = asArray(selection?.children).filter((child) => String(child?.type || "") === "icon");
+  if (selection && selectionIcons.length < 2) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_CONTROL_MUTATED", "grid_table_col_item_select must remain unchanged with checked and unchecked icon controls.", { page: page.title, path: entry.pointer, iconCount: selectionIcons.length }));
+  }
+
+  const collectionActions = asArray(entry.control?.attrs?.actions);
+  if (!collectionActions.length) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_COLLECTION_ACTIONS_MISSING", "collection_control_grid_table_with_multiselect must preserve Collection root attrs.actions[] for row selection and item/bulk behavior.", { page: page.title, path: `${entry.pointer}.attrs.actions` }));
+  }
+
+  const header = findDescendantByIdentity(wrapper, "grid_table_col_header");
+  const itemGrid = findDescendantByIdentity(wrapper, "grid_col_item");
+  const headerColumns = gridColumnWidths(header, "1");
+  const itemColumns = gridColumnWidths(itemGrid, "1");
+  if (!headerColumns.length || !itemColumns.length || headerColumns.join("|") !== itemColumns.join("|")) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_HEADER_ITEM_COLUMN_MISMATCH", "grid_table_col_header and grid_col_item must keep matching column count and widths after business field mapping.", {
+      page: page.title,
+      path: entry.pointer,
+      headerColumns,
+      itemColumns,
+    }));
+  }
+
+  const opNormal = findDescendantByIdentity(wrapper, "op_normal");
+  const normalButtons = findDescendants(opNormal, (node) => String(node?.type || "") === "action_button");
+  for (const button of normalButtons) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_BUTTON_ACTION_MISSING", "Every op_normal action_button must bind to a valid action; Search/Add labels may be remapped, but action wiring cannot be omitted.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+
+  const opMulti = findDescendantByIdentity(wrapper, "op_multipleselected");
+  const batchButtons = findDescendants(opMulti, (node) => String(node?.type || "") === "action_button");
+  for (const button of batchButtons) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_BUTTON_ACTION_MISSING", "Every grid-table multiselect toolbar action_button must bind to a valid action.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+
+  const itemControls = findDescendants(itemGrid, (node) => String(node?.type || "").startsWith("dynamic-"));
+  if (!itemControls.length) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_DYNAMIC_CONTROLS_MISSING", "grid_col_item should map repeated item columns with Dynamic controls from the selected Collection data source.", { page: page.title, path: entry.pointer }));
+  }
+
+  validateGridMultiselectPageDependencies(page, entry, findings);
+}
+
+function validateGridMultiselectPageDependencies(page, entry, findings) {
+  const dependencyChecks = [
+    ["filterVars", "DASH_DATASET_GRID_MULTISELECT_FILTERVARS_MISSING"],
+    ["tempVars", "DASH_DATASET_GRID_MULTISELECT_TEMPVARS_MISSING"],
+    ["actions", "DASH_DATASET_GRID_MULTISELECT_PAGE_ACTIONS_MISSING"],
+    ["formAction", "DASH_DATASET_GRID_MULTISELECT_FORM_ACTION_MISSING"],
+  ];
+  for (const [key, code] of dependencyChecks) {
+    const value = page.resource?.[key];
+    const count = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : 0;
+    if (count < 1) {
+      findings.push(error(code, "collection_control_grid_table_with_multiselect requires page-level dependencies from the source template.", { page: page.title, path: entry.pointer, dependency: key }));
+    }
+  }
+  const pageText = JSON.stringify(page.resource || {});
+  for (const requiredToken of ["var_SelectedItems", "var_SelectedItemsAmount"]) {
+    if (!pageText.includes(requiredToken)) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_SELECTED_VARIABLE_MISSING", "Grid-table multiselect template requires selected item variables from the source template.", { page: page.title, path: entry.pointer, requiredToken }));
     }
   }
 }
