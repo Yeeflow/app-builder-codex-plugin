@@ -16,6 +16,8 @@ const results = [];
 
 try {
   expectPass("registered full-app skill entrypoints pass", ["--registry", REGISTRY, "--root", ROOT]);
+  const bundledRoot = createBundledPluginRoot();
+  expectPass("installed plugin bundled skill layout passes", ["--registry", REGISTRY, "--root", bundledRoot]);
 
   const missingInputs = mutateRegistry("missing-inputs.json", (registry) => {
     registry.entrypoints[0].inputs = ["yeeflow-app-plan.md"];
@@ -68,4 +70,20 @@ function mutateRegistry(name, mutate) {
   const file = path.join(tempDir, name);
   fs.writeFileSync(file, JSON.stringify(registry, null, 2));
   return file;
+}
+
+function createBundledPluginRoot() {
+  const root = path.join(tempDir, "bundled-plugin-root");
+  for (const file of [
+    "skills/yeeflow-application-builder/SKILL.md",
+    "skills/yeeflow-application-generator/SKILL.md",
+    "scripts/yeeflow-application-delivery-workflow.mjs",
+    "scripts/yeeflow-package-api-automation.mjs",
+    "generate-vendor-onboarding-yapk-schema-v2.mjs",
+  ]) {
+    const target = path.join(root, file);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, "# test fixture\n");
+  }
+  return root;
 }
