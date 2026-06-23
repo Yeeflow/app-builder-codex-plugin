@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.11
+
+- Release Dashboard dataset presentation Golden References from PR #159.
+- Register approved Dashboard Collection dataset templates: responsive card grid, card multiselect toolbar, grid-table, grid-table with multiselect, grid-table with search, and Event Pipeline Grid-Table.
+- Require App Plan Dashboard dataset regions that use Collection to select one approved presentation reference and explain the business rationale without runtime IDs or low-level payload properties.
+- Add generated package validation for missing template provenance, unknown template IDs, simplified grid-table structures, missing multiselect action contracts, and missing search/fulltext linkage.
+- Register the new gate in Dashboard hard gates, first-generation YAPK preflight, aggregate UI gates, and YAPK cache artifact checks.
+- Clarify that Projects Center / Project Tasks is source proof for the multiselect grid-table template, not a business-domain restriction.
+
 ## 0.8.10
 
 - Release YAPK Dashboard runtime materialization and preflight gates from PR #157.

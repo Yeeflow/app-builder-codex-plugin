@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.10`
+`0.8.11`
+
+Version `0.8.11` releases Dashboard dataset presentation Golden References from PR #159. Dashboard Collection dataset regions must now choose one approved presentation reference: responsive card grid, card multiselect toolbar, grid-table, grid-table with multiselect, grid-table with search, or Event Pipeline Grid-Table. App Plans must name the selected reference and business rationale without runtime IDs or low-level payload properties, and generated-final validation now blocks missing provenance, unknown templates, simplified grid-table structures, missing multiselect action contracts, and missing search/fulltext linkage before signing.
 
 Version `0.8.10` releases YAPK Dashboard runtime materialization and preflight gates from PR #157. Generated-final validation now fails KPI cards without Summary/ReportIds/exts/tempVars/save_var/visible bindings, unconsumed dashboard filters or placeholder filter conditions, business controls inside `page_title_section`, simplified grid-table/Data table lookalikes, shared Collection wrappers, Dynamic user field-family mismatches, embedded `ListDatas` sample rows, and App Plan parser fail-open cases before signing.
 
