@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.12
+
+- Release Dashboard root binding, v1.1 Content padding, and runtime proof gates from PR #161.
+- Fail generated-final Dashboard Type 103 pages when `Pages[].ListID` drifts from the decoded package root `ListSet.ListID`; `LayoutID` remains the page layout resource ID.
+- Enforce Dashboard Page Layouts v1.1 `Content` padding parity with the canonical template, replacing obsolete forced-zero Content normalization.
+- Derive package API canonical runtime URLs from the decoded package root ListSetID instead of install response IDs.
+- Preserve sanitized install/sign response messages and classify already-installed fresh-install responses as upgrade follow-up, not final success.
+- Register focused dashboard install/runtime root-binding regressions in aggregate UI and YAPK cache gates.
+
 ## 0.8.11
 
 - Release Dashboard dataset presentation Golden References from PR #159.

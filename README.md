@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.11`
+- Version: `0.8.12`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.11` adds Dashboard dataset presentation Golden References from PR #159: Dashboard Collection dataset regions must select one approved template, App Plans must name the selected reference and business rationale, and generated-final packages now fail missing provenance, unknown templates, simplified grid-table Collections, missing multiselect action contracts, or missing search/fulltext linkage before signing.
+Current release `0.8.12` releases Dashboard root binding, v1.1 Content padding, and runtime proof gates from PR #161: generated-final Dashboard pages now fail copied source-page ListID bindings, Dashboard Page Layouts v1.1 Content padding must preserve the canonical template, package API runtime URL proof uses the decoded package root ListSetID, and already-installed install responses are routed to upgrade-check / upgrade-apply instead of being treated as fresh-install success.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.11
+Version: 0.8.12
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.11
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.12
 ```
 
 ## What Is Included
