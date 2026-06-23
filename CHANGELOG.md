@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.21
+
+- Release the full export-shaped `collection_control_card_with_multiselect_toolbar` template from PR #179.
+- Add the sanitized Company Overview v1.3 / Collection card multiple select wrapper template as a tracked reference artifact.
+- Require generated dashboards to preserve `card_with_multiselect_toolbar_wrapper`, locked `card_col_item_multi_select`, Collection root actions, selected-state variables, page-level filter/temp/action/formAction dependencies, and approved editable regions.
+- Add focused regressions for simplified card multiselect structures, missing page-level dependencies, missing button action bindings, and optional item operation removal.
+
 ## 0.8.20
 
 - Release Dashboard Collection template materialization conformance gates from PR #177.
