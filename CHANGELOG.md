@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.20
+
+- Release Dashboard Collection template materialization conformance gates from PR #177.
+- Compare App Plan Dashboard dataset regions against generated Dashboard Collection regions when both plan and package are available.
+- Fail generated-final packages when selected templates are not materialized, region templates mismatch, planned template diversity collapses to one generated template, planned Collection regions are missing, or matched Collections lack explicit root provenance.
+- Add focused regressions proving multi-template App Plans cannot pass when generation collapses every Collection to Event Pipeline Grid-Table.
+
 ## 0.8.19
 
 - Release Dashboard Golden Reference property fidelity gates from PR #175.

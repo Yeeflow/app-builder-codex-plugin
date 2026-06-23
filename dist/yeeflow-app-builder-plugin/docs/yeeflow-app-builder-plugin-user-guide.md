@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.19`
+`0.8.20`
+
+Version `0.8.20` releases Dashboard Collection template materialization conformance gates from PR #177. Generated-final validation now compares each App Plan Dashboard dataset region with the generated Dashboard Collection region, fails missing planned regions, template mismatches, collapsed template diversity, App Plan-selected templates not materialized, and missing explicit Collection-root template provenance.
 
 Version `0.8.19` releases Dashboard Golden Reference property fidelity gates from PR #175. Generated Dashboard modules must preserve child-control typography and filter appearance contracts from Dashboard Page Layouts v1.1 / Event Portfolio references, including title, subtitle, KPI, grid-table header, select-filter label layout, placeholder color, radius, and fixed-width positioning.
 
