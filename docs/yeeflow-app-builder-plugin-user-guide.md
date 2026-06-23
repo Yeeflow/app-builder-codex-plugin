@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.12`
+`0.8.13`
+
+Version `0.8.13` releases Dashboard Collection template slot decision gates from PR #163. Dashboard dataset regions that use Collection must choose exactly one approved presentation reference from the registry using source resource type, when-to-use, when-not-to-use, and required business signals as the App Plan rationale. Generated Dashboard Collections are component-level dataset regions inside Dashboard Page Layouts v1.1, normally under `section_content_area`; copied source shells, page headers, root `Content` placement, invented or simplified Collection templates, and source-reference field/label/ID leakage remain blockers.
 
 Version `0.8.12` releases Dashboard root binding, v1.1 Content padding, and runtime proof gates from PR #161. Generated-final Dashboard Type 103 pages must bind `Pages[].ListID` to the decoded package root `ListSet.ListID` while keeping `LayoutID` as the page layout resource ID. Dashboard Page Layouts v1.1 `Content` padding must match the canonical template instead of obsolete forced-zero normalization. Package API automation now derives canonical runtime URLs from the decoded package root, preserves sanitized server messages, and classifies already-installed fresh-install responses as upgrade-check / upgrade-apply follow-up rather than final install success.
 
