@@ -62,7 +62,7 @@ async function testApplicationListSetExtraction() {
     Status: 0,
     Data: { ID: 123456, Continue: false, Status: 0 },
   }), "application/json"), "/listset/package/install");
-  assert.equal(installSummary.applicationListSetId, "123456");
+  assert.equal(installSummary.applicationListSetId, undefined);
 
   assert.equal(extractApplicationListSetId({
     Status: 0,
@@ -97,6 +97,20 @@ function testApplicationAccessLinkBuilder() {
   assert.equal(available.listSetId, "123456");
   assert.equal(available.link, "https://safe-tenant.yeeflow.com/#/list-set/41/123456");
   assert.match(available.proofBoundary, /not browser runtime proof/);
+
+  const packageRoot = buildApplicationAccessReport({
+    operation: "install-yapk",
+    responseSummary: { ok: true, applicationListSetId: "999999" },
+    auth: oauthAuth,
+    packageRootProof: { wrapperListId: "123456", decodedListSetId: "123456", rootIdsMatch: true },
+  });
+  assert.equal(packageRoot.status, "available");
+  assert.equal(packageRoot.listSetId, "123456");
+  assert.equal(packageRoot.apiReturnedApplicationListSetId, "999999");
+  assert.equal(packageRoot.packageRootListSetId, "123456");
+  assert.equal(packageRoot.canonicalUrlSource, "decoded-package-root");
+  assert.equal(packageRoot.apiRootMatchesPackageRoot, false);
+  assert.equal(packageRoot.link, "https://safe-tenant.yeeflow.com/#/list-set/41/123456");
 
   const envTenant = buildApplicationAccessReport({
     operation: "install-yapk",
@@ -139,12 +153,15 @@ function testUpgradeCheckClassification() {
   );
   assert.equal(
     classifyApiResult({ httpStatus: 200, apiStatus: 0, message: "", upgradeCheck: false }).resultClass,
-    "upgrade_applied",
+    "upgrade_submitted",
   );
   assert.notEqual(
     classifyApiResult({ httpStatus: 200, apiStatus: 0, message: "", upgradeCheck: true }).resultClass,
     "success",
   );
+  const alreadyInstalled = classifyApiResult({ httpStatus: 200, apiStatus: 540017, message: "already installed" });
+  assert.equal(alreadyInstalled.resultClass, "already_installed_in_tenant");
+  assert.equal(alreadyInstalled.suggestedNextOperation, "upgrade-check-yapk / upgrade-apply-yapk");
 }
 
 function makeResponse(body, contentType) {

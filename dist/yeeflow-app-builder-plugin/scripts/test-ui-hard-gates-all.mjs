@@ -49,6 +49,15 @@ const childTests = [
     ],
   },
   {
+    name: "Dashboard install/runtime root binding and v1.1 padding regression suite",
+    command: ["scripts/test-dashboard-install-runtime-root-binding-gates.mjs"],
+    validators: [
+      "validate-yapk-package Type 103 page root binding",
+      "Dashboard Page Layouts v1.1 Content padding parity",
+      "package API canonical runtime URL boundary",
+    ],
+  },
+  {
     name: "YAPK dashboard runtime materialization and preflight regression suite",
     command: ["scripts/test-yapk-dashboard-runtime-materialization-preflight-gates.mjs"],
     validators: [
