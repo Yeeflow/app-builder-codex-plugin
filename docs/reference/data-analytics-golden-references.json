@@ -1,0 +1,129 @@
+{
+  "version": "1.0.0",
+  "registryId": "data-analytics-golden-references",
+  "description": "Approved Data Analytics golden reference templates for generated Dashboard pages and Data List forms. Generated analytics controls must clone one approved template and preserve its export-shaped style, layout, and typography contract.",
+  "approvedTemplateIds": [
+    "data_analytics_pie_chart_with_title",
+    "data_analytics_column_chart_with_title",
+    "data_analytics_bar_chart_with_title",
+    "data_analytics_line_chart_with_title",
+    "data_analytics_pivot_table_standard"
+  ],
+  "allowedSurfaces": [
+    "dashboard",
+    "data-list-form"
+  ],
+  "forbiddenSurfaces": [
+    "approval-form"
+  ],
+  "dashboardPageLayoutsV11AllowedSectionContainers": [
+    "2_columns_section",
+    "3_columns_section"
+  ],
+  "references": [
+    {
+      "templateId": "data_analytics_pie_chart_with_title",
+      "displayName": "Pie Chart With Title",
+      "sourceTemplate": "docs/reference/data-analytics-pie-chart-with-title.template.json",
+      "controlType": "pie-chart",
+      "rootWrapperId": "pie_chart_with_title_wrapper",
+      "titleControlId": "pie_chart_title",
+      "editableRegions": [
+        "pie_chart_container",
+        "pie_chart_title"
+      ],
+      "lockedRule": "The pie_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside pie_chart_container and the business text value of pie_chart_title may change.",
+      "whenToUse": [
+        "Use when users need part-to-whole distribution by category, status, type, or ownership.",
+        "Use for compact composition metrics that fit a Dashboard two-column or three-column section."
+      ],
+      "whenNotToUse": [
+        "Do not use for time-series trends.",
+        "Do not use when many categories make a pie chart unreadable."
+      ]
+    },
+    {
+      "templateId": "data_analytics_column_chart_with_title",
+      "displayName": "Column Chart With Title",
+      "sourceTemplate": "docs/reference/data-analytics-column-chart-with-title.template.json",
+      "controlType": "bar-chart",
+      "semanticChartKind": "column-chart",
+      "rootWrapperId": "column_chart_with_title_wrapper",
+      "titleControlId": "column_chart_title",
+      "editableRegions": [
+        "column_chart_container",
+        "column_chart_title"
+      ],
+      "lockedRule": "The column_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside column_chart_container and the business text value of column_chart_title may change.",
+      "whenToUse": [
+        "Use when users need vertical comparison across statuses, priorities, categories, teams, or periods.",
+        "Use for count or numeric aggregate comparisons where column height is the primary signal."
+      ],
+      "whenNotToUse": [
+        "Do not use when horizontal label space is required; use the bar chart template instead.",
+        "Do not use for pivot-style cross-tab analysis."
+      ]
+    },
+    {
+      "templateId": "data_analytics_bar_chart_with_title",
+      "displayName": "Bar Chart With Title",
+      "sourceTemplate": "docs/reference/data-analytics-bar-chart-with-title.template.json",
+      "controlType": "bar-chart",
+      "semanticChartKind": "bar-chart",
+      "rootWrapperId": "bar_chart_with_title_wrapper",
+      "titleControlId": "bar_chart_title",
+      "editableRegions": [
+        "bar_chart_container",
+        "bar_chart_title"
+      ],
+      "lockedRule": "The bar_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside bar_chart_container and the business text value of bar_chart_title may change.",
+      "whenToUse": [
+        "Use when users need horizontal comparison across categories with longer labels.",
+        "Use for ranked counts, grouped categories, request types, or backlog distribution."
+      ],
+      "whenNotToUse": [
+        "Do not use for time-series line movement.",
+        "Do not use when the requirement is a cross-tab pivot table."
+      ]
+    },
+    {
+      "templateId": "data_analytics_line_chart_with_title",
+      "displayName": "Line Chart With Title",
+      "sourceTemplate": "docs/reference/data-analytics-line-chart-with-title.template.json",
+      "controlType": "line-chart",
+      "rootWrapperId": "line_chart_with_title_wrapper",
+      "titleControlId": "line_chart_title",
+      "editableRegions": [
+        "line_chart_container",
+        "line_chart_title"
+      ],
+      "lockedRule": "The line_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside line_chart_container and the business text value of line_chart_title may change.",
+      "whenToUse": [
+        "Use when users need trend movement over time.",
+        "Use for created, completed, approved, overdue, usage, or volume trends by date or period."
+      ],
+      "whenNotToUse": [
+        "Do not use for categorical part-to-whole distribution.",
+        "Do not use when there is no time or ordered dimension."
+      ]
+    },
+    {
+      "templateId": "data_analytics_pivot_table_standard",
+      "displayName": "Pivot Table Standard",
+      "sourceTemplate": "docs/reference/data-analytics-pivot-table-standard.template.json",
+      "controlType": "pivot-table",
+      "rootWrapperId": "pivot_table_standard",
+      "titleControlId": null,
+      "editableRegions": [],
+      "lockedRule": "The pivot_table_standard control must preserve all exported style settings. Only legal data-source, rows, columns, and values binding may be mapped to the current app.",
+      "whenToUse": [
+        "Use when users need cross-tab analysis by row, column, and aggregate value.",
+        "Use for operational matrices, category by status summaries, owner by priority counts, or period by type totals."
+      ],
+      "whenNotToUse": [
+        "Do not use for chart-only visual comparison.",
+        "Do not use on Approval forms."
+      ]
+    }
+  ]
+}

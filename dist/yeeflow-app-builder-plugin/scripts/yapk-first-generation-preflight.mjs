@@ -62,6 +62,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--app-plan", plan] : []),
   ]));
+  gates.push(runGate("data-analytics-golden-references", [
+    "scripts/validate-data-analytics-golden-references.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("dashboard-generation-hard-gates", [
     "scripts/validate-dashboard-generation-hard-gates.mjs",
     "--package",

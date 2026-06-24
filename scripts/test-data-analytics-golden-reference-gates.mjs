@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const SCRIPT = path.join(ROOT, "scripts/validate-data-analytics-golden-references.mjs");
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "data-analytics-golden-"));
+const results = [];
+
+try {
+  expectPass("registry validates", ["--registry"]);
+  expectPass("Dashboard v1.1 analytics inside approved 2/3-column sections pass", ["--resource", writeJson("valid-dashboard.json", dashboardResource()), "--surface", "dashboard"]);
+  expectPass("Data List form analytics usage passes", ["--resource", writeJson("valid-data-list-form.json", dataListFormResource()), "--surface", "data-list-form"]);
+
+  expectCode("Approval form analytics usage is forbidden", ["--resource", writeJson("approval-form.json", approvalFormResource()), "--surface", "approval-form"], "DATA_ANALYTICS_APPROVAL_FORM_FORBIDDEN");
+  expectCode("Dashboard v1.1 analytics outside 2/3-column sections fail", ["--resource", writeJson("outside-section.json", dashboardResource({ outsideSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID");
+  expectCode("Simplified chart without approved wrapper fails", ["--resource", writeJson("missing-wrapper.json", dashboardResource({ missingWrapper: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_WRAPPER_MISSING");
+  expectCode("Unknown analytics template ID fails", ["--resource", writeJson("unknown-template.json", dashboardResource({ unknownTemplate: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_UNKNOWN");
+  expectCode("Chart-with-title template requires title control", ["--resource", writeJson("missing-title.json", dashboardResource({ missingTitle: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING");
+
+  printSummary(0);
+} catch (error) {
+  results.push({ name: "unexpected test harness error", status: "fail", error: error.message });
+  printSummary(1);
+}
+
+function expectPass(name, args) {
+  const result = run(args);
+  results.push({ name, status: result.status === 0 ? "pass" : "fail", args, stdout: result.stdout.slice(0, 1000), stderr: result.stderr.slice(0, 1000) });
+  assert.equal(result.status, 0, `${name}\n${result.stdout}\n${result.stderr}`);
+}
+
+function expectCode(name, args, code) {
+  const result = run(args);
+  const output = `${result.stdout}\n${result.stderr}`;
+  results.push({ name, status: result.status !== 0 && output.includes(code) ? "pass" : "fail", args, expectedCode: code, stdout: result.stdout.slice(0, 1000), stderr: result.stderr.slice(0, 1000) });
+  assert.notEqual(result.status, 0, `${name} should fail`);
+  assert.match(output, new RegExp(code), `${name} should include ${code}\n${output}`);
+}
+
+function run(args) {
+  return spawnSync(process.execPath, [SCRIPT, ...args], { cwd: ROOT, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+}
+
+function dashboardResource(options = {}) {
+  const analytics = [
+    chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
+    chartModule("data_analytics_column_chart_with_title", "column_chart_with_title_wrapper", "column_chart_title", "column_chart_control", "bar-chart"),
+    chartModule("data_analytics_bar_chart_with_title", "bar_chart_with_title_wrapper", "bar_chart_title", "bar_chart_control", "bar-chart"),
+    chartModule("data_analytics_line_chart_with_title", "line_chart_with_title_wrapper", "line_chart_title", "line_chart_control", "line-chart"),
+    pivotModule(),
+  ];
+  if (options.unknownTemplate) analytics[0].attrs.dataAnalyticsTemplateId = "data_analytics_unknown_chart";
+  if (options.missingWrapper) analytics[0] = { type: "pie-chart", nv_label: "pie_chart_control", attrs: { dataAnalyticsTemplateId: "data_analytics_pie_chart_with_title" } };
+  if (options.missingTitle) analytics[0].children = analytics[0].children.filter((child) => child.nv_label !== "pie_chart_title");
+
+  return {
+    type: "page",
+    nv_label: "dashboard-page-layouts-v1.1",
+    derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-v1.1",
+    children: [
+      {
+        type: "container",
+        nv_label: "Main",
+        children: [
+          {
+            type: "container",
+            nv_label: "Content",
+            children: options.outsideSection
+              ? analytics
+              : [
+                  section("2_columns_section", analytics.slice(0, 3)),
+                  section("3_columns_section", analytics.slice(3)),
+                ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function dataListFormResource() {
+  return {
+    type: "form",
+    nv_label: "Asset Analytics Form",
+    children: [
+      chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
+      pivotModule(),
+    ],
+  };
+}
+
+function approvalFormResource() {
+  return {
+    type: "approval-form",
+    nv_label: "Approval Task",
+    children: [
+      chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
+    ],
+  };
+}
+
+function section(id, children) {
+  return {
+    type: "container",
+    nv_label: id,
+    children: [
+      {
+        type: "container",
+        nv_label: "section_content_area",
+        children,
+      },
+    ],
+  };
+}
+
+function chartModule(templateId, wrapperId, titleId, controlId, controlType) {
+  return {
+    type: "container",
+    nv_label: wrapperId,
+    attrs: { dataAnalyticsTemplateId: templateId },
+    children: [
+      { type: "text", nv_label: titleId, attrs: { headc: { title: { value: "Business-specific title" } } } },
+      { type: "container", nv_label: wrapperId.replace("_with_title_wrapper", "_container"), children: [
+        { type: controlType, nv_label: controlId, attrs: { dataAnalyticsTemplateId: templateId, data: { list: { ListID: "list_assets" } } } },
+      ] },
+    ],
+  };
+}
+
+function pivotModule() {
+  return {
+    type: "pivot-table",
+    nv_label: "pivot_table_standard",
+    attrs: { dataAnalyticsTemplateId: "data_analytics_pivot_table_standard", rows: {}, columns: {}, values: {} },
+  };
+}
+
+function writeJson(name, value) {
+  const file = path.join(tempDir, name);
+  fs.writeFileSync(file, JSON.stringify(value, null, 2));
+  return file;
+}
+
+function printSummary(exitCode) {
+  console.log(JSON.stringify({ status: exitCode === 0 ? "pass" : "fail", results }, null, 2));
+  process.exit(exitCode);
+}
