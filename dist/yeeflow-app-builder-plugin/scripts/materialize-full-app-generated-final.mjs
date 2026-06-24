@@ -7,6 +7,18 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
+const DASHBOARD_V11_TEMPLATE_PATH = path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json");
+const COLLECTION_TEMPLATE_PATHS = {
+  collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
+  collection_control_grid_table_with_search: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
+  "Event Pipeline Grid-Table": path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
+  collection_control_grid_table_with_multiselect: path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json"),
+  collection_control_card_with_multiselect_toolbar: path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json"),
+  collection_control_responsive_card_grid: path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json"),
+};
+const APPROVED_COLLECTION_TEMPLATE_IDS = Object.freeze(Object.keys(COLLECTION_TEMPLATE_PATHS));
+const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
+const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -175,9 +187,68 @@ function analyzeAppPlanResourceDemand(planText) {
     counts,
     resources,
     navigationItemsByGroup,
+    dashboardDatasetRecords: collectDashboardDatasetRecords(planText),
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
   };
+}
+
+function collectDashboardDatasetRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
+  if (!section.trim()) return [];
+  const lines = section.split(/\r?\n/);
+  const records = [];
+  let currentDashboardPage = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const templateColumn = findHeaderIndex(normalizedHeaders, [
+      "selected collection presentation reference",
+      "selected record display control",
+      "selected collection template",
+      "collection template",
+      "record display control",
+      "control",
+    ]);
+    const regionColumn = findHeaderIndex(normalizedHeaders, ["dataset region", "section", "section name", "region"]);
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name"]);
+    if (templateColumn === -1 || regionColumn === -1 || sourceColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const raw = lines[rowIndex];
+      const selectedTemplateId = extractApprovedCollectionTemplateId(raw);
+      if (selectedTemplateId) {
+        records.push({
+          dashboardPage: cleanResourceName(cells[pageColumn]) || currentDashboardPage,
+          datasetRegion: cleanResourceName(cells[regionColumn]),
+          sourceResource: cleanResourceName(cells[sourceColumn]),
+          selectedTemplateId,
+          raw: raw.trim(),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return records;
+}
+
+function findHeaderIndex(normalizedHeaders, candidates) {
+  const normalizedCandidates = candidates.map(normKey);
+  return normalizedHeaders.findIndex((header) => normalizedCandidates.includes(header));
+}
+
+function extractApprovedCollectionTemplateId(text) {
+  for (const templateId of APPROVED_COLLECTION_TEMPLATE_IDS) {
+    const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
+  }
+  return "";
 }
 
 function buildMissingResourceGraph(planDemand) {
@@ -541,7 +612,8 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
   }));
 
   const pages = planDemand.resources.dashboards.map((name, index) => {
-    const firstListName = dataListNames[index % dataListNames.length];
+    const datasetRecord = selectDashboardDatasetRecord({ planDemand, pageName: name, pageIndex: index });
+    const firstListName = datasetRecord?.sourceResource || dataListNames[index % dataListNames.length];
     const firstListId = dataListByName.get(normKey(firstListName)) || dataListByName.values().next().value || rootListId;
     return {
       ListID: rootListId,
@@ -561,6 +633,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
               layoutId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
               listName: firstListName,
               listId: firstListId,
+            datasetRecord,
             summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
             filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
             collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
@@ -592,7 +665,500 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
   };
 }
 
-function buildMaterialDashboardResource({ name, layoutId, listName, listId, summaryId, filterId, collectionId }) {
+function selectDashboardDatasetRecord({ planDemand, pageName, pageIndex }) {
+  const records = planDemand.dashboardDatasetRecords || [];
+  if (!records.length) return null;
+  return records.find((record) => normKey(record.dashboardPage) && (normKey(pageName).includes(normKey(record.dashboardPage)) || normKey(record.dashboardPage).includes(normKey(pageName))))
+    || records[pageIndex % records.length]
+    || records[0];
+}
+
+function buildMaterialDashboardResource({ name, layoutId, listName, listId, datasetRecord, summaryId, filterId, collectionId }) {
+  const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
+  const resource = buildDashboardV11Shell({ name, layoutId });
+  const sourceResource = datasetRecord?.sourceResource || listName;
+  const selectedTemplateId = datasetRecord?.selectedTemplateId || "collection_control_grid_table";
+  const datasetRegion = datasetRecord?.datasetRegion || `${sourceResource} records`;
+  const collectionRoot = buildCollectionTemplateInstance({
+    templateId: selectedTemplateId,
+    dashboardName: name,
+    datasetRegion,
+    listName: sourceResource,
+    listId,
+    collectionId,
+  });
+  const templateDependencies = collectionRoot.pageLevelDependencies || {};
+  const contentArea = findBusinessSectionContentArea(resource);
+  if (contentArea) {
+    contentArea.datasetRegion = datasetRegion;
+    contentArea.datasetRegionName = datasetRegion;
+    contentArea.attrs = {
+      ...(contentArea.attrs || {}),
+      datasetRegion,
+      datasetRegionName: datasetRegion,
+      appPlanDatasetRegion: datasetRegion,
+    };
+    contentArea.children = [collectionRoot];
+  }
+  const summary = buildSummaryControl({ summaryId, tempVar, listName: sourceResource, listId });
+  const hiddenHost = contentArea || findFirstByIdentity(resource, "Content") || resource;
+  hiddenHost.children = Array.isArray(hiddenHost.children) ? hiddenHost.children : [];
+  hiddenHost.children.push(summary);
+  applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, tempVar });
+  resource.filterVars = normalizeDependencyArray(templateDependencies.filterVars);
+  resource.tempVars = uniqueByName([
+    ...normalizeDependencyArray(templateDependencies.tempVars),
+    { name: tempVar, type: "number", source: summaryId },
+    { name: "var_SelectedItems", type: "array", source: collectionId },
+    { name: "var_SelectedItemsAmount", type: "number", source: collectionId },
+    { name: "var_isDeleteConfirmed", type: "boolean", source: "delete-confirmation" },
+  ]);
+  resource.ReportIds = [summaryId];
+  resource.exts = [{
+    i: summaryId,
+    id: summaryId,
+    category: "___Pivot___",
+    key: "summary",
+    attr: {
+      ListID: stringId(listId),
+      settings: {
+        values: [{ fieldName: "ListDataID", field: "ListDataID", id: "ListDataID", func: "COUNT", label: "Active Records" }],
+      },
+    },
+  }];
+  resource.actions = normalizeDependencyArray(templateDependencies.actions);
+  resource.formAction = normalizeDependencyArray(templateDependencies.formAction);
+  resource.LayoutID = layoutId;
+  resource.plannedControls = { kpis: true, gridTable: true };
+  resource.generatedFinalDashboardMaterialization = {
+    shellTemplate: PAGE_LAYOUT_TEMPLATE_ID,
+    datasetRegion,
+    selectedCollectionTemplateId: selectedTemplateId,
+    sourceResource,
+  };
+  normalizeGeneratedDashboardControls(resource, name);
+  return resource;
+}
+
+function buildDashboardV11Shell({ name }) {
+  const registry = JSON.parse(fs.readFileSync(DASHBOARD_V11_TEMPLATE_PATH, "utf8"));
+  const template = registry.templates?.find((item) => item?.id === PAGE_LAYOUT_TEMPLATE_ID) || registry.templates?.[0];
+  const resource = clone(template?.template?.parsedResource || {});
+  resource.id = `${slugify(name)}_dashboard_v11_root`;
+  resource.name = name;
+  resource.title = name;
+  resource.ver = "1.0.0";
+  resource.derivedFromGoldenReference = DASHBOARD_GOLDEN_REFERENCE_ID;
+  resource.goldenReferenceId = DASHBOARD_GOLDEN_REFERENCE_ID;
+  resource.templateMarker = PAGE_LAYOUT_TEMPLATE_ID;
+  resource.derivedFromDashboardPageLayoutTemplate = PAGE_LAYOUT_TEMPLATE_ID;
+  resource.attrs = {
+    ...(resource.attrs || {}),
+    derivedFromGoldenReference: DASHBOARD_GOLDEN_REFERENCE_ID,
+    templateMarker: PAGE_LAYOUT_TEMPLATE_ID,
+    dashboardPageLayoutTemplateId: PAGE_LAYOUT_TEMPLATE_ID,
+  };
+  removeOperationsWithoutActions(resource);
+  return resource;
+}
+
+function buildSummaryControl({ summaryId, tempVar, listName, listId }) {
+  return {
+    type: "summary",
+    id: summaryId,
+    name: "Active Records Summary",
+    title: "Active Records Summary",
+    runtimeModelProven: true,
+    attrs: {
+      runtimeModelProven: true,
+      control_display: { hidden: true },
+      data: {
+        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        aggregation: "COUNT",
+        field: "ListDataID",
+        fieldName: "ListDataID",
+      },
+      save_var: { name: tempVar },
+    },
+    save_var: { name: tempVar },
+  };
+}
+
+function buildCollectionTemplateInstance({ templateId, dashboardName, datasetRegion, listName, listId, collectionId }) {
+  const template = loadCollectionTemplate(templateId);
+  const root = clone(template?.templateResource?.rootContainer || {});
+  root.id = `${collectionId}_${slugify(templateId)}_wrapper`;
+  root.name = datasetRegion;
+  root.datasetRegion = datasetRegion;
+  root.datasetRegionName = datasetRegion;
+  root.appPlanDatasetRegion = datasetRegion;
+  root.datasetPresentationTemplateId = templateId;
+  root.derivedFromDatasetPresentationTemplate = templateId;
+  root.attrs = {
+    ...(root.attrs || {}),
+    datasetRegion,
+    datasetRegionName: datasetRegion,
+    appPlanDatasetRegion: datasetRegion,
+    datasetPresentationTemplateId: templateId,
+    derivedFromDatasetPresentationTemplate: templateId,
+  };
+  const collection = findFirstByType(root, "collection");
+  if (collection) {
+    collection.id = collectionId;
+    collection.name = `${datasetRegion} Collection`;
+    collection.title = `${datasetRegion} Collection`;
+    collection.datasetRegion = datasetRegion;
+    collection.datasetPresentationTemplateId = templateId;
+    collection.derivedFromDatasetPresentationTemplate = templateId;
+    collection.attrs = {
+      ...(collection.attrs || {}),
+      datasetPresentationTemplateId: templateId,
+      derivedFromDatasetPresentationTemplate: templateId,
+      templateId,
+      sourceResourceType: "Data list",
+      data: {
+        ...(collection.attrs?.data || {}),
+        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        source: listName,
+        sourceResourceType: "Data list",
+        datasetRegion,
+        datasetPresentationTemplateId: templateId,
+        field: "Title",
+        filter: [{ field: "Title", operator: "contains", value: "{{search}}" }],
+        fulltext: [{ field: "Title", value: "{{search}}" }],
+        link: collection.attrs?.data?.link === "{{DetailLayoutID}}" ? "{{DetailLayoutID}}" : (collection.attrs?.data?.link || "{{DetailLayoutID}}"),
+        opentype: collection.attrs?.data?.opentype || "slide",
+      },
+      actions: ensureCollectionActions(collection.attrs?.actions),
+      layout: {
+        ...(collection.attrs?.layout || {}),
+        col: collection.attrs?.layout?.col || [null, { desktop: 3, tablet: 2, mobile: 1 }],
+      },
+    };
+  }
+  for (const control of findDescendants(root, (node) => String(node?.type || "").startsWith("dynamic-"))) {
+    control.attrs = {
+      ...(control.attrs || {}),
+      data: {
+        ...(control.attrs?.data || {}),
+        ListID: stringId(listId),
+        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        field: "Title",
+        fieldName: "Title",
+      },
+      field: control.attrs?.field || "Title",
+      fieldName: control.attrs?.fieldName || "Title",
+    };
+  }
+  for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
+    search.attrs = {
+      ...(search.attrs || {}),
+      placeholder: { ...(search.attrs?.placeholder || {}), value: `Search ${listName}` },
+      data: {
+        ...(search.attrs?.data || {}),
+        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        field: "Title",
+      },
+    };
+  }
+  if (templateId === "collection_control_grid_table_with_multiselect") {
+    enforceFullWidth(root, ["grid_table_col_multiselect_wrapper", "grid_table_col_caption", "grid_table_col_content"]);
+  }
+  if (templateId === "collection_control_responsive_card_grid") {
+    removeUnavailableImageControls(root);
+  }
+  replaceTemplateResidue(root, { datasetRegion, listName });
+  setTitleText(root, datasetRegion);
+  const pageDependencies = template.pageLevelDependencies || {};
+  root.pageLevelDependencies = {
+    tempVars: pageDependencies.tempVars || [],
+    filterVars: pageDependencies.filterVars || [],
+    actions: pageDependencies.actions || [],
+    formAction: pageDependencies.formAction || [],
+  };
+  root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
+  return root;
+}
+
+function normalizeDependencyArray(value) {
+  if (Array.isArray(value)) return clone(value);
+  if (value && typeof value === "object") return Object.entries(value).map(([name, config]) => ({ name, ...(config && typeof config === "object" ? config : { value: config }) }));
+  return [];
+}
+
+function uniqueByName(items) {
+  const seen = new Set();
+  const out = [];
+  for (const item of items) {
+    const key = String(item?.name || item?.key || item?.id || JSON.stringify(item));
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
+
+function loadCollectionTemplate(templateId) {
+  const templatePath = COLLECTION_TEMPLATE_PATHS[templateId] || COLLECTION_TEMPLATE_PATHS.collection_control_grid_table;
+  const template = JSON.parse(fs.readFileSync(templatePath, "utf8"));
+  if (templateId === "collection_control_grid_table_with_search" || templateId === "Event Pipeline Grid-Table") {
+    return { ...template, templateId };
+  }
+  return template;
+}
+
+function ensureCollectionActions(actions) {
+  const out = Array.isArray(actions) ? clone(actions) : [];
+  const text = JSON.stringify(out);
+  if (!/ListDataID/.test(text) || !/__ctx_coll/.test(text) || !out.some((action) => String(action?.type || "") === "coll")) {
+    out.push({ type: "coll", name: "Open item", field: "ListDataID", value: "{{__ctx_coll.ListDataID}}", context: "__ctx_coll" });
+  }
+  if (!/confirm/.test(JSON.stringify(out)) || !/setdatalist/.test(JSON.stringify(out))) {
+    out.push({
+      type: "coll",
+      id: "confirm-delete-current-item",
+      name: "Confirm delete current item",
+      field: "ListDataID",
+      value: "{{__ctx_coll.ListDataID}}",
+      context: "__ctx_coll",
+      steps: [
+        { type: "confirm", saveVar: "var_isDeleteConfirmed" },
+        { type: "setdatalist", operation: "remove", condition: "{{var_isDeleteConfirmed}}", keyField: "ListDataID", value: "{{__ctx_coll.ListDataID}}" },
+      ],
+    });
+  }
+  return out;
+}
+
+function enforceFullWidth(root, identities) {
+  for (const identity of identities) {
+    const node = findFirstByIdentity(root, identity);
+    if (!node) continue;
+    node.width = "full";
+    node.attrs = node.attrs || {};
+    node.attrs.style = { ...(node.attrs.style || {}), widthtype: [null, "1"] };
+    node.attrs.common = {
+      ...(node.attrs.common || {}),
+      positioning: {
+        ...(node.attrs.common?.positioning || {}),
+        widthtype: [null, "1"],
+      },
+    };
+  }
+}
+
+function removeUnavailableImageControls(root) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => String(child?.type || "") !== "dynamic-image");
+    for (const child of node.children) visit(child);
+  };
+  visit(root);
+}
+
+function replaceTemplateResidue(root, { datasetRegion, listName }) {
+  const singular = listName.replace(/s$/i, "") || "item";
+  const replacements = new Map([
+    ["All tasks", datasetRegion],
+    ["All tasks - Multiple select", datasetRegion],
+    ["Search tasks", `Search ${listName}`],
+    ["Search items", `Search ${listName}`],
+    ["Search events", `Search ${listName}`],
+    ["Add Task", `Add ${singular}`],
+    ["Add item", `Add ${singular}`],
+    ["Mark as completed", "Update selected items"],
+    ["Assignee", "Owner"],
+    ["Completion (%)", "Status"],
+    ["Progress bar", "Status"],
+  ]);
+  const visit = (node) => {
+    if (!node || typeof node !== "object") return;
+    for (const [key, value] of Object.entries(node)) {
+      if (typeof value === "string" && replacements.has(value)) node[key] = replacements.get(value);
+      else if (value && typeof value === "object") visit(value);
+    }
+  };
+  visit(root);
+}
+
+function applyDashboardTextMapping(resource, { name, datasetRegion, listName, tempVar }) {
+  const pageTitle = findFirstByIdentity(resource, "event_portfolio_title");
+  setHeadingText(pageTitle, name);
+  const subtitle = findFirstByIdentity(resource, "event_portfolio_subtitle");
+  setHeadingText(subtitle, `Operational view for ${listName}.`);
+  const sectionTitle = findFirstByIdentity(resource, "section_title_header");
+  if (sectionTitle) {
+    const titleText = findDescendants(sectionTitle, (node) => String(node?.type || "") === "heading")[0];
+    setHeadingText(titleText, datasetRegion);
+  }
+  const kpiLabel = findFirstByIdentity(resource, "event_portfolio_kpi_planned_events_label");
+  setHeadingText(kpiLabel, "Active Records");
+  const kpiValue = findFirstByIdentity(resource, "event_portfolio_kpi_planned_events_value");
+  if (kpiValue) {
+    setHeadingText(kpiValue, "0");
+    kpiValue.attrs = {
+      ...(kpiValue.attrs || {}),
+      headc: {
+        ...(kpiValue.attrs?.headc || {}),
+        title: {
+          ...(kpiValue.attrs?.headc?.title || {}),
+          value: "0",
+          variable: { name: tempVar },
+        },
+      },
+    };
+  }
+}
+
+function setTitleText(root, title) {
+  for (const id of ["grid_table_col_title", "card_col_title"]) {
+    const control = findFirstByIdentity(root, id);
+    if (control) setHeadingText(control, title);
+  }
+}
+
+function setHeadingText(control, value) {
+  if (!control) return;
+  control.name = value;
+  control.title = value;
+  control.attrs = {
+    ...(control.attrs || {}),
+    headc: {
+      ...(control.attrs?.headc || {}),
+      title: {
+        ...(control.attrs?.headc?.title || {}),
+        value,
+      },
+    },
+  };
+}
+
+function normalizeGeneratedDashboardControls(resource, pageName) {
+  let index = 0;
+  const visit = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (node.type) {
+      index += 1;
+      const identity = firstMeaningfulIdentity(node);
+      if (!identity) node.name = `${pageName} ${node.type} ${index}`;
+      else if (isDefaultNavigatorName(node.name) && isDefaultNavigatorName(node.attrs?.nav_label) && isDefaultNavigatorName(node.attrs?.nv_label)) node.name = identity;
+      if (String(node.type) === "heading" && String(node.label || "") === "Text") {
+        node.attrs = node.attrs || {};
+        node.attrs.heads = node.attrs.heads || {};
+        if (!Array.isArray(node.attrs.heads.ty) && typeof node.attrs.heads.ty !== "object") node.attrs.heads.ty = [null, "body-medium"];
+        if (typeof node.attrs.heads.color !== "string" || !node.attrs.heads.color.trim()) node.attrs.heads.color = "#1f2937";
+        node.attrs.headc = node.attrs.headc || {};
+        node.attrs.headc.title = node.attrs.headc.title || { value: node.name || pageName };
+        if (node.attrs.headc.title.value === undefined && node.attrs.headc.title.variable === undefined) node.attrs.headc.title.value = node.name || pageName;
+      }
+    }
+    for (const child of Array.isArray(node.children) ? node.children : []) visit(child);
+  };
+  visit(resource);
+}
+
+function firstMeaningfulIdentity(control) {
+  return identityCandidates(control).find((candidate) => !isDefaultNavigatorName(candidate)) || "";
+}
+
+function isDefaultNavigatorName(value) {
+  return !value || /^(Container|Grid|Text|Dynamic field|Dynamic user|Kanban|Collection|Button|Summary|Icon|Text Editor)(\s*\d+)?$/i.test(String(value).trim());
+}
+
+function removeOperationsWithoutActions(root) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      if (hasIdentity(child, "Operations") && !hasActionConfiguration(child)) return false;
+      visit(child);
+      return true;
+    });
+  };
+  visit(root);
+}
+
+function hasActionConfiguration(control) {
+  const attrs = control?.attrs || {};
+  if (attrs.control_action || attrs.action || attrs["action-type"] || attrs.actionType) return true;
+  if (Array.isArray(attrs.actions) && attrs.actions.length) return true;
+  if (Array.isArray(control?.actions) && control.actions.length) return true;
+  return findDescendants(control, (node) => {
+    const childAttrs = node?.attrs || {};
+    return Boolean(childAttrs.control_action || childAttrs.action || childAttrs["action-type"] || childAttrs.actionType || (Array.isArray(childAttrs.actions) && childAttrs.actions.length));
+  }).length > 0;
+}
+
+function findFirstByIdentity(root, expected) {
+  let found = null;
+  const visit = (node) => {
+    if (found || !node || typeof node !== "object") return;
+    if (hasIdentity(node, expected)) {
+      found = node;
+      return;
+    }
+    for (const child of Array.isArray(node.children) ? node.children : []) visit(child);
+  };
+  visit(root);
+  return found;
+}
+
+function findBusinessSectionContentArea(root) {
+  const contentCardWrappers = findDescendants(root, (node) => hasIdentity(node, "content_card_wrapper"));
+  for (const wrapper of contentCardWrappers) {
+    const slot = findFirstByIdentity(wrapper, "section_content_area");
+    if (slot) return slot;
+  }
+  return findFirstByIdentity(root, "section_content_area");
+}
+
+function findFirstByType(root, type) {
+  return findDescendants(root, (node) => String(node?.type || "") === type)[0] || null;
+}
+
+function findDescendants(root, predicate) {
+  const out = [];
+  const visit = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (predicate(node)) out.push(node);
+    for (const child of Array.isArray(node.children) ? node.children : []) visit(child);
+  };
+  visit(root);
+  return out;
+}
+
+function hasIdentity(control, expected) {
+  const normalized = normKey(expected);
+  return identityCandidates(control).some((candidate) => normKey(candidate) === normalized);
+}
+
+function identityCandidates(control) {
+  return [
+    control?.id,
+    control?.ID,
+    control?.key,
+    control?.name,
+    control?.Name,
+    control?.label,
+    control?.Label,
+    control?.nv_label,
+    control?.nav_label,
+    control?.attrs?.id,
+    control?.attrs?.name,
+    control?.attrs?.label,
+    control?.attrs?.nv_label,
+    control?.attrs?.nav_label,
+    control?.attrs?.templateMarker,
+    control?.attrs?.dashboardPageLayoutTemplateId,
+    control?.templateMarker,
+    control?.derivedFromDashboardPageLayoutTemplate,
+  ].filter(Boolean).map(String);
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function buildLegacyMaterialDashboardResource({ name, layoutId, listName, listId, summaryId, filterId, collectionId }) {
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   return {
     type: "dashboard-page",
