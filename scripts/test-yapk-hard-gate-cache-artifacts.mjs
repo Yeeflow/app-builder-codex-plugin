@@ -119,6 +119,7 @@ const requiredDocs = [
   "docs/training/dashboard-root-binding-padding-runtime-proof-gates-training-report.md",
   "docs/training/dashboard-page-layouts-v1.1-template-adoption-training-report.md",
   "docs/training/dashboard-v1.1-controlled-slots-repeatable-modules-training-report.md",
+  "docs/training/dashboard-shell-collection-validator-alignment-training-report.md",
   "docs/reference/dashboard-golden-references.json",
   "docs/reference/dashboard-dataset-presentation-golden-references.json",
   "docs/reference/collection-control-card-with-multiselect-toolbar.template.json",

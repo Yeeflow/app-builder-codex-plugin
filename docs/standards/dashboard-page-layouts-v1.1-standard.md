@@ -35,6 +35,8 @@ Every generated Dashboard page must preserve:
 - `content` container padding preserved from the canonical v1.1 template
 - selected non-empty business section containers only
 
+Generation must instantiate this full page shell before placing dataset presentation components. A dashboard that only materializes a selected Collection component, KPI component, or filter component without the v1.1 shell is incomplete even when the component-level template itself is valid.
+
 ## Standard Sections
 
 Supported section patterns:
@@ -174,6 +176,8 @@ Data Filters must also be consumed. Each generated filter must have at least one
 Collection grid/table controls must point to real app lists and fields.
 
 Each primary grid-table Collection must live in its own independent `content_card_wrapper` or approved grid-table wrapper copied from the template/reference. Multiple unrelated grid-table Collections in one wrapper are not considered a valid v1.1 dashboard section because runtime layout and filtering become ambiguous.
+
+Card-style Collection templates such as `collection_control_card_with_multiselect_toolbar` are valid dataset components, but they are not grid-table components. Grid-table-specific gates must not require card templates to have grid header/item grids, grid-table detail links, or table column parity. Card templates are validated through the dataset-presentation template gate and their own export-shaped subtree contract.
 
 User and identity fields must render with Dynamic user controls, not generic Dynamic field controls.
 

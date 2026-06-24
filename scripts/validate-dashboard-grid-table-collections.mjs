@@ -5,6 +5,18 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
 
+const GRID_TABLE_TEMPLATE_IDS = new Set([
+  "collection_control_grid_table",
+  "collection_control_grid_table_with_multiselect",
+  "collection_control_grid_table_with_search",
+  "Event Pipeline Grid-Table",
+]);
+
+const CARD_TEMPLATE_IDS = new Set([
+  "collection_control_responsive_card_grid",
+  "collection_control_card_with_multiselect_toolbar",
+]);
+
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.package) {
@@ -40,7 +52,7 @@ export function validateDashboardGridTableCollections(options) {
     dataListCount += page.controls.filter((entry) => entry.control.type === "data-list").length;
     const collections = page.controls.filter((entry) => entry.control.type === "collection");
     collectionCount += collections.length;
-    collections.forEach((entry) => validateGridTableCollection(entry, page, { options, detailLayouts, findings }));
+    collections.forEach((entry) => validateDashboardCollection(entry, page, { options, detailLayouts, findings }));
     if (options.requireGridTableCollections) {
       page.controls.filter((entry) => entry.control.type === "data-list").forEach((entry) => {
         findings.push(error("DASHBOARD_DATA_LIST_USED_WHEN_COLLECTION_REQUIRED", "Dashboard record-list section uses data-list where grid-table Collection is required.", { page: page.title, path: entry.pointer }));
@@ -77,7 +89,24 @@ function validateDashboardPage(page, context) {
   }
 }
 
-function validateGridTableCollection(entry, page, context) {
+function validateDashboardCollection(entry, page, context) {
+  const templateId = effectiveTemplateId(entry);
+  if (CARD_TEMPLATE_IDS.has(templateId)) {
+    validateCardCollection(entry, page, context, templateId);
+    return;
+  }
+  if (templateId && !GRID_TABLE_TEMPLATE_IDS.has(templateId)) return;
+  validateGridTableCollection(entry, page, context, templateId || "implicit-grid-table");
+}
+
+function validateCardCollection(entry, page, context, templateId) {
+  const { options, findings } = context;
+  if (options.requireGridTableCollections) {
+    findings.push(error("DASHBOARD_CARD_COLLECTION_WHEN_GRID_TABLE_REQUIRED", "Dashboard Collection uses a card presentation template where this run explicitly requires grid-table Collections.", { page: page.title, path: entry.pointer, templateId }));
+  }
+}
+
+function validateGridTableCollection(entry, page, context, templateId) {
   const { options, detailLayouts, findings } = context;
   const { control, pointer, parent, parentPointer, siblingIndex } = entry;
   const header = findPairedHeader(parent, siblingIndex);
@@ -99,15 +128,16 @@ function validateGridTableCollection(entry, page, context) {
   if (!itemGrid) {
     findings.push(error("DASHBOARD_GRID_TABLE_ITEM_GRID_MISSING", "Grid-table Collection must contain a repeated flex_grid item row.", { page: page.title, path: pointer }));
   }
-  if (options.requireRowDetailLinks !== false) validateRowDetailLink(control, pointer, page, detailLayouts, findings);
+  if (options.requireRowDetailLinks !== false) validateRowDetailLink(control, pointer, page, detailLayouts, findings, templateId);
 }
 
-function validateRowDetailLink(collection, pointer, page, detailLayouts, findings) {
+function validateRowDetailLink(collection, pointer, page, detailLayouts, findings, templateId) {
   const data = collection?.attrs?.data || {};
   const listId = String(data?.list?.ListID || "");
   const link = data.link === undefined || data.link === null ? "" : String(data.link);
+  if (isExplicitNoOpen(data)) return;
   if (!link) {
-    findings.push(error("DASHBOARD_COLLECTION_DETAIL_LINK_MISSING", "Collection row-click detail requires attrs.data.link to a concrete custom detail layout.", { page: page.title, path: `${pointer}.attrs.data.link`, listId }));
+    findings.push(error("DASHBOARD_COLLECTION_DETAIL_LINK_MISSING", "Collection row-click detail requires attrs.data.link to a concrete custom detail layout when the selected grid-table template or App Plan includes row/card open behavior. Use explicit no-open metadata when no detail open behavior is planned.", { page: page.title, path: `${pointer}.attrs.data.link`, listId, templateId }));
     return;
   }
   const layout = detailLayouts.byLayoutId.get(link);
@@ -122,6 +152,41 @@ function validateRowDetailLink(collection, pointer, page, detailLayouts, finding
   if (Number(data.modalsize) !== 2) {
     findings.push(error("DASHBOARD_COLLECTION_DETAIL_MODALSIZE_INVALID", "Collection row-click detail must set attrs.data.modalsize = 2.", { page: page.title, path: `${pointer}.attrs.data.modalsize`, actual: data.modalsize ?? null }));
   }
+}
+
+function isExplicitNoOpen(data) {
+  const markers = [
+    data?.detailOpenBehavior,
+    data?.openBehavior,
+    data?.rowOpenBehavior,
+    data?.cardOpenBehavior,
+    data?.openMode,
+  ].map((value) => String(value ?? "").trim().toLowerCase());
+  return markers.some((value) => ["none", "no-open", "disabled", "not planned", "not-planned", "no detail"].includes(value))
+    || data?.disableOpen === true
+    || data?.openDisabled === true;
+}
+
+function effectiveTemplateId(entry) {
+  return firstTemplateId([entry.control, entry.parent]);
+}
+
+function firstTemplateId(nodes) {
+  for (const node of nodes.filter(Boolean)) {
+    const candidates = [
+      node?.attrs?.datasetPresentationTemplateId,
+      node?.attrs?.collectionPresentationTemplateId,
+      node?.attrs?.derivedFromCollectionTemplate,
+      node?.attrs?.derivedFromGoldenReference,
+      node?.datasetPresentationTemplateId,
+      node?.collectionPresentationTemplateId,
+      node?.derivedFromCollectionTemplate,
+      node?.derivedFromGoldenReference,
+    ].filter(Boolean).map(String);
+    const found = candidates.find((candidate) => GRID_TABLE_TEMPLATE_IDS.has(candidate) || CARD_TEMPLATE_IDS.has(candidate));
+    if (found) return found;
+  }
+  return "";
 }
 
 function validateTextStyle(control, pointer, page, findings, { requireTitleStyle }) {
