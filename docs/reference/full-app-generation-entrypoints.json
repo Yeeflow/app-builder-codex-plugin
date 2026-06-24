@@ -19,10 +19,11 @@
           "api-issued-ids.json"
         ],
         "mustProceedAfterPlanningPass": true,
-        "planningPassContinuation": "When planning gates pass and business defaults are user-default-approved-for-generation, this node CLI is the callable materialization handoff for generated-final .yapk artifacts. Do not stop solely because no standalone CLI exists.",
+        "planningPassContinuation": "When planning gates pass and business defaults are user-default-approved-for-generation, this node CLI is the callable generated-final materialization handoff only when the App Plan resource graph can be fully materialized. Do not stop solely because no standalone CLI exists, but also do not emit placeholder packages for nontrivial App Plans; fail closed with a concrete resource-graph capability finding.",
         "hardStops": [
           "business defaults are not user-default-approved-for-generation",
           "API-issued ID manifest is missing or invalid",
+          "materializer cannot generate the full App Plan resource graph",
           "required generated-final validators fail",
           "user explicitly requested planning-only or no package generation"
         ],
@@ -58,7 +59,7 @@
         "validate-yapk-id-provenance.mjs",
         "validate-yapk-navigation-runtime-metadata.mjs"
       ],
-      "proofBoundary": "A materialized package is not signing/install/runtime proof. Generated-final preflight must pass before signing is attempted."
+      "proofBoundary": "A materialized package is not signing/install/runtime proof. Placeholder/schema-smoke output is never signing eligible, and nontrivial App Plans must fail closed until full resource-graph materialization is implemented. Generated-final preflight must pass before signing is attempted."
     },
     {
       "id": "skill:yeeflow-application-builder",

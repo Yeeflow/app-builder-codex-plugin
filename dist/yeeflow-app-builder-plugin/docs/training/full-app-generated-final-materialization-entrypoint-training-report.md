@@ -4,7 +4,7 @@
 
 This training closes the clean-room execution gap where planning gates passed but the run stopped before generated-final package creation because no concrete callable materialization command was available to the executor.
 
-The plugin now ships `scripts/materialize-full-app-generated-final.mjs` as a first-class node CLI materializer. It consumes approved Markdown planning contracts and API-issued IDs, then emits generated-final package artifacts without crossing into signing, install/import, upgrade, seed data, Version Management, or browser/runtime proof.
+The plugin now ships `scripts/materialize-full-app-generated-final.mjs` as a first-class node CLI materializer. It consumes approved Markdown planning contracts and API-issued IDs, then emits generated-final package artifacts only when it can honestly materialize the declared resource graph without crossing into signing, install/import, upgrade, seed data, Version Management, or browser/runtime proof.
 
 ## Source Finding
 
@@ -45,12 +45,14 @@ node scripts/materialize-full-app-generated-final.mjs \
   --json
 ```
 
-It emits:
+When the App Plan is trivial or a regression fixture, it emits:
 
 - generated-final `.yapk`;
 - decoded resource JSON;
 - ID provenance report;
 - generation report.
+
+For nontrivial App Plans that declare data lists, approval forms, reports, custom forms, dashboards, or navigation groups, it must fail closed until full resource-graph materialization is implemented. It must not emit a placeholder package or report `signingEligible: true`.
 
 It must not:
 
@@ -70,13 +72,15 @@ The focused regression suite proves:
 - package, decoded resource, ID provenance, and generation reports are written;
 - the generated package wrapper passes canonical schema validation in the focused fixture;
 - materialization keeps `Sign` blank and records the proof boundary;
-- API ID manifest mode is signing-eligible only after later generated-final preflight passes.
+- API ID manifest mode remains not signing/install eligible unless the full App Plan resource graph is materialized and later generated-final preflight passes;
+- nontrivial App Plans fail closed with `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` instead of producing placeholder packages.
 
 ## Expected Future Behavior
 
 A clean-room run that passes planning gates must no longer report "no generator" when the registry and materializer are present. If it cannot proceed, it must report the concrete blocker, such as:
 
 - missing API-issued IDs;
+- standalone materializer resource-graph capability gap;
 - failed generated-final preflight;
 - failed ID provenance;
 - failed navigation metadata;

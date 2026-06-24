@@ -42,7 +42,7 @@ node scripts/materialize-full-app-generated-final.mjs \
   --json
 ```
 
-This CLI is the concrete package-artifact handoff for clean-room tests and automation. It consumes approved Markdown planning contracts and an API-issued ID manifest, then emits:
+This CLI is the concrete package-artifact handoff for clean-room tests and automation only when it can materialize the approved App Plan resource graph. It consumes approved Markdown planning contracts and an API-issued ID manifest, then emits:
 
 - generated-final `.yapk`;
 - decoded resource JSON;
@@ -50,6 +50,8 @@ This CLI is the concrete package-artifact handoff for clean-room tests and autom
 - generation report.
 
 The materializer is not a signing, install/import, upgrade, seed-data, Version Management, or browser/runtime proof tool. It must stop before those stages and its report must say so. Plugin regression tests may use an explicit fixture-ID mode, but fixture-ID output is not signing/install eligible and must never be reported as live Yeeflow ID provenance.
+
+The materializer must also be honest about implementation coverage. If a nontrivial App Plan declares data lists, approval forms, reports, custom forms, dashboards, navigation groups, or other business resources that the standalone materializer cannot fully generate, it must fail closed with `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED`. It must not emit a placeholder `.yapk`, must not return `status: pass`, and must not set `signingEligible: true` for a package that has not materialized the App Plan resource graph and passed generated-final hard gates.
 
 The registry must validate from both layouts used by this repository:
 
@@ -76,4 +78,4 @@ node scripts/inspect-full-app-generation-entrypoints.mjs
 
 The inspector must pass before a plugin-only clean-room generation report claims that no generation entrypoint exists. If a user or test specifically requires a standalone CLI, report that the installed plugin exposes skill-orchestrated generation entrypoints rather than inventing or misclassifying a helper script.
 
-If the inspector passes and generation still stops immediately after planning, classify that as an execution bug in the run, not as evidence that the plugin lacks a full-app generation entrypoint. If API-issued IDs are unavailable, hard-stop with an ID-source error rather than claiming that no materialization entrypoint exists.
+If the inspector passes and generation still stops immediately after planning, classify the concrete blocker. If API-issued IDs are unavailable, hard-stop with an ID-source error rather than claiming that no materialization entrypoint exists. If the standalone materializer is present but cannot generate the declared App Plan resource graph, hard-stop with `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` and route the run to the skill-orchestrated generator or a follow-up full resource-graph implementation task.
