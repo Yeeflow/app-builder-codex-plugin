@@ -35,6 +35,33 @@ const COLLECTION_ALLOWED_SLOT_IDS = new Set([
   "section_content_area",
 ]);
 
+const GRID_MULTISELECT_FULL_WIDTH_IDS = [
+  "grid_table_col_multiselect_wrapper",
+  "grid_table_col_caption",
+  "grid_table_col_content",
+];
+
+const GRID_MULTISELECT_LOCKED_STYLE_IDS = [
+  "grid_table_col_multiselect_wrapper",
+  "grid_table_col_caption",
+  "grid_table_col_content",
+  "op_normal",
+  "op_multipleselected",
+  "selected_items_amount_wrapper",
+  "multiple_operations_wrapper",
+];
+
+const GRID_MULTISELECT_TEMPLATE_RESIDUE = [
+  "All tasks",
+  "All tasks - Multiple select",
+  "Search tasks",
+  "Add Task",
+  "Mark as completed",
+  "Assignee",
+  "Completion (%)",
+  "Progress bar",
+];
+
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || (!args.registry && !args.appPlan && !args.package)) {
@@ -519,6 +546,7 @@ function validatePackage(packagePath, registryInfo, findings) {
   }
 
   for (const page of collectDashboardPages(decoded)) {
+    validateKpiTemplateMaterialization(page, findings);
     const collections = page.controls.filter((entry) => String(entry.control?.type || "") === "collection");
     for (const entry of collections) {
       validateCollectionEntry(entry, page, registryInfo.approvedIds, findings);
@@ -840,6 +868,10 @@ function validateGridMultiselect(entry, page, findings) {
     }
   }
 
+  validateGridMultiselectFullWidth(wrapper, page, entry, findings);
+  validateGridMultiselectLockedStyleParity(wrapper, page, entry, findings);
+  validateGridMultiselectTemplateResidue(wrapper, page, entry, findings);
+
   const selection = findDescendantByIdentity(wrapper, "grid_table_col_item_select");
   const selectionIcons = asArray(selection?.children).filter((child) => String(child?.type || "") === "icon");
   if (selection && selectionIcons.length < 2) {
@@ -850,6 +882,8 @@ function validateGridMultiselect(entry, page, findings) {
   if (!collectionActions.length) {
     findings.push(error("DASH_DATASET_GRID_MULTISELECT_COLLECTION_ACTIONS_MISSING", "collection_control_grid_table_with_multiselect must preserve Collection root attrs.actions[] for row selection and item/bulk behavior.", { page: page.title, path: `${entry.pointer}.attrs.actions` }));
   }
+  validateGridMultiselectSelectionAction(selection, collectionActions, page, entry, findings);
+  validateGridMultiselectFilterShape(entry, page, findings);
 
   const header = findDescendantByIdentity(wrapper, "grid_table_col_header");
   const itemGrid = findDescendantByIdentity(wrapper, "grid_col_item");
@@ -888,6 +922,121 @@ function validateGridMultiselect(entry, page, findings) {
   validateGridMultiselectPageDependencies(page, entry, findings);
 }
 
+function validateGridMultiselectFullWidth(wrapper, page, entry, findings) {
+  for (const identity of GRID_MULTISELECT_FULL_WIDTH_IDS) {
+    const node = findDescendantByIdentity(wrapper, identity);
+    if (!node) continue;
+    const fullWidth =
+      node.width === "full"
+      && arrayEquals(node?.attrs?.style?.widthtype, [null, "1"])
+      && arrayEquals(node?.attrs?.common?.positioning?.widthtype, [null, "1"]);
+    if (!fullWidth) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_FULL_WIDTH_CONTRACT_MISSING", "Locked grid-table multiselect structural containers must preserve the full-width contract across Designer-relevant width layers.", {
+        page: page.title,
+        path: entry.pointer,
+        control: identity,
+        width: node.width ?? null,
+        styleWidthType: node?.attrs?.style?.widthtype ?? null,
+        positioningWidthType: node?.attrs?.common?.positioning?.widthtype ?? null,
+      }));
+    }
+  }
+}
+
+function validateGridMultiselectLockedStyleParity(wrapper, page, entry, findings) {
+  const sourceRoot = loadGridMultiselectSourceTemplateRoot();
+  if (!sourceRoot) return;
+  for (const identity of GRID_MULTISELECT_LOCKED_STYLE_IDS) {
+    const generated = findDescendantByIdentity(wrapper, identity);
+    const source = findDescendantByIdentity(sourceRoot, identity);
+    if (!generated || !source) continue;
+    const checks = [
+      ["attrs.style.gap", source?.attrs?.style?.gap, generated?.attrs?.style?.gap],
+      ["attrs.container.gap", source?.attrs?.container?.gap, generated?.attrs?.container?.gap],
+    ];
+    for (const [property, expected, actual] of checks) {
+      if (expected === undefined) continue;
+      if (!deepEqual(expected, actual)) {
+        findings.push(error("DASH_DATASET_GRID_MULTISELECT_LOCKED_STYLE_DRIFT", "Locked grid-table multiselect template spacing must be cloned from the source template and must not be rewritten by a normalizer.", {
+          page: page.title,
+          path: entry.pointer,
+          control: identity,
+          property,
+          expected,
+          actual: actual ?? null,
+        }));
+      }
+    }
+  }
+}
+
+function validateGridMultiselectTemplateResidue(wrapper, page, entry, findings) {
+  const residue = GRID_MULTISELECT_TEMPLATE_RESIDUE.filter((token) => controlTextIncludes(wrapper, token));
+  if (!residue.length) return;
+  findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_RESIDUE", "Generated grid-table multiselect modules must replace source-domain captions, placeholders, buttons, and field labels with the target business domain.", {
+    page: page.title,
+    path: entry.pointer,
+    residue,
+  }));
+}
+
+function validateGridMultiselectSelectionAction(selection, collectionActions, page, entry, findings) {
+  if (!selection) return;
+  const actionId = String(selection?.attrs?.control_action || selection?.attrs?.action || selection?.control_action || "").trim();
+  if (!actionId) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_SELECT_ACTION_MISSING", "grid_table_col_item_select must keep its select/toggle action binding from the template; the selection checkbox cannot be static.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+  const actionIds = new Set([
+    ...asArray(collectionActions).flatMap((action) => [action?.id, action?.ID, action?.name]),
+    ...asArray(page.resource?.actions).flatMap((action) => [action?.id, action?.ID, action?.name]),
+    ...asArray(page.resource?.formAction).flatMap((action) => [action?.id, action?.ID, action?.name]),
+  ].map((value) => String(value || "").trim()).filter(Boolean));
+  if (actionIds.size && !actionIds.has(actionId)) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_SELECT_ACTION_UNRESOLVED", "grid_table_col_item_select action binding must resolve to a Collection or page action preserved from the template.", {
+      page: page.title,
+      path: entry.pointer,
+      controlAction: actionId,
+      availableActionIds: [...actionIds],
+    }));
+  }
+}
+
+function validateGridMultiselectFilterShape(entry, page, findings) {
+  for (const [index, filter] of asArray(entry.control?.attrs?.data?.filter).entries()) {
+    const serialized = JSON.stringify(filter);
+    if (!/filter_/i.test(serialized)) continue;
+    const condition = findFilterCondition(filter);
+    if (!condition) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_FILTER_CONDITION_SHAPE_INVALID", "Grid-table multiselect filter conditions must keep the Designer-recognized condition structure.", { page: page.title, path: `${entry.pointer}.attrs.data.filter[${index}]` }));
+      continue;
+    }
+    const operator = String(condition.op ?? condition.operator ?? "");
+    const rhs = condition.right ?? condition.value ?? condition.values ?? condition.rhs;
+    const rhsItems = Array.isArray(rhs) ? rhs : [rhs];
+    const rhsObject = rhsItems.find(isObject) || {};
+    if (operator !== "9" || condition.showCus !== false || rhsObject.valueType !== "string" || !String(rhsObject.id || "").startsWith("__filter_") || String(rhsObject.name || "").startsWith("__filter_")) {
+      findings.push(error("DASH_DATASET_GRID_MULTISELECT_FILTER_CONDITION_SHAPE_INVALID", "Grid-table multiselect filter condition must use op/operator 9, showCus:false, string RHS, prefixed variable id, and raw variable name for Designer compatibility.", {
+        page: page.title,
+        path: `${entry.pointer}.attrs.data.filter[${index}]`,
+        operator: operator || null,
+        showCus: condition.showCus ?? null,
+        rhs: rhsObject,
+      }));
+    }
+  }
+
+  const bindingNames = new Set(asArray(entry.control?.attrs?.data?.filterBindings).map((binding) => String(binding?.name || binding?.id || binding || "").replace(/^__filter_/, "").trim()).filter(Boolean));
+  if (bindingNames.size) {
+    const filterText = JSON.stringify(entry.control?.attrs?.data?.filter || []);
+    for (const binding of bindingNames) {
+      if (!filterText.includes(binding)) {
+        findings.push(error("DASH_DATASET_GRID_MULTISELECT_FILTER_BINDING_UNCONSUMED", "Grid-table multiselect filterBindings[] must correspond to variables consumed by attrs.data.filter[].", { page: page.title, path: entry.pointer, binding }));
+      }
+    }
+  }
+}
+
 function validateGridMultiselectPageDependencies(page, entry, findings) {
   const dependencyChecks = [
     ["filterVars", "DASH_DATASET_GRID_MULTISELECT_FILTERVARS_MISSING"],
@@ -907,6 +1056,22 @@ function validateGridMultiselectPageDependencies(page, entry, findings) {
     if (!pageText.includes(requiredToken)) {
       findings.push(error("DASH_DATASET_GRID_MULTISELECT_SELECTED_VARIABLE_MISSING", "Grid-table multiselect template requires selected item variables from the source template.", { page: page.title, path: entry.pointer, requiredToken }));
     }
+  }
+}
+
+function validateKpiTemplateMaterialization(page, findings) {
+  const kpiWrapper = findDescendantByIdentity(page.resource, "kpi_cards_wrapper");
+  if (!kpiWrapper) return;
+  if (!findDescendantByIdentity(kpiWrapper, "kpi_cards_kpi_row")) {
+    findings.push(error("DASH_DATASET_KPI_MODULE_ROW_MISSING", "Dashboard KPI regions must clone the approved kpi_cards_kpi_row module instead of assembling loose KPI cards.", { page: page.title, path: page.pointer }));
+  }
+  const helperNodes = findDescendants(kpiWrapper, (node) => identityCandidates(node).some((identity) => /^ops_kpi_/i.test(identity) || /helper[_-]?kpi/i.test(identity)));
+  if (helperNodes.length) {
+    findings.push(error("DASH_DATASET_KPI_HELPER_CARD_FORBIDDEN", "Dashboard KPI cards must be materialized from approved KPI templates; helper-created ops_kpi_* cards are forbidden.", {
+      page: page.title,
+      path: page.pointer,
+      helperNodes: helperNodes.map((node) => identityCandidates(node)[0] || node.id || null).filter(Boolean),
+    }));
   }
 }
 
@@ -1007,6 +1172,61 @@ function hasActionBinding(node) {
     node?.action,
   ];
   return candidates.some((candidate) => String(candidate || "").trim());
+}
+
+function loadGridMultiselectSourceTemplateRoot() {
+  try {
+    const template = JSON.parse(fs.readFileSync(GRID_MULTISELECT_TEMPLATE_PATH, "utf8"));
+    return template?.templateResource?.rootContainer || null;
+  } catch {
+    return null;
+  }
+}
+
+function controlTextIncludes(root, token) {
+  const needle = String(token || "").toLowerCase();
+  if (!needle) return false;
+  return findDescendants(root, (node) => {
+    const values = [
+      node?.label,
+      node?.title,
+      node?.Title,
+      node?.name,
+      node?.nv_label,
+      node?.attrs?.placeholder,
+      node?.attrs?.label,
+      node?.attrs?.title,
+      node?.attrs?.name,
+      node?.attrs?.headc?.title?.value,
+      node?.attrs?.heads?.value,
+    ];
+    return values.some((value) => String(value || "").toLowerCase().includes(needle));
+  }).length > 0;
+}
+
+function findFilterCondition(filter) {
+  if (!isObject(filter)) return null;
+  if (filter.op !== undefined || filter.operator !== undefined) return filter;
+  for (const value of Object.values(filter)) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const found = findFilterCondition(item);
+        if (found) return found;
+      }
+    } else if (isObject(value)) {
+      const found = findFilterCondition(value);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function deepEqual(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function arrayEquals(left, right) {
+  return Array.isArray(left) && Array.isArray(right) && left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function normalizeIdentity(value) {

@@ -177,6 +177,34 @@ Dashboard validator commands used during validation:
   badItemGrid.attrs.columns["1"].list = [[46, "px"], [3, "fr"], [1, "fr"]];
   expectCode("grid-table multiselect header/item column mismatch fails", ["--package", writePackage("bad-grid-multiselect-columns", badGridMultiselectColumnsPages)], "DASH_DATASET_GRID_MULTISELECT_HEADER_ITEM_COLUMN_MISMATCH");
 
+  const badGridFullWidthPages = validPages();
+  delete findControl(badGridFullWidthPages[3], "grid_table_col_caption").attrs.style.widthtype;
+  expectCode("grid-table multiselect structural containers require full width", ["--package", writePackage("bad-grid-multiselect-full-width", badGridFullWidthPages)], "DASH_DATASET_GRID_MULTISELECT_FULL_WIDTH_CONTRACT_MISSING");
+
+  const badGridResiduePages = validPages();
+  findControl(badGridResiduePages[3], "grid_bulk_search").attrs.placeholder = "Search tasks";
+  expectCode("grid-table multiselect source-domain text residue fails", ["--package", writePackage("bad-grid-multiselect-residue", badGridResiduePages)], "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_RESIDUE");
+
+  const badGridGapPages = validPages();
+  findControl(badGridGapPages[3], "op_normal").attrs.style.gap = [null, "--sp--s0"];
+  expectCode("grid-table multiselect locked gap drift fails", ["--package", writePackage("bad-grid-multiselect-gap-drift", badGridGapPages)], "DASH_DATASET_GRID_MULTISELECT_LOCKED_STYLE_DRIFT");
+
+  const badGridSelectActionPages = validPages();
+  delete findControl(badGridSelectActionPages[3], "grid_table_col_item_select").attrs.control_action;
+  expectCode("grid-table multiselect row selector must keep action binding", ["--package", writePackage("bad-grid-multiselect-select-action", badGridSelectActionPages)], "DASH_DATASET_GRID_MULTISELECT_SELECT_ACTION_MISSING");
+
+  const badGridFilterShapePages = validPages();
+  const badGridFilterCollection = findControl(badGridFilterShapePages[3], "bulk_reminders_collection");
+  badGridFilterCollection.attrs.data.filter = [{ operator: "9", showCus: true, right: [{ valueType: "array", id: "filter_bad", name: "__filter_bad" }] }];
+  badGridFilterCollection.attrs.data.filterBindings = [{ name: "bad" }];
+  expectCode("grid-table multiselect filter condition must keep Designer shape", ["--package", writePackage("bad-grid-multiselect-filter-shape", badGridFilterShapePages)], "DASH_DATASET_GRID_MULTISELECT_FILTER_CONDITION_SHAPE_INVALID");
+
+  const helperKpiPages = validPages();
+  helperKpiPages[0].children[0].children[0].children[0].children.push(container("kpi_cards_wrapper", [
+    container("ops_kpi_total_loans", [heading("ops_kpi_total_loans_value", "12")]),
+  ]));
+  expectCode("helper-created KPI cards under KPI wrapper fail", ["--package", writePackage("helper-kpi-card", helperKpiPages)], "DASH_DATASET_KPI_MODULE_ROW_MISSING");
+
   const missingGridDepsPages = validPages();
   delete missingGridDepsPages[3].tempVars;
   expectCode("grid-table multiselect without page-level dependencies fails", ["--package", writePackage("grid-multiselect-missing-deps", missingGridDepsPages)], "DASH_DATASET_GRID_MULTISELECT_TEMPVARS_MISSING");
@@ -403,7 +431,7 @@ function gridMultiselectSection(prefix) {
       ]),
       container("grid_table_col_operations", [
         container("op_normal", [
-          { id: "grid_bulk_search", type: "search-filter", label: "Search tasks", attrs: { placeholder: "Search tasks" } },
+          { id: "grid_bulk_search", type: "search-filter", label: "Search loans", attrs: { placeholder: "Search loan requests" } },
           { id: "grid_bulk_add_button", type: "action_button", label: "Add item", attrs: { control_action: "grid_page_add_item" }, nv_label: "Add new item" },
         ]),
         container("op_multipleselected", [
@@ -411,27 +439,31 @@ function gridMultiselectSection(prefix) {
             heading("grid_selected_items_amount", [{ exprType: "variable", id: "__temp_var_SelectedItemsAmount", name: "var_SelectedItemsAmount" }, { type: "str", value: " selected" }]),
           ]),
           container("multiple_operations_wrapper", [
-            { id: "btn_set_items", type: "action_button", label: "Mark as completed", attrs: { control_action: "grid_page_bulk_complete" }, nv_label: "btn_set_items" },
+            { id: "btn_set_items", type: "action_button", label: "Send reminders", attrs: { control_action: "grid_page_bulk_complete" }, nv_label: "btn_set_items" },
             { id: "btn_delete_items", type: "action_button", label: "Delete selected items", attrs: { control_action: "grid_page_bulk_delete" }, nv_label: "btn_delete_items" },
           ]),
         ]),
       ]),
     ]),
-    container("grid_table_col_table_wrapper", [
+    container("grid_table_col_content", [
       gridHeader("grid_table_col_header", columns),
       collection(`${prefix}_collection`, "collection_control_grid_table_with_multiselect", {
         children: [gridItem("grid_col_item", columns, [
           container("grid_table_col_item_select", [
             { id: "grid_item_unchecked", type: "icon", attrs: { icon: "fa-regular fa-square" } },
             { id: "grid_item_checked", type: "icon", attrs: { icon: "fa-regular fa-square-check" } },
-          ]),
+          ], { attrs: { control_action: `${prefix}_select_items` } }),
           dynamic(`${prefix}_title`, "dynamic-field", "Title"),
           dynamic(`${prefix}_owner`, "dynamic-user", "User1"),
           dynamic(`${prefix}_status`, "dynamic-field", "Text1"),
           { id: `${prefix}_progress`, type: "progress", attrs: { bar: { per: { variable: [{ exprType: "variable_ctx", id: "Decimal2", ctx: "__ctx_coll" }] } } } },
         ])],
         attrs: {
-          data: { list: { ListID: "list_loans" } },
+          data: {
+            list: { ListID: "list_loans" },
+            filter: [{ operator: "9", showCus: false, right: [{ valueType: "string", id: "__filter_loan_status", name: "filter_loan_status" }] }],
+            filterBindings: [{ name: "loan_status" }],
+          },
           datasetRegion: "Bulk reminders",
           appPlanDatasetRegion: "Bulk reminders",
           layout: { col: [null, 1], hover: { enable: true } },
@@ -593,8 +625,55 @@ function gridItem(id, columns, children) {
   };
 }
 
-function container(id, children = []) {
-  return { id, name: id, type: "container", children };
+function container(id, children = [], extras = {}) {
+  return {
+    id,
+    name: id,
+    type: "container",
+    ...lockedContainerDefaults(id),
+    ...extras,
+    attrs: {
+      ...(lockedContainerDefaults(id).attrs || {}),
+      ...(extras.attrs || {}),
+      style: {
+        ...(lockedContainerDefaults(id).attrs?.style || {}),
+        ...(extras.attrs?.style || {}),
+      },
+      common: {
+        ...(lockedContainerDefaults(id).attrs?.common || {}),
+        ...(extras.attrs?.common || {}),
+        positioning: {
+          ...(lockedContainerDefaults(id).attrs?.common?.positioning || {}),
+          ...(extras.attrs?.common?.positioning || {}),
+        },
+      },
+      container: {
+        ...(lockedContainerDefaults(id).attrs?.container || {}),
+        ...(extras.attrs?.container || {}),
+      },
+    },
+    children,
+  };
+}
+
+function lockedContainerDefaults(id) {
+  const fullWidth = {
+    width: "full",
+    attrs: {
+      style: { widthtype: [null, "1"] },
+      common: { positioning: { widthtype: [null, "1"] } },
+    },
+  };
+  const map = {
+    grid_table_col_multiselect_wrapper: { ...fullWidth, attrs: { ...fullWidth.attrs, style: { ...fullWidth.attrs.style, direction: [null, "column"], align_items: [null, "flex-start"], gap: [null, 0] }, container: { gap: 0 } } },
+    grid_table_col_caption: { ...fullWidth, attrs: { ...fullWidth.attrs, style: { ...fullWidth.attrs.style, direction: [null, "row", "column", "column"], align_items: [null, "center", "flex-start"], justify_content: [null, "space-between"], gap: [null, "--sp--s200", "--sp--s150", "--sp--s100"] } } },
+    grid_table_col_content: { ...fullWidth, attrs: { ...fullWidth.attrs, style: { ...fullWidth.attrs.style, gap: [null, 0] } } },
+    op_normal: { attrs: { style: { widthtype: [null, "2", "1"], gap: [null, 10], direction: [null, "row"], align_items: [null, "center"], justify_content: [null, "flex-end"] } } },
+    op_multipleselected: { attrs: { style: { widthtype: [null, "2", "1", "1"], gap: [null, 10], direction: [null, "row", null, "column-reverse"], align_items: [null, "center"], justify_content: [null, "flex-end", "space-between"] } } },
+    selected_items_amount_wrapper: { attrs: { style: { direction: [null, "row"], align_items: [null, "center"], justify_content: [null, "flex-end", null, "flex-start"], gap: [null, "--sp--s150"], widthtype: [null, "2", null, "1"] } } },
+    multiple_operations_wrapper: { attrs: { style: { widthtype: [null, "2", "1"], gap: [null, 10], direction: [null, "row"], align_items: [null, "center"], justify_content: [null, "flex-end"] } } },
+  };
+  return structuredClone(map[id] || {});
 }
 
 function heading(id, value) {
