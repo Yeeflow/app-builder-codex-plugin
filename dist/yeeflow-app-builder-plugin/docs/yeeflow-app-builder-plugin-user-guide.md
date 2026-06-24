@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.31`
+`0.8.32`
+
+Version `0.8.32` releases full-app materializer fail-closed resource-graph gates from PR #201. The standalone materializer must fail with `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` for nontrivial App Plans when it cannot generate the declared data lists, approval forms, reports, dashboards, navigation, and related resources. Placeholder or schema-smoke output is never signing/install eligible.
 
 Version `0.8.31` releases the full-app generated-final materialization entrypoint from PR #199. Clean-room generation can now call `scripts/materialize-full-app-generated-final.mjs` from approved Functional Specification and Yeeflow App Plan Markdown plus an API-issued ID manifest to produce a generated-final `.yapk`, decoded resource, ID provenance report, and generation report. Fixture ID mode remains regression-only and not signing/install eligible; the CLI does not sign, install/import, upgrade, seed data, or claim runtime/browser proof.
 

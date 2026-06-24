@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.32
+
+- Release full-app materializer fail-closed resource-graph gates from PR #201.
+- Make `scripts/materialize-full-app-generated-final.mjs` fail closed for nontrivial App Plans until full resource-graph materialization is implemented.
+- Prevent placeholder/schema-smoke packages from reporting `signingEligible: true` or being treated as signing/install eligible.
+- Align materializer smoke provenance metadata with `api-generated` allocation source expectations and use a domain-safe default FontAwesome icon.
+
 ## 0.8.31
 
 - Release the full-app generated-final materialization entrypoint from PR #199.
