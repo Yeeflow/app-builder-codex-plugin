@@ -187,6 +187,8 @@ Visible KPI cards that claim live metrics must use Summary-backed values. Requir
 
 Data Filter static package validation and runtime filter linkage proof remain separate. Runtime proof must show before/after table or KPI data changes.
 
+When an approved App Plan declares Dashboard Summary/KPI metrics or filters, generation must materialize those declarations as real controls in the v1.1 shell. A generated Dashboard that contains only a Collection template, or only component provenance, fails even if the Collection template itself is valid. Planned metrics require Summary/KPI controls with source list, aggregate field/function, `exts`, `ReportIds`, `tempVars`, `save_var`, and visible bound KPI text. Planned filters require Data Filter/search/select/radio controls with source field, variable, display/value mapping, visual label/placeholder metadata, and at least one downstream Collection/table/KPI consumer.
+
 ## Runtime Route
 
 Runtime proof must use:

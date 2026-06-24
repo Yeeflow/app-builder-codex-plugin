@@ -652,7 +652,8 @@
                       "ty": [
                         null,
                         "h5-medium"
-                      ]
+                      ],
+                      "color": "var(--text-primary)"
                     },
                     "common": {
                       "positioning": {
@@ -1007,6 +1008,13 @@
                                   "2"
                                 ]
                               }
+                            },
+                            "heads": {
+                              "ty": [
+                                null,
+                                "s-medium"
+                              ],
+                              "color": "var(--text-secondary)"
                             }
                           },
                           "nv_label": "selected_items_amount"
@@ -1847,6 +1855,13 @@
                           "2"
                         ]
                       }
+                    },
+                    "heads": {
+                      "ty": [
+                        null,
+                        "s-medium"
+                      ],
+                      "color": "var(--text-primary)"
                     }
                   }
                 },

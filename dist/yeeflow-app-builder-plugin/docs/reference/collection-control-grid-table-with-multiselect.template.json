@@ -568,8 +568,11 @@
           ],
           "gap": [
             null,
-            "--sp--s0"
+            0
           ]
+        },
+        "container": {
+          "gap": 0
         }
       },
       "children": [
@@ -639,7 +642,8 @@
                       "ty": [
                         null,
                         "h5-medium"
-                      ]
+                      ],
+                      "color": "var(--text-primary)"
                     },
                     "common": {
                       "positioning": {
@@ -984,6 +988,13 @@
                                   "2"
                                 ]
                               }
+                            },
+                            "heads": {
+                              "ty": [
+                                null,
+                                "s-medium"
+                              ],
+                              "color": "var(--text-secondary)"
                             }
                           },
                           "nv_label": "selected_items_amount"
@@ -2058,7 +2069,7 @@
                     "ListSetID": "{{ListSetID}}"
                   },
                   "filter": [],
-                  "link": "default",
+                  "link": "{{DetailLayoutID}}",
                   "modalsize": 2,
                   "sort": [
                     {
@@ -2084,7 +2095,8 @@
                       ]
                     }
                   ],
-                  "ps": 16
+                  "ps": 16,
+                  "opentype": "slide"
                 },
                 "layout": {
                   "col": [
@@ -3337,7 +3349,8 @@
                                   12
                                 ],
                                 "wei": "500"
-                              }
+                              },
+                              "color": "var(--text-primary)"
                             },
                             "headc": {
                               "title": {
