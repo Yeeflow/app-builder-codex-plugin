@@ -8,9 +8,32 @@ This standard defines the only approved Data Analytics templates for generated Y
 - `data_analytics_column_chart_with_title`
 - `data_analytics_bar_chart_with_title`
 - `data_analytics_line_chart_with_title`
+- `data_analytics_area_chart_with_title`
 - `data_analytics_pivot_table_standard`
 
 Each template is stored as an export-shaped JSON artifact under `docs/reference/`. Generators must clone the approved template subtree and remap only the declared editable business regions. They must not create simplified chart or pivot lookalikes.
+
+Each registry entry must include App Plan selection guidance:
+
+- `summary`
+- `suitableSourceResourceTypes`
+- `whenToUse`
+- `whenNotToUse`
+- `requiredBusinessSignals`
+- `requiredAppPlanDeclaration`
+- `generationProof`
+- `proofBoundary`
+
+App Plan generation must use this guidance to select exactly one approved Data Analytics template for each Dashboard or Data List form analytics region. Selection is a business decision: match the business question, source data, grouping/axis fields, value/aggregate fields, and intended analysis pattern. Do not defer template choice to resource generation.
+
+## Selection Patterns
+
+- Pie chart: use for part-to-whole distribution across a small category set.
+- Column chart: use for vertical comparison across short-label categories, priorities, teams, or periods.
+- Bar chart: use for horizontal comparison, ranking, or longer category labels.
+- Line chart: use for point-to-point trend movement over time or another ordered dimension.
+- Area chart: use for trend movement where filled area emphasizes volume, magnitude, utilization, demand, capacity, or workload over time.
+- Pivot table: use for cross-tab row/column/value matrix analysis.
 
 ## Surface Rules
 

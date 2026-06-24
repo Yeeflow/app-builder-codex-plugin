@@ -151,6 +151,7 @@ const requiredDocs = [
   "docs/reference/data-analytics-column-chart-with-title.template.json",
   "docs/reference/data-analytics-bar-chart-with-title.template.json",
   "docs/reference/data-analytics-line-chart-with-title.template.json",
+  "docs/reference/data-analytics-area-chart-with-title.template.json",
   "docs/reference/data-analytics-pivot-table-standard.template.json",
   "docs/reference/collection-control-responsive-card-grid.template.json",
   "docs/reference/collection-control-card-with-multiselect-toolbar.template.json",

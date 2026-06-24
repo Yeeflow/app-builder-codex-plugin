@@ -53,7 +53,7 @@ const childTests = [
     command: ["scripts/test-data-analytics-golden-reference-gates.mjs"],
     validators: [
       "validate-data-analytics-golden-references",
-      "approved Pie, Column, Bar, Line, and Pivot templates",
+      "approved Pie, Column, Bar, Line, Area, and Pivot templates",
       "Dashboard v1.1 two/three-column placement",
       "Approval form exclusion",
     ],

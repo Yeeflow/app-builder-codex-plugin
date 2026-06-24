@@ -14,6 +14,7 @@ const results = [];
 
 try {
   expectPass("registry validates", ["--registry"]);
+  expectCode("Registry missing App Plan selection guidance fails", ["--registry", writeJson("registry-missing-guidance.json", registryMissingGuidance())], "DATA_ANALYTICS_REFERENCE_GUIDANCE_INCOMPLETE");
   expectPass("Dashboard v1.1 analytics inside approved 2/3-column sections pass", ["--resource", writeJson("valid-dashboard.json", dashboardResource()), "--surface", "dashboard"]);
   expectPass("Data List form analytics usage passes", ["--resource", writeJson("valid-data-list-form.json", dataListFormResource()), "--surface", "data-list-form"]);
 
@@ -53,6 +54,7 @@ function dashboardResource(options = {}) {
     chartModule("data_analytics_column_chart_with_title", "column_chart_with_title_wrapper", "column_chart_title", "column_chart_control", "bar-chart"),
     chartModule("data_analytics_bar_chart_with_title", "bar_chart_with_title_wrapper", "bar_chart_title", "bar_chart_control", "bar-chart"),
     chartModule("data_analytics_line_chart_with_title", "line_chart_with_title_wrapper", "line_chart_title", "line_chart_control", "line-chart"),
+    chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
     pivotModule(),
   ];
   if (options.unknownTemplate) analytics[0].attrs.dataAnalyticsTemplateId = "data_analytics_unknown_chart";
@@ -90,6 +92,7 @@ function dataListFormResource() {
     nv_label: "Asset Analytics Form",
     children: [
       chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
+      chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
       pivotModule(),
     ],
   };
@@ -103,6 +106,13 @@ function approvalFormResource() {
       chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
     ],
   };
+}
+
+function registryMissingGuidance() {
+  const registry = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/data-analytics-golden-references.json"), "utf8"));
+  for (const reference of registry.references || []) reference.sourceTemplate = path.join(ROOT, reference.sourceTemplate);
+  delete registry.references[0].requiredBusinessSignals;
+  return registry;
 }
 
 function section(id, children) {

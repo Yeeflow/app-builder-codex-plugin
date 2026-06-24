@@ -1,12 +1,13 @@
 {
   "version": "1.0.0",
   "registryId": "data-analytics-golden-references",
-  "description": "Approved Data Analytics golden reference templates for generated Dashboard pages and Data List forms. Generated analytics controls must clone one approved template and preserve its export-shaped style, layout, and typography contract.",
+  "description": "Approved Data Analytics golden reference templates for generated Dashboard pages and Data List forms. Generated analytics controls must select one template by business need, clone the approved export-shaped template, and preserve its style, layout, typography, and surface contract.",
   "approvedTemplateIds": [
     "data_analytics_pie_chart_with_title",
     "data_analytics_column_chart_with_title",
     "data_analytics_bar_chart_with_title",
     "data_analytics_line_chart_with_title",
+    "data_analytics_area_chart_with_title",
     "data_analytics_pivot_table_standard"
   ],
   "allowedSurfaces": [
@@ -34,13 +35,39 @@
       ],
       "lockedRule": "The pie_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside pie_chart_container and the business text value of pie_chart_title may change.",
       "whenToUse": [
-        "Use when users need part-to-whole distribution by category, status, type, or ownership.",
-        "Use for compact composition metrics that fit a Dashboard two-column or three-column section."
+        "Use when users need part-to-whole distribution by category, status, type, owner group, or priority.",
+        "Use when the business question is which category makes up the largest share of a known total.",
+        "Use when the category count is small enough for a readable legend, typically two to six meaningful slices."
       ],
       "whenNotToUse": [
-        "Do not use for time-series trends.",
-        "Do not use when many categories make a pie chart unreadable."
-      ]
+        "Do not use for time-series trends or ordered date movement.",
+        "Do not use when many categories make the pie chart unreadable.",
+        "Do not use when precise ranking or side-by-side comparison is more important than share of total."
+      ],
+      "summary": "Card-style pie chart module with a custom title and a compact legend for part-to-whole composition.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report",
+        "Data Report"
+      ],
+      "requiredBusinessSignals": [
+        "part-to-whole",
+        "distribution",
+        "share",
+        "status mix",
+        "category mix",
+        "composition",
+        "small category set"
+      ],
+      "requiredAppPlanDeclaration": "Select data_analytics_pie_chart_with_title for a Dashboard/Data List form analytics region when the business question is distribution or share of a total. Declare the source object, category/grouping field, aggregate/count field, title text, and why the category set is small enough for a pie chart.",
+      "generationProof": [
+        "pie_chart_with_title_wrapper root subtree",
+        "pie_chart_title Text control mapped to a business title",
+        "pie_chart_container data binding mapped to a legal source and category/aggregate fields",
+        "template provenance on the wrapper or analytics control"
+      ],
+      "proofBoundary": "Export-shaped pie chart template only; not proof for time-series, ranking, pivot, funnel, gauge, or custom chart layouts."
     },
     {
       "templateId": "data_analytics_column_chart_with_title",
@@ -56,13 +83,38 @@
       ],
       "lockedRule": "The column_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside column_chart_container and the business text value of column_chart_title may change.",
       "whenToUse": [
-        "Use when users need vertical comparison across statuses, priorities, categories, teams, or periods.",
-        "Use for count or numeric aggregate comparisons where column height is the primary signal."
+        "Use when users need vertical comparison across statuses, priorities, categories, teams, owners, or periods.",
+        "Use when column height should be the primary signal for count, total, or numeric aggregate comparison.",
+        "Use when labels are short enough to fit under vertical columns."
       ],
       "whenNotToUse": [
         "Do not use when horizontal label space is required; use the bar chart template instead.",
-        "Do not use for pivot-style cross-tab analysis."
-      ]
+        "Do not use for part-to-whole composition where share of total is the main question.",
+        "Do not use for cross-tab row/column matrix analysis; use pivot table instead."
+      ],
+      "summary": "Card-style vertical column chart module with a custom title for comparing values across categories or periods.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report",
+        "Data Report"
+      ],
+      "requiredBusinessSignals": [
+        "vertical comparison",
+        "short category labels",
+        "count by status",
+        "count by priority",
+        "period comparison",
+        "numeric aggregate comparison"
+      ],
+      "requiredAppPlanDeclaration": "Select data_analytics_column_chart_with_title when the analytics region needs vertical category or period comparison. Declare the source object, x-axis/grouping field, y-axis aggregate, title text, and why vertical columns fit the labels.",
+      "generationProof": [
+        "column_chart_with_title_wrapper root subtree",
+        "column_chart_title Text control mapped to a business title",
+        "column_chart_container data binding mapped to legal category and aggregate fields",
+        "template provenance on the wrapper or analytics control"
+      ],
+      "proofBoundary": "Export-shaped column chart template only; not proof for horizontal bar ranking, area trends, line trends, pivot matrices, or custom chart layouts."
     },
     {
       "templateId": "data_analytics_bar_chart_with_title",
@@ -79,12 +131,37 @@
       "lockedRule": "The bar_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside bar_chart_container and the business text value of bar_chart_title may change.",
       "whenToUse": [
         "Use when users need horizontal comparison across categories with longer labels.",
-        "Use for ranked counts, grouped categories, request types, or backlog distribution."
+        "Use for ranked counts, request types, issue categories, backlog distribution, queue load, or owner/team workload comparisons.",
+        "Use when the y-axis category labels need more room than a column chart provides."
       ],
       "whenNotToUse": [
-        "Do not use for time-series line movement.",
-        "Do not use when the requirement is a cross-tab pivot table."
-      ]
+        "Do not use for time-series movement where a date or ordered period is the primary x-axis.",
+        "Do not use when share of total is the main question; use pie chart if category count is small.",
+        "Do not use when row/column cross-tab totals are needed; use pivot table instead."
+      ],
+      "summary": "Card-style horizontal bar chart module with a custom title for ranked or category comparison with longer labels.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report",
+        "Data Report"
+      ],
+      "requiredBusinessSignals": [
+        "horizontal comparison",
+        "long category labels",
+        "ranking",
+        "category workload",
+        "queue distribution",
+        "backlog by type"
+      ],
+      "requiredAppPlanDeclaration": "Select data_analytics_bar_chart_with_title when the analytics region needs horizontal category/ranking comparison. Declare the source object, y-axis category field, aggregate/count field, title text, and why horizontal labels are preferable.",
+      "generationProof": [
+        "bar_chart_with_title_wrapper root subtree",
+        "bar_chart_title Text control mapped to a business title",
+        "bar_chart_container data binding mapped to legal category and aggregate fields",
+        "template provenance on the wrapper or analytics control"
+      ],
+      "proofBoundary": "Export-shaped bar chart template only; not proof for vertical columns, line/area trends, pivot matrices, or custom chart layouts."
     },
     {
       "templateId": "data_analytics_line_chart_with_title",
@@ -99,13 +176,88 @@
       ],
       "lockedRule": "The line_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside line_chart_container and the business text value of line_chart_title may change.",
       "whenToUse": [
-        "Use when users need trend movement over time.",
-        "Use for created, completed, approved, overdue, usage, or volume trends by date or period."
+        "Use when users need trend movement over time or another ordered dimension.",
+        "Use for created, completed, approved, overdue, usage, volume, SLA, or throughput trends by date or period.",
+        "Use when the shape, peaks, dips, and direction of the trend are more important than filled volume."
       ],
       "whenNotToUse": [
         "Do not use for categorical part-to-whole distribution.",
-        "Do not use when there is no time or ordered dimension."
-      ]
+        "Do not use when there is no time, date, period, or ordered dimension.",
+        "Do not use when cumulative magnitude or filled area emphasis is the primary visual need; use area chart instead."
+      ],
+      "summary": "Card-style line chart module with a custom title for trend movement over ordered time or sequence fields.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report",
+        "Data Report"
+      ],
+      "requiredBusinessSignals": [
+        "time trend",
+        "over time",
+        "date series",
+        "period movement",
+        "trend direction",
+        "volume trend",
+        "throughput trend"
+      ],
+      "requiredAppPlanDeclaration": "Select data_analytics_line_chart_with_title when the analytics region needs a line trend over date/period/order. Declare the source object, date/period field, aggregate/count field, title text, and why line movement is the best signal.",
+      "generationProof": [
+        "line_chart_with_title_wrapper root subtree",
+        "line_chart_title Text control mapped to a business title",
+        "line_chart_container data binding mapped to legal date/period and aggregate fields",
+        "template provenance on the wrapper or analytics control"
+      ],
+      "proofBoundary": "Export-shaped line chart template only; not proof for area-filled trends, categorical ranking, pie distribution, pivot matrices, or custom chart layouts."
+    },
+    {
+      "templateId": "data_analytics_area_chart_with_title",
+      "displayName": "Area Chart With Title",
+      "sourceTemplate": "docs/reference/data-analytics-area-chart-with-title.template.json",
+      "controlType": "line-chart",
+      "semanticChartKind": "area-chart",
+      "rootWrapperId": "area_chart_with_title_wrapper",
+      "titleControlId": "area_chart_title",
+      "editableRegions": [
+        "area_chart_container",
+        "area_chart_title"
+      ],
+      "lockedRule": "The area_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside area_chart_container and the business text value of area_chart_title may change.",
+      "whenToUse": [
+        "Use when users need trend movement over time with filled area emphasis.",
+        "Use for cumulative volume, utilization, demand, capacity, workload, or backlog trends where magnitude over time matters.",
+        "Use when the business audience should quickly see both direction and total visual weight of the trend."
+      ],
+      "whenNotToUse": [
+        "Do not use for categorical part-to-whole distribution.",
+        "Do not use when there is no time, date, period, or ordered dimension.",
+        "Do not use when exact point-to-point trend shape is more important than magnitude emphasis; use line chart instead."
+      ],
+      "summary": "Card-style area chart module with a custom title for time or ordered trends where the filled area emphasizes volume or magnitude.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report",
+        "Data Report"
+      ],
+      "requiredBusinessSignals": [
+        "area trend",
+        "filled trend",
+        "cumulative volume",
+        "utilization trend",
+        "capacity trend",
+        "demand trend",
+        "workload over time",
+        "magnitude over time"
+      ],
+      "requiredAppPlanDeclaration": "Select data_analytics_area_chart_with_title when the analytics region needs a filled trend over date/period/order. Declare the source object, date/period field, aggregate/count field, title text, and why filled area magnitude is useful.",
+      "generationProof": [
+        "area_chart_with_title_wrapper root subtree",
+        "area_chart_title Text control mapped to a business title",
+        "area_chart_container data binding mapped to legal date/period and aggregate fields",
+        "template provenance on the wrapper or analytics control"
+      ],
+      "proofBoundary": "Export-shaped area chart template implemented with the approved line-chart control shape; not proof for generic line charts, stacked area variants, pie distribution, pivot matrices, or custom chart layouts."
     },
     {
       "templateId": "data_analytics_pivot_table_standard",
@@ -118,12 +270,39 @@
       "lockedRule": "The pivot_table_standard control must preserve all exported style settings. Only legal data-source, rows, columns, and values binding may be mapped to the current app.",
       "whenToUse": [
         "Use when users need cross-tab analysis by row, column, and aggregate value.",
-        "Use for operational matrices, category by status summaries, owner by priority counts, or period by type totals."
+        "Use for operational matrices such as category by team, status by owner, period by type, priority by department, or impact by support group.",
+        "Use when users need to compare multiple intersections instead of a single chart axis."
       ],
       "whenNotToUse": [
         "Do not use for chart-only visual comparison.",
+        "Do not use when users need a simple single-axis category chart.",
         "Do not use on Approval forms."
-      ]
+      ],
+      "summary": "Standard pivot table analytics control for cross-tab analysis by row, column, and aggregate values.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report",
+        "Data Report"
+      ],
+      "requiredBusinessSignals": [
+        "pivot",
+        "cross-tab",
+        "matrix",
+        "row by column",
+        "team by category",
+        "status by owner",
+        "aggregate table",
+        "multidimensional analysis"
+      ],
+      "requiredAppPlanDeclaration": "Select data_analytics_pivot_table_standard when the analytics region needs row/column/value cross-tab analysis. Declare the source object, row fields, column fields, value aggregate fields, and why matrix analysis is required.",
+      "generationProof": [
+        "pivot_table_standard control identity",
+        "legal source binding",
+        "configured rows, columns, and values from real fields",
+        "template provenance on the pivot control"
+      ],
+      "proofBoundary": "Export-shaped pivot table template only; not proof for charts, editable grids, Collection tables, or Approval form analytics."
     }
   ]
 }
