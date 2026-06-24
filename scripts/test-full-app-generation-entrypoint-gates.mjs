@@ -20,7 +20,7 @@ try {
   expectPass("installed plugin bundled skill layout passes", ["--registry", REGISTRY, "--root", bundledRoot]);
 
   const missingInputs = mutateRegistry("missing-inputs.json", (registry) => {
-    registry.entrypoints[0].inputs = ["yeeflow-app-plan.md"];
+    findSkillEntrypoint(registry).inputs = ["yeeflow-app-plan.md"];
   });
   expectCode("full-app entrypoint requires Functional Spec and App Plan inputs", ["--registry", missingInputs, "--root", ROOT], "FULL_APP_GENERATOR_ENTRYPOINT_INPUT_CONTRACT_INVALID");
 
@@ -38,27 +38,42 @@ try {
   expectCode("delivery workflow helper must not be classified as full-app generator", ["--registry", misclassifiedDelivery, "--root", ROOT], "FULL_APP_GENERATOR_ENTRYPOINT_MISCLASSIFIED_HELPER");
 
   const missingOutput = mutateRegistry("missing-output.json", (registry) => {
-    registry.entrypoints[0].supportedOutputs = ["validation reports"];
+    findSkillEntrypoint(registry).supportedOutputs = ["validation reports"];
   });
   expectCode("full-app entrypoint requires generated-final yapk output contract", ["--registry", missingOutput, "--root", ROOT], "FULL_APP_GENERATOR_ENTRYPOINT_OUTPUT_CONTRACT_INVALID");
 
   const missingCallable = mutateRegistry("missing-callable.json", (registry) => {
-    delete registry.entrypoints[0].callable;
-    delete registry.entrypoints[0].callableAs;
-    delete registry.entrypoints[0].invocationContract;
+    const entrypoint = findSkillEntrypoint(registry);
+    delete entrypoint.callable;
+    delete entrypoint.callableAs;
+    delete entrypoint.invocationContract;
   });
   expectCode("full-app entrypoint requires callable Codex skill contract", ["--registry", missingCallable, "--root", ROOT], "FULL_APP_GENERATOR_CALLABLE_CONTRACT_MISSING");
 
   const weakContinuation = mutateRegistry("weak-continuation.json", (registry) => {
-    registry.entrypoints[0].invocationContract.mustProceedAfterPlanningPass = false;
-    registry.entrypoints[0].invocationContract.planningPassContinuation = "Stop after planning if no CLI exists.";
+    const entrypoint = findSkillEntrypoint(registry);
+    entrypoint.invocationContract.mustProceedAfterPlanningPass = false;
+    entrypoint.invocationContract.planningPassContinuation = "Stop after planning if no CLI exists.";
   });
   expectCode("full-app entrypoint cannot stop after planning solely because no standalone CLI exists", ["--registry", weakContinuation, "--root", ROOT], "FULL_APP_GENERATOR_PLANNING_CONTINUATION_INVALID");
 
   const missingCallableInputs = mutateRegistry("missing-callable-inputs.json", (registry) => {
-    registry.entrypoints[0].invocationContract.requiredInputs = ["yeeflow-app-plan.md"];
+    findSkillEntrypoint(registry).invocationContract.requiredInputs = ["yeeflow-app-plan.md"];
   });
   expectCode("callable full-app contract repeats Markdown inputs", ["--registry", missingCallableInputs, "--root", ROOT], "FULL_APP_GENERATOR_CALLABLE_INPUTS_INVALID");
+
+  const missingMaterializer = mutateRegistry("missing-materializer.json", (registry) => {
+    registry.entrypoints = registry.entrypoints.filter((entrypoint) => entrypoint.kind !== "standalone-full-app-materializer");
+  });
+  expectCode("standalone materializer entrypoint is required", ["--registry", missingMaterializer, "--root", ROOT], "FULL_APP_GENERATOR_MATERIALIZER_ENTRYPOINT_MISSING");
+
+  const weakMaterializer = mutateRegistry("weak-materializer.json", (registry) => {
+    const materializer = registry.entrypoints.find((entrypoint) => entrypoint.kind === "standalone-full-app-materializer");
+    materializer.callableAs = "codex-skill-entrypoint";
+    materializer.invocationContract.executionMode = "codex-skill-callable";
+    materializer.invocationContract.requiredInputs = ["functional-specification.md", "yeeflow-app-plan.md"];
+  });
+  expectCode("standalone materializer requires node CLI contract and API ID manifest", ["--registry", weakMaterializer, "--root", ROOT], "FULL_APP_GENERATOR_NODE_CLI_CONTRACT_INVALID");
 
   console.log(JSON.stringify({ status: "pass", cases: results }, null, 2));
 } finally {
@@ -90,11 +105,16 @@ function mutateRegistry(name, mutate) {
   return file;
 }
 
+function findSkillEntrypoint(registry) {
+  return registry.entrypoints.find((entrypoint) => entrypoint.id === "skill:yeeflow-application-builder");
+}
+
 function createBundledPluginRoot() {
   const root = path.join(tempDir, "bundled-plugin-root");
   for (const file of [
     "skills/yeeflow-application-builder/SKILL.md",
     "skills/yeeflow-application-generator/SKILL.md",
+    "scripts/materialize-full-app-generated-final.mjs",
     "scripts/yeeflow-application-delivery-workflow.mjs",
     "scripts/yeeflow-package-api-automation.mjs",
     "generate-vendor-onboarding-yapk-schema-v2.mjs",

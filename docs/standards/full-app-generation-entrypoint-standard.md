@@ -12,7 +12,7 @@ Valid full-app generation entrypoints must:
 - default new application delivery to `.yapk` unless the user explicitly requests `.yap`;
 - declare required planning gates and generated-final package gates;
 - declare `bundledPath` when the source checkout path and installed plugin payload path differ;
-- declare `callable: true`, `callableAs: codex-skill-entrypoint`, and an `invocationContract` that names the Codex skill, repeats the required Markdown inputs, and requires continuation after planning gates pass;
+- declare `callable: true` and an `invocationContract` that names either the Codex skill orchestration entrypoint or the node CLI materialization entrypoint, repeats the required inputs, and requires continuation after planning gates pass;
 - produce generated-final package artifacts before signing/install/runtime proof is claimed;
 - be clearly distinguished from proof/demo, delivery-decision, package API, and sample-specific helpers.
 
@@ -29,10 +29,33 @@ When the registry reports a callable Codex skill entrypoint and the Functional S
 
 The `invocationContract.planningPassContinuation` field is the machine-readable handoff from planning validation to package generation. It must say that planning-pass runs continue toward a generated-final `.yapk` through the registered skill entrypoint and must explicitly forbid stopping solely because no standalone CLI exists.
 
+## Standalone Materialization CLI
+
+The plugin must also expose a callable node CLI materializer:
+
+```sh
+node scripts/materialize-full-app-generated-final.mjs \
+  --functional-spec functional-specification.md \
+  --app-plan yeeflow-app-plan.md \
+  --out-dir dist \
+  --api-id-manifest api-issued-ids.json \
+  --json
+```
+
+This CLI is the concrete package-artifact handoff for clean-room tests and automation. It consumes approved Markdown planning contracts and an API-issued ID manifest, then emits:
+
+- generated-final `.yapk`;
+- decoded resource JSON;
+- ID provenance report;
+- generation report.
+
+The materializer is not a signing, install/import, upgrade, seed-data, Version Management, or browser/runtime proof tool. It must stop before those stages and its report must say so. Plugin regression tests may use an explicit fixture-ID mode, but fixture-ID output is not signing/install eligible and must never be reported as live Yeeflow ID provenance.
+
 The registry must validate from both layouts used by this repository:
 
 - source checkout layout: `skills/installed/<skill-name>/SKILL.md`
 - installed plugin payload layout: `skills/<skill-name>/SKILL.md`
+- source and installed script layout: `scripts/materialize-full-app-generated-final.mjs`
 
 ## Non-Full-App Helpers
 
@@ -53,4 +76,4 @@ node scripts/inspect-full-app-generation-entrypoints.mjs
 
 The inspector must pass before a plugin-only clean-room generation report claims that no generation entrypoint exists. If a user or test specifically requires a standalone CLI, report that the installed plugin exposes skill-orchestrated generation entrypoints rather than inventing or misclassifying a helper script.
 
-If the inspector passes and generation still stops immediately after planning, classify that as an execution bug in the run, not as evidence that the plugin lacks a full-app generation entrypoint.
+If the inspector passes and generation still stops immediately after planning, classify that as an execution bug in the run, not as evidence that the plugin lacks a full-app generation entrypoint. If API-issued IDs are unavailable, hard-stop with an ID-source error rather than claiming that no materialization entrypoint exists.
