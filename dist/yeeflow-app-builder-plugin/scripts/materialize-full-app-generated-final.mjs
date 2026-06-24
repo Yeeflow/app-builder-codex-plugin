@@ -82,6 +82,11 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 
   const provenance = {
     status: "pass",
+    generatorProvenance: {
+      name: "materialize-full-app-generated-final",
+      pluginVersion: "0.8.35-training",
+      mode: fixtureMode ? "fixture-regression" : planDemand.hasMaterialResources ? "minimal-resource-graph" : "schema-smoke-only",
+    },
     generator: {
       name: "materialize-full-app-generated-final",
       version: "0.8.34-training",
@@ -213,26 +218,24 @@ function buildIdPaths(planDemand) {
   ];
   planDemand.resources.dataLists.forEach((name, index) => {
     paths.push(`decoded.Childs[${index}].List.ListID`);
-    paths.push(`decoded.Childs[${index}].Fields.Title.FieldID`);
-    paths.push(`decoded.Childs[${index}].Layouts.default.LayoutID`);
+    paths.push(`decoded.Childs[${index}].Fields[0].FieldID`);
+    paths.push(`decoded.Childs[${index}].Layouts[0].LayoutID`);
   });
   planDemand.resources.customForms.forEach((name, index) => {
-    paths.push(`decoded.Childs[0].Layouts.custom[${index}].LayoutID`);
+    paths.push(`decoded.Childs[0].Layouts[${index + 1}].LayoutID`);
   });
   planDemand.resources.approvalForms.forEach((name, index) => {
     paths.push(`decoded.Forms[${index}].Key`);
-    paths.push(`decoded.Forms[${index}].FormDef.ID`);
+    paths.push(`decoded.Forms[${index}].DefResourceID`);
   });
   planDemand.resources.formReports.forEach((name, index) => {
-    paths.push(`decoded.FormNewReports[${index}].ReportID`);
+    paths.push(`decoded.FormNewReports[${index}].ID`);
   });
   planDemand.resources.dashboards.forEach((name, index) => {
     paths.push(`decoded.Pages[${index}].LayoutID`);
-    paths.push(`decoded.Pages[${index}].LayoutInResources[0].ID`);
-    paths.push(`decoded.Pages[${index}].LayoutInResources[0].RefId`);
-    paths.push(`decoded.Pages[${index}].Summary.ID`);
-    paths.push(`decoded.Pages[${index}].Filter.ID`);
-    paths.push(`decoded.Pages[${index}].Collection.ID`);
+  });
+  planDemand.resources.navigationGroups.forEach((name, index) => {
+    paths.push(`decoded.ListSet.LayoutView.sort[${index}].ID`);
   });
   return paths;
 }
@@ -250,7 +253,7 @@ function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = 
   const headingNames = [...section.matchAll(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/gim)]
     .map((match) => cleanResourceName(match[1]))
     .filter((name) => !isNonResourceName(name));
-  if (headingNames.length) return unique(headingNames);
+  if (headingNames.length && key !== "customForms") return unique(headingNames);
 
   const tableNames = [];
   for (const table of parseMarkdownTables(section)) {
@@ -336,6 +339,7 @@ function isNonResourceName(value) {
   const text = cleanResourceName(value);
   if (!text) return true;
   if (/^(not applicable|n\/a|none|no|deferred|status|resource type|purpose|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (/^no custom\b/i.test(text)) return true;
   if (/^(dashboard page name|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
   return false;
 }
@@ -403,18 +407,29 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
   const dataListNames = planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`];
   const dataListByName = new Map();
   const childs = dataListNames.map((name, index) => {
-    const listId = numberId(ids[`decoded.Childs[${index}].List.ListID`]);
+    const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
+    const titleFieldId = stringId(ids[`decoded.Childs[${index}].Fields[0].FieldID`]);
     dataListByName.set(normKey(name), listId);
     const layouts = [
       {
         ListID: listId,
-        LayoutID: stringId(ids[`decoded.Childs[${index}].Layouts.default.LayoutID`]),
+        LayoutID: stringId(ids[`decoded.Childs[${index}].Layouts[0].LayoutID`]),
         Title: "Default View",
         Type: 0,
         LayoutView: JSON.stringify({
-          fields: ["Title"],
-          query: [{ FieldName: "Title", FieldID: stringId(ids[`decoded.Childs[${index}].Fields.Title.FieldID`]) }],
+          layout: [
+            { FieldID: titleFieldId, FieldName: "Title", DisplayName: "Title", Type: "input", Order: 1, Mobile: 2, Show: true },
+          ],
+          query: [
+            { FieldID: titleFieldId, FieldName: "Title", field: "Title" },
+            { FieldName: "ListDataID", field: "ListDataID" },
+            { FieldName: "CreatedBy", field: "CreatedBy" },
+            { FieldName: "ModifiedBy", field: "ModifiedBy" },
+            { FieldName: "Created", field: "Created" },
+            { FieldName: "Modified", field: "Modified" },
+          ],
         }),
+        Ext1: JSON.stringify({ Url: "default" }),
         IsDefault: true,
         IsItemPerm: false,
         Perms: [],
@@ -425,7 +440,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
       for (const [customIndex, customName] of planDemand.resources.customForms.entries()) {
         layouts.push({
           ListID: listId,
-          LayoutID: stringId(ids[`decoded.Childs[0].Layouts.custom[${customIndex}].LayoutID`]),
+          LayoutID: stringId(ids[`decoded.Childs[0].Layouts[${customIndex + 1}].LayoutID`]),
           Title: customName,
           Type: 1,
           LayoutView: JSON.stringify({ source: "minimal-resource-graph", formName: customName }),
@@ -434,8 +449,8 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
           Perms: [],
           LayoutInResources: [
             {
-              ID: numberId(ids[`decoded.Childs[0].Layouts.custom[${customIndex}].LayoutID`]),
-              RefId: numberId(ids[`decoded.Childs[0].Layouts.custom[${customIndex}].LayoutID`]),
+              ID: stringId(ids[`decoded.Childs[0].Layouts[${customIndex + 1}].LayoutID`]),
+              RefId: stringId(ids[`decoded.Childs[0].Layouts[${customIndex + 1}].LayoutID`]),
               Resource: JSON.stringify({
                 type: "form",
                 name: customName,
@@ -453,7 +468,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
       List: listInfo({ listId, title: name, type: 1, ext2: "{\"generatedFinal\":true}" }),
       Fields: [
         {
-          FieldID: stringId(ids[`decoded.Childs[${index}].Fields.Title.FieldID`]),
+          FieldID: titleFieldId,
           ListID: listId,
           FieldName: "Title",
           FieldType: "Text",
@@ -483,6 +498,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
 
   const forms = planDemand.resources.approvalForms.map((name, index) => {
     const key = stringId(ids[`decoded.Forms[${index}].Key`]);
+    const defId = stringId(ids[`decoded.Forms[${index}].DefResourceID`]);
     return {
       Category: "",
       Name: name,
@@ -490,21 +506,22 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
       IsItemPerm: false,
       AppID: 41,
       ListID: 0,
-      ProcModelID: stringId(ids[`decoded.Forms[${index}].FormDef.ID`]),
+      ProcModelID: defId,
       Description: "",
       Ext: "",
-      DefResourceID: stringId(ids[`decoded.Forms[${index}].FormDef.ID`]),
-      DefResource: exportResource({
-        type: "approval-form",
-        name,
-        children: [
-          { type: "container", name: "Main", children: [{ type: "dynamic-field", name: "Title", attrs: { data: { field: "Title" } } }] },
+      DefResourceID: defId,
+      DefResource: exportResource(buildApprovalDefResource({ name, formKey: key, defId })),
+      Status: 1,
+      DeployedDefID: defId,
+      WorkflowType: 2,
+      Settings: JSON.stringify({
+        taskurl: `${defId}_task`,
+        actions: [
+          { name: "Submit", type: "form_action" },
+          { name: "Approve", type: "form_action" },
+          { name: "Reject", type: "form_action" },
         ],
       }),
-      Status: 1,
-      DeployedDefID: stringId(ids[`decoded.Forms[${index}].FormDef.ID`]),
-      WorkflowType: 2,
-      Settings: "",
       Deployed: true,
       NoRule: { Prefix: "REQ-{index}", StartIndex: 1, CustomLength: 4, AutoIncrement: 1 },
       Perms: [],
@@ -512,7 +529,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
   });
 
   const formNewReports = planDemand.resources.formReports.map((name, index) => ({
-    ID: numberId(ids[`decoded.FormNewReports[${index}].ReportID`]),
+    ID: stringId(ids[`decoded.FormNewReports[${index}].ID`]),
     DefKey: forms[0]?.Key || "",
     Name: name,
     Description: "",
@@ -532,20 +549,21 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
       Type: 103,
       Title: name,
       LayoutView: null,
-      Ext2: "{\"generatedFinal\":true}",
+      Ext2: JSON.stringify({ src: true, generatedFinal: true }),
       IsDefault: index === 0,
       IsItemPerm: false,
       LayoutInResources: [
         {
-          ID: numberId(ids[`decoded.Pages[${index}].LayoutInResources[0].ID`]),
-          RefId: numberId(ids[`decoded.Pages[${index}].LayoutInResources[0].RefId`]),
-          Resource: JSON.stringify(buildMaterialDashboardResource({
-            name,
-            listName: firstListName,
-            listId: firstListId,
-            summaryId: stringId(ids[`decoded.Pages[${index}].Summary.ID`]),
-            filterId: stringId(ids[`decoded.Pages[${index}].Filter.ID`]),
-            collectionId: stringId(ids[`decoded.Pages[${index}].Collection.ID`]),
+          ID: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
+          RefId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
+            Resource: JSON.stringify(buildMaterialDashboardResource({
+              name,
+              layoutId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
+              listName: firstListName,
+              listId: firstListId,
+            summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
+            filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
+            collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
           })),
         },
       ],
@@ -555,7 +573,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
   return {
     ListSet: {
       ...listInfo({ listId: rootListId, title: appTitle, type: 1024, ext2: "{\"generatedFinal\":true}" }),
-      LayoutView: buildNavigationLayoutView(planDemand),
+      LayoutView: buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName, forms, pages }),
     },
     Pages: pages,
     Forms: forms,
@@ -574,48 +592,74 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
   };
 }
 
-function buildMaterialDashboardResource({ name, listName, listId, summaryId, filterId, collectionId }) {
+function buildMaterialDashboardResource({ name, layoutId, listName, listId, summaryId, filterId, collectionId }) {
+  const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   return {
-    type: "page",
+    type: "dashboard-page",
     id: `${slugify(name)}_root`,
     name,
     title: name,
+    ver: "1.0.0",
+    attrs: { container: { padding: ["--sp--s0", "--sp--s0", "--sp--s0", "--sp--s0"] } },
+    filterVars: [],
+    tempVars: [{ name: tempVar, type: "number", source: summaryId }],
+    ReportIds: [summaryId],
+    exts: [{
+      i: summaryId,
+      id: summaryId,
+      category: "___Pivot___",
+      key: "summary",
+      attr: {
+        ListID: stringId(listId),
+        settings: {
+          values: [{ field: "ListDataID", type: "count", label: "Active Records" }],
+        },
+      },
+    }],
+    actions: [],
+    derivedFromGoldenReference: "dashboard-page-layouts-v1.1",
+    templateMarker: "dashboard-page-layouts-v1.1",
+    LayoutID: layoutId,
     children: [
       {
         type: "container",
         id: "Main",
         name: "Main",
         title: "Main",
-        attrs: { container: { cw: "2", direction: "vertical", gap: 16, padding: ["--sp--s0", "--sp--s0", "--sp--s0", "--sp--s0"] } },
+        attrs: { container: { cw: "2", widthtype: [null, "1"], direction: "vertical", gap: 16, align_items: "stretch", justify_content: "flex-start", padding: ["--sp--s0", "--sp--s0", "--sp--s0", "--sp--s0"] } },
         children: [
           {
             type: "container",
             id: "Content",
             name: "Content",
             title: "Content",
-            attrs: { container: { cw: "2", direction: "vertical", gap: 16, padding: ["--sp--s0", "--sp--s0", "--sp--s0", "--sp--s0"] } },
+            attrs: {
+              container: { cw: "2", widthtype: [null, "1"], direction: "vertical", gap: 16, align_items: "stretch", justify_content: "flex-start" },
+              common: { padding: [null, { top: 24, right: 28, bottom: 24, left: 28 }] },
+            },
             children: [
-              { type: "text", id: `${slugify(name)}_title`, name, title: name, attrs: { text: { value: name, heads: "h2-bold" } } },
+              { type: "heading", label: "Text", id: `${slugify(name)}_title`, name, title: name, attrs: { headc: { title: { value: name } }, heads: { ty: [null, "h2-bold"], color: "#111827" } } },
               {
                 type: "summary",
                 id: summaryId,
                 name: "Active Records",
                 title: "Active Records",
-                attrs: { data: { ListID: stringId(listId), aggregation: "count", field: "ListDataID" } },
+                save_var: { name: tempVar },
+                attrs: { data: { list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName }, aggregation: "count", field: "ListDataID" }, save_var: { name: tempVar } },
               },
               {
                 type: "data-filter",
                 id: filterId,
                 name: "Status filter",
                 title: "Status filter",
-                attrs: { data: { ListID: stringId(listId), field: "Title" }, label: "Status", placeholder: `Filter ${listName}` },
+                attrs: { data: { list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName }, field: "Title" }, label: "Status", placeholder: `Filter ${listName}` },
               },
               {
                 type: "collection",
                 id: collectionId,
                 name: `${listName} collection`,
                 title: `${listName} collection`,
-                attrs: { data: { ListID: stringId(listId), source: listName, field: "Title" }, collection: { template: "collection_control_grid_table" } },
+                attrs: { data: { list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName }, source: listName, field: "Title" }, collection: { template: "collection_control_grid_table" } },
                 children: [
                   { type: "dynamic-field", id: `${collectionId}_title`, name: "Title", title: "Title", attrs: { data: { field: "Title", ListID: stringId(listId) } } },
                 ],
@@ -628,24 +672,43 @@ function buildMaterialDashboardResource({ name, listName, listId, summaryId, fil
   };
 }
 
-function buildNavigationLayoutView(planDemand) {
+function buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName, forms, pages }) {
   const groups = planDemand.resources.navigationGroups.length ? planDemand.resources.navigationGroups : ["Workspace"];
-  const dashboardItems = planDemand.resources.dashboards.map((name) => ({ Title: name, Type: 103, Target: name }));
-  const formItems = planDemand.resources.approvalForms.map((name) => ({ Title: name, Type: 105, Target: name }));
-  const listItems = planDemand.resources.dataLists.map((name) => ({ Title: name, Type: 1, Target: name }));
-  const reportItems = planDemand.resources.formReports.map((name) => ({ Title: name, Type: 106, Target: name }));
+  const dashboardItems = pages.map((page) => ({ Title: page.Title, Type: 103, Target: page.Title, ListID: page.LayoutID, LayoutID: page.LayoutID }));
+  const formItems = forms.map((form) => ({ Title: form.Name, Type: 105, Target: form.Name, ListID: form.Key }));
+  const listItems = planDemand.resources.dataLists.map((name) => ({ Title: name, Type: 1, Target: name, ListID: dataListByName.get(normKey(name)) }));
+  const reportItems = planDemand.resources.formReports.map((name) => ({ Title: name, Type: 105, Target: name, ListID: forms[0]?.Key || "" }));
   const allItems = dashboardItems.concat(formItems, listItems, reportItems);
   const itemsByGroup = planDemand.navigationItemsByGroup || {};
-  const typeForTarget = new Map(allItems.map((item) => [normKey(item.Target), item.Type]));
+  const targetByName = new Map(allItems.flatMap((item) => [[normKey(item.Target), item], [normKey(item.Title), item]]));
   const sort = groups.map((groupName, index) => ({
+    ID: stringId(ids[`decoded.ListSet.LayoutView.sort[${index}].ID`]),
+    AppID: 41,
+    ListSetID: stringId(rootListId),
     Title: groupName,
     Type: "classes",
+    Icon: "fa-solid fa-folder",
     list: (itemsByGroup[groupName] || []).length
-      ? itemsByGroup[groupName].map((item) => ({ Title: item.title, Target: item.target, Type: typeForTarget.get(normKey(item.target)) || inferNavigationType(item.type) }))
-      : allItems.filter((item, itemIndex) => itemIndex % groups.length === index),
+      ? itemsByGroup[groupName].map((item) => toRuntimeNavigationItem(targetByName.get(normKey(item.title)) || targetByName.get(normKey(item.target)) || { Title: item.title, Type: inferNavigationType(item.type), ListID: "" }, rootListId))
+        .filter(Boolean)
+      : allItems.filter((item, itemIndex) => itemIndex % groups.length === index).map((item) => toRuntimeNavigationItem(item, rootListId)),
   }));
-  if (sort.length && sort.every((group) => !group.list.length)) sort[0].list = allItems;
+  if (sort.length && sort.every((group) => !group.list.length)) sort[0].list = allItems.map((item) => toRuntimeNavigationItem(item, rootListId)).filter(Boolean);
   return JSON.stringify({ sortVer: 1, sort });
+}
+
+function toRuntimeNavigationItem(item, rootListId) {
+  if (!["1", "103", "105"].includes(String(item.Type))) return null;
+  if (!item.ListID) return null;
+  const out = {
+    AppID: 41,
+    Title: item.Title,
+    Type: item.Type,
+    ListID: stringId(item.ListID || ""),
+    ListSetID: stringId(rootListId),
+  };
+  if (String(item.Type) === "103") out.LayoutID = stringId(item.LayoutID || item.ListID || "");
+  return out;
 }
 
 function inferNavigationType(value) {
@@ -656,7 +719,64 @@ function inferNavigationType(value) {
 }
 
 function exportResource(resource) {
-  return `::brotli::${zlib.brotliCompressSync(Buffer.from(JSON.stringify(resource), "utf8")).toString("base64")}`;
+  const prefix = Buffer.from("::brotli::", "utf8");
+  const compressed = zlib.brotliCompressSync(Buffer.from(JSON.stringify(resource), "utf8"));
+  return Buffer.concat([prefix, compressed]).toString("base64");
+}
+
+function buildApprovalDefResource({ name, formKey, defId }) {
+  const submissionPageId = `${defId}_submission`;
+  const taskPageId = `${defId}_task`;
+  const startId = `${defId}_start`;
+  const flowId = `${defId}_flow_start_task`;
+  const taskId = `${defId}_task_node`;
+  const approvedFlowId = `${defId}_flow_approved`;
+  const rejectedFlowId = `${defId}_flow_rejected`;
+  const endId = `${defId}_end`;
+  return {
+    id: defId,
+    key: formKey,
+    defkey: formKey,
+    name,
+    title: name,
+    workflowType: 2,
+    AppListSetID: "generated-final-app-listset",
+    ProcModelAppID: 41,
+    ProcModelListID: defId,
+    ProcModelListSetID: formKey,
+    variables: [{ name: "requestTitle", type: "text", source: "Title" }],
+    graphposition: { x: 0, y: 0 },
+    graphzoom: 1,
+    graphver: "1.0",
+    pageurls: [
+      { id: submissionPageId, pageUrl: submissionPageId, url: submissionPageId, type: "request", title: "Submission form", formdef: approvalFormDef(submissionPageId, name, "Submit") },
+      { id: taskPageId, pageUrl: taskPageId, url: taskPageId, type: "task", title: "Task form", formdef: approvalFormDef(taskPageId, name, "Approve") },
+    ],
+    childshapes: [
+      { id: startId, resourceid: startId, stencil: { id: "StartNoneEvent" }, incoming: [], outgoing: [{ resourceid: flowId }], properties: { name: "Start" }, bounds: { upperLeft: { x: 100, y: 100 }, lowerRight: { x: 130, y: 130 } } },
+      { id: flowId, resourceid: flowId, stencil: { id: "SequenceFlow" }, source: { resourceid: startId }, target: { resourceid: taskId }, incoming: [{ resourceid: startId }], outgoing: [{ resourceid: taskId }], properties: { name: "Submit" }, dockers: [{ x: 130, y: 115 }, { x: 220, y: 115 }] },
+      { id: taskId, resourceid: taskId, stencil: { id: "MultiAssignmentTask" }, incoming: [{ resourceid: flowId }], outgoing: [{ resourceid: approvedFlowId }, { resourceid: rejectedFlowId }], properties: { name: "Review", taskurl: taskPageId, usertaskassignment: { mode: "initiator-manager", users: [] } }, bounds: { upperLeft: { x: 220, y: 80 }, lowerRight: { x: 340, y: 150 } } },
+      { id: approvedFlowId, resourceid: approvedFlowId, stencil: { id: "SequenceFlow" }, source: { resourceid: taskId }, target: { resourceid: endId }, incoming: [{ resourceid: taskId }], outgoing: [{ resourceid: endId }], properties: { name: "Approved", conditioninfo: "approved" }, dockers: [{ x: 340, y: 105 }, { x: 440, y: 105 }] },
+      { id: rejectedFlowId, resourceid: rejectedFlowId, stencil: { id: "SequenceFlow" }, source: { resourceid: taskId }, target: { resourceid: endId }, incoming: [{ resourceid: taskId }], outgoing: [{ resourceid: endId }], properties: { name: "Rejected", conditioninfo: "rejected" }, dockers: [{ x: 340, y: 135 }, { x: 440, y: 135 }] },
+      { id: endId, resourceid: endId, stencil: { id: "EndNoneEvent" }, incoming: [{ resourceid: approvedFlowId }, { resourceid: rejectedFlowId }], outgoing: [], properties: { name: "End" }, bounds: { upperLeft: { x: 440, y: 100 }, lowerRight: { x: 470, y: 130 } } },
+    ],
+  };
+}
+
+function approvalFormDef(id, title, actionLabel) {
+  return {
+    id,
+    title,
+    ver: "1.0.0",
+    type: "form",
+    children: [
+      { type: "container", id: `${id}_main`, name: "Main", children: [
+        { type: "heading", label: "Text", id: `${id}_title`, name: title, attrs: { headc: { title: { value: title } }, heads: { ty: [null, "h3-bold"], color: "#111827" } } },
+        { type: "dynamic-field", id: `${id}_field_title`, name: "Title", attrs: { data: { field: "Title" } } },
+        { type: "button", id: `${id}_action`, name: actionLabel, attrs: { action: { type: "form-action", label: actionLabel } } },
+      ] },
+    ],
+  };
 }
 
 function listInfo({ listId, title, type, ext2 = "" }) {
@@ -675,7 +795,7 @@ function listInfo({ listId, title, type, ext2 = "" }) {
     Ext3: "",
     Type: type,
     Flags: 1,
-    LayoutView: "",
+    LayoutView: type === 1 ? null : "",
     Perms: [],
     AdvancePerms: [],
     IndexCode: "flowcraft",
@@ -742,7 +862,7 @@ function stringId(id) {
 }
 
 function numberId(id) {
-  return Number(String(id));
+  return String(id);
 }
 
 function normKey(value) {

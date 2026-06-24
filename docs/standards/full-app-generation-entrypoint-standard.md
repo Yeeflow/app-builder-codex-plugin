@@ -53,6 +53,17 @@ The materializer is not a signing, install/import, upgrade, seed-data, Version M
 
 The materializer must also be honest about implementation coverage. For nontrivial App Plans that declare data lists, approval forms, reports, custom forms, dashboards, and navigation groups, the standalone materializer must emit a minimal generated-final resource graph rather than a placeholder package. The output must include the planned `Childs[]`, `Forms[]`, `FormNewReports[]`, dashboard `Pages[]`, custom list layouts, and grouped `ListSet.LayoutView` navigation needed for generated-final resource-completeness validation. It must keep `signingEligible: false` until generated-final preflight passes.
 
+Minimal resource-graph output must be internally valid before it is handed to signing readiness. The materializer must preserve API-issued IDs as strings and must not pass them through JavaScript `Number`, because 16+ digit Yeeflow IDs lose precision and can collapse into duplicate resource IDs. Its ID provenance manifest must use actual decoded JSON paths, not logical helper aliases.
+
+For supported generated-final output, the materializer must also emit:
+
+- runtime-shaped navigation group metadata with API-issued group IDs, `AppID`, `ListSetID`, icons, and supported child targets;
+- data-list default views with `Ext1.Url = default`, visible `layout[]` columns, `query[]` fields, and required system query fields;
+- approval `DefResource` as `base64("::brotli::" + Brotli(JSON))` with page registrations, request/task form metadata, workflow graph nodes, task URL, actions, variables, and approved/rejected paths;
+- dashboard resources with export-style wrapper keys, `Ext2.src`, `LayoutInResources[0].ID/RefId = LayoutID`, canonical Dashboard Page Layouts v1.1 Content padding, Summary `exts`, `ReportIds`, and `save_var` runtime model metadata.
+
+Form report resources belong in `FormNewReports[]`. Runtime navigation must not emit unsupported Type `106` children; report navigation entries must resolve through a supported dashboard, approval form, or data-list target while the report resource remains present in `FormNewReports[]`.
+
 If a future App Plan declares resource categories that the standalone materializer still cannot generate, it must fail closed with `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED`. It must not emit a placeholder `.yapk`, must not return `status: pass`, and must not set `signingEligible: true` for a package that has not materialized the App Plan resource graph and passed generated-final hard gates.
 
 When used, the `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` finding must be actionable. It must include:
