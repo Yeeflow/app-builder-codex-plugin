@@ -1,0 +1,2859 @@
+{
+  "schemaVersion": "1.0",
+  "templateId": "collection_control_grid_table",
+  "displayName": "Collection control grid-table full template",
+  "source": {
+    "packageFile": "Projects Center_1-v1.7.yapk",
+    "packageSha256": "5b4c6167ee4549d7dcedf3605bd02f59672cacea3545ed911ff1d0e9fb882ba8",
+    "sourceDashboardPage": "Collection_control_grid_table",
+    "sourceRootContainer": "grid_table_col_wrapper",
+    "extractedAt": "2026-06-24T09:53:16.437Z",
+    "decodeMethod": "collection-control-generation-standard tolerant Brotli decoder",
+    "packageResourceDecodeAttempts": [
+      {
+        "method": "base64",
+        "success": true,
+        "bytes": 56412
+      },
+      {
+        "method": "strict-brotli",
+        "success": false,
+        "errorClass": "Z_BUF_ERROR"
+      },
+      {
+        "method": "tolerant-brotli",
+        "success": true,
+        "decodedTextBytes": 604366
+      }
+    ],
+    "boundary": "Dashboard page shell is excluded; this artifact starts at grid_table_col_wrapper and includes every descendant plus page-level dependencies needed by the template.",
+    "templateArtifactNormalizations": [
+      "Filled missing plain-string attrs.heads.color on two exported Text controls so the reference artifact can be linted as a complete generator source-of-truth; no YAPK source package was modified."
+    ]
+  },
+  "usageContract": {
+    "materializationRule": "Clone grid_table_col_wrapper and every descendant as the source of truth. Do not hand-build a visually similar grid-table Collection.",
+    "hostRule": "Place the cloned wrapper only inside an approved Dashboard Page Layouts v1.1 section_content_area or equivalent allowed content slot.",
+    "immutableByDefault": true,
+    "editableRegions": [
+      {
+        "identity": "grid_table_col_title_wrapper",
+        "allowedChanges": [
+          "Update grid_table_col_title text to the business/data-source title. Preserve exported style, layout, typography, and wrapper settings."
+        ]
+      },
+      {
+        "identity": "op_normal",
+        "allowedChanges": [
+          "May add/delete controls. Prefer preserving Search filter and Add item button. Search filter placeholder and Add item text may be business-mapped."
+        ]
+      },
+      {
+        "identity": "grid_table_col_header",
+        "allowedChanges": [
+          "May change displayed header labels and column count/widths according to business fields, but header grid and item grid column count, widths, and other column properties must remain identical."
+        ]
+      },
+      {
+        "identity": "grid_col_item",
+        "allowedChanges": [
+          "May change item-cell content according to business fields. User fields use dynamic-user, Image fields use dynamic-image, File/Attachment fields use dynamic-file, all other business fields use dynamic-field."
+        ]
+      },
+      {
+        "identity": "grid_table_col_item_operations",
+        "allowedChanges": [
+          "Optional for Data list / Document library operations. May add operation buttons under grid_table_col_item_op_menu. Omit the whole operation region for display-only/non-editable sources."
+        ]
+      }
+    ],
+    "lockedRegions": [
+      "grid_table_col_wrapper itself and every descendant outside the editable regions must strictly preserve the exported control settings.",
+      "grid_table_col_item_op_menu Drop bar shell must keep its exported structure when item operations are present.",
+      "Collection root actions and operation-button action references must remain coherent; edit/delete buttons require matching Collection actions.",
+      "Delete item flows require the page-level confirmation temp variable and conditional delete flow from the template when delete is offered."
+    ],
+    "displayOnlyMode": {
+      "appliesWhen": "Dashboard region only displays Form report/Data report rows or a read-only Data list/Document library projection.",
+      "requiredOmissions": [
+        "grid_table_col_caption when no toolbar/title/action area is needed",
+        "grid_table_col_item_operations",
+        "grid_table_col_item_op_menu and descendants"
+      ],
+      "forbidden": [
+        "edit/delete Collection actions",
+        "operation buttons without actions"
+      ]
+    },
+    "sourceResourceTypeRules": {
+      "dataListOrDocumentLibrary": "May include add/edit/delete operations when business requirements need them and Collection actions are present.",
+      "formReportOrDataReport": "View-only. Do not include grid_table_col_item_operations or editable/delete operation controls."
+    },
+    "headerItemParity": "grid_table_col_header and grid_col_item must always keep the same column count, column widths, and column property signature after business mapping.",
+    "dynamicControlMapping": [
+      {
+        "fieldType": "User",
+        "requiredControlType": "dynamic-user"
+      },
+      {
+        "fieldType": "Image",
+        "requiredControlType": "dynamic-image"
+      },
+      {
+        "fieldType": "File or Attachment",
+        "requiredControlType": "dynamic-file"
+      },
+      {
+        "fieldType": "Other scalar/business field",
+        "requiredControlType": "dynamic-field"
+      }
+    ]
+  },
+  "pageLevelDependencies": {
+    "filterVars": [
+      {
+        "id": "filter_keywords",
+        "idx": "443fe066-4234-4d00-8805-2b7febb4125c"
+      }
+    ],
+    "tempVars": [
+      {
+        "idx": "9a5fc05b-9430-4107-9403-2eb273a1fe9d",
+        "id": "var_isDeleteConfirmed"
+      }
+    ],
+    "filter": [
+      {
+        "id": "filter_keywords",
+        "idx": "443fe066-4234-4d00-8805-2b7febb4125c"
+      }
+    ],
+    "actions": [],
+    "formAction": {
+      "onLoad": "b86f79f0-55ce-4cd5-80cd-853de950db42"
+    },
+    "exts": []
+  },
+  "templateResource": {
+    "rootContainer": {
+      "id": "ffec8e6e-b94c-4edc-a366-ed9d2f3e213a",
+      "type": "container",
+      "label": "Container",
+      "attrs": {
+        "style": {
+          "direction": [
+            null,
+            "column"
+          ],
+          "align_items": [
+            null,
+            "flex-start"
+          ],
+          "gap": [
+            null,
+            "--sp--s0"
+          ]
+        }
+      },
+      "children": [
+        {
+          "id": "64881fd0-3434-4771-aa4c-ee929ec35559",
+          "type": "container",
+          "label": "Container",
+          "attrs": {
+            "style": {
+              "direction": [
+                null,
+                "row",
+                "column",
+                "column"
+              ],
+              "align_items": [
+                null,
+                "center",
+                "flex-start"
+              ],
+              "justify_content": [
+                null,
+                "space-between"
+              ],
+              "gap": [
+                null,
+                "--sp--s200",
+                "--sp--s150",
+                "--sp--s100"
+              ]
+            }
+          },
+          "children": [
+            {
+              "id": "9d3a0ed3-49bd-4b2a-8d67-81987c317536",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "widthtype": [
+                    null,
+                    "2"
+                  ],
+                  "direction": [
+                    null,
+                    "column"
+                  ],
+                  "gap": [
+                    null,
+                    "--sp--s0"
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "id": "35d28419-d4e0-4e31-ac1f-e850253b4bdb",
+                  "type": "heading",
+                  "label": "Text",
+                  "attrs": {
+                    "headc": {
+                      "title": {
+                        "value": "Collection title here",
+                        "variable": null
+                      }
+                    },
+                    "heads": {
+                      "ty": [
+                        null,
+                        "h5-medium"
+                      ],
+                      "color": "#141b2d"
+                    },
+                    "common": {
+                      "positioning": {
+                        "widthtype": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [],
+                  "nv_label": "grid_table_col_title"
+                }
+              ],
+              "nv_label": "grid_table_col_title_wrapper"
+            },
+            {
+              "id": "c69c165a-d237-46d2-ab01-7d4853600bdf",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "widthtype": [
+                    null,
+                    "2",
+                    "1"
+                  ],
+                  "gap": [
+                    null,
+                    10
+                  ],
+                  "direction": [
+                    null,
+                    "row"
+                  ],
+                  "align_items": [
+                    null,
+                    "center"
+                  ],
+                  "justify_content": [
+                    null,
+                    "flex-end",
+                    "space-between"
+                  ]
+                },
+                "control_display": []
+              },
+              "children": [
+                {
+                  "id": "c2ef6673-8a43-42f3-ba4d-1231510f4673",
+                  "type": "container",
+                  "label": "Container",
+                  "attrs": {
+                    "style": {
+                      "widthtype": [
+                        null,
+                        "2",
+                        "1"
+                      ],
+                      "gap": [
+                        null,
+                        10
+                      ],
+                      "direction": [
+                        null,
+                        "row"
+                      ],
+                      "align_items": [
+                        null,
+                        "center"
+                      ],
+                      "justify_content": [
+                        null,
+                        "flex-end"
+                      ]
+                    },
+                    "control_display": [
+                      {
+                        "id": "9ee51405-ee4f-41c1-ac1a-b4e9d0a7d67a",
+                        "controlId": "b71b3ee5-4003-4c44-8c0d-231787f08617",
+                        "formulas": [
+                          {
+                            "exprType": "variable",
+                            "valueType": "string",
+                            "id": "__temp_var_SelectedItemsAmount",
+                            "type": "expr",
+                            "name": "var_SelectedItemsAmount"
+                          },
+                          {
+                            "type": "op",
+                            "op": ">"
+                          },
+                          {
+                            "type": "num",
+                            "value": "0"
+                          }
+                        ],
+                        "actions": {
+                          "id": "2057f1d1-a864-45d2-8d8f-0d7b5ff1a12d",
+                          "type": 1,
+                          "attrs": {
+                            "style_regulation_action": "style_regulation_action_hidden",
+                            "style_regulation_action_color": null,
+                            "action_style": null,
+                            "icon_type": null
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "id": "86d70e1d-cfe5-434f-9868-4324cb0ea65d",
+                      "type": "search-filter",
+                      "label": "Search items",
+                      "attrs": {
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "3",
+                              "1"
+                            ],
+                            "width": [
+                              null,
+                              200
+                            ]
+                          }
+                        },
+                        "placeholder": "Search items",
+                        "edit": {
+                          "pcolor": "var(--c--neutral-dark-hover)",
+                          "normal": {
+                            "border": {
+                              "radius": [
+                                null,
+                                {
+                                  "top": "--sp--s100",
+                                  "right": "--sp--s100",
+                                  "bottom": "--sp--s100",
+                                  "left": "--sp--s100"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "binding": "__filter_filter_keywords",
+                      "displayLabel": [
+                        null,
+                        false
+                      ]
+                    },
+                    {
+                      "id": "0ac8441f-3ab9-46a0-9e74-c437fed46c54",
+                      "type": "action_button",
+                      "attrs": {
+                        "button-style": "2",
+                        "label": {
+                          "variable": null
+                        },
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "container": {
+                            "size": [
+                              null,
+                              "grow",
+                              "none"
+                            ]
+                          }
+                        },
+                        "control_action": "77a4ae40-f393-408a-9273-0e47fbc83b10",
+                        "icon-type": "3",
+                        "icon": "fa-regular fa-plus",
+                        "action-type": "5",
+                        "data": {
+                          "list": {
+                            "AppID": 41,
+                            "ListSetID": "2058726109535285249",
+                            "ListID": "2058726119586017281"
+                          }
+                        },
+                        "button": {
+                          "normal": {
+                            "border": {
+                              "radius": [
+                                null,
+                                {
+                                  "top": "--sp--s100",
+                                  "right": "--sp--s100",
+                                  "bottom": "--sp--s100",
+                                  "left": "--sp--s100"
+                                }
+                              ],
+                              "type": "99"
+                            }
+                          }
+                        }
+                      },
+                      "label": "Add Task",
+                      "nv_label": "Add new item"
+                    }
+                  ],
+                  "nv_label": "op_normal"
+                }
+              ],
+              "nv_label": "grid_table_col_operations"
+            }
+          ],
+          "nv_label": "grid_table_col_caption"
+        },
+        {
+          "id": "aa9a8bb4-32d3-46b7-bedc-05ccde7ec28c",
+          "type": "container",
+          "label": "Container",
+          "displayLabel": true,
+          "attrs": {
+            "style": {
+              "gap": [
+                null,
+                0
+              ]
+            },
+            "control_display": [
+              {
+                "id": "420ce768-1ea3-4137-b56a-42f1c9e1e980",
+                "controlId": "56fc7318-2e63-4cd8-adec-13e560d4db41",
+                "formulas": [
+                  {
+                    "exprType": "variable",
+                    "valueType": "string",
+                    "id": "__temp_var_task-view",
+                    "type": "expr",
+                    "name": "var_task-view"
+                  },
+                  {
+                    "type": "op",
+                    "op": "=="
+                  },
+                  {
+                    "type": "str",
+                    "value": ""
+                  },
+                  {
+                    "type": "op",
+                    "op": "or"
+                  },
+                  {
+                    "exprType": "variable",
+                    "valueType": "string",
+                    "id": "__temp_var_task-view",
+                    "type": "expr",
+                    "name": "var_task-view"
+                  },
+                  {
+                    "type": "op",
+                    "op": "=="
+                  },
+                  {
+                    "type": "str",
+                    "value": "list"
+                  }
+                ],
+                "actions": {
+                  "id": "1eaa2e5e-96b4-40eb-8bb5-b9e228926122",
+                  "type": 1,
+                  "attrs": {
+                    "style_regulation_action": "style_regulation_action_show",
+                    "style_regulation_action_color": null,
+                    "action_style": null
+                  }
+                }
+              }
+            ]
+          },
+          "children": [
+            {
+              "id": "b828b8fe-358e-4987-a00b-f9c87f55ba85",
+              "type": "flex_grid",
+              "label": "Grid",
+              "displayLabel": [
+                null,
+                false
+              ],
+              "attrs": {
+                "ver": 1,
+                "canFold": true,
+                "columns": {
+                  "1": {
+                    "list": [
+                      {
+                        "value": 2,
+                        "unit": "fr"
+                      },
+                      {
+                        "value": 1,
+                        "unit": "fr"
+                      },
+                      {
+                        "value": 1,
+                        "unit": "fr"
+                      },
+                      {
+                        "value": 1,
+                        "unit": "fr"
+                      },
+                      {
+                        "value": 1,
+                        "unit": "fr"
+                      },
+                      {
+                        "value": 1,
+                        "unit": "fr"
+                      }
+                    ],
+                    "last": {
+                      "value": 1,
+                      "unit": "fr"
+                    }
+                  }
+                },
+                "rows": {
+                  "1": {
+                    "list": [
+                      {
+                        "unit": "auto"
+                      }
+                    ],
+                    "last": {
+                      "unit": "auto"
+                    }
+                  }
+                },
+                "cgap": {
+                  "1": 10
+                },
+                "cgapU": {
+                  "1": "px"
+                },
+                "rgap": [
+                  null,
+                  0
+                ],
+                "rgapU": [
+                  null,
+                  "px"
+                ],
+                "content": {
+                  "border": {
+                    "type": "1",
+                    "width": [
+                      null,
+                      {
+                        "top": null,
+                        "right": null,
+                        "bottom": 1,
+                        "left": null
+                      }
+                    ],
+                    "color": "#f2f2f2"
+                  },
+                  "pd": [
+                    null,
+                    {
+                      "top": 10,
+                      "right": 10,
+                      "bottom": 10,
+                      "left": 10
+                    }
+                  ],
+                  "align-i": [
+                    null,
+                    "2"
+                  ]
+                },
+                "common": {
+                  "hide": [
+                    null,
+                    null,
+                    null,
+                    true
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "id": "d6212a7b-7da4-43bf-93f6-fbca31794f80",
+                  "type": "container",
+                  "label": "Container",
+                  "displayLabel": true,
+                  "attrs": {
+                    "style": {
+                      "align_items": [
+                        null,
+                        "flex-start"
+                      ],
+                      "justify_content": [
+                        null,
+                        "center"
+                      ],
+                      "gap": [
+                        null,
+                        "--sp--s075"
+                      ]
+                    },
+                    "common": {
+                      "grid": {
+                        "align": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "8c722e7b-9e8c-4996-acdd-7c6482206840",
+                      "type": "heading",
+                      "label": "Text",
+                      "displayLabel": true,
+                      "attrs": {
+                        "heads": {
+                          "ty": {
+                            "size": [
+                              null,
+                              11
+                            ],
+                            "wei": "500"
+                          },
+                          "color": "#9b9b9b"
+                        },
+                        "headc": {
+                          "title": {
+                            "value": "Title",
+                            "variable": null
+                          },
+                          "align": [
+                            null,
+                            "left"
+                          ]
+                        },
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        }
+                      },
+                      "parentCol": 1
+                    }
+                  ],
+                  "nv_label": "grid_table_col_header_title_column"
+                },
+                {
+                  "id": "13a21f7d-87ab-4c13-9d97-5597b0b83156",
+                  "type": "container",
+                  "label": "Container",
+                  "displayLabel": true,
+                  "attrs": {
+                    "style": {
+                      "align_items": [
+                        null,
+                        "flex-start"
+                      ],
+                      "justify_content": [
+                        null,
+                        "center"
+                      ],
+                      "gap": [
+                        null,
+                        "--sp--s075"
+                      ]
+                    },
+                    "common": {
+                      "grid": {
+                        "align": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "9fa0e158-fef6-4e40-9af7-69da99eb22fc",
+                      "type": "heading",
+                      "label": "Text",
+                      "displayLabel": true,
+                      "attrs": {
+                        "heads": {
+                          "ty": {
+                            "size": [
+                              null,
+                              11
+                            ],
+                            "wei": "500"
+                          },
+                          "color": "#9b9b9b"
+                        },
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        },
+                        "headc": {
+                          "title": {
+                            "value": "Assignee",
+                            "variable": null
+                          },
+                          "align": [
+                            null,
+                            "center"
+                          ]
+                        }
+                      },
+                      "parentCol": 1
+                    }
+                  ],
+                  "parentCol": 1,
+                  "nv_label": "grid_table_col_header_column"
+                },
+                {
+                  "id": "e6ebe21a-8dbd-474c-8cbc-f529de499e13",
+                  "type": "container",
+                  "label": "Container",
+                  "displayLabel": true,
+                  "attrs": {
+                    "style": {
+                      "align_items": [
+                        null,
+                        "flex-start"
+                      ],
+                      "justify_content": [
+                        null,
+                        "center"
+                      ],
+                      "gap": [
+                        null,
+                        "--sp--s075"
+                      ]
+                    },
+                    "common": {
+                      "grid": {
+                        "align": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "ff5bb1ee-109a-4000-9184-fd4dcdddbae8",
+                      "type": "heading",
+                      "label": "Text",
+                      "displayLabel": true,
+                      "attrs": {
+                        "heads": {
+                          "ty": {
+                            "size": [
+                              null,
+                              11
+                            ],
+                            "wei": "500"
+                          },
+                          "color": "#9b9b9b"
+                        },
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        },
+                        "headc": {
+                          "title": {
+                            "value": "Start date",
+                            "variable": null
+                          },
+                          "align": [
+                            null,
+                            "center"
+                          ]
+                        }
+                      },
+                      "parentCol": 1
+                    }
+                  ],
+                  "parentCol": 1,
+                  "nv_label": "grid_table_col_header_column"
+                },
+                {
+                  "id": "7ab82b44-dc85-4d9e-a75e-d8d343ccefb6",
+                  "type": "container",
+                  "label": "Container",
+                  "displayLabel": true,
+                  "attrs": {
+                    "style": {
+                      "align_items": [
+                        null,
+                        "flex-start"
+                      ],
+                      "justify_content": [
+                        null,
+                        "center"
+                      ],
+                      "gap": [
+                        null,
+                        "--sp--s075"
+                      ]
+                    },
+                    "common": {
+                      "grid": {
+                        "align": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "9940a9fa-973f-4340-b859-8fb60663b763",
+                      "type": "heading",
+                      "label": "Text",
+                      "displayLabel": true,
+                      "attrs": {
+                        "heads": {
+                          "ty": {
+                            "size": [
+                              null,
+                              11
+                            ],
+                            "wei": "500"
+                          },
+                          "color": "#9b9b9b"
+                        },
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        },
+                        "control_display": [
+                          {
+                            "id": "d6aa5b21-5a59-4fea-9729-a090542a2770",
+                            "controlId": "acb1062d-6b81-4c12-add1-629a8617423b",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text3",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Severity"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "Critical"
+                              }
+                            ],
+                            "actions": {
+                              "id": "f9cbf94e-9b5b-4026-93d6-4e9a7ce2d3ef",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"bgcolor\":\"#e50a6d\",\"color\":\"#ffffff\"}}"
+                              }
+                            }
+                          },
+                          {
+                            "id": "45efa4fc-ea25-4020-b92d-dfaa1858b3db",
+                            "controlId": "acb1062d-6b81-4c12-add1-629a8617423b",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text3",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Severity"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "Major"
+                              }
+                            ],
+                            "actions": {
+                              "id": "93f5f9e8-110e-498e-b382-23a6c8b46a4f",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"bgcolor\":\"#0b89e3\",\"color\":\"#ffffff\"}}"
+                              }
+                            }
+                          },
+                          {
+                            "id": "b8a576ed-358f-470c-8a26-12b011c7a646",
+                            "controlId": "acb1062d-6b81-4c12-add1-629a8617423b",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text3",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Severity"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "Minor"
+                              }
+                            ],
+                            "actions": {
+                              "id": "8f513936-232e-4d1b-84ae-5f49319b9110",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"bgcolor\":\"#f2f2f2\",\"color\":\"#4a4a4a\"}}"
+                              }
+                            }
+                          }
+                        ],
+                        "headc": {
+                          "title": {
+                            "value": "End date",
+                            "variable": null
+                          },
+                          "align": [
+                            null,
+                            "center"
+                          ]
+                        }
+                      },
+                      "parentCol": 1
+                    }
+                  ],
+                  "parentCol": 1,
+                  "nv_label": "grid_table_col_header_column"
+                },
+                {
+                  "id": "81a45ce0-d8a6-4850-b9a5-db9abb4fbb40",
+                  "type": "container",
+                  "label": "Container",
+                  "displayLabel": true,
+                  "attrs": {
+                    "style": {
+                      "align_items": [
+                        null,
+                        "flex-start"
+                      ],
+                      "justify_content": [
+                        null,
+                        "center"
+                      ],
+                      "gap": [
+                        null,
+                        "--sp--s075"
+                      ]
+                    },
+                    "common": {
+                      "grid": {
+                        "align": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "4c27a0b2-1d01-4258-8d4d-b951f70f4a09",
+                      "type": "heading",
+                      "label": "Text",
+                      "displayLabel": true,
+                      "attrs": {
+                        "heads": {
+                          "ty": {
+                            "size": [
+                              null,
+                              11
+                            ],
+                            "wei": "500"
+                          },
+                          "color": "#9b9b9b"
+                        },
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        },
+                        "control_display": [
+                          {
+                            "id": "793dfa0c-ee85-40c6-9df7-e0faa55ee5d5",
+                            "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text1",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Status"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "Open"
+                              }
+                            ],
+                            "actions": {
+                              "id": "67ba477c-183c-4ba3-8ef5-17caa2240c1b",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"color\":\"#08b1de\"}}"
+                              }
+                            }
+                          },
+                          {
+                            "id": "d4fd953b-dfe9-4210-8b92-979e0f39318f",
+                            "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text1",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Status"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "Closed"
+                              }
+                            ],
+                            "actions": {
+                              "id": "7b4c344c-cced-40f6-b929-4679c2a25014",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"color\":\"#979797\"}}"
+                              }
+                            }
+                          },
+                          {
+                            "id": "42e44a0b-24b1-41de-9496-d9637799d5fc",
+                            "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text1",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Status"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "In progress"
+                              }
+                            ],
+                            "actions": {
+                              "id": "5de63ceb-57ab-4f3a-b299-fc7cff0529e0",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"color\":\"#e8af13\"}}"
+                              }
+                            }
+                          }
+                        ],
+                        "headc": {
+                          "title": {
+                            "value": "Completion (%)",
+                            "variable": null
+                          },
+                          "align": [
+                            null,
+                            "center"
+                          ]
+                        }
+                      },
+                      "parentCol": 1
+                    }
+                  ],
+                  "parentCol": 1,
+                  "nv_label": "grid_table_col_header_column"
+                },
+                {
+                  "id": "404ddf76-9633-4b75-91aa-2d3905c4f611",
+                  "type": "container",
+                  "label": "Container",
+                  "displayLabel": true,
+                  "attrs": {
+                    "style": {
+                      "align_items": [
+                        null,
+                        "flex-start"
+                      ],
+                      "justify_content": [
+                        null,
+                        "center"
+                      ],
+                      "gap": [
+                        null,
+                        "--sp--s075"
+                      ]
+                    },
+                    "common": {
+                      "grid": {
+                        "align": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "dc5c1be1-a671-4bbc-8b4a-053e37386917",
+                      "type": "heading",
+                      "label": "Text",
+                      "displayLabel": true,
+                      "attrs": {
+                        "heads": {
+                          "ty": {
+                            "size": [
+                              null,
+                              11
+                            ],
+                            "wei": "500"
+                          },
+                          "color": "#9b9b9b"
+                        },
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        },
+                        "control_display": [
+                          {
+                            "id": "793dfa0c-ee85-40c6-9df7-e0faa55ee5d5",
+                            "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text1",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Status"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "Open"
+                              }
+                            ],
+                            "actions": {
+                              "id": "67ba477c-183c-4ba3-8ef5-17caa2240c1b",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"color\":\"#08b1de\"}}"
+                              }
+                            }
+                          },
+                          {
+                            "id": "d4fd953b-dfe9-4210-8b92-979e0f39318f",
+                            "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text1",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Status"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "Closed"
+                              }
+                            ],
+                            "actions": {
+                              "id": "7b4c344c-cced-40f6-b929-4679c2a25014",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"color\":\"#979797\"}}"
+                              }
+                            }
+                          },
+                          {
+                            "id": "42e44a0b-24b1-41de-9496-d9637799d5fc",
+                            "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                            "formulas": [
+                              {
+                                "exprType": "variable_ctx",
+                                "valueType": "radio",
+                                "id": "Text1",
+                                "ctx": "__ctx_coll",
+                                "type": "expr",
+                                "name": "Collection item:Status"
+                              },
+                              {
+                                "type": "op",
+                                "op": "=="
+                              },
+                              {
+                                "type": "str",
+                                "value": "In progress"
+                              }
+                            ],
+                            "actions": {
+                              "id": "5de63ceb-57ab-4f3a-b299-fc7cff0529e0",
+                              "type": 1,
+                              "attrs": {
+                                "style_regulation_action": "style_class",
+                                "style_regulation_action_color": null,
+                                "action_style": "{\"normal\":{\"color\":\"#e8af13\"}}"
+                              }
+                            }
+                          }
+                        ],
+                        "headc": {
+                          "title": {
+                            "value": "Status",
+                            "variable": null
+                          },
+                          "align": [
+                            null,
+                            "center"
+                          ]
+                        }
+                      },
+                      "parentCol": 1
+                    }
+                  ],
+                  "parentCol": 1,
+                  "nv_label": "grid_table_col_header_column"
+                }
+              ],
+              "nv_label": "grid_table_col_header"
+            },
+            {
+              "id": "8736e286-5c4c-4353-bea0-e3f816f8f79b",
+              "type": "collection",
+              "label": "Collection",
+              "displayLabel": true,
+              "attrs": {
+                "data": {
+                  "list": {
+                    "AppID": 41,
+                    "ListID": "2058726119586017281",
+                    "Type": 1,
+                    "Title": "Tasks",
+                    "ListSetID": "2058726109535285249"
+                  },
+                  "filter": [],
+                  "link": "default",
+                  "modalsize": 2,
+                  "sort": [
+                    {
+                      "SortName": "Datetime1",
+                      "SortByDesc": true
+                    }
+                  ],
+                  "fulltext": [
+                    {
+                      "fields": [
+                        "Title",
+                        "Text2",
+                        "Text6"
+                      ],
+                      "value": [
+                        {
+                          "exprType": "variable",
+                          "valueType": "string",
+                          "id": "__filter_filter_keywords",
+                          "type": "expr",
+                          "name": "filter_keywords"
+                        }
+                      ]
+                    }
+                  ],
+                  "ps": 16
+                },
+                "layout": {
+                  "col": [
+                    null,
+                    1
+                  ],
+                  "rg": [
+                    null,
+                    0,
+                    null,
+                    10
+                  ],
+                  "cg": [
+                    null,
+                    10
+                  ],
+                  "hover": {
+                    "bgColor": "#f2f2f2"
+                  },
+                  "normal": {
+                    "border": {
+                      "type": "1",
+                      "width": [
+                        null,
+                        {
+                          "top": "--sp--s0",
+                          "right": "--sp--s0",
+                          "bottom": "--sp--s0",
+                          "left": "--sp--s0"
+                        },
+                        null,
+                        {
+                          "top": "--sp--s012",
+                          "right": "--sp--s012",
+                          "bottom": "--sp--s012",
+                          "left": "--sp--s012"
+                        }
+                      ],
+                      "radius": [
+                        null,
+                        null,
+                        null,
+                        {
+                          "top": "--sp--s150",
+                          "right": "--sp--s150",
+                          "bottom": "--sp--s150",
+                          "left": "--sp--s150"
+                        }
+                      ],
+                      "color": "var(--c--neutral-light-active)"
+                    }
+                  },
+                  "cp": [
+                    null,
+                    null,
+                    null,
+                    {
+                      "top": "--sp--s150",
+                      "right": "--sp--s100",
+                      "bottom": "--sp--s150",
+                      "left": "--sp--s100"
+                    }
+                  ]
+                },
+                "actions": [
+                  {
+                    "id": "7ee384ef-30c7-4ec7-a5aa-0ee9932f2aff",
+                    "name": "Edit item",
+                    "steps": [
+                      {
+                        "type": "listitem",
+                        "attrs": {
+                          "data": {
+                            "list": {
+                              "AppID": 41,
+                              "ListSetID": "2058571956842409984",
+                              "ListID": "2058571966637289476"
+                            }
+                          },
+                          "op_type": "edit",
+                          "listdataid": [
+                            {
+                              "exprType": "variable_ctx",
+                              "valueType": "input",
+                              "id": "ListDataID",
+                              "ctx": "__ctx_coll",
+                              "type": "expr",
+                              "name": "Collection item:Id"
+                            }
+                          ],
+                          "layout": "2058571966637289475",
+                          "op": "modal",
+                          "modalsize": 0
+                        }
+                      }
+                    ],
+                    "type": "coll"
+                  },
+                  {
+                    "id": "d5ad7b6b-72af-4ddc-8338-4f799960e1e9",
+                    "name": "Delete item",
+                    "steps": [
+                      {
+                        "type": "confirm",
+                        "attrs": {
+                          "confirm_qs": [
+                            {
+                              "type": "str",
+                              "value": "Are you sure that you want to delete this item?"
+                            }
+                          ],
+                          "confirm_rs": {
+                            "exprType": "variable",
+                            "valueType": "string",
+                            "id": "__temp_var_isDeleteConfirmed",
+                            "type": "expr",
+                            "name": "var_isDeleteConfirmed"
+                          }
+                        }
+                      },
+                      {
+                        "type": "setdatalist",
+                        "attrs": {
+                          "list": {
+                            "AppID": 41,
+                            "ListSetID": "2058571956842409984",
+                            "ListID": "2058571966637289476"
+                          },
+                          "listtype": "select",
+                          "type": "remove",
+                          "wheres": [
+                            {
+                              "key": "01d4cc4f-c015-4eec-b56e-85465180d18c",
+                              "pre": "and",
+                              "left": "ListDataID",
+                              "op": "0",
+                              "right": [
+                                {
+                                  "exprType": "variable_ctx",
+                                  "valueType": "input",
+                                  "id": "ListDataID",
+                                  "ctx": "__ctx_coll",
+                                  "type": "expr",
+                                  "name": "Collection item:Id"
+                                }
+                              ],
+                              "showCus": false
+                            }
+                          ]
+                        },
+                        "condition": [
+                          {
+                            "exprType": "variable",
+                            "valueType": "string",
+                            "id": "__temp_var_isDeleteConfirmed",
+                            "type": "expr",
+                            "name": "var_isDeleteConfirmed"
+                          },
+                          {
+                            "type": "op",
+                            "op": "=="
+                          },
+                          {
+                            "type": "bool",
+                            "value": true
+                          }
+                        ]
+                      },
+                      {
+                        "type": "otheraction",
+                        "attrs": {
+                          "control_action": "cdf1ac08-104c-4968-9f73-101d4fe803fb"
+                        },
+                        "name": "Reset the selected items"
+                      }
+                    ],
+                    "type": "coll"
+                  }
+                ],
+                "pagination": {
+                  "p": {
+                    "sp": [
+                      null,
+                      "--sp--s150"
+                    ],
+                    "ty": {
+                      "size": [
+                        null,
+                        "--sp--s200"
+                      ]
+                    }
+                  }
+                }
+              },
+              "children": [
+                {
+                  "id": "27063e6d-ff19-45b8-bf6e-58ff577efe6f",
+                  "type": "flex_grid",
+                  "label": "Grid",
+                  "displayLabel": [
+                    null,
+                    false
+                  ],
+                  "attrs": {
+                    "ver": 1,
+                    "canFold": true,
+                    "columns": {
+                      "1": {
+                        "list": [
+                          {
+                            "value": 2,
+                            "unit": "fr"
+                          },
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          },
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          },
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          },
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          },
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          }
+                        ],
+                        "last": {
+                          "value": 1,
+                          "unit": "fr"
+                        }
+                      },
+                      "3": {
+                        "list": [
+                          {
+                            "value": 1,
+                            "unit": "fr"
+                          }
+                        ],
+                        "last": {
+                          "value": 1,
+                          "unit": "fr"
+                        }
+                      }
+                    },
+                    "rows": {
+                      "1": {
+                        "list": [
+                          {
+                            "unit": "auto"
+                          }
+                        ],
+                        "last": {
+                          "unit": "auto"
+                        }
+                      }
+                    },
+                    "cgap": {
+                      "1": 10
+                    },
+                    "cgapU": {
+                      "1": "px"
+                    },
+                    "rgap": [
+                      null,
+                      0,
+                      null,
+                      10
+                    ],
+                    "rgapU": [
+                      null,
+                      "px",
+                      null,
+                      "px"
+                    ],
+                    "content": {
+                      "border": {
+                        "type": "1",
+                        "width": [
+                          null,
+                          {
+                            "top": null,
+                            "right": null,
+                            "bottom": 1,
+                            "left": null
+                          },
+                          null,
+                          {
+                            "top": "--sp--s0",
+                            "right": "--sp--s0",
+                            "bottom": "--sp--s0",
+                            "left": "--sp--s0"
+                          }
+                        ],
+                        "color": "#f2f2f2",
+                        "radius": [
+                          null,
+                          null,
+                          null,
+                          {
+                            "top": "",
+                            "right": "",
+                            "bottom": "",
+                            "left": ""
+                          }
+                        ]
+                      },
+                      "pd": [
+                        null,
+                        {
+                          "top": 5,
+                          "right": 10,
+                          "bottom": 5,
+                          "left": 10
+                        }
+                      ],
+                      "justify-i": [
+                        null,
+                        "7"
+                      ],
+                      "align-i": [
+                        null,
+                        "2"
+                      ]
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "a09568d2-1870-4d65-9cd0-62769e1aa0f5",
+                      "type": "container",
+                      "label": "Container",
+                      "displayLabel": true,
+                      "attrs": {
+                        "style": {
+                          "gap": [
+                            null,
+                            "--sp--s075"
+                          ],
+                          "align_items": [
+                            null,
+                            "center"
+                          ],
+                          "direction": [
+                            null,
+                            "row"
+                          ],
+                          "justify_content": [
+                            null,
+                            "space-between"
+                          ]
+                        },
+                        "common": {
+                          "grid": {
+                            "align": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "37f9c6d2-60a4-4378-a28b-f1b5aa90e22a",
+                          "type": "dynamic-field",
+                          "label": "Dynamic field",
+                          "attrs": {
+                            "item_style": {
+                              "ty": {
+                                "size": [
+                                  null,
+                                  14
+                                ],
+                                "wei": "500"
+                              }
+                            },
+                            "source": "3",
+                            "obj-f": "Title",
+                            "common": {
+                              "positioning": {
+                                "widthtype": [
+                                  null,
+                                  "2"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "id": "9a6a13ad-eded-4ce4-a2d3-6925b4366d01",
+                          "type": "container",
+                          "label": "Container",
+                          "attrs": {
+                            "style": {
+                              "direction": [
+                                null,
+                                "row"
+                              ],
+                              "align_items": [
+                                null,
+                                "center"
+                              ],
+                              "justify_content": [
+                                null,
+                                null
+                              ],
+                              "gap": [
+                                null,
+                                "--sp--s150"
+                              ],
+                              "widthtype": [
+                                null,
+                                "2"
+                              ]
+                            }
+                          },
+                          "children": [
+                            {
+                              "id": "0bd82a50-f0dc-4b27-a4c0-0f793a3db869",
+                              "type": "dropbar",
+                              "label": "Drop bar",
+                              "attrs": {
+                                "button": {
+                                  "text": {
+                                    "value": "",
+                                    "variable": null
+                                  },
+                                  "button_type": "1",
+                                  "before_icon_type": "3",
+                                  "before_icon": "fa-regular fa-ellipsis",
+                                  "pd": [
+                                    null,
+                                    {
+                                      "top": "--sp--s075",
+                                      "right": "--sp--s075",
+                                      "bottom": "--sp--s075",
+                                      "left": "--sp--s075"
+                                    }
+                                  ],
+                                  "background": {
+                                    "normal": {
+                                      "bdr": {
+                                        "top": "--sp--s075",
+                                        "right": "--sp--s075",
+                                        "bottom": "--sp--s075",
+                                        "left": "--sp--s075"
+                                      },
+                                      "bdt": "0"
+                                    },
+                                    "hover": {
+                                      "type": "classic",
+                                      "classic": {
+                                        "color": "var(--c--neutral-light)"
+                                      }
+                                    }
+                                  }
+                                },
+                                "content": {
+                                  "content_type": "3",
+                                  "pd": [
+                                    null,
+                                    {
+                                      "top": "--sp--s075",
+                                      "right": "--sp--s0",
+                                      "bottom": "--sp--s075",
+                                      "left": "--sp--s0"
+                                    }
+                                  ],
+                                  "normal": {
+                                    "border": {
+                                      "radius": [
+                                        null,
+                                        {
+                                          "top": "--sp--s100",
+                                          "right": "--sp--s100",
+                                          "bottom": "--sp--s100",
+                                          "left": "--sp--s100"
+                                        }
+                                      ],
+                                      "boxShadow": {
+                                        "color": "rgba(0, 0, 0, 0.05)",
+                                        "x": 0,
+                                        "y": 0,
+                                        "blur": 6,
+                                        "spread": 0,
+                                        "position": "outline"
+                                      }
+                                    },
+                                    "bgColor": "var(--c--neutral-dark-active)",
+                                    "color": "var(--c--background)"
+                                  }
+                                },
+                                "settings": {
+                                  "mode": "click",
+                                  "width": [
+                                    null,
+                                    180
+                                  ]
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "603c0219-47e3-4afa-9f06-0896860d0ea2",
+                                  "type": "container",
+                                  "label": "Container",
+                                  "attrs": {
+                                    "style": {
+                                      "gap": [
+                                        null,
+                                        "--sp--s0"
+                                      ]
+                                    }
+                                  },
+                                  "children": [
+                                    {
+                                      "id": "c2433165-ead4-4194-8804-24d280e68936",
+                                      "type": "action_button",
+                                      "attrs": {
+                                        "icon-type": "3",
+                                        "icon": "fa-regular fa-pencil",
+                                        "label": {
+                                          "variable": null
+                                        },
+                                        "button": {
+                                          "ty": [
+                                            null,
+                                            "base-light"
+                                          ],
+                                          "normal": {
+                                            "border": {
+                                              "type": "0"
+                                            },
+                                            "c": "var(--c--background)"
+                                          },
+                                          "ins": [
+                                            null,
+                                            {
+                                              "top": "--sp--s100",
+                                              "right": "--sp--s150",
+                                              "bottom": "--sp--s100",
+                                              "left": "--sp--s150"
+                                            }
+                                          ],
+                                          "hover": {
+                                            "bg": "var(--c--neutral-darker)"
+                                          }
+                                        },
+                                        "align": [
+                                          null,
+                                          "justify"
+                                        ],
+                                        "icon-space": "--sp--s100",
+                                        "action-type": "1",
+                                        "operation": "edit",
+                                        "control_action": "7ee384ef-30c7-4ec7-a5aa-0ee9932f2aff"
+                                      },
+                                      "label": "Edit item",
+                                      "nv_label": "btn_edit_item"
+                                    },
+                                    {
+                                      "id": "01176a4e-a176-4969-b23e-4a52585ab1b8",
+                                      "type": "action_button",
+                                      "attrs": {
+                                        "button": {
+                                          "ty": [
+                                            null,
+                                            "base-light"
+                                          ],
+                                          "normal": {
+                                            "border": {
+                                              "type": "0"
+                                            },
+                                            "c": "var(--c--background)"
+                                          },
+                                          "ins": [
+                                            null,
+                                            {
+                                              "top": "--sp--s100",
+                                              "right": "--sp--s150",
+                                              "bottom": "--sp--s100",
+                                              "left": "--sp--s150"
+                                            }
+                                          ],
+                                          "hover": {
+                                            "bg": "var(--c--neutral-darker)"
+                                          }
+                                        },
+                                        "align": [
+                                          null,
+                                          "justify"
+                                        ],
+                                        "icon-space": "--sp--s100",
+                                        "action-type": "1",
+                                        "label": {
+                                          "variable": null
+                                        },
+                                        "operation": "del",
+                                        "icon-type": "3",
+                                        "icon": "fa-regular fa-trash",
+                                        "control_action": "d5ad7b6b-72af-4ddc-8338-4f799960e1e9"
+                                      },
+                                      "label": "Delete item",
+                                      "nv_label": "btn_delete_item"
+                                    }
+                                  ],
+                                  "nv_label": "grid_table_col_item_op_menu_panel"
+                                }
+                              ],
+                              "nv_label": "grid_table_col_item_op_menu"
+                            }
+                          ],
+                          "nv_label": "grid_table_col_item_operations"
+                        }
+                      ],
+                      "parentCol": 1,
+                      "nv_label": "grid_table_col_item_title_column"
+                    },
+                    {
+                      "id": "0ea226df-89bd-4e3d-b9f8-7779b629cb7f",
+                      "type": "container",
+                      "label": "Container",
+                      "displayLabel": true,
+                      "attrs": {
+                        "style": {
+                          "align_items": [
+                            null,
+                            "center"
+                          ],
+                          "direction": [
+                            null,
+                            "row"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ],
+                          "gap": [
+                            null,
+                            "--sp--s075"
+                          ]
+                        },
+                        "common": {
+                          "grid": {
+                            "align": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "hide": [
+                            null,
+                            null,
+                            null,
+                            false
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "320228b3-f93a-49e7-8302-84d2846a5c9c",
+                          "type": "dynamic-user",
+                          "label": "Dynamic user",
+                          "attrs": {
+                            "source": "3",
+                            "obj-f": "Text2",
+                            "show_picture": false,
+                            "item_style": {
+                              "pd": [
+                                null,
+                                {
+                                  "top": "--sp--s0",
+                                  "right": "--sp--s0",
+                                  "bottom": "--sp--s0",
+                                  "left": "--sp--s0"
+                                }
+                              ]
+                            },
+                            "common": {
+                              "positioning": {
+                                "widthtype": [
+                                  null,
+                                  "2"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "parentCol": 1,
+                      "nv_label": "grid_table_col_item_column"
+                    },
+                    {
+                      "id": "49987b93-6abe-4efe-bd20-a1cd86db01ac",
+                      "type": "container",
+                      "label": "Container",
+                      "displayLabel": true,
+                      "attrs": {
+                        "style": {
+                          "align_items": [
+                            null,
+                            "center"
+                          ],
+                          "direction": [
+                            null,
+                            "row"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ],
+                          "gap": [
+                            null,
+                            "--sp--s075"
+                          ]
+                        },
+                        "common": {
+                          "grid": {
+                            "align": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "hide": [
+                            null,
+                            null,
+                            null,
+                            false
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "09dcf64f-0076-46d2-8b4b-f0ec03841a89",
+                          "type": "dynamic-field",
+                          "label": "Dynamic field",
+                          "attrs": {
+                            "item_style": {
+                              "ty": {
+                                "size": [
+                                  null,
+                                  12
+                                ],
+                                "wei": "0"
+                              }
+                            },
+                            "source": "3",
+                            "obj-f": "Datetime1",
+                            "common": {
+                              "positioning": {
+                                "widthtype": [
+                                  null,
+                                  "2"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "parentCol": 1,
+                      "nv_label": "grid_table_col_item_column"
+                    },
+                    {
+                      "id": "4b2bdeee-31e3-422a-834c-9ec35377cbb2",
+                      "type": "container",
+                      "label": "Container",
+                      "displayLabel": true,
+                      "attrs": {
+                        "style": {
+                          "align_items": [
+                            null,
+                            "center"
+                          ],
+                          "direction": [
+                            null,
+                            "row"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ],
+                          "gap": [
+                            null,
+                            "--sp--s075"
+                          ]
+                        },
+                        "common": {
+                          "grid": {
+                            "align": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "hide": [
+                            null,
+                            null,
+                            null,
+                            false
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "1870cf86-4d26-48a2-a031-f37648b9970f",
+                          "type": "dynamic-field",
+                          "label": "Dynamic field",
+                          "attrs": {
+                            "item_style": {
+                              "ty": {
+                                "size": [
+                                  null,
+                                  12
+                                ],
+                                "wei": "0"
+                              }
+                            },
+                            "source": "3",
+                            "obj-f": "Datetime2",
+                            "common": {
+                              "positioning": {
+                                "widthtype": [
+                                  null,
+                                  "2"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "parentCol": 1,
+                      "nv_label": "grid_table_col_item_column"
+                    },
+                    {
+                      "id": "64a068dd-425f-4407-b7aa-6901583a0fcb",
+                      "type": "container",
+                      "label": "Container",
+                      "displayLabel": true,
+                      "attrs": {
+                        "style": {
+                          "align_items": [
+                            null,
+                            "center"
+                          ],
+                          "direction": [
+                            null,
+                            "row"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ],
+                          "gap": [
+                            null,
+                            "--sp--s075"
+                          ]
+                        },
+                        "common": {
+                          "grid": {
+                            "align": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "hide": [
+                            null,
+                            null,
+                            null,
+                            false
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "2830112b-4655-4be3-81fe-3bdb7924f04c",
+                          "type": "progress",
+                          "label": "Progress bar",
+                          "displayLabel": true,
+                          "attrs": {
+                            "bar": {
+                              "per": {
+                                "value": null,
+                                "variable": [
+                                  {
+                                    "exprType": "variable_ctx",
+                                    "valueType": "percent",
+                                    "id": "Decimal2",
+                                    "ctx": "__ctx_coll",
+                                    "type": "expr",
+                                    "name": "Collection item:Completion percentage"
+                                  }
+                                ]
+                              },
+                              "title": {
+                                "value": "",
+                                "variable": null
+                              },
+                              "disp": "1",
+                              "it": {
+                                "value": "",
+                                "variable": null
+                              }
+                            }
+                          },
+                          "parentCol": 1
+                        }
+                      ],
+                      "parentCol": 1,
+                      "nv_label": "grid_table_col_item_column"
+                    },
+                    {
+                      "id": "c47b1636-5aae-4105-9527-3cbff9eee2e5",
+                      "type": "container",
+                      "label": "Container",
+                      "displayLabel": true,
+                      "attrs": {
+                        "style": {
+                          "align_items": [
+                            null,
+                            "center"
+                          ],
+                          "direction": [
+                            null,
+                            "row"
+                          ],
+                          "justify_content": [
+                            null,
+                            "flex-start"
+                          ],
+                          "gap": [
+                            null,
+                            "--sp--s075"
+                          ]
+                        },
+                        "common": {
+                          "grid": {
+                            "align": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "hide": [
+                            null,
+                            null,
+                            null,
+                            false
+                          ]
+                        },
+                        "control_display": []
+                      },
+                      "children": [
+                        {
+                          "id": "5eac0d2f-6bae-475d-93b8-61d14ba6c4b9",
+                          "type": "heading",
+                          "label": "Text",
+                          "displayLabel": true,
+                          "attrs": {
+                            "heads": {
+                              "ty": {
+                                "size": [
+                                  null,
+                                  12
+                                ],
+                                "wei": "500"
+                              },
+                              "color": "#141b2d"
+                            },
+                            "headc": {
+                              "title": {
+                                "value": null,
+                                "variable": [
+                                  {
+                                    "exprType": "variable_ctx",
+                                    "valueType": "radio",
+                                    "id": "Text1",
+                                    "ctx": "__ctx_coll",
+                                    "type": "expr",
+                                    "name": "Collection item:Status"
+                                  }
+                                ]
+                              },
+                              "align": [
+                                null,
+                                "center"
+                              ]
+                            },
+                            "control_display": [
+                              {
+                                "id": "793dfa0c-ee85-40c6-9df7-e0faa55ee5d5",
+                                "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                                "formulas": [
+                                  {
+                                    "exprType": "variable_ctx",
+                                    "valueType": "radio",
+                                    "id": "Text1",
+                                    "ctx": "__ctx_coll",
+                                    "type": "expr",
+                                    "name": "Collection item:Status"
+                                  },
+                                  {
+                                    "type": "op",
+                                    "op": "=="
+                                  },
+                                  {
+                                    "type": "str",
+                                    "value": "Open"
+                                  }
+                                ],
+                                "actions": {
+                                  "id": "67ba477c-183c-4ba3-8ef5-17caa2240c1b",
+                                  "type": 1,
+                                  "attrs": {
+                                    "style_regulation_action": "style_class",
+                                    "style_regulation_action_color": null,
+                                    "action_style": "{\"normal\":{\"color\":\"#1ec933\",\"border\":{\"type\":\"1\",\"width\":[null,{\"top\":1,\"right\":1,\"bottom\":1,\"left\":1}],\"color\":\"#1ec933\"},\"bgcolor\":\"rgba(30, 201, 51, 0.1)\"}}"
+                                  }
+                                }
+                              },
+                              {
+                                "id": "d4fd953b-dfe9-4210-8b92-979e0f39318f",
+                                "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                                "formulas": [
+                                  {
+                                    "exprType": "variable_ctx",
+                                    "valueType": "radio",
+                                    "id": "Text1",
+                                    "ctx": "__ctx_coll",
+                                    "type": "expr",
+                                    "name": "Collection item:Status"
+                                  },
+                                  {
+                                    "type": "op",
+                                    "op": "=="
+                                  },
+                                  {
+                                    "type": "str",
+                                    "value": "Closed"
+                                  }
+                                ],
+                                "actions": {
+                                  "id": "7b4c344c-cced-40f6-b929-4679c2a25014",
+                                  "type": 1,
+                                  "attrs": {
+                                    "style_regulation_action": "style_class",
+                                    "style_regulation_action_color": null,
+                                    "action_style": "{\"normal\":{\"color\":\"#f82b60\",\"border\":{\"type\":\"1\",\"color\":\"#f82b60\"},\"bgcolor\":\"rgba(248, 43, 96, 0.1)\"}}"
+                                  }
+                                }
+                              },
+                              {
+                                "id": "42e44a0b-24b1-41de-9496-d9637799d5fc",
+                                "controlId": "aa9a7043-5698-499f-8456-89fc8c2a10d8",
+                                "formulas": [
+                                  {
+                                    "exprType": "variable_ctx",
+                                    "valueType": "radio",
+                                    "id": "Text1",
+                                    "ctx": "__ctx_coll",
+                                    "type": "expr",
+                                    "name": "Collection item:Status"
+                                  },
+                                  {
+                                    "type": "op",
+                                    "op": "=="
+                                  },
+                                  {
+                                    "type": "str",
+                                    "value": "In progress"
+                                  }
+                                ],
+                                "actions": {
+                                  "id": "5de63ceb-57ab-4f3a-b299-fc7cff0529e0",
+                                  "type": 1,
+                                  "attrs": {
+                                    "style_regulation_action": "style_class",
+                                    "style_regulation_action_color": null,
+                                    "action_style": "{\"normal\":{\"color\":\"#18bfff\",\"border\":{\"type\":\"1\",\"color\":\"#18bfff\"},\"bgcolor\":\"rgba(24, 191, 255, 0.1)\"}}"
+                                  }
+                                }
+                              },
+                              {
+                                "id": "00c10c3b-4946-4820-8411-dd654dfc9b52",
+                                "controlId": "9589b407-392a-4c86-b595-48526072d768",
+                                "formulas": [
+                                  {
+                                    "exprType": "variable_ctx",
+                                    "valueType": "radio",
+                                    "id": "Text1",
+                                    "ctx": "__ctx_coll",
+                                    "type": "expr",
+                                    "name": "Collection item:Status"
+                                  },
+                                  {
+                                    "type": "op",
+                                    "op": "=="
+                                  },
+                                  {
+                                    "type": "str",
+                                    "value": "In review"
+                                  }
+                                ],
+                                "actions": {
+                                  "id": "77d751a0-0dc6-417d-96a9-d821e1c07abd",
+                                  "type": 1,
+                                  "attrs": {
+                                    "style_regulation_action": "style_class",
+                                    "style_regulation_action_color": null,
+                                    "action_style": "{\"normal\":{\"color\":\"#8b46ff\",\"border\":{\"type\":\"1\",\"color\":\"#8b46ff\"},\"bgcolor\":\"rgba(139, 70, 255, 0.1)\"}}"
+                                  }
+                                }
+                              }
+                            ],
+                            "common": {
+                              "padding": [
+                                null,
+                                {
+                                  "top": 5,
+                                  "right": 10,
+                                  "bottom": 5,
+                                  "left": 10
+                                }
+                              ],
+                              "positioning": {
+                                "widthtype": [
+                                  null,
+                                  "0"
+                                ]
+                              }
+                            }
+                          },
+                          "parentCol": 1
+                        }
+                      ],
+                      "parentCol": 1,
+                      "nv_label": "grid_table_col_item_column"
+                    }
+                  ],
+                  "parentCol": 1,
+                  "nv_label": "grid_col_item"
+                }
+              ],
+              "nv_label": "grid_table_col_body"
+            }
+          ],
+          "nv_label": "grid_table_col_content"
+        }
+      ],
+      "nv_label": "grid_table_col_wrapper"
+    },
+    "collectionActions": [
+      {
+        "id": "7ee384ef-30c7-4ec7-a5aa-0ee9932f2aff",
+        "name": "Edit item",
+        "steps": [
+          {
+            "type": "listitem",
+            "attrs": {
+              "data": {
+                "list": {
+                  "AppID": 41,
+                  "ListSetID": "2058571956842409984",
+                  "ListID": "2058571966637289476"
+                }
+              },
+              "op_type": "edit",
+              "listdataid": [
+                {
+                  "exprType": "variable_ctx",
+                  "valueType": "input",
+                  "id": "ListDataID",
+                  "ctx": "__ctx_coll",
+                  "type": "expr",
+                  "name": "Collection item:Id"
+                }
+              ],
+              "layout": "2058571966637289475",
+              "op": "modal",
+              "modalsize": 0
+            }
+          }
+        ],
+        "type": "coll"
+      },
+      {
+        "id": "d5ad7b6b-72af-4ddc-8338-4f799960e1e9",
+        "name": "Delete item",
+        "steps": [
+          {
+            "type": "confirm",
+            "attrs": {
+              "confirm_qs": [
+                {
+                  "type": "str",
+                  "value": "Are you sure that you want to delete this item?"
+                }
+              ],
+              "confirm_rs": {
+                "exprType": "variable",
+                "valueType": "string",
+                "id": "__temp_var_isDeleteConfirmed",
+                "type": "expr",
+                "name": "var_isDeleteConfirmed"
+              }
+            }
+          },
+          {
+            "type": "setdatalist",
+            "attrs": {
+              "list": {
+                "AppID": 41,
+                "ListSetID": "2058571956842409984",
+                "ListID": "2058571966637289476"
+              },
+              "listtype": "select",
+              "type": "remove",
+              "wheres": [
+                {
+                  "key": "01d4cc4f-c015-4eec-b56e-85465180d18c",
+                  "pre": "and",
+                  "left": "ListDataID",
+                  "op": "0",
+                  "right": [
+                    {
+                      "exprType": "variable_ctx",
+                      "valueType": "input",
+                      "id": "ListDataID",
+                      "ctx": "__ctx_coll",
+                      "type": "expr",
+                      "name": "Collection item:Id"
+                    }
+                  ],
+                  "showCus": false
+                }
+              ]
+            },
+            "condition": [
+              {
+                "exprType": "variable",
+                "valueType": "string",
+                "id": "__temp_var_isDeleteConfirmed",
+                "type": "expr",
+                "name": "var_isDeleteConfirmed"
+              },
+              {
+                "type": "op",
+                "op": "=="
+              },
+              {
+                "type": "bool",
+                "value": true
+              }
+            ]
+          },
+          {
+            "type": "otheraction",
+            "attrs": {
+              "control_action": "cdf1ac08-104c-4968-9f73-101d4fe803fb"
+            },
+            "name": "Reset the selected items"
+          }
+        ],
+        "type": "coll"
+      }
+    ],
+    "headerColumns": [
+      {
+        "value": 2,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      }
+    ],
+    "itemColumns": [
+      {
+        "value": 2,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      },
+      {
+        "value": 1,
+        "unit": "fr"
+      }
+    ],
+    "sourceCollectionData": {
+      "list": {
+        "AppID": 41,
+        "ListID": "2058726119586017281",
+        "Type": 1,
+        "Title": "Tasks",
+        "ListSetID": "2058726109535285249"
+      },
+      "filter": [],
+      "link": "default",
+      "modalsize": 2,
+      "sort": [
+        {
+          "SortName": "Datetime1",
+          "SortByDesc": true
+        }
+      ],
+      "fulltext": [
+        {
+          "fields": [
+            "Title",
+            "Text2",
+            "Text6"
+          ],
+          "value": [
+            {
+              "exprType": "variable",
+              "valueType": "string",
+              "id": "__filter_filter_keywords",
+              "type": "expr",
+              "name": "filter_keywords"
+            }
+          ]
+        }
+      ],
+      "ps": 16
+    },
+    "sourceCollectionLayout": {
+      "col": [
+        null,
+        1
+      ],
+      "rg": [
+        null,
+        0,
+        null,
+        10
+      ],
+      "cg": [
+        null,
+        10
+      ],
+      "hover": {
+        "bgColor": "#f2f2f2"
+      },
+      "normal": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s0",
+              "right": "--sp--s0",
+              "bottom": "--sp--s0",
+              "left": "--sp--s0"
+            },
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "radius": [
+            null,
+            null,
+            null,
+            {
+              "top": "--sp--s150",
+              "right": "--sp--s150",
+              "bottom": "--sp--s150",
+              "left": "--sp--s150"
+            }
+          ],
+          "color": "var(--c--neutral-light-active)"
+        }
+      },
+      "cp": [
+        null,
+        null,
+        null,
+        {
+          "top": "--sp--s150",
+          "right": "--sp--s100",
+          "bottom": "--sp--s150",
+          "left": "--sp--s100"
+        }
+      ]
+    },
+    "sourceCollectionPagination": {
+      "p": {
+        "sp": [
+          null,
+          "--sp--s150"
+        ],
+        "ty": {
+          "size": [
+            null,
+            "--sp--s200"
+          ]
+        }
+      }
+    }
+  },
+  "extractionIndex": {
+    "rootPointerInSourcePage": "$.children[0].children[0]",
+    "slotPointers": {
+      "grid_table_col_wrapper": "$",
+      "grid_table_col_caption": "$.children[0]",
+      "grid_table_col_title_wrapper": "$.children[0].children[0]",
+      "grid_table_col_title": "$.children[0].children[0].children[0]",
+      "grid_table_col_operations": "$.children[0].children[1]",
+      "op_normal": "$.children[0].children[1].children[0]",
+      "grid_table_col_content": "$.children[1]",
+      "grid_table_col_header": "$.children[1].children[0]",
+      "grid_table_col_body": "$.children[1].children[1]",
+      "grid_col_item": "$.children[1].children[1].children[0]",
+      "grid_table_col_item_title_column": "$.children[1].children[1].children[0].children[0]",
+      "grid_table_col_item_operations": "$.children[1].children[1].children[0].children[0].children[1]",
+      "grid_table_col_item_op_menu": "$.children[1].children[1].children[0].children[0].children[1].children[0]",
+      "grid_table_col_item_op_menu_panel": "$.children[1].children[1].children[0].children[0].children[1].children[0].children[0]",
+      "btn_edit_item": "$.children[1].children[1].children[0].children[0].children[1].children[0].children[0].children[0]",
+      "btn_delete_item": "$.children[1].children[1].children[0].children[0].children[1].children[0].children[0].children[1]"
+    },
+    "slotCounts": {
+      "grid_table_col_wrapper": 1,
+      "grid_table_col_caption": 1,
+      "grid_table_col_title_wrapper": 1,
+      "grid_table_col_title": 1,
+      "grid_table_col_operations": 1,
+      "op_normal": 1,
+      "grid_table_col_content": 1,
+      "grid_table_col_header": 1,
+      "grid_table_col_body": 1,
+      "grid_col_item": 1,
+      "grid_table_col_item_title_column": 1,
+      "grid_table_col_item_operations": 1,
+      "grid_table_col_item_op_menu": 1,
+      "grid_table_col_item_op_menu_panel": 1,
+      "btn_edit_item": 1,
+      "btn_delete_item": 1
+    },
+    "headerColumnCount": 6,
+    "itemColumnCount": 6,
+    "collectionPointer": "$.children[1].children[1]"
+  },
+  "validationContract": {
+    "requiredTemplateFile": "docs/reference/collection-control-grid-table.template.json",
+    "requiredRegistryTemplateId": "collection_control_grid_table",
+    "packageHardGateCodes": [
+      "DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_WRAPPER_MISSING",
+      "DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_SLOT_MISSING",
+      "DASH_DATASET_GRID_TABLE_COLUMN_MISMATCH",
+      "DASH_DATASET_GRID_TABLE_OPERATION_ACTION_MISSING",
+      "DASH_DATASET_GRID_TABLE_DISPLAY_ONLY_OPERATION_FORBIDDEN"
+    ]
+  }
+}

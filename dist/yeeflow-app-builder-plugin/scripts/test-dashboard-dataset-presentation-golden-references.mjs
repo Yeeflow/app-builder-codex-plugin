@@ -28,6 +28,20 @@ try {
   delete badCardText.attrs.heads;
   expectCode("card multiselect source template Text metadata is enforced", ["--registry", REGISTRY, "--card-template", writeJson("bad-card-text-template.json", badCardTextTemplate)], "DASH_DATASET_CARD_MULTISELECT_TEMPLATE_TEXT_HEADS_MISSING");
 
+  const gridTableTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"), "utf8"));
+  const badGridTableSlotTemplate = structuredClone(gridTableTemplate);
+  delete badGridTableSlotTemplate.extractionIndex.slotPointers.grid_col_item;
+  expectCode("grid-table source template slots are enforced", ["--registry", REGISTRY, "--grid-table-template", writeJson("bad-grid-table-slot-template.json", badGridTableSlotTemplate)], "DASH_DATASET_GRID_TABLE_TEMPLATE_SLOT_MISSING");
+
+  const badGridTableTextTemplate = structuredClone(gridTableTemplate);
+  const badGridTableText = findFirstTemplateText(badGridTableTextTemplate);
+  delete badGridTableText.attrs.heads;
+  expectCode("grid-table source template Text metadata is enforced", ["--registry", REGISTRY, "--grid-table-template", writeJson("bad-grid-table-text-template.json", badGridTableTextTemplate)], "DASH_DATASET_GRID_TABLE_TEMPLATE_TEXT_HEADS_MISSING");
+
+  const badGridTableColumnTemplate = structuredClone(gridTableTemplate);
+  badGridTableColumnTemplate.templateResource.itemColumns = badGridTableColumnTemplate.templateResource.itemColumns.slice(0, -1);
+  expectCode("grid-table source template header/item column parity is enforced", ["--registry", REGISTRY, "--grid-table-template", writeJson("bad-grid-table-column-template.json", badGridTableColumnTemplate)], "DASH_DATASET_GRID_TABLE_TEMPLATE_COLUMN_PARITY_INVALID");
+
   const gridTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json"), "utf8"));
   const badGridWrapperTemplate = structuredClone(gridTemplate);
   delete badGridWrapperTemplate.templateResource.rootContainer.attrs.container;
@@ -145,7 +159,7 @@ Dashboard validator commands used during validation:
   expectCode("App Plan-to-package conformance fails on region template mismatch", ["--app-plan", conformancePlan, "--package", writePackage("region-template-mismatch", mismatchedRegionPages)], "DASH_DATASET_REGION_TEMPLATE_MISMATCH");
 
   const inheritedOnlyPages = validPages();
-  const activeLoansAncestor = findControl(inheritedOnlyPages[1], "active_loans_content_card_wrapper");
+  const activeLoansAncestor = findControl(inheritedOnlyPages[1], "grid_table_col_wrapper");
   activeLoansAncestor.attrs = { ...(activeLoansAncestor.attrs || {}), datasetPresentationTemplateId: "collection_control_grid_table" };
   delete findControl(inheritedOnlyPages[1], "active_loans_collection").attrs.datasetPresentationTemplateId;
   expectCode("App Plan-to-package conformance requires explicit Collection-root provenance", ["--app-plan", conformancePlan, "--package", writePackage("inherited-only-template", inheritedOnlyPages)], "DASH_DATASET_COLLECTION_EXPLICIT_PROVENANCE_MISSING");
@@ -203,6 +217,27 @@ Dashboard validator commands used during validation:
   const activeLoans = findControl(simplifiedGridPages[1], "active_loans_collection");
   activeLoans.children = [{ id: "plain_child", type: "container", children: [] }];
   expectCode("simplified grid-table Collection fails", ["--package", writePackage("simplified-grid", simplifiedGridPages)], "DASH_DATASET_GRID_TABLE_ITEM_GRID_MISSING");
+
+  const missingGridWrapperPages = validPages();
+  const activeGridCollection = findControl(missingGridWrapperPages[1], "active_loans_collection");
+  findControl(missingGridWrapperPages[1], "section_content_area").children = [
+    gridHeader("active_loans_header_grid", [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]]),
+    activeGridCollection,
+  ];
+  expectCode("base grid-table without export-shaped wrapper fails", ["--package", writePackage("base-grid-table-wrapper-missing", missingGridWrapperPages)], "DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_WRAPPER_MISSING");
+
+  const badBaseGridColumnsPages = validPages();
+  findControl(badBaseGridColumnsPages[1], "grid_col_item").attrs.columns["1"].list = [[3, "fr"], [1, "fr"]];
+  expectCode("base grid-table header/item column mismatch fails", ["--package", writePackage("base-grid-table-column-mismatch", badBaseGridColumnsPages)], "DASH_DATASET_GRID_TABLE_HEADER_ITEM_COLUMN_MISMATCH");
+
+  const badBaseGridActionPages = validPages();
+  delete findControl(badBaseGridActionPages[1], "btn_edit_item").attrs.control_action;
+  expectCode("base grid-table item operation button without action fails", ["--package", writePackage("base-grid-table-missing-operation-action", badBaseGridActionPages)], "DASH_DATASET_GRID_TABLE_OPERATION_ACTION_MISSING");
+
+  const viewOnlyBaseGridPages = validPages();
+  const viewOnlyCollection = findControl(viewOnlyBaseGridPages[1], "active_loans_collection");
+  viewOnlyCollection.attrs.data.sourceResourceType = "Form Report";
+  expectCode("base grid-table display-only report source forbids item operations", ["--package", writePackage("base-grid-table-view-only-ops", viewOnlyBaseGridPages)], "DASH_DATASET_GRID_TABLE_DISPLAY_ONLY_OPERATION_FORBIDDEN");
 
   const badMultiselectPages = validPages();
   const bulk = findControl(badMultiselectPages[3], "bulk_reminders_collection");
@@ -401,7 +436,7 @@ function validPages() {
     ], responsiveCardGridPageDeps()),
     page("Active Loans Dashboard", [
       gridTableSection("active_loans", "collection_control_grid_table"),
-    ]),
+    ], baseGridTablePageDeps()),
     page("Document Search Dashboard", [
       { id: "loan_search", type: "search-filter", attrs: { variable: "loan_search" } },
       gridTableSection("document_search", "collection_control_grid_table_with_search", { fulltext: [{ fields: ["Title", "Text1"], value: [{ exprType: "variable", id: "__filter_loan_search" }] }] }),
@@ -475,6 +510,18 @@ function gridMultiselectPageDeps() {
     ],
     filter: [{ id: "filter_keywords" }],
     formAction: [{ id: "grid_form_refresh_after_bulk" }],
+  };
+}
+
+function baseGridTablePageDeps() {
+  return {
+    filterVars: [{ idx: "base-grid-filter-keywords-idx", id: "filter_keywords" }],
+    tempVars: [{ idx: "base-grid-delete-confirmed-idx", id: "var_isDeleteConfirmed" }],
+    actions: [
+      { id: "active_loans_add_item", name: "Add item", steps: [{ type: "listitem", attrs: { op_type: "add" } }] },
+    ],
+    filter: [{ idx: "base-grid-filter-keywords-idx", id: "filter_keywords" }],
+    formAction: [{ id: "base_grid_form_refresh" }],
   };
 }
 
@@ -718,9 +765,7 @@ function gridTableSection(prefix, templateId, options = {}) {
     dynamic(`${prefix}_status`, "dynamic-field", "Text1"),
     { id: `${prefix}_progress`, type: "progress", attrs: { bar: { per: { variable: [{ exprType: "variable_ctx", id: "Decimal2", ctx: "__ctx_coll" }] } } } },
   ].filter(Boolean);
-  return container(`${prefix}_content_card_wrapper`, [
-    gridHeader(`${prefix}_header_grid`, columns),
-    collection(`${prefix}_collection`, templateId, {
+  const body = collection(`${prefix}_collection`, templateId, {
       children: [gridItem(`${prefix}_item_grid`, columns, itemChildren)],
       attrs: {
         data: {
@@ -742,7 +787,69 @@ function gridTableSection(prefix, templateId, options = {}) {
           ],
         } : {}),
       },
-    }),
+    });
+  if (templateId !== "collection_control_grid_table") {
+    return container(`${prefix}_content_card_wrapper`, [
+      gridHeader(`${prefix}_header_grid`, columns),
+      body,
+    ]);
+  }
+  return container("grid_table_col_wrapper", [
+    container("grid_table_col_caption", [
+      container("grid_table_col_title_wrapper", [
+        heading("grid_table_col_title", "Active loans"),
+      ]),
+      container("grid_table_col_operations", [
+        container("op_normal", [
+          { id: `${prefix}_search`, type: "search-filter", label: "Search loans", attrs: { placeholder: "Search loan requests" } },
+          { id: `${prefix}_add_button`, type: "action_button", label: "Add item", attrs: { control_action: `${prefix}_add_item` }, nv_label: "Add new item" },
+        ]),
+      ]),
+    ]),
+    container("grid_table_col_content", [
+      gridHeader("grid_table_col_header", columns),
+      {
+        ...body,
+        id: `${prefix}_collection`,
+        nv_label: "grid_table_col_body",
+        attrs: {
+          ...body.attrs,
+          actions: [
+            {
+              id: `${prefix}_edit_item`,
+              name: "Edit item",
+              type: "coll",
+              steps: [{ type: "listitem", attrs: { op_type: "edit", listdataid: [{ exprType: "variable_ctx", id: "ListDataID", ctx: "__ctx_coll" }] } }],
+            },
+            {
+              id: `${prefix}_delete_item`,
+              name: "Delete item",
+              type: "coll",
+              steps: [
+                { type: "confirm", attrs: { confirm_rs: { exprType: "variable", id: "__temp_var_isDeleteConfirmed", name: "var_isDeleteConfirmed" } } },
+                { type: "setdatalist", attrs: { type: "remove", wheres: [{ left: "ListDataID", right: [{ exprType: "variable_ctx", id: "ListDataID", ctx: "__ctx_coll" }] }] } },
+              ],
+            },
+          ],
+        },
+        children: [gridItem("grid_col_item", columns, [
+          container("grid_table_col_item_title_column", [
+            dynamic(`${prefix}_title`, "dynamic-field", "Title"),
+            container("grid_table_col_item_operations", [
+              container("grid_table_col_item_op_menu", [
+                container("grid_table_col_item_op_menu_panel", [
+                  { id: "btn_edit_item", type: "action_button", label: "Edit item", attrs: { control_action: `${prefix}_edit_item` }, nv_label: "btn_edit_item" },
+                  { id: "btn_delete_item", type: "action_button", label: "Delete item", attrs: { control_action: `${prefix}_delete_item` }, nv_label: "btn_delete_item" },
+                ]),
+              ]),
+            ]),
+          ]),
+          dynamic(`${prefix}_owner`, "dynamic-user", "User1"),
+          dynamic(`${prefix}_status`, "dynamic-field", "Text1"),
+          { id: `${prefix}_progress`, type: "progress", attrs: { bar: { per: { variable: [{ exprType: "variable_ctx", id: "Decimal2", ctx: "__ctx_coll" }] } } } },
+        ])],
+      },
+    ]),
   ]);
 }
 

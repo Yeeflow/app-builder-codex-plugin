@@ -1894,7 +1894,7 @@
     },
     {
       "templateId": "collection_control_grid_table",
-      "purpose": "Render dense operational records as a table-like Collection body with a header flex_grid and repeated item flex_grid.",
+      "purpose": "Render dense operational records as a table-like Collection using the full grid_table_col_wrapper export-shaped component.",
       "pattern_scope": "grid_table_only",
       "proven_formats": [
         "YAP",
@@ -1925,11 +1925,13 @@
         "mustResolveInPackage": true
       },
       "requiredStructure": [
-        "caption/title container",
-        "toolbar/search/add-action row when requested",
-        "header flex_grid",
-        "Collection root",
-        "item flex_grid as first Collection child",
+        "grid_table_col_wrapper component root",
+        "grid_table_col_caption",
+        "grid_table_col_title_wrapper",
+        "op_normal",
+        "grid_table_col_header flex_grid",
+        "grid_table_col_body Collection root",
+        "grid_col_item repeated item flex_grid as first Collection child",
         "pagination when paging is generated"
       ],
       "headerGridRequirements": [
@@ -1945,19 +1947,49 @@
         "attrs.columns[\"3\"].list defines mobile columns"
       ],
       "validationChecks": [
+        "DASH_DATASET_GRID_TABLE_TEMPLATE_REFERENCE_MISSING absent",
+        "DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_WRAPPER_MISSING absent",
+        "DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_SLOT_MISSING absent",
+        "DASH_DATASET_GRID_TABLE_HEADER_ITEM_COLUMN_MISMATCH absent",
+        "DASH_DATASET_GRID_TABLE_OPERATION_ACTION_MISSING absent",
+        "DASH_DATASET_GRID_TABLE_DISPLAY_ONLY_OPERATION_FORBIDDEN absent",
         "COLLECTION_GRID_TABLE_HEADER_GRID_MISSING absent",
         "COLLECTION_GRID_TABLE_ITEM_GRID_MISSING absent",
         "COLLECTION_GRID_TABLE_COLUMN_COUNT_MISMATCH absent",
-        "COLLECTION_GRID_TABLE_COLUMN_WIDTH_MISMATCH absent",
-        "COLLECTION_GRID_TABLE_HEADER_CAPTION_VISIBLE absent",
-        "COLLECTION_GRID_TABLE_ITEM_CAPTION_VISIBLE absent",
-        "COLLECTION_GRID_TABLE_MOBILE_HEADER_NOT_HIDDEN absent",
-        "COLLECTION_GRID_TABLE_MOBILE_ITEM_GRID_COLUMNS_INVALID absent"
+        "COLLECTION_GRID_TABLE_COLUMN_WIDTH_MISMATCH absent"
       ],
       "proofBoundaries": [
-        "dashboard/page usage proven from Projects Center",
+        "dashboard/page component usage proven from Projects Center_1 v1.7",
         "approval-form and data-list-form hosts remain pending",
-        "not interchangeable with collection_control_responsive_card_grid"
+        "not interchangeable with collection_control_responsive_card_grid",
+        "not a Dashboard page shell; place inside Dashboard Page Layouts v1.1 content slot"
+      ],
+      "fullTemplateReference": "docs/reference/collection-control-grid-table.template.json",
+      "sourcePage": "Collection_control_grid_table",
+      "sourceRootContainer": "grid_table_col_wrapper",
+      "editableRegions": [
+        "grid_table_col_title_wrapper",
+        "op_normal",
+        "grid_table_col_header",
+        "grid_col_item",
+        "grid_table_col_item_operations"
+      ],
+      "lockedRegions": [
+        "all descendants outside editable regions preserve source style/layout/typography/control settings",
+        "grid_table_col_body remains the Collection root and action host",
+        "operation buttons require matching Collection/page actions when present",
+        "delete operations require confirmation temp variable and conditional delete flow"
+      ],
+      "displayOnlyRules": [
+        "Form Report/Data Report regions are view-only",
+        "omit grid_table_col_item_operations for report/display-only sources",
+        "do not emit edit/delete controls for non-editable sources"
+      ],
+      "dynamicControlMapping": [
+        "User fields use dynamic-user",
+        "Image fields use dynamic-image",
+        "File or Attachment fields use dynamic-file",
+        "all other fields use dynamic-field"
       ]
     },
     {
