@@ -44,6 +44,9 @@ export function inspectFullAppGenerationEntrypoints(options = {}) {
   if (!fullAppEntrypoints.some((entrypoint) => entrypoint.kind === "skill-orchestrated-full-app-generator")) {
     findings.push(error("FULL_APP_GENERATOR_SKILL_ENTRYPOINT_MISSING", "The plugin must expose at least one skill-orchestrated full-app generator entrypoint for Functional Spec + App Plan generation."));
   }
+  if (!fullAppEntrypoints.some((entrypoint) => entrypoint.kind === "standalone-full-app-materializer")) {
+    findings.push(error("FULL_APP_GENERATOR_MATERIALIZER_ENTRYPOINT_MISSING", "The plugin must expose a callable node CLI materializer that emits generated-final package artifacts from approved planning contracts and API-issued IDs."));
+  }
 
   validateNonFullAppEntrypoints(registry.nonFullAppEntrypoints, root, findings);
   return buildReport(findings.some((finding) => finding.level === "error") ? "fail" : "pass", root, registryPath, fullAppEntrypoints, findings);
@@ -91,10 +94,21 @@ function validateCallableContract(entrypoint, id, kind, findings) {
   const callable = entrypoint.callable === true;
   const callableAs = String(entrypoint.callableAs || "").trim();
   const contract = entrypoint.invocationContract;
-  if (!callable || callableAs !== "codex-skill-entrypoint" || !contract || typeof contract !== "object" || Array.isArray(contract)) {
+  if (!callable || !contract || typeof contract !== "object" || Array.isArray(contract)) {
     findings.push(error("FULL_APP_GENERATOR_CALLABLE_CONTRACT_MISSING", "Full-app generator entrypoints must be explicitly callable as Codex skill entrypoints, not only descriptive registry records.", {
       id,
       callable: entrypoint.callable,
+      callableAs: entrypoint.callableAs || null,
+    }));
+    return;
+  }
+  if (kind === "standalone-full-app-materializer") {
+    validateNodeCliMaterializerContract(entrypoint, id, callableAs, contract, findings);
+    return;
+  }
+  if (callableAs !== "codex-skill-entrypoint") {
+    findings.push(error("FULL_APP_GENERATOR_CALLABLE_CONTRACT_MISSING", "Skill-orchestrated full-app generator entrypoints must be callable as Codex skill entrypoints.", {
+      id,
       callableAs: entrypoint.callableAs || null,
     }));
     return;
@@ -120,6 +134,48 @@ function validateCallableContract(entrypoint, id, kind, findings) {
   const hardStops = Array.isArray(contract.hardStops) ? contract.hardStops.map((item) => String(item || "")) : [];
   if (!hardStops.some((item) => /business defaults/i.test(item)) || !hardStops.some((item) => /validators fail/i.test(item) || /validators/i.test(item))) {
     findings.push(error("FULL_APP_GENERATOR_HARD_STOPS_INCOMPLETE", "Callable full-app generation contract must name real hard stops such as unapproved business defaults and generated-final validator failures.", { id, hardStops }));
+  }
+}
+
+function validateNodeCliMaterializerContract(entrypoint, id, callableAs, contract, findings) {
+  const executionMode = String(contract.executionMode || "").trim();
+  const command = String(contract.command || "").trim();
+  const requiredInputs = Array.isArray(contract.requiredInputs) ? contract.requiredInputs : [];
+  const continuation = String(contract.planningPassContinuation || "").trim();
+  if (callableAs !== "node-cli" || executionMode !== "node-cli-callable" || !command.includes("materialize-full-app-generated-final.mjs")) {
+    findings.push(error("FULL_APP_GENERATOR_NODE_CLI_CONTRACT_INVALID", "Standalone full-app materializers must declare callableAs node-cli, executionMode node-cli-callable, and the materialization command.", {
+      id,
+      callableAs,
+      executionMode,
+      command,
+    }));
+  }
+  for (const required of ["functional-specification.md", "yeeflow-app-plan.md", "api-issued-ids.json"]) {
+    if (!requiredInputs.includes(required)) {
+      findings.push(error("FULL_APP_GENERATOR_NODE_CLI_INPUTS_INVALID", "Standalone full-app materializer must require Functional Spec, App Plan, and API-issued ID manifest inputs.", {
+        id,
+        requiredInputs,
+        missing: required,
+      }));
+    }
+  }
+  if (contract.mustProceedAfterPlanningPass !== true || !/generated-final/i.test(continuation) || !/do not stop/i.test(continuation) || !/standalone CLI/i.test(continuation)) {
+    findings.push(error("FULL_APP_GENERATOR_PLANNING_CONTINUATION_INVALID", "Callable full-app generation contract must require continuation after planning pass and forbid stopping solely because no standalone CLI exists.", {
+      id,
+      mustProceedAfterPlanningPass: contract.mustProceedAfterPlanningPass || null,
+      planningPassContinuation: continuation || null,
+    }));
+  }
+  const outputs = Array.isArray(entrypoint.supportedOutputs) ? entrypoint.supportedOutputs.map((item) => String(item || "")) : [];
+  if (!outputs.some((item) => /\.yapk/i.test(item)) || !outputs.some((item) => /ID provenance/i.test(item))) {
+    findings.push(error("FULL_APP_GENERATOR_NODE_CLI_OUTPUTS_INVALID", "Standalone full-app materializer must declare generated-final .yapk and ID provenance outputs.", {
+      id,
+      supportedOutputs: outputs,
+    }));
+  }
+  const boundary = `${contract.proofBoundary || ""} ${entrypoint.proofBoundary || ""}`;
+  if (!/never signs/i.test(boundary) && !/not signing/i.test(boundary) && !/before signing/i.test(boundary)) {
+    findings.push(error("FULL_APP_GENERATOR_NODE_CLI_PROOF_BOUNDARY_MISSING", "Standalone full-app materializer must explicitly preserve signing/install/runtime proof boundaries.", { id }));
   }
 }
 

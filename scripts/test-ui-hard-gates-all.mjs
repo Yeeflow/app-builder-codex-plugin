@@ -68,6 +68,16 @@ const childTests = [
     ],
   },
   {
+    name: "Full-app generated-final materialization entrypoint regression suite",
+    command: ["scripts/test-full-app-materialization-entrypoint-gates.mjs"],
+    validators: [
+      "materialize-full-app-generated-final",
+      "generated-final package artifact creation",
+      "API ID manifest requirement",
+      "signing/install proof boundary",
+    ],
+  },
+  {
     name: "Dashboard install/runtime root binding and v1.1 padding regression suite",
     command: ["scripts/test-dashboard-install-runtime-root-binding-gates.mjs"],
     validators: [

@@ -166,7 +166,7 @@ The YAP Service Desk v8 smoke lessons are shared layout guidance for YAPK page/f
 
 Use this skill for Yeeflow `.yapk` version-management packages for existing application upgrades.
 
-For new full-application generation, first inspect `docs/reference/full-app-generation-entrypoints.json` with `scripts/inspect-full-app-generation-entrypoints.mjs` when the run is plugin-only or clean-room. This skill validates and packages generated `.yapk` content, but package validation and API automation are not themselves generic full-app generators. Do not use delivery helpers, package API helpers, runtime-proof generators, or sample-specific generators as substitutes for the skill-orchestrated full-app generation entrypoint.
+For new full-application generation, first inspect `docs/reference/full-app-generation-entrypoints.json` with `scripts/inspect-full-app-generation-entrypoints.mjs` when the run is plugin-only or clean-room. This skill validates and packages generated `.yapk` content, but package validation and API automation are not themselves generic full-app generators. Use `scripts/materialize-full-app-generated-final.mjs` as the concrete generated-final package materialization handoff after planning gates pass and API-issued IDs are available. Do not use delivery helpers, package API helpers, runtime-proof generators, or sample-specific generators as substitutes for the skill-orchestrated full-app generation entrypoint or the standalone materializer. If generated-final materialization cannot run because API-issued IDs are unavailable, report that hard stop directly.
 
 ## YAPK From Scratch Hardening
 
