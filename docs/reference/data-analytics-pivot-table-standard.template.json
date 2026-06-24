@@ -1,0 +1,171 @@
+{
+    "_ak_c": {
+        "id": "3ced9a97-86c6-45a7-aaba-548eb7de9f35",
+        "type": "pivot-table",
+        "label": "Pivot table",
+        "attrs": {
+            "rows": {
+                "pt_c_0": {
+                    "bc": "var(--c--neutral-light)"
+                },
+                "pt_c_1": {
+                    "bc": "var(--c--neutral-light)"
+                }
+            },
+            "columns": {
+                "pt_c_0": {}
+            },
+            "values": {
+                "pt_c_0": {},
+                "pt_c_1": {}
+            },
+            "showsorter": false,
+            "table": {
+                "br": {
+                    "top": "--sp--s075",
+                    "right": "--sp--s075",
+                    "bottom": "--sp--s075",
+                    "left": "--sp--s075"
+                },
+                "bdt": "1",
+                "bdw": [
+                    null,
+                    {
+                        "top": "--sp--s012",
+                        "right": "--sp--s012",
+                        "bottom": "--sp--s012",
+                        "left": "--sp--s012"
+                    }
+                ],
+                "bdc": "var(--c--neutral-light-active)"
+            },
+            "header": {
+                "bdt": "1",
+                "bdw": [
+                    null,
+                    {
+                        "top": "--sp--s0",
+                        "right": "--sp--s012",
+                        "bottom": "--sp--s012",
+                        "left": "--sp--s012"
+                    }
+                ],
+                "bdc": "var(--c--neutral-light-active)",
+                "normal": {
+                    "bgcolor": "var(--c--neutral-light)"
+                },
+                "ty": [
+                    null,
+                    "s-semi-bold"
+                ]
+            },
+            "body": {
+                "bdt": "1",
+                "bdw": [
+                    null,
+                    {
+                        "top": "--sp--s0",
+                        "right": "--sp--s012",
+                        "bottom": "--sp--s012",
+                        "left": "--sp--s012"
+                    }
+                ],
+                "bdc": "var(--c--neutral-light-active)",
+                "ty": [
+                    null,
+                    "s-regular"
+                ],
+                "hover": {
+                    "rbgcolor": "var(--c--neutral-light)"
+                },
+                "normal": {
+                    "rbgcolor": "var(--c--background)"
+                }
+            },
+            "grandtotal": {
+                "bdt": "1",
+                "bdw": [
+                    null,
+                    {
+                        "top": "--sp--s012",
+                        "right": "--sp--s012",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s012"
+                    }
+                ],
+                "bdc": "var(--c--neutral-light-active)",
+                "ty": [
+                    null,
+                    "s-medium"
+                ],
+                "normal": {
+                    "color": "var(--c--primary-dark)",
+                    "bgcolor": "var(--c--primary-light)"
+                }
+            },
+            "subtotal": {
+                "ty": [
+                    null,
+                    "s-medium"
+                ],
+                "normal": {
+                    "rbgcolor": "var(--c--neutral-light)"
+                }
+            }
+        },
+        "nv_label": "pivot_table_standard"
+    },
+    "_ak_c_opt": {
+        "exts": [
+            {
+                "category": "___Pivot___",
+                "key": "PivotTable",
+                "i": "3ced9a97-86c6-45a7-aaba-548eb7de9f35",
+                "attr": {
+                    "modelType": 3,
+                    "settings": {
+                        "rows": [
+                            {
+                                "fieldName": "Text4",
+                                "func": "",
+                                "id": "Text4",
+                                "mapkey": "pt_c_0"
+                            },
+                            {
+                                "fieldName": "Text8",
+                                "func": "",
+                                "id": "Text8",
+                                "mapkey": "pt_c_1"
+                            }
+                        ],
+                        "columns": [
+                            {
+                                "fieldName": "Text26",
+                                "func": "",
+                                "id": "Text26",
+                                "mapkey": "pt_c_0"
+                            }
+                        ],
+                        "values": [
+                            {
+                                "fieldName": "Decimal1",
+                                "func": "AVG",
+                                "id": "Decimal1_AVG",
+                                "mapkey": "pt_c_0"
+                            },
+                            {
+                                "fieldName": "Decimal2",
+                                "func": "AVG",
+                                "id": "Decimal2_AVG",
+                                "mapkey": "pt_c_1"
+                            }
+                        ]
+                    },
+                    "AppID": 41,
+                    "ListID": "2054077096447066112",
+                    "ListSetID": "2054077087595905025"
+                }
+            }
+        ]
+    }
+}

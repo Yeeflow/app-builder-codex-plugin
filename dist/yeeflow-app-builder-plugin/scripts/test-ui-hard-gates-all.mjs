@@ -49,6 +49,16 @@ const childTests = [
     ],
   },
   {
+    name: "Data Analytics golden-reference regression suite",
+    command: ["scripts/test-data-analytics-golden-reference-gates.mjs"],
+    validators: [
+      "validate-data-analytics-golden-references",
+      "approved Pie, Column, Bar, Line, and Pivot templates",
+      "Dashboard v1.1 two/three-column placement",
+      "Approval form exclusion",
+    ],
+  },
+  {
     name: "Full-app generation entrypoint contract regression suite",
     command: ["scripts/test-full-app-generation-entrypoint-gates.mjs"],
     validators: [

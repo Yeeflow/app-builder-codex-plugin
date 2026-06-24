@@ -1,0 +1,332 @@
+{
+    "_ak_c": {
+        "id": "4e311ab7-96bc-4f57-b81f-7c1e6ec352e7",
+        "type": "container",
+        "label": "Container",
+        "displayLabel": true,
+        "attrs": {
+            "common": {
+                "padding": [
+                    null,
+                    {
+                        "top": 20,
+                        "right": 20,
+                        "bottom": 20,
+                        "left": 20
+                    }
+                ],
+                "border": {
+                    "normal": {
+                        "type": "1",
+                        "width": [
+                            null,
+                            {
+                                "top": 1,
+                                "right": 1,
+                                "bottom": 1,
+                                "left": 1
+                            }
+                        ],
+                        "color": "rgba(7, 22, 56, 0.1)",
+                        "radius": [
+                            null,
+                            {
+                                "top": 10,
+                                "right": 10,
+                                "bottom": 10,
+                                "left": 10
+                            }
+                        ]
+                    },
+                    "hover": {
+                        "boxShadow": {
+                            "color": "rgba(195, 195, 195, 0.3)",
+                            "x": 0,
+                            "y": 0,
+                            "blur": 30,
+                            "spread": 0,
+                            "position": "outline"
+                        }
+                    }
+                },
+                "background": {
+                    "normal": {
+                        "type": "classic",
+                        "classic": {
+                            "color": "var(--c--background)"
+                        }
+                    }
+                }
+            },
+            "style": {
+                "gap": [
+                    null,
+                    10
+                ],
+                "widthtype": [
+                    null,
+                    "1"
+                ],
+                "width": [
+                    null,
+                    30
+                ],
+                "widthu": [
+                    null,
+                    "%"
+                ],
+                "direction": [
+                    null,
+                    "column"
+                ],
+                "justify_content": [
+                    null,
+                    "space-between"
+                ]
+            },
+            "control_display": [
+                {
+                    "id": "9e7ef944-4932-4d7c-8b19-317bba48d2d3",
+                    "controlId": "bdb295a2-2022-4778-bcb7-a811433d334f",
+                    "formulas": [
+                        {
+                            "exprType": "variable",
+                            "valueType": "string",
+                            "id": "__temp_var_Centre",
+                            "type": "expr",
+                            "name": "var_Centre"
+                        },
+                        {
+                            "type": "op",
+                            "op": "=="
+                        },
+                        {
+                            "type": "str",
+                            "value": "ALL"
+                        },
+                        {
+                            "type": "op",
+                            "op": "or"
+                        },
+                        {
+                            "type": "func",
+                            "func": "isNullOrEmpty",
+                            "params": [
+                                [
+                                    {
+                                        "exprType": "variable",
+                                        "valueType": "string",
+                                        "id": "__temp_var_Centre",
+                                        "type": "expr",
+                                        "name": "var_Centre"
+                                    }
+                                ]
+                            ]
+                        },
+                        {
+                            "type": "op",
+                            "op": "=="
+                        },
+                        {
+                            "type": "bool",
+                            "value": true
+                        }
+                    ],
+                    "actions": {
+                        "id": "7ea5b93a-752f-4bc0-aaf3-ffc3a7439f19",
+                        "type": 1,
+                        "attrs": {
+                            "style_regulation_action": "style_regulation_action_show",
+                            "style_regulation_action_color": null,
+                            "action_style": null,
+                            "icon_type": null
+                        }
+                    }
+                }
+            ]
+        },
+        "children": [
+            {
+                "id": "31ff32dc-e969-47ec-a595-c9c50abb38a6",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            10
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "cdb78acc-8f3f-463b-8e51-34c42152fed5",
+                        "type": "container",
+                        "label": "Container",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "padding": [
+                                    null,
+                                    {
+                                        "top": null,
+                                        "right": null,
+                                        "bottom": 5,
+                                        "left": null
+                                    }
+                                ],
+                                "border": {
+                                    "normal": {
+                                        "type": "1",
+                                        "width": [
+                                            null,
+                                            {
+                                                "bottom": 1
+                                            }
+                                        ],
+                                        "color": "rgba(7, 22, 56, 0.1)"
+                                    }
+                                }
+                            },
+                            "style": {
+                                "direction": [
+                                    null,
+                                    "row"
+                                ],
+                                "align_items": [
+                                    null,
+                                    "center"
+                                ]
+                            }
+                        },
+                        "children": [
+                            {
+                                "id": "f7bc3642-a52a-4590-9c2f-fc26be5b1d2b",
+                                "type": "heading",
+                                "label": "Text",
+                                "displayLabel": true,
+                                "attrs": {
+                                    "headc": {
+                                        "title": {
+                                            "value": "👥. Ticket Volume Over Time",
+                                            "variable": null
+                                        }
+                                    },
+                                    "heads": {
+                                        "ty": {
+                                            "size": [
+                                                null,
+                                                18
+                                            ],
+                                            "wei": "300"
+                                        }
+                                    }
+                                },
+                                "parentCol": 1,
+                                "nv_label": "line_chart_title"
+                            }
+                        ],
+                        "parentCol": 1,
+                        "nv_label": "line_chart_title_wrapper"
+                    },
+                    {
+                        "id": "a98bfdcb-418f-435c-ad01-3aeee1d395ee",
+                        "type": "line-chart",
+                        "label": "Line chart",
+                        "displayLabel": true,
+                        "attrs": {},
+                        "parentCol": 1,
+                        "nv_label": "line_chart_control"
+                    }
+                ],
+                "parentCol": 1,
+                "nv_label": "line_chart_container"
+            }
+        ],
+        "parentCol": 1,
+        "nv_label": "line_chart_with_title_wrapper"
+    },
+    "_ak_c_opt": {
+        "exts": [
+            {
+                "category": "___Pivot___",
+                "key": "line-chart",
+                "i": "a98bfdcb-418f-435c-ad01-3aeee1d395ee",
+                "attr": {
+                    "chartType": "1",
+                    "settings": {
+                        "rows": [
+                            {
+                                "type": "datepicker",
+                                "label": "Created Time",
+                                "attr": {
+                                    "displayLabel": true,
+                                    "readonly": true,
+                                    "showtime": true,
+                                    "dateformat": "0"
+                                },
+                                "fieldName": "Created",
+                                "fieldType": "Datetime",
+                                "func": "DATE",
+                                "id": "Created"
+                            }
+                        ],
+                        "values": [
+                            {
+                                "type": "input",
+                                "label": "Id",
+                                "attr": {
+                                    "displayLabel": true,
+                                    "readonly": true
+                                },
+                                "fieldName": "ListDataID",
+                                "fieldType": "Bigint",
+                                "func": "COUNT",
+                                "id": "ListDataID_COUNT"
+                            }
+                        ],
+                        "preConditions": null,
+                        "Conditions": [
+                            {
+                                "key": "1ec1d2f6-cd2b-4d18-a69f-f2d5090a6fc5",
+                                "pre": "and",
+                                "left": "Created",
+                                "op": "0",
+                                "right": [
+                                    {
+                                        "exprType": "variable",
+                                        "valueType": "string",
+                                        "id": "__filter_f_SubmittedPeriod",
+                                        "type": "expr",
+                                        "name": "f_SubmittedPeriod"
+                                    }
+                                ],
+                                "showCus": false
+                            },
+                            {
+                                "key": "bec90db1-bc2a-4af8-84a4-480eac4dccb5",
+                                "pre": "and",
+                                "left": "Text26",
+                                "op": "0",
+                                "right": [
+                                    {
+                                        "exprType": "variable",
+                                        "valueType": "string",
+                                        "id": "__filter_filter_Team",
+                                        "type": "expr",
+                                        "name": "filter_Team"
+                                    }
+                                ],
+                                "showCus": false
+                            }
+                        ]
+                    },
+                    "AppID": 41,
+                    "ListID": "2054077096447066112",
+                    "ListSetID": "2054077087595905025"
+                }
+            }
+        ]
+    }
+}

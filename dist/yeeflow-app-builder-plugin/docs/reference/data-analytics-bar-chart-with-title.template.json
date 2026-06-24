@@ -1,0 +1,351 @@
+{
+    "_ak_c": {
+        "id": "7860b1be-f749-43b3-ba1d-771a8b61a165",
+        "type": "container",
+        "label": "Container",
+        "displayLabel": true,
+        "attrs": {
+            "common": {
+                "padding": [
+                    null,
+                    {
+                        "top": 20,
+                        "right": 20,
+                        "bottom": 20,
+                        "left": 20
+                    }
+                ],
+                "border": {
+                    "normal": {
+                        "type": "1",
+                        "width": [
+                            null,
+                            {
+                                "top": 1,
+                                "right": 1,
+                                "bottom": 1,
+                                "left": 1
+                            }
+                        ],
+                        "color": "rgba(7, 22, 56, 0.1)",
+                        "radius": [
+                            null,
+                            {
+                                "top": 10,
+                                "right": 10,
+                                "bottom": 10,
+                                "left": 10
+                            }
+                        ]
+                    },
+                    "hover": {
+                        "boxShadow": {
+                            "color": "rgba(195, 195, 195, 0.3)",
+                            "x": 0,
+                            "y": 0,
+                            "blur": 30,
+                            "spread": 0,
+                            "position": "outline"
+                        }
+                    }
+                },
+                "background": {
+                    "normal": {
+                        "type": "classic",
+                        "classic": {
+                            "color": "var(--c--background)"
+                        }
+                    }
+                }
+            },
+            "style": {
+                "gap": [
+                    null,
+                    10
+                ],
+                "widthtype": [
+                    null,
+                    "1"
+                ],
+                "width": [
+                    null,
+                    30
+                ],
+                "widthu": [
+                    null,
+                    "%"
+                ],
+                "direction": [
+                    null,
+                    "column"
+                ],
+                "justify_content": [
+                    null,
+                    "space-between"
+                ]
+            }
+        },
+        "children": [
+            {
+                "id": "a0fe5d28-c9b6-4d33-baa2-45f556ceab3e",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "direction": [
+                            null,
+                            "column"
+                        ],
+                        "justify_content": [
+                            null,
+                            "flex-start"
+                        ],
+                        "gap": [
+                            null,
+                            10
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "670ccb85-ff57-4de0-8bc0-7a0c0fe864c1",
+                        "type": "container",
+                        "label": "Container",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "padding": [
+                                    null,
+                                    {
+                                        "top": null,
+                                        "right": null,
+                                        "bottom": 5,
+                                        "left": null
+                                    }
+                                ],
+                                "border": {
+                                    "normal": {
+                                        "type": "1",
+                                        "width": [
+                                            null,
+                                            {
+                                                "bottom": 1
+                                            }
+                                        ],
+                                        "color": "rgba(7, 22, 56, 0.1)"
+                                    }
+                                }
+                            }
+                        },
+                        "children": [
+                            {
+                                "id": "878b9a74-4263-4f03-b2cf-32dcaffd1b34",
+                                "type": "heading",
+                                "label": "Text",
+                                "displayLabel": true,
+                                "attrs": {
+                                    "headc": {
+                                        "title": {
+                                            "value": "👬. Tickets by Category",
+                                            "variable": null
+                                        }
+                                    },
+                                    "heads": {
+                                        "ty": {
+                                            "size": [
+                                                null,
+                                                18
+                                            ],
+                                            "wei": "300"
+                                        }
+                                    }
+                                },
+                                "parentCol": 1,
+                                "nv_label": "bar_chart_title"
+                            }
+                        ],
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "e41b9469-d9d1-4422-87b7-f4c015db2446",
+                        "type": "bar-chart",
+                        "label": "Column chart",
+                        "displayLabel": true,
+                        "attrs": {},
+                        "parentCol": 1,
+                        "nv_label": "bar_chart_control"
+                    }
+                ],
+                "parentCol": 1,
+                "nv_label": "bar_chart_container"
+            }
+        ],
+        "parentCol": 1,
+        "nv_label": "bar_chart_with_title_wrapper"
+    },
+    "_ak_c_opt": {
+        "exts": [
+            {
+                "category": "___Pivot___",
+                "key": "bar-chart",
+                "i": "e41b9469-d9d1-4422-87b7-f4c015db2446",
+                "attr": {
+                    "chartType": "4",
+                    "settings": {
+                        "rows": [
+                            {
+                                "type": "lookup",
+                                "label": "Type of Request",
+                                "attr": {
+                                    "max-selection": 20,
+                                    "appid": 41,
+                                    "listid": "2054077096749056000",
+                                    "listsetid": "2054077087595905025",
+                                    "listfield": "Title",
+                                    "list_tooltip_field": null,
+                                    "addition": [
+                                        {
+                                            "FieldName": "Title",
+                                            "FieldID": "2054077096757444609",
+                                            "IsShow": true,
+                                            "RelationName": "Text28",
+                                            "Value": null,
+                                            "Order": "0"
+                                        }
+                                    ],
+                                    "sort-first": {
+                                        "SortName": "Created",
+                                        "SortByDesc": false
+                                    },
+                                    "sort-second": null,
+                                    "listfilter": null,
+                                    "required": true,
+                                    "displayStyle": "dropdown",
+                                    "placeholder": "Select the type of request"
+                                },
+                                "fieldName": "Text3",
+                                "fieldType": "Text",
+                                "func": "",
+                                "id": "Text3"
+                            },
+                            {
+                                "type": "lookup",
+                                "label": "Category",
+                                "attr": {
+                                    "max-selection": 20,
+                                    "appid": 41,
+                                    "listid": "2054077096774221824",
+                                    "listsetid": "2054077087595905025",
+                                    "listfield": "Title",
+                                    "list_tooltip_field": null,
+                                    "addition": [
+                                        {
+                                            "FieldName": "Title",
+                                            "FieldID": "2054077096778416129",
+                                            "IsShow": false,
+                                            "RelationName": "Text30",
+                                            "Value": null,
+                                            "Order": null
+                                        },
+                                        {
+                                            "FieldName": "Text2",
+                                            "FieldID": "2054077096782610433",
+                                            "IsShow": false,
+                                            "RelationName": "Text26",
+                                            "Value": null,
+                                            "Order": null
+                                        }
+                                    ],
+                                    "sort-first": {
+                                        "SortName": "Created",
+                                        "SortByDesc": false
+                                    },
+                                    "sort-second": null,
+                                    "listfilter": [
+                                        {
+                                            "key": "473731a4-cdab-4a92-a390-17754b86c98c",
+                                            "pre": "and",
+                                            "left": "Text1",
+                                            "op": "0",
+                                            "right": [
+                                                {
+                                                    "exprType": "list_field",
+                                                    "valueType": "lookup",
+                                                    "prop": "Text3",
+                                                    "id": "Type_of_Request",
+                                                    "type": "expr",
+                                                    "name": "List Fields:Type of Request"
+                                                }
+                                            ],
+                                            "showCus": false
+                                        }
+                                    ],
+                                    "displayStyle": "dropdown",
+                                    "required": true,
+                                    "placeholder": "Choose the category that best fits your issue"
+                                },
+                                "fieldName": "Text4",
+                                "fieldType": "Text",
+                                "func": "",
+                                "id": "Text4"
+                            }
+                        ],
+                        "values": [
+                            {
+                                "type": "input",
+                                "label": "Id",
+                                "attr": {
+                                    "displayLabel": true,
+                                    "readonly": true
+                                },
+                                "fieldName": "ListDataID",
+                                "fieldType": "Bigint",
+                                "func": "COUNT",
+                                "id": "ListDataID_COUNT"
+                            }
+                        ],
+                        "preConditions": null,
+                        "Conditions": [
+                            {
+                                "key": "160d3ad3-efc2-49b9-8711-4a25642fb591",
+                                "pre": "and",
+                                "left": "Created",
+                                "op": "0",
+                                "right": [
+                                    {
+                                        "exprType": "variable",
+                                        "valueType": "string",
+                                        "id": "__filter_f_SubmittedPeriod",
+                                        "type": "expr",
+                                        "name": "f_SubmittedPeriod"
+                                    }
+                                ],
+                                "showCus": false
+                            },
+                            {
+                                "key": "5383b50e-3491-4f83-a15e-064e935244d7",
+                                "pre": "and",
+                                "left": "Text26",
+                                "op": "0",
+                                "right": [
+                                    {
+                                        "exprType": "variable",
+                                        "valueType": "string",
+                                        "id": "__filter_filter_Team",
+                                        "type": "expr",
+                                        "name": "filter_Team"
+                                    }
+                                ],
+                                "showCus": false
+                            }
+                        ]
+                    },
+                    "AppID": 41,
+                    "ListID": "2054077096447066112",
+                    "ListSetID": "2054077087595905025"
+                }
+            }
+        ]
+    }
+}
