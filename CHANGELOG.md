@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.36
+
+- Release full-app materializer generated-final preflight alignment from PR #209.
+- Preserve API-issued IDs as strings to avoid JavaScript precision loss and duplicate decoded IDs.
+- Emit ID provenance paths that match the actual decoded package, including data-list fields/layouts, approval DefResource IDs, custom form layouts, and dashboard layout resources.
+- Materialize runtime navigation metadata, generated data-list default views, canonical approval DefResource workflow/task/action metadata, and dashboard Summary/filter/Collection runtime metadata so nontrivial full-app packages pass generated-final preflight gates before signing can be considered.
+- Extend full-app materializer regression coverage to require ID provenance, runtime navigation, data-list schema, YAPK package, generated export-shape, and generated-final resource-completeness validation for nontrivial App Plans.
+
 ## 0.8.35
 
 - Release minimal full-app materializer resource-graph generation from PR #207.

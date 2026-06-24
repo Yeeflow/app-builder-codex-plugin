@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.35`
+`0.8.36`
+
+Version `0.8.36` releases full-app materializer generated-final preflight alignment from PR #209. Nontrivial materialized packages must preserve API-issued IDs as strings, emit ID provenance paths that match the actual decoded package, generate runtime navigation metadata, generated data-list default views, canonical approval DefResource workflow/task/action metadata, and dashboard Summary/filter/Collection runtime metadata before signing eligibility can be considered.
 
 Version `0.8.35` releases minimal full-app materializer resource-graph generation from PR #207. Supported nontrivial App Plans now materialize generated-final `.yapk` packages with schema-shaped data lists, approval forms, FormNewReports, custom list layouts, dashboard pages, and grouped navigation. The standalone materializer still keeps `signingEligible: false` until generated-final preflight passes; it does not sign, install/import, upgrade, seed data, or claim browser/runtime proof.
 
