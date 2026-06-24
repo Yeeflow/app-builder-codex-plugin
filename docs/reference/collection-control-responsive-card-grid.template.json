@@ -1,0 +1,2355 @@
+{
+  "schemaVersion": "1.0",
+  "templateId": "collection_control_responsive_card_grid",
+  "displayName": "Collection Control Responsive Card Grid",
+  "source": {
+    "packageFile": "Company Overview-v1.4.yapk",
+    "packageTitle": "Company Overview",
+    "packageVersion": "v1.4",
+    "sourceDashboardPageTitle": "Collection_control_responsive_card_grid",
+    "sourceDashboardPageType": "103",
+    "sourceDashboardLayoutID": "{{sourceDashboardLayoutID}}",
+    "sourceLayoutResourceID": "{{sourceLayoutResourceID}}",
+    "decodeMethod": "tolerant-streaming-brotli",
+    "decodeDiagnostic": "Z_BUF_ERROR:unexpected end of file",
+    "extractionBoundary": "Plugin reference template stores only the responsive card Collection component subtree and required page-level dependencies. Source resource IDs are redacted/placeholders; generated packages must remap all resource IDs to the target app."
+  },
+  "usageContract": {
+    "host": "Dashboard Page Layouts v1.1 business-content slot such as section_content_area",
+    "copyRule": "Copy collection_control_responsive_card_wrapper and all descendants as the component root. Do not recreate the component from a generic card Collection or simplified controls.",
+    "immutableByDefault": "All containers and controls are locked unless listed in editableRegions or repeatableOptionalParts.",
+    "requiredDependencies": [
+      "pageLevelDependencies.filterVars and pageLevelDependencies.filter when search/fulltext is present",
+      "pageLevelDependencies.tempVars when delete confirmation is present",
+      "collection root attrs.actions when item operation buttons are present",
+      "grid_table_col_item_op_menu action buttons must bind to Collection actions when present"
+    ],
+    "displayOnlyMode": "When the source is Form Report/Data Report or the business requirement is display-only, card_col_caption and card_col_item_multi_select may be omitted; do not emit edit/delete actions for view-only datasets."
+  },
+  "editableRegions": [
+    {
+      "nv_label": "card_col_title_wrapper",
+      "rule": "May edit business title content only. card_col_title text must match the Collection data source/business region. Preserve wrapper layout/style.",
+      "pointer": "$.children[0].children[0]"
+    },
+    {
+      "nv_label": "op_normal",
+      "rule": "May add/delete normal-mode controls. Recommended to keep Search filter and Add item button; may change Search title/placeholder and Add item button text. Every button must keep a valid action binding.",
+      "pointer": "$.children[0].children[1].children[0]"
+    },
+    {
+      "nv_label": "card_col_item",
+      "rule": "May map repeated item fields to the selected data source. Use Dynamic user for user fields, Dynamic image only for image fields, Dynamic file for file/attachment fields, and Dynamic field otherwise. Include a subject-style Large/Semi bold Dynamic field when a subject/title field exists.",
+      "pointer": "$.children[1].children[0]"
+    },
+    {
+      "nv_label": "card_col_item_multi_select",
+      "rule": "Optional item-operation host. May be omitted for display-only or non-Data List/Document Library sources. If present, preserve dropbar shell and bind every operation button to Collection actions.",
+      "pointer": "$.children[1].children[0].children[3]"
+    },
+    {
+      "nv_label": "grid_table_col_item_op_menu",
+      "rule": "May add/remove item operation buttons such as Edit/Delete. Every button must bind to a Collection action; delete requires confirmation temp variable and conditional delete flow.",
+      "pointer": "$.children[1].children[0].children[3].children[0]"
+    }
+  ],
+  "repeatableOptionalParts": [
+    {
+      "nv_label": "grid_table_col_item_op_menu_panel action buttons",
+      "rule": "May contain multiple item-operation buttons when the Collection source supports item operations. Buttons are not allowed for Form Report/Data Report view-only datasets.",
+      "pointer": "$.children[1].children[0].children[3].children[0].children[0]"
+    }
+  ],
+  "lockedRegions": [
+    {
+      "nv_label": "collection_control_responsive_card_wrapper",
+      "rule": "Component root and structural wrapper styles/layout must remain export-shape identical except for allowed descendant edits.",
+      "pointer": "$"
+    },
+    {
+      "nv_label": "card_col_caption",
+      "rule": "Caption area style/layout must remain unchanged when included. It may be omitted only for display-only or non-operational datasets.",
+      "pointer": "$.children[0]"
+    },
+    {
+      "nv_label": "card_col_body",
+      "rule": "Collection root settings, responsive layout, search/fulltext wiring, pagination, data/action wiring, and item template host must remain unchanged except app-specific data-source/action remapping through supported generator logic.",
+      "pointer": "$.children[1]"
+    }
+  ],
+  "dynamicControlMappingRules": {
+    "userField": "dynamic-user",
+    "imageField": "dynamic-image; do not emit if selected data source has no image field",
+    "fileOrAttachmentField": "dynamic-file",
+    "defaultField": "dynamic-field",
+    "subjectField": "Prefer a Dynamic field equivalent to the source Survey Program name role and preserve Large/Semi bold subject styling."
+  },
+  "operationRules": {
+    "addItem": "If Add item exists, it must bind to a valid add/listitem action for Data List/Document Library sources.",
+    "editItem": "If Edit exists, it must bind to a Collection action that opens the selected item using __ctx_coll ListDataID.",
+    "deleteItem": "If Delete exists, it must bind to a Collection action with confirm step, temp variable var_isDeleteConfirmed, condition check, and setdatalist remove scoped by __ctx_coll ListDataID.",
+    "viewOnlySources": "Form Report/Data Report dataset presentations must not include edit/delete item operation controls."
+  },
+  "pageLevelDependencies": {
+    "filterVars": [
+      {
+        "idx": "9f4bdadf-a55d-4962-8c1f-e26ef39a2c56",
+        "id": "filter_keywords"
+      }
+    ],
+    "tempVars": [
+      {
+        "idx": "21e2c39d-6e96-4171-8e15-fca994c925b2",
+        "id": "var_isDeleteConfirmed"
+      }
+    ],
+    "actions": [],
+    "filter": [
+      {
+        "idx": "9f4bdadf-a55d-4962-8c1f-e26ef39a2c56",
+        "id": "filter_keywords"
+      }
+    ],
+    "formAction": {
+      "onLoad": "cdf1ac08-104c-4968-9f73-101d4fe803fb"
+    }
+  },
+  "templateResource": {
+    "rootContainer": {
+      "id": "6c305bb6-445d-40a2-9a6f-37419d63f6b0",
+      "type": "container",
+      "label": "Container",
+      "attrs": {
+        "style": {
+          "gap": [
+            null,
+            "--sp--s200"
+          ],
+          "direction": [
+            null,
+            "column"
+          ]
+        }
+      },
+      "children": [
+        {
+          "id": "6ce9dfa1-f50d-4d32-a1d2-8184d2fc054f",
+          "type": "container",
+          "label": "Container",
+          "attrs": {
+            "style": {
+              "direction": [
+                null,
+                "row",
+                "column",
+                "column"
+              ],
+              "align_items": [
+                null,
+                "center",
+                "flex-start"
+              ],
+              "justify_content": [
+                null,
+                "space-between"
+              ],
+              "gap": [
+                null,
+                "--sp--s200",
+                "--sp--s150",
+                "--sp--s100"
+              ]
+            }
+          },
+          "children": [
+            {
+              "id": "e251d4d8-53f9-4826-83d5-8696c5cd0e4c",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "widthtype": [
+                    null,
+                    "2",
+                    "1",
+                    "1"
+                  ],
+                  "direction": [
+                    null,
+                    "column"
+                  ],
+                  "gap": [
+                    null,
+                    "--sp--s0"
+                  ],
+                  "align_items": [
+                    null,
+                    null,
+                    "flex-start",
+                    "flex-start"
+                  ],
+                  "justify_content": [
+                    null,
+                    null,
+                    null,
+                    "flex-start"
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "id": "1c745fc8-f75a-4b40-baa2-64355852d622",
+                  "type": "heading",
+                  "label": "Text",
+                  "attrs": {
+                    "headc": {
+                      "title": {
+                        "value": "Collection title here",
+                        "variable": null
+                      }
+                    },
+                    "heads": {
+                      "ty": [
+                        null,
+                        "h5-medium"
+                      ]
+                    },
+                    "common": {
+                      "positioning": {
+                        "widthtype": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [],
+                  "nv_label": "card_col_title"
+                }
+              ],
+              "nv_label": "card_col_title_wrapper"
+            },
+            {
+              "id": "f593c1ed-1493-4ee0-9869-9d40c8280562",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "widthtype": [
+                    null,
+                    "2",
+                    "1",
+                    "1"
+                  ],
+                  "gap": [
+                    null,
+                    10
+                  ],
+                  "direction": [
+                    null,
+                    "row"
+                  ],
+                  "align_items": [
+                    null,
+                    "center"
+                  ],
+                  "justify_content": [
+                    null,
+                    "flex-end",
+                    "space-between"
+                  ]
+                }
+              },
+              "children": [
+                {
+                  "id": "f0d05d2f-8858-40d4-811f-d826b06465f0",
+                  "type": "container",
+                  "label": "Container",
+                  "attrs": {
+                    "style": {
+                      "widthtype": [
+                        null,
+                        "2",
+                        "1",
+                        "1"
+                      ],
+                      "gap": [
+                        null,
+                        10
+                      ],
+                      "direction": [
+                        null,
+                        "row"
+                      ],
+                      "align_items": [
+                        null,
+                        "center"
+                      ],
+                      "justify_content": [
+                        null,
+                        "flex-end"
+                      ]
+                    },
+                    "control_display": [
+                      {
+                        "id": "9ee51405-ee4f-41c1-ac1a-b4e9d0a7d67a",
+                        "controlId": "b71b3ee5-4003-4c44-8c0d-231787f08617",
+                        "formulas": [
+                          {
+                            "exprType": "variable",
+                            "valueType": "string",
+                            "id": "__temp_var_SelectedItemsAmount",
+                            "type": "expr",
+                            "name": "var_SelectedItemsAmount"
+                          },
+                          {
+                            "type": "op",
+                            "op": ">"
+                          },
+                          {
+                            "type": "num",
+                            "value": "0"
+                          }
+                        ],
+                        "actions": {
+                          "id": "2057f1d1-a864-45d2-8d8f-0d7b5ff1a12d",
+                          "type": 1,
+                          "attrs": {
+                            "style_regulation_action": "style_regulation_action_hidden",
+                            "style_regulation_action_color": null,
+                            "action_style": null,
+                            "icon_type": null
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "children": [
+                    {
+                      "id": "2fd6aa84-777f-48ac-a2b0-57d1d79fdecd",
+                      "type": "search-filter",
+                      "label": "Search items",
+                      "attrs": {
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "3",
+                              "1"
+                            ],
+                            "width": [
+                              null,
+                              200
+                            ]
+                          }
+                        },
+                        "placeholder": "Search items",
+                        "edit": {
+                          "pcolor": "var(--c--neutral-dark-hover)",
+                          "normal": {
+                            "border": {
+                              "radius": [
+                                null,
+                                {
+                                  "top": "--sp--s100",
+                                  "right": "--sp--s100",
+                                  "bottom": "--sp--s100",
+                                  "left": "--sp--s100"
+                                }
+                              ]
+                            }
+                          },
+                          "pd": [
+                            null,
+                            {
+                              "top": "--sp--s075",
+                              "right": "--sp--s075",
+                              "bottom": "--sp--s075",
+                              "left": "--sp--s075"
+                            }
+                          ]
+                        }
+                      },
+                      "binding": "__filter_filter_keywords",
+                      "displayLabel": [
+                        null,
+                        false
+                      ]
+                    },
+                    {
+                      "id": "0ebf0d4d-256b-4f36-ac08-65aed0f7c1ce",
+                      "type": "action_button",
+                      "attrs": {
+                        "button-style": "2",
+                        "label": {
+                          "variable": null
+                        },
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "container": {
+                            "size": [
+                              null,
+                              "grow",
+                              "none"
+                            ]
+                          }
+                        },
+                        "control_action": "77a4ae40-f393-408a-9273-0e47fbc83b10",
+                        "icon-type": "3",
+                        "icon": "fa-regular fa-plus",
+                        "action-type": "5",
+                        "data": {
+                          "list": {
+                            "AppID": 41,
+                            "ListSetID": "{{ListSetID}}",
+                            "ListID": "{{ListID}}"
+                          }
+                        },
+                        "button": {
+                          "normal": {
+                            "border": {
+                              "radius": [
+                                null,
+                                {
+                                  "top": "--sp--s100",
+                                  "right": "--sp--s100",
+                                  "bottom": "--sp--s100",
+                                  "left": "--sp--s100"
+                                }
+                              ],
+                              "type": "99"
+                            }
+                          }
+                        }
+                      },
+                      "label": "Add item",
+                      "nv_label": "Add new item"
+                    }
+                  ],
+                  "nv_label": "op_normal"
+                }
+              ],
+              "nv_label": "card_col_operations"
+            }
+          ],
+          "nv_label": "card_col_caption"
+        },
+        {
+          "id": "a36128b9-ff96-4298-9f5e-0e21b460ac70",
+          "type": "collection",
+          "label": "Collection",
+          "attrs": {
+            "data": {
+              "list": {
+                "AppID": 41,
+                "ListID": "{{ListID}}",
+                "Type": 1,
+                "Title": "Company Overview",
+                "ListSetID": "{{ListSetID}}"
+              },
+              "sort": [
+                {
+                  "SortName": "Created",
+                  "SortByDesc": true
+                }
+              ],
+              "ps": 9,
+              "filter": [],
+              "fulltext": [
+                {
+                  "fields": [
+                    "Title",
+                    "Text1",
+                    "Text5"
+                  ],
+                  "value": [
+                    {
+                      "exprType": "variable",
+                      "valueType": "string",
+                      "id": "__filter_filter_keywords",
+                      "type": "expr",
+                      "name": "filter_keywords"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "cg": [
+                null,
+                16
+              ],
+              "rg": [
+                null,
+                16
+              ],
+              "cp": [
+                null,
+                {
+                  "top": "--sp--s0",
+                  "right": "--sp--s0",
+                  "bottom": "--sp--s0",
+                  "left": "--sp--s0"
+                }
+              ],
+              "align-i": [
+                null,
+                "7"
+              ],
+              "col": [
+                null,
+                null,
+                2,
+                1
+              ]
+            },
+            "actions": [
+              {
+                "id": "79cfee27-8aa5-4fa4-8eb4-eae160a53bdf",
+                "name": "Edit item",
+                "steps": [
+                  {
+                    "type": "listitem",
+                    "attrs": {
+                      "data": {
+                        "list": {
+                          "AppID": 41,
+                          "ListSetID": "{{ListSetID}}",
+                          "ListID": "{{ListID}}"
+                        }
+                      },
+                      "op_type": "edit",
+                      "listdataid": [
+                        {
+                          "exprType": "variable_ctx",
+                          "valueType": "input",
+                          "id": "ListDataID",
+                          "ctx": "__ctx_coll",
+                          "type": "expr",
+                          "name": "Collection item:Id"
+                        }
+                      ],
+                      "layout": "{{DetailLayoutID}}",
+                      "op": "modal",
+                      "modalsize": 0
+                    }
+                  }
+                ],
+                "type": "coll"
+              },
+              {
+                "id": "91e3d175-da37-4de3-92a1-a58816c09a9b",
+                "name": "Delete item",
+                "steps": [
+                  {
+                    "type": "confirm",
+                    "attrs": {
+                      "confirm_qs": [
+                        {
+                          "type": "str",
+                          "value": "Are you sure that you want to delete this item?"
+                        }
+                      ],
+                      "confirm_rs": {
+                        "exprType": "variable",
+                        "valueType": "string",
+                        "id": "__temp_var_isDeleteConfirmed",
+                        "type": "expr",
+                        "name": "var_isDeleteConfirmed"
+                      }
+                    }
+                  },
+                  {
+                    "type": "setdatalist",
+                    "attrs": {
+                      "list": {
+                        "AppID": 41,
+                        "ListSetID": "{{ListSetID}}",
+                        "ListID": "{{ListID}}"
+                      },
+                      "listtype": "select",
+                      "type": "remove",
+                      "wheres": [
+                        {
+                          "key": "01d4cc4f-c015-4eec-b56e-85465180d18c",
+                          "pre": "and",
+                          "left": "ListDataID",
+                          "op": "0",
+                          "right": [
+                            {
+                              "exprType": "variable_ctx",
+                              "valueType": "input",
+                              "id": "ListDataID",
+                              "ctx": "__ctx_coll",
+                              "type": "expr",
+                              "name": "Collection item:Id"
+                            }
+                          ],
+                          "showCus": false
+                        }
+                      ]
+                    },
+                    "condition": [
+                      {
+                        "exprType": "variable",
+                        "valueType": "string",
+                        "id": "__temp_var_isDeleteConfirmed",
+                        "type": "expr",
+                        "name": "var_isDeleteConfirmed"
+                      },
+                      {
+                        "type": "op",
+                        "op": "=="
+                      },
+                      {
+                        "type": "bool",
+                        "value": true
+                      }
+                    ]
+                  }
+                ],
+                "type": "coll"
+              }
+            ],
+            "pagination": {
+              "p": {
+                "sp": [
+                  null,
+                  16
+                ],
+                "ty": {
+                  "size": [
+                    null,
+                    "--sp--s200"
+                  ]
+                }
+              }
+            }
+          },
+          "children": [
+            {
+              "id": "39ee2424-30c9-4a52-a81e-a0963a6b1150",
+              "type": "container",
+              "label": "Container",
+              "attrs": {
+                "style": {
+                  "gap": [
+                    null,
+                    "--sp--s100"
+                  ],
+                  "direction": [
+                    null,
+                    "column"
+                  ],
+                  "wrap": [
+                    null,
+                    "nowrap"
+                  ],
+                  "widthtype": [
+                    null,
+                    "1"
+                  ],
+                  "align_items": [
+                    null,
+                    "stretch"
+                  ],
+                  "justify_content": [
+                    null,
+                    "flex-start"
+                  ],
+                  "background": "#ffffff",
+                  "border": {
+                    "type": "1",
+                    "width": [
+                      null,
+                      {
+                        "top": 1,
+                        "right": 1,
+                        "bottom": 1,
+                        "left": 1
+                      }
+                    ],
+                    "color": "#e5edf5"
+                  },
+                  "padding": [
+                    null,
+                    {
+                      "top": 18,
+                      "right": 18,
+                      "bottom": 18,
+                      "left": 18
+                    }
+                  ],
+                  "radius": [
+                    null,
+                    {
+                      "top": 16,
+                      "right": 16,
+                      "bottom": 16,
+                      "left": 16
+                    }
+                  ]
+                },
+                "common": {
+                  "padding": [
+                    null,
+                    {
+                      "top": 26,
+                      "right": 26,
+                      "bottom": 26,
+                      "left": 26
+                    },
+                    null,
+                    {
+                      "top": 18,
+                      "right": 18,
+                      "bottom": 18,
+                      "left": 18
+                    }
+                  ],
+                  "background": {
+                    "normal": {
+                      "type": "classic",
+                      "classic": {
+                        "color": "#ffffff"
+                      }
+                    }
+                  },
+                  "border": {
+                    "normal": {
+                      "type": "1",
+                      "width": [
+                        null,
+                        {
+                          "top": 1,
+                          "right": 1,
+                          "bottom": 1,
+                          "left": 1
+                        }
+                      ],
+                      "color": "#d8e1ef",
+                      "radius": [
+                        null,
+                        {
+                          "top": 16,
+                          "right": 16,
+                          "bottom": 16,
+                          "left": 16
+                        }
+                      ]
+                    }
+                  },
+                  "shadow": {
+                    "normal": {
+                      "type": "drop",
+                      "x": 0,
+                      "y": 8,
+                      "blur": 20,
+                      "spread": 0,
+                      "color": "rgba(15, 23, 42, 0.06)"
+                    }
+                  }
+                },
+                "visualIntent": {
+                  "component": "kpi-card",
+                  "contentFidelity": "outer-card-inline-icon-tile-text-stack-summary-value-trend-helper",
+                  "designMockValueBoundary": "value remains live runtime binding; Office Asset design comparison is informational only",
+                  "mockValueBoundary": "visual-target-only"
+                },
+                "fullWidthKpiCard": true
+              },
+              "children": [
+                {
+                  "id": "f20f8ea4-3bf1-450a-ae42-2fb9ca9e9bff",
+                  "type": "dynamic-image",
+                  "label": "Dynamic image",
+                  "attrs": {
+                    "source": "3",
+                    "obj-f": "Text11",
+                    "preview_image": "2",
+                    "et": "https://img.yeeflow.com/1EjntlLup3",
+                    "setting": {
+                      "img_height": [
+                        null,
+                        160,
+                        null,
+                        96
+                      ],
+                      "fit": [
+                        null,
+                        "2"
+                      ]
+                    },
+                    "image": {
+                      "border": {
+                        "radius": [
+                          null,
+                          {
+                            "top": "--sp--s100",
+                            "right": "--sp--s100",
+                            "bottom": "--sp--s100",
+                            "left": "--sp--s100"
+                          }
+                        ]
+                      }
+                    },
+                    "common": {
+                      "hide": [
+                        null,
+                        false
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "3542bfb6-d5f3-4abd-9ce4-62cbfa259b5b",
+                  "type": "dynamic-field",
+                  "label": "Dynamic field",
+                  "attrs": {
+                    "source": "3",
+                    "obj-f": "Title",
+                    "item_style": {
+                      "ty": [
+                        null,
+                        "l-semi-bold"
+                      ]
+                    },
+                    "common": {
+                      "positioning": {
+                        "widthtype": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  },
+                  "children": [],
+                  "nv_label": "Survey Program name"
+                },
+                {
+                  "id": "3722c35b-e549-474d-9a48-bad88ea515e8",
+                  "type": "heading",
+                  "label": "Text",
+                  "attrs": {
+                    "headc": {
+                      "title": {
+                        "value": null,
+                        "variable": [
+                          {
+                            "exprType": "variable_ctx",
+                            "valueType": "radio",
+                            "id": "Text1",
+                            "ctx": "__ctx_coll",
+                            "type": "expr",
+                            "name": "Collection item:Status"
+                          }
+                        ]
+                      }
+                    },
+                    "common": {
+                      "positioning": {
+                        "widthtype": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "8c276de6-f6d1-4d8a-830b-dfe6e6f12bec",
+                  "type": "container",
+                  "label": "Container",
+                  "attrs": {
+                    "style": {
+                      "widthtype": [
+                        null,
+                        "2"
+                      ],
+                      "direction": [
+                        null,
+                        "row"
+                      ],
+                      "gap": [
+                        null,
+                        "--sp--s025"
+                      ],
+                      "overflow": [
+                        null,
+                        "visible"
+                      ]
+                    },
+                    "common": {
+                      "ty": {
+                        "normal": {
+                          "color": "var(--c--neutral)"
+                        },
+                        "hover": {
+                          "color": "var(--c--neutral-dark)"
+                        }
+                      },
+                      "pos": [
+                        null,
+                        "absolute"
+                      ],
+                      "hor": [
+                        null,
+                        "right"
+                      ],
+                      "horoffset": [
+                        null,
+                        12
+                      ],
+                      "veroffset": [
+                        null,
+                        12
+                      ],
+                      "background": {
+                        "normal": {
+                          "type": "classic",
+                          "classic": {
+                            "color": "rgba(255, 255, 255, 0.6)"
+                          }
+                        },
+                        "hover": {
+                          "type": "classic",
+                          "classic": {
+                            "color": "#ffffff"
+                          }
+                        }
+                      },
+                      "border": {
+                        "normal": {
+                          "radius": [
+                            null,
+                            {
+                              "top": "--sp--s100",
+                              "right": "--sp--s100",
+                              "bottom": "--sp--s100",
+                              "left": "--sp--s100"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "control_action": null
+                  },
+                  "children": [
+                    {
+                      "id": "f0c95ccc-4c91-4c28-bd17-dc48f6d23e2a",
+                      "type": "dropbar",
+                      "label": "Drop bar",
+                      "attrs": {
+                        "button": {
+                          "text": {
+                            "value": "",
+                            "variable": null
+                          },
+                          "button_type": "1",
+                          "before_icon_type": "3",
+                          "before_icon": "fa-regular fa-ellipsis",
+                          "pd": [
+                            null,
+                            {
+                              "top": "--sp--s075",
+                              "right": "--sp--s075",
+                              "bottom": "--sp--s075",
+                              "left": "--sp--s075"
+                            }
+                          ],
+                          "background": {
+                            "normal": {
+                              "bdr": {
+                                "top": "--sp--s075",
+                                "right": "--sp--s075",
+                                "bottom": "--sp--s075",
+                                "left": "--sp--s075"
+                              },
+                              "bdt": "0"
+                            },
+                            "hover": {
+                              "type": null,
+                              "classic": {
+                                "color": "var(--c--neutral-light)"
+                              }
+                            }
+                          }
+                        },
+                        "content": {
+                          "content_type": "3",
+                          "pd": [
+                            null,
+                            {
+                              "top": "--sp--s075",
+                              "right": "--sp--s0",
+                              "bottom": "--sp--s075",
+                              "left": "--sp--s0"
+                            }
+                          ],
+                          "normal": {
+                            "border": {
+                              "radius": [
+                                null,
+                                {
+                                  "top": "--sp--s100",
+                                  "right": "--sp--s100",
+                                  "bottom": "--sp--s100",
+                                  "left": "--sp--s100"
+                                }
+                              ],
+                              "boxShadow": {
+                                "color": "rgba(0, 0, 0, 0.05)",
+                                "x": 0,
+                                "y": 0,
+                                "blur": 6,
+                                "spread": 0,
+                                "position": "outline"
+                              }
+                            },
+                            "bgColor": "var(--c--neutral-dark-active)",
+                            "color": "var(--c--background)"
+                          }
+                        },
+                        "settings": {
+                          "mode": "click",
+                          "width": [
+                            null,
+                            180
+                          ],
+                          "fixed": false,
+                          "autoposition": false,
+                          "position": [
+                            null,
+                            "bottomRight"
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "9b3bf3e1-3525-4c5b-b814-836836f1c03a",
+                          "type": "container",
+                          "label": "Container",
+                          "attrs": {
+                            "style": {
+                              "gap": [
+                                null,
+                                "--sp--s0"
+                              ]
+                            }
+                          },
+                          "children": [
+                            {
+                              "id": "8d694e1b-eb78-4bb2-a4cf-4ec15589bcfe",
+                              "type": "action_button",
+                              "attrs": {
+                                "icon-type": "3",
+                                "icon": "fa-regular fa-pencil",
+                                "label": {
+                                  "variable": null
+                                },
+                                "button": {
+                                  "ty": [
+                                    null,
+                                    "base-light"
+                                  ],
+                                  "normal": {
+                                    "border": {
+                                      "type": "0"
+                                    },
+                                    "c": "var(--c--background)"
+                                  },
+                                  "ins": [
+                                    null,
+                                    {
+                                      "top": "--sp--s100",
+                                      "right": "--sp--s150",
+                                      "bottom": "--sp--s100",
+                                      "left": "--sp--s150"
+                                    }
+                                  ],
+                                  "hover": {
+                                    "bg": "var(--c--neutral-darker)"
+                                  }
+                                },
+                                "align": [
+                                  null,
+                                  "justify"
+                                ],
+                                "icon-space": "--sp--s100",
+                                "action-type": "1",
+                                "operation": "edit",
+                                "control_action": "79cfee27-8aa5-4fa4-8eb4-eae160a53bdf"
+                              },
+                              "label": "Edit item",
+                              "nv_label": "btn_edit_item"
+                            },
+                            {
+                              "id": "1c348d15-de7f-42f5-ba59-1d6f0d3ec6d3",
+                              "type": "action_button",
+                              "attrs": {
+                                "button": {
+                                  "ty": [
+                                    null,
+                                    "base-light"
+                                  ],
+                                  "normal": {
+                                    "border": {
+                                      "type": "0"
+                                    },
+                                    "c": "var(--c--background)"
+                                  },
+                                  "ins": [
+                                    null,
+                                    {
+                                      "top": "--sp--s100",
+                                      "right": "--sp--s150",
+                                      "bottom": "--sp--s100",
+                                      "left": "--sp--s150"
+                                    }
+                                  ],
+                                  "hover": {
+                                    "bg": "var(--c--neutral-darker)"
+                                  }
+                                },
+                                "align": [
+                                  null,
+                                  "justify"
+                                ],
+                                "icon-space": "--sp--s100",
+                                "action-type": "1",
+                                "label": {
+                                  "variable": null
+                                },
+                                "operation": "del",
+                                "icon-type": "3",
+                                "icon": "fa-regular fa-trash",
+                                "control_action": "91e3d175-da37-4de3-92a1-a58816c09a9b"
+                              },
+                              "label": "Delete item",
+                              "nv_label": "btn_delete_item"
+                            }
+                          ],
+                          "nv_label": "grid_table_col_item_op_menu_panel"
+                        }
+                      ],
+                      "nv_label": "grid_table_col_item_op_menu"
+                    }
+                  ],
+                  "nv_label": "card_col_item_multi_select"
+                },
+                {
+                  "id": "50eb37b1-dfc0-46f5-8123-70d06356684f",
+                  "type": "container",
+                  "label": "Container",
+                  "attrs": {
+                    "style": {
+                      "gap": [
+                        null,
+                        "--sp--s200"
+                      ],
+                      "direction": [
+                        null,
+                        "row"
+                      ],
+                      "justify_content": [
+                        null,
+                        "space-between"
+                      ],
+                      "align_items": [
+                        null,
+                        "center"
+                      ]
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "dd674030-e0e4-42ae-a74f-62889067f461",
+                      "type": "dynamic-field",
+                      "label": "Dynamic field",
+                      "attrs": {
+                        "source": "3",
+                        "obj-f": "Text3",
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        }
+                      },
+                      "children": [],
+                      "nv_label": "Satisfaction area"
+                    },
+                    {
+                      "id": "49f4a7b1-fde9-4248-8b2c-4e283a56de97",
+                      "type": "dynamic-field",
+                      "label": "Dynamic field",
+                      "attrs": {
+                        "source": "3",
+                        "obj-f": "Text4",
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "padding": [
+                            null,
+                            {
+                              "top": "--sp--s0",
+                              "right": "--sp--s0",
+                              "bottom": "--sp--s0",
+                              "left": "--sp--s0"
+                            }
+                          ]
+                        },
+                        "t-af": {
+                          "gap": [
+                            null,
+                            10
+                          ]
+                        },
+                        "t-be": {
+                          "gap": [
+                            null,
+                            10
+                          ]
+                        },
+                        "item_style": {
+                          "pd": [
+                            null,
+                            {
+                              "top": "",
+                              "right": "",
+                              "bottom": "",
+                              "left": ""
+                            }
+                          ]
+                        }
+                      },
+                      "children": [],
+                      "nv_label": "Status"
+                    }
+                  ]
+                },
+                {
+                  "id": "0dd19670-8c50-46ef-ae9f-231b9a7c8880",
+                  "type": "container",
+                  "label": "Container",
+                  "attrs": {
+                    "style": {
+                      "gap": [
+                        null,
+                        "--sp--s200"
+                      ],
+                      "direction": [
+                        null,
+                        "row"
+                      ],
+                      "justify_content": [
+                        null,
+                        "space-between"
+                      ],
+                      "align_items": [
+                        null,
+                        "center"
+                      ]
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "891f0cb2-1f82-4f87-8aa3-58f160b6c1d7",
+                      "type": "dynamic-field",
+                      "label": "Dynamic field",
+                      "attrs": {
+                        "source": "3",
+                        "obj-f": "Text1",
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          }
+                        }
+                      },
+                      "children": [],
+                      "nv_label": "Satisfaction area"
+                    },
+                    {
+                      "id": "9e2b79de-b8ad-4354-8ca8-c230a4ad33bf",
+                      "type": "dynamic-field",
+                      "label": "Dynamic field",
+                      "attrs": {
+                        "source": "3",
+                        "obj-f": "Decimal1",
+                        "common": {
+                          "positioning": {
+                            "widthtype": [
+                              null,
+                              "2"
+                            ]
+                          },
+                          "padding": [
+                            null,
+                            {
+                              "top": "--sp--s0",
+                              "right": "--sp--s0",
+                              "bottom": "--sp--s0",
+                              "left": "--sp--s0"
+                            }
+                          ]
+                        },
+                        "t-af": {
+                          "gap": [
+                            null,
+                            10
+                          ]
+                        },
+                        "t-be": {
+                          "gap": [
+                            null,
+                            10
+                          ]
+                        },
+                        "item_style": {
+                          "pd": [
+                            null,
+                            {
+                              "top": "",
+                              "right": "",
+                              "bottom": "",
+                              "left": ""
+                            }
+                          ]
+                        }
+                      },
+                      "children": [],
+                      "nv_label": "Status"
+                    }
+                  ]
+                },
+                {
+                  "id": "5909e25e-2399-46fc-98df-75f94ed76561",
+                  "type": "dynamic-user",
+                  "label": "Dynamic user",
+                  "attrs": {
+                    "source": "3",
+                    "obj-f": "Text10",
+                    "i-len": [
+                      null,
+                      3
+                    ],
+                    "addition_fields": [
+                      "Email"
+                    ],
+                    "picture_style": {
+                      "image-size": [
+                        null,
+                        28
+                      ],
+                      "border": {
+                        "radius": [
+                          null,
+                          {
+                            "top": 50,
+                            "right": 50,
+                            "bottom": 50,
+                            "left": 50
+                          }
+                        ],
+                        "radiusUnit": [
+                          null,
+                          "%"
+                        ]
+                      },
+                      "gap": [
+                        null,
+                        "--sp--s150"
+                      ],
+                      "align": [
+                        null,
+                        "center"
+                      ]
+                    },
+                    "item_style": {
+                      "space": [
+                        null,
+                        "--sp--s150"
+                      ]
+                    },
+                    "common": {
+                      "positioning": {
+                        "widthtype": [
+                          null,
+                          "2"
+                        ]
+                      }
+                    },
+                    "text_style": {
+                      "name_ty": [
+                        null,
+                        "s-medium"
+                      ],
+                      "fields_ty": [
+                        null,
+                        "xs-regular"
+                      ],
+                      "fields_color": "var(--c--neutral-dark-hover)"
+                    }
+                  }
+                },
+                {
+                  "id": "1fd10543-4075-47b9-9e5d-758148b869a1",
+                  "type": "dynamic-file",
+                  "label": "Dynamic file",
+                  "attrs": {
+                    "source": "3",
+                    "obj-f": "Text8",
+                    "i-len": [
+                      null,
+                      2
+                    ],
+                    "content": {
+                      "w": [
+                        null,
+                        100
+                      ],
+                      "h": [
+                        null,
+                        ""
+                      ],
+                      "wu": [
+                        null,
+                        "%"
+                      ],
+                      "iconsize": [
+                        null,
+                        20
+                      ],
+                      "pd": [
+                        null,
+                        {
+                          "top": "--sp--s150",
+                          "right": "--sp--s150",
+                          "bottom": "--sp--s150",
+                          "left": "--sp--s150"
+                        }
+                      ],
+                      "normal": {
+                        "border": {
+                          "radius": [
+                            null,
+                            {
+                              "top": "--sp--s200",
+                              "right": "--sp--s200",
+                              "bottom": "--sp--s200",
+                              "left": "--sp--s200"
+                            }
+                          ],
+                          "type": "1",
+                          "width": [
+                            null,
+                            {
+                              "top": 1,
+                              "right": 1,
+                              "bottom": 1,
+                              "left": 1
+                            }
+                          ],
+                          "color": "var(--c--neutral-light-active)"
+                        },
+                        "bgColor": "var(--c--neutral-light)"
+                      }
+                    },
+                    "opbtn": {
+                      "normal": {}
+                    }
+                  }
+                },
+                {
+                  "id": "2428c7eb-ac6a-4b61-96d2-bd5569950999",
+                  "type": "dynamic-file",
+                  "label": "Dynamic file",
+                  "attrs": {
+                    "source": "3",
+                    "obj-f": "Text8",
+                    "i-len": [
+                      null,
+                      2
+                    ],
+                    "content": {
+                      "w": [
+                        null,
+                        100
+                      ],
+                      "h": [
+                        null,
+                        ""
+                      ],
+                      "wu": [
+                        null,
+                        "%"
+                      ],
+                      "iconsize": [
+                        null,
+                        20
+                      ],
+                      "pd": [
+                        null,
+                        {
+                          "top": "--sp--s075",
+                          "right": "--sp--s075",
+                          "bottom": "--sp--s075",
+                          "left": "--sp--s075"
+                        }
+                      ],
+                      "normal": {
+                        "border": {
+                          "radius": [
+                            null,
+                            {
+                              "top": "--sp--s100",
+                              "right": "--sp--s100",
+                              "bottom": "--sp--s100",
+                              "left": "--sp--s100"
+                            }
+                          ],
+                          "type": "1",
+                          "width": [
+                            null,
+                            {
+                              "top": 1,
+                              "right": 1,
+                              "bottom": 1,
+                              "left": 1
+                            }
+                          ],
+                          "color": "var(--c--neutral-light-active)"
+                        },
+                        "bgColor": "var(--c--neutral-light)"
+                      },
+                      "ty": [
+                        null,
+                        "s-medium"
+                      ]
+                    },
+                    "opbtn": {
+                      "normal": {}
+                    },
+                    "type_icon_show": true
+                  }
+                }
+              ],
+              "nv_label": "card_col_item"
+            }
+          ],
+          "nv_label": "card_col_body"
+        }
+      ],
+      "nv_label": "collection_control_responsive_card_wrapper"
+    },
+    "collectionIdentity": "card_col_body",
+    "itemIdentity": "card_col_item",
+    "operationMenuIdentity": "grid_table_col_item_op_menu",
+    "itemDynamicControls": [
+      {
+        "pointer": "$.children[0]",
+        "id": "f20f8ea4-3bf1-450a-ae42-2fb9ca9e9bff",
+        "nv_label": null,
+        "label": "Dynamic image",
+        "type": "dynamic-image",
+        "field": "Text11"
+      },
+      {
+        "pointer": "$.children[1]",
+        "id": "3542bfb6-d5f3-4abd-9ce4-62cbfa259b5b",
+        "nv_label": "Survey Program name",
+        "label": "Dynamic field",
+        "type": "dynamic-field",
+        "field": "Title"
+      },
+      {
+        "pointer": "$.children[4].children[0]",
+        "id": "dd674030-e0e4-42ae-a74f-62889067f461",
+        "nv_label": "Satisfaction area",
+        "label": "Dynamic field",
+        "type": "dynamic-field",
+        "field": "Text3"
+      },
+      {
+        "pointer": "$.children[4].children[1]",
+        "id": "49f4a7b1-fde9-4248-8b2c-4e283a56de97",
+        "nv_label": "Status",
+        "label": "Dynamic field",
+        "type": "dynamic-field",
+        "field": "Text4"
+      },
+      {
+        "pointer": "$.children[5].children[0]",
+        "id": "891f0cb2-1f82-4f87-8aa3-58f160b6c1d7",
+        "nv_label": "Satisfaction area",
+        "label": "Dynamic field",
+        "type": "dynamic-field",
+        "field": "Text1"
+      },
+      {
+        "pointer": "$.children[5].children[1]",
+        "id": "9e2b79de-b8ad-4354-8ca8-c230a4ad33bf",
+        "nv_label": "Status",
+        "label": "Dynamic field",
+        "type": "dynamic-field",
+        "field": "Decimal1"
+      },
+      {
+        "pointer": "$.children[6]",
+        "id": "5909e25e-2399-46fc-98df-75f94ed76561",
+        "nv_label": null,
+        "label": "Dynamic user",
+        "type": "dynamic-user",
+        "field": "Text10"
+      },
+      {
+        "pointer": "$.children[7]",
+        "id": "1fd10543-4075-47b9-9e5d-758148b869a1",
+        "nv_label": null,
+        "label": "Dynamic file",
+        "type": "dynamic-file",
+        "field": "Text8"
+      },
+      {
+        "pointer": "$.children[8]",
+        "id": "2428c7eb-ac6a-4b61-96d2-bd5569950999",
+        "nv_label": null,
+        "label": "Dynamic file",
+        "type": "dynamic-file",
+        "field": "Text8"
+      }
+    ],
+    "collectionActions": [
+      {
+        "id": "79cfee27-8aa5-4fa4-8eb4-eae160a53bdf",
+        "name": "Edit item",
+        "type": "coll",
+        "stepTypes": [
+          "listitem"
+        ]
+      },
+      {
+        "id": "91e3d175-da37-4de3-92a1-a58816c09a9b",
+        "name": "Delete item",
+        "type": "coll",
+        "stepTypes": [
+          "confirm",
+          "setdatalist"
+        ]
+      }
+    ]
+  },
+  "extractionIndex": {
+    "slotPointers": {
+      "collection_control_responsive_card_wrapper": {
+        "pointer": "$",
+        "type": "container",
+        "label": "Container",
+        "nv_label": "collection_control_responsive_card_wrapper",
+        "id": "6c305bb6-445d-40a2-9a6f-37419d63f6b0"
+      },
+      "card_col_caption": {
+        "pointer": "$.children[0]",
+        "type": "container",
+        "label": "Container",
+        "nv_label": "card_col_caption",
+        "id": "6ce9dfa1-f50d-4d32-a1d2-8184d2fc054f"
+      },
+      "card_col_title_wrapper": {
+        "pointer": "$.children[0].children[0]",
+        "type": "container",
+        "label": "Container",
+        "nv_label": "card_col_title_wrapper",
+        "id": "e251d4d8-53f9-4826-83d5-8696c5cd0e4c"
+      },
+      "card_col_title": {
+        "pointer": "$.children[0].children[0].children[0]",
+        "type": "heading",
+        "label": "Text",
+        "nv_label": "card_col_title",
+        "id": "1c745fc8-f75a-4b40-baa2-64355852d622"
+      },
+      "card_col_operations": {
+        "pointer": "$.children[0].children[1]",
+        "type": "container",
+        "label": "Container",
+        "nv_label": "card_col_operations",
+        "id": "f593c1ed-1493-4ee0-9869-9d40c8280562"
+      },
+      "op_normal": {
+        "pointer": "$.children[0].children[1].children[0]",
+        "type": "container",
+        "label": "Container",
+        "nv_label": "op_normal",
+        "id": "f0d05d2f-8858-40d4-811f-d826b06465f0"
+      },
+      "card_col_body": {
+        "pointer": "$.children[1]",
+        "type": "collection",
+        "label": "Collection",
+        "nv_label": "card_col_body",
+        "id": "a36128b9-ff96-4298-9f5e-0e21b460ac70"
+      },
+      "card_col_item": {
+        "pointer": "$.children[1].children[0]",
+        "type": "container",
+        "label": "Container",
+        "nv_label": "card_col_item",
+        "id": "39ee2424-30c9-4a52-a81e-a0963a6b1150"
+      },
+      "card_col_item_multi_select": {
+        "pointer": "$.children[1].children[0].children[3]",
+        "type": "container",
+        "label": "Container",
+        "nv_label": "card_col_item_multi_select",
+        "id": "8c276de6-f6d1-4d8a-830b-dfe6e6f12bec"
+      },
+      "grid_table_col_item_op_menu": {
+        "pointer": "$.children[1].children[0].children[3].children[0]",
+        "type": "dropbar",
+        "label": "Drop bar",
+        "nv_label": "grid_table_col_item_op_menu",
+        "id": "f0c95ccc-4c91-4c28-bd17-dc48f6d23e2a"
+      },
+      "grid_table_col_item_op_menu_panel": {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0]",
+        "type": "container",
+        "label": "Container",
+        "nv_label": "grid_table_col_item_op_menu_panel",
+        "id": "9b3bf3e1-3525-4c5b-b814-836836f1c03a"
+      },
+      "btn_edit_item": {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[0]",
+        "type": "action_button",
+        "label": "Edit item",
+        "nv_label": "btn_edit_item",
+        "id": "8d694e1b-eb78-4bb2-a4cf-4ec15589bcfe"
+      },
+      "btn_delete_item": {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[1]",
+        "type": "action_button",
+        "label": "Delete item",
+        "nv_label": "btn_delete_item",
+        "id": "1c348d15-de7f-42f5-ba59-1d6f0d3ec6d3"
+      }
+    },
+    "controlCount": 61,
+    "controls": [
+      {
+        "pointer": "$",
+        "id": "6c305bb6-445d-40a2-9a6f-37419d63f6b0",
+        "nv_label": "collection_control_responsive_card_wrapper",
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[0]",
+        "id": "6ce9dfa1-f50d-4d32-a1d2-8184d2fc054f",
+        "nv_label": "card_col_caption",
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[0].children[0]",
+        "id": "e251d4d8-53f9-4826-83d5-8696c5cd0e4c",
+        "nv_label": "card_col_title_wrapper",
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[0].children[0].children[0]",
+        "id": "1c745fc8-f75a-4b40-baa2-64355852d622",
+        "nv_label": "card_col_title",
+        "label": "Text",
+        "type": "heading"
+      },
+      {
+        "pointer": "$.children[0].children[1]",
+        "id": "f593c1ed-1493-4ee0-9869-9d40c8280562",
+        "nv_label": "card_col_operations",
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0]",
+        "id": "f0d05d2f-8858-40d4-811f-d826b06465f0",
+        "nv_label": "op_normal",
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].attrs.control_display[0]",
+        "id": "9ee51405-ee4f-41c1-ac1a-b4e9d0a7d67a",
+        "nv_label": null,
+        "label": null,
+        "type": null
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].attrs.control_display[0].formulas[0]",
+        "id": "__temp_var_SelectedItemsAmount",
+        "nv_label": null,
+        "label": null,
+        "type": "expr"
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].attrs.control_display[0].formulas[1]",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "op"
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].attrs.control_display[0].formulas[2]",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "num"
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].attrs.control_display[0].actions",
+        "id": "2057f1d1-a864-45d2-8d8f-0d7b5ff1a12d",
+        "nv_label": null,
+        "label": null,
+        "type": 1
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].children[0]",
+        "id": "2fd6aa84-777f-48ac-a2b0-57d1d79fdecd",
+        "nv_label": null,
+        "label": "Search items",
+        "type": "search-filter"
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].children[1]",
+        "id": "0ebf0d4d-256b-4f36-ac08-65aed0f7c1ce",
+        "nv_label": "Add new item",
+        "label": "Add item",
+        "type": "action_button"
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].children[1].attrs",
+        "id": null,
+        "nv_label": null,
+        "label": {
+          "variable": null
+        },
+        "type": null
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].children[1].attrs.button.normal.border",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "99"
+      },
+      {
+        "pointer": "$.children[1]",
+        "id": "a36128b9-ff96-4298-9f5e-0e21b460ac70",
+        "nv_label": "card_col_body",
+        "label": "Collection",
+        "type": "collection"
+      },
+      {
+        "pointer": "$.children[1].attrs.data.fulltext[0].value[0]",
+        "id": "__filter_filter_keywords",
+        "nv_label": null,
+        "label": null,
+        "type": "expr"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[0]",
+        "id": "79cfee27-8aa5-4fa4-8eb4-eae160a53bdf",
+        "nv_label": null,
+        "label": null,
+        "type": "coll"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[0].steps[0]",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "listitem"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[0].steps[0].attrs.listdataid[0]",
+        "id": "ListDataID",
+        "nv_label": null,
+        "label": null,
+        "type": "expr"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1]",
+        "id": "91e3d175-da37-4de3-92a1-a58816c09a9b",
+        "nv_label": null,
+        "label": null,
+        "type": "coll"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[0]",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "confirm"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[0].attrs.confirm_qs[0]",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "str"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[0].attrs.confirm_rs",
+        "id": "__temp_var_isDeleteConfirmed",
+        "nv_label": null,
+        "label": null,
+        "type": "expr"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[1]",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "setdatalist"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[1].attrs",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "remove"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[1].attrs.wheres[0].right[0]",
+        "id": "ListDataID",
+        "nv_label": null,
+        "label": null,
+        "type": "expr"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[1].condition[0]",
+        "id": "__temp_var_isDeleteConfirmed",
+        "nv_label": null,
+        "label": null,
+        "type": "expr"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[1].condition[1]",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "op"
+      },
+      {
+        "pointer": "$.children[1].attrs.actions[1].steps[1].condition[2]",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "bool"
+      },
+      {
+        "pointer": "$.children[1].children[0]",
+        "id": "39ee2424-30c9-4a52-a81e-a0963a6b1150",
+        "nv_label": "card_col_item",
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[1].children[0].attrs.style.border",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "1"
+      },
+      {
+        "pointer": "$.children[1].children[0].attrs.common.background.normal",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "classic"
+      },
+      {
+        "pointer": "$.children[1].children[0].attrs.common.border.normal",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "1"
+      },
+      {
+        "pointer": "$.children[1].children[0].attrs.common.shadow.normal",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "drop"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[0]",
+        "id": "f20f8ea4-3bf1-450a-ae42-2fb9ca9e9bff",
+        "nv_label": null,
+        "label": "Dynamic image",
+        "type": "dynamic-image"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[1]",
+        "id": "3542bfb6-d5f3-4abd-9ce4-62cbfa259b5b",
+        "nv_label": "Survey Program name",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[2]",
+        "id": "3722c35b-e549-474d-9a48-bad88ea515e8",
+        "nv_label": null,
+        "label": "Text",
+        "type": "heading"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[2].attrs.headc.title.variable[0]",
+        "id": "Text1",
+        "nv_label": null,
+        "label": null,
+        "type": "expr"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3]",
+        "id": "8c276de6-f6d1-4d8a-830b-dfe6e6f12bec",
+        "nv_label": "card_col_item_multi_select",
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].attrs.common.background.normal",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "classic"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].attrs.common.background.hover",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "classic"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0]",
+        "id": "f0c95ccc-4c91-4c28-bd17-dc48f6d23e2a",
+        "nv_label": "grid_table_col_item_op_menu",
+        "label": "Drop bar",
+        "type": "dropbar"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0]",
+        "id": "9b3bf3e1-3525-4c5b-b814-836836f1c03a",
+        "nv_label": "grid_table_col_item_op_menu_panel",
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[0]",
+        "id": "8d694e1b-eb78-4bb2-a4cf-4ec15589bcfe",
+        "nv_label": "btn_edit_item",
+        "label": "Edit item",
+        "type": "action_button"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[0].attrs",
+        "id": null,
+        "nv_label": null,
+        "label": {
+          "variable": null
+        },
+        "type": null
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[0].attrs.button.normal.border",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "0"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[1]",
+        "id": "1c348d15-de7f-42f5-ba59-1d6f0d3ec6d3",
+        "nv_label": "btn_delete_item",
+        "label": "Delete item",
+        "type": "action_button"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[1].attrs",
+        "id": null,
+        "nv_label": null,
+        "label": {
+          "variable": null
+        },
+        "type": null
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[1].attrs.button.normal.border",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "0"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[4]",
+        "id": "50eb37b1-dfc0-46f5-8123-70d06356684f",
+        "nv_label": null,
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[4].children[0]",
+        "id": "dd674030-e0e4-42ae-a74f-62889067f461",
+        "nv_label": "Satisfaction area",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[4].children[1]",
+        "id": "49f4a7b1-fde9-4248-8b2c-4e283a56de97",
+        "nv_label": "Status",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[5]",
+        "id": "0dd19670-8c50-46ef-ae9f-231b9a7c8880",
+        "nv_label": null,
+        "label": "Container",
+        "type": "container"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[5].children[0]",
+        "id": "891f0cb2-1f82-4f87-8aa3-58f160b6c1d7",
+        "nv_label": "Satisfaction area",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[5].children[1]",
+        "id": "9e2b79de-b8ad-4354-8ca8-c230a4ad33bf",
+        "nv_label": "Status",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[6]",
+        "id": "5909e25e-2399-46fc-98df-75f94ed76561",
+        "nv_label": null,
+        "label": "Dynamic user",
+        "type": "dynamic-user"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[7]",
+        "id": "1fd10543-4075-47b9-9e5d-758148b869a1",
+        "nv_label": null,
+        "label": "Dynamic file",
+        "type": "dynamic-file"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[7].attrs.content.normal.border",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "1"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[8]",
+        "id": "2428c7eb-ac6a-4b61-96d2-bd5569950999",
+        "nv_label": null,
+        "label": "Dynamic file",
+        "type": "dynamic-file"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[8].attrs.content.normal.border",
+        "id": null,
+        "nv_label": null,
+        "label": null,
+        "type": "1"
+      }
+    ],
+    "dynamicAndActionControls": [
+      {
+        "pointer": "$.children[0].children[1].children[0].children[0]",
+        "id": "2fd6aa84-777f-48ac-a2b0-57d1d79fdecd",
+        "nv_label": null,
+        "label": "Search items",
+        "type": "search-filter"
+      },
+      {
+        "pointer": "$.children[0].children[1].children[0].children[1]",
+        "id": "0ebf0d4d-256b-4f36-ac08-65aed0f7c1ce",
+        "nv_label": "Add new item",
+        "label": "Add item",
+        "type": "action_button"
+      },
+      {
+        "pointer": "$.children[1]",
+        "id": "a36128b9-ff96-4298-9f5e-0e21b460ac70",
+        "nv_label": "card_col_body",
+        "label": "Collection",
+        "type": "collection"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[0]",
+        "id": "f20f8ea4-3bf1-450a-ae42-2fb9ca9e9bff",
+        "nv_label": null,
+        "label": "Dynamic image",
+        "type": "dynamic-image"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[1]",
+        "id": "3542bfb6-d5f3-4abd-9ce4-62cbfa259b5b",
+        "nv_label": "Survey Program name",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0]",
+        "id": "f0c95ccc-4c91-4c28-bd17-dc48f6d23e2a",
+        "nv_label": "grid_table_col_item_op_menu",
+        "label": "Drop bar",
+        "type": "dropbar"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[0]",
+        "id": "8d694e1b-eb78-4bb2-a4cf-4ec15589bcfe",
+        "nv_label": "btn_edit_item",
+        "label": "Edit item",
+        "type": "action_button"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[3].children[0].children[0].children[1]",
+        "id": "1c348d15-de7f-42f5-ba59-1d6f0d3ec6d3",
+        "nv_label": "btn_delete_item",
+        "label": "Delete item",
+        "type": "action_button"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[4].children[0]",
+        "id": "dd674030-e0e4-42ae-a74f-62889067f461",
+        "nv_label": "Satisfaction area",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[4].children[1]",
+        "id": "49f4a7b1-fde9-4248-8b2c-4e283a56de97",
+        "nv_label": "Status",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[5].children[0]",
+        "id": "891f0cb2-1f82-4f87-8aa3-58f160b6c1d7",
+        "nv_label": "Satisfaction area",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[5].children[1]",
+        "id": "9e2b79de-b8ad-4354-8ca8-c230a4ad33bf",
+        "nv_label": "Status",
+        "label": "Dynamic field",
+        "type": "dynamic-field"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[6]",
+        "id": "5909e25e-2399-46fc-98df-75f94ed76561",
+        "nv_label": null,
+        "label": "Dynamic user",
+        "type": "dynamic-user"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[7]",
+        "id": "1fd10543-4075-47b9-9e5d-758148b869a1",
+        "nv_label": null,
+        "label": "Dynamic file",
+        "type": "dynamic-file"
+      },
+      {
+        "pointer": "$.children[1].children[0].children[8]",
+        "id": "2428c7eb-ac6a-4b61-96d2-bd5569950999",
+        "nv_label": null,
+        "label": "Dynamic file",
+        "type": "dynamic-file"
+      }
+    ],
+    "remapSensitiveReferences": [
+      {
+        "pointer": "$.templateResource.rootContainer.children[0].children[1].children[0].children[1].attrs.data.list.ListSetID",
+        "key": "ListSetID",
+        "value": "{{ListSetID}}"
+      },
+      {
+        "pointer": "$.templateResource.rootContainer.children[0].children[1].children[0].children[1].attrs.data.list.ListID",
+        "key": "ListID",
+        "value": "{{ListID}}"
+      },
+      {
+        "pointer": "$.templateResource.rootContainer.children[1].attrs.data.list.ListID",
+        "key": "ListID",
+        "value": "{{ListID}}"
+      },
+      {
+        "pointer": "$.templateResource.rootContainer.children[1].attrs.data.list.ListSetID",
+        "key": "ListSetID",
+        "value": "{{ListSetID}}"
+      },
+      {
+        "pointer": "$.templateResource.rootContainer.children[1].attrs.actions[0].steps[0].attrs.data.list.ListSetID",
+        "key": "ListSetID",
+        "value": "{{ListSetID}}"
+      },
+      {
+        "pointer": "$.templateResource.rootContainer.children[1].attrs.actions[0].steps[0].attrs.data.list.ListID",
+        "key": "ListID",
+        "value": "{{ListID}}"
+      },
+      {
+        "pointer": "$.templateResource.rootContainer.children[1].attrs.actions[0].steps[0].attrs.layout",
+        "key": "layout",
+        "value": "{{DetailLayoutID}}"
+      },
+      {
+        "pointer": "$.templateResource.rootContainer.children[1].attrs.actions[1].steps[1].attrs.list.ListSetID",
+        "key": "ListSetID",
+        "value": "{{ListSetID}}"
+      },
+      {
+        "pointer": "$.templateResource.rootContainer.children[1].attrs.actions[1].steps[1].attrs.list.ListID",
+        "key": "ListID",
+        "value": "{{ListID}}"
+      }
+    ]
+  },
+  "validationExpectations": [
+    "Generated dashboards using this template must contain collection_control_responsive_card_wrapper with export-shape subtree fidelity.",
+    "Generated dashboards must not replace this template with a generic responsive card, ad hoc card grid, or simplified Collection.",
+    "Generated dashboards must map card_col_item fields using Dynamic control types that match the selected data source field types.",
+    "Generated dashboards must not emit Dynamic image when the selected data source has no image field.",
+    "Generated dashboards may omit card_col_caption and card_col_item_multi_select only for display-only or view-only Form Report/Data Report scenarios.",
+    "Generated dashboards must preserve Collection root actions and delete-confirmation temp variable/condition flow whenever item operation buttons are present."
+  ],
+  "trainingSource": {
+    "userProvidedPackage": "Company Overview-v1.4.yapk",
+    "sourceExport": "Company Overview-v1.4.yapk",
+    "sourceDashboardPageTitle": "Collection_control_responsive_card_grid",
+    "sourceRootControl": "collection_control_responsive_card_wrapper"
+  }
+}

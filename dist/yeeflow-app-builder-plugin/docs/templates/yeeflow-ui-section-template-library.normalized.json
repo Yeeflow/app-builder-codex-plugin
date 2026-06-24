@@ -1655,10 +1655,11 @@
         "descriptionOrProgress"
       ],
       "wrapperRequirements": [
-        "section header container",
-        "selected count text when multiselect is generated",
-        "operation toolbar when bulk actions are generated",
-        "Collection root below wrapper controls"
+        "collection_control_responsive_card_wrapper root container and descendants",
+        "card_col_caption and op_normal when search/add/item operations are needed",
+        "card_col_body Collection root",
+        "card_col_item repeated card item",
+        "optional card_col_item_multi_select with grid_table_col_item_op_menu for single-record operations"
       ],
       "responsiveSettings": {
         "desktopColumns": 3,
@@ -1692,12 +1693,47 @@
         "COLLECTION_DATA_SOURCE_INVALID absent",
         "COLLECTION_REFERENCED_FIELD_MISSING absent",
         "COLLECTION_CURRENT_ITEM_CONTEXT_MISSING absent",
-        "COLLECTION_CHILD_CONTROL_ID_DUPLICATE absent"
+        "COLLECTION_CHILD_CONTROL_ID_DUPLICATE absent",
+        "DASH_DATASET_RESPONSIVE_CARD_WRAPPER_MISSING absent",
+        "DASH_DATASET_RESPONSIVE_CARD_SLOT_MISSING absent",
+        "DASH_DATASET_RESPONSIVE_CARD_DYNAMIC_CONTROL_TYPE_MISMATCH absent",
+        "DASH_DATASET_RESPONSIVE_CARD_IMAGE_FIELD_UNAVAILABLE absent",
+        "DASH_DATASET_RESPONSIVE_CARD_BUTTON_ACTION_MISSING absent",
+        "DASH_DATASET_RESPONSIVE_CARD_DELETE_CONFIRMATION_TEMPVAR_MISSING absent"
       ],
       "proofBoundaries": [
         "YAPK card Collection proven for the decoded Company Overview card pattern through strict or tolerant Brotli",
         "YAPK validation inspects Pages[].LayoutInResources[].Resource, Forms[].DefResource pageurls[].formdef, and Childs[].Layouts[].LayoutInResources[].Resource",
         "Collection + Grid table-style pattern is separate"
+      ],
+      "fullTemplateReference": "docs/reference/collection-control-responsive-card-grid.template.json",
+      "sourceReference": {
+        "packageFile": "Company Overview-v1.4.yapk",
+        "pageTitle": "Collection_control_responsive_card_grid",
+        "root": "collection_control_responsive_card_wrapper"
+      },
+      "editableRegions": [
+        "card_col_title_wrapper",
+        "op_normal",
+        "card_col_item",
+        "card_col_item_multi_select",
+        "grid_table_col_item_op_menu"
+      ],
+      "lockedRegions": [
+        "collection_control_responsive_card_wrapper outside editable descendants",
+        "card_col_body layout/filter/fulltext/pagination shape",
+        "card_col_caption style/layout when included"
+      ],
+      "dynamicControlMappingRules": {
+        "userField": "dynamic-user",
+        "imageField": "dynamic-image only when image field exists",
+        "fileOrAttachmentField": "dynamic-file",
+        "defaultField": "dynamic-field"
+      },
+      "operationRules": [
+        "operation buttons must bind to Collection actions",
+        "delete requires confirmation temp variable and conditional delete continuation",
+        "Form Report/Data Report and display-only card regions should omit edit/delete operations"
       ]
     },
     {
