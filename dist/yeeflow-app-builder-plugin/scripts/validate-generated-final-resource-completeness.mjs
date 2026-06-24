@@ -135,7 +135,11 @@ function parseAppPlan(file) {
 
 function parseDataListHeadings(text) {
   const section = extractSection(text, /^##\s+4\.\s+Data Lists and Document Libraries Plan/i);
-  return [...section.matchAll(/^###\s+4\.[x0-9]+\s+(.+?)\s*$/gim)].map((match) => plannedItem(match[1], section, match.index, "dataLists"));
+  const headingItems = [...section.matchAll(/^###\s+4\.[x0-9]+\s+(.+?)\s*$/gim)].map((match) => plannedItem(match[1], section, match.index, "dataLists"));
+  if (headingItems.length) return headingItems;
+  return parseMarkdownTables(section)
+    .filter((table) => table.headers.includes("List Name") || table.headers.includes("Data List Name") || table.headers.includes("Document Library Name"))
+    .flatMap((table) => table.rows.map((row) => plannedItem(row["List Name"] || row["Data List Name"] || row["Document Library Name"], section, row.__index, "dataLists")));
 }
 
 function parseApprovalForms(text) {
@@ -181,6 +185,30 @@ function parseDashboards(text) {
       raw: body,
     });
   }
+  if (!dashboards.length) {
+    const tableDashboards = parseMarkdownTables(section)
+      .filter((table) => table.headers.includes("Dashboard Page Name") || table.headers.includes("Dashboard Page") || table.headers.includes("Page Name"))
+      .flatMap((table) => table.rows.map((row) => cleanName(row["Dashboard Page Name"] || row["Dashboard Page"] || row["Page Name"])))
+      .filter((name) => !isPlaceholder(name));
+    const pageNameDashboards = [...section.matchAll(/^Page name:\s*(.+?)\s*$/gim)]
+      .map((match) => cleanName(match[1]))
+      .filter((name) => !isPlaceholder(name));
+    const names = uniqueByNorm(tableDashboards.concat(pageNameDashboards));
+    for (const name of names) {
+      dashboards.push({
+        name,
+        category: "dashboards",
+        line: lineNumberFor(text, name) || lineNumberFor(text, "Dashboard Pages Plan"),
+        deferred: hasExplicitDeferredStatus(sectionForDashboardName(section, name)),
+        metrics: parseTableItems(section, /^####\s+Summary Metrics/i, "Metric Name", "dashboardMetrics"),
+        filters: parseTableItems(section, /^####\s+Dashboard Filters/i, "Filter Name", "dashboardFilters"),
+        recordRegions: parseDashboardScopedItems(section, /^####\s+Record Display Control Selection/i, name, "Section", "dashboardRecordRegions"),
+        sections: parseDashboardScopedItems(section, /^####\s+Dashboard Sections/i, name, "Section Name", "dashboardSections"),
+        dynamicControls: parseTableItems(section, /^####\s+Item Template Dynamic Controls/i, "Business Label", "dashboardDynamicControls"),
+        raw: sectionForDashboardName(section, name) || section,
+      });
+    }
+  }
   return dashboards.filter((item) => !isPlaceholder(item.name));
 }
 
@@ -197,6 +225,14 @@ function parseNavigation(text) {
       if (!groupMap.has(norm(groupName))) groupMap.set(norm(groupName), { name: groupName, category: "navigation", line: lineNumberFor(text, groupName), items: [] });
       groupMap.get(norm(groupName)).items.push({ name: target || itemName, item: itemName, category: "navigation", line: lineNumberFor(text, itemName), type: row["Yeeflow Resource Type"] || "" });
     }
+  } else {
+    const match = section.match(/Navigation groups:\s*(.+?)\s*$/im);
+    if (match) {
+      for (const part of match[1].split(/\s*,\s*/)) {
+        const groupName = cleanName(part.replace(/\s+with\s+.+$/i, ""));
+        if (groupName && !groupMap.has(norm(groupName))) groupMap.set(norm(groupName), { name: groupName, category: "navigation", line: lineNumberFor(text, groupName), items: [] });
+      }
+    }
   }
   return { groups: [...groupMap.values()] };
 }
@@ -207,6 +243,29 @@ function parseTableItems(text, headingPattern, nameHeader, category) {
   return parseMarkdownTables(section)
     .filter((table) => table.headers.includes(nameHeader))
     .flatMap((table) => table.rows.map((row) => plannedItem(row[nameHeader], section, row.__index, category, { row })));
+}
+
+function parseDashboardScopedItems(text, headingPattern, dashboardName, nameHeader, category) {
+  const section = extractSection(text, headingPattern);
+  if (!section) return [];
+  return parseMarkdownTables(section)
+    .filter((table) => table.headers.includes(nameHeader))
+    .flatMap((table) => table.rows
+      .filter((row) => {
+        const dashboardCell = row["Dashboard Page"] || row["Dashboard Page Name"] || row.Page || "";
+        return !dashboardCell || norm(dashboardCell) === norm(dashboardName);
+      })
+      .map((row) => plannedItem(row[nameHeader], section, row.__index, category, { row })));
+}
+
+function sectionForDashboardName(section, dashboardName) {
+  const escaped = escapeRegExp(dashboardName);
+  const pageNamePattern = new RegExp(`^Page name:\\s*${escaped}\\s*$`, "im");
+  const lines = section.split(/\r?\n/);
+  const start = lines.findIndex((line) => pageNamePattern.test(line));
+  if (start < 0) return "";
+  const end = lines.findIndex((line, index) => index > start && /^Page name:\s*/i.test(line));
+  return lines.slice(start, end < 0 ? lines.length : end).join("\n");
 }
 
 function parseMarkdownTables(section) {
@@ -604,6 +663,18 @@ function isTableLine(line) {
 
 function splitTableLine(line) {
   return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cleanName(cell));
+}
+
+function uniqueByNorm(values) {
+  const seen = new Set();
+  const out = [];
+  for (const value of values) {
+    const key = norm(value);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(value);
+  }
+  return out;
 }
 
 function controlChildren(control) {

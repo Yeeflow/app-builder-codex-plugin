@@ -23,6 +23,9 @@ function run() {
   assertFails("wrapper missing attrs.style.gap fails", packagePath({ omitStyleGap: true }), "DASHBOARD_GRID_TABLE_WRAPPER_STYLE_GAP_MISSING");
   assertFails("wrapper missing attrs.container.gap fails", packagePath({ omitContainerGap: true }), "DASHBOARD_GRID_TABLE_WRAPPER_CONTAINER_GAP_MISSING");
   assertFails("Collection without detail link fails", packagePath({ omitDetailLink: true }), "DASHBOARD_COLLECTION_DETAIL_LINK_MISSING");
+  assertPass("grid-table Collection may explicitly declare no row detail open behavior", packagePath({ omitDetailLink: true, explicitNoOpen: true }));
+  assertPass("card Collection template is not validated with grid-table header/item rules", packagePath({ cardTemplate: true }), { requireGridTableCollections: false });
+  assertFails("card Collection template still fails when this run explicitly requires grid-table Collections", packagePath({ cardTemplate: true }), "DASHBOARD_CARD_COLLECTION_WHEN_GRID_TABLE_REQUIRED");
   assertFails("Collection detail link to missing custom layout fails", packagePath({ missingDetailLayout: true }), "DASHBOARD_COLLECTION_DETAIL_LAYOUT_MISSING");
   assertFails("Type 1 custom layout with LayoutView null fails", packagePath({ nullDetailLayoutView: true }), "DASHBOARD_TYPE1_DETAIL_LAYOUTVIEW_NULL");
   assertFails("enumerable helper field leaks fail", packagePath({ helperLeak: true }), "DASHBOARD_HELPER_METADATA_LEAK");
@@ -31,8 +34,8 @@ function run() {
   console.log("Dashboard grid-table Collection gate tests passed");
 }
 
-function assertPass(label, file) {
-  const report = validateDashboardGridTableCollections(options(file));
+function assertPass(label, file, overrides = {}) {
+  const report = validateDashboardGridTableCollections(options(file, overrides));
   assert.equal(report.status, "pass", `${label}: ${JSON.stringify(report.findings, null, 2)}`);
 }
 
@@ -42,13 +45,14 @@ function assertFails(label, file, code) {
   assert.ok(report.findings.some((finding) => finding.code === code), `${label}: expected ${code}, got ${report.findings.map((finding) => finding.code).join(", ")}`);
 }
 
-function options(file) {
+function options(file, overrides = {}) {
   return {
     package: file,
     requireGridTableCollections: true,
     requireHideHeader: true,
     requireVisibleTitle: true,
     requireRowDetailLinks: true,
+    ...overrides,
   };
 }
 
@@ -116,6 +120,7 @@ function titleControl(flags) {
 }
 
 function recordListControls(flags) {
+  if (flags.cardTemplate) return [wrapper([collection({ ...flags, templateId: "collection_control_card_with_multiselect_toolbar", omitDetailLink: true })], "card-wrapper", flags)];
   if (flags.useDataList) return [{ type: "data-list", attrs: { data: { list: { ListID: flags.listId } } } }];
   if (flags.separateHeaderWrapper) {
     return [
@@ -147,9 +152,10 @@ function collection(flags) {
     modalsize: 2,
   };
   if (!flags.omitDetailLink) data.link = flags.detailLayoutId;
+  if (flags.explicitNoOpen) data.detailOpenBehavior = "none";
   return {
     type: "collection",
-    attrs: { data },
+    attrs: { data, ...(flags.templateId ? { datasetPresentationTemplateId: flags.templateId } : {}) },
     children: [{ type: "flex_grid", attrs: { role: "row" } }],
   };
 }

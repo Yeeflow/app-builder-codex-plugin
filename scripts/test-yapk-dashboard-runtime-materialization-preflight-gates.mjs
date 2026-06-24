@@ -59,6 +59,47 @@ function collection(name = "Loan Collection", extra = {}) {
   };
 }
 
+function filterControl() {
+  return {
+    type: "select-filter",
+    id: "priority-filter",
+    name: "Priority Filter",
+    attrs: {
+      data: { list: { ListID: LIST_ID, Title: "Loan Transactions" }, field: "Text1" },
+      binding: "priorityFilter",
+      display_f: "Text1",
+      value_f: "ListDataID",
+      lablay: [null, "top"],
+      lab: { value: "Priority", ty: [null, "xs-light"] },
+      edit: { pcolor: "#667085", normal: { border: { radius: [null, 6] } } },
+    },
+  };
+}
+
+function summaryControl() {
+  return {
+    type: "summary",
+    id: "open-requests-summary",
+    name: "Open Requests Summary",
+    attrs: {
+      data: {
+        list: { ListID: LIST_ID, Title: "Loan Transactions" },
+        field: "ListDataID",
+        method: "count",
+      },
+    },
+  };
+}
+
+function visibleKpiText() {
+  return {
+    type: "heading",
+    id: "open-requests-kpi-value",
+    name: "Open Requests KPI Value",
+    attrs: { heads: { title: { value: "Open Requests" }, ty: [null, "h2-bold"], color: [null, "text-primary"] } },
+  };
+}
+
 function dashboardResource(children) {
   return JSON.stringify({
     title: "Asset Loan Operations Dashboard",
@@ -142,6 +183,10 @@ function expectCode(label, result, code) {
   assert.match(`${result.stdout}\n${result.stderr}`, new RegExp(code), `${label} did not report ${code}.\n${result.stdout}\n${result.stderr}`);
 }
 
+function expectPass(label, result) {
+  assert.equal(result.status, 0, `${label} should pass.\n${result.stdout}\n${result.stderr}`);
+}
+
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "yapk-dashboard-runtime-materialization-"));
 const results = [];
 
@@ -174,6 +219,43 @@ Dashboard pages and data lists are required.
 `);
   expectCode("non-empty resource-like App Plan with zero parsed resources fails closed", run(["scripts/validate-generated-final-resource-completeness.mjs", "--plan", planFile, "--package", kpiNoSummary]), "GENERATED_FINAL_APP_PLAN_RESOURCE_PARSE_EMPTY");
   results.push("plan-parser-fail-closed");
+
+  const currentSchemaPlan = path.join(tempDir, "current-schema-app-plan.md");
+  fs.writeFileSync(currentSchemaPlan, `# Office Asset Loan Management - Yeeflow App Plan
+
+## 4. Data Lists and Document Libraries Plan
+| List Name | Purpose | Key Fields |
+|---|---|---|
+| Loan Transactions | active and historical loans | Title, Text1 |
+
+## 14. Dashboard Pages Plan
+Page name: Asset Loan Operations Dashboard.
+Business purpose: active loan operations.
+
+| Dashboard Page Name | Business Purpose | Source Data Lists/Business Objects |
+|---|---|---|
+| Asset Loan Operations Dashboard | active loan operations | Loan Transactions |
+
+#### Dashboard Filters
+| Filter Name | Source Data List | Filter Field |
+|---|---|---|
+| Priority Filter | Loan Transactions | Text1 |
+
+#### Summary Metrics
+| Metric Name | Source Data List | Source Field(s) | Calculation Logic |
+|---|---|---|---|
+| Open Requests | Loan Transactions | ListDataID | count records |
+
+#### Record Display Control Selection
+| Dashboard Page | Section | Data Source | Display Need | Selected Record Display Control | Selected Collection Presentation Reference |
+|---|---|---|---|---|---|
+| Asset Loan Operations Dashboard | Active Loans | Loan Transactions | dense operational row scanning | Collection | collection_control_grid_table |
+`);
+  const currentSchemaPackage = writePackage(tempDir, "current-schema-completeness-pass", decoded({
+    dashboardChildren: [filterControl(), summaryControl(), visibleKpiText(), collection()],
+  }));
+  expectPass("current unified App Plan schema parses resources and passes completeness", run(["scripts/validate-generated-final-resource-completeness.mjs", "--plan", currentSchemaPlan, "--package", currentSchemaPackage]));
+  results.push("current-schema-parser-pass");
 
   const pageTitleCollection = writePackage(tempDir, "page-title-collection", decoded({
     dashboardChildren: [{
