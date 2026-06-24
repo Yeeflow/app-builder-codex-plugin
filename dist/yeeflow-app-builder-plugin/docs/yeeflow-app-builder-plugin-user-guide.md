@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.36`
+`0.8.37`
+
+Version `0.8.37` releases Area chart and Data Analytics template selection guidance from PR #211. The plugin now registers six approved Data Analytics templates, including Area chart, and every App Plan chart/data-analytics region must use the Data Analytics Template Selection table to choose exactly one approved template by business fit, source-resource type, grouping/axis fields, value/aggregate fields, proof boundary, and placement constraints.
 
 Version `0.8.36` releases full-app materializer generated-final preflight alignment from PR #209. Nontrivial materialized packages must preserve API-issued IDs as strings, emit ID provenance paths that match the actual decoded package, generate runtime navigation metadata, generated data-list default views, canonical approval DefResource workflow/task/action metadata, and dashboard Summary/filter/Collection runtime metadata before signing eligibility can be considered.
 

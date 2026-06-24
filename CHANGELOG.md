@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.37
+
+- Release Area chart and Data Analytics template selection guidance from PR #211.
+- Add the `data_analytics_area_chart_with_title` golden reference template and register all six approved Data Analytics templates: Pie chart, Column chart, Bar chart, Line chart, Area chart, and Pivot table.
+- Expand each Data Analytics golden reference with App Plan selection guidance, including summary, suitable source resource types, when to use, when not to use, required business signals, required App Plan declaration, proof boundary, and generation proof.
+- Require App Plans to use the Data Analytics Template Selection table when Dashboard sections plan chart/data-analytics regions, with exactly one approved template ID per analytics region.
+- Preserve Dashboard/Data List form usage only, block Approval form usage, and keep Dashboard Page Layouts v1.1 analytics placement limited to 2-column or 3-column sections.
+
 ## 0.8.36
 
 - Release full-app materializer generated-final preflight alignment from PR #209.
