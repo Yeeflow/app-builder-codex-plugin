@@ -6,7 +6,7 @@ import zlib from "node:zlib";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-boxes-stacked", c: "#0065FF" });
+const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -38,6 +38,19 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   fs.mkdirSync(outDir, { recursive: true });
   const specText = fs.readFileSync(specPath, "utf8");
   const planText = fs.readFileSync(planPath, "utf8");
+  const planDemand = analyzeAppPlanResourceDemand(planText);
+  if (!fixtureMode && planDemand.hasMaterialResources) {
+    findings.push(error(
+      "FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED",
+      "The standalone materializer cannot yet generate the full App Plan resource graph. It must fail closed instead of emitting a placeholder generated-final package.",
+      {
+        planned: planDemand.counts,
+        evidence: planDemand.evidence,
+        requiredBehavior: "Use the skill-orchestrated full-app generator or implement full materialization for data lists, approval forms, reports, dashboards, navigation, icon, and ID provenance before signing readiness.",
+      },
+    ));
+    return buildFailure(findings, { outDir, specPath, planPath, signingEligible: false });
+  }
   const appTitle = sanitizeTitle(options.title || extractTitle(planText) || extractTitle(specText) || "Generated Yeeflow Application");
   const slug = slugify(appTitle);
   const ids = allocateIds(idSource.ids, [
@@ -85,14 +98,20 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 
   const provenance = {
     status: "pass",
+    generator: {
+      name: "materialize-full-app-generated-final",
+      version: "0.8.32",
+      mode: fixtureMode ? "fixture-regression" : "schema-smoke-only",
+    },
     sourceMarker: fixtureMode ? "api-generated-fixture-for-tests" : "api-generated",
-    signingEligible: !fixtureMode,
+    allocationSource: "api-generated",
+    signingEligible: false,
     package: summarizePath(packagePath),
     allocations: Object.entries(ids).map(([pathName, id]) => ({
       path: pathName,
       id: stringId(id),
       purpose: pathName,
-      source: fixtureMode ? "fixture-api-id-list" : "api-issued-id-manifest",
+      source: fixtureMode ? "api-generated-fixture-for-tests" : "api-generated",
     })),
     proofBoundary: fixtureMode
       ? "Fixture IDs are only for plugin regression. Do not sign, install, import, upgrade, or claim live Yeeflow ID provenance with this package."
@@ -102,8 +121,8 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 
   const generationReport = {
     status: "pass",
-    mode: fixtureMode ? "fixture-regression" : "generated-final",
-    signingEligible: !fixtureMode,
+    mode: fixtureMode ? "fixture-regression" : "schema-smoke-only",
+    signingEligible: false,
     inputs: {
       functionalSpecification: summarizePath(specPath),
       appPlan: summarizePath(planPath),
@@ -119,6 +138,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
       "No install/import/upgrade was attempted.",
       "No browser/runtime proof was attempted.",
       "Generated-final preflight is required before any signing request.",
+      "This standalone materializer must fail closed for nontrivial App Plans until full resource-graph materialization is implemented.",
     ],
   };
   fs.writeFileSync(generationReportPath, `${JSON.stringify(generationReport, null, 2)}\n`);
@@ -137,6 +157,64 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     proofBoundary: generationReport.hardStopsPreserved,
     findings: [],
   };
+}
+
+function analyzeAppPlanResourceDemand(planText) {
+  const sections = [
+    ["dataLists", /^##\s+4\.\s+Data Lists and Document Libraries Plan/im],
+    ["approvalForms", /^##\s+5\.\s+Approval Forms Plan/im],
+    ["formReports", /^##\s+6\.\s+Form Reports Plan/im],
+    ["customForms", /^##\s+10\.\s+Custom Data List Forms Plan/im],
+    ["dashboards", /^##\s+14\.\s+Dashboard Pages Plan/im],
+    ["navigationGroups", /^##\s+15\.\s+Application Navigation Plan/im],
+  ];
+  const counts = {};
+  const evidence = [];
+  for (const [key, marker] of sections) {
+    const section = extractNumberedSection(planText, marker);
+    const count = countPlannedRowsOrHeadings(section);
+    counts[key] = count;
+    if (count > 0) evidence.push({ section: key, plannedItems: count });
+  }
+  return {
+    counts,
+    evidence,
+    hasMaterialResources: Object.values(counts).some((count) => count > 0),
+  };
+}
+
+function extractNumberedSection(text, marker) {
+  const match = marker.exec(text);
+  if (!match) return "";
+  const start = match.index;
+  const next = text.slice(start + match[0].length).search(/\n##\s+\d+\.\s+/);
+  return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
+}
+
+function countPlannedRowsOrHeadings(section) {
+  if (!section.trim()) return 0;
+  const headingCount = [...section.matchAll(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/gim)]
+    .map((match) => cleanResourceName(match[1]))
+    .filter((name) => !isNonResourceName(name)).length;
+  const tableRows = section.split(/\r?\n/)
+    .filter((line) => /^\|/.test(line.trim()))
+    .filter((line) => !/^\|\s*-+/.test(line.trim()))
+    .slice(1)
+    .map((line) => line.split("|").map((cell) => cleanResourceName(cell)).filter(Boolean))
+    .filter((cells) => cells.some((cell) => !isNonResourceName(cell)));
+  return Math.max(headingCount, tableRows.length);
+}
+
+function cleanResourceName(value) {
+  return String(value || "").replace(/`/g, "").replace(/\*\*/g, "").trim();
+}
+
+function isNonResourceName(value) {
+  const text = cleanResourceName(value);
+  if (!text) return true;
+  if (/^(not applicable|n\/a|none|no|deferred|status|resource type|purpose|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (/^(dashboard page name|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
+  return false;
 }
 
 function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId }) {

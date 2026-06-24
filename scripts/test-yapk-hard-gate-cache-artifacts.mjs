@@ -129,6 +129,7 @@ const requiredDocs = [
   "docs/training/full-app-entrypoint-cache-path-alignment-training-report.md",
   "docs/training/full-app-skill-callable-generation-contract-training-report.md",
   "docs/training/full-app-generated-final-materialization-entrypoint-training-report.md",
+  "docs/training/full-app-materializer-fail-closed-resource-graph-training-report.md",
   "docs/training/validator-semantic-tolerance-dashboard-dataset-lines-training-report.md",
   "docs/training/dashboard-filter-module-synthesis-gates-training-report.md",
   "docs/training/dashboard-golden-reference-property-fidelity-gates-training-report.md",

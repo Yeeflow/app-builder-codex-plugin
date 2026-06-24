@@ -83,7 +83,7 @@ try {
     ],
   }, null, 2));
   const apiOut = path.join(tempDir, "api-materialized");
-  const apiRun = expectPass("API ID manifest mode is signing-eligible after materialization only", [
+  const apiRun = expectPass("API ID manifest mode can emit schema-smoke artifacts only for trivial plans", [
     MATERIALIZER,
     "--functional-spec", spec,
     "--app-plan", plan,
@@ -93,10 +93,49 @@ try {
     "--json",
   ]);
   const apiReport = JSON.parse(apiRun.stdout);
-  assert.equal(apiReport.signingEligible, true);
+  assert.equal(apiReport.signingEligible, false);
   assert.equal(JSON.parse(fs.readFileSync(apiReport.outputs.package, "utf8")).TenantID, "1234567890123456");
   assert.match(fs.readFileSync(apiReport.outputs.generationReport, "utf8"), /Generated-final preflight is required before any signing request/);
-  cases.push("API ID manifest mode writes generated-final artifacts without signing");
+  assert.match(fs.readFileSync(apiReport.outputs.idProvenance, "utf8"), /"allocationSource": "api-generated"/);
+  cases.push("API ID manifest mode writes schema-smoke artifacts without signing");
+
+  const resourcePlan = path.join(tempDir, "resource-yeeflow-app-plan.md");
+  fs.writeFileSync(resourcePlan, [
+    "# Yeeflow App Plan: Office Asset Loan Management",
+    "",
+    "## Plan Status",
+    "",
+    "Business defaults approval status: user-default-approved-for-generation.",
+    "",
+    "## 4. Data Lists and Document Libraries Plan",
+    "",
+    "| List Name | Purpose |",
+    "| --- | --- |",
+    "| Office Assets | Track assets. |",
+    "| Loan Transactions | Track loans. |",
+    "",
+    "## 5. Approval Forms Plan",
+    "",
+    "### 5.1 Asset Loan Request",
+    "",
+    "## 14. Dashboard Pages Plan",
+    "",
+    "### 14.1 Asset Loan Operations Dashboard",
+    "",
+    "## 15. Application Navigation Plan",
+    "",
+    "| Group | Item | Target |",
+    "| --- | --- | --- |",
+    "| Dashboards | Asset Loan Operations Dashboard | Dashboard page |",
+  ].join("\n"));
+  expectCode("nontrivial App Plan fails closed instead of placeholder package", [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", resourcePlan,
+    "--out-dir", path.join(tempDir, "resource-plan"),
+    "--api-id-manifest", apiIdManifest,
+    "--json",
+  ], "FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED");
 
   console.log(JSON.stringify({ status: "pass", cases }, null, 2));
 } finally {
