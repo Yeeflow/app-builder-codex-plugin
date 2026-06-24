@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.27`
+- Version: `0.8.28`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.27` releases the full export-shaped `collection_control_responsive_card_grid` template from PR #191: generated Dashboard responsive-card Collections must clone the approved `collection_control_responsive_card_wrapper`, preserve locked wrapper/item/caption/action structure, map editable title/search/button/item fields through the approved slots, use field-type compatible Dynamic controls, omit image controls when no Image field exists, and preserve delete-confirmation temp variable/action wiring when item operations are enabled.
+Current release `0.8.28` releases the full export-shaped `collection_control_grid_table` template from PR #193: generated Dashboard grid-table Collections must clone the approved `grid_table_col_wrapper`, preserve locked wrapper/caption/operation/action structure, map editable title/search/button/header/item/operation regions through the approved slots, keep `grid_table_col_header` and `grid_col_item` column counts/widths/properties aligned, use field-type compatible Dynamic controls, omit operation/caption layers when the source is display-only or non-mutable, and preserve delete-confirmation temp variable/action wiring when item operations are enabled.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.27
+Version: 0.8.28
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.27
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.28
 ```
 
 ## What Is Included

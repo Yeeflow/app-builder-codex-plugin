@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.27`
+`0.8.28`
+
+Version `0.8.28` releases the full export-shaped `collection_control_grid_table` template from PR #193. The plugin now carries the Projects Center v1.7 / Collection_control_grid_table wrapper template, preserves `grid_table_col_wrapper`, approved editable title/search/button/header/item/operation regions, matching header/item grid column definitions, display-only source restrictions, and delete-confirmation temp variable/action dependencies.
 
 Version `0.8.27` releases the full export-shaped `collection_control_responsive_card_grid` template from PR #191. The plugin now carries the Company Overview v1.4 / Collection_control_responsive_card_grid wrapper template, preserves `collection_control_responsive_card_wrapper`, approved editable title/search/button/item regions, optional caption/item-operation rules, field-type compatible Dynamic controls, and delete-confirmation temp variable/action dependencies.
 
