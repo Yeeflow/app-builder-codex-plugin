@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.33
+
+- Release full-app materializer resource-demand precision gates from PR #203.
+- Require fail-closed materializer reports to include exact planned resource names, counts, and missing generated-final output surfaces.
+- Prevent App Plan field rows, dashboard section rows, metric rows, filter rows, item-template rows, validator commands, and prose from inflating resource-demand counts.
+- Keep nontrivial App Plans package-free and not signing/install eligible until the full resource graph can be materialized and generated-final preflight passes.
+
 ## 0.8.32
 
 - Release full-app materializer fail-closed resource-graph gates from PR #201.
