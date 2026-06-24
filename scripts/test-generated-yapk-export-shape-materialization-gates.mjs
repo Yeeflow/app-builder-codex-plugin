@@ -15,7 +15,7 @@ const DASHBOARD_ID = "2068704921732997204";
 const SUMMARY_ID = "43c38762-5133-430f-af09-faeec1be3bc0";
 const TENANT_ID = "1900000000000101";
 
-function defResource({ positions = true } = {}) {
+function defResource({ positions = true, assignee = true } = {}) {
   const pageRequest = "page-request";
   const pageTask = "page-task";
   const def = {
@@ -53,10 +53,21 @@ function defResource({ positions = true } = {}) {
     ],
     childshapes: [
       shape("start", "StartNoneEvent", { outgoing: [{ resourceid: "flow-start-task" }], positions }),
-      shape("task", "MultiAssignmentTask", { incoming: [{ resourceid: "flow-start-task" }], outgoing: [{ resourceid: "flow-task-end" }], taskurl: pageTask, positions }),
-      shape("end", "EndNoneEvent", { incoming: [{ resourceid: "flow-task-end" }], positions }),
+      shape("task", "MultiAssignmentTask", {
+        incoming: [{ resourceid: "flow-start-task" }],
+        outgoing: [{ resourceid: "flow-task-approved" }, { resourceid: "flow-task-rejected" }],
+        taskurl: pageTask,
+        positions,
+        properties: assignee ? {
+          approveway: "anyapprove",
+          usertaskassignment: [{ type: "user", method: "direct", title: "Sanitized approver", value: "1000000000000000999" }],
+        } : { approveway: "anyapprove" },
+      }),
+      shape("end-approved", "EndNoneEvent", { incoming: [{ resourceid: "flow-task-approved" }], positions }),
+      shape("end-rejected", "EndRejectEvent", { incoming: [{ resourceid: "flow-task-rejected" }], positions }),
       flow("flow-start-task", "start", "task", positions),
-      flow("flow-task-end", "task", "end", positions),
+      flow("flow-task-approved", "task", "end-approved", positions, "Approved"),
+      flow("flow-task-rejected", "task", "end-rejected", positions, "Rejected"),
     ],
   };
   return Buffer.concat([
@@ -65,19 +76,19 @@ function defResource({ positions = true } = {}) {
   ]).toString("base64");
 }
 
-function shape(id, stencil, { incoming = [], outgoing = [], taskurl, positions = true } = {}) {
+function shape(id, stencil, { incoming = [], outgoing = [], taskurl, positions = true, properties = {} } = {}) {
   return {
     id,
     resourceid: id,
     stencil: { id: stencil },
     incoming,
     outgoing,
-    properties: taskurl ? { taskurl, taskUrl: taskurl, TaskUrl: taskurl } : {},
+    properties: { ...(taskurl ? { taskurl, taskUrl: taskurl, TaskUrl: taskurl } : {}), ...properties },
     ...(positions ? { bounds: { upperLeft: { x: 10, y: 10 }, lowerRight: { x: 110, y: 60 } } } : {}),
   };
 }
 
-function flow(id, source, target, positions = true) {
+function flow(id, source, target, positions = true, name = "") {
   return {
     id,
     resourceid: id,
@@ -86,6 +97,7 @@ function flow(id, source, target, positions = true) {
     target: { resourceid: target },
     incoming: [{ resourceid: source }],
     outgoing: [{ resourceid: target }],
+    properties: name ? { name, conditioninfo: [{ label: name }] } : {},
     ...(positions ? { dockers: [{ x: 120, y: 30 }, { x: 180, y: 30 }] } : {}),
   };
 }
@@ -106,8 +118,11 @@ function titleField(extra = {}) {
   return field("Title", { IsSystem: true, IsIndex: true, Status: 0, FieldIndex: 0, ...extra });
 }
 
-function dashboardResource({ hiddenSummary = false, unsafeSummary = false, unsafeChart = false, textOnlyNavLabel = false } = {}) {
+function dashboardResource({ hiddenSummary = false, unsafeSummary = false, unsafeChart = false, textOnlyNavLabel = false, residueText = "" } = {}) {
   const children = [];
+  if (residueText) {
+    children.push({ type: "heading", name: "Residue Text", attrs: { headc: { title: { value: residueText } } } });
+  }
   if (textOnlyNavLabel) {
     children.push({ type: "heading", attrs: { nv_label: "Loan Operations KPI" } });
   } else {
@@ -226,12 +241,19 @@ try {
   expectCode("approval DefResource without graph positions fails", runValidator(writePackage(tempDir, "no-positions", decoded({ approval: { positions: false } }))), "APPROVAL_WORKFLOW_GRAPH_POSITION_MISSING");
   cases.push({ case: "fail: approval DefResource without graph positions", status: "pass" });
 
+  expectCode("approval DefResource without task assignee fails", runValidator(writePackage(tempDir, "no-assignee", decoded({ approval: { assignee: false } }))), "APPROVAL_TASK_ASSIGNEE_METADATA_MISSING");
+  cases.push({ case: "fail: approval DefResource without task assignee", status: "pass" });
+
   expectCode("hidden Summary host does not count as visible KPI content", runValidator(writePackage(tempDir, "hidden-summary-only", decoded({ dashboard: { hiddenSummary: true, textOnlyNavLabel: true } }))), "DASHBOARD_VISIBLE_BUSINESS_CONTENT_MISSING|DASHBOARD_BOUND_BUSINESS_CONTROL_MISSING|DASHBOARD_TEXT_CONTROL_CONTENT_MISSING");
   cases.push({ case: "fail: hidden Summary host not visible content proof", status: "pass" });
 
   expectCode("Summary without complete model config fails", runValidator(writePackage(tempDir, "unsafe-summary", decoded({ dashboard: { unsafeSummary: true } }))), "DASHBOARD_SUMMARY_RUNTIME_MODEL_INCOMPLETE");
   expectCode("Chart without complete model config fails", runValidator(writePackage(tempDir, "unsafe-chart", decoded({ dashboard: { unsafeChart: true } }))), "DASHBOARD_CHART_RUNTIME_MODEL_INCOMPLETE");
   cases.push({ case: "fail: Summary/chart without complete model config", status: "pass" });
+
+  expectCode("generic visible control label residue fails", runValidator(writePackage(tempDir, "generic-grid-residue", decoded({ dashboard: { residueText: "Grid" } }))), "DASHBOARD_VISIBLE_CONTROL_LABEL_RESIDUE");
+  expectCode("source template business text residue fails", runValidator(writePackage(tempDir, "survey-source-residue", decoded({ dashboard: { residueText: "Active Survey Programs" } }))), "DASHBOARD_SOURCE_TEMPLATE_TEXT_RESIDUE");
+  cases.push({ case: "fail: visible generic/source-template dashboard residue", status: "pass" });
 
   expectPass("visual-safe table/filter/collection dashboard passes", runValidator(writePackage(tempDir, "visual-safe", decoded())));
   cases.push({ case: "pass: visible filter/collection without unsafe Summary", status: "pass" });

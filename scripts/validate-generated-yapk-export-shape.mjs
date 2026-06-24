@@ -158,6 +158,18 @@ function validateApprovalWorkflow(def, formPath, findings) {
   const nodeShapes = shapes.filter((shape) => String(shape?.stencil?.id || "").toLowerCase() !== "sequenceflow");
   const flows = shapes.filter((shape) => String(shape?.stencil?.id || "").toLowerCase() === "sequenceflow");
   if (!flows.length) findings.push(error("APPROVAL_WORKFLOW_SEQUENCE_LINKS_MISSING", "Approval workflow must include incoming/outgoing SequenceFlow links.", { path: `${formPath}.DefResource.childshapes` }));
+  const taskNodes = nodeShapes.filter((shape) => /task/i.test(String(shape?.stencil?.id || "")));
+  if (!taskNodes.some((shape) => String(shape?.stencil?.id || "") === "MultiAssignmentTask")) {
+    findings.push(error("APPROVAL_MULTIASSIGNMENT_TASK_REQUIRED", "Generated-final approval workflows must use a real MultiAssignmentTask reviewer step, not a thin or ambiguous task placeholder.", { path: `${formPath}.DefResource.childshapes` }));
+  }
+  for (const [taskIndex, task] of taskNodes.entries()) {
+    if (!hasTaskAssigneeMetadata(task)) {
+      findings.push(error("APPROVAL_TASK_ASSIGNEE_METADATA_MISSING", "Approval task nodes must include assignee metadata for generated-final routing safety.", { path: `${formPath}.DefResource.childshapes.task[${taskIndex}]` }));
+    }
+  }
+  const flowLabels = flows.map((flow) => JSON.stringify([flow?.properties?.name, flow?.properties?.conditioninfo, flow?.name, flow?.label])).join("\n");
+  if (!/approve|approved/i.test(flowLabels)) findings.push(error("APPROVAL_APPROVED_PATH_MISSING", "Approval workflow must include an Approved decision path.", { path: `${formPath}.DefResource.childshapes` }));
+  if (!/reject|rejected/i.test(flowLabels)) findings.push(error("APPROVAL_REJECTED_PATH_MISSING", "Approval workflow must include a Rejected decision path.", { path: `${formPath}.DefResource.childshapes` }));
   for (const [shapeIndex, shape] of shapes.entries()) {
     const shapePath = `${formPath}.DefResource.childshapes[${shapeIndex}]`;
     if (!present(shape?.id) || !present(shape?.resourceid)) findings.push(error("APPROVAL_WORKFLOW_GRAPH_ID_MISSING", "Workflow childshape must include id and resourceid.", { path: shapePath }));
@@ -170,6 +182,22 @@ function validateApprovalWorkflow(def, formPath, findings) {
       findings.push(error("APPROVAL_WORKFLOW_NODE_LINKS_MISSING", "Workflow nodes must include incoming/outgoing link metadata.", { path: shapePath }));
     }
   }
+}
+
+function hasTaskAssigneeMetadata(task) {
+  const props = task?.properties || {};
+  const candidates = [
+    props.usertaskassignment,
+    props.userTaskAssignment,
+    props.assignment,
+    props.assignee,
+    props.assignees,
+    task?.usertaskassignment,
+    task?.assignment,
+    task?.assignee,
+    task?.assignees,
+  ];
+  return candidates.some((value) => Array.isArray(value) ? value.length > 0 : isObject(value) ? Object.keys(value).length > 0 : present(value));
 }
 
 function validateWorkflowTaskUrls(def, formPath, pageIds, findings) {
@@ -253,6 +281,16 @@ function validateNoEmbeddedListDatas(decoded, findings) {
         path: `$.Childs[${childIndex}].List.ListDatas`,
       }));
     }
+    if (child?.List && isObject(child.List) && Object.prototype.hasOwnProperty.call(child.List, "Items")) {
+      const value = child.List.Items;
+      const rowCount = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : null;
+      if (rowCount === null || rowCount > 0) {
+        findings.push(error("YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN", "Generated-final YAPK AppPackageInfo must not embed seed/sample rows in Childs[].List.Items; emit a companion seed artifact and run explicit post-install seeding.", {
+          path: `$.Childs[${childIndex}].List.Items`,
+          rowCount,
+        }));
+      }
+    }
   }
 }
 
@@ -302,6 +340,37 @@ function validateTextControlContent(entry, page, findings) {
   if (!["heading", "text", "text-editor"].includes(type)) return;
   if (!present(entry.control?.attrs?.headc?.title?.value) && !present(entry.control?.attrs?.headc?.title?.variable) && !present(entry.control?.attrs?.title?.value) && !present(entry.control?.value)) {
     findings.push(error("DASHBOARD_TEXT_CONTROL_CONTENT_MISSING", "Rendered Text/Heading controls must use real text/binding content; nav_label/nv_label metadata is not rendered content proof.", { page: page.title, path: entry.pointer, navLabel: entry.control?.attrs?.nav_label || entry.control?.attrs?.nv_label || null }));
+  }
+  validateVisibleTextDomainResidue(entry, page, findings);
+}
+
+function validateVisibleTextDomainResidue(entry, page, findings) {
+  if (isHidden(entry.control)) return;
+  const value = renderedText(entry.control).trim();
+  if (!value) return;
+  if (/^(?:Grid|Container|Text|Placeholder|Dynamic field|Dynamic user)$/i.test(value)) {
+    findings.push(error("DASHBOARD_VISIBLE_CONTROL_LABEL_RESIDUE", "Generated Dashboard user-facing text must not expose raw control-type labels; rewrite the label into the current business domain or remove the placeholder.", {
+      page: page.title,
+      path: entry.pointer,
+      text: value,
+    }));
+  }
+  const pageDomain = String(page.title || "").toLowerCase();
+  const sourceResidue = [
+    { pattern: /\bAll tasks\s*-\s*Multiple select\b/i, domain: /task/ },
+    { pattern: /\bActive Survey Programs?\b/i, domain: /survey|program/ },
+    { pattern: /\bSurvey Program\b/i, domain: /survey|program/ },
+    { pattern: /\bProject Tasks?\b/i, domain: /project|task/ },
+    { pattern: /\bEvent Pipeline\b/i, domain: /event/ },
+  ];
+  for (const item of sourceResidue) {
+    if (item.pattern.test(value) && !item.domain.test(pageDomain)) {
+      findings.push(error("DASHBOARD_SOURCE_TEMPLATE_TEXT_RESIDUE", "Generated Dashboard still exposes source-template business text that does not match the current page domain.", {
+        page: page.title,
+        path: entry.pointer,
+        text: value,
+      }));
+    }
   }
 }
 
@@ -356,6 +425,16 @@ function hasResourceBinding(control) {
 
 function hasVisibleBusinessText(control) {
   return present(control?.attrs?.headc?.title?.value) || present(control?.attrs?.title?.value) || present(control?.value) || present(control?.name) || present(control?.label);
+}
+
+function renderedText(control) {
+  const candidates = [
+    control?.attrs?.headc?.title?.value,
+    control?.attrs?.heads?.title?.value,
+    control?.attrs?.title?.value,
+    control?.value,
+  ];
+  return String(candidates.find((candidate) => typeof candidate === "string" && candidate.trim()) || "");
 }
 
 function isHidden(control) {

@@ -528,6 +528,10 @@ KPI cards that display live metrics must be backed by Summary controls with matc
 
 Filters must bind to valid list fields and be consumed by Collection/table/KPI query or filter metadata. A filter with UI options but no consumer linkage, or one using scalar placeholder operator/value metadata such as `0`, is not generated-final ready.
 
+Dashboard template use must be domain-normalized before signing readiness. Template selection/provenance is not enough: rewrite every visible title, subtitle, Collection column, card field, toolbar button, batch action, row/card action, filter placeholder, empty state, and KPI label/value helper into the current App Plan business domain. Remove or rewrite source-template residue such as `All tasks - Multiple select`, `Active Survey Programs`, `Survey Program`, `Project Tasks`, unrelated `Event Pipeline`, and visible raw control labels such as `Grid`, `Container`, `Text`, `Dynamic field`, or `Placeholder`.
+
+When runtime seed data is used to verify dashboard quality, produce expected KPI values from the seed artifact and include them in runtime evidence. Dynamic binding is not the same as business correctness; visible KPI values must match the seed-derived expected counts/sums/rates before claiming generated dashboard quality.
+
 User/identity source fields must render with Dynamic user controls. Non-user fields must not be rendered with Dynamic user merely for styling.
 
 <!-- advanced-controls-learning:start -->

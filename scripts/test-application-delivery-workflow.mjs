@@ -72,7 +72,10 @@ function testConfirmationRules() {
 }
 
 function testApiResultClassification() {
-  assert.equal(classifyApiResult({ httpStatus: 200, apiStatus: 0, message: "" }).resultClass, "success");
+  const submitted = classifyApiResult({ httpStatus: 200, apiStatus: 0, message: "" });
+  assert.equal(submitted.resultClass, "submitted");
+  assert.notEqual(submitted.resultClass, "success");
+  assert.match(submitted.proofBoundary, /asynchronous materialization/i);
   assert.equal(classifyApiResult({ httpStatus: 200, apiStatus: 1, message: "package already exists" }).resultClass, "already_installed_in_tenant");
   assert.equal(classifyApiResult({ httpStatus: 200, apiStatus: 1, message: "应用已存在" }).resultClass, "already_installed_in_tenant");
   assert.equal(classifyApiResult({ httpStatus: 200, apiStatus: 540017, message: "validation failed" }).resultClass, "already_installed_in_tenant");

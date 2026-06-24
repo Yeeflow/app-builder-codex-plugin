@@ -333,6 +333,16 @@ function validateNoEmbeddedListDatas(pkg, path, errors) {
   if (isObject(pkg.List) && Object.prototype.hasOwnProperty.call(pkg.List, "ListDatas")) {
     add(errors, "YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].List.ListDatas.", { path: `${path}.List.ListDatas` });
   }
+  if (isObject(pkg.List) && Object.prototype.hasOwnProperty.call(pkg.List, "Items")) {
+    const value = pkg.List.Items;
+    const rowCount = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : null;
+    if (rowCount === null || rowCount > 0) {
+      add(errors, "YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN", "Generated-final YAPK AppPackageInfo must not embed seed/sample rows in Childs[].List.Items. Emit a companion seed artifact and run explicit post-install seeding instead.", {
+        path: `${path}.List.Items`,
+        rowCount,
+      });
+    }
+  }
 }
 
 function storageFamilyForFieldName(fieldName) {

@@ -42,6 +42,7 @@ export function inspectVisibleKpiRuntimeBindings({ evidence: evidencePath, claim
       addFinding(findings, "error", "KPI_DYNAMIC_PROOF_USES_FALLBACK", "Dynamic KPI proof must not rely on static or formatted fallback values.", { kpi: label });
     }
   }
+  validateExpectedKpiValues(evidence, kpis, findings);
 
   if (evidence.dynamicVisibleKpiRuntimeProven === true) {
     validateProvenUuidSummaryRuntimeEvidence(evidence, findings);
@@ -58,6 +59,35 @@ export function inspectVisibleKpiRuntimeBindings({ evidence: evidencePath, claim
     dynamicVisibleKpiRuntimeProven: evidence.dynamicVisibleKpiRuntimeProven === true,
     provenShape: evidence.dynamicVisibleKpiRuntimeProven === true ? scalar(evidence.dynamicBindingShape || evidence.provenBindingShape) : null,
   });
+}
+
+function validateExpectedKpiValues(evidence, kpis, findings) {
+  const expected = evidence.expectedKpis || evidence.expectedKpiValues || evidence.seedDerivedExpectedKpis;
+  if (!expected || typeof expected !== "object" || Array.isArray(expected)) return;
+  const visibleByLabel = new Map();
+  for (const kpi of kpis) {
+    const label = scalar(kpi.label || kpi.name || "KPI").trim().toLowerCase();
+    if (!label) continue;
+    visibleByLabel.set(label, scalar(kpi.renderedText ?? kpi.text ?? kpi.value).trim());
+  }
+  for (const [label, expectedValue] of Object.entries(expected)) {
+    const visibleValue = visibleByLabel.get(String(label).trim().toLowerCase());
+    if (visibleValue === undefined) {
+      addFinding(findings, "error", "KPI_EXPECTED_VALUE_VISIBLE_KPI_MISSING", "Seed-derived KPI proof expected a visible KPI label that was not captured in runtime evidence.", { kpi: label });
+      continue;
+    }
+    if (normalizeComparableKpiValue(visibleValue) !== normalizeComparableKpiValue(expectedValue)) {
+      addFinding(findings, "error", "KPI_EXPECTED_VALUE_MISMATCH", "Visible KPI value must match the seed-derived expected business value before claiming KPI semantic correctness.", {
+        kpi: label,
+        expected: scalar(expectedValue),
+        actual: visibleValue,
+      });
+    }
+  }
+}
+
+function normalizeComparableKpiValue(value) {
+  return scalar(value).replace(/[, ]+/g, "").trim().toLowerCase();
 }
 
 function buildReport(evidencePath, findings, summary = {}) {
