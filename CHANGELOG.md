@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.35
+
+- Release minimal full-app materializer resource-graph generation from PR #207.
+- Materialize supported nontrivial App Plans into generated-final `.yapk` packages with schema-shaped data lists, approval forms, FormNewReports, custom list layouts, dashboard pages, and grouped navigation.
+- Keep standalone materializer output `signingEligible: false` until generated-final preflight passes, preserving the signing/install/runtime proof boundary.
+- Update full-app entrypoint standard, registry, focused regression coverage, cache artifact checks, and dist mirrors.
+
 ## 0.8.34
 
 - Release generated-final resource-completeness path-independent test harness hardening from PR #205.
