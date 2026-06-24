@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MATERIALIZER = path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs");
 const SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-standard-package-schema.mjs");
+const COMPLETENESS_VALIDATOR = path.join(ROOT, "scripts/validate-generated-final-resource-completeness.mjs");
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "full-app-materializer-"));
 const cases = [];
 
@@ -73,14 +74,7 @@ try {
 
   const apiIdManifest = path.join(tempDir, "api-issued-ids.json");
   fs.writeFileSync(apiIdManifest, JSON.stringify({
-    ids: [
-      "920000000000000001",
-      "920000000000000002",
-      "920000000000000003",
-      "920000000000000004",
-      "920000000000000005",
-      "920000000000000006",
-    ],
+    ids: Array.from({ length: 120 }, (_, index) => String(920000000000000001n + BigInt(index))),
   }, null, 2));
   const apiOut = path.join(tempDir, "api-materialized");
   const apiRun = expectPass("API ID manifest mode can emit schema-smoke artifacts only for trivial plans", [
@@ -167,19 +161,22 @@ try {
     "| Administration | Office Assets | Data list |",
   ].join("\n"));
   const resourceOut = path.join(tempDir, "resource-plan");
-  const failClosed = expectCode("nontrivial App Plan fails closed instead of placeholder package", [
+  const resourceRun = expectPass("nontrivial App Plan materializes minimal resource graph instead of placeholder package", [
     MATERIALIZER,
     "--functional-spec", spec,
     "--app-plan", resourcePlan,
     "--out-dir", resourceOut,
     "--api-id-manifest", apiIdManifest,
     "--json",
-  ], "FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED");
-  const failClosedReport = JSON.parse(failClosed.stdout);
-  assert.equal(failClosedReport.signingEligible, false);
-  assert.equal(fs.existsSync(resourceOut), false, "nontrivial fail-closed path must not emit an output directory or package");
-  const blocker = failClosedReport.findings.find((finding) => finding.code === "FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED");
-  assert.deepEqual(blocker.planned, {
+  ]);
+  const resourceReport = JSON.parse(resourceRun.stdout);
+  assert.equal(resourceReport.status, "pass");
+  assert.equal(resourceReport.mode, "minimal-resource-graph");
+  assert.equal(resourceReport.signingEligible, false);
+  assert.equal(fs.existsSync(resourceReport.outputs.package), true, "nontrivial materializer writes package");
+  assert.equal(fs.existsSync(resourceReport.outputs.decodedResource), true, "nontrivial materializer writes decoded resource");
+  const resourceGenerationReport = JSON.parse(fs.readFileSync(resourceReport.outputs.generationReport, "utf8"));
+  assert.deepEqual(resourceGenerationReport.plannedResourceDemand.counts, {
     dataLists: 4,
     approvalForms: 2,
     formReports: 1,
@@ -187,10 +184,29 @@ try {
     dashboards: 2,
     navigationGroups: 3,
   });
-  assert.equal(blocker.missingResourceGraph.length, 6);
-  assert.deepEqual(blocker.plannedResources.dataLists, ["Office Assets", "Loan Transactions", "Asset Categories", "Return Inspections"]);
-  assert.deepEqual(blocker.plannedResources.dashboards, ["Asset Loan Operations Dashboard", "Overdue Monitor"]);
-  cases.push("nontrivial App Plan reports exact missing resource graph without over-counting field/section rows");
+  assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dataLists, ["Office Assets", "Loan Transactions", "Asset Categories", "Return Inspections"]);
+  assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dashboards, ["Asset Loan Operations Dashboard", "Overdue Monitor"]);
+  const decodedResource = JSON.parse(fs.readFileSync(resourceReport.outputs.decodedResource, "utf8"));
+  assert.equal(decodedResource.Childs.length, 4, "planned data lists are materialized");
+  assert.equal(decodedResource.Forms.length, 2, "planned approval forms are materialized");
+  assert.equal(decodedResource.FormNewReports.length, 1, "planned form reports are materialized");
+  assert.equal(decodedResource.Pages.length, 2, "planned dashboards are materialized");
+  assert.equal(decodedResource.Pages.some((page) => page.Title === "Getting Started Dashboard"), false, "nontrivial path must not emit placeholder dashboard");
+  assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
+  assert.match(decodedResource.ListSet.LayoutView, /Requests/);
+  assert.match(decodedResource.ListSet.LayoutView, /Administration/);
+
+  expectPass("nontrivial generated package passes canonical schema validation", [
+    SCHEMA_VALIDATOR,
+    resourceReport.outputs.package,
+    "--schema-only",
+  ]);
+  expectPass("nontrivial generated package satisfies App Plan resource completeness", [
+    COMPLETENESS_VALIDATOR,
+    "--plan", resourcePlan,
+    "--package", resourceReport.outputs.package,
+  ]);
+  cases.push("nontrivial App Plan materializes data lists, approval forms, reports, dashboards, custom forms, and navigation without placeholder output");
 
   console.log(JSON.stringify({ status: "pass", cases }, null, 2));
 } finally {
