@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { inspectFullPageDesignArtifacts } from "./inspect-full-page-design-artifacts.mjs";
 import { inspectPageImplementationBlueprint } from "./inspect-page-implementation-blueprint.mjs";
 import { compareBlueprintToDecodedResource } from "./compare-blueprint-to-decoded-resource.mjs";
+import { artifactPathsForRoot } from "./lib/plugin-root-layout.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "full-page-blueprint-gates-"));
@@ -173,11 +174,13 @@ function testDistMirror() {
     "compare-blueprint-to-decoded-resource.mjs",
     "test-full-page-design-blueprint-generation-gates.mjs",
   ]) {
-    const source = fs.readFileSync(path.join(ROOT, "scripts", script), "utf8");
-    const dist = fs.readFileSync(path.join(ROOT, "dist", "yeeflow-app-builder-plugin", "scripts", script), "utf8");
-    assert.equal(dist, source, `${script} source/dist mirror differs`);
+    const { source, mirror, mirrorRequired } = artifactPathsForRoot(ROOT, `scripts/${script}`);
+    assert.equal(fs.existsSync(source), true, `${script} source exists`);
+    if (mirrorRequired) {
+      assert.equal(fs.readFileSync(mirror, "utf8"), fs.readFileSync(source, "utf8"), `${script} source/dist mirror differs`);
+    }
   }
-  cases.push("source/dist full-page design blueprint scripts mirror exactly");
+  cases.push("source/dist or installed-payload full-page design blueprint scripts resolve");
 }
 
 function goodManifest() {
