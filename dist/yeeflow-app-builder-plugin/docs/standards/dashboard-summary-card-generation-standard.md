@@ -256,6 +256,8 @@ KPI Runtime Binding Proof v1.0.1 proved dynamic visible KPI binding for one exac
 
 Runtime proof must include before/after source data mutation evidence, expected-value notes, inspector output, and refreshed/recalculated after-evidence. The v1.0.1 proof changed the KPI values from `3 / 600 / 2 / 300` to `4 / 1000 / 3 / 700`. Because Summary recalculation can be asynchronous or cache-delayed, stale after-evidence that still shows before values is not proof.
 
+When generated apps use seed/demo rows for runtime verification, KPI proof must also include seed-derived expected values and compare them with the visible runtime KPI text. A KPI that is merely bound to a Summary control is package-valid, but not business-semantically proven until the visible value matches the expected count/sum/rate derived from the seeded records.
+
 Do not generalize this proof to semantic/non-UUID Summary IDs, approval forms, public forms, unsupported surfaces, or other visible binding shapes. If a generated package does not use the exact proven UUID Summary shape and does not provide before/after mutation proof, visible KPI binding remains unproven and fallback KPI values must be explicitly labeled fallback. Marketing Event dashboards may use this shape, but must still run their own before/after mutation proof before claiming runtime dynamic KPI success.
 
 ## Sample Data Rule

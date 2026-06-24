@@ -35,11 +35,31 @@ export function inspectRuntimeEvidence({ evidence: evidencePath, claimHighQualit
   if (evidence.tablesGridsNonScaffold !== true) addFinding(findings, "error", "RUNTIME_TABLES_GRIDS_SCAFFOLD", "Tables/grids must not be empty scaffolds in runtime evidence.");
   if (evidence.badgesDistinct !== true) addFinding(findings, "error", "RUNTIME_BADGES_NOT_DISTINCT", "Badges/chips must be visually distinct in runtime evidence.");
   if (evidence.pageLooksPlainScaffold === true) addFinding(findings, "error", "RUNTIME_PAGE_LOOKS_SCAFFOLD", "Runtime page still looks like a plain scaffold.");
+  const visibleText = collectVisibleRuntimeText(evidence);
+  if (/\bStart to build with Components\b/i.test(visibleText) || /\bADD NEW COMPONENT\b/i.test(visibleText)) {
+    addFinding(findings, "error", "YAPK_RUNTIME_EMPTY_COMPONENT_SHELL_BLOCKER", "Runtime proof must fail when the installed app opens to Yeeflow's empty Components builder shell instead of generated app content.");
+  }
+  if (/\bInstall failed\b/i.test(visibleText) || /failed/i.test(String(evidence.appTileStatus || evidence.installTileStatus || ""))) {
+    addFinding(findings, "error", "YAPK_RUNTIME_INSTALL_FAILED_TILE", "Runtime proof must fail when the installed app tile or page reports Install failed.");
+  }
 
   return buildReport(evidencePath, findings, {
     screenshot: evidence.screenshot || evidence.screenshotPath ? path.basename(evidence.screenshot || evidence.screenshotPath) : "redacted",
     runtimeScreenshotCaptured: evidence.runtimeScreenshotCaptured === true,
   });
+}
+
+function collectVisibleRuntimeText(evidence) {
+  const values = [
+    evidence.visibleText,
+    evidence.pageText,
+    evidence.bodyText,
+    evidence.runtimeText,
+    evidence.html,
+    evidence.text,
+    ...(Array.isArray(evidence.pages) ? evidence.pages.flatMap((page) => [page.visibleText, page.pageText, page.bodyText, page.html, page.text]) : []),
+  ];
+  return values.filter((value) => typeof value === "string").join("\n");
 }
 
 function buildReport(evidencePath, findings, summary = {}) {

@@ -147,6 +147,9 @@ function testApplicationAccessLinkBuilder() {
 }
 
 function testUpgradeCheckClassification() {
+  const installSubmitted = classifyApiResult({ httpStatus: 200, apiStatus: 0, message: "" });
+  assert.equal(installSubmitted.resultClass, "submitted");
+  assert.notEqual(installSubmitted.resultClass, "success");
   assert.equal(
     classifyApiResult({ httpStatus: 200, apiStatus: 0, message: "", upgradeCheck: true }).resultClass,
     "upgrade_check_passed",

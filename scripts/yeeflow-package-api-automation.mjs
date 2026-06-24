@@ -752,15 +752,20 @@ function classifyApiResult({ httpStatus, apiStatus, message, upgradeCheck }) {
   if (httpStatus < 200 || httpStatus >= 300) {
     return { resultClass: "http_rejected", messageClass: classifyMessage(message) };
   }
-  if (Number(apiStatus) === 0) {
+  const hasApiStatus = apiStatus !== null && apiStatus !== undefined && apiStatus !== "";
+  if (hasApiStatus && Number(apiStatus) === 0) {
     if (upgradeCheck === true) return { resultClass: "upgrade_check_passed", messageClass: "none" };
     if (upgradeCheck === false) return { resultClass: "upgrade_submitted", messageClass: "none" };
-    return { resultClass: "success", messageClass: "none" };
+    return {
+      resultClass: "submitted",
+      messageClass: "none",
+      proofBoundary: "API Status 0 means the package request was accepted for asynchronous materialization; it is not install/runtime success.",
+    };
   }
-  if (Number(apiStatus) === 540017 || isAlreadyInstalledMessage(message)) {
+  if ((hasApiStatus && Number(apiStatus) === 540017) || isAlreadyInstalledMessage(message)) {
     return { resultClass: "already_installed_in_tenant", messageClass: "already_installed", suggestedNextOperation: "upgrade-check-yapk / upgrade-apply-yapk" };
   }
-  if (apiStatus !== null && apiStatus !== undefined) {
+  if (hasApiStatus) {
     return { resultClass: "api_rejected", messageClass: classifyMessage(message) };
   }
   if (upgradeCheck === true) return { resultClass: "upgrade_check_passed", messageClass: classifyMessage(message) };

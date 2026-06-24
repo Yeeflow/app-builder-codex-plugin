@@ -208,6 +208,12 @@ try {
   expectCode("embedded ListDatas fails canonical schema validator", run(["scripts/validate-standard-package-schema.mjs", embeddedRows]), "YAPK_EMBEDDED_LISTDATAS_FORBIDDEN");
   results.push("embedded-listdatas");
 
+  const embeddedListItems = writePackage(tempDir, "embedded-list-items", decoded({ childPatch: { List: { ListID: LIST_ID, Title: "Loan Transactions", Flags: 1, LayoutView: null, Items: [{ Title: "Seed row" }] } } }));
+  expectCode("embedded List.Items fails generic YAPK validator", run(["validate-yapk-package.js", embeddedListItems]), "YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN");
+  expectCode("embedded List.Items fails canonical schema validator", run(["scripts/validate-standard-package-schema.mjs", embeddedListItems]), "YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN");
+  expectCode("embedded List.Items fails generated export-shape gate", run(["scripts/validate-generated-yapk-export-shape.mjs", "--package", embeddedListItems]), "YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN");
+  results.push("embedded-list-items");
+
   const planFile = path.join(tempDir, "empty-parse-app-plan.md");
   fs.writeFileSync(planFile, `# Office Asset Loan Management - Yeeflow App Plan
 

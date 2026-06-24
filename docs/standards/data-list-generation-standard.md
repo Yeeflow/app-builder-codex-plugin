@@ -302,7 +302,14 @@ Required:
 4. Keep sample data synthetic and tenant-neutral.
 5. Do not use private tenant records, private URLs, or real customer data.
 
-For app-level `.yap` or `.yapk` packages where the target list and dependent list are packaged together:
+For generated-final app-level `.yapk` packages:
+
+- Do not embed seed/sample rows in `Childs[].List.Items`, `Childs[].ListDatas`, or `Childs[].List.ListDatas`.
+- Emit synthetic seed rows as a separate companion artifact.
+- Run live seed writes only after explicit approval, after install/materialization proof, and with before/after count reporting.
+- Use `TriggerFlow: false` by default for demo/test seed writes unless the user explicitly asks to exercise workflows.
+
+For app-level `.yap` packages or non-final local-only experiments where the target list and dependent list are packaged together:
 
 - Local sample record IDs may be generated in the package.
 - Yeeflow should remap target sample record IDs and dependent lookup values consistently during import/install.
