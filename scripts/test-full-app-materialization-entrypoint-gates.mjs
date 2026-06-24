@@ -11,6 +11,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MATERIALIZER = path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs");
 const SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-standard-package-schema.mjs");
 const COMPLETENESS_VALIDATOR = path.join(ROOT, "scripts/validate-generated-final-resource-completeness.mjs");
+const ID_PROVENANCE_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-id-provenance.mjs");
+const NAVIGATION_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-navigation-runtime-metadata.mjs");
+const DATA_LIST_SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-data-list-system-schema.mjs");
+const EXPORT_SHAPE_VALIDATOR = path.join(ROOT, "scripts/validate-generated-yapk-export-shape.mjs");
+const YAPK_PACKAGE_VALIDATOR = path.join(ROOT, "validate-yapk-package.js");
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "full-app-materializer-"));
 const cases = [];
 
@@ -135,10 +140,19 @@ try {
     "",
     "## 10. Custom Data List Forms Plan",
     "",
+    "### 10.1 Office Assets",
+    "",
     "| Form Name | Form Type | Purpose |",
     "| --- | --- | --- |",
     "| Asset Quick View | View item | Compact asset details. |",
+    "| Asset Quick View | 1 | Title field row that must not create a duplicate form. |",
+    "",
+    "### 10.2 Loan Transactions",
+    "",
+    "| Form Name | Form Type | Purpose |",
+    "| --- | --- | --- |",
     "| Loan Edit Form | Edit item | Coordinator loan edits. |",
+    "| Loan Edit Form | 1 | Title field row that must not create a duplicate form. |",
     "",
     "## 14. Dashboard Pages Plan",
     "",
@@ -158,6 +172,7 @@ try {
     "| --- | --- | --- |",
     "| Dashboards | Asset Loan Operations Dashboard | Dashboard page |",
     "| Requests | Asset Loan Request | Approval form |",
+    "| Reports | Asset Loan Request Report | Form report |",
     "| Administration | Office Assets | Data list |",
   ].join("\n"));
   const resourceOut = path.join(tempDir, "resource-plan");
@@ -182,7 +197,7 @@ try {
     formReports: 1,
     customForms: 2,
     dashboards: 2,
-    navigationGroups: 3,
+    navigationGroups: 4,
   });
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dataLists, ["Office Assets", "Loan Transactions", "Asset Categories", "Return Inspections"]);
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dashboards, ["Asset Loan Operations Dashboard", "Overdue Monitor"]);
@@ -192,6 +207,12 @@ try {
   assert.equal(decodedResource.FormNewReports.length, 1, "planned form reports are materialized");
   assert.equal(decodedResource.Pages.length, 2, "planned dashboards are materialized");
   assert.equal(decodedResource.Pages.some((page) => page.Title === "Getting Started Dashboard"), false, "nontrivial path must not emit placeholder dashboard");
+  assert.equal(new Set(decodedResource.Childs.map((child) => String(child.List.ListID))).size, decodedResource.Childs.length, "data list IDs must not collapse through JavaScript number precision");
+  assert.equal(new Set(decodedResource.Pages.map((page) => String(page.LayoutID))).size, decodedResource.Pages.length, "dashboard LayoutIDs must be unique");
+  for (const page of decodedResource.Pages) {
+    assert.equal(String(page.LayoutInResources[0].ID), String(page.LayoutID), "dashboard LayoutInResources[0].ID must equal LayoutID");
+    assert.equal(String(page.LayoutInResources[0].RefId), String(page.LayoutID), "dashboard LayoutInResources[0].RefId must equal LayoutID");
+  }
   assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
   assert.match(decodedResource.ListSet.LayoutView, /Requests/);
   assert.match(decodedResource.ListSet.LayoutView, /Administration/);
@@ -206,7 +227,31 @@ try {
     "--plan", resourcePlan,
     "--package", resourceReport.outputs.package,
   ]);
+  expectPass("nontrivial generated package passes ID provenance validation", [
+    ID_PROVENANCE_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+    "--manifest", resourceReport.outputs.idProvenance,
+  ]);
+  expectPass("nontrivial generated package passes runtime navigation metadata validation", [
+    NAVIGATION_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+    "--id-provenance", resourceReport.outputs.idProvenance,
+  ]);
+  expectPass("nontrivial generated package passes generated data-list schema validation", [
+    DATA_LIST_SCHEMA_VALIDATOR,
+    resourceReport.outputs.package,
+    "--strict-generated-list",
+  ]);
+  expectPass("nontrivial generated package passes default YAPK package validation", [
+    YAPK_PACKAGE_VALIDATOR,
+    resourceReport.outputs.package,
+  ]);
+  expectPass("nontrivial generated package passes generated YAPK export-shape validation", [
+    EXPORT_SHAPE_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+  ]);
   cases.push("nontrivial App Plan materializes data lists, approval forms, reports, dashboards, custom forms, and navigation without placeholder output");
+  cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, data-list schema, YAPK package, and export-shape gates");
 
   console.log(JSON.stringify({ status: "pass", cases }, null, 2));
 } finally {

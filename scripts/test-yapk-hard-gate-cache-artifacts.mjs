@@ -132,6 +132,7 @@ const requiredDocs = [
   "docs/training/full-app-materializer-fail-closed-resource-graph-training-report.md",
   "docs/training/full-app-materializer-resource-demand-precision-training-report.md",
   "docs/training/full-app-materializer-minimal-resource-graph-training-report.md",
+  "docs/training/full-app-materializer-generated-final-preflight-alignment-training-report.md",
   "docs/training/generated-final-resource-completeness-path-independent-test-harness-training-report.md",
   "docs/training/validator-semantic-tolerance-dashboard-dataset-lines-training-report.md",
   "docs/training/dashboard-filter-module-synthesis-gates-training-report.md",
