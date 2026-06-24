@@ -7,6 +7,7 @@
     "data_analytics_column_chart_with_title",
     "data_analytics_bar_chart_with_title",
     "data_analytics_line_chart_with_title",
+    "data_analytics_area_chart_with_title",
     "data_analytics_pivot_table_standard"
   ],
   "allowedSurfaces": [
@@ -101,6 +102,28 @@
       "whenToUse": [
         "Use when users need trend movement over time.",
         "Use for created, completed, approved, overdue, usage, or volume trends by date or period."
+      ],
+      "whenNotToUse": [
+        "Do not use for categorical part-to-whole distribution.",
+        "Do not use when there is no time or ordered dimension."
+      ]
+    },
+    {
+      "templateId": "data_analytics_area_chart_with_title",
+      "displayName": "Area Chart With Title",
+      "sourceTemplate": "docs/reference/data-analytics-area-chart-with-title.template.json",
+      "controlType": "line-chart",
+      "semanticChartKind": "area-chart",
+      "rootWrapperId": "area_chart_with_title_wrapper",
+      "titleControlId": "area_chart_title",
+      "editableRegions": [
+        "area_chart_container",
+        "area_chart_title"
+      ],
+      "lockedRule": "The area_chart_with_title_wrapper subtree and every non-editable descendant must preserve the exported style, layout, and typography settings. Only data-source binding inside area_chart_container and the business text value of area_chart_title may change.",
+      "whenToUse": [
+        "Use when users need trend movement over time with filled area emphasis.",
+        "Use for cumulative volume, utilization, demand, capacity, or workload trends where magnitude over time matters."
       ],
       "whenNotToUse": [
         "Do not use for categorical part-to-whole distribution.",

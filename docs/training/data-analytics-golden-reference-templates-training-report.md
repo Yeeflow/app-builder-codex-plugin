@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This training introduces export-shaped golden reference templates for Pie chart, Column chart, Bar chart, Line chart, and Pivot table Data Analytics controls.
+This training introduces export-shaped golden reference templates for Pie chart, Column chart, Bar chart, Line chart, Area chart, and Pivot table Data Analytics controls.
 
 ## Source Templates
 
@@ -10,6 +10,7 @@ This training introduces export-shaped golden reference templates for Pie chart,
 - `Column_chart_with_title.json` -> `data_analytics_column_chart_with_title`
 - `Bar_chart_with_title.json` -> `data_analytics_bar_chart_with_title`
 - `Line_chart_with_title.json` -> `data_analytics_line_chart_with_title`
+- `Area_chart_with_title.json` -> `data_analytics_area_chart_with_title`
 - `pivot_table_standard.json` -> `data_analytics_pivot_table_standard`
 
 ## Behavior Added

@@ -8,6 +8,7 @@ This standard defines the only approved Data Analytics templates for generated Y
 - `data_analytics_column_chart_with_title`
 - `data_analytics_bar_chart_with_title`
 - `data_analytics_line_chart_with_title`
+- `data_analytics_area_chart_with_title`
 - `data_analytics_pivot_table_standard`
 
 Each template is stored as an export-shaped JSON artifact under `docs/reference/`. Generators must clone the approved template subtree and remap only the declared editable business regions. They must not create simplified chart or pivot lookalikes.
