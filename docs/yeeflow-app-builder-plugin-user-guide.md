@@ -20,9 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.29`
+`0.8.30`
 
-Version `0.8.29` releases first-generation smoke and installed-cache-root alignment from PR #195. Account Health first-generation smoke positive fixtures must be generated-final preflight-clean, stale seed-row/native-Title/simplified-dashboard shapes remain negative regressions, and cache/UI hard gates support both source checkouts and installed Codex plugin payload roots.
+Version `0.8.30` releases Data Analytics golden reference templates from PR #197. Pie chart, Column chart, Bar chart, Line chart, and Pivot table controls must clone approved export-shaped templates, preserve locked style/layout/typography, use Dashboard or Data List form surfaces only, block Approval form usage, and place Dashboard Page Layouts v1.1 analytics templates only inside 2-column or 3-column sections.
 
 Version `0.8.28` releases the full export-shaped `collection_control_grid_table` template from PR #193. The plugin now carries the Projects Center v1.7 / Collection_control_grid_table wrapper template, preserves `grid_table_col_wrapper`, approved editable title/search/button/header/item/operation regions, matching header/item grid column definitions, display-only source restrictions, and delete-confirmation temp variable/action dependencies.
 

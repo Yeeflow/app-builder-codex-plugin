@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.30
+
+- Release Data Analytics golden reference templates from PR #197.
+- Add export-shaped Pie chart, Column chart, Bar chart, Line chart, and Pivot table template artifacts with a closed approved registry.
+- Add generated-final validation for approved analytics template provenance, chart wrapper/title fidelity, Dashboard Page Layouts v1.1 2/3-column placement, Data List form allowance, and Approval form exclusion.
+- Register the analytics gate in first-generation YAPK preflight, aggregate UI hard gates, cache artifact checks, and generator/validator skill guidance.
+
 ## 0.8.29
 
 - Release first-generation smoke and installed-cache-root alignment from PR #195.
