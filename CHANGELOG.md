@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.28
+
+- Release the full export-shaped `collection_control_grid_table` template from PR #193.
+- Add the sanitized Projects Center v1.7 / Collection_control_grid_table wrapper template as a tracked reference artifact.
+- Require generated dashboards to preserve `grid_table_col_wrapper`, locked wrapper/caption/operation/action structure, approved editable title/search/button/header/item/operation regions, and field-type compatible Dynamic controls.
+- Enforce `grid_table_col_header` and `grid_col_item` column count, width, and property parity, and block simplified grid-table approximations, mismatched header/item fields, missing operation action bindings, and invalid mutable controls for display-only sources before signing readiness.
+
 ## 0.8.27
 
 - Release the full export-shaped `collection_control_responsive_card_grid` template from PR #191.
