@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.8.24
+
+- Release Dashboard multiselect template fidelity and materialization gates from PR #185.
+- Enforce source-template Text typography/color metadata for card and grid-table multiselect templates before release/cache smoke.
+- Harden grid-table multiselect wrapper/detail contracts with zero-gap metadata, `{{DetailLayoutID}}` replacement, slide-open detail layout rules, and generator guidance for real Summary/KPI/Data Filter materialization.
+
 ## 0.8.23
 
 - Release Dashboard shell and Collection validator alignment from PR #183.
