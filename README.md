@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.33`
+- Version: `0.8.34`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.33` releases full-app materializer resource-demand precision from PR #203: fail-closed materializer reports now include exact planned resource names, counts, and missing generated-final output surfaces, while field rows, dashboard section rows, metric rows, filter rows, item-template rows, validator commands, and prose no longer inflate resource-demand counts. Nontrivial App Plans remain package-free and not signing/install eligible until the full resource graph can be materialized and generated-final preflight passes.
+Current release `0.8.34` releases generated-final resource-completeness path-independent test harness hardening from PR #205: the focused regression harness resolves the validator by absolute path, invokes it from an external working directory, emits explicit diagnostics when JSON or findings are missing, and keeps the planned approval form with decoded `Forms: []` hard failure enforced.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.33
+Version: 0.8.34
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.33
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.34
 ```
 
 ## What Is Included

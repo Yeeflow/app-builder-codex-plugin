@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.33`
+`0.8.34`
+
+Version `0.8.34` releases generated-final resource-completeness path-independent test harness hardening from PR #205. The focused regression harness must resolve the validator by absolute path, invoke it from an external working directory, emit explicit diagnostics when JSON or `findings[]` output is missing, and keep the planned approval form with decoded `Forms: []` hard failure enforced.
 
 Version `0.8.33` releases full-app materializer resource-demand precision gates from PR #203. `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` reports must now include exact planned resource names, counts, and missing generated-final output surfaces, and the parser must not count data-list fields, dashboard sections, metrics, filters, item-template rows, validator commands, or prose as resources. Nontrivial App Plans remain package-free and not signing/install eligible until full resource-graph materialization and generated-final preflight pass.
 

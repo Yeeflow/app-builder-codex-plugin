@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.34
+
+- Release generated-final resource-completeness path-independent test harness hardening from PR #205.
+- Resolve the generated-final resource-completeness validator through an absolute path in the focused regression harness.
+- Invoke the validator from an external working directory so source checkouts, installed caches, and active marketplace payloads exercise the same path-independent contract.
+- Emit explicit diagnostics when validator JSON or `findings[]` output is missing, instead of ambiguous undefined findings.
+- Keep the planned approval form with decoded `Forms: []` regression case strict with `GENERATED_FINAL_FORMS_EMPTY_WITH_PLANNED_APPROVAL_FORMS`.
+
 ## 0.8.33
 
 - Release full-app materializer resource-demand precision gates from PR #203.
