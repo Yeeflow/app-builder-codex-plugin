@@ -20,9 +20,10 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.25`
+`0.8.26`
 
-Version `0.8.25` releases clean full E2E install, seed, approval, and dashboard quality gates from PR #187. Package API `Status: 0` is now submitted/accepted only, generated-final YAPK packages cannot embed seed rows in `Childs[].List.Items`, approval `DefResource` must include materialization-safe routing with Approved/Rejected paths, runtime proof rejects install-failed and empty Components shells, generated dashboards must remove source-template/generic visible residue, and seed-derived KPI expected values can be compared against visible runtime KPI values.
+Version `0.8.26` releases Dashboard template materialization fidelity gates from PR #189. Approved Dashboard Collection and KPI templates are now clone-and-map contracts: grid-table multiselect output must preserve full-width wrapper/caption/content layers, locked spacing, source-domain text replacement, select action wiring, and Designer-compatible filter condition shape, while KPI wrappers must materialize approved KPI row/card modules instead of helper-created lookalikes.
+
 
 Version `0.8.24` releases Dashboard multiselect template fidelity and materialization gates from PR #185. Card and grid-table multiselect template artifacts now fail source-template validation when Text typography/color metadata is missing; grid-table multiselect preserves zero-gap wrapper metadata, requires a `{{DetailLayoutID}}` source contract, and generated packages must replace it with a concrete slide-open detail layout. The generator guidance also reinforces that v1.1 dashboards must materialize planned Summary/KPI and Data Filter controls, not only Collection templates.
 
