@@ -10,12 +10,30 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPT = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
+const REGISTRY = path.join(ROOT, "docs/reference/dashboard-dataset-presentation-golden-references.json");
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dashboard-dataset-presentation-"));
 const results = [];
 
 try {
   expectPass("registry validates", ["--registry"]);
+  const cardTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json"), "utf8"));
+  const badCardTextTemplate = structuredClone(cardTemplate);
+  const badCardText = findFirstTemplateText(badCardTextTemplate);
+  delete badCardText.attrs.heads;
+  expectCode("card multiselect source template Text metadata is enforced", ["--registry", REGISTRY, "--card-template", writeJson("bad-card-text-template.json", badCardTextTemplate)], "DASH_DATASET_CARD_MULTISELECT_TEMPLATE_TEXT_HEADS_MISSING");
+
+  const gridTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json"), "utf8"));
+  const badGridWrapperTemplate = structuredClone(gridTemplate);
+  delete badGridWrapperTemplate.templateResource.rootContainer.attrs.container;
+  badGridWrapperTemplate.templateResource.rootContainer.attrs.style.gap = [null, "--sp--s0"];
+  expectCode("grid-table multiselect source wrapper gap is enforced", ["--registry", REGISTRY, "--grid-template", writeJson("bad-grid-wrapper-template.json", badGridWrapperTemplate)], "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_WRAPPER_CONTAINER_GAP_MISSING");
+
+  const badGridDetailTemplate = structuredClone(gridTemplate);
+  const badGridCollection = findByIdentity(badGridDetailTemplate.templateResource.rootContainer, "grid_table_col_body");
+  badGridCollection.attrs.data.link = "default";
+  delete badGridCollection.attrs.data.opentype;
+  expectCode("grid-table multiselect source detail-link contract is enforced", ["--registry", REGISTRY, "--grid-template", writeJson("bad-grid-detail-template.json", badGridDetailTemplate)], "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_DETAIL_LINK_PLACEHOLDER_INVALID");
 
   const validPlan = write("valid-plan.md", `# Yeeflow App Plan
 
@@ -212,6 +230,52 @@ function write(name, text) {
   const file = path.join(tempDir, name);
   fs.writeFileSync(file, text);
   return file;
+}
+
+function writeJson(name, value) {
+  return write(name, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function findFirstTemplateText(template) {
+  const text = findNode(template.templateResource.rootContainer, (node) => node?.type === "heading" && node?.label === "Text");
+  assert.ok(text, "template has Text control");
+  return text;
+}
+
+function findByIdentity(root, identity) {
+  const normalized = normalizeIdentity(identity);
+  const node = findNode(root, (candidate) => [
+    candidate?.id,
+    candidate?.name,
+    candidate?.label,
+    candidate?.nv_label,
+    candidate?.attrs?.name,
+    candidate?.attrs?.label,
+    candidate?.attrs?.nv_label,
+  ].map(normalizeIdentity).includes(normalized));
+  assert.ok(node, `template has ${identity}`);
+  return node;
+}
+
+function findNode(root, predicate) {
+  if (!root || typeof root !== "object") return null;
+  if (predicate(root)) return root;
+  for (const value of Object.values(root)) {
+    if (Array.isArray(value)) {
+      for (const child of value) {
+        const found = findNode(child, predicate);
+        if (found) return found;
+      }
+    } else if (value && typeof value === "object") {
+      const found = findNode(value, predicate);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function normalizeIdentity(value) {
+  return String(value || "").trim().toLowerCase().replace(/[\s_/-]+/g, "_");
 }
 
 function writePackage(name, pages) {

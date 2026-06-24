@@ -106,6 +106,10 @@ For full application generation, dashboard work must come from the application p
 
 Do not substitute a static or minimal dashboard for a planned functional dashboard. Generate the full planned dashboard scope when it is inside proven patterns: source lists, KPI summaries, queues, charts, Data tables, Collection/Kanban/Timeline views, actions, and filters as appropriate. Staged/minimal dashboard packages are only for explicit MVP requests or focused runtime proof.
 
+Dashboard Page Layouts v1.1 remains the page shell even when the dashboard's main business content is a Collection template. Insert approved Collection templates only into approved v1.1 business slots such as `section_content_area`; never generate a dashboard whose only meaningful content is the Collection component without the v1.1 shell. If the App Plan declares Summary/KPI metrics or filters, materialize them as real Summary/KPI and Data Filter/search/select/radio controls with valid bindings and consumers before handoff.
+
+For multiselect Collection templates, do not rebuild the visual tree by hand. `collection_control_card_with_multiselect_toolbar` and `collection_control_grid_table_with_multiselect` must be cloned from their full JSON template artifacts with Text `attrs.heads.ty` and plain-string `attrs.heads.color` intact. Grid-table multiselect must replace `{{DetailLayoutID}}` with a concrete custom detail layout id for the source list and keep row open metadata `opentype = "slide"` / `modalsize = 2`; `link: "default"` is not a valid generated-final value.
+
 ## Web App Dashboard Pattern Mapping
 
 Design dashboards like modern web application pages first, then map the design to Yeeflow controls. Decide the user goal, information priority, main actions, density, responsive expectation, and operational vs executive use before selecting controls.

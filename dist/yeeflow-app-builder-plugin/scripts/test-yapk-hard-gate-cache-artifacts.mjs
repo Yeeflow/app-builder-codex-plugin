@@ -109,6 +109,7 @@ const requiredDocs = [
   "docs/training/dashboard-collection-template-materialization-conformance-training-report.md",
   "docs/training/collection-card-multiselect-toolbar-full-template-training-report.md",
   "docs/training/collection-grid-table-multiselect-full-template-training-report.md",
+  "docs/training/dashboard-multiselect-template-fidelity-and-materialization-training-report.md",
   "docs/training/dashboard-collection-template-slot-decision-gates-training-report.md",
   "docs/training/full-app-generation-entrypoint-and-collection-template-exact-match-training-report.md",
   "docs/training/full-app-entrypoint-cache-path-alignment-training-report.md",

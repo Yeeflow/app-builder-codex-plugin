@@ -93,6 +93,8 @@ Recommended editable behavior:
 - Multiselect references must preserve selected state, selected count, checkbox icons, bulk toolbar/actions, `ListDataID`, and `__ctx_coll` current-item context.
 - `collection_control_card_with_multiselect_toolbar` must preserve the full `card_with_multiselect_toolbar_wrapper` subtree, all non-editable style/layout/typography properties, page-level dependencies, Collection root actions, and the locked `card_col_item_multi_select` control.
 - `collection_control_grid_table_with_multiselect` must preserve the full `grid_table_col_multiselect_wrapper` subtree, all non-editable style/layout/typography properties, page-level dependencies, Collection root actions, the locked `grid_table_col_item_select` control, and matched `grid_table_col_header` / `grid_col_item` column definitions.
+- Multiselect source template artifacts must themselves pass fidelity lint before they can be used for generation. Every Text control in `collection-control-card-with-multiselect-toolbar.template.json` and `collection-control-grid-table-with-multiselect.template.json` must preserve `attrs.heads.ty` and plain-string `attrs.heads.color`; missing typography/color metadata in the reference file is a release blocker, not something for the generator to infer.
+- `collection_control_grid_table_with_multiselect` must keep the wrapper gap contract required by grid-table validators: `grid_table_col_multiselect_wrapper.attrs.container.gap = 0` and `attrs.style.gap = [null, 0]`. Its Collection detail-open contract must use `attrs.data.link = "{{DetailLayoutID}}"` in the source artifact, and generation must replace that placeholder with a concrete Type `1` custom detail layout for the selected source list plus `attrs.data.opentype = "slide"` and `attrs.data.modalsize = 2`. `link: "default"`, empty links, or unresolved placeholders are generated-final blockers.
 - Search references must preserve `search-filter` or equivalent search control plus Collection `attrs.data.fulltext[]` linkage.
 - Event Pipeline Grid-Table must preserve the reference subtree inside Dashboard Page Layouts v1.1 slots and replace Marketing Event fields with app-specific fields. The same slot-only/component-only rule applies to every approved Collection presentation reference.
 
@@ -125,6 +127,7 @@ Recommended editable behavior:
 Run `scripts/validate-dashboard-dataset-presentation-golden-references.mjs` for:
 
 - registry quality
+- source template fidelity for card/grid multiselect artifacts, including Text metadata, grid wrapper gap, and grid detail-open placeholder contract
 - App Plan selected reference IDs
 - generated package Collection template provenance
 - generated package Collection structural conformance

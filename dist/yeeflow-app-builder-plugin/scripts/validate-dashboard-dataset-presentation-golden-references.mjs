@@ -50,7 +50,7 @@ export function validateDashboardDatasetPresentationGoldenReferences(options = {
   const findings = [];
   const registryPath = path.resolve(options.registry || REGISTRY_PATH);
   const registry = readJson(registryPath, findings, "DASH_DATASET_PRESENTATION_REGISTRY_MISSING");
-  const registryInfo = validateRegistry(registry, findings);
+  const registryInfo = validateRegistry(registry, findings, options);
 
   if (options.appPlan) validateAppPlan(path.resolve(options.appPlan), registryInfo, findings);
   if (options.package) validatePackage(path.resolve(options.package), registryInfo, findings);
@@ -66,7 +66,7 @@ export function validateDashboardDatasetPresentationGoldenReferences(options = {
   };
 }
 
-function validateRegistry(registry, findings) {
+function validateRegistry(registry, findings, options = {}) {
   if (!registry) return { approvedIds: APPROVED_IDS, references: new Map() };
   const ids = new Set(asArray(registry.references).map((item) => String(item?.templateId || item?.referenceId || "")).filter(Boolean));
   const references = new Map();
@@ -88,12 +88,12 @@ function validateRegistry(registry, findings) {
       }
     }
   }
-  validateCardMultiselectTemplateArtifact(registry, findings);
-  validateGridMultiselectTemplateArtifact(registry, findings);
+  validateCardMultiselectTemplateArtifact(registry, findings, options);
+  validateGridMultiselectTemplateArtifact(registry, findings, options);
   return { approvedIds: ids.size ? ids : APPROVED_IDS, references };
 }
 
-function validateCardMultiselectTemplateArtifact(registry, findings) {
+function validateCardMultiselectTemplateArtifact(registry, findings, options = {}) {
   const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_card_with_multiselect_toolbar");
   const referencePath = String(entry?.fullTemplateReference || "").trim();
   if (referencePath !== "docs/reference/collection-control-card-with-multiselect-toolbar.template.json") {
@@ -103,7 +103,8 @@ function validateCardMultiselectTemplateArtifact(registry, findings) {
     }));
     return;
   }
-  const template = readJson(CARD_MULTISELECT_TEMPLATE_PATH, findings, "DASH_DATASET_CARD_MULTISELECT_TEMPLATE_FILE_MISSING");
+  const templatePath = path.resolve(options.cardTemplate || CARD_MULTISELECT_TEMPLATE_PATH);
+  const template = readJson(templatePath, findings, "DASH_DATASET_CARD_MULTISELECT_TEMPLATE_FILE_MISSING");
   if (!template) return;
   if (template.templateId !== "collection_control_card_with_multiselect_toolbar") {
     findings.push(error("DASH_DATASET_CARD_MULTISELECT_TEMPLATE_ID_INVALID", "Card multiselect template artifact has an unexpected templateId.", { actual: template.templateId }));
@@ -125,9 +126,13 @@ function validateCardMultiselectTemplateArtifact(registry, findings) {
       findings.push(error("DASH_DATASET_CARD_MULTISELECT_TEMPLATE_DEPENDENCY_MISSING", "Card multiselect template artifact is missing required page-level dependency data.", { dependency: key }));
     }
   }
+  validateTemplateTextControls(template, findings, {
+    codePrefix: "DASH_DATASET_CARD_MULTISELECT_TEMPLATE",
+    templateId: "collection_control_card_with_multiselect_toolbar",
+  });
 }
 
-function validateGridMultiselectTemplateArtifact(registry, findings) {
+function validateGridMultiselectTemplateArtifact(registry, findings, options = {}) {
   const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_grid_table_with_multiselect");
   const referencePath = String(entry?.fullTemplateReference || "").trim();
   if (referencePath !== "docs/reference/collection-control-grid-table-with-multiselect.template.json") {
@@ -137,7 +142,8 @@ function validateGridMultiselectTemplateArtifact(registry, findings) {
     }));
     return;
   }
-  const template = readJson(GRID_MULTISELECT_TEMPLATE_PATH, findings, "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_FILE_MISSING");
+  const templatePath = path.resolve(options.gridTemplate || GRID_MULTISELECT_TEMPLATE_PATH);
+  const template = readJson(templatePath, findings, "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_FILE_MISSING");
   if (!template) return;
   if (template.templateId !== "collection_control_grid_table_with_multiselect") {
     findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_ID_INVALID", "Grid-table multiselect template artifact has an unexpected templateId.", { actual: template.templateId }));
@@ -166,6 +172,60 @@ function validateGridMultiselectTemplateArtifact(registry, findings) {
       headerColumnCount: headerColumns.length,
       itemColumnCount: itemColumns.length,
     }));
+  }
+  const root = template.templateResource?.rootContainer;
+  if (root?.attrs?.container?.gap !== 0) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_WRAPPER_CONTAINER_GAP_MISSING", "Grid-table multiselect template root must preserve attrs.container.gap = 0 for generated grid-table wrapper parity.", {
+      templateId: "collection_control_grid_table_with_multiselect",
+      actual: root?.attrs?.container?.gap ?? null,
+    }));
+  }
+  if (!Array.isArray(root?.attrs?.style?.gap) || root.attrs.style.gap[0] !== null || root.attrs.style.gap[1] !== 0) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_WRAPPER_STYLE_GAP_MISSING", "Grid-table multiselect template root must preserve attrs.style.gap = [null, 0] for generated grid-table wrapper parity.", {
+      templateId: "collection_control_grid_table_with_multiselect",
+      actual: root?.attrs?.style?.gap ?? null,
+    }));
+  }
+  const collection = findDescendantByIdentity(root, "grid_table_col_body");
+  const data = collection?.attrs?.data || {};
+  if (String(data.link || "") !== "{{DetailLayoutID}}") {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_DETAIL_LINK_PLACEHOLDER_INVALID", "Grid-table multiselect template must use {{DetailLayoutID}} as a required replacement contract, not default or an empty row-detail link.", {
+      templateId: "collection_control_grid_table_with_multiselect",
+      actual: data.link ?? null,
+    }));
+  }
+  if (data.opentype !== "slide") {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_DETAIL_OPENTYPE_MISSING", "Grid-table multiselect template must preserve attrs.data.opentype = \"slide\" so generated row detail opens in a slide panel.", {
+      templateId: "collection_control_grid_table_with_multiselect",
+      actual: data.opentype ?? null,
+    }));
+  }
+  validateTemplateTextControls(template, findings, {
+    codePrefix: "DASH_DATASET_GRID_MULTISELECT_TEMPLATE",
+    templateId: "collection_control_grid_table_with_multiselect",
+  });
+}
+
+function validateTemplateTextControls(template, findings, { codePrefix, templateId }) {
+  const root = template?.templateResource?.rootContainer;
+  const textControls = findDescendants(root, (node) => String(node?.type || "") === "heading" && String(node?.label || "") === "Text");
+  if (!textControls.length) {
+    findings.push(error(`${codePrefix}_TEXT_CONTROLS_MISSING`, "Multiselect template artifact must include export-shaped Text controls with typography metadata.", { templateId }));
+    return;
+  }
+  for (const control of textControls) {
+    const identity = identityCandidates(control)[0] || control.id || null;
+    const heads = control?.attrs?.heads;
+    if (!isObject(heads)) {
+      findings.push(error(`${codePrefix}_TEXT_HEADS_MISSING`, "Multiselect template Text controls must preserve attrs.heads metadata from the export-shaped reference.", { templateId, control: identity }));
+      continue;
+    }
+    if (heads.ty === undefined) {
+      findings.push(error(`${codePrefix}_TEXT_TYPOGRAPHY_MISSING`, "Multiselect template Text controls must preserve attrs.heads.ty typography metadata.", { templateId, control: identity }));
+    }
+    if (typeof heads.color !== "string" || !heads.color.trim()) {
+      findings.push(error(`${codePrefix}_TEXT_COLOR_MISSING`, "Multiselect template Text controls must preserve attrs.heads.color as a plain string for designer/runtime fidelity.", { templateId, control: identity, actual: heads.color ?? null }));
+    }
   }
 }
 
@@ -993,6 +1053,12 @@ function parseArgs(argv) {
     } else if (token === "--package") {
       args.package = argv[i + 1];
       i += 1;
+    } else if (token === "--card-template") {
+      args.cardTemplate = argv[i + 1];
+      i += 1;
+    } else if (token === "--grid-template") {
+      args.gridTemplate = argv[i + 1];
+      i += 1;
     } else {
       throw new Error(`Unexpected argument: ${token}`);
     }
@@ -1003,6 +1069,7 @@ function parseArgs(argv) {
 function printUsage() {
   console.log(`Usage:
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry
+  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --card-template <template.json> --grid-template <template.json>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --app-plan <yeeflow-app-plan.md>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --package <app.yapk>`);
 }
