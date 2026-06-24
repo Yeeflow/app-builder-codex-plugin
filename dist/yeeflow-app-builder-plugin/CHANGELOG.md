@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.8.29
+
+- Release first-generation smoke and installed-cache-root alignment from PR #195.
+- Keep Account Health first-generation smoke positive fixtures generated-final preflight-clean, with embedded seed rows, missing native Title index metadata, and legacy simplified dashboard shells retained as negative regressions.
+- Allow cache artifact and aggregate UI hard gates to run from both source checkouts and installed Codex plugin payload roots without requiring a nested `dist/yeeflow-app-builder-plugin` directory inside installed cache payloads.
+
 ## 0.8.28
 
 - Release the full export-shaped `collection_control_grid_table` template from PR #193.
