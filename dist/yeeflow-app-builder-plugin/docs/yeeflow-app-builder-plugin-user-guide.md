@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.22`
+`0.8.23`
+
+Version `0.8.23` aligns Dashboard Page Layouts v1.1 shell validation with Dashboard Collection template validation from PR #183. Generated dashboards must instantiate the full v1.1 shell before placing dataset components, grid-table gates no longer apply table-specific checks to card multiselect templates, explicit no-open metadata is accepted when row/card open behavior is not planned, and generated-final completeness parsing understands the current unified App Plan Dashboard schema.
 
 Version `0.8.22` releases the full export-shaped `collection_control_grid_table_with_multiselect` template from PR #181. The plugin now carries the Projects Center v1.6 / All Tasks - multiple select wrapper template, preserves `grid_table_col_multiselect_wrapper`, locked `grid_table_col_item_select`, Collection root actions, page-level temp/filter/form action dependencies, matching header/item grid column definitions, and allows edits only in approved business regions.
 

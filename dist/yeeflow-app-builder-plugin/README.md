@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.22`
+- Version: `0.8.23`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.22` releases the full export-shaped `collection_control_grid_table_with_multiselect` template from PR #181: the plugin now carries the Projects Center v1.6 / All Tasks - multiple select wrapper template, preserves grid_table_col_multiselect_wrapper and locked selection/action wiring, keeps header/item grid columns aligned, includes required page-level dependencies, allows edits only in approved regions, and blocks simplified grid-table multiselect approximations before generated-final signing readiness.
+Current release `0.8.23` aligns Dashboard Page Layouts v1.1 shell validation with Dashboard Collection template validation from PR #183: generated dashboards must instantiate the full v1.1 shell before placing dataset components, grid-table gates no longer apply table-specific checks to card multiselect templates, explicit no-open metadata is accepted when row/card open behavior is not planned, and generated-final completeness parsing understands the current unified App Plan Dashboard schema.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.22
+Version: 0.8.23
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.22
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.23
 ```
 
 ## What Is Included

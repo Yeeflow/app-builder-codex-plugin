@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.23
+
+- Release Dashboard shell and Collection validator alignment from PR #183.
+- Require generated dashboards to instantiate the full Dashboard Page Layouts v1.1 shell before placing dataset components.
+- Keep grid-table-specific checks scoped to grid-table templates so card multiselect templates are validated by their own export-shaped contract.
+- Accept explicit no-open metadata when row/card open behavior is not planned, and parse the current unified App Plan Dashboard schema during generated-final completeness validation.
+
 ## 0.8.22
 
 - Release the full export-shaped `collection_control_grid_table_with_multiselect` template from PR #181.
