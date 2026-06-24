@@ -55,6 +55,34 @@ Validator scope rule: this gate parses canonical Dashboard record-display / data
 - If more than one reference seems possible, the App Plan must pick exactly one for that dataset region and state why the other options were not chosen at business level. Do not defer the choice to resource generation.
 - Template IDs must be parsed as exact tokens. `collection_control_grid_table_with_multiselect` and `collection_control_grid_table_with_search` are distinct approved templates and must not be counted as also selecting `collection_control_grid_table`.
 
+## Responsive Card Grid Template
+
+`collection_control_responsive_card_grid` is backed by the full export-shaped template artifact at `docs/reference/collection-control-responsive-card-grid.template.json`. The source is Company Overview v1.4, Dashboard page `Collection_control_responsive_card_grid`, component root `collection_control_responsive_card_wrapper`.
+
+Generation must copy `collection_control_responsive_card_wrapper` and all descendants as the component root. It is not enough to create a generic card Collection, ad hoc responsive card grid, or simplified repeated card.
+
+Only these regions are editable:
+
+- `card_col_title_wrapper`
+- `op_normal`
+- `card_col_item`
+- `card_col_item_multi_select`
+- `grid_table_col_item_op_menu`
+
+Everything else is locked by default and must strictly preserve the template's existing control settings, style, layout, spacing, and typography. `card_col_body` remains the Collection root and must preserve its responsive layout, pagination, filter/fulltext shape, and action host while remapping source IDs to the target app.
+
+Recommended editable behavior:
+
+- `card_col_title_wrapper` may change the `card_col_title` Text value to a business title derived from the selected Collection data source.
+- `op_normal` may add/delete normal-mode controls, but should retain the Search filter and Add item button when the selected Data List or Document Library source supports those actions. Search title/placeholder and Add item button text may be changed, but every button must keep a valid action binding.
+- `card_col_item` maps repeated card content to fields from the selected source resource. User fields use `dynamic-user`; image fields use `dynamic-image`; file or attachment fields use `dynamic-file`; all other fields use `dynamic-field`.
+- Do not emit `dynamic-image` if the selected data source has no image field.
+- `card_col_item` should include one subject-style Dynamic field based on the source `Survey Program name` role and preserve its Large/Semi bold visual role when a title/subject field exists.
+- `card_col_item_multi_select` contains `grid_table_col_item_op_menu` for single-record operations such as Edit or Delete. This region may be omitted when no item operations are needed.
+- Every `grid_table_col_item_op_menu` operation button must bind to a valid Collection action. Edit/Delete buttons require matching Collection actions. Delete requires the template delete-confirmation temp variable and conditional delete continuation before `setdatalist remove`.
+- If the region is display-only, `card_col_caption` and its descendants may be omitted.
+- If the source is a Form Report or Data Report, `card_col_caption`, `card_col_item_multi_select`, and item operation controls should not be emitted because report datasets are view-only.
+
 ## Card Multiselect Toolbar Template
 
 `collection_control_card_with_multiselect_toolbar` is backed by the full export-shaped template artifact at `docs/reference/collection-control-card-with-multiselect-toolbar.template.json`. Generation must copy `card_with_multiselect_toolbar_wrapper` and all descendants as the component root. It is not enough to create a generic card Collection, add checkbox icons, or add a separate toolbar.

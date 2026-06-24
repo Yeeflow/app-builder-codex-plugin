@@ -17,6 +17,11 @@ const results = [];
 
 try {
   expectPass("registry validates", ["--registry"]);
+  const responsiveTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json"), "utf8"));
+  const badResponsiveTemplate = structuredClone(responsiveTemplate);
+  delete badResponsiveTemplate.extractionIndex.slotPointers.card_col_item;
+  expectCode("responsive card grid source template slots are enforced", ["--registry", REGISTRY, "--responsive-card-template", writeJson("bad-responsive-card-template.json", badResponsiveTemplate)], "DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_SLOT_MISSING");
+
   const cardTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json"), "utf8"));
   const badCardTextTemplate = structuredClone(cardTemplate);
   const badCardText = findFirstTemplateText(badCardTextTemplate);
@@ -150,11 +155,48 @@ Dashboard validator commands used during validation:
   expectCode("Collection template outside v1.1 section content slot fails", ["--package", writePackage("outside-slot", outsideSlotPages)], "DASH_DATASET_COLLECTION_OUTSIDE_V11_SLOT");
 
   const noProvenancePages = validPages();
-  findControl(noProvenancePages[0], "asset_cards_collection").attrs.datasetPresentationTemplateId = "";
+  findControl(noProvenancePages[0], "card_col_body").attrs.datasetPresentationTemplateId = "";
   expectCode("Collection without approved template provenance fails", ["--package", writePackage("no-provenance", noProvenancePages)], "DASH_DATASET_COLLECTION_TEMPLATE_PROVENANCE_MISSING");
 
+  const simplifiedResponsivePages = validPages();
+  simplifiedResponsivePages[0].children[0].children[0].children[0].children[1].children = [
+    collection("card_col_body", "collection_control_responsive_card_grid", {
+      children: [container("card_col_item", [dynamic("asset_title", "dynamic-field", "Title")])],
+      attrs: { layout: { col: [null, null, 2, 1] }, data: { list: { ListID: "list_assets", Title: "Assets" } } },
+    }),
+  ];
+  expectCode("responsive card grid without wrapper fails", ["--package", writePackage("responsive-card-simplified-wrapper", simplifiedResponsivePages)], "DASH_DATASET_RESPONSIVE_CARD_WRAPPER_MISSING");
+
+  const badResponsiveImagePages = validPages();
+  findControl(badResponsiveImagePages[0], "asset_card_image").attrs["obj-f"] = "Text1";
+  expectCode("responsive card Dynamic image requires Image field", ["--package", writePackage("responsive-card-image-wrong-field", badResponsiveImagePages)], "DASH_DATASET_RESPONSIVE_CARD_DYNAMIC_CONTROL_TYPE_MISMATCH");
+
+  const missingResponsiveButtonActionPages = validPages();
+  delete findControl(missingResponsiveButtonActionPages[0], "btn_delete_item").attrs.control_action;
+  expectCode("responsive card item operation button without action fails", ["--package", writePackage("responsive-card-missing-button-action", missingResponsiveButtonActionPages)], "DASH_DATASET_RESPONSIVE_CARD_BUTTON_ACTION_MISSING");
+
+  const missingResponsiveDeleteTempPages = validPages();
+  delete missingResponsiveDeleteTempPages[0].tempVars;
+  expectCode("responsive card delete action requires confirmation temp variable", ["--package", writePackage("responsive-card-missing-delete-temp", missingResponsiveDeleteTempPages)], "DASH_DATASET_RESPONSIVE_CARD_DELETE_CONFIRMATION_TEMPVAR_MISSING");
+
+  const displayOnlyResponsivePages = validPages();
+  const displayWrapper = findControl(displayOnlyResponsivePages[0], "collection_control_responsive_card_wrapper");
+  displayWrapper.children = [
+    collection("card_col_body", "collection_control_responsive_card_grid", {
+      children: [container("card_col_item", [dynamic("asset_card_subject", "dynamic-field", "Title")], { attrs: { style: { gap: [null, "--sp--s100"], direction: [null, "column"], wrap: [null, "nowrap"], widthtype: [null, "1"], align_items: [null, "stretch"], justify_content: [null, "flex-start"], background: "#ffffff", border: { type: "1", width: [null, { top: 1, right: 1, bottom: 1, left: 1 }], color: "#e5edf5" }, padding: [null, { top: 18, right: 18, bottom: 18, left: 18 }], radius: [null, { top: 16, right: 16, bottom: 16, left: 16 }] } } })],
+      attrs: {
+        data: { list: { ListID: "list_assets", Title: "Assets" } },
+        datasetRegion: "Asset cards",
+        appPlanDatasetRegion: "Asset cards",
+        layout: { cg: [null, 16], rg: [null, 16], cp: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }], "align-i": [null, "7"], col: [null, null, 2, 1] },
+        actions: [],
+      },
+    }),
+  ];
+  expectPass("responsive card display-only mode may omit caption and item operations", ["--package", writePackage("responsive-card-display-only", displayOnlyResponsivePages)]);
+
   const inventedTemplatePages = validPages();
-  findControl(inventedTemplatePages[0], "asset_cards_collection").attrs.datasetPresentationTemplateId = "collection_control_fake";
+  findControl(inventedTemplatePages[0], "card_col_body").attrs.datasetPresentationTemplateId = "collection_control_fake";
   expectCode("invented template id fails", ["--package", writePackage("invented-template", inventedTemplatePages)], "DASH_DATASET_COLLECTION_TEMPLATE_UNKNOWN");
 
   const simplifiedGridPages = validPages();
@@ -313,12 +355,29 @@ function writePackage(name, pages) {
       {
         ListID: "list_assets",
         Title: "Assets",
-        Fields: [{ FieldName: "Title" }, { FieldName: "Text1" }, { FieldName: "Text2" }, { FieldName: "Decimal2" }, { FieldName: "User1" }],
+        Fields: [
+          { FieldName: "Title", FieldType: "Text" },
+          { FieldName: "Text1", FieldType: "Text" },
+          { FieldName: "Text2", FieldType: "Text" },
+          { FieldName: "Decimal2", FieldType: "Number" },
+          { FieldName: "User1", FieldType: "User" },
+          { FieldName: "Image1", FieldType: "Image" },
+          { FieldName: "File1", FieldType: "File" },
+        ],
       },
       {
         ListID: "list_loans",
         Title: "Loan Requests",
-        Fields: [{ FieldName: "Title" }, { FieldName: "Text1" }, { FieldName: "Text2" }, { FieldName: "Decimal2" }, { FieldName: "Datetime1" }, { FieldName: "User1" }],
+        Fields: [
+          { FieldName: "Title", FieldType: "Text" },
+          { FieldName: "Text1", FieldType: "Text" },
+          { FieldName: "Text2", FieldType: "Text" },
+          { FieldName: "Decimal2", FieldType: "Number" },
+          { FieldName: "Datetime1", FieldType: "DateTime" },
+          { FieldName: "User1", FieldType: "User" },
+          { FieldName: "Image1", FieldType: "Image" },
+          { FieldName: "File1", FieldType: "File" },
+        ],
       },
     ],
     Pages: pages.map((resource, index) => ({
@@ -338,11 +397,8 @@ function writePackage(name, pages) {
 function validPages() {
   return [
     page("Asset Cards Dashboard", [
-      collection("asset_cards_collection", "collection_control_responsive_card_grid", {
-        children: [container("asset_card_item", [dynamic("asset_title", "dynamic-field", "Title")])],
-        attrs: { layout: { col: [null, 3, 2, 1] }, data: { list: { ListID: "list_assets" } } },
-      }),
-    ]),
+      responsiveCardGridSection(),
+    ], responsiveCardGridPageDeps()),
     page("Active Loans Dashboard", [
       gridTableSection("active_loans", "collection_control_grid_table"),
     ]),
@@ -420,6 +476,106 @@ function gridMultiselectPageDeps() {
     filter: [{ id: "filter_keywords" }],
     formAction: [{ id: "grid_form_refresh_after_bulk" }],
   };
+}
+
+function responsiveCardGridPageDeps() {
+  return {
+    filterVars: [{ idx: "responsive-filter-keywords-idx", id: "filter_keywords" }],
+    tempVars: [{ idx: "responsive-delete-confirmed-idx", id: "var_isDeleteConfirmed" }],
+    filter: [{ idx: "responsive-filter-keywords-idx", id: "filter_keywords" }],
+    formAction: { onLoad: "responsive_on_load" },
+  };
+}
+
+function responsiveCardGridSection() {
+  return container("collection_control_responsive_card_wrapper", [
+    container("card_col_caption", [
+      container("card_col_title_wrapper", [
+        heading("card_col_title", "Available Asset Cards", { attrs: { heads: { ty: [null, "h5-medium"] }, common: { positioning: { widthtype: [null, "2"] } } } }),
+      ], { attrs: { style: { widthtype: [null, "2", "1", "1"], direction: [null, "column"], gap: [null, "--sp--s0"], align_items: [null, null, "flex-start", "flex-start"], justify_content: [null, null, null, "flex-start"] } } }),
+      container("card_col_operations", [
+        container("op_normal", [
+          { id: "responsive_card_search", type: "search-filter", label: "Search assets", attrs: { placeholder: "Search assets" } },
+          { id: "responsive_card_add_button", type: "action_button", label: "Add asset", attrs: { control_action: "responsive_add_item", "action-type": "5" }, nv_label: "Add new item" },
+        ]),
+      ], { attrs: { style: { widthtype: [null, "2", "1", "1"], gap: [null, 10], direction: [null, "row"], align_items: [null, "center"], justify_content: [null, "flex-end", "space-between"] } } }),
+    ], { attrs: { style: { direction: [null, "row", "column", "column"], align_items: [null, "center", "flex-start"], justify_content: [null, "space-between"], gap: [null, "--sp--s200", "--sp--s150", "--sp--s100"] } } }),
+    collection("card_col_body", "collection_control_responsive_card_grid", {
+      children: [
+        container("card_col_item", [
+          dynamic("asset_card_image", "dynamic-image", "Image1"),
+          dynamic("asset_card_subject", "dynamic-field", "Title", { nv_label: "Survey Program name", attrs: { item_style: { ty: [null, "large-semibold"] } } }),
+          heading("asset_card_status_text", [{ exprType: "variable_ctx", id: "Text1", ctx: "__ctx_coll", type: "expr", name: "Collection item:Status" }]),
+          container("card_col_item_multi_select", [
+            {
+              id: "grid_table_col_item_op_menu",
+              type: "dropbar",
+              label: "Drop bar",
+              children: [
+                container("grid_table_col_item_op_menu_panel", [
+                  { id: "btn_edit_item", type: "action_button", label: "Edit item", attrs: { control_action: "responsive_edit_item", operation: "edit" } },
+                  { id: "btn_delete_item", type: "action_button", label: "Delete item", attrs: { control_action: "responsive_delete_item", operation: "del" } },
+                ]),
+              ],
+            },
+          ], { attrs: { control_action: null, style: { widthtype: [null, "2"], direction: [null, "row"], gap: [null, "--sp--s025"], overflow: [null, "visible"] } } }),
+          dynamic("asset_card_owner", "dynamic-user", "User1"),
+          dynamic("asset_card_file", "dynamic-file", "File1"),
+        ], {
+          attrs: {
+            style: {
+              gap: [null, "--sp--s100"],
+              direction: [null, "column"],
+              wrap: [null, "nowrap"],
+              widthtype: [null, "1"],
+              align_items: [null, "stretch"],
+              justify_content: [null, "flex-start"],
+              background: "#ffffff",
+              border: { type: "1", width: [null, { top: 1, right: 1, bottom: 1, left: 1 }], color: "#e5edf5" },
+              padding: [null, { top: 18, right: 18, bottom: 18, left: 18 }],
+              radius: [null, { top: 16, right: 16, bottom: 16, left: 16 }],
+            },
+          },
+        }),
+      ],
+      attrs: {
+        data: {
+          list: { ListID: "list_assets", Title: "Assets" },
+          sort: [{ SortName: "Created", SortByDesc: true }],
+          ps: 9,
+          filter: [],
+          fulltext: [{ fields: ["Title", "Text1"], value: [{ exprType: "variable", valueType: "string", id: "__filter_filter_keywords", type: "expr", name: "filter_keywords" }] }],
+        },
+        datasetRegion: "Asset cards",
+        appPlanDatasetRegion: "Asset cards",
+        layout: {
+          cg: [null, 16],
+          rg: [null, 16],
+          cp: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
+          "align-i": [null, "7"],
+          col: [null, null, 2, 1],
+        },
+        actions: [
+          {
+            id: "responsive_edit_item",
+            name: "Edit item",
+            type: "coll",
+            steps: [{ type: "listitem", attrs: { op_type: "edit", listdataid: [{ exprType: "variable_ctx", id: "ListDataID", ctx: "__ctx_coll" }] } }],
+          },
+          {
+            id: "responsive_delete_item",
+            name: "Delete item",
+            type: "coll",
+            steps: [
+              { type: "confirm", attrs: { confirm_rs: { exprType: "variable", id: "__temp_var_isDeleteConfirmed", name: "var_isDeleteConfirmed" } } },
+              { type: "setdatalist", attrs: { type: "remove", wheres: [{ left: "ListDataID", right: [{ exprType: "variable_ctx", id: "ListDataID", ctx: "__ctx_coll" }] }] }, condition: [{ exprType: "variable", id: "__temp_var_isDeleteConfirmed", name: "var_isDeleteConfirmed" }, { type: "op", op: "==" }, { type: "bool", value: true }] },
+            ],
+          },
+        ],
+        pagination: { p: { sp: [null, 16] } },
+      },
+    }),
+  ], { attrs: { style: { gap: [null, "--sp--s200"], direction: [null, "column"] } } });
 }
 
 function gridMultiselectSection(prefix) {
@@ -676,13 +832,33 @@ function lockedContainerDefaults(id) {
   return structuredClone(map[id] || {});
 }
 
-function heading(id, value) {
+function heading(id, value, extras = {}) {
   const title = Array.isArray(value) ? { variable: value } : { value };
-  return { id, type: "heading", attrs: { headc: { title } } };
+  return {
+    id,
+    type: "heading",
+    ...extras,
+    attrs: {
+      ...(extras.attrs || {}),
+      headc: {
+        ...(extras.attrs?.headc || {}),
+        title,
+      },
+    },
+  };
 }
 
-function dynamic(id, type, field) {
-  return { id, type, attrs: { source: "3", "obj-f": field } };
+function dynamic(id, type, field, extras = {}) {
+  return {
+    id,
+    type,
+    ...extras,
+    attrs: {
+      ...(extras.attrs || {}),
+      source: "3",
+      "obj-f": field,
+    },
+  };
 }
 
 function findControl(root, id) {

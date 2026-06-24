@@ -480,6 +480,12 @@ Purpose: render source-list records as responsive Collection cards with a sectio
 
 Pattern scope: `card_style_only`.
 
+Full template artifact:
+
+- `docs/reference/collection-control-responsive-card-grid.template.json`
+- Source export: Company Overview v1.4, Dashboard page `Collection_control_responsive_card_grid`, root component `collection_control_responsive_card_wrapper`.
+- Generation must copy the root wrapper and all descendants, not reconstruct a simplified card Collection.
+
 Applicable formats:
 
 - YAP: proven for dashboard, approval form, and data-list form.
@@ -513,10 +519,25 @@ Required data:
 
 Required wrapper:
 
-- section header container
-- operation toolbar container when selected/bulk operations are generated
-- selected item count text when multiselect is generated
-- Collection root below the header/toolbar
+- `collection_control_responsive_card_wrapper` root container and descendants
+- `card_col_caption` and `op_normal` when search/add/item operations are needed
+- `card_col_body` Collection root
+- `card_col_item` repeated card item
+- optional `card_col_item_multi_select` with `grid_table_col_item_op_menu` for single-record operations
+
+Editable regions:
+
+- `card_col_title_wrapper`
+- `op_normal`
+- `card_col_item`
+- `card_col_item_multi_select`
+- `grid_table_col_item_op_menu`
+
+Locked regions:
+
+- `collection_control_responsive_card_wrapper` root structure outside editable descendants
+- `card_col_body` Collection root layout/filter/fulltext/pagination shape
+- `card_col_caption` style/layout when included
 
 Responsive settings:
 
@@ -536,6 +557,14 @@ Item card structure:
 - dynamic file controls only when fields exist
 - native text metadata for headings/text
 - no placeholder text
+
+Operation rules:
+
+- `op_normal` should retain the Search filter and Add item button when supported by the business source; title/placeholder/button text may be remapped.
+- `grid_table_col_item_op_menu` may include Edit/Delete or other item actions only when the source supports item operations.
+- Every operation button must bind to a Collection action.
+- Delete item requires the template delete-confirmation temp variable and conditional delete continuation before `setdatalist remove`.
+- Form Report/Data Report and display-only card regions should omit `card_col_caption`, `card_col_item_multi_select`, and edit/delete operations.
 
 Validation checks:
 

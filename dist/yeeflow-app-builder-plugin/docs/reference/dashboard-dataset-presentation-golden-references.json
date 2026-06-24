@@ -13,39 +13,46 @@
   "references": [
     {
       "templateId": "collection_control_responsive_card_grid",
-      "displayName": "Responsive Card Collection",
-      "sourceReference": "Collection control card-style responsive grid standard and template library",
+      "displayName": "Responsive Card Grid Collection",
+      "sourceReference": "Company Overview v1.4 / Collection_control_responsive_card_grid export-shaped component template",
       "category": "collection-card",
       "suitableSourceResourceTypes": [
         "Data List",
-        "Form Report",
-        "Document Library metadata list"
+        "Document Library metadata list",
+        "Form Report view-only dataset",
+        "Data Report view-only dataset"
       ],
       "whenToUse": [
-        "Users need to browse business records as cards.",
-        "The dataset has a small to medium field set with visual status, owner, date, or summary metadata.",
-        "Card scanning is more useful than dense row comparison."
+        "Users need to browse business records as responsive cards.",
+        "The dataset has a small to medium field set with visual status, owner, date, file, image, or summary metadata.",
+        "Card scanning is more useful than dense row comparison.",
+        "The page needs a display-first card grid, optionally with item operations for Data List or Document Library sources."
       ],
       "whenNotToUse": [
         "Dense spreadsheet-style comparison is required.",
-        "Bulk row operations are required.",
-        "The requirement asks for table headers, column alignment, or grid-table scanning."
+        "Bulk row/card selection or a selected-items toolbar is required.",
+        "The requirement asks for table headers, column alignment, or grid-table scanning.",
+        "The source is Form Report or Data Report and edit/delete item operations are requested; those sources are view-only."
       ],
       "requiredBusinessSignals": [
         "card browsing",
+        "responsive cards",
         "record cards",
         "asset cards",
         "request cards",
-        "portfolio cards"
+        "portfolio cards",
+        "display-only report cards"
       ],
-      "requiredAppPlanDeclaration": "Select collection_control_responsive_card_grid for the Dashboard dataset region and explain the card-browsing business reason.",
+      "requiredAppPlanDeclaration": "Select collection_control_responsive_card_grid for the Dashboard dataset region and explain the card-browsing/display-first business reason, plus whether item operations are allowed by the source type.",
       "generationProof": [
-        "Collection root",
-        "responsive card layout",
-        "item template with current item bindings",
-        "legal data source"
+        "collection_control_responsive_card_wrapper component root",
+        "card_col_body Collection root with explicit template provenance",
+        "card_col_item repeated item template with Dynamic controls matched to field types",
+        "no Dynamic image unless the selected data source has an Image field",
+        "grid_table_col_item_op_menu actions and delete-confirmation temp variable only when item operations are present"
       ],
-      "proofBoundary": "Export-proven card pattern only; not proof for grid-table, row-list, grouped, nested, gallery, timeline, or Kanban layouts."
+      "proofBoundary": "Export-proven responsive card grid component only; not proof for grid-table, card multiselect toolbar, grouped, nested, gallery, timeline, or Kanban layouts. Form Report/Data Report uses are view-only and must not include edit/delete item actions.",
+      "fullTemplateReference": "docs/reference/collection-control-responsive-card-grid.template.json"
     },
     {
       "templateId": "collection_control_card_with_multiselect_toolbar",

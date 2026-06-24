@@ -7,6 +7,7 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk } from "./lib/yapk-d
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-dataset-presentation-golden-references.json");
+const RESPONSIVE_CARD_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json");
 const CARD_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json");
 const GRID_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json");
 
@@ -115,9 +116,57 @@ function validateRegistry(registry, findings, options = {}) {
       }
     }
   }
+  validateResponsiveCardGridTemplateArtifact(registry, findings, options);
   validateCardMultiselectTemplateArtifact(registry, findings, options);
   validateGridMultiselectTemplateArtifact(registry, findings, options);
   return { approvedIds: ids.size ? ids : APPROVED_IDS, references };
+}
+
+function validateResponsiveCardGridTemplateArtifact(registry, findings, options = {}) {
+  const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_responsive_card_grid");
+  const referencePath = String(entry?.fullTemplateReference || "").trim();
+  if (referencePath !== "docs/reference/collection-control-responsive-card-grid.template.json") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_REFERENCE_MISSING", "collection_control_responsive_card_grid must point to the full export-shaped template artifact.", {
+      expected: "docs/reference/collection-control-responsive-card-grid.template.json",
+      actual: referencePath || null,
+    }));
+    return;
+  }
+  const templatePath = path.resolve(options.responsiveCardTemplate || RESPONSIVE_CARD_GRID_TEMPLATE_PATH);
+  const template = readJson(templatePath, findings, "DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_FILE_MISSING");
+  if (!template) return;
+  if (template.templateId !== "collection_control_responsive_card_grid") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_ID_INVALID", "Responsive card grid template artifact has an unexpected templateId.", { actual: template.templateId }));
+  }
+  if (template.templateResource?.rootContainer?.nv_label !== "collection_control_responsive_card_wrapper") {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_ROOT_INVALID", "Responsive card grid template artifact must use collection_control_responsive_card_wrapper as the root container.", {
+      actual: template.templateResource?.rootContainer?.nv_label || null,
+    }));
+  }
+  for (const label of ["collection_control_responsive_card_wrapper", "card_col_title_wrapper", "op_normal", "card_col_body", "card_col_item", "card_col_item_multi_select", "grid_table_col_item_op_menu"]) {
+    if (!template.extractionIndex?.slotPointers?.[label]) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_SLOT_MISSING", "Responsive card grid template artifact is missing a required slot pointer.", { slot: label }));
+    }
+  }
+  for (const key of ["filterVars", "tempVars", "filter", "formAction"]) {
+    const value = template.pageLevelDependencies?.[key];
+    const count = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : 0;
+    if (count < 1) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_DEPENDENCY_MISSING", "Responsive card grid template artifact is missing required page-level dependency data.", { dependency: key }));
+    }
+  }
+  const collectionActions = asArray(template.templateResource?.collectionActions);
+  if (!collectionActions.some((action) => /edit/i.test(String(action?.name || ""))) || !collectionActions.some((action) => /delete/i.test(String(action?.name || "")))) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_COLLECTION_ACTIONS_MISSING", "Responsive card grid template artifact must preserve source edit/delete Collection action contracts for optional item operation menus.", {
+      actionNames: collectionActions.map((action) => action?.name).filter(Boolean),
+    }));
+  }
+  const title = findDescendantByIdentity(template.templateResource?.rootContainer, "card_col_title");
+  if (!isObject(title?.attrs?.heads) || title.attrs.heads.ty === undefined) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_TITLE_TYPOGRAPHY_MISSING", "Responsive card grid source title must preserve exported typography metadata.", {
+      actual: title?.attrs?.heads ?? null,
+    }));
+  }
 }
 
 function validateCardMultiselectTemplateArtifact(registry, findings, options = {}) {
@@ -545,16 +594,17 @@ function validatePackage(packagePath, registryInfo, findings) {
     return;
   }
 
+  const fieldCatalog = collectFieldCatalog(decoded);
   for (const page of collectDashboardPages(decoded)) {
     validateKpiTemplateMaterialization(page, findings);
     const collections = page.controls.filter((entry) => String(entry.control?.type || "") === "collection");
     for (const entry of collections) {
-      validateCollectionEntry(entry, page, registryInfo.approvedIds, findings);
+      validateCollectionEntry(entry, page, registryInfo.approvedIds, findings, { fieldCatalog });
     }
   }
 }
 
-function validateCollectionEntry(entry, page, approvedIds, findings) {
+function validateCollectionEntry(entry, page, approvedIds, findings, context = {}) {
   validateCollectionSlot(entry, page, findings);
   const provenance = resolveTemplateId(entry, page);
   if (!provenance.templateId) {
@@ -570,6 +620,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings) {
   if (provenance.templateId === "collection_control_grid_table_with_search") validateSearch(entry, page, findings);
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
+  if (provenance.templateId === "collection_control_responsive_card_grid") validateResponsiveCardGrid(entry, page, findings, context);
   if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
   if (provenance.templateId === "collection_control_grid_table_with_multiselect") validateGridMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
@@ -755,6 +806,165 @@ function validateCard(entry, page, findings) {
   }
   if (!Array.isArray(entry.control?.attrs?.layout?.col)) {
     findings.push(error("DASH_DATASET_CARD_RESPONSIVE_COLUMNS_MISSING", "Card Collection templates require responsive attrs.layout.col metadata.", { page: page.title, path: `${entry.pointer}.attrs.layout.col` }));
+  }
+}
+
+function validateResponsiveCardGrid(entry, page, findings, context = {}) {
+  const wrapper = findNearestAncestorByIdentity(entry, "collection_control_responsive_card_wrapper");
+  if (!wrapper) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_WRAPPER_MISSING", "collection_control_responsive_card_grid must be generated from the full collection_control_responsive_card_wrapper subtree, not a simplified card Collection.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+
+  const requiredSlots = [
+    "card_col_body",
+    "card_col_item",
+  ];
+  for (const slot of requiredSlots) {
+    if (!findDescendantByIdentity(wrapper, slot)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_SLOT_MISSING", "collection_control_responsive_card_grid is missing a required export-shaped slot.", { page: page.title, path: entry.pointer, slot }));
+    }
+  }
+  const caption = findDescendantByIdentity(wrapper, "card_col_caption");
+  if (caption) {
+    for (const slot of ["card_col_title_wrapper", "op_normal"]) {
+      if (!findDescendantByIdentity(caption, slot)) {
+        findings.push(error("DASH_DATASET_RESPONSIVE_CARD_SLOT_MISSING", "collection_control_responsive_card_grid caption area is present but missing a required export-shaped slot.", { page: page.title, path: entry.pointer, slot }));
+      }
+    }
+  }
+
+  validateResponsiveCardLockedStyleParity(wrapper, page, entry, findings);
+  validateResponsiveCardDynamicControls(entry, wrapper, page, findings, context);
+  validateResponsiveCardOperations(entry, wrapper, page, findings);
+}
+
+function validateResponsiveCardLockedStyleParity(wrapper, page, entry, findings) {
+  const sourceRoot = loadResponsiveCardGridSourceTemplateRoot();
+  if (!sourceRoot) return;
+  for (const identity of ["collection_control_responsive_card_wrapper", "card_col_caption", "card_col_operations", "card_col_body"]) {
+    const generated = identity === "collection_control_responsive_card_wrapper" ? wrapper : findDescendantByIdentity(wrapper, identity);
+    const source = identity === "collection_control_responsive_card_wrapper" ? sourceRoot : findDescendantByIdentity(sourceRoot, identity);
+    if (!generated || !source) continue;
+    const checks = [
+      ["attrs.style", source?.attrs?.style, generated?.attrs?.style],
+      ["attrs.layout.col", source?.attrs?.layout?.col, generated?.attrs?.layout?.col],
+      ["attrs.layout.cg", source?.attrs?.layout?.cg, generated?.attrs?.layout?.cg],
+      ["attrs.layout.rg", source?.attrs?.layout?.rg, generated?.attrs?.layout?.rg],
+    ];
+    for (const [property, expected, actual] of checks) {
+      if (expected === undefined) continue;
+      if (!deepEqual(expected, actual)) {
+        findings.push(error("DASH_DATASET_RESPONSIVE_CARD_LOCKED_STYLE_DRIFT", "Locked responsive card grid template structure must be cloned from the source template and not rebuilt from simplified helper defaults.", {
+          page: page.title,
+          path: entry.pointer,
+          control: identity,
+          property,
+          expected,
+          actual: actual ?? null,
+        }));
+      }
+    }
+  }
+}
+
+function validateResponsiveCardDynamicControls(entry, wrapper, page, findings, context = {}) {
+  const cardItem = findDescendantByIdentity(wrapper, "card_col_item");
+  const itemControls = findDescendants(cardItem, (node) => String(node?.type || "").startsWith("dynamic-"));
+  if (!itemControls.length) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_DYNAMIC_CONTROLS_MISSING", "card_col_item must map repeated card content with Dynamic controls from the selected Collection data source.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+  if (!itemControls.some((node) => String(node?.type || "") === "dynamic-field")) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_SUBJECT_FIELD_MISSING", "card_col_item should include at least one subject-style Dynamic field for the primary record title/subject.", { page: page.title, path: entry.pointer }));
+  }
+
+  const fieldInfo = resolveCollectionFieldCatalog(entry, context.fieldCatalog);
+  if (!fieldInfo) return;
+  const hasImageField = [...fieldInfo.fields.values()].some((field) => inferFieldKind(field) === "image");
+  for (const control of itemControls) {
+    const fieldName = resolveDynamicFieldName(control);
+    if (!fieldName) continue;
+    const field = fieldInfo.fields.get(normalizeIdentity(fieldName));
+    if (!field) continue;
+    const expected = expectedDynamicControlType(field);
+    if (String(control.type || "") !== expected) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_DYNAMIC_CONTROL_TYPE_MISMATCH", "Responsive card grid item fields must use Dynamic controls that match the selected data source field type.", {
+        page: page.title,
+        path: entry.pointer,
+        control: identityCandidates(control)[0] || control.id || null,
+        field: fieldName,
+        fieldKind: inferFieldKind(field),
+        expectedControlType: expected,
+        actualControlType: control.type || null,
+      }));
+    }
+  }
+  if (!hasImageField) {
+    const imageControls = itemControls.filter((node) => String(node?.type || "") === "dynamic-image");
+    for (const control of imageControls) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_IMAGE_FIELD_UNAVAILABLE", "Do not generate Dynamic image in collection_control_responsive_card_grid when the selected Collection data source has no Image field.", {
+        page: page.title,
+        path: entry.pointer,
+        control: identityCandidates(control)[0] || control.id || null,
+        listId: fieldInfo.listId || null,
+      }));
+    }
+  }
+}
+
+function validateResponsiveCardOperations(entry, wrapper, page, findings) {
+  const opNormal = findDescendantByIdentity(wrapper, "op_normal");
+  const normalButtons = findDescendants(opNormal, (node) => String(node?.type || "") === "action_button");
+  for (const button of normalButtons) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_BUTTON_ACTION_MISSING", "Every responsive card op_normal action_button must bind to a valid action; Search/Add text may be remapped, but action wiring cannot be omitted.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+
+  const itemOperations = findDescendantByIdentity(wrapper, "card_col_item_multi_select");
+  if (!itemOperations) return;
+  const dropbar = findDescendantByIdentity(itemOperations, "grid_table_col_item_op_menu");
+  if (!dropbar) {
+    findings.push(error("DASH_DATASET_RESPONSIVE_CARD_OPERATION_MENU_MISSING", "card_col_item_multi_select is present but missing the grid_table_col_item_op_menu Drop bar operation menu from the source template.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+
+  const operationButtons = findDescendants(dropbar, (node) => String(node?.type || "") === "action_button");
+  for (const button of operationButtons) {
+    if (!hasActionBinding(button)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_BUTTON_ACTION_MISSING", "Every grid_table_col_item_op_menu action_button must bind to a valid Collection action.", { page: page.title, path: entry.pointer, button: identityCandidates(button)[0] || button.id || null }));
+    }
+  }
+
+  const collectionActions = asArray(entry.control?.attrs?.actions);
+  const availableActionIds = new Set([
+    ...collectionActions.flatMap((action) => [action?.id, action?.ID, action?.name]),
+    ...asArray(page.resource?.actions).flatMap((action) => [action?.id, action?.ID, action?.name]),
+  ].map((value) => String(value || "").trim()).filter(Boolean));
+  for (const button of operationButtons) {
+    const actionId = String(button?.attrs?.control_action || button?.attrs?.action || button?.control_action || "").trim();
+    if (actionId && availableActionIds.size && !availableActionIds.has(actionId)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_BUTTON_ACTION_UNRESOLVED", "Responsive card item operation button action must resolve to a Collection or page action preserved from the template.", {
+        page: page.title,
+        path: entry.pointer,
+        button: identityCandidates(button)[0] || button.id || null,
+        controlAction: actionId,
+        availableActionIds: [...availableActionIds],
+      }));
+    }
+  }
+
+  const hasDeleteButton = operationButtons.some((button) => /delete|del|remove/i.test(`${button?.label || ""} ${button?.id || ""} ${button?.attrs?.operation || ""}`));
+  if (hasDeleteButton) {
+    const actionText = JSON.stringify(collectionActions);
+    const tempVarText = JSON.stringify(page.resource?.tempVars || []);
+    if (!tempVarText.includes("var_isDeleteConfirmed")) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_DELETE_CONFIRMATION_TEMPVAR_MISSING", "Responsive card Delete item operation requires the template delete-confirmation temp variable.", { page: page.title, path: entry.pointer }));
+    }
+    if (!/confirm/.test(actionText) || !/setdatalist/.test(actionText) || !/ListDataID/.test(actionText) || !/__ctx_coll/.test(actionText)) {
+      findings.push(error("DASH_DATASET_RESPONSIVE_CARD_DELETE_ACTION_CONTRACT_INVALID", "Responsive card Delete item operation requires confirm plus conditional setdatalist remove scoped by __ctx_coll ListDataID.", { page: page.title, path: `${entry.pointer}.attrs.actions` }));
+    }
   }
 }
 
@@ -1183,6 +1393,94 @@ function loadGridMultiselectSourceTemplateRoot() {
   }
 }
 
+function loadResponsiveCardGridSourceTemplateRoot() {
+  try {
+    const template = JSON.parse(fs.readFileSync(RESPONSIVE_CARD_GRID_TEMPLATE_PATH, "utf8"));
+    return template?.templateResource?.rootContainer || null;
+  } catch {
+    return null;
+  }
+}
+
+function collectFieldCatalog(decoded) {
+  const byListId = new Map();
+  const byTitle = new Map();
+  for (const list of asArray(decoded?.Childs)) {
+    const fields = new Map();
+    for (const field of [
+      ...asArray(list?.Fields),
+      ...asArray(list?.Fields?.Items),
+      ...asArray(list?.List?.Fields),
+      ...asArray(list?.List?.Fields?.Items),
+    ]) {
+      if (!isObject(field)) continue;
+      for (const key of [field.FieldName, field.Name, field.Title, field.InternalName, field.ID, field.FieldID]) {
+        const normalized = normalizeIdentity(key);
+        if (normalized) fields.set(normalized, field);
+      }
+    }
+    const info = {
+      listId: String(list?.ListID || list?.ID || list?.List?.ListID || "").trim(),
+      title: String(list?.Title || list?.Name || list?.List?.Title || "").trim(),
+      fields,
+    };
+    if (info.listId) byListId.set(info.listId, info);
+    if (info.title) byTitle.set(normalizeIdentity(info.title), info);
+  }
+  return { byListId, byTitle };
+}
+
+function resolveCollectionFieldCatalog(entry, fieldCatalog) {
+  if (!fieldCatalog) return null;
+  const data = entry.control?.attrs?.data || {};
+  const list = data.list || {};
+  const listId = String(list.ListID || list.id || data.ListID || "").trim();
+  if (listId && fieldCatalog.byListId?.has(listId)) return fieldCatalog.byListId.get(listId);
+  const title = normalizeIdentity(list.Title || data.Title || "");
+  if (title && fieldCatalog.byTitle?.has(title)) return fieldCatalog.byTitle.get(title);
+  return null;
+}
+
+function resolveDynamicFieldName(control) {
+  const candidates = [
+    control?.attrs?.["obj-f"],
+    control?.attrs?.field,
+    control?.attrs?.FieldName,
+    control?.attrs?.data?.field,
+    control?.attrs?.data?.FieldName,
+    control?.field,
+    control?.FieldName,
+  ];
+  return candidates.map((value) => String(value || "").trim()).find(Boolean) || "";
+}
+
+function expectedDynamicControlType(field) {
+  const kind = inferFieldKind(field);
+  if (kind === "user") return "dynamic-user";
+  if (kind === "image") return "dynamic-image";
+  if (kind === "file") return "dynamic-file";
+  return "dynamic-field";
+}
+
+function inferFieldKind(field) {
+  const values = [
+    field?.FieldType,
+    field?.Type,
+    field?.DataType,
+    field?.ControlType,
+    field?.TypeName,
+    field?.FieldTypeName,
+    field?.Category,
+    field?.Title,
+    field?.FieldName,
+    field?.Name,
+  ].map((value) => String(value || "").toLowerCase()).join(" ");
+  if (/\b(user|people|person|member|owner|assignee|requester|employee)\b/.test(values)) return "user";
+  if (/\b(image|picture|photo|thumbnail|avatar)\b/.test(values)) return "image";
+  if (/\b(file|attachment|document|upload)\b/.test(values)) return "file";
+  return "field";
+}
+
 function controlTextIncludes(root, token) {
   const needle = String(token || "").toLowerCase();
   if (!needle) return false;
@@ -1273,6 +1571,9 @@ function parseArgs(argv) {
     } else if (token === "--package") {
       args.package = argv[i + 1];
       i += 1;
+    } else if (token === "--responsive-card-template") {
+      args.responsiveCardTemplate = argv[i + 1];
+      i += 1;
     } else if (token === "--card-template") {
       args.cardTemplate = argv[i + 1];
       i += 1;
@@ -1289,7 +1590,7 @@ function parseArgs(argv) {
 function printUsage() {
   console.log(`Usage:
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry
-  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --card-template <template.json> --grid-template <template.json>
+  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --responsive-card-template <template.json> --card-template <template.json> --grid-template <template.json>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --app-plan <yeeflow-app-plan.md>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --package <app.yapk>`);
 }
