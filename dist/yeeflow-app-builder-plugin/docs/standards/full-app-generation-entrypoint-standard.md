@@ -53,6 +53,16 @@ The materializer is not a signing, install/import, upgrade, seed-data, Version M
 
 The materializer must also be honest about implementation coverage. If a nontrivial App Plan declares data lists, approval forms, reports, custom forms, dashboards, navigation groups, or other business resources that the standalone materializer cannot fully generate, it must fail closed with `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED`. It must not emit a placeholder `.yapk`, must not return `status: pass`, and must not set `signingEligible: true` for a package that has not materialized the App Plan resource graph and passed generated-final hard gates.
 
+The `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` finding must be actionable. It must include:
+
+- exact planned resource counts by category;
+- parsed planned resource names by category;
+- a `missingResourceGraph[]` list that maps each planned category to its required generated-final output surface;
+- `packageEmitted: false`;
+- `signingEligible: false`.
+
+The materializer's App Plan resource-demand parser must count only resource-level declarations. Field tables, dashboard section tables, metric rows, filter rows, item-template rows, validator command text, and explanatory prose must not inflate resource counts. If a section uses resource headings, those headings are authoritative for that resource category. Table fallback counting is allowed only for canonical resource-name headers such as `List Name`, `Form Report Name`, `Form Name`, `Dashboard Page Name`, or navigation `Group`.
+
 The registry must validate from both layouts used by this repository:
 
 - source checkout layout: `skills/installed/<skill-name>/SKILL.md`
