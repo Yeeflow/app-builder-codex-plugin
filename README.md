@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.31`
+- Version: `0.8.32`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.31` releases the full-app generated-final materialization entrypoint from PR #199: clean-room generation can call a standalone Node CLI from approved Functional Specification and Yeeflow App Plan Markdown plus an API-issued ID manifest to produce a generated-final `.yapk`, decoded resource, ID provenance report, and generation report. The entrypoint preserves the proof boundary: fixture IDs are regression-only and not signing/install eligible, and the CLI never signs, installs/imports, upgrades, seeds data, or claims runtime proof.
+Current release `0.8.32` makes the standalone full-app materializer fail closed for nontrivial App Plans from PR #201: the CLI must not emit placeholder `.yapk` packages or report `signingEligible: true` when it cannot materialize the declared resource graph. Fixture/schema-smoke output remains not signing/install eligible, and real full-generation success still requires complete resource materialization plus generated-final preflight before signing.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.31
+Version: 0.8.32
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.31
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.32
 ```
 
 ## What Is Included
