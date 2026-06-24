@@ -35,6 +35,18 @@ The resumed `0.8.31` validation proved:
 - API ID manifest smoke output is not signing/install eligible;
 - provenance smoke output includes `allocationSource: "api-generated"`;
 - nontrivial App Plans fail closed with `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED`.
+- nontrivial App Plans report exact missing resource graph details without over-counting field rows, dashboard section rows, metric rows, filter rows, or other non-resource table rows.
+
+## Follow-up Precision Update
+
+The `0.8.32` clean-room revalidation confirmed that fail-closed behavior worked, but the materializer's resource-demand counts were inflated for rich App Plans. This update tightens the parser and failure report:
+
+- resource headings are authoritative when present;
+- canonical table fallback is scoped to resource-name headers only;
+- dashboard business-section, filter, metric, and item-template rows are not counted as dashboard pages;
+- data-list field rows are not counted as data lists;
+- the fail-closed finding includes `plannedResources` and `missingResourceGraph[]`;
+- no output directory or placeholder package is emitted for nontrivial App Plans that the standalone materializer cannot fully generate.
 
 ## Safety Boundary
 

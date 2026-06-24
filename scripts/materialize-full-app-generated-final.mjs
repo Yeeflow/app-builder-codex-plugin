@@ -35,22 +35,26 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   const idSource = loadIdSource({ cwd, apiIdManifest: options.apiIdManifest, fixtureMode, findings });
   if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
 
-  fs.mkdirSync(outDir, { recursive: true });
   const specText = fs.readFileSync(specPath, "utf8");
   const planText = fs.readFileSync(planPath, "utf8");
   const planDemand = analyzeAppPlanResourceDemand(planText);
   if (!fixtureMode && planDemand.hasMaterialResources) {
+    const missingResourceGraph = buildMissingResourceGraph(planDemand);
     findings.push(error(
       "FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED",
       "The standalone materializer cannot yet generate the full App Plan resource graph. It must fail closed instead of emitting a placeholder generated-final package.",
       {
         planned: planDemand.counts,
-        evidence: planDemand.evidence,
+        plannedResources: planDemand.resources,
+        missingResourceGraph,
+        packageEmitted: false,
+        signingEligible: false,
         requiredBehavior: "Use the skill-orchestrated full-app generator or implement full materialization for data lists, approval forms, reports, dashboards, navigation, icon, and ID provenance before signing readiness.",
       },
     ));
     return buildFailure(findings, { outDir, specPath, planPath, signingEligible: false });
   }
+  fs.mkdirSync(outDir, { recursive: true });
   const appTitle = sanitizeTitle(options.title || extractTitle(planText) || extractTitle(specText) || "Generated Yeeflow Application");
   const slug = slugify(appTitle);
   const ids = allocateIds(idSource.ids, [
@@ -161,26 +165,50 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 
 function analyzeAppPlanResourceDemand(planText) {
   const sections = [
-    ["dataLists", /^##\s+4\.\s+Data Lists and Document Libraries Plan/im],
-    ["approvalForms", /^##\s+5\.\s+Approval Forms Plan/im],
-    ["formReports", /^##\s+6\.\s+Form Reports Plan/im],
-    ["customForms", /^##\s+10\.\s+Custom Data List Forms Plan/im],
-    ["dashboards", /^##\s+14\.\s+Dashboard Pages Plan/im],
-    ["navigationGroups", /^##\s+15\.\s+Application Navigation Plan/im],
+    { key: "dataLists", marker: /^##\s+4\.\s+Data Lists and Document Libraries Plan/im, tableHeaders: ["List Name", "Data List Name", "Document Library Name"], outputSurface: "$.Childs[]" },
+    { key: "approvalForms", marker: /^##\s+5\.\s+Approval Forms Plan/im, tableHeaders: ["Approval Form Name", "Form Name"], outputSurface: "$.Forms[]" },
+    { key: "formReports", marker: /^##\s+6\.\s+Form Reports Plan/im, tableHeaders: ["Form Report Name"], outputSurface: "$.FormNewReports[]" },
+    { key: "customForms", marker: /^##\s+10\.\s+Custom Data List Forms Plan/im, tableHeaders: ["Form Name"], outputSurface: "$.Childs[].Layouts[]" },
+    { key: "dashboards", marker: /^##\s+14\.\s+Dashboard Pages Plan/im, tableHeaders: ["Dashboard Page Name", "Dashboard Page", "Page Name"], outputSurface: "$.Pages[] Type 103" },
+    { key: "navigationGroups", marker: /^##\s+15\.\s+Application Navigation Plan/im, tableHeaders: ["Group"], outputSurface: "$.ListSet.LayoutView.sort[]" },
   ];
   const counts = {};
+  const resources = {};
   const evidence = [];
-  for (const [key, marker] of sections) {
+  for (const { key, marker, tableHeaders, outputSurface } of sections) {
     const section = extractNumberedSection(planText, marker);
-    const count = countPlannedRowsOrHeadings(section);
+    const names = collectPlannedResourceNames(section, { tableHeaders, key });
+    const count = names.length;
     counts[key] = count;
-    if (count > 0) evidence.push({ section: key, plannedItems: count });
+    resources[key] = names;
+    if (count > 0) evidence.push({ section: key, outputSurface, plannedItems: count, names });
   }
   return {
     counts,
+    resources,
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
   };
+}
+
+function buildMissingResourceGraph(planDemand) {
+  const surfaceByKey = {
+    dataLists: "$.Childs[] data list/document library resources",
+    approvalForms: "$.Forms[] approval form definitions",
+    formReports: "$.FormNewReports[] approval report registrations",
+    customForms: "$.Childs[].Layouts[] custom data list form layouts",
+    dashboards: "$.Pages[] Type 103 dashboard pages with materialized v1.1 content",
+    navigationGroups: "$.ListSet.LayoutView.sort[] grouped navigation runtime metadata",
+  };
+  return Object.entries(planDemand.resources)
+    .filter(([, names]) => names.length)
+    .map(([category, names]) => ({
+      category,
+      plannedCount: names.length,
+      plannedNames: names,
+      requiredOutputSurface: surfaceByKey[category],
+      materializerStatus: "not-implemented",
+    }));
 }
 
 function extractNumberedSection(text, marker) {
@@ -191,18 +219,70 @@ function extractNumberedSection(text, marker) {
   return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
 }
 
-function countPlannedRowsOrHeadings(section) {
-  if (!section.trim()) return 0;
-  const headingCount = [...section.matchAll(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/gim)]
+function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = {}) {
+  if (!section.trim()) return [];
+  const headingNames = [...section.matchAll(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/gim)]
     .map((match) => cleanResourceName(match[1]))
-    .filter((name) => !isNonResourceName(name)).length;
-  const tableRows = section.split(/\r?\n/)
-    .filter((line) => /^\|/.test(line.trim()))
-    .filter((line) => !/^\|\s*-+/.test(line.trim()))
-    .slice(1)
-    .map((line) => line.split("|").map((cell) => cleanResourceName(cell)).filter(Boolean))
-    .filter((cells) => cells.some((cell) => !isNonResourceName(cell)));
-  return Math.max(headingCount, tableRows.length);
+    .filter((name) => !isNonResourceName(name));
+  if (headingNames.length) return unique(headingNames);
+
+  const tableNames = [];
+  for (const table of parseMarkdownTables(section)) {
+    const nameHeader = tableHeaders.find((header) => table.headers.includes(header));
+    if (!nameHeader) continue;
+    for (const row of table.rows) {
+      const name = cleanResourceName(row[nameHeader]);
+      if (!isNonResourceName(name)) tableNames.push(name);
+    }
+  }
+  if (key === "dashboards") {
+    for (const match of section.matchAll(/^-\s*Page name:\s*(.+?)\s*$/gim)) {
+      const name = cleanResourceName(match[1]);
+      if (!isNonResourceName(name)) tableNames.push(name);
+    }
+  }
+  return unique(tableNames);
+}
+
+function parseMarkdownTables(section) {
+  const lines = section.split(/\r?\n/);
+  const tables = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const rows = [];
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const row = {};
+      headers.forEach((header, cellIndex) => { row[header] = cells[cellIndex] || ""; });
+      rows.push(row);
+      rowIndex += 1;
+    }
+    tables.push({ headers, rows });
+    index = rowIndex;
+  }
+  return tables;
+}
+
+function isTableLine(line) {
+  return /^\s*\|.+\|\s*$/.test(line || "");
+}
+
+function splitTableLine(line) {
+  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cleanResourceName(cell));
+}
+
+function unique(values) {
+  const seen = new Set();
+  const out = [];
+  for (const value of values) {
+    const key = value.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(value);
+  }
+  return out;
 }
 
 function cleanResourceName(value) {
