@@ -83,6 +83,34 @@ Recommended editable behavior:
 - If the region is display-only, `card_col_caption` and its descendants may be omitted.
 - If the source is a Form Report or Data Report, `card_col_caption`, `card_col_item_multi_select`, and item operation controls should not be emitted because report datasets are view-only.
 
+## Base Grid-Table Template
+
+`collection_control_grid_table` is backed by the full export-shaped template artifact at `docs/reference/collection-control-grid-table.template.json`. The source is Projects Center_1 v1.7, Dashboard page `Collection_control_grid_table`, component root `grid_table_col_wrapper`. Projects Center is the export-proven source reference only; the template can be selected for any Dashboard dataset that needs dense row/column scanning without multi-row selection or dedicated fulltext-search specialization.
+
+Generation must copy `grid_table_col_wrapper` and all descendants as the component root. It is not enough to create a generic header grid plus Collection body that merely resembles a table.
+
+Only these regions are editable:
+
+- `grid_table_col_title_wrapper`
+- `op_normal`
+- `grid_table_col_header`
+- `grid_col_item`
+- `grid_table_col_item_operations`
+
+Everything else is locked by default and must strictly preserve the template's existing control settings, style, layout, spacing, and typography. `grid_table_col_body` remains the Collection root and must preserve its Collection action host, filter/search host, pagination shape, and runtime binding shape while remapping source IDs to the target app.
+
+Recommended editable behavior:
+
+- `grid_table_col_title_wrapper` may change the `grid_table_col_title` Text value to a business title derived from the selected Collection data source.
+- `op_normal` may add/delete controls, but should retain the Search filter and Add item button when the selected Data List or Document Library source supports those actions. Search placeholder and Add item button text may be changed, but every button must keep a valid action binding.
+- `grid_table_col_header` maps visible column labels to the selected source resource. `grid_col_item` maps repeated row content to fields from the same source resource.
+- User fields use `dynamic-user`; image fields use `dynamic-image`; file or attachment fields use `dynamic-file`; all other fields use `dynamic-field`.
+- `grid_table_col_header` and `grid_col_item` must always have the same column count, column widths, and compatible grid properties after business mapping. The actual number of columns and whether a progress control is used depends on business fields; six columns and progress bars are not mandatory.
+- Header Text controls inside `grid_table_col_header_title_column` and `grid_table_col_header_column` must describe the corresponding field/content rendered in the matching `grid_col_item` column.
+- `grid_table_col_item_operations` is optional and may contain per-item actions such as Edit or Delete through `grid_table_col_item_op_menu`, but every action control must bind to a valid action. Edit/Delete buttons require matching Collection actions. Delete requires the template delete-confirmation temp variable and conditional delete continuation before `setdatalist remove`.
+- If the region is display-only, `grid_table_col_caption` and its descendants may be omitted when no title/toolbar/actions are needed.
+- If the source is a Form Report or Data Report, `grid_table_col_caption`, `grid_table_col_item_operations`, and operation controls should not be emitted because report datasets are view-only.
+
 ## Card Multiselect Toolbar Template
 
 `collection_control_card_with_multiselect_toolbar` is backed by the full export-shaped template artifact at `docs/reference/collection-control-card-with-multiselect-toolbar.template.json`. Generation must copy `card_with_multiselect_toolbar_wrapper` and all descendants as the component root. It is not enough to create a generic card Collection, add checkbox icons, or add a separate toolbar.
@@ -118,7 +146,7 @@ Recommended editable behavior:
 - For App Plan-declared Dashboard dataset regions, the generated Collection root must carry explicit template provenance. Ancestor-only inference is not enough for plan-to-package conformance because it can hide template collapse.
 - Generation must dispatch each Dashboard dataset region by the App Plan's selected template ID. Do not route all Dashboard Collections through `Event Pipeline Grid-Table`, generic grid-table, card fallback, or any other single default builder unless that exact template was selected for that exact region.
 - Do not create generic repeated cards, fake grid tables, simplified Data table lookalikes, or ad hoc Collection item templates.
-- Grid-table references must preserve header `flex_grid`, Collection body, repeated item `flex_grid`, matching columns, mobile item-grid behavior, and valid source list bindings.
+- Grid-table references must preserve the approved template wrapper, header `flex_grid`, Collection body, repeated item `flex_grid`, matching columns, mobile item-grid behavior, and valid source list bindings.
 - Grid-table-specific validation applies only to grid-table references: `collection_control_grid_table`, `collection_control_grid_table_with_multiselect`, `collection_control_grid_table_with_search`, and `Event Pipeline Grid-Table`. It must not be applied to card references such as `collection_control_card_with_multiselect_toolbar` or `collection_control_responsive_card_grid`.
 - Row/card detail open metadata is required only when the selected template or App Plan declares row/card open behavior. If no open behavior is planned, generation must emit explicit no-open metadata instead of leaving unresolved links or placeholder layout IDs.
 - Multiselect references must preserve selected state, selected count, checkbox icons, bulk toolbar/actions, `ListDataID`, and `__ctx_coll` current-item context.

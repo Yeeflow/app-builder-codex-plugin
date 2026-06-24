@@ -734,22 +734,30 @@ Proof boundaries:
 
 ## collection_control_grid_table
 
-Purpose: render dense operational records as a table-like Collection body with a header `flex_grid` and a repeated item `flex_grid`.
+Purpose: render dense operational records as a table-like Collection using the full `grid_table_col_wrapper` export-shaped component.
 
 Pattern scope: `grid_table_only`.
 
 Applicable formats:
 
 - YAP: proven for Projects Center dashboard/page resources.
-- YAPK: proven for Projects Center dashboard/page resources when Resource decodes through strict or tolerant Brotli.
+- YAPK: proven for Projects Center_1 v1.7 dashboard/page resources when Resource decodes through strict or tolerant Brotli.
 
 Applicable surfaces:
 
 - dashboard/page resource
 
+Full template reference:
+
+- `docs/reference/collection-control-grid-table.template.json`
+- Source page: `Collection_control_grid_table`
+- Component root: `grid_table_col_wrapper`
+
 Not for:
 
 - card-style Collection
+- multi-select Collection; use `collection_control_grid_table_with_multiselect`
+- dedicated search/fulltext Collection; use `collection_control_grid_table_with_search`
 - kanban Collection
 - gallery/media Collection
 - timeline Collection
@@ -759,11 +767,14 @@ Not for:
 
 Required structure:
 
-- caption/title container
+- `grid_table_col_wrapper` component root
+- `grid_table_col_caption`
+- `grid_table_col_title_wrapper`
 - optional toolbar/search/add-action row
-- header `flex_grid`
-- Collection root
-- repeated item `flex_grid` as first Collection child
+- `op_normal`
+- `grid_table_col_header`
+- `grid_table_col_body` Collection root
+- `grid_col_item` repeated item `flex_grid` as first Collection child
 - pagination when paging is generated
 
 Header and item grid requirements:
@@ -773,9 +784,31 @@ Header and item grid requirements:
 - desktop `attrs.columns["1"].list[]` count and widths must match
 - header mobile hidden through `attrs.common.hide[3] === true`
 - item grid defines mobile columns, defaulting to one `1fr` column
+- the generated column count is business-specific; it does not have to stay fixed at six columns
+- header text must describe the corresponding field/content shown in the matching `grid_col_item` column
+
+Editable regions:
+
+- `grid_table_col_title_wrapper`: only map title text to the current data source/business title.
+- `op_normal`: may keep, remove, or adapt Search filter/Add item controls; every button must bind to an action.
+- `grid_table_col_header` and `grid_col_item`: may remap columns and Dynamic controls by business fields; user fields use `dynamic-user`, image fields use `dynamic-image`, file/attachment fields use `dynamic-file`, and all other fields use `dynamic-field`.
+- `grid_table_col_item_operations`: optional per-item operation area. If present, every operation button must bind to a valid Collection/page action.
+
+Locked regions:
+
+- everything outside the editable regions must preserve the source template's style, layout, typography, spacing, and control settings.
+- `grid_table_col_body` remains the Collection root and action host.
+- edit/delete operation buttons require matching Collection actions; delete also requires the exported confirmation temp variable and conditional delete flow.
+- Form Report/Data Report display-only regions must not emit `grid_table_col_item_operations` or edit/delete operation controls.
 
 Validation checks:
 
+- `DASH_DATASET_GRID_TABLE_TEMPLATE_REFERENCE_MISSING` absent
+- `DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_WRAPPER_MISSING` absent
+- `DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_SLOT_MISSING` absent
+- `DASH_DATASET_GRID_TABLE_HEADER_ITEM_COLUMN_MISMATCH` absent
+- `DASH_DATASET_GRID_TABLE_OPERATION_ACTION_MISSING` absent
+- `DASH_DATASET_GRID_TABLE_DISPLAY_ONLY_OPERATION_FORBIDDEN` absent
 - `COLLECTION_GRID_TABLE_HEADER_GRID_MISSING` absent
 - `COLLECTION_GRID_TABLE_ITEM_GRID_MISSING` absent
 - `COLLECTION_GRID_TABLE_COLUMN_COUNT_MISMATCH` absent
@@ -787,9 +820,10 @@ Validation checks:
 
 Proof boundaries:
 
-- Dashboard/page usage is proven.
+- Dashboard/page component usage is proven.
 - Approval-form and data-list-form hosts remain pending.
 - This template is not interchangeable with `collection_control_responsive_card_grid`.
+- This template is not a Dashboard page shell; it must be placed inside an approved Dashboard Page Layouts v1.1 content slot.
 
 ## collection_control_grid_table_with_multiselect
 

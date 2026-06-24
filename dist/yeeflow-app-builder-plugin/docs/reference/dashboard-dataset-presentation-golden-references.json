@@ -111,21 +111,24 @@
     {
       "templateId": "collection_control_grid_table",
       "displayName": "Collection Grid-Table",
-      "sourceReference": "Projects Center dashboard/page Collection grid-table export study",
+      "sourceReference": "Projects Center_1 v1.7 / Collection_control_grid_table / grid_table_col_wrapper export-shaped template",
       "category": "collection-grid-table",
       "suitableSourceResourceTypes": [
         "Data List",
+        "Document Library metadata list",
         "Form Report",
-        "Document Library metadata list"
+        "Data Report"
       ],
       "whenToUse": [
-        "Users need dense row/column scanning.",
-        "The dataset has several comparable fields such as status, owner, due date, priority, progress, or category.",
-        "A Collection item template is required instead of a plain Data table."
+        "Users need dense row/column scanning without multi-select or fulltext-search specialization.",
+        "The dataset has comparable fields such as status, owner, due date, priority, progress, category, or other operational columns.",
+        "A Collection item template is required instead of a plain Data table, and row/item operations may be available for Data List or Document Library sources."
       ],
       "whenNotToUse": [
-        "Only simple tabular data is required and Data table is explicitly requested.",
-        "The data should be shown as cards, Kanban, timeline, grouped, nested, or gallery."
+        "The dataset needs multi-row selection and batch actions; use collection_control_grid_table_with_multiselect.",
+        "The dataset needs a dedicated fulltext/search presentation; use collection_control_grid_table_with_search.",
+        "The data should be shown as cards, Kanban, timeline, grouped, nested, or gallery.",
+        "The region is display-only and a native Data table was explicitly requested instead of a Collection."
       ],
       "requiredBusinessSignals": [
         "grid-table",
@@ -133,18 +136,38 @@
         "task list",
         "record list",
         "dense table",
-        "operational table"
+        "operational table",
+        "row/column scanning"
       ],
-      "requiredAppPlanDeclaration": "Select collection_control_grid_table for the Dashboard dataset region and explain the dense scanning need.",
+      "requiredAppPlanDeclaration": "Select collection_control_grid_table for the Dashboard dataset region and explain why dense row/column scanning is needed without multi-select/search specialization.",
       "generationProof": [
-        "header flex_grid",
-        "Collection body",
-        "item flex_grid",
-        "matching columns",
-        "responsive mobile item grid",
-        "valid source list"
+        "full grid_table_col_wrapper subtree cloned from docs/reference/collection-control-grid-table.template.json",
+        "grid_table_col_title_wrapper mapped to the current business dataset title",
+        "op_normal mapped or intentionally omitted according to actions/search needs",
+        "grid_table_col_header and grid_col_item have matching column count, widths, and column property signatures",
+        "grid_table_col_body Collection root binds to the selected source resource",
+        "Dynamic controls selected by field type: dynamic-user, dynamic-image, dynamic-file, or dynamic-field",
+        "optional grid_table_col_item_operations binds each button to Collection actions and is omitted for display-only/non-editable sources"
       ],
-      "proofBoundary": "Export-proven dashboard/page grid-table pattern only."
+      "proofBoundary": "Export-shaped grid_table_col_wrapper component only; Dashboard page shell must still come from Dashboard Page Layouts v1.1.",
+      "fullTemplateReference": "docs/reference/collection-control-grid-table.template.json",
+      "exportShapeContract": {
+        "sourceTemplate": "docs/reference/collection-control-grid-table.template.json",
+        "rootContainer": "grid_table_col_wrapper",
+        "editableRegions": [
+          "grid_table_col_title_wrapper",
+          "op_normal",
+          "grid_table_col_header",
+          "grid_col_item",
+          "grid_table_col_item_operations"
+        ],
+        "optionalRegions": [
+          "grid_table_col_caption",
+          "grid_table_col_item_operations",
+          "grid_table_col_item_op_menu"
+        ],
+        "lockedRule": "All controls outside editable regions must strictly preserve exported style/layout/font/control settings."
+      }
     },
     {
       "templateId": "collection_control_grid_table_with_multiselect",

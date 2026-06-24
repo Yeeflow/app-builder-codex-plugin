@@ -9,6 +9,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-dataset-presentation-golden-references.json");
 const RESPONSIVE_CARD_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json");
 const CARD_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json");
+const GRID_TABLE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table.template.json");
 const GRID_MULTISELECT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json");
 
 const APPROVED_IDS = new Set([
@@ -118,6 +119,7 @@ function validateRegistry(registry, findings, options = {}) {
   }
   validateResponsiveCardGridTemplateArtifact(registry, findings, options);
   validateCardMultiselectTemplateArtifact(registry, findings, options);
+  validateGridTableTemplateArtifact(registry, findings, options);
   validateGridMultiselectTemplateArtifact(registry, findings, options);
   return { approvedIds: ids.size ? ids : APPROVED_IDS, references };
 }
@@ -208,6 +210,59 @@ function validateCardMultiselectTemplateArtifact(registry, findings, options = {
   });
 }
 
+function validateGridTableTemplateArtifact(registry, findings, options = {}) {
+  const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_grid_table");
+  const referencePath = String(entry?.fullTemplateReference || "").trim();
+  if (referencePath !== "docs/reference/collection-control-grid-table.template.json") {
+    findings.push(error("DASH_DATASET_GRID_TABLE_TEMPLATE_REFERENCE_MISSING", "collection_control_grid_table must point to the full export-shaped template artifact.", {
+      expected: "docs/reference/collection-control-grid-table.template.json",
+      actual: referencePath || null,
+    }));
+    return;
+  }
+  const templatePath = path.resolve(options.gridTableTemplate || GRID_TABLE_TEMPLATE_PATH);
+  const template = readJson(templatePath, findings, "DASH_DATASET_GRID_TABLE_TEMPLATE_FILE_MISSING");
+  if (!template) return;
+  if (template.templateId !== "collection_control_grid_table") {
+    findings.push(error("DASH_DATASET_GRID_TABLE_TEMPLATE_ID_INVALID", "Grid-table template artifact has an unexpected templateId.", { actual: template.templateId }));
+  }
+  if (template.templateResource?.rootContainer?.nv_label !== "grid_table_col_wrapper") {
+    findings.push(error("DASH_DATASET_GRID_TABLE_TEMPLATE_ROOT_INVALID", "Grid-table template artifact must use grid_table_col_wrapper as the root container.", {
+      actual: template.templateResource?.rootContainer?.nv_label || null,
+    }));
+  }
+  for (const label of ["grid_table_col_title_wrapper", "op_normal", "grid_table_col_header", "grid_table_col_body", "grid_col_item", "grid_table_col_item_operations", "grid_table_col_item_op_menu"]) {
+    if (!template.extractionIndex?.slotPointers?.[label]) {
+      findings.push(error("DASH_DATASET_GRID_TABLE_TEMPLATE_SLOT_MISSING", "Grid-table template artifact is missing a required slot pointer.", { slot: label }));
+    }
+  }
+  for (const key of ["filterVars", "tempVars", "filter", "formAction"]) {
+    const value = template.pageLevelDependencies?.[key];
+    const count = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : 0;
+    if (count < 1) {
+      findings.push(error("DASH_DATASET_GRID_TABLE_TEMPLATE_DEPENDENCY_MISSING", "Grid-table template artifact is missing required page-level dependency data.", { dependency: key }));
+    }
+  }
+  const collectionActions = asArray(template.templateResource?.collectionActions);
+  if (!collectionActions.some((action) => /edit/i.test(String(action?.name || ""))) || !collectionActions.some((action) => /delete/i.test(String(action?.name || "")))) {
+    findings.push(error("DASH_DATASET_GRID_TABLE_TEMPLATE_COLLECTION_ACTIONS_MISSING", "Grid-table template artifact must preserve source edit/delete Collection action contracts for optional item operation menus.", {
+      actionNames: collectionActions.map((action) => action?.name).filter(Boolean),
+    }));
+  }
+  const headerColumns = asArray(template.templateResource?.headerColumns);
+  const itemColumns = asArray(template.templateResource?.itemColumns);
+  if (!headerColumns.length || headerColumns.length !== itemColumns.length || JSON.stringify(headerColumns) !== JSON.stringify(itemColumns)) {
+    findings.push(error("DASH_DATASET_GRID_TABLE_TEMPLATE_COLUMN_PARITY_INVALID", "Grid-table template artifact must record matching header/item column definitions.", {
+      headerColumnCount: headerColumns.length,
+      itemColumnCount: itemColumns.length,
+    }));
+  }
+  validateTemplateTextControls(template, findings, {
+    codePrefix: "DASH_DATASET_GRID_TABLE_TEMPLATE",
+    templateId: "collection_control_grid_table",
+  });
+}
+
 function validateGridMultiselectTemplateArtifact(registry, findings, options = {}) {
   const entry = asArray(registry?.references).find((item) => String(item?.templateId || "") === "collection_control_grid_table_with_multiselect");
   const referencePath = String(entry?.fullTemplateReference || "").trim();
@@ -286,21 +341,21 @@ function validateTemplateTextControls(template, findings, { codePrefix, template
   const root = template?.templateResource?.rootContainer;
   const textControls = findDescendants(root, (node) => String(node?.type || "") === "heading" && String(node?.label || "") === "Text");
   if (!textControls.length) {
-    findings.push(error(`${codePrefix}_TEXT_CONTROLS_MISSING`, "Multiselect template artifact must include export-shaped Text controls with typography metadata.", { templateId }));
+    findings.push(error(`${codePrefix}_TEXT_CONTROLS_MISSING`, "Collection template artifact must include export-shaped Text controls with typography metadata.", { templateId }));
     return;
   }
   for (const control of textControls) {
     const identity = identityCandidates(control)[0] || control.id || null;
     const heads = control?.attrs?.heads;
     if (!isObject(heads)) {
-      findings.push(error(`${codePrefix}_TEXT_HEADS_MISSING`, "Multiselect template Text controls must preserve attrs.heads metadata from the export-shaped reference.", { templateId, control: identity }));
+      findings.push(error(`${codePrefix}_TEXT_HEADS_MISSING`, "Collection template Text controls must preserve attrs.heads metadata from the export-shaped reference.", { templateId, control: identity }));
       continue;
     }
     if (heads.ty === undefined) {
-      findings.push(error(`${codePrefix}_TEXT_TYPOGRAPHY_MISSING`, "Multiselect template Text controls must preserve attrs.heads.ty typography metadata.", { templateId, control: identity }));
+      findings.push(error(`${codePrefix}_TEXT_TYPOGRAPHY_MISSING`, "Collection template Text controls must preserve attrs.heads.ty typography metadata.", { templateId, control: identity }));
     }
     if (typeof heads.color !== "string" || !heads.color.trim()) {
-      findings.push(error(`${codePrefix}_TEXT_COLOR_MISSING`, "Multiselect template Text controls must preserve attrs.heads.color as a plain string for designer/runtime fidelity.", { templateId, control: identity, actual: heads.color ?? null }));
+      findings.push(error(`${codePrefix}_TEXT_COLOR_MISSING`, "Collection template Text controls must preserve attrs.heads.color as a plain string for designer/runtime fidelity.", { templateId, control: identity, actual: heads.color ?? null }));
     }
   }
 }
@@ -760,6 +815,9 @@ function planRecordSummary(record) {
 }
 
 function validateGridTable(entry, page, templateId, findings) {
+  if (templateId === "collection_control_grid_table") {
+    validateBaseGridTableFullTemplate(entry, page, findings);
+  }
   const parent = entry.ancestors[entry.ancestors.length - 1] || null;
   const siblings = asArray(parent?.children);
   const siblingIndex = siblings.indexOf(entry.control);
@@ -773,6 +831,75 @@ function validateGridTable(entry, page, templateId, findings) {
     if (!headerColumns.length || !itemColumns.length || headerColumns.join("|") !== itemColumns.join("|")) {
       findings.push(error("DASH_DATASET_GRID_TABLE_COLUMN_MISMATCH", "Selected grid-table Collection template requires matching desktop header/item columns.", { page: page.title, path: entry.pointer, templateId, headerColumns, itemColumns }));
     }
+  }
+}
+
+function validateBaseGridTableFullTemplate(entry, page, findings) {
+  const wrapper = findNearestAncestorByIdentity(entry, "grid_table_col_wrapper");
+  if (!wrapper) {
+    findings.push(error("DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_WRAPPER_MISSING", "collection_control_grid_table must be generated from the full grid_table_col_wrapper subtree, not a simplified header-plus-Collection approximation.", { page: page.title, path: entry.pointer }));
+    return;
+  }
+
+  const requiredSlots = [
+    "grid_table_col_title_wrapper",
+    "op_normal",
+    "grid_table_col_header",
+    "grid_table_col_body",
+    "grid_col_item",
+  ];
+  for (const slot of requiredSlots) {
+    if (!findDescendantByIdentity(wrapper, slot)) {
+      findings.push(error("DASH_DATASET_GRID_TABLE_FULL_TEMPLATE_SLOT_MISSING", "collection_control_grid_table is missing a required export-shaped slot.", { page: page.title, path: entry.pointer, slot }));
+    }
+  }
+
+  const header = findDescendantByIdentity(wrapper, "grid_table_col_header");
+  const itemGrid = findDescendantByIdentity(wrapper, "grid_col_item");
+  const headerColumns = gridColumnWidths(header, "1");
+  const itemColumns = gridColumnWidths(itemGrid, "1");
+  if (!headerColumns.length || !itemColumns.length || headerColumns.join("|") !== itemColumns.join("|")) {
+    findings.push(error("DASH_DATASET_GRID_TABLE_HEADER_ITEM_COLUMN_MISMATCH", "grid_table_col_header and grid_col_item must keep matching column count and widths after business field mapping.", {
+      page: page.title,
+      path: entry.pointer,
+      headerColumns,
+      itemColumns,
+    }));
+  }
+
+  const operations = findDescendantByIdentity(wrapper, "grid_table_col_item_operations");
+  const opMenu = findDescendantByIdentity(wrapper, "grid_table_col_item_op_menu");
+  if (operations || opMenu) {
+    const operationButtons = findDescendants(operations || opMenu, (node) => String(node?.type || "") === "action_button");
+    for (const button of operationButtons) {
+      if (!hasActionBinding(button)) {
+        findings.push(error("DASH_DATASET_GRID_TABLE_OPERATION_ACTION_MISSING", "Every grid_table_col_item_operations button must bind to a Collection/page action when operations are present.", {
+          page: page.title,
+          path: entry.pointer,
+          button: identityCandidates(button)[0] || button.id || null,
+        }));
+      }
+    }
+    const collectionActions = asArray(entry.control?.attrs?.actions);
+    if (!collectionActions.length) {
+      findings.push(error("DASH_DATASET_GRID_TABLE_COLLECTION_ACTIONS_MISSING", "grid-table item operations require matching Collection root attrs.actions[] contracts.", { page: page.title, path: `${entry.pointer}.attrs.actions` }));
+    }
+    const pageText = JSON.stringify(page.resource || {});
+    const hasDeleteButton = operationButtons.some((button) => /delete/i.test(`${identityCandidates(button).join(" ")} ${button?.label || ""}`));
+    if (hasDeleteButton && !/var_isDeleteConfirmed|isDeleteConfirmed|confirm/i.test(pageText)) {
+      findings.push(error("DASH_DATASET_GRID_TABLE_DELETE_CONFIRMATION_TEMPVAR_MISSING", "Delete item operations require the exported delete-confirmation temp variable/flow.", { page: page.title, path: entry.pointer }));
+    }
+  }
+
+  const dynamicControls = findDescendants(itemGrid, (node) => String(node?.type || "").startsWith("dynamic-"));
+  if (!dynamicControls.length) {
+    findings.push(error("DASH_DATASET_GRID_TABLE_DYNAMIC_CONTROLS_MISSING", "grid_col_item should map repeated item columns with Dynamic controls from the selected Collection data source.", { page: page.title, path: entry.pointer }));
+  }
+
+  const sourceType = String(entry.control?.attrs?.sourceResourceType || entry.control?.attrs?.data?.sourceResourceType || entry.control?.attrs?.data?.resourceType || "").toLowerCase();
+  const isViewOnly = /form report|data report|report/.test(sourceType);
+  if (isViewOnly && (operations || opMenu)) {
+    findings.push(error("DASH_DATASET_GRID_TABLE_DISPLAY_ONLY_OPERATION_FORBIDDEN", "Form Report/Data Report display-only grid-table regions must not include item operation menus or edit/delete controls.", { page: page.title, path: entry.pointer, sourceType }));
   }
 }
 
@@ -1577,6 +1704,9 @@ function parseArgs(argv) {
     } else if (token === "--card-template") {
       args.cardTemplate = argv[i + 1];
       i += 1;
+    } else if (token === "--grid-table-template") {
+      args.gridTableTemplate = argv[i + 1];
+      i += 1;
     } else if (token === "--grid-template") {
       args.gridTemplate = argv[i + 1];
       i += 1;
@@ -1590,7 +1720,7 @@ function parseArgs(argv) {
 function printUsage() {
   console.log(`Usage:
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry
-  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --responsive-card-template <template.json> --card-template <template.json> --grid-template <template.json>
+  node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --registry <registry.json> --responsive-card-template <template.json> --card-template <template.json> --grid-table-template <template.json> --grid-template <template.json>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --app-plan <yeeflow-app-plan.md>
   node scripts/validate-dashboard-dataset-presentation-golden-references.mjs --package <app.yapk>`);
 }
