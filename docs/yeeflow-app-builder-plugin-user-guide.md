@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.23`
+`0.8.24`
+
+Version `0.8.24` releases Dashboard multiselect template fidelity and materialization gates from PR #185. Card and grid-table multiselect template artifacts now fail source-template validation when Text typography/color metadata is missing; grid-table multiselect preserves zero-gap wrapper metadata, requires a `{{DetailLayoutID}}` source contract, and generated packages must replace it with a concrete slide-open detail layout. The generator guidance also reinforces that v1.1 dashboards must materialize planned Summary/KPI and Data Filter controls, not only Collection templates.
 
 Version `0.8.23` aligns Dashboard Page Layouts v1.1 shell validation with Dashboard Collection template validation from PR #183. Generated dashboards must instantiate the full v1.1 shell before placing dataset components, grid-table gates no longer apply table-specific checks to card multiselect templates, explicit no-open metadata is accepted when row/card open behavior is not planned, and generated-final completeness parsing understands the current unified App Plan Dashboard schema.
 
