@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.28`
+- Version: `0.8.29`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.28` releases the full export-shaped `collection_control_grid_table` template from PR #193: generated Dashboard grid-table Collections must clone the approved `grid_table_col_wrapper`, preserve locked wrapper/caption/operation/action structure, map editable title/search/button/header/item/operation regions through the approved slots, keep `grid_table_col_header` and `grid_col_item` column counts/widths/properties aligned, use field-type compatible Dynamic controls, omit operation/caption layers when the source is display-only or non-mutable, and preserve delete-confirmation temp variable/action wiring when item operations are enabled.
+Current release `0.8.29` releases first-generation smoke and installed-cache-root alignment from PR #195: Account Health first-generation smoke positive fixtures must be generated-final preflight-clean, stale seed-row/native-Title/simplified-dashboard shapes remain negative regressions, and cache/UI hard gates now support both source checkouts and installed Codex plugin payload roots without requiring a nested `dist/yeeflow-app-builder-plugin` directory inside the installed cache payload.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.28
+Version: 0.8.29
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.28
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.29
 ```
 
 ## What Is Included
