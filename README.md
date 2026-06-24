@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.30`
+- Version: `0.8.31`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.30` releases Data Analytics golden reference templates from PR #197: Pie chart, Column chart, Bar chart, Line chart, and Pivot table controls must clone approved export-shaped templates, preserve locked style/layout/typography, remain limited to Dashboard and Data List form surfaces, block Approval form usage, and sit inside 2-column or 3-column sections when used on Dashboard Page Layouts v1.1 pages.
+Current release `0.8.31` releases the full-app generated-final materialization entrypoint from PR #199: clean-room generation can call a standalone Node CLI from approved Functional Specification and Yeeflow App Plan Markdown plus an API-issued ID manifest to produce a generated-final `.yapk`, decoded resource, ID provenance report, and generation report. The entrypoint preserves the proof boundary: fixture IDs are regression-only and not signing/install eligible, and the CLI never signs, installs/imports, upgrades, seeds data, or claims runtime proof.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.30
+Version: 0.8.31
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.30
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.31
 ```
 
 ## What Is Included
