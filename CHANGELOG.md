@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.38
+
+- Release full-app Dashboard v1.1 Collection template materialization from PR #213.
+- Make the standalone full-app materializer clone the registered `dashboard-page-layouts-v1.1` shell for generated Dashboard pages instead of assembling minimal heading/Summary/filter/Collection pages by hand.
+- Parse Dashboard dataset presentation rows from the Markdown App Plan and materialize the exact selected Collection template inside the approved `content_card_wrapper > section_content_area` business slot.
+- Preserve Collection template provenance, source-list binding, dataset-region metadata, page-level temp variables, actions, form actions, multiselect/delete-operation dependencies, and Summary/KPI temp-variable bindings.
+- Align aggregate Dashboard hard gates so approved Collection template internals are delegated to specialized Collection template validators instead of producing false generic container/dynamic-user failures.
+
 ## 0.8.37
 
 - Release Area chart and Data Analytics template selection guidance from PR #211.
