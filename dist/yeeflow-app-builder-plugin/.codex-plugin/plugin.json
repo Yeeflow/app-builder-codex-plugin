@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.34",
+  "version": "0.8.35",
   "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with Dashboard template materialization fidelity, v1.1 dashboard shell, Summary/KPI, Data Filter, and YAP/YAPK hard gates.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",

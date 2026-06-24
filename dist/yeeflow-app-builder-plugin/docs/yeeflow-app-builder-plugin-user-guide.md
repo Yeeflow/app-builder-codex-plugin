@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.34`
+`0.8.35`
+
+Version `0.8.35` releases minimal full-app materializer resource-graph generation from PR #207. Supported nontrivial App Plans now materialize generated-final `.yapk` packages with schema-shaped data lists, approval forms, FormNewReports, custom list layouts, dashboard pages, and grouped navigation. The standalone materializer still keeps `signingEligible: false` until generated-final preflight passes; it does not sign, install/import, upgrade, seed data, or claim browser/runtime proof.
 
 Version `0.8.34` releases generated-final resource-completeness path-independent test harness hardening from PR #205. The focused regression harness must resolve the validator by absolute path, invoke it from an external working directory, emit explicit diagnostics when JSON or `findings[]` output is missing, and keep the planned approval form with decoded `Forms: []` hard failure enforced.
 
