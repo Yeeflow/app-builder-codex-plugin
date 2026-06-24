@@ -4,6 +4,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const VALIDATOR = path.join(ROOT, "scripts", "validate-generated-final-resource-completeness.mjs");
 
 function plan({ deferred = false, dataReports = false } = {}) {
   return `# Office Asset Loan Management - Yeeflow App Plan
@@ -159,7 +163,8 @@ function writeFile(dir, name, content) {
 }
 
 function run(planFile, packageFile) {
-  const result = spawnSync(process.execPath, ["scripts/validate-generated-final-resource-completeness.mjs", "--plan", planFile, "--package", packageFile], {
+  const result = spawnSync(process.execPath, [VALIDATOR, "--plan", planFile, "--package", packageFile], {
+    cwd: os.tmpdir(),
     encoding: "utf8",
     maxBuffer: 16 * 1024 * 1024,
   });
@@ -167,7 +172,22 @@ function run(planFile, packageFile) {
   try {
     report = JSON.parse(result.stdout || "{}");
   } catch (error) {
-    throw new Error(`Validator did not emit JSON: ${error.message}\n${result.stdout}\n${result.stderr}`);
+    throw new Error([
+      `Validator did not emit JSON: ${error.message}`,
+      `validator: ${VALIDATOR}`,
+      `exit: ${result.status}`,
+      `stdout: ${result.stdout}`,
+      `stderr: ${result.stderr}`,
+    ].join("\n"));
+  }
+  if (!report || !Array.isArray(report.findings)) {
+    throw new Error([
+      "Validator JSON output did not include a findings array.",
+      `validator: ${VALIDATOR}`,
+      `exit: ${result.status}`,
+      `stdout: ${result.stdout}`,
+      `stderr: ${result.stderr}`,
+    ].join("\n"));
   }
   return { result, report };
 }
@@ -178,12 +198,24 @@ function codes(report) {
 
 function expectFail(caseName, report, code) {
   if (report.status !== "fail" || !codes(report).has(code)) {
-    throw new Error(`${caseName} did not fail with ${code}: ${JSON.stringify(report.findings, null, 2)}`);
+    throw new Error([
+      `${caseName} did not fail with ${code}.`,
+      `status: ${report.status}`,
+      `errors: ${JSON.stringify(report.errors || [], null, 2)}`,
+      `findings: ${JSON.stringify(report.findings || [], null, 2)}`,
+    ].join("\n"));
   }
 }
 
 function expectPass(caseName, report) {
-  if (report.status !== "pass") throw new Error(`${caseName} should pass: ${JSON.stringify(report.findings, null, 2)}`);
+  if (report.status !== "pass") {
+    throw new Error([
+      `${caseName} should pass.`,
+      `status: ${report.status}`,
+      `errors: ${JSON.stringify(report.errors || [], null, 2)}`,
+      `findings: ${JSON.stringify(report.findings || [], null, 2)}`,
+    ].join("\n"));
+  }
 }
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "generated-final-completeness-"));
@@ -194,7 +226,7 @@ try {
 
   let output = run(basePlan, writeFile(tempDir, "forms-empty.json", decoded({ forms: false })));
   expectFail("approval form planned but Forms empty", output.report, "GENERATED_FINAL_FORMS_EMPTY_WITH_PLANNED_APPROVAL_FORMS");
-  results.push({ case: "fail: planned approval form with Forms empty", status: "pass" });
+  results.push({ case: "fail: planned approval form with Forms empty", status: "pass", validatorInvocation: "absolute-path-from-external-cwd" });
 
   output = run(basePlan, writeFile(tempDir, "dashboard-empty.json", decoded({ dashboardEmpty: true })));
   expectFail("dashboard planned but Content empty", output.report, "GENERATED_FINAL_DASHBOARD_SHELL_ONLY");
