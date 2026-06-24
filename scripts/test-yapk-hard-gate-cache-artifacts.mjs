@@ -3,10 +3,13 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { artifactPathsForRoot, pluginRootMode } from "./lib/plugin-root-layout.mjs";
 
 const ROOT = process.cwd();
+const ROOT_MODE = pluginRootMode(ROOT);
 
 const hardGateScripts = [
+  "scripts/lib/plugin-root-layout.mjs",
   "scripts/validate-yapk-id-provenance.mjs",
   "scripts/validate-yapk-navigation-runtime-metadata.mjs",
   "scripts/validate-yapk-upgrade-id-stability.mjs",
@@ -73,17 +76,20 @@ const hardGateScripts = [
   "scripts/test-full-page-design-blueprint-generation-gates.mjs",
   "scripts/test-ui-control-property-fidelity.mjs",
   "scripts/test-yeeflow-control-property-knowledge-base.mjs",
+  "scripts/test-installed-cache-root-path-alignment.mjs",
 ];
 
 for (const sourcePath of hardGateScripts) {
-  const distPath = path.join("dist/yeeflow-app-builder-plugin", sourcePath);
-  assert.equal(fs.existsSync(path.join(ROOT, sourcePath)), true, `${sourcePath} exists`);
-  assert.equal(fs.existsSync(path.join(ROOT, distPath)), true, `${distPath} exists for materialized cache smoke`);
-  assert.equal(
-    fs.readFileSync(path.join(ROOT, distPath), "utf8"),
-    fs.readFileSync(path.join(ROOT, sourcePath), "utf8"),
-    `${distPath} mirrors ${sourcePath}`,
-  );
+  const { source, mirror, mirrorRequired } = artifactPathsForRoot(ROOT, sourcePath);
+  assert.equal(fs.existsSync(source), true, `${sourcePath} exists`);
+  if (mirrorRequired) {
+    assert.equal(fs.existsSync(mirror), true, `${path.relative(ROOT, mirror)} exists for materialized cache smoke`);
+    assert.equal(
+      fs.readFileSync(mirror, "utf8"),
+      fs.readFileSync(source, "utf8"),
+      `${path.relative(ROOT, mirror)} mirrors ${sourcePath}`,
+    );
+  }
 }
 
 const requiredDocs = [
@@ -125,6 +131,7 @@ const requiredDocs = [
   "docs/training/dashboard-page-layouts-v1.1-template-adoption-training-report.md",
   "docs/training/dashboard-v1.1-controlled-slots-repeatable-modules-training-report.md",
   "docs/training/dashboard-shell-collection-validator-alignment-training-report.md",
+  "docs/training/first-generation-smoke-cache-root-alignment-training-report.md",
   "docs/reference/dashboard-golden-references.json",
   "docs/reference/dashboard-dataset-presentation-golden-references.json",
   "docs/reference/collection-control-responsive-card-grid.template.json",
@@ -139,14 +146,16 @@ const requiredDocs = [
 ];
 
 for (const sourcePath of requiredDocs) {
-  const distPath = path.join("dist/yeeflow-app-builder-plugin", sourcePath);
-  assert.equal(fs.existsSync(path.join(ROOT, sourcePath)), true, `${sourcePath} exists`);
-  assert.equal(fs.existsSync(path.join(ROOT, distPath)), true, `${distPath} exists for materialized cache smoke`);
-  assert.equal(
-    fs.readFileSync(path.join(ROOT, distPath), "utf8"),
-    fs.readFileSync(path.join(ROOT, sourcePath), "utf8"),
-    `${distPath} mirrors ${sourcePath}`,
-  );
+  const { source, mirror, mirrorRequired } = artifactPathsForRoot(ROOT, sourcePath);
+  assert.equal(fs.existsSync(source), true, `${sourcePath} exists`);
+  if (mirrorRequired) {
+    assert.equal(fs.existsSync(mirror), true, `${path.relative(ROOT, mirror)} exists for materialized cache smoke`);
+    assert.equal(
+      fs.readFileSync(mirror, "utf8"),
+      fs.readFileSync(source, "utf8"),
+      `${path.relative(ROOT, mirror)} mirrors ${sourcePath}`,
+    );
+  }
 }
 
 const extensionRegistry = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/yeeflow-control-property-extensions.json"), "utf8"));
@@ -355,7 +364,12 @@ for (const findingCode of [
   assert.match(blueprintParityInspector, new RegExp(findingCode), `${findingCode} is enforced by compare-blueprint-to-decoded-resource`);
 }
 
-const skillText = fs.readFileSync(path.join(ROOT, "skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md"), "utf8");
+const skillPath = [
+  path.join(ROOT, "skills/installed/yeeflow-ui-generation-hard-gates/SKILL.md"),
+  path.join(ROOT, "skills/yeeflow-ui-generation-hard-gates/SKILL.md"),
+].find((candidate) => fs.existsSync(candidate));
+assert.ok(skillPath, "yeeflow-ui-generation-hard-gates skill exists in source or installed payload layout");
+const skillText = fs.readFileSync(skillPath, "utf8");
 for (const phrase of [
   /type: "summary"/,
   /_ak_c/,
@@ -385,4 +399,4 @@ for (const phrase of [
   assert.match(skillText, phrase, `hard-gate skill includes Summary/full-page wording: ${phrase}`);
 }
 
-console.log("YAPK hard-gate cache artifact checks passed");
+console.log(`YAPK hard-gate cache artifact checks passed (${ROOT_MODE})`);

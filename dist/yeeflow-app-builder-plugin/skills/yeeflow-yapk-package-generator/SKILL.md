@@ -107,6 +107,8 @@ Account Health smoke testing added a pre-sign gate for new generated YAPK packag
 
 Do not write, sign, or hand off a generated YAPK when decoded app objects contain extra `AppID` fields, root `ListSet.LayoutView` is null/object/array instead of a JSON string, sample rows are outside `Childs[].List.Items`, sample row values are non-string, native/system `Title` is missing, a generated `Text0` primary field exists, FieldName suffix/index or storage family is mismatched, dashboard `Ext2` lacks `{"src":true}`, `LayoutInResources` IDs do not match `LayoutID`, Data table columns lack `Field`, or generated Text controls use ad hoc `type:"text"`.
 
+First-generation smoke fixtures must stay generated-final preflight-clean. Do not keep embedded seed rows, missing native Title metadata, or simplified dashboard shells in positive smoke fixtures. Those stale shapes belong in negative regression tests. Generated-final packages must not embed seed data in decoded list rows; seed rows belong in a separate post-install seed artifact and require explicit user approval before live execution.
+
 ## Full Application Visual Quality Gate
 
 Vendor Onboarding full UI v2 proved that import/install success is not enough. Do not call a generated package a full UI application unless it implements the approved plan and mockup-derived pages, forms, controls, bindings, and actions at usable quality. Blank or generic Data List custom forms are quality failures. Default/plain buttons without action bindings are quality failures. Default alert copy such as `Alert` or `Here is the description` is a quality failure. Kanban and Collection controls without meaningful dynamic item templates and item actions are quality failures.

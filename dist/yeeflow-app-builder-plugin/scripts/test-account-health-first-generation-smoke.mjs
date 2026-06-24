@@ -43,7 +43,22 @@ function choiceRules(values) {
   });
 }
 
-function rootLayoutView(dashboardLayoutId, rootId) {
+function rootLayoutView(listId, rootId) {
+  return JSON.stringify({
+    sortVer: 1,
+    sort: [
+      {
+        AppID: 41,
+        Title: "Accounts",
+        ListID: listId,
+        ListSetID: rootId,
+        Type: 1,
+      },
+    ],
+  });
+}
+
+function legacyDashboardRootLayoutView(dashboardLayoutId, rootId) {
   return JSON.stringify({
     sortVer: 1,
     sort: [
@@ -72,12 +87,14 @@ function listInfo(base) {
 }
 
 function fieldInfo(base) {
+  const isNativeTitle = base.FieldName === "Title" || base.InternalName === "Title";
   return {
     Status: base.IsSystem ? 0 : 1,
     Category: 1,
     Rules: "{}",
     IsSort: false,
     IsUnique: false,
+    IsIndex: base.IsIndex ?? isNativeTitle,
     ...base,
   };
 }
@@ -169,7 +186,6 @@ function dashboardPage(listId, rootId) {
 function decodedAccountHealth() {
   const rootId = id(1);
   const listId = id(2);
-  const dashboardLayoutId = id(30);
   const layoutId = id(40);
   return {
     ListSet: listInfo({
@@ -180,20 +196,10 @@ function decodedAccountHealth() {
       Flags: 1,
       TableCode: "flowcraft",
       IndexCode: "flowcraft",
-      LayoutView: rootLayoutView(dashboardLayoutId, rootId),
+      LayoutView: rootLayoutView(listId, rootId),
       Items: {},
     }),
-    Pages: [{
-      ListID: rootId,
-      LayoutID: dashboardLayoutId,
-      Type: 103,
-      Title: "Account Health",
-      LayoutView: null,
-      Ext2: JSON.stringify({ src: true }),
-      IsDefault: true,
-      IsItemPerm: false,
-      LayoutInResources: [{ ID: dashboardLayoutId, RefId: dashboardLayoutId, Resource: JSON.stringify(dashboardPage(listId, rootId)) }],
-    }],
+    Pages: [],
     Forms: [],
     FormNewReports: [],
     DataReports: [],
@@ -215,20 +221,6 @@ function decodedAccountHealth() {
         TableCode: "flowcraft",
         IndexCode: "flowcraft",
         LayoutView: null,
-        Items: {
-          [id(200)]: {
-            Title: "Acme Finance",
-            Text1: "Green",
-            Text2: "Owner: Customer Success",
-            Decimal4: "12.5",
-          },
-          [id(201)]: {
-            Title: "Northstar Retail",
-            Text1: "Amber",
-            Text2: "Owner: Renewals",
-            Decimal4: "42.0",
-          },
-        },
       }),
       Fields: [
         fieldInfo({ ListID: listId, FieldID: id(10), FieldName: "Title", InternalName: "Title", DisplayName: "Account", FieldIndex: 0, IsSystem: true, Type: "input", FieldType: "Text" }),
@@ -315,27 +307,15 @@ try {
   writeIdProvenance(file, decoded);
   assert.equal(fs.existsSync(path.join(ROOT, "schemas/yapk-schema.json")), true);
   assert.equal(fs.existsSync(path.join(ROOT, "schemas/yap-schema.json")), true);
-  assert.equal(decoded.ListSet.LayoutView, rootLayoutView(decoded.Pages[0].LayoutID, decoded.ListSet.ListID));
+  assert.equal(decoded.ListSet.LayoutView, rootLayoutView(decoded.Childs[0].List.ListID, decoded.ListSet.ListID));
   assert.equal(decoded.AppID, undefined);
   assert.equal(decoded.ListSet.AppID, undefined);
   assert.equal(decoded.Childs[0].List.AppID, undefined);
   assert.equal(decoded.Childs[0].Fields.some((field) => field.FieldName === "Text0"), false);
   assert.equal(decoded.Childs[0].Fields.find((field) => field.FieldName === "Title")?.IsSystem, true);
-  assert.equal(decoded.Childs[0].List.Items && typeof decoded.Childs[0].List.Items === "object", true);
-  for (const row of Object.values(decoded.Childs[0].List.Items)) {
-    for (const value of Object.values(row)) assert.equal(typeof value, "string");
-  }
-  assert.equal(decoded.Pages[0].Type, 103);
-  assert.deepEqual(JSON.parse(decoded.Pages[0].Ext2), { src: true });
-  assert.equal(decoded.Pages[0].LayoutInResources[0].ID, decoded.Pages[0].LayoutID);
-  assert.equal(decoded.Pages[0].LayoutInResources[0].RefId, decoded.Pages[0].LayoutID);
-  const pageJson = JSON.parse(decoded.Pages[0].LayoutInResources[0].Resource);
-  assert.equal(pageJson.children[0].id, "Main");
-  assert.equal(pageJson.children[0].children[0].id, "Content");
-  assert.equal(JSON.stringify(pageJson).includes("\"type\":\"text\""), false);
-  assert.equal(JSON.stringify(pageJson).includes("\"type\":\"heading\""), true);
-  assert.equal(pageJson.children[0].children[0].children[0].label, "Text");
-  assert.ok(pageJson.children[0].children[0].children[1].attrs.listarr.every((column) => column.Field && column.FieldName));
+  assert.equal(decoded.Childs[0].Fields.find((field) => field.FieldName === "Title")?.IsIndex, true);
+  assert.equal(Object.hasOwn(decoded.Childs[0].List, "Items"), false);
+  assert.deepEqual(decoded.Pages, []);
   assert.equal(fs.readdirSync(tempDir).some((name) => name.endsWith(".yap")), false);
 
   const preflight = runYapkFirstGenerationPreflight(file);
@@ -361,9 +341,35 @@ try {
   decimalMismatch.Childs[0].Fields.find((field) => field.FieldName === "Decimal4").FieldIndex = 7;
   expectFailure(writeYapk(tempDir, "decimal-mismatch", decimalMismatch), "YAPK_FIELD_NAME_SUFFIX_INDEX_MISMATCH");
 
-  const nonStringSample = decodedAccountHealth();
-  nonStringSample.Childs[0].List.Items[id(200)].Decimal4 = 12.5;
-  expectFailure(writeYapk(tempDir, "non-string-sample", nonStringSample), "SAMPLE_VALUE_NOT_STRING");
+  const embeddedSampleRows = decodedAccountHealth();
+  embeddedSampleRows.Childs[0].List.Items = {
+    [id(200)]: { Title: "Acme Finance", Text1: "Green", Decimal4: "12.5" },
+  };
+  expectFailure(writeYapk(tempDir, "embedded-sample-rows", embeddedSampleRows), "YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN");
+
+  const nativeTitleMissingIndex = decodedAccountHealth();
+  delete nativeTitleMissingIndex.Childs[0].Fields.find((field) => field.FieldName === "Title").IsIndex;
+  expectFailure(writeYapk(tempDir, "native-title-missing-index", nativeTitleMissingIndex), "NATIVE_TITLE_ISINDEX_MISSING");
+
+  const legacySimplifiedDashboard = decodedAccountHealth();
+  const legacyDashboardLayoutId = id(30);
+  legacySimplifiedDashboard.ListSet.LayoutView = legacyDashboardRootLayoutView(legacyDashboardLayoutId, legacySimplifiedDashboard.ListSet.ListID);
+  legacySimplifiedDashboard.Pages = [{
+    ListID: legacySimplifiedDashboard.ListSet.ListID,
+    LayoutID: legacyDashboardLayoutId,
+    Type: 103,
+    Title: "Account Health",
+    LayoutView: null,
+    Ext2: JSON.stringify({ src: true }),
+    IsDefault: true,
+    IsItemPerm: false,
+    LayoutInResources: [{
+      ID: legacyDashboardLayoutId,
+      RefId: legacyDashboardLayoutId,
+      Resource: JSON.stringify(dashboardPage(legacySimplifiedDashboard.Childs[0].List.ListID, legacySimplifiedDashboard.ListSet.ListID)),
+    }],
+  }];
+  expectFailure(writeYapk(tempDir, "legacy-simplified-dashboard", legacySimplifiedDashboard), "DASH_GOLDEN_RESOURCE_HEADER_BAND_MISSING|DASH_LAYOUT_RESOURCE_TEMPLATE_MARKER_MISSING");
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

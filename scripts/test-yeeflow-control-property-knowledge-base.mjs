@@ -7,6 +7,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { inspectYeeflowControlConfigurations } from "./inspect-yeeflow-control-configurations.mjs";
+import { artifactPathsForRoot } from "./lib/plugin-root-layout.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const normalizedPath = path.join(ROOT, "docs", "reference", "yeeflow-control-configurations.normalized.json");
@@ -309,10 +310,12 @@ function testSourceDistMirrors() {
     "docs/reference/yeeflow-control-property-extensions.json",
     "docs/standards/yeeflow-control-property-knowledge-base.md",
   ]) {
-    const distPath = path.join("dist", "yeeflow-app-builder-plugin", sourcePath);
-    assert.equal(fs.existsSync(path.join(ROOT, sourcePath)), true, `${sourcePath} exists`);
-    assert.equal(fs.existsSync(path.join(ROOT, distPath)), true, `${distPath} exists`);
-    assert.equal(fs.readFileSync(path.join(ROOT, distPath), "utf8"), fs.readFileSync(path.join(ROOT, sourcePath), "utf8"), `${distPath} mirrors ${sourcePath}`);
+    const { source, mirror, mirrorRequired } = artifactPathsForRoot(ROOT, sourcePath);
+    assert.equal(fs.existsSync(source), true, `${sourcePath} exists`);
+    if (mirrorRequired) {
+      assert.equal(fs.existsSync(mirror), true, `${path.relative(ROOT, mirror)} exists`);
+      assert.equal(fs.readFileSync(mirror, "utf8"), fs.readFileSync(source, "utf8"), `${path.relative(ROOT, mirror)} mirrors ${sourcePath}`);
+    }
   }
 }
 

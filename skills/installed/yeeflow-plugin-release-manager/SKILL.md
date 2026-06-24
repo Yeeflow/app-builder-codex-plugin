@@ -57,6 +57,8 @@ Use [plugin-release-checklist.md](references/plugin-release-checklist.md) before
 - UI cache or icon behavior
 - install result
 
+When running artifact checks from a source checkout, root files and `dist/yeeflow-app-builder-plugin` mirrors must be byte-identical. When running the same checks from an installed Codex plugin cache root, the root is already the plugin payload; do not require a nested `dist/yeeflow-app-builder-plugin` directory inside that cache root.
+
 ## Reporting
 
 Report latest detected version, changed bundled skills, version decision, archive path, validation results, commit hash, branch status, RC tag or final tag, and whether plugin rebuild is still pending.
