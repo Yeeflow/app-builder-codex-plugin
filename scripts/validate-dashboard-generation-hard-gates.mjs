@@ -13,6 +13,13 @@ const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"
 const RECORD_DISPLAY_FIELD = "ListDataID";
 const CONTAINER_WIDTH_CODES = new Set(["1", "2", "3"]);
 const NUMERIC_AGG_FUNCS = new Set(["SUM", "AVG", "AVERAGE", "MIN", "MAX"]);
+const DASHBOARD_DATASET_TEMPLATE_ROOT_IDS = new Set([
+  "grid_table_col_wrapper",
+  "grid_table_col_multiselect_wrapper",
+  "card_with_multiselect_toolbar_wrapper",
+  "collection_control_responsive_card_wrapper",
+  "Event Pipeline Grid-Table",
+]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -232,6 +239,7 @@ function validateDynamicUserFieldTypes(page, listIndex, findings) {
   for (const entry of page.controls) {
     const type = String(entry.control?.type || "");
     if (!["dynamic-user", "dynamic-field"].includes(type)) continue;
+    if (isInsideDashboardDatasetTemplate(entry, page)) continue;
     const field = resolveBoundField(entry.control, listIndex);
     if (!field) continue;
     const userField = isUserField(field);
@@ -253,6 +261,7 @@ function validateDynamicUserFieldTypes(page, listIndex, findings) {
 }
 
 function validateContainer(entry, page, findings) {
+  if (isInsideDashboardDatasetTemplate(entry, page)) return;
   const style = entry.control?.attrs?.style || {};
   const widthtype = style.widthtype;
   if (typeof widthtype === "string") {
@@ -268,6 +277,12 @@ function validateContainer(entry, page, findings) {
       findings.push(error(`DASH_CONTAINER_${key.toUpperCase()}_MISSING`, `Generated dashboard Containers must explicitly set attrs.style.${key}.`, { page: page.title, path: `${entry.pointer}.attrs.style.${key}` }));
     }
   }
+}
+
+function isInsideDashboardDatasetTemplate(entry, page) {
+  if ([...DASHBOARD_DATASET_TEMPLATE_ROOT_IDS].some((identity) => matchesSemanticId(entry.control, identity))) return true;
+  const ancestors = findAncestors(page.resource, entry.control);
+  return ancestors.some((node) => [...DASHBOARD_DATASET_TEMPLATE_ROOT_IDS].some((identity) => matchesSemanticId(node, identity)));
 }
 
 function validateKpiCards(page, findings) {

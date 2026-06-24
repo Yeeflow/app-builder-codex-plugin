@@ -15,6 +15,10 @@ const ID_PROVENANCE_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-id-proven
 const NAVIGATION_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-navigation-runtime-metadata.mjs");
 const DATA_LIST_SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-data-list-system-schema.mjs");
 const EXPORT_SHAPE_VALIDATOR = path.join(ROOT, "scripts/validate-generated-yapk-export-shape.mjs");
+const DASHBOARD_LAYOUT_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-page-layout-template.mjs");
+const DASHBOARD_DATASET_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
+const DASHBOARD_GOLDEN_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-golden-reference-conformance.mjs");
+const DASHBOARD_HARD_GATES_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-generation-hard-gates.mjs");
 const YAPK_PACKAGE_VALIDATOR = path.join(ROOT, "validate-yapk-package.js");
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "full-app-materializer-"));
 const cases = [];
@@ -161,7 +165,7 @@ try {
     "#### Dashboard Sections",
     "| Section Name | Data Source | Selected Record Display Control |",
     "| --- | --- | --- |",
-    "| Active loans | Loan Transactions | collection_control_grid_table |",
+    "| Active loans | Loan Transactions | collection_control_grid_table_with_multiselect |",
     "| Availability cards | Office Assets | collection_control_responsive_card_grid |",
     "",
     "### 14.2 Overdue Monitor",
@@ -250,8 +254,26 @@ try {
     EXPORT_SHAPE_VALIDATOR,
     "--package", resourceReport.outputs.package,
   ]);
+  expectPass("nontrivial generated package passes Dashboard Page Layouts v1.1 validation", [
+    DASHBOARD_LAYOUT_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+  ]);
+  expectPass("nontrivial generated package passes Dashboard Collection template materialization validation", [
+    DASHBOARD_DATASET_VALIDATOR,
+    "--app-plan", resourcePlan,
+    "--package", resourceReport.outputs.package,
+  ]);
+  expectPass("nontrivial generated package passes Dashboard Golden Reference validation", [
+    DASHBOARD_GOLDEN_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+  ]);
+  expectPass("nontrivial generated package passes aggregate Dashboard hard gates", [
+    DASHBOARD_HARD_GATES_VALIDATOR,
+    "--plan", resourcePlan,
+    "--package", resourceReport.outputs.package,
+  ]);
   cases.push("nontrivial App Plan materializes data lists, approval forms, reports, dashboards, custom forms, and navigation without placeholder output");
-  cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, data-list schema, YAPK package, and export-shape gates");
+  cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, data-list schema, YAPK package, export-shape, Dashboard v1.1, Dashboard Collection template, Golden Reference, and aggregate Dashboard hard gates");
 
   console.log(JSON.stringify({ status: "pass", cases }, null, 2));
 } finally {
