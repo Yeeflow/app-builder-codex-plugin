@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.26`
+`0.8.27`
+
+Version `0.8.27` releases the full export-shaped `collection_control_responsive_card_grid` template from PR #191. The plugin now carries the Company Overview v1.4 / Collection_control_responsive_card_grid wrapper template, preserves `collection_control_responsive_card_wrapper`, approved editable title/search/button/item regions, optional caption/item-operation rules, field-type compatible Dynamic controls, and delete-confirmation temp variable/action dependencies.
 
 Version `0.8.26` releases Dashboard template materialization fidelity gates from PR #189. Approved Dashboard Collection and KPI templates are now clone-and-map contracts: grid-table multiselect output must preserve full-width wrapper/caption/content layers, locked spacing, source-domain text replacement, select action wiring, and Designer-compatible filter condition shape, while KPI wrappers must materialize approved KPI row/card modules instead of helper-created lookalikes.
 

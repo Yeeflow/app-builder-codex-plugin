@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.26`
+- Version: `0.8.27`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.26` releases Dashboard template materialization fidelity gates from PR #189: approved Collection/KPI templates are clone-and-map contracts, grid-table multiselect requires full-width wrapper/caption/content layers, locked spacing, source-domain text replacement, select action and Designer-compatible filter shape fidelity, and KPI wrappers must materialize approved KPI row/card modules rather than helper-created lookalikes.
+Current release `0.8.27` releases the full export-shaped `collection_control_responsive_card_grid` template from PR #191: generated Dashboard responsive-card Collections must clone the approved `collection_control_responsive_card_wrapper`, preserve locked wrapper/item/caption/action structure, map editable title/search/button/item fields through the approved slots, use field-type compatible Dynamic controls, omit image controls when no Image field exists, and preserve delete-confirmation temp variable/action wiring when item operations are enabled.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.26
+Version: 0.8.27
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.26
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.27
 ```
 
 ## What Is Included

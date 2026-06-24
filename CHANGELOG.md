@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.27
+
+- Release the full export-shaped `collection_control_responsive_card_grid` template from PR #191.
+- Add the sanitized Company Overview v1.4 / Collection_control_responsive_card_grid wrapper template as a tracked reference artifact.
+- Require generated dashboards to preserve `collection_control_responsive_card_wrapper`, locked responsive-card structure, approved editable title/search/button/item regions, optional caption/item-operation rules, field-type compatible Dynamic controls, and delete-confirmation temp variable/action dependencies.
+- Block simplified responsive-card approximations, dynamic-image controls without Image fields, missing item operation action bindings, and drift outside approved template slots before signing readiness.
+
 ## 0.8.26
 
 - Release Dashboard template materialization fidelity gates from PR #189.
