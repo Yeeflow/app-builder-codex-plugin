@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.8.26
+
+- Release Dashboard template materialization fidelity gates from PR #189.
+- Treat approved Dashboard Collection/KPI templates as clone-and-map contracts rather than visual suggestions.
+- Enforce grid-table multiselect full-width wrapper/caption/content layers, locked spacing parity, source-domain text replacement, row-select action wiring, Designer-compatible filter condition shape, and approved KPI row/card materialization.
+
 ## 0.8.25
 
 - Release clean full E2E install, seed, approval, and dashboard quality gates from PR #187.
