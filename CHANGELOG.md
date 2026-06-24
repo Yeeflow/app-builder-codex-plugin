@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.31
+
+- Release the full-app generated-final materialization entrypoint from PR #199.
+- Add `scripts/materialize-full-app-generated-final.mjs` as a standalone Node CLI that consumes approved `functional-specification.md`, `yeeflow-app-plan.md`, and an API-issued ID manifest to emit a generated-final `.yapk`, decoded resource, ID provenance report, and generation report.
+- Keep the signing/install boundary explicit: fixture ID mode is regression-only and not signing/install eligible, while normal generated-final materialization requires API-issued IDs before package artifacts can proceed toward signing readiness.
+- Register the materialization entrypoint in the full-app generation entrypoint registry, cache artifact checks, aggregate UI hard gates, and builder/generator/package-validator skill guidance.
+
 ## 0.8.30
 
 - Release Data Analytics golden reference templates from PR #197.
