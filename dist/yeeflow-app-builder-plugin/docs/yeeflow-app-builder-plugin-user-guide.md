@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.32`
+`0.8.33`
+
+Version `0.8.33` releases full-app materializer resource-demand precision gates from PR #203. `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` reports must now include exact planned resource names, counts, and missing generated-final output surfaces, and the parser must not count data-list fields, dashboard sections, metrics, filters, item-template rows, validator commands, or prose as resources. Nontrivial App Plans remain package-free and not signing/install eligible until full resource-graph materialization and generated-final preflight pass.
 
 Version `0.8.32` releases full-app materializer fail-closed resource-graph gates from PR #201. The standalone materializer must fail with `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` for nontrivial App Plans when it cannot generate the declared data lists, approval forms, reports, dashboards, navigation, and related resources. Placeholder or schema-smoke output is never signing/install eligible.
 
