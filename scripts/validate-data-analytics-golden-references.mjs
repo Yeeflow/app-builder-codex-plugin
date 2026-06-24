@@ -10,6 +10,16 @@ const REGISTRY_PATH = path.join(ROOT, "docs/reference/data-analytics-golden-refe
 const DASHBOARD_V11_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table"]);
 const APPROVED_DASHBOARD_V11_SECTION_IDS = new Set(["2_columns_section", "3_columns_section"]);
+const REQUIRED_GUIDANCE_KEYS = [
+  "summary",
+  "suitableSourceResourceTypes",
+  "whenToUse",
+  "whenNotToUse",
+  "requiredBusinessSignals",
+  "requiredAppPlanDeclaration",
+  "generationProof",
+  "proofBoundary",
+];
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -55,6 +65,12 @@ function validateRegistry(registry, references, findings, registryPath) {
     }
   }
   for (const reference of references.values()) {
+    for (const key of REQUIRED_GUIDANCE_KEYS) {
+      const value = reference[key];
+      if (value === undefined || (Array.isArray(value) && value.length === 0) || String(value || "").trim() === "") {
+        findings.push(error("DATA_ANALYTICS_REFERENCE_GUIDANCE_INCOMPLETE", "Data Analytics golden reference is missing required App Plan selection guidance.", { templateId: reference.templateId, missing: key }));
+      }
+    }
     const templatePath = path.resolve(path.dirname(registryPath), "..", "..", reference.sourceTemplate || "");
     if (!fs.existsSync(templatePath)) {
       findings.push(error("DATA_ANALYTICS_TEMPLATE_FILE_MISSING", "Data Analytics source template file is missing.", { templateId: reference.templateId, sourceTemplate: reference.sourceTemplate }));

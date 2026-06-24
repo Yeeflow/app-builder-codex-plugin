@@ -66,6 +66,7 @@ const REQUIRED_PATTERNS = [
   ["RECORD_DISPLAY_CONTROL_SELECTION", /Record Display Control Selection/i],
   ["DASHBOARD_FILTERS", /Dashboard Filters/i],
   ["SUMMARY_METRICS", /Summary Metrics/i],
+  ["DATA_ANALYTICS_TEMPLATE_SELECTION", /Data Analytics Template Selection/i],
   ["DASHBOARD_ACTIONS", /Dashboard Actions/i],
   ["ITEM_TEMPLATE_DYNAMIC_CONTROLS", /Item Template Dynamic Controls/i],
   ["COLLECTION_KANBAN_ACTIONS", /Collection (and|\/) Kanban Item Actions|Collection\/Kanban item actions/i],
@@ -96,6 +97,11 @@ const REQUIRED_TABLE_SCHEMAS = [
     section: "Dashboard Pages Plan",
     code: "SUMMARY_METRICS_TABLE_SCHEMA_MISSING",
     headers: ["Metric Name", "Source Data List", "Source Field(s)", "Calculation Logic", "Selected Yeeflow Control Type Category", "Display Format Intent", "Proof Boundary or Deferred Note"],
+  },
+  {
+    section: "Dashboard Pages Plan",
+    code: "DATA_ANALYTICS_TEMPLATE_SELECTION_TABLE_SCHEMA_MISSING",
+    headers: ["Section", "Surface", "Data Source", "Business Question", "Selected Data Analytics Template", "Grouping/Axis Fields", "Value/Aggregate Fields", "Selection Reason", "Proof Boundary"],
   },
   {
     section: "Dashboard Pages Plan",
@@ -161,6 +167,15 @@ const DASHBOARD_FORBIDDEN_IMPLEMENTATION_PATTERNS = [
   ["APP_PLAN_DASHBOARD_EXACT_RESOURCE_ID_LEAK", /\b\d{16,}\b/],
   ["APP_PLAN_DASHBOARD_LAYOUT_JSON_LEAK", /"type"\s*:\s*"?(?:container|collection|summary|data-table|kanban|text|heading)"?|^\s*[{[]\s*$/im],
 ];
+
+const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = new Set([
+  "data_analytics_pie_chart_with_title",
+  "data_analytics_column_chart_with_title",
+  "data_analytics_bar_chart_with_title",
+  "data_analytics_line_chart_with_title",
+  "data_analytics_area_chart_with_title",
+  "data_analytics_pivot_table_standard",
+]);
 
 function usage(exitCode = 1) {
   const text = [
@@ -363,6 +378,7 @@ function validateDashboardPagesPlan(text, findings) {
     ["APP_PLAN_DASHBOARD_SECTIONS_MISSING", /#### Dashboard Sections/i],
     ["APP_PLAN_DASHBOARD_FILTERS_MISSING", /#### Dashboard Filters/i],
     ["APP_PLAN_DASHBOARD_SUMMARY_METRICS_MISSING", /#### Summary Metrics/i],
+    ["APP_PLAN_DASHBOARD_DATA_ANALYTICS_SELECTION_MISSING", /#### Data Analytics Template Selection/i],
     ["APP_PLAN_DASHBOARD_ACTIONS_MISSING", /#### Dashboard Actions/i],
     ["APP_PLAN_DASHBOARD_RECORD_DISPLAY_SELECTION_MISSING", /#### Record Display Control Selection/i],
     ["APP_PLAN_DASHBOARD_DYNAMIC_CONTROLS_MISSING", /#### Item Template Dynamic Controls/i],
@@ -397,6 +413,8 @@ function validateDashboardPagesPlan(text, findings) {
       message: "Dashboard Pages Plan mentions a dashboard but does not choose supported Yeeflow control type categories.",
     });
   }
+
+  validateDashboardDataAnalyticsTemplateSelection(dashboard, findings);
 
   const policyText = policyDashboardText(dashboard);
   for (const line of policyText.split(/\r?\n/)) {
@@ -433,6 +451,35 @@ function validateDashboardPagesPlan(text, findings) {
         value: match[0],
       });
     }
+  }
+}
+
+function validateDashboardDataAnalyticsTemplateSelection(dashboard, findings) {
+  const dashboardSectionsBlock = dashboard.split(/#### Dashboard Filters/i)[0].split(/#### Dashboard Sections/i)[1] || "";
+  const analyticsPlanned = splitTableRows(dashboardSectionsBlock).some((row) => /\b(Chart|Data analytics|Pie chart|Column chart|Bar chart|Line chart|Area chart|Pivot table)\b/i.test(row));
+  const selectionBlock = dashboard.split(/#### Dashboard Actions/i)[0].split(/#### Data Analytics Template Selection/i)[1] || "";
+  const rows = splitTableRows(selectionBlock);
+  const selectedIds = [];
+  for (const row of rows) {
+    const ids = [...row.matchAll(/\bdata_analytics_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    for (const id of ids) {
+      selectedIds.push(id);
+      if (!APPROVED_DATA_ANALYTICS_TEMPLATE_IDS.has(id)) {
+        findings.push({
+          level: "error",
+          code: "APP_PLAN_DATA_ANALYTICS_TEMPLATE_UNKNOWN",
+          message: "Data Analytics Template Selection must use an approved Data Analytics golden reference template ID.",
+          templateId: id,
+        });
+      }
+    }
+  }
+  if (analyticsPlanned && selectedIds.length === 0) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_DATA_ANALYTICS_TEMPLATE_SELECTION_REQUIRED",
+      message: "Dashboard sections that select Chart/Data analytics must include an approved Data Analytics template ID in the Data Analytics Template Selection table.",
+    });
   }
 }
 

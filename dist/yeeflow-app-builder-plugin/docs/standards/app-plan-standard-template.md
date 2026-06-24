@@ -393,6 +393,23 @@ Rules:
 | --- | --- | --- | --- | --- | --- | --- |
 | <Metric> | <List> | <Fields> | <Business calculation> | Summary / KPI card | count / percentage / currency / duration / number | <Proof/deferred note> |
 
+#### Data Analytics Template Selection
+
+Required for every Dashboard or Data List form section that uses a chart, pivot table, or Data Analytics control.
+
+| Section | Surface | Data Source | Business Question | Selected Data Analytics Template | Grouping/Axis Fields | Value/Aggregate Fields | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Section> | Dashboard / Data List form | <Data List/Form Report/Data Report/Document Library metadata list> | <Question> | <approved Data Analytics template ID> | <Business fields only, no runtime IDs> | <Business fields/aggregate logic> | <Reason using template guidance> | <Local/runtime proof boundary> |
+
+Rules:
+
+- The Selected Data Analytics Template must be one of `data_analytics_pie_chart_with_title`, `data_analytics_column_chart_with_title`, `data_analytics_bar_chart_with_title`, `data_analytics_line_chart_with_title`, `data_analytics_area_chart_with_title`, or `data_analytics_pivot_table_standard` from `docs/reference/data-analytics-golden-references.json`.
+- For each chart/pivot region, state the business question, source data, grouping/axis fields, value/aggregate fields, and selection reason. The rationale must use the selected template's `whenToUse`, `whenNotToUse`, `requiredBusinessSignals`, and `suitableSourceResourceTypes` guidance.
+- Select exactly one approved Data Analytics template per analytics region. Do not list multiple possible templates for the same region and do not leave the template choice to generation.
+- App Plan selection is a business decision only. It must not include generated `ListID`, `LayoutID`, `PageID`, action type codes, JSON property paths, placeholder IDs, or runtime payload fields in this table.
+- Data Analytics templates are allowed only on Dashboard pages and Data List forms. They must not be planned for Approval forms.
+- On Dashboard Page Layouts v1.1 pages, generated resources must place Data Analytics templates only inside `2_columns_section` or `3_columns_section`; the App Plan may state this placement requirement without prescribing low-level container properties.
+
 #### Dashboard Actions
 
 | Action Name | Business Purpose | Source/Target Business Object | Expected User Outcome | Supported Yeeflow Action Category When Known | Proof Boundary or Deferred Note |

@@ -16,12 +16,16 @@ This training introduces export-shaped golden reference templates for Pie chart,
 ## Behavior Added
 
 - Data Analytics templates are a closed approved list.
+- Each approved template carries App Plan selection guidance: summary, suitable source resource types, when to use, when not to use, required business signals, required App Plan declaration, generation proof, and proof boundary.
+- App Plan generation must use `Data Analytics Template Selection` to choose exactly one approved template per analytics region before generation.
 - Dashboard and Data List form usage is allowed.
 - Approval form usage is blocked.
 - Dashboard Page Layouts v1.1 placement is restricted to `2_columns_section` and `3_columns_section`.
 - Chart-with-title templates must preserve wrapper, style, layout, and typography while allowing business title text and chart data binding.
 - Pivot table generation must preserve exported style settings.
 - Generated-final preflight now runs Data Analytics golden reference validation.
+- Registry validation fails if any approved Data Analytics template lacks App Plan selection guidance.
+- App Plan validation fails when a Dashboard section selects Chart/Data analytics but does not name an approved Data Analytics template ID.
 
 ## Safety Boundary
 

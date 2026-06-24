@@ -37,6 +37,16 @@ function expectFinding(report, code) {
   );
 }
 
+function insertTableRowAfterHeader(text, subsectionTitle, row) {
+  const subsection = `#### ${subsectionTitle}`;
+  const start = text.indexOf(subsection);
+  if (start === -1) throw new Error(`Missing subsection ${subsectionTitle}`);
+  const separatorStart = text.indexOf("\n| ---", start);
+  if (separatorStart === -1) throw new Error(`Missing table separator for ${subsectionTitle}`);
+  const insertAt = text.indexOf("\n", separatorStart + 1);
+  return `${text.slice(0, insertAt + 1)}${row}\n${text.slice(insertAt + 1)}`;
+}
+
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "functional-spec-app-plan-gates-"));
 const results = [];
 
@@ -48,6 +58,24 @@ try {
   output = run("scripts/validate-app-plan-resource-order.mjs", "docs/standards/app-plan-standard-template.md");
   assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
   results.push({ case: "canonical App Plan template passes", status: "pass" });
+
+  const canonicalPlan = fs.readFileSync("docs/standards/app-plan-standard-template.md", "utf8");
+  const chartDashboardRow = "| 2 | Ticket Trend | Show ticket creation volume over time | Tickets | Created Date, Ticket count | Chart / Data analytics | A line chart answers the time trend business question | None | Local generated-final and runtime proof required |";
+  const analyticsSelectionRow = "| Ticket Trend | Dashboard | Tickets | How many tickets were created over time? | data_analytics_line_chart_with_title | Created Date | Count of tickets | Time trend requires the approved line chart template | Local generated-final and runtime proof required |";
+  const chartPlanMissingSelection = writeFixture(tempDir, "chart-plan-missing-analytics-template.md", insertTableRowAfterHeader(canonicalPlan, "Dashboard Sections", chartDashboardRow));
+  output = run("scripts/validate-app-plan-resource-order.mjs", chartPlanMissingSelection);
+  assert.equal(output.report.status, "fail");
+  expectFinding(output.report, "APP_PLAN_DATA_ANALYTICS_TEMPLATE_SELECTION_REQUIRED");
+  results.push({ case: "App Plan chart analytics without selected template fails", status: "pass" });
+
+  const chartPlanWithSelection = writeFixture(
+    tempDir,
+    "chart-plan-with-analytics-template.md",
+    insertTableRowAfterHeader(insertTableRowAfterHeader(canonicalPlan, "Dashboard Sections", chartDashboardRow), "Data Analytics Template Selection", analyticsSelectionRow),
+  );
+  output = run("scripts/validate-app-plan-resource-order.mjs", chartPlanWithSelection);
+  assert.equal(output.report.status, "pass", JSON.stringify(output.report.findings, null, 2));
+  results.push({ case: "App Plan chart analytics with approved template passes", status: "pass" });
 
   const badSpec = writeFixture(tempDir, "bad-spec.md", `
 # Broken - Functional Specification
