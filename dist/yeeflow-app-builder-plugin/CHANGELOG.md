@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.8.25
+
+- Release clean full E2E install, seed, approval, and dashboard quality gates from PR #187.
+- Treat package API `Status: 0` as submitted/accepted only; final success still requires async materialization and browser/runtime proof.
+- Block generated-final YAPK seed rows in `Childs[].List.Items`, strengthen approval `DefResource` task-routing checks, reject install-failed/empty Components runtime evidence, and enforce dashboard source-template/generic-label cleanup plus seed-derived KPI expected-value proof.
+
 ## 0.8.24
 
 - Release Dashboard multiselect template fidelity and materialization gates from PR #185.

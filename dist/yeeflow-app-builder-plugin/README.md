@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.24`
+- Version: `0.8.25`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.24` releases Dashboard multiselect template fidelity and materialization gates from PR #185: card/grid multiselect source templates now preserve Text typography/color metadata, grid-table multiselect keeps zero-gap wrapper metadata and a concrete detail-layout replacement contract, and generated dashboards must materialize planned Summary/KPI and Data Filter controls rather than stopping at Collection-only pages.
+Current release `0.8.25` releases clean full E2E install, seed, approval, and dashboard quality gates from PR #187: package API `Status: 0` is submitted/accepted only, generated-final YAPK packages cannot embed seed rows in `Childs[].List.Items`, approval `DefResource` must include real task routing and Approved/Rejected paths, runtime proof rejects install-failed/empty Components shells, dashboards reject source-template/generic visible residue, and seed-derived KPI expected values can be enforced.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.24
+Version: 0.8.25
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.24
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.25
 ```
 
 ## What Is Included
