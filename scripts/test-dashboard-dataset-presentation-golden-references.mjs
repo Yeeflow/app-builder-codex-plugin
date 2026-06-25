@@ -91,6 +91,34 @@ Dashboard validator commands used during validation:
 `);
   expectPass("App Plan ignores non-dataset prose and validator commands without workaround text", ["--app-plan", noWorkaroundPlan]);
 
+  const scopedDashboardPlan = write("scoped-dashboard-plan.md", `# Yeeflow App Plan
+
+## Dashboard Pages Plan
+
+### 14.1 Active Loans Dashboard
+
+#### Record Display Control Selection
+
+| Section Name | Data Source | Display Need | Selected Record Display Control | Selected Collection Presentation Reference | Required Business Fields | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Active loans | Loan Requests Data List | Dense operational row scanning | Collection | collection_control_grid_table | Loan title, requester, due date, status | Dense row/column scanning for an operational work queue | Open selected loan | Must preserve the full grid_table_col_wrapper internals |
+`);
+  expectPass("App Plan-to-package conformance inherits Dashboard heading when table omits Dashboard Page column", ["--app-plan", scopedDashboardPlan, "--package", writePackage("scoped-dashboard-package-conformance", validPages())]);
+
+  const wrapperMentionPlan = write("wrapper-mention-plan.md", `# Yeeflow App Plan
+
+## Dashboard Pages Plan
+
+### 14.1 Asset Cards Dashboard
+
+#### Record Display Control Selection
+
+| Section Name | Data Source | Display Need | Selected Record Display Control | Selected Collection Presentation Reference | Required Business Fields | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Asset cards | Assets Data List | Browse available assets as cards | Collection | collection_control_responsive_card_grid | Asset name, owner, availability | Card browsing is better for asset overview | Open selected asset | Must clone collection_control_responsive_card_wrapper as the internal template root |
+`);
+  expectPass("App Plan may mention approved internal wrapper IDs without treating them as selected templates", ["--app-plan", wrapperMentionPlan]);
+
   const missingPlan = write("missing-plan.md", `# Yeeflow App Plan
 
 ## Dashboard Pages Plan

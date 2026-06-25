@@ -17,6 +17,12 @@ const COLLECTION_TEMPLATE_PATHS = {
   collection_control_responsive_card_grid: path.join(ROOT, "docs/reference/collection-control-responsive-card-grid.template.json"),
 };
 const APPROVED_COLLECTION_TEMPLATE_IDS = Object.freeze(Object.keys(COLLECTION_TEMPLATE_PATHS));
+const GRID_TABLE_TEMPLATE_IDS = new Set([
+  "collection_control_grid_table",
+  "collection_control_grid_table_with_search",
+  "collection_control_grid_table_with_multiselect",
+  "Event Pipeline Grid-Table",
+]);
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 
@@ -187,6 +193,9 @@ function analyzeAppPlanResourceDemand(planText) {
     counts,
     resources,
     navigationItemsByGroup,
+    dataListFieldSpecs: collectDataListFieldSpecs(planText),
+    customFormRecords: collectCustomFormRecords(planText),
+    dashboardFilterRecords: collectDashboardFilterRecords(planText),
     dashboardDatasetRecords: collectDashboardDatasetRecords(planText),
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
@@ -231,6 +240,134 @@ function collectDashboardDatasetRecords(planText) {
           raw: raw.trim(),
         });
       }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return records;
+}
+
+function collectDataListFieldSpecs(planText) {
+  const section = extractNumberedSection(planText, /^##\s+4\.\s+Data Lists and Document Libraries Plan/im);
+  const byList = {};
+  if (!section.trim()) return byList;
+  const lines = section.split(/\r?\n/);
+  let currentList = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) {
+      currentList = cleanResourceName(heading[1]);
+      if (currentList && !byList[normKey(currentList)]) byList[normKey(currentList)] = [];
+      continue;
+    }
+    if (!currentList || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const displayColumn = findHeaderIndex(normalizedHeaders, ["display name", "field name", "name"]);
+    const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "field id", "fieldname"]);
+    const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "field type", "type"]);
+    const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "control type", "control"]);
+    const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "options", "values"]);
+    if (displayColumn === -1 || fieldTypeColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const displayName = cleanResourceName(cells[displayColumn]);
+      if (!displayName || isNonResourceName(displayName)) {
+        rowIndex += 1;
+        continue;
+      }
+      const fieldType = cleanResourceName(cells[fieldTypeColumn]) || "Text";
+      const controlType = controlTypeColumn === -1 ? "" : cleanResourceName(cells[controlTypeColumn]);
+      const fieldName = cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, fieldType, byList[normKey(currentList)].length);
+      byList[normKey(currentList)].push({
+        displayName,
+        fieldName,
+        fieldType,
+        controlType,
+        choiceValues: choiceColumn === -1 ? "" : cleanResourceName(cells[choiceColumn]),
+      });
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return byList;
+}
+
+function collectCustomFormRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+10\.\s+Custom Data List Forms Plan/im);
+  const records = [];
+  if (!section.trim()) return records;
+  const lines = section.split(/\r?\n/);
+  let currentList = "";
+  const seen = new Set();
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) {
+      currentList = cleanResourceName(heading[1]);
+      continue;
+    }
+    if (!currentList || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const formColumn = findHeaderIndex(normalizedHeaders, ["form name", "custom form name"]);
+    const typeColumn = findHeaderIndex(normalizedHeaders, ["form type", "type", "purpose"]);
+    if (formColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const formName = cleanResourceName(cells[formColumn]);
+      if (!formName || isNonResourceName(formName)) {
+        rowIndex += 1;
+        continue;
+      }
+      const key = `${normKey(currentList)}::${normKey(formName)}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        records.push({
+          listName: currentList,
+          formName,
+          formType: typeColumn === -1 ? "" : cleanResourceName(cells[typeColumn]),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return records;
+}
+
+function collectDashboardFilterRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
+  const records = [];
+  if (!section.trim()) return records;
+  const lines = section.split(/\r?\n/);
+  let currentDashboardPage = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const filterColumn = findHeaderIndex(normalizedHeaders, ["filter name", "filter", "control label"]);
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
+    const fieldColumn = findHeaderIndex(normalizedHeaders, ["field", "filter field", "source field", "filter field display name"]);
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name"]);
+    if (filterColumn === -1 || fieldColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const filterName = cleanResourceName(cells[filterColumn]);
+      if (!filterName || isNonResourceName(filterName) || /not applicable|n\/a|none/i.test(filterName)) {
+        rowIndex += 1;
+        continue;
+      }
+      records.push({
+        dashboardPage: cleanResourceName(cells[pageColumn]) || currentDashboardPage,
+        filterName,
+        sourceResource: sourceColumn === -1 ? "" : cleanResourceName(cells[sourceColumn]),
+        fieldDisplayName: cleanResourceName(cells[fieldColumn]),
+      });
       rowIndex += 1;
     }
     index = rowIndex;
@@ -288,11 +425,18 @@ function buildIdPaths(planDemand) {
     "decoded.ListSet.ListID",
   ];
   planDemand.resources.dataLists.forEach((name, index) => {
+    const fieldSpecs = fieldSpecsForList(planDemand, name);
     paths.push(`decoded.Childs[${index}].List.ListID`);
-    paths.push(`decoded.Childs[${index}].Fields[0].FieldID`);
+    fieldSpecs.forEach((field, fieldIndex) => {
+      paths.push(`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`);
+    });
     paths.push(`decoded.Childs[${index}].Layouts[0].LayoutID`);
   });
-  planDemand.resources.customForms.forEach((name, index) => {
+  for (const assignment of assignCustomFormLayoutPositions(planDemand, planDemand.resources.dataLists)) {
+    paths.push(`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`);
+  }
+  const assignedFormNames = new Set(planDemand.customFormRecords.map((record) => normKey(record.formName)));
+  planDemand.resources.customForms.filter((name) => !assignedFormNames.has(normKey(name))).forEach((name, index) => {
     paths.push(`decoded.Childs[0].Layouts[${index + 1}].LayoutID`);
   });
   planDemand.resources.approvalForms.forEach((name, index) => {
@@ -359,6 +503,149 @@ function collectNavigationItemsByGroup(section) {
     }
   }
   return byGroup;
+}
+
+function fieldSpecsForList(planDemand, listName) {
+  const specs = planDemand.dataListFieldSpecs?.[normKey(listName)] || [];
+  const normalized = [];
+  const seen = new Set();
+  const add = (field) => {
+    const fieldName = cleanResourceName(field.fieldName || field.displayName || "Title");
+    const displayName = cleanResourceName(field.displayName || fieldName);
+    const key = normKey(fieldName || displayName);
+    if (!fieldName || seen.has(key)) return;
+    seen.add(key);
+    normalized.push({
+      displayName,
+      fieldName,
+      fieldType: cleanResourceName(field.fieldType) || "Text",
+      controlType: cleanResourceName(field.controlType) || inferControlType(field.fieldType),
+      choiceValues: cleanResourceName(field.choiceValues),
+    });
+  };
+  add({ displayName: "Title", fieldName: "Title", fieldType: "Text", controlType: "input" });
+  for (const spec of specs) add(spec);
+  return normalized.slice(0, 16);
+}
+
+function assignCustomFormLayoutPositions(planDemand, dataListNames) {
+  const listIndexByName = new Map(dataListNames.map((name, index) => [normKey(name), index]));
+  const offsetsByList = new Map();
+  return (planDemand.customFormRecords || [])
+    .map((record) => {
+      const listIndex = listIndexByName.has(normKey(record.listName)) ? listIndexByName.get(normKey(record.listName)) : 0;
+      const next = (offsetsByList.get(listIndex) || 0) + 1;
+      offsetsByList.set(listIndex, next);
+      return { ...record, listIndex, layoutIndex: next };
+    });
+}
+
+function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
+  const fieldType = normalizeFieldType(field.fieldType);
+  const type = normalizeControlType(field.controlType || field.fieldType);
+  const isTitle = fieldIndex === 0 || field.fieldName === "Title";
+  const fieldName = isTitle ? "Title" : `${fieldType}${fieldIndex}`;
+  const rules = buildFieldRules({ field, type });
+  return {
+    FieldID: fieldId,
+    ListID: listId,
+    FieldName: fieldName,
+    FieldType: fieldType,
+    FieldIndex: fieldIndex,
+    DisplayName: field.displayName,
+    InternalName: fieldName,
+    Type: type,
+    Status: isTitle ? 0 : 1,
+    Category: 0,
+    DefaultValue: "",
+    Rules: rules,
+    IsSort: false,
+    IsSystem: isTitle,
+    IsUnique: false,
+    IsIndex: isTitle,
+    Ext1: "",
+    Ext2: "",
+    Ext3: "",
+  };
+}
+
+function buildCustomFormLayout({ layoutId, listId, listName, formName, fields }) {
+  return {
+    ListID: listId,
+    LayoutID: layoutId,
+    Title: formName,
+    Type: 1,
+    LayoutView: JSON.stringify({ source: "minimal-resource-graph", formName, listName }),
+    IsDefault: false,
+    IsItemPerm: false,
+    Perms: [],
+    LayoutInResources: [
+      {
+        ID: layoutId,
+        RefId: layoutId,
+        Resource: JSON.stringify({
+          type: "form",
+          id: `${slugify(formName)}_form_root`,
+          name: formName,
+          title: formName,
+          attrs: { container: { cw: "2", padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] } },
+          children: [
+            { type: "heading", label: "Text", id: `${slugify(formName)}_title`, name: formName, title: formName, attrs: { headc: { title: { value: formName } }, heads: { ty: [null, "h3-bold"], color: "#111827" } } },
+            ...fields.slice(0, 8).map((field, index) => ({
+              type: dynamicControlTypeForField(field),
+              id: `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`,
+              name: field.DisplayName,
+              title: field.DisplayName,
+              attrs: {
+                data: {
+                  list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+                  field: field.FieldName,
+                  fieldName: field.FieldName,
+                },
+              },
+            })),
+          ],
+        }),
+      },
+    ],
+  };
+}
+
+function buildFieldRules({ field, type }) {
+  const choiceTypes = new Set(["select", "radio", "checkbox", "tag"]);
+  if (!choiceTypes.has(type)) return "";
+  const values = String(field.choiceValues || "")
+    .split(/[,;]+/)
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (!values.length) return "";
+  const colors = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"];
+  const choices = values.map((value, index) => ({
+    key: String(index + 1),
+    value,
+    color: colors[index % colors.length],
+  }));
+  return JSON.stringify({
+    choices,
+    color_choices: choices,
+    displayStyle: "dropdown",
+    show_color: false,
+  });
+}
+
+function selectDashboardFiltersForPage({ planDemand, pageName, datasetRecord, fallbackListName }) {
+  const records = planDemand.dashboardFilterRecords || [];
+  const pageMatches = records.filter((record) => dashboardNameMatches(pageName, record.dashboardPage));
+  if (pageMatches.length) return pageMatches;
+  const sourceName = datasetRecord?.sourceResource || fallbackListName;
+  return records.filter((record) => !record.dashboardPage && (!record.sourceResource || normKey(record.sourceResource) === normKey(sourceName)));
+}
+
+function dashboardNameMatches(pageName, plannedPageName) {
+  if (!plannedPageName) return false;
+  const left = normKey(pageName);
+  const right = normKey(plannedPageName);
+  return left === right || left.includes(right) || right.includes(left);
 }
 
 function parseMarkdownTables(section) {
@@ -477,10 +764,24 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
 function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
   const dataListNames = planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`];
   const dataListByName = new Map();
+  const listMetaByName = new Map();
+  const customFormAssignments = assignCustomFormLayoutPositions(planDemand, dataListNames);
+  const assignedFormNames = new Set(customFormAssignments.map((assignment) => normKey(assignment.formName)));
+  const fallbackCustomForms = planDemand.resources.customForms
+    .filter((name) => !assignedFormNames.has(normKey(name)))
+    .map((formName, index) => ({ listName: dataListNames[0], formName, formType: "", listIndex: 0, layoutIndex: index + 1 }));
+  const allCustomFormAssignments = customFormAssignments.concat(fallbackCustomForms);
   const childs = dataListNames.map((name, index) => {
     const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
-    const titleFieldId = stringId(ids[`decoded.Childs[${index}].Fields[0].FieldID`]);
     dataListByName.set(normKey(name), listId);
+    const fieldSpecs = fieldSpecsForList(planDemand, name);
+    const fields = fieldSpecs.map((field, fieldIndex) => buildFieldRecord({
+      field,
+      fieldIndex,
+      listId,
+      fieldId: stringId(ids[`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`]),
+    }));
+    const customLayoutsForList = allCustomFormAssignments.filter((assignment) => assignment.listIndex === index);
     const layouts = [
       {
         ListID: listId,
@@ -488,11 +789,17 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
         Title: "Default View",
         Type: 0,
         LayoutView: JSON.stringify({
-          layout: [
-            { FieldID: titleFieldId, FieldName: "Title", DisplayName: "Title", Type: "input", Order: 1, Mobile: 2, Show: true },
-          ],
+          layout: fields.slice(0, 8).map((field, fieldIndex) => ({
+            FieldID: field.FieldID,
+            FieldName: field.FieldName,
+            DisplayName: field.DisplayName,
+            Type: field.Type,
+            Order: fieldIndex + 1,
+            Mobile: 2,
+            Show: true,
+          })),
           query: [
-            { FieldID: titleFieldId, FieldName: "Title", field: "Title" },
+            ...fields.map((field) => ({ FieldID: field.FieldID, FieldName: field.FieldName, field: field.FieldName })),
             { FieldName: "ListDataID", field: "ListDataID" },
             { FieldName: "CreatedBy", field: "CreatedBy" },
             { FieldName: "ModifiedBy", field: "ModifiedBy" },
@@ -507,59 +814,17 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
         LayoutInResources: [],
       },
     ];
-    if (index === 0) {
-      for (const [customIndex, customName] of planDemand.resources.customForms.entries()) {
-        layouts.push({
-          ListID: listId,
-          LayoutID: stringId(ids[`decoded.Childs[0].Layouts[${customIndex + 1}].LayoutID`]),
-          Title: customName,
-          Type: 1,
-          LayoutView: JSON.stringify({ source: "minimal-resource-graph", formName: customName }),
-          IsDefault: false,
-          IsItemPerm: false,
-          Perms: [],
-          LayoutInResources: [
-            {
-              ID: stringId(ids[`decoded.Childs[0].Layouts[${customIndex + 1}].LayoutID`]),
-              RefId: stringId(ids[`decoded.Childs[0].Layouts[${customIndex + 1}].LayoutID`]),
-              Resource: JSON.stringify({
-                type: "form",
-                name: customName,
-                children: [
-                  { type: "text", name: `${customName} title`, attrs: { text: { value: customName } } },
-                  { type: "dynamic-field", name: "Title", attrs: { data: { field: "Title" } } },
-                ],
-              }),
-            },
-          ],
-        });
-      }
+    for (const assignment of customLayoutsForList) {
+      const layoutId = stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]);
+      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, fields }));
     }
+    const detailLayoutId = customLayoutsForList.length
+      ? stringId(ids[`decoded.Childs[${index}].Layouts[${customLayoutsForList[0].layoutIndex}].LayoutID`])
+      : "";
+    listMetaByName.set(normKey(name), { listName: name, listId, fields, detailLayoutId });
     return {
       List: listInfo({ listId, title: name, type: 1, ext2: "{\"generatedFinal\":true}" }),
-      Fields: [
-        {
-          FieldID: titleFieldId,
-          ListID: listId,
-          FieldName: "Title",
-          FieldType: "Text",
-          FieldIndex: 0,
-          DisplayName: "Title",
-          InternalName: "Title",
-          Type: "input",
-          Status: 0,
-          Category: 0,
-          DefaultValue: "",
-          Rules: "",
-          IsSort: false,
-          IsSystem: true,
-          IsUnique: false,
-          IsIndex: true,
-          Ext1: "",
-          Ext2: "",
-          Ext3: "",
-        },
-      ],
+      Fields: fields,
       Layouts: layouts,
       RemindRules: [],
       PublicForms: [],
@@ -614,7 +879,9 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
   const pages = planDemand.resources.dashboards.map((name, index) => {
     const datasetRecord = selectDashboardDatasetRecord({ planDemand, pageName: name, pageIndex: index });
     const firstListName = datasetRecord?.sourceResource || dataListNames[index % dataListNames.length];
-    const firstListId = dataListByName.get(normKey(firstListName)) || dataListByName.values().next().value || rootListId;
+    const firstListMeta = listMetaByName.get(normKey(firstListName)) || listMetaByName.values().next().value || { listName: firstListName, listId: rootListId, fields: fieldSpecsForList(planDemand, firstListName), detailLayoutId: "" };
+    const firstListId = firstListMeta.listId || dataListByName.get(normKey(firstListName)) || dataListByName.values().next().value || rootListId;
+    const dashboardFilters = selectDashboardFiltersForPage({ planDemand, pageName: name, datasetRecord, fallbackListName: firstListName });
     return {
       ListID: rootListId,
       LayoutID: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
@@ -633,7 +900,9 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
               layoutId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
               listName: firstListName,
               listId: firstListId,
+              listMeta: firstListMeta,
             datasetRecord,
+            dashboardFilters,
             summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
             filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
             collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
@@ -673,18 +942,23 @@ function selectDashboardDatasetRecord({ planDemand, pageName, pageIndex }) {
     || records[0];
 }
 
-function buildMaterialDashboardResource({ name, layoutId, listName, listId, datasetRecord, summaryId, filterId, collectionId }) {
+function buildMaterialDashboardResource({ name, layoutId, listName, listId, listMeta, datasetRecord, dashboardFilters, summaryId, filterId, collectionId }) {
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   const resource = buildDashboardV11Shell({ name, layoutId });
   const sourceResource = datasetRecord?.sourceResource || listName;
   const selectedTemplateId = datasetRecord?.selectedTemplateId || "collection_control_grid_table";
   const datasetRegion = datasetRecord?.datasetRegion || `${sourceResource} records`;
+  const sourceListMeta = listMeta || { listName: sourceResource, listId, fields: [{ fieldName: "Title", displayName: "Title", fieldType: "Text", controlType: "input" }], detailLayoutId: "" };
+  const normalizedFilters = normalizeDashboardFilters({ filters: dashboardFilters, listMeta: sourceListMeta, dashboardName: name });
   const collectionRoot = buildCollectionTemplateInstance({
     templateId: selectedTemplateId,
     dashboardName: name,
     datasetRegion,
     listName: sourceResource,
     listId,
+    listMeta: sourceListMeta,
+    detailLayoutId: sourceListMeta.detailLayoutId,
+    filterBindings: normalizedFilters,
     collectionId,
   });
   const templateDependencies = collectionRoot.pageLevelDependencies || {};
@@ -704,8 +978,19 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, data
   const hiddenHost = contentArea || findFirstByIdentity(resource, "Content") || resource;
   hiddenHost.children = Array.isArray(hiddenHost.children) ? hiddenHost.children : [];
   hiddenHost.children.push(summary);
+  materializeDashboardFilters(resource, {
+    filters: normalizedFilters,
+    listName: sourceResource,
+    listId,
+    filterIdPrefix: filterId,
+    datasetRegion,
+    host: contentArea,
+  });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, tempVar });
-  resource.filterVars = normalizeDependencyArray(templateDependencies.filterVars);
+  resource.filterVars = uniqueByName([
+    ...normalizeDependencyArray(templateDependencies.filterVars),
+    ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
+  ]);
   resource.tempVars = uniqueByName([
     ...normalizeDependencyArray(templateDependencies.tempVars),
     { name: tempVar, type: "number", source: summaryId },
@@ -735,9 +1020,93 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, data
     datasetRegion,
     selectedCollectionTemplateId: selectedTemplateId,
     sourceResource,
+    filters: normalizedFilters.map((filter) => ({ name: filter.filterName, fieldName: filter.fieldName })),
   };
   normalizeGeneratedDashboardControls(resource, name);
   return resource;
+}
+
+function normalizeDashboardFilters({ filters, listMeta, dashboardName }) {
+  return (filters || []).map((filter, index) => {
+    const field = resolveFieldSpec(listMeta, filter.fieldDisplayName) || resolveFieldSpec(listMeta, "Title") || fieldsForDynamicControls(listMeta)[0];
+    const variable = `flt_${slugify(dashboardName).replace(/-/g, "_")}_${slugify(filter.filterName || field.displayName).replace(/-/g, "_")}`;
+    return {
+      ...filter,
+      fieldName: field.fieldName,
+      displayName: field.displayName,
+      variable,
+      controlId: `${variable}_${index + 1}`,
+    };
+  });
+}
+
+function materializeDashboardFilters(resource, { filters, listName, listId, filterIdPrefix, datasetRegion, host }) {
+  if (!filters.length) return;
+  const filterGroup = host || findFirstByIdentity(resource, "section_content_area") || findFirstByIdentity(resource, "Content") || resource;
+  filterGroup.children = Array.isArray(filterGroup.children) ? filterGroup.children : [];
+  for (const [index, filter] of filters.entries()) {
+    filterGroup.children.unshift(buildDashboardSelectFilter({
+      filter,
+      listName,
+      listId,
+      id: `${filterIdPrefix}_${index + 1}`,
+      datasetRegion,
+    }));
+  }
+}
+
+function buildDashboardSelectFilter({ filter, listName, listId, id, datasetRegion }) {
+  return {
+    type: "select-filter",
+    id,
+    name: filter.filterName,
+    title: filter.filterName,
+    label: filter.filterName,
+    binding: filter.variable,
+    attrs: {
+      nv_label: filter.filterName,
+      nav_label: filter.filterName,
+      display_f: filter.fieldName,
+      value_f: filter.fieldName,
+      lablay: [null, "top"],
+      lab: { ty: [null, "xs-light"], color: "#667085" },
+      edit: {
+        pcolor: "#98A2B3",
+        placeholder: { color: "#98A2B3" },
+        normal: { border: { radius: [null, 8] } },
+      },
+      placeholder: { value: `Select ${filter.filterName}` },
+      common: {
+        positioning: {
+          widthtype: [null, "3"],
+          width: [null, 200],
+        },
+      },
+      data: {
+        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        field: filter.fieldName,
+        displayField: filter.fieldName,
+        valueField: filter.fieldName,
+        filter: [{ field: filter.fieldName, operator: "not_empty", value: "{{ListDataID}}" }],
+        datasetRegion,
+      },
+      filterVar: filter.variable,
+    },
+  };
+}
+
+function buildCollectionFilterConditions(filters) {
+  return (filters || []).map((filter) => ({
+    key: `filter_${slugify(filter.variable)}`,
+    pre: "and",
+    left: filter.fieldName,
+    field: filter.fieldName,
+    op: "9",
+    operator: "9",
+    right: [{ exprType: "variable", valueType: "string", id: `__filter_${filter.variable}`, type: "expr", name: filter.variable }],
+    showCus: false,
+    sourceFilterId: filter.controlId,
+  }));
 }
 
 function buildDashboardV11Shell({ name }) {
@@ -784,7 +1153,7 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId }) {
   };
 }
 
-function buildCollectionTemplateInstance({ templateId, dashboardName, datasetRegion, listName, listId, collectionId }) {
+function buildCollectionTemplateInstance({ templateId, dashboardName, datasetRegion, listName, listId, listMeta, detailLayoutId, filterBindings, collectionId }) {
   const template = loadCollectionTemplate(templateId);
   const root = clone(template?.templateResource?.rootContainer || {});
   root.id = `${collectionId}_${slugify(templateId)}_wrapper`;
@@ -802,8 +1171,12 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     datasetPresentationTemplateId: templateId,
     derivedFromDatasetPresentationTemplate: templateId,
   };
+  if (GRID_TABLE_TEMPLATE_IDS.has(templateId)) enforceGridWrapperGap(root);
   const collection = findFirstByType(root, "collection");
   if (collection) {
+    if (GRID_TABLE_TEMPLATE_IDS.has(templateId)) enforceContainerGap(findParent(root, collection));
+    const filterConditions = buildCollectionFilterConditions(filterBindings);
+    const detailLink = detailLayoutId || "";
     collection.id = collectionId;
     collection.name = `${datasetRegion} Collection`;
     collection.title = `${datasetRegion} Collection`;
@@ -823,11 +1196,13 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
         sourceResourceType: "Data list",
         datasetRegion,
         datasetPresentationTemplateId: templateId,
-        field: "Title",
-        filter: [{ field: "Title", operator: "contains", value: "{{search}}" }],
-        fulltext: [{ field: "Title", value: "{{search}}" }],
-        link: collection.attrs?.data?.link === "{{DetailLayoutID}}" ? "{{DetailLayoutID}}" : (collection.attrs?.data?.link || "{{DetailLayoutID}}"),
-        opentype: collection.attrs?.data?.opentype || "slide",
+        field: primaryFieldName(listMeta),
+        filter: [{ field: primaryFieldName(listMeta), operator: "contains", value: "{{search}}" }, ...filterConditions],
+        fulltext: [{ field: primaryFieldName(listMeta), value: "{{search}}" }],
+        link: detailLink || collection.attrs?.data?.link || "",
+        opentype: detailLink ? "slide" : (collection.attrs?.data?.opentype || "slide"),
+        modalsize: detailLink ? 2 : (collection.attrs?.data?.modalsize ?? 2),
+        filterBindings: filterBindings.map((filter) => ({ name: filter.variable, id: `__filter_${filter.variable}`, field: filter.fieldName, sourceFilterId: filter.controlId })),
       },
       actions: ensureCollectionActions(collection.attrs?.actions),
       layout: {
@@ -836,19 +1211,30 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
       },
     };
   }
+  if (collection && detailLayoutId) {
+    collection.attrs.data.link = detailLayoutId;
+    collection.attrs.data.opentype = "slide";
+    collection.attrs.data.modalsize = 2;
+  }
+  const bindableFields = fieldsForDynamicControls(listMeta);
+  let dynamicIndex = 0;
   for (const control of findDescendants(root, (node) => String(node?.type || "").startsWith("dynamic-"))) {
+    const field = bindableFields[dynamicIndex % bindableFields.length] || bindableFields[0];
+    dynamicIndex += 1;
     control.attrs = {
       ...(control.attrs || {}),
       data: {
         ...(control.attrs?.data || {}),
         ListID: stringId(listId),
         list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
-        field: "Title",
-        fieldName: "Title",
+        field: field.fieldName,
+        fieldName: field.fieldName,
       },
-      field: control.attrs?.field || "Title",
-      fieldName: control.attrs?.fieldName || "Title",
+      field: field.fieldName,
+      fieldName: field.fieldName,
     };
+    control.name = field.displayName;
+    control.title = field.displayName;
   }
   for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
     search.attrs = {
@@ -857,7 +1243,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
       data: {
         ...(search.attrs?.data || {}),
         list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
-        field: "Title",
+        field: primaryFieldName(listMeta),
       },
     };
   }
@@ -954,6 +1340,21 @@ function removeUnavailableImageControls(root) {
     for (const child of node.children) visit(child);
   };
   visit(root);
+}
+
+function enforceGridWrapperGap(root) {
+  for (const identity of ["grid_table_col_wrapper", "grid_table_col_multiselect_wrapper", "Event Pipeline Grid-Table"]) {
+    const node = findFirstByIdentity(root, identity);
+    if (!node) continue;
+    enforceContainerGap(node);
+  }
+}
+
+function enforceContainerGap(node) {
+  if (!node) return;
+  node.attrs = node.attrs || {};
+  node.attrs.container = { ...(node.attrs.container || {}), gap: 0 };
+  node.attrs.style = { ...(node.attrs.style || {}), gap: [null, 0] };
 }
 
 function replaceTemplateResidue(root, { datasetRegion, listName }) {
@@ -1113,6 +1514,23 @@ function findBusinessSectionContentArea(root) {
 
 function findFirstByType(root, type) {
   return findDescendants(root, (node) => String(node?.type || "") === type)[0] || null;
+}
+
+function findParent(root, target) {
+  let parent = null;
+  const visit = (node) => {
+    if (parent || !node || typeof node !== "object" || !Array.isArray(node.children)) return;
+    for (const child of node.children) {
+      if (child === target) {
+        parent = node;
+        return;
+      }
+      visit(child);
+      if (parent) return;
+    }
+  };
+  visit(root);
+  return parent;
 }
 
 function findDescendants(root, predicate) {
@@ -1417,6 +1835,82 @@ function resolveRequiredPath(cwd, requested, fallbackName) {
 
 function sanitizeTitle(value) {
   return String(value || "").replace(/\s+/g, " ").trim().slice(0, 120) || "Generated Yeeflow Application";
+}
+
+function inferFieldKey(displayName, fieldType, index) {
+  if (/^title$/i.test(displayName)) return "Title";
+  const prefix = fieldPrefix(fieldType);
+  return `${prefix}${Math.max(1, index + 1)}`;
+}
+
+function fieldPrefix(fieldType) {
+  const normalized = normKey(fieldType);
+  if (/date|time/.test(normalized)) return "Datetime";
+  if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "Decimal";
+  if (/boolean|yes no|checkbox|bit/.test(normalized)) return "Bit";
+  return "Text";
+}
+
+function inferControlType(fieldType) {
+  const normalized = normKey(fieldType);
+  if (/user|people|person/.test(normalized)) return "identity-picker";
+  if (/date|time/.test(normalized)) return "datepicker";
+  if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "input_number";
+  if (/boolean|yes no|checkbox|bit/.test(normalized)) return "checkbox";
+  if (/choice|select|status|category/.test(normalized)) return "select";
+  if (/file|attachment/.test(normalized)) return "file-upload";
+  if (/image|photo|picture/.test(normalized)) return "icon-upload";
+  return "input";
+}
+
+function normalizeFieldType(fieldType) {
+  const normalized = normKey(fieldType);
+  if (/date|time/.test(normalized)) return "Datetime";
+  if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "Decimal";
+  if (/boolean|yes no|checkbox|bit/.test(normalized)) return "Bit";
+  return "Text";
+}
+
+function normalizeControlType(controlType) {
+  const normalized = normKey(controlType);
+  if (/user|identity/.test(normalized)) return "identity-picker";
+  if (/date|datetime/.test(normalized)) return "datepicker";
+  if (/number|decimal|currency|amount|percent/.test(normalized)) return "input_number";
+  if (/checkbox|bit|boolean/.test(normalized)) return "checkbox";
+  if (/select|choice|dropdown/.test(normalized)) return "select";
+  if (/file|attachment/.test(normalized)) return "file-upload";
+  if (/image|photo|picture|icon/.test(normalized)) return "icon-upload";
+  if (/note|textarea|multi line/.test(normalized)) return "textarea";
+  return "input";
+}
+
+function dynamicControlTypeForField(field) {
+  const normalized = normKey(field.FieldType || field.Type || field.fieldType);
+  if (/user/.test(normalized)) return "dynamic-user";
+  if (/image|photo|picture/.test(normalized)) return "dynamic-image";
+  if (/file|attachment/.test(normalized)) return "dynamic-file";
+  return "dynamic-field";
+}
+
+function fieldsForDynamicControls(listMeta) {
+  const rawFields = listMeta?.fields || [];
+  const fields = rawFields.map((field) => ({
+    fieldName: field.FieldName || field.fieldName || "Title",
+    displayName: field.DisplayName || field.displayName || field.FieldName || "Title",
+    fieldType: field.FieldType || field.fieldType || "Text",
+  }));
+  return fields.length ? fields : [{ fieldName: "Title", displayName: "Title", fieldType: "Text" }];
+}
+
+function primaryFieldName(listMeta) {
+  const fields = fieldsForDynamicControls(listMeta);
+  return (fields.find((field) => field.fieldName === "Title") || fields[0]).fieldName;
+}
+
+function resolveFieldSpec(listMeta, requestedName) {
+  const requested = normKey(requestedName);
+  if (!requested) return null;
+  return fieldsForDynamicControls(listMeta).find((field) => normKey(field.fieldName) === requested || normKey(field.displayName) === requested) || null;
 }
 
 function slugify(value) {

@@ -21,6 +21,22 @@ const APPROVED_IDS = new Set([
   "Event Pipeline Grid-Table",
 ]);
 
+const INTERNAL_TEMPLATE_STRUCTURE_IDS = new Set([
+  "collection_control_responsive_card_wrapper",
+  "grid_table_col_wrapper",
+  "grid_table_col_multiselect_wrapper",
+  "card_with_multiselect_toolbar_wrapper",
+  "card_col_title_wrapper",
+  "grid_table_col_title_wrapper",
+  "op_normal",
+  "op_multipleselected",
+  "card_col_item",
+  "card_col_item_multi_select",
+  "grid_col_item",
+  "grid_table_col_item_select",
+  "grid_table_col_item_operations",
+]);
+
 const GRID_TABLE_IDS = new Set([
   "collection_control_grid_table",
   "collection_control_grid_table_with_multiselect",
@@ -372,7 +388,7 @@ function validateAppPlan(appPlanPath, registryInfo, findings) {
   const approvedIds = registryInfo.approvedIds;
   const invented = [...dashboardDatasetLines.join("\n").matchAll(/\b(collection_control_[A-Za-z0-9_-]+|Event\s+Pipeline\s+Grid-Table)\b/g)]
     .map((match) => match[1])
-    .filter((id) => !approvedIds.has(id));
+    .filter((id) => !approvedIds.has(id) && !INTERNAL_TEMPLATE_STRUCTURE_IDS.has(id));
   for (const id of invented) {
     findings.push(error("DASH_DATASET_APP_PLAN_REFERENCE_UNKNOWN", "App Plan selected an unknown Dashboard dataset presentation reference.", { referenceId: id }));
   }
@@ -406,7 +422,7 @@ function collectDashboardDatasetPlanRecords(text, approvedIds) {
   if (!dashboard.trim()) return [];
 
   const records = [];
-  for (const table of markdownTables(dashboard)) {
+  for (const table of markdownTablesWithHeadings(dashboard)) {
     const headers = table.headers.map(normalizeTableCell);
     const selectedReferenceIndex = headers.findIndex((header) => header === "selected collection presentation reference");
     const genericControlIndex = headers.findIndex((header) => header === "control" || header === "selected control");
@@ -431,7 +447,7 @@ function collectDashboardDatasetPlanRecords(text, approvedIds) {
       const selected = extractApprovedTemplateIds(row.raw, approvedIds);
       if (selected.length !== 1) continue;
       records.push({
-        dashboardPage: row.cells[dashboardPageIndex] || "",
+        dashboardPage: row.cells[dashboardPageIndex] || table.dashboardPage || "",
         datasetRegion: row.cells[datasetRegionIndex] || "",
         sourceResource: row.cells[sourceIndex] || "",
         selectedTemplateId: selected[0],
@@ -568,6 +584,30 @@ function markdownTables(sectionText) {
     }
     index -= 1;
     tables.push({ headers, rows });
+  }
+  return tables;
+}
+
+function markdownTablesWithHeadings(sectionText) {
+  const tables = [];
+  const lines = String(sectionText || "").split(/\r?\n/);
+  let currentDashboardPage = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+(?:\d+(?:\.\d+)?\s+)?(.+?)\s*$/);
+    if (heading) currentDashboardPage = heading[1].trim();
+    const header = lines[index].trim();
+    const separator = String(lines[index + 1] || "").trim();
+    if (!isMarkdownTableRow(header) || !/^\|(?:\s*:?-{3,}:?\s*\|)+\s*$/.test(separator)) continue;
+    const headers = splitMarkdownRow(header);
+    const rows = [];
+    index += 2;
+    while (index < lines.length && isMarkdownTableRow(lines[index].trim())) {
+      const raw = lines[index];
+      rows.push({ raw, cells: splitMarkdownRow(raw) });
+      index += 1;
+    }
+    index -= 1;
+    tables.push({ headers, rows, dashboardPage: currentDashboardPage });
   }
   return tables;
 }
