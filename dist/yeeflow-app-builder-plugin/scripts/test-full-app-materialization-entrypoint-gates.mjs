@@ -13,6 +13,7 @@ const SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-standard-package-sche
 const COMPLETENESS_VALIDATOR = path.join(ROOT, "scripts/validate-generated-final-resource-completeness.mjs");
 const ID_PROVENANCE_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-id-provenance.mjs");
 const NAVIGATION_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-navigation-runtime-metadata.mjs");
+const LIVE_INSTALL_READINESS_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-live-install-readiness.mjs");
 const DATA_LIST_SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-data-list-system-schema.mjs");
 const BIT_FIELD_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-bit-field-controls.mjs");
 const EXPORT_SHAPE_VALIDATOR = path.join(ROOT, "scripts/validate-generated-yapk-export-shape.mjs");
@@ -252,6 +253,17 @@ try {
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dashboards, ["Asset Loan Operations Dashboard", "Overdue Monitor"]);
   assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardAnalyticsRecords.length, 2, "planned Data Analytics template selections are parsed");
   const decodedResource = JSON.parse(fs.readFileSync(resourceReport.outputs.decodedResource, "utf8"));
+  const resourceWrapper = JSON.parse(fs.readFileSync(resourceReport.outputs.package, "utf8"));
+  assert.equal(String(resourceWrapper.ListID), String(decodedResource.ListSet.ListID), "wrapper.ListID must equal decoded ListSet.ListID");
+  assert.equal(String(resourceWrapper.ListID), String(decodedResource.Pages[0].ListID), "dashboard pages must belong to decoded root ListSetID");
+  const dashboardUuids = new Set();
+  for (const page of decodedResource.Pages) {
+    const parsedDashboard = JSON.parse(page.LayoutInResources[0].Resource);
+    for (const value of collectObjectIdUuids(parsedDashboard)) {
+      assert.equal(dashboardUuids.has(value), false, `dashboard UUID ${value} must be unique across generated dashboard pages`);
+      dashboardUuids.add(value);
+    }
+  }
   const seedDataArtifact = JSON.parse(fs.readFileSync(resourceReport.outputs.seedData, "utf8"));
   assert.equal(seedDataArtifact.artifactType, "post-install-seed-data", "seed rows are separated from package content");
   assert.equal(seedDataArtifact.lists.length, 4, "seed companion artifact covers planned data lists");
@@ -319,6 +331,11 @@ try {
     "--package", resourceReport.outputs.package,
     "--id-provenance", resourceReport.outputs.idProvenance,
   ]);
+  expectPass("nontrivial generated package passes live install readiness validation", [
+    LIVE_INSTALL_READINESS_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+    "--id-provenance", resourceReport.outputs.idProvenance,
+  ]);
   expectPass("nontrivial generated package passes generated data-list schema validation", [
     DATA_LIST_SCHEMA_VALIDATOR,
     resourceReport.outputs.package,
@@ -382,7 +399,7 @@ try {
     nextRequiredStages: ["setsign", "verifysign", "package API install/import or upgrade", "Version Management final success where applicable", "browser/runtime proof"],
   });
   cases.push("nontrivial App Plan materializes data lists, approval forms, reports, dashboards, custom forms, and navigation without placeholder output");
-  cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, data-list schema, YAPK package, export-shape, Dashboard v1.1, Dashboard Collection template, Golden Reference, aggregate Dashboard hard gates, Summary contract, and first-generation preflight");
+  cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, live install readiness, data-list schema, YAPK package, export-shape, Dashboard v1.1, Dashboard Collection template, Golden Reference, aggregate Dashboard hard gates, Summary contract, and first-generation preflight");
   cases.push("preflight pass emits signing-readiness handoff fields without changing materializer signing boundary");
 
   console.log(JSON.stringify({ status: "pass", cases }, null, 2));
@@ -407,4 +424,20 @@ function expectCode(name, args, code) {
 
 function run(args) {
   return spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+}
+
+function collectObjectIdUuids(root) {
+  const out = [];
+  const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const visit = (node) => {
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    if (typeof node.id === "string" && uuidRe.test(node.id)) out.push(node.id);
+    for (const child of Object.values(node)) visit(child);
+  };
+  visit(root);
+  return out;
 }

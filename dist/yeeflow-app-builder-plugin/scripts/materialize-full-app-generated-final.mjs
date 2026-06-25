@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
@@ -41,6 +42,7 @@ const GRID_TABLE_TEMPLATE_IDS = new Set([
 ]);
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
+const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -95,7 +97,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     PackageId: stringId(ids["wrapper.PackageId"]),
     TenantID: options.tenantId ? String(options.tenantId) : "0",
     AppID: 41,
-    ListID: stringId(ids["wrapper.ListID"]),
+    ListID: stringId(ids["decoded.ListSet.ListID"]),
     Title: appTitle,
     Description: `Generated-final package materialized from ${path.basename(specPath)} and ${path.basename(planPath)}.`,
     IconUrl: appIconUrl,
@@ -547,7 +549,6 @@ function buildIdPaths(planDemand) {
   if (!planDemand.hasMaterialResources) {
     return [
       "wrapper.PackageId",
-      "wrapper.ListID",
       "decoded.ListSet.ListID",
       "decoded.Pages[0].LayoutID",
       "decoded.Pages[0].LayoutInResources[0].ID",
@@ -556,7 +557,6 @@ function buildIdPaths(planDemand) {
   }
   const paths = [
     "wrapper.PackageId",
-    "wrapper.ListID",
     "decoded.ListSet.ListID",
   ];
   planDemand.resources.dataLists.forEach((name, index) => {
@@ -1307,7 +1307,53 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
   };
   normalizeGeneratedDashboardControls(resource, name);
   removeEmptyBusinessSections(resource);
+  instantiateDashboardControlUuids(resource, slugify(name));
   return resource;
+}
+
+function instantiateDashboardControlUuids(resource, pageSeed) {
+  let index = 0;
+  const referenceReplacements = new Map();
+  const visit = (node) => {
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    if (typeof node.id === "string" && UUID_CONTROL_ID_RE.test(node.id)) {
+      const oldId = node.id;
+      index += 1;
+      node.id = deterministicUuid(`${pageSeed}:control:${index}:${node.id}`);
+      if (!referenceReplacements.has(oldId)) referenceReplacements.set(oldId, node.id);
+    }
+    for (const child of Object.values(node)) visit(child);
+  };
+  visit(resource);
+  if (!referenceReplacements.size) return;
+  const replaceReferences = (node, key = "") => {
+    if (Array.isArray(node)) {
+      for (let itemIndex = 0; itemIndex < node.length; itemIndex += 1) node[itemIndex] = replaceReferences(node[itemIndex]);
+      return node;
+    }
+    if (!node || typeof node !== "object") {
+      if (typeof node !== "string" || key === "id") return node;
+      let out = node;
+      for (const [from, to] of referenceReplacements) out = out.split(from).join(to);
+      return out;
+    }
+    for (const [childKey, child] of Object.entries(node)) {
+      if (childKey === "id") continue;
+      node[childKey] = replaceReferences(child, childKey);
+    }
+    return node;
+  };
+  replaceReferences(resource);
+}
+
+function deterministicUuid(seed) {
+  const hex = crypto.createHash("sha256").update(seed).digest("hex");
+  const variant = ((Number.parseInt(hex.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, "0");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-${variant}${hex.slice(18, 20)}-${hex.slice(20, 32)}`;
 }
 
 function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar }) {
