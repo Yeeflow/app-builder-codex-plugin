@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.43
+
+- Release Data List Form Layouts v1.1 golden references from PR #223.
+- Register export-shaped New/Edit and View Item custom Data List form templates parsed from the Data list page layouts export.
+- Require App Plans to select `data_list_form_layout_new_edit_v1_1` for New/Edit forms and `data_list_form_layout_view_item_v1_1` for View forms.
+- Add generated-final and first-generation preflight validation for template provenance, allowed business slots, New/Edit related-data exclusions, View Item title/KPI regions, and full-app materializer clone-and-map output.
+- Preserve proof boundaries: local fixture regression may prove the custom form layout contract, but signing/install/runtime proof still require OAuth, API-issued IDs, and all generated-final gates to pass.
+
 ## 0.8.42
 
 - Release Dashboard Summary hidden-host and field metadata gates from PR #221.

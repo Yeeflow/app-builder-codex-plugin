@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.42`
+`0.8.43`
+
+Version `0.8.43` releases Data List Form Layouts v1.1 golden references from PR #223. Generated custom Data List New/Edit forms must clone `data_list_form_layout_new_edit_v1_1`, View Item forms must clone `data_list_form_layout_view_item_v1_1`, App Plans must select the correct Data List Form Layout template, and generated-final preflight now blocks custom forms that mutate locked template regions, omit template provenance, or place business content outside approved slots.
 
 Version `0.8.42` releases Dashboard Summary hidden-host and field metadata gates from PR #221. Generated Dashboard KPI Summary controls must live inside dedicated hidden host containers, Summary count controls must include designer-shaped `ListDataID` field metadata, and first-generation YAPK preflight now blocks missing Summary hidden hosts or unresolved Summary field metadata before signing readiness can be considered.
 
