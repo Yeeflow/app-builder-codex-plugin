@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.50
+
+- Release signing-readiness preflight handoff reporting from PR #237.
+- Keep standalone materializer output explicitly signing-ineligible before generated-final preflight.
+- Add `materializerSigningEligible`, `preflightEligibleForSigning`, `signingReadinessSource`, and `signingReadiness` fields to separate materializer artifact generation from pre-sign local readiness.
+- Make `yapk-first-generation-preflight` report `preflightEligibleForSigning: true` only when all local generated-final gates pass.
+
 ## 0.8.49
 
 - Release Dashboard select-filter option-source placeholder hard gates from PR #235.
