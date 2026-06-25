@@ -20,9 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.39`
+`0.8.40`
 
-Version `0.8.39` releases full-app Dashboard filter, dataset-region, and resource-depth materialization from PR #215. The standalone materializer now emits App Plan-declared Dashboard select filters, maps dataset regions reliably, preserves approved internal Collection wrapper references without misclassification, completes grid-table gap/detail-layout contracts, expands generated data lists with planned business fields, and attaches custom forms to the correct source lists before generated-final signing eligibility can be considered.
+Version `0.8.40` releases Dashboard KPI temp variable binding hard gates from PR #217. Generated Dashboard KPI values are rebound to page-local Summary/temp variables, source-template Event Portfolio temp variable residue is blocked, undeclared KPI temp variable references fail generated-final validation, and each visible KPI value gets matching Summary, `ReportIds`, `exts`, and `tempVars` metadata before generated-final signing eligibility can be considered.
 
 Version `0.8.38` releases full-app Dashboard v1.1 Collection template materialization from PR #213. The standalone materializer now clones the registered Dashboard Page Layouts v1.1 shell, parses App Plan Dashboard dataset rows, materializes the exact selected Collection template inside `content_card_wrapper > section_content_area`, and preserves Collection provenance, source binding, page-level dependencies, and Summary/KPI temp-variable bindings before generated-final signing eligibility can be considered.
 

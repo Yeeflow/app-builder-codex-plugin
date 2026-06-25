@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.39`
+- Version: `0.8.40`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.39` releases full-app Dashboard filter, dataset-region, and resource-depth materialization from PR #215: the standalone materializer now emits App Plan-declared Dashboard select filters, maps dataset regions reliably, preserves approved internal Collection wrapper references without misclassification, completes grid-table gap/detail-layout contracts, expands generated data lists with planned business fields, and attaches custom forms to the correct source lists.
+Current release `0.8.40` releases Dashboard KPI temp variable binding hard gates from PR #217: generated Dashboard KPI values are rebound to page-local Summary/temp variables, source-template Event Portfolio temp variable residue is blocked, undeclared KPI temp variable references fail generated-final validation, and each visible KPI value gets matching Summary, `ReportIds`, `exts`, and `tempVars` metadata before signing eligibility can be considered.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.39
+Version: 0.8.40
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.39
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.40
 ```
 
 ## What Is Included

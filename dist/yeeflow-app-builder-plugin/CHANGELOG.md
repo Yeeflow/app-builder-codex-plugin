@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.40
+
+- Release Dashboard KPI temp variable binding hard gates from PR #217.
+- Rebind every generated Dashboard KPI value to page-local Summary/temp variables instead of retaining Event Portfolio source-template variables.
+- Generate hidden Summary controls, `Resource.ReportIds`, `Resource.exts`, and page `tempVars` for each visible KPI value produced by the standalone full-app materializer.
+- Fail generated-final Dashboard validation when visible KPI text references source-template variables such as `__temp_event_portfolio_*` or any undeclared page-local temp variable.
+- Preserve generated-final signing boundaries: local fixture regression may prove preflight, but signing/install/runtime proof still require API-issued IDs and all generated-final gates to pass.
+
 ## 0.8.39
 
 - Release full-app Dashboard filter, dataset-region, and resource-depth materialization from PR #215.
