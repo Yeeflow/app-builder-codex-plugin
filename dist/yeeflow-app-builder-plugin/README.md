@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.51`
+- Version: `0.8.52`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.51` releases live E2E install readiness gates from PR #239: generated-final preflight now blocks root ListID mismatches, Dashboard page root ownership drift, cross-page Dashboard template control UUID reuse, missing nested dashboard/approval DefResource ID provenance, approval DefResource key drift, and install proof overclaims before signing.
+Current release `0.8.52` releases Approval Form Layouts v1.1 golden references from PR #241: generated Approval form submission and task pages must clone approved page-layout templates, preserve locked page structure and action/history regions, select templates in the App Plan, and pass generated-final preflight before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.51
+Version: 0.8.52
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.51
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.52
 ```
 
 ## What Is Included
