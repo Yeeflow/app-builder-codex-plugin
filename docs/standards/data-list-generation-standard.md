@@ -29,6 +29,29 @@ Every generated data list must include:
 9. Custom forms or default form routing that can load correctly.
 10. Export-shaped default view metadata that materializes columns in the runtime UI.
 
+## Custom Data List Form Layout Templates
+
+Generated custom Data List forms must use Data List Form Layouts v1.1 when they are planned as New Item, Edit Item, or View Item forms.
+
+Approved page-level templates:
+
+- `data_list_form_layout_new_edit_v1_1` for New Item and Edit Item forms
+- `data_list_form_layout_view_item_v1_1` for View Item forms
+
+The source registry is `docs/reference/data-list-form-layout-templates.json`.
+
+Generators must clone the selected export-shaped template first and then place business-specific fields, actions, analytics, or related data only inside approved business-content slots. They must not generate title-only, flat, or ad hoc custom Data List form layouts.
+
+New/Edit forms must focus on the current list item and must not include related Collection/Data Analytics/KPI regions. View Item forms may show current-record information plus related business data, approved Collection templates, Data Analytics templates, and KPI regions.
+
+Generated-final packages must pass:
+
+```bash
+node scripts/validate-data-list-form-layout-template.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>
+```
+
+Signing readiness, install/import, upgrade, and runtime proof must remain blocked when custom Data List form layouts fail this gate.
+
 ## Default Data View Rules
 
 Every generated data list must configure the default data view with visible display fields.

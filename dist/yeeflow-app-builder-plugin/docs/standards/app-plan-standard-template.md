@@ -270,6 +270,23 @@ Return to the Data lists and Document libraries from Section 4 and plan their cu
 | --- | --- | --- | --- | --- | --- | --- |
 | <Form> | New/Edit/View/Detail/Custom/Print | <Purpose> | <Users/pages> | <Layout> | Yes/No | <Notes> |
 
+#### Data List Form Layout Template Selection
+
+Required for every custom Data List form that will be generated as a New Item, Edit Item, or View Item form.
+
+| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <List> | <Form> | New/Edit/View | <approved template id> | <Sections> | <None or related datasets> | <Reason> | <Proof> |
+
+Rules:
+
+- The Selected Data List Form Layout Template must be one of `data_list_form_layout_new_edit_v1_1` or `data_list_form_layout_view_item_v1_1` from `docs/reference/data-list-form-layout-templates.json`.
+- New Item and Edit Item custom forms must select `data_list_form_layout_new_edit_v1_1`. If New and Edit use separate forms, both must still select this template.
+- View Item custom forms must select `data_list_form_layout_view_item_v1_1`.
+- New/Edit forms focus on the current list item and must not plan related Collection/Data Analytics/KPI regions.
+- View Item forms may plan current-record display plus related business data, approved Collection templates, approved Data Analytics templates, and KPI regions inside the v1.1 allowed slots.
+- App Plan selection is a business/layout decision only. It must not include generated `ListID`, `LayoutID`, action type codes, JSON property paths, placeholder IDs, copied control JSON, or runtime payload fields.
+
 #### Form Fields
 
 | Form Name | Field Order | Business Label | Field Name | Field ID | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
@@ -293,6 +310,7 @@ Required whenever a Sub List control appears on a New/Edit/View/Detail/Custom/Pr
 Rules:
 
 - Every list that users create or edit records in should have a runtime-safe Add/New form plan.
+- Every generated New/Edit/View custom Data List form must select the correct Data List Form Layouts v1.1 template before generation.
 - Query data and Set data list actions must identify target application/list/fields.
 - Data List custom form root padding must follow the active plugin standard.
 - Distinguish business labels from exact Yeeflow implementation types. Slash-combined or vague implementation wording is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.
