@@ -36,11 +36,11 @@ Root wrapper:
 
 ## Placement
 
-When a generated custom Data List form uses Data List Form Layouts v1.1, every `form_grid_fields_wrapper` must be placed inside a `section_content_area` container.
+When a generated custom Data List form uses Data List Form Layouts v1.1, every `form_grid_fields_wrapper` must be placed inside a `section_content_area` container under one of the approved v1.1 content card wrappers: `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 
-If a form has many fields or needs business grouping, create multiple `content_card_wrapper` sections from the page-level layout template. Each group may contain one `form_grid_fields_wrapper` inside that section's `section_content_area`.
+If a form has many fields or needs business grouping, create multiple approved content-card sections from the page-level layout template. Each group may contain one `form_grid_fields_wrapper` inside that section's `section_content_area`. Use `content_card_60_wrapper` or `content_card_40_wrapper` when the field group belongs in a 60/40 split section; do not invent a new card wrapper.
 
-Do not place the field grid directly under root `Content`, `content_card_wrapper`, `section_title_area`, `Operations`, or KPI regions.
+Do not place the field grid directly under root `Content`, any content card wrapper, `section_title_area`, `Operations`, or KPI regions.
 
 ## Responsive Grid Columns
 

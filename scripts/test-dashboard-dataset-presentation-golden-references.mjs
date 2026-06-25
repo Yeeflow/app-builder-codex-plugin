@@ -160,6 +160,15 @@ Dashboard validator commands used during validation:
   expectCode("App Plan selects exactly one Collection presentation reference", ["--app-plan", multiplePlan], "DASH_DATASET_APP_PLAN_REFERENCE_NOT_EXACTLY_ONE");
 
   expectPass("synthetic app using all approved Dashboard Collection references passes", ["--package", writePackage("valid-all", validPages())]);
+
+  const sixtyCardPages = validPages();
+  renameFirstContentCard(sixtyCardPages[1], "content_card_60_wrapper");
+  expectPass("Collection template inside 60 percent v1.1 content card section_content_area passes", ["--package", writePackage("valid-60-card-slot", sixtyCardPages)]);
+
+  const fortyCardPages = validPages();
+  renameFirstContentCard(fortyCardPages[1], "content_card_40_wrapper");
+  expectPass("Collection template inside 40 percent v1.1 content card section_content_area passes", ["--package", writePackage("valid-40-card-slot", fortyCardPages)]);
+
   const conformancePlan = write("conformance-plan.md", `# Yeeflow App Plan
 
 ## Dashboard Pages Plan
@@ -195,6 +204,10 @@ Dashboard validator commands used during validation:
   const outsideSlotPages = validPages();
   outsideSlotPages[1].children[0].children[0].children = [gridTableSection("active_loans", "collection_control_grid_table")];
   expectCode("Collection template outside v1.1 section content slot fails", ["--package", writePackage("outside-slot", outsideSlotPages)], "DASH_DATASET_COLLECTION_OUTSIDE_V11_SLOT");
+
+  const invalidCardSlotPages = validPages();
+  renameFirstContentCard(invalidCardSlotPages[1], "custom_unapproved_card_wrapper");
+  expectCode("Collection template inside unapproved card wrapper fails", ["--package", writePackage("unapproved-card-slot", invalidCardSlotPages)], "DASH_DATASET_COLLECTION_OUTSIDE_V11_SLOT");
 
   const noProvenancePages = validPages();
   findControl(noProvenancePages[0], "card_col_body").attrs.datasetPresentationTemplateId = "";
@@ -1007,6 +1020,13 @@ function findControl(root, id) {
     }
   }
   return null;
+}
+
+function renameFirstContentCard(resource, identity) {
+  const card = findControl(resource, "content_card_wrapper");
+  card.id = identity;
+  card.name = identity;
+  card.nv_label = identity;
 }
 
 function findControlsByType(root, type) {

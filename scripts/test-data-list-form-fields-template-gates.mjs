@@ -23,10 +23,22 @@ try {
   const validForm = dataListFormResource();
   expectPass("Data List form with field-grid inside section_content_area passes", ["--resource", writeJson("valid-form.json", validForm), "--surface", "data-list-form"]);
 
+  const validSixty = dataListFormResource();
+  renameContentCard(validSixty, "content_card_60_wrapper");
+  expectPass("Data List form field-grid inside 60 percent content card section_content_area passes", ["--resource", writeJson("valid-60-card-form.json", validSixty), "--surface", "data-list-form"]);
+
+  const validForty = dataListFormResource();
+  renameContentCard(validForty, "content_card_40_wrapper");
+  expectPass("Data List form field-grid inside 40 percent content card section_content_area passes", ["--resource", writeJson("valid-40-card-form.json", validForty), "--surface", "data-list-form"]);
+
   const outsideSlot = dataListFormResource();
   content(outsideSlot).children.push(fieldGrid());
   firstSectionSlot(outsideSlot).children = [];
   expectCode("field-grid outside section_content_area fails", ["--resource", writeJson("outside-slot.json", outsideSlot), "--surface", "data-list-form"], "DATA_LIST_FORM_FIELDS_PLACEMENT_INVALID");
+
+  const invalidCardSlot = dataListFormResource();
+  renameContentCard(invalidCardSlot, "custom_unapproved_card_wrapper");
+  expectCode("field-grid inside unapproved card section_content_area fails", ["--resource", writeJson("invalid-card-slot.json", invalidCardSlot), "--surface", "data-list-form"], "DATA_LIST_FORM_FIELDS_PLACEMENT_INVALID");
 
   const noWrapper = dataListFormResource();
   firstSectionSlot(noWrapper).children = [fieldControl({ type: "input", label: "Asset Name" })];
@@ -186,6 +198,13 @@ function firstSectionSlot(resource) {
 
 function firstWrapper(resource) {
   return find(resource, "form_grid_fields_wrapper");
+}
+
+function renameContentCard(resource, identity) {
+  const card = find(resource, "content_card_wrapper");
+  card.id = identity;
+  card.name = identity;
+  card.nv_label = identity;
 }
 
 function find(node, identity) {

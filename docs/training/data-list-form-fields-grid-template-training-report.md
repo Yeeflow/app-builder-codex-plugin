@@ -6,6 +6,8 @@ This training adds `data_list_form_fields_grid_v1_1` as the approved field-layou
 
 This follow-up also adds `data_list_form_control_sublist_v1_1` as the required control-level golden reference for Sub list fields inside `form_grid_fields_wrapper`.
 
+This follow-up clarifies the shared Layouts v1.1 placement rule: `data_list_form_fields_grid_v1_1` and approved Collection golden reference templates may be hosted in the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` on Dashboard Page Layouts v1.1 and Data List Form Layouts v1.1 pages.
+
 The source field-grid template was provided as a user attachment.
 
 The source Sub list control template was provided as a user attachment.
@@ -23,7 +25,7 @@ The root wrapper is:
 - `form_grid_fields_wrapper`
 - control type: `flex_grid`
 
-Generated field controls must be placed inside this wrapper. When used with Data List Form Layouts v1.1, the wrapper must live inside `section_content_area`.
+Generated field controls must be placed inside this wrapper. When used with Data List Form Layouts v1.1, the wrapper must live inside `section_content_area` under one of the approved content card wrappers: `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 
 The template is designed to be used inside:
 
@@ -41,7 +43,7 @@ The template is designed to be used inside:
 - Sub list controls must clone `data_list_form_control_sublist_v1_1`; they may map business field metadata and nested field definitions/control types, but must preserve locked table, header, row, card, border, padding, typography, and zero-margin settings.
 - A Grid cell may contain one direct control; use a Container or nested Grid when multiple controls must share a cell.
 - Dynamic display rules may be applied to grouped Containers or nested Grids when several fields share the same visibility condition.
-- Large field groups may be split into multiple `content_card_wrapper` sections, each with one `form_grid_fields_wrapper` in `section_content_area`.
+- Large field groups may be split into multiple approved content-card sections, each with one `form_grid_fields_wrapper` in `section_content_area`. The approved hosts are `content_card_wrapper`, `content_card_60_wrapper`, and `content_card_40_wrapper`.
 
 ## App Plan Impact
 

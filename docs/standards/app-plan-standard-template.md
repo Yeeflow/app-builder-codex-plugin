@@ -284,7 +284,7 @@ Rules:
 - New Item and Edit Item custom forms must select `data_list_form_layout_new_edit_v1_1`. If New and Edit use separate forms, both must still select this template.
 - View Item custom forms must select `data_list_form_layout_view_item_v1_1`.
 - New/Edit forms focus on the current list item and must not plan related Collection/Data Analytics/KPI regions.
-- View Item forms may plan current-record display plus related business data, approved Collection templates, approved Data Analytics templates, and KPI regions inside the v1.1 allowed slots.
+- View Item forms may plan current-record display plus related business data, approved Collection templates, approved Data Analytics templates, and KPI regions inside the v1.1 allowed slots. Field-grid and Collection templates may use the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` depending on the required section width.
 - App Plan selection is a business/layout decision only. It must not include generated `ListID`, `LayoutID`, action type codes, JSON property paths, placeholder IDs, copied control JSON, or runtime payload fields.
 
 #### Form Fields
@@ -300,7 +300,7 @@ Required for every generated custom Data List New/Edit/View form that displays c
 Rules:
 
 - Select `data_list_form_fields_grid_v1_1` from `docs/reference/data-list-form-field-layout-templates.json` for every generated field group on a New/Edit/View custom Data List form.
-- Current-record field controls must be placed inside the selected `form_grid_fields_wrapper`, not directly inside `section_content_area`.
+- Current-record field controls must be placed inside the selected `form_grid_fields_wrapper`, not directly inside `section_content_area`; the field grid itself must be hosted in the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 - Multiple line, Rich text, and Sub list controls must be listed as full-row field controls and generated with column span equal to the parent Grid's column count for each responsive breakpoint.
 - PC/laptop columns should be 2 or 3, tablet columns must not exceed PC/laptop columns, and mobile columns should be 1.
 - Sub list field controls must use the control-level `data_list_form_control_sublist_v1_1` template inside `form_grid_fields_wrapper`; the App Plan names the Sub list business field and nested fields, while generation maps concrete `attrs.list-variables` and `attrs.list-fields`.

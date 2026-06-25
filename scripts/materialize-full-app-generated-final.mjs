@@ -612,7 +612,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     setTemplateText(resource, "page_title_text", formName);
     setTemplateText(resource, "page_title_description", `View ${listName} record details and related operational context.`);
   }
-  const slot = findFirstByIdentity(resource, "section_content_area");
+  const slot = findBusinessSectionContentArea(resource);
   if (slot) {
     slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
@@ -1687,7 +1687,8 @@ function findFirstByIdentity(root, expected) {
 }
 
 function findBusinessSectionContentArea(root) {
-  const contentCardWrappers = findDescendants(root, (node) => hasIdentity(node, "content_card_wrapper"));
+  const approvedWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+  const contentCardWrappers = findDescendants(root, (node) => [...approvedWrappers].some((identity) => hasIdentity(node, identity)));
   for (const wrapper of contentCardWrappers) {
     const slot = findFirstByIdentity(wrapper, "section_content_area");
     if (slot) return slot;

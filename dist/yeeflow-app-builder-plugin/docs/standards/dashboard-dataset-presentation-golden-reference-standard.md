@@ -135,7 +135,7 @@ Recommended editable behavior:
 
 ## Generation Rules
 
-- Dashboard Page Layouts v1.1 is the page shell. All approved Dashboard Collection presentation references are component-level dataset regions that must be placed inside approved v1.1 business-content slots, normally `section_content_area`.
+- Dashboard Page Layouts v1.1 is the page shell. All approved Dashboard Collection presentation references are component-level dataset regions that must be placed inside the `section_content_area` of an approved v1.1 content card wrapper: `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 - Approved Collection and KPI modules are source-of-truth artifacts, not visual suggestions. Generation must materialize them by cloning the approved export-shaped template subtree, then replacing only the allowed business slots. Do not use local helper functions to rebuild a "similar" grid, card, toolbar, KPI row, checkbox cell, or filter from scratch.
 - Do not place Collection presentation templates directly under page root, `Main`, root `Content`, `page_title_section`, header/title areas, structural layout wrappers, or a copied source-app page shell.
 - Do not copy the source application page shell for any Collection reference. Event Portfolio, Projects Center, Project Tasks, and card-grid source exports are proof sources only; they are not generated page shells for another app.

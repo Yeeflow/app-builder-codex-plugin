@@ -11,6 +11,11 @@ const TEMPLATE_ID = "data_list_form_fields_grid_v1_1";
 const SUBLIST_TEMPLATE_ID = "data_list_form_control_sublist_v1_1";
 const ROOT_WRAPPER_ID = "form_grid_fields_wrapper";
 const REQUIRED_PLACEMENT_SLOT = "section_content_area";
+const APPROVED_CONTENT_CARD_WRAPPERS = new Set([
+  "content_card_wrapper",
+  "content_card_60_wrapper",
+  "content_card_40_wrapper",
+]);
 const REQUIRED_FULL_ROW_TYPES = new Set(["textarea", "richtext", "list"]);
 const GENERIC_FIELD_NAV_LABELS = new Set([
   "",
@@ -230,8 +235,12 @@ function validateResource(rawResource, context) {
   }
   if (context.requirePlacement) {
     for (const wrapper of wrappers) {
-      if (!hasAncestorIdentity(resource, wrapper, REQUIRED_PLACEMENT_SLOT)) {
-        context.findings.push(error("DATA_LIST_FORM_FIELDS_PLACEMENT_INVALID", "When used with Data List Form Layouts v1.1, form_grid_fields_wrapper must be placed inside section_content_area.", { source: context.source }));
+      if (!hasApprovedSectionContentPlacement(resource, wrapper)) {
+        context.findings.push(error("DATA_LIST_FORM_FIELDS_PLACEMENT_INVALID", "When used with Data List Form Layouts v1.1, form_grid_fields_wrapper must be placed inside section_content_area under content_card_wrapper, content_card_60_wrapper, or content_card_40_wrapper.", {
+          source: context.source,
+          approvedContentCardWrappers: [...APPROVED_CONTENT_CARD_WRAPPERS],
+          requiredSlot: REQUIRED_PLACEMENT_SLOT,
+        }));
       }
     }
   }
@@ -455,6 +464,16 @@ function findEntry(root, node) {
 function hasAncestorIdentity(root, node, identity) {
   const entry = findEntry(root, node);
   return Boolean(entry?.ancestors?.some((ancestor) => hasIdentity(ancestor, identity)));
+}
+
+function hasApprovedSectionContentPlacement(root, node) {
+  const entry = findEntry(root, node);
+  if (!entry) return false;
+  const slotIndex = entry.ancestors.findIndex((ancestor) => hasIdentity(ancestor, REQUIRED_PLACEMENT_SLOT));
+  if (slotIndex === -1) return false;
+  return entry.ancestors
+    .slice(0, slotIndex)
+    .some((ancestor) => identityCandidates(ancestor).some((identity) => APPROVED_CONTENT_CARD_WRAPPERS.has(identity)));
 }
 
 function isInsideAny(node, ancestors) {

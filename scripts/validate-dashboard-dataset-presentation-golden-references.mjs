@@ -53,6 +53,12 @@ const COLLECTION_ALLOWED_SLOT_IDS = new Set([
   "section_content_area",
 ]);
 
+const COLLECTION_ALLOWED_CARD_WRAPPER_IDS = new Set([
+  "content_card_wrapper",
+  "content_card_60_wrapper",
+  "content_card_40_wrapper",
+]);
+
 const GRID_MULTISELECT_FULL_WIDTH_IDS = [
   "grid_table_col_multiselect_wrapper",
   "grid_table_col_caption",
@@ -745,13 +751,26 @@ function collectDashboardCollectionRecords(decoded, approvedIds) {
 }
 
 function validateCollectionSlot(entry, page, findings) {
-  const ancestorIdentities = new Set(entry.ancestors.flatMap(identityCandidates).map(normalizeIdentity));
-  if ([...COLLECTION_ALLOWED_SLOT_IDS].some((id) => ancestorIdentities.has(normalizeIdentity(id)))) return;
-  findings.push(error("DASH_DATASET_COLLECTION_OUTSIDE_V11_SLOT", "Dashboard Collection presentation templates are component-level references and must be placed inside an approved Dashboard Page Layouts v1.1 business-content slot such as section_content_area, not directly under page root, Main, Content, page title/header, or a copied source-app shell.", {
+  if (hasApprovedCollectionSlot(entry)) return;
+  findings.push(error("DASH_DATASET_COLLECTION_OUTSIDE_V11_SLOT", "Dashboard Collection presentation templates are component-level references and must be placed inside section_content_area under content_card_wrapper, content_card_60_wrapper, or content_card_40_wrapper, not directly under page root, Main, Content, page title/header, or a copied source-app shell.", {
     page: page.title,
     path: entry.pointer,
     approvedSlotIds: [...COLLECTION_ALLOWED_SLOT_IDS],
+    approvedContentCardWrappers: [...COLLECTION_ALLOWED_CARD_WRAPPER_IDS],
   }));
+}
+
+function hasApprovedCollectionSlot(entry) {
+  const slotIndex = entry.ancestors.findIndex((ancestor) => hasNormalizedIdentity(ancestor, "section_content_area"));
+  if (slotIndex === -1) return false;
+  return entry.ancestors
+    .slice(0, slotIndex)
+    .some((ancestor) => [...COLLECTION_ALLOWED_CARD_WRAPPER_IDS].some((id) => hasNormalizedIdentity(ancestor, id)));
+}
+
+function hasNormalizedIdentity(node, identity) {
+  const normalized = normalizeIdentity(identity);
+  return identityCandidates(node).map(normalizeIdentity).includes(normalized);
 }
 
 function resolveTemplateId(entry, page) {
