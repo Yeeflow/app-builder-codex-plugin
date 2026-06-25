@@ -78,6 +78,22 @@ export function collectFieldMaps(pkg) {
         if (value) fields.set(value, field);
       }
     }
+    if (!fields.has("ListDataID")) {
+      const listDataIdField = {
+        FieldID: "ListDataID",
+        ListID: listId,
+        FieldName: "ListDataID",
+        InternalName: "ListDataID",
+        DisplayName: "Record ID",
+        FieldType: "Text",
+        Type: "text",
+        Status: 0,
+        IsSystem: true,
+        IsIndex: true,
+      };
+      fields.set("ListDataID", listDataIdField);
+      fields.set("Record ID", listDataIdField);
+    }
     byListId.set(listId, { list: child.list, fields });
   }
   return byListId;

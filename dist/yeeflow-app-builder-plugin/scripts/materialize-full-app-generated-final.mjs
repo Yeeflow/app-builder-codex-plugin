@@ -982,9 +982,9 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, list
     listId,
     label: contract.label,
   }));
-  const hiddenHost = contentArea || findFirstByIdentity(resource, "Content") || resource;
-  hiddenHost.children = Array.isArray(hiddenHost.children) ? hiddenHost.children : [];
-  hiddenHost.children.push(...summaries);
+  const summaryHostParent = contentArea || findFirstByIdentity(resource, "Content") || resource;
+  summaryHostParent.children = Array.isArray(summaryHostParent.children) ? summaryHostParent.children : [];
+  summaryHostParent.children.push(buildHiddenSummaryHost({ dashboardName: name, summaries }));
   materializeDashboardFilters(resource, {
     filters: normalizedFilters,
     listName: sourceResource,
@@ -1169,8 +1169,45 @@ function summarySaveVariable(tempVar) {
   };
 }
 
+function buildSummaryFieldMetadata() {
+  return {
+    FieldID: "ListDataID",
+    FieldName: "ListDataID",
+    InternalName: "ListDataID",
+    DisplayName: "Record ID",
+    FieldType: "Text",
+    Type: "text",
+    IsSystem: true,
+    IsIndex: true,
+    Status: 0,
+  };
+}
+
+function buildHiddenSummaryHost({ dashboardName, summaries }) {
+  return {
+    type: "container",
+    id: `${slugify(dashboardName)}_kpi_data_host`,
+    name: "KPI data host",
+    title: "KPI data host",
+    attrs: {
+      nv_label: "KPI data host",
+      common: { hide: [null, true, true, true] },
+      style: {
+        direction: [null, "row"],
+        widthtype: [null, "1"],
+        gap: [null, 0],
+        align_items: [null, "center"],
+        justify_content: [null, "flex-start"],
+      },
+      display: { rule: "1 == 0" },
+    },
+    children: summaries,
+  };
+}
+
 function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Active Records" }) {
   const saveVariable = summarySaveVariable(tempVar);
+  const fieldMetadata = buildSummaryFieldMetadata();
   return {
     type: "summary",
     id: summaryId,
@@ -1183,9 +1220,15 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Ac
       data: {
         list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
         aggregation: "COUNT",
-        field: "ListDataID",
+        field: fieldMetadata,
         fieldName: "ListDataID",
+        fieldObject: fieldMetadata,
+        fieldInfo: fieldMetadata,
       },
+      field: fieldMetadata,
+      fieldObject: fieldMetadata,
+      fieldInfo: fieldMetadata,
+      allowAllRecords: true,
       save_var: saveVariable,
     },
     save_var: saveVariable,
