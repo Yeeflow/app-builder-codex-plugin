@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.48
+
+- Release Dashboard Collection action placeholder hard gates from PR #233.
+- Rewrite generated Dashboard Collection template action references so source-template placeholders such as `{{ListSetID}}`, `{{ListID}}`, `{{DetailLayoutID}}`, `{{sourceLongId}}`, and `{{search}}` cannot reach generated-final resources.
+- Prune copied detail/open action buttons when a generated Collection has no concrete detail layout, instead of leaving unsupported template actions behind.
+- Emit expression-token filter/fulltext conditions for generated Dashboard Collection filters instead of literal placeholder strings.
+- Add dataset golden-reference validation and focused regression coverage for unresolved `{{...}}` placeholders anywhere inside decoded Dashboard resources.
+
 ## 0.8.47
 
 - Release full-app Data Analytics materialization runtime gates from PR #231.
