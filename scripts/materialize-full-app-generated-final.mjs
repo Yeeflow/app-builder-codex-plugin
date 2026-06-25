@@ -944,6 +944,7 @@ function selectDashboardDatasetRecord({ planDemand, pageName, pageIndex }) {
 
 function buildMaterialDashboardResource({ name, layoutId, listName, listId, listMeta, datasetRecord, dashboardFilters, summaryId, filterId, collectionId }) {
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
+  const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar });
   const resource = buildDashboardV11Shell({ name, layoutId });
   const sourceResource = datasetRecord?.sourceResource || listName;
   const selectedTemplateId = datasetRecord?.selectedTemplateId || "collection_control_grid_table";
@@ -974,10 +975,16 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, list
     };
     contentArea.children = [collectionRoot];
   }
-  const summary = buildSummaryControl({ summaryId, tempVar, listName: sourceResource, listId });
+  const summaries = kpiContracts.map((contract) => buildSummaryControl({
+    summaryId: contract.summaryId,
+    tempVar: contract.tempVar,
+    listName: sourceResource,
+    listId,
+    label: contract.label,
+  }));
   const hiddenHost = contentArea || findFirstByIdentity(resource, "Content") || resource;
   hiddenHost.children = Array.isArray(hiddenHost.children) ? hiddenHost.children : [];
-  hiddenHost.children.push(summary);
+  hiddenHost.children.push(...summaries);
   materializeDashboardFilters(resource, {
     filters: normalizedFilters,
     listName: sourceResource,
@@ -986,31 +993,37 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, list
     datasetRegion,
     host: contentArea,
   });
-  applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, tempVar });
+  applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
   resource.filterVars = uniqueByName([
     ...normalizeDependencyArray(templateDependencies.filterVars),
     ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
   ]);
   resource.tempVars = uniqueByName([
     ...normalizeDependencyArray(templateDependencies.tempVars),
-    { name: tempVar, type: "number", source: summaryId },
+    ...kpiContracts.map((contract) => ({
+      id: `__temp_${contract.tempVar}`,
+      name: contract.tempVar,
+      type: "number",
+      source: contract.summaryId,
+      kpiKey: contract.key,
+    })),
     { name: "var_SelectedItems", type: "array", source: collectionId },
     { name: "var_SelectedItemsAmount", type: "number", source: collectionId },
     { name: "var_isDeleteConfirmed", type: "boolean", source: "delete-confirmation" },
   ]);
-  resource.ReportIds = [summaryId];
-  resource.exts = [{
-    i: summaryId,
-    id: summaryId,
+  resource.ReportIds = kpiContracts.map((contract) => contract.summaryId);
+  resource.exts = kpiContracts.map((contract) => ({
+    i: contract.summaryId,
+    id: contract.summaryId,
     category: "___Pivot___",
     key: "summary",
     attr: {
       ListID: stringId(listId),
       settings: {
-        values: [{ fieldName: "ListDataID", field: "ListDataID", id: "ListDataID", func: "COUNT", label: "Active Records" }],
+        values: [{ fieldName: "ListDataID", field: "ListDataID", id: "ListDataID", func: "COUNT", label: contract.label }],
       },
     },
-  }];
+  }));
   resource.actions = normalizeDependencyArray(templateDependencies.actions);
   resource.formAction = normalizeDependencyArray(templateDependencies.formAction);
   resource.LayoutID = layoutId;
@@ -1024,6 +1037,21 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, list
   };
   normalizeGeneratedDashboardControls(resource, name);
   return resource;
+}
+
+function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar }) {
+  const pageSlug = slugify(pageName).replace(/-/g, "_");
+  const specs = [
+    ["planned_events", "Active Records"],
+    ["approved_budget", "Approved Records"],
+    ["registration_rate", "Completion Signal"],
+    ["lead_follow_up", "Follow-up Queue"],
+  ];
+  return specs.map(([key, label], index) => {
+    const tempVar = index === 0 ? primaryTempVar : `tmp_${pageSlug}_${key}_count`;
+    const summaryId = index === 0 ? summaryIdBase : `${summaryIdBase}_${key}`;
+    return { key, label, tempVar, summaryId };
+  });
 }
 
 function normalizeDashboardFilters({ filters, listMeta, dashboardName }) {
@@ -1131,12 +1159,23 @@ function buildDashboardV11Shell({ name }) {
   return resource;
 }
 
-function buildSummaryControl({ summaryId, tempVar, listName, listId }) {
+function summarySaveVariable(tempVar) {
+  return {
+    exprType: "variable",
+    valueType: "string",
+    id: `__temp_${tempVar}`,
+    type: "expr",
+    name: tempVar,
+  };
+}
+
+function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Active Records" }) {
+  const saveVariable = summarySaveVariable(tempVar);
   return {
     type: "summary",
     id: summaryId,
-    name: "Active Records Summary",
-    title: "Active Records Summary",
+    name: `${label} Summary`,
+    title: `${label} Summary`,
     runtimeModelProven: true,
     attrs: {
       runtimeModelProven: true,
@@ -1147,9 +1186,9 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId }) {
         field: "ListDataID",
         fieldName: "ListDataID",
       },
-      save_var: { name: tempVar },
+      save_var: saveVariable,
     },
-    save_var: { name: tempVar },
+    save_var: saveVariable,
   };
 }
 
@@ -1382,7 +1421,7 @@ function replaceTemplateResidue(root, { datasetRegion, listName }) {
   visit(root);
 }
 
-function applyDashboardTextMapping(resource, { name, datasetRegion, listName, tempVar }) {
+function applyDashboardTextMapping(resource, { name, datasetRegion, listName, kpiContracts }) {
   const pageTitle = findFirstByIdentity(resource, "event_portfolio_title");
   setHeadingText(pageTitle, name);
   const subtitle = findFirstByIdentity(resource, "event_portfolio_subtitle");
@@ -1392,10 +1431,12 @@ function applyDashboardTextMapping(resource, { name, datasetRegion, listName, te
     const titleText = findDescendants(sectionTitle, (node) => String(node?.type || "") === "heading")[0];
     setHeadingText(titleText, datasetRegion);
   }
-  const kpiLabel = findFirstByIdentity(resource, "event_portfolio_kpi_planned_events_label");
-  setHeadingText(kpiLabel, "Active Records");
-  const kpiValue = findFirstByIdentity(resource, "event_portfolio_kpi_planned_events_value");
-  if (kpiValue) {
+  for (const contract of kpiContracts || []) {
+    const kpiLabel = findFirstByIdentity(resource, `event_portfolio_kpi_${contract.key}_label`);
+    setHeadingText(kpiLabel, contract.label);
+    const kpiValue = findFirstByIdentity(resource, `event_portfolio_kpi_${contract.key}_value`);
+    if (!kpiValue) continue;
+    const saveVariable = summarySaveVariable(contract.tempVar);
     setHeadingText(kpiValue, "0");
     kpiValue.attrs = {
       ...(kpiValue.attrs || {}),
@@ -1404,7 +1445,7 @@ function applyDashboardTextMapping(resource, { name, datasetRegion, listName, te
         title: {
           ...(kpiValue.attrs?.headc?.title || {}),
           value: "0",
-          variable: { name: tempVar },
+          variable: [saveVariable],
         },
       },
     };

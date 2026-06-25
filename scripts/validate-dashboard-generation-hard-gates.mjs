@@ -86,6 +86,7 @@ function validateDecodedDashboards(decoded, findings) {
     }
     validateDashboardBusinessRuntime(page, listIndex, findings);
     validateKpiCards(page, findings);
+    validateKpiTempVarReferences(page, findings);
     validateSummaryBindings(page, listIndex, findings);
   }
 }
@@ -387,6 +388,55 @@ function validateSummaryBindings(page, listIndex, findings) {
       findings.push(error("DASH_SUMMARY_REPORTIDS_MISSING", "Resource.ReportIds[] must include every Summary control id.", { page: page.title, path: `${page.pointer}.ReportIds`, summaryId: id }));
     }
   }
+}
+
+function validateKpiTempVarReferences(page, findings) {
+  const declared = new Set(asArray(page.resource?.tempVars).flatMap((item) => [item?.id, item?.name, item?.key, item?.value].filter(Boolean).map(String)));
+  for (const item of [...declared]) {
+    if (!item.startsWith("__temp_")) declared.add(`__temp_${item}`);
+    if (item.startsWith("__temp_")) declared.add(item.replace(/^__temp_+/, ""));
+  }
+  for (const entry of page.controls) {
+    if (!isTextLike(entry.control)) continue;
+    const title = entry.control?.attrs?.headc?.title || entry.control?.attrs?.title || {};
+    if (!present(title?.variable)) continue;
+    const refs = collectTempVarReferenceTokens(title.variable);
+    for (const ref of refs) {
+      if (/^__temp_event_portfolio_|event_portfolio_/i.test(ref)) {
+        findings.push(error("DASH_KPI_SOURCE_TEMPLATE_TEMPVAR_RESIDUE", "Visible KPI value bindings must not retain Event Portfolio source-template temp variables after business-domain mapping.", {
+          page: page.title,
+          path: `${entry.pointer}.attrs.headc.title.variable`,
+          tempVar: ref,
+        }));
+      }
+      const variants = new Set([ref]);
+      if (ref.startsWith("__temp_")) variants.add(ref.replace(/^__temp_+/, ""));
+      else variants.add(`__temp_${ref}`);
+      if (![...variants].some((variant) => declared.has(variant))) {
+        findings.push(error("DASH_KPI_TEMPVAR_UNDECLARED", "Visible KPI value bindings must reference temp variables declared in the dashboard Resource.tempVars array.", {
+          page: page.title,
+          path: `${entry.pointer}.attrs.headc.title.variable`,
+          tempVar: ref,
+        }));
+      }
+    }
+  }
+}
+
+function collectTempVarReferenceTokens(value, out = new Set()) {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectTempVarReferenceTokens(item, out));
+    return out;
+  }
+  if (!isObject(value)) {
+    if (typeof value === "string" && /(?:^|_)__?temp_|^tmp_|event_portfolio_/i.test(value)) out.add(value);
+    return out;
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (["id", "name", "key", "value"].includes(key) && typeof child === "string" && /(?:^|_)__?temp_|^tmp_|event_portfolio_/i.test(child)) out.add(child);
+    else collectTempVarReferenceTokens(child, out);
+  }
+  return out;
 }
 
 function validateSummaryValue(value, index, ext, summary, page, listIndex, findings) {
