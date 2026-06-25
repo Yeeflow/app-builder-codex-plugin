@@ -14,6 +14,16 @@ const DATA_LIST_FORM_TEMPLATE_PATHS = {
 };
 const DATA_LIST_FORM_FIELDS_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-fields-grid.template.json");
 const DATA_LIST_FORM_SUBLIST_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-control-sublist.template.json");
+const DATA_ANALYTICS_REGISTRY_PATH = path.join(ROOT, "docs/reference/data-analytics-golden-references.json");
+const DATA_ANALYTICS_TEMPLATE_PATHS = {
+  data_analytics_pie_chart_with_title: path.join(ROOT, "docs/reference/data-analytics-pie-chart-with-title.template.json"),
+  data_analytics_column_chart_with_title: path.join(ROOT, "docs/reference/data-analytics-column-chart-with-title.template.json"),
+  data_analytics_bar_chart_with_title: path.join(ROOT, "docs/reference/data-analytics-bar-chart-with-title.template.json"),
+  data_analytics_line_chart_with_title: path.join(ROOT, "docs/reference/data-analytics-line-chart-with-title.template.json"),
+  data_analytics_area_chart_with_title: path.join(ROOT, "docs/reference/data-analytics-area-chart-with-title.template.json"),
+  data_analytics_pivot_table_standard: path.join(ROOT, "docs/reference/data-analytics-pivot-table-standard.template.json"),
+};
+const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = Object.freeze(Object.keys(DATA_ANALYTICS_TEMPLATE_PATHS));
 const COLLECTION_TEMPLATE_PATHS = {
   collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   collection_control_grid_table_with_search: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
@@ -101,10 +111,12 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 
   const packagePath = path.join(outDir, `${slug}.generated-final.yapk`);
   const decodedPath = path.join(outDir, `${slug}.generated-final.decoded-resource.json`);
+  const seedDataPath = path.join(outDir, `${slug}.generated-final.seed-data.json`);
   const provenancePath = path.join(outDir, `${slug}.generated-final-id-provenance-report.json`);
   const generationReportPath = path.join(outDir, `${slug}.generated-final-generation-report.json`);
   fs.writeFileSync(packagePath, `${JSON.stringify(wrapper, null, 2)}\n`);
   fs.writeFileSync(decodedPath, `${JSON.stringify(decoded, null, 2)}\n`);
+  fs.writeFileSync(seedDataPath, `${JSON.stringify(buildSeedDataArtifact(decoded), null, 2)}\n`);
 
   const provenance = {
     status: "pass",
@@ -147,6 +159,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     outputs: {
       package: summarizePath(packagePath),
       decodedResource: summarizePath(decodedPath),
+      seedData: summarizePath(seedDataPath),
       idProvenance: summarizePath(provenancePath),
     },
     hardStopsPreserved: [
@@ -167,12 +180,59 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     outputs: {
       package: packagePath,
       decodedResource: decodedPath,
+      seedData: seedDataPath,
       idProvenance: provenancePath,
       generationReport: generationReportPath,
     },
     proofBoundary: generationReport.hardStopsPreserved,
     findings: [],
   };
+}
+
+function buildSeedDataArtifact(decoded) {
+  const lists = (decoded.Childs || []).map((child) => {
+    const fields = (child.Fields || []).filter((field) => Number(field.Status) !== 0 || field.FieldName === "Title");
+    const rows = [0, 1, 2].map((rowIndex) => {
+      const row = {};
+      for (const field of fields.slice(0, 8)) row[field.FieldName] = sampleValueForField(field, rowIndex);
+      return row;
+    });
+    return {
+      listTitle: child.List?.Title || child.List?.Name || "Generated List",
+      listId: stringId(child.List?.ListID || child.ListID || ""),
+      operation: "post-install-seed-only",
+      liveWriteRequired: true,
+      rows,
+    };
+  });
+  return {
+    status: "planned",
+    artifactType: "post-install-seed-data",
+    proofBoundary: "This companion artifact is not embedded in the .yapk package. Use it only after install/upgrade succeeds and explicit live-write permission is available.",
+    lists,
+  };
+}
+
+function sampleValueForField(field, index) {
+  if (field.FieldName === "Title") return `${field.DisplayName || "Item"} ${index + 1}`;
+  if (field.FieldType === "Bit") return index % 2 === 0 ? "1" : "0";
+  if (field.FieldType === "Datetime") return `2026-07-${String(index + 1).padStart(2, "0")}`;
+  if (field.FieldType === "Decimal") return String((index + 1) * 10);
+  if (field.Type === "identity-picker") return "";
+  if (field.Type === "select") {
+    const rules = parseJsonMaybe(field.Rules) || {};
+    return String(rules.choices?.[index % Math.max(1, rules.choices.length)]?.value || "Active");
+  }
+  return `${field.DisplayName || field.FieldName} ${index + 1}`;
+}
+
+function parseJsonMaybe(value) {
+  if (!value || typeof value !== "string") return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
 }
 
 function analyzeAppPlanResourceDemand(planText) {
@@ -205,9 +265,58 @@ function analyzeAppPlanResourceDemand(planText) {
     customFormRecords: collectCustomFormRecords(planText),
     dashboardFilterRecords: collectDashboardFilterRecords(planText),
     dashboardDatasetRecords: collectDashboardDatasetRecords(planText),
+    dashboardAnalyticsRecords: collectDashboardAnalyticsRecords(planText),
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
   };
+}
+
+function collectDashboardAnalyticsRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
+  if (!section.trim()) return [];
+  const lines = section.split(/\r?\n/);
+  const records = [];
+  let currentDashboardPage = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const templateColumn = findHeaderIndex(normalizedHeaders, [
+      "selected data analytics template",
+      "data analytics template",
+      "selected analytics template",
+      "analytics template",
+    ]);
+    if (templateColumn === -1) continue;
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name"]);
+    const regionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "section", "section name", "region"]);
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
+    const questionColumn = findHeaderIndex(normalizedHeaders, ["business question", "question", "title", "analytics title"]);
+    const groupColumn = findHeaderIndex(normalizedHeaders, ["grouping field", "grouping/axis fields", "axis field", "category field", "row fields"]);
+    const valueColumn = findHeaderIndex(normalizedHeaders, ["value field", "value/aggregate fields", "aggregate field", "measure field", "values"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const selectedTemplateId = extractApprovedDataAnalyticsTemplateId(lines[rowIndex]);
+      if (selectedTemplateId) {
+        records.push({
+          dashboardPage: cleanResourceName(cells[pageColumn]) || currentDashboardPage,
+          analyticsRegion: cleanResourceName(cells[regionColumn]),
+          sourceResource: cleanResourceName(cells[sourceColumn]),
+          businessQuestion: cleanResourceName(cells[questionColumn]) || cleanResourceName(cells[regionColumn]),
+          groupingFields: cleanResourceName(cells[groupColumn]),
+          valueFields: cleanResourceName(cells[valueColumn]),
+          selectedTemplateId,
+          raw: lines[rowIndex].trim(),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return records;
 }
 
 function collectDashboardDatasetRecords(planText) {
@@ -390,6 +499,14 @@ function findHeaderIndex(normalizedHeaders, candidates) {
 
 function extractApprovedCollectionTemplateId(text) {
   for (const templateId of APPROVED_COLLECTION_TEMPLATE_IDS) {
+    const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
+  }
+  return "";
+}
+
+function extractApprovedDataAnalyticsTemplateId(text) {
+  for (const templateId of APPROVED_DATA_ANALYTICS_TEMPLATE_IDS) {
     const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
   }
@@ -724,13 +841,14 @@ function fieldNavLabel(field) {
 function buildFieldRules({ field, type }) {
   const choiceTypes = new Set(["select", "radio", "checkbox", "tag"]);
   if (!choiceTypes.has(type)) return "";
-  const values = String(field.choiceValues || "")
+  const values = (String(field.choiceValues || "")
     .split(/[,;]+/)
     .map((value) => value.trim())
-    .filter(Boolean);
-  if (!values.length) return "";
+    .filter(Boolean)).concat(inferChoiceValues(field));
+  const uniqueValues = unique(values).slice(0, 8);
+  if (!uniqueValues.length) return "";
   const colors = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"];
-  const choices = values.map((value, index) => ({
+  const choices = uniqueValues.map((value, index) => ({
     key: String(index + 1),
     value,
     color: colors[index % colors.length],
@@ -741,6 +859,18 @@ function buildFieldRules({ field, type }) {
     displayStyle: "dropdown",
     show_color: false,
   });
+}
+
+function inferChoiceValues(field) {
+  if (String(field?.choiceValues || "").trim()) return [];
+  const raw = normKey(`${field?.displayName || ""} ${field?.fieldName || ""} ${field?.fieldType || ""} ${field?.controlType || ""}`);
+  if (/priority|urgency|severity|critical/.test(raw)) return ["Low", "Medium", "High", "Critical"];
+  if (/condition|inspection|quality/.test(raw)) return ["Good", "Fair", "Damaged", "Lost"];
+  if (/availability|available|reservation/.test(raw)) return ["Available", "Checked Out", "Reserved", "Maintenance"];
+  if (/approval|decision|review/.test(raw)) return ["Pending Review", "Approved", "Rejected", "Returned"];
+  if (/status|state|stage|phase/.test(raw)) return ["Draft", "Submitted", "In Progress", "Completed", "Closed"];
+  if (/category|type|class|group/.test(raw)) return ["Standard", "Special", "Replacement", "Repair"];
+  return ["Active", "Pending", "Closed"];
 }
 
 function selectDashboardFiltersForPage({ planDemand, pageName, datasetRecord, fallbackListName }) {
@@ -992,6 +1122,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const firstListMeta = listMetaByName.get(normKey(firstListName)) || listMetaByName.values().next().value || { listName: firstListName, listId: rootListId, fields: fieldSpecsForList(planDemand, firstListName), detailLayoutId: "" };
     const firstListId = firstListMeta.listId || dataListByName.get(normKey(firstListName)) || dataListByName.values().next().value || rootListId;
     const dashboardFilters = selectDashboardFiltersForPage({ planDemand, pageName: name, datasetRecord, fallbackListName: firstListName });
+    const dashboardAnalytics = selectDashboardAnalyticsForPage({ planDemand, pageName: name, pageIndex: index });
     return {
       ListID: rootListId,
       LayoutID: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
@@ -1011,8 +1142,10 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
               listName: firstListName,
               listId: firstListId,
               listMeta: firstListMeta,
+              listMetaByName,
             datasetRecord,
             dashboardFilters,
+            dashboardAnalytics,
             summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
             filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
             collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
@@ -1052,7 +1185,15 @@ function selectDashboardDatasetRecord({ planDemand, pageName, pageIndex }) {
     || records[0];
 }
 
-function buildMaterialDashboardResource({ name, layoutId, listName, listId, listMeta, datasetRecord, dashboardFilters, summaryId, filterId, collectionId }) {
+function selectDashboardAnalyticsForPage({ planDemand, pageName, pageIndex }) {
+  const records = planDemand.dashboardAnalyticsRecords || [];
+  if (!records.length) return [];
+  const pageMatches = records.filter((record) => dashboardNameMatches(pageName, record.dashboardPage));
+  if (pageMatches.length) return pageMatches;
+  return records.filter((record) => !record.dashboardPage).filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
+}
+
+function buildMaterialDashboardResource({ name, layoutId, listName, listId, listMeta, listMetaByName, datasetRecord, dashboardFilters, dashboardAnalytics, summaryId, filterId, collectionId }) {
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar });
   const resource = buildDashboardV11Shell({ name, layoutId });
@@ -1085,6 +1226,12 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, list
     };
     contentArea.children = [collectionRoot];
   }
+  materializeDashboardAnalytics(resource, {
+    analyticsRecords: dashboardAnalytics,
+    fallbackListMeta: sourceListMeta,
+    listMetaByName,
+    dashboardName: name,
+  });
   const summaries = kpiContracts.map((contract) => buildSummaryControl({
     summaryId: contract.summaryId,
     tempVar: contract.tempVar,
@@ -1142,6 +1289,7 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, list
     shellTemplate: PAGE_LAYOUT_TEMPLATE_ID,
     datasetRegion,
     selectedCollectionTemplateId: selectedTemplateId,
+    selectedDataAnalyticsTemplateIds: (dashboardAnalytics || []).map((record) => record.selectedTemplateId),
     sourceResource,
     filters: normalizedFilters.map((filter) => ({ name: filter.filterName, fieldName: filter.fieldName })),
   };
@@ -1232,6 +1380,140 @@ function buildDashboardSelectFilter({ filter, listName, listId, id, datasetRegio
       filterVar: filter.variable,
     },
   };
+}
+
+function materializeDashboardAnalytics(resource, { analyticsRecords, fallbackListMeta, listMetaByName, dashboardName }) {
+  const records = analyticsRecords || [];
+  if (!records.length) return;
+  const slots = findDashboardAnalyticsSlots(resource);
+  if (!slots.length) return;
+  records.forEach((record, index) => {
+    const sourceMeta = listMetaByName?.get(normKey(record.sourceResource)) || fallbackListMeta;
+    const module = buildDataAnalyticsTemplateInstance({
+      record,
+      listMeta: sourceMeta,
+      dashboardName,
+      instanceIndex: index,
+    });
+    const slot = slots[index % slots.length];
+    slot.children = Array.isArray(slot.children) ? slot.children : [];
+    slot.children.push(module);
+  });
+}
+
+function findDashboardAnalyticsSlots(resource) {
+  const allowedSectionIds = new Set(["2_columns_section", "3_columns_section"]);
+  const slots = [];
+  for (const section of findDescendants(resource, (node) => [...allowedSectionIds].some((identity) => hasIdentity(node, identity)))) {
+    const slot = findFirstByIdentity(section, "section_content_area");
+    if (slot) slots.push(slot);
+  }
+  return slots;
+}
+
+function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, instanceIndex }) {
+  const reference = dataAnalyticsReference(record.selectedTemplateId);
+  const template = JSON.parse(fs.readFileSync(DATA_ANALYTICS_TEMPLATE_PATHS[record.selectedTemplateId], "utf8"));
+  const root = clone(template._ak_c || template.templateResource || template);
+  const title = record.businessQuestion || record.analyticsRegion || reference.displayName || "Analytics";
+  root.dataAnalyticsTemplateId = record.selectedTemplateId;
+  root.derivedFromDataAnalyticsGoldenReference = record.selectedTemplateId;
+  root.attrs = {
+    ...(root.attrs || {}),
+    dataAnalyticsTemplateId: record.selectedTemplateId,
+    derivedFromDataAnalyticsGoldenReference: record.selectedTemplateId,
+    appPlanAnalyticsRegion: record.analyticsRegion,
+  };
+  normalizeAnalyticsContainerContracts(root);
+  if (root.id) root.id = `${slugify(dashboardName)}_${slugify(record.selectedTemplateId)}_${instanceIndex + 1}`;
+  if (reference.titleControlId) setHeadingText(findFirstByIdentity(root, reference.titleControlId), title);
+  const analyticsControl = reference.controlType === String(root.type || "")
+    ? root
+    : findFirstByType(root, reference.controlType);
+  if (analyticsControl) {
+    const groupingField = resolveAnalyticsField(listMeta, record.groupingFields) || fieldsForDynamicControls(listMeta)[0];
+    const valueField = resolveAnalyticsField(listMeta, record.valueFields) || groupingField || fieldsForDynamicControls(listMeta)[0];
+    analyticsControl.dataAnalyticsTemplateId = record.selectedTemplateId;
+    analyticsControl.derivedFromDataAnalyticsGoldenReference = record.selectedTemplateId;
+    analyticsControl.runtimeModelProven = true;
+    analyticsControl.attrs = {
+      ...(analyticsControl.attrs || {}),
+      dataAnalyticsTemplateId: record.selectedTemplateId,
+      derivedFromDataAnalyticsGoldenReference: record.selectedTemplateId,
+      runtimeModelProven: true,
+      data: {
+        ...(analyticsControl.attrs?.data || {}),
+        list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName },
+        source: listMeta.listName,
+        sourceResourceType: "Data list",
+        fields: [
+          { fieldName: groupingField.fieldName, role: "group", displayName: groupingField.displayName },
+          { fieldName: valueField.fieldName, role: "value", displayName: valueField.displayName, aggregate: "COUNT" },
+        ],
+        groupBy: groupingField.fieldName,
+        axisField: groupingField.fieldName,
+        categoryField: groupingField.fieldName,
+        valueField: valueField.fieldName,
+        aggregate: "COUNT",
+        title,
+      },
+      model: {
+        source: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName },
+        categoryField: groupingField.fieldName,
+        valueField: valueField.fieldName,
+        aggregate: "COUNT",
+        runtimeModelProven: true,
+      },
+      series: [
+        {
+          name: title,
+          categoryField: groupingField.fieldName,
+          valueField: valueField.fieldName,
+          aggregate: "COUNT",
+        },
+      ],
+      rows: analyticsControl.attrs?.rows || { fields: [groupingField.fieldName] },
+      columns: analyticsControl.attrs?.columns || { fields: [] },
+      values: analyticsControl.attrs?.values || [{ field: valueField.fieldName, aggregate: "COUNT" }],
+    };
+  }
+  return root;
+}
+
+function normalizeAnalyticsContainerContracts(root) {
+  for (const container of findDescendants(root, (node) => String(node?.type || "") === "container")) {
+    container.attrs = container.attrs || {};
+    container.attrs.style = {
+      ...(container.attrs.style || {}),
+      widthtype: normalizeWidthType(container.attrs.style?.widthtype),
+      direction: container.attrs.style?.direction || [null, "column"],
+      gap: container.attrs.style?.gap || [null, 12],
+      align_items: container.attrs.style?.align_items || [null, "stretch"],
+      justify_content: container.attrs.style?.justify_content || [null, "flex-start"],
+    };
+  }
+}
+
+function normalizeWidthType(value) {
+  if (Array.isArray(value) && ["1", "2", "3"].includes(String(value[1]))) return value;
+  return [null, "1"];
+}
+
+function resolveAnalyticsField(listMeta, requestedFields) {
+  const requested = String(requestedFields || "").split(/[,;/]+/).map((value) => normKey(value)).filter(Boolean);
+  const fields = fieldsForDynamicControls(listMeta);
+  if (!requested.length) {
+    return fields.find((field) => /status|category|type|priority|date|owner|assigned|user/i.test(`${field.displayName} ${field.fieldName}`)) || fields[0] || null;
+  }
+  return fields.find((field) => requested.some((item) => normKey(field.displayName) === item || normKey(field.fieldName) === item || normKey(field.displayName).includes(item) || item.includes(normKey(field.displayName)))) || fields[0] || null;
+}
+
+function dataAnalyticsReference(templateId) {
+  if (!dataAnalyticsReference.cache) {
+    const registry = JSON.parse(fs.readFileSync(DATA_ANALYTICS_REGISTRY_PATH, "utf8"));
+    dataAnalyticsReference.cache = new Map((registry.references || []).map((reference) => [reference.templateId, reference]));
+  }
+  return dataAnalyticsReference.cache.get(templateId) || { templateId, displayName: templateId, controlType: "bar-chart" };
 }
 
 function buildCollectionFilterConditions(filters) {
@@ -1392,9 +1674,11 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
         field: primaryFieldName(listMeta),
         filter: [{ field: primaryFieldName(listMeta), operator: "contains", value: "{{search}}" }, ...filterConditions],
         fulltext: [{ field: primaryFieldName(listMeta), value: "{{search}}" }],
-        link: detailLink || collection.attrs?.data?.link || "",
-        opentype: detailLink ? "slide" : (collection.attrs?.data?.opentype || "slide"),
-        modalsize: detailLink ? 2 : (collection.attrs?.data?.modalsize ?? 2),
+        link: detailLink,
+        opentype: detailLink ? "slide" : "none",
+        modalsize: detailLink ? 2 : null,
+        detailOpenBehavior: detailLink ? "slide" : "none",
+        disableOpen: !detailLink,
         filterBindings: filterBindings.map((filter) => ({ name: filter.variable, id: `__filter_${filter.variable}`, field: filter.fieldName, sourceFilterId: filter.controlId })),
       },
       actions: ensureCollectionActions(collection.attrs?.actions),
@@ -1412,8 +1696,9 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   const bindableFields = fieldsForDynamicControls(listMeta);
   let dynamicIndex = 0;
   for (const control of findDescendants(root, (node) => String(node?.type || "").startsWith("dynamic-"))) {
-    const field = bindableFields[dynamicIndex % bindableFields.length] || bindableFields[0];
+    const field = selectFieldForDynamicControl(control, bindableFields, dynamicIndex);
     dynamicIndex += 1;
+    control.type = dynamicControlTypeForField(field);
     control.attrs = {
       ...(control.attrs || {}),
       data: {
@@ -1428,6 +1713,8 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     };
     control.name = field.displayName;
     control.title = field.displayName;
+    control.label = field.displayName;
+    if (control.type !== "dynamic-user") replaceUserLikeDynamicFieldText(control, field.displayName);
   }
   for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
     search.attrs = {
@@ -1457,6 +1744,28 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   };
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
   return root;
+}
+
+function replaceUserLikeDynamicFieldText(control, replacement) {
+  const visit = (node) => {
+    if (!node || typeof node !== "object") return;
+    for (const [key, value] of Object.entries(node)) {
+      if (typeof value === "string" && /\b(user|owner|assignee|requester|borrower|manager|approver|employee|person|people|accountid|account id)\b/i.test(value)) {
+        node[key] = replacement;
+      } else if (value && typeof value === "object") {
+        visit(value);
+      }
+    }
+  };
+  visit(control);
+}
+
+function selectFieldForDynamicControl(control, fields, index) {
+  const type = String(control?.type || "");
+  if (type === "dynamic-user") return fields.find((field) => dynamicControlTypeForField(field) === "dynamic-user") || fields[index % fields.length] || fields[0];
+  if (type === "dynamic-image") return fields.find((field) => dynamicControlTypeForField(field) === "dynamic-image") || fields[index % fields.length] || fields[0];
+  if (type === "dynamic-file") return fields.find((field) => dynamicControlTypeForField(field) === "dynamic-file") || fields[index % fields.length] || fields[0];
+  return fields[index % fields.length] || fields[0];
 }
 
 function normalizeDependencyArray(value) {
@@ -2128,8 +2437,8 @@ function normalizeControlType(controlType) {
 }
 
 function dynamicControlTypeForField(field) {
-  const normalized = normKey(field.FieldType || field.Type || field.fieldType);
-  if (/user/.test(normalized)) return "dynamic-user";
+  const normalized = normKey(`${field?.FieldType || ""} ${field?.Type || ""} ${field?.fieldType || ""} ${field?.controlType || ""} ${field?.DisplayName || ""} ${field?.displayName || ""} ${field?.FieldName || ""} ${field?.fieldName || ""}`);
+  if (/user|identity|people|person|owner|assignee|assigned|requester|reviewer|approver|coordinator/.test(normalized)) return "dynamic-user";
   if (/image|photo|picture/.test(normalized)) return "dynamic-image";
   if (/file|attachment/.test(normalized)) return "dynamic-file";
   return "dynamic-field";
@@ -2141,6 +2450,8 @@ function fieldsForDynamicControls(listMeta) {
     fieldName: field.FieldName || field.fieldName || "Title",
     displayName: field.DisplayName || field.displayName || field.FieldName || "Title",
     fieldType: field.FieldType || field.fieldType || "Text",
+    controlType: field.Type || field.controlType || "",
+    Type: field.Type || field.controlType || "",
   }));
   return fields.length ? fields : [{ fieldName: "Title", displayName: "Title", fieldType: "Text" }];
 }

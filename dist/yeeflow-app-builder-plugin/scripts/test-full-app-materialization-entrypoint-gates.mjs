@@ -18,6 +18,7 @@ const BIT_FIELD_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-bit-field-con
 const EXPORT_SHAPE_VALIDATOR = path.join(ROOT, "scripts/validate-generated-yapk-export-shape.mjs");
 const DASHBOARD_LAYOUT_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-page-layout-template.mjs");
 const DASHBOARD_DATASET_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
+const DATA_ANALYTICS_VALIDATOR = path.join(ROOT, "scripts/validate-data-analytics-golden-references.mjs");
 const DASHBOARD_GOLDEN_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-golden-reference-conformance.mjs");
 const DASHBOARD_HARD_GATES_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-generation-hard-gates.mjs");
 const SUMMARY_CONTRACT_VALIDATOR = path.join(ROOT, "scripts/inspect-dashboard-summary-control-contract.mjs");
@@ -192,6 +193,12 @@ try {
     "| Active loans | Loan Transactions | collection_control_grid_table_with_multiselect |",
     "| Availability cards | Office Assets | collection_control_responsive_card_grid |",
     "",
+    "#### Data Analytics Template Selection",
+    "| Dashboard Page | Analytics Region | Source Resource | Business Question | Selected Data Analytics Template | Grouping Field | Value Field |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| Asset Loan Operations Dashboard | Loan status mix | Loan Transactions | Loan transactions by status | data_analytics_pie_chart_with_title | Status | ListDataID |",
+    "| Asset Loan Operations Dashboard | Loan volume trend | Loan Transactions | Loan transactions over time | data_analytics_line_chart_with_title | Due Date | ListDataID |",
+    "",
     "### 14.2 Overdue Monitor",
     "",
     "## 15. Application Navigation Plan",
@@ -218,7 +225,9 @@ try {
   assert.equal(resourceReport.signingEligible, false);
   assert.equal(fs.existsSync(resourceReport.outputs.package), true, "nontrivial materializer writes package");
   assert.equal(fs.existsSync(resourceReport.outputs.decodedResource), true, "nontrivial materializer writes decoded resource");
+  assert.equal(fs.existsSync(resourceReport.outputs.seedData), true, "nontrivial materializer writes post-install seed-data companion artifact");
   const resourceGenerationReport = JSON.parse(fs.readFileSync(resourceReport.outputs.generationReport, "utf8"));
+  assert.equal(resourceGenerationReport.outputs.seedData.path.endsWith(".generated-final.seed-data.json"), true, "generation report exposes seed-data companion artifact");
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.counts, {
     dataLists: 4,
     approvalForms: 2,
@@ -229,7 +238,11 @@ try {
   });
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dataLists, ["Office Assets", "Loan Transactions", "Asset Categories", "Return Inspections"]);
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dashboards, ["Asset Loan Operations Dashboard", "Overdue Monitor"]);
+  assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardAnalyticsRecords.length, 2, "planned Data Analytics template selections are parsed");
   const decodedResource = JSON.parse(fs.readFileSync(resourceReport.outputs.decodedResource, "utf8"));
+  const seedDataArtifact = JSON.parse(fs.readFileSync(resourceReport.outputs.seedData, "utf8"));
+  assert.equal(seedDataArtifact.artifactType, "post-install-seed-data", "seed rows are separated from package content");
+  assert.equal(seedDataArtifact.lists.length, 4, "seed companion artifact covers planned data lists");
   assert.equal(decodedResource.Childs.length, 4, "planned data lists are materialized");
   assert.equal(decodedResource.Forms.length, 2, "planned approval forms are materialized");
   assert.equal(decodedResource.FormNewReports.length, 1, "planned form reports are materialized");
@@ -249,6 +262,9 @@ try {
     assert.equal(String(page.LayoutInResources[0].ID), String(page.LayoutID), "dashboard LayoutInResources[0].ID must equal LayoutID");
     assert.equal(String(page.LayoutInResources[0].RefId), String(page.LayoutID), "dashboard LayoutInResources[0].RefId must equal LayoutID");
   }
+  const decodedText = JSON.stringify(decodedResource);
+  assert.match(decodedText, /data_analytics_pie_chart_with_title/, "planned pie chart analytics template is materialized");
+  assert.match(decodedText, /data_analytics_line_chart_with_title/, "planned line chart analytics template is materialized");
   assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
   const resourceFixtureOut = path.join(tempDir, "resource-plan-fixture");
   const resourceFixtureRun = expectPass("nontrivial fixture mode allocates enough synthetic API-shaped IDs", [
@@ -312,6 +328,11 @@ try {
     DASHBOARD_DATASET_VALIDATOR,
     "--app-plan", resourcePlan,
     "--package", resourceReport.outputs.package,
+  ]);
+  expectPass("nontrivial generated package passes Data Analytics template materialization validation", [
+    DATA_ANALYTICS_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+    "--plan", resourcePlan,
   ]);
   expectPass("nontrivial generated package passes Dashboard Golden Reference validation", [
     DASHBOARD_GOLDEN_VALIDATOR,

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -23,6 +24,9 @@ try {
   expectCode("Simplified chart without approved wrapper fails", ["--resource", writeJson("missing-wrapper.json", dashboardResource({ missingWrapper: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_WRAPPER_MISSING");
   expectCode("Unknown analytics template ID fails", ["--resource", writeJson("unknown-template.json", dashboardResource({ unknownTemplate: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_UNKNOWN");
   expectCode("Chart-with-title template requires title control", ["--resource", writeJson("missing-title.json", dashboardResource({ missingTitle: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING");
+  const appPlan = writeText("analytics-app-plan.md", analyticsAppPlan());
+  expectPass("Generated package materializes App Plan selected Data Analytics templates", ["--package", writeYapk("analytics-present.yapk", dashboardResource()), "--plan", appPlan]);
+  expectCode("Generated package fails when App Plan selected Data Analytics templates are not materialized", ["--package", writeYapk("analytics-missing.yapk", dashboardResource({ noAnalytics: true })), "--plan", appPlan], "DATA_ANALYTICS_PLANNED_TEMPLATE_NOT_MATERIALIZED");
 
   printSummary(0);
 } catch (error) {
@@ -60,6 +64,7 @@ function dashboardResource(options = {}) {
   if (options.unknownTemplate) analytics[0].attrs.dataAnalyticsTemplateId = "data_analytics_unknown_chart";
   if (options.missingWrapper) analytics[0] = { type: "pie-chart", nv_label: "pie_chart_control", attrs: { dataAnalyticsTemplateId: "data_analytics_pie_chart_with_title" } };
   if (options.missingTitle) analytics[0].children = analytics[0].children.filter((child) => child.nv_label !== "pie_chart_title");
+  if (options.noAnalytics) analytics.length = 0;
 
   return {
     type: "page",
@@ -84,6 +89,49 @@ function dashboardResource(options = {}) {
       },
     ],
   };
+}
+
+function analyticsAppPlan() {
+  return [
+    "# Yeeflow App Plan: Analytics App",
+    "",
+    "## 14. Dashboard Pages Plan",
+    "",
+    "### 14.1 Operations Dashboard",
+    "",
+    "#### Data Analytics Template Selection",
+    "| Dashboard Page | Analytics Region | Source Resource | Business Question | Selected Data Analytics Template | Grouping Field | Value Field |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| Operations Dashboard | Status mix | Tickets | Tickets by status | data_analytics_pie_chart_with_title | Status | ListDataID |",
+    "| Operations Dashboard | Volume trend | Tickets | Ticket volume over time | data_analytics_line_chart_with_title | Created | ListDataID |",
+  ].join("\n");
+}
+
+function writeYapk(name, dashboard) {
+  const decoded = {
+    ListSet: { ListID: "app_1", Title: "Analytics App" },
+    Pages: [
+      {
+        Title: "Operations Dashboard",
+        Type: 103,
+        LayoutInResources: [{ Resource: JSON.stringify(dashboard) }],
+      },
+    ],
+    Childs: [],
+    Forms: [],
+    FormNewReports: [],
+    DataReports: [],
+    PortalInfo: null,
+  };
+  const wrapper = {
+    PackageId: "pkg_1",
+    TenantID: "tenant_1",
+    AppID: 41,
+    ListID: "app_1",
+    Title: "Analytics App",
+    Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64"),
+  };
+  return writeJson(name, wrapper);
 }
 
 function dataListFormResource() {
@@ -154,6 +202,12 @@ function pivotModule() {
 function writeJson(name, value) {
   const file = path.join(tempDir, name);
   fs.writeFileSync(file, JSON.stringify(value, null, 2));
+  return file;
+}
+
+function writeText(name, value) {
+  const file = path.join(tempDir, name);
+  fs.writeFileSync(file, value);
   return file;
 }
 
