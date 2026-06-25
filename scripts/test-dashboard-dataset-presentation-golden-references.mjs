@@ -170,6 +170,26 @@ Dashboard validator commands used during validation:
   };
   expectCode("Dashboard Collection action placeholders fail before signing", ["--package", writePackage("collection-action-placeholders", actionPlaceholderPages)], "DASH_DATASET_COLLECTION_TEMPLATE_PLACEHOLDER_UNRESOLVED");
 
+  const selectFilterPlaceholderPages = validPages();
+  const selectFilterHost = findControl(selectFilterPlaceholderPages[0], "section_content_area");
+  selectFilterHost.children = [
+    {
+      type: "select-filter",
+      id: "asset_status_filter",
+      name: "Asset Status",
+      attrs: {
+        data: {
+          field: "Text2",
+          displayField: "Text2",
+          valueField: "Text2",
+          filter: [{ field: "Text2", operator: "not_empty", value: "{{ListDataID}}" }],
+        },
+      },
+    },
+    ...(selectFilterHost.children || []),
+  ];
+  expectCode("Dashboard select-filter option-source ListDataID placeholder fails before signing", ["--package", writePackage("select-filter-option-placeholder", selectFilterPlaceholderPages)], "DASH_SELECT_FILTER_OPTION_SOURCE_PLACEHOLDER_UNRESOLVED");
+
   const sixtyCardPages = validPages();
   renameFirstContentCard(sixtyCardPages[1], "content_card_60_wrapper");
   expectPass("Collection template inside 60 percent v1.1 content card section_content_area passes", ["--package", writePackage("valid-60-card-slot", sixtyCardPages)]);

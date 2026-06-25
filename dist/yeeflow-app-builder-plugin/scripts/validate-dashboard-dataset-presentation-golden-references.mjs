@@ -733,7 +733,10 @@ function validateDashboardTemplatePlaceholders(page, findings) {
   const matches = [];
   collectTemplatePlaceholders(page.resource, page.pointer, matches);
   for (const match of matches) {
-    findings.push(error("DASH_DATASET_COLLECTION_TEMPLATE_PLACEHOLDER_UNRESOLVED", "Generated Dashboard resources must not retain source-template placeholders such as {{ListSetID}}, {{ListID}}, {{DetailLayoutID}}, or any other {{...}} token after Collection template clone-and-map.", {
+    const isSelectFilterOptionPlaceholder = match.token === "{{ListDataID}}" && /\.attrs\.data\.filter\[\d+\]\.value$/.test(match.path);
+    findings.push(error(isSelectFilterOptionPlaceholder ? "DASH_SELECT_FILTER_OPTION_SOURCE_PLACEHOLDER_UNRESOLVED" : "DASH_DATASET_COLLECTION_TEMPLATE_PLACEHOLDER_UNRESOLVED", isSelectFilterOptionPlaceholder
+      ? "Generated Dashboard select-filter option-source filters must not retain literal {{ListDataID}} placeholders."
+      : "Generated Dashboard resources must not retain source-template placeholders such as {{ListSetID}}, {{ListID}}, {{DetailLayoutID}}, or any other {{...}} token after Collection template clone-and-map.", {
       page: page.title,
       path: match.path,
       value: match.value,
