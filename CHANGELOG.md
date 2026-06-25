@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.45
+
+- Release YAPK Bit/switch field hard gates from PR #227.
+- Add generated-final validation for Bit field metadata, string defaults, and default/custom `LayoutView` switch-control rows.
+- Run the Bit field validator from first-generation YAPK preflight so wrong `input`/`checkbox` Bit controls block signing readiness.
+- Make standalone full-app materialization emit planned boolean, yes/no, and flag fields as `FieldType: "Bit"` with runtime `Type: "switch"` and string default values.
+- Preserve existing root identity, TenantID/signing readiness, already-installed response classification, approval export-shape, and runtime proof boundaries from the 0.8.42 Office Asset analysis.
+
 ## 0.8.44
 
 - Release Data List Form Fields Grid v1.1 and Sub List control golden references from PR #225.
