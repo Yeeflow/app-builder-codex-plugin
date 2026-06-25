@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { validatePackageWrapperIcon } = require("./lib/application-icon-validation.cjs");
+const { validatePackageApplicationIcons } = require("./lib/application-icon-validation.cjs");
 
 function usage() {
   console.error("Usage: node scripts/validate-application-icon.js --package <app.yap|app.yapk> [--domain <domain-key>]");
@@ -41,11 +41,12 @@ if (loaded.error) {
   process.exit(1);
 }
 
-const result = validatePackageWrapperIcon(loaded.wrapper, { domain: args.domain });
+const result = validatePackageApplicationIcons(loaded.wrapper, { domain: args.domain });
 const report = {
   status: result.ok ? "pass" : "fail",
   package: loaded.package,
   icon: result.parsed,
+  decodedRootIconSurfaces: result.decodedRootIconSurfaces || [],
   domainRule: result.domainRule ? {
     domain: result.domainRule.domain,
     allowedIconTokens: result.domainRule.allowedIconTokens,

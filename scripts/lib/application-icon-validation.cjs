@@ -1,3 +1,5 @@
+const zlib = require("zlib");
+
 const IMAGE_URL_RE = /^(?:https?:)?\/\/|^data:image\//i;
 const IMAGE_EXTENSION_RE = /\.(?:png|jpe?g|gif|webp|svg|ico)(?:[?#].*)?$/i;
 const SVG_RE = /<svg\b|<\/svg>/i;
@@ -109,6 +111,57 @@ function validatePackageWrapperIcon(wrapper, options = {}) {
   return validateApplicationIconUrl(wrapper?.IconUrl, context);
 }
 
+function validatePackageApplicationIcons(wrapper, options = {}) {
+  const context = {
+    title: options.title ?? wrapper?.Title,
+    description: options.description ?? wrapper?.Description,
+    domain: options.domain,
+  };
+  const wrapperResult = validateApplicationIconUrl(wrapper?.IconUrl, context);
+  const findings = wrapperResult.findings.map((finding) => ({ ...finding, surface: "wrapper.IconUrl" }));
+  const decoded = decodePackageResource(wrapper?.Resource);
+  const rootSurfaces = [];
+  if (decoded && isPlainObject(decoded.ListSet)) {
+    rootSurfaces.push(["decoded.ListSet.IconUrl", decoded.ListSet.IconUrl]);
+    if (isPlainObject(decoded.ListSet.ListModel) && Object.prototype.hasOwnProperty.call(decoded.ListSet.ListModel, "IconUrl")) {
+      rootSurfaces.push(["decoded.ListSet.ListModel.IconUrl", decoded.ListSet.ListModel.IconUrl]);
+    }
+  }
+
+  for (const [surface, iconUrl] of rootSurfaces) {
+    const result = validateApplicationIconUrl(iconUrl, context);
+    for (const finding of result.findings) findings.push({ ...finding, surface });
+    if (wrapperResult.ok && typeof iconUrl === "string" && iconUrl.trim() && iconUrl.trim() !== String(wrapper.IconUrl || "").trim()) {
+      add(findings, "APPLICATION_ICON_ROOT_SURFACE_MISMATCH", "Root application icon surfaces must match the wrapper FontAwesome IconUrl JSON.", {
+        surface,
+        expected: wrapper.IconUrl,
+        actual: iconUrl,
+      });
+    }
+  }
+
+  return {
+    ok: findings.length === 0,
+    findings,
+    parsed: wrapperResult.parsed,
+    domainRule: wrapperResult.domainRule,
+    decodedRootIconSurfaces: rootSurfaces.map(([surface, iconUrl]) => ({ surface, iconUrl })),
+  };
+}
+
+function decodePackageResource(resource) {
+  if (typeof resource !== "string" || !resource.trim()) return null;
+  const raw = resource.trim();
+  try {
+    if (raw.startsWith("[______gizp______]")) {
+      return JSON.parse(zlib.gunzipSync(Buffer.from(raw.slice("[______gizp______]".length), "base64")).toString("utf8"));
+    }
+    return JSON.parse(zlib.brotliDecompressSync(Buffer.from(raw, "base64")).toString("utf8"));
+  } catch {
+    return null;
+  }
+}
+
 function domainRuleFor(options = {}) {
   if (options.domain) return DOMAIN_ICON_RULES.find((rule) => rule.domain === options.domain) || null;
   const haystack = `${options.title || ""} ${options.description || ""}`.toLowerCase();
@@ -125,6 +178,7 @@ function isPlainObject(value) {
 
 module.exports = {
   DOMAIN_ICON_RULES,
+  validatePackageApplicationIcons,
   validateApplicationIconUrl,
   validatePackageWrapperIcon,
 };

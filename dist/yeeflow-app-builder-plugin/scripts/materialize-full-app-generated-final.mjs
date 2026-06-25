@@ -68,15 +68,17 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   const idPaths = buildIdPaths(planDemand);
   const ids = allocateIds(idSource.ids, idPaths, findings);
   if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
+  const appIconUrl = options.iconUrl || DEFAULT_ICON;
 
   const decoded = planDemand.hasMaterialResources
-    ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids })
+    ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl })
     : buildDecodedPackage({
       appTitle,
       rootListId: numberId(ids["decoded.ListSet.ListID"]),
       dashboardLayoutId: stringId(ids["decoded.Pages[0].LayoutID"]),
       layoutResourceId: numberId(ids["decoded.Pages[0].LayoutInResources[0].ID"]),
       layoutResourceRefId: numberId(ids["decoded.Pages[0].LayoutInResources[0].RefId"]),
+      iconUrl: appIconUrl,
     });
   const resource = zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64");
   const wrapper = {
@@ -86,7 +88,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     ListID: stringId(ids["wrapper.ListID"]),
     Title: appTitle,
     Description: `Generated-final package materialized from ${path.basename(specPath)} and ${path.basename(planPath)}.`,
-    IconUrl: options.iconUrl || DEFAULT_ICON,
+    IconUrl: appIconUrl,
     Resource: resource,
     Notes: fixtureMode
       ? "Fixture-ID materialization for plugin regression only. Not signing/install eligible."
@@ -810,9 +812,9 @@ function isNonResourceName(value) {
   return false;
 }
 
-function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId }) {
+function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId, iconUrl = DEFAULT_ICON }) {
   return {
-    ListSet: listInfo({ listId: rootListId, title: appTitle, type: 1024, ext2: "{\"src\":true}" }),
+    ListSet: listInfo({ listId: rootListId, title: appTitle, type: 1024, ext2: "{\"src\":true}", iconUrl }),
     Pages: [
       {
         ListID: rootListId,
@@ -869,7 +871,7 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
   };
 }
 
-function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
+function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON }) {
   const dataListNames = planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`];
   const dataListByName = new Map();
   const listMetaByName = new Map();
@@ -1022,7 +1024,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
 
   return {
     ListSet: {
-      ...listInfo({ listId: rootListId, title: appTitle, type: 1024, ext2: "{\"generatedFinal\":true}" }),
+      ...listInfo({ listId: rootListId, title: appTitle, type: 1024, ext2: "{\"generatedFinal\":true}", iconUrl }),
       LayoutView: buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName, forms, pages }),
     },
     Pages: pages,
@@ -1144,6 +1146,7 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, list
     filters: normalizedFilters.map((filter) => ({ name: filter.filterName, fieldName: filter.fieldName })),
   };
   normalizeGeneratedDashboardControls(resource, name);
+  removeEmptyBusinessSections(resource);
   return resource;
 }
 
@@ -1205,7 +1208,7 @@ function buildDashboardSelectFilter({ filter, listName, listId, id, datasetRegio
       display_f: filter.fieldName,
       value_f: filter.fieldName,
       lablay: [null, "top"],
-      lab: { ty: [null, "xs-light"], color: "#667085" },
+      lab: { value: filter.filterName, ty: [null, "xs-light"], color: "#667085" },
       edit: {
         pcolor: "#98A2B3",
         placeholder: { color: "#98A2B3" },
@@ -1429,7 +1432,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
     search.attrs = {
       ...(search.attrs || {}),
-      placeholder: { ...(search.attrs?.placeholder || {}), value: `Search ${listName}` },
+      placeholder: { value: `Search ${listName}` },
       data: {
         ...(search.attrs?.data || {}),
         list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
@@ -1668,6 +1671,31 @@ function removeOperationsWithoutActions(root) {
     });
   };
   visit(root);
+}
+
+function removeEmptyBusinessSections(root) {
+  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
+      const slot = findFirstByIdentity(child, "section_content_area");
+      return hasMeaningfulBusinessContent(slot);
+    });
+  };
+  visit(root);
+}
+
+function hasMeaningfulBusinessContent(node) {
+  if (!node || !Array.isArray(node.children) || node.children.length === 0) return false;
+  return findDescendants(node, (control) => {
+    const type = String(control?.type || "");
+    if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
+    if (type === "button" && hasActionConfiguration(control)) return true;
+    if (hasIdentity(control, "form_grid_fields_wrapper")) return true;
+    return false;
+  }).length > 0;
 }
 
 function hasActionConfiguration(control) {
@@ -1971,7 +1999,7 @@ function approvalFormDef(id, title, actionLabel) {
   };
 }
 
-function listInfo({ listId, title, type, ext2 = "" }) {
+function listInfo({ listId, title, type, ext2 = "", iconUrl = "" }) {
   return {
     ListID: listId,
     Title: title,
@@ -1980,7 +2008,7 @@ function listInfo({ listId, title, type, ext2 = "" }) {
     IsItemPerm: false,
     IsVerRecord: false,
     HasComment: false,
-    IconUrl: "",
+    IconUrl: iconUrl,
     TableCode: "flowcraft",
     Ext1: "",
     Ext2: ext2,

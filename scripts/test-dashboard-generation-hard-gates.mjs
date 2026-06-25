@@ -313,6 +313,21 @@ function findBusinessSectionContentArea(root) {
   return found;
 }
 
+function pruneEmptyContentCardWrappers(root) {
+  const removable = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+  const isRemovableWrapper = (node) => ids(node).some((id) => removable.has(id));
+  const hasMaterializedSectionContent = (node) => {
+    const slot = find(node, "section_content_area");
+    return Boolean(slot && Array.isArray(slot.children) && slot.children.length > 0);
+  };
+  const prune = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    for (const child of node.children) prune(child);
+    node.children = node.children.filter((child) => !isRemovableWrapper(child) || hasMaterializedSectionContent(child));
+  };
+  prune(root);
+}
+
 function visitWithAncestors(node, ancestors, fn) {
   if (!node || typeof node !== "object") return;
   fn(node, ancestors);
@@ -385,6 +400,7 @@ function validV11Resource(flags = {}) {
   }
   const main = find(root, "Main") || find(root, "main");
   if (flags.mainStyle && main) main.attrs.style = flags.mainStyle;
+  pruneEmptyContentCardWrappers(root);
   return root;
 }
 
@@ -578,8 +594,32 @@ try {
 
   expectCode("filter has data field but no display_f", ["--package", writePackage(tempDir, "filter-no-display", decoded({ filterPatch: { display_f: "" } }))], "DASH_FILTER_DISPLAY_FIELD_MISSING");
   expectCode("filter has no value_f", ["--package", writePackage(tempDir, "filter-no-value", decoded({ filterPatch: { value_f: "" } }))], "DASH_FILTER_VALUE_FIELD_MISSING");
+  expectCode("select filter missing lab.value fails", ["--package", writePackage(tempDir, "filter-no-label-value", decoded({ filterPatch: { lab: { ty: [null, "xs-light"] } } }))], "DASH_FILTER_LABEL_VALUE_MISSING");
+  expectCode("select filter placeholder string-spread numeric keys fail", ["--package", writePackage(tempDir, "filter-placeholder-numeric-keys", decoded({ filterPatch: { placeholder: { 0: "S", 1: "e", value: "Select priority" } } }))], "DASH_FILTER_PLACEHOLDER_NUMERIC_KEYS_FORBIDDEN");
   expectCode("filter copied without app-specific attrs.data.field fails", ["--package", writePackage(tempDir, "filter-no-field", decoded({ filterPatch: { data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, filter: [] } } }))], "DASH_FILTER_FIELD_UNRESOLVED|DASH_GOLDEN_RESOURCE_FILTER_DATA_FIELD_MISSING|DASH_LAYOUT_DATA_FILTER_FIELD_MISSING");
   expectCode("filter lacks label/dropdown style metadata", ["--package", writePackage(tempDir, "filter-no-style", decoded({ filterPatch: { lablay: undefined, lab: {}, edit: {} } }))], "DASH_FILTER_LABEL_LAYOUT_MISSING|DASH_FILTER_PLACEHOLDER_COLOR_MISSING|DASH_FILTER_RADIUS_MISSING");
+
+  const searchPlaceholderObject = validV11Resource();
+  findBusinessSectionContentArea(searchPlaceholderObject).children.unshift({
+    type: "search-filter",
+    id: "search_filter_bad_placeholder",
+    name: "Search Requests",
+    attrs: { placeholder: { 0: "S", 1: "e", value: "Search Requests" } },
+  });
+  expectCode("search filter placeholder string-spread numeric keys fail", ["--package", writePackage(tempDir, "search-placeholder-numeric-keys", decodedWithResource(searchPlaceholderObject))], "DASH_SEARCH_FILTER_PLACEHOLDER_NUMERIC_KEYS_FORBIDDEN");
+
+  const emptyContentCard = validV11Resource();
+  find(emptyContentCard, "Content").children.push({
+    type: "container",
+    id: "content_card_wrapper",
+    name: "content_card_wrapper",
+    attrs: { style: style([null, "1"]) },
+    children: [
+      { type: "container", id: "section_title_header", name: "section_title_header", attrs: { style: style([null, "1"]) }, children: [{ type: "heading", name: "Empty Section", attrs: { headc: { title: { value: "Empty Section" } } } }] },
+      { type: "container", id: "section_content_area", name: "section_content_area", attrs: { style: style([null, "1"]) }, children: [] },
+    ],
+  });
+  expectCode("empty visible v1.1 content card section fails", ["--package", writePackage(tempDir, "empty-section-content-area", decodedWithResource(emptyContentCard))], "DASH_EMPTY_SECTION_CONTENT_AREA");
 
   const adHocRootFilterGroup = validV11Resource();
   find(adHocRootFilterGroup, "Content").children.push(eventPortfolioFilterGroup());

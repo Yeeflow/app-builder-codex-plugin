@@ -157,6 +157,7 @@ const requiredDocs = [
   "docs/training/data-list-form-layouts-v1.1-golden-reference-training-report.md",
   "docs/training/data-list-form-fields-grid-template-training-report.md",
   "docs/training/yapk-bit-switch-root-identity-signing-gates-training-report.md",
+  "docs/training/root-icon-dashboard-empty-section-filter-hard-gates-training-report.md",
   "docs/reference/dashboard-golden-references.json",
   "docs/reference/dashboard-dataset-presentation-golden-references.json",
   "docs/reference/data-analytics-golden-references.json",
