@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.39
+
+- Release full-app Dashboard filter, dataset-region, and resource-depth materialization from PR #215.
+- Generate App Plan-declared Dashboard select filters with field metadata, styling contract, and Collection consumption bindings instead of search-only filter output.
+- Align Dashboard dataset-region parsing so generated regions match App Plan rows and approved internal Collection wrapper IDs are not treated as selected template IDs.
+- Complete grid-table Collection gap/detail-layout contracts and preserve source-list detail links for generated Dashboard Collections.
+- Expand generated data lists with planned business fields and attach custom data-list forms to the correct host lists.
+- Preserve generated-final signing boundaries: local fixture regression may prove preflight, but signing/install/runtime proof still require API-issued IDs and all generated-final gates to pass.
+
 ## 0.8.38
 
 - Release full-app Dashboard v1.1 Collection template materialization from PR #213.

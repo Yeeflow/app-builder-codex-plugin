@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.38`
+- Version: `0.8.39`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.38` releases full-app Dashboard v1.1 Collection template materialization from PR #213: the standalone materializer now clones the Dashboard Page Layouts v1.1 shell, parses App Plan Dashboard dataset rows, and materializes the exact selected Collection template inside approved business slots instead of emitting minimal hand-built dashboard structures.
+Current release `0.8.39` releases full-app Dashboard filter, dataset-region, and resource-depth materialization from PR #215: the standalone materializer now emits App Plan-declared Dashboard select filters, maps dataset regions reliably, preserves approved internal Collection wrapper references without misclassification, completes grid-table gap/detail-layout contracts, expands generated data lists with planned business fields, and attaches custom forms to the correct source lists.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.38
+Version: 0.8.39
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.38
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.39
 ```
 
 ## What Is Included
