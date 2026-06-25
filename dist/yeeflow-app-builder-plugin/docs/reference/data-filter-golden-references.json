@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "approvedTemplateIds": [
+    "dashboard_standard_filter_group"
+  ],
+  "references": [
+    {
+      "templateId": "dashboard_standard_filter_group",
+      "displayName": "Dashboard Standard Filter Group",
+      "sourceTemplate": "docs/reference/data-filter-standard-filter-group.template.json",
+      "rootWrapperId": "dashboard_standard_filter_group",
+      "derivedFromGoldenReference": "event_portfolio_filter_group",
+      "controlTypes": [
+        "radio-filter",
+        "select-filter",
+        "checkbox-filter",
+        "relative-period",
+        "hierarchy-filter",
+        "sorting-filters"
+      ],
+      "allowedSurfaces": [
+        "dashboard",
+        "data-list-form",
+        "approval-form-submission",
+        "approval-form-task",
+        "data-list-workflow-task",
+        "schedule-workflow-task"
+      ],
+      "summary": "Standard wrapper for two or more page-level Data Filter controls. It preserves the Event Portfolio filter-group visual contract while allowing each child filter to be mapped to the generated app's source list, field, label, placeholder, and downstream consumers.",
+      "whenToUse": "Use whenever a generated Dashboard, custom Data List form, Approval submission form, Approval task form, Data list workflow task form, or Schedule workflow task form contains two or more page-level Data Filter controls.",
+      "whenNotToUse": "Do not use for a single page-level filter, and do not use it for local toolbar search boxes inside Collection templates.",
+      "editableRegions": [
+        "child filter label text",
+        "child filter placeholder text",
+        "child filter data source",
+        "child filter source field",
+        "child filter binding",
+        "child filter consumer linkage"
+      ],
+      "lockedContract": [
+        "root container identity",
+        "root container row layout",
+        "root container gap and alignment",
+        "child filter label typography",
+        "child filter label layout tuple",
+        "child filter placeholder color",
+        "child filter radius",
+        "child filter fixed-width positioning",
+        "child filter dropdown body shadow and radius"
+      ],
+      "requiredAppPlanDeclaration": "When a page or form plans two or more page-level Data Filter controls, the App Plan must state that the filters use dashboard_standard_filter_group.",
+      "generationProof": "Generated-final validation must prove every page with two or more page-level Data Filter controls wraps those filters in dashboard_standard_filter_group and preserves the locked visual/filter contract.",
+      "proofBoundary": "This template validates export-shape placement and filter-control contract. Runtime data changes still require explicit browser/runtime proof."
+    }
+  ]
+}

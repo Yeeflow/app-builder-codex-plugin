@@ -459,6 +459,18 @@ Rules:
 | --- | --- | --- | --- | --- | --- | --- |
 | <Filter> | <List> | <Field> | <Sections> | Data Filter / Text search / choice/date filter / runtime-proof-required / export-learning-required / deferred | <Default scope> | <Proof/deferred note> |
 
+#### Page Level Data Filter Group Template Selection
+
+| Page/Form Surface | Page/Form Name | Filter Count | Selected Data Filter Group Template | Included Filters | Placement Region | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Dashboard / Custom Data List form / Approval submission / Approval task / Data list workflow task / Schedule workflow task | <Name> | <Count> | dashboard_standard_filter_group when count is two or more | <Filters> | <Approved section_content_area> | <Reason> | Generated-final validation plus runtime proof if linkage is claimed |
+
+Rules:
+
+- If a page or form contains two or more page level Data Filter controls, select `dashboard_standard_filter_group`.
+- Do not use this table for local Collection toolbar search boxes.
+- Do not include generated `ListID`, `ListSetID`, runtime field storage IDs, or copied control JSON.
+
 #### Summary Metrics
 
 | Metric Name | Source Data List | Source Field(s) | Calculation Logic | Selected Yeeflow Control Type Category | Display Format Intent | Proof Boundary or Deferred Note |
