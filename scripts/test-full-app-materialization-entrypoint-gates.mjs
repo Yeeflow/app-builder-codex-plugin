@@ -218,6 +218,20 @@ try {
     assert.equal(String(page.LayoutInResources[0].RefId), String(page.LayoutID), "dashboard LayoutInResources[0].RefId must equal LayoutID");
   }
   assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
+  const resourceFixtureOut = path.join(tempDir, "resource-plan-fixture");
+  const resourceFixtureRun = expectPass("nontrivial fixture mode allocates enough synthetic API-shaped IDs", [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", resourcePlan,
+    "--out-dir", resourceFixtureOut,
+    "--allow-fixture-api-ids-for-tests",
+    "--json",
+  ]);
+  const resourceFixtureReport = JSON.parse(resourceFixtureRun.stdout);
+  assert.equal(resourceFixtureReport.status, "pass");
+  assert.equal(resourceFixtureReport.mode, "fixture-regression");
+  assert.equal(resourceFixtureReport.signingEligible, false);
+  assert.match(fs.readFileSync(resourceFixtureReport.outputs.idProvenance, "utf8"), /api-generated-fixture-for-tests/);
   assert.match(decodedResource.ListSet.LayoutView, /Requests/);
   assert.match(decodedResource.ListSet.LayoutView, /Administration/);
 

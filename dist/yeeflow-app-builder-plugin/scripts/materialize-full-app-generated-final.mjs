@@ -1840,10 +1840,15 @@ function loadIdSource({ cwd, apiIdManifest, fixtureMode, findings }) {
     return { ids };
   }
   if (fixtureMode) {
-    return { ids: ["910000000000000001", "910000000000000002", "910000000000000003", "910000000000000004", "910000000000000005", "910000000000000006"] };
+    return { ids: buildFixtureApiIds(1024) };
   }
   findings.push(error("FULL_APP_MATERIALIZATION_API_ID_SOURCE_REQUIRED", "Generated-final materialization requires --api-id-manifest with API-issued IDs. Use --allow-fixture-api-ids-for-tests only in plugin regression tests."));
   return null;
+}
+
+function buildFixtureApiIds(count) {
+  const base = 910000000000000001n;
+  return Array.from({ length: count }, (_, index) => String(base + BigInt(index)));
 }
 
 function allocateIds(ids, paths, findings) {
