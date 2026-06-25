@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.50`
+`0.8.51`
+
+Version `0.8.51` releases live E2E install readiness gates from PR #239. Generated-final preflight now requires wrapper/root `ListID` alignment, Dashboard page root ownership alignment, per-page Dashboard template control UUID re-instantiation, API-issued provenance for IDs embedded inside Dashboard JSON resources and encoded approval `DefResource` payloads, approval DefResource key alignment, and exact Version Management `PackageId` row status `Succeed` before final install success can be claimed. Package API `apiStatus: 0` remains submitted-only and does not prove install completion.
 
 Version `0.8.50` releases signing-readiness preflight handoff reporting from PR #237. Standalone materialization remains signing-ineligible and reports `materializerSigningEligible: false`, `preflightEligibleForSigning: null`, and `signingReadinessSource: "not-run"`. `yapk-first-generation-preflight` now reports the actual local pre-sign readiness with `preflightEligibleForSigning`, `signingReadinessSource: "yapk-first-generation-preflight"`, and `signingReadiness`, so a passed preflight can proceed to explicit signing without misreading the materializer boundary as a package-quality failure.
 
