@@ -10,6 +10,7 @@ import { validateDashboardPageLayoutTemplate } from "./validate-dashboard-page-l
 import { validateDashboardDatasetPresentationGoldenReferences } from "./validate-dashboard-dataset-presentation-golden-references.mjs";
 
 const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"]);
+const SEARCH_FILTER_TYPE = "search-filter";
 const RECORD_DISPLAY_FIELD = "ListDataID";
 const CONTAINER_WIDTH_CODES = new Set(["1", "2", "3"]);
 const NUMERIC_AGG_FUNCS = new Set(["SUM", "AVG", "AVERAGE", "MIN", "MAX"]);
@@ -82,6 +83,7 @@ function validateDecodedDashboards(decoded, findings) {
   for (const page of collectDashboardPages(decoded)) {
     for (const entry of page.controls) {
       if (FILTER_TYPES.has(String(entry.control?.type || ""))) validateFilter(entry, page, listIndex, findings);
+      if (String(entry.control?.type || "") === SEARCH_FILTER_TYPE) validateSearchFilter(entry, page, findings);
       if (String(entry.control?.type || "") === "container") validateContainer(entry, page, findings);
     }
     validateDashboardBusinessRuntime(page, listIndex, findings);
@@ -125,6 +127,7 @@ function validateDashboardBusinessRuntime(page, listIndex, findings) {
   }
 
   validatePageTitleSectionPurity(page, findings);
+  validateNonEmptyBusinessSections(page, findings);
   validateIndependentContentCardWrappers(page, collections, findings);
   validateDynamicUserFieldTypes(page, listIndex, findings);
 }
@@ -173,6 +176,41 @@ function validateFilter(entry, page, listIndex, findings) {
   if (!present(attrs.edit?.normal?.border?.radius)) {
     findings.push(error("DASH_FILTER_RADIUS_MISSING", "Dashboard filters must set attrs.edit.normal.border.radius using a Yeeflow-supported radius shape.", { page: page.title, path: `${pointer}.attrs.edit.normal.border.radius` }));
   }
+  if (String(control.type || "") === "select-filter" && !present(attrs.lab?.value)) {
+    findings.push(error("DASH_FILTER_LABEL_VALUE_MISSING", "Dashboard select-filter controls must set attrs.lab.value to the visible filter label text.", { page: page.title, path: `${pointer}.attrs.lab.value`, type: control.type }));
+  }
+  validatePlaceholderShape(attrs.placeholder, `${pointer}.attrs.placeholder`, page, findings, { codePrefix: "DASH_FILTER", required: true });
+}
+
+function validateSearchFilter(entry, page, findings) {
+  const attrs = entry.control?.attrs || {};
+  validatePlaceholderShape(attrs.placeholder, `${entry.pointer}.attrs.placeholder`, page, findings, { codePrefix: "DASH_SEARCH_FILTER", required: true });
+}
+
+function validatePlaceholderShape(value, pointer, page, findings, { codePrefix, required }) {
+  if (!present(value)) {
+    if (required) findings.push(error(`${codePrefix}_PLACEHOLDER_VALUE_MISSING`, "Generated filter controls must include an export-proven placeholder text value.", { page: page.title, path: pointer }));
+    return;
+  }
+  if (typeof value === "string") {
+    if (value.trim() === "[object Object]") {
+      findings.push(error(`${codePrefix}_PLACEHOLDER_OBJECT_STRING_FORBIDDEN`, "Generated filter placeholder must not render as [object Object].", { page: page.title, path: pointer, value }));
+    }
+    return;
+  }
+  if (!isObject(value)) {
+    findings.push(error(`${codePrefix}_PLACEHOLDER_SHAPE_INVALID`, "Generated filter placeholder must be a string or an object containing only a string value plus supported style metadata.", { page: page.title, path: pointer, value }));
+    return;
+  }
+  const numericKeys = Object.keys(value).filter((key) => /^\d+$/.test(key));
+  if (numericKeys.length) {
+    findings.push(error(`${codePrefix}_PLACEHOLDER_NUMERIC_KEYS_FORBIDDEN`, "Generated filter placeholder objects must not be created by spreading a string into numeric character keys.", { page: page.title, path: pointer, numericKeys: numericKeys.slice(0, 8) }));
+  }
+  if (value.value !== undefined && (typeof value.value !== "string" || !value.value.trim())) {
+    findings.push(error(`${codePrefix}_PLACEHOLDER_VALUE_INVALID`, "Generated filter placeholder object value must be a non-empty string.", { page: page.title, path: `${pointer}.value`, value: value.value }));
+  } else if (value.value === undefined && !("color" in value) && !("pcolor" in value)) {
+    findings.push(error(`${codePrefix}_PLACEHOLDER_VALUE_MISSING`, "Generated filter placeholder object must include a string value when it is used for placeholder text.", { page: page.title, path: pointer, value }));
+  }
 }
 
 function filterConsumedByCollection(filterEntry, collectionEntry) {
@@ -209,6 +247,49 @@ function validatePageTitleSectionPurity(page, findings) {
       }
     }
   }
+}
+
+function validateNonEmptyBusinessSections(page, findings) {
+  const approvedWrappers = ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"];
+  for (const entry of page.controls) {
+    if (entry.control?.type !== "container") continue;
+    if (isInsideDashboardDatasetTemplate(entry, page)) continue;
+    if (!approvedWrappers.some((identity) => matchesSemanticId(entry.control, identity))) continue;
+    const slot = findDescendantEntry(entry.control, `${entry.pointer}`, "section_content_area");
+    if (!slot) continue;
+    if (!hasMeaningfulBusinessContent(slot.control)) {
+      findings.push(error("DASH_EMPTY_SECTION_CONTENT_AREA", "Visible Dashboard v1.1 content card wrappers must not keep an empty title-only section_content_area; remove unused copied template sections or materialize real business content.", {
+        page: page.title,
+        path: slot.pointer,
+        wrapperPath: entry.pointer,
+      }));
+    }
+  }
+}
+
+function findDescendantEntry(control, pointer, semanticId) {
+  const descendants = collectDescendants(control, pointer);
+  return descendants.find((entry) => matchesSemanticId(entry.control, semanticId)) || null;
+}
+
+function hasMeaningfulBusinessContent(control) {
+  if (!control || !Array.isArray(control.children) || control.children.length === 0) return false;
+  const descendants = collectDescendants(control, "$");
+  return descendants.some((entry) => {
+    const type = String(entry.control?.type || "");
+    if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
+    if (type === "button" && hasActionConfiguration(entry.control)) return true;
+    if (matchesSemanticId(entry.control, "form_grid_fields_wrapper")) return true;
+    return false;
+  });
+}
+
+function hasActionConfiguration(control) {
+  const attrs = control?.attrs || {};
+  if (attrs.control_action || attrs.action || attrs["action-type"] || attrs.actionType) return true;
+  if (Array.isArray(attrs.actions) && attrs.actions.length) return true;
+  if (Array.isArray(control?.actions) && control.actions.length) return true;
+  return false;
 }
 
 function validateIndependentContentCardWrappers(page, collections, findings) {

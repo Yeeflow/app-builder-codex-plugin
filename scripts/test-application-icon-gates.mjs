@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -16,6 +17,29 @@ function writePackage(dir, name, iconUrl, patch = {}) {
     IconUrl: iconUrl,
     Resource: "placeholder-not-read-by-icon-validator",
     ...patch,
+  };
+  fs.writeFileSync(file, `${JSON.stringify(wrapper)}\n`);
+  return file;
+}
+
+function writeDecodedPackage(dir, name, iconUrl, decodedPatch = {}) {
+  const file = path.join(dir, `${name}.yapk`);
+  const decoded = {
+    ListSet: {
+      ListID: "1908351910552752128",
+      Title: "Facility Maintenance Request Management",
+      IconUrl: iconUrl,
+      ListModel: { IconUrl: iconUrl },
+    },
+    Pages: [],
+    Childs: [],
+    ...decodedPatch,
+  };
+  const wrapper = {
+    Title: "Facility Maintenance Request Management",
+    Description: "Facility maintenance work order intake, assignment, SLA, and closure app.",
+    IconUrl: iconUrl,
+    Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64"),
   };
   fs.writeFileSync(file, `${JSON.stringify(wrapper)}\n`);
   return file;
@@ -45,6 +69,25 @@ try {
   const validFile = writePackage(tempDir, "valid-fontawesome", validIcon);
   const validReport = expectPass("valid FontAwesome JSON icon", validFile);
   assert.deepEqual(validReport.icon, { b: "#E6F0FF", i: "fa-solid fa-screwdriver-wrench", c: "#0065FF" });
+
+  const decodedValidFile = writeDecodedPackage(tempDir, "valid-decoded-root-fontawesome", validIcon);
+  const decodedValidReport = expectPass("valid decoded root FontAwesome icon surfaces", decodedValidFile);
+  assert.equal(decodedValidReport.decodedRootIconSurfaces.length, 2);
+
+  expectCode(
+    "decoded root ListSet.IconUrl missing",
+    writeDecodedPackage(tempDir, "decoded-root-icon-missing", validIcon, {
+      ListSet: { ListID: "1908351910552752128", Title: "Facility Maintenance Request Management", IconUrl: "", ListModel: { IconUrl: validIcon } },
+    }),
+    "APPLICATION_ICONURL_REQUIRED",
+  );
+  expectCode(
+    "decoded root ListModel.IconUrl mismatch",
+    writeDecodedPackage(tempDir, "decoded-root-listmodel-icon-mismatch", validIcon, {
+      ListSet: { ListID: "1908351910552752128", Title: "Facility Maintenance Request Management", IconUrl: validIcon, ListModel: { IconUrl: JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" }) } },
+    }),
+    "APPLICATION_ICON_ROOT_SURFACE_MISMATCH",
+  );
 
   expectCode(
     "image URL IconUrl",
