@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.49
+
+- Release Dashboard select-filter option-source placeholder hard gates from PR #235.
+- Stop generated Dashboard select filters from emitting literal `{{ListDataID}}` current-item placeholders in `attrs.data.filter[].value`.
+- Emit `filter: []` for select-filter option sources when no validated runtime option-source filter is required.
+- Add a specific generated-final validator code, `DASH_SELECT_FILTER_OPTION_SOURCE_PLACEHOLDER_UNRESOLVED`, plus focused regression coverage and training guidance.
+
 ## 0.8.48
 
 - Release Dashboard Collection action placeholder hard gates from PR #233.
