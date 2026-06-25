@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.47`
+- Version: `0.8.48`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.47` releases full-app Data Analytics materialization runtime gates from PR #231: generated-final full-app materialization now parses App Plan Data Analytics Template Selection rows, clones selected approved Pie, Column, Bar, Line, Area, and Pivot templates into Dashboard v1.1 two/three-column sections, binds chart/pivot runtime models to included data-list fields, and first-generation preflight blocks planned analytics templates that are not materialized. The materializer also emits runtime-safe select choices, maps identity fields to Dynamic user controls, prevents unresolved Collection detail-link placeholders, and writes post-install seed-data companion artifacts instead of embedding sample rows in `.yapk` content.
+Current release `0.8.48` releases Dashboard Collection action placeholder hard gates from PR #233: generated-final Dashboard Collection template actions must rewrite or remove source-template placeholders such as `{{ListSetID}}`, `{{ListID}}`, `{{DetailLayoutID}}`, `{{sourceLongId}}`, and `{{search}}` before signing readiness. The standalone materializer now rewrites concrete runtime list/detail references, prunes unsupported detail/open actions when no detail layout exists, emits expression-token filter/fulltext conditions, and the dataset golden-reference validator blocks unresolved template placeholders anywhere in decoded Dashboard resources.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.47
+Version: 0.8.48
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.47
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.48
 ```
 
 ## What Is Included

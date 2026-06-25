@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.47`
+`0.8.48`
+
+Version `0.8.48` releases Dashboard Collection action placeholder hard gates from PR #233. Generated-final Dashboard Collection template actions must rewrite or remove source-template placeholders such as `{{ListSetID}}`, `{{ListID}}`, `{{DetailLayoutID}}`, `{{sourceLongId}}`, and `{{search}}` before signing readiness. The standalone materializer now rewrites concrete runtime list/detail references, prunes unsupported detail/open actions when no detail layout exists, emits expression-token filter/fulltext conditions, and the dataset golden-reference validator blocks unresolved template placeholders anywhere in decoded Dashboard resources.
 
 Version `0.8.47` releases full-app Data Analytics materialization runtime gates from PR #231. Generated-final full-app materialization parses App Plan Data Analytics Template Selection rows, clones selected approved Pie, Column, Bar, Line, Area, and Pivot templates into Dashboard Page Layouts v1.1 two/three-column sections, binds chart/pivot runtime models to included data-list fields, and first-generation preflight blocks planned analytics templates that are not materialized. The materializer also emits runtime-safe select choices, maps identity fields to Dynamic user controls, prevents unresolved Collection detail-link placeholders, and writes post-install seed-data companion artifacts instead of embedding sample rows in generated-final `.yapk` content.
 
