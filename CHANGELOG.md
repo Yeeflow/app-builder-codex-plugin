@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.41
+
+- Release full-app materializer fixture ID demand alignment from PR #219.
+- Allocate enough synthetic API-shaped fixture IDs for nontrivial App Plan regression materialization instead of using a tiny fixed six-ID set.
+- Keep fixture provenance clearly regression-only through `api-generated-fixture-for-tests` and keep fixture output `signingEligible: false`.
+- Preserve proof boundaries: fixture materialization must not be signed, installed/imported, upgraded, seeded, sent through Version Management, or reported as live Yeeflow ID provenance.
+
 ## 0.8.40
 
 - Release Dashboard KPI temp variable binding hard gates from PR #217.
