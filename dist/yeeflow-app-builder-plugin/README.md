@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.42`
+- Version: `0.8.43`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.42` releases Dashboard Summary hidden-host and field metadata gates from PR #221: generated Dashboard KPI Summary controls now live inside dedicated hidden host containers, Summary count controls include designer-shaped `ListDataID` field metadata, and first-generation YAPK preflight blocks missing Summary hidden hosts or unresolved Summary field metadata before signing readiness can be considered.
+Current release `0.8.43` releases Data List Form Layouts v1.1 golden references from PR #223: generated custom Data List New/Edit forms must clone `data_list_form_layout_new_edit_v1_1`, View Item forms must clone `data_list_form_layout_view_item_v1_1`, App Plans must select the correct Data List Form Layout template, and first-generation YAPK preflight blocks custom forms that mutate locked template regions or place business content outside approved slots.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.42
+Version: 0.8.43
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.42
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.43
 ```
 
 ## What Is Included
