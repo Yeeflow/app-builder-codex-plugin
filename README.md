@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.45`
+- Version: `0.8.46`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.45` releases YAPK Bit/switch field hard gates from PR #227: generated-final YAPK Bit fields must use `FieldType = "Bit"`, runtime `Type = "switch"`, string default values `"0"` or `"1"`, and matching switch rows in default and custom `LayoutView` metadata. First-generation preflight now blocks wrong Bit control types before signing readiness, and the standalone materializer maps planned boolean, yes/no, and flag fields to switch metadata.
+Current release `0.8.46` releases root application icon, Dashboard empty-section, and filter-shape hard gates from PR #229: generated-final packages must keep wrapper and decoded root `ListSet.IconUrl` FontAwesome JSON surfaces aligned, reject empty visible Dashboard v1.1 `section_content_area` modules, require select-filter label values, reject malformed select/search placeholder objects, and make the standalone materializer propagate root icons, prune unused copied dashboard sections, and emit safe filter label/placeholder shapes.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.45
+Version: 0.8.46
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.45
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.46
 ```
 
 ## What Is Included

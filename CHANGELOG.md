@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.46
+
+- Release root application icon, Dashboard empty-section, and filter-shape hard gates from PR #229.
+- Validate decoded root `ListSet.IconUrl` surfaces in addition to wrapper `IconUrl`, and block blank, image-based, or mismatched root application icon metadata before signing readiness.
+- Reject visible Dashboard Page Layouts v1.1 content-card sections whose `section_content_area` remains empty after template copy-and-map.
+- Enforce select-filter rendered label values and valid select/search placeholder shapes so string-spread numeric placeholder objects cannot render as `[object Object]`.
+- Make the standalone full-app materializer propagate FontAwesome root icons, remove unused copied dashboard sections, and emit safe filter label/placeholder metadata.
+
 ## 0.8.45
 
 - Release YAPK Bit/switch field hard gates from PR #227.
