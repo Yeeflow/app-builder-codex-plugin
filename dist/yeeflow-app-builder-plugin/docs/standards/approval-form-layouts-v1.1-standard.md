@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Approval Form Layouts v1.1 is the page-level golden reference standard for generated Yeeflow Approval form submission and task pages. It aligns Approval forms with Dashboard Page Layouts v1.1 and Data List Form Layouts v1.1 while preserving Approval-specific runtime controls.
+Approval Form Layouts v1.1 is the page-level golden reference standard for generated Yeeflow Approval form submission pages and workflow task pages. It aligns Approval forms, Data list workflow task forms, and Schedule workflow task forms with Dashboard Page Layouts v1.1 and Data List Form Layouts v1.1 while preserving workflow-specific runtime controls.
 
 Generation must copy one of the approved export-shaped Approval form templates first, then remove, duplicate, or adapt only the allowed business regions according to the App Plan.
 
@@ -28,7 +28,13 @@ The templates were parsed from the user-provided `Approval form page layout.ywf`
 
 Use `approval_form_layout_submission_v1_1` for the single submission form page in every generated Approval form.
 
-Use `approval_form_layout_task_v1_1` for every generated task form page. An Approval form may have zero or multiple task forms, but every generated task form must use this template. When there is no special business need for assignee-editable fields, task-form field controls should be readonly and should present submitted context for review.
+Use `approval_form_layout_task_v1_1` for every generated workflow task form page. This includes:
+
+- Approval form task pages
+- Data list workflow task forms
+- Schedule workflow task forms
+
+An Approval form may have zero or multiple task forms, but every generated task form must use this template. Data list workflows and Schedule workflows may also contain zero or multiple task forms; every generated task form in those workflow families must use this same task template. When there is no special business need for assignee-editable fields, task-form field controls should be readonly and should present submitted or workflow context for review.
 
 ## Required Page Shell
 
@@ -132,6 +138,22 @@ Rules:
 - Do not include generated `ListID`, `FormID`, `ProcModelID`, `FlowKey`, `DefResourceID`, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
 - If a task page needs assignee-editable fields, the App Plan must state that business reason; otherwise task fields should be generated readonly.
 - Approval form pages may use approved Collection templates and current-record field layout templates in allowed slots, but must not select Data Analytics templates.
+
+When a Data list workflow or Schedule workflow includes a task form, that workflow plan section must include a Workflow Task Form Layout Template Selection table and select `approval_form_layout_task_v1_1` for each generated workflow task form.
+
+Add this table under the Data List Workflows Plan or Schedule Workflows Plan when workflow task forms are planned:
+
+| Workflow | Host Resource | Task Form | Workflow Surface | Selected Workflow Task Form Layout Template | Business Sections Needed | Editable Task Inputs | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Workflow> | <List/Library/Schedule> | <Task form> | Data list workflow task / Schedule workflow task | approval_form_layout_task_v1_1 | <Sections> | <None or fields> | <Reason> | Generated-final validation |
+
+Rules:
+
+- Data list workflow task forms must select `approval_form_layout_task_v1_1`.
+- Schedule workflow task forms must select `approval_form_layout_task_v1_1`.
+- Do not create a separate or simplified task-page template for Data list workflows or Schedule workflows.
+- The same locked `action_panel_flow_history_wrapper`, hidden form title CSS, page background, content width, section structure, allowed slots, readonly-default field guidance, and Data Analytics prohibition apply to workflow task forms outside Approval forms.
+- Do not include generated `ListID`, `FormID`, workflow IDs, task URLs, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
 
 ## Required Gates
 

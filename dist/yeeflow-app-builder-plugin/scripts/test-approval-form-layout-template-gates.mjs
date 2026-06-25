@@ -20,6 +20,7 @@ try {
   expectPass("Submission form template resource passes", ["--resource", writeJson("submission-valid.json", submissionResource()), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"]);
   expectPass("Task form template resource passes", ["--resource", writeJson("task-valid.json", taskResource()), "--template", TASK_TEMPLATE_ID, "--page-role", "task"]);
   expectPass("generated package with submission and task templates passes", ["--package", writePackage("valid-approval-layout.yapk", decodedPackage())]);
+  expectPass("generated package with data-list and schedule workflow task templates passes", ["--package", writePackage("valid-workflow-task-layouts.yapk", decodedPackage({ workflowTasks: true }))]);
   expectPass("App Plan approval layout selections pass", ["--plan", writeText("valid-app-plan.md", appPlan())]);
 
   const missingMarker = taskResource({ marker: false });
@@ -45,6 +46,13 @@ try {
   expectCode("App Plan approval form without layout selection table fails", ["--plan", writeText("plan-missing-selection.md", appPlan({ omitSelection: true }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING");
   expectCode("App Plan submission selecting task template fails", ["--plan", writeText("plan-submission-wrong.md", appPlan({ submissionTemplate: TASK_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_SUBMISSION_TEMPLATE_MISMATCH");
   expectCode("App Plan task selecting submission template fails", ["--plan", writeText("plan-task-wrong.md", appPlan({ taskTemplate: SUBMISSION_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_TASK_TEMPLATE_MISMATCH");
+  expectCode("App Plan schedule workflow task without layout table fails", ["--plan", writeText("plan-schedule-task-missing.md", appPlan({ omitScheduleTaskSelection: true }))], "APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_SELECTION_TABLE_MISSING");
+  expectCode("App Plan data-list workflow task selecting submission template fails", ["--plan", writeText("plan-data-list-task-wrong.md", appPlan({ dataListWorkflowTaskTemplate: SUBMISSION_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_TEMPLATE_UNKNOWN");
+
+  const workflowTaskWrong = taskResource();
+  workflowTaskWrong.approvalFormLayoutTemplateId = SUBMISSION_TEMPLATE_ID;
+  workflowTaskWrong.derivedFromApprovalFormLayoutTemplate = SUBMISSION_TEMPLATE_ID;
+  expectCode("data-list workflow task using submission marker fails", ["--package", writePackage("wrong-workflow-task-template.yapk", decodedPackage({ workflowTasks: true, workflowTaskResource: workflowTaskWrong }))], "APPROVAL_FORM_LAYOUT_TEMPLATE_MISMATCH");
 
   console.log(JSON.stringify({ status: "pass", results }, null, 2));
 } finally {
@@ -108,7 +116,7 @@ function decodedPackage(options = {}) {
       { id: "task-page", type: 2, title: "Task form page layout", pagetype: 1, formdef: task },
     ],
   };
-  return {
+  const decoded = {
     ListSet: { ListID: "1909200000000000001", Title: "Approval Form Layout Test" },
     Childs: [],
     Forms: [
@@ -126,9 +134,39 @@ function decodedPackage(options = {}) {
     Navigation: [],
     IconUrl: "{\"b\":\"#0f766e\",\"i\":\"fa-solid fa-clipboard-check\",\"c\":\"#ffffff\"}",
   };
+  if (options.workflowTasks) {
+    const workflowTask = options.workflowTaskResource || taskResource();
+    decoded.DataListWorkflows = [
+      {
+        Name: "Asset return review workflow",
+        DefResource: encodeDefResource({
+          key: "DL-WF-TASK",
+          defkey: "DL-WF-TASK",
+          workflowType: "data-list",
+          pageurls: [
+            { id: "dl-task-page", type: 2, title: "Data list workflow task", pagetype: 1, formdef: workflowTask },
+          ],
+        }),
+      },
+    ];
+    decoded.ScheduleWorkflows = [
+      {
+        Name: "Overdue escalation workflow",
+        DefResource: encodeDefResource({
+          key: "SCHED-WF-TASK",
+          defkey: "SCHED-WF-TASK",
+          workflowType: "schedule",
+          pageurls: [
+            { id: "schedule-task-page", type: 2, title: "Schedule workflow task", pagetype: 1, formdef: taskResource() },
+          ],
+        }),
+      },
+    ];
+  }
+  return decoded;
 }
 
-function appPlan({ omitSelection = false, submissionTemplate = SUBMISSION_TEMPLATE_ID, taskTemplate = TASK_TEMPLATE_ID } = {}) {
+function appPlan({ omitSelection = false, submissionTemplate = SUBMISSION_TEMPLATE_ID, taskTemplate = TASK_TEMPLATE_ID, omitScheduleTaskSelection = false, dataListWorkflowTaskTemplate = TASK_TEMPLATE_ID } = {}) {
   const selection = omitSelection ? "" : `
 #### Approval Form Layout Template Selection
 
@@ -136,6 +174,20 @@ function appPlan({ omitSelection = false, submissionTemplate = SUBMISSION_TEMPLA
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Asset Loan Approval | Submission form | Submission | ${submissionTemplate} | Page title and request sections | Current request data only | Submission captures requester-entered approval fields | Generated-final validation |
 | Asset Loan Approval | Coordinator task form | Task | ${taskTemplate} | Page title, readonly request context, action/history section | Related loan context | Task reviewers need consistent readonly context and workflow action area | Generated-final validation |
+`;
+  const scheduleSelection = omitScheduleTaskSelection ? "" : `
+#### Workflow Task Form Layout Template Selection
+
+| Workflow | Host Resource | Task Form | Workflow Surface | Selected Workflow Task Form Layout Template | Business Sections Needed | Editable Task Inputs | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Overdue Escalation | Schedule | Escalation task form | Schedule workflow task | ${TASK_TEMPLATE_ID} | Page title, readonly overdue context, action/history section | None | Scheduled reviewers need the same workflow task form standard | Generated-final validation |
+`;
+  const dataListWorkflowSelection = `
+#### Workflow Task Form Layout Template Selection
+
+| Workflow | Host Resource | Task Form | Workflow Surface | Selected Workflow Task Form Layout Template | Business Sections Needed | Editable Task Inputs | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Return Review | Loan Requests | Return review task form | Data list workflow task | ${dataListWorkflowTaskTemplate} | Page title, readonly return context, action/history section | Return notes when required | Data list workflow task forms use the same v1.1 task template | Generated-final validation |
 `;
   return `
 # Office Asset Loan Management - Yeeflow App Plan
@@ -176,7 +228,11 @@ ${selection}
 Form report is a standalone Yeeflow resource type based on one specific Approval Form. Do not merge Form report with Dashboard page planning.
 
 ## 7. Schedule Workflows Plan
-Placeholder.
+| Schedule Workflow Name | Description | Schedule Configuration | Trigger Frequency | Nodes | Branches | Data Read/Write | Proof Level | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Overdue Escalation | Create review tasks for overdue returns | Supported config | Daily | Assignment Task with task form | Approved/Rejected | Reads Loan Requests | runtime-proof-required | Task form required |
+
+${scheduleSelection}
 
 ## 8. AI Agents Plan
 Placeholder.
@@ -188,6 +244,12 @@ Placeholder.
 No custom data list forms are planned for this fixture.
 
 ## 11. Data List Workflows Plan
+| Workflow Name | Host List/Library | Trigger Condition | Nodes in Order | Branches | Branch Conditions | Data Read/Write | Notifications/AI/External Calls | Proof Level | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Return Review | Loan Requests | Returned with exception | Assignment Task with task form | Approved/Rejected | Reviewer decision | Updates Loan Requests | None | runtime-proof-required | Task form required |
+
+${dataListWorkflowSelection}
+
 No Sub List actions are needed.
 
 ## 12. Notifications Plan
