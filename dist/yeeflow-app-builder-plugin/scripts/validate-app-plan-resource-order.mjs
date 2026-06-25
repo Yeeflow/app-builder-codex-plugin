@@ -202,6 +202,7 @@ const APPROVED_APPROVAL_FORM_LAYOUT_TEMPLATE_IDS = new Set([
   "approval_form_layout_submission_v1_1",
   "approval_form_layout_task_v1_1",
 ]);
+const APPROVAL_TASK_LAYOUT_TEMPLATE_ID = "approval_form_layout_task_v1_1";
 
 function usage(exitCode = 1) {
   const text = [
@@ -515,7 +516,7 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
   if (!customForms.trim()) return;
   const hasConcreteCustomFormRows = splitTableRows(customForms).some((row) => /\|\s*(New|Edit|View|New\/Edit|Detail|Custom|Print)\s*\|/i.test(row));
   const selectionBlock = customForms.split(/#### Form Fields/i)[0].split(/#### Data List Form Layout Template Selection/i)[1] || "";
-  const rows = splitTableRows(selectionBlock);
+  const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*Workflow\s*\|/i.test(row));
   const selectedIds = [];
   for (const row of rows) {
     const ids = [...row.matchAll(/\bdata_list_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
@@ -564,7 +565,7 @@ function validateDataListFormFieldsTemplateSelection(text, findings) {
   if (!hasConcreteCustomFormRows) return;
   if (/intentionally has no current-record field controls/i.test(customForms)) return;
   const selectionBlock = customForms.split(/#### Custom Form Actions|#### Sub List List Actions|##\s+11\./i)[0].split(/#### Form Fields Layout Template Selection/i)[1] || "";
-  const rows = splitTableRows(selectionBlock);
+  const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row));
   const selectedIds = [];
   for (const row of rows) {
     const ids = [...row.matchAll(/\bdata_list_form_fields_[a-z0-9_]+\b/g)].map((match) => match[0]);
@@ -620,13 +621,15 @@ function validateDataListFormFieldsTemplateSelection(text, findings) {
 
 function validateApprovalFormLayoutTemplateSelection(text, findings) {
   const sections = extractSections(text);
+  validateWorkflowTaskLayoutTemplateSelection(text, findings, "Schedule Workflows Plan", "schedule workflow task");
+  validateWorkflowTaskLayoutTemplateSelection(text, findings, "Data List Workflows Plan", "data list workflow task");
   const approvalForms = sectionBody(sections, "Approval Forms Plan");
   if (!approvalForms.trim()) return;
   const dataRows = splitTableRows(approvalForms).filter((row) => !/^\|\s*(Approval Form|Field Order|Step Order|Task Form Name|Action Name|Host Form)\s*\|/i.test(row));
   const hasApprovalRows = dataRows.some((row) => /\b(Submission|Task|Workflow|Review|Approve|Reject|approval_form_layout_)\b/i.test(row));
   if (!hasApprovalRows) return;
   const selectionBlock = approvalForms.split(/##\s+6\./i)[0].split(/#### Approval Form Layout Template Selection/i)[1] || "";
-  const rows = splitTableRows(selectionBlock);
+  const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row));
   const selectedIds = [];
   for (const row of rows) {
     const ids = [...row.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
@@ -664,6 +667,70 @@ function validateApprovalFormLayoutTemplateSelection(text, findings) {
       code: "APP_PLAN_APPROVAL_FORM_LAYOUT_TEMPLATE_SELECTION_REQUIRED",
       message: "Approval Forms Plan must select approved Approval Form Layouts v1.1 templates for generated submission and task pages.",
     });
+  }
+}
+
+function validateWorkflowTaskLayoutTemplateSelection(text, findings, sectionName, expectedSurface) {
+  const sections = extractSections(text);
+  const section = sectionBody(sections, sectionName);
+  if (!section.trim()) return;
+  const actionableRows = splitTableRows(section).filter((row) => !/^\|\s*(Workflow|---)\s*\|/i.test(row));
+  const hasTaskFormNeed = actionableRows.some((row) => /\b(task form|task page|assignment task|user task|approval_form_layout_task_v1_1)\b/i.test(row));
+  if (!hasTaskFormNeed) return;
+  if (!/Workflow Task Form Layout Template Selection/i.test(section)) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_WORKFLOW_TASK_FORM_LAYOUT_SELECTION_TABLE_MISSING",
+      message: `${sectionName} must include a Workflow Task Form Layout Template Selection table when workflow task forms are planned.`,
+      section: sectionName,
+    });
+    return;
+  }
+  const selectionBlock = section.split(/#### Workflow Task Form Layout Template Selection/i)[1]?.split(/####|##\s+\d+\./i)[0] || "";
+  const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*(Workflow|---)\s*\|/i.test(row));
+  const selectedRows = rows.filter((row) => /\btask\b/i.test(row) || row.includes(APPROVAL_TASK_LAYOUT_TEMPLATE_ID));
+  if (!selectedRows.length) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_WORKFLOW_TASK_FORM_LAYOUT_TEMPLATE_SELECTION_REQUIRED",
+      message: `${sectionName} must select approval_form_layout_task_v1_1 for every generated workflow task form.`,
+      section: sectionName,
+    });
+    return;
+  }
+  for (const row of selectedRows) {
+    const ids = [...row.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    for (const id of ids) {
+      if (id !== APPROVAL_TASK_LAYOUT_TEMPLATE_ID) {
+        findings.push({
+          level: "error",
+          code: "APP_PLAN_WORKFLOW_TASK_FORM_LAYOUT_TEMPLATE_UNKNOWN",
+          message: "Workflow task forms may only use approval_form_layout_task_v1_1.",
+          section: sectionName,
+          templateId: id,
+          row,
+        });
+      }
+    }
+    if (!row.includes(APPROVAL_TASK_LAYOUT_TEMPLATE_ID)) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_WORKFLOW_TASK_FORM_LAYOUT_TEMPLATE_MISMATCH",
+        message: "Workflow task forms must select approval_form_layout_task_v1_1.",
+        section: sectionName,
+        row,
+      });
+    }
+    if (!new RegExp(expectedSurface.replace(/\s+/g, "\\s+"), "i").test(row)) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_WORKFLOW_TASK_FORM_LAYOUT_SURFACE_MISSING",
+        message: "Workflow task form layout selection must identify whether this is a Data list workflow task or Schedule workflow task.",
+        section: sectionName,
+        expectedSurface,
+        row,
+      });
+    }
   }
 }
 

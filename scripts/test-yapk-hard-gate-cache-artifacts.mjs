@@ -164,6 +164,7 @@ const requiredDocs = [
   "docs/training/data-list-form-layouts-v1.1-golden-reference-training-report.md",
   "docs/training/data-list-form-fields-grid-template-training-report.md",
   "docs/training/approval-form-layouts-v1.1-golden-reference-training-report.md",
+  "docs/training/approval-task-layout-workflow-surfaces-training-report.md",
   "docs/training/yapk-bit-switch-root-identity-signing-gates-training-report.md",
   "docs/training/root-icon-dashboard-empty-section-filter-hard-gates-training-report.md",
   "docs/training/full-app-data-analytics-materialization-runtime-gates-training-report.md",

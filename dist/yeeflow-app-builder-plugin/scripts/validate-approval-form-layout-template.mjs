@@ -11,6 +11,7 @@ const REGISTRY_PATH = path.join(ROOT, "docs/reference/approval-form-layout-templ
 const SUBMISSION_TEMPLATE_ID = "approval_form_layout_submission_v1_1";
 const TASK_TEMPLATE_ID = "approval_form_layout_task_v1_1";
 const TEMPLATE_IDS = new Set([SUBMISSION_TEMPLATE_ID, TASK_TEMPLATE_ID]);
+const TASK_WORKFLOW_SURFACES = new Set(["approval-form-task", "data-list-workflow-task", "schedule-workflow-task"]);
 const BACKGROUND = "#f4f7fb";
 const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" };
 const CONTENT_WIDTH = 1280;
@@ -83,6 +84,13 @@ function validateRegistry(registry, references, findings, registryPath) {
     findings.push(error("APPROVAL_FORM_LAYOUT_LOCKED_ACTION_HISTORY_MISSING", "Registry must lock action_panel_flow_history_wrapper.", {}));
   }
   for (const reference of references.values()) {
+    if (reference.templateId === TASK_TEMPLATE_ID) {
+      for (const surface of TASK_WORKFLOW_SURFACES) {
+        if (!asArray(reference.allowedWorkflowTaskSurfaces).includes(surface)) {
+          findings.push(error("APPROVAL_FORM_LAYOUT_TASK_WORKFLOW_SURFACE_MISSING", "Task layout template must declare every approved workflow task surface.", { templateId: reference.templateId, surface }));
+        }
+      }
+    }
     const templatePath = path.resolve(path.dirname(registryPath), "..", "..", reference.sourceTemplate || "");
     if (!fs.existsSync(templatePath)) {
       findings.push(error("APPROVAL_FORM_LAYOUT_TEMPLATE_FILE_MISSING", "Approval Form Layout template file is missing.", { templateId: reference.templateId, sourceTemplate: reference.sourceTemplate }));
@@ -132,6 +140,28 @@ function validatePackage(packagePath, context) {
       if (role === "task") validateTaskReadonlyGuidance(page.formdef, context.findings, `${formIndex}.${pageIndex}`);
     }
   }
+  for (const workflow of collectWorkflowTaskDefResources(decoded)) {
+    const def = decodeDefResource(workflow.defResource);
+    if (!def) {
+      context.findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_DEFRESOURCE_DECODE_FAILED", "Workflow task DefResource must decode before Approval Form Layouts v1.1 validation.", { source: workflow.source }));
+      continue;
+    }
+    const taskPages = asArray(def.pageurls).filter((page) => Number(page?.type) === 2);
+    for (const [pageIndex, page] of taskPages.entries()) {
+      if (!isObject(page?.formdef)) {
+        context.findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_FORMDEF_MISSING", "Workflow task page must include a parseable formdef using approval_form_layout_task_v1_1.", { source: workflow.source, pageIndex }));
+        continue;
+      }
+      validateFormResource(page.formdef, {
+        findings: context.findings,
+        templateId: TASK_TEMPLATE_ID,
+        pageRole: "task",
+        source: `${workflow.source} / ${page?.title || page?.name || `task page ${pageIndex + 1}`}`,
+        requireMarker: true,
+      });
+      validateTaskReadonlyGuidance(page.formdef, context.findings, `${workflow.source}.${pageIndex}`);
+    }
+  }
 }
 
 function validateAppPlan(planPath, findings) {
@@ -140,6 +170,8 @@ function validateAppPlan(planPath, findings) {
     return;
   }
   const text = fs.readFileSync(planPath, "utf8");
+  validateWorkflowTaskAppPlanSelection(text, findings, "Schedule Workflows Plan", "schedule workflow task");
+  validateWorkflowTaskAppPlanSelection(text, findings, "Data List Workflows Plan", "data list workflow task");
   const section = extractSection(text, /^##\s+5\.\s+Approval Forms Plan/im);
   if (!section.trim()) return;
   const hasApprovalForm = /Approval Form|Submission Form|Task Form|Task forms?/i.test(section) && /\|/.test(section);
@@ -149,7 +181,7 @@ function validateAppPlan(planPath, findings) {
     return;
   }
   const selectionBlock = section.split(/#### Form Actions and Temp Variables|#### Sub List List Actions|##\s+6\./i)[0].split(/#### Approval Form Layout Template Selection/i)[1] || "";
-  const rows = tableRows(selectionBlock);
+  const rows = tableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row.raw));
   const selectedIds = [];
   for (const row of rows) {
     const ids = [...row.raw.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
@@ -169,6 +201,39 @@ function validateAppPlan(planPath, findings) {
   }
   if (!selectedIds.length) {
     findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_TEMPLATE_SELECTION_REQUIRED", "Approval Forms Plan must select approved templates for submission and task forms.", {}));
+  }
+}
+
+function validateWorkflowTaskAppPlanSelection(text, findings, sectionName, expectedSurface) {
+  const section = extractNamedSection(text, sectionName);
+  if (!section.trim()) return;
+  const actionableRows = tableRows(section).map((row) => row.raw).filter((row) => !/^\|\s*(Workflow|---)\s*\|/i.test(row));
+  const hasTaskFormNeed = actionableRows.some((row) => /\b(task form|task page|assignment task|user task|approval_form_layout_task_v1_1)\b/i.test(row));
+  if (!hasTaskFormNeed) return;
+  if (!/Workflow Task Form Layout Template Selection/i.test(section)) {
+    findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_SELECTION_TABLE_MISSING", `${sectionName} must include a Workflow Task Form Layout Template Selection table when workflow task forms are planned.`, { section: sectionName }));
+    return;
+  }
+  const selectionBlock = section.split(/#### Workflow Task Form Layout Template Selection/i)[1]?.split(/####|##\s+\d+\./i)[0] || "";
+  const rows = tableRows(selectionBlock).filter((row) => row.cells[0]?.toLowerCase() !== "workflow");
+  const selectedRows = rows.filter((row) => row.raw.includes(TASK_TEMPLATE_ID) || /\btask\b/i.test(row.raw));
+  if (!selectedRows.length) {
+    findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_TEMPLATE_SELECTION_REQUIRED", `${sectionName} must select approval_form_layout_task_v1_1 for each generated workflow task form.`, { section: sectionName }));
+    return;
+  }
+  for (const row of selectedRows) {
+    const ids = [...row.raw.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    for (const id of ids) {
+      if (id !== TASK_TEMPLATE_ID) {
+        findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_TEMPLATE_UNKNOWN", "Workflow task forms may only use approval_form_layout_task_v1_1.", { section: sectionName, templateId: id, row: row.raw }));
+      }
+    }
+    if (!row.raw.includes(TASK_TEMPLATE_ID)) {
+      findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_TEMPLATE_MISMATCH", "Workflow task forms must select approval_form_layout_task_v1_1.", { section: sectionName, row: row.raw }));
+    }
+    if (expectedSurface && !new RegExp(expectedSurface.replace(/\s+/g, "\\s+"), "i").test(row.raw)) {
+      findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_SURFACE_MISSING", "Workflow task template selection row must identify the workflow task surface.", { section: sectionName, expectedSurface, row: row.raw }));
+    }
   }
 }
 
@@ -290,6 +355,50 @@ function decodeDefResource(value) {
   }
 }
 
+function collectWorkflowTaskDefResources(decoded) {
+  const out = [];
+  const seen = new Set();
+  const roots = [
+    ["DataListWorkflows", decoded?.DataListWorkflows],
+    ["DataListWorkflow", decoded?.DataListWorkflow],
+    ["ListWorkflows", decoded?.ListWorkflows],
+    ["Workflows", decoded?.Workflows],
+    ["ScheduleWorkflows", decoded?.ScheduleWorkflows],
+    ["ScheduledWorkflows", decoded?.ScheduledWorkflows],
+    ["Schedules", decoded?.Schedules],
+    ["Processes", decoded?.Processes],
+  ];
+  for (const [label, value] of roots) {
+    collectDefResourceObjects(value, `$${label}`, out, seen);
+  }
+  collectDefResourceObjects(decoded?.Data?.DataListWorkflows, "$.Data.DataListWorkflows", out, seen);
+  collectDefResourceObjects(decoded?.Data?.ScheduleWorkflows, "$.Data.ScheduleWorkflows", out, seen);
+  return out.filter((entry) => {
+    const def = decodeDefResource(entry.defResource);
+    return asArray(def?.pageurls).some((page) => Number(page?.type) === 2);
+  });
+}
+
+function collectDefResourceObjects(value, pointer, out, seen) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => collectDefResourceObjects(item, `${pointer}[${index}]`, out, seen));
+    return;
+  }
+  if (!isObject(value)) return;
+  const defResource = value.DefResource || value.defResource || value.WorkflowResource || value.workflowResource;
+  if (defResource) {
+    const key = `${pointer}:${String(value.Name || value.Title || value.Key || value.ID || out.length)}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push({ source: `${value.Name || value.Title || value.Key || pointer}`, defResource });
+    }
+  }
+  for (const [key, child] of Object.entries(value)) {
+    if (key === "Forms" || key === "DefResource" || key === "defResource" || key === "WorkflowResource" || key === "workflowResource") continue;
+    if (/workflow|process|schedule/i.test(key)) collectDefResourceObjects(child, `${pointer}.${key}`, out, seen);
+  }
+}
+
 function resolveTemplateId(resource) {
   return String(resource?.approvalFormLayoutTemplateId || resource?.derivedFromApprovalFormLayoutTemplate || resource?.attrs?.approvalFormLayoutTemplateId || resource?.attrs?.derivedFromApprovalFormLayoutTemplate || "");
 }
@@ -401,6 +510,15 @@ function extractSection(text, headingPattern) {
     }
   }
   return lines.slice(start, end).join("\n");
+}
+
+function extractNamedSection(text, name) {
+  const pattern = new RegExp(`^##\\s+\\d+\\.\\s+${escapeRegex(name)}\\s*$`, "im");
+  return extractSection(text, pattern);
+}
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function readJson(file, findings, code) {

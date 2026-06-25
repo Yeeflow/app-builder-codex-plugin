@@ -253,10 +253,19 @@ Rules:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Workflow> | <Description> | <Supported config> | Daily/Weekly/Monthly/etc. | <Nodes> | <Branches> | <Data> | proven/export-proven/runtime-proof-required/deferred | <Notes> |
 
+#### Workflow Task Form Layout Template Selection
+
+Required when a Schedule workflow includes a generated task form page.
+
+| Workflow | Host Resource | Task Form | Workflow Surface | Selected Workflow Task Form Layout Template | Business Sections Needed | Editable Task Inputs | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Schedule workflow> | <Schedule> | <Task form> | Schedule workflow task | approval_form_layout_task_v1_1 | <Sections> | <None or fields> | <Reason> | Generated-final validation |
+
 Rules:
 
 - Schedule configuration must use properties supported by the plugin's Schedule workflow documentation.
 - Each node must include type, order, configuration, branch conditions, and data read/write behavior.
+- If a Schedule workflow includes a task form, it must select `approval_form_layout_task_v1_1`. The generated task form must follow the same Approval Form Layouts v1.1 task template contract as Approval form task pages, including readonly-by-default fields unless assignee input is required.
 
 ## 8. AI Agents Plan
 
@@ -364,10 +373,19 @@ Return to the Data lists and Document libraries from Section 4 and plan list wor
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Workflow> | <List> | <Trigger> | <Nodes> | <Branches> | <Conditions> | <Data> | <Calls> | <Proof> | <Notes> |
 
+#### Workflow Task Form Layout Template Selection
+
+Required when a Data list workflow includes a generated task form page.
+
+| Workflow | Host Resource | Task Form | Workflow Surface | Selected Workflow Task Form Layout Template | Business Sections Needed | Editable Task Inputs | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Data list workflow> | <List or Library> | <Task form> | Data list workflow task | approval_form_layout_task_v1_1 | <Sections> | <None or fields> | <Reason> | Generated-final validation |
+
 Rules:
 
 - Node types must come from active plugin workflow-node documentation or export-proven references.
 - Runtime execution proof is separate from package validation.
+- If a Data list workflow includes a task form, it must select `approval_form_layout_task_v1_1`. The generated task form must follow the same Approval Form Layouts v1.1 task template contract as Approval form task pages, including readonly-by-default fields unless assignee input is required.
 
 ## 12. Notifications Plan
 
