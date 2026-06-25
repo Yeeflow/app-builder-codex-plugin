@@ -120,12 +120,24 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   });
 
   const failed = gates.find((gate) => !gate.ok);
+  const ok = !failed;
   return {
-    ok: !failed,
+    ok,
     package: summarizePath(resolvedPackage),
     plan: plan ? summarizePath(plan) : null,
     idProvenance: summarizePath(idProvenance),
     failedGate: failed?.gate || null,
+    preflightEligibleForSigning: ok,
+    signingReadinessSource: "yapk-first-generation-preflight",
+    signingReadiness: {
+      status: ok ? "preflight-pass" : "preflight-fail",
+      preflightEligibleForSigning: ok,
+      source: "yapk-first-generation-preflight",
+      blockedBy: failed?.gate || null,
+      nextRequiredStages: ok
+        ? ["setsign", "verifysign", "package API install/import or upgrade", "Version Management final success where applicable", "browser/runtime proof"]
+        : ["fix generated-final preflight failures", "rerun yapk-first-generation-preflight"],
+    },
     gates,
     proofBoundary: "Local preflight only. ID provenance, upgrade ID stability, Bit/switch data-list field controls, navigation metadata, dashboard dataset presentation reference conformance, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity, workspace targeting correctness, or field runtime correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
   };

@@ -133,6 +133,9 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     sourceMarker: fixtureMode ? "api-generated-fixture-for-tests" : "api-generated",
     allocationSource: "api-generated",
     signingEligible: false,
+    materializerSigningEligible: false,
+    preflightEligibleForSigning: null,
+    signingReadinessSource: "not-run",
     package: summarizePath(packagePath),
     allocations: Object.entries(ids).map(([pathName, id]) => ({
       path: pathName,
@@ -150,6 +153,9 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     status: "pass",
     mode: fixtureMode ? "fixture-regression" : planDemand.hasMaterialResources ? "minimal-resource-graph" : "schema-smoke-only",
     signingEligible: false,
+    materializerSigningEligible: false,
+    preflightEligibleForSigning: null,
+    signingReadinessSource: "not-run",
     plannedResourceDemand: planDemand,
     inputs: {
       functionalSpecification: summarizePath(specPath),
@@ -168,6 +174,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
       "No browser/runtime proof was attempted.",
       "Generated-final preflight is required before any signing request.",
       "Standalone materialization emits the planned generated-final resource surfaces but remains signing-ineligible until all generated-final hard gates pass.",
+      "Use yapk-first-generation-preflight output as the signing-readiness handoff; materializer signingEligible remains false because this script does not run the final preflight/signing stage.",
     ],
   };
   fs.writeFileSync(generationReportPath, `${JSON.stringify(generationReport, null, 2)}\n`);
@@ -176,6 +183,9 @@ export function materializeFullAppGeneratedFinal(options = {}) {
     status: "pass",
     mode: generationReport.mode,
     signingEligible: generationReport.signingEligible,
+    materializerSigningEligible: false,
+    preflightEligibleForSigning: null,
+    signingReadinessSource: "not-run",
     outputDirectory: outDir,
     outputs: {
       package: packagePath,

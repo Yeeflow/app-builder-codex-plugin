@@ -65,6 +65,9 @@ try {
   const report = JSON.parse(materialized.stdout);
   assert.equal(report.status, "pass");
   assert.equal(report.signingEligible, false);
+  assert.equal(report.materializerSigningEligible, false);
+  assert.equal(report.preflightEligibleForSigning, null);
+  assert.equal(report.signingReadinessSource, "not-run");
   assert.equal(fs.existsSync(report.outputs.package), true, "package exists");
   assert.equal(fs.existsSync(report.outputs.decodedResource), true, "decoded resource exists");
   assert.equal(fs.existsSync(report.outputs.idProvenance), true, "id provenance exists");
@@ -101,6 +104,9 @@ try {
   ]);
   const apiReport = JSON.parse(apiRun.stdout);
   assert.equal(apiReport.signingEligible, false);
+  assert.equal(apiReport.materializerSigningEligible, false);
+  assert.equal(apiReport.preflightEligibleForSigning, null);
+  assert.equal(apiReport.signingReadinessSource, "not-run");
   assert.equal(JSON.parse(fs.readFileSync(apiReport.outputs.package, "utf8")).TenantID, "1234567890123456");
   assert.match(fs.readFileSync(apiReport.outputs.generationReport, "utf8"), /Generated-final preflight is required before any signing request/);
   assert.match(fs.readFileSync(apiReport.outputs.idProvenance, "utf8"), /"allocationSource": "api-generated"/);
@@ -223,10 +229,16 @@ try {
   assert.equal(resourceReport.status, "pass");
   assert.equal(resourceReport.mode, "minimal-resource-graph");
   assert.equal(resourceReport.signingEligible, false);
+  assert.equal(resourceReport.materializerSigningEligible, false);
+  assert.equal(resourceReport.preflightEligibleForSigning, null);
+  assert.equal(resourceReport.signingReadinessSource, "not-run");
   assert.equal(fs.existsSync(resourceReport.outputs.package), true, "nontrivial materializer writes package");
   assert.equal(fs.existsSync(resourceReport.outputs.decodedResource), true, "nontrivial materializer writes decoded resource");
   assert.equal(fs.existsSync(resourceReport.outputs.seedData), true, "nontrivial materializer writes post-install seed-data companion artifact");
   const resourceGenerationReport = JSON.parse(fs.readFileSync(resourceReport.outputs.generationReport, "utf8"));
+  assert.equal(resourceGenerationReport.materializerSigningEligible, false);
+  assert.equal(resourceGenerationReport.preflightEligibleForSigning, null);
+  assert.equal(resourceGenerationReport.signingReadinessSource, "not-run");
   assert.equal(resourceGenerationReport.outputs.seedData.path.endsWith(".generated-final.seed-data.json"), true, "generation report exposes seed-data companion artifact");
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.counts, {
     dataLists: 4,
@@ -280,6 +292,9 @@ try {
   assert.equal(resourceFixtureReport.status, "pass");
   assert.equal(resourceFixtureReport.mode, "fixture-regression");
   assert.equal(resourceFixtureReport.signingEligible, false);
+  assert.equal(resourceFixtureReport.materializerSigningEligible, false);
+  assert.equal(resourceFixtureReport.preflightEligibleForSigning, null);
+  assert.equal(resourceFixtureReport.signingReadinessSource, "not-run");
   assert.match(fs.readFileSync(resourceFixtureReport.outputs.idProvenance, "utf8"), /api-generated-fixture-for-tests/);
   assert.match(decodedResource.ListSet.LayoutView, /Requests/);
   assert.match(decodedResource.ListSet.LayoutView, /Administration/);
@@ -348,14 +363,27 @@ try {
     SUMMARY_CONTRACT_VALIDATOR,
     "--package", resourceReport.outputs.package,
   ]);
-  expectPass("nontrivial generated package passes first-generation preflight including Summary contract", [
+  const preflightRun = expectPass("nontrivial generated package passes first-generation preflight including Summary contract", [
     FIRST_GENERATION_PREFLIGHT,
     "--package", resourceReport.outputs.package,
     "--plan", resourcePlan,
     "--json",
   ]);
+  const preflightReport = JSON.parse(preflightRun.stdout);
+  assert.equal(preflightReport.ok, true);
+  assert.equal(preflightReport.failedGate, null);
+  assert.equal(preflightReport.preflightEligibleForSigning, true);
+  assert.equal(preflightReport.signingReadinessSource, "yapk-first-generation-preflight");
+  assert.deepEqual(preflightReport.signingReadiness, {
+    status: "preflight-pass",
+    preflightEligibleForSigning: true,
+    source: "yapk-first-generation-preflight",
+    blockedBy: null,
+    nextRequiredStages: ["setsign", "verifysign", "package API install/import or upgrade", "Version Management final success where applicable", "browser/runtime proof"],
+  });
   cases.push("nontrivial App Plan materializes data lists, approval forms, reports, dashboards, custom forms, and navigation without placeholder output");
   cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, data-list schema, YAPK package, export-shape, Dashboard v1.1, Dashboard Collection template, Golden Reference, aggregate Dashboard hard gates, Summary contract, and first-generation preflight");
+  cases.push("preflight pass emits signing-readiness handoff fields without changing materializer signing boundary");
 
   console.log(JSON.stringify({ status: "pass", cases }, null, 2));
 } finally {
