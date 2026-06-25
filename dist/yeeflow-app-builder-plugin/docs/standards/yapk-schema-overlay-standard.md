@@ -26,6 +26,8 @@ Other decoded app modules, including `Forms`, `FormNewReports`, `DataReports`, `
 
 The current canonical date/date-time storage enum remains `Datetime`, not legacy `DateTime`. Generated YAPK fields must use `FieldType = "Datetime"` and custom storage names such as `Datetime1`.
 
+Generated YAPK boolean fields must keep the storage/control split exact: `FieldType = "Bit"` and the runtime field/control `Type = "switch"`. Do not generate `Type = "input"`, `Type = "checkbox"`, or helper boolean names for Bit fields. Generated Bit field `DefaultValue` must be the string `"0"` or `"1"`, and every default view or custom layout `LayoutView` field row that references the Bit field must also use `Type = "switch"`. Run `scripts/validate-yapk-bit-field-controls.mjs --package <file.yapk>` through first-generation preflight; failures are signing-readiness blockers because wrong Bit control types can install but break designer/runtime materialization.
+
 ## Product Schema Refresh v0.6.17
 
 The v0.6.17 official schema refresh replaces the canonical YAP and YAPK schemas with the latest product-team files. Generated YAPK packages must include the stricter required metadata in the canonical schema, including full `ListSet`, `ListInfo`, `ListFieldInfo`, layout/resource/report/tag/metadata/portal/agent/component fields where those structures are present.
