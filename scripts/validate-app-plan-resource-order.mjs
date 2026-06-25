@@ -198,6 +198,11 @@ const APPROVED_DATA_LIST_FORM_FIELDS_TEMPLATE_IDS = new Set([
   "data_list_form_fields_grid_v1_1",
 ]);
 
+const APPROVED_APPROVAL_FORM_LAYOUT_TEMPLATE_IDS = new Set([
+  "approval_form_layout_submission_v1_1",
+  "approval_form_layout_task_v1_1",
+]);
+
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
@@ -613,6 +618,55 @@ function validateDataListFormFieldsTemplateSelection(text, findings) {
   }
 }
 
+function validateApprovalFormLayoutTemplateSelection(text, findings) {
+  const sections = extractSections(text);
+  const approvalForms = sectionBody(sections, "Approval Forms Plan");
+  if (!approvalForms.trim()) return;
+  const dataRows = splitTableRows(approvalForms).filter((row) => !/^\|\s*(Approval Form|Field Order|Step Order|Task Form Name|Action Name|Host Form)\s*\|/i.test(row));
+  const hasApprovalRows = dataRows.some((row) => /\b(Submission|Task|Workflow|Review|Approve|Reject|approval_form_layout_)\b/i.test(row));
+  if (!hasApprovalRows) return;
+  const selectionBlock = approvalForms.split(/##\s+6\./i)[0].split(/#### Approval Form Layout Template Selection/i)[1] || "";
+  const rows = splitTableRows(selectionBlock);
+  const selectedIds = [];
+  for (const row of rows) {
+    const ids = [...row.matchAll(/\bapproval_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    for (const id of ids) {
+      selectedIds.push(id);
+      if (!APPROVED_APPROVAL_FORM_LAYOUT_TEMPLATE_IDS.has(id)) {
+        findings.push({
+          level: "error",
+          code: "APP_PLAN_APPROVAL_FORM_LAYOUT_TEMPLATE_UNKNOWN",
+          message: "Approval Form Layout Template Selection must use an approved Approval Form Layouts v1.1 template ID.",
+          templateId: id,
+        });
+      }
+    }
+    if (/\bsubmission\b/i.test(row) && !row.includes("approval_form_layout_submission_v1_1")) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_APPROVAL_FORM_LAYOUT_SUBMISSION_TEMPLATE_MISMATCH",
+        message: "Submission form pages must select approval_form_layout_submission_v1_1.",
+        row,
+      });
+    }
+    if (/\btask\b/i.test(row) && !row.includes("approval_form_layout_task_v1_1")) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_APPROVAL_FORM_LAYOUT_TASK_TEMPLATE_MISMATCH",
+        message: "Task form pages must select approval_form_layout_task_v1_1.",
+        row,
+      });
+    }
+  }
+  if (selectedIds.length === 0) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_APPROVAL_FORM_LAYOUT_TEMPLATE_SELECTION_REQUIRED",
+      message: "Approval Forms Plan must select approved Approval Form Layouts v1.1 templates for generated submission and task pages.",
+    });
+  }
+}
+
 export function validate(file) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const headings = headingLineIndexes(text);
@@ -654,6 +708,7 @@ export function validate(file) {
 
   validateResourceOrder(text, findings);
   validateControlActionPlanning(text, findings);
+  validateApprovalFormLayoutTemplateSelection(text, findings);
   validateDataListFormLayoutTemplateSelection(text, findings);
   validateDataListFormFieldsTemplateSelection(text, findings);
   validateDashboardPagesPlan(text, findings);

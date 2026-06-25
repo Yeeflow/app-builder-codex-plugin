@@ -13,6 +13,14 @@ const DATA_LIST_FORM_TEMPLATE_PATHS = {
   newEdit: path.join(ROOT, "docs/reference/data-list-form-layout-new-edit.template.json"),
   view: path.join(ROOT, "docs/reference/data-list-form-layout-view-item.template.json"),
 };
+const APPROVAL_FORM_TEMPLATE_PATHS = {
+  submission: path.join(ROOT, "docs/reference/approval-form-layout-submission.template.json"),
+  task: path.join(ROOT, "docs/reference/approval-form-layout-task.template.json"),
+};
+const APPROVAL_FORM_TEMPLATE_IDS = {
+  submission: "approval_form_layout_submission_v1_1",
+  task: "approval_form_layout_task_v1_1",
+};
 const DATA_LIST_FORM_FIELDS_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-fields-grid.template.json");
 const DATA_LIST_FORM_SUBLIST_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-control-sublist.template.json");
 const DATA_ANALYTICS_REGISTRY_PATH = path.join(ROOT, "docs/reference/data-analytics-golden-references.json");
@@ -2249,10 +2257,14 @@ function identityCandidates(control) {
     control?.attrs?.dashboardPageLayoutTemplateId,
     control?.attrs?.dataListFormLayoutTemplateId,
     control?.attrs?.derivedFromDataListFormLayoutTemplate,
+    control?.attrs?.approvalFormLayoutTemplateId,
+    control?.attrs?.derivedFromApprovalFormLayoutTemplate,
     control?.templateMarker,
     control?.derivedFromDashboardPageLayoutTemplate,
     control?.dataListFormLayoutTemplateId,
     control?.derivedFromDataListFormLayoutTemplate,
+    control?.approvalFormLayoutTemplateId,
+    control?.derivedFromApprovalFormLayoutTemplate,
   ].filter(Boolean).map(String);
 }
 
@@ -2428,8 +2440,8 @@ function buildApprovalDefResource({ name, formKey, defId }) {
     graphzoom: 1,
     graphver: "1.0",
     pageurls: [
-      { id: submissionPageId, pageUrl: submissionPageId, url: submissionPageId, type: "request", title: "Submission form", formdef: approvalFormDef(submissionPageId, name, "Submit") },
-      { id: taskPageId, pageUrl: taskPageId, url: taskPageId, type: "task", title: "Task form", formdef: approvalFormDef(taskPageId, name, "Approve") },
+      { id: submissionPageId, pageUrl: submissionPageId, url: submissionPageId, type: 1, title: "Submission form", formdef: approvalFormDef(submissionPageId, name, "submission") },
+      { id: taskPageId, pageUrl: taskPageId, url: taskPageId, type: 2, title: "Task form", formdef: approvalFormDef(taskPageId, name, "task") },
     ],
     childshapes: [
       { id: startId, resourceid: startId, stencil: { id: "StartNoneEvent" }, incoming: [], outgoing: [{ resourceid: flowId }], properties: { name: "Start" }, bounds: { upperLeft: { x: 100, y: 100 }, lowerRight: { x: 130, y: 130 } } },
@@ -2442,20 +2454,21 @@ function buildApprovalDefResource({ name, formKey, defId }) {
   };
 }
 
-function approvalFormDef(id, title, actionLabel) {
-  return {
-    id,
-    title,
-    ver: "1.0.0",
-    type: "form",
-    children: [
-      { type: "container", id: `${id}_main`, name: "Main", children: [
-        { type: "heading", label: "Text", id: `${id}_title`, name: title, attrs: { headc: { title: { value: title } }, heads: { ty: [null, "h3-bold"], color: "#111827" } } },
-        { type: "dynamic-field", id: `${id}_field_title`, name: "Title", attrs: { data: { field: "Title" } } },
-        { type: "button", id: `${id}_action`, name: actionLabel, attrs: { action: { type: "form-action", label: actionLabel } } },
-      ] },
-    ],
-  };
+function approvalFormDef(id, title, role) {
+  const templateId = role === "task" ? APPROVAL_FORM_TEMPLATE_IDS.task : APPROVAL_FORM_TEMPLATE_IDS.submission;
+  const templatePath = role === "task" ? APPROVAL_FORM_TEMPLATE_PATHS.task : APPROVAL_FORM_TEMPLATE_PATHS.submission;
+  const raw = JSON.parse(fs.readFileSync(templatePath, "utf8"));
+  const resource = clone(raw.templateResource);
+  resource.id = id;
+  resource.title = role === "task" ? `${title} Task` : `${title} Submission`;
+  resource.name = resource.title;
+  resource.approvalFormLayoutTemplateId = templateId;
+  resource.derivedFromApprovalFormLayoutTemplate = templateId;
+  resource.approvalFormLayoutRole = role;
+  setTemplateText(resource, "page_title_text", resource.title);
+  setTemplateText(resource, "page_title_description", role === "task" ? `Review and act on ${title}.` : `Submit ${title}.`);
+  instantiateDashboardControlUuids(resource, `${slugify(title)}-${role}-approval-form`);
+  return resource;
 }
 
 function listInfo({ listId, title, type, ext2 = "", iconUrl = "" }) {

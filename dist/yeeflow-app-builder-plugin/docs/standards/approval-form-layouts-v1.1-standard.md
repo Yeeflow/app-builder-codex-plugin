@@ -1,0 +1,150 @@
+# Approval Form Layouts v1.1 Standard
+
+## Purpose
+
+Approval Form Layouts v1.1 is the page-level golden reference standard for generated Yeeflow Approval form submission and task pages. It aligns Approval forms with Dashboard Page Layouts v1.1 and Data List Form Layouts v1.1 while preserving Approval-specific runtime controls.
+
+Generation must copy one of the approved export-shaped Approval form templates first, then remove, duplicate, or adapt only the allowed business regions according to the App Plan.
+
+## Registry
+
+The canonical registry is:
+
+`docs/reference/approval-form-layout-templates.json`
+
+Approved template ids:
+
+- `approval_form_layout_submission_v1_1`
+- `approval_form_layout_task_v1_1`
+
+Source template files:
+
+- `docs/reference/approval-form-layout-submission.template.json`
+- `docs/reference/approval-form-layout-task.template.json`
+
+The templates were parsed from the user-provided `Approval form page layout.ywf` export. The source Approval form is `Approval form page layout`, with one submission page and one task page.
+
+## Template Selection
+
+Use `approval_form_layout_submission_v1_1` for the single submission form page in every generated Approval form.
+
+Use `approval_form_layout_task_v1_1` for every generated task form page. An Approval form may have zero or multiple task forms, but every generated task form must use this template. When there is no special business need for assignee-editable fields, task-form field controls should be readonly and should present submitted context for review.
+
+## Required Page Shell
+
+Both generated Approval form page templates must preserve:
+
+- parseable Yeeflow Approval form `pageurls[].formdef` JSON
+- root `attrs.container.cw = "2"`
+- root token-array zero padding
+- root background `#f4f7fb`
+- root custom CSS that hides the native form title with `.form-name { display: none !important; }`
+- `main > content`
+- `main` as a centered column layout
+- `content` as a column layout with custom width `1280`
+- the exported `content` padding/background/spacing from the selected template
+- the exported `page_title_section`
+- the exported `action_panel_flow_history_wrapper`
+
+The root form padding is zero. Inner form sections keep the exported template padding and layout.
+
+## Standard Sections
+
+Supported section patterns:
+
+- page title section
+- 1-column content section
+- 2-column section
+- 3-column section
+- 60/40 2-column section
+- action panel and workflow history section
+
+Each content card must preserve:
+
+- `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`
+- `section_title_area`
+- `section_title_header`
+- `section_content_area`
+
+The 60/40 section may use the exported 60 and 40 wrapper containers. The percentage values may be changed only when the App Plan's business content requires a different split, and the generated layout must still copy the template section structure.
+
+## Controlled Business Slots
+
+Business-specific content may be added or changed only inside these containers:
+
+- `page_title_content`
+- `Operations`
+- `section_content_area`
+- `section_title_header`
+
+Within `page_title_content`, the text of `page_title_text` and `page_title_description` may change to match the current Approval form purpose.
+
+Within `section_title_header`, the text of `section_title_text` and `section_title_description` may change to describe the content inside the associated content card.
+
+Within `Operations`, generated controls must be real configured action controls. Placeholder or visual-only buttons are forbidden in generated packages.
+
+Within `section_content_area`, generated resources may insert Approval form field controls, the approved Data List Form field-grid template, approved Collection templates, Text/Heading controls, or other plugin-supported controls appropriate to Approval forms.
+
+Approval forms must not use Data Analytics controls, Data Analytics golden reference templates, chart templates, pivot table templates, Summary/KPI analytics, or `kpi_metrics_wrapper`.
+
+## Locked Action And History Region
+
+`action_panel_flow_history_wrapper` is locked.
+
+It must preserve:
+
+- the exported wrapper container structure and styling
+- one Action panel control
+- one workflow history control
+- the exported section-content host structure
+
+Generated Approval forms must not remove, restyle, or replace this region. Business content belongs in the allowed business slots, not inside this locked wrapper except for the existing Action panel and workflow history controls.
+
+## Repeatable And Removable Modules
+
+Generated Approval form pages may remove unused modules. New modules may only be created by copying one of these approved repeatable/removable modules from the selected template:
+
+- `1_columns_section`
+- `content_card_wrapper`
+- `2_columns_section`
+- `3_columns_section`
+- `2_columns_60/40_section`
+- `content_card_60_wrapper`
+- `content_card_40_wrapper`
+
+Copied modules must preserve the template's structure, hierarchy, control types, width, padding, direction, gap, background, typography, and required children. Do not invent new Approval form layout modules.
+
+## App Plan Requirements
+
+When the app includes Approval forms, the App Plan Approval Forms Plan must select the correct Approval Form Layout template for every generated submission and task page.
+
+Add an Approval Form Layout Template Selection table under the Approval Forms Plan:
+
+| Approval Form | Form Page | Page Role | Selected Approval Form Layout Template | Business Sections Needed | Related Data Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Approval Form> | <Submission or Task page> | Submission/Task | <approved template id> | <Sections> | <None or related datasets> | <Reason> | <Proof> |
+
+Rules:
+
+- Select exactly one approved template per Approval form page.
+- Submission pages must select `approval_form_layout_submission_v1_1`.
+- Task pages must select `approval_form_layout_task_v1_1`.
+- Do not include generated `ListID`, `FormID`, `ProcModelID`, `FlowKey`, `DefResourceID`, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
+- If a task page needs assignee-editable fields, the App Plan must state that business reason; otherwise task fields should be generated readonly.
+- Approval form pages may use approved Collection templates and current-record field layout templates in allowed slots, but must not select Data Analytics templates.
+
+## Required Gates
+
+Run:
+
+```bash
+node scripts/validate-approval-form-layout-template.mjs --registry docs/reference/approval-form-layout-templates.json
+```
+
+Generated-final `.yapk` packages must also pass:
+
+```bash
+node scripts/validate-approval-form-layout-template.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>
+```
+
+First-generation preflight invokes this gate before signing readiness. Signing, install/import, upgrade, Version Management, and runtime proof must remain blocked when generated Approval form pages violate this standard.

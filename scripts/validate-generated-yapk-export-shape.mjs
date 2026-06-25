@@ -123,8 +123,8 @@ function validateApprovalPages(def, formPath, findings) {
     if (!present(page?.pageUrl) && !present(page?.url)) findings.push(error("APPROVAL_PAGEURL_URL_MISSING", "Approval page registration must include pageUrl/url metadata.", { path: pagePath }));
     if (!present(page?.type) && !present(page?.pagetype)) findings.push(error("APPROVAL_PAGEURL_TYPE_MISSING", "Approval page registration must include request/task type metadata.", { path: pagePath }));
     const typeText = `${page?.type ?? ""} ${page?.pagetype ?? ""} ${page?.title ?? ""}`.toLowerCase();
-    if (/request|submit|^1$/.test(typeText)) hasRequest = true;
-    if (/task|review|approve|^2$/.test(typeText)) hasTask = true;
+    if (/request|submit/.test(typeText) || String(page?.type ?? "") === "1") hasRequest = true;
+    if (/task|review|approve/.test(typeText) || String(page?.type ?? "") === "2") hasTask = true;
     if (!isObject(page?.formdef)) findings.push(error("APPROVAL_PAGEURL_FORMDEF_MISSING", "Approval page registration must embed formdef.", { path: `${pagePath}.formdef` }));
     else {
       if (!Array.isArray(page.formdef.children) || page.formdef.children.length === 0) findings.push(error("APPROVAL_PAGE_FORMDEF_CHILDREN_MISSING", "Approval page formdef.children must contain designer controls.", { path: `${pagePath}.formdef.children` }));

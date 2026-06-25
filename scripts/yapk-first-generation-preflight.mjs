@@ -82,6 +82,12 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("approval-form-layouts-v1.1", [
+    "scripts/validate-approval-form-layout-template.mjs",
+    "--package",
+    resolvedPackage,
+    ...(plan ? ["--plan", plan] : []),
+  ]));
   gates.push(runGate("dashboard-generation-hard-gates", [
     "scripts/validate-dashboard-generation-hard-gates.mjs",
     "--package",
