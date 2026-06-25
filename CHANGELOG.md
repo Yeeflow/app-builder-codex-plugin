@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.44
+
+- Release Data List Form Fields Grid v1.1 and Sub List control golden references from PR #225.
+- Register `data_list_form_fields_grid_v1_1` for generated Data List form field layouts and require all current-record fields to live inside the template grid instead of ad hoc form-control placement.
+- Register `data_list_form_control_sublist_v1_1` for Sub list fields and require Sub list controls to preserve the approved export-shaped template except for mapped list/field/title/content metadata.
+- Enforce generated field-control `nav_label` metadata, zero field margins, responsive grid column/span constraints, one direct control per grid cell unless wrapped by an approved Container/Grid, and full-row treatment for Multiple line, Rich text, and Sub list controls.
+- Allow field-grid and Collection templates in Dashboard/Data List Form Layouts v1.1 only inside `section_content_area` under `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
+
 ## 0.8.43
 
 - Release Data List Form Layouts v1.1 golden references from PR #223.
