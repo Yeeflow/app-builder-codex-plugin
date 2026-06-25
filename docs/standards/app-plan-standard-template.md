@@ -188,6 +188,22 @@ Required when the approval workflow contains Assignment task nodes.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | <Business label> | <Field> | <ID> | <Exact variable type> | <Exact control type> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
 
+#### Approval Form Layout Template Selection
+
+| Approval Form | Form Page | Page Role | Selected Approval Form Layout Template | Business Sections Needed | Related Data Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Approval form> | <Submission form> | Submission | approval_form_layout_submission_v1_1 | <Sections> | <Related data or None> | <Reason> | Generated-final validation |
+| <Approval form> | <Task form> | Task | approval_form_layout_task_v1_1 | <Sections> | <Related data or None> | <Reason> | Generated-final validation |
+
+Approval form layout rules:
+
+- Every Approval form has exactly one submission form page. It must select `approval_form_layout_submission_v1_1`.
+- Every generated task form page must select `approval_form_layout_task_v1_1`.
+- The selected template must come from `docs/reference/approval-form-layout-templates.json`.
+- The App Plan may describe business sections and related data needs, but must not include generated `ListID`, `FormID`, `ProcModelID`, `FlowKey`, `DefResourceID`, runtime IDs, JSON property paths, or copied control payloads.
+- Approval form pages must not select Data Analytics templates, chart templates, pivot table templates, Summary/KPI analytics, or `kpi_metrics_wrapper`.
+- Task form field controls should be readonly unless this table or the Task Form Fields table states a business reason for assignee-editable fields.
+
 #### Form Actions and Temp Variables
 
 | Action Name | Host Form | Trigger Location | Trigger Type | Temp Variables | Steps | Data Read | Data Write | Bound Controls | Notes |
