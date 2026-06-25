@@ -1,0 +1,481 @@
+{
+  "_ak_c": {
+    "id": "75329348-fb99-41c5-9112-7118d9d89a5c",
+    "binding": "Text36",
+    "type": "list",
+    "label": "Ticket detail items",
+    "attrs": {
+      "list-variables": [
+        {
+          "idx": "36b0e3a3-7496-4c31-a914-20aa9ff45bcf",
+          "id": "Name",
+          "name": "Name",
+          "type": "text",
+          "editable": true
+        },
+        {
+          "idx": "d08b2778-a944-4b7f-b506-aac8fe7f28a2",
+          "id": "Description",
+          "name": "Description",
+          "type": "text",
+          "editable": true
+        },
+        {
+          "idx": "c9f7b353-3ca9-49b0-90cf-fcaccf108e76",
+          "id": "Date",
+          "name": "Date",
+          "type": "date",
+          "editable": true
+        },
+        {
+          "idx": "f9ab7c7f-2234-4c6f-a1c2-37f21feecd57",
+          "id": "Owner",
+          "name": "Owner",
+          "type": "user",
+          "editable": true
+        },
+        {
+          "idx": "1e6154af-8b89-404c-a3bc-d5eff9326224",
+          "id": "Amount",
+          "name": "Amount",
+          "type": "number",
+          "editable": true
+        }
+      ],
+      "list-fields": [
+        {
+          "idx": "36b0e3a3-7496-4c31-a914-20aa9ff45bcf",
+          "id": "Name",
+          "name": "Name",
+          "type": "text",
+          "editable": true,
+          "control": {
+            "id": "c4f9a997-1248-47a0-b76c-d4913a5a796e",
+            "label": "Name",
+            "binding": "Name",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text36",
+              "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c"
+            },
+            "type": "input",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "d08b2778-a944-4b7f-b506-aac8fe7f28a2",
+          "id": "Description",
+          "name": "Description",
+          "type": "text",
+          "editable": true,
+          "control": {
+            "id": "74bc28f1-c228-4750-b855-d06839e4b7cc",
+            "label": "Description",
+            "binding": "Description",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text36",
+              "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c",
+              "edit": {
+                "fhlay": "auto",
+                "textarea_minrows": 1
+              }
+            },
+            "type": "textarea",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "c9f7b353-3ca9-49b0-90cf-fcaccf108e76",
+          "id": "Date",
+          "name": "Date",
+          "type": "date",
+          "editable": true,
+          "control": {
+            "id": "051db3e6-3aa2-4771-8495-b50c67e5efda",
+            "label": "Date",
+            "binding": "Date",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text36",
+              "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c"
+            },
+            "type": "datepicker",
+            "displayLabel": [
+              null,
+              true
+            ],
+            "value": null
+          }
+        },
+        {
+          "idx": "f9ab7c7f-2234-4c6f-a1c2-37f21feecd57",
+          "id": "Owner",
+          "name": "Owner",
+          "type": "user",
+          "editable": true,
+          "control": {
+            "id": "248891c2-6b90-44dc-8316-800286b7cc82",
+            "label": "Owner",
+            "binding": "Owner",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text36",
+              "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c"
+            },
+            "type": "identity-picker",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        },
+        {
+          "idx": "1e6154af-8b89-404c-a3bc-d5eff9326224",
+          "id": "Amount",
+          "name": "Amount",
+          "type": "number",
+          "editable": true,
+          "control": {
+            "id": "36d4e568-01b9-4da3-a760-ecf014333355",
+            "label": "Amount",
+            "binding": "Amount",
+            "attrs": {
+              "list_field": true,
+              "list_field_binding": "Text36",
+              "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c"
+            },
+            "type": "input_number",
+            "displayLabel": [
+              null,
+              true
+            ]
+          }
+        }
+      ],
+      "common": {
+        "grid": {
+          "position": [
+            null,
+            {
+              "cSpan": 2
+            },
+            null,
+            {
+              "cSpan": 1
+            }
+          ]
+        },
+        "border": {
+          "normal": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": 1,
+                "right": 1,
+                "bottom": 1,
+                "left": 1
+              }
+            ],
+            "color": "#d8e1ef",
+            "radius": [
+              null,
+              {
+                "top": "--sp--s150",
+                "right": "--sp--s150",
+                "bottom": "--sp--s150",
+                "left": "--sp--s150"
+              }
+            ]
+          }
+        },
+        "padding": [
+          null,
+          {
+            "top": "--sp--s150",
+            "right": "--sp--s150",
+            "bottom": "--sp--s150",
+            "left": "--sp--s150"
+          }
+        ],
+        "margin": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s0",
+            "bottom": "--sp--s0",
+            "left": "--sp--s0"
+          }
+        ]
+      },
+      "table": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral-light-active)",
+          "radius": [
+            null,
+            {
+              "top": "--sp--s075",
+              "right": "--sp--s075",
+              "bottom": "--sp--s075",
+              "left": "--sp--s075"
+            }
+          ]
+        },
+        "row": {
+          "bdt": "1",
+          "bdw": [
+            null,
+            {
+              "top": "--sp--s0",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "bdc": "var(--c--neutral-light-active)"
+        },
+        "title": {
+          "ty": [
+            null,
+            "s-medium"
+          ],
+          "color": "var(--c--primary-dark)"
+        },
+        "value": {
+          "ty": [
+            null,
+            "s-medium"
+          ],
+          "color": "var(--c--primary-dark)"
+        }
+      },
+      "header": {
+        "bdt": "1",
+        "bdw": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "bdc": "var(--c--neutral-light-active)",
+        "normal": {
+          "bgcolor": "var(--c--neutral-light)"
+        },
+        "ty": [
+          null,
+          "s-semi-bold"
+        ],
+        "pd": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      },
+      "add": {
+        "mar": [
+          null,
+          {
+            "top": "",
+            "right": "",
+            "bottom": "",
+            "left": ""
+          }
+        ]
+      },
+      "list-fields-summary": [
+        {
+          "id": "5e58cbf4-1d9e-43dc-a39c-09f6a367cd8b",
+          "field": "Amount",
+          "type": "total",
+          "display": true,
+          "binding": null
+        }
+      ],
+      "card": {
+        "mar": [
+          null,
+          null,
+          null,
+          {
+            "top": "",
+            "right": "",
+            "bottom": "",
+            "left": ""
+          }
+        ],
+        "pd": [
+          null,
+          null,
+          null,
+          {
+            "top": "",
+            "right": "",
+            "bottom": "",
+            "left": ""
+          }
+        ],
+        "content": {
+          "pd": [
+            null,
+            null,
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ],
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              null,
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)",
+            "radius": [
+              null,
+              null,
+              null,
+              {
+                "top": "--sp--s150",
+                "right": "--sp--s150",
+                "bottom": "--sp--s150",
+                "left": "--sp--s150"
+              }
+            ]
+          },
+          "controlpd": [
+            null,
+            null,
+            null,
+            {
+              "top": "--sp--s0",
+              "right": "--sp--s0",
+              "bottom": "--sp--s0",
+              "left": "--sp--s0"
+            }
+          ]
+        },
+        "summary": {
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              null,
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)",
+            "radius": [
+              null,
+              null,
+              null,
+              {
+                "top": "--sp--s150",
+                "right": "--sp--s150",
+                "bottom": "--sp--s150",
+                "left": "--sp--s150"
+              }
+            ]
+          },
+          "controlpd": [
+            null,
+            null,
+            null,
+            {
+              "top": "--sp--s050",
+              "right": "--sp--s100",
+              "bottom": "--sp--s050",
+              "left": "--sp--s100"
+            }
+          ],
+          "title": {
+            "ty": [
+              null,
+              null,
+              null,
+              "s-medium"
+            ],
+            "color": "var(--c--primary-dark)"
+          },
+          "value": {
+            "ty": [
+              null,
+              null,
+              null,
+              "s-medium"
+            ],
+            "color": "var(--c--primary-dark)"
+          }
+        }
+      },
+      "title": {
+        "ty": [
+          null,
+          "base-medium"
+        ],
+        "pd": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s0",
+            "bottom": "--sp--s0",
+            "left": "--sp--s0"
+          }
+        ],
+        "border": {
+          "type": "0"
+        }
+      }
+    },
+    "fieldID": "2070040101910233089",
+    "isFilter": false,
+    "isSort": false,
+    "isUnique": false,
+    "isSystem": false,
+    "status": 1,
+    "value": null,
+    "displayLabel": [
+      null,
+      true
+    ]
+  },
+  "_ak_c_opt": {}
+}

@@ -53,6 +53,7 @@ const REQUIRED_PATTERNS = [
   ["TASK_FORM_PLACEHOLDER", /(?:Task Form Fields|Task page fields|Task fields|Assignee task fields)[\s\S]*(?:Placeholder|input hint|entry hint|prompt text)/i],
   ["CUSTOM_FORM_PLACEHOLDER", /Custom Data List Forms Plan[\s\S]*Placeholder/i],
   ["DATA_LIST_FORM_LAYOUT_TEMPLATE_SELECTION", /Data List Form Layout Template Selection/i],
+  ["DATA_LIST_FORM_FIELDS_TEMPLATE_SELECTION", /Form Fields Layout Template Selection/i],
   ["FORM_REPORTS", /Form Reports Plan/i],
   ["FORM_REPORT_STANDALONE", /Form report is a standalone Yeeflow resource type|Form Report is an independent Yeeflow resource|Form reports? (?:are|is) independent approval-based resources?/i],
   ["FORM_REPORT_APPROVAL_BASED", /based on (one )?specific Approval Form|based on their related Approval forms|approval-based resources?|created from a specific Approval form/i],
@@ -124,6 +125,11 @@ const REQUIRED_TABLE_SCHEMAS = [
     code: "DATA_LIST_FORM_LAYOUT_TEMPLATE_SELECTION_TABLE_SCHEMA_MISSING",
     headers: ["Data List or Library", "Custom Form", "Form Usage", "Selected Data List Form Layout Template", "Business Sections Needed", "Related Data / Analytics Needed", "Selection Reason", "Proof Boundary"],
   },
+  {
+    section: "Custom Data List Forms Plan",
+    code: "DATA_LIST_FORM_FIELDS_TEMPLATE_SELECTION_TABLE_SCHEMA_MISSING",
+    headers: ["Data List or Library", "Custom Form", "Field Group", "Selected Form Fields Layout Template", "PC/Laptop Columns", "Tablet Columns", "Mobile Columns", "Full-Row Field Controls", "Dynamic Display Grouping", "Proof Boundary"],
+  },
 ];
 
 const DASHBOARD_ALLOWED_CONTROL_CATEGORIES = [
@@ -186,6 +192,10 @@ const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = new Set([
 const APPROVED_DATA_LIST_FORM_LAYOUT_TEMPLATE_IDS = new Set([
   "data_list_form_layout_new_edit_v1_1",
   "data_list_form_layout_view_item_v1_1",
+]);
+
+const APPROVED_DATA_LIST_FORM_FIELDS_TEMPLATE_IDS = new Set([
+  "data_list_form_fields_grid_v1_1",
 ]);
 
 function usage(exitCode = 1) {
@@ -541,6 +551,68 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
   }
 }
 
+function validateDataListFormFieldsTemplateSelection(text, findings) {
+  const sections = extractSections(text);
+  const customForms = sectionBody(sections, "Custom Data List Forms Plan");
+  if (!customForms.trim()) return;
+  const hasConcreteCustomFormRows = splitTableRows(customForms).some((row) => /\|\s*(?:New|Edit|View|New\/Edit)\s*\|/i.test(row));
+  if (!hasConcreteCustomFormRows) return;
+  if (/intentionally has no current-record field controls/i.test(customForms)) return;
+  const selectionBlock = customForms.split(/#### Custom Form Actions|#### Sub List List Actions|##\s+11\./i)[0].split(/#### Form Fields Layout Template Selection/i)[1] || "";
+  const rows = splitTableRows(selectionBlock);
+  const selectedIds = [];
+  for (const row of rows) {
+    const ids = [...row.matchAll(/\bdata_list_form_fields_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    for (const id of ids) {
+      selectedIds.push(id);
+      if (!APPROVED_DATA_LIST_FORM_FIELDS_TEMPLATE_IDS.has(id)) {
+        findings.push({
+          level: "error",
+          code: "APP_PLAN_DATA_LIST_FORM_FIELDS_TEMPLATE_UNKNOWN",
+          message: "Form Fields Layout Template Selection must use an approved Data List Form field-layout template ID.",
+          templateId: id,
+        });
+      }
+    }
+    if (!row.includes("data_list_form_fields_grid_v1_1")) continue;
+    const cells = row.split("|").slice(1, -1).map((cell) => cell.trim());
+    const pc = Number(cells[4]);
+    const tablet = Number(cells[5]);
+    const mobile = Number(cells[6]);
+    if (!Number.isFinite(pc) || pc < 2 || pc > 3) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_DATA_LIST_FORM_FIELDS_PC_COLUMNS_INVALID",
+        message: "PC/laptop columns for data_list_form_fields_grid_v1_1 must be 2 or 3.",
+        row,
+      });
+    }
+    if (Number.isFinite(tablet) && Number.isFinite(pc) && tablet > pc) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_DATA_LIST_FORM_FIELDS_TABLET_COLUMNS_INVALID",
+        message: "Tablet columns must not exceed PC/laptop columns for data_list_form_fields_grid_v1_1.",
+        row,
+      });
+    }
+    if (Number.isFinite(mobile) && mobile !== 1) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_DATA_LIST_FORM_FIELDS_MOBILE_COLUMNS_INVALID",
+        message: "Mobile columns should be 1 for data_list_form_fields_grid_v1_1.",
+        row,
+      });
+    }
+  }
+  if (selectedIds.length === 0) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_DATA_LIST_FORM_FIELDS_TEMPLATE_SELECTION_REQUIRED",
+      message: "Custom Data List Forms Plan must select data_list_form_fields_grid_v1_1 for generated current-record field groups.",
+    });
+  }
+}
+
 export function validate(file) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const headings = headingLineIndexes(text);
@@ -583,6 +655,7 @@ export function validate(file) {
   validateResourceOrder(text, findings);
   validateControlActionPlanning(text, findings);
   validateDataListFormLayoutTemplateSelection(text, findings);
+  validateDataListFormFieldsTemplateSelection(text, findings);
   validateDashboardPagesPlan(text, findings);
   validateRequiredTableSchemas(extractSections(text), findings);
 

@@ -12,6 +12,8 @@ const DATA_LIST_FORM_TEMPLATE_PATHS = {
   newEdit: path.join(ROOT, "docs/reference/data-list-form-layout-new-edit.template.json"),
   view: path.join(ROOT, "docs/reference/data-list-form-layout-view-item.template.json"),
 };
+const DATA_LIST_FORM_FIELDS_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-fields-grid.template.json");
+const DATA_LIST_FORM_SUBLIST_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-control-sublist.template.json");
 const COLLECTION_TEMPLATE_PATHS = {
   collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   collection_control_grid_table_with_search: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
@@ -610,24 +612,102 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     setTemplateText(resource, "page_title_text", formName);
     setTemplateText(resource, "page_title_description", `View ${listName} record details and related operational context.`);
   }
-  const slot = findFirstByIdentity(resource, "section_content_area");
+  const slot = findBusinessSectionContentArea(resource);
   if (slot) {
-    slot.children = fields.slice(0, 12).map((field, index) => ({
-      type: dynamicControlTypeForField(field),
-      id: `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`,
-      name: field.DisplayName,
-      title: field.DisplayName,
-      label: field.DisplayName,
-      attrs: {
-        data: {
-          list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
-          field: field.FieldName,
-          fieldName: field.FieldName,
-        },
-      },
-    }));
+    slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
   return resource;
+}
+
+function buildDataListFormFieldsGrid({ fields, formName, listId, listName, templateKind }) {
+  const template = JSON.parse(fs.readFileSync(DATA_LIST_FORM_FIELDS_GRID_TEMPLATE_PATH, "utf8"));
+  const wrapper = clone(template._ak_c || template.templateResource || template);
+  wrapper.id = "form_grid_fields_wrapper";
+  wrapper.nv_label = "form_grid_fields_wrapper";
+  wrapper.dataListFormFieldsTemplateId = "data_list_form_fields_grid_v1_1";
+  wrapper.derivedFromDataListFormFieldsTemplate = "data_list_form_fields_grid_v1_1";
+  wrapper.children = fields.map((field, index) => buildDataListFormFieldControl({ field, index, formName, listId, listName, templateKind }));
+  return wrapper;
+}
+
+function buildDataListFormFieldControl({ field, index, formName, listId, listName, templateKind }) {
+  const type = templateKind === "view" && !isSubListFormField(field) ? dynamicControlTypeForField(field) : normalizeControlType(field.Type || field.FieldType || field.DisplayName);
+  if (isSubListFormField(field, type)) {
+    return buildDataListFormSubListControl({ field, index, formName, listId, listName });
+  }
+  const fullRow = isFullRowFormField(field, type);
+  const control = {
+    type,
+    id: `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`,
+    name: field.DisplayName,
+    title: field.DisplayName,
+    label: field.DisplayName,
+    nv_label: fieldNavLabel(field),
+    binding: field.FieldName,
+    fieldID: field.FieldID,
+    displayLabel: [null, true],
+    attrs: {
+      common: {
+        margin: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
+      },
+      data: {
+        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        field: field.FieldName,
+        fieldName: field.FieldName,
+        fieldId: field.FieldID,
+      },
+    },
+  };
+  if (fullRow) {
+    control.attrs.common.grid = { position: [null, { cSpan: 2 }, null, { cSpan: 1 }] };
+  }
+  return control;
+}
+
+function buildDataListFormSubListControl({ field, index, formName, listId, listName }) {
+  const template = JSON.parse(fs.readFileSync(DATA_LIST_FORM_SUBLIST_TEMPLATE_PATH, "utf8"));
+  const control = clone(template._ak_c || template.templateResource || template);
+  const id = `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`;
+  control.id = id;
+  control.name = field.DisplayName;
+  control.title = field.DisplayName;
+  control.label = field.DisplayName;
+  control.nv_label = fieldNavLabel(field);
+  control.binding = field.FieldName;
+  control.fieldID = field.FieldID;
+  control.dataListFormControlTemplateId = "data_list_form_control_sublist_v1_1";
+  control.derivedFromDataListFormControlTemplate = "data_list_form_control_sublist_v1_1";
+  control.attrs ||= {};
+  control.attrs.common ||= {};
+  control.attrs.common.margin = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }];
+  control.attrs.common.grid = { position: [null, { cSpan: 2 }, null, { cSpan: 1 }] };
+  control.attrs.data = {
+    list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+    field: field.FieldName,
+    fieldName: field.FieldName,
+    fieldId: field.FieldID,
+  };
+  for (const listField of Array.isArray(control.attrs["list-fields"]) ? control.attrs["list-fields"] : []) {
+    if (listField?.control?.attrs) {
+      listField.control.attrs.list_field_binding = field.FieldName;
+      listField.control.attrs.list_control_id = id;
+    }
+  }
+  return control;
+}
+
+function isFullRowFormField(field, controlType) {
+  const raw = normKey(`${field?.DisplayName || ""} ${field?.FieldType || ""} ${field?.Type || ""} ${controlType || ""}`);
+  return /textarea|multi line|multiline|richtext|rich text|sub list|sublist|\blist\b/.test(raw);
+}
+
+function isSubListFormField(field, controlType = "") {
+  const raw = normKey(`${field?.DisplayName || ""} ${field?.FieldType || ""} ${field?.Type || ""} ${controlType || ""}`);
+  return /sub list|sublist|\blist\b/.test(raw);
+}
+
+function fieldNavLabel(field) {
+  return `field_${slugify(field?.FieldName || field?.DisplayName || "field")}`.replace(/-/g, "_");
 }
 
 function buildFieldRules({ field, type }) {
@@ -1607,7 +1687,8 @@ function findFirstByIdentity(root, expected) {
 }
 
 function findBusinessSectionContentArea(root) {
-  const contentCardWrappers = findDescendants(root, (node) => hasIdentity(node, "content_card_wrapper"));
+  const approvedWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+  const contentCardWrappers = findDescendants(root, (node) => [...approvedWrappers].some((identity) => hasIdentity(node, identity)));
   for (const wrapper of contentCardWrappers) {
     const slot = findFirstByIdentity(wrapper, "section_content_area");
     if (slot) return slot;
@@ -1996,6 +2077,7 @@ function normalizeFieldType(fieldType) {
 
 function normalizeControlType(controlType) {
   const normalized = normKey(controlType);
+  if (/sub list|sublist|\blist\b/.test(normalized)) return "list";
   if (/user|identity/.test(normalized)) return "identity-picker";
   if (/date|datetime/.test(normalized)) return "datepicker";
   if (/number|decimal|currency|amount|percent/.test(normalized)) return "input_number";

@@ -1,0 +1,2855 @@
+{
+  "_ak_c": {
+    "id": "9843edb1-3091-4f4b-ba7b-b95c11de9ebf",
+    "type": "flex_grid",
+    "label": "Ticket basic information",
+    "displayLabel": [
+      null,
+      false
+    ],
+    "attrs": {
+      "ver": 1,
+      "canFold": true,
+      "columns": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rows": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "cgap": {
+        "1": 24
+      },
+      "cgapU": {
+        "1": "px"
+      },
+      "rgap": [
+        null,
+        12
+      ],
+      "rgapU": [
+        null,
+        "px"
+      ]
+    },
+    "children": [
+      {
+        "id": "7cb06735-db63-44c7-ad36-28c729b3c7f0",
+        "binding": "Title",
+        "type": "input",
+        "label": "Title",
+        "displayLabel": [
+          null,
+          true
+        ],
+        "attrs": {
+          "required": true,
+          "common": {
+            "grid": {
+              "position": [
+                null,
+                {
+                  "type": "0",
+                  "cSpan": 2
+                },
+                null,
+                {
+                  "cSpan": 1
+                }
+              ]
+            },
+            "margin": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          },
+          "placeholder": "Briefly summarize your issue or request (e.g., 'Unable to access email')",
+          "edit": {
+            "pcolor": "var(--cus-c--TextGrey)"
+          },
+          "lab": {
+            "color": "var(--cus-c--TextGrey)"
+          }
+        },
+        "fieldID": "2054077096451260417",
+        "isFilter": true,
+        "isSort": true,
+        "isUnique": false,
+        "isSystem": true,
+        "status": 1,
+        "parentCol": 1
+      },
+      {
+        "id": "f6c9f4df-649f-44da-bdaa-90a6ae8e3ebc",
+        "type": "container",
+        "label": "Container",
+        "displayLabel": true,
+        "attrs": {
+          "common": {
+            "grid": {
+              "position": [
+                null,
+                {
+                  "cSpan": 2
+                },
+                null,
+                {
+                  "cSpan": 1
+                }
+              ]
+            },
+            "margin": [
+              null,
+              null
+            ],
+            "padding": [
+              null,
+              {
+                "top": "",
+                "right": "",
+                "bottom": "",
+                "left": ""
+              }
+            ]
+          },
+          "style": {
+            "gap": [
+              null,
+              5
+            ]
+          }
+        },
+        "children": [
+          {
+            "id": "ac9a3d2e-a712-47f5-aac4-104a462ae102",
+            "type": "container",
+            "label": "Container",
+            "displayLabel": true,
+            "attrs": {
+              "style": {
+                "direction": [
+                  null,
+                  "row"
+                ],
+                "gap": [
+                  null,
+                  8
+                ],
+                "align_items": [
+                  null,
+                  "center"
+                ]
+              }
+            },
+            "children": [
+              {
+                "id": "a417e70a-a1a1-4aa8-85db-9464556b469e",
+                "type": "heading",
+                "label": "Text",
+                "displayLabel": true,
+                "attrs": {
+                  "headc": {
+                    "title": {
+                      "value": "Description",
+                      "variable": null
+                    }
+                  },
+                  "heads": {
+                    "color": "var(--cus-c--TextGrey)",
+                    "ty": {
+                      "wei": "500",
+                      "size": [
+                        null,
+                        14
+                      ]
+                    }
+                  },
+                  "common": {
+                    "positioning": {
+                      "widthtype": [
+                        null,
+                        "2"
+                      ]
+                    },
+                    "container": {
+                      "size": [
+                        null,
+                        null
+                      ]
+                    }
+                  }
+                },
+                "parentCol": 1
+              },
+              {
+                "id": "4f97c5b5-2b5e-4c91-a82c-66916bef6739",
+                "type": "heading",
+                "label": "Text",
+                "displayLabel": true,
+                "attrs": {
+                  "headc": {
+                    "title": {
+                      "value": "*",
+                      "variable": null
+                    }
+                  },
+                  "heads": {
+                    "color": "var(--c--extra-color-2)",
+                    "ty": {
+                      "wei": "500",
+                      "size": [
+                        null,
+                        14
+                      ],
+                      "lh": [
+                        null,
+                        5
+                      ]
+                    }
+                  },
+                  "common": {
+                    "positioning": {
+                      "widthtype": [
+                        null,
+                        "2"
+                      ]
+                    }
+                  }
+                },
+                "parentCol": 1
+              }
+            ],
+            "parentCol": 1
+          },
+          {
+            "id": "dd536079-e442-4472-bf95-ab4714ea5dd5",
+            "type": "heading",
+            "label": "Text",
+            "displayLabel": true,
+            "attrs": {
+              "headc": {
+                "title": {
+                  "value": "(Provide detailed information about your issue or request, including any steps to reproduce the problem or specific requirements)",
+                  "variable": null
+                }
+              },
+              "heads": {
+                "color": "var(--cus-c--TextGrey)",
+                "ty": {
+                  "wei": "500",
+                  "size": [
+                    null,
+                    11
+                  ]
+                }
+              },
+              "common": {
+                "positioning": {
+                  "widthtype": [
+                    null,
+                    "2"
+                  ]
+                }
+              }
+            },
+            "parentCol": 1
+          },
+          {
+            "id": "e501c0b4-77d5-4a54-921a-36bea9aa99a6",
+            "binding": "Text2",
+            "type": "richtext",
+            "label": "Description",
+            "displayLabel": [
+              null,
+              false
+            ],
+            "attrs": {
+              "required": true,
+              "common": {
+                "margin": [
+                  null,
+                  {
+                    "top": 0,
+                    "right": 0,
+                    "bottom": 0,
+                    "left": 0
+                  }
+                ]
+              },
+              "edit": {
+                "size": 13
+              }
+            },
+            "fieldID": "2054077096493203457",
+            "isFilter": false,
+            "isSort": false,
+            "isUnique": false,
+            "isSystem": false,
+            "status": 1,
+            "parentCol": 1
+          },
+          {
+            "id": "34fc2671-617b-48a0-8cf2-8deebb73c2a1",
+            "type": "container",
+            "label": "Container",
+            "displayLabel": true,
+            "attrs": {
+              "style": {
+                "gap": [
+                  null,
+                  5
+                ],
+                "direction": [
+                  null,
+                  "row",
+                  null,
+                  "column"
+                ],
+                "justify_content": [
+                  null,
+                  "space-between",
+                  null,
+                  "flex-start"
+                ],
+                "align_items": [
+                  null,
+                  "center",
+                  null,
+                  "flex-start"
+                ]
+              },
+              "common": {
+                "padding": [
+                  null,
+                  {
+                    "top": 5,
+                    "right": 10,
+                    "bottom": 5,
+                    "left": 10
+                  }
+                ],
+                "border": {
+                  "normal": {
+                    "type": "1",
+                    "width": [
+                      null,
+                      {
+                        "top": 1,
+                        "right": 1,
+                        "bottom": 1,
+                        "left": 1
+                      }
+                    ],
+                    "color": "var(--cus-c--bgGrey200)",
+                    "radius": [
+                      null,
+                      {
+                        "top": 8,
+                        "right": 8,
+                        "bottom": 8,
+                        "left": 8
+                      }
+                    ]
+                  }
+                },
+                "margin": [
+                  null,
+                  {
+                    "top": 10,
+                    "right": null,
+                    "bottom": null,
+                    "left": null
+                  }
+                ]
+              }
+            },
+            "children": [
+              {
+                "id": "7d54a78d-591b-4866-9d8b-64934c13161c",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                  "style": {
+                    "direction": [
+                      null,
+                      "row",
+                      null,
+                      "column"
+                    ],
+                    "gap": [
+                      null,
+                      "--sp--s100"
+                    ],
+                    "align_items": [
+                      null,
+                      "center",
+                      null,
+                      "flex-start"
+                    ],
+                    "widthtype": [
+                      null,
+                      "2",
+                      null,
+                      "1"
+                    ]
+                  }
+                },
+                "children": [
+                  {
+                    "id": "ee665765-feb9-4d8e-988f-12065d1c814c",
+                    "type": "heading",
+                    "label": "Text",
+                    "displayLabel": true,
+                    "attrs": {
+                      "heads": {
+                        "color": "var(--cus-c--TextGrey)",
+                        "ty": {
+                          "wei": "500",
+                          "size": [
+                            null,
+                            12
+                          ]
+                        }
+                      },
+                      "common": {
+                        "positioning": {
+                          "widthtype": [
+                            null,
+                            "2"
+                          ]
+                        },
+                        "container": {
+                          "size": [
+                            null,
+                            "grow"
+                          ]
+                        }
+                      },
+                      "headc": {
+                        "title": {
+                          "value": "#Tags",
+                          "variable": null
+                        }
+                      }
+                    },
+                    "parentCol": 1
+                  },
+                  {
+                    "id": "4a078dc6-5f57-441b-813a-2f5d08bb5a1e",
+                    "binding": "Text35",
+                    "type": "tag",
+                    "label": "Tags",
+                    "displayLabel": [
+                      null,
+                      false
+                    ],
+                    "attrs": {
+                      "multiple": true,
+                      "source": "application",
+                      "customTags": true,
+                      "category": "2054077095851474945",
+                      "process-field-tag-maxcount": 50,
+                      "lablay": [
+                        null,
+                        "side"
+                      ],
+                      "edit": {
+                        "pcolor": "var(--cus-c--TextGrey)",
+                        "normal": {
+                          "border": {
+                            "type": "1",
+                            "width": [
+                              null,
+                              {
+                                "top": 1,
+                                "right": 1,
+                                "bottom": 1,
+                                "left": 1
+                              }
+                            ],
+                            "color": "var(--cus-c--bgGrey200)"
+                          }
+                        },
+                        "select": {
+                          "normal": {
+                            "bgColor": "var(--cus-c--PrimaryLight200)"
+                          }
+                        }
+                      },
+                      "lab": {
+                        "color": "var(--cus-c--TextGrey)"
+                      },
+                      "common": {
+                        "margin": [
+                          null,
+                          {
+                            "top": "--sp--s0",
+                            "right": "--sp--s0",
+                            "bottom": "--sp--s0",
+                            "left": "--sp--s0"
+                          }
+                        ]
+                      }
+                    },
+                    "fieldID": "2054077096673558529",
+                    "isFilter": false,
+                    "isSort": false,
+                    "isUnique": false,
+                    "isSystem": false,
+                    "status": 1,
+                    "parentCol": 1
+                  }
+                ],
+                "parentCol": 1
+              },
+              {
+                "id": "4240d141-4a1b-48cf-9b66-9720b343b746",
+                "type": "heading",
+                "label": "Text",
+                "displayLabel": true,
+                "attrs": {
+                  "heads": {
+                    "color": "var(--cus-c--TextGrey)",
+                    "ty": {
+                      "wei": "0",
+                      "size": [
+                        null,
+                        12
+                      ]
+                    }
+                  },
+                  "common": {
+                    "positioning": {
+                      "widthtype": [
+                        null,
+                        "2"
+                      ]
+                    },
+                    "container": {
+                      "size": [
+                        null,
+                        null
+                      ]
+                    }
+                  },
+                  "headc": {
+                    "title": {
+                      "value": "Add tags (e.g., Network Issue, Software Bug, Access Request)",
+                      "variable": null
+                    }
+                  }
+                },
+                "parentCol": 1
+              }
+            ],
+            "parentCol": 1
+          }
+        ],
+        "parentCol": 1
+      },
+      {
+        "id": "ff51956f-f239-4d2d-9722-00ab252314dc",
+        "binding": "Text3",
+        "type": "lookup",
+        "label": "Type of Request",
+        "displayLabel": [
+          null,
+          true
+        ],
+        "attrs": {
+          "max-selection": 20,
+          "appid": 41,
+          "listid": "2054077096749056000",
+          "listsetid": "2054077087595905025",
+          "listfield": "Title",
+          "list_tooltip_field": null,
+          "addition": [
+            {
+              "FieldName": "Title",
+              "FieldID": "2054077096757444609",
+              "IsShow": true,
+              "RelationName": "Text28",
+              "Value": null,
+              "Order": "0"
+            }
+          ],
+          "sort-first": {
+            "SortName": "Created",
+            "SortByDesc": false
+          },
+          "sort-second": null,
+          "listfilter": null,
+          "required": true,
+          "displayStyle": "dropdown",
+          "lab": {
+            "color": "var(--cus-c--TextGrey)"
+          },
+          "placeholder": "Select the type of request",
+          "edit": {
+            "pcolor": "var(--cus-c--TextGrey)"
+          },
+          "common": {
+            "margin": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        },
+        "fieldID": "2054077096497397760",
+        "isFilter": false,
+        "isSort": false,
+        "isUnique": false,
+        "isSystem": false,
+        "status": 1,
+        "parentCol": 1
+      },
+      {
+        "id": "494d3a0c-863d-4c0f-9f7e-a6ee317f2b4b",
+        "binding": "Text4",
+        "type": "lookup",
+        "label": "Category",
+        "displayLabel": [
+          null,
+          true
+        ],
+        "attrs": {
+          "max-selection": 20,
+          "appid": 41,
+          "listid": "2054077096774221824",
+          "listsetid": "2054077087595905025",
+          "listfield": "Title",
+          "list_tooltip_field": null,
+          "addition": [
+            {
+              "FieldName": "Title",
+              "FieldID": "2054077096778416129",
+              "IsShow": false,
+              "RelationName": "Text30",
+              "Value": null,
+              "Order": null
+            },
+            {
+              "FieldName": "Text2",
+              "FieldID": "2054077096782610433",
+              "IsShow": false,
+              "RelationName": "Text26",
+              "Value": null,
+              "Order": null
+            }
+          ],
+          "sort-first": {
+            "SortName": "Created",
+            "SortByDesc": false
+          },
+          "sort-second": null,
+          "listfilter": [
+            {
+              "key": "473731a4-cdab-4a92-a390-17754b86c98c",
+              "pre": "and",
+              "left": "Text1",
+              "op": "0",
+              "right": [
+                {
+                  "exprType": "list_field",
+                  "valueType": "lookup",
+                  "prop": "Text3",
+                  "id": "Type_of_Request",
+                  "type": "expr",
+                  "name": "List Fields:Type of Request"
+                }
+              ],
+              "showCus": false
+            }
+          ],
+          "displayStyle": "dropdown",
+          "required": true,
+          "lab": {
+            "color": "var(--cus-c--TextGrey)"
+          },
+          "placeholder": "Choose the category that best fits your issue",
+          "edit": {
+            "pcolor": "var(--cus-c--TextGrey)"
+          },
+          "common": {
+            "margin": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        },
+        "fieldID": "2054077096501592065",
+        "isFilter": false,
+        "isSort": false,
+        "isUnique": false,
+        "isSystem": false,
+        "status": 1,
+        "parentCol": 1
+      },
+      {
+        "id": "153a436a-b33e-419a-aa11-05f95bab4ad2",
+        "binding": "Text34",
+        "type": "lookup",
+        "label": "Priority Level",
+        "displayLabel": [
+          null,
+          true
+        ],
+        "attrs": {
+          "edit": {
+            "pcolor": "var(--cus-c--TextGrey)"
+          },
+          "lab": {
+            "color": "var(--cus-c--TextGrey)"
+          },
+          "max-selection": 20,
+          "appid": 41,
+          "listid": "2054077097449504769",
+          "listsetid": "2054077087595905025",
+          "listfield": "Title",
+          "list_tooltip_field": null,
+          "addition": [
+            {
+              "FieldName": "Title",
+              "FieldID": "2054077097453699072",
+              "IsShow": true,
+              "RelationName": "Text5",
+              "Value": null,
+              "Order": "0"
+            },
+            {
+              "FieldName": "Decimal1",
+              "FieldID": "2054077097453699073",
+              "IsShow": true,
+              "RelationName": "Decimal3",
+              "Value": null,
+              "Order": "6"
+            },
+            {
+              "FieldName": "Decimal2",
+              "FieldID": "2054077097457893376",
+              "IsShow": true,
+              "RelationName": "Decimal4",
+              "Value": null,
+              "Order": "7"
+            }
+          ],
+          "sort-first": {
+            "SortName": "Decimal3",
+            "SortByDesc": false
+          },
+          "sort-second": null,
+          "listfilter": null,
+          "displayStyle": "dropdown",
+          "required": true,
+          "placeholder": "Select the urgency level (e.g., High)",
+          "common": {
+            "margin": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        },
+        "fieldID": "2054077096673558528",
+        "isFilter": false,
+        "isSort": false,
+        "isUnique": false,
+        "isSystem": false,
+        "status": 1,
+        "parentCol": 1
+      },
+      {
+        "id": "32bf16eb-2ab5-45ee-a38a-1e0144791e04",
+        "binding": "Text6",
+        "type": "location-picker",
+        "label": "Location",
+        "displayLabel": [
+          null,
+          true
+        ],
+        "attrs": {
+          "placeholder": "Select your office location (e.g., Headquarters)",
+          "lab": {
+            "color": "var(--cus-c--TextGrey)"
+          },
+          "edit": {
+            "pcolor": "var(--cus-c--TextGrey)"
+          },
+          "common": {
+            "margin": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        },
+        "fieldID": "2054077096514174977",
+        "isFilter": false,
+        "isSort": false,
+        "isUnique": false,
+        "isSystem": false,
+        "status": 1,
+        "value": "CurrentUser",
+        "parentCol": 1
+      },
+      {
+        "id": "875bd929-c94b-414f-9a6d-91f84489e363",
+        "type": "container",
+        "label": "Container",
+        "displayLabel": true,
+        "attrs": {
+          "common": {
+            "grid": {
+              "position": [
+                null,
+                {
+                  "cSpan": 2
+                },
+                null,
+                {
+                  "cSpan": 1
+                }
+              ]
+            }
+          }
+        },
+        "children": [
+          {
+            "id": "4df25cdc-c26d-4f74-8a09-d90732516478",
+            "type": "flex_grid",
+            "label": "Type of Request is Incident",
+            "displayLabel": [
+              null,
+              false
+            ],
+            "attrs": {
+              "ver": 1,
+              "canFold": true,
+              "columns": {
+                "1": {
+                  "list": [
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    },
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    }
+                  ],
+                  "last": {
+                    "value": 1,
+                    "unit": "fr"
+                  }
+                },
+                "3": {
+                  "list": [
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    }
+                  ],
+                  "last": {
+                    "value": 1,
+                    "unit": "fr"
+                  }
+                }
+              },
+              "rows": {
+                "1": {
+                  "list": [
+                    {
+                      "unit": "auto"
+                    }
+                  ],
+                  "last": {
+                    "unit": "auto"
+                  }
+                }
+              },
+              "cgap": {
+                "1": 24
+              },
+              "cgapU": {
+                "1": "px"
+              },
+              "control_display": [
+                {
+                  "id": "859bdd64-d928-4400-994e-802d336c18ac",
+                  "controlId": "4df25cdc-c26d-4f74-8a09-d90732516478",
+                  "formulas": [
+                    {
+                      "exprType": "list_field",
+                      "valueType": "input",
+                      "prop": "Text28",
+                      "id": "Request_Type__Title_",
+                      "type": "expr",
+                      "name": "List Fields:Request Type (Title)"
+                    },
+                    {
+                      "type": "op",
+                      "op": "=="
+                    },
+                    {
+                      "type": "str",
+                      "value": "Incident"
+                    }
+                  ],
+                  "actions": {
+                    "id": "35679772-b5db-46ff-a44b-9eb12ba7cb53",
+                    "type": 1,
+                    "attrs": {
+                      "style_regulation_action": "style_regulation_action_show",
+                      "style_regulation_action_color": null,
+                      "action_style": null,
+                      "icon_type": null
+                    }
+                  }
+                }
+              ],
+              "rgap": [
+                null,
+                12
+              ],
+              "rgapU": [
+                null,
+                "px"
+              ]
+            },
+            "children": [
+              {
+                "id": "ce4f402c-5be9-4fef-b79f-4d887769e2e1",
+                "binding": "Text8",
+                "type": "radio",
+                "label": "Impact Level",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "choices": [
+                    "Organization-wide",
+                    "Individual User",
+                    "Multiple Users",
+                    "Entire Department"
+                  ],
+                  "color_choices": [
+                    {
+                      "value": "Organization-wide",
+                      "key": "97b27411-3a2a-4161-85f7-01a90f9aa6ba"
+                    },
+                    {
+                      "value": "Individual User",
+                      "key": "825df67c-9a25-4be2-a726-b2a6d98bbcce"
+                    },
+                    {
+                      "value": "Multiple Users",
+                      "key": "7d0e0d2f-2064-4638-a76a-86e31b663e94"
+                    },
+                    {
+                      "value": "Entire Department",
+                      "key": "aba951ef-0c64-4c13-ad19-8bcfb22acfe7"
+                    }
+                  ],
+                  "ver": 1,
+                  "displayStyle": "dropdown",
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Select the number of users affected (e.g., Individual, Multiple Users)",
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096518369281",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "value": "",
+                "parentCol": 1
+              },
+              {
+                "id": "9ea319e4-1b72-47e8-aef0-4a5ee75cb149",
+                "binding": "Text9",
+                "type": "radio",
+                "label": "Urgency Level",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "choices": [
+                    "Critical (Work stoppage)",
+                    "High (Significant impact)",
+                    "Medium (Moderate impact)",
+                    "Low (Minimal impact)"
+                  ],
+                  "color_choices": [
+                    {
+                      "value": "Critical (Work stoppage)",
+                      "key": "a1b0d21c-674a-4a94-9931-a41e863c0601",
+                      "color": {
+                        "background": "#f82b60",
+                        "color": "#ffffff"
+                      }
+                    },
+                    {
+                      "value": "High (Significant impact)",
+                      "key": "963d7976-d80a-4e36-9133-da22007a189f",
+                      "color": {
+                        "background": "#fcb400",
+                        "color": "#ffffff"
+                      }
+                    },
+                    {
+                      "value": "Medium (Moderate impact)",
+                      "key": "728ab681-6111-4b67-95b2-44595d94e7f6",
+                      "color": {
+                        "background": "#20d9d2",
+                        "color": "#ffffff"
+                      }
+                    },
+                    {
+                      "value": "Low (Minimal impact)",
+                      "key": "19f5e0b9-3242-4917-916c-69c580ad4d3b",
+                      "color": {
+                        "background": "#eeeeee",
+                        "color": "#3b2501"
+                      }
+                    }
+                  ],
+                  "show_color": true,
+                  "ver": 1,
+                  "displayStyle": "dropdown",
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Choose the urgency (e.g., Critical)",
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096522563584",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "value": "",
+                "parentCol": 1
+              },
+              {
+                "id": "a33b8ac9-232c-4f79-8c2f-de5c801cef3c",
+                "binding": "Datetime1",
+                "type": "datepicker",
+                "label": "Occurrence Time",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "showtime": true,
+                  "dateformat": "1",
+                  "minuteStep": "15",
+                  "placeholder": "Select when the issue occurred",
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096526757889",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1,
+                "value": null
+              },
+              {
+                "id": "9ef47d6a-9f23-4dba-9dd3-9511c0e0eb8d",
+                "binding": "Text10",
+                "type": "lookup",
+                "label": "Affected Systems or Services",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "max-selection": 20,
+                  "appid": 41,
+                  "listid": "2054077096971354113",
+                  "listsetid": "2054077087595905025",
+                  "listfield": "Title",
+                  "list_tooltip_field": null,
+                  "addition": null,
+                  "sort-first": {
+                    "SortName": "Created",
+                    "SortByDesc": false
+                  },
+                  "sort-second": null,
+                  "listfilter": null,
+                  "multiple": true,
+                  "displayStyle": "dropdown",
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Select the impacted systems (e.g., Email Services, VPN Access)",
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096530952192",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "220f7952-31d6-4c07-b173-129fcf072270",
+                "binding": "Text11",
+                "type": "textarea",
+                "label": "Error Messages",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Enter any error messages received (e.g., 'Access Denied')",
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  }
+                },
+                "fieldID": "2054077096535146497",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "cfba052d-855a-4e06-b984-51707be46526",
+                "binding": "Text12",
+                "type": "textarea",
+                "label": "Recent Changes Made",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Describe any recent changes before the issue occurred"
+                },
+                "fieldID": "2054077096539340800",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              }
+            ],
+            "parentCol": 1
+          },
+          {
+            "id": "0e974b2f-a2cc-46a1-822f-8c5f310b3e63",
+            "type": "flex_grid",
+            "label": "Type of Request is Service Request",
+            "displayLabel": [
+              null,
+              false
+            ],
+            "attrs": {
+              "ver": 1,
+              "canFold": true,
+              "columns": {
+                "1": {
+                  "list": [
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    },
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    }
+                  ],
+                  "last": {
+                    "value": 1,
+                    "unit": "fr"
+                  }
+                },
+                "3": {
+                  "list": [
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    }
+                  ],
+                  "last": {
+                    "value": 1,
+                    "unit": "fr"
+                  }
+                }
+              },
+              "rows": {
+                "1": {
+                  "list": [
+                    {
+                      "unit": "auto"
+                    }
+                  ],
+                  "last": {
+                    "unit": "auto"
+                  }
+                }
+              },
+              "cgap": {
+                "1": 24
+              },
+              "cgapU": {
+                "1": "px"
+              },
+              "control_display": [
+                {
+                  "id": "da943c3a-efc2-4340-b107-4f034d7e8557",
+                  "controlId": "0e974b2f-a2cc-46a1-822f-8c5f310b3e63",
+                  "formulas": [
+                    {
+                      "exprType": "list_field",
+                      "valueType": "input",
+                      "prop": "Text28",
+                      "id": "Request_Type__Title_",
+                      "type": "expr",
+                      "name": "List Fields:Request Type (Title)"
+                    },
+                    {
+                      "type": "op",
+                      "op": "=="
+                    },
+                    {
+                      "type": "str",
+                      "value": "Service Request"
+                    }
+                  ],
+                  "actions": {
+                    "id": "495a4f08-4848-4688-9882-8f2cb7bc9192",
+                    "type": 1,
+                    "attrs": {
+                      "style_regulation_action": "style_regulation_action_show",
+                      "style_regulation_action_color": null,
+                      "action_style": null,
+                      "icon_type": null
+                    }
+                  }
+                }
+              ],
+              "rgap": [
+                null,
+                12
+              ],
+              "rgapU": [
+                null,
+                "px"
+              ]
+            },
+            "children": [
+              {
+                "id": "25508a08-a8ed-40f8-8ed0-f22332cdaa14",
+                "binding": "Text13",
+                "type": "lookup",
+                "label": "Service Category",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "max-selection": 20,
+                  "appid": 41,
+                  "listid": "2054077097004908544",
+                  "listsetid": "2054077087595905025",
+                  "listfield": "Title",
+                  "list_tooltip_field": null,
+                  "addition": null,
+                  "sort-first": {
+                    "SortName": "Created",
+                    "SortByDesc": false
+                  },
+                  "sort-second": null,
+                  "listfilter": null,
+                  "displayStyle": "dropdown",
+                  "placeholder": "Select the service you are requesting",
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096543535105",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "2d930457-aed9-4ba0-ba44-5c5da12c355d",
+                "binding": "Datetime2",
+                "type": "datepicker",
+                "label": "Desired Completion Date",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "placeholder": "Select your preferred completion date",
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096551923712",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1,
+                "value": null
+              },
+              {
+                "id": "c1903988-24fa-4634-aff5-9f2ffb180083",
+                "binding": "Text16",
+                "type": "input",
+                "label": "Cost Center",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Enter the cost center or budget code (if applicable)",
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096556118017",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "337eaa79-8cc1-47c5-88b9-37bd70486957",
+                "binding": "Text14",
+                "type": "textarea",
+                "label": "Requested Item or Service Details",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Specify the item or service you need (e.g., 'Adobe Photoshop installation')"
+                },
+                "fieldID": "2054077096543535106",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "bf419d91-8f9b-48a7-b6f5-c627855367cc",
+                "binding": "Text15",
+                "type": "textarea",
+                "label": "Justification or Business Reason",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Explain why you need this item or service"
+                },
+                "fieldID": "2054077096547729409",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              }
+            ],
+            "parentCol": 1
+          },
+          {
+            "id": "30b417e9-9207-4ed7-a70b-edcb460c71be",
+            "type": "flex_grid",
+            "label": "Type of Request is Change Request",
+            "displayLabel": [
+              null,
+              false
+            ],
+            "attrs": {
+              "ver": 1,
+              "canFold": true,
+              "columns": {
+                "1": {
+                  "list": [
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    },
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    }
+                  ],
+                  "last": {
+                    "value": 1,
+                    "unit": "fr"
+                  }
+                },
+                "3": {
+                  "list": [
+                    {
+                      "value": 1,
+                      "unit": "fr"
+                    }
+                  ],
+                  "last": {
+                    "value": 1,
+                    "unit": "fr"
+                  }
+                }
+              },
+              "rows": {
+                "1": {
+                  "list": [
+                    {
+                      "unit": "auto"
+                    }
+                  ],
+                  "last": {
+                    "unit": "auto"
+                  }
+                }
+              },
+              "cgap": {
+                "1": 24
+              },
+              "cgapU": {
+                "1": "px"
+              },
+              "control_display": [
+                {
+                  "id": "07c0bb44-b98d-41bf-9c56-c46c2ff83deb",
+                  "controlId": "30b417e9-9207-4ed7-a70b-edcb460c71be",
+                  "formulas": [
+                    {
+                      "exprType": "list_field",
+                      "valueType": "input",
+                      "prop": "Text28",
+                      "id": "Request_Type__Title_",
+                      "type": "expr",
+                      "name": "List Fields:Request Type (Title)"
+                    },
+                    {
+                      "type": "op",
+                      "op": "=="
+                    },
+                    {
+                      "type": "str",
+                      "value": "Change Request"
+                    }
+                  ],
+                  "actions": {
+                    "id": "c28a3c29-197f-4e51-8434-0ff69485425c",
+                    "type": 1,
+                    "attrs": {
+                      "style_regulation_action": "style_regulation_action_show",
+                      "style_regulation_action_color": null,
+                      "action_style": null,
+                      "icon_type": null
+                    }
+                  }
+                }
+              ],
+              "rgap": [
+                null,
+                12
+              ],
+              "rgapU": [
+                null,
+                "px"
+              ]
+            },
+            "children": [
+              {
+                "id": "8c8b92ff-b9fc-4d03-b122-15b8f8d3dcda",
+                "binding": "Text17",
+                "type": "radio",
+                "label": "Change Type",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "choices": [
+                    "Emergency Change",
+                    "Normal Change",
+                    "Standard Change"
+                  ],
+                  "color_choices": [
+                    {
+                      "value": "Emergency Change",
+                      "key": "e6fb1b1a-34f6-4c75-8501-9cff6ff290af"
+                    },
+                    {
+                      "value": "Normal Change",
+                      "key": "f4d30635-a403-4b06-bc9d-eac5c014919a"
+                    },
+                    {
+                      "value": "Standard Change",
+                      "key": "484b60bf-9b5e-422c-82ce-c6783ab03390"
+                    }
+                  ],
+                  "ver": 1,
+                  "displayStyle": "dropdown",
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Select the type of change (e.g., Normal Change)",
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096564506624",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "value": "",
+                "parentCol": 1
+              },
+              {
+                "id": "578eca21-8ea1-45f4-9932-2d69ddf43e47",
+                "binding": "Text21",
+                "type": "radio",
+                "label": "Risk Assessment",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "choices": [
+                    "High",
+                    "Medium",
+                    "Low"
+                  ],
+                  "color_choices": [
+                    {
+                      "value": "High",
+                      "key": "cf58a8ee-92bf-461a-bbdd-e2797d9377e1",
+                      "color": {
+                        "background": "#f82b60",
+                        "color": "#ffffff"
+                      }
+                    },
+                    {
+                      "value": "Medium",
+                      "key": "0bcd527b-f4c8-4bb9-be24-f5153771300f",
+                      "color": {
+                        "background": "#fcb400",
+                        "color": "#ffffff"
+                      }
+                    },
+                    {
+                      "value": "Low",
+                      "key": "77e0bed7-73d2-456d-8188-de9407047c9d",
+                      "color": {
+                        "background": "#20d9d2",
+                        "color": "#ffffff"
+                      }
+                    }
+                  ],
+                  "show_color": true,
+                  "ver": 1,
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096623226882",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "value": "",
+                "parentCol": 1
+              },
+              {
+                "id": "7876cdb6-81ea-4998-a65b-914a7608a719",
+                "binding": "Datetime3",
+                "type": "datepicker",
+                "label": "Scheduled Implementation Date and Time",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "showtime": true,
+                  "dateformat": "1",
+                  "minuteStep": "1",
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Select the planned date and time for implementation",
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096631615489",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1,
+                "value": null
+              },
+              {
+                "id": "19c597ca-0abe-4fdd-bcb1-103abff916dc",
+                "binding": "Text24",
+                "type": "lookup",
+                "label": "Affected Configuration Items",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "max-selection": 20,
+                  "appid": 41,
+                  "listid": "2054077097046851585",
+                  "listsetid": "2054077087595905025",
+                  "listfield": "Title",
+                  "list_tooltip_field": null,
+                  "addition": null,
+                  "sort-first": {
+                    "SortName": "Created",
+                    "SortByDesc": false
+                  },
+                  "sort-second": null,
+                  "listfilter": null,
+                  "multiple": true,
+                  "displayStyle": "dropdown",
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Select the items that will be affected (e.g., Servers, Applications)",
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "common": {
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  }
+                },
+                "fieldID": "2054077096631615490",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "eb62fd78-8383-4269-b08d-24df3be3469a",
+                "binding": "Text18",
+                "type": "textarea",
+                "label": "Detailed Change Description",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Provide a detailed description of the proposed change"
+                },
+                "fieldID": "2054077096619032577",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "92d4f4a2-7496-49fa-bd0f-39ce56e3bb09",
+                "binding": "Text19",
+                "type": "textarea",
+                "label": "Reason for Change",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Explain the need for this change"
+                },
+                "fieldID": "2054077096623226880",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "ed0a09b2-bcfb-43d1-8219-486a1eda35cc",
+                "binding": "Text20",
+                "type": "textarea",
+                "label": "Impact Analysis",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Describe potential effects on systems and users"
+                },
+                "fieldID": "2054077096623226881",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "c9572138-7c10-4648-93e5-73882c72f851",
+                "binding": "Text22",
+                "type": "textarea",
+                "label": "Implementation Plan",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Outline the steps to implement the change"
+                },
+                "fieldID": "2054077096627421185",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              },
+              {
+                "id": "bd8b8273-4290-4626-a6bd-2e1253040858",
+                "binding": "Text23",
+                "type": "textarea",
+                "label": "Backout Plan",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "attrs": {
+                  "common": {
+                    "grid": {
+                      "position": [
+                        null,
+                        {
+                          "cSpan": 2
+                        },
+                        null,
+                        {
+                          "cSpan": 1
+                        }
+                      ]
+                    },
+                    "margin": [
+                      null,
+                      {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s0",
+                        "left": "--sp--s0"
+                      }
+                    ]
+                  },
+                  "edit": {
+                    "pcolor": "var(--cus-c--TextGrey)"
+                  },
+                  "lab": {
+                    "color": "var(--cus-c--TextGrey)"
+                  },
+                  "placeholder": "Detail steps to reverse the change if necessary"
+                },
+                "fieldID": "2054077096627421186",
+                "isFilter": false,
+                "isSort": false,
+                "isUnique": false,
+                "isSystem": false,
+                "status": 1,
+                "parentCol": 1
+              }
+            ],
+            "parentCol": 1
+          }
+        ],
+        "parentCol": 1
+      },
+      {
+        "id": "4e4be5ca-e8e1-4756-99dc-1cddc7550971",
+        "type": "container",
+        "label": "Container",
+        "displayLabel": true,
+        "attrs": {
+          "common": {
+            "grid": {
+              "position": [
+                null,
+                {
+                  "cSpan": 2
+                },
+                null,
+                {
+                  "cSpan": 1
+                }
+              ]
+            },
+            "margin": [
+              null,
+              null
+            ],
+            "padding": [
+              null,
+              {
+                "top": "",
+                "right": "",
+                "bottom": "",
+                "left": ""
+              }
+            ]
+          },
+          "style": {
+            "gap": [
+              null,
+              5
+            ]
+          }
+        },
+        "children": [
+          {
+            "id": "5b2859a6-b31e-444d-b132-a66391c34ef1",
+            "type": "heading",
+            "label": "Text",
+            "displayLabel": true,
+            "attrs": {
+              "headc": {
+                "title": {
+                  "value": "Attachments",
+                  "variable": null
+                }
+              },
+              "heads": {
+                "color": "var(--cus-c--TextGrey)",
+                "ty": {
+                  "wei": "500",
+                  "size": [
+                    null,
+                    14
+                  ]
+                }
+              },
+              "common": {
+                "positioning": {
+                  "widthtype": [
+                    null,
+                    "2"
+                  ]
+                },
+                "container": {
+                  "size": [
+                    null,
+                    null
+                  ]
+                }
+              }
+            },
+            "parentCol": 1
+          },
+          {
+            "id": "75fb9c64-baa6-4251-9b0b-cf57c3b95be6",
+            "type": "heading",
+            "label": "Text",
+            "displayLabel": true,
+            "attrs": {
+              "headc": {
+                "title": {
+                  "value": "Attach relevant files (e.g., screenshots, error messages)",
+                  "variable": null
+                }
+              },
+              "heads": {
+                "color": "var(--cus-c--TextGrey)",
+                "ty": {
+                  "wei": "500",
+                  "size": [
+                    null,
+                    11
+                  ]
+                }
+              },
+              "common": {
+                "positioning": {
+                  "widthtype": [
+                    null,
+                    "2"
+                  ]
+                }
+              }
+            },
+            "parentCol": 1
+          },
+          {
+            "id": "940da494-aef6-4ae0-b6e9-1eda6191c7ab",
+            "binding": "Text7",
+            "type": "file-upload",
+            "label": "Attachments",
+            "displayLabel": [
+              null,
+              false
+            ],
+            "attrs": {
+              "ver": 1,
+              "file_multiple": true,
+              "common": {
+                "margin": [
+                  null,
+                  {
+                    "top": 0,
+                    "right": 0,
+                    "bottom": 0,
+                    "left": 0
+                  }
+                ]
+              },
+              "lab": {
+                "color": "var(--cus-c--TextGrey)"
+              }
+            },
+            "fieldID": "2054077096518369280",
+            "isFilter": false,
+            "isSort": false,
+            "isUnique": false,
+            "isSystem": false,
+            "status": 1,
+            "parentCol": 1
+          }
+        ],
+        "parentCol": 1
+      },
+      {
+        "id": "75329348-fb99-41c5-9112-7118d9d89a5c",
+        "binding": "Text36",
+        "type": "list",
+        "label": "Ticket detail items",
+        "attrs": {
+          "list-variables": [
+            {
+              "idx": "36b0e3a3-7496-4c31-a914-20aa9ff45bcf",
+              "id": "Name",
+              "name": "Name",
+              "type": "text",
+              "editable": true
+            },
+            {
+              "idx": "d08b2778-a944-4b7f-b506-aac8fe7f28a2",
+              "id": "Description",
+              "name": "Description",
+              "type": "text",
+              "editable": true
+            },
+            {
+              "idx": "c9f7b353-3ca9-49b0-90cf-fcaccf108e76",
+              "id": "Date",
+              "name": "Date",
+              "type": "date",
+              "editable": true
+            },
+            {
+              "idx": "f9ab7c7f-2234-4c6f-a1c2-37f21feecd57",
+              "id": "Owner",
+              "name": "Owner",
+              "type": "user",
+              "editable": true
+            },
+            {
+              "idx": "1e6154af-8b89-404c-a3bc-d5eff9326224",
+              "id": "Amount",
+              "name": "Amount",
+              "type": "number",
+              "editable": true
+            }
+          ],
+          "list-fields": [
+            {
+              "idx": "36b0e3a3-7496-4c31-a914-20aa9ff45bcf",
+              "id": "Name",
+              "name": "Name",
+              "type": "text",
+              "editable": true,
+              "control": {
+                "id": "c4f9a997-1248-47a0-b76c-d4913a5a796e",
+                "label": "Name",
+                "binding": "Name",
+                "attrs": {
+                  "list_field": true,
+                  "list_field_binding": "Text36",
+                  "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c"
+                },
+                "type": "input",
+                "displayLabel": [
+                  null,
+                  true
+                ]
+              }
+            },
+            {
+              "idx": "d08b2778-a944-4b7f-b506-aac8fe7f28a2",
+              "id": "Description",
+              "name": "Description",
+              "type": "text",
+              "editable": true,
+              "control": {
+                "id": "74bc28f1-c228-4750-b855-d06839e4b7cc",
+                "label": "Description",
+                "binding": "Description",
+                "attrs": {
+                  "list_field": true,
+                  "list_field_binding": "Text36",
+                  "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c",
+                  "edit": {
+                    "fhlay": "auto",
+                    "textarea_minrows": 1
+                  }
+                },
+                "type": "textarea",
+                "displayLabel": [
+                  null,
+                  true
+                ]
+              }
+            },
+            {
+              "idx": "c9f7b353-3ca9-49b0-90cf-fcaccf108e76",
+              "id": "Date",
+              "name": "Date",
+              "type": "date",
+              "editable": true,
+              "control": {
+                "id": "051db3e6-3aa2-4771-8495-b50c67e5efda",
+                "label": "Date",
+                "binding": "Date",
+                "attrs": {
+                  "list_field": true,
+                  "list_field_binding": "Text36",
+                  "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c"
+                },
+                "type": "datepicker",
+                "displayLabel": [
+                  null,
+                  true
+                ],
+                "value": null
+              }
+            },
+            {
+              "idx": "f9ab7c7f-2234-4c6f-a1c2-37f21feecd57",
+              "id": "Owner",
+              "name": "Owner",
+              "type": "user",
+              "editable": true,
+              "control": {
+                "id": "248891c2-6b90-44dc-8316-800286b7cc82",
+                "label": "Owner",
+                "binding": "Owner",
+                "attrs": {
+                  "list_field": true,
+                  "list_field_binding": "Text36",
+                  "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c"
+                },
+                "type": "identity-picker",
+                "displayLabel": [
+                  null,
+                  true
+                ]
+              }
+            },
+            {
+              "idx": "1e6154af-8b89-404c-a3bc-d5eff9326224",
+              "id": "Amount",
+              "name": "Amount",
+              "type": "number",
+              "editable": true,
+              "control": {
+                "id": "36d4e568-01b9-4da3-a760-ecf014333355",
+                "label": "Amount",
+                "binding": "Amount",
+                "attrs": {
+                  "list_field": true,
+                  "list_field_binding": "Text36",
+                  "list_control_id": "75329348-fb99-41c5-9112-7118d9d89a5c"
+                },
+                "type": "input_number",
+                "displayLabel": [
+                  null,
+                  true
+                ]
+              }
+            }
+          ],
+          "common": {
+            "grid": {
+              "position": [
+                null,
+                {
+                  "cSpan": 2
+                },
+                null,
+                {
+                  "cSpan": 1
+                }
+              ]
+            },
+            "border": {
+              "normal": {
+                "type": "1",
+                "width": [
+                  null,
+                  {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1,
+                    "left": 1
+                  }
+                ],
+                "color": "#d8e1ef",
+                "radius": [
+                  null,
+                  {
+                    "top": "--sp--s150",
+                    "right": "--sp--s150",
+                    "bottom": "--sp--s150",
+                    "left": "--sp--s150"
+                  }
+                ]
+              }
+            },
+            "padding": [
+              null,
+              {
+                "top": "--sp--s150",
+                "right": "--sp--s150",
+                "bottom": "--sp--s150",
+                "left": "--sp--s150"
+              }
+            ],
+            "margin": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          },
+          "table": {
+            "border": {
+              "type": "1",
+              "width": [
+                null,
+                {
+                  "top": "--sp--s012",
+                  "right": "--sp--s012",
+                  "bottom": "--sp--s012",
+                  "left": "--sp--s012"
+                }
+              ],
+              "color": "var(--c--neutral-light-active)",
+              "radius": [
+                null,
+                {
+                  "top": "--sp--s075",
+                  "right": "--sp--s075",
+                  "bottom": "--sp--s075",
+                  "left": "--sp--s075"
+                }
+              ]
+            },
+            "row": {
+              "bdt": "1",
+              "bdw": [
+                null,
+                {
+                  "top": "--sp--s0",
+                  "right": "--sp--s012",
+                  "bottom": "--sp--s012",
+                  "left": "--sp--s012"
+                }
+              ],
+              "bdc": "var(--c--neutral-light-active)"
+            },
+            "title": {
+              "ty": [
+                null,
+                "s-medium"
+              ],
+              "color": "var(--c--primary-dark)"
+            },
+            "value": {
+              "ty": [
+                null,
+                "s-medium"
+              ],
+              "color": "var(--c--primary-dark)"
+            }
+          },
+          "header": {
+            "bdt": "1",
+            "bdw": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "bdc": "var(--c--neutral-light-active)",
+            "normal": {
+              "bgcolor": "var(--c--neutral-light)"
+            },
+            "ty": [
+              null,
+              "s-semi-bold"
+            ],
+            "pd": [
+              null,
+              {
+                "top": "--sp--s100",
+                "right": "--sp--s100",
+                "bottom": "--sp--s100",
+                "left": "--sp--s100"
+              }
+            ]
+          },
+          "add": {
+            "mar": [
+              null,
+              {
+                "top": "",
+                "right": "",
+                "bottom": "",
+                "left": ""
+              }
+            ]
+          },
+          "list-fields-summary": [
+            {
+              "id": "5e58cbf4-1d9e-43dc-a39c-09f6a367cd8b",
+              "field": "Amount",
+              "type": "total",
+              "display": true,
+              "binding": null
+            }
+          ],
+          "card": {
+            "mar": [
+              null,
+              null,
+              null,
+              {
+                "top": "",
+                "right": "",
+                "bottom": "",
+                "left": ""
+              }
+            ],
+            "pd": [
+              null,
+              null,
+              null,
+              {
+                "top": "",
+                "right": "",
+                "bottom": "",
+                "left": ""
+              }
+            ],
+            "content": {
+              "pd": [
+                null,
+                null,
+                null,
+                {
+                  "top": "--sp--s100",
+                  "right": "--sp--s100",
+                  "bottom": "--sp--s100",
+                  "left": "--sp--s100"
+                }
+              ],
+              "border": {
+                "type": "1",
+                "width": [
+                  null,
+                  null,
+                  null,
+                  {
+                    "top": "--sp--s012",
+                    "right": "--sp--s012",
+                    "bottom": "--sp--s012",
+                    "left": "--sp--s012"
+                  }
+                ],
+                "color": "var(--c--neutral-light-active)",
+                "radius": [
+                  null,
+                  null,
+                  null,
+                  {
+                    "top": "--sp--s150",
+                    "right": "--sp--s150",
+                    "bottom": "--sp--s150",
+                    "left": "--sp--s150"
+                  }
+                ]
+              },
+              "controlpd": [
+                null,
+                null,
+                null,
+                {
+                  "top": "--sp--s0",
+                  "right": "--sp--s0",
+                  "bottom": "--sp--s0",
+                  "left": "--sp--s0"
+                }
+              ]
+            },
+            "summary": {
+              "border": {
+                "type": "1",
+                "width": [
+                  null,
+                  null,
+                  null,
+                  {
+                    "top": "--sp--s012",
+                    "right": "--sp--s012",
+                    "bottom": "--sp--s012",
+                    "left": "--sp--s012"
+                  }
+                ],
+                "color": "var(--c--neutral-light-active)",
+                "radius": [
+                  null,
+                  null,
+                  null,
+                  {
+                    "top": "--sp--s150",
+                    "right": "--sp--s150",
+                    "bottom": "--sp--s150",
+                    "left": "--sp--s150"
+                  }
+                ]
+              },
+              "controlpd": [
+                null,
+                null,
+                null,
+                {
+                  "top": "--sp--s050",
+                  "right": "--sp--s100",
+                  "bottom": "--sp--s050",
+                  "left": "--sp--s100"
+                }
+              ],
+              "title": {
+                "ty": [
+                  null,
+                  null,
+                  null,
+                  "s-medium"
+                ],
+                "color": "var(--c--primary-dark)"
+              },
+              "value": {
+                "ty": [
+                  null,
+                  null,
+                  null,
+                  "s-medium"
+                ],
+                "color": "var(--c--primary-dark)"
+              }
+            }
+          },
+          "title": {
+            "ty": [
+              null,
+              "base-medium"
+            ],
+            "pd": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ],
+            "border": {
+              "type": "0"
+            }
+          }
+        },
+        "fieldID": "2070040101910233089",
+        "isFilter": false,
+        "isSort": false,
+        "isUnique": false,
+        "isSystem": false,
+        "status": 1,
+        "value": null,
+        "displayLabel": [
+          null,
+          true
+        ]
+      }
+    ],
+    "parentCol": 1,
+    "nv_label": "form_grid_fields_wrapper"
+  },
+  "_ak_c_opt": {}
+}

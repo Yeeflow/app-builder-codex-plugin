@@ -73,6 +73,12 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("data-list-form-fields-v1.1", [
+    "scripts/validate-data-list-form-fields-template.mjs",
+    "--package",
+    resolvedPackage,
+    ...(plan ? ["--plan", plan] : []),
+  ]));
   gates.push(runGate("dashboard-generation-hard-gates", [
     "scripts/validate-dashboard-generation-hard-gates.mjs",
     "--package",

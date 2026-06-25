@@ -136,6 +136,13 @@ Ready.
 
 ${selection}
 
+#### Form Fields Layout Template Selection
+
+| Data List or Library | Custom Form | Field Group | Selected Form Fields Layout Template | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Assets | Asset New/Edit | Basic fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |
+| Assets | Asset View | Current record fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |
+
 ## 11. Data List Workflows Plan
 `;
 }
