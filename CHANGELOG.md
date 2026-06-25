@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.47
+
+- Release full-app Data Analytics materialization runtime gates from PR #231.
+- Parse App Plan Data Analytics Template Selection rows and materialize selected approved Pie, Column, Bar, Line, Area, and Pivot templates inside Dashboard Page Layouts v1.1 two/three-column sections.
+- Add App Plan/package conformance to the Data Analytics golden-reference validator and run it from first-generation preflight so planned analytics templates cannot be silently omitted.
+- Bind generated chart/pivot controls to included data-list fields with runtime model metadata and template provenance instead of simplified visual-only controls.
+- Add runtime-safe fallback choices for select fields, map identity fields to Dynamic user controls, prevent unresolved Collection detail-link placeholders, and emit post-install seed-data companion artifacts instead of embedding sample rows in generated-final `.yapk` content.
+
 ## 0.8.46
 
 - Release root application icon, Dashboard empty-section, and filter-shape hard gates from PR #229.

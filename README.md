@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.46`
+- Version: `0.8.47`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.46` releases root application icon, Dashboard empty-section, and filter-shape hard gates from PR #229: generated-final packages must keep wrapper and decoded root `ListSet.IconUrl` FontAwesome JSON surfaces aligned, reject empty visible Dashboard v1.1 `section_content_area` modules, require select-filter label values, reject malformed select/search placeholder objects, and make the standalone materializer propagate root icons, prune unused copied dashboard sections, and emit safe filter label/placeholder shapes.
+Current release `0.8.47` releases full-app Data Analytics materialization runtime gates from PR #231: generated-final full-app materialization now parses App Plan Data Analytics Template Selection rows, clones selected approved Pie, Column, Bar, Line, Area, and Pivot templates into Dashboard v1.1 two/three-column sections, binds chart/pivot runtime models to included data-list fields, and first-generation preflight blocks planned analytics templates that are not materialized. The materializer also emits runtime-safe select choices, maps identity fields to Dynamic user controls, prevents unresolved Collection detail-link placeholders, and writes post-install seed-data companion artifacts instead of embedding sample rows in `.yapk` content.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.46
+Version: 0.8.47
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.46
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.47
 ```
 
 ## What Is Included
