@@ -1376,7 +1376,7 @@ function buildDashboardSelectFilter({ filter, listName, listId, id, datasetRegio
         field: filter.fieldName,
         displayField: filter.fieldName,
         valueField: filter.fieldName,
-        filter: [{ field: filter.fieldName, operator: "not_empty", value: "{{ListDataID}}" }],
+        filter: [],
         datasetRegion,
       },
       filterVar: filter.variable,
