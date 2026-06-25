@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.42
+
+- Release Dashboard Summary hidden-host and field metadata gates from PR #221.
+- Place generated Dashboard KPI Summary controls inside a dedicated hidden host container instead of visible content regions.
+- Add designer-shaped `ListDataID` field metadata to generated Summary count controls so the Summary runtime contract can resolve target list fields.
+- Run the Dashboard Summary control contract inspector from first-generation YAPK preflight before signing readiness can be considered.
+- Preserve proof boundaries: local fixture regression can prove the generated-final Summary contract, but signing/install/runtime proof still require OAuth, API-issued IDs, and all generated-final gates to pass.
+
 ## 0.8.41
 
 - Release full-app materializer fixture ID demand alignment from PR #219.

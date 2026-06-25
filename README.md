@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.41`
+- Version: `0.8.42`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.41` releases full-app materializer fixture ID demand alignment from PR #219: regression fixture mode now allocates enough synthetic API-shaped numeric string IDs for nontrivial App Plan resource graphs, while fixture output remains regression-only, `signingEligible: false`, and forbidden for signing, install/import, upgrade, seed data, Version Management, or browser/runtime proof.
+Current release `0.8.42` releases Dashboard Summary hidden-host and field metadata gates from PR #221: generated Dashboard KPI Summary controls now live inside dedicated hidden host containers, Summary count controls include designer-shaped `ListDataID` field metadata, and first-generation YAPK preflight blocks missing Summary hidden hosts or unresolved Summary field metadata before signing readiness can be considered.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.41
+Version: 0.8.42
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.41
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.42
 ```
 
 ## What Is Included

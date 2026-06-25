@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.41`
+`0.8.42`
+
+Version `0.8.42` releases Dashboard Summary hidden-host and field metadata gates from PR #221. Generated Dashboard KPI Summary controls must live inside dedicated hidden host containers, Summary count controls must include designer-shaped `ListDataID` field metadata, and first-generation YAPK preflight now blocks missing Summary hidden hosts or unresolved Summary field metadata before signing readiness can be considered.
 
 Version `0.8.41` releases full-app materializer fixture ID demand alignment from PR #219. Regression fixture mode now allocates enough synthetic API-shaped numeric string IDs for nontrivial App Plan resource graphs, while fixture output remains regression-only, `signingEligible: false`, and forbidden for signing, install/import, upgrade, seed data, Version Management, or browser/runtime proof.
 
