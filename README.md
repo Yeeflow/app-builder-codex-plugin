@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.40`
+- Version: `0.8.41`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.40` releases Dashboard KPI temp variable binding hard gates from PR #217: generated Dashboard KPI values are rebound to page-local Summary/temp variables, source-template Event Portfolio temp variable residue is blocked, undeclared KPI temp variable references fail generated-final validation, and each visible KPI value gets matching Summary, `ReportIds`, `exts`, and `tempVars` metadata before signing eligibility can be considered.
+Current release `0.8.41` releases full-app materializer fixture ID demand alignment from PR #219: regression fixture mode now allocates enough synthetic API-shaped numeric string IDs for nontrivial App Plan resource graphs, while fixture output remains regression-only, `signingEligible: false`, and forbidden for signing, install/import, upgrade, seed data, Version Management, or browser/runtime proof.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.40
+Version: 0.8.41
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.40
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.41
 ```
 
 ## What Is Included

@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.40`
+`0.8.41`
+
+Version `0.8.41` releases full-app materializer fixture ID demand alignment from PR #219. Regression fixture mode now allocates enough synthetic API-shaped numeric string IDs for nontrivial App Plan resource graphs, while fixture output remains regression-only, `signingEligible: false`, and forbidden for signing, install/import, upgrade, seed data, Version Management, or browser/runtime proof.
 
 Version `0.8.40` releases Dashboard KPI temp variable binding hard gates from PR #217. Generated Dashboard KPI values are rebound to page-local Summary/temp variables, source-template Event Portfolio temp variable residue is blocked, undeclared KPI temp variable references fail generated-final validation, and each visible KPI value gets matching Summary, `ReportIds`, `exts`, and `tempVars` metadata before generated-final signing eligibility can be considered.
 
