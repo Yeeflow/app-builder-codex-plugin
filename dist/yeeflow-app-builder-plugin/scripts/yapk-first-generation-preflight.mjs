@@ -70,6 +70,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("data-filter-standard-group", [
+    "scripts/validate-data-filter-standard-group.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("data-list-form-layouts-v1.1", [
     "scripts/validate-data-list-form-layout-template.mjs",
     "--package",

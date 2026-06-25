@@ -95,6 +95,8 @@ Within `section_content_area`, generated resources may insert current-record fie
 
 Current-record Data List fields must be placed inside the approved `data_list_form_fields_grid_v1_1` field-layout template. Do not place field controls directly in `section_content_area`. If the form has many fields, create multiple approved content-card sections and put one `form_grid_fields_wrapper` inside each section's `section_content_area`. The approved host wrappers are `content_card_wrapper`, `content_card_60_wrapper`, and `content_card_40_wrapper`. Field controls inside the wrapper must receive business-specific `nv_label`/`nav_label` values. Sub list fields must use the control-level `data_list_form_control_sublist_v1_1` template and preserve its locked style/table/header/card settings.
 
+If a generated custom Data List form contains two or more page-level Data Filter controls, those filters must be grouped inside `dashboard_standard_filter_group` from `docs/reference/data-filter-standard-filter-group.template.json`. Place the group inside an approved `section_content_area` hosted by `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
+
 Within `kpi_card_wrapper`, generated View Item forms may map KPI card text, icons, bindings, and Summary-backed values. New/Edit forms must not use KPI cards.
 
 ## Repeatable And Removable Modules

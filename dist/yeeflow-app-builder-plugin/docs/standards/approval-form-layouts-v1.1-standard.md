@@ -93,6 +93,8 @@ Within `section_content_area`, generated resources may insert Approval form fiel
 
 Approval forms must not use Data Analytics controls, Data Analytics golden reference templates, chart templates, pivot table templates, Summary/KPI analytics, or `kpi_metrics_wrapper`.
 
+If an Approval submission page, Approval task page, Data list workflow task form, or Schedule workflow task form contains two or more page-level Data Filter controls, those filters must be grouped inside `dashboard_standard_filter_group` from `docs/reference/data-filter-standard-filter-group.template.json`. The group must be placed inside an approved `section_content_area` and must preserve the standard filter-group wrapper and child filter visual contract.
+
 ## Locked Action And History Region
 
 `action_panel_flow_history_wrapper` is locked.

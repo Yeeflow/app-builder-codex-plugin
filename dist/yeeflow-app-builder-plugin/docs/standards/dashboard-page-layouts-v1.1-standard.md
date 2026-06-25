@@ -126,6 +126,8 @@ Dashboard Collection presentation templates from `docs/reference/dashboard-datas
 
 Dashboard filter modules follow the same component rule. When a Dashboard filter is planned, copy an approved v1.1/Event Portfolio filter module into an approved business-content slot such as `section_content_area`, then map it to the app-specific data source and field. Do not create an ad hoc filter container, copy `event_portfolio_filter_group` directly under root `Content`, or invent a new layout module for filters.
 
+When a generated Dashboard page contains two or more page-level Data Filter controls, the filters must be grouped inside `dashboard_standard_filter_group` from `docs/reference/data-filter-standard-filter-group.template.json`. The group may be placed only inside an approved v1.1 business-content slot such as `section_content_area`; do not scatter multiple filters as loose siblings.
+
 Every generated Dashboard filter must preserve the reference UI contract and receive app-specific data binding:
 
 - `attrs.data.list` resolves to an included app list
