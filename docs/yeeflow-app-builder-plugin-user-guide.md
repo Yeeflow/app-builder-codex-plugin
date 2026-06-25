@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.51`
+`0.8.52`
+
+Version `0.8.52` releases Approval Form Layouts v1.1 golden references from PR #241. Generated Approval form submission pages must clone `approval_form_layout_submission_v1_1`, task pages must clone `approval_form_layout_task_v1_1`, App Plans must select the correct template for each approval page, and generated-final preflight now blocks missing template provenance, locked action/history region drift, hidden-title CSS drift, content width drift, business controls outside approved slots, and Approval-form Data Analytics usage.
 
 Version `0.8.51` releases live E2E install readiness gates from PR #239. Generated-final preflight now requires wrapper/root `ListID` alignment, Dashboard page root ownership alignment, per-page Dashboard template control UUID re-instantiation, API-issued provenance for IDs embedded inside Dashboard JSON resources and encoded approval `DefResource` payloads, approval DefResource key alignment, and exact Version Management `PackageId` row status `Succeed` before final install success can be claimed. Package API `apiStatus: 0` remains submitted-only and does not prove install completion.
 

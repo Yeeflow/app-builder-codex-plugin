@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.52
+
+- Release Approval Form Layouts v1.1 golden references from PR #241.
+- Register export-shaped submission and task form page templates parsed from the Approval form page layout export.
+- Require App Plans to select `approval_form_layout_submission_v1_1` for submission pages and `approval_form_layout_task_v1_1` for task pages.
+- Add generated-final and first-generation preflight validation for template provenance, locked `action_panel_flow_history_wrapper`, hidden-title CSS, content width, allowed business slots, and Approval-form Data Analytics exclusion.
+- Make the standalone full-app materializer clone the selected Approval form layout templates instead of emitting minimal hand-written form definitions.
+
 ## 0.8.51
 
 - Release live E2E install readiness gates from PR #239.
