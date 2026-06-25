@@ -23,7 +23,7 @@ const REQUIRED_GUIDANCE_KEYS = [
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
-  if (args.help || (!args.registry && !args.resource && !args.package)) {
+  if (args.help || (!args.registry && !args.resource && !args.package && !args.appPlan)) {
     printUsage();
     process.exit(args.help ? 0 : 1);
   }
@@ -45,13 +45,18 @@ export function validateDataAnalyticsGoldenReferences(options = {}) {
     validateResource(resource, { surface, pageTitle: path.basename(options.resource), findings, references });
   }
 
-  if (options.package) validatePackage(path.resolve(options.package), { findings, references });
+  let packageSummary = null;
+  if (options.package) packageSummary = validatePackage(path.resolve(options.package), { findings, references });
+  const appPlanPath = options.appPlan ? path.resolve(options.appPlan) : null;
+  if (appPlanPath) validateAppPlanMaterialization(appPlanPath, { findings, references, packageSummary });
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
     registry: registryPath,
     resource: options.resource ? path.resolve(options.resource) : null,
     package: options.package ? path.resolve(options.package) : null,
+    appPlan: appPlanPath,
+    packageSummary: packageSummary ? summarizePackageAnalytics(packageSummary) : null,
     findings,
   };
 }
@@ -101,25 +106,146 @@ function validateRegistry(registry, references, findings, registryPath) {
 function validatePackage(packagePath, context) {
   if (!fs.existsSync(packagePath)) {
     context.findings.push(error("DATA_ANALYTICS_PACKAGE_MISSING", "Package file is missing.", { package: packagePath }));
-    return;
+    return null;
   }
   let decoded;
   try {
     ({ decoded } = readDecodedYapk(packagePath));
   } catch (err) {
     context.findings.push(error("DATA_ANALYTICS_PACKAGE_DECODE_FAILED", `Could not decode package Resource: ${err.message}`, { package: packagePath }));
-    return;
+    return null;
   }
+  const resources = [];
 
   for (const page of collectDashboardPages(decoded)) {
+    resources.push({ surface: "dashboard", title: page.title, resource: page.resource });
     validateResource(page.resource, { surface: "dashboard", pageTitle: page.title, findings: context.findings, references: context.references });
   }
   for (const form of collectDataListForms(decoded)) {
+    resources.push({ surface: "data-list-form", title: form.title, resource: form.resource });
     validateResource(form.resource, { surface: "data-list-form", pageTitle: form.title, findings: context.findings, references: context.references });
   }
   for (const form of collectApprovalForms(decoded)) {
+    resources.push({ surface: "approval-form", title: form.title, resource: form.resource });
     validateResource(form.resource, { surface: "approval-form", pageTitle: form.title, findings: context.findings, references: context.references });
   }
+  return collectPackageAnalytics(resources, context.references);
+}
+
+function collectPackageAnalytics(resources, references) {
+  const byTemplateId = new Map([...references.keys()].map((id) => [id, []]));
+  const occurrences = [];
+  for (const resourceInfo of resources) {
+    const index = indexResource(resourceInfo.resource);
+    for (const entry of index.entries) {
+      const type = String(entry.node?.type || "");
+      const candidateIds = templateIdCandidates(entry.node).filter((id) => references.has(id));
+      if (!ANALYTICS_TYPES.has(type) && !candidateIds.length) continue;
+      const provenance = resolveTemplateProvenance(entry, index, references);
+      const templateId = provenance.templateId || candidateIds[0] || "";
+      if (!templateId || !references.has(templateId)) continue;
+      const occurrence = {
+        templateId,
+        surface: resourceInfo.surface,
+        pageTitle: resourceInfo.title,
+        path: entry.pointer,
+        type,
+      };
+      occurrences.push(occurrence);
+      if (!byTemplateId.has(templateId)) byTemplateId.set(templateId, []);
+      byTemplateId.get(templateId).push(occurrence);
+    }
+  }
+  return { occurrences, byTemplateId };
+}
+
+function validateAppPlanMaterialization(appPlanPath, context) {
+  if (!fs.existsSync(appPlanPath)) {
+    context.findings.push(error("DATA_ANALYTICS_APP_PLAN_MISSING", "App Plan file is missing.", { appPlan: appPlanPath }));
+    return;
+  }
+  const planText = fs.readFileSync(appPlanPath, "utf8");
+  const planned = collectPlannedDataAnalyticsTemplates(planText, context.references);
+  if (!planned.length) return;
+  if (!context.packageSummary) {
+    context.findings.push(error("DATA_ANALYTICS_PACKAGE_REQUIRED_FOR_APP_PLAN", "App Plan declares Data Analytics templates, so package validation is required.", { appPlan: appPlanPath, plannedCount: planned.length }));
+    return;
+  }
+  for (const record of planned) {
+    if (record.surface && /approval/i.test(record.surface)) {
+      context.findings.push(error("DATA_ANALYTICS_APPROVAL_FORM_PLANNED", "App Plan must not assign Data Analytics templates to Approval forms.", record));
+      continue;
+    }
+    const occurrences = context.packageSummary.byTemplateId.get(record.templateId) || [];
+    if (!occurrences.length) {
+      context.findings.push(error("DATA_ANALYTICS_PLANNED_TEMPLATE_NOT_MATERIALIZED", "App Plan selected a Data Analytics golden reference, but the generated package does not materialize that template.", record));
+      continue;
+    }
+    if (record.dashboardPage) {
+      const pageMatches = occurrences.some((occurrence) => dashboardNameMatches(record.dashboardPage, occurrence.pageTitle));
+      if (!pageMatches) {
+        context.findings.push(error("DATA_ANALYTICS_PLANNED_TEMPLATE_PAGE_MISMATCH", "Generated package contains the Data Analytics template, but not on the planned Dashboard/Data List form surface.", { ...record, actualPages: occurrences.map((item) => item.pageTitle) }));
+      }
+    }
+  }
+}
+
+function collectPlannedDataAnalyticsTemplates(planText, references) {
+  const records = [];
+  const lines = String(planText || "").split(/\r?\n/);
+  let currentDashboardPage = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) currentDashboardPage = cleanMarkdownCell(heading[1]);
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map(normKey);
+    const templateColumn = findHeaderIndex(normalizedHeaders, [
+      "selected data analytics template",
+      "data analytics template",
+      "selected analytics template",
+      "analytics template",
+    ]);
+    if (templateColumn === -1) continue;
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name", "custom form", "form name"]);
+    const surfaceColumn = findHeaderIndex(normalizedHeaders, ["surface", "usage surface", "page type", "form usage"]);
+    const sectionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "section", "section name", "region"]);
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const raw = lines[rowIndex];
+      const templateId = extractApprovedDataAnalyticsTemplateId(raw, references);
+      if (templateId) {
+        records.push({
+          templateId,
+          dashboardPage: cleanMarkdownCell(cells[pageColumn]) || currentDashboardPage,
+          surface: surfaceColumn === -1 ? "" : cleanMarkdownCell(cells[surfaceColumn]),
+          analyticsRegion: sectionColumn === -1 ? "" : cleanMarkdownCell(cells[sectionColumn]),
+          sourceResource: sourceColumn === -1 ? "" : cleanMarkdownCell(cells[sourceColumn]),
+          raw: raw.trim(),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return records;
+}
+
+function extractApprovedDataAnalyticsTemplateId(text, references) {
+  for (const templateId of references.keys()) {
+    const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
+  }
+  return "";
+}
+
+function summarizePackageAnalytics(summary) {
+  return {
+    occurrenceCount: summary.occurrences.length,
+    byTemplateId: Object.fromEntries([...summary.byTemplateId.entries()].map(([id, items]) => [id, items.length])),
+  };
 }
 
 function validateResource(resource, context) {
@@ -330,6 +456,34 @@ function identityCandidates(node) {
   ].filter((value) => value !== undefined && value !== null).map(String);
 }
 
+function dashboardNameMatches(left, right) {
+  if (!left || !right) return false;
+  const normalizedLeft = normKey(left);
+  const normalizedRight = normKey(right);
+  return normalizedLeft === normalizedRight || normalizedLeft.includes(normalizedRight) || normalizedRight.includes(normalizedLeft);
+}
+
+function findHeaderIndex(normalizedHeaders, candidates) {
+  const normalizedCandidates = candidates.map(normKey);
+  return normalizedHeaders.findIndex((header) => normalizedCandidates.includes(header));
+}
+
+function isTableLine(line) {
+  return /^\s*\|.+\|\s*$/.test(line || "");
+}
+
+function splitTableLine(line) {
+  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cleanMarkdownCell(cell));
+}
+
+function cleanMarkdownCell(value) {
+  return String(value || "").replace(/`/g, "").replace(/\*\*/g, "").trim();
+}
+
+function normKey(value) {
+  return cleanMarkdownCell(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
 function isMainModule() {
   return import.meta.url === pathToFileURL(process.argv[1]).href;
 }
@@ -352,6 +506,7 @@ function parseArgs(argv) {
     else if (token === "--resource") args.resource = argv[++index];
     else if (token === "--surface") args.surface = argv[++index];
     else if (token === "--package") args.package = argv[++index];
+    else if (token === "--plan" || token === "--app-plan") args.appPlan = argv[++index];
     else throw new Error(`Unexpected argument: ${token}`);
   }
   return args;
@@ -361,7 +516,7 @@ function printUsage() {
   console.log(`Usage:
   node scripts/validate-data-analytics-golden-references.mjs --registry
   node scripts/validate-data-analytics-golden-references.mjs --resource <resource.json> --surface <dashboard|data-list-form|approval-form>
-  node scripts/validate-data-analytics-golden-references.mjs --package <app.yapk>`);
+  node scripts/validate-data-analytics-golden-references.mjs --package <app.yapk> [--plan <yeeflow-app-plan.md>]`);
 }
 
 function error(code, message, data = {}) {

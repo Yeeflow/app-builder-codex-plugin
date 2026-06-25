@@ -67,6 +67,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     "scripts/validate-data-analytics-golden-references.mjs",
     "--package",
     resolvedPackage,
+    ...(plan ? ["--plan", plan] : []),
   ]));
   gates.push(runGate("data-list-form-layouts-v1.1", [
     "scripts/validate-data-list-form-layout-template.mjs",
