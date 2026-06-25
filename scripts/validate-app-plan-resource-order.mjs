@@ -52,6 +52,7 @@ const REQUIRED_PATTERNS = [
   ["APPROVAL_SUBMISSION_PLACEHOLDER", /(?:Submission Form Fields|Submission fields|Submitter-entered fields|Request intake fields)[\s\S]*(?:Placeholder|input hint|entry hint|prompt text)/i],
   ["TASK_FORM_PLACEHOLDER", /(?:Task Form Fields|Task page fields|Task fields|Assignee task fields)[\s\S]*(?:Placeholder|input hint|entry hint|prompt text)/i],
   ["CUSTOM_FORM_PLACEHOLDER", /Custom Data List Forms Plan[\s\S]*Placeholder/i],
+  ["DATA_LIST_FORM_LAYOUT_TEMPLATE_SELECTION", /Data List Form Layout Template Selection/i],
   ["FORM_REPORTS", /Form Reports Plan/i],
   ["FORM_REPORT_STANDALONE", /Form report is a standalone Yeeflow resource type|Form Report is an independent Yeeflow resource|Form reports? (?:are|is) independent approval-based resources?/i],
   ["FORM_REPORT_APPROVAL_BASED", /based on (one )?specific Approval Form|based on their related Approval forms|approval-based resources?|created from a specific Approval form/i],
@@ -118,6 +119,11 @@ const REQUIRED_TABLE_SCHEMAS = [
     code: "ITEM_TEMPLATE_DYNAMIC_CONTROLS_TABLE_SCHEMA_MISSING",
     headers: ["Host Control", "Source List", "Business Label", "Source Field", "Expected Dynamic Display Control Category", "Display Purpose", "Proof Boundary or Deferred Note"],
   },
+  {
+    section: "Custom Data List Forms Plan",
+    code: "DATA_LIST_FORM_LAYOUT_TEMPLATE_SELECTION_TABLE_SCHEMA_MISSING",
+    headers: ["Data List or Library", "Custom Form", "Form Usage", "Selected Data List Form Layout Template", "Business Sections Needed", "Related Data / Analytics Needed", "Selection Reason", "Proof Boundary"],
+  },
 ];
 
 const DASHBOARD_ALLOWED_CONTROL_CATEGORIES = [
@@ -175,6 +181,11 @@ const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = new Set([
   "data_analytics_line_chart_with_title",
   "data_analytics_area_chart_with_title",
   "data_analytics_pivot_table_standard",
+]);
+
+const APPROVED_DATA_LIST_FORM_LAYOUT_TEMPLATE_IDS = new Set([
+  "data_list_form_layout_new_edit_v1_1",
+  "data_list_form_layout_view_item_v1_1",
 ]);
 
 function usage(exitCode = 1) {
@@ -483,6 +494,53 @@ function validateDashboardDataAnalyticsTemplateSelection(dashboard, findings) {
   }
 }
 
+function validateDataListFormLayoutTemplateSelection(text, findings) {
+  const sections = extractSections(text);
+  const customForms = sectionBody(sections, "Custom Data List Forms Plan");
+  if (!customForms.trim()) return;
+  const hasConcreteCustomFormRows = splitTableRows(customForms).some((row) => /\|\s*(New|Edit|View|New\/Edit|Detail|Custom|Print)\s*\|/i.test(row));
+  const selectionBlock = customForms.split(/#### Form Fields/i)[0].split(/#### Data List Form Layout Template Selection/i)[1] || "";
+  const rows = splitTableRows(selectionBlock);
+  const selectedIds = [];
+  for (const row of rows) {
+    const ids = [...row.matchAll(/\bdata_list_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
+    for (const id of ids) {
+      selectedIds.push(id);
+      if (!APPROVED_DATA_LIST_FORM_LAYOUT_TEMPLATE_IDS.has(id)) {
+        findings.push({
+          level: "error",
+          code: "APP_PLAN_DATA_LIST_FORM_LAYOUT_TEMPLATE_UNKNOWN",
+          message: "Data List Form Layout Template Selection must use an approved Data List Form Layouts v1.1 template ID.",
+          templateId: id,
+        });
+      }
+    }
+    if (/\b(?:new|edit|new\/edit)\b/i.test(row) && !row.includes("data_list_form_layout_new_edit_v1_1")) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_DATA_LIST_FORM_LAYOUT_NEW_EDIT_TEMPLATE_MISMATCH",
+        message: "New/Edit custom Data List forms must select data_list_form_layout_new_edit_v1_1.",
+        row,
+      });
+    }
+    if (/\bview\b/i.test(row) && !row.includes("data_list_form_layout_view_item_v1_1")) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_DATA_LIST_FORM_LAYOUT_VIEW_TEMPLATE_MISMATCH",
+        message: "View Item custom Data List forms must select data_list_form_layout_view_item_v1_1.",
+        row,
+      });
+    }
+  }
+  if (hasConcreteCustomFormRows && selectedIds.length === 0) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_DATA_LIST_FORM_LAYOUT_TEMPLATE_SELECTION_REQUIRED",
+      message: "Custom Data List Forms Plan must select an approved Data List Form Layouts v1.1 template for generated New/Edit/View forms.",
+    });
+  }
+}
+
 export function validate(file) {
   const text = fs.readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   const headings = headingLineIndexes(text);
@@ -524,6 +582,7 @@ export function validate(file) {
 
   validateResourceOrder(text, findings);
   validateControlActionPlanning(text, findings);
+  validateDataListFormLayoutTemplateSelection(text, findings);
   validateDashboardPagesPlan(text, findings);
   validateRequiredTableSchemas(extractSections(text), findings);
 

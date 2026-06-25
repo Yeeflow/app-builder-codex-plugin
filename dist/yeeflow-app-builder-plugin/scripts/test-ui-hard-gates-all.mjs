@@ -59,6 +59,16 @@ const childTests = [
     ],
   },
   {
+    name: "Data List Form Layouts v1.1 golden-reference regression suite",
+    command: ["scripts/test-data-list-form-layout-template-gates.mjs"],
+    validators: [
+      "validate-data-list-form-layout-template",
+      "New/Edit and View custom Data List form page shell templates",
+      "allowed business slots and repeatable modules",
+      "App Plan Data List Form Layout template selection",
+    ],
+  },
+  {
     name: "Full-app generation entrypoint contract regression suite",
     command: ["scripts/test-full-app-generation-entrypoint-gates.mjs"],
     validators: [

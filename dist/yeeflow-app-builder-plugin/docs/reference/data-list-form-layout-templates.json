@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "registryId": "data-list-form-layouts-v1.1",
+  "defaultVersion": "data-list-form-layouts-v1.1",
+  "description": "Approved page-level golden reference templates for generated Yeeflow custom Data List forms. These templates align Data List forms with Dashboard Page Layouts v1.1 visual structure while keeping New/Edit and View item form responsibilities separate.",
+  "sourceExport": "Data list page layouts.ydl",
+  "sourceDataListName": "Data list page layouts",
+  "approvedTemplateIds": [
+    "data_list_form_layout_new_edit_v1_1",
+    "data_list_form_layout_view_item_v1_1"
+  ],
+  "requiredRoot": {
+    "backgroundColor": "#f4f7fb",
+    "rootContainerCw": "2",
+    "rootPadding": "zero-token-array",
+    "mainContentRequired": true
+  },
+  "allowedBusinessContentContainers": [
+    "page_title_content",
+    "Operations",
+    "section_content_area",
+    "section_title_header",
+    "kpi_card_wrapper"
+  ],
+  "allowedRepeatableRemovableModules": [
+    "1_columns_section",
+    "content_card_wrapper",
+    "2_columns_section",
+    "3_columns_section",
+    "2_columns_60/40_section",
+    "kpi_metrics_wrapper",
+    "kpi_card_wrapper"
+  ],
+  "templates": [
+    {
+      "templateId": "data_list_form_layout_new_edit_v1_1",
+      "displayName": "New and Edit form",
+      "sourceTemplate": "docs/reference/data-list-form-layout-new-edit.template.json",
+      "requiredForFormTypes": [
+        "new",
+        "edit"
+      ],
+      "forbiddenForFormTypes": [
+        "view"
+      ],
+      "role": "New/Edit current-record form",
+      "requiredTemplateRegions": [
+        "main",
+        "content",
+        "1_columns_section",
+        "content_card_wrapper",
+        "section_title_area",
+        "section_title_header",
+        "section_content_area"
+      ],
+      "forbiddenTemplateRegions": [
+        "page_title_section",
+        "kpi_metrics_wrapper"
+      ],
+      "allowedComponentFamilies": [
+        "current-item Dynamic field controls",
+        "current-item Dynamic user controls",
+        "current-item Dynamic image controls",
+        "current-item Dynamic file controls",
+        "Text/Heading controls",
+        "configured action buttons in Operations"
+      ],
+      "forbiddenComponentFamilies": [
+        "Collection templates",
+        "Data Analytics templates",
+        "related record lists",
+        "Dashboard-only page shells",
+        "Approval form controls"
+      ],
+      "appPlanUse": "Select this template for every New Item or Edit Item custom Data List form. If New and Edit use separate forms, both must still select data_list_form_layout_new_edit_v1_1."
+    },
+    {
+      "templateId": "data_list_form_layout_view_item_v1_1",
+      "displayName": "View item",
+      "sourceTemplate": "docs/reference/data-list-form-layout-view-item.template.json",
+      "requiredForFormTypes": [
+        "view"
+      ],
+      "forbiddenForFormTypes": [
+        "new",
+        "edit"
+      ],
+      "role": "View current-record plus related-context form",
+      "requiredTemplateRegions": [
+        "main",
+        "content",
+        "page_title_section",
+        "page_title_content",
+        "page_title_text",
+        "page_title_description",
+        "kpi_metrics_wrapper",
+        "1_columns_section",
+        "content_card_wrapper",
+        "section_title_area",
+        "section_title_header",
+        "section_content_area"
+      ],
+      "allowedComponentFamilies": [
+        "current-item Dynamic controls",
+        "Dashboard-validated Collection templates",
+        "Data Analytics templates",
+        "KPI cards",
+        "related business data regions",
+        "configured action buttons in Operations"
+      ],
+      "forbiddenComponentFamilies": [
+        "Approval form controls",
+        "Dashboard page root shells copied as competing roots"
+      ],
+      "appPlanUse": "Select this template for every View Item custom Data List form. It may include current-record details plus related datasets, Data Analytics, KPI cards, and Dashboard-validated component golden references inside allowed slots."
+    }
+  ]
+}

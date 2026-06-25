@@ -8,6 +8,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
 const DASHBOARD_V11_TEMPLATE_PATH = path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json");
+const DATA_LIST_FORM_TEMPLATE_PATHS = {
+  newEdit: path.join(ROOT, "docs/reference/data-list-form-layout-new-edit.template.json"),
+  view: path.join(ROOT, "docs/reference/data-list-form-layout-view-item.template.json"),
+};
 const COLLECTION_TEMPLATE_PATHS = {
   collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   collection_control_grid_table_with_search: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
@@ -569,7 +573,10 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
   };
 }
 
-function buildCustomFormLayout({ layoutId, listId, listName, formName, fields }) {
+function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", fields }) {
+  const templateKind = /\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit";
+  const templateId = templateKind === "view" ? "data_list_form_layout_view_item_v1_1" : "data_list_form_layout_new_edit_v1_1";
+  const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields });
   return {
     ListID: listId,
     LayoutID: layoutId,
@@ -583,32 +590,44 @@ function buildCustomFormLayout({ layoutId, listId, listName, formName, fields })
       {
         ID: layoutId,
         RefId: layoutId,
-        Resource: JSON.stringify({
-          type: "form",
-          id: `${slugify(formName)}_form_root`,
-          name: formName,
-          title: formName,
-          attrs: { container: { cw: "2", padding: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }] } },
-          children: [
-            { type: "heading", label: "Text", id: `${slugify(formName)}_title`, name: formName, title: formName, attrs: { headc: { title: { value: formName } }, heads: { ty: [null, "h3-bold"], color: "#111827" } } },
-            ...fields.slice(0, 8).map((field, index) => ({
-              type: dynamicControlTypeForField(field),
-              id: `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`,
-              name: field.DisplayName,
-              title: field.DisplayName,
-              attrs: {
-                data: {
-                  list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
-                  field: field.FieldName,
-                  fieldName: field.FieldName,
-                },
-              },
-            })),
-          ],
-        }),
+        Resource: JSON.stringify(resource),
       },
     ],
   };
+}
+
+function materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields }) {
+  const templateFile = DATA_LIST_FORM_TEMPLATE_PATHS[templateKind];
+  const template = JSON.parse(fs.readFileSync(templateFile, "utf8"));
+  const resource = clone(template.templateResource);
+  resource.derivedFromDataListFormLayoutTemplate = templateId;
+  resource.dataListFormLayoutTemplateId = templateId;
+  resource.title = formName;
+  removeOperationsWithoutActions(resource);
+  setTemplateText(resource, "section_title_text", formName);
+  setTemplateText(resource, "section_title_description", templateKind === "view" ? `Review ${listName} details and related context.` : `Capture and maintain ${listName} item details.`);
+  if (templateKind === "view") {
+    setTemplateText(resource, "page_title_text", formName);
+    setTemplateText(resource, "page_title_description", `View ${listName} record details and related operational context.`);
+  }
+  const slot = findFirstByIdentity(resource, "section_content_area");
+  if (slot) {
+    slot.children = fields.slice(0, 12).map((field, index) => ({
+      type: dynamicControlTypeForField(field),
+      id: `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`,
+      name: field.DisplayName,
+      title: field.DisplayName,
+      label: field.DisplayName,
+      attrs: {
+        data: {
+          list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+          field: field.FieldName,
+          fieldName: field.FieldName,
+        },
+      },
+    }));
+  }
+  return resource;
 }
 
 function buildFieldRules({ field, type }) {
@@ -816,7 +835,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids }) {
     ];
     for (const assignment of customLayoutsForList) {
       const layoutId = stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]);
-      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, fields }));
+      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, fields }));
     }
     const detailLayoutId = customLayoutsForList.length
       ? stringId(ids[`decoded.Childs[${index}].Layouts[${customLayoutsForList[0].layoutIndex}].LayoutID`])
@@ -1651,13 +1670,28 @@ function identityCandidates(control) {
     control?.attrs?.nav_label,
     control?.attrs?.templateMarker,
     control?.attrs?.dashboardPageLayoutTemplateId,
+    control?.attrs?.dataListFormLayoutTemplateId,
+    control?.attrs?.derivedFromDataListFormLayoutTemplate,
     control?.templateMarker,
     control?.derivedFromDashboardPageLayoutTemplate,
+    control?.dataListFormLayoutTemplateId,
+    control?.derivedFromDataListFormLayoutTemplate,
   ].filter(Boolean).map(String);
 }
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function setTemplateText(root, identity, value) {
+  const node = findFirstByIdentity(root, identity);
+  if (!node) return;
+  node.name = value;
+  node.title = value;
+  node.attrs = node.attrs || {};
+  node.attrs.headc = node.attrs.headc || {};
+  node.attrs.headc.title = node.attrs.headc.title || {};
+  node.attrs.headc.title.value = value;
 }
 
 function buildLegacyMaterialDashboardResource({ name, layoutId, listName, listId, summaryId, filterId, collectionId }) {
