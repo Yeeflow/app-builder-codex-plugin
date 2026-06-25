@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.53
+
+- Release standard Data Filter group golden reference gates from PR #244.
+- Register `dashboard_standard_filter_group` as the approved wrapper for pages/forms that contain two or more page-level Data Filter controls.
+- Require Dashboard pages, custom Data List forms, Approval submission/task forms, Data list workflow task forms, and Schedule workflow task forms to place multiple page-level filters inside the approved group while excluding local Collection toolbar search controls.
+- Add generated-final and first-generation preflight validation for group provenance, row layout, gap/alignment, label typography, label layout, placeholder styling, radius, fixed-width positioning, and loose sibling filter rejection.
+- Update App Plan, Dashboard, Data List Form, Approval Form, full-app materialization, builder, generator, and package-validator guidance so future generation selects and preserves the standard filter group.
+
 ## 0.8.52
 
 - Release Approval Form Layouts v1.1 golden references from PR #241.

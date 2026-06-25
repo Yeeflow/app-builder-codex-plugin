@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.52`
+`0.8.53`
+
+Version `0.8.53` releases standard Data Filter group golden reference gates from PR #244. Generated Dashboard pages, custom Data List forms, Approval submission/task forms, Data list workflow task forms, and Schedule workflow task forms with two or more page-level Data Filter controls must clone `dashboard_standard_filter_group`, preserve the approved wrapper and child filter style contract, exclude local Collection toolbar search controls, and pass generated-final preflight for group provenance, row layout, gap/alignment, label typography, label layout, placeholder styling, radius, fixed-width positioning, and loose sibling filter rejection.
 
 Version `0.8.52` releases Approval Form Layouts v1.1 golden references from PR #241. Generated Approval form submission pages must clone `approval_form_layout_submission_v1_1`, task pages must clone `approval_form_layout_task_v1_1`, App Plans must select the correct template for each approval page, and generated-final preflight now blocks missing template provenance, locked action/history region drift, hidden-title CSS drift, content width drift, business controls outside approved slots, and Approval-form Data Analytics usage.
 
