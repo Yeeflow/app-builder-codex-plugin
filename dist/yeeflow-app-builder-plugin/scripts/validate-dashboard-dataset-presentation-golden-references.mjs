@@ -85,6 +85,7 @@ const GRID_MULTISELECT_TEMPLATE_RESIDUE = [
   "Completion (%)",
   "Progress bar",
 ];
+const TEMPLATE_PLACEHOLDER_RE = /\{\{[^{}]+\}\}/g;
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -697,6 +698,7 @@ function validatePackage(packagePath, registryInfo, findings) {
 
   const fieldCatalog = collectFieldCatalog(decoded);
   for (const page of collectDashboardPages(decoded)) {
+    validateDashboardTemplatePlaceholders(page, findings);
     validateKpiTemplateMaterialization(page, findings);
     const collections = page.controls.filter((entry) => String(entry.control?.type || "") === "collection");
     for (const entry of collections) {
@@ -725,6 +727,37 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
   if (provenance.templateId === "collection_control_grid_table_with_multiselect") validateGridMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
+}
+
+function validateDashboardTemplatePlaceholders(page, findings) {
+  const matches = [];
+  collectTemplatePlaceholders(page.resource, page.pointer, matches);
+  for (const match of matches) {
+    findings.push(error("DASH_DATASET_COLLECTION_TEMPLATE_PLACEHOLDER_UNRESOLVED", "Generated Dashboard resources must not retain source-template placeholders such as {{ListSetID}}, {{ListID}}, {{DetailLayoutID}}, or any other {{...}} token after Collection template clone-and-map.", {
+      page: page.title,
+      path: match.path,
+      value: match.value,
+      token: match.token,
+    }));
+  }
+}
+
+function collectTemplatePlaceholders(value, pointer, matches) {
+  if (typeof value === "string") {
+    for (const token of value.match(TEMPLATE_PLACEHOLDER_RE) || []) {
+      matches.push({ path: pointer, value, token });
+    }
+    if (value.trim() === "[object Object]") {
+      matches.push({ path: pointer, value, token: "[object Object]" });
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => collectTemplatePlaceholders(item, `${pointer}[${index}]`, matches));
+    return;
+  }
+  if (!isObject(value)) return;
+  for (const [key, child] of Object.entries(value)) collectTemplatePlaceholders(child, `${pointer}.${key}`, matches);
 }
 
 function collectDashboardCollectionRecords(decoded, approvedIds) {

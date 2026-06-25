@@ -1139,6 +1139,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
             Resource: JSON.stringify(buildMaterialDashboardResource({
               name,
               layoutId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
+              rootListSetId: rootListId,
               listName: firstListName,
               listId: firstListId,
               listMeta: firstListMeta,
@@ -1193,7 +1194,7 @@ function selectDashboardAnalyticsForPage({ planDemand, pageName, pageIndex }) {
   return records.filter((record) => !record.dashboardPage).filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
 }
 
-function buildMaterialDashboardResource({ name, layoutId, listName, listId, listMeta, listMetaByName, datasetRecord, dashboardFilters, dashboardAnalytics, summaryId, filterId, collectionId }) {
+function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecord, dashboardFilters, dashboardAnalytics, summaryId, filterId, collectionId }) {
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar });
   const resource = buildDashboardV11Shell({ name, layoutId });
@@ -1207,6 +1208,7 @@ function buildMaterialDashboardResource({ name, layoutId, listName, listId, list
     dashboardName: name,
     datasetRegion,
     listName: sourceResource,
+    rootListSetId,
     listId,
     listMeta: sourceListMeta,
     detailLayoutId: sourceListMeta.detailLayoutId,
@@ -1530,6 +1532,15 @@ function buildCollectionFilterConditions(filters) {
   }));
 }
 
+function buildCollectionFullTextConditions(filters) {
+  return (filters || []).map((filter) => ({
+    fields: [filter.fieldName],
+    field: filter.fieldName,
+    value: [{ exprType: "variable", valueType: "string", id: `__filter_${filter.variable}`, type: "expr", name: filter.variable }],
+    sourceFilterId: filter.controlId,
+  }));
+}
+
 function buildDashboardV11Shell({ name }) {
   const registry = JSON.parse(fs.readFileSync(DASHBOARD_V11_TEMPLATE_PATH, "utf8"));
   const template = registry.templates?.find((item) => item?.id === PAGE_LAYOUT_TEMPLATE_ID) || registry.templates?.[0];
@@ -1628,7 +1639,7 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Ac
   };
 }
 
-function buildCollectionTemplateInstance({ templateId, dashboardName, datasetRegion, listName, listId, listMeta, detailLayoutId, filterBindings, collectionId }) {
+function buildCollectionTemplateInstance({ templateId, dashboardName, datasetRegion, listName, rootListSetId, listId, listMeta, detailLayoutId, filterBindings, collectionId }) {
   const template = loadCollectionTemplate(templateId);
   const root = clone(template?.templateResource?.rootContainer || {});
   root.id = `${collectionId}_${slugify(templateId)}_wrapper`;
@@ -1651,6 +1662,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   if (collection) {
     if (GRID_TABLE_TEMPLATE_IDS.has(templateId)) enforceContainerGap(findParent(root, collection));
     const filterConditions = buildCollectionFilterConditions(filterBindings);
+    const fullTextConditions = buildCollectionFullTextConditions(filterBindings);
     const detailLink = detailLayoutId || "";
     collection.id = collectionId;
     collection.name = `${datasetRegion} Collection`;
@@ -1672,8 +1684,8 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
         datasetRegion,
         datasetPresentationTemplateId: templateId,
         field: primaryFieldName(listMeta),
-        filter: [{ field: primaryFieldName(listMeta), operator: "contains", value: "{{search}}" }, ...filterConditions],
-        fulltext: [{ field: primaryFieldName(listMeta), value: "{{search}}" }],
+        filter: filterConditions,
+        fulltext: fullTextConditions,
         link: detailLink,
         opentype: detailLink ? "slide" : "none",
         modalsize: detailLink ? 2 : null,
@@ -1735,15 +1747,97 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   }
   replaceTemplateResidue(root, { datasetRegion, listName });
   setTitleText(root, datasetRegion);
+  sanitizeCollectionRuntimeReferences(root, {
+    rootListSetId,
+    listId,
+    detailLayoutId,
+  });
   const pageDependencies = template.pageLevelDependencies || {};
   root.pageLevelDependencies = {
-    tempVars: pageDependencies.tempVars || [],
-    filterVars: pageDependencies.filterVars || [],
-    actions: pageDependencies.actions || [],
-    formAction: pageDependencies.formAction || [],
+    tempVars: replaceCollectionTemplatePlaceholders(pageDependencies.tempVars || [], { rootListSetId, listId, detailLayoutId }),
+    filterVars: replaceCollectionTemplatePlaceholders(pageDependencies.filterVars || [], { rootListSetId, listId, detailLayoutId }),
+    actions: replaceCollectionTemplatePlaceholders(pageDependencies.actions || [], { rootListSetId, listId, detailLayoutId }),
+    formAction: replaceCollectionTemplatePlaceholders(pageDependencies.formAction || [], { rootListSetId, listId, detailLayoutId }),
   };
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
   return root;
+}
+
+function sanitizeCollectionRuntimeReferences(root, { rootListSetId, listId, detailLayoutId }) {
+  const removedActionIds = new Set();
+  for (const collection of findDescendants(root, (node) => String(node?.type || "") === "collection")) {
+    const actions = Array.isArray(collection?.attrs?.actions) ? collection.attrs.actions : [];
+    const keptActions = [];
+    for (const action of actions) {
+      if (!detailLayoutId && isDetailLayoutAction(action)) {
+        for (const actionId of actionIdentityCandidates(action)) removedActionIds.add(actionId);
+        continue;
+      }
+      keptActions.push(replaceCollectionTemplatePlaceholders(action, { rootListSetId, listId, detailLayoutId }));
+    }
+    collection.attrs = collection.attrs || {};
+    collection.attrs.actions = keptActions;
+  }
+  replaceCollectionTemplatePlaceholders(root, { rootListSetId, listId, detailLayoutId }, { mutate: true });
+  if (removedActionIds.size) pruneActionButtonsForRemovedActions(root, removedActionIds);
+}
+
+function isDetailLayoutAction(action) {
+  const text = JSON.stringify(action || {});
+  if (text.includes("{{DetailLayoutID}}")) return true;
+  return /"op_type"\s*:\s*"edit"/i.test(text) && /"type"\s*:\s*"listitem"/i.test(text);
+}
+
+function actionIdentityCandidates(action) {
+  return [
+    action?.id,
+    action?.ID,
+    action?.name,
+    action?.Name,
+    action?.attrs?.id,
+    action?.attrs?.name,
+    action?.attrs?.control_action,
+  ].map((value) => String(value || "").trim()).filter(Boolean);
+}
+
+function pruneActionButtonsForRemovedActions(root, removedActionIds) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      const actionId = String(child?.attrs?.control_action || child?.attrs?.action || child?.control_action || child?.action || "").trim();
+      if (String(child?.type || "") === "action_button" && actionId && removedActionIds.has(actionId)) return false;
+      visit(child);
+      return true;
+    });
+  };
+  visit(root);
+}
+
+function replaceCollectionTemplatePlaceholders(value, { rootListSetId, listId, detailLayoutId }, options = {}) {
+  const replacements = {
+    "{{ListSetID}}": stringId(rootListSetId || ""),
+    "{{ListID}}": stringId(listId || ""),
+    "{{DetailLayoutID}}": stringId(detailLayoutId || ""),
+    "{{sourceLongId}}": stringId(detailLayoutId || ""),
+  };
+  const visit = (node) => {
+    if (typeof node === "string") {
+      let out = node;
+      for (const [token, replacement] of Object.entries(replacements)) out = out.split(token).join(replacement);
+      return out;
+    }
+    if (Array.isArray(node)) {
+      for (let index = 0; index < node.length; index += 1) node[index] = visit(node[index]);
+      return node;
+    }
+    if (node && typeof node === "object") {
+      for (const [key, child] of Object.entries(node)) node[key] = visit(child);
+      return node;
+    }
+    return node;
+  };
+  const target = options.mutate ? value : clone(value);
+  return visit(target);
 }
 
 function replaceUserLikeDynamicFieldText(control, replacement) {

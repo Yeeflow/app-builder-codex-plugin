@@ -265,6 +265,7 @@ try {
   const decodedText = JSON.stringify(decodedResource);
   assert.match(decodedText, /data_analytics_pie_chart_with_title/, "planned pie chart analytics template is materialized");
   assert.match(decodedText, /data_analytics_line_chart_with_title/, "planned line chart analytics template is materialized");
+  assert.doesNotMatch(decodedText, /\{\{(?:DetailLayoutID|ListSetID|ListID|FieldID|ListDataID)[^}]*\}\}/, "materialized generated-final package must not retain template action/reference placeholders");
   assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
   const resourceFixtureOut = path.join(tempDir, "resource-plan-fixture");
   const resourceFixtureRun = expectPass("nontrivial fixture mode allocates enough synthetic API-shaped IDs", [
