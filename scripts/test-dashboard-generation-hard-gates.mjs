@@ -123,6 +123,16 @@ function find(node, id) {
   return found;
 }
 
+function bindAllKpiValueControls(root, variable) {
+  for (const key of ["planned_events", "approved_budget", "registration_rate", "lead_follow_up"]) {
+    const value = find(root, `event_portfolio_kpi_${key}_value`);
+    if (!value) continue;
+    value.attrs = value.attrs || {};
+    value.attrs.headc = { ...(value.attrs.headc || {}), title: { variable: [variable] } };
+    value.attrs.heads = { ty: [null, "h2-bold"], color: "#071638" };
+  }
+}
+
 function domainString(value) {
   const replacements = new Map([
     ["Event", "Request"],
@@ -347,17 +357,15 @@ function validV11Resource(flags = {}) {
   removeOperations(root);
   const businessSection = findBusinessSectionContentArea(root);
   businessSection.children = [eventPortfolioFilterGroup(flags.filterPatch || {}), summaryControl(flags.summaryPatch || {}), eventPipelineGridTableRegion()];
-  const kpiValue = find(root, "event_portfolio_kpi_planned_events_value");
   const kpiWrapper = find(root, "kpi_metrics_wrapper") || find(root, "kpi_cards_wrapper");
   if (kpiWrapper) {
     kpiWrapper.derivedFromGoldenReference = "event_portfolio_kpi_row";
     kpiWrapper.width = "full";
   }
-  if (kpiValue) {
-    kpiValue.attrs = kpiValue.attrs || {};
-    kpiValue.attrs.headc = { title: { variable: [flags.visibleVariable === false ? { id: "otherVar", name: "otherVar" } : SAVE_VAR] } };
-    kpiValue.attrs.heads = { ty: [null, "h2-bold"], color: "#071638" };
-  }
+  const visibleVariable = flags.visibleVariable === false
+    ? { id: "otherVar", name: "otherVar" }
+    : (typeof flags.visibleVariable === "object" && flags.visibleVariable ? flags.visibleVariable : SAVE_VAR);
+  bindAllKpiValueControls(root, visibleVariable);
   applyKpiMode(root, flags.kpiMode || "valid");
   const filter = find(root, "event_portfolio_pipeline_status_filter") || find(root, "event_portfolio_region_filter");
   if (filter) setNearestContainerReference(root, filter, "event_portfolio_filter_group");
@@ -603,6 +611,8 @@ try {
   expectCode("COUNT does not select ListDataID fails", ["--package", writePackage(tempDir, "summary-bad-count", decoded({ extValues: [{ fieldName: "Title", func: "COUNT", id: "Title" }] }))], "DASH_SUMMARY_COUNT_FIELD_INVALID");
   expectCode("AVG does not select numeric field fails", ["--package", writePackage(tempDir, "summary-bad-avg", decoded({ extValues: [{ fieldName: "Text1", func: "AVG", id: "Text1" }] }))], "DASH_SUMMARY_NUMERIC_FIELD_INVALID");
   expectCode("visible KPI text variable mismatch fails", ["--package", writePackage(tempDir, "summary-visible-mismatch", decoded({ visibleVariable: false }))], "DASH_SUMMARY_VISIBLE_KPI_BINDING_MISMATCH");
+  expectCode("visible KPI source-template temp variable residue fails", ["--package", writePackage(tempDir, "kpi-source-template-tempvar", decoded({ visibleVariable: { id: "__temp_event_portfolio_approved_budget", name: "__temp_event_portfolio_approved_budget" } }))], "DASH_KPI_SOURCE_TEMPLATE_TEMPVAR_RESIDUE");
+  expectCode("visible KPI undeclared temp variable fails", ["--package", writePackage(tempDir, "kpi-undeclared-tempvar", decoded({ visibleVariable: { id: "__temp_missing_metric", name: "missing_metric" } }))], "DASH_KPI_TEMPVAR_UNDECLARED");
 
   const passReport = writeReport(tempDir, "pass-report.json", {
     canonicalApplication: { listSetId: LIST_SET_ID, url: `https://codex.yeeflow.com/#/list-set/41/${LIST_SET_ID}` },
