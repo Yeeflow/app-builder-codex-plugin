@@ -19,6 +19,8 @@ const DASHBOARD_LAYOUT_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-p
 const DASHBOARD_DATASET_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
 const DASHBOARD_GOLDEN_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-golden-reference-conformance.mjs");
 const DASHBOARD_HARD_GATES_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-generation-hard-gates.mjs");
+const SUMMARY_CONTRACT_VALIDATOR = path.join(ROOT, "scripts/inspect-dashboard-summary-control-contract.mjs");
+const FIRST_GENERATION_PREFLIGHT = path.join(ROOT, "scripts/yapk-first-generation-preflight.mjs");
 const YAPK_PACKAGE_VALIDATOR = path.join(ROOT, "validate-yapk-package.js");
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "full-app-materializer-"));
 const cases = [];
@@ -286,8 +288,18 @@ try {
     "--plan", resourcePlan,
     "--package", resourceReport.outputs.package,
   ]);
+  expectPass("nontrivial generated package passes Dashboard Summary hidden-host and field-metadata contract", [
+    SUMMARY_CONTRACT_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+  ]);
+  expectPass("nontrivial generated package passes first-generation preflight including Summary contract", [
+    FIRST_GENERATION_PREFLIGHT,
+    "--package", resourceReport.outputs.package,
+    "--plan", resourcePlan,
+    "--json",
+  ]);
   cases.push("nontrivial App Plan materializes data lists, approval forms, reports, dashboards, custom forms, and navigation without placeholder output");
-  cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, data-list schema, YAPK package, export-shape, Dashboard v1.1, Dashboard Collection template, Golden Reference, and aggregate Dashboard hard gates");
+  cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, data-list schema, YAPK package, export-shape, Dashboard v1.1, Dashboard Collection template, Golden Reference, aggregate Dashboard hard gates, Summary contract, and first-generation preflight");
 
   console.log(JSON.stringify({ status: "pass", cases }, null, 2));
 } finally {

@@ -73,6 +73,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("dashboard-summary-control-contract", [
+    "scripts/inspect-dashboard-summary-control-contract.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("dashboard-golden-reference-conformance", [
     "scripts/validate-dashboard-golden-reference-conformance.mjs",
     "--package",
