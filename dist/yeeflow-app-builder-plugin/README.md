@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.48`
+- Version: `0.8.49`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.48` releases Dashboard Collection action placeholder hard gates from PR #233: generated-final Dashboard Collection template actions must rewrite or remove source-template placeholders such as `{{ListSetID}}`, `{{ListID}}`, `{{DetailLayoutID}}`, `{{sourceLongId}}`, and `{{search}}` before signing readiness. The standalone materializer now rewrites concrete runtime list/detail references, prunes unsupported detail/open actions when no detail layout exists, emits expression-token filter/fulltext conditions, and the dataset golden-reference validator blocks unresolved template placeholders anywhere in decoded Dashboard resources.
+Current release `0.8.49` releases Dashboard select-filter option-source placeholder hard gates from PR #235: generated Dashboard select filters must not emit literal `{{ListDataID}}` current-item placeholders in `attrs.data.filter[].value`. The standalone materializer now emits `filter: []` when no validated runtime option-source filter is required, and dataset golden-reference validation reports `DASH_SELECT_FILTER_OPTION_SOURCE_PLACEHOLDER_UNRESOLVED` before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.48
+Version: 0.8.49
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.48
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.49
 ```
 
 ## What Is Included

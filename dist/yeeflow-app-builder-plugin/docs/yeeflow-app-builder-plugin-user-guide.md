@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.48`
+`0.8.49`
+
+Version `0.8.49` releases Dashboard select-filter option-source placeholder hard gates from PR #235. Generated Dashboard select filters must not emit literal `{{ListDataID}}` current-item placeholders in `attrs.data.filter[].value`. The standalone materializer now emits `filter: []` when no validated runtime option-source filter is required, and dataset golden-reference validation reports `DASH_SELECT_FILTER_OPTION_SOURCE_PLACEHOLDER_UNRESOLVED` before signing readiness.
 
 Version `0.8.48` releases Dashboard Collection action placeholder hard gates from PR #233. Generated-final Dashboard Collection template actions must rewrite or remove source-template placeholders such as `{{ListSetID}}`, `{{ListID}}`, `{{DetailLayoutID}}`, `{{sourceLongId}}`, and `{{search}}` before signing readiness. The standalone materializer now rewrites concrete runtime list/detail references, prunes unsupported detail/open actions when no detail layout exists, emits expression-token filter/fulltext conditions, and the dataset golden-reference validator blocks unresolved template placeholders anywhere in decoded Dashboard resources.
 
