@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.50`
+- Version: `0.8.51`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.50` releases signing-readiness preflight handoff reporting from PR #237: standalone materialization now reports its own boundary through `materializerSigningEligible: false`, `preflightEligibleForSigning: null`, and `signingReadinessSource: "not-run"`, while `yapk-first-generation-preflight` reports the actual pre-sign handoff with `preflightEligibleForSigning` and `signingReadiness`.
+Current release `0.8.51` releases live E2E install readiness gates from PR #239: generated-final preflight now blocks root ListID mismatches, Dashboard page root ownership drift, cross-page Dashboard template control UUID reuse, missing nested dashboard/approval DefResource ID provenance, approval DefResource key drift, and install proof overclaims before signing.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.50
+Version: 0.8.51
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.50
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.51
 ```
 
 ## What Is Included

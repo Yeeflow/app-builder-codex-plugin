@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.51
+
+- Release live E2E install readiness gates from PR #239.
+- Require generated-final wrapper/root identity alignment before signing: `wrapper.ListID` must equal decoded `ListSet.ListID`, and every Dashboard page must target that decoded root.
+- Re-instantiate UUID-shaped Dashboard template control IDs per generated page while preserving action/control references.
+- Validate IDs embedded inside Dashboard JSON resources and encoded approval `DefResource` payloads against API-issued ID provenance.
+- Treat install/import API `apiStatus: 0` as submitted-only and require exact Version Management `PackageId` row status `Succeed` for final install success claims.
+
 ## 0.8.50
 
 - Release signing-readiness preflight handoff reporting from PR #237.
