@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.44`
+`0.8.45`
+
+Version `0.8.45` releases YAPK Bit/switch field hard gates from PR #227. Generated-final YAPK Bit fields must use `FieldType = "Bit"`, runtime `Type = "switch"`, string default values `"0"` or `"1"`, and matching switch rows in default and custom `LayoutView` metadata. First-generation preflight now blocks wrong Bit control types before signing readiness, and the standalone materializer maps planned boolean, yes/no, and flag fields to switch metadata.
 
 Version `0.8.44` releases Data List Form Fields Grid v1.1 and Sub List control golden references from PR #225. Generated custom Data List forms must place current-record fields inside `data_list_form_fields_grid_v1_1`, Sub list fields must clone `data_list_form_control_sublist_v1_1`, generated field controls must carry business-specific `nav_label` metadata and zero field margins, and Dashboard/Data List Form Layouts v1.1 may host field-grid and Collection templates only inside approved `section_content_area` slots under `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 

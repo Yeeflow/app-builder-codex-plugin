@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.44`
+- Version: `0.8.45`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.44` releases Data List Form Fields Grid v1.1 and Sub List control golden references from PR #225: generated custom Data List forms must place current-record fields inside `data_list_form_fields_grid_v1_1`, Sub list fields must clone `data_list_form_control_sublist_v1_1`, every generated field control must use business-specific `nav_label` metadata and zero field margin, and Dashboard/Data List Form Layouts v1.1 may host field-grid and Collection templates only inside approved `section_content_area` slots under `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
+Current release `0.8.45` releases YAPK Bit/switch field hard gates from PR #227: generated-final YAPK Bit fields must use `FieldType = "Bit"`, runtime `Type = "switch"`, string default values `"0"` or `"1"`, and matching switch rows in default and custom `LayoutView` metadata. First-generation preflight now blocks wrong Bit control types before signing readiness, and the standalone materializer maps planned boolean, yes/no, and flag fields to switch metadata.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.44
+Version: 0.8.45
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.44
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.45
 ```
 
 ## What Is Included
