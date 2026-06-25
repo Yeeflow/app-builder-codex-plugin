@@ -5,6 +5,9 @@
   "approvedTemplateIds": [
     "data_list_form_fields_grid_v1_1"
   ],
+  "approvedControlTemplateIds": [
+    "data_list_form_control_sublist_v1_1"
+  ],
   "templates": [
     {
       "templateId": "data_list_form_fields_grid_v1_1",
@@ -43,8 +46,32 @@
       "appPlanUse": "For every generated custom Data List New/Edit/View form that displays current list fields, select data_list_form_fields_grid_v1_1 for each field group. The App Plan should describe group purpose, fields included, desktop/tablet/mobile column counts, full-row field controls, and dynamic-display grouping needs without generated runtime IDs or JSON payloads."
     }
   ],
+  "controlTemplates": [
+    {
+      "templateId": "data_list_form_control_sublist_v1_1",
+      "displayName": "Data List Form Sub List Control v1.1",
+      "sourceTemplate": "docs/reference/data-list-form-control-sublist.template.json",
+      "rootControlType": "list",
+      "requiredHostTemplate": "data_list_form_fields_grid_v1_1",
+      "requiredPlacement": "inside form_grid_fields_wrapper",
+      "allowedEditableAreas": [
+        "Business title/label/name/binding for the Sub list field",
+        "attrs.list-variables for the selected Sub list fields",
+        "attrs.list-fields and each nested field control type based on the selected Sub list field types",
+        "Column span metadata needed to span the full parent Grid width"
+      ],
+      "lockedAreas": [
+        "Sub list table, header, row, card, border, padding, and typography style settings",
+        "Sub list control type",
+        "Sub list zero-margin contract"
+      ],
+      "appPlanUse": "When a custom Data List form includes a Sub list field, select data_list_form_fields_grid_v1_1 for the field group and materialize each Sub list field from data_list_form_control_sublist_v1_1. Do not generate simplified list controls."
+    }
+  ],
   "rules": {
     "fieldMargin": "Every generated Data List field control inside form_grid_fields_wrapper must set margin to zero.",
+    "fieldNavLabel": "Every generated field control inside form_grid_fields_wrapper must have a business-specific nv_label/nav_label derived from the list field or grouped field purpose. Do not keep generic template control names.",
+    "subListControlTemplate": "Every Sub list field control inside form_grid_fields_wrapper must clone data_list_form_control_sublist_v1_1 and preserve all locked style, table, header, card, padding, border, and typography settings while mapping only the business field metadata and nested field controls.",
     "fullRowControls": "Multiple line, Rich text, and Sub list controls must span the full parent Grid width on every responsive breakpoint.",
     "gridCellContent": "A Grid cell may contain one direct control. When multiple controls are needed in one cell, place a Container or nested Grid in that cell and put the controls inside it.",
     "responsiveColumns": "PC/laptop columns should be 2 or 3, tablet columns must not exceed PC/laptop columns, and mobile columns should be 1.",

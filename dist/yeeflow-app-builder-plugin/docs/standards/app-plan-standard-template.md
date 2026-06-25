@@ -303,6 +303,8 @@ Rules:
 - Current-record field controls must be placed inside the selected `form_grid_fields_wrapper`, not directly inside `section_content_area`.
 - Multiple line, Rich text, and Sub list controls must be listed as full-row field controls and generated with column span equal to the parent Grid's column count for each responsive breakpoint.
 - PC/laptop columns should be 2 or 3, tablet columns must not exceed PC/laptop columns, and mobile columns should be 1.
+- Sub list field controls must use the control-level `data_list_form_control_sublist_v1_1` template inside `form_grid_fields_wrapper`; the App Plan names the Sub list business field and nested fields, while generation maps concrete `attrs.list-variables` and `attrs.list-fields`.
+- Generated field controls must receive business-specific `nv_label` / `nav_label` values derived from their field or group purpose.
 - If a custom form intentionally has no current-record field controls, state that explicitly with the business reason and proof boundary.
 - This table is a planning contract only. Do not include generated `ListID`, `LayoutID`, `FieldID`, JSON property paths, copied control JSON, or runtime payload fields.
 

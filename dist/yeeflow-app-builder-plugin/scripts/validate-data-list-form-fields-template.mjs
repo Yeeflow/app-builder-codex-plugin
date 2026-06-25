@@ -8,9 +8,32 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk } from "./lib/yapk-d
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/data-list-form-field-layout-templates.json");
 const TEMPLATE_ID = "data_list_form_fields_grid_v1_1";
+const SUBLIST_TEMPLATE_ID = "data_list_form_control_sublist_v1_1";
 const ROOT_WRAPPER_ID = "form_grid_fields_wrapper";
 const REQUIRED_PLACEMENT_SLOT = "section_content_area";
 const REQUIRED_FULL_ROW_TYPES = new Set(["textarea", "richtext", "list"]);
+const GENERIC_FIELD_NAV_LABELS = new Set([
+  "",
+  "field",
+  "control",
+  "input",
+  "textarea",
+  "richtext",
+  "list",
+  "sublist",
+  "sub list",
+  "ticket detail items",
+  "survey program name",
+  "container",
+]);
+const SUBLIST_LOCKED_ATTR_PATHS = [
+  ["common", "border"],
+  ["common", "padding"],
+  ["table"],
+  ["header"],
+  ["add"],
+  ["card"],
+];
 const FIELD_CONTROL_TYPES = new Set([
   "input",
   "textarea",
@@ -97,6 +120,33 @@ function validateRegistry(registry, findings, registryPath) {
   }
   const template = readJson(templatePath, findings, "DATA_LIST_FORM_FIELDS_TEMPLATE_PARSE_FAILED");
   validateResource(template, { findings, source: reference.displayName || TEMPLATE_ID, requirePlacement: false, requireWrapperWhenFieldsExist: true, registryMode: true });
+  validateSubListRegistry(registry, findings, registryPath);
+}
+
+function validateSubListRegistry(registry, findings, registryPath) {
+  if (!asArray(registry.approvedControlTemplateIds).includes(SUBLIST_TEMPLATE_ID)) {
+    findings.push(error("DATA_LIST_FORM_SUBLIST_TEMPLATE_REFERENCE_MISSING", "Data List Form field-layout registry must include data_list_form_control_sublist_v1_1.", { templateId: SUBLIST_TEMPLATE_ID }));
+  }
+  const reference = asArray(registry.controlTemplates).find((item) => item?.templateId === SUBLIST_TEMPLATE_ID);
+  if (!reference) {
+    findings.push(error("DATA_LIST_FORM_SUBLIST_TEMPLATE_REFERENCE_MISSING", "Data List Form field-layout registry is missing the approved Sub list control template reference.", { templateId: SUBLIST_TEMPLATE_ID }));
+    return;
+  }
+  if (reference.rootControlType !== "list") {
+    findings.push(error("DATA_LIST_FORM_SUBLIST_TEMPLATE_ROOT_CONTRACT_INVALID", "Sub list control template must identify a list root control.", { templateId: SUBLIST_TEMPLATE_ID, actual: reference.rootControlType }));
+  }
+  const templatePath = path.resolve(path.dirname(registryPath), "..", "..", reference.sourceTemplate || "");
+  if (!fs.existsSync(templatePath)) {
+    findings.push(error("DATA_LIST_FORM_SUBLIST_TEMPLATE_FILE_MISSING", "Data List Form Sub list control template file is missing.", { templateId: SUBLIST_TEMPLATE_ID, sourceTemplate: reference.sourceTemplate }));
+    return;
+  }
+  const template = normalizeTemplateResource(readJson(templatePath, findings, "DATA_LIST_FORM_SUBLIST_TEMPLATE_PARSE_FAILED"));
+  if (!isObject(template) || template.type !== "list") {
+    findings.push(error("DATA_LIST_FORM_SUBLIST_TEMPLATE_ROOT_CONTRACT_INVALID", "Sub list control template source must parse to a list control.", { templateId: SUBLIST_TEMPLATE_ID, actual: template?.type || null }));
+    return;
+  }
+  validateFieldControl(template, { findings, source: reference.displayName || SUBLIST_TEMPLATE_ID, registryMode: true });
+  validateSubListControl(template, { findings, source: reference.displayName || SUBLIST_TEMPLATE_ID, registryMode: true });
 }
 
 function validatePackage(packagePath, context) {
@@ -239,6 +289,10 @@ function validateFieldControl(control, context) {
   if (!hasZeroMargin(control)) {
     context.findings.push(error("DATA_LIST_FORM_FIELDS_FIELD_MARGIN_NOT_ZERO", "Every field control inside form_grid_fields_wrapper must explicitly set margin to zero.", { source: context.source, type: control.type, identities: identityCandidates(control) }));
   }
+  if (!context.registryMode && !isReferenceTemplateSource(context) && !hasBusinessNavLabel(control)) {
+    context.findings.push(error("DATA_LIST_FORM_FIELDS_NAV_LABEL_MISSING", "Every generated field control inside form_grid_fields_wrapper must have a business-specific nv_label/nav_label derived from the list field or grouped field purpose.", { source: context.source, type: control.type, identities: identityCandidates(control) }));
+  }
+  if (String(control.type || "") === "list") validateSubListControl(control, context);
 }
 
 function validateFullRowSpan(hostControl, columnCounts, context, gridLabel, originalControl = hostControl) {
@@ -257,6 +311,65 @@ function validateFullRowSpan(hostControl, columnCounts, context, gridLabel, orig
       }));
     }
   }
+}
+
+function validateSubListControl(control, context) {
+  const template = getSubListTemplate(context);
+  if (!template) return;
+  if (!context.registryMode && !isReferenceTemplateSource(context) && !hasApprovedSubListTemplateProvenance(control)) {
+    context.findings.push(error("DATA_LIST_FORM_SUBLIST_TEMPLATE_PROVENANCE_MISSING", "Generated Sub list controls must declare data_list_form_control_sublist_v1_1 provenance.", { source: context.source, identities: identityCandidates(control) }));
+  }
+  if (!Array.isArray(control?.attrs?.["list-variables"]) || !Array.isArray(control?.attrs?.["list-fields"])) {
+    context.findings.push(error("DATA_LIST_FORM_SUBLIST_FIELDS_MISSING", "Sub list controls must include list-variables and list-fields metadata.", { source: context.source, identities: identityCandidates(control) }));
+  }
+  for (const attrPath of SUBLIST_LOCKED_ATTR_PATHS) {
+    const expected = getPath(template?.attrs, attrPath);
+    const actual = getPath(control?.attrs, attrPath);
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      context.findings.push(error("DATA_LIST_FORM_SUBLIST_TEMPLATE_STYLE_DRIFT", "Generated Sub list controls must preserve locked style/table/header/card settings from data_list_form_control_sublist_v1_1.", {
+        source: context.source,
+        identities: identityCandidates(control),
+        attrPath: `attrs.${attrPath.join(".")}`,
+      }));
+    }
+  }
+}
+
+function isReferenceTemplateSource(context) {
+  return /\.template\.json$/i.test(String(context.source || ""));
+}
+
+function getSubListTemplate(context) {
+  if (context.subListTemplate !== undefined) return context.subListTemplate;
+  const templatePath = path.join(ROOT, "docs/reference/data-list-form-control-sublist.template.json");
+  try {
+    context.subListTemplate = normalizeTemplateResource(JSON.parse(fs.readFileSync(templatePath, "utf8")));
+  } catch {
+    context.subListTemplate = null;
+    context.findings.push(error("DATA_LIST_FORM_SUBLIST_TEMPLATE_FILE_MISSING", "Data List Form Sub list control template file is missing.", { templateId: SUBLIST_TEMPLATE_ID, sourceTemplate: "docs/reference/data-list-form-control-sublist.template.json" }));
+  }
+  return context.subListTemplate;
+}
+
+function hasApprovedSubListTemplateProvenance(control) {
+  return identityCandidates(control).includes(SUBLIST_TEMPLATE_ID)
+    || control?.attrs?.dataListFormControlTemplateId === SUBLIST_TEMPLATE_ID
+    || control?.attrs?.derivedFromDataListFormControlTemplate === SUBLIST_TEMPLATE_ID
+    || control?.dataListFormControlTemplateId === SUBLIST_TEMPLATE_ID
+    || control?.derivedFromDataListFormControlTemplate === SUBLIST_TEMPLATE_ID;
+}
+
+function hasBusinessNavLabel(control) {
+  const value = String(control?.nv_label || control?.nav_label || control?.attrs?.nv_label || control?.attrs?.nav_label || "").trim();
+  if (!value) return false;
+  const normalized = value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  if (GENERIC_FIELD_NAV_LABELS.has(normalized)) return false;
+  if (/^(input|textarea|richtext|list|field|control)[ _-]?\d*$/i.test(value)) return false;
+  return true;
+}
+
+function getPath(object, parts) {
+  return parts.reduce((current, part) => (isObject(current) || Array.isArray(current)) ? current?.[part] : undefined, object);
 }
 
 function responsiveColumnCounts(grid) {
@@ -385,8 +498,12 @@ function identityCandidates(node) {
     node?.attrs?.nav_label,
     node?.attrs?.dataListFormFieldsTemplateId,
     node?.attrs?.derivedFromDataListFormFieldsTemplate,
+    node?.attrs?.dataListFormControlTemplateId,
+    node?.attrs?.derivedFromDataListFormControlTemplate,
     node?.dataListFormFieldsTemplateId,
     node?.derivedFromDataListFormFieldsTemplate,
+    node?.dataListFormControlTemplateId,
+    node?.derivedFromDataListFormControlTemplate,
   ].filter(Boolean).map(String);
 }
 

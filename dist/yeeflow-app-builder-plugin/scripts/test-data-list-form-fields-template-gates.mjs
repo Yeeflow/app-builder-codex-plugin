@@ -10,8 +10,10 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPT = path.join(ROOT, "scripts/validate-data-list-form-fields-template.mjs");
+const SUBLIST_TEMPLATE = path.join(ROOT, "docs/reference/data-list-form-control-sublist.template.json");
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "data-list-form-fields-v11-"));
 const TEMPLATE_ID = "data_list_form_fields_grid_v1_1";
+const SUBLIST_TEMPLATE_ID = "data_list_form_control_sublist_v1_1";
 const results = [];
 
 try {
@@ -34,9 +36,22 @@ try {
   firstWrapper(badMargin).children[0].attrs.common.margin = [null, { top: 5, right: 5, bottom: 5, left: 5 }];
   expectCode("field control non-zero margin fails", ["--resource", writeJson("bad-margin.json", badMargin), "--surface", "data-list-form"], "DATA_LIST_FORM_FIELDS_FIELD_MARGIN_NOT_ZERO");
 
+  const badNavLabel = dataListFormResource();
+  delete firstWrapper(badNavLabel).children[0].nv_label;
+  expectCode("field control without business nav_label fails", ["--resource", writeJson("bad-nav-label.json", badNavLabel), "--surface", "data-list-form"], "DATA_LIST_FORM_FIELDS_NAV_LABEL_MISSING");
+
   const badSpan = dataListFormResource();
   firstWrapper(badSpan).children[1].attrs.common.grid.position = [null, { cSpan: 1 }, null, { cSpan: 1 }];
   expectCode("rich text full-row span mismatch fails", ["--resource", writeJson("bad-span.json", badSpan), "--surface", "data-list-form"], "DATA_LIST_FORM_FIELDS_FULL_ROW_SPAN_INVALID");
+
+  const badSubListProvenance = dataListFormResource();
+  delete firstWrapper(badSubListProvenance).children[2].dataListFormControlTemplateId;
+  delete firstWrapper(badSubListProvenance).children[2].derivedFromDataListFormControlTemplate;
+  expectCode("Sub list without approved control template provenance fails", ["--resource", writeJson("bad-sublist-provenance.json", badSubListProvenance), "--surface", "data-list-form"], "DATA_LIST_FORM_SUBLIST_TEMPLATE_PROVENANCE_MISSING");
+
+  const badSubListStyle = dataListFormResource();
+  firstWrapper(badSubListStyle).children[2].attrs.header.ty = [null, "h5-medium"];
+  expectCode("Sub list locked template style drift fails", ["--resource", writeJson("bad-sublist-style.json", badSubListStyle), "--surface", "data-list-form"], "DATA_LIST_FORM_SUBLIST_TEMPLATE_STYLE_DRIFT");
 
   const badMobile = dataListFormResource();
   firstWrapper(badMobile).attrs.columns["3"].list = [{ value: 1, unit: "fr" }, { value: 1, unit: "fr" }];
@@ -126,10 +141,12 @@ function fieldGrid() {
 }
 
 function fieldControl({ type, label, span = null }) {
+  if (type === "list") return subListControl({ label, span });
   const control = {
     id: `${type}-${label}`.replace(/\W+/g, "-").toLowerCase(),
     type,
     label,
+    nv_label: fieldNavLabel(label),
     attrs: {
       common: {
         margin: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
@@ -138,6 +155,25 @@ function fieldControl({ type, label, span = null }) {
   };
   if (span) control.attrs.common.grid = { position: span };
   return control;
+}
+
+function subListControl({ label, span }) {
+  const template = JSON.parse(fs.readFileSync(SUBLIST_TEMPLATE, "utf8"));
+  const control = structuredClone(template._ak_c || template.templateResource || template);
+  control.id = `sublist-${label}`.replace(/\W+/g, "-").toLowerCase();
+  control.label = label;
+  control.name = label;
+  control.title = label;
+  control.binding = "LineItems";
+  control.nv_label = fieldNavLabel(label);
+  control.dataListFormControlTemplateId = SUBLIST_TEMPLATE_ID;
+  control.derivedFromDataListFormControlTemplate = SUBLIST_TEMPLATE_ID;
+  control.attrs.common.grid = { position: span };
+  return control;
+}
+
+function fieldNavLabel(label) {
+  return `field_${label}`.replace(/\W+/g, "_").toLowerCase();
 }
 
 function content(resource) {

@@ -93,7 +93,7 @@ Within `Operations`, generated controls must be real configured action controls.
 
 Within `section_content_area`, generated resources may insert current-record field controls, Dynamic user/image/file/field controls, related record display components, approved Collection templates, approved Data Analytics templates, or other plugin-supported controls appropriate to the form type.
 
-Current-record Data List fields must be placed inside the approved `data_list_form_fields_grid_v1_1` field-layout template. Do not place field controls directly in `section_content_area`. If the form has many fields, create multiple `content_card_wrapper` sections and put one `form_grid_fields_wrapper` inside each section's `section_content_area`.
+Current-record Data List fields must be placed inside the approved `data_list_form_fields_grid_v1_1` field-layout template. Do not place field controls directly in `section_content_area`. If the form has many fields, create multiple `content_card_wrapper` sections and put one `form_grid_fields_wrapper` inside each section's `section_content_area`. Field controls inside the wrapper must receive business-specific `nv_label`/`nav_label` values. Sub list fields must use the control-level `data_list_form_control_sublist_v1_1` template and preserve its locked style/table/header/card settings.
 
 Within `kpi_card_wrapper`, generated View Item forms may map KPI card text, icons, bindings, and Summary-backed values. New/Edit forms must not use KPI cards.
 

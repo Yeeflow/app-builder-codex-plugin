@@ -4,14 +4,17 @@
 
 This training adds `data_list_form_fields_grid_v1_1` as the approved field-layout golden reference for current-record fields on generated custom Data List New, Edit, and View forms.
 
-The source template was provided as:
+This follow-up also adds `data_list_form_control_sublist_v1_1` as the required control-level golden reference for Sub list fields inside `form_grid_fields_wrapper`.
 
-`/Users/rengerhu/Downloads/data_list_form_grid_fields.json`
+The source field-grid template was provided as a user attachment.
 
-The approved template is registered under:
+The source Sub list control template was provided as a user attachment.
+
+The approved templates are registered under:
 
 - `docs/reference/data-list-form-field-layout-templates.json`
 - `docs/reference/data-list-form-fields-grid.template.json`
+- `docs/reference/data-list-form-control-sublist.template.json`
 
 ## Template Contract
 
@@ -33,7 +36,9 @@ The template is designed to be used inside:
 - Tablet columns must not exceed PC/laptop columns.
 - Mobile columns should be 1.
 - Every generated field control inside the wrapper must explicitly set margin to zero.
+- Every generated field control inside the wrapper must have a business-specific `nv_label`/`nav_label`.
 - Multiple line, Rich text, and Sub list controls must span the full parent Grid width on every configured breakpoint.
+- Sub list controls must clone `data_list_form_control_sublist_v1_1`; they may map business field metadata and nested field definitions/control types, but must preserve locked table, header, row, card, border, padding, typography, and zero-margin settings.
 - A Grid cell may contain one direct control; use a Container or nested Grid when multiple controls must share a cell.
 - Dynamic display rules may be applied to grouped Containers or nested Grids when several fields share the same visibility condition.
 - Large field groups may be split into multiple `content_card_wrapper` sections, each with one `form_grid_fields_wrapper` in `section_content_area`.
@@ -51,6 +56,8 @@ The table records field group, responsive column counts, full-row fields, Dynami
 ## Generator Impact
 
 The full-app generated-final materializer now clones `form_grid_fields_wrapper` before placing current-record field controls in custom Data List forms. It no longer places generated fields directly into `section_content_area`.
+
+Generated field controls now receive business-specific navigator labels. Sub list fields now clone `data_list_form_control_sublist_v1_1` and carry explicit control-template provenance.
 
 ## Gates Added
 

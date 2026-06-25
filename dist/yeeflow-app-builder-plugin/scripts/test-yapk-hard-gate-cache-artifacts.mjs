@@ -168,6 +168,7 @@ const requiredDocs = [
   "docs/reference/data-list-form-layout-view-item.template.json",
   "docs/reference/data-list-form-field-layout-templates.json",
   "docs/reference/data-list-form-fields-grid.template.json",
+  "docs/reference/data-list-form-control-sublist.template.json",
   "docs/reference/collection-control-responsive-card-grid.template.json",
   "docs/reference/collection-control-card-with-multiselect-toolbar.template.json",
   "docs/reference/collection-control-grid-table.template.json",

@@ -21,9 +21,14 @@ Approved template id:
 
 - `data_list_form_fields_grid_v1_1`
 
+Approved control-level template id:
+
+- `data_list_form_control_sublist_v1_1`
+
 Source template file:
 
 - `docs/reference/data-list-form-fields-grid.template.json`
+- `docs/reference/data-list-form-control-sublist.template.json`
 
 Root wrapper:
 
@@ -65,6 +70,12 @@ attrs.margin = [null, { top: 0, right: 0, bottom: 0, left: 0 }]
 
 Generated field controls must not rely on implicit default margins.
 
+## Field Control Navigator Labels
+
+Every generated field control inside `form_grid_fields_wrapper` must receive a business-specific `nv_label` or `nav_label` derived from the actual Data List field or field group.
+
+Do not keep generic or copied template labels such as `input`, `list`, `Sub list`, `Ticket detail items`, `Survey Program name`, or other source-domain sample names. The navigator label is part of designer maintainability proof and must make the generated form readable in the Yeeflow designer tree.
+
 ## Full-Row Controls
 
 These field control types must occupy a full Grid row:
@@ -76,6 +87,24 @@ These field control types must occupy a full Grid row:
 Full-row placement is expressed by setting the control's column span to the parent Grid's column count for each responsive breakpoint. The span must never exceed the parent Grid's column count on that breakpoint.
 
 For example, if the parent Grid has 2 PC columns and 1 mobile column, a rich text control should use a PC column span of 2 and a mobile column span of 1.
+
+## Sub List Control Template
+
+Sub list fields must use the approved control-level golden reference template:
+
+- Template ID: `data_list_form_control_sublist_v1_1`
+- Source template: `docs/reference/data-list-form-control-sublist.template.json`
+- Root control type: `list`
+- Required host: inside `form_grid_fields_wrapper`
+
+When mapping a business Sub list field, generation may update only:
+
+- the Sub list field label, title, name, binding, and navigator label;
+- `attrs.list-variables`;
+- `attrs.list-fields` and nested field control types needed by the selected Sub list fields;
+- the column-span metadata required to span the full parent Grid width.
+
+All table, header, row, card, border, padding, typography, and zero-margin settings must remain template-derived. Generated forms must not use simplified `list` controls for Sub list fields.
 
 ## One Control Per Grid Cell
 
