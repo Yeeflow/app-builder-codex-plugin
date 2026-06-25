@@ -52,6 +52,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("application-fontawesome-icon", ["scripts/validate-application-icon.js", "--package", resolvedPackage]));
   gates.push(runGate("decoded-app-package-runtime", ["validate-yapk-package.js", resolvedPackage]));
   gates.push(runGate("data-list-system-schema", ["scripts/validate-data-list-system-schema.mjs", resolvedPackage, "--strict-generated-list", "--json"]));
+  gates.push(runGate("data-list-bit-field-controls", ["scripts/validate-yapk-bit-field-controls.mjs", "--package", resolvedPackage]));
   gates.push(runGate("api-issued-content-id-provenance", ["scripts/validate-yapk-id-provenance.mjs", "--package", resolvedPackage, "--manifest", idProvenance]));
   gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
   gates.push(runGate("generated-yapk-export-shape-materialization", ["scripts/validate-generated-yapk-export-shape.mjs", "--package", resolvedPackage]));
@@ -125,7 +126,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     idProvenance: summarizePath(idProvenance),
     failedGate: failed?.gate || null,
     gates,
-    proofBoundary: "Local preflight only. ID provenance, upgrade ID stability, navigation metadata, dashboard dataset presentation reference conformance, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity or workspace targeting correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
+    proofBoundary: "Local preflight only. ID provenance, upgrade ID stability, Bit/switch data-list field controls, navigation metadata, dashboard dataset presentation reference conformance, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity, workspace targeting correctness, or field runtime correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
   };
 }
 

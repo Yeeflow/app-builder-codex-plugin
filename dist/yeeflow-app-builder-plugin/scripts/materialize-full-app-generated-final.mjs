@@ -548,7 +548,7 @@ function assignCustomFormLayoutPositions(planDemand, dataListNames) {
 
 function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
   const fieldType = normalizeFieldType(field.fieldType);
-  const type = normalizeControlType(field.controlType || field.fieldType);
+  const type = controlTypeForFieldType(field, fieldType);
   const isTitle = fieldIndex === 0 || field.fieldName === "Title";
   const fieldName = isTitle ? "Title" : `${fieldType}${fieldIndex}`;
   const rules = buildFieldRules({ field, type });
@@ -563,7 +563,7 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
     Type: type,
     Status: isTitle ? 0 : 1,
     Category: 0,
-    DefaultValue: "",
+    DefaultValue: defaultValueForFieldType(fieldType),
     Rules: rules,
     IsSort: false,
     IsSystem: isTitle,
@@ -573,6 +573,15 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
     Ext2: "",
     Ext3: "",
   };
+}
+
+function controlTypeForFieldType(field, fieldType) {
+  if (fieldType === "Bit") return "switch";
+  return normalizeControlType(field.controlType || field.fieldType);
+}
+
+function defaultValueForFieldType(fieldType) {
+  return fieldType === "Bit" ? "0" : "";
 }
 
 function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", fields }) {
@@ -2060,7 +2069,7 @@ function inferControlType(fieldType) {
   if (/user|people|person/.test(normalized)) return "identity-picker";
   if (/date|time/.test(normalized)) return "datepicker";
   if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "input_number";
-  if (/boolean|yes no|checkbox|bit/.test(normalized)) return "checkbox";
+  if (/boolean|yes no|checkbox|bit/.test(normalized)) return "switch";
   if (/choice|select|status|category/.test(normalized)) return "select";
   if (/file|attachment/.test(normalized)) return "file-upload";
   if (/image|photo|picture/.test(normalized)) return "icon-upload";
@@ -2081,7 +2090,8 @@ function normalizeControlType(controlType) {
   if (/user|identity/.test(normalized)) return "identity-picker";
   if (/date|datetime/.test(normalized)) return "datepicker";
   if (/number|decimal|currency|amount|percent/.test(normalized)) return "input_number";
-  if (/checkbox|bit|boolean/.test(normalized)) return "checkbox";
+  if (/switch|bit|boolean|yes no|flag/.test(normalized)) return "switch";
+  if (/checkbox/.test(normalized)) return "checkbox";
   if (/select|choice|dropdown/.test(normalized)) return "select";
   if (/file|attachment/.test(normalized)) return "file-upload";
   if (/image|photo|picture|icon/.test(normalized)) return "icon-upload";

@@ -14,6 +14,7 @@ const COMPLETENESS_VALIDATOR = path.join(ROOT, "scripts/validate-generated-final
 const ID_PROVENANCE_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-id-provenance.mjs");
 const NAVIGATION_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-navigation-runtime-metadata.mjs");
 const DATA_LIST_SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-data-list-system-schema.mjs");
+const BIT_FIELD_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-bit-field-controls.mjs");
 const EXPORT_SHAPE_VALIDATOR = path.join(ROOT, "scripts/validate-generated-yapk-export-shape.mjs");
 const DASHBOARD_LAYOUT_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-page-layout-template.mjs");
 const DASHBOARD_DATASET_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
@@ -119,6 +120,7 @@ try {
     "| Field Name | Type | Purpose |",
     "| --- | --- | --- |",
     "| Asset Tag | Text | Identify asset. |",
+    "| Requires Approval | Boolean | Flag assets that require coordinator approval before checkout. |",
     "| Assigned To | User | Current assignee. |",
     "",
     "### 4.2 Loan Transactions",
@@ -235,6 +237,14 @@ try {
   assert.equal(decodedResource.Pages.some((page) => page.Title === "Getting Started Dashboard"), false, "nontrivial path must not emit placeholder dashboard");
   assert.equal(new Set(decodedResource.Childs.map((child) => String(child.List.ListID))).size, decodedResource.Childs.length, "data list IDs must not collapse through JavaScript number precision");
   assert.equal(new Set(decodedResource.Pages.map((page) => String(page.LayoutID))).size, decodedResource.Pages.length, "dashboard LayoutIDs must be unique");
+  const officeAssets = decodedResource.Childs.find((child) => child.List.Title === "Office Assets");
+  const approvalFlag = officeAssets.Fields.find((field) => field.DisplayName === "Requires Approval");
+  assert.equal(approvalFlag.FieldType, "Bit", "planned boolean field uses Bit storage");
+  assert.equal(approvalFlag.Type, "switch", "planned boolean field uses switch control type");
+  assert.equal(approvalFlag.DefaultValue, "0", "planned boolean field uses string zero default");
+  const officeAssetsDefaultView = JSON.parse(officeAssets.Layouts.find((layout) => Number(layout.Type) === 0).LayoutView);
+  const approvalFlagLayoutRow = officeAssetsDefaultView.layout.find((row) => row.FieldID === approvalFlag.FieldID);
+  assert.equal(approvalFlagLayoutRow.Type, "switch", "default view row for Bit field uses switch control type");
   for (const page of decodedResource.Pages) {
     assert.equal(String(page.LayoutInResources[0].ID), String(page.LayoutID), "dashboard LayoutInResources[0].ID must equal LayoutID");
     assert.equal(String(page.LayoutInResources[0].RefId), String(page.LayoutID), "dashboard LayoutInResources[0].RefId must equal LayoutID");
@@ -281,6 +291,10 @@ try {
     DATA_LIST_SCHEMA_VALIDATOR,
     resourceReport.outputs.package,
     "--strict-generated-list",
+  ]);
+  expectPass("nontrivial generated package passes Bit/switch field control validation", [
+    BIT_FIELD_VALIDATOR,
+    "--package", resourceReport.outputs.package,
   ]);
   expectPass("nontrivial generated package passes default YAPK package validation", [
     YAPK_PACKAGE_VALIDATOR,
