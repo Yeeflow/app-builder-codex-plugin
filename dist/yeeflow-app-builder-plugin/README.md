@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.43`
+- Version: `0.8.44`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.43` releases Data List Form Layouts v1.1 golden references from PR #223: generated custom Data List New/Edit forms must clone `data_list_form_layout_new_edit_v1_1`, View Item forms must clone `data_list_form_layout_view_item_v1_1`, App Plans must select the correct Data List Form Layout template, and first-generation YAPK preflight blocks custom forms that mutate locked template regions or place business content outside approved slots.
+Current release `0.8.44` releases Data List Form Fields Grid v1.1 and Sub List control golden references from PR #225: generated custom Data List forms must place current-record fields inside `data_list_form_fields_grid_v1_1`, Sub list fields must clone `data_list_form_control_sublist_v1_1`, every generated field control must use business-specific `nav_label` metadata and zero field margin, and Dashboard/Data List Form Layouts v1.1 may host field-grid and Collection templates only inside approved `section_content_area` slots under `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.43
+Version: 0.8.44
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.43
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.44
 ```
 
 ## What Is Included

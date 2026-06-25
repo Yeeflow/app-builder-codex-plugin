@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.43`
+`0.8.44`
+
+Version `0.8.44` releases Data List Form Fields Grid v1.1 and Sub List control golden references from PR #225. Generated custom Data List forms must place current-record fields inside `data_list_form_fields_grid_v1_1`, Sub list fields must clone `data_list_form_control_sublist_v1_1`, generated field controls must carry business-specific `nav_label` metadata and zero field margins, and Dashboard/Data List Form Layouts v1.1 may host field-grid and Collection templates only inside approved `section_content_area` slots under `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 
 Version `0.8.43` releases Data List Form Layouts v1.1 golden references from PR #223. Generated custom Data List New/Edit forms must clone `data_list_form_layout_new_edit_v1_1`, View Item forms must clone `data_list_form_layout_view_item_v1_1`, App Plans must select the correct Data List Form Layout template, and generated-final preflight now blocks custom forms that mutate locked template regions, omit template provenance, or place business content outside approved slots.
 
