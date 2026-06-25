@@ -51,9 +51,11 @@ This CLI is the concrete package-artifact handoff for clean-room tests and autom
 
 The materializer is not a signing, install/import, upgrade, seed-data, Version Management, or browser/runtime proof tool. It must stop before those stages and its report must say so. Plugin regression tests may use an explicit fixture-ID mode, but fixture-ID output is not signing/install eligible and must never be reported as live Yeeflow ID provenance.
 
-Fixture-ID mode must still exercise realistic generated-final resource graphs. When `--allow-fixture-api-ids-for-tests` is used, the materializer must allocate enough synthetic API-shaped numeric string IDs for the actual App Plan resource demand instead of using a tiny fixed ID set that only works for trivial schema-smoke plans. Fixture IDs must remain clearly marked as regression-only, `signingEligible: false`, and not live Yeeflow ID provenance.
+Fixture-ID mode must still exercise realistic generated-final resource graphs. When `--allow-fixture-api-ids-for-tests` is used, the materializer must allocate enough synthetic API-shaped numeric string IDs for the actual App Plan resource demand instead of using a tiny fixed ID set that only works for trivial schema-smoke plans. Fixture IDs must remain clearly marked as regression-only, `signingEligible: false`, `materializerSigningEligible: false`, and not live Yeeflow ID provenance.
 
-The materializer must also be honest about implementation coverage. For nontrivial App Plans that declare data lists, approval forms, reports, custom forms, dashboards, and navigation groups, the standalone materializer must emit a minimal generated-final resource graph rather than a placeholder package. The output must include the planned `Childs[]`, `Forms[]`, `FormNewReports[]`, dashboard `Pages[]`, custom list layouts, and grouped `ListSet.LayoutView` navigation needed for generated-final resource-completeness validation. It must keep `signingEligible: false` until generated-final preflight passes.
+The materializer must also be honest about implementation coverage. For nontrivial App Plans that declare data lists, approval forms, reports, custom forms, dashboards, and navigation groups, the standalone materializer must emit a minimal generated-final resource graph rather than a placeholder package. The output must include the planned `Childs[]`, `Forms[]`, `FormNewReports[]`, dashboard `Pages[]`, custom list layouts, and grouped `ListSet.LayoutView` navigation needed for generated-final resource-completeness validation. It must keep `signingEligible: false`, `materializerSigningEligible: false`, `preflightEligibleForSigning: null`, and `signingReadinessSource: "not-run"` because standalone materialization does not run the final generated-final preflight stage.
+
+After materialization, `scripts/yapk-first-generation-preflight.mjs` is the signing-readiness handoff. When all generated-final gates pass, its JSON result must include `preflightEligibleForSigning: true`, `signingReadinessSource: "yapk-first-generation-preflight"`, and a `signingReadiness` object whose status is `preflight-pass`. When any gate fails, it must include `preflightEligibleForSigning: false` and the failing gate. Do not reinterpret the materializer's static `signingEligible: false` as a package-quality failure after preflight has passed; use the preflight readiness fields for the next signing stage decision.
 
 Minimal resource-graph output must be internally valid before it is handed to signing readiness. The materializer must preserve API-issued IDs as strings and must not pass them through JavaScript `Number`, because 16+ digit Yeeflow IDs lose precision and can collapse into duplicate resource IDs. Its ID provenance manifest must use actual decoded JSON paths, not logical helper aliases.
 
@@ -81,6 +83,9 @@ When used, the `FULL_APP_MATERIALIZATION_RESOURCE_GRAPH_NOT_IMPLEMENTED` finding
 - a `missingResourceGraph[]` list that maps each planned category to its required generated-final output surface;
 - `packageEmitted: false`;
 - `signingEligible: false`.
+- `materializerSigningEligible: false`.
+- `preflightEligibleForSigning: null`.
+- `signingReadinessSource: "not-run"`.
 
 The materializer's App Plan resource-demand parser must count only resource-level declarations. Field tables, dashboard section tables, metric rows, filter rows, item-template rows, validator command text, and explanatory prose must not inflate resource counts. If a section uses resource headings, those headings are authoritative for that resource category. Table fallback counting is allowed only for canonical resource-name headers such as `List Name`, `Form Report Name`, `Form Name`, `Dashboard Page Name`, or navigation `Group`.
 
