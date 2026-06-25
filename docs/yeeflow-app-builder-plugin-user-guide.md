@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.49`
+`0.8.50`
+
+Version `0.8.50` releases signing-readiness preflight handoff reporting from PR #237. Standalone materialization remains signing-ineligible and reports `materializerSigningEligible: false`, `preflightEligibleForSigning: null`, and `signingReadinessSource: "not-run"`. `yapk-first-generation-preflight` now reports the actual local pre-sign readiness with `preflightEligibleForSigning`, `signingReadinessSource: "yapk-first-generation-preflight"`, and `signingReadiness`, so a passed preflight can proceed to explicit signing without misreading the materializer boundary as a package-quality failure.
 
 Version `0.8.49` releases Dashboard select-filter option-source placeholder hard gates from PR #235. Generated Dashboard select filters must not emit literal `{{ListDataID}}` current-item placeholders in `attrs.data.filter[].value`. The standalone materializer now emits `filter: []` when no validated runtime option-source filter is required, and dataset golden-reference validation reports `DASH_SELECT_FILTER_OPTION_SOURCE_PLACEHOLDER_UNRESOLVED` before signing readiness.
 
