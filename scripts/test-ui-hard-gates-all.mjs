@@ -69,6 +69,16 @@ const childTests = [
     ],
   },
   {
+    name: "Data List Form Fields Grid v1.1 golden-reference regression suite",
+    command: ["scripts/test-data-list-form-fields-template-gates.mjs"],
+    validators: [
+      "validate-data-list-form-fields-template",
+      "form_grid_fields_wrapper field layout template",
+      "responsive Grid columns and column-span safety",
+      "field-control zero-margin and section_content_area placement",
+    ],
+  },
+  {
     name: "Full-app generation entrypoint contract regression suite",
     command: ["scripts/test-full-app-generation-entrypoint-gates.mjs"],
     validators: [

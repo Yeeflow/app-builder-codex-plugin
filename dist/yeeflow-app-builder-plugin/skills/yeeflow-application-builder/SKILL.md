@@ -239,6 +239,8 @@ For every Collection, Kanban, Vertical Timeline, or Horizontal Timeline, the App
 
 For every Collection or Kanban, the App Plan must either state `No Collection/Kanban item actions required` or list item actions with trigger control, action type, current item context, temp variables, steps, data read/write targets, and runtime proof boundary. For every Approval Form or Custom Data List form that includes a Sub List, the App Plan must either state `No custom Sub List actions required` or list Sub List actions with current row context, steps, affected Summary fields, parent field bindings, and runtime proof boundary.
 
+For every generated custom Data List New/Edit/View form that displays current-record fields, the App Plan must include a Form Fields Layout Template Selection table selecting `data_list_form_fields_grid_v1_1`. State each field group, PC/laptop columns, tablet columns, mobile columns, full-row field controls, and any Dynamic display grouping. Current-record fields must be generated inside `form_grid_fields_wrapper` within the page-level template's `section_content_area`; do not place field controls directly in `section_content_area`.
+
 ## Visual Design To Implementation Workflow
 
 When the user provides UI mockup images, screenshots, generated design images, wireframes, or asks Codex to design images first, treat those visuals as implementation references, not decoration. Before package generation, extract a Markdown UI implementation spec from the visual design.

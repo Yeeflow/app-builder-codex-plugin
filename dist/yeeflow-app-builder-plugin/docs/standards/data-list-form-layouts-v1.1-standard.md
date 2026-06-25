@@ -22,6 +22,11 @@ Source template files:
 - `docs/reference/data-list-form-layout-new-edit.template.json`
 - `docs/reference/data-list-form-layout-view-item.template.json`
 
+Current-record field layout template:
+
+- `data_list_form_fields_grid_v1_1` from `docs/reference/data-list-form-field-layout-templates.json`
+- source file `docs/reference/data-list-form-fields-grid.template.json`
+
 The templates were parsed from the user-provided `Data list page layouts.ydl` export. The source Data List is `Data list page layouts`, with `New and Edit form` assigned to New Item/Edit Item and `View item` assigned to View Item.
 
 ## Template Selection
@@ -87,6 +92,8 @@ Within `section_title_header`, the text of `section_title_text` and `section_tit
 Within `Operations`, generated controls must be real configured action controls. Placeholder or visual-only buttons are forbidden.
 
 Within `section_content_area`, generated resources may insert current-record field controls, Dynamic user/image/file/field controls, related record display components, approved Collection templates, approved Data Analytics templates, or other plugin-supported controls appropriate to the form type.
+
+Current-record Data List fields must be placed inside the approved `data_list_form_fields_grid_v1_1` field-layout template. Do not place field controls directly in `section_content_area`. If the form has many fields, create multiple `content_card_wrapper` sections and put one `form_grid_fields_wrapper` inside each section's `section_content_area`.
 
 Within `kpi_card_wrapper`, generated View Item forms may map KPI card text, icons, bindings, and Summary-backed values. New/Edit forms must not use KPI cards.
 
@@ -168,6 +175,7 @@ Rules:
 - View forms must select `data_list_form_layout_view_item_v1_1`.
 - Do not include generated `ListID`, `LayoutID`, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
 - Data Analytics and Collection template choices for View Item related regions must still use their own approved template selection tables when those components are planned.
+- Current-record field groups must also select `data_list_form_fields_grid_v1_1` in a Form Fields Layout Template Selection table.
 
 ## Required Gates
 
@@ -175,12 +183,14 @@ Run:
 
 ```bash
 node scripts/validate-data-list-form-layout-template.mjs --registry docs/reference/data-list-form-layout-templates.json
+node scripts/validate-data-list-form-fields-template.mjs --registry docs/reference/data-list-form-field-layout-templates.json
 ```
 
 Generated-final `.yapk` packages must also pass:
 
 ```bash
 node scripts/validate-data-list-form-layout-template.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>
+node scripts/validate-data-list-form-fields-template.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>
 ```
 
 First-generation preflight invokes this gate before signing readiness. Signing, install/import, upgrade, Version Management, and runtime proof must remain blocked when generated custom Data List forms violate this standard.

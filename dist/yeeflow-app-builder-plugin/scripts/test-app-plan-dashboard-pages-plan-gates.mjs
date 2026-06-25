@@ -115,7 +115,23 @@ No AI Agent required; not applicable.
 No Copilot required; not applicable.
 
 ## 10. Custom Data List Forms Plan
-Placeholder planning included for request detail form.
+### 10.1 Maintenance Requests
+
+| Form Name | Form Type | Purpose | Used By | Layout Pattern | Actions Required | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| Request New/Edit | New/Edit | Create and update maintenance requests | Coordinators | Data List Form Layouts v1.1 | Yes | Placeholder text is planned for editable fields |
+
+#### Data List Form Layout Template Selection
+
+| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Maintenance Requests | Request New/Edit | New/Edit | data_list_form_layout_new_edit_v1_1 | Current item field sections | None | New/Edit focuses on current item editing | Generated-final validation |
+
+#### Form Fields Layout Template Selection
+
+| Data List or Library | Custom Form | Field Group | Selected Form Fields Layout Template | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Maintenance Requests | Request New/Edit | Request details | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Description | None | Generated-final validation |
 
 ## 11. Data List Workflows Plan
 Assignment notification workflow with trigger, action, and proof boundary.
@@ -207,6 +223,11 @@ Dashboard page identity:
 | --- | --- | --- | --- | --- | --- | --- |
 | Open Requests | Maintenance Requests | status | Count requests where status is not final | Summary / KPI card | count | runtime-proof-required |
 | Completion Rate | Maintenance Requests | status, completed at, submitted at | Completed divided by submitted for selected period | Summary / KPI card | percentage | runtime-proof-required |
+
+#### Data Analytics Template Selection
+| Section | Surface | Data Source | Business Question | Selected Data Analytics Template | Grouping/Axis Fields | Value/Aggregate Fields | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Priority Trend | Dashboard | Maintenance Requests | How many requests exist by priority? | data_analytics_column_chart_with_title | priority | count of requests | Compare request volume across priority values | Generated-final validation |
 
 #### Dashboard Actions
 | Action Name | Business Purpose | Source/Target Business Object | Expected User Outcome | Supported Yeeflow Action Category When Known | Proof Boundary or Deferred Note |

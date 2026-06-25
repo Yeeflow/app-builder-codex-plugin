@@ -289,6 +289,23 @@ Rules:
 
 #### Form Fields
 
+#### Form Fields Layout Template Selection
+
+Required for every generated custom Data List New/Edit/View form that displays current-record fields.
+
+| Data List or Library | Custom Form | Field Group | Selected Form Fields Layout Template | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <List> | <Form> | <Field group> | data_list_form_fields_grid_v1_1 | 2 or 3 | <= PC/laptop | 1 | Multiple line / Rich text / Sub list fields | <None or grouping rule> | Generated-final validation |
+
+Rules:
+
+- Select `data_list_form_fields_grid_v1_1` from `docs/reference/data-list-form-field-layout-templates.json` for every generated field group on a New/Edit/View custom Data List form.
+- Current-record field controls must be placed inside the selected `form_grid_fields_wrapper`, not directly inside `section_content_area`.
+- Multiple line, Rich text, and Sub list controls must be listed as full-row field controls and generated with column span equal to the parent Grid's column count for each responsive breakpoint.
+- PC/laptop columns should be 2 or 3, tablet columns must not exceed PC/laptop columns, and mobile columns should be 1.
+- If a custom form intentionally has no current-record field controls, state that explicitly with the business reason and proof boundary.
+- This table is a planning contract only. Do not include generated `ListID`, `LayoutID`, `FieldID`, JSON property paths, copied control JSON, or runtime payload fields.
+
 | Form Name | Field Order | Business Label | Field Name | Field ID | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Binding | Read Only | Required | Default Value | Placeholder | Dynamic Display | Custom Validation | Lookup Target | Lookup Display Field | Additional Lookup Fields | Sublist/Summary Notes | Description |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | <Form> | 1 | <Business label> | <Field> | <ID> | <Exact field type> | <Exact control type> | <Plugin skill/doc/export reference> | validator-backed/runtime-proof-required/export-learning-required/deferred | <Reason or N/A> | <Binding> | Yes/No | Yes/No | <Default> | <Placeholder text> | <Rule> | <Rule> | <List> | <Field> | <Fields> | <Notes> | <Description> |
@@ -311,6 +328,7 @@ Rules:
 
 - Every list that users create or edit records in should have a runtime-safe Add/New form plan.
 - Every generated New/Edit/View custom Data List form must select the correct Data List Form Layouts v1.1 template before generation.
+- Every generated field group on a New/Edit/View custom Data List form must select `data_list_form_fields_grid_v1_1` before generation.
 - Query data and Set data list actions must identify target application/list/fields.
 - Data List custom form root padding must follow the active plugin standard.
 - Distinguish business labels from exact Yeeflow implementation types. Slash-combined or vague implementation wording is not generation-ready unless marked `runtime-proof-required`, `export-learning-required`, or `deferred`.

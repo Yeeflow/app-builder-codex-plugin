@@ -12,6 +12,7 @@ const DATA_LIST_FORM_TEMPLATE_PATHS = {
   newEdit: path.join(ROOT, "docs/reference/data-list-form-layout-new-edit.template.json"),
   view: path.join(ROOT, "docs/reference/data-list-form-layout-view-item.template.json"),
 };
+const DATA_LIST_FORM_FIELDS_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-fields-grid.template.json");
 const COLLECTION_TEMPLATE_PATHS = {
   collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   collection_control_grid_table_with_search: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
@@ -612,22 +613,55 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   }
   const slot = findFirstByIdentity(resource, "section_content_area");
   if (slot) {
-    slot.children = fields.slice(0, 12).map((field, index) => ({
-      type: dynamicControlTypeForField(field),
-      id: `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`,
-      name: field.DisplayName,
-      title: field.DisplayName,
-      label: field.DisplayName,
-      attrs: {
-        data: {
-          list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
-          field: field.FieldName,
-          fieldName: field.FieldName,
-        },
-      },
-    }));
+    slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
   return resource;
+}
+
+function buildDataListFormFieldsGrid({ fields, formName, listId, listName, templateKind }) {
+  const template = JSON.parse(fs.readFileSync(DATA_LIST_FORM_FIELDS_GRID_TEMPLATE_PATH, "utf8"));
+  const wrapper = clone(template._ak_c || template.templateResource || template);
+  wrapper.id = "form_grid_fields_wrapper";
+  wrapper.nv_label = "form_grid_fields_wrapper";
+  wrapper.dataListFormFieldsTemplateId = "data_list_form_fields_grid_v1_1";
+  wrapper.derivedFromDataListFormFieldsTemplate = "data_list_form_fields_grid_v1_1";
+  wrapper.children = fields.map((field, index) => buildDataListFormFieldControl({ field, index, formName, listId, listName, templateKind }));
+  return wrapper;
+}
+
+function buildDataListFormFieldControl({ field, index, formName, listId, listName, templateKind }) {
+  const type = templateKind === "view" ? dynamicControlTypeForField(field) : normalizeControlType(field.Type || field.FieldType || field.DisplayName);
+  const fullRow = isFullRowFormField(field, type);
+  const control = {
+    type,
+    id: `${slugify(formName)}_${slugify(field.FieldName)}_${index + 1}`,
+    name: field.DisplayName,
+    title: field.DisplayName,
+    label: field.DisplayName,
+    binding: field.FieldName,
+    fieldID: field.FieldID,
+    displayLabel: [null, true],
+    attrs: {
+      common: {
+        margin: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
+      },
+      data: {
+        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        field: field.FieldName,
+        fieldName: field.FieldName,
+        fieldId: field.FieldID,
+      },
+    },
+  };
+  if (fullRow) {
+    control.attrs.common.grid = { position: [null, { cSpan: 2 }, null, { cSpan: 1 }] };
+  }
+  return control;
+}
+
+function isFullRowFormField(field, controlType) {
+  const raw = normKey(`${field?.DisplayName || ""} ${field?.FieldType || ""} ${field?.Type || ""} ${controlType || ""}`);
+  return /textarea|multi line|multiline|richtext|rich text|sub list|sublist|\blist\b/.test(raw);
 }
 
 function buildFieldRules({ field, type }) {

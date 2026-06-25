@@ -42,12 +42,15 @@ The source registry is `docs/reference/data-list-form-layout-templates.json`.
 
 Generators must clone the selected export-shaped template first and then place business-specific fields, actions, analytics, or related data only inside approved business-content slots. They must not generate title-only, flat, or ad hoc custom Data List form layouts.
 
+Current-record Data List fields inside generated New/Edit/View custom forms must use the field-layout golden reference `data_list_form_fields_grid_v1_1` from `docs/reference/data-list-form-field-layout-templates.json`. The generator must clone `form_grid_fields_wrapper` into the page-level template's `section_content_area`, place field controls inside that Grid, set every field control margin to zero, keep Multiple line/Rich text/Sub list controls as full-row controls, and keep responsive column spans bounded by the parent Grid's columns.
+
 New/Edit forms must focus on the current list item and must not include related Collection/Data Analytics/KPI regions. View Item forms may show current-record information plus related business data, approved Collection templates, Data Analytics templates, and KPI regions.
 
 Generated-final packages must pass:
 
 ```bash
 node scripts/validate-data-list-form-layout-template.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>
+node scripts/validate-data-list-form-fields-template.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>
 ```
 
 Signing readiness, install/import, upgrade, and runtime proof must remain blocked when custom Data List form layouts fail this gate.
