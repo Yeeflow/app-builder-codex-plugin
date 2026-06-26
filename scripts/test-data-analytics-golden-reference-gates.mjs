@@ -31,6 +31,10 @@ try {
   expectCode("Visual analytics template without runtime exts fails", ["--resource", writeJson("missing-runtime.json", dashboardResource({ omitRuntimeBindings: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_EXT_MISSING");
   expectCode("Runtime ext without ReportIds registration fails", ["--resource", writeJson("missing-reportids.json", dashboardResource({ omitReportIds: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_REPORT_ID_MISSING");
   expectCode("Runtime ext with unresolved source field fails", ["--package", writeYapk("analytics-bad-field.yapk", dashboardResource({ badRuntimeField: true }))], "DATA_ANALYTICS_RUNTIME_FIELD_UNRESOLVED");
+  expectCode("Generated chart without runtimeModelProven fails", ["--resource", writeJson("missing-runtime-model-proven.json", dashboardResource({ missingRuntimeModelProven: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_MODEL_PROVEN_MISSING");
+  expectCode("Generated chart without both template IDs fails", ["--resource", writeJson("template-id-mismatch.json", dashboardResource({ templateIdMismatch: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_ID_CONTRACT_MISSING");
+  expectCode("Generated chart with derived COUNT field ID fails", ["--resource", writeJson("derived-count-field.json", dashboardResource({ derivedValueField: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DERIVED_FIELD_ID_INVALID");
+  expectCode("Generated chart with stale model surface fails", ["--resource", writeJson("stale-model-surface.json", dashboardResource({ staleValueSurface: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_MODEL_SURFACE_MISMATCH");
   const appPlan = writeText("analytics-app-plan.md", analyticsAppPlan());
   expectPass("Generated package materializes App Plan selected Data Analytics templates", ["--package", writeYapk("analytics-present.yapk", dashboardResource()), "--plan", appPlan]);
   expectCode("Generated package fails when App Plan selected Data Analytics templates are not materialized", ["--package", writeYapk("analytics-missing.yapk", dashboardResource({ noAnalytics: true })), "--plan", appPlan], "DATA_ANALYTICS_PLANNED_TEMPLATE_NOT_MATERIALIZED");
@@ -71,6 +75,14 @@ function dashboardResource(options = {}) {
   if (options.unknownTemplate) analytics[0].attrs.dataAnalyticsTemplateId = "data_analytics_unknown_chart";
   if (options.missingWrapper) analytics[0] = { type: "pie-chart", nv_label: "pie_chart_control", attrs: { dataAnalyticsTemplateId: "data_analytics_pie_chart_with_title" } };
   if (options.missingTitle) analytics[0].children = analytics[0].children.filter((child) => child.nv_label !== "pie_chart_title");
+  const firstControl = findAnalyticsControl(analytics[0]);
+  if (firstControl && options.missingRuntimeModelProven) {
+    delete firstControl.runtimeModelProven;
+    delete firstControl.attrs.runtimeModelProven;
+  }
+  if (firstControl && options.templateIdMismatch) firstControl.attrs.templateId = "data_analytics_line_chart_with_title";
+  if (firstControl && options.derivedValueField) firstControl.attrs.values = [{ field: "ListDataID_COUNT", aggregate: "COUNT" }];
+  if (firstControl && options.staleValueSurface) firstControl.attrs.model.valueField = "Title";
   if (options.noAnalytics) analytics.length = 0;
 
   const resource = {
@@ -230,11 +242,29 @@ function chartModule(templateId, wrapperId, titleId, controlId, controlType) {
   return {
     type: "container",
     nv_label: wrapperId,
-    attrs: { dataAnalyticsTemplateId: templateId },
+    dataAnalyticsTemplateId: templateId,
+    templateId,
+    attrs: { dataAnalyticsTemplateId: templateId, templateId },
     children: [
       { type: "text", nv_label: titleId, attrs: { headc: { title: { value: "Business-specific title" } } } },
       { type: "container", nv_label: wrapperId.replace("_with_title_wrapper", "_container"), children: [
-        { type: controlType, id: controlId, nv_label: controlId, attrs: { dataAnalyticsTemplateId: templateId, data: { list: { ListID: "list_assets" } } } },
+        {
+          type: controlType,
+          id: controlId,
+          nv_label: controlId,
+          dataAnalyticsTemplateId: templateId,
+          templateId,
+          runtimeModelProven: true,
+          attrs: {
+            dataAnalyticsTemplateId: templateId,
+            templateId,
+            runtimeModelProven: true,
+            data: { list: { ListID: "list_assets" }, groupBy: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", axisField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID" },
+            model: { categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID", aggregate: "COUNT", runtimeModelProven: true },
+            series: [{ name: "Business-specific title", categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID", aggregate: "COUNT" }],
+            values: [{ field: "ListDataID", aggregate: "COUNT" }],
+          },
+        },
       ] },
     ],
   };
@@ -245,8 +275,19 @@ function pivotModule() {
     type: "pivot-table",
     id: "pivot_table_control",
     nv_label: "pivot_table_standard",
-    attrs: { dataAnalyticsTemplateId: "data_analytics_pivot_table_standard", rows: {}, columns: {}, values: {} },
+    dataAnalyticsTemplateId: "data_analytics_pivot_table_standard",
+    templateId: "data_analytics_pivot_table_standard",
+    runtimeModelProven: true,
+    attrs: { dataAnalyticsTemplateId: "data_analytics_pivot_table_standard", templateId: "data_analytics_pivot_table_standard", runtimeModelProven: true, rows: {}, columns: {}, values: [{ field: "ListDataID", aggregate: "COUNT" }] },
   };
+}
+
+function findAnalyticsControl(node) {
+  let found = null;
+  visit(node, (candidate) => {
+    if (!found && ["pie-chart", "bar-chart", "line-chart", "pivot-table"].includes(String(candidate?.type || ""))) found = candidate;
+  });
+  return found;
 }
 
 function addAnalyticsRuntimeBindings(resource, options = {}) {

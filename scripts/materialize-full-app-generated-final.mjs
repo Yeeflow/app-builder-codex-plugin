@@ -1701,10 +1701,12 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
   const root = clone(template._ak_c || template.templateResource || template);
   const title = record.businessQuestion || record.analyticsRegion || reference.displayName || "Analytics";
   root.dataAnalyticsTemplateId = record.selectedTemplateId;
+  root.templateId = record.selectedTemplateId;
   root.derivedFromDataAnalyticsGoldenReference = record.selectedTemplateId;
   root.attrs = {
     ...(root.attrs || {}),
     dataAnalyticsTemplateId: record.selectedTemplateId,
+    templateId: record.selectedTemplateId,
     derivedFromDataAnalyticsGoldenReference: record.selectedTemplateId,
     appPlanAnalyticsRegion: record.analyticsRegion,
   };
@@ -1717,16 +1719,18 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
   let runtimeContract = null;
   if (analyticsControl) {
     const groupingField = resolveAnalyticsField(listMeta, record.groupingFields) || fieldsForDynamicControls(listMeta)[0];
-    const valueField = resolveAnalyticsField(listMeta, record.valueFields) || groupingField || fieldsForDynamicControls(listMeta)[0];
+    const valueField = analyticsCountField(listMeta);
     if (!analyticsControl.id || !UUID_CONTROL_ID_RE.test(String(analyticsControl.id))) {
       analyticsControl.id = deterministicUuid(`${dashboardName}:${record.selectedTemplateId}:${instanceIndex}:analytics-control`);
     }
     analyticsControl.dataAnalyticsTemplateId = record.selectedTemplateId;
+    analyticsControl.templateId = record.selectedTemplateId;
     analyticsControl.derivedFromDataAnalyticsGoldenReference = record.selectedTemplateId;
     analyticsControl.runtimeModelProven = true;
     analyticsControl.attrs = {
       ...(analyticsControl.attrs || {}),
       dataAnalyticsTemplateId: record.selectedTemplateId,
+      templateId: record.selectedTemplateId,
       derivedFromDataAnalyticsGoldenReference: record.selectedTemplateId,
       runtimeModelProven: true,
       data: {
@@ -1820,6 +1824,21 @@ function runtimeFieldRef(field, role) {
     id: String(field?.fieldId || field?.FieldID || fieldName),
     label: String(field?.displayName || field?.DisplayName || fieldName),
     role,
+  };
+}
+
+function analyticsCountField(listMeta) {
+  const fields = fieldsForDynamicControls(listMeta);
+  const listDataId = fields.find((field) => String(field.fieldName || field.FieldName || "") === "ListDataID");
+  return listDataId || {
+    fieldName: "ListDataID",
+    FieldName: "ListDataID",
+    fieldId: "ListDataID",
+    FieldID: "ListDataID",
+    displayName: "Record ID",
+    DisplayName: "Record ID",
+    fieldType: "Text",
+    FieldType: "Text",
   };
 }
 
