@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.63`
+- Version: `0.8.64`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.63` releases Data List custom form LayoutView runtime source gates from PR #265: generated Type 1 custom Data List forms duplicate complete form JSON into both `LayoutView` and `LayoutInResources[0].Resource`, and generated-final validation blocks placeholder or drifting runtime form sources before signing readiness.
+Current release `0.8.64` releases layout cleanup, live install readiness, and validator-entrypoint alignment gates from PR #267: generated Dashboard, Data List form, and Approval form layouts prune unused copied sections; Approval task forms preserve Submission form business fields as readonly context unless explicitly overridden; YAPK signing readiness rejects placeholder `TenantID: "0"`; runtime proof scopes `Install failed` tiles to the target app; and public YAPK validator entrypoints are byte-aligned to prevent duplicate-rule drift.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.63
+Version: 0.8.64
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.63
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.64
 ```
 
 ## What Is Included

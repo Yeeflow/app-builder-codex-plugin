@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.64
+
+- Release layout cleanup, live install readiness, and validator-entrypoint alignment gates from PR #267.
+- Remove unused copied Dashboard, Data List form, and Approval form sections when their `section_content_area` or repeatable wrapper modules have no real business content.
+- Keep Approval task forms aligned with Submission form business fields as readonly review context unless the App Plan explicitly excludes or makes fields editable.
+- Block generated-final signing readiness when wrapper `TenantID` is missing, invalid, or placeholder `"0"`.
+- Scope runtime `Install failed` tile attribution to the target app when workspace/home evidence contains unrelated historical failed apps.
+- Add public `validate-yapk-package.js` entrypoint byte-parity regression coverage so root, dist, script, and skill validators cannot drift.
+
 ## 0.8.63
 
 - Release Data List custom form LayoutView runtime-source gates from PR #265.

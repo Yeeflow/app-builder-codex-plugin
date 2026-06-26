@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.63`
+`0.8.64`
+
+Version `0.8.64` releases layout cleanup, live install readiness, and validator-entrypoint alignment gates from PR #267. Generated Dashboard, Data List form, and Approval form layouts must prune unused copied sections; Approval task forms keep Submission form business fields as readonly review context unless the App Plan explicitly excludes or makes them editable; generated-final signing readiness rejects placeholder `TenantID: "0"`; runtime proof scopes `Install failed` tiles to the target app; and public YAPK validator entrypoints stay byte-aligned to prevent duplicate-rule drift.
 
 Version `0.8.63` releases Data List custom form LayoutView runtime-source gates from PR #265. Generated Type 1 custom Data List forms now write complete rendered form JSON to both `Layouts[].LayoutView` and `Layouts[].LayoutInResources[0].Resource`; generated-final validation blocks missing, placeholder, or drifting LayoutView runtime sources before signing readiness.
 
