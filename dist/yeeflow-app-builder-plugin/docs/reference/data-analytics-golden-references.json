@@ -18,8 +18,16 @@
     "approval-form"
   ],
   "dashboardPageLayoutsV11AllowedSectionContainers": [
+    "content_card_wrapper",
     "2_columns_section",
-    "3_columns_section"
+    "3_columns_section",
+    "2_columns_60/40_section"
+  ],
+  "dataListFormViewItemLayoutsV11AllowedSectionContainers": [
+    "content_card_wrapper",
+    "2_columns_section",
+    "3_columns_section",
+    "2_columns_60/40_section"
   ],
   "references": [
     {

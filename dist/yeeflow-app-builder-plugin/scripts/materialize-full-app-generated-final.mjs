@@ -1607,7 +1607,7 @@ function materializeDashboardAnalytics(resource, { analyticsRecords, fallbackLis
 }
 
 function findDashboardAnalyticsSlots(resource) {
-  const allowedSectionIds = new Set(["2_columns_section", "3_columns_section"]);
+  const allowedSectionIds = new Set(["content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
   const slots = [];
   for (const section of findDescendants(resource, (node) => [...allowedSectionIds].some((identity) => hasIdentity(node, identity)))) {
     const slot = findFirstByIdentity(section, "section_content_area");

@@ -8,8 +8,10 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/data-analytics-golden-references.json");
 const DASHBOARD_V11_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
+const DATA_LIST_FORM_NEW_EDIT_TEMPLATE_ID = "data_list_form_layout_new_edit_v1_1";
+const DATA_LIST_FORM_VIEW_TEMPLATE_ID = "data_list_form_layout_view_item_v1_1";
 const ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table"]);
-const APPROVED_DASHBOARD_V11_SECTION_IDS = new Set(["2_columns_section", "3_columns_section"]);
+const APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS = new Set(["content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
 const RUNTIME_CATEGORY = "___Pivot___";
 const CONTROL_KEY_BY_TYPE = {
   "pie-chart": "pie-chart",
@@ -273,6 +275,8 @@ function validateResource(resource, context) {
   }
 
   const isDashboardV11 = context.surface === "dashboard" && resourceHasIdentity(resource, DASHBOARD_V11_TEMPLATE_ID);
+  const isDataListFormNewEdit = context.surface === "data-list-form" && resourceHasIdentity(resource, DATA_LIST_FORM_NEW_EDIT_TEMPLATE_ID);
+  const isDataListFormView = context.surface === "data-list-form" && resourceHasIdentity(resource, DATA_LIST_FORM_VIEW_TEMPLATE_ID);
   for (const entry of analyticsControls) {
     const provenance = resolveTemplateProvenance(entry, index, context.references);
     if (!provenance.templateId) {
@@ -293,8 +297,14 @@ function validateResource(resource, context) {
     if (reference.titleControlId && !findByIdentity(index, reference.titleControlId)) {
       context.findings.push(error("DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING", "Chart-with-title templates must include the approved title Text control.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, titleControlId: reference.titleControlId }));
     }
-    if (isDashboardV11 && !hasAncestorInSet(entry, APPROVED_DASHBOARD_V11_SECTION_IDS)) {
-      context.findings.push(error("DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID", "Dashboard Page Layouts v1.1 Data Analytics templates must be placed inside 2_columns_section or 3_columns_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_DASHBOARD_V11_SECTION_IDS] }));
+    if (isDataListFormNewEdit) {
+      context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_NEW_EDIT_FORBIDDEN", "Data Analytics templates must not be used on Data List Form Layouts v1.1 New/Edit forms.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId }));
+    }
+    if (isDashboardV11 && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
+      context.findings.push(error("DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID", "Dashboard Page Layouts v1.1 Data Analytics templates must be placed inside content_card_wrapper, 2_columns_section, 3_columns_section, or 2_columns_60/40_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS] }));
+    }
+    if (isDataListFormView && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
+      context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_VIEW_V11_SECTION_PLACEMENT_INVALID", "Data List Form Layouts v1.1 View Item Data Analytics templates must be placed inside content_card_wrapper, 2_columns_section, 3_columns_section, or 2_columns_60/40_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS] }));
     }
     validateRuntimeBinding(resource, entry, reference, context);
   }
