@@ -251,7 +251,7 @@ function collectFieldRefs(value, refs = []) {
   } else if (isObject(value)) {
     if (isExpressionObject(value)) return refs;
     for (const [key, child] of Object.entries(value)) {
-      if (/^(field|fieldName|Field|FieldName|FieldID|fieldId|name)$/i.test(key) && typeof child === "string" && child.trim()) refs.push(child);
+      if (/^(field|fieldName|Field|FieldName|FieldID|fieldId)$/i.test(key) && typeof child === "string" && child.trim()) refs.push(child);
       else collectFieldRefs(child, refs);
     }
   }

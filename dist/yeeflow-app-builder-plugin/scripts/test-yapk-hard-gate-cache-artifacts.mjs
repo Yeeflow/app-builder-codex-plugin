@@ -181,6 +181,7 @@ const requiredDocs = [
   "docs/training/data-analytics-runtime-binding-hard-gates-training-report.md",
   "docs/training/data-filter-standard-filter-group-training-report.md",
   "docs/training/dashboard-filter-runtime-upgrade-proof-training-report.md",
+  "docs/training/dashboard-collection-search-retirement-and-analytics-identity-hardening-training-report.md",
   "docs/reference/dashboard-golden-references.json",
   "docs/reference/dashboard-dataset-presentation-golden-references.json",
   "docs/reference/data-analytics-golden-references.json",

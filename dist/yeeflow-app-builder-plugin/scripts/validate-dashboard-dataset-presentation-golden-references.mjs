@@ -17,7 +17,6 @@ const APPROVED_IDS = new Set([
   "collection_control_card_with_multiselect_toolbar",
   "collection_control_grid_table",
   "collection_control_grid_table_with_multiselect",
-  "collection_control_grid_table_with_search",
   "Event Pipeline Grid-Table",
 ]);
 
@@ -40,7 +39,6 @@ const INTERNAL_TEMPLATE_STRUCTURE_IDS = new Set([
 const GRID_TABLE_IDS = new Set([
   "collection_control_grid_table",
   "collection_control_grid_table_with_multiselect",
-  "collection_control_grid_table_with_search",
   "Event Pipeline Grid-Table",
 ]);
 
@@ -665,7 +663,6 @@ function lineMatchesReferenceGuidance(line, templateId, reference) {
     collection_control_card_with_multiselect_toolbar: ["card", "multi-select", "multiselect", "bulk", "batch", "selected"],
     collection_control_grid_table: ["dense", "row", "column", "work queue", "task list", "record list", "operational table", "scan"],
     collection_control_grid_table_with_multiselect: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection"],
-    collection_control_grid_table_with_search: ["search", "fulltext", "quick find", "lookup"],
     "Event Pipeline Grid-Table": ["primary", "high-fidelity", "pipeline", "portfolio", "work queue", "health", "status", "progress"],
   };
   return asArray(fallbackSignals[templateId]).some((signal) => normalized.includes(normalizeForMatch(signal)));
@@ -720,7 +717,6 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   }
 
   if (GRID_TABLE_IDS.has(provenance.templateId)) validateGridTable(entry, page, provenance.templateId, findings);
-  if (provenance.templateId === "collection_control_grid_table_with_search") validateSearch(entry, page, findings);
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid") validateResponsiveCardGrid(entry, page, findings, context);
@@ -995,14 +991,6 @@ function validateBaseGridTableFullTemplate(entry, page, findings) {
   const isViewOnly = /form report|data report|report/.test(sourceType);
   if (isViewOnly && (operations || opMenu)) {
     findings.push(error("DASH_DATASET_GRID_TABLE_DISPLAY_ONLY_OPERATION_FORBIDDEN", "Form Report/Data Report display-only grid-table regions must not include item operation menus or edit/delete controls.", { page: page.title, path: entry.pointer, sourceType }));
-  }
-}
-
-function validateSearch(entry, page, findings) {
-  const hasSearchControl = page.controls.some((candidate) => String(candidate.control?.type || "") === "search-filter");
-  const hasFulltext = asArray(entry.control?.attrs?.data?.fulltext).length > 0;
-  if (!hasSearchControl || !hasFulltext) {
-    findings.push(error("DASH_DATASET_GRID_TABLE_SEARCH_LINKAGE_MISSING", "collection_control_grid_table_with_search requires search-filter and Collection attrs.data.fulltext[] linkage.", { page: page.title, path: entry.pointer, hasSearchControl, hasFulltext }));
   }
 }
 

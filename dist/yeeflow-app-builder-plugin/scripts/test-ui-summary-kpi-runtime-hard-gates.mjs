@@ -102,6 +102,7 @@ function run() {
   expectFail("Data Analytics Summary with missing ReportIds entry fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-missing-reportids.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary" })) }), "ANALYTICS_REPORTIDS_REGISTRATION_MISSING");
   expectFail("Data Analytics Summary placeholder field still fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-placeholder-field.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", reportIds: [UUID_SUMMARY_ID], dataFieldName: "placeholder_field" })) }), "ANALYTICS_PLACEHOLDER_FIELD_REFERENCE");
   expectFail("Non-Summary analytics invalid field still fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-pie-invalid-field.json", analyticsDecoded({ type: "pie-chart", id: "11111111-1111-4111-8111-111111111111", dataFieldName: "MissingField" })) }), "ANALYTICS_FIELD_REFERENCE_INVALID");
+  expectPass("Non-Summary analytics series display name is not treated as a source field", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-pie-business-question-series-name.json", analyticsDecoded({ type: "pie-chart", id: "11111111-1111-4111-8111-111111111111", seriesName: "How many loans are in each lifecycle status?" })) }));
   expectFail("Data Analytics Summary with non-UUID ID fails unless export-proven", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-non-uuid.json", analyticsDecoded({ type: "summary", id: "summary-total" })) }), "ANALYTICS_CONTROL_ID_NOT_RUNTIME_SAFE");
   for (const [label, type] of [
     ["Pie chart", "pie-chart"],
@@ -418,7 +419,7 @@ function runtimeEvidence(overrides = {}) {
   };
 }
 
-function analyticsDecoded({ type, id, extKey, reportIds = [], resourceReportIds = [], runtimeProofClaimed = false, semanticKey = "analytics:synthetic", dataFieldName = "ListDataID", omitTempVars = false } = {}) {
+function analyticsDecoded({ type, id, extKey, reportIds = [], resourceReportIds = [], runtimeProofClaimed = false, semanticKey = "analytics:synthetic", dataFieldName = "ListDataID", omitTempVars = false, seriesName = "" } = {}) {
   const dataField = field(dataFieldName, dataFieldName === "Decimal1" ? "Decimal" : "Text", dataFieldName === "Decimal1" ? "Amount" : "Record ID");
   const saveVar = { exprType: "variable", valueType: "string", id: "__temp___temp_analytics_summary", type: "expr", name: "__temp_analytics_summary" };
   const control = {
@@ -432,6 +433,7 @@ function analyticsDecoded({ type, id, extKey, reportIds = [], resourceReportIds 
       fieldObject: field("ListDataID", "Text", "Record ID"),
       fieldInfo: field("ListDataID", "Text", "Record ID"),
       settings: { values: [{ fieldName: "ListDataID", id: "ListDataID", func: "COUNT" }] },
+      ...(seriesName ? { series: [{ name: seriesName, categoryField: "ListDataID", valueField: "ListDataID" }] } : {}),
       ...(type === "summary" ? { save_var: saveVar } : {}),
     },
   };
