@@ -35,6 +35,7 @@ export function validateYapkUpgradeScope({ previousPackage, newPackage, scope } 
   validateRootIdentity(previous, next, findings);
   validateListScope(previous, next, rules, findings);
   validateUnrelatedCollections(previous, next, rules, findings);
+  validateDashboardFullPackageScope(previous, next, rules, findings);
   validateApprovalDefResourceScope(previous, next, rules, findings);
 
   return report(previousPackage, newPackage, scope, findings, {
@@ -43,6 +44,33 @@ export function validateYapkUpgradeScope({ previousPackage, newPackage, scope } 
     allowedChanges: [...rules.allowedChanges],
     disallowedChanges: [...rules.disallowedChanges],
   });
+}
+
+function validateDashboardFullPackageScope(previous, next, rules, findings) {
+  const isDashboardUpgrade = rules.upgradeType === "dashboard" || rules.upgradeType === "dashboard-only" || rules.allowedChangeTypes.has("dashboard");
+  if (!isDashboardUpgrade) return;
+  const groups = ["Childs", "Forms", "FormNewReports", "DataReports", "Groups", "Tags", "Metadatas", "Agents", "Connections", "Knowledges", "Themes", "Components", "PortalInfo"];
+  for (const group of groups) {
+    if (stableJson(previous?.[group] ?? null) !== stableJson(next?.[group] ?? null)) {
+      findings.push(finding("error", "UPGRADE_DASHBOARD_ONLY_NON_DASHBOARD_RESOURCE_MUTATION", "Dashboard-only upgrades must be full upgrade packages and preserve non-Dashboard resource groups unchanged.", { resource: group }));
+    }
+  }
+  const previousPages = asArray(previous?.Pages);
+  const nextPages = asArray(next?.Pages);
+  if (previousPages.length !== nextPages.length) {
+    findings.push(finding("error", "UPGRADE_DASHBOARD_ONLY_PAGE_COUNT_DRIFT", "Dashboard-only upgrades must preserve the existing page set and replace only declared Dashboard page resources.", { previousPages: previousPages.length, nextPages: nextPages.length }));
+  }
+  const targetTitles = new Set(asArray(rules.targetPages || rules.targetDashboardPages).map((item) => scalar(isObject(item) ? item.Title || item.title || item.name : item)).filter(Boolean));
+  if (targetTitles.size) {
+    const previousByTitle = new Map(previousPages.map((page) => [titleOf(page), stableJson(page)]));
+    for (const page of nextPages) {
+      const title = titleOf(page);
+      if (targetTitles.has(title)) continue;
+      if (previousByTitle.has(title) && previousByTitle.get(title) !== stableJson(page)) {
+        findings.push(finding("error", "UPGRADE_DASHBOARD_ONLY_UNDECLARED_PAGE_MUTATION", "Dashboard-only upgrades may mutate only declared target Dashboard pages.", { page: title }));
+      }
+    }
+  }
 }
 
 function validateDeclaredScope(rules, findings) {
@@ -228,6 +256,7 @@ function normalizeScope(scope) {
     disallowedChanges: new Set(asArray(scope?.disallowedChanges || scope?.forbiddenChanges).map((item) => scalar(item).toLowerCase()).filter(Boolean)),
     allowedChangeTypes: new Set(asArray(scope?.allowedResourceTypes || scope?.allowedChangeTypes).map((item) => scalar(item).toLowerCase()).filter(Boolean)),
     allowNewLists: scope?.allowNewLists === true,
+    targetPages: asArray(scope?.targetPages || scope?.targetDashboardPages || scope?.targets?.pages),
     generatedContentIds,
   };
 }

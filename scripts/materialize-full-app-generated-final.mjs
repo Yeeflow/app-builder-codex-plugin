@@ -1380,20 +1380,13 @@ function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar })
 }
 
 function normalizeDashboardFilters({ filters, listMeta, dashboardName }) {
-  return (filters || []).map((filter, index) => {
-    const field = resolveFieldSpec(listMeta, filter.fieldDisplayName) || resolveFieldSpec(listMeta, "Title") || fieldsForDynamicControls(listMeta)[0];
-    const variable = `flt_${slugify(dashboardName).replace(/-/g, "_")}_${slugify(filter.filterName || field.displayName).replace(/-/g, "_")}`;
-    return {
-      ...filter,
-      fieldName: field.fieldName,
-      displayName: field.displayName,
-      variable,
-      controlId: `${variable}_${index + 1}`,
-    };
-  });
+  return [];
 }
 
 function materializeDashboardFilters(resource, { filters, listName, listId, filterIdPrefix, datasetRegion, host }) {
+  // Page-level select-filter to Collection runtime linkage is intentionally disabled until an
+  // export-proven empty-value bypass contract exists. Collection templates still provide proven
+  // search-filter/fulltext behavior for generated dashboards.
   if (!filters.length) return;
   const filterGroup = host || findFirstByIdentity(resource, "section_content_area") || findFirstByIdentity(resource, "Content") || resource;
   filterGroup.children = Array.isArray(filterGroup.children) ? filterGroup.children : [];
