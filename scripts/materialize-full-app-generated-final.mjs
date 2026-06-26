@@ -859,12 +859,13 @@ function buildCustomFormLayout({ layoutId, listId, listName, formName, formType 
   const templateKind = /\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit";
   const templateId = templateKind === "view" ? "data_list_form_layout_view_item_v1_1" : "data_list_form_layout_new_edit_v1_1";
   const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields });
+  const resourceJson = JSON.stringify(resource);
   return {
     ListID: listId,
     LayoutID: layoutId,
     Title: formName,
     Type: 1,
-    LayoutView: JSON.stringify({ source: "minimal-resource-graph", formName, listName }),
+    LayoutView: resourceJson,
     IsDefault: false,
     IsItemPerm: false,
     Perms: [],
@@ -872,7 +873,7 @@ function buildCustomFormLayout({ layoutId, listId, listName, formName, formType 
       {
         ID: layoutId,
         RefId: layoutId,
-        Resource: JSON.stringify(resource),
+        Resource: resourceJson,
       },
     ],
   };

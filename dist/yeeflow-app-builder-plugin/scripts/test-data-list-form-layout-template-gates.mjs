@@ -21,6 +21,21 @@ try {
   expectPass("New/Edit template resource with marker passes", ["--resource", writeJson("new-edit-valid.json", newEditResource()), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"]);
   expectPass("View item template resource with marker passes", ["--resource", writeJson("view-valid.json", viewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"]);
   expectPass("generated package with New/Edit and View templates passes", ["--package", writePackage("valid-package.yapk", decodedPackage())]);
+  expectCode("generated package with Type 1 form LayoutView placeholder fails", ["--package", writePackage("layoutview-placeholder.yapk", decodedPackage({ layouts: [
+    { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
+    formLayout("layout-new-edit", "New and Edit form", newEditResource(), { layoutView: { source: "minimal-resource-graph", formName: "New and Edit form", listName: "Assets" } }),
+    formLayout("layout-view", "View item", viewResource()),
+  ] }))], "DATA_LIST_FORM_LAYOUTVIEW_PLACEHOLDER");
+  expectCode("generated package with Type 1 form LayoutView/resource drift fails", ["--package", writePackage("layoutview-resource-drift.yapk", decodedPackage({ layouts: [
+    { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
+    formLayout("layout-new-edit", "New and Edit form", newEditResource()),
+    formLayout("layout-view", "View item", viewResource(), { layoutView: newEditResource() }),
+  ] }))], "DATA_LIST_FORM_LAYOUTVIEW_RESOURCE_DRIFT");
+  expectCode("generated package with empty Type 1 custom form layout fails", ["--package", writePackage("empty-custom-form-layout.yapk", decodedPackage({ layouts: [
+    { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
+    { LayoutID: "layout-new-edit", Title: "New and Edit form", Type: 1, LayoutInResources: [] },
+    formLayout("layout-view", "View item", viewResource()),
+  ] }))], "DATA_LIST_FORM_LAYOUTVIEW_RESOURCE_MISSING");
   expectCode("generated package using default New/Edit/View layouts fails", ["--package", writePackage("default-layout-package.yapk", decodedPackage({ layoutView: { add: "default", edit: "default", view: "default" }, layouts: [{ LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] }] }))], "DATA_LIST_FORM_LAYOUT_DEFAULT_USAGE_FORBIDDEN");
   expectCode("generated package missing View custom form assignment fails", ["--package", writePackage("missing-view-assignment.yapk", decodedPackage({ layoutView: { add: "layout-new-edit", edit: "layout-new-edit" } }))], "DATA_LIST_FORM_LAYOUT_USAGE_MISSING");
   expectCode("generated package with display setting pointing to Type 0 layout fails", ["--package", writePackage("type0-form-assignment.yapk", decodedPackage({ layoutView: { add: "layout-default", edit: "layout-new-edit", view: "layout-view" } }))], "DATA_LIST_FORM_LAYOUT_USAGE_NOT_CUSTOM_FORM");
@@ -94,8 +109,8 @@ function decodedPackage(options = {}) {
   const view = options.viewResource || viewResource();
   const layouts = options.layouts || [
     { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
-    { LayoutID: "layout-new-edit", Title: "New and Edit form", Type: 1, LayoutInResources: [{ ID: "layout-new-edit", RefId: "layout-new-edit", Resource: JSON.stringify(newEdit) }] },
-    { LayoutID: "layout-view", Title: "View item", Type: 1, LayoutInResources: [{ ID: "layout-view", RefId: "layout-view", Resource: JSON.stringify(view) }] },
+    formLayout("layout-new-edit", "New and Edit form", newEdit),
+    formLayout("layout-view", "View item", view),
   ];
   const layoutView = options.layoutView || { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view" };
   return {
@@ -113,6 +128,18 @@ function decodedPackage(options = {}) {
     DataReports: [],
     Navigation: [],
     IconUrl: "{\"b\":\"#0f766e\",\"i\":\"fa-solid fa-box\",\"c\":\"#ffffff\"}",
+  };
+}
+
+function formLayout(layoutId, title, resource, options = {}) {
+  const resourceJson = JSON.stringify(resource);
+  const layoutView = options.layoutView === undefined ? resource : options.layoutView;
+  return {
+    LayoutID: layoutId,
+    Title: title,
+    Type: 1,
+    LayoutView: typeof layoutView === "string" ? layoutView : JSON.stringify(layoutView),
+    LayoutInResources: [{ ID: layoutId, RefId: layoutId, Resource: resourceJson }],
   };
 }
 

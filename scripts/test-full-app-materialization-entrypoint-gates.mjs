@@ -347,6 +347,7 @@ try {
   assert.equal(decodedResource.FormNewReports.length, 1, "planned form reports are materialized");
   assert.equal(decodedResource.Pages.length, 2, "planned dashboards are materialized");
   assert.equal(decodedResource.Pages.some((page) => page.Title === "Getting Started Dashboard"), false, "nontrivial path must not emit placeholder dashboard");
+  assertDataListCustomFormRuntimeSources(decodedResource);
   const assetLoanDef = decodeDefResource(decodedResource.Forms.find((form) => form.Name === "Asset Loan Request").DefResource);
   const assetLoanDefText = JSON.stringify(assetLoanDef);
   assert.match(assetLoanDefText, /Requester/, "approval submission/task formdef materializes planned Requester field");
@@ -538,6 +539,40 @@ function expectCode(name, args, code) {
 
 function run(args) {
   return spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+}
+
+function assertDataListCustomFormRuntimeSources(decodedResource) {
+  for (const child of decodedResource.Childs || []) {
+    for (const layout of child.Layouts || []) {
+      if (Number(layout.Type) !== 1) continue;
+      const layoutView = parseJson(layout.LayoutView);
+      const embedded = parseJson((layout.LayoutInResources || [])[0]?.Resource);
+      assert.ok(layoutView && typeof layoutView === "object", `${child.List.Title} ${layout.Title} LayoutView must contain form JSON`);
+      assert.ok(embedded && typeof embedded === "object", `${child.List.Title} ${layout.Title} LayoutInResources[0].Resource must contain form JSON`);
+      assert.ok(Array.isArray(layoutView.children) && layoutView.children.length > 0, `${child.List.Title} ${layout.Title} LayoutView must contain rendered form children`);
+      assert.ok(Array.isArray(embedded.children) && embedded.children.length > 0, `${child.List.Title} ${layout.Title} embedded Resource must contain rendered form children`);
+      assert.doesNotMatch(JSON.stringify(layoutView), /minimal-resource-graph|placeholder/i, `${child.List.Title} ${layout.Title} LayoutView must not be a placeholder`);
+      assert.equal(stableJson(layoutView), stableJson(embedded), `${child.List.Title} ${layout.Title} LayoutView must mirror LayoutInResources[0].Resource`);
+    }
+  }
+}
+
+function parseJson(value) {
+  if (!value) return null;
+  if (typeof value === "object") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map((item) => stableJson(item)).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
 }
 
 function collectObjectIdUuids(root) {
