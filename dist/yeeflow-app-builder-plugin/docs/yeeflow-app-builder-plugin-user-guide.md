@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.66`
+`0.8.67`
+
+Version `0.8.67` releases Approval workflow condition and upgrade proof gates from PR #273. Generated Approval workflows now use Designer-readable `left/op/right` Completion condition metadata for Approved and Rejected outcomes, line-manager assignment is bound through `ApplicantUserID`, canonical end-node routing is enforced, and Approval workflow upgrades require live Designer/DefBlob proof after Version Management `Succeed`.
 
 Version `0.8.66` releases collection action layout and approval field fidelity gates from PR #271. Dashboard Collection template actions now rewrite or remove unresolved layout placeholders such as `{{layout}}`; Approval form field validation requires App Plan planned visible labels such as `Loan Number` to survive materialization instead of accepting technical-only bindings; source approval layout templates are included as cache artifacts; and focused clean-checkout regression coverage prevents source/dist template drift.
 

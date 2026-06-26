@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.66`
+- Version: `0.8.67`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.66` releases collection action layout and approval field fidelity gates from PR #271: Dashboard Collection template actions now rewrite or remove unresolved layout placeholders such as `{{layout}}`; Approval form field validation requires App Plan planned visible labels such as `Loan Number` to survive materialization instead of accepting technical-only bindings; source approval layout templates are included as cache artifacts; and focused clean-checkout regression coverage prevents source/dist template drift.
+Current release `0.8.67` releases Approval workflow condition and upgrade proof gates from PR #273: generated Approval workflows now use Designer-readable outcome Completion conditions, line-manager assignee expressions are bound through `ApplicantUserID`, Approved/Rejected paths route to their canonical end nodes, and Approval workflow upgrades require live Designer/DefBlob proof after Version Management `Succeed`.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.66
+Version: 0.8.67
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.66
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.67
 ```
 
 ## What Is Included
