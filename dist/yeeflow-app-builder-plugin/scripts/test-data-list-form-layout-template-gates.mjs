@@ -52,6 +52,14 @@ try {
   content(directRootBusinessControl).children.push({ type: "collection", nv_label: "loose_collection", attrs: { data: { list: { ListID: "list-1" } } } });
   expectCode("business control directly under Content fails", ["--resource", writeJson("view-root-business.json", directRootBusinessControl), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_INVENTED_ROOT_MODULE");
 
+  const emptyCopiedSection = newEditResource();
+  addEmptyCopiedContentCard(emptyCopiedSection);
+  expectCode("generated Data List form empty copied business section fails", ["--resource", writeJson("new-edit-empty-copied-section.json", emptyCopiedSection), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
+
+  const residualTemplateLabel = newEditResource();
+  firstSlot(residualTemplateLabel).children.push({ type: "text", id: "stale_section_text", nv_label: "stale_section_text", text: "Active Loan Pipeline" });
+  expectCode("generated Data List form residual template label fails", ["--resource", writeJson("new-edit-residual-template-label.json", residualTemplateLabel), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_TEMPLATE_RESIDUAL_LABEL");
+
   const markerMissing = viewResource({ marker: false });
   expectCode("generated package form missing template marker fails", ["--package", writePackage("missing-marker.yapk", decodedPackage({ viewResource: markerMissing }))], "DATA_LIST_FORM_LAYOUT_TEMPLATE_MARKER_MISSING");
 
@@ -93,6 +101,12 @@ function template(file, templateId, marker = true) {
     resource.dataListFormLayoutTemplateId = templateId;
   }
   removeOperations(resource);
+  setTemplateText(resource, "section_title_text", "Asset Details");
+  setTemplateText(resource, "section_title_description", "Review and maintain asset details.");
+  setTemplateText(resource, "page_title_text", "Asset View");
+  setTemplateText(resource, "page_title_description", "View asset record details.");
+  materializeFirstFieldSlot(resource);
+  removeEmptyBusinessSections(resource);
   return resource;
 }
 
@@ -203,7 +217,8 @@ function content(resource) {
 }
 
 function firstSlot(resource) {
-  return find(resource, "section_content_area");
+  const card = find(resource, "content_card_wrapper") || find(resource, "content_card_60_wrapper") || find(resource, "content_card_40_wrapper");
+  return card ? find(card, "section_content_area") : find(resource, "section_content_area");
 }
 
 function ids(node) {
@@ -234,6 +249,65 @@ function removeByIdentity(node, identity) {
 
 function removeOperations(node) {
   removeByIdentity(node, "Operations");
+}
+
+function setTemplateText(root, identity, text) {
+  const node = find(root, identity);
+  if (!node) return;
+  node.text = text;
+  node.title = text;
+  node.value = text;
+  node.attrs = { ...(node.attrs || {}), text };
+}
+
+function materializeFirstFieldSlot(resource) {
+  const slot = firstSlot(resource);
+  if (!slot) return;
+  slot.children = [
+    {
+      type: "grid",
+      id: "form_grid_fields_wrapper",
+      nv_label: "form_grid_fields_wrapper",
+      dataListFormFieldsTemplateId: "data_list_form_fields_grid_v1_1",
+      children: [
+        { type: "input", id: "asset_title", nv_label: "Asset Name", name: "Asset Name", attrs: { data: { field: "Title" } } },
+      ],
+    },
+  ];
+}
+
+function addEmptyCopiedContentCard(resource) {
+  const card = find(resource, "content_card_wrapper");
+  const rootContent = content(resource);
+  if (!card || !rootContent) return;
+  const copy = clone(card);
+  const slot = find(copy, "section_content_area");
+  if (slot) slot.children = [];
+  rootContent.children.push(copy);
+}
+
+function removeEmptyBusinessSections(root) {
+  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+  const visitAndFilter = (node) => {
+    if (!node || typeof node !== "object" || !Array.isArray(node.children)) return;
+    node.children.forEach(visitAndFilter);
+    node.children = node.children.filter((child) => {
+      if (![...removableWrappers].some((identity) => ids(child).includes(identity))) return true;
+      return hasMeaningfulBusinessContent(child);
+    });
+  };
+  visitAndFilter(root);
+}
+
+function hasMeaningfulBusinessContent(node) {
+  let meaningful = false;
+  visit(node, (current) => {
+    if (meaningful || current === node) return;
+    const type = String(current?.type || "");
+    if (["input", "input_number", "switch", "textarea", "richtext", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file", "collection", "pie-chart", "bar-chart", "line-chart", "pivot-table", "summary"].includes(type)) meaningful = true;
+    if (current?.dataListFormFieldsTemplateId || current?.dataListFormControlTemplateId) meaningful = true;
+  });
+  return meaningful;
 }
 
 function clone(value) {

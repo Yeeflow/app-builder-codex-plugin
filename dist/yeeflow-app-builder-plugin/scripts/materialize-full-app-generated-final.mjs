@@ -897,6 +897,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   if (slot) {
     slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
+  removeEmptyBusinessSections(resource);
   return resource;
 }
 
@@ -2380,14 +2381,13 @@ function removeOperationsWithoutActions(root) {
 }
 
 function removeEmptyBusinessSections(root) {
-  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
   const visit = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       visit(child);
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
-      const slot = findFirstByIdentity(child, "section_content_area");
-      return hasMeaningfulBusinessContent(slot);
+      return hasMeaningfulBusinessContent(child);
     });
   };
   visit(root);

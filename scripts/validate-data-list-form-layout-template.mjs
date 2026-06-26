@@ -14,11 +14,16 @@ const BACKGROUND = "#f4f7fb";
 const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" };
 const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header", "kpi_card_wrapper"]);
 const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper", "kpi_card_wrapper"]);
+const REMOVABLE_SECTION_MODULES = new Set(["1_columns_section", "content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
 const REQUIRED_NEW_EDIT_REGIONS = ["main", "content", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area"];
 const REQUIRED_VIEW_REGIONS = ["main", "content", "page_title_section", "page_title_content", "page_title_text", "page_title_description", "kpi_metrics_wrapper", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area"];
 const DATA_ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table", "summary"]);
 const DATASET_TYPES = new Set(["collection", "data-table", "datatable", "data-list", "kanban", "timeline-v", "timeline-h", "document-library"]);
 const FORM_USAGES = ["add", "edit", "view"];
+const RESIDUAL_TEMPLATE_LABEL_PATTERNS = [
+  /\bActive Loan Pipeline\b/i,
+  /\bCoordinator guidance: prioritize overdue items and returns/i,
+];
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -73,6 +78,15 @@ function validateRegistry(registry, references, findings, registryPath) {
   for (const moduleId of REPEATABLE_MODULES) {
     if (!asArray(registry.allowedRepeatableRemovableModules).includes(moduleId)) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_REPEATABLE_MODULE_MISSING", "Registry must document every repeatable/removable module.", { moduleId }));
+    }
+  }
+  const unusedPolicy = registry.unusedSectionPolicy || {};
+  if (unusedPolicy.generatedFinalMustPruneUnusedSections !== true || unusedPolicy.emptySectionContentAreaForbidden !== true || unusedPolicy.titleOnlyCopiedSectionsForbidden !== true) {
+    findings.push(error("DATA_LIST_FORM_LAYOUT_UNUSED_SECTION_POLICY_MISSING", "Registry must explicitly require generated-final Data List forms to prune unused copied sections and reject empty section_content_area containers.", { unusedSectionPolicy: unusedPolicy }));
+  }
+  for (const moduleId of REMOVABLE_SECTION_MODULES) {
+    if (!asArray(unusedPolicy.appliesToModules).includes(moduleId)) {
+      findings.push(error("DATA_LIST_FORM_LAYOUT_UNUSED_SECTION_POLICY_MODULE_MISSING", "Registry unused-section policy must list every generated-final removable section module.", { moduleId }));
     }
   }
   for (const reference of references.values()) {
@@ -240,11 +254,32 @@ function validateBusinessSlots(resource, context) {
     if (!findFirstByIdentity(card, "section_title_area")) {
       context.findings.push(error("DATA_LIST_FORM_LAYOUT_SECTION_TITLE_AREA_MISSING", "Every content_card_wrapper must preserve section_title_area.", { source: context.source }));
     }
-    if (!findFirstByIdentity(card, "section_content_area")) {
+    const slot = findFirstByIdentity(card, "section_content_area");
+    if (!slot) {
       context.findings.push(error("DATA_LIST_FORM_LAYOUT_SECTION_CONTENT_AREA_MISSING", "Every content_card_wrapper must preserve section_content_area.", { source: context.source }));
+    } else if (!context.registryMode && !hasMeaningfulBusinessContent(slot)) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA", "Generated Data List form content card wrappers must not keep empty copied template sections; remove unused sections or materialize real business content.", { source: context.source, path: pointerForNode(resource, slot) }));
     }
   }
   if (!context.registryMode) {
+    for (const entry of flatten(resource)) {
+      const ids = identityCandidates(entry.node);
+      const isRemovableModule = ids.some((id) => REMOVABLE_SECTION_MODULES.has(id));
+      if (!isRemovableModule) continue;
+      if (ids.includes("page_title_section") || findFirstByIdentity(entry.node, "page_title_content")) continue;
+      if (!hasMeaningfulBusinessContent(entry.node)) {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_UNUSED_SECTION_MODULE", "Generated Data List form section modules must be removed when they do not contain real business content.", { source: context.source, path: entry.pointer, identities: ids }));
+      }
+    }
+  }
+  if (!context.registryMode) {
+    for (const entry of flatten(resource)) {
+      const text = nodeText(entry.node);
+      const pattern = RESIDUAL_TEMPLATE_LABEL_PATTERNS.find((candidate) => candidate.test(text));
+      if (pattern) {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_TEMPLATE_RESIDUAL_LABEL", "Generated Data List forms must not retain unrelated source-template section labels or descriptions; map titles/descriptions to the current Data List purpose or remove the unused section.", { source: context.source, path: entry.pointer, text: text.slice(0, 200) }));
+      }
+    }
     for (const operations of findAllByIdentity(resource, "Operations")) {
       const descendants = flatten(operations).map((entry) => entry.node);
       const actionLike = descendants.filter((node) => isActionLooking(node));
@@ -267,6 +302,38 @@ function validateBusinessSlots(resource, context) {
     if (isInsideAllowedBusinessSlot(entry, resource)) continue;
     context.findings.push(error("DATA_LIST_FORM_LAYOUT_BUSINESS_CONTROL_OUTSIDE_ALLOWED_SLOT", "Business controls must be placed only inside approved Data List Form v1.1 business-content slots.", { source: context.source, path: entry.pointer, type, identities: identityCandidates(entry.node) }));
   }
+}
+
+function hasMeaningfulBusinessContent(node) {
+  if (!node) return false;
+  for (const entry of flatten(node)) {
+    const current = entry.node;
+    if (current === node) continue;
+    const type = String(current?.type || "");
+    if (isBusinessControlType(type)) return true;
+    const ids = identityCandidates(current);
+    if (ids.some((id) => id === "form_grid_fields_wrapper" || id === "data_list_form_control_sublist_v1_1")) return true;
+    if (current?.dataListFormFieldsTemplateId || current?.derivedFromDataListFormFieldsTemplate) return true;
+    if (current?.dataListFormControlTemplateId || current?.derivedFromDataListFormControlTemplate) return true;
+    if (current?.collectionTemplateId || current?.dataAnalyticsTemplateId || current?.derivedFromCollectionTemplate || current?.derivedFromDataAnalyticsTemplate) return true;
+  }
+  return false;
+}
+
+function nodeText(node) {
+  if (!isObject(node)) return "";
+  const values = [];
+  for (const key of ["text", "title", "value", "DisplayName", "description", "placeholder"]) {
+    const value = node?.[key];
+    if (typeof value === "string") values.push(value);
+    else if (Array.isArray(value)) values.push(...value.filter((item) => typeof item === "string"));
+  }
+  for (const key of ["text", "title", "value", "description", "placeholder"]) {
+    const value = node?.attrs?.[key];
+    if (typeof value === "string") values.push(value);
+    else if (Array.isArray(value)) values.push(...value.filter((item) => typeof item === "string"));
+  }
+  return values.join(" ");
 }
 
 function requireIdentity(resource, id, context, code) {
@@ -444,6 +511,10 @@ function flatten(resource) {
   }
   visit(resource, "$", []);
   return entries;
+}
+
+function pointerForNode(resource, target) {
+  return flatten(resource).find((entry) => entry.node === target)?.pointer || "$";
 }
 
 function findFirstByIdentity(resource, identity) {

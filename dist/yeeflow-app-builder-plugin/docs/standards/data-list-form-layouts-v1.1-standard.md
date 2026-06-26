@@ -99,7 +99,7 @@ Within `page_title_content`, the text of `page_title_text` and `page_title_descr
 
 Within `section_title_header`, the text of `section_title_text` and `section_title_description` may change to describe the content inside the associated `content_card_wrapper`.
 
-Within `Operations`, generated controls must be real configured action controls. Placeholder or visual-only buttons are forbidden.
+Within `Operations`, generated controls must be real configured action controls. Placeholder or visual-only buttons are forbidden. If no real action is needed for a page title or content section, remove the `Operations` container from that generated form region instead of leaving template buttons behind.
 
 Within `section_content_area`, generated resources may insert current-record field controls, Dynamic user/image/file/field controls, related record display components, approved Collection templates, approved Data Analytics templates, or other plugin-supported controls appropriate to the form type. For Data List Form Layouts v1.1, these business-content `section_content_area` regions must belong to an approved content card wrapper: `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 
@@ -113,7 +113,7 @@ Within `kpi_card_wrapper`, generated View Item forms may map KPI card text, icon
 
 ## Repeatable And Removable Modules
 
-Generated forms may remove unused modules. New modules may only be created by copying one of these approved repeatable/removable modules from the selected template:
+Generated forms must remove unused modules. New modules may only be created by copying one of these approved repeatable/removable modules from the selected template:
 
 - `1_columns_section`
 - `content_card_wrapper`
@@ -124,6 +124,12 @@ Generated forms may remove unused modules. New modules may only be created by co
 - `kpi_card_wrapper`
 
 Copied modules must preserve the template's structure, hierarchy, control types, width, padding, direction, gap, background, typography, and required children. Do not invent new form layout modules.
+
+Generated forms must not keep title-only copied sections. A `content_card_wrapper`, `content_card_60_wrapper`, `content_card_40_wrapper`, `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` is allowed in the final form only when it contains real business content in an approved slot. Empty `section_content_area` containers, copied placeholder section titles such as `Active Loan Pipeline`, and sections that do not contain current-record fields, approved related components, configured actions, or other real business controls must be pruned before generated-final validation.
+
+For New/Edit forms, the common case is a single current-record field section. Do not keep the remaining template example sections unless the App Plan explicitly requires additional current-record field groups and those sections are fully materialized with real fields or configured actions.
+
+For View Item forms, keep only the page title, required view structure, and the sections that are backed by current-record details, related datasets, Data Analytics, KPI cards, filters, or configured actions. Do not keep copied Dashboard or loan/event placeholder section text when no corresponding business content was generated.
 
 ## New/Edit Form Rules
 
@@ -220,3 +226,6 @@ The package gate must fail when a generated business list:
 - points any usage to a missing layout or a non-Type `1` layout
 - assigns New/Edit to a form that does not carry `data_list_form_layout_new_edit_v1_1`
 - assigns View to a form that does not carry `data_list_form_layout_view_item_v1_1`
+- keeps an empty `section_content_area` inside a visible content card wrapper
+- keeps a copied section module that has only template title/description text and no real business content
+- retains unrelated source-template labels in generated form sections instead of mapping them to the current Data List purpose

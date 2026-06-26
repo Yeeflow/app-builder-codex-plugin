@@ -31,6 +31,21 @@
     "kpi_metrics_wrapper",
     "kpi_card_wrapper"
   ],
+  "unusedSectionPolicy": {
+    "generatedFinalMustPruneUnusedSections": true,
+    "emptySectionContentAreaForbidden": true,
+    "titleOnlyCopiedSectionsForbidden": true,
+    "templateResidualLabelsForbidden": true,
+    "appliesToModules": [
+      "1_columns_section",
+      "content_card_wrapper",
+      "content_card_60_wrapper",
+      "content_card_40_wrapper",
+      "2_columns_section",
+      "3_columns_section",
+      "2_columns_60/40_section"
+    ]
+  },
   "templates": [
     {
       "templateId": "data_list_form_layout_new_edit_v1_1",
