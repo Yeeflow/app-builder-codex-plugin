@@ -6,7 +6,7 @@ import { pathToFileURL } from "node:url";
 import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/yapk-decode-utils.mjs";
 
 const DASHBOARD_RECORD_CONTROLS = new Set(["collection", "data-table", "datatable", "kanban", "vertical-timeline", "horizontal-timeline", "timeline"]);
-const DASHBOARD_FILTER_CONTROLS = new Set(["data-filter", "select-filter", "radio-filter", "checkbox-filter", "filter"]);
+const DASHBOARD_FILTER_CONTROLS = new Set(["data-filter", "select-filter", "radio-filter", "checkbox-filter", "filter", "search-filter"]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));

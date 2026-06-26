@@ -64,6 +64,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--app-plan", plan] : []),
   ]));
+  gates.push(runGate("dashboard-select-filter-runtime-contract", [
+    "scripts/validate-dashboard-select-filter-runtime-contract.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("data-analytics-golden-references", [
     "scripts/validate-data-analytics-golden-references.mjs",
     "--package",
