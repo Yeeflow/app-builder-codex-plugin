@@ -1,0 +1,2546 @@
+{
+    "_ak_c": {
+        "id": "c25f6463-65ae-48af-9889-ba74574e4f5b",
+        "type": "flex_grid",
+        "label": "Section 2  Contact information",
+        "displayLabel": [
+            null,
+            false
+        ],
+        "attrs": {
+            "ver": 1,
+            "canFold": true,
+            "columns": {
+                "1": {
+                    "list": [
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        },
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        },
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        }
+                    ],
+                    "last": {
+                        "value": 1,
+                        "unit": "fr"
+                    }
+                },
+                "3": {
+                    "list": [
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        }
+                    ],
+                    "last": {
+                        "value": 1,
+                        "unit": "fr"
+                    }
+                }
+            },
+            "rows": {
+                "1": {
+                    "list": [
+                        {
+                            "unit": "auto"
+                        }
+                    ],
+                    "last": {
+                        "unit": "auto"
+                    }
+                }
+            },
+            "cgap": {
+                "1": 24
+            },
+            "cgapU": {
+                "1": "px"
+            },
+            "rgap": [
+                null,
+                12
+            ],
+            "rgapU": [
+                null,
+                "px"
+            ]
+        },
+        "children": [
+            {
+                "id": "4ac3ba4a-d835-4516-809d-c603701c1b0b",
+                "type": "input",
+                "label": "Primary Contact Name",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., John Doe",
+                    "required": true
+                },
+                "binding": "contact_PrimaryContactName",
+                "parentCol": 1
+            },
+            {
+                "id": "188e0782-067a-45fa-94dd-8d9bb12fcff8",
+                "type": "input",
+                "label": "Job Title",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., Procurement Manager",
+                    "required": true
+                },
+                "binding": "contact_JobTitle",
+                "parentCol": 1
+            },
+            {
+                "id": "656f5bc0-0387-4ef3-b657-c089bc4681e6",
+                "type": "input",
+                "label": "Telephone Number",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., (555) 987-6543"
+                },
+                "binding": "contact_TelephoneNumber",
+                "parentCol": 1
+            },
+            {
+                "id": "5ce92653-5c47-48cb-860b-923ad45db8e1",
+                "type": "input",
+                "label": "Fax Number",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., (555) 345-6789 (optional)"
+                },
+                "binding": "contact_FaxNumber",
+                "parentCol": 1
+            },
+            {
+                "id": "93ff05f0-d57c-42d8-98fd-44f5b1d50bf9",
+                "type": "input",
+                "label": "Email Address",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., johndoe@example.com"
+                },
+                "binding": "contact_EmailAddress",
+                "parentCol": 1
+            },
+            {
+                "id": "ffa164c4-880d-4070-8b02-b1b3f4696d34",
+                "type": "container",
+                "label": "Container",
+                "attrs": {},
+                "children": []
+            },
+            {
+                "id": "034b6105-fed9-40d4-b477-1f64c47517a9",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            5
+                        ]
+                    },
+                    "common": {
+                        "padding": [
+                            null,
+                            {
+                                "top": "--sp--s150",
+                                "right": "--sp--s150",
+                                "bottom": "--sp--s150",
+                                "left": "--sp--s150"
+                            }
+                        ],
+                        "border": {
+                            "normal": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    {
+                                        "top": 1,
+                                        "right": 1,
+                                        "bottom": 1,
+                                        "left": 1
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    {
+                                        "top": "--sp--s075",
+                                        "right": "--sp--s075",
+                                        "bottom": "--sp--s075",
+                                        "left": "--sp--s075"
+                                    }
+                                ]
+                            }
+                        },
+                        "grid": {
+                            "position": [
+                                null,
+                                {},
+                                null,
+                                {
+                                    "cSpan": 1
+                                }
+                            ]
+                        }
+                    }
+                },
+                "children": [
+                    {
+                        "id": "5314ecc9-c045-483b-a0a0-13d6f1a12e6a",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "4.1 Quality Certifications",
+                                    "variable": null
+                                }
+                            },
+                            "heads": {
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        14
+                                    ],
+                                    "wei": "500"
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "26dcb3e4-2065-46c3-9fb8-79bf232efcb0",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "List of relevant quality management certifications (e.g., ISO 9001).",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "de999fe2-e262-4220-9212-717a38e89c32",
+                        "type": "file-upload",
+                        "label": "Quality Certifications",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "ver": 1,
+                            "type_icon_show": true,
+                            "content": {
+                                "pd": [
+                                    null,
+                                    {}
+                                ],
+                                "w": [
+                                    null,
+                                    null
+                                ],
+                                "wu": [
+                                    null,
+                                    "%"
+                                ],
+                                "normal": {
+                                    "border": {
+                                        "type": "0"
+                                    }
+                                }
+                            },
+                            "opbtn": {
+                                "normal": {
+                                    "bgColor": "rgba(46, 43, 120, 0.1)"
+                                }
+                            },
+                            "uploadbtn": {
+                                "normal": {
+                                    "border": {
+                                        "type": "99",
+                                        "width": [
+                                            null,
+                                            {
+                                                "top": 1,
+                                                "right": 1,
+                                                "bottom": 1,
+                                                "left": 1
+                                            }
+                                        ],
+                                        "color": "var(--c--primary)"
+                                    },
+                                    "bgColor": "rgba(46, 43, 120, 0.1)"
+                                },
+                                "mar": [
+                                    null,
+                                    {
+                                        "top": "",
+                                        "right": "",
+                                        "bottom": "",
+                                        "left": ""
+                                    }
+                                ],
+                                "pd": [
+                                    null,
+                                    {
+                                        "top": "",
+                                        "right": "",
+                                        "bottom": "",
+                                        "left": ""
+                                    }
+                                ]
+                            },
+                            "upload_btn": {
+                                "value": "Upload certifications",
+                                "variable": null
+                            },
+                            "file_multiple": true,
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            }
+                        },
+                        "binding": "files_QualityCertifications",
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "d7e6d726-f589-42f0-b0e0-fdda5b11526b",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            5
+                        ]
+                    },
+                    "common": {
+                        "padding": [
+                            null,
+                            {
+                                "top": "--sp--s150",
+                                "right": "--sp--s150",
+                                "bottom": "--sp--s150",
+                                "left": "--sp--s150"
+                            }
+                        ],
+                        "border": {
+                            "normal": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    {
+                                        "top": 1,
+                                        "right": 1,
+                                        "bottom": 1,
+                                        "left": 1
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    {
+                                        "top": "--sp--s075",
+                                        "right": "--sp--s075",
+                                        "bottom": "--sp--s075",
+                                        "left": "--sp--s075"
+                                    }
+                                ]
+                            }
+                        },
+                        "grid": {
+                            "position": [
+                                null,
+                                {},
+                                null,
+                                {
+                                    "cSpan": 1
+                                }
+                            ]
+                        }
+                    }
+                },
+                "children": [
+                    {
+                        "id": "ef839a6e-6f28-42de-948e-fa7bf6036750",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "4.2 Compliance Documents",
+                                    "variable": null
+                                }
+                            },
+                            "heads": {
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        14
+                                    ],
+                                    "wei": "500"
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "c0467ff3-b65b-4b38-9bcc-5afcce95563d",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "Evidence of compliance with industry regulations, environmental standards, etc.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "1e0c62dc-a294-4d95-b514-09c7e69e9c6c",
+                        "type": "file-upload",
+                        "label": "Compliance Documents",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "uploadbtn": {
+                                "normal": {
+                                    "border": {
+                                        "type": "99",
+                                        "width": [
+                                            null,
+                                            {
+                                                "top": 1,
+                                                "right": 1,
+                                                "bottom": 1,
+                                                "left": 1
+                                            }
+                                        ],
+                                        "color": "var(--c--primary)"
+                                    },
+                                    "bgColor": "rgba(46, 43, 120, 0.1)"
+                                },
+                                "mar": [
+                                    null,
+                                    {
+                                        "top": "",
+                                        "right": "",
+                                        "bottom": "",
+                                        "left": ""
+                                    }
+                                ],
+                                "pd": [
+                                    null,
+                                    {
+                                        "top": "",
+                                        "right": "",
+                                        "bottom": "",
+                                        "left": ""
+                                    }
+                                ]
+                            },
+                            "content": {
+                                "pd": [
+                                    null,
+                                    {}
+                                ],
+                                "w": [
+                                    null,
+                                    null
+                                ],
+                                "wu": [
+                                    null,
+                                    "%"
+                                ],
+                                "normal": {
+                                    "border": {
+                                        "type": "0"
+                                    }
+                                }
+                            },
+                            "opbtn": {
+                                "normal": {
+                                    "bgColor": "rgba(46, 43, 120, 0.1)"
+                                }
+                            },
+                            "ver": 1,
+                            "type_icon_show": true,
+                            "upload_btn": {
+                                "value": "Upload documents",
+                                "variable": null
+                            },
+                            "file_multiple": true
+                        },
+                        "binding": "files_ComplianceDocuments",
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "e00ead66-0add-4f64-933f-d45bbf344150",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            5
+                        ]
+                    },
+                    "common": {
+                        "padding": [
+                            null,
+                            {
+                                "top": "--sp--s150",
+                                "right": "--sp--s150",
+                                "bottom": "--sp--s150",
+                                "left": "--sp--s150"
+                            }
+                        ],
+                        "border": {
+                            "normal": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    {
+                                        "top": 1,
+                                        "right": 1,
+                                        "bottom": 1,
+                                        "left": 1
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    {
+                                        "top": "--sp--s075",
+                                        "right": "--sp--s075",
+                                        "bottom": "--sp--s075",
+                                        "left": "--sp--s075"
+                                    }
+                                ]
+                            }
+                        },
+                        "grid": {
+                            "position": [
+                                null,
+                                {}
+                            ]
+                        }
+                    }
+                },
+                "children": [
+                    {
+                        "id": "64ce91f3-b792-48de-b07c-a9e023f6df52",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "4.3 Safety Standards",
+                                    "variable": null
+                                }
+                            },
+                            "heads": {
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        14
+                                    ],
+                                    "wei": "500"
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "ecbb0a17-2f7a-4a85-82f3-708af6c157a6",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "Information on adherence to safety standards and practices.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "386ce959-a902-4850-ae20-e398a8604a12",
+                        "type": "file-upload",
+                        "label": "Safety Standards",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "uploadbtn": {
+                                "normal": {
+                                    "border": {
+                                        "type": "99",
+                                        "width": [
+                                            null,
+                                            {
+                                                "top": 1,
+                                                "right": 1,
+                                                "bottom": 1,
+                                                "left": 1
+                                            }
+                                        ],
+                                        "color": "var(--c--primary)"
+                                    },
+                                    "bgColor": "rgba(46, 43, 120, 0.1)"
+                                },
+                                "mar": [
+                                    null,
+                                    {
+                                        "top": "",
+                                        "right": "",
+                                        "bottom": "",
+                                        "left": ""
+                                    }
+                                ],
+                                "pd": [
+                                    null,
+                                    {
+                                        "top": "",
+                                        "right": "",
+                                        "bottom": "",
+                                        "left": ""
+                                    }
+                                ]
+                            },
+                            "content": {
+                                "pd": [
+                                    null,
+                                    {}
+                                ],
+                                "w": [
+                                    null,
+                                    null
+                                ],
+                                "wu": [
+                                    null,
+                                    "%"
+                                ],
+                                "normal": {
+                                    "border": {
+                                        "type": "0"
+                                    }
+                                }
+                            },
+                            "opbtn": {
+                                "normal": {
+                                    "bgColor": "rgba(46, 43, 120, 0.1)"
+                                }
+                            },
+                            "ver": 1,
+                            "type_icon_show": true,
+                            "upload_btn": {
+                                "value": "Upload documents",
+                                "variable": null
+                            },
+                            "file_multiple": true
+                        },
+                        "binding": "files_SafetyStandards",
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "6e681cc9-d6e0-4368-86c0-9fe298d13766",
+                "type": "list",
+                "label": "Catalogs/Brochures",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "grid": {
+                            "position": [
+                                null,
+                                {
+                                    "cSpan": 3
+                                },
+                                null,
+                                {
+                                    "cSpan": 1
+                                }
+                            ]
+                        },
+                        "border": {
+                            "normal": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    {
+                                        "top": 1,
+                                        "right": 1,
+                                        "bottom": 1,
+                                        "left": 1
+                                    }
+                                ],
+                                "color": "#d8e1ef",
+                                "radius": [
+                                    null,
+                                    {
+                                        "top": "--sp--s150",
+                                        "right": "--sp--s150",
+                                        "bottom": "--sp--s150",
+                                        "left": "--sp--s150"
+                                    }
+                                ]
+                            }
+                        },
+                        "padding": [
+                            null,
+                            {
+                                "top": "--sp--s150",
+                                "right": "--sp--s150",
+                                "bottom": "--sp--s150",
+                                "left": "--sp--s150"
+                            }
+                        ],
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "table": {
+                        "border": {
+                            "type": "1",
+                            "width": [
+                                null,
+                                {
+                                    "top": "--sp--s012",
+                                    "right": "--sp--s012",
+                                    "bottom": "--sp--s012",
+                                    "left": "--sp--s012"
+                                }
+                            ],
+                            "color": "var(--c--neutral-light-active)",
+                            "radius": [
+                                null,
+                                {
+                                    "top": "--sp--s075",
+                                    "right": "--sp--s075",
+                                    "bottom": "--sp--s075",
+                                    "left": "--sp--s075"
+                                }
+                            ]
+                        },
+                        "row": {
+                            "bdt": "1",
+                            "bdw": [
+                                null,
+                                {
+                                    "top": "--sp--s0",
+                                    "right": "--sp--s012",
+                                    "bottom": "--sp--s012",
+                                    "left": "--sp--s012"
+                                }
+                            ],
+                            "bdc": "var(--c--neutral-light-active)"
+                        },
+                        "title": {
+                            "ty": [
+                                null,
+                                "s-medium"
+                            ],
+                            "color": "var(--c--primary-dark)"
+                        },
+                        "value": {
+                            "ty": [
+                                null,
+                                "s-medium"
+                            ],
+                            "color": "var(--c--primary-dark)"
+                        }
+                    },
+                    "header": {
+                        "bdt": "1",
+                        "bdw": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s012",
+                                "bottom": "--sp--s012",
+                                "left": "--sp--s012"
+                            }
+                        ],
+                        "bdc": "var(--c--neutral-light-active)",
+                        "normal": {
+                            "bgcolor": "var(--c--neutral-light)"
+                        },
+                        "ty": [
+                            null,
+                            "s-semi-bold"
+                        ],
+                        "pd": [
+                            null,
+                            {
+                                "top": "--sp--s100",
+                                "right": "--sp--s100",
+                                "bottom": "--sp--s100",
+                                "left": "--sp--s100"
+                            }
+                        ]
+                    },
+                    "add": {
+                        "mar": [
+                            null,
+                            {
+                                "top": "",
+                                "right": "",
+                                "bottom": "",
+                                "left": ""
+                            }
+                        ]
+                    },
+                    "card": {
+                        "mar": [
+                            null,
+                            null,
+                            null,
+                            {
+                                "top": "",
+                                "right": "",
+                                "bottom": "",
+                                "left": ""
+                            }
+                        ],
+                        "pd": [
+                            null,
+                            null,
+                            null,
+                            {
+                                "top": "",
+                                "right": "",
+                                "bottom": "",
+                                "left": ""
+                            }
+                        ],
+                        "content": {
+                            "pd": [
+                                null,
+                                null,
+                                null,
+                                {
+                                    "top": "--sp--s100",
+                                    "right": "--sp--s100",
+                                    "bottom": "--sp--s100",
+                                    "left": "--sp--s100"
+                                }
+                            ],
+                            "border": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    null,
+                                    null,
+                                    {
+                                        "top": "--sp--s012",
+                                        "right": "--sp--s012",
+                                        "bottom": "--sp--s012",
+                                        "left": "--sp--s012"
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    null,
+                                    null,
+                                    {
+                                        "top": "--sp--s150",
+                                        "right": "--sp--s150",
+                                        "bottom": "--sp--s150",
+                                        "left": "--sp--s150"
+                                    }
+                                ]
+                            },
+                            "controlpd": [
+                                null,
+                                null,
+                                null,
+                                {
+                                    "top": "--sp--s0",
+                                    "right": "--sp--s0",
+                                    "bottom": "--sp--s0",
+                                    "left": "--sp--s0"
+                                }
+                            ]
+                        },
+                        "summary": {
+                            "border": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    null,
+                                    null,
+                                    {
+                                        "top": "--sp--s012",
+                                        "right": "--sp--s012",
+                                        "bottom": "--sp--s012",
+                                        "left": "--sp--s012"
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    null,
+                                    null,
+                                    {
+                                        "top": "--sp--s150",
+                                        "right": "--sp--s150",
+                                        "bottom": "--sp--s150",
+                                        "left": "--sp--s150"
+                                    }
+                                ]
+                            },
+                            "controlpd": [
+                                null,
+                                null,
+                                null,
+                                {
+                                    "top": "--sp--s050",
+                                    "right": "--sp--s100",
+                                    "bottom": "--sp--s050",
+                                    "left": "--sp--s100"
+                                }
+                            ],
+                            "title": {
+                                "ty": [
+                                    null,
+                                    null,
+                                    null,
+                                    "s-medium"
+                                ],
+                                "color": "var(--c--primary-dark)"
+                            },
+                            "value": {
+                                "ty": [
+                                    null,
+                                    null,
+                                    null,
+                                    "s-medium"
+                                ],
+                                "color": "var(--c--primary-dark)"
+                            }
+                        }
+                    },
+                    "title": {
+                        "ty": [
+                            null,
+                            "base-medium"
+                        ],
+                        "pd": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ],
+                        "border": {
+                            "type": "0"
+                        }
+                    },
+                    "list-fields": [
+                        {
+                            "idx": "30f6bf90-d54d-4627-942a-ad64c14756e8",
+                            "id": "catalog_name",
+                            "name": "Name",
+                            "type": "text",
+                            "editable": true,
+                            "control": {
+                                "id": "56bc3330-cb62-4383-aaf8-67677de8b08c",
+                                "label": "Name",
+                                "binding": "catalog_name",
+                                "attrs": {
+                                    "list_field": true,
+                                    "list_field_binding": "list_Catalogs",
+                                    "list_control_id": "6e681cc9-d6e0-4368-86c0-9fe298d13766",
+                                    "placeholder": "Provide visual and detailed descriptions",
+                                    "edit": {
+                                        "normal": {
+                                            "border": {
+                                                "type": "1",
+                                                "width": [
+                                                    null,
+                                                    {
+                                                        "top": 1,
+                                                        "right": 1,
+                                                        "bottom": 1,
+                                                        "left": 1
+                                                    }
+                                                ],
+                                                "color": "rgba(7, 22, 56, 0.3)"
+                                            }
+                                        },
+                                        "pcolor": "rgba(7, 22, 56, 0.4)"
+                                    }
+                                },
+                                "type": "input",
+                                "displayLabel": [
+                                    null,
+                                    true
+                                ]
+                            }
+                        },
+                        {
+                            "idx": "c60fe28a-f03f-4dc1-8013-79cc00a43119",
+                            "id": "catalog_file",
+                            "name": "Files",
+                            "type": "file",
+                            "editable": true,
+                            "control": {
+                                "id": "31bc2fa7-9b60-4424-84be-a3b78a22a60f",
+                                "label": "Files",
+                                "binding": "catalog_file",
+                                "attrs": {
+                                    "list_field": true,
+                                    "list_field_binding": "list_Catalogs",
+                                    "list_control_id": "6e681cc9-d6e0-4368-86c0-9fe298d13766",
+                                    "ver": 1,
+                                    "file_multiple": true,
+                                    "upload_btn": {
+                                        "value": "Upload files",
+                                        "variable": null
+                                    },
+                                    "content": {
+                                        "iconsize": [
+                                            null,
+                                            18
+                                        ],
+                                        "normal": {
+                                            "border": {
+                                                "type": "0",
+                                                "width": [
+                                                    null,
+                                                    {
+                                                        "top": 1,
+                                                        "right": 1,
+                                                        "bottom": 1,
+                                                        "left": 1
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "opbtn": {
+                                        "normal": {
+                                            "color": "var(--c--primary)",
+                                            "bgColor": "rgba(46, 43, 120, 0.1)"
+                                        }
+                                    },
+                                    "uploadbtn": {
+                                        "normal": {
+                                            "border": {
+                                                "type": "99",
+                                                "width": [
+                                                    null,
+                                                    {
+                                                        "top": 1,
+                                                        "right": 1,
+                                                        "bottom": 1,
+                                                        "left": 1
+                                                    }
+                                                ],
+                                                "color": "var(--c--primary)"
+                                            },
+                                            "bgColor": "rgba(46, 43, 120, 0.1)"
+                                        }
+                                    }
+                                },
+                                "type": "file-upload",
+                                "displayLabel": [
+                                    null,
+                                    true
+                                ]
+                            }
+                        }
+                    ],
+                    "list-variables": [
+                        {
+                            "idx": "30f6bf90-d54d-4627-942a-ad64c14756e8",
+                            "id": "catalog_name",
+                            "name": "Name",
+                            "type": "text",
+                            "editable": true
+                        },
+                        {
+                            "idx": "c60fe28a-f03f-4dc1-8013-79cc00a43119",
+                            "id": "catalog_file",
+                            "name": "Files",
+                            "type": "file",
+                            "editable": true
+                        }
+                    ]
+                },
+                "binding": "list_Catalogs"
+            },
+            {
+                "id": "efbac855-6616-48b6-8029-8e766007a66b",
+                "type": "list",
+                "label": "Products & Services",
+                "displayLabel": [
+                    null,
+                    false
+                ],
+                "attrs": {
+                    "common": {
+                        "grid": {
+                            "position": [
+                                null,
+                                {
+                                    "cSpan": 3
+                                },
+                                null,
+                                {
+                                    "cSpan": 1
+                                }
+                            ]
+                        },
+                        "border": {
+                            "normal": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    {
+                                        "top": 1,
+                                        "right": 1,
+                                        "bottom": 1,
+                                        "left": 1
+                                    }
+                                ],
+                                "color": "#d8e1ef",
+                                "radius": [
+                                    null,
+                                    {
+                                        "top": "--sp--s150",
+                                        "right": "--sp--s150",
+                                        "bottom": "--sp--s150",
+                                        "left": "--sp--s150"
+                                    }
+                                ]
+                            }
+                        },
+                        "padding": [
+                            null,
+                            {
+                                "top": "--sp--s150",
+                                "right": "--sp--s150",
+                                "bottom": "--sp--s150",
+                                "left": "--sp--s150"
+                            }
+                        ],
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "table": {
+                        "border": {
+                            "type": "1",
+                            "width": [
+                                null,
+                                {
+                                    "top": "--sp--s012",
+                                    "right": "--sp--s012",
+                                    "bottom": "--sp--s012",
+                                    "left": "--sp--s012"
+                                }
+                            ],
+                            "color": "var(--c--neutral-light-active)",
+                            "radius": [
+                                null,
+                                {
+                                    "top": "--sp--s075",
+                                    "right": "--sp--s075",
+                                    "bottom": "--sp--s075",
+                                    "left": "--sp--s075"
+                                }
+                            ]
+                        },
+                        "row": {
+                            "bdt": "1",
+                            "bdw": [
+                                null,
+                                {
+                                    "top": "--sp--s0",
+                                    "right": "--sp--s012",
+                                    "bottom": "--sp--s012",
+                                    "left": "--sp--s012"
+                                }
+                            ],
+                            "bdc": "var(--c--neutral-light-active)"
+                        },
+                        "title": {
+                            "ty": [
+                                null,
+                                "s-medium"
+                            ],
+                            "color": "var(--c--primary-dark)"
+                        },
+                        "value": {
+                            "ty": [
+                                null,
+                                "s-medium"
+                            ],
+                            "color": "var(--c--primary-dark)"
+                        }
+                    },
+                    "header": {
+                        "bdt": "1",
+                        "bdw": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s012",
+                                "bottom": "--sp--s012",
+                                "left": "--sp--s012"
+                            }
+                        ],
+                        "bdc": "var(--c--neutral-light-active)",
+                        "normal": {
+                            "bgcolor": "var(--c--neutral-light)"
+                        },
+                        "ty": [
+                            null,
+                            "s-semi-bold"
+                        ],
+                        "pd": [
+                            null,
+                            {
+                                "top": "--sp--s100",
+                                "right": "--sp--s100",
+                                "bottom": "--sp--s100",
+                                "left": "--sp--s100"
+                            }
+                        ]
+                    },
+                    "add": {
+                        "mar": [
+                            null,
+                            {
+                                "top": "",
+                                "right": "",
+                                "bottom": "",
+                                "left": ""
+                            }
+                        ]
+                    },
+                    "card": {
+                        "mar": [
+                            null,
+                            null,
+                            null,
+                            {
+                                "top": "",
+                                "right": "",
+                                "bottom": "",
+                                "left": ""
+                            }
+                        ],
+                        "pd": [
+                            null,
+                            null,
+                            null,
+                            {
+                                "top": "",
+                                "right": "",
+                                "bottom": "",
+                                "left": ""
+                            }
+                        ],
+                        "content": {
+                            "pd": [
+                                null,
+                                null,
+                                null,
+                                {
+                                    "top": "--sp--s100",
+                                    "right": "--sp--s100",
+                                    "bottom": "--sp--s100",
+                                    "left": "--sp--s100"
+                                }
+                            ],
+                            "border": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    null,
+                                    null,
+                                    {
+                                        "top": "--sp--s012",
+                                        "right": "--sp--s012",
+                                        "bottom": "--sp--s012",
+                                        "left": "--sp--s012"
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    null,
+                                    null,
+                                    {
+                                        "top": "--sp--s150",
+                                        "right": "--sp--s150",
+                                        "bottom": "--sp--s150",
+                                        "left": "--sp--s150"
+                                    }
+                                ]
+                            },
+                            "controlpd": [
+                                null,
+                                null,
+                                null,
+                                {
+                                    "top": "--sp--s0",
+                                    "right": "--sp--s0",
+                                    "bottom": "--sp--s0",
+                                    "left": "--sp--s0"
+                                }
+                            ]
+                        },
+                        "summary": {
+                            "border": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    null,
+                                    null,
+                                    {
+                                        "top": "--sp--s012",
+                                        "right": "--sp--s012",
+                                        "bottom": "--sp--s012",
+                                        "left": "--sp--s012"
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    null,
+                                    null,
+                                    {
+                                        "top": "--sp--s150",
+                                        "right": "--sp--s150",
+                                        "bottom": "--sp--s150",
+                                        "left": "--sp--s150"
+                                    }
+                                ]
+                            },
+                            "controlpd": [
+                                null,
+                                null,
+                                null,
+                                {
+                                    "top": "--sp--s050",
+                                    "right": "--sp--s100",
+                                    "bottom": "--sp--s050",
+                                    "left": "--sp--s100"
+                                }
+                            ],
+                            "title": {
+                                "ty": [
+                                    null,
+                                    null,
+                                    null,
+                                    "s-medium"
+                                ],
+                                "color": "var(--c--primary-dark)"
+                            },
+                            "value": {
+                                "ty": [
+                                    null,
+                                    null,
+                                    null,
+                                    "s-medium"
+                                ],
+                                "color": "var(--c--primary-dark)"
+                            }
+                        }
+                    },
+                    "title": {
+                        "ty": [
+                            null,
+                            "base-medium"
+                        ],
+                        "pd": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ],
+                        "border": {
+                            "type": "0"
+                        }
+                    },
+                    "list-fields": [
+                        {
+                            "idx": "31679163-1b23-49f4-9718-3dd4b58c44f5",
+                            "id": "ps_category",
+                            "name": "Product/Service",
+                            "type": "lookup",
+                            "editable": true,
+                            "value": "{\"AppID\":41,\"ListID\":\"2070178805766307842\",\"ListSetID\":\"2070178795543605248\"}",
+                            "control": {
+                                "id": "d5555061-4598-4170-9ba9-42d3dac05d2f",
+                                "label": "Product/Service",
+                                "binding": "ps_category",
+                                "attrs": {
+                                    "list_field": true,
+                                    "list_field_binding": "list_ProductsandService",
+                                    "list_control_id": "efbac855-6616-48b6-8029-8e766007a66b",
+                                    "listid": "2070178805766307842",
+                                    "appid": 41,
+                                    "listfield": "Title",
+                                    "placeholder": "Select Product/Service Category",
+                                    "addition": [
+                                        {
+                                            "FieldName": "Title",
+                                            "FieldID": "2070178805766307843",
+                                            "IsShow": true,
+                                            "RelationName": "",
+                                            "Value": null,
+                                            "Order": "0"
+                                        },
+                                        {
+                                            "FieldName": "Text1",
+                                            "FieldID": "2070178805770502144",
+                                            "IsShow": true,
+                                            "RelationName": "",
+                                            "Value": null,
+                                            "Order": "1"
+                                        }
+                                    ],
+                                    "edit": {
+                                        "normal": {
+                                            "border": {
+                                                "type": "1",
+                                                "width": [
+                                                    null,
+                                                    {
+                                                        "top": 1,
+                                                        "right": 1,
+                                                        "bottom": 1,
+                                                        "left": 1
+                                                    }
+                                                ],
+                                                "color": "rgba(7, 22, 56, 0.3)"
+                                            }
+                                        },
+                                        "pcolor": "rgba(7, 22, 56, 0.4)"
+                                    }
+                                },
+                                "type": "lookup",
+                                "displayLabel": [
+                                    null,
+                                    true
+                                ]
+                            },
+                            "attrs": {
+                                "table": {
+                                    "cw": [
+                                        null,
+                                        30
+                                    ],
+                                    "cwu": [
+                                        null,
+                                        "%"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "idx": "826eabee-1196-40b2-b6d2-54d13a2a53c8",
+                            "id": "ps_Description",
+                            "name": "Description",
+                            "type": "text",
+                            "editable": true,
+                            "control": {
+                                "id": "d59f9886-d067-45b1-986f-636f3344c03e",
+                                "label": "Description",
+                                "binding": "ps_Description",
+                                "attrs": {
+                                    "list_field": true,
+                                    "list_field_binding": "list_ProductsandService",
+                                    "list_control_id": "efbac855-6616-48b6-8029-8e766007a66b",
+                                    "placeholder": "Please provide a detailed description of this type of product or service this supplier offering.",
+                                    "edit": {
+                                        "normal": {
+                                            "border": {
+                                                "type": "1",
+                                                "color": "rgba(7, 22, 56, 0.3)",
+                                                "width": [
+                                                    null,
+                                                    {
+                                                        "top": 1,
+                                                        "right": 1,
+                                                        "bottom": 1,
+                                                        "left": 1
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "pcolor": "rgba(7, 22, 56, 0.4)"
+                                    }
+                                },
+                                "type": "input",
+                                "displayLabel": [
+                                    null,
+                                    true
+                                ]
+                            }
+                        }
+                    ],
+                    "list-variables": [
+                        {
+                            "idx": "31679163-1b23-49f4-9718-3dd4b58c44f5",
+                            "id": "ps_category",
+                            "name": "Product/Service",
+                            "type": "lookup",
+                            "editable": true,
+                            "value": "{\"AppID\":41,\"ListID\":\"2070178805766307842\",\"ListSetID\":\"2070178795543605248\"}"
+                        },
+                        {
+                            "idx": "826eabee-1196-40b2-b6d2-54d13a2a53c8",
+                            "id": "ps_Description",
+                            "name": "Description",
+                            "type": "text",
+                            "editable": true
+                        }
+                    ]
+                },
+                "binding": "list_ProductsandService"
+            },
+            {
+                "id": "7fdbf593-45c2-4e5f-9081-1210642eecf9",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            5
+                        ]
+                    },
+                    "common": {
+                        "padding": [
+                            null,
+                            {
+                                "top": "--sp--s150",
+                                "right": "--sp--s150",
+                                "bottom": "--sp--s150",
+                                "left": "--sp--s150"
+                            }
+                        ],
+                        "border": {
+                            "normal": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    {
+                                        "top": 1,
+                                        "right": 1,
+                                        "bottom": 1,
+                                        "left": 1
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    {
+                                        "top": "--sp--s075",
+                                        "right": "--sp--s075",
+                                        "bottom": "--sp--s075",
+                                        "left": "--sp--s075"
+                                    }
+                                ]
+                            }
+                        },
+                        "grid": {
+                            "position": [
+                                null,
+                                {
+                                    "cSpan": 3
+                                },
+                                null,
+                                {
+                                    "cSpan": 1
+                                }
+                            ]
+                        }
+                    }
+                },
+                "children": [
+                    {
+                        "id": "f6b13a22-acfd-4564-b1e8-df9d0373d057",
+                        "type": "container",
+                        "label": "Container",
+                        "displayLabel": true,
+                        "attrs": {
+                            "style": {
+                                "direction": [
+                                    null,
+                                    "row",
+                                    null,
+                                    "column"
+                                ],
+                                "gap": [
+                                    null,
+                                    10
+                                ],
+                                "align_items": [
+                                    null,
+                                    "center"
+                                ]
+                            }
+                        },
+                        "children": [
+                            {
+                                "id": "29feec3b-3213-444b-9f8f-45c16ab63bb2",
+                                "type": "heading",
+                                "label": "Text",
+                                "displayLabel": true,
+                                "attrs": {
+                                    "heads": {
+                                        "ty": {
+                                            "size": [
+                                                null,
+                                                16
+                                            ],
+                                            "wei": "600"
+                                        },
+                                        "color": "rgba(7, 22, 56, 0.8)"
+                                    },
+                                    "common": {
+                                        "margin": [
+                                            null,
+                                            {}
+                                        ],
+                                        "positioning": {
+                                            "widthtype": [
+                                                null,
+                                                "2",
+                                                null,
+                                                "1"
+                                            ]
+                                        },
+                                        "border": {
+                                            "normal": {
+                                                "type": "1",
+                                                "width": [
+                                                    null,
+                                                    {
+                                                        "top": null,
+                                                        "right": null,
+                                                        "bottom": null,
+                                                        "left": 5
+                                                    }
+                                                ],
+                                                "color": "var(--c--primary)"
+                                            }
+                                        },
+                                        "padding": [
+                                            null,
+                                            {
+                                                "top": null,
+                                                "right": null,
+                                                "bottom": null,
+                                                "left": 10
+                                            }
+                                        ]
+                                    },
+                                    "headc": {
+                                        "title": {
+                                            "value": "Unique Selling Points",
+                                            "variable": null
+                                        }
+                                    }
+                                },
+                                "parentCol": 1
+                            },
+                            {
+                                "id": "c26e1821-148a-42ae-b75a-8d70edbe30f0",
+                                "type": "heading",
+                                "label": "Text",
+                                "displayLabel": true,
+                                "attrs": {
+                                    "headc": {
+                                        "title": {
+                                            "value": "(What sets the supplier apart from competitors?)",
+                                            "variable": null
+                                        }
+                                    },
+                                    "common": {
+                                        "positioning": {
+                                            "widthtype": [
+                                                null,
+                                                "2"
+                                            ]
+                                        }
+                                    },
+                                    "heads": {
+                                        "color": "rgba(7, 22, 56, 0.6)"
+                                    }
+                                },
+                                "parentCol": 1
+                            }
+                        ],
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "a2a4ba10-e64c-4a29-a908-b7c71d86f310",
+                        "type": "textarea",
+                        "label": "Unique Selling Points",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "placeholder": "Please describe the unique benefits or features of their products/services that distinguish from competitors. Aim to highlight strengths that would be of particular interest to our business.",
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            }
+                        },
+                        "binding": "field_SellingPoints",
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "e67c6c6d-a952-43cf-833a-8c055dcccef1",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            0
+                        ],
+                        "width": [
+                            null,
+                            null,
+                            null,
+                            null
+                        ],
+                        "widthu": [
+                            null,
+                            null,
+                            null,
+                            "%"
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "efb47c8a-fa1c-420b-9764-d4c957e0dbd8",
+                        "type": "currency",
+                        "label": "Annual Revenue",
+                        "displayLabel": [
+                            null,
+                            true
+                        ],
+                        "attrs": {
+                            "currency-display-as": {
+                                "country": "United States Dollars",
+                                "currencyCode": "USD"
+                            },
+                            "placeholder": "e.g., $10 million USD",
+                            "country-currency": {
+                                "country": "United States Dollars",
+                                "currencySymbol": "$",
+                                "currencyCode": "USD"
+                            },
+                            "rounded-to": "0",
+                            "decimalPlaces": 0,
+                            "required": true,
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            }
+                        },
+                        "binding": "finance_AnnualRevenue",
+                        "value": "",
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "d78439e4-6bb2-4ca3-aae6-0a15711ee70e",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "heads": {
+                                "color": "rgba(7, 22, 56, 0.6)",
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        10
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "Provide the total revenue for the most recent fiscal year.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "847c33b5-07d7-4100-82a2-e9d4ece66f96",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            0
+                        ],
+                        "width": [
+                            null,
+                            null,
+                            null,
+                            null
+                        ],
+                        "widthu": [
+                            null,
+                            null,
+                            null,
+                            "%"
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "f141c9fb-b46d-4286-96e2-77cdf708c16d",
+                        "type": "input",
+                        "label": "Credit Terms Previously Offered",
+                        "displayLabel": [
+                            null,
+                            true
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "placeholder": "e.g., Net 30, 2% 10, Net 60"
+                        },
+                        "binding": "finance_CreditTerms",
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "b1ac0e44-703d-47ef-a889-93d94148aa69",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "heads": {
+                                "color": "rgba(7, 22, 56, 0.6)",
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        10
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "Describe the typical payment terms the supplier offers to their customers.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "4eaefc42-753e-4440-8898-dba08adb97cd",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            0
+                        ],
+                        "width": [
+                            null,
+                            null,
+                            null,
+                            null
+                        ],
+                        "widthu": [
+                            null,
+                            null,
+                            null,
+                            "%"
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "2929284c-c9ed-4d69-8cef-024a235d47d1",
+                        "type": "input",
+                        "label": "Dun & Bradstreet D-U-N-S Number (if available)",
+                        "displayLabel": [
+                            null,
+                            true
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "placeholder": "e.g., 00-000-0000"
+                        },
+                        "binding": "finance_DUNS",
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "b5f2faf8-649e-401f-b2c5-52bcb1334442",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "heads": {
+                                "color": "rgba(7, 22, 56, 0.6)",
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        10
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "The D-U-N-S Number is a unique nine-digit identifier for businesses and is used to establish a business credit file, which could be indicative of the company's reliability and financial stability.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "697e6a02-a5fe-48c6-a69e-55d5704e1d04",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            0
+                        ]
+                    },
+                    "common": {
+                        "grid": {
+                            "position": [
+                                null,
+                                {
+                                    "cSpan": 3
+                                },
+                                null,
+                                {
+                                    "cSpan": 1
+                                }
+                            ]
+                        }
+                    }
+                },
+                "children": [
+                    {
+                        "id": "346ab194-df29-4038-8a4f-ef9dd0f52bd2",
+                        "type": "textarea",
+                        "label": "Bank References",
+                        "displayLabel": [
+                            null,
+                            true
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "placeholder": "Bank Name, Contact Person, Contact Email/Phone"
+                        },
+                        "binding": "finance_BankReferences"
+                    },
+                    {
+                        "id": "e4016551-8de9-4f57-8bc7-03265c95d314",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "heads": {
+                                "color": "rgba(7, 22, 56, 0.6)",
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        10
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "Provide bank reference(s) that can attest to the financial reliability and standing of the supplier.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "8f0271be-7eae-4bb5-a767-c21f9c0ec780",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            0
+                        ]
+                    },
+                    "common": {
+                        "grid": {
+                            "position": [
+                                null,
+                                {
+                                    "cSpan": 3
+                                },
+                                null,
+                                {
+                                    "cSpan": 1
+                                }
+                            ]
+                        }
+                    }
+                },
+                "children": [
+                    {
+                        "id": "a4e3e623-6c3e-4845-876f-7de188dd01de",
+                        "type": "textarea",
+                        "label": "Ownership and Management",
+                        "displayLabel": [
+                            null,
+                            true
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "placeholder": "List of major owners and key management personnel"
+                        },
+                        "binding": "finance_Ownership",
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "9efbf802-5120-4409-adca-310e49a89353",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "heads": {
+                                "color": "rgba(7, 22, 56, 0.6)",
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        10
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "Understanding who owns and runs the company can provide insights into the supplier's financial stability and business practices.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    }
+                ]
+            },
+            {
+                "id": "4580a5dc-f324-4f1b-bb8d-2699b802e501",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            5
+                        ]
+                    },
+                    "common": {
+                        "padding": [
+                            null,
+                            {
+                                "top": "--sp--s150",
+                                "right": "--sp--s150",
+                                "bottom": "--sp--s150",
+                                "left": "--sp--s150"
+                            }
+                        ],
+                        "border": {
+                            "normal": {
+                                "type": "1",
+                                "width": [
+                                    null,
+                                    {
+                                        "top": 1,
+                                        "right": 1,
+                                        "bottom": 1,
+                                        "left": 1
+                                    }
+                                ],
+                                "color": "var(--c--neutral-light-active)",
+                                "radius": [
+                                    null,
+                                    {
+                                        "top": "--sp--s075",
+                                        "right": "--sp--s075",
+                                        "bottom": "--sp--s075",
+                                        "left": "--sp--s075"
+                                    }
+                                ]
+                            }
+                        },
+                        "grid": {
+                            "position": [
+                                null,
+                                {
+                                    "cSpan": 3
+                                },
+                                null,
+                                {
+                                    "cSpan": 1
+                                }
+                            ]
+                        }
+                    }
+                },
+                "children": [
+                    {
+                        "id": "c858fa20-138d-4ae8-9ec3-34f18fc8992a",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "Financial Statements",
+                                    "variable": null
+                                }
+                            },
+                            "heads": {
+                                "ty": {
+                                    "wei": "600"
+                                },
+                                "color": "var(--c--text)"
+                            }
+                        },
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "d8a5bcd9-9e3b-4ab6-9f84-8ba2dbdbe2a8",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "heads": {
+                                "color": "var(--c--primary)",
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        11
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "Attach the most recent financial statements (balance sheet, income statement, cash flow statement). Acceptable formats: PDF, DOCX. Maximum file size: 10MB.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "0d0dcafd-f5c7-4334-a211-f0720b231cb8",
+                        "type": "file-upload",
+                        "label": "Financial Statements",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "uploadbtn": {
+                                "normal": {
+                                    "border": {
+                                        "type": "99",
+                                        "width": [
+                                            null,
+                                            {
+                                                "top": 1,
+                                                "right": 1,
+                                                "bottom": 1,
+                                                "left": 1
+                                            }
+                                        ],
+                                        "color": "var(--c--primary)"
+                                    },
+                                    "bgColor": "rgba(46, 43, 120, 0.1)"
+                                },
+                                "mar": [
+                                    null,
+                                    {
+                                        "top": "",
+                                        "right": "",
+                                        "bottom": "",
+                                        "left": ""
+                                    }
+                                ],
+                                "pd": [
+                                    null,
+                                    {
+                                        "top": "",
+                                        "right": "",
+                                        "bottom": "",
+                                        "left": ""
+                                    }
+                                ]
+                            },
+                            "content": {
+                                "pd": [
+                                    null,
+                                    {}
+                                ],
+                                "w": [
+                                    null,
+                                    null
+                                ],
+                                "wu": [
+                                    null,
+                                    "%"
+                                ],
+                                "normal": {
+                                    "border": {
+                                        "type": "0"
+                                    }
+                                },
+                                "iconsize": [
+                                    null,
+                                    24
+                                ]
+                            },
+                            "opbtn": {
+                                "normal": {
+                                    "bgColor": "rgba(46, 43, 120, 0.1)"
+                                }
+                            },
+                            "ver": 1
+                        },
+                        "binding": "file_FinancialStatements",
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "c76504c1-33f6-410b-b65a-741a23d2d5c0",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "heads": {
+                                "color": "rgba(7, 22, 56, 0.6)",
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        10
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "Request the latest financial statements to review the supplier's financial health.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    }
+                ]
+            }
+        ],
+        "nv_label": "form_grid_fields_3col_wrapper"
+    },
+    "_ak_c_opt": {}
+}

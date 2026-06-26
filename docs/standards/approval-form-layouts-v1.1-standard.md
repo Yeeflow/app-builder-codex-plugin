@@ -91,6 +91,8 @@ Within `Operations`, generated controls must be real configured action controls.
 
 Within `section_content_area`, generated resources may insert Approval form field controls, the approved Data List Form field-grid template, approved Collection templates, Text/Heading controls, or other plugin-supported controls appropriate to Approval forms.
 
+Approval form field controls must use the Approval Form Field Layouts v1.1 templates from `docs/reference/approval-form-field-layout-templates.json`. Select `approval_form_fields_grid_2col_v1_1` or `approval_form_fields_grid_3col_v1_1`, then place the cloned `form_grid_fields_2col_wrapper` or `form_grid_fields_3col_wrapper` only inside `content_card_wrapper > section_content_area`.
+
 Approval forms must not use Data Analytics controls, Data Analytics golden reference templates, chart templates, pivot table templates, Summary/KPI analytics, or `kpi_metrics_wrapper`.
 
 If an Approval submission page, Approval task page, Data list workflow task form, or Schedule workflow task form contains two or more page-level Data Filter controls, those filters must be grouped inside `dashboard_standard_filter_group` from `docs/reference/data-filter-standard-filter-group.template.json`. The group must be placed inside an approved `section_content_area` and must preserve the standard filter-group wrapper and child filter visual contract.
@@ -140,6 +142,12 @@ Rules:
 - Do not include generated `ListID`, `FormID`, `ProcModelID`, `FlowKey`, `DefResourceID`, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
 - If a task page needs assignee-editable fields, the App Plan must state that business reason; otherwise task fields should be generated readonly.
 - Approval form pages may use approved Collection templates and current-record field layout templates in allowed slots, but must not select Data Analytics templates.
+
+The Approval Forms Plan must also include an Approval Form Fields Layout Template Selection table for each generated field group that displays submission or task fields:
+
+| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Approval Form> | <Submission or Task page> | <Field group> | approval_form_fields_grid_2col_v1_1 or approval_form_fields_grid_3col_v1_1 | Submission fields or task fields | 2 or 3 | <= PC/laptop | 1 | <Multiple line/Rich text/Sub List fields> | <None or grouping rule> | Generated-final validation |
 
 When a Data list workflow or Schedule workflow includes a task form, that workflow plan section must include a Workflow Task Form Layout Template Selection table and select `approval_form_layout_task_v1_1` for each generated workflow task form.
 
