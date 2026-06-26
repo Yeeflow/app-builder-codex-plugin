@@ -175,6 +175,14 @@ function appPlan({ omitSelection = false, submissionTemplate = SUBMISSION_TEMPLA
 | Asset Loan Approval | Submission form | Submission | ${submissionTemplate} | Page title and request sections | Current request data only | Submission captures requester-entered approval fields | Generated-final validation |
 | Asset Loan Approval | Coordinator task form | Task | ${taskTemplate} | Page title, readonly request context, action/history section | Related loan context | Task reviewers need consistent readonly context and workflow action area | Generated-final validation |
 `;
+  const fieldLayoutSelection = `
+#### Approval Form Fields Layout Template Selection
+
+| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Asset Loan Approval | Submission form | Request fields | approval_form_fields_grid_2col_v1_1 | Submission fields | 2 | 2 | 1 | Multiple line | None | Generated-final validation |
+| Asset Loan Approval | Coordinator task form | Review fields | approval_form_fields_grid_3col_v1_1 | Task fields | 3 | 2 | 1 | Multiple line | None | Generated-final validation |
+`;
   const scheduleSelection = omitScheduleTaskSelection ? "" : `
 #### Workflow Task Form Layout Template Selection
 
@@ -223,6 +231,8 @@ Placeholder.
 | Asset Loan Approval | Route asset requests | Placeholder and input hint for request fields | Placeholder task page fields | Coordinator task form | Loan Requests | Generated-final validation |
 
 ${selection}
+
+${fieldLayoutSelection}
 
 ## 6. Form Reports Plan
 Form report is a standalone Yeeflow resource type based on one specific Approval Form. Do not merge Form report with Dashboard page planning.

@@ -628,7 +628,7 @@ function validateApprovalFormLayoutTemplateSelection(text, findings) {
   const dataRows = splitTableRows(approvalForms).filter((row) => !/^\|\s*(Approval Form|Field Order|Step Order|Task Form Name|Action Name|Host Form)\s*\|/i.test(row));
   const hasApprovalRows = dataRows.some((row) => /\b(Submission|Task|Workflow|Review|Approve|Reject|approval_form_layout_)\b/i.test(row));
   if (!hasApprovalRows) return;
-  const selectionBlock = approvalForms.split(/##\s+6\./i)[0].split(/#### Approval Form Layout Template Selection/i)[1] || "";
+  const selectionBlock = extractSubsection(approvalForms, /^####\s+Approval Form Layout Template Selection\s*$/im);
   const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row));
   const selectedIds = [];
   for (const row of rows) {
@@ -732,6 +732,15 @@ function validateWorkflowTaskLayoutTemplateSelection(text, findings, sectionName
       });
     }
   }
+}
+
+function extractSubsection(sectionText, headingPattern) {
+  const match = headingPattern.exec(sectionText);
+  if (!match) return "";
+  const start = match.index + match[0].length;
+  const rest = sectionText.slice(start);
+  const next = rest.search(/\n####\s+|\n##\s+\d+\./);
+  return next === -1 ? rest : rest.slice(0, next);
 }
 
 export function validate(file) {
