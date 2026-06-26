@@ -103,6 +103,8 @@ Within `Operations`, generated controls must be real configured action controls.
 
 Within `section_content_area`, generated resources may insert current-record field controls, Dynamic user/image/file/field controls, related record display components, approved Collection templates, approved Data Analytics templates, or other plugin-supported controls appropriate to the form type. For Data List Form Layouts v1.1, these business-content `section_content_area` regions must belong to an approved content card wrapper: `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 
+On View Item forms, Data Analytics golden reference templates from `docs/reference/data-analytics-golden-references.json` may be placed in `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`. The generator must clone the full approved template subtree, preserve locked style/layout/typography properties, and map only the approved title/data-binding editable regions. New/Edit forms must not use Data Analytics templates.
+
 Current-record Data List fields must be placed inside the approved `data_list_form_fields_grid_v1_1` field-layout template. Do not place field controls directly in `section_content_area`. If the form has many fields, create multiple approved content-card sections and put one `form_grid_fields_wrapper` inside each section's `section_content_area`. The approved host wrappers are `content_card_wrapper`, `content_card_60_wrapper`, and `content_card_40_wrapper`. Field controls inside the wrapper must receive business-specific `nv_label`/`nav_label` values. Sub list fields must use the control-level `data_list_form_control_sublist_v1_1` template and preserve its locked style/table/header/card settings.
 
 If a generated custom Data List form contains two or more page-level Data Filter controls, those filters must be grouped inside `dashboard_standard_filter_group` from `docs/reference/data-filter-standard-filter-group.template.json`. Place the group inside an approved `section_content_area` hosted by `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
@@ -164,7 +166,7 @@ They may contain:
 - current item display fields
 - related business data
 - approved Dashboard Collection templates
-- approved Data Analytics templates
+- approved Data Analytics templates in `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`
 - Summary-backed KPI cards
 - configured action buttons
 

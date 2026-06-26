@@ -16,11 +16,15 @@ const results = [];
 try {
   expectPass("registry validates", ["--registry"]);
   expectCode("Registry missing App Plan selection guidance fails", ["--registry", writeJson("registry-missing-guidance.json", registryMissingGuidance())], "DATA_ANALYTICS_REFERENCE_GUIDANCE_INCOMPLETE");
-  expectPass("Dashboard v1.1 analytics inside approved 2/3-column sections pass", ["--resource", writeJson("valid-dashboard.json", dashboardResource()), "--surface", "dashboard"]);
-  expectPass("Data List form analytics usage passes", ["--resource", writeJson("valid-data-list-form.json", dataListFormResource()), "--surface", "data-list-form"]);
+  expectPass("Dashboard v1.1 analytics inside approved content card and multi-column sections pass", ["--resource", writeJson("valid-dashboard.json", dashboardResource()), "--surface", "dashboard"]);
+  expectPass("Dashboard v1.1 analytics inside 60/40 section pass", ["--resource", writeJson("valid-dashboard-6040.json", dashboardResource({ only6040: true })), "--surface", "dashboard"]);
+  expectPass("Data List View Item form analytics inside approved content card and multi-column sections pass", ["--resource", writeJson("valid-data-list-form.json", dataListFormResource()), "--surface", "data-list-form"]);
+  expectPass("Data List View Item form analytics inside 60/40 section pass", ["--resource", writeJson("valid-data-list-form-6040.json", dataListFormResource({ only6040: true })), "--surface", "data-list-form"]);
 
   expectCode("Approval form analytics usage is forbidden", ["--resource", writeJson("approval-form.json", approvalFormResource()), "--surface", "approval-form"], "DATA_ANALYTICS_APPROVAL_FORM_FORBIDDEN");
-  expectCode("Dashboard v1.1 analytics outside 2/3-column sections fail", ["--resource", writeJson("outside-section.json", dashboardResource({ outsideSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID");
+  expectCode("Data List New/Edit form analytics usage is forbidden", ["--resource", writeJson("new-edit-data-list-form.json", dataListFormResource({ newEdit: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_NEW_EDIT_FORBIDDEN");
+  expectCode("Dashboard v1.1 analytics outside approved content card or multi-column sections fail", ["--resource", writeJson("outside-section.json", dashboardResource({ outsideSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID");
+  expectCode("Data List View Item form analytics outside approved content card or multi-column sections fail", ["--resource", writeJson("outside-data-list-form-section.json", dataListFormResource({ outsideSection: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_VIEW_V11_SECTION_PLACEMENT_INVALID");
   expectCode("Simplified chart without approved wrapper fails", ["--resource", writeJson("missing-wrapper.json", dashboardResource({ missingWrapper: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_WRAPPER_MISSING");
   expectCode("Unknown analytics template ID fails", ["--resource", writeJson("unknown-template.json", dashboardResource({ unknownTemplate: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_UNKNOWN");
   expectCode("Chart-with-title template requires title control", ["--resource", writeJson("missing-title.json", dashboardResource({ missingTitle: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING");
@@ -83,9 +87,13 @@ function dashboardResource(options = {}) {
             nv_label: "Content",
             children: options.outsideSection
               ? analytics
+              : options.only6040
+                ? [section("2_columns_60/40_section", analytics)]
               : [
-                  section("2_columns_section", analytics.slice(0, 3)),
-                  section("3_columns_section", analytics.slice(3)),
+                  contentCard(analytics.slice(0, 1)),
+                  section("2_columns_section", analytics.slice(1, 3)),
+                  section("3_columns_section", analytics.slice(3, 5)),
+                  section("2_columns_60/40_section", analytics.slice(5)),
                 ],
           },
         ],
@@ -151,14 +159,22 @@ function writeYapk(name, dashboard) {
   return writeJson(name, wrapper);
 }
 
-function dataListFormResource() {
+function dataListFormResource(options = {}) {
+  const analytics = [
+    chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
+    chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
+    pivotModule(),
+  ];
   const resource = {
     type: "form",
-    nv_label: "Asset Analytics Form",
+    nv_label: options.newEdit ? "data_list_form_layout_new_edit_v1_1" : "data_list_form_layout_view_item_v1_1",
+    templateId: options.newEdit ? "data_list_form_layout_new_edit_v1_1" : "data_list_form_layout_view_item_v1_1",
     children: [
-      chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
-      chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
-      pivotModule(),
+      ...(options.outsideSection ? analytics : options.only6040 ? [section("2_columns_60/40_section", analytics)] : [
+        contentCard(analytics.slice(0, 1)),
+        section("2_columns_section", analytics.slice(1, 2)),
+        section("3_columns_section", analytics.slice(2)),
+      ]),
     ],
   };
   addAnalyticsRuntimeBindings(resource);
@@ -186,6 +202,20 @@ function section(id, children) {
   return {
     type: "container",
     nv_label: id,
+    children: [
+      {
+        type: "container",
+        nv_label: "section_content_area",
+        children,
+      },
+    ],
+  };
+}
+
+function contentCard(children) {
+  return {
+    type: "container",
+    nv_label: "content_card_wrapper",
     children: [
       {
         type: "container",
