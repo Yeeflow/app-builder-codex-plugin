@@ -63,7 +63,7 @@ Runtime caveat: the same refresh stabilization seen in the v11 lookup baseline r
 
 Passed:
 
-- `node --check generate-knowledge-base-phase1-full.mjs`
+- `node --check tools/generators/generate-knowledge-base-phase1-full.mjs`
 - `node validate-yap-package.js knowledge-base-phase1-full-resource.json --mode generator --stage final`
 - `node validate-yap-graph.js knowledge-base-phase1-full-resource.json --mode generator --stage final`
 - `node build-yap-wrapper.js knowledge-base-phase1-full-resource.json knowledge-base-phase1-full.generated.yap --title "Knowledge Base Phase 1 Full" --description "..."`

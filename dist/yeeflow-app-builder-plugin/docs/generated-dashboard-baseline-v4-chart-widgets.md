@@ -6,7 +6,7 @@
 - generated package: `generated-dashboard-chart-widgets-v4.yap`
 - generated resource: `generated-dashboard-chart-widgets-v4-resource.json`
 - generated app def: `generated-dashboard-chart-widgets-v4-app-def.json`
-- generator: `generate-dashboard-chart-widgets-v4.mjs`
+- generator: `tools/generators/generate-dashboard-chart-widgets-v4.mjs`
 
 ## What It Proves
 
@@ -75,7 +75,7 @@ Do not remap tenant/user metadata such as `TenantID`, `CreatedBy`, or `ModifiedB
 
 ## Validation Results
 
-- `node --check generate-dashboard-chart-widgets-v4.mjs`: pass
+- `node --check tools/generators/generate-dashboard-chart-widgets-v4.mjs`: pass
 - `node --check validate-yap-package.js`: pass
 - package validation on resource: `pass_with_warnings`; only `APP_THEME_EMPTY`
 - graph validation on resource: pass

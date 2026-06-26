@@ -5,7 +5,7 @@ Date: 2026-05-14
 ## Package
 
 - App name: Approval Form Controls Test v3
-- Generator: `generate-approval-form-controls-test-v3-upload-media.mjs`
+- Generator: `tools/generators/generate-approval-form-controls-test-v3-upload-media.mjs`
 - Decoded app definition: `approval-form-controls-test-v3-app-def.json`
 - Approval form definition: `approval-form-controls-test-v3-approval-form-def.json`
 - Data list definition: `approval-form-controls-test-v3-list-def.json`
@@ -31,7 +31,7 @@ Scope note: binary file/image persistence into data-list fields was intentionall
 
 Local checks passed:
 
-- `node --check generate-approval-form-controls-test-v3-upload-media.mjs`
+- `node --check tools/generators/generate-approval-form-controls-test-v3-upload-media.mjs`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`
 - `node --check validate-ywf-def.js`

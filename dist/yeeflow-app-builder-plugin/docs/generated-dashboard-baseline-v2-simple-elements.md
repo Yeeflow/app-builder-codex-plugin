@@ -73,7 +73,7 @@ For static simple dashboard elements:
 
 Passed:
 
-- `node --check generate-dashboard-simple-elements-v2.mjs`
+- `node --check tools/generators/generate-dashboard-simple-elements-v2.mjs`
 - `node --check validate-yap-package.js`
 - decoded resource package validation: `pass_with_warnings` for `APP_THEME_EMPTY`
 - decoded resource graph validation: `pass`

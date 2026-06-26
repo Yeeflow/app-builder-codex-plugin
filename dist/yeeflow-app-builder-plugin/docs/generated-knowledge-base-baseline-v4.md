@@ -82,7 +82,7 @@ v4 fixed the runtime issue by:
 
 Passed:
 
-- `node --check generate-knowledge-base-dashboard-v1.mjs`
+- `node --check tools/generators/generate-knowledge-base-dashboard-v1.mjs`
 - `node validate-yap-package.js knowledge-base-generated-v4-resource.json --mode generator --stage final`
 - `node validate-yap-graph.js knowledge-base-generated-v4-resource.json --mode generator --stage final`
 - `node build-yap-wrapper.js knowledge-base-generated-v4-resource.json knowledge-base-generated-v4.yap --title "Knowledge Base Generated v4" --description "..."`

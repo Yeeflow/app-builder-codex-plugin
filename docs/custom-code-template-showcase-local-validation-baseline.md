@@ -15,7 +15,7 @@ Generated package path: `custom-code-template-showcase.v1.yap`
 - Query/read-only templates need Yeeflow runtime field keys such as `Text3` and `Datetime1` when reading list row values. Display labels and custom internal names are not reliable row-value keys.
 - Several query templates needed generated-package compatibility with Yeeflow SDK response shapes that return rows under `listData`/`ListData`.
 - Broad `queryItems` fallback calls without `selectedFields` are useful for custom-code smoke packages, because projected query payloads can return empty data even when seeded list records exist.
-- The original 13 template source files were not changed; compatibility is applied by `generate-custom-code-template-showcase-v1.mjs` while embedding scripts into the showcase package.
+- The original 13 template source files were not changed; compatibility is applied by `tools/generators/generate-custom-code-template-showcase-v1.mjs` while embedding scripts into the showcase package.
 
 ## Local Validation
 

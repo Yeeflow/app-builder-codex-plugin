@@ -82,7 +82,7 @@ Correct field ownership shape:
 
 ## Patch
 
-Patched `generate-custom-code-template-showcase-v1.mjs`:
+Patched `tools/generators/generate-custom-code-template-showcase-v1.mjs`:
 
 - Preserve baseline tenant/user metadata instead of remapping it to `6182...`.
 - Build `ReplaceIds` from generated local app-resource IDs only.

@@ -110,7 +110,7 @@ The following must not be reported as generic full-app generators:
 - `scripts/yeeflow-application-delivery-workflow.mjs`, which only decides delivery flow;
 - `scripts/yeeflow-package-api-automation.mjs`, which requires an existing package;
 - `generate-*-runtime-proof.mjs`, which creates focused proof/demo artifacts;
-- sample-specific generators such as `generate-vendor-onboarding-yapk-schema-v2.mjs`.
+- sample-specific generators such as `tools/generators/generate-vendor-onboarding-yapk-schema-v2.mjs`.
 
 ## Validation
 

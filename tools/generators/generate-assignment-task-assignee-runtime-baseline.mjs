@@ -9,7 +9,7 @@ const DEFAULT_OUTPUT = "assignment-task-assignee-runtime-baseline.v2.yap";
 function usage(exitCode = 1) {
   const message = [
     "Usage:",
-    "  node generate-assignment-task-assignee-runtime-baseline.mjs [--source source.yap] [--out output.yap]",
+    "  node tools/generators/generate-assignment-task-assignee-runtime-baseline.mjs [--source source.yap] [--out output.yap]",
     "",
     "Builds a focused runtime baseline from the export-proven Assignment Task assignee shapes.",
     "The generated .yap may contain tenant-local org references from the source export and must stay ignored.",

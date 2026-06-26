@@ -24,7 +24,7 @@ Continue approval-form control runtime testing after the successful `Approval Fo
 
 Package: `Approval Form Controls Test v2`
 
-Generator: `generate-approval-form-controls-test-v2-advanced-inputs.mjs`
+Generator: `tools/generators/generate-approval-form-controls-test-v2-advanced-inputs.mjs`
 
 Controls under test:
 

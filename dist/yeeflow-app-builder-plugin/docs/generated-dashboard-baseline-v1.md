@@ -57,7 +57,7 @@ It does not include tenant/user metadata IDs and does not invent `LayoutInResour
 Passed:
 
 - `node --check decode-yap-resource.js`
-- `node --check generate-dashboard-minimal-v1.mjs`
+- `node --check tools/generators/generate-dashboard-minimal-v1.mjs`
 - `node --check inspect-dashboard-pages.js`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`

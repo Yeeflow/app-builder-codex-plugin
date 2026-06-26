@@ -128,7 +128,7 @@ Generated package:
 
 - Workspace package: `heep-hong-it-eworkflow-option-a.v9.yap`
 - Upload copy: `/Users/Renger/Downloads/heep-hong-it-eworkflow-option-a.v9.yap`
-- Source generator: `generate-heep-hong-option-a-v9.mjs`
+- Source generator: `tools/generators/generate-heep-hong-option-a-v9.mjs`
 - App definition: `heep-hong-it-eworkflow-option-a-app-def.v9.json`
 - Approval form definition: `heep-hong-it-eworkflow-option-a-purchase-requisition-approval-form-def.v9.json`
 
@@ -203,7 +203,7 @@ Workflow path:
 
 Validation result:
 
-- `node --check generate-heep-hong-option-a-v9.mjs`: pass
+- `node --check tools/generators/generate-heep-hong-option-a-v9.mjs`: pass
 - `node validate-yap-package.js ./heep-hong-it-eworkflow-option-a-app-def.v9.json --mode generator --stage final`: pass
 - `node validate-yap-graph.js ./heep-hong-it-eworkflow-option-a-app-def.v9.json --mode generator --stage final --json ./heep-hong-it-eworkflow-option-a-graph-validation.v9.json --md ./heep-hong-it-eworkflow-option-a-graph-validation.v9.md`: pass
 - `node validate-ywf-def.js ./heep-hong-it-eworkflow-option-a-purchase-requisition-approval-form-def.v9.json --mode final`: pass

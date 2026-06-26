@@ -9,7 +9,7 @@ Do not start v3 generation until explicitly requested.
 - Functional source: `IT Hardware CAPEX Request.md`
 - Visual source: `it_hardware_capex_request_page.jsx`
 - Runtime UI correction source: `IT Hardware CAPEX Request Runtime V2.yap`
-- Working generator baseline: `generate-it-hardware-capex-request-v2.mjs`
+- Working generator baseline: `tools/generators/generate-it-hardware-capex-request-v2.mjs`
 - Working package baseline: `docs/generated-it-hardware-capex-request-baseline-v2.md`
 - UI rules: `docs/yeeflow-form-design-quality-rules.md`
 - Runtime V2 study: `docs/it-hardware-capex-request-runtime-v2-ui-study.md`
@@ -54,7 +54,7 @@ Do not add:
 
 Run:
 
-- `node --check generate-it-hardware-capex-request-v3.mjs`
+- `node --check tools/generators/generate-it-hardware-capex-request-v3.mjs`
 - `node validate-yap-package.js <v3-app-def> --mode generator --stage final`
 - `node validate-yap-graph.js <v3-app-def> --mode generator --stage final`
 - `node validate-ywf-def.js <v3-approval-def> --mode final`

@@ -4,7 +4,7 @@
 
 - App: `Form Actions Phase 2 Query Submit Test v1`
 - Runtime import label used for the final retest: `Form Actions Phase 2 Query Submit Test v1 Retest`
-- Generator: `generate-form-actions-phase-2-query-submit-test-v1.mjs`
+- Generator: `tools/generators/generate-form-actions-phase-2-query-submit-test-v1.mjs`
 - Workspace package: `/Users/Renger/Documents/Codex Projects/AI Agent and Copilot templates/form-actions-phase-2-query-submit-test-v1.yap`
 
 The `.yap`, generated package JSON, decoded form/list JSON, and validation JSON remain ignored and are not intended for Git staging.
@@ -13,8 +13,8 @@ The `.yap`, generated package JSON, decoded form/list JSON, and validation JSON 
 
 Ran successfully:
 
-- `node --check generate-form-actions-phase-2-query-submit-test-v1.mjs`
-- `node generate-form-actions-phase-2-query-submit-test-v1.mjs`
+- `node --check tools/generators/generate-form-actions-phase-2-query-submit-test-v1.mjs`
+- `node tools/generators/generate-form-actions-phase-2-query-submit-test-v1.mjs`
 - `node scripts/smoke-expression-validation.mjs`
 - `node validate-yap-package.js form-actions-phase-2-query-submit-test-v1-app-def.json --mode generator --stage final`
 - `node validate-yap-graph.js form-actions-phase-2-query-submit-test-v1-app-def.json --mode generator --stage final`

@@ -8,7 +8,7 @@ Source baseline: Stage M generated package and local Stage M decoded app/resourc
 - Downloads copy: `/Users/Renger/Downloads/service-desk-pro-dashboard-stage-n.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-n-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-n-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-n.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-n.mjs`
 - ID family: `259`
 
 ## What This Proves
@@ -20,7 +20,7 @@ Source baseline: Stage M generated package and local Stage M decoded app/resourc
 
 ## Validation Results
 
-- `node --check generate-service-desk-pro-dashboard-stage-n.mjs`: pass
+- `node --check tools/generators/generate-service-desk-pro-dashboard-stage-n.mjs`: pass
 - package validation on decoded resource: `pass_with_warnings`
 - graph validation on decoded resource: pass
 - wrapper build: pass

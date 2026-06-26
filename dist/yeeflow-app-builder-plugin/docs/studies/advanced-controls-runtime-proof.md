@@ -10,7 +10,7 @@ Runtime status: passed for the focused generated package. The user confirmed tha
 - Data List custom forms: `New Item`, `Edit Item`, `View page`
 - Manual-test package path: `/Users/Renger/Downloads/advanced-controls-runtime-proof.v1.yap`
 - Local ignored generated package: `advanced-controls-runtime-proof.v1.yap`
-- Generator: `generate-advanced-controls-runtime-proof.mjs`
+- Generator: `tools/generators/generate-advanced-controls-runtime-proof.mjs`
 
 The generated `.yap` package, decoded app data, decoded resource JSON, validation JSON, screenshots, and runtime evidence files are not committed. The committed artifacts are limited to the generator script, this proof doc, safe validator/inspector updates, and skill guidance.
 
@@ -57,7 +57,7 @@ All local validation commands completed with zero errors:
 
 | Check | Result | Notes |
 | --- | --- | --- |
-| `node --check generate-advanced-controls-runtime-proof.mjs` | pass | generator syntax valid |
+| `node --check tools/generators/generate-advanced-controls-runtime-proof.mjs` | pass | generator syntax valid |
 | `node --check scripts/inspect-advanced-controls.mjs` | pass | inspector syntax valid |
 | `node --check validate-yap-package.js` | pass | package validator syntax valid |
 | `node validate-yap-package.js advanced-controls-runtime-proof.v1.yap --mode generator --stage final` | pass_with_warnings, 0 errors | warnings are runtime-sensitive field/control support and UI style guidance |

@@ -20,7 +20,7 @@ This replaces the previous generated shape that used `attrs.heads.color = [null,
 
 ## Generated Files
 
-- `generate-it-hardware-capex-request-v3.mjs`
+- `tools/generators/generate-it-hardware-capex-request-v3.mjs`
 - `it-hardware-capex-request-app-def.v4-text-standard.json`
 - `it-hardware-capex-request-approval-form-def.v4-text-standard.json`
 - `it-hardware-capex-request-list-def.v4-text-standard.json`
@@ -33,7 +33,7 @@ This replaces the previous generated shape that used `attrs.heads.color = [null,
 Local validation passed on 2026-05-14:
 
 - `node --check scripts/inspect-ywf-text-controls.mjs`: pass
-- `node --check generate-it-hardware-capex-request-v3.mjs`: pass
+- `node --check tools/generators/generate-it-hardware-capex-request-v3.mjs`: pass
 - `node --check validate-ywf-def.js`: pass
 - JSON parse checks for the decoded text-style sample inspection files and v4 generated JSON files: pass
 - `validate-ywf-def.js text-style-sample-decoded-def.json --mode final`: not applicable as a final approval workflow because the sample export is a Text style sample form, not a complete approval process with submit/task pages and approval panels.

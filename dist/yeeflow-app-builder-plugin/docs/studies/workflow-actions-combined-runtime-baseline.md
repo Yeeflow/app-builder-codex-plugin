@@ -10,7 +10,7 @@ This baseline is designed to prove import/open/designer/publish behavior first. 
 
 | Item | Value |
 |---|---|
-| Generator | `generate-workflow-actions-combined-runtime-baseline.mjs` |
+| Generator | `tools/generators/generate-workflow-actions-combined-runtime-baseline.mjs` |
 | Generated package | `workflow-actions-combined-runtime-baseline.v1.yap` |
 | App title | Workflow Actions Runtime Baseline |
 | Approval form | Workflow Action Approval Test |

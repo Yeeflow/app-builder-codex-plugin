@@ -19,8 +19,8 @@ This study records the local generation and validation status for the Vendor Onb
 - YAP product-schema result candidate with lookups: `/Users/Renger/Downloads/vendor-onboarding-compliance-management.v1.4-yap-schema-result.yap`
 - YAP unique-ID product-schema result candidate without lookups: `/Users/Renger/Downloads/vendor-onboarding-compliance-management.v1.5-unique-ids-no-lookups.yap`
 - YAP unique-ID product-schema result candidate with lookups: `/Users/Renger/Downloads/vendor-onboarding-compliance-management.v1.5-unique-ids.yap`
-- Generator: `generate-vendor-onboarding-compliance-yapk.mjs`
-- Install-compatibility generator: `generate-vendor-onboarding-install-compatible-yapk.mjs`
+- Generator: `tools/generators/generate-vendor-onboarding-compliance-yapk.mjs`
+- Install-compatibility generator: `tools/generators/generate-vendor-onboarding-install-compatible-yapk.mjs`
 - Branch: `codex/vendor-onboarding-yapk-runtime-proof`
 - Package type: YAPK
 - V1 generated status: local validation candidate with placeholder signature shape
@@ -230,8 +230,8 @@ Root cause:
 
 Generator fix:
 
-- `generate-vendor-onboarding-install-compatible-yapk.mjs` now normalizes every field `Category` to an integer before encoding/signing.
-- `generate-vendor-onboarding-yap-fallbacks.mjs` now normalizes every schema-direct YAP field `Category` to an integer.
+- `tools/generators/generate-vendor-onboarding-install-compatible-yapk.mjs` now normalizes every field `Category` to an integer before encoding/signing.
+- `tools/generators/generate-vendor-onboarding-yap-fallbacks.mjs` now normalizes every schema-direct YAP field `Category` to an integer.
 - Missing, null, empty, or legacy `"List"` category values are normalized to the observed export-compatible integer default `0`; numeric strings are converted to integers; invalid non-numeric values fail generation.
 
 Validator hardening:
@@ -294,7 +294,7 @@ Root cause:
 
 Generator fix:
 
-- `generate-vendor-onboarding-yap-fallbacks.mjs` now writes corrected product-schema YAP candidates with `ListExportResult`.
+- `tools/generators/generate-vendor-onboarding-yap-fallbacks.mjs` now writes corrected product-schema YAP candidates with `ListExportResult`.
 - The conservative first candidate removes lookup relationships by converting lookup fields to schema-compatible text inputs and clearing lookup rules.
 - The second candidate preserves the four vendor lookup relationships for follow-up testing after the no-lookup package proves the base import layer.
 
@@ -358,7 +358,7 @@ Root cause:
 
 Generator fix:
 
-- `generate-vendor-onboarding-yap-fallbacks.mjs` now creates V1.5 YAP candidates with a deterministic safe integer ID allocator.
+- `tools/generators/generate-vendor-onboarding-yap-fallbacks.mjs` now creates V1.5 YAP candidates with a deterministic safe integer ID allocator.
 - Generated IDs are below `Number.MAX_SAFE_INTEGER`.
 - `ListID`, `FieldID`, `LayoutID`, and `LayoutInResources[].ID` values are unique in their package domains.
 - List view columns are rebuilt after ID allocation so view `FieldID` and `FieldName` references resolve to the regenerated fields.
@@ -435,7 +435,7 @@ API use:
 Generator update:
 
 - Added `scripts/yeeflow-id-api-utils.mjs` for safe environment loading and batched ID requests.
-- `generate-vendor-onboarding-yap-fallbacks.mjs` now uses API-issued IDs for the real import candidates.
+- `tools/generators/generate-vendor-onboarding-yap-fallbacks.mjs` now uses API-issued IDs for the real import candidates.
 - The local deterministic ID allocator remains only as a historical/offline fallback for V1.5 style isolation candidates.
 - V1.6 creates separate API ID batches for each candidate so the three generated packages do not reuse the same generated IDs.
 
@@ -500,7 +500,7 @@ Root cause:
 
 Generator fix:
 
-- `generate-vendor-onboarding-yap-fallbacks.mjs` now sets `AppID = 41` for `ListExportResult.AppID`, root `ListModel.AppID`, child `ListModel.AppID`, field `AppID`, layout `AppID`, navigation metadata, and lookup rules.
+- `tools/generators/generate-vendor-onboarding-yap-fallbacks.mjs` now sets `AppID = 41` for `ListExportResult.AppID`, root `ListModel.AppID`, child `ListModel.AppID`, field `AppID`, layout `AppID`, navigation metadata, and lookup rules.
 - The generate-unique-ids API is still used for root ListID, child ListIDs, FieldIDs, LayoutIDs, and layout resource IDs.
 - V1.7 requests 81 API IDs per package candidate instead of 82 because `AppID` is no longer requested.
 

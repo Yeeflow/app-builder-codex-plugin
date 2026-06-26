@@ -9,7 +9,7 @@
 - List validation JSON: `it-hardware-capex-request-list-def.v2.json`
 - Wrapper: `it-hardware-capex-request.generated.v2.yap`
 - User-test copy: `/Users/Renger/Downloads/IT Hardware CAPEX Request Generated v2.yap`
-- Generator: `generate-it-hardware-capex-request-v2.mjs`
+- Generator: `tools/generators/generate-it-hardware-capex-request-v2.mjs`
 - ID family: `439...`
 - Flow key: `CPX2`
 
@@ -56,7 +56,7 @@ Full request submission and downstream approval task completion were not exhaust
 
 ## Validation
 
-- `node --check generate-it-hardware-capex-request-v2.mjs`: pass
+- `node --check tools/generators/generate-it-hardware-capex-request-v2.mjs`: pass
 - `validate-yap-package.js`: pass with warnings, 0 errors
 - `validate-yap-graph.js`: pass, 0 warnings
 - `validate-ywf-def.js`: pass with warnings, 0 errors

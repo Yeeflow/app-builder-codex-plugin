@@ -20,14 +20,14 @@ The generated package keeps the Enterprise Document Center structure with three 
 
 The corrected package passed local validation with warnings only:
 
-- `node --check generate-doc-library-control-form-hosts.mjs`
+- `node --check tools/generators/generate-doc-library-control-form-hosts.mjs`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`
 - `node --check validate-ydl-list.js`
 - `node --check validate-ywf-def.js`
 - `node --check yeeflow-control-field-schema-utils.js`
 - `node --check skills/installed/yeeflow-application-generator/scripts/yeeflow-control-field-schema-utils.js`
-- `node generate-doc-library-control-form-hosts.mjs <downloads>/Document\ Library\ Sample.yap`
+- `node tools/generators/generate-doc-library-control-form-hosts.mjs <downloads>/Document\ Library\ Sample.yap`
 - `node validate-yap-package.js enterprise-document-center-form-hosted-doc-library.yap --mode generator --stage final`
 - `node validate-yap-graph.js enterprise-document-center-form-hosted-doc-library.yap --mode generator --stage final`
 - `node validate-ywf-def.js enterprise-document-center-form-hosted-doc-library.approval-form-def.json --mode final`

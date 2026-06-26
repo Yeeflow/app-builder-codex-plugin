@@ -181,7 +181,7 @@
       "reason": "Focused proof/demo generators only; they are not generic Functional Spec + App Plan to full-app YAPK generators."
     },
     {
-      "path": "generate-vendor-onboarding-yapk-schema-v2.mjs",
+      "path": "tools/generators/generate-vendor-onboarding-yapk-schema-v2.mjs",
       "reason": "Sample-specific generator; not a generic full-app generator."
     }
   ]

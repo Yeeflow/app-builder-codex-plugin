@@ -18,7 +18,7 @@ Current proof level:
 |---|---|---|
 | Previous source export | `/Users/Renger/Downloads/Test ABC.yap` | not committed |
 | Latest source export | `/Users/Renger/Downloads/Test ABC (1).yap` | not committed |
-| Generator script | `generate-assignment-task-assignee-runtime-baseline.mjs` | committed |
+| Generator script | `tools/generators/generate-assignment-task-assignee-runtime-baseline.mjs` | committed |
 | Generated package | `assignment-task-assignee-runtime-baseline.v2.yap` | ignored and not committed |
 | Upload convenience copy | `/private/tmp/a.yap` | outside repo, not committed |
 | User-exported manual repair | `/Users/Renger/Downloads/Assignment Task Assignee Runtime Baseline.yap` | not committed |
@@ -83,7 +83,7 @@ The regenerated package passed local validation with warnings:
 
 | Check | Result | Notes |
 |---|---|---|
-| Generator syntax check | passed | `node --check generate-assignment-task-assignee-runtime-baseline.mjs` |
+| Generator syntax check | passed | `node --check tools/generators/generate-assignment-task-assignee-runtime-baseline.mjs` |
 | Package validation | `pass_with_warnings` | 0 errors, 14 warnings retained from source shape |
 | Graph validation | `pass_with_warnings` | 0 errors, 10 workflow warnings remain |
 | Assignment inspector | passed | 11 Assignment Task nodes found |

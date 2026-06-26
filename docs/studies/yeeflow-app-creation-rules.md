@@ -166,8 +166,8 @@ All future generators that create Yeeflow app/list/workflow packages must:
 
 Patched generator sources in this pass:
 
-- `generate-workflow-actions-combined-runtime-baseline.mjs`
-- `generate-workflow-actions-batch-runtime-baseline.mjs`
+- `tools/generators/generate-workflow-actions-combined-runtime-baseline.mjs`
+- `tools/generators/generate-workflow-actions-batch-runtime-baseline.mjs`
 
 The Form Report runtime baseline generator is not present on current `main`; the previous generated package issue is covered by validator/inspector checks and documented as pending product-feedback/runtime follow-up.
 

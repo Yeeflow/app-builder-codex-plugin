@@ -8,7 +8,7 @@ Source export studied: `<downloads>/Service Desk Pro Dashboard Stage L.yap`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-m.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-m-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-m-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-m.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-m.mjs`
 - ID family: `258`
 
 ## What This Proves
@@ -44,7 +44,7 @@ Apply this once per relevant local Support Tickets dashboard binding. Do not dup
 
 ## Validation Results
 
-- `node --check generate-service-desk-pro-dashboard-stage-m.mjs`: pass
+- `node --check tools/generators/generate-service-desk-pro-dashboard-stage-m.mjs`: pass
 - package validation on decoded resource: `pass_with_warnings`
 - only package warning: `APP_THEME_EMPTY`
 - graph validation on decoded resource: pass

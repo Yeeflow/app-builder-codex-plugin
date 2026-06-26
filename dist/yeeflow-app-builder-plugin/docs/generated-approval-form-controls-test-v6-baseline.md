@@ -30,7 +30,7 @@ Deferred:
 
 Commands passed:
 
-- `node --check generate-approval-form-controls-test-v6-lookup-list.mjs`
+- `node --check tools/generators/generate-approval-form-controls-test-v6-lookup-list.mjs`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`
 - `node --check validate-ywf-def.js`

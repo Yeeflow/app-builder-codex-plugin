@@ -13,7 +13,7 @@ Update on 2026-05-17: v1 is accepted for the required baseline paths. Non-blocki
 - Package: `employee-family-implant.v1.yap`
 - Decoded app definition: `employee-family-implant-app-def.v1.json`
 - Approval form definition: `employee-family-implant-approval-form-def.v1.json`
-- Generator: `generate-employee-family-implant-v1.mjs`
+- Generator: `tools/generators/generate-employee-family-implant-v1.mjs`
 - Accepted v1 package: `<downloads>/Employee Family Implant Query Filter Expression Fix 20260517.yap`
 - Earlier accepted manual package: `<downloads>/Employee Family Implant DateDiff Unit Fix 20260517.yap`
 - Latest regenerated process-design package: `<downloads>/Employee Family Implant Quota Lifecycle Branch Coverage 20260517.yap`
@@ -87,7 +87,7 @@ The latest regenerated package addresses newly found application-design issues:
 
 Local validation for this process-design package:
 
-- `node --check generate-employee-family-implant-v1.mjs`
+- `node --check tools/generators/generate-employee-family-implant-v1.mjs`
 - `node --check validate-yap-package.js`
 - JSON parse checks: pass
 - `validate-ywf-def`: `pass_with_warnings`, 0 errors
@@ -128,7 +128,7 @@ The quota aggregation root cause was later fixed by the Query Filter Expression 
 
 ## What Passed Locally
 
-- `node --check generate-employee-family-implant-v1.mjs`
+- `node --check tools/generators/generate-employee-family-implant-v1.mjs`
 - `node --check validate-ywf-def.js`
 - JSON parse checks for app/form/spec/report artifacts
 - expression smoke tests, including the direct descriptor rejection test

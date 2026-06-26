@@ -6,7 +6,7 @@
 - generated package: `generated-dashboard-data-bound-v3.yap`
 - generated resource: `generated-dashboard-data-bound-v3-resource.json`
 - generated app def: `generated-dashboard-data-bound-v3-app-def.json`
-- generator: `generate-dashboard-data-bound-v3.mjs`
+- generator: `tools/generators/generate-dashboard-data-bound-v3.mjs`
 
 ## What It Proves
 
@@ -45,7 +45,7 @@ Do not remap tenant/user metadata such as `TenantID`, `CreatedBy`, or `ModifiedB
 
 ## Validation Results
 
-- `node --check generate-dashboard-data-bound-v3.mjs`: pass
+- `node --check tools/generators/generate-dashboard-data-bound-v3.mjs`: pass
 - `node --check validate-yap-package.js`: pass
 - package validation: `pass_with_warnings` with only `APP_THEME_EMPTY`
 - graph validation: pass
