@@ -42,7 +42,7 @@ Generation posture:
 
 ### Runtime Coverage Consolidation
 
-Use `approval-form-control-runtime-coverage.json` and `docs/approval-form-control-runtime-coverage-matrix.md` as the current control safety matrix.
+Use `fixtures/runtime-test-specs/approval-form-control-runtime-coverage.json` and `docs/approval-form-control-runtime-coverage-matrix.md` as the current control safety matrix.
 
 Runtime-proven generated controls now include:
 

@@ -110,7 +110,7 @@ Use these rules for generated packages:
 - Custom task buttons use `type="action_button"` and bind through `attrs.control_action` to a `formdef.actions[].id`. Keep that binding consistent with the button label and Submit form operation.
 - Submit form operation shapes found in task forms are: no `submitType` for approval/default submit on Approval tasks, `submitType="2"` for reject, `submitType="4"` for reassign with `forword` and `remark`, `submitType="5"` for add assignee with `forword`, `remark`, and `assignee`, and no `submitType` for complete on Complete tasks. Preserve the export spelling `forword`.
 - `Workflow Actions Runtime Baseline (2)_Task forms.yap` contains a custom-button binding mismatch: the visible `Add others to this task` button points to the reject action ID while a separate `Add assignee button clicked` action contains `submitType="5"`. The follow-up `Workflow Action Approval Test.ywf` corrects this binding so the Add others button resolves to the add-assignee action. Use the corrected `.ywf` shape as the positive export-proven reference, and keep validators warning-first when label, bound action, and Submit form operation disagree.
-- `generate-workflow-task-form-runtime-baseline.mjs` applies the corrected `.ywf` definition to the studied task-form package family. The resulting package imported, opened, rendered the form designer and workflow designer, showed all four task forms in the selector, showed `WARTB Task3` custom buttons, and published successfully. Treat this as import/open/designer/publish proof only; custom button execution, reassign/add-assignee runtime behavior, Complete task execution, task-owner field persistence, Claim Task task-form behavior, and email delivery remain unproven.
+- `tools/generators/generate-workflow-task-form-runtime-baseline.mjs` applies the corrected `.ywf` definition to the studied task-form package family. The resulting package imported, opened, rendered the form designer and workflow designer, showed all four task forms in the selector, showed `WARTB Task3` custom buttons, and published successfully. Treat this as import/open/designer/publish proof only; custom button execution, reassign/add-assignee runtime behavior, Complete task execution, task-owner field persistence, Claim Task task-form behavior, and email delivery remain unproven.
 
 ## Runtime-Proof Requirements
 
@@ -126,7 +126,7 @@ Do not claim runtime behavior from export study alone.
 
 ## Focused Baseline Result
 
-`generate-assignment-task-assignee-runtime-baseline.mjs` creates `assignment-task-assignee-runtime-baseline.v1.yap` from the export-proven shapes in `Test ABC (1).yap`. The package is intentionally ignored because it can contain tenant-local copied assignment references.
+`tools/generators/generate-assignment-task-assignee-runtime-baseline.mjs` creates `assignment-task-assignee-runtime-baseline.v1.yap` from the export-proven shapes in `Test ABC (1).yap`. The package is intentionally ignored because it can contain tenant-local copied assignment references.
 
 Local validation of the generated package is validator-backed for 11 Assignment Task nodes covering static user, multiple users, direct position, position by department, position by location, user group, Sequential appointed order, Parallel/default appointed order, `approveway` variants, custom percentage, and email notification configuration.
 
@@ -136,7 +136,7 @@ The V2 runtime package fixed the duplicate-import/process-ID problem by using fr
 
 Treat V2 as import/open/designer/publish proof only. Do not promote Assignment Task routing, group expansion, position expansion, appointed-order behavior, custom-percentage completion, or email delivery to runtime-proven until a safe request is submitted and observed.
 
-`generate-workflow-actions-combined-runtime-baseline.mjs` extends the publish-proven V2 approach with one data-list workflow and additional Complete task, due-date, reminder, and Start settings. Use it for designer/open/publish proof first. Its `minute` due-date task is exploratory/product-documented because the studied exports proved `hour`, `day`, and `express` but did not prove the minute serialization.
+`tools/generators/generate-workflow-actions-combined-runtime-baseline.mjs` extends the publish-proven V2 approach with one data-list workflow and additional Complete task, due-date, reminder, and Start settings. Use it for designer/open/publish proof first. Its `minute` due-date task is exploratory/product-documented because the studied exports proved `hour`, `day`, and `express` but did not prove the minute serialization.
 
 The combined workflow-actions package imported, opened, rendered approval and data-list workflow designers, and published both workflows successfully. This upgrades the covered shapes to import/open/designer/publish-proven for the generated host package:
 

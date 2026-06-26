@@ -283,7 +283,7 @@ Stop before final generation if:
 
 Generated files:
 
-- `generate-dashboard-minimal-v1.mjs`
+- `tools/generators/generate-dashboard-minimal-v1.mjs`
 - `generated-dashboard-minimal-v1-resource.json`
 - `generated-dashboard-minimal-v1-app-def.json`
 - `generated-dashboard-minimal-v1.yap`
@@ -301,7 +301,7 @@ Minimal shape:
 
 Validation:
 
-- `node --check generate-dashboard-minimal-v1.mjs`: pass
+- `node --check tools/generators/generate-dashboard-minimal-v1.mjs`: pass
 - `node --check decode-yap-resource.js`: pass
 - `node --check inspect-dashboard-pages.js`: pass
 - `node --check validate-yap-package.js`: pass
@@ -400,7 +400,7 @@ Generator hardening learned:
 
 Validation results:
 
-- `node --check generate-dashboard-data-bound-v3.mjs`: pass
+- `node --check tools/generators/generate-dashboard-data-bound-v3.mjs`: pass
 - `node --check validate-yap-package.js`: pass
 - `node validate-yap-package.js generated-dashboard-data-bound-v3-resource.json --mode generator --stage final`: `pass_with_warnings`; only `APP_THEME_EMPTY`
 - `node validate-yap-graph.js generated-dashboard-data-bound-v3-resource.json --mode generator --stage final`: pass
@@ -475,7 +475,7 @@ Field binding learned:
 
 Validation results:
 
-- `node --check generate-dashboard-chart-widgets-v4.mjs`: pass
+- `node --check tools/generators/generate-dashboard-chart-widgets-v4.mjs`: pass
 - `node --check validate-yap-package.js`: pass
 - `node validate-yap-package.js generated-dashboard-chart-widgets-v4-resource.json --mode generator --stage final`: `pass_with_warnings`; only `APP_THEME_EMPTY`
 - `node validate-yap-graph.js generated-dashboard-chart-widgets-v4-resource.json --mode generator --stage final`: pass
@@ -569,7 +569,7 @@ Validation results:
 - source decode: pass, 39 `ReplaceIds`, large numeric ids preserved
 - source compatibility package validation: `pass_with_warnings`; `APP_THEME_EMPTY` and `LARGE_NUMERIC_IDS`
 - source compatibility graph validation: `pass_with_warnings`; `LARGE_NUMERIC_IDS`
-- `node --check generate-dashboard-filter-controls-v5.mjs`: pass
+- `node --check tools/generators/generate-dashboard-filter-controls-v5.mjs`: pass
 - generated resource package validation: `pass_with_warnings`; only `APP_THEME_EMPTY`
 - generated resource graph validation: pass
 - wrapper build and round-trip: pass
@@ -624,7 +624,7 @@ Selected resumed package:
 - package: `service-desk-pro-dashboard-stage-b-or-c.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-b-or-c-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-b-or-c-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-c.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-c.mjs`
 
 What Stage C proves:
 
@@ -663,7 +663,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-d.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-d-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-d-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-d.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-d.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-d.generated.yap`
 
 What Stage D proves:
@@ -730,7 +730,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-e.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-e-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-e-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-e.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-e.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-e.generated.yap`
 
 Runtime evidence:
@@ -747,7 +747,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-f1.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-f1-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-f1-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-f1.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-f1.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-f1.generated.yap`
 
 Runtime evidence:
@@ -776,7 +776,7 @@ Stage F2 adds one `bar-chart` / column chart to the Stage F1 package:
 - package: `service-desk-pro-dashboard-stage-f2.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-f2-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-f2-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-f2.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-f2.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-f2.generated.yap`
 
 Local validation:
@@ -816,7 +816,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-g.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-g-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-g-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-g.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-g.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-g.generated.yap`
 
 Validation:
@@ -851,7 +851,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-h.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-h-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-h-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-h.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-h.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-h.generated.yap`
 
 Validation:
@@ -890,7 +890,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-i.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-i-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-i-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-i.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-i.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-i.generated.yap`
 
 Runtime evidence:
@@ -914,7 +914,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-j.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-j-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-j-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-j.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-j.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-j.generated.yap`
 
 Runtime evidence:
@@ -939,7 +939,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-k.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-k-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-k-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-k.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-k.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-k.generated.yap`
 
 Runtime evidence:
@@ -964,7 +964,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-l.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-l-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-l-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-l.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-l.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-l.generated.yap`
 
 Runtime evidence:
@@ -1007,7 +1007,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-m.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-m-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-m-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-m.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-m.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-m.generated.yap`
 
 Export-back observation:
@@ -1068,7 +1068,7 @@ Generated artifacts:
 - package: `service-desk-pro-dashboard-stage-n.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-n-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-n-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-n.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-n.mjs`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-n.generated.yap`
 
 Stage N preserves:
@@ -1088,7 +1088,7 @@ Stage N changes:
 
 Validation evidence:
 
-- `node --check generate-service-desk-pro-dashboard-stage-n.mjs`: pass
+- `node --check tools/generators/generate-service-desk-pro-dashboard-stage-n.mjs`: pass
 - decoded resource package validation: `pass_with_warnings`
 - decoded resource graph validation: pass
 - wrapper build: pass
@@ -1147,8 +1147,8 @@ Dedicated study doc: `docs/dashboard-collection-control-pattern-study.md`
 
 First safe generation plan:
 
-- `dashboard-collection-first-generation-test-plan.md`
-- `dashboard-collection-first-generation-test-spec.json`
+- `docs/studies/root-runtime-proofs/dashboard-collection-first-generation-test-plan.md`
+- `fixtures/runtime-test-specs/dashboard-collection-first-generation-test-spec.json`
 
 Generation/runtime results:
 

@@ -66,7 +66,7 @@ Workflow branch conditions use numeric `conditioninfo` wrappers with `n.>` and `
 
 Local checks passed:
 
-- `node --check generate-expression-sublist-summary-workflow-test-v1.mjs`
+- `node --check tools/generators/generate-expression-sublist-summary-workflow-test-v1.mjs`
 - `node --check yeeflow-expression-utils.js`
 - `node --check validate-ywf-def.js`
 - `node --check scripts/smoke-expression-validation.mjs`

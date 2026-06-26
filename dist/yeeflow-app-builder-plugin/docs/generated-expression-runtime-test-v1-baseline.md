@@ -134,7 +134,7 @@ Rule learned:
 
 Local validation passed before runtime import:
 
-- `node --check generate-expression-runtime-test-v1.mjs`
+- `node --check tools/generators/generate-expression-runtime-test-v1.mjs`
 - `node scripts/smoke-expression-validation.mjs`
 - `node validate-yap-package.js expression-runtime-test-v1-app-def.json --mode generator --stage final`
 - `node validate-yap-graph.js expression-runtime-test-v1-app-def.json --mode generator --stage final`

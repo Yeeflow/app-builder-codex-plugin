@@ -5,7 +5,7 @@ Date: 2026-05-14
 ## Package
 
 - App name: Approval Form Controls Test v4
-- Generator: `generate-approval-form-controls-test-v4-pickers.mjs`
+- Generator: `tools/generators/generate-approval-form-controls-test-v4-pickers.mjs`
 - Decoded app definition: `approval-form-controls-test-v4-app-def.json`
 - Approval form definition: `approval-form-controls-test-v4-approval-form-def.json`
 - Data list definition: `approval-form-controls-test-v4-list-def.json`
@@ -40,7 +40,7 @@ Direct picker-value persistence into data-list picker fields was intentionally d
 
 Local checks passed:
 
-- `node --check generate-approval-form-controls-test-v4-pickers.mjs`
+- `node --check tools/generators/generate-approval-form-controls-test-v4-pickers.mjs`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`
 - `node --check validate-ywf-def.js`

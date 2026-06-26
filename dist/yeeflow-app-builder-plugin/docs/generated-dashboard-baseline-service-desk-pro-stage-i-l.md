@@ -17,7 +17,7 @@ Latest proven package:
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-l.generated.yap`
 - app def: `service-desk-pro-dashboard-stage-l-app-def.json`
 - resource: `service-desk-pro-dashboard-stage-l-resource.json`
-- generator: `generate-service-desk-pro-dashboard-stage-l.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-l.mjs`
 - ID family: `257`
 
 ## What This Proves
@@ -70,7 +70,7 @@ The Stage L filtered table adds:
 
 For Stage L:
 
-- `node --check generate-service-desk-pro-dashboard-stage-l.mjs`: pass
+- `node --check tools/generators/generate-service-desk-pro-dashboard-stage-l.mjs`: pass
 - package validation on decoded resource: `pass_with_warnings`
 - only package warning: `APP_THEME_EMPTY`
 - graph validation on decoded resource: pass

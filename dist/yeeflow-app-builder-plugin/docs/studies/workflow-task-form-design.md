@@ -171,7 +171,7 @@ References:
 
 ## Focused Runtime Baseline
 
-`generate-workflow-task-form-runtime-baseline.mjs` creates `workflow-task-form-runtime-baseline.v1.yap` by applying the corrected `Workflow Action Approval Test.ywf` form definition to the studied package family.
+`tools/generators/generate-workflow-task-form-runtime-baseline.mjs` creates `workflow-task-form-runtime-baseline.v1.yap` by applying the corrected `Workflow Action Approval Test.ywf` form definition to the studied package family.
 
 The generated package imported in Yeeflow as `Workflow Task Form Runtime Baseline`, opened successfully, opened the approval form, opened the form designer, rendered the task-form selector with `WARTB`, `WARTB Task`, `WARTB Task2`, `WARTB Task3`, and `WARTB Task4`, rendered `WARTB Task3` with the custom approve/reject/reassign/add-assignee buttons, opened the workflow designer, and published successfully.
 

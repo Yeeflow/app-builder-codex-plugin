@@ -62,7 +62,7 @@ This matrix separates export-backed control anatomy from generated runtime proof
 | `workflowControlPanel` | n/a | Yes | Yes | Proven | Submit and approval actions completed successfully. |
 | `workflowHistory` | n/a | Yes | Yes | Proven | Flow history rendered on review task page. |
 
-The machine-readable version is `approval-form-control-runtime-coverage.json`.
+The machine-readable version is `fixtures/runtime-test-specs/approval-form-control-runtime-coverage.json`.
 
 ## Consolidated Coverage Summary
 

@@ -115,7 +115,7 @@ Source compatibility validation:
 
 Generated v4 validation:
 
-- `node --check generate-knowledge-base-dashboard-v1.mjs`: passed
+- `node --check tools/generators/generate-knowledge-base-dashboard-v1.mjs`: passed
 - decoded resource package validation: passed with `APP_THEME_EMPTY` warning
 - decoded resource graph validation: passed
 - wrapper build and round-trip validation: passed

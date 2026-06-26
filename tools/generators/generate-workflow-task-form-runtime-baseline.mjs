@@ -11,7 +11,7 @@ const DEFAULT_OUTPUT = "workflow-task-form-runtime-baseline.v1.yap";
 function usage(exitCode = 1) {
   const message = [
     "Usage:",
-    "  node generate-workflow-task-form-runtime-baseline.mjs [--package-source input.yap] [--ywf-source input.ywf] [--out output.yap]",
+    "  node tools/generators/generate-workflow-task-form-runtime-baseline.mjs [--package-source input.yap] [--ywf-source input.ywf] [--out output.yap]",
     "",
     "Builds a focused task-form runtime baseline package by applying the corrected approval-form .ywf definition to the task-form .yap package.",
     "The generated .yap can contain tenant-local task assignee references copied from exports and must stay ignored/uncommitted.",

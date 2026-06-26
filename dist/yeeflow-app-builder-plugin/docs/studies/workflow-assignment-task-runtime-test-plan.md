@@ -63,7 +63,7 @@ Runtime proof requires import/open plus actual disposable request execution for 
 
 ## Baseline Attempt Result
 
-The focused generator `generate-assignment-task-assignee-runtime-baseline.mjs` produced `assignment-task-assignee-runtime-baseline.v1.yap` with 11 Assignment Task nodes and fresh package IDs. Local validation passed with warnings, and the generated package remains ignored/uncommitted.
+The focused generator `tools/generators/generate-assignment-task-assignee-runtime-baseline.mjs` produced `assignment-task-assignee-runtime-baseline.v1.yap` with 11 Assignment Task nodes and fresh package IDs. Local validation passed with warnings, and the generated package remains ignored/uncommitted.
 
 The first runtime attempt imported and opened the generated app, opened the workflow designer, and showed Assignment Task panels. Sequential appointed order rendered as selected for the sequential task. Parallel/default tasks rendered with Parallel selected when `issequential` was absent. The email notification task opened in the designer, but email delivery was not tested.
 
@@ -143,7 +143,7 @@ The focused `Workflow Task Form Runtime Baseline` package was generated from the
 
 ## Combined Workflow Actions Baseline
 
-The combined generator `generate-workflow-actions-combined-runtime-baseline.mjs` creates `workflow-actions-combined-runtime-baseline.v1.yap` for one approval form plus one child data list. It is intended to prove import/open/designer/publish behavior for the learned approval-form and data-list workflow action settings together.
+The combined generator `tools/generators/generate-workflow-actions-combined-runtime-baseline.mjs` creates `workflow-actions-combined-runtime-baseline.v1.yap` for one approval form plus one child data list. It is intended to prove import/open/designer/publish behavior for the learned approval-form and data-list workflow action settings together.
 
 The generated approval workflow uses a non-overlapping left-to-right graph and appends representative Complete task, due-date, reminder, and Start settings to the previously publish-proven Assignment Task assignee baseline. The generated data-list workflow embeds the studied `Purchase Requests.ydl` Start, Assignment Task, and task-form shapes into the same app package.
 

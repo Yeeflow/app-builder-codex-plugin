@@ -17,7 +17,7 @@ const TARGET_APPROVAL_KEY = "WABTGT";
 function usage(exitCode = 1) {
   const message = [
     "Usage:",
-    "  node generate-workflow-actions-batch-runtime-baseline.mjs [--source input.yap] [--out output.yap]",
+    "  node tools/generators/generate-workflow-actions-batch-runtime-baseline.mjs [--source input.yap] [--out output.yap]",
     "",
     "Builds a focused Claim Task, Set variable, Set data list, and Signal event designer/publish runtime baseline.",
   ].join("\n");

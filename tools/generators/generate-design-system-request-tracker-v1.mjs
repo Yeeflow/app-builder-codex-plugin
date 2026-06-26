@@ -2,7 +2,7 @@ import fs from "node:fs";
 import crypto from "node:crypto";
 
 const sourcePath = "visitor-access-management-app-def.v11-five-fields-multitype.json";
-const specPath = "yeeflow-design-system-first-test-spec.json";
+const specPath = "fixtures/runtime-test-specs/yeeflow-design-system-first-test-spec.json";
 const outAppPath = "design-system-request-tracker-app-def.v1.json";
 const outFormDefPath = "design-system-request-tracker-approval-form-def.v1.json";
 const outReportPath = "design-system-request-tracker-generation-report.v1.json";

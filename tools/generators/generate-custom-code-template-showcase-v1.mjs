@@ -1013,7 +1013,7 @@ function writeReports(data, resource) {
 }
 
 function updateSpecReadiness() {
-  const specPath = "custom-code-template-showcase-app-spec.json";
+  const specPath = "fixtures/runtime-test-specs/custom-code-template-showcase-app-spec.json";
   const spec = JSON.parse(fs.readFileSync(specPath, "utf8"));
   spec.readyForGeneration = true;
   spec.doNotGenerateYet = false;

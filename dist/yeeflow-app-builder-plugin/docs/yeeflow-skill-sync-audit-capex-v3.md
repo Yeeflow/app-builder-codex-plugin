@@ -74,7 +74,7 @@ CAPEX Runtime V2/V3/V4 learning:
 CAPEX generated-app runtime baseline:
 
 - `IT Hardware CAPEX Request v4 Text Standard`
-- generator: `generate-it-hardware-capex-request-v3.mjs`
+- generator: `tools/generators/generate-it-hardware-capex-request-v3.mjs`
 - baseline doc: `docs/generated-it-hardware-capex-request-text-standard-baseline.md`
 - runtime result: import/open/form-open passed; generated Text control Typography and Text shadow designer popups opened successfully
 - accepted validation state: package/form/list validation may pass with warnings, but no Text-control errors or unsafe Text-control shapes remain

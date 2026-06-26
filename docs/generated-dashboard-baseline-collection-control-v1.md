@@ -108,7 +108,7 @@ For table-style Collection header and repeated row grids, also set:
 
 Card v1:
 
-- `node --check generate-dashboard-collection-card-v1.mjs`: pass
+- `node --check tools/generators/generate-dashboard-collection-card-v1.mjs`: pass
 - `validate-yap-package.js`: pass with `APP_THEME_EMPTY` warning
 - `validate-yap-graph.js`: pass
 - `build-yap-wrapper.js`: pass
@@ -116,7 +116,7 @@ Card v1:
 
 Table v3:
 
-- `node --check generate-dashboard-collection-table-v3.mjs`: pass
+- `node --check tools/generators/generate-dashboard-collection-table-v3.mjs`: pass
 - `validate-yap-package.js`: pass with `APP_THEME_EMPTY` warning
 - `validate-yap-graph.js`: pass
 - `build-yap-wrapper.js`: pass
@@ -124,7 +124,7 @@ Table v3:
 
 Search v5:
 
-- `node --check generate-dashboard-collection-search-v5.mjs`: pass
+- `node --check tools/generators/generate-dashboard-collection-search-v5.mjs`: pass
 - `validate-yap-package.js`: pass with `APP_THEME_EMPTY` warning
 - `validate-yap-graph.js`: pass
 - `build-yap-wrapper.js`: pass
@@ -134,7 +134,7 @@ Search v5:
 
 Search Button v6:
 
-- `node --check generate-dashboard-collection-search-button-v6.mjs`: pass
+- `node --check tools/generators/generate-dashboard-collection-search-button-v6.mjs`: pass
 - `validate-yap-package.js`: pass with `APP_THEME_EMPTY` warning
 - `validate-yap-graph.js`: pass
 - `build-yap-wrapper.js`: pass
@@ -144,7 +144,7 @@ Search Button v6:
 
 Grid v7:
 
-- `node --check generate-dashboard-collection-grid-v7.mjs`: pass
+- `node --check tools/generators/generate-dashboard-collection-grid-v7.mjs`: pass
 - `validate-yap-package.js`: pass with `APP_THEME_EMPTY` warning
 - `validate-yap-graph.js`: pass
 - `build-yap-wrapper.js`: pass
@@ -154,7 +154,7 @@ Grid v7:
 
 Grid Display v8:
 
-- `node --check generate-dashboard-collection-grid-display-v8.mjs`: pass
+- `node --check tools/generators/generate-dashboard-collection-grid-display-v8.mjs`: pass
 - `validate-yap-package.js`: pass with `APP_THEME_EMPTY` warning
 - `validate-yap-graph.js`: pass
 - `build-yap-wrapper.js`: pass

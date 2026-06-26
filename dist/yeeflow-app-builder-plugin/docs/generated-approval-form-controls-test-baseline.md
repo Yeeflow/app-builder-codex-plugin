@@ -5,7 +5,7 @@ Date: 2026-05-14
 ## Package
 
 - App name: Approval Form Controls Test
-- Generator: `generate-approval-form-controls-test-v1.mjs`
+- Generator: `tools/generators/generate-approval-form-controls-test-v1.mjs`
 - Decoded app definition: `approval-form-controls-test-app-def.v1.json`
 - Approval form definition: `approval-form-controls-test-approval-form-def.v1.json`
 - Data list definition: `approval-form-controls-test-list-def.v1.json`
@@ -82,7 +82,7 @@ Deferred controls:
 
 Local checks passed:
 
-- `node --check generate-approval-form-controls-test-v1.mjs`
+- `node --check tools/generators/generate-approval-form-controls-test-v1.mjs`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`
 - `node --check validate-ywf-def.js`

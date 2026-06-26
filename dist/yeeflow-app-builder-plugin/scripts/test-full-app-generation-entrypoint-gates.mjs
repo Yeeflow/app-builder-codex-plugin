@@ -117,7 +117,7 @@ function createBundledPluginRoot() {
     "scripts/materialize-full-app-generated-final.mjs",
     "scripts/yeeflow-application-delivery-workflow.mjs",
     "scripts/yeeflow-package-api-automation.mjs",
-    "generate-vendor-onboarding-yapk-schema-v2.mjs",
+    "tools/generators/generate-vendor-onboarding-yapk-schema-v2.mjs",
   ]) {
     const target = path.join(root, file);
     fs.mkdirSync(path.dirname(target), { recursive: true });

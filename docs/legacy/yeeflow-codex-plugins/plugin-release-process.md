@@ -311,7 +311,7 @@ Main improvements:
 
 - Adds Advanced Controls export-learning from `/Users/Renger/Downloads/Company Overview (3).yap`.
 - Adds focused generated runtime proof from `/Users/Renger/Downloads/advanced-controls-runtime-proof.v1.yap`.
-- Bundles `scripts/inspect-advanced-controls.mjs`, `generate-advanced-controls-runtime-proof.mjs`, `docs/studies/advanced-controls.md`, `docs/studies/advanced-controls-runtime-proof.md`, and normalized Advanced Controls refs.
+- Bundles `scripts/inspect-advanced-controls.mjs`, `tools/generators/generate-advanced-controls-runtime-proof.mjs`, `docs/studies/advanced-controls.md`, `docs/studies/advanced-controls-runtime-proof.md`, and normalized Advanced Controls refs.
 - Updates validators/import-readiness and generator/runtime/package skills for Tab, Toggle, Timer, Icon list, Divider, Alert, Progress bar, Spacer, Progress circle, Steps bar, QR Code, Barcode, Embed, and Document embed.
 - Preserves v0.5.27 Collection/Kanban actions support, v0.5.26 YAPK hardening, v0.5.25 Kanban/Collection/Timeline support, v0.5.24 Dynamic Sub List/Print Page support, v0.5.23 LayoutView hardening, and v0.5.22 YAPK support.
 

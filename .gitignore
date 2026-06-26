@@ -39,9 +39,9 @@ coverage/
 *.md
 !README.md
 !CHANGELOG.md
-!dashboard-collection-first-generation-test-plan.md
-!it-hardware-capex-request-v3-ui-refresh-plan.md
-!yeeflow-expression-first-generation-test-plan.md
+!docs/studies/root-runtime-proofs/dashboard-collection-first-generation-test-plan.md
+!docs/studies/root-runtime-proofs/it-hardware-capex-request-v3-ui-refresh-plan.md
+!docs/studies/root-runtime-proofs/yeeflow-expression-first-generation-test-plan.md
 !docs/
 !docs/**/*.md
 !generated/README.md
@@ -93,7 +93,7 @@ yeeflow-data-list-generator/
 
 # Large or decoded generated artifacts that may contain customer data.
 *.json
-!dashboard-collection-first-generation-test-spec.json
+!fixtures/runtime-test-specs/dashboard-collection-first-generation-test-spec.json
 !it-hardware-capex-request-ui-generation-spec.json
 !it-hardware-capex-request-v3-ui-refresh-spec.json
 !workflow-action-configurations.normalized.json
@@ -106,7 +106,7 @@ yeeflow-data-list-generator/
 !dashboard-dataset-presentation-golden-references.json
 !collection-control-card-with-multiselect-toolbar.template.json
 !collection-control-grid-table-with-multiselect.template.json
-!yeeflow-expression-first-generation-test-spec.json
+!fixtures/runtime-test-specs/yeeflow-expression-first-generation-test-spec.json
 !docs/studies/normalized/*.normalized.json
 !docs/studies/normalized/**/*.normalized.json
 !skills/installed/yeeflow-application-generator/scripts/workflow-action-configurations.normalized.json
@@ -159,27 +159,27 @@ yeeflow-data-list-generator/
 !package-lock.json
 
 # Curated restored development assets from the legacy repository.
-!approval-form-control-runtime-coverage.json
-!approval-form-controls-runtime-test-plan.md
-!approval-form-controls-runtime-test-spec.json
-!custom-code-smart-lookup-picker-runtime-test-plan.md
-!custom-code-smart-lookup-picker-runtime-test-spec.json
-!custom-code-smart-lookup-picker-test.validate-graph.md
-!custom-code-template-showcase-app-plan.md
-!custom-code-template-showcase-app-spec.json
-!custom-code-template-showcase.v1.validate-graph-wrapper.md
-!custom-code-template-showcase.v1.validate-graph.md
-!expression-runtime-test-v1-patch-user-expression-study.md
-!expression-sublist-summary-workflow-test-plan.md
-!expression-sublist-summary-workflow-test-spec.json
-!expression-user-profile-runtime-test-plan.md
-!expression-user-profile-runtime-test-spec.json
-!form-actions-phase-1-runtime-test-plan.md
-!form-actions-phase-1-runtime-test-spec.json
-!form-actions-phase-2-query-submit-runtime-test-plan.md
-!form-actions-phase-2-query-submit-runtime-test-spec.json
-!yeeflow-design-system-first-test-plan.md
-!yeeflow-design-system-first-test-spec.json
+!fixtures/runtime-test-specs/approval-form-control-runtime-coverage.json
+!docs/studies/root-runtime-proofs/approval-form-controls-runtime-test-plan.md
+!fixtures/runtime-test-specs/approval-form-controls-runtime-test-spec.json
+!docs/studies/root-runtime-proofs/custom-code-smart-lookup-picker-runtime-test-plan.md
+!fixtures/runtime-test-specs/custom-code-smart-lookup-picker-runtime-test-spec.json
+!docs/studies/root-runtime-proofs/custom-code-smart-lookup-picker-test.validate-graph.md
+!docs/studies/root-runtime-proofs/custom-code-template-showcase-app-plan.md
+!fixtures/runtime-test-specs/custom-code-template-showcase-app-spec.json
+!docs/studies/root-runtime-proofs/custom-code-template-showcase.v1.validate-graph-wrapper.md
+!docs/studies/root-runtime-proofs/custom-code-template-showcase.v1.validate-graph.md
+!docs/studies/root-runtime-proofs/expression-runtime-test-v1-patch-user-expression-study.md
+!docs/studies/root-runtime-proofs/expression-sublist-summary-workflow-test-plan.md
+!fixtures/runtime-test-specs/expression-sublist-summary-workflow-test-spec.json
+!docs/studies/root-runtime-proofs/expression-user-profile-runtime-test-plan.md
+!fixtures/runtime-test-specs/expression-user-profile-runtime-test-spec.json
+!docs/studies/root-runtime-proofs/form-actions-phase-1-runtime-test-plan.md
+!fixtures/runtime-test-specs/form-actions-phase-1-runtime-test-spec.json
+!docs/studies/root-runtime-proofs/form-actions-phase-2-query-submit-runtime-test-plan.md
+!fixtures/runtime-test-specs/form-actions-phase-2-query-submit-runtime-test-spec.json
+!docs/studies/root-runtime-proofs/yeeflow-design-system-first-test-plan.md
+!fixtures/runtime-test-specs/yeeflow-design-system-first-test-spec.json
 !yeeflow-yapk-schema-standard-summary.json
 !docs/generated-app-plans/
 !docs/generated-app-plans/**/*.json

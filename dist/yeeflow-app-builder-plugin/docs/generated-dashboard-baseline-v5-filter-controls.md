@@ -6,7 +6,7 @@
 - generated package: `generated-dashboard-filter-controls-v5.yap`
 - generated resource: `generated-dashboard-filter-controls-v5-resource.json`
 - generated app def: `generated-dashboard-filter-controls-v5-app-def.json`
-- generator: `generate-dashboard-filter-controls-v5.mjs`
+- generator: `tools/generators/generate-dashboard-filter-controls-v5.mjs`
 
 ## What It Proves
 
@@ -103,7 +103,7 @@ Do not include UUID-like filter controls, chart controls, summary controls, or p
 
 ## Validation Results
 
-- `node --check generate-dashboard-filter-controls-v5.mjs`: pass
+- `node --check tools/generators/generate-dashboard-filter-controls-v5.mjs`: pass
 - `node --check validate-yap-package.js`: pass
 - package validation on resource: `pass_with_warnings`; only `APP_THEME_EMPTY`
 - graph validation on resource: pass

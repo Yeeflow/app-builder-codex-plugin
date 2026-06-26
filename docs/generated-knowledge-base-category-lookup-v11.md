@@ -61,7 +61,7 @@ No record was saved during the new-item lookup check.
 
 Passed:
 
-- `node --check generate-knowledge-base-category-lookup-v11.mjs`
+- `node --check tools/generators/generate-knowledge-base-category-lookup-v11.mjs`
 - `node validate-yap-package.js knowledge-base-category-lookup-v11-resource.json --mode generator --stage final`
 - `node validate-yap-graph.js knowledge-base-category-lookup-v11-resource.json --mode generator --stage final`
 - `node build-yap-wrapper.js knowledge-base-category-lookup-v11-resource.json knowledge-base-category-lookup-v11.yap --title "Knowledge Base Category Lookup v11" --description "..."`

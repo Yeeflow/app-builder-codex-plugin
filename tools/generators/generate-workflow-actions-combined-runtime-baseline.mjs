@@ -13,7 +13,7 @@ const DEFAULT_OUTPUT = "workflow-actions-combined-runtime-baseline.v1.yap";
 function usage(exitCode = 1) {
   const message = [
     "Usage:",
-    "  node generate-workflow-actions-combined-runtime-baseline.mjs [--out output.yap]",
+    "  node tools/generators/generate-workflow-actions-combined-runtime-baseline.mjs [--out output.yap]",
     "",
     "Builds a combined approval-form + data-list workflow action runtime baseline.",
     "The generated .yap can contain tenant-local assignee references cloned from exports and must stay ignored.",
@@ -249,7 +249,7 @@ function relinkLinearWorkflow(def, orderedNodes) {
 function buildBaseApproval(args, tempDir) {
   const tempApprovalPath = path.join(tempDir, "combined-approval-base.yap");
   execFileSync(process.execPath, [
-    "generate-assignment-task-assignee-runtime-baseline.mjs",
+    "tools/generators/generate-assignment-task-assignee-runtime-baseline.mjs",
     "--source",
     "/Users/Renger/Downloads/Test ABC (1).yap",
     "--out",

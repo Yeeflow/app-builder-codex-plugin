@@ -26,7 +26,7 @@ This is a focused runtime proof pass for Dashboard Pivot Table Data Analytics co
 
 ## Generated Package
 
-The generator script `generate-pivot-table-control-runtime-proof.mjs` creates a small synthetic Yeeflow app with one data list and three Dashboard Pivot Table controls:
+The generator script `tools/generators/generate-pivot-table-control-runtime-proof.mjs` creates a small synthetic Yeeflow app with one data list and three Dashboard Pivot Table controls:
 
 | Pivot Table | Rows | Columns | Value | Purpose |
 | --- | --- | --- | --- | --- |
@@ -42,7 +42,7 @@ The v2 follow-up package uses the same three Pivot Table controls and includes 2
 
 Local validation passed the strict generated-app readiness gate with zero errors.
 
-- `node --check generate-pivot-table-control-runtime-proof.mjs`: pass
+- `node --check tools/generators/generate-pivot-table-control-runtime-proof.mjs`: pass
 - `node --check scripts/inspect-pivot-table-controls.mjs`: pass
 - Pivot Table inspector: pass, 3 Pivot Tables, 0 findings
 - Dashboard/page inspector: pass
@@ -87,7 +87,7 @@ After the v1 blocker, the generator produced `pivot-table-control-runtime-proof-
 
 Local validation for v2 passed with zero errors:
 
-- `node --check generate-pivot-table-control-runtime-proof.mjs`: pass
+- `node --check tools/generators/generate-pivot-table-control-runtime-proof.mjs`: pass
 - Pivot Table inspector: pass, 3 Pivot Tables, 0 findings
 - Aggregate import-readiness inspector: `pass_with_warnings`, 0 errors
 

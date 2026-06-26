@@ -17,7 +17,7 @@ Local copy used for import:
 Generator:
 
 ```text
-generate-workflow-task-form-runtime-baseline.mjs
+tools/generators/generate-workflow-task-form-runtime-baseline.mjs
 ```
 
 The generated package starts from `Workflow Actions Runtime Baseline (2)_Task forms.yap` and applies the corrected approval-form definition from `Workflow Action Approval Test.ywf`.
@@ -74,7 +74,7 @@ No approval request was submitted, no task operation was executed, no user was r
 
 Local validation before import:
 
-- `node --check generate-workflow-task-form-runtime-baseline.mjs`
+- `node --check tools/generators/generate-workflow-task-form-runtime-baseline.mjs`
 - `node --check scripts/inspect-workflow-task-forms.mjs`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`

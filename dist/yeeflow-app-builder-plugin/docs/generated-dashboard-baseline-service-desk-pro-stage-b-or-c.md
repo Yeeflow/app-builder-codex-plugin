@@ -7,7 +7,7 @@
 - generated resource: `service-desk-pro-dashboard-stage-b-or-c-resource.json`
 - generated package: `service-desk-pro-dashboard-stage-b-or-c.generated.yap`
 - Downloads copy: `<downloads>/service-desk-pro-dashboard-stage-b-or-c.generated.yap`
-- generator: `generate-service-desk-pro-dashboard-stage-c.mjs`
+- generator: `tools/generators/generate-service-desk-pro-dashboard-stage-c.mjs`
 
 ## What It Proves
 
@@ -25,7 +25,7 @@ This package proves the Service Desk Pro dashboard rebuild can resume safely fro
 
 ## Validation Results
 
-- `node --check generate-service-desk-pro-dashboard-stage-c.mjs`: pass
+- `node --check tools/generators/generate-service-desk-pro-dashboard-stage-c.mjs`: pass
 - generated resource package validation: `pass_with_warnings`
 - only warning: `APP_THEME_EMPTY`, inherited from the proven minimal dashboard pattern
 - generated resource graph validation: pass

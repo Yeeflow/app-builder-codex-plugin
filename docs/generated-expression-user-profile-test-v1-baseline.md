@@ -9,7 +9,7 @@
 - Target list definition: `expression-user-profile-test-v1-request-list-def.json`
 - Wrapper package: `Expression User Profile Test v1.generated.yap`
 - User-test copy: `/Users/Renger/Downloads/Expression User Profile Test v1.generated.yap`
-- Generator: `generate-expression-user-profile-test-v1.mjs`
+- Generator: `tools/generators/generate-expression-user-profile-test-v1.mjs`
 
 ## Learned Functions
 
@@ -96,7 +96,7 @@ ContentList created a row with the generated request number, user name, login/em
 
 Passed local validation:
 
-- `node --check generate-expression-user-profile-test-v1.mjs`
+- `node --check tools/generators/generate-expression-user-profile-test-v1.mjs`
 - `node --check yeeflow-expression-utils.js`
 - `node scripts/smoke-expression-validation.mjs`
 - JSON parse checks for normalized references and generated definitions

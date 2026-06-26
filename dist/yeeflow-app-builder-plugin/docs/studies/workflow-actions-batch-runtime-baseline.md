@@ -16,7 +16,7 @@ This is not workflow execution proof. No approval request was submitted, no data
 | Item | Value |
 |---|---|
 | Generated app | `Workflow Actions Batch Runtime Baseline` |
-| Generator | `generate-workflow-actions-batch-runtime-baseline.mjs` |
+| Generator | `tools/generators/generate-workflow-actions-batch-runtime-baseline.mjs` |
 | Generated package | `/Users/Renger/Documents/Codex Projects/AI Agent and Copilot templates - runtime/workflow-actions-batch-runtime-baseline.v1.yap` |
 | Import-test copy | `<downloads>/workflow-actions-batch-runtime-baseline.v1.yap` |
 | Source model | `<downloads>/Workflow Actions Runtime Baseline (6)_Signal event.yap` |
@@ -39,7 +39,7 @@ The generated `.yap` package is ignored and must remain uncommitted.
 
 | Check | Result |
 |---|---|
-| `node --check generate-workflow-actions-batch-runtime-baseline.mjs` | passed |
+| `node --check tools/generators/generate-workflow-actions-batch-runtime-baseline.mjs` | passed |
 | package validation in compatibility mode | passed with warnings, 0 errors |
 | graph validation in compatibility mode | passed with warnings, 0 unresolved edges/cycles |
 | workflow action config validation | passed |

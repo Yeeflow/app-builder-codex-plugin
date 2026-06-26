@@ -14,7 +14,7 @@ const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-regular fa-calendar-c
 function usage() {
   console.error([
     "Usage:",
-    "  node generate-scheduled-workflow-safe-runtime-baseline.mjs --source <source.yap> --out <output.yap>",
+    "  node tools/generators/generate-scheduled-workflow-safe-runtime-baseline.mjs --source <source.yap> --out <output.yap>",
     "",
     "The source export is decoded read-only. The generated output is a sanitized package with fresh local IDs,",
     "a far-future non-deployed Scheduled Workflow, a fake test recipient, and no external connections.",

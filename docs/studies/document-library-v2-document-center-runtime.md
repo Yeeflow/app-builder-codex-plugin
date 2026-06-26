@@ -37,7 +37,7 @@ Each library preserves the runtime-passed native document-library base shape:
 
 Local validation passed before runtime import:
 
-- `node --check generate-enterprise-document-center-v2.mjs`
+- `node --check tools/generators/generate-enterprise-document-center-v2.mjs`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`
 - `node --check validate-ydl-list.js`

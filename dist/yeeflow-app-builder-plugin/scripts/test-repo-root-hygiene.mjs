@@ -1,0 +1,151 @@
+#!/usr/bin/env node
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+
+const ROOT_ALLOWLIST = new Set([
+  ".env.example",
+  ".gitignore",
+  "CHANGELOG.md",
+  "README.md",
+  "apply-ywf-metadata.js",
+  "build-yap-wrapper.js",
+  "build-ydl-wrapper.js",
+  "build-ywf-wrapper.js",
+  "control-configurations.normalized.json",
+  "decode-yap-resource.js",
+  "extract-yap-metadata.js",
+  "extract-ydl-metadata.js",
+  "field-configurations.normalized.json",
+  "inspect-dashboard-pages.js",
+  "inspect-yap-package.js",
+  "inspect-ydl-package.js",
+  "normalize-yeeflow-control-field-configs.mjs",
+  "validate-yap-graph.js",
+  "validate-yap-package.js",
+  "validate-yapk-package.js",
+  "validate-ydl-against-yap.js",
+  "validate-ydl-list.js",
+  "validate-ywf-def-against-yap.js",
+  "validate-ywf-def.js",
+  "workflow-action-config-validator.js",
+  "workflow-action-configurations.normalized.json",
+  "yeeflow-control-field-schema-utils.js",
+  "yeeflow-expression-function-knowledge-base.normalized.json",
+  "yeeflow-expression-functions.normalized.json",
+  "yeeflow-expression-operators.normalized.json",
+  "yeeflow-expression-utils.js",
+  "yeeflow-yapk-schema-standard-summary.json",
+]);
+
+const DIST_ROOT_ALLOWLIST = new Set([
+  ".env.example",
+  "CHANGELOG.md",
+  "README.md",
+  "control-configurations.normalized.json",
+  "field-configurations.normalized.json",
+  "inspect-yap-package.js",
+  "validate-yap-graph.js",
+  "validate-yap-package.js",
+  "validate-yapk-package.js",
+  "validate-ydl-list.js",
+  "validate-ywf-def-against-yap.js",
+  "validate-ywf-def.js",
+  "workflow-action-config-validator.js",
+  "workflow-action-configurations.normalized.json",
+  "yeeflow-control-field-schema-utils.js",
+  "yeeflow-expression-function-knowledge-base.normalized.json",
+  "yeeflow-expression-functions.normalized.json",
+  "yeeflow-expression-operators.normalized.json",
+  "yeeflow-expression-utils.js",
+  "yeeflow-yapk-schema-standard-summary.json",
+]);
+
+function gitLsFiles() {
+  const result = spawnSync("git", ["ls-files"], { encoding: "utf8" });
+  if (result.status !== 0) {
+    throw new Error(result.stderr || "git ls-files failed");
+  }
+  return result.stdout.split(/\r?\n/).filter(Boolean);
+}
+
+function isDeprecatedRootArtifact(fileName) {
+  return (
+    /^generate-/.test(fileName) ||
+    /-test-plan\.md$/.test(fileName) ||
+    /-test-spec\.json$/.test(fileName) ||
+    /runtime-coverage\.json$/.test(fileName) ||
+    /validate-graph.*\.md$/.test(fileName) ||
+    /ui-refresh-plan\.md$/.test(fileName) ||
+    /app-plan\.md$/.test(fileName)
+  );
+}
+
+const files = gitLsFiles();
+const findings = [];
+const sourceRootFiles = files.filter((file) => !file.includes("/"));
+const distRootFiles = files
+  .filter((file) => file.startsWith("dist/yeeflow-app-builder-plugin/"))
+  .filter((file) => file.split("/").length === 3)
+  .map((file) => path.basename(file));
+
+for (const file of sourceRootFiles) {
+  if (!ROOT_ALLOWLIST.has(file)) {
+    findings.push({
+      code: "ROOT_FILE_NOT_ALLOWLISTED",
+      message: "Repository root should only contain documentation, compatibility CLI entrypoints, and root-level compatibility data.",
+      file,
+    });
+  }
+  if (isDeprecatedRootArtifact(file)) {
+    findings.push({
+      code: "ROOT_HISTORICAL_ARTIFACT_FORBIDDEN",
+      message: "Historical generators, runtime proof plans, specs, and studies must live under tools/, docs/, or fixtures/ instead of repository root.",
+      file,
+    });
+  }
+}
+
+for (const file of distRootFiles) {
+  if (!DIST_ROOT_ALLOWLIST.has(file)) {
+    findings.push({
+      code: "DIST_ROOT_FILE_NOT_ALLOWLISTED",
+      message: "Plugin dist root should only contain compatibility entrypoints and required runtime reference data.",
+      file: `dist/yeeflow-app-builder-plugin/${file}`,
+    });
+  }
+  if (isDeprecatedRootArtifact(file)) {
+    findings.push({
+      code: "DIST_ROOT_HISTORICAL_ARTIFACT_FORBIDDEN",
+      message: "Historical generators and runtime proof artifacts must not sit at plugin dist root.",
+      file: `dist/yeeflow-app-builder-plugin/${file}`,
+    });
+  }
+}
+
+const requiredDirs = [
+  "tools/generators",
+  "docs/studies/root-runtime-proofs",
+  "fixtures/runtime-test-specs",
+  "dist/yeeflow-app-builder-plugin/tools/generators",
+];
+
+for (const dir of requiredDirs) {
+  const hasTrackedFile = files.some((file) => file.startsWith(`${dir}/`));
+  if (!hasTrackedFile) {
+    findings.push({
+      code: "ROOT_HYGIENE_DIRECTORY_EMPTY",
+      message: "Expected repository organization directory has no tracked files.",
+      directory: dir,
+    });
+  }
+}
+
+const report = {
+  status: findings.length ? "fail" : "pass",
+  sourceRootFileCount: sourceRootFiles.length,
+  distRootFileCount: distRootFiles.length,
+  findings,
+};
+
+console.log(JSON.stringify(report, null, 2));
+process.exit(findings.length ? 1 : 0);

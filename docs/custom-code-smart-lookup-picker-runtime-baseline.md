@@ -15,7 +15,7 @@ Local validation passed before runtime import:
 | Check | Result |
 |---|---|
 | TSX static check | Passed with `esbuild` against `smart-lookup-picker.tsx` |
-| Generator syntax | Passed with `node --check generate-custom-code-smart-lookup-picker-test.mjs` |
+| Generator syntax | Passed with `node --check tools/generators/generate-custom-code-smart-lookup-picker-test.mjs` |
 | Package validation | Passed with warnings |
 | Graph validation | Passed |
 | YWF validation | Passed with warnings |

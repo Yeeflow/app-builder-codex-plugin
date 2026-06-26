@@ -179,8 +179,8 @@ function parseArgs(argv) {
     templatesDir: null,
     jsonOut: "custom-code-template-library-inspection.json",
     studyOut: "docs/custom-code-template-library-study.md",
-    planOut: "custom-code-template-showcase-app-plan.md",
-    specOut: "custom-code-template-showcase-app-spec.json",
+    planOut: "docs/studies/root-runtime-proofs/custom-code-template-showcase-app-plan.md",
+    specOut: "fixtures/runtime-test-specs/custom-code-template-showcase-app-spec.json",
   };
   for (let index = 2; index < argv.length; index += 1) {
     const arg = argv[index];

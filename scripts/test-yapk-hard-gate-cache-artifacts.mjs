@@ -102,6 +102,7 @@ const hardGateScripts = [
   "scripts/test-ui-control-property-fidelity.mjs",
   "scripts/test-yeeflow-control-property-knowledge-base.mjs",
   "scripts/test-installed-cache-root-path-alignment.mjs",
+  "scripts/test-repo-root-hygiene.mjs",
 ];
 
 for (const sourcePath of hardGateScripts) {
@@ -192,6 +193,7 @@ const requiredDocs = [
   "docs/training/data-filter-standard-filter-group-training-report.md",
   "docs/training/dashboard-filter-runtime-upgrade-proof-training-report.md",
   "docs/training/dashboard-collection-search-retirement-and-analytics-identity-hardening-training-report.md",
+  "docs/training/repo-root-hygiene-compatibility-training-report.md",
   "docs/reference/dashboard-golden-references.json",
   "docs/reference/dashboard-dataset-presentation-golden-references.json",
   "docs/reference/data-analytics-golden-references.json",

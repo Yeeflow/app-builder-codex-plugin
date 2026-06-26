@@ -5,7 +5,7 @@ Date: 2026-05-14
 ## Package
 
 - App name: Approval Form Controls Test v2
-- Generator: `generate-approval-form-controls-test-v2-advanced-inputs.mjs`
+- Generator: `tools/generators/generate-approval-form-controls-test-v2-advanced-inputs.mjs`
 - Decoded app definition: `approval-form-controls-test-v2-app-def.json`
 - Approval form definition: `approval-form-controls-test-v2-approval-form-def.json`
 - Data list definition: `approval-form-controls-test-v2-list-def.json`
@@ -36,13 +36,13 @@ Partially proved:
 
 Local checks passed:
 
-- `node --check generate-approval-form-controls-test-v2-advanced-inputs.mjs`
+- `node --check tools/generators/generate-approval-form-controls-test-v2-advanced-inputs.mjs`
 - `node --check validate-yap-package.js`
 - `node --check validate-yap-graph.js`
 - `node --check validate-ywf-def.js`
 - `node --check validate-ydl-list.js`
 - `node --check workflow-action-config-validator.js`
-- JSON parse checks for `approval-form-control-runtime-coverage.json` and `approval-form-controls-runtime-test-spec.json`
+- JSON parse checks for `fixtures/runtime-test-specs/approval-form-control-runtime-coverage.json` and `fixtures/runtime-test-specs/approval-form-controls-runtime-test-spec.json`
 
 Package and component validation:
 

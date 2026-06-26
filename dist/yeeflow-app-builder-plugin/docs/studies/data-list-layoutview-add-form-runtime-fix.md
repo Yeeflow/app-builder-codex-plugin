@@ -49,7 +49,7 @@ The generated Data List also put `[{ SortName, SortByDesc }]` into `ListModel.La
 
 ## Fix
 
-`generate-container-button-action-runtime-proof.mjs` now creates concrete Type `1` Data List form layouts:
+`tools/generators/generate-container-button-action-runtime-proof.mjs` now creates concrete Type `1` Data List form layouts:
 
 - `New Item`
 - `Edit Item`

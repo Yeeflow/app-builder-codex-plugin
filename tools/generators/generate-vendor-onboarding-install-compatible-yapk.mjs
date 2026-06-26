@@ -12,7 +12,7 @@ const DESCRIPTION = "Full-scope generated YAPK candidate for vendor onboarding, 
 const ICON_URL = "{\"b\":\"#E6F7FF\",\"i\":\"fa-regular fa-building-shield\",\"c\":\"#008DA6\"}";
 
 function ensureBaseAppPackage() {
-  const result = spawnSync(process.execPath, ["generate-vendor-onboarding-compliance-yapk.mjs"], {
+  const result = spawnSync(process.execPath, ["tools/generators/generate-vendor-onboarding-compliance-yapk.mjs"], {
     cwd: process.cwd(),
     encoding: "utf8",
     env: {

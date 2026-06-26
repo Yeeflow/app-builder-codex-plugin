@@ -4,7 +4,7 @@
 
 - Runtime status: user-confirmed runtime pass
 - Generated package: `/Users/Renger/Downloads/kanban-collection-timeline-runtime-proof.v1.yap`
-- Generator: `generate-kanban-collection-timeline-runtime-proof.mjs`
+- Generator: `tools/generators/generate-kanban-collection-timeline-runtime-proof.mjs`
 - App name: `Kanban Collection Timeline Runtime Proof`
 - Dashboard: `Dynamic Controls Runtime Dashboard`
 - Data List: `Dynamic Control Runtime Items`

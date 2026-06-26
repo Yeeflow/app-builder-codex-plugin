@@ -8,7 +8,7 @@
 - List validation JSON: `it-hardware-capex-request-list-def.v1.json`
 - Wrapper: `it-hardware-capex-request.generated.v1.yap`
 - User-test copy: `/Users/Renger/Downloads/IT Hardware CAPEX Request Generated v1.yap`
-- Generator: `generate-it-hardware-capex-request-v1.mjs`
+- Generator: `tools/generators/generate-it-hardware-capex-request-v1.mjs`
 - ID family: `438...`
 - Flow key: `CAPX`
 
@@ -86,7 +86,7 @@ Every review/task has a rejection path to End with Rejection. InclusiveGateway c
 
 ## Validation
 
-- `node --check generate-it-hardware-capex-request-v1.mjs`: pass
+- `node --check tools/generators/generate-it-hardware-capex-request-v1.mjs`: pass
 - `validate-yap-package.js`: pass with warnings, 0 errors
 - `validate-yap-graph.js`: pass, 0 warnings
 - `validate-ywf-def.js`: pass with warnings, 0 errors

@@ -43,7 +43,7 @@ No external dependency IDs are introduced in Stage D.
 
 ## Validation Results
 
-- `node --check generate-service-desk-pro-dashboard-stage-d.mjs`: pass
+- `node --check tools/generators/generate-service-desk-pro-dashboard-stage-d.mjs`: pass
 - generated resource package validation: `pass_with_warnings`; only `APP_THEME_EMPTY`
 - generated resource graph validation: pass
 - wrapper build and round-trip: pass

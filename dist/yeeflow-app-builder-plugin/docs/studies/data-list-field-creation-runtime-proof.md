@@ -6,7 +6,7 @@ This focused runtime baseline validates a generated Data List package after the 
 
 ## Package
 
-- Generator: `generate-data-list-field-creation-runtime-proof.mjs`
+- Generator: `tools/generators/generate-data-list-field-creation-runtime-proof.mjs`
 - Local package: `data-list-field-creation-runtime-proof.v1.yap`
 - Import copy: `<downloads>/data-list-field-creation-runtime-proof.v1.yap`
 - App: `Data List Field Creation Runtime Proof`

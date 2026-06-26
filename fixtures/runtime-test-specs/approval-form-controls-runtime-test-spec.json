@@ -18,7 +18,7 @@
       "controls": ["percent", "daterange", "time", "hyperlink", "rate", "calculated"],
       "infrastructureControls": ["input", "textarea", "input_number", "identity-picker", "workflowControlPanel", "workflowHistory"],
       "outputFiles": {
-        "generator": "generate-approval-form-controls-test-v2-advanced-inputs.mjs",
+        "generator": "tools/generators/generate-approval-form-controls-test-v2-advanced-inputs.mjs",
         "appDef": "approval-form-controls-test-v2-app-def.json",
         "formDef": "approval-form-controls-test-v2-approval-form-def.json",
         "listDef": "approval-form-controls-test-v2-list-def.json",

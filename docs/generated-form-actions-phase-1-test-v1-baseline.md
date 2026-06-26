@@ -2,7 +2,7 @@
 
 ## Package
 
-- Generator: `generate-form-actions-phase-1-test-v1.mjs`
+- Generator: `tools/generators/generate-form-actions-phase-1-test-v1.mjs`
 - Decoded app: `form-actions-phase-1-test-v1-app-def.json`
 - Approval form: `form-actions-phase-1-test-v1-approval-form-def.json`
 - Data list: `form-actions-phase-1-test-v1-request-list-def.json`
@@ -15,8 +15,8 @@ The regenerated local package uses fresh ID family `473` and form key `FAP1S`.
 
 Passed:
 
-- `node --check generate-form-actions-phase-1-test-v1.mjs`
-- `node generate-form-actions-phase-1-test-v1.mjs`
+- `node --check tools/generators/generate-form-actions-phase-1-test-v1.mjs`
+- `node tools/generators/generate-form-actions-phase-1-test-v1.mjs`
 - `node validate-yap-package.js form-actions-phase-1-test-v1-app-def.json --mode generator --stage final`
 - `node validate-yap-graph.js form-actions-phase-1-test-v1-app-def.json --mode generator --stage final`
 - `node validate-ywf-def.js form-actions-phase-1-test-v1-approval-form-def.json --mode final`

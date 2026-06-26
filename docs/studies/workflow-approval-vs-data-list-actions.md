@@ -120,7 +120,7 @@ Runtime submit/routing proof should use disposable list records and safe assigne
 
 ## Combined Baseline Coverage
 
-`generate-workflow-actions-combined-runtime-baseline.mjs` builds a single ignored package with one approval form and one data list so the two workflow families can be checked in one Yeeflow app:
+`tools/generators/generate-workflow-actions-combined-runtime-baseline.mjs` builds a single ignored package with one approval form and one data list so the two workflow families can be checked in one Yeeflow app:
 
 - approval-form workflow: Start terminate/recall/email fields plus representative Assignment Task assignee, task type, appointed order, due-date, reminder, and notification settings
 - data-list workflow: Start email settings without terminate/recall fields, Created By/list-field assignee expression, and a task form with list-bound controls

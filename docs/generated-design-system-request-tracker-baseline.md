@@ -50,7 +50,7 @@ The package applies the generated-app design-system standards:
 
 All blocking local validation passed.
 
-- `node --check generate-design-system-request-tracker-v1.mjs`: pass
+- `node --check tools/generators/generate-design-system-request-tracker-v1.mjs`: pass
 - `node validate-yap-package.js ./design-system-request-tracker-app-def.v1.json --mode generator --stage final`: pass with warnings, errors `0`, warnings `5`
 - `node validate-yap-graph.js ./design-system-request-tracker-app-def.v1.json --mode generator --stage final`: pass
 - `node validate-ywf-def.js ./design-system-request-tracker-approval-form-def.v1.json --mode final`: pass with warnings, errors `0`, warnings `2`
