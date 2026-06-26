@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.61`
+- Version: `0.8.62`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.61` releases Approval form unused section cleanup gates from PR #261: generated Approval submission/task pages remove no-action Operations containers, remove empty copied business sections, preserve the locked `action_panel_flow_history_wrapper`, and keep fieldless generated forms valid with a single no-fields business content card instead of unused template scaffolding.
+Current release `0.8.62` releases Approval workflow publish-readiness gates from PR #263: generated Approval workflows include Designer-publish-ready `flowPage`, structured `variables.basic/listref/filter`, submission/task page URL aliases, assignment metadata, approve metadata, rejected-path routing to `EndRejectEvent`, and non-overlapping graph positions before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.61
+Version: 0.8.62
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.61
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.62
 ```
 
 ## What Is Included

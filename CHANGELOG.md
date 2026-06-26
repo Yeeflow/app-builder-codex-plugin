@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.62
+
+- Release Approval workflow publish-readiness gates from PR #263.
+- Generate Approval workflow `DefResource` with Designer-publish-ready `flowPage`, structured `variables.basic/listref/filter`, and registered submission/task page URLs.
+- Require Start and Assignment Task `taskurl` aliases to resolve to the correct submission/task pages.
+- Require `MultiAssignmentTask` assignee array, approve metadata, rejected-path routing to `EndRejectEvent`, valid graph refs, and non-overlapping workflow node positions.
+- Add generated-final preflight coverage, focused regression tests, source/dist cache artifact expectations, and generator/package-validator skill guidance.
+
 ## 0.8.61
 
 - Release Approval form unused section cleanup gates from PR #261.
