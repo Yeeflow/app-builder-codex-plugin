@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.65`
+`0.8.66`
+
+Version `0.8.66` releases collection action layout and approval field fidelity gates from PR #271. Dashboard Collection template actions now rewrite or remove unresolved layout placeholders such as `{{layout}}`; Approval form field validation requires App Plan planned visible labels such as `Loan Number` to survive materialization instead of accepting technical-only bindings; source approval layout templates are included as cache artifacts; and focused clean-checkout regression coverage prevents source/dist template drift.
 
 Version `0.8.65` releases repository root hygiene and compatibility gates from PR #269. Historical root generator helpers now live under `tools/generators/`, runtime proof studies under `docs/studies/root-runtime-proofs/`, and runtime test specifications under `fixtures/runtime-test-specs/`; public root CLI/validator/wrapper entrypoints remain stable, source/dist reference paths are aligned, and `scripts/test-repo-root-hygiene.mjs` prevents root-level proof and generator clutter from returning.
 
