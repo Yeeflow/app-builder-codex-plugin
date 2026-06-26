@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.62`
+- Version: `0.8.63`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.62` releases Approval workflow publish-readiness gates from PR #263: generated Approval workflows include Designer-publish-ready `flowPage`, structured `variables.basic/listref/filter`, submission/task page URL aliases, assignment metadata, approve metadata, rejected-path routing to `EndRejectEvent`, and non-overlapping graph positions before signing readiness.
+Current release `0.8.63` releases Data List custom form LayoutView runtime source gates from PR #265: generated Type 1 custom Data List forms duplicate complete form JSON into both `LayoutView` and `LayoutInResources[0].Resource`, and generated-final validation blocks placeholder or drifting runtime form sources before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.62
+Version: 0.8.63
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.62
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.63
 ```
 
 ## What Is Included

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.63
+
+- Release Data List custom form LayoutView runtime-source gates from PR #265.
+- Write complete rendered Type 1 custom Data List form JSON to both `Layouts[].LayoutView` and `Layouts[].LayoutInResources[0].Resource`.
+- Block missing, blank, malformed, placeholder, or drifting custom form `LayoutView` surfaces before signing readiness.
+- Extend full-app materializer regression coverage so generated New/Edit/View custom forms load from the same runtime and export form JSON.
+- Add runtime-source standard/training docs, cache artifact expectations, and generator/package-validator skill guidance.
+
 ## 0.8.62
 
 - Release Approval workflow publish-readiness gates from PR #263.

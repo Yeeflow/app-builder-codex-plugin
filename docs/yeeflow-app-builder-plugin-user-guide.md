@@ -20,9 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.62`
+`0.8.63`
 
-Version `0.8.62` releases Approval workflow publish-readiness gates from PR #263. Generated Approval workflows must include Designer-publish-ready `flowPage`, structured `variables.basic/listref/filter`, submission/task page URL aliases, assignment metadata, approve metadata, rejected-path routing to `EndRejectEvent`, valid graph refs, and non-overlapping workflow node positions before signing readiness.
+Version `0.8.63` releases Data List custom form LayoutView runtime-source gates from PR #265. Generated Type 1 custom Data List forms now write complete rendered form JSON to both `Layouts[].LayoutView` and `Layouts[].LayoutInResources[0].Resource`; generated-final validation blocks missing, placeholder, or drifting LayoutView runtime sources before signing readiness.
 
 Version `0.8.61` releases Approval form unused section cleanup gates from PR #261. Generated Approval submission/task pages must remove no-action Operations containers, remove empty copied business sections, preserve the locked `action_panel_flow_history_wrapper`, and keep fieldless generated forms valid with a single no-fields business content card instead of unused template scaffolding.
 
