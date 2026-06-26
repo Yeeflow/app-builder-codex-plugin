@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.57
+
+- Release Dashboard Collection search-template retirement and analytics identity hardening from PR #252.
+- Remove `collection_control_grid_table_with_search` from the approved Dashboard Collection golden reference set; generated App Plans must choose one of the remaining approved Collection templates.
+- Treat search/fulltext as behavior inside an approved Collection template instead of a standalone template ID.
+- Recursively rewrite copied Collection source IDs and placeholders inside generated Dashboard Collection action/data payloads before signing readiness.
+- Ensure generated Data Analytics controls, including Pivot table controls, use UUID-shaped runtime IDs and keep `ReportIds[]` / `exts[].i` aligned.
+- Narrow Data Analytics source-field identity scanning so display labels such as `series[].name` are not treated as source field references.
+
 ## 0.8.56
 
 - Release Approval Form Fields Grid v1.1 golden references from PR #250.

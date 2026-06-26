@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.56`
+`0.8.57`
+
+Version `0.8.57` releases Dashboard Collection search-template retirement and analytics identity hardening from PR #252. `collection_control_grid_table_with_search` is retired from the approved Dashboard Collection golden reference set; generated App Plans must choose one of the remaining approved Collection templates and model search/fulltext as behavior inside that template. Generated Dashboard Collection clones must recursively rewrite copied source IDs and placeholders, and generated Data Analytics controls, including Pivot table controls, must use UUID-shaped runtime IDs aligned with `ReportIds[]` and `exts[].i`. Data Analytics identity validation now ignores display labels such as `series[].name` when checking source-field references.
 
 Version `0.8.56` releases Approval Form Fields Grid v1.1 golden references from PR #250. Generated Approval form submission/task form field groups must use `approval_form_fields_grid_2col_v1_1` or `approval_form_fields_grid_3col_v1_1`, App Plans must select the chosen field-grid template per form field group, and generated-final preflight blocks Approval form field controls outside approved wrappers, nonzero field margins, invalid responsive column counts, full-row control span mismatches, and missing business-specific field `nav_label` metadata.
 
