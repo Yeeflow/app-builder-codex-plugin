@@ -17,8 +17,36 @@ const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", l
 const CONTENT_WIDTH = 1280;
 const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header"]);
 const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "content_card_60_wrapper", "content_card_40_wrapper"]);
+const CONTENT_WRAPPER_MODULES = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+const SECTION_MODULES = new Set(["1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
 const REQUIRED_REGIONS = ["main", "content", "page_title_section", "page_title_content", "page_title_text", "page_title_description", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area", "action_panel_flow_history_wrapper"];
 const DATA_ANALYTICS_TYPES = new Set(["pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "summary"]);
+const MEANINGFUL_BUSINESS_TYPES = new Set([
+  "input",
+  "textarea",
+  "richtext",
+  "rich-text",
+  "radio",
+  "checkbox",
+  "switch",
+  "date",
+  "datetime",
+  "number",
+  "input_number",
+  "lookup",
+  "people",
+  "user",
+  "collection",
+  "data-filter",
+  "select-filter",
+  "radio-filter",
+  "checkbox-filter",
+  "search-filter",
+  "dynamic-field",
+  "dynamic-user",
+  "dynamic-image",
+  "dynamic-file",
+]);
 const BROTLI_PREFIX = Buffer.from("::brotli::", "utf8");
 
 if (isMainModule()) {
@@ -82,6 +110,12 @@ function validateRegistry(registry, references, findings, registryPath) {
   }
   if (!asArray(registry.lockedContainers).includes("action_panel_flow_history_wrapper")) {
     findings.push(error("APPROVAL_FORM_LAYOUT_LOCKED_ACTION_HISTORY_MISSING", "Registry must lock action_panel_flow_history_wrapper.", {}));
+  }
+  const cleanup = registry.generatedCleanupRules || {};
+  for (const key of ["unusedCopiedModulesMustBeRemoved", "operationsWithoutConfiguredActionsMustBeRemoved", "emptyContentCardSectionsMustBeRemoved", "lockedActionPanelFlowHistoryWrapperMustRemain"]) {
+    if (cleanup[key] !== true) {
+      findings.push(error("APPROVAL_FORM_LAYOUT_CLEANUP_RULE_MISSING", "Registry must document generated Approval form cleanup hard rules.", { rule: key }));
+    }
   }
   for (const reference of references.values()) {
     if (reference.templateId === TASK_TEMPLATE_ID) {
@@ -319,12 +353,58 @@ function validateBusinessSlots(resource, context) {
     if (!findFirstByIdentity(card, "section_title_area")) context.findings.push(error("APPROVAL_FORM_LAYOUT_SECTION_TITLE_AREA_MISSING", "Every content card wrapper must preserve section_title_area.", { source: context.source }));
     if (!findFirstByIdentity(card, "section_content_area")) context.findings.push(error("APPROVAL_FORM_LAYOUT_SECTION_CONTENT_AREA_MISSING", "Every content card wrapper must preserve section_content_area.", { source: context.source }));
   }
+  if (!context.registryMode) validateGeneratedModuleCleanup(resource, context);
   for (const entry of flatten(resource)) {
     const type = String(entry.node?.type || "");
     if (!isBusinessControlType(type)) continue;
     if (isWorkflowLockedControl(entry, resource) || isInsideAllowedBusinessSlot(entry, resource)) continue;
     context.findings.push(error("APPROVAL_FORM_LAYOUT_BUSINESS_CONTROL_OUTSIDE_ALLOWED_SLOT", "Business controls must be placed only inside approved Approval Form v1.1 business-content slots.", { source: context.source, path: entry.pointer, type, identities: identityCandidates(entry.node) }));
   }
+}
+
+function validateGeneratedModuleCleanup(resource, context) {
+  for (const entry of flatten(resource)) {
+    if (hasIdentity(entry.node, "Operations") && !hasActionConfiguration(entry.node)) {
+      context.findings.push(error("APPROVAL_FORM_LAYOUT_OPERATIONS_WITHOUT_ACTIONS", "Generated Approval form Operations containers must be removed unless they contain real configured Yeeflow actions.", { source: context.source, path: entry.pointer }));
+    }
+    if (identityCandidates(entry.node).some((id) => CONTENT_WRAPPER_MODULES.has(id))) {
+      const slot = findFirstByIdentity(entry.node, "section_content_area");
+      if (!hasMeaningfulBusinessContent(slot)) {
+        context.findings.push(error("APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA", "Generated Approval form content card wrappers must not keep empty copied template sections; remove unused sections or materialize real business content.", { source: context.source, path: entry.pointer }));
+      }
+    }
+    if (identityCandidates(entry.node).some((id) => SECTION_MODULES.has(id)) && !containsLockedActionHistory(entry.node) && !hasMeaningfulBusinessContent(entry.node)) {
+      context.findings.push(error("APPROVAL_FORM_LAYOUT_UNUSED_SECTION_MODULE", "Generated Approval form section modules must be removed when they do not contain real business content.", { source: context.source, path: entry.pointer }));
+    }
+  }
+}
+
+function containsLockedActionHistory(node) {
+  return Boolean(findFirstByIdentity(node, "action_panel_flow_history_wrapper"));
+}
+
+function hasMeaningfulBusinessContent(node) {
+  if (!isObject(node)) return false;
+  return flatten(node).some((entry) => {
+    const type = String(entry.node?.type || "");
+    if (MEANINGFUL_BUSINESS_TYPES.has(type)) return true;
+    if (entry.node?.approvalFormNoFieldsNotice === true) return true;
+    if (identityCandidates(entry.node).some((id) => id === "form_grid_fields_wrapper" || id === "form_grid_fields_2col_wrapper" || id === "form_grid_fields_3col_wrapper")) return true;
+    if (["button", "action_button"].includes(type) && hasActionConfiguration(entry.node)) return true;
+    return false;
+  });
+}
+
+function hasActionConfiguration(control) {
+  const attrs = control?.attrs || {};
+  if (attrs.control_action || attrs.action || attrs["action-type"] || attrs.actionType) return true;
+  if (Array.isArray(attrs.actions) && attrs.actions.length) return true;
+  if (Array.isArray(control?.actions) && control.actions.length) return true;
+  return flatten(control).some((entry) => {
+    if (entry.node === control) return false;
+    const childAttrs = entry.node?.attrs || {};
+    return Boolean(childAttrs.control_action || childAttrs.action || childAttrs["action-type"] || childAttrs.actionType || (Array.isArray(childAttrs.actions) && childAttrs.actions.length) || (Array.isArray(entry.node?.actions) && entry.node.actions.length));
+  });
 }
 
 function validateTaskReadonlyGuidance(resource, findings, source) {

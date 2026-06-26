@@ -4,7 +4,7 @@
 
 Approval Form Layouts v1.1 is the page-level golden reference standard for generated Yeeflow Approval form submission pages and workflow task pages. It aligns Approval forms, Data list workflow task forms, and Schedule workflow task forms with Dashboard Page Layouts v1.1 and Data List Form Layouts v1.1 while preserving workflow-specific runtime controls.
 
-Generation must copy one of the approved export-shaped Approval form templates first, then remove, duplicate, or adapt only the allowed business regions according to the App Plan.
+Generation must copy one of the approved export-shaped Approval form templates first, then remove, duplicate, or adapt only the allowed business regions according to the App Plan. Generated packages must remove unused copied modules; the source template may contain optional examples, but generated Approval forms must not keep unused visual sections.
 
 ## Registry
 
@@ -87,7 +87,7 @@ Within `page_title_content`, the text of `page_title_text` and `page_title_descr
 
 Within `section_title_header`, the text of `section_title_text` and `section_title_description` may change to describe the content inside the associated content card.
 
-Within `Operations`, generated controls must be real configured action controls. Placeholder or visual-only buttons are forbidden in generated packages.
+Within `Operations`, generated controls must be real configured action controls. Placeholder or visual-only buttons are forbidden in generated packages. If a page title section or content card has no real page-level or section-level action, remove that `Operations` container from the generated form.
 
 Within `section_content_area`, generated resources may insert Approval form field controls, the approved Data List Form field-grid template, approved Collection templates, Text/Heading controls, or other plugin-supported controls appropriate to Approval forms.
 
@@ -116,7 +116,7 @@ Generated Approval forms must not remove, restyle, or replace this region. Busin
 
 ## Repeatable And Removable Modules
 
-Generated Approval form pages may remove unused modules. New modules may only be created by copying one of these approved repeatable/removable modules from the selected template:
+Generated Approval form pages must remove unused modules. New modules may only be created by copying one of these approved repeatable/removable modules from the selected template:
 
 - `1_columns_section`
 - `content_card_wrapper`
@@ -127,6 +127,8 @@ Generated Approval form pages may remove unused modules. New modules may only be
 - `content_card_40_wrapper`
 
 Copied modules must preserve the template's structure, hierarchy, control types, width, padding, direction, gap, background, typography, and required children. Do not invent new Approval form layout modules.
+
+Generated forms must not keep empty copied business sections. A copied `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` is valid only when its `section_content_area` contains real business content such as an approved Approval Form Field Layout wrapper, a configured Collection template, a data filter group, Dynamic controls, or an action button with real Yeeflow action configuration. A copied `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` that does not contain real business content must be removed. The locked `action_panel_flow_history_wrapper` is the exception and must remain intact.
 
 ## App Plan Requirements
 
