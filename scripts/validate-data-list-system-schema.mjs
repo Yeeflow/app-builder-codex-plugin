@@ -207,6 +207,19 @@ function addIssue(issues, level, code, listTitle, message, detail = {}) {
   issues.push({ level, code, listTitle, message, ...detail });
 }
 
+function hasExportProvenCustomFormRouting(child) {
+  const layoutView = parseMaybeJson(child.list.LayoutView, null);
+  if (!layoutView || typeof layoutView !== "object" || Array.isArray(layoutView)) return false;
+  const layouts = new Map((Array.isArray(child.layouts) ? child.layouts : []).map((layout) => [String(layout?.LayoutID || ""), layout]));
+  for (const usage of ["add", "edit", "view"]) {
+    const layoutId = String(layoutView?.[usage] || "").trim();
+    if (!layoutId || layoutId.toLowerCase() === "default") return false;
+    const layout = layouts.get(layoutId);
+    if (!layout || Number(layout.Type) !== 1) return false;
+  }
+  return true;
+}
+
 function fieldLabel(field) {
   return `${field.DisplayName || field.FieldName || "(unnamed)"} [${field.FieldName || "no FieldName"}]`;
 }
@@ -538,7 +551,7 @@ function validateChild(child, issues, context, args) {
     addIssue(issues, "error", "TEXT0_PRIMARY_FIELD_INVALID_WHEN_TITLE_USED", child.title, "Generated list still contains Text0; use native Title instead of Text0 as primary display field.");
   }
 
-  if (args.strictGeneratedList && child.list.LayoutView != null) {
+  if (args.strictGeneratedList && child.list.LayoutView != null && !hasExportProvenCustomFormRouting(child)) {
     addIssue(issues, "error", "LIST_LAYOUTVIEW_SHOULD_BE_NULL", child.title, "Generated default data-list routing should keep List.LayoutView null unless export-proven custom form routing is configured.");
   }
 

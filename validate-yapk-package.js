@@ -306,7 +306,7 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
     if (pkg.List.Type !== undefined && !LIST_TYPE_ENUM.has(Number(pkg.List.Type))) add(errors, "YAPK_LIST_TYPE_INVALID", "List.Type is outside product schema enum.", { path: `${path}.List.Type` });
     if (Number(pkg.List.Flags) !== 1) add(errors, "YAPK_LISTMODEL_FLAGS_MISSING_OR_INVALID", "Generated AppPackageInfo child list resources require List.Flags = 1 before signing.", { path: `${path}.List.Flags`, value: pkg.List.Flags });
     validateAppStorageCodes(pkg.List, `${path}.List`, errors, appId);
-    if (pkg.List.LayoutView !== null && pkg.List.LayoutView !== undefined) {
+    if (pkg.List.LayoutView !== null && pkg.List.LayoutView !== undefined && !hasExportResolvedCustomFormRouting(pkg)) {
       add(errors, "LIST_LAYOUTVIEW_SHOULD_BE_NULL", "Generated child List.LayoutView must be null unless custom form routing is fully export-resolved.", { path: `${path}.List.LayoutView` });
     }
   }
@@ -318,6 +318,19 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
   validateDefaultViews(pkg, path, errors);
   validateChoiceSampleRows(pkg, path, errors);
   if ("Defs" in pkg) add(errors, "YAPK_CHILDS_USES_DEFS", "YAPK Childs items must use Fields, not YAP Defs.", { path: `${path}.Defs` });
+}
+
+function hasExportResolvedCustomFormRouting(pkg) {
+  const layoutView = parseMaybeJson(pkg?.List?.LayoutView, null);
+  if (!isObject(layoutView)) return false;
+  const layouts = new Map(asArray(pkg?.Layouts).map((layout) => [String(layout?.LayoutID || ""), layout]));
+  for (const usage of ["add", "edit", "view"]) {
+    const layoutId = String(layoutView?.[usage] || "").trim();
+    if (!layoutId || layoutId.toLowerCase() === "default") return false;
+    const layout = layouts.get(layoutId);
+    if (!layout || Number(layout.Type) !== 1) return false;
+  }
+  return true;
 }
 
 function validateNoEmbeddedListDatas(pkg, path, errors) {

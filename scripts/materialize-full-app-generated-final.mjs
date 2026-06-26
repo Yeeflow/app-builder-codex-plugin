@@ -676,13 +676,60 @@ function fieldSpecsForList(planDemand, listName) {
 function assignCustomFormLayoutPositions(planDemand, dataListNames) {
   const listIndexByName = new Map(dataListNames.map((name, index) => [normKey(name), index]));
   const offsetsByList = new Map();
-  return (planDemand.customFormRecords || [])
+  return ensureRequiredCustomFormRecords(planDemand, dataListNames)
     .map((record) => {
       const listIndex = listIndexByName.has(normKey(record.listName)) ? listIndexByName.get(normKey(record.listName)) : 0;
       const next = (offsetsByList.get(listIndex) || 0) + 1;
       offsetsByList.set(listIndex, next);
       return { ...record, listIndex, layoutIndex: next };
     });
+}
+
+function ensureRequiredCustomFormRecords(planDemand, dataListNames) {
+  const records = [...(planDemand.customFormRecords || [])];
+  for (const listName of dataListNames) {
+    const listRecords = records.filter((record) => normKey(record.listName) === normKey(listName));
+    if (!listRecords.some((record) => customFormUsage(record) === "newEdit")) {
+      records.push({
+        listName,
+        formName: `${listName} New/Edit Form`,
+        formType: "New/Edit",
+        generatedByPolicy: "required-new-edit-custom-form",
+      });
+    }
+    if (!listRecords.some((record) => customFormUsage(record) === "view")) {
+      records.push({
+        listName,
+        formName: `${listName} View Item`,
+        formType: "View",
+        generatedByPolicy: "required-view-custom-form",
+      });
+    }
+  }
+  return records;
+}
+
+function customFormUsage(record) {
+  const text = `${record?.formType || ""} ${record?.formName || ""}`.toLowerCase();
+  if (/\bview\b|detail/.test(text)) return "view";
+  if (/new\s*\/\s*edit|\bnew\b|\bedit\b|create/.test(text)) return "newEdit";
+  return "";
+}
+
+function buildDataListFormDisplaySettings({ customLayoutsForList, ids }) {
+  const byUsage = new Map();
+  for (const assignment of customLayoutsForList) {
+    const usage = customFormUsage(assignment);
+    if (!usage || byUsage.has(usage)) continue;
+    byUsage.set(usage, stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]));
+  }
+  const newEditLayoutId = byUsage.get("newEdit") || byUsage.get("view") || "";
+  const viewLayoutId = byUsage.get("view") || newEditLayoutId;
+  return {
+    add: newEditLayoutId,
+    edit: newEditLayoutId,
+    view: viewLayoutId,
+  };
 }
 
 function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
@@ -1078,12 +1125,11 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       const layoutId = stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]);
       layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, fields }));
     }
-    const detailLayoutId = customLayoutsForList.length
-      ? stringId(ids[`decoded.Childs[${index}].Layouts[${customLayoutsForList[0].layoutIndex}].LayoutID`])
-      : "";
+    const displayLayoutView = buildDataListFormDisplaySettings({ customLayoutsForList, ids });
+    const detailLayoutId = displayLayoutView.view || displayLayoutView.edit || displayLayoutView.add || "";
     listMetaByName.set(normKey(name), { listName: name, listId, fields, detailLayoutId });
     return {
-      List: listInfo({ listId, title: name, type: 1, ext2: "{\"generatedFinal\":true}" }),
+      List: listInfo({ listId, title: name, type: 1, ext2: "{\"generatedFinal\":true}", layoutView: JSON.stringify(displayLayoutView) }),
       Fields: fields,
       Layouts: layouts,
       RemindRules: [],
@@ -2576,7 +2622,7 @@ function approvalFormDef(id, title, role) {
   return resource;
 }
 
-function listInfo({ listId, title, type, ext2 = "", iconUrl = "" }) {
+function listInfo({ listId, title, type, ext2 = "", iconUrl = "", layoutView = null }) {
   return {
     ListID: listId,
     Title: title,
@@ -2592,7 +2638,7 @@ function listInfo({ listId, title, type, ext2 = "", iconUrl = "" }) {
     Ext3: "",
     Type: type,
     Flags: 1,
-    LayoutView: type === 1 ? null : "",
+    LayoutView: type === 1 ? layoutView : "",
     Perms: [],
     AdvancePerms: [],
     IndexCode: "flowcraft",

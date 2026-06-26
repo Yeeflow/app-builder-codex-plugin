@@ -307,6 +307,8 @@ Rules:
 
 Return to the Data lists and Document libraries from Section 4 and plan their custom forms.
 
+Every business Data List or Document Library from Section 4 must plan custom forms for New Item, Edit Item, and View Item. Do not plan Yeeflow's built-in default layout for generated business lists. If a generated list is a hidden system/support list and custom forms are intentionally not needed, add an explicit system/support-list form-layout exemption with reason, user impact, fallback, and proof boundary.
+
 ### 10.x <Data List or Document Library Name>
 
 | Form Name | Form Type | Purpose | Used By | Layout Pattern | Actions Required | Notes |
@@ -315,7 +317,7 @@ Return to the Data lists and Document libraries from Section 4 and plan their cu
 
 #### Data List Form Layout Template Selection
 
-Required for every custom Data List form that will be generated as a New Item, Edit Item, or View Item form.
+Required for every Section 4 Data List or Document Library. Each business list must have New/Edit and View custom form coverage.
 
 | Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -326,6 +328,8 @@ Rules:
 - The Selected Data List Form Layout Template must be one of `data_list_form_layout_new_edit_v1_1` or `data_list_form_layout_view_item_v1_1` from `docs/reference/data-list-form-layout-templates.json`.
 - New Item and Edit Item custom forms must select `data_list_form_layout_new_edit_v1_1`. If New and Edit use separate forms, both must still select this template.
 - View Item custom forms must select `data_list_form_layout_view_item_v1_1`.
+- Default New/Edit/View layouts are forbidden for generated business Data Lists and Document Libraries.
+- System/support-list exemptions must be explicit; silent omission of custom forms is not generation-ready.
 - New/Edit forms focus on the current list item and must not plan related Collection/Data Analytics/KPI regions.
 - View Item forms may plan current-record display plus related business data, approved Collection templates, approved Data Analytics templates, and KPI regions inside the v1.1 allowed slots. Field-grid and Collection templates may use the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` depending on the required section width.
 - App Plan selection is a business/layout decision only. It must not include generated `ListID`, `LayoutID`, action type codes, JSON property paths, placeholder IDs, copied control JSON, or runtime payload fields.

@@ -31,9 +31,19 @@ The templates were parsed from the user-provided `Data list page layouts.ydl` ex
 
 ## Template Selection
 
+Every generated business Data List and Document Library must use custom Data List forms for all three item entry points:
+
+- New Item
+- Edit Item
+- View Item
+
+Do not use the Yeeflow built-in `default` layout for any generated business Data List New/Edit/View entry point. `ListModel.LayoutView.add`, `ListModel.LayoutView.edit`, and `ListModel.LayoutView.view` must each point to a Type `1` custom form layout owned by the same list.
+
 Use `data_list_form_layout_new_edit_v1_1` for every custom Data List form used as New Item or Edit Item. If a list uses separate New and Edit custom forms, both forms must use this template as their page layout source.
 
 Use `data_list_form_layout_view_item_v1_1` for every custom Data List form used as View Item.
+
+System/support lists may skip custom forms only when the App Plan explicitly declares a system/support-list form-layout exemption with the reason, runtime impact, and proof boundary. Silent omission, empty `LayoutView`, missing `add`/`edit`/`view`, or literal `default` is not generation-ready.
 
 New/Edit forms focus on editing the current list item. They must not include related business-data regions, Collection templates, charts, pivot tables, or KPI analytics.
 
@@ -162,7 +172,7 @@ Dashboard Page Layouts v1.1 and Dashboard component golden references remain com
 
 ## App Plan Requirements
 
-The App Plan Custom Data List Forms Plan must select the correct Data List Form Layout template for each planned custom form.
+The App Plan Custom Data List Forms Plan must select the correct Data List Form Layout template for each Data List or Document Library from Section 4, unless the list is explicitly documented as a system/support-list exemption.
 
 Add a Data List Form Layout Template Selection table under each relevant custom form plan:
 
@@ -172,9 +182,12 @@ Add a Data List Form Layout Template Selection table under each relevant custom 
 
 Rules:
 
+- Every business Data List or Document Library planned in Section 4 must have New/Edit and View custom form rows in Section 10.
 - Select exactly one approved template per custom Data List form.
 - New/Edit forms must select `data_list_form_layout_new_edit_v1_1`.
 - View forms must select `data_list_form_layout_view_item_v1_1`.
+- Default New/Edit/View layouts are forbidden for generated business lists.
+- System/support-list exemptions must be explicit and must include a reason, user impact, fallback, and proof boundary.
 - Do not include generated `ListID`, `LayoutID`, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
 - Data Analytics and Collection template choices for View Item related regions must still use their own approved template selection tables when those components are planned.
 - Current-record field groups must also select `data_list_form_fields_grid_v1_1` in a Form Fields Layout Template Selection table.
@@ -196,3 +209,12 @@ node scripts/validate-data-list-form-fields-template.mjs --package <app.yapk> --
 ```
 
 First-generation preflight invokes this gate before signing readiness. Signing, install/import, upgrade, Version Management, and runtime proof must remain blocked when generated custom Data List forms violate this standard.
+
+The package gate must fail when a generated business list:
+
+- has no parseable `LayoutView` display settings
+- omits `add`, `edit`, or `view`
+- assigns any of those usages to literal `default`
+- points any usage to a missing layout or a non-Type `1` layout
+- assigns New/Edit to a form that does not carry `data_list_form_layout_new_edit_v1_1`
+- assigns View to a form that does not carry `data_list_form_layout_view_item_v1_1`
