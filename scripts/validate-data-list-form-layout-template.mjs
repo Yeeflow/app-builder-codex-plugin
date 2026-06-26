@@ -105,6 +105,7 @@ function validatePackage(packagePath, context) {
   let customFormCount = 0;
   for (const form of collectDataListForms(decoded)) {
     customFormCount += 1;
+    validateCustomFormRuntimeSource(form, context);
     const usages = usageByLayoutId.get(String(form.layoutId)) || [];
     const expected = inferExpectedTemplate(form, usages);
     validateFormResource(form.resource, {
@@ -280,12 +281,62 @@ function collectDataListForms(decoded) {
     const listTitle = child?.List?.Title || child?.ListModel?.Title || child?.Title || child?.Name || `Childs[${childIndex}]`;
     for (const [layoutIndex, layout] of asArray(child?.Layouts || child?.Item?.Layouts).entries()) {
       if (Number(layout?.Type) !== 1) continue;
-      const resource = parseResource(asArray(layout?.LayoutInResources)[0]?.Resource);
-      if (!resource) continue;
-      forms.push({ listTitle, title: layout?.Title || `Layouts[${layoutIndex}]`, layoutId: layout?.LayoutID, resource });
+      const layoutResourceValue = asArray(layout?.LayoutInResources)[0]?.Resource;
+      const resource = parseResource(layoutResourceValue);
+      const layoutViewResource = parseResource(layout?.LayoutView);
+      forms.push({
+        listTitle,
+        title: layout?.Title || `Layouts[${layoutIndex}]`,
+        layoutId: layout?.LayoutID,
+        layoutIndex,
+        resource: resource || layoutViewResource,
+        layoutViewResource,
+        layoutResource: resource,
+        layoutViewRaw: layout?.LayoutView,
+        layoutResourceRaw: layoutResourceValue,
+      });
     }
   }
   return forms;
+}
+
+function validateCustomFormRuntimeSource(form, context) {
+  const detail = {
+    list: form.listTitle,
+    layout: form.title,
+    layoutId: form.layoutId,
+    layoutIndex: form.layoutIndex,
+  };
+  if (!isObject(form.layoutViewResource)) {
+    context.findings.push(error("DATA_LIST_FORM_LAYOUTVIEW_RESOURCE_MISSING", "Type 1 custom Data List form Layout.LayoutView must contain the complete form JSON used by runtime/designer, not a placeholder, blank, null, or omitted value.", detail));
+    return;
+  }
+  if (!isObject(form.layoutResource)) {
+    context.findings.push(error("DATA_LIST_FORM_LAYOUTINRESOURCE_RESOURCE_MISSING", "Type 1 custom Data List form LayoutInResources[0].Resource must contain the complete form JSON.", detail));
+    return;
+  }
+  if (isPlaceholderLayoutView(form.layoutViewResource)) {
+    context.findings.push(error("DATA_LIST_FORM_LAYOUTVIEW_PLACEHOLDER", "Type 1 custom Data List form Layout.LayoutView must not be a minimal/source placeholder. It must duplicate the complete form JSON so runtime and Designer can load fields.", { ...detail, layoutView: form.layoutViewResource }));
+  }
+  if (!sameStableJson(form.layoutViewResource, form.layoutResource)) {
+    context.findings.push(error("DATA_LIST_FORM_LAYOUTVIEW_RESOURCE_DRIFT", "Type 1 custom Data List form Layout.LayoutView must be equivalent to LayoutInResources[0].Resource. Runtime reads LayoutView, while export/materialization also carries LayoutInResources; both surfaces must stay aligned.", detail));
+  }
+}
+
+function isPlaceholderLayoutView(value) {
+  if (!isObject(value)) return false;
+  const source = String(value.source || value.generatedBy || "").toLowerCase();
+  return source.includes("minimal-resource-graph") || (!Array.isArray(value.children) && !value.type && !value._ak_c);
+}
+
+function sameStableJson(left, right) {
+  return stableJson(left) === stableJson(right);
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map((item) => stableJson(item)).join(",")}]`;
+  if (isObject(value)) return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(",")}}`;
+  return JSON.stringify(value);
 }
 
 function validateListDisplayAssignments(decoded, context) {
