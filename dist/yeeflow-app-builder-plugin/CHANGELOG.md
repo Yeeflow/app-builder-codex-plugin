@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.68
+
+- Release Dashboard Collection and Pie/Data Analytics golden rebuild gates from PR #275.
+- Preserve the real `grid_table_col_body` Collection root when rebuilding `collection_control_grid_table_with_multiselect` regions from the approved template.
+- Re-instantiate cloned Dashboard template UUID-like values per page so copied template internals do not collide across generated Dashboard resources.
+- Require Pie/Data Analytics controls to clone the full approved wrapper instead of simplified chart shells and keep template provenance on the visible analytics control.
+- Require chart runtime `attrs.data`, `attrs.model`, `attrs.series[]`, and `attrs.values[]` to match the host `Resource.ReportIds[]` and `Resource.exts[]` runtime model.
+- Block derived pseudo-field IDs such as `ListDataID_COUNT`; COUNT analytics must use real source fields with aggregate metadata.
+
 ## 0.8.67
 
 - Release Approval workflow condition and upgrade proof gates from PR #273.
