@@ -186,6 +186,7 @@ const requiredDocs = [
   "docs/training/approval-task-layout-workflow-surfaces-training-report.md",
   "docs/training/approval-form-fields-grid-template-training-report.md",
   "docs/training/approval-workflow-publish-readiness-training-report.md",
+  "docs/training/approval-workflow-condition-upgrade-proof-training-report.md",
   "docs/training/yapk-bit-switch-root-identity-signing-gates-training-report.md",
   "docs/training/root-icon-dashboard-empty-section-filter-hard-gates-training-report.md",
   "docs/training/full-app-data-analytics-materialization-runtime-gates-training-report.md",

@@ -41,7 +41,9 @@ export function inspectYapkUpgradeVersionRow({ evidence, packageId } = {}) {
     }
   }
   if (row && String(row.Status || row.status || "") === "Succeed") {
-    validateRuntimeProof(data.runtimeProof, findings);
+    validateRuntimeProof(data.runtimeProof, findings, {
+      expectedApprovalWorkflow: data.expectedApprovalWorkflow || data.expectedApprovalWorkflowSummary || data.expectedDefBlobSummary,
+    });
   }
   const proofArtifact = data.screenshot || data.screenshotPath || data.domProofPath || data.structuredDomProofPath;
   if (!proofArtifact) findings.push(finding("warning", "UPGRADE_VERSION_ROW_PROOF_ARTIFACT_MISSING", "Version Management proof should save screenshot or structured DOM evidence."));
@@ -52,7 +54,7 @@ export function inspectYapkUpgradeVersionRow({ evidence, packageId } = {}) {
   });
 }
 
-function validateRuntimeProof(runtimeProof, findings) {
+function validateRuntimeProof(runtimeProof, findings, options = {}) {
   if (!isObject(runtimeProof)) {
     findings.push(finding("error", "UPGRADE_RUNTIME_PROOF_MISSING", "Final Succeed row must be followed by separate browser/runtime proof for the affected surface."));
     return;
@@ -62,7 +64,41 @@ function validateRuntimeProof(runtimeProof, findings) {
   if (runtimeProof.expectedLabel && !asArray(runtimeProof.visibleLabels).map(String).includes(String(runtimeProof.expectedLabel))) {
     findings.push(finding("error", "UPGRADE_RUNTIME_FIELD_LABEL_MISSING", "Runtime proof must show the intended field label on the affected surface.", { expectedLabel: runtimeProof.expectedLabel }));
   }
+  if (options.expectedApprovalWorkflow || runtimeProof.approvalWorkflowProof) {
+    validateApprovalWorkflowRuntimeProof(runtimeProof, options.expectedApprovalWorkflow || {}, findings);
+  }
   if (!runtimeProof.screenshot && !runtimeProof.domProof) findings.push(finding("warning", "UPGRADE_RUNTIME_PROOF_ARTIFACT_MISSING", "Runtime proof should save screenshot or structured DOM evidence."));
+}
+
+function validateApprovalWorkflowRuntimeProof(runtimeProof, expected, findings) {
+  const proof = isObject(runtimeProof.approvalWorkflowProof) ? runtimeProof.approvalWorkflowProof : runtimeProof;
+  const live = proof.liveDefBlobSummary || proof.liveDesignerSummary || proof.defBlobSummary;
+  if (!isObject(live)) {
+    findings.push(finding("error", "UPGRADE_APPROVAL_DEF_BLOB_PROOF_MISSING", "Approval workflow upgrades require live Designer/DefBlob summary after Version Management Succeed; a Succeed row alone does not prove the workflow was overwritten."));
+    return;
+  }
+  if (proof.designerOpened !== true && proof.workflowDesignerOpened !== true) {
+    findings.push(finding("error", "UPGRADE_APPROVAL_DESIGNER_OPEN_PROOF_MISSING", "Approval workflow runtime proof must show that the workflow Designer opened after upgrade."));
+  }
+  if (proof.publishSucceeded !== true && proof.workflowPublished !== true) {
+    findings.push(finding("error", "UPGRADE_APPROVAL_PUBLISH_PROOF_MISSING", "Approval workflow runtime proof must show that the upgraded workflow can publish."));
+  }
+  const comparisons = [
+    ["taskName", "UPGRADE_APPROVAL_TASK_NAME_STALE"],
+    ["taskId", "UPGRADE_APPROVAL_TASK_ID_STALE"],
+    ["assigneeExpressionHash", "UPGRADE_APPROVAL_ASSIGNEE_STALE"],
+    ["approvedConditionHash", "UPGRADE_APPROVAL_APPROVED_CONDITION_STALE"],
+    ["rejectedConditionHash", "UPGRADE_APPROVAL_REJECTED_CONDITION_STALE"],
+  ];
+  for (const [key, code] of comparisons) {
+    if (expected[key] === undefined || expected[key] === null || expected[key] === "") continue;
+    if (String(live[key] || "") !== String(expected[key])) {
+      findings.push(finding("error", code, `Live Approval workflow ${key} does not match the upgraded package summary.`, {
+        expected: String(expected[key]),
+        actual: live[key] === undefined || live[key] === null ? null : String(live[key]),
+      }));
+    }
+  }
 }
 
 function sanitize(text) {

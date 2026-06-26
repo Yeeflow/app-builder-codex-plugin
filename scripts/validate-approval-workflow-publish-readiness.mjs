@@ -139,6 +139,7 @@ function validateOneDef(def, context) {
   validateVariableShape(def, context);
   validateTaskUrlAliases(def, context);
   validateAssignmentShape(def, context);
+  validateSequenceFlowOutcomeConditions(def, context);
   validateRejectedPath(def, context);
   validateNodePositions(def, context);
   validateGraphRefs(def, context);
@@ -249,6 +250,68 @@ function validateRejectedPath(def, context) {
   }
 }
 
+function validateSequenceFlowOutcomeConditions(def, context) {
+  const shapes = asArray(def.childshapes);
+  const shapeById = new Map(shapes.map((shape) => [shapeId(shape), shape]));
+  const flows = shapes.filter((shape) => stencilId(shape) === "SequenceFlow");
+  for (const [shapeIndex, task] of shapes.entries()) {
+    if (stencilId(task) !== "MultiAssignmentTask") continue;
+    const taskId = shapeId(task);
+    const outgoingIds = new Set(asArray(task.outgoing).map(refId).filter(Boolean));
+    const outgoingFlows = flows.filter((flow) => outgoingIds.has(shapeId(flow)) || refId(flow.source) === taskId);
+    for (const outcome of ["Approved", "Rejected"]) {
+      const flow = outgoingFlows.find((candidate) => flowMatchesOutcome(candidate, outcome));
+      if (!flow) {
+        context.findings.push(issue("APPROVAL_WORKFLOW_OUTCOME_FLOW_MISSING", `MultiAssignmentTask must have an outgoing ${outcome} SequenceFlow.`, {
+          source: context.source,
+          path: `$.childshapes[${shapeIndex}].outgoing`,
+          taskId,
+          outcome,
+        }));
+        continue;
+      }
+      const conditionPath = workflowShapePath(shapes, flow, "properties.conditioninfo");
+      const conditions = asArray(flow?.properties?.conditioninfo);
+      if (!conditions.length) {
+        context.findings.push(issue("APPROVAL_WORKFLOW_OUTCOME_CONDITION_MISSING", `${outcome} SequenceFlow must include Designer-readable task Outcome conditioninfo.`, {
+          source: context.source,
+          path: conditionPath,
+          taskId,
+          flowId: shapeId(flow),
+          outcome,
+        }));
+        continue;
+      }
+      if (conditions.some((condition) => isLegacyLabelValueCondition(condition))) {
+        context.findings.push(issue("APPROVAL_WORKFLOW_OUTCOME_CONDITION_LEGACY_SHAPE", `${outcome} SequenceFlow conditioninfo must not use simplified {label,value}; it must use left/op/right task Outcome expression shape.`, {
+          source: context.source,
+          path: conditionPath,
+          taskId,
+          flowId: shapeId(flow),
+          outcome,
+        }));
+      }
+      if (!conditions.some((condition) => isDesignerOutcomeCondition(condition, taskId, outcome))) {
+        context.findings.push(issue("APPROVAL_WORKFLOW_OUTCOME_CONDITION_INVALID", `${outcome} SequenceFlow conditioninfo must compare the current task Outcome to ${outcome} with left/op/right Designer expression fields.`, {
+          source: context.source,
+          path: conditionPath,
+          taskId,
+          flowId: shapeId(flow),
+          outcome,
+        }));
+      }
+      const target = shapeById.get(refId(flow.target));
+      if (outcome === "Approved" && stencilId(target) !== "EndNoneEvent") {
+        context.findings.push(issue("APPROVAL_WORKFLOW_APPROVED_PATH_NOT_END", "Approved approval transition must target EndNoneEvent.", {
+          source: context.source,
+          path: workflowShapePath(shapes, flow, "target"),
+          targetStencil: stencilId(target) || null,
+        }));
+      }
+    }
+  }
+}
+
 function validateNodePositions(def, context) {
   const occupied = new Map();
   for (const [shapeIndex, shape] of asArray(def.childshapes).entries()) {
@@ -336,6 +399,38 @@ function refId(ref) {
 
 function isRejectedFlow(flow) {
   return /reject|rejected/i.test(JSON.stringify([flow?.properties?.name, flow?.properties?.conditioninfo, flow?.name, flow?.label]));
+}
+
+function flowMatchesOutcome(flow, outcome) {
+  const text = JSON.stringify([flow?.properties?.name, flow?.properties?.conditioninfo, flow?.name, flow?.label]);
+  return new RegExp(outcome, "i").test(text);
+}
+
+function isLegacyLabelValueCondition(condition) {
+  return isObject(condition)
+    && Object.prototype.hasOwnProperty.call(condition, "label")
+    && Object.prototype.hasOwnProperty.call(condition, "value")
+    && !Object.prototype.hasOwnProperty.call(condition, "left")
+    && !Object.prototype.hasOwnProperty.call(condition, "op")
+    && !Object.prototype.hasOwnProperty.call(condition, "right");
+}
+
+function isDesignerOutcomeCondition(condition, taskId, outcome) {
+  if (!isObject(condition)) return false;
+  const left = String(condition.left || "");
+  const op = String(condition.op || "");
+  const right = String(condition.right || "");
+  return left.includes(taskId)
+    && /type(?:&quot;|")?\s*(?::|=)?(?:&quot;|")?task/i.test(left)
+    && /Outcome/i.test(left)
+    && op === "s.="
+    && right.includes(outcome)
+    && /Task outcome/i.test(right);
+}
+
+function workflowShapePath(shapes, targetShape, suffix = "") {
+  const index = shapes.findIndex((shape) => shape === targetShape || shapeId(shape) === shapeId(targetShape));
+  return `$.childshapes[${index < 0 ? "?" : index}]${suffix ? `.${suffix}` : ""}`;
 }
 
 function nodePosition(shape) {

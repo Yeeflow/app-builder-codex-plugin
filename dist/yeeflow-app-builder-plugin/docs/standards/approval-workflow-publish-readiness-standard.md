@@ -33,7 +33,13 @@ Required Assignment Task node:
 - `properties.taskurl`, `properties.taskUrl`, and `properties.TaskUrl` must all reference the task page ID.
 - `properties.usertaskassignment` must be a non-empty array.
 - `properties.approveway` and `properties.approvepercentage` must be present.
-- Approved and Rejected outgoing conditions must be explicit and Designer-readable.
+- Applicant line-manager assignment must use the export-proven `ApplicantUserID` + `LineManager` expression button shape, not a legacy `Applicant` shortcut or a free-text placeholder.
+- Approved and Rejected outgoing conditions must be explicit and Designer-readable:
+  - `conditioninfo[]` rows must use `left`, `op`, and `right`.
+  - `left` must be a task Outcome expression that references the current `MultiAssignmentTask` id.
+  - `op` must be `s.=`.
+  - `right` must be the matching `Task outcome:Approved` or `Task outcome:Rejected` button.
+  - Simplified `{ "label": "Task outcome:Approved", "value": "Approved" }` and `{ "label": "Task outcome:Rejected", "value": "Rejected" }` objects are not publish-ready.
 
 Required end paths:
 
@@ -67,3 +73,5 @@ A passing local workflow publish-readiness gate proves only that the generated p
 - Assignment routing, approval execution, rejection execution, or notification behavior works.
 
 Those require a separate browser/runtime proof after install or upgrade, including Designer open/publish evidence and final Version Management success evidence for the exact package ID.
+
+For existing-app upgrades, `upgrade-check`, `upgrade-apply`, and Version Management `Succeed` still do not prove that the live Approval workflow Designer surface was overwritten. When an upgrade changes an Approval workflow, the proof bundle must compare the package-side workflow summary with a live Designer/DefBlob summary after the Version Management row reaches `Succeed`. At minimum the proof must include task name/id when available, assignee expression hash, Approved condition hash, Rejected condition hash, Designer-open evidence, and publish-success evidence. If the live summary still reflects the previous workflow, classify the upgrade proof as failed even when the package itself is fresh-install publish-ready.

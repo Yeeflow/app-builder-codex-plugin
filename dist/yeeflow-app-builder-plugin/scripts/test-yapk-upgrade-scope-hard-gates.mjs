@@ -229,6 +229,47 @@ try {
   expectPass("succeed version row plus runtime proof passes", "scripts/inspect-yapk-upgrade-version-row.mjs", ["--evidence", succeedRuntime]);
   cases.push("pass: final Succeed row plus runtime list-field proof");
 
+  const approvalSucceedNoDefBlob = writeJson(tempDir, "approval-succeed-no-defblob.json", {
+    packageId: "fa9573d3-30cf-4e70-a93a-ac7de98f05ea",
+    rows: [{ PackageId: "fa9573d3-30cf-4e70-a93a-ac7de98f05ea", Status: "Succeed" }],
+    expectedApprovalWorkflow: {
+      taskName: "Line manager approval",
+      assigneeExpressionHash: "assignee-v2",
+      approvedConditionHash: "approved-v2",
+      rejectedConditionHash: "rejected-v2",
+    },
+    runtimeProof: { status: "pass", surface: "Approval workflow designer", screenshot: "validation/workflow.png" },
+  });
+  expectFail("approval workflow upgrade without live DefBlob proof fails", "scripts/inspect-yapk-upgrade-version-row.mjs", ["--evidence", approvalSucceedNoDefBlob], "UPGRADE_APPROVAL_DEF_BLOB_PROOF_MISSING");
+  cases.push("fail: approval workflow Version Management Succeed without live DefBlob proof");
+
+  const approvalSucceedRuntime = writeJson(tempDir, "approval-succeed-runtime.json", {
+    packageId: "fa9573d3-30cf-4e70-a93a-ac7de98f05ea",
+    rows: [{ PackageId: "fa9573d3-30cf-4e70-a93a-ac7de98f05ea", Status: "Succeed" }],
+    screenshot: "validation/version-management.png",
+    expectedApprovalWorkflow: {
+      taskName: "Line manager approval",
+      assigneeExpressionHash: "assignee-v2",
+      approvedConditionHash: "approved-v2",
+      rejectedConditionHash: "rejected-v2",
+    },
+    runtimeProof: {
+      status: "pass",
+      surface: "Approval workflow designer",
+      designerOpened: true,
+      publishSucceeded: true,
+      screenshot: "validation/workflow-publish.png",
+      liveDefBlobSummary: {
+        taskName: "Line manager approval",
+        assigneeExpressionHash: "assignee-v2",
+        approvedConditionHash: "approved-v2",
+        rejectedConditionHash: "rejected-v2",
+      },
+    },
+  });
+  expectPass("approval workflow Succeed plus live DefBlob proof passes", "scripts/inspect-yapk-upgrade-version-row.mjs", ["--evidence", approvalSucceedRuntime]);
+  cases.push("pass: approval workflow Succeed row plus live DefBlob/publish proof");
+
   const previousLineage = {
     objects: [
       { semanticKey: "layout:Return Reviews:Return Review Form", objectType: "layout", path: "decoded.Childs[0].Layouts[0].LayoutID", id: id(20), idSource: "previous-version-preserved" },
