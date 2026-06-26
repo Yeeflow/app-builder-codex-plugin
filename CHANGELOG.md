@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.59
+
+- Release Approval form field materialization hard gates from PR #257.
+- Parse App Plan `Submission Form Fields` and `Task Form Fields` as generation inputs for Approval forms.
+- Materialize planned business fields into `Forms[].DefResource.pageurls[].formdef` using approved Approval Form Field Layouts v1.1 wrappers.
+- Block shell-only Approval forms where the layout, titles, and workflow skeleton exist but planned submission/task field controls are missing.
+- Scrub unrelated source-template business labels from generated Approval form content and extend package-plus-plan validation for planned field completeness.
+
 ## 0.8.58
 
 - Release Data List custom form default-layout hard gates from PR #254.

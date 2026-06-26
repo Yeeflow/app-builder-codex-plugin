@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.58`
+- Version: `0.8.59`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.58` releases Data List custom form default-layout hard gates from PR #254: every generated business Data List and Document Library must plan and assign custom New/Edit/View forms, `default` form routing is forbidden, `List.LayoutView.add/edit/view` must resolve to same-list Type 1 custom form layouts, and full-app materialization plus package validators now align with Data List Form Layouts v1.1.
+Current release `0.8.59` releases Approval form field materialization hard gates from PR #257: App Plan `Submission Form Fields` and `Task Form Fields` are generation inputs, generated `Forms[].DefResource.pageurls[].formdef` must contain the planned business fields inside approved Approval Form Field Layouts v1.1 wrappers, and shell-only Approval forms are blocked before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.58
+Version: 0.8.59
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.58
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.59
 ```
 
 ## What Is Included
