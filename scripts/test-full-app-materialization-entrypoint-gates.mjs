@@ -335,6 +335,8 @@ try {
   const dashboardUuids = new Set();
   for (const page of decodedResource.Pages) {
     const parsedDashboard = JSON.parse(page.LayoutInResources[0].Resource);
+    assert.equal(hasControlIdentity(parsedDashboard, "kpi_metrics_wrapper"), false, "dashboards without planned Summary Metrics must not keep empty KPI wrapper");
+    assert.equal(hasControlIdentity(parsedDashboard, "event_portfolio_kpi_planned_events"), false, "dashboards without planned Summary Metrics must not keep source KPI cards");
     for (const value of collectObjectIdUuids(parsedDashboard)) {
       assert.equal(dashboardUuids.has(value), false, `dashboard UUID ${value} must be unique across generated dashboard pages`);
       dashboardUuids.add(value);
@@ -600,6 +602,41 @@ function collectObjectIdUuids(root) {
   };
   visit(root);
   return out;
+}
+
+function hasControlIdentity(root, identity) {
+  let found = false;
+  const visit = (node) => {
+    if (found) return;
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    const candidates = [
+      node.id,
+      node.name,
+      node.label,
+      node.nav_label,
+      node.nv_label,
+      node.attrs?.name,
+      node.attrs?.label,
+      node.attrs?.nav_label,
+      node.attrs?.nv_label,
+      node.attrs?.data?.templateId,
+      node.attrs?.data?.sourceTemplateId,
+      node.derivedFromDashboardPageLayoutTemplate,
+      node.dataAnalyticsTemplateId,
+      node.collectionTemplateId,
+    ].filter(Boolean).map(String);
+    if (candidates.includes(identity)) {
+      found = true;
+      return;
+    }
+    for (const child of node.children || []) visit(child);
+  };
+  visit(root);
+  return found;
 }
 
 function collectApprovalFieldKeys(root) {

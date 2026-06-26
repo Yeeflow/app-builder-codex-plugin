@@ -330,7 +330,10 @@ function pruneEmptyContentCardWrappers(root) {
   const prune = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     for (const child of node.children) prune(child);
-    node.children = node.children.filter((child) => !isRemovableWrapper(child) || hasMaterializedSectionContent(child));
+    node.children = node.children.filter((child) => {
+      if (ids(child).includes("section_content_area") && (!Array.isArray(child.children) || child.children.length === 0)) return false;
+      return !isRemovableWrapper(child) || hasMaterializedSectionContent(child);
+    });
   };
   prune(root);
 }

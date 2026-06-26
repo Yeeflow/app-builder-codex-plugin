@@ -19,6 +19,8 @@ function registry() {
 function templateResource() {
   const resource = clone(registry().templates[0].template.parsedResource);
   resource.derivedFromDashboardPageLayoutTemplate = TEMPLATE_ID;
+  resource.generatedFinalDashboardMaterialization = { kpiCount: 4 };
+  resource.plannedControls = { kpis: true, kpiCount: 4 };
   removeOperations(resource);
   adaptText(resource);
   ensureCollection(resource);
@@ -67,11 +69,12 @@ function removeOperations(node) {
 }
 
 function removeEmptyBusinessSections(root) {
-  const removable = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+  const removable = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper"]);
   const visitNode = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       visitNode(child);
+      if (ids(child).includes("section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
       if (!ids(child).some((id) => removable.has(id))) return true;
       return hasMeaningfulBusinessContent(child);
     });
@@ -85,6 +88,7 @@ function hasMeaningfulBusinessContent(node) {
     if (found) return;
     const type = String(current?.type || "").toLowerCase();
     if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) found = true;
+    if (["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"].some((id) => ids(current).includes(id))) found = true;
   });
   return found;
 }
@@ -204,6 +208,26 @@ try {
   find(find(emptyContentArea, "content_card_wrapper"), "section_content_area").children = [];
   expectCode("generated dashboard empty section_content_area fails", ["--package", writePackage(tempDir, "empty-section-content-area", decoded(emptyContentArea))], "DASH_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
 
+  const emptyPageTitleSlot = templateResource();
+  find(emptyPageTitleSlot, "page_title_section").children.push({ type: "container", id: "empty_page_title_slot", nv_label: "section_content_area", children: [] });
+  expectCode("generated dashboard empty page-title section_content_area fails", ["--package", writePackage(tempDir, "empty-page-title-section-content-area", decoded(emptyPageTitleSlot))], "DASH_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
+
+  const emptyKpiWrapper = templateResource();
+  find(emptyKpiWrapper, "kpi_metrics_wrapper").children = [];
+  emptyKpiWrapper.generatedFinalDashboardMaterialization = { kpiCount: 0 };
+  emptyKpiWrapper.plannedControls = { kpis: false, kpiCount: 0 };
+  expectCode("generated dashboard empty kpi_metrics_wrapper fails", ["--package", writePackage(tempDir, "empty-kpi-wrapper", decoded(emptyKpiWrapper))], "DASH_LAYOUT_EMPTY_KPI_METRICS_WRAPPER");
+
+  const unplannedKpi = templateResource();
+  unplannedKpi.generatedFinalDashboardMaterialization = { kpiCount: 0 };
+  unplannedKpi.plannedControls = { kpis: false, kpiCount: 0 };
+  expectCode("generated dashboard unplanned KPI cards fail", ["--package", writePackage(tempDir, "unplanned-kpi-cards", decoded(unplannedKpi))], "DASH_LAYOUT_UNPLANNED_KPI_CARD_PRESENT");
+
+  const kpiCountMismatch = templateResource();
+  kpiCountMismatch.generatedFinalDashboardMaterialization = { kpiCount: 2 };
+  kpiCountMismatch.plannedControls = { kpis: true, kpiCount: 2 };
+  expectCode("generated dashboard extra source KPI cards fail", ["--package", writePackage(tempDir, "kpi-count-mismatch", decoded(kpiCountMismatch))], "DASH_LAYOUT_KPI_CARD_COUNT_MISMATCH");
+
   const emptyOperations = templateResource();
   const header = find(emptyOperations, "page_title_header");
   header.children.push({ type: "container", name: "Operations", attrs: { style: { widthtype: [null, "2"] } }, children: [{ type: "heading", name: "Create Request Button", attrs: { heads: { title: { value: "Create Request" } } } }] });
@@ -225,7 +249,7 @@ try {
   upgradeAfter.Childs[0].List.Title = "Changed Loan Requests";
   expectCode("dashboard-only upgrade changing non-dashboard resources fails", ["--upgrade-scope", writeJson(tempDir, "bad-upgrade.json", { scope: { type: "dashboard-only" }, before: upgradeBefore, after: upgradeAfter })], "DASH_LAYOUT_UPGRADE_NON_DASHBOARD_MUTATION");
 
-  console.log(JSON.stringify({ status: "pass", cases: 16 }, null, 2));
+  console.log(JSON.stringify({ status: "pass", cases: 20 }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

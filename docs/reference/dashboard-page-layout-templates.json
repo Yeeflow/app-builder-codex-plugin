@@ -52,6 +52,7 @@
         "actions",
         "domain icons",
         "section selection",
+        "section display order",
         "optional section removal",
         "section pattern duplication"
       ],
@@ -61,6 +62,9 @@
         "placeholder Operations controls",
         "visual-only action buttons",
         "empty section_content_area containers",
+        "empty kpi_metrics_wrapper containers",
+        "unplanned KPI cards",
+        "unused copied KPI source cards",
         "title-only copied business sections",
         "unrelated template/domain labels",
         "guessed /p/{LayoutID} runtime route",
@@ -70,7 +74,10 @@
         "unusedCopiedModulesMustBeRemoved": true,
         "operationsWithoutConfiguredActionsMustBeRemoved": true,
         "emptySectionContentAreaForbidden": true,
-        "titleOnlyCopiedSectionsForbidden": true
+        "titleOnlyCopiedSectionsForbidden": true,
+        "emptyKpiMetricsWrapperForbidden": true,
+        "kpiCardsMustMatchPlannedMetrics": true,
+        "repeatableModulesMayBeReordered": true
       },
       "template": {
         "source": "Dashboard page layouts-v1.1.yapk",

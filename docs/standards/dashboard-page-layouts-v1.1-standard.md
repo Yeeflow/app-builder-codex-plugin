@@ -118,7 +118,11 @@ Allowed repeatable/removable template modules:
 
 Unneeded repeatable modules may be removed. New layout modules may only be added by copying one of the allowed repeatable/removable template modules. Copied modules must preserve template structure, hierarchy, control types, width, padding, direction, gap, background, and required children.
 
-Do not invent new dashboard layout modules. Non-business template containers must remain structurally equivalent to the template. KPI cards may be added only by copying `event_portfolio_kpi_planned_events` and replacing the allowed KPI business content.
+The selected repeatable modules may be reordered to match business priority. For example, `kpi_metrics_wrapper` is usually near the top of an operational Dashboard, but `2_columns_section`, `3_columns_section`, `2_columns_60/40_section`, and `content_card_wrapper` may appear before or after it when the Functional Specification/App Plan makes that order more useful. Reordering is allowed only for approved repeatable modules; it must not create new structural container shapes.
+
+Do not invent new dashboard layout modules. Non-business template containers must remain structurally equivalent to the template. KPI cards may be added only by copying one of the approved KPI card variants: `event_portfolio_kpi_planned_events`, `event_portfolio_kpi_approved_budget`, `event_portfolio_kpi_registration_rate`, or `event_portfolio_kpi_lead_follow_up`, then replacing the allowed KPI business content.
+
+KPI card generation is demand-driven. If the Functional Specification/App Plan does not require KPI or Summary Metric cards for a Dashboard, do not include `kpi_metrics_wrapper` or any Event Portfolio KPI card containers. If one, two, or three KPI cards are required, include exactly that many KPI cards and remove the unused source-template KPI cards. Do not keep all four KPI card source containers simply because the template contains four examples.
 
 Business controls such as Collections, Data Filters, KPI values, action buttons, Data Analytics templates, and data-bound display controls must not be placed directly under root `Content`. They must be inside approved v1.1 slots, normally a `section_content_area` that belongs to `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`, inside a copied `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`, or inside registered KPI/action slots.
 
@@ -129,6 +133,8 @@ Dashboard Collection presentation templates from `docs/reference/dashboard-datas
 Dashboard filter modules follow the same component rule. When a Dashboard filter is planned, copy an approved v1.1/Event Portfolio filter module into an approved business-content slot such as `section_content_area`, then map it to the app-specific data source and field. Do not create an ad hoc filter container, copy `event_portfolio_filter_group` directly under root `Content`, or invent a new layout module for filters.
 
 When a generated Dashboard page contains two or more page-level Data Filter controls, the filters must be grouped inside `dashboard_standard_filter_group` from `docs/reference/data-filter-standard-filter-group.template.json`. The group may be placed only inside an approved v1.1 business-content slot such as `section_content_area`; do not scatter multiple filters as loose siblings.
+
+Generated Dashboard pages must never retain empty copied layout modules. If any `section_content_area` would contain no real business controls, remove that empty slot or the owning copied module before generated-final validation. Remove `content_card_wrapper`, `2_columns_section`, `3_columns_section`, `2_columns_60/40_section`, and `kpi_metrics_wrapper` when they have no real business content. Empty sections may exist only in the registered template source, never in generated-final package resources.
 
 Every generated Dashboard filter must preserve the reference UI contract and receive app-specific data binding:
 
