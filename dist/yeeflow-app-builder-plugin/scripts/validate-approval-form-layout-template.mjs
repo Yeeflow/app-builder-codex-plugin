@@ -180,7 +180,7 @@ function validateAppPlan(planPath, findings) {
     findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING", "Approval Forms Plan must include an Approval Form Layout Template Selection table when approval forms are planned."));
     return;
   }
-  const selectionBlock = section.split(/#### Form Actions and Temp Variables|#### Sub List List Actions|##\s+6\./i)[0].split(/#### Approval Form Layout Template Selection/i)[1] || "";
+  const selectionBlock = extractSubsection(section, /^####\s+Approval Form Layout Template Selection\s*$/im);
   const rows = tableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row.raw));
   const selectedIds = [];
   for (const row of rows) {
@@ -235,6 +235,15 @@ function validateWorkflowTaskAppPlanSelection(text, findings, sectionName, expec
       findings.push(error("APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_SURFACE_MISSING", "Workflow task template selection row must identify the workflow task surface.", { section: sectionName, expectedSurface, row: row.raw }));
     }
   }
+}
+
+function extractSubsection(sectionText, headingPattern) {
+  const match = headingPattern.exec(sectionText);
+  if (!match) return "";
+  const start = match.index + match[0].length;
+  const rest = sectionText.slice(start);
+  const next = rest.search(/\n####\s+|\n##\s+\d+\./);
+  return next === -1 ? rest : rest.slice(0, next);
 }
 
 function validateFormResource(resource, context) {

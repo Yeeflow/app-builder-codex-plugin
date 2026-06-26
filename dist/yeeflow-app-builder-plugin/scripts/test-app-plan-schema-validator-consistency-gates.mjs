@@ -80,6 +80,29 @@ try {
   assert.equal(templateOutput.report.schema, "yeeflow-app-plan-resource-order");
   results.push({ case: "template validator and resource-order validator both accept the same primary Yeeflow App Plan Markdown", status: "pass" });
 
+  const approvalFieldsConcretePlan = officePlan
+    .replace(
+      [
+        "| <Approval form> | <Submission form> | Submission | approval_form_layout_submission_v1_1 | <Sections> | <Related data or None> | <Reason> | Generated-final validation |",
+        "| <Approval form> | <Task form> | Task | approval_form_layout_task_v1_1 | <Sections> | <Related data or None> | <Reason> | Generated-final validation |",
+      ].join("\n"),
+      [
+        "| Asset Loan Approval | Submission form | Submission | approval_form_layout_submission_v1_1 | Page title and request sections | Current request data only | Submission captures requester-entered approval fields | Generated-final validation |",
+        "| Asset Loan Approval | Coordinator task form | Task | approval_form_layout_task_v1_1 | Page title, readonly request context, action/history section | Related loan context | Task reviewers need consistent readonly context and workflow action area | Generated-final validation |",
+      ].join("\n"),
+    )
+    .replace(
+      "| <Approval form> | <Submission or task form> | <Field group> | approval_form_fields_grid_2col_v1_1 or approval_form_fields_grid_3col_v1_1 | Submission fields or task fields | 2 or 3 | <= PC/laptop | 1 | Multiple line / Rich text / Sub list fields | <None or grouping rule> | Generated-final validation |",
+      [
+        "| Asset Loan Approval | Submission form | Request fields | approval_form_fields_grid_2col_v1_1 | Submission fields | 2 | 2 | 1 | Multiple line | None | Generated-final validation |",
+        "| Asset Loan Approval | Coordinator task form | Review fields | approval_form_fields_grid_3col_v1_1 | Task fields | 3 | 2 | 1 | Multiple line | None | Generated-final validation |",
+      ].join("\n"),
+    );
+  file = writeFixture(tempDir, "approval-fields-layout-selection-boundary.md", approvalFieldsConcretePlan);
+  output = run(["scripts/validate-app-plan-resource-order.mjs", file, "--json"]);
+  expectPass(output, "Approval Form Layout Template Selection stops before Approval Form Fields Layout Template Selection");
+  results.push({ case: "Approval Form Layout Template Selection ignores adjacent Approval Form Fields Layout Template Selection rows", status: "pass" });
+
   file = writeFixture(tempDir, "missing-dashboard-subtable.md", removeDashboardSubtable(officePlan, "Summary Metrics"));
   output = run(["scripts/validate-app-plan-resource-order.mjs", file, "--json"]);
   expectFail(output, "APP_PLAN_DASHBOARD_SUMMARY_METRICS_MISSING", "App Plan missing Dashboard Pages Plan subtables");
