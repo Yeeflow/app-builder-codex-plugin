@@ -104,6 +104,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("approval-workflow-publish-readiness", [
+    "scripts/validate-approval-workflow-publish-readiness.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("dashboard-generation-hard-gates", [
     "scripts/validate-dashboard-generation-hard-gates.mjs",
     "--package",
@@ -162,7 +167,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
         : ["fix generated-final preflight failures", "rerun yapk-first-generation-preflight"],
     },
     gates,
-    proofBoundary: "Local preflight only. ID provenance, upgrade ID stability, Bit/switch data-list field controls, navigation metadata, dashboard dataset presentation reference conformance, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity, workspace targeting correctness, or field runtime correctness, API acceptance is not runtime browser proof, and runtime designer proof still requires a separate explicit step.",
+    proofBoundary: "Local preflight only. ID provenance, upgrade ID stability, Bit/switch data-list field controls, navigation metadata, Approval workflow publish readiness, dashboard dataset presentation reference conformance, dashboard grid-table Collection validation, and package workspace-selection readiness are separate hard gates; signing/signature verification do not prove ID continuity, workspace targeting correctness, or field runtime correctness, API acceptance and Version Management submitted/updated states are not runtime Designer publish proof, and runtime designer proof still requires a separate explicit step.",
   };
 }
 

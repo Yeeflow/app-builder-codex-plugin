@@ -89,6 +89,17 @@ const childTests = [
     ],
   },
   {
+    name: "Approval workflow publish-readiness regression suite",
+    command: ["scripts/test-approval-workflow-publish-readiness-gates.mjs"],
+    validators: [
+      "validate-approval-workflow-publish-readiness",
+      "flowPage and variables.basic/listref/filter shape",
+      "Start and task page taskurl aliases",
+      "MultiAssignmentTask assignment and approve metadata",
+      "Rejected path and non-overlapping Designer graph positions",
+    ],
+  },
+  {
     name: "Full-app generation entrypoint contract regression suite",
     command: ["scripts/test-full-app-generation-entrypoint-gates.mjs"],
     validators: [
