@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.60`
+`0.8.61`
+
+Version `0.8.61` releases Approval form unused section cleanup gates from PR #261. Generated Approval submission/task pages must remove no-action Operations containers, remove empty copied business sections, preserve the locked `action_panel_flow_history_wrapper`, and keep fieldless generated forms valid with a single no-fields business content card instead of unused template scaffolding.
 
 Version `0.8.60` releases Data Analytics v1.1 section placement slots from PR #259. All six approved Data Analytics golden reference templates may now be used in `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` on Dashboard Page Layouts v1.1 and Data List Form View Item Layouts v1.1. Data Analytics templates remain forbidden on Approval forms and Data List New/Edit forms.
 

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.61
+
+- Release Approval form unused section cleanup gates from PR #261.
+- Remove generated Approval form Operations containers unless they contain configured Yeeflow actions.
+- Remove empty copied Approval form business sections while preserving the locked `action_panel_flow_history_wrapper`.
+- Keep fieldless generated Approval forms valid with a no-fields business content card instead of empty template sections.
+- Align approval layout registry rules, validator hard gates, full-app materializer cleanup, and focused/full-app regression tests.
+
 ## 0.8.60
 
 - Release Data Analytics v1.1 section placement slots from PR #259.
