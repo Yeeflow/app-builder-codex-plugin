@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.54
+
+- Release Dashboard filter runtime and full-upgrade proof gates from PR #246.
+- Block unproven page-level select-filter variables consumed by Collection `In` (`op/operator = 9`) conditions because empty select-filter state can clear all Collection rows at runtime.
+- Prefer proven search-filter/fulltext Collection display until an export-proven select-filter empty-value bypass contract exists.
+- Add generated-final preflight validation for Dashboard select-filter runtime safety.
+- Require dashboard-only upgrades for existing complete apps to be full upgrade packages with non-Dashboard resources preserved and unchanged-diff proof.
+- Add runtime proof inspection for business rows, absence of `No data` and `[object Object]`, real Data List Collection bindings, search-filter behavior, Version Management `Succeed`, and error-log capture when upgrade processing fails.
+
 ## 0.8.53
 
 - Release standard Data Filter group golden reference gates from PR #244.

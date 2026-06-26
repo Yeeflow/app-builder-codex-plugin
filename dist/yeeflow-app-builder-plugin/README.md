@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.53`
+- Version: `0.8.54`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.53` releases standard Data Filter group golden reference gates from PR #244: pages/forms with two or more page-level Data Filter controls must clone `dashboard_standard_filter_group`, preserve the approved wrapper and child filter style contract, exclude local Collection toolbar search boxes, select the filter group in the App Plan, and pass generated-final preflight before signing readiness.
+Current release `0.8.54` releases Dashboard filter runtime and full-upgrade proof gates from PR #246: generated Dashboards must not use unproven page-level select-filter variables consumed by Collection `In` conditions, search-filter/fulltext display is preferred until an export-proven empty-value bypass exists, dashboard-only upgrades must be full packages with non-Dashboard resources unchanged, and runtime proof must verify business rows, no `No data`, no `[object Object]`, real Data List bindings, search behavior, Version Management `Succeed`, and captured error logs on failure.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.53
+Version: 0.8.54
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.53
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.54
 ```
 
 ## What Is Included
