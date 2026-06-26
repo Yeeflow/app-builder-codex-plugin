@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.59`
+- Version: `0.8.60`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.59` releases Approval form field materialization hard gates from PR #257: App Plan `Submission Form Fields` and `Task Form Fields` are generation inputs, generated `Forms[].DefResource.pageurls[].formdef` must contain the planned business fields inside approved Approval Form Field Layouts v1.1 wrappers, and shell-only Approval forms are blocked before signing readiness.
+Current release `0.8.60` releases Data Analytics v1.1 section placement slots from PR #259: all six approved Data Analytics golden reference templates may be placed in `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` on Dashboard Page Layouts v1.1 and Data List Form View Item Layouts v1.1, while remaining forbidden on Approval forms and Data List New/Edit forms.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.59
+Version: 0.8.60
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.59
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.60
 ```
 
 ## What Is Included

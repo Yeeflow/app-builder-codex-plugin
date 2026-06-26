@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.59",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with live E2E install readiness gates and YAP/YAPK hard gates. Approval form field materialization hard gates.",
+  "version": "0.8.60",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with live E2E install readiness gates and YAP/YAPK hard gates. Data Analytics v1.1 section placement slots.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [

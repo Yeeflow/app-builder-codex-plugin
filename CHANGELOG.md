@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.60
+
+- Release Data Analytics v1.1 section placement slots from PR #259.
+- Allow all six approved Data Analytics golden reference templates on Dashboard Page Layouts v1.1 and Data List Form View Item Layouts v1.1 inside `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`.
+- Keep Data Analytics templates forbidden on Approval forms and Data List New/Edit forms.
+- Align the Data Analytics validator, full-app materializer slot lookup, registry, standards, and focused regression tests with the expanded placement contract.
+
 ## 0.8.59
 
 - Release Approval form field materialization hard gates from PR #257.
