@@ -2235,6 +2235,11 @@ function rewriteCollectionTemplateRuntimeRefs(node, { rootListSetId, listId, det
   const rootId = stringId(rootListSetId);
   const sourceListId = stringId(listId);
   const layoutId = stringId(detailLayoutId);
+  const layoutPlaceholderPattern = /\{\{(?:DetailLayoutID|LayoutID|layoutId|layout|PageID|pageId)\}\}/g;
+  const layoutPlaceholderTestPattern = /\{\{(?:DetailLayoutID|LayoutID|layoutId|layout|PageID|pageId)\}\}/;
+  const isLayoutRefKey = (key) => /^(?:link|layout|LayoutID|layoutId|PageID|pageId)$/i.test(key);
+  const hasLayoutPlaceholder = (value) => typeof value === "string" && layoutPlaceholderTestPattern.test(value);
+  const replaceLayoutPlaceholders = (value) => String(value).replace(layoutPlaceholderPattern, layoutId);
   const visit = (value, key = "") => {
     if (Array.isArray(value)) {
       for (let index = 0; index < value.length; index += 1) value[index] = visit(value[index], key);
@@ -2246,9 +2251,10 @@ function rewriteCollectionTemplateRuntimeRefs(node, { rootListSetId, listId, det
         .replaceAll("{{ListSetID}}", rootId)
         .replaceAll("{{ListID}}", sourceListId)
         .replaceAll("{{DetailLayoutID}}", layoutId);
+      out = replaceLayoutPlaceholders(out);
       for (const oldId of SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds) out = out.replaceAll(oldId, rootId);
       for (const oldId of SOURCE_COLLECTION_TEMPLATE_IDS.listIds) out = out.replaceAll(oldId, sourceListId);
-      if ((/^(?:link|layout|LayoutID|layoutId|PageID|pageId)$/i.test(key) || /\{\{DetailLayoutID\}\}/.test(value)) && !layoutId) {
+      if ((isLayoutRefKey(key) || hasLayoutPlaceholder(value)) && !layoutId) {
         return "";
       }
       return out;
@@ -2258,8 +2264,8 @@ function rewriteCollectionTemplateRuntimeRefs(node, { rootListSetId, listId, det
         value[childKey] = rootId;
       } else if (/^ListID$/i.test(childKey) && typeof child === "string" && (SOURCE_COLLECTION_TEMPLATE_IDS.listIds.has(child) || /\{\{ListID\}\}/.test(child))) {
         value[childKey] = sourceListId;
-      } else if (/^(?:link|layout|LayoutID|layoutId|PageID|pageId)$/i.test(childKey) && typeof child === "string" && /\{\{DetailLayoutID\}\}/.test(child)) {
-        value[childKey] = layoutId;
+      } else if (isLayoutRefKey(childKey) && typeof child === "string" && hasLayoutPlaceholder(child)) {
+        value[childKey] = layoutId ? replaceLayoutPlaceholders(child) : "";
       } else {
         value[childKey] = visit(child, childKey);
       }
@@ -3008,7 +3014,6 @@ function scrubApprovalSourceDomainResidue(node, title) {
     [/Loan Status/g, "Request Status"],
     [/\bPipeline\b/g, "Workflow"],
   ];
-  if (!/loan/i.test(title)) replacements.push([/\bLoan\b/g, "Request"]);
   const visit = (value) => {
     if (Array.isArray(value)) {
       for (let index = 0; index < value.length; index += 1) value[index] = visit(value[index]);
@@ -3018,6 +3023,7 @@ function scrubApprovalSourceDomainResidue(node, title) {
       if (typeof value !== "string") return value;
       return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), value);
     }
+    if (value.approvalFieldMaterializedFromPlan === true) return value;
     for (const [key, child] of Object.entries(value)) {
       if (key === "id") continue;
       value[key] = visit(child);

@@ -96,6 +96,11 @@ Rules:
 | Field | Placeholder |
 | --- | --- |
 | Review Decision | Select decision |
+#### Approval Form Layout Template Selection
+| Approval Form | Form Page | Page Role | Selected Approval Form Layout Template | Business Sections Needed | Related Data Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Maintenance Intake Review | Submission form | Submission | approval_form_layout_submission_v1_1 | Request details | Current request only | Submission captures requester-entered approval fields | Generated-final validation |
+| Maintenance Intake Review | Review task form | Task | approval_form_layout_task_v1_1 | Readonly request context and action/history section | Workflow context | Task reviewers need consistent context and action area | Generated-final validation |
 #### Sub List List Actions
 No custom Sub List actions required.
 

@@ -63,6 +63,18 @@ try {
   expectPass("Package materializes App Plan approval form fields", ["--package", writePackage("package-with-planned-fields.yapk", decodedPackage(approvalFormResource())), "--plan", writeText("plan-valid-with-fields.md", appPlan())]);
   expectCode("Package missing planned approval form field fails", ["--package", writePackage("package-missing-planned-field.yapk", decodedPackage(approvalFormResource())), "--plan", writeText("plan-extra-field.md", appPlan({ extraSubmissionField: "Traveler" }))], "APPROVAL_FORM_FIELDS_PLANNED_FIELD_NOT_MATERIALIZED");
 
+  const loanNumberResource = approvalFormResource();
+  firstWrapper(loanNumberResource).children.push(fieldControl({ type: "input", label: "Loan Number" }));
+  expectPass("Package preserves planned Approval field visible label with Loan terminology", ["--package", writePackage("package-loan-number-field.yapk", decodedPackage(loanNumberResource)), "--plan", writeText("plan-loan-number-field.md", appPlan({ extraSubmissionField: "Loan Number" }))]);
+
+  const driftedLoanNumberResource = approvalFormResource();
+  const driftedLoanNumber = fieldControl({ type: "input", label: "Request Number" });
+  driftedLoanNumber.binding = "LoanNumber";
+  driftedLoanNumber.fieldName = "LoanNumber";
+  driftedLoanNumber.attrs.data = { field: "LoanNumber", fieldName: "LoanNumber", displayName: "Request Number" };
+  firstWrapper(driftedLoanNumberResource).children.push(driftedLoanNumber);
+  expectCode("Package with only technical LoanNumber binding but drifted visible label fails", ["--package", writePackage("package-loan-number-label-drift.yapk", decodedPackage(driftedLoanNumberResource)), "--plan", writeText("plan-loan-number-label-drift.md", appPlan({ extraSubmissionField: "Loan Number" }))], "APPROVAL_FORM_FIELDS_PLANNED_FIELD_NOT_MATERIALIZED");
+
   console.log(JSON.stringify({ status: "pass", results }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });

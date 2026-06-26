@@ -35,6 +35,7 @@ function baseV11Resource() {
   adaptBusinessText(resource);
   ensureCollectionInsideSection(resource);
   ensureSummaryBackedKpis(resource);
+  pruneUnusedTemplateModules(resource);
   return resource;
 }
 
@@ -84,7 +85,7 @@ function adaptBusinessText(node) {
 
 function ensureCollectionInsideSection(resource) {
   const section = findBusinessSectionContentArea(resource);
-  section.children = [gridHeader(), collectionControl()];
+  section.children = [gridTableWrapper()];
 }
 
 function ensureSummaryBackedKpis(resource) {
@@ -102,11 +103,75 @@ function ensureSummaryBackedKpis(resource) {
   const section = findBusinessSectionContentArea(resource);
   section.children = section.children || [];
   section.children.push(summaryControl());
-  const kpiCard = find(resource, "event_portfolio_kpi_planned_events");
-  if (kpiCard) {
-    kpiCard.children = kpiCard.children || [];
-    kpiCard.children.push(visibleKpiValue());
+  section.children.push(visibleKpiValue());
+}
+
+function pruneUnusedTemplateModules(resource) {
+  const content = find(resource, "Content") || find(resource, "content");
+  if (content?.children) {
+    content.children = content.children.filter((child) => ![
+      "2_columns_section",
+      "3_columns_section",
+      "2_columns_60/40_section",
+      "kpi_metrics_wrapper",
+    ].some((identity) => hasIdentity(child, identity)));
   }
+  const pageTitle = find(resource, "page_title_section");
+  if (pageTitle?.children) {
+    pageTitle.children = pageTitle.children.filter((child) => !hasIdentity(child, "section_content_area"));
+  }
+}
+
+function gridTableWrapper() {
+  return {
+    type: "container",
+    id: "grid_table_col_wrapper",
+    name: "grid_table_col_wrapper",
+    attrs: { style: { widthtype: [null, "1"], direction: [null, "column"] } },
+    children: [
+      {
+        type: "container",
+        id: "grid_table_col_caption",
+        name: "grid_table_col_caption",
+        children: [
+          {
+            type: "container",
+            id: "grid_table_col_title_wrapper",
+            name: "grid_table_col_title_wrapper",
+            children: [{ type: "heading", id: "grid_table_col_title", name: "grid_table_col_title", attrs: { headc: { title: { value: "Asset Loan Work Queue" } } } }],
+          },
+          {
+            type: "container",
+            id: "grid_table_col_operations",
+            name: "grid_table_col_operations",
+            children: [{
+              type: "container",
+              id: "op_normal",
+              name: "op_normal",
+              children: [
+                { type: "search-filter", id: "loan_work_queue_search", name: "loan_work_queue_search", attrs: { placeholder: "Search loans" } },
+                { type: "action_button", id: "loan_work_queue_add", name: "loan_work_queue_add", label: "Add loan", attrs: { control_action: "loan_work_queue_add_item" } },
+              ],
+            }],
+          },
+        ],
+      },
+      {
+        type: "container",
+        id: "grid_table_col_content",
+        name: "grid_table_col_content",
+        children: [
+          gridHeader("grid_table_col_header"),
+          {
+            ...collectionControl(),
+            id: "loan_work_queue_collection",
+            nv_label: "grid_table_col_body",
+            children: [gridItem("grid_col_item")],
+          },
+        ],
+      },
+    ],
+  };
 }
 
 function collectionControl() {
@@ -119,28 +184,28 @@ function collectionControl() {
       data: { list: { AppID: 41, ListID: LIST_ID, Type: 1, Title: "Loan Requests", ListSetID: APP_ID } },
       filterBindings: ["LoanStatus"],
     },
-    children: [gridItem()],
+    children: [gridItem("loan_work_queue_item_grid")],
   };
 }
 
-function gridHeader() {
+function gridHeader(id = "loan_work_queue_header_grid") {
   const columns = [[2, "fr"], [1, "fr"], [1, "fr"]];
   return {
     type: "flex_grid",
-    id: "loan_work_queue_header_grid",
-    name: "loan_work_queue_header_grid",
+    id,
+    name: id,
     displayLabel: [null, false],
     attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } }, common: { hide: [null, false, false, true] } },
     children: ["Loan", "Status", "Owner"].map((label) => ({ type: "heading", name: label, attrs: { headc: { title: { value: label } } } })),
   };
 }
 
-function gridItem() {
+function gridItem(id = "loan_work_queue_item_grid") {
   const columns = [[2, "fr"], [1, "fr"], [1, "fr"]];
   return {
     type: "flex_grid",
-    id: "loan_work_queue_item_grid",
-    name: "loan_work_queue_item_grid",
+    id,
+    name: id,
     displayLabel: [null, false],
     attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } } },
     children: [
@@ -168,9 +233,10 @@ function visibleKpiValue() {
   return {
     type: "heading",
     name: "Open Loans KPI Value",
+    label: "Text",
     attrs: {
       headc: { title: { variable: [SAVE_VAR] } },
-      heads: { ty: [null, "h2"], color: "#071638" },
+      heads: { ty: [null, "h2-bold"], color: "#071638" },
     },
   };
 }

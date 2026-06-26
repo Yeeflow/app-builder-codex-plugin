@@ -386,6 +386,13 @@ Dashboard validator commands used during validation:
   findControl(unresolvedCardLayoutPages[3], "card_item_edit").attrs.control_action = { type: "open-detail", layout: "{{layout}}" };
   expectCode("card multiselect unresolved layout placeholder fails", ["--package", writePackage("card-multiselect-unresolved-layout-placeholder", unresolvedCardLayoutPages)], "DASH_DATASET_COLLECTION_TEMPLATE_PLACEHOLDER_UNRESOLVED");
 
+  const unresolvedCardActionLayoutPages = validPages();
+  findControl(unresolvedCardActionLayoutPages[3], "card_bulk_collection").attrs.actions[0].steps.push({
+    type: "open-detail",
+    attrs: { layout: "{{layout}}" },
+  });
+  expectCode("card multiselect action-step layout placeholder fails", ["--package", writePackage("card-multiselect-action-layout-placeholder", unresolvedCardActionLayoutPages)], "DASH_DATASET_COLLECTION_TEMPLATE_PLACEHOLDER_UNRESOLVED");
+
   const noItemOperationsPages = validPages();
   const cardItem = findControl(noItemOperationsPages[3], "card_col_item");
   cardItem.children = cardItem.children.filter((child) => child.id !== "card_col_item_operations");

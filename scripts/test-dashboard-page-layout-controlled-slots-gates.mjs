@@ -22,6 +22,7 @@ function templateResource() {
   removeOperations(resource);
   adaptAllowedBusinessText(resource);
   ensureCollection(resource);
+  pruneUnusedTemplateModules(resource);
   return resource;
 }
 
@@ -49,7 +50,8 @@ function replaceBusinessStrings(node) {
 }
 
 function ensureCollection(resource) {
-  const section = find(resource, "section_content_area");
+  const contentCard = find(resource, "content_card_wrapper");
+  const section = find(contentCard, "section_content_area");
   section.children = section.children || [];
   section.children.push({
     type: "collection",
@@ -58,6 +60,17 @@ function ensureCollection(resource) {
       data: { list: { ListID: LIST_ID, Title: "Loan Requests" } },
     },
   });
+}
+
+function pruneUnusedTemplateModules(resource) {
+  const content = find(resource, "content");
+  if (content?.children) {
+    content.children = content.children.filter((child) => !["2_columns_section", "3_columns_section", "2_columns_60/40_section"].some((identity) => ids(child).includes(identity)));
+  }
+  const pageTitle = find(resource, "page_title_section");
+  if (pageTitle?.children) {
+    pageTitle.children = pageTitle.children.filter((child) => !ids(child).includes("section_content_area"));
+  }
 }
 
 function removeOperations(node) {
