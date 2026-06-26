@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.58`
+`0.8.59`
+
+Version `0.8.59` releases Approval form field materialization hard gates from PR #257. App Plan `Submission Form Fields` and `Task Form Fields` are now generation inputs for Approval forms, and generated `Forms[].DefResource.pageurls[].formdef` must contain those planned business fields inside approved Approval Form Field Layouts v1.1 wrappers. Shell-only Approval forms that only replace titles or workflow skeletons are blocked before signing readiness.
 
 Version `0.8.58` releases Data List custom form default-layout hard gates from PR #254. Generated business Data Lists and Document Libraries must now plan and assign custom New/Edit/View forms, never Yeeflow `default` form routing. App Plans must cover every Section 4 business list/library in Section 10 with `data_list_form_layout_new_edit_v1_1` for New/Edit and `data_list_form_layout_view_item_v1_1` for View unless an explicit system/support-list exemption is declared. Generated packages must wire `List.LayoutView.add/edit/view` to same-list Type 1 custom form layouts, and the full-app materializer, data-list schema validator, and YAPK package validator all enforce the same contract before signing readiness.
 
