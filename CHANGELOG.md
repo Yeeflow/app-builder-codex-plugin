@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.67
+
+- Release Approval workflow condition and upgrade proof gates from PR #273.
+- Generate Approval workflow outcome transitions with Designer-readable `left/op/right` Completion condition metadata instead of legacy simplified `label/value` entries.
+- Bind line-manager approval tasks through the generated `ApplicantUserID` workflow variable and `LineManager` assignee expression.
+- Require Approved paths to route to `EndNoneEvent` and Rejected paths to route to `EndRejectEvent` with non-overlapping workflow graph positions.
+- Require Approval workflow upgrade validation to include live Designer/DefBlob proof after Version Management `Succeed`, including task name, task ID, assignee expression hash, Approved/Rejected condition hashes, designer-open proof, and publish proof.
+
 ## 0.8.66
 
 - Release collection action layout and approval field fidelity gates from PR #271.
