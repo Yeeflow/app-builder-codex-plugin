@@ -22,6 +22,7 @@ function templateResource() {
   removeOperations(resource);
   adaptText(resource);
   ensureCollection(resource);
+  removeEmptyBusinessSections(resource);
   return resource;
 }
 
@@ -45,7 +46,8 @@ function adaptText(node) {
 }
 
 function ensureCollection(resource) {
-  const section = find(resource, "section_content_area");
+  const wrapper = find(resource, "content_card_wrapper");
+  const section = wrapper ? find(wrapper, "section_content_area") : find(resource, "section_content_area");
   section.children = section.children || [];
   section.children.push({
     type: "collection",
@@ -62,6 +64,29 @@ function removeOperations(node) {
     node.children = node.children.filter((child) => !ids(child).includes("Operations"));
     node.children.forEach(removeOperations);
   }
+}
+
+function removeEmptyBusinessSections(root) {
+  const removable = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+  const visitNode = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visitNode(child);
+      if (!ids(child).some((id) => removable.has(id))) return true;
+      return hasMeaningfulBusinessContent(child);
+    });
+  };
+  visitNode(root);
+}
+
+function hasMeaningfulBusinessContent(node) {
+  let found = false;
+  visit(node, (current) => {
+    if (found) return;
+    const type = String(current?.type || "").toLowerCase();
+    if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) found = true;
+  });
+  return found;
 }
 
 function decoded(resource = templateResource()) {
@@ -175,6 +200,10 @@ try {
   find(missingContent, "content_card_wrapper").children = find(missingContent, "content_card_wrapper").children.filter((child) => !ids(child).includes("section_content_area"));
   expectCode("section card missing section_content_area fails", ["--package", writePackage(tempDir, "missing-content-area", decoded(missingContent))], "DASH_LAYOUT_RESOURCE_SECTION_CONTENT_AREA_MISSING");
 
+  const emptyContentArea = templateResource();
+  find(find(emptyContentArea, "content_card_wrapper"), "section_content_area").children = [];
+  expectCode("generated dashboard empty section_content_area fails", ["--package", writePackage(tempDir, "empty-section-content-area", decoded(emptyContentArea))], "DASH_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
+
   const emptyOperations = templateResource();
   const header = find(emptyOperations, "page_title_header");
   header.children.push({ type: "container", name: "Operations", attrs: { style: { widthtype: [null, "2"] } }, children: [{ type: "heading", name: "Create Request Button", attrs: { heads: { title: { value: "Create Request" } } } }] });
@@ -196,7 +225,7 @@ try {
   upgradeAfter.Childs[0].List.Title = "Changed Loan Requests";
   expectCode("dashboard-only upgrade changing non-dashboard resources fails", ["--upgrade-scope", writeJson(tempDir, "bad-upgrade.json", { scope: { type: "dashboard-only" }, before: upgradeBefore, after: upgradeAfter })], "DASH_LAYOUT_UPGRADE_NON_DASHBOARD_MUTATION");
 
-  console.log(JSON.stringify({ status: "pass", cases: 15 }, null, 2));
+  console.log(JSON.stringify({ status: "pass", cases: 16 }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }

@@ -60,13 +60,21 @@
         "loose prompt-only dashboard shell",
         "placeholder Operations controls",
         "visual-only action buttons",
+        "empty section_content_area containers",
+        "title-only copied business sections",
         "unrelated template/domain labels",
         "guessed /p/{LayoutID} runtime route",
         "dashboard-only upgrade mutation of non-dashboard resources"
       ],
+      "generatedCleanupRules": {
+        "unusedCopiedModulesMustBeRemoved": true,
+        "operationsWithoutConfiguredActionsMustBeRemoved": true,
+        "emptySectionContentAreaForbidden": true,
+        "titleOnlyCopiedSectionsForbidden": true
+      },
       "template": {
-        "source": "/Users/rengerhu/Downloads/Dashboard page layouts-v1.1.yapk",
-        "decodedSource": "/Users/rengerhu/Documents/Plugin Test2/office-asset-loan-management-20260622-020834-085-dashboard-golden-ref-shape-upgrade/validation/dashboard-page-layouts-v1.1.decoded.json",
+        "source": "Dashboard page layouts-v1.1.yapk",
+        "decodedSource": "dashboard-page-layouts-v1.1.decoded.json",
         "extractedAt": "2026-06-22T08:46:22.226Z",
         "pageMetadata": {
           "ID": null,

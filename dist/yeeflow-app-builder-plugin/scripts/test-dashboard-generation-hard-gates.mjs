@@ -314,7 +314,14 @@ function findBusinessSectionContentArea(root) {
 }
 
 function pruneEmptyContentCardWrappers(root) {
-  const removable = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+  const removable = new Set([
+    "content_card_wrapper",
+    "content_card_60_wrapper",
+    "content_card_40_wrapper",
+    "2_columns_section",
+    "3_columns_section",
+    "2_columns_60/40_section",
+  ]);
   const isRemovableWrapper = (node) => ids(node).some((id) => removable.has(id));
   const hasMaterializedSectionContent = (node) => {
     const slot = find(node, "section_content_area");

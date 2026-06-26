@@ -127,6 +127,8 @@ Copied modules must preserve the template's structure, hierarchy, control types,
 
 Generated forms must not keep title-only copied sections. A `content_card_wrapper`, `content_card_60_wrapper`, `content_card_40_wrapper`, `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` is allowed in the final form only when it contains real business content in an approved slot. Empty `section_content_area` containers, copied placeholder section titles such as `Active Loan Pipeline`, and sections that do not contain current-record fields, approved related components, configured actions, or other real business controls must be pruned before generated-final validation.
 
+If a `section_content_area` would have no generated business content, remove the entire copied section/card that owns it. Do not keep an empty `section_content_area` as a spacer or as a future placeholder.
+
 For New/Edit forms, the common case is a single current-record field section. Do not keep the remaining template example sections unless the App Plan explicitly requires additional current-record field groups and those sections are fully materialized with real fields or configured actions.
 
 For View Item forms, keep only the page title, required view structure, and the sections that are backed by current-record details, related datasets, Data Analytics, KPI cards, filters, or configured actions. Do not keep copied Dashboard or loan/event placeholder section text when no corresponding business content was generated.

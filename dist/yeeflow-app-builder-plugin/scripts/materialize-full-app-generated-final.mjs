@@ -2754,7 +2754,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
         pagetype: 1,
         name: "Task form",
         title: "Task form",
-        formdef: approvalFormDef(taskPageId, name, "task", approvalFieldSpecs.task || approvalFieldSpecs.submission || []),
+        formdef: approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs)),
       },
     ],
     childshapes: [
@@ -2845,6 +2845,12 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
       },
     ],
   };
+}
+
+function approvalTaskFieldSpecs(approvalFieldSpecs = {}) {
+  const submissionFields = Array.isArray(approvalFieldSpecs.submission) ? approvalFieldSpecs.submission : [];
+  const taskOnlyFields = Array.isArray(approvalFieldSpecs.task) ? approvalFieldSpecs.task : [];
+  return uniqueApprovalFieldSpecs([...submissionFields, ...taskOnlyFields]);
 }
 
 function buildApprovalVariables(approvalFieldSpecs = {}) {

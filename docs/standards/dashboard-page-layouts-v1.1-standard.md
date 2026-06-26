@@ -157,6 +157,12 @@ Golden Reference component regions inside v1.1 slots must preserve child-control
 
 If no real actions exist, omit the `Operations` container.
 
+## Generated Section Cleanup
+
+Generated Dashboard pages must not keep empty copied business sections. If a `section_content_area` would have no generated business content, remove the entire unused copied module that owns it instead of leaving a title-only card or an empty content area. This applies to `content_card_wrapper`, `content_card_60_wrapper`, `content_card_40_wrapper`, `2_columns_section`, `3_columns_section`, and `2_columns_60/40_section`.
+
+An empty `section_content_area` is never acceptable in a generated Dashboard resource. It is allowed in the registry/template source only as a copy source before business section selection. Generated-final validation must fail when a Dashboard page keeps an empty section content area, a copied title-only business card, or a copied repeatable section with no Collection, Data Analytics, KPI/Summary, filter group, field display, or configured action content.
+
 ## Business Mapping
 
 Generated Dashboard pages must replace template business content with the current app domain:
