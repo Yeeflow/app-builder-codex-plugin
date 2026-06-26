@@ -2059,42 +2059,6 @@
         "grid_table_col_item_select",
         "grid_table_col_body"
       ]
-    },
-    {
-      "templateId": "collection_control_grid_table_with_search",
-      "purpose": "Add search/fulltext filtering to a grid/table Collection.",
-      "pattern_scope": "grid_table_only",
-      "proven_formats": [
-        "YAP",
-        "YAPK"
-      ],
-      "proven_surfaces": [
-        "dashboard_page"
-      ],
-      "not_for": [
-        "card_style",
-        "kanban",
-        "gallery",
-        "timeline",
-        "nested_collection",
-        "grouped_collection",
-        "unknown_collection_pattern"
-      ],
-      "requiredSearchShape": [
-        "search-filter control above table",
-        "Collection attrs.data.fulltext[]",
-        "fulltext fields resolve to source list",
-        "search variable resolves"
-      ],
-      "validationChecks": [
-        "COLLECTION_GRID_TABLE_SEARCH_FILTER_MISSING absent",
-        "COLLECTION_GRID_TABLE_SEARCH_FIELDS_INVALID absent",
-        "COLLECTION_FILTER_FIELD_INVALID absent"
-      ],
-      "proofBoundaries": [
-        "search proven for Projects Center task table fields",
-        "other operators or hosts need separate proof"
-      ]
     }
   ]
 }

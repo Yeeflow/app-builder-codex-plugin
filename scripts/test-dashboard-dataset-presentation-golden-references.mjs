@@ -62,12 +62,21 @@ try {
 | --- | --- | --- | --- | --- | --- |
 | Operations | Asset cards | Assets Data List | Browse available assets as cards | collection_control_responsive_card_grid | Card browsing is better for asset overview |
 | Operations | Active loans | Loan Requests Data List | Dense work queue scan | collection_control_grid_table | Dense row/column scanning for an operational work queue |
-| Operations | Search documents | Document Library | Search document metadata | collection_control_grid_table_with_search | Fulltext document lookup |
 | Operations | Bulk reminders | Loan Requests Data List | Batch send reminders | collection_control_grid_table_with_multiselect | Multi-row selection and batch reminder |
 | Operations | Bulk card close | Loan Requests Data List | Batch close selected card records | collection_control_card_with_multiselect_toolbar | Multi-select cards with selected count and batch operation |
 | Operations | Primary work queue | Loan Requests Data List | Primary operational pipeline | Event Pipeline Grid-Table | High-fidelity work queue |
 `);
   expectPass("App Plan with approved dataset presentation references passes", ["--app-plan", validPlan]);
+
+  const retiredSearchPlan = write("retired-search-plan.md", `# Yeeflow App Plan
+
+## Dashboard Pages Plan
+
+| Dashboard Page | Dataset Region | Source Resource | Business Purpose | Selected Collection Presentation Reference | Selection Rationale |
+| --- | --- | --- | --- | --- | --- |
+| Operations Dashboard | Document search | Document Library | Search document metadata | collection_control_grid_table_with_search | Fulltext document lookup |
+`);
+  expectCode("retired search-only Collection template is no longer approved", ["--app-plan", retiredSearchPlan], "DASH_DATASET_APP_PLAN_REFERENCE_UNKNOWN");
 
   const noWorkaroundPlan = write("no-workaround-plan.md", `# Yeeflow App Plan
 
@@ -155,7 +164,7 @@ Dashboard validator commands used during validation:
 
 | Dashboard Page | Dataset Region | Source Resource | Business Purpose | Selected Collection Presentation Reference | Selection Rationale |
 | --- | --- | --- | --- | --- | --- |
-| Operations Dashboard | Active loans | Loan Requests Data List | Dashboard Collection work queue | collection_control_grid_table and collection_control_grid_table_with_search | Dense scanning and search |
+| Operations Dashboard | Active loans | Loan Requests Data List | Dashboard Collection work queue | collection_control_grid_table and collection_control_grid_table_with_multiselect | Dense scanning and batch selection |
 `);
   expectCode("App Plan selects exactly one Collection presentation reference", ["--app-plan", multiplePlan], "DASH_DATASET_APP_PLAN_REFERENCE_NOT_EXACTLY_ONE");
 
@@ -206,7 +215,6 @@ Dashboard validator commands used during validation:
 | --- | --- | --- | --- | --- | --- | --- |
 | Asset Cards Dashboard | Asset cards | Assets Data List | Browse available assets as cards | Collection | collection_control_responsive_card_grid | Card browsing is better for asset overview |
 | Active Loans Dashboard | Active loans | Loan Requests Data List | Dense operational row scanning | Collection | collection_control_grid_table | Dense row/column scanning for an operational work queue |
-| Document Search Dashboard | Document search | Document Library | Search document metadata | Collection | collection_control_grid_table_with_search | Fulltext document lookup |
 | Bulk Reminder Dashboard | Bulk reminders | Loan Requests Data List | Batch send reminders | Collection | collection_control_grid_table_with_multiselect | Multi-row selection and batch reminder |
 | Card Bulk Dashboard | Bulk cards | Loan Requests Data List | Batch close selected card records | Collection | collection_control_card_with_multiselect_toolbar | Multi-select cards with selected count and batch operation |
 | Primary Pipeline Dashboard | Event pipeline | Loan Requests Data List | Primary operational pipeline | Collection | Event Pipeline Grid-Table | High-fidelity work queue |
@@ -221,7 +229,7 @@ Dashboard validator commands used during validation:
   expectCode("App Plan selected template must be materialized", ["--app-plan", conformancePlan, "--package", writePackage("collapsed-template-materialization", collapsedPages)], "DASH_DATASET_APP_PLAN_TEMPLATE_NOT_MATERIALIZED");
 
   const mismatchedRegionPages = validPages();
-  findControl(mismatchedRegionPages[1], "active_loans_collection").attrs.datasetPresentationTemplateId = "collection_control_grid_table_with_search";
+  findControl(mismatchedRegionPages[1], "active_loans_collection").attrs.datasetPresentationTemplateId = "collection_control_grid_table_with_multiselect";
   expectCode("App Plan-to-package conformance fails on region template mismatch", ["--app-plan", conformancePlan, "--package", writePackage("region-template-mismatch", mismatchedRegionPages)], "DASH_DATASET_REGION_TEMPLATE_MISMATCH");
 
   const inheritedOnlyPages = validPages();
@@ -310,38 +318,38 @@ Dashboard validator commands used during validation:
   expectCode("base grid-table display-only report source forbids item operations", ["--package", writePackage("base-grid-table-view-only-ops", viewOnlyBaseGridPages)], "DASH_DATASET_GRID_TABLE_DISPLAY_ONLY_OPERATION_FORBIDDEN");
 
   const badMultiselectPages = validPages();
-  const bulk = findControl(badMultiselectPages[3], "bulk_reminders_collection");
+  const bulk = findControl(badMultiselectPages[2], "bulk_reminders_collection");
   bulk.attrs.actions = [];
   expectCode("multiselect Collection without bulk action contract fails", ["--package", writePackage("bad-multiselect", badMultiselectPages)], "DASH_DATASET_MULTISELECT_ACTION_CONTRACT_INVALID");
 
   const simplifiedGridMultiselectPages = validPages();
-  const simplifiedBulkCollection = findControl(simplifiedGridMultiselectPages[3], "bulk_reminders_collection");
-  simplifiedGridMultiselectPages[3].children[0].children[0].children[0].children[1].children = [simplifiedBulkCollection];
+  const simplifiedBulkCollection = findControl(simplifiedGridMultiselectPages[2], "bulk_reminders_collection");
+  simplifiedGridMultiselectPages[2].children[0].children[0].children[0].children[1].children = [simplifiedBulkCollection];
   expectCode("grid-table multiselect without export-shaped wrapper fails", ["--package", writePackage("simplified-grid-multiselect", simplifiedGridMultiselectPages)], "DASH_DATASET_GRID_MULTISELECT_WRAPPER_MISSING");
 
   const badGridMultiselectColumnsPages = validPages();
-  const badItemGrid = findControl(badGridMultiselectColumnsPages[3], "grid_col_item");
+  const badItemGrid = findControl(badGridMultiselectColumnsPages[2], "grid_col_item");
   badItemGrid.attrs.columns["1"].list = [[46, "px"], [3, "fr"], [1, "fr"]];
   expectCode("grid-table multiselect header/item column mismatch fails", ["--package", writePackage("bad-grid-multiselect-columns", badGridMultiselectColumnsPages)], "DASH_DATASET_GRID_MULTISELECT_HEADER_ITEM_COLUMN_MISMATCH");
 
   const badGridFullWidthPages = validPages();
-  delete findControl(badGridFullWidthPages[3], "grid_table_col_caption").attrs.style.widthtype;
+  delete findControl(badGridFullWidthPages[2], "grid_table_col_caption").attrs.style.widthtype;
   expectCode("grid-table multiselect structural containers require full width", ["--package", writePackage("bad-grid-multiselect-full-width", badGridFullWidthPages)], "DASH_DATASET_GRID_MULTISELECT_FULL_WIDTH_CONTRACT_MISSING");
 
   const badGridResiduePages = validPages();
-  findControl(badGridResiduePages[3], "grid_bulk_search").attrs.placeholder = "Search tasks";
+  findControl(badGridResiduePages[2], "grid_bulk_search").attrs.placeholder = "Search tasks";
   expectCode("grid-table multiselect source-domain text residue fails", ["--package", writePackage("bad-grid-multiselect-residue", badGridResiduePages)], "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_RESIDUE");
 
   const badGridGapPages = validPages();
-  findControl(badGridGapPages[3], "op_normal").attrs.style.gap = [null, "--sp--s0"];
+  findControl(badGridGapPages[2], "op_normal").attrs.style.gap = [null, "--sp--s0"];
   expectCode("grid-table multiselect locked gap drift fails", ["--package", writePackage("bad-grid-multiselect-gap-drift", badGridGapPages)], "DASH_DATASET_GRID_MULTISELECT_LOCKED_STYLE_DRIFT");
 
   const badGridSelectActionPages = validPages();
-  delete findControl(badGridSelectActionPages[3], "grid_table_col_item_select").attrs.control_action;
+  delete findControl(badGridSelectActionPages[2], "grid_table_col_item_select").attrs.control_action;
   expectCode("grid-table multiselect row selector must keep action binding", ["--package", writePackage("bad-grid-multiselect-select-action", badGridSelectActionPages)], "DASH_DATASET_GRID_MULTISELECT_SELECT_ACTION_MISSING");
 
   const badGridFilterShapePages = validPages();
-  const badGridFilterCollection = findControl(badGridFilterShapePages[3], "bulk_reminders_collection");
+  const badGridFilterCollection = findControl(badGridFilterShapePages[2], "bulk_reminders_collection");
   badGridFilterCollection.attrs.data.filter = [{ operator: "9", showCus: true, right: [{ valueType: "array", id: "filter_bad", name: "__filter_bad" }] }];
   badGridFilterCollection.attrs.data.filterBindings = [{ name: "bad" }];
   expectCode("grid-table multiselect filter condition must keep Designer shape", ["--package", writePackage("bad-grid-multiselect-filter-shape", badGridFilterShapePages)], "DASH_DATASET_GRID_MULTISELECT_FILTER_CONDITION_SHAPE_INVALID");
@@ -353,29 +361,29 @@ Dashboard validator commands used during validation:
   expectCode("helper-created KPI cards under KPI wrapper fail", ["--package", writePackage("helper-kpi-card", helperKpiPages)], "DASH_DATASET_KPI_MODULE_ROW_MISSING");
 
   const missingGridDepsPages = validPages();
-  delete missingGridDepsPages[3].tempVars;
+  delete missingGridDepsPages[2].tempVars;
   expectCode("grid-table multiselect without page-level dependencies fails", ["--package", writePackage("grid-multiselect-missing-deps", missingGridDepsPages)], "DASH_DATASET_GRID_MULTISELECT_TEMPVARS_MISSING");
 
   const missingGridButtonActionPages = validPages();
-  findControl(missingGridButtonActionPages[3], "grid_bulk_add_button").attrs.control_action = "";
+  findControl(missingGridButtonActionPages[2], "grid_bulk_add_button").attrs.control_action = "";
   expectCode("grid-table multiselect Add button without action fails", ["--package", writePackage("grid-multiselect-missing-button-action", missingGridButtonActionPages)], "DASH_DATASET_GRID_MULTISELECT_BUTTON_ACTION_MISSING");
 
   const simplifiedCardMultiselectPages = validPages();
-  const cardBulk = findControl(simplifiedCardMultiselectPages[4], "card_bulk_collection");
-  const cardWrapper = findControl(simplifiedCardMultiselectPages[4], "card_with_multiselect_toolbar_wrapper");
+  const cardBulk = findControl(simplifiedCardMultiselectPages[3], "card_bulk_collection");
+  const cardWrapper = findControl(simplifiedCardMultiselectPages[3], "card_with_multiselect_toolbar_wrapper");
   cardWrapper.children = [cardBulk];
   expectCode("card multiselect without export-shaped slots fails", ["--package", writePackage("simplified-card-multiselect", simplifiedCardMultiselectPages)], "DASH_DATASET_CARD_MULTISELECT_SLOT_MISSING");
 
   const missingCardDepsPages = validPages();
-  delete missingCardDepsPages[4].tempVars;
+  delete missingCardDepsPages[3].tempVars;
   expectCode("card multiselect without page-level dependencies fails", ["--package", writePackage("card-multiselect-missing-deps", missingCardDepsPages)], "DASH_DATASET_CARD_MULTISELECT_TEMPVARS_MISSING");
 
   const missingCardActionPages = validPages();
-  findControl(missingCardActionPages[4], "card_bulk_add_button").attrs.control_action = "";
+  findControl(missingCardActionPages[3], "card_bulk_add_button").attrs.control_action = "";
   expectCode("card multiselect Add button without action fails", ["--package", writePackage("card-multiselect-missing-action", missingCardActionPages)], "DASH_DATASET_CARD_MULTISELECT_BUTTON_ACTION_MISSING");
 
   const noItemOperationsPages = validPages();
-  const cardItem = findControl(noItemOperationsPages[4], "card_col_item");
+  const cardItem = findControl(noItemOperationsPages[3], "card_col_item");
   cardItem.children = cardItem.children.filter((child) => child.id !== "card_col_item_operations");
   expectPass("card multiselect item operations region may be removed", ["--package", writePackage("card-multiselect-no-item-operations", noItemOperationsPages)]);
 
@@ -507,10 +515,6 @@ function validPages() {
     page("Active Loans Dashboard", [
       gridTableSection("active_loans", "collection_control_grid_table"),
     ], baseGridTablePageDeps()),
-    page("Document Search Dashboard", [
-      { id: "loan_search", type: "search-filter", attrs: { variable: "loan_search" } },
-      gridTableSection("document_search", "collection_control_grid_table_with_search", { fulltext: [{ fields: ["Title", "Text1"], value: [{ exprType: "variable", id: "__filter_loan_search" }] }] }),
-    ]),
     page("Bulk Reminder Dashboard", [
       heading("selected_count", [{ exprType: "variable", valueType: "string", id: "__temp_var_SelectedItemsAmount", type: "expr", name: "var_SelectedItemsAmount" }, { type: "str", value: " Items are selected." }]),
       gridMultiselectSection("bulk_reminders"),

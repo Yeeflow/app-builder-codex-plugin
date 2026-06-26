@@ -757,7 +757,6 @@ Not for:
 
 - card-style Collection
 - multi-select Collection; use `collection_control_grid_table_with_multiselect`
-- dedicated search/fulltext Collection; use `collection_control_grid_table_with_search`
 - kanban Collection
 - gallery/media Collection
 - timeline Collection
@@ -915,36 +914,4 @@ Proof boundaries:
 - Do not infer card-style absolute top-right selection behavior from this table pattern.
 - Do not infer this full export-shaped contract from the base `collection_control_grid_table`; select and materialize this template only when the App Plan selected `collection_control_grid_table_with_multiselect`.
 
-## collection_control_grid_table_with_search
-
-Purpose: add export-proven search/fulltext filtering to the grid/table Collection.
-
-Pattern scope: `grid_table_only`.
-
-Applicable formats:
-
-- YAP
-- YAPK
-
-Applicable surfaces:
-
-- dashboard/page resource
-
-Required search structure:
-
-- `search-filter` control above the table
-- placeholder or label matching the table content
-- Collection `attrs.data.fulltext[]`
-- fulltext fields resolve to the source list
-- search variable resolves to the page/filter context
-
-Validation checks:
-
-- `COLLECTION_GRID_TABLE_SEARCH_FILTER_MISSING` absent
-- `COLLECTION_GRID_TABLE_SEARCH_FIELDS_INVALID` absent
-- `COLLECTION_FILTER_FIELD_INVALID` absent
-
-Proof boundaries:
-
-- Search is proven for the Projects Center task table fields.
-- Other search/filter hosts or operators need separate export-backed proof.
+Search/fulltext behavior is not a separate Collection template. When the App Plan needs keyword search, select the approved presentation template that matches the dataset shape, then map `search-filter` and `attrs.data.fulltext[]` inside that template's editable toolbar/filter region with app-specific fields and runtime-safe expression variables.

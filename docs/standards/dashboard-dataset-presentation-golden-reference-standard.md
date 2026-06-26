@@ -18,7 +18,6 @@ This standard keeps business planning separate from low-level Yeeflow payload ge
 | `collection_control_card_with_multiselect_toolbar` | Card-style records with selected state and bulk toolbar. |
 | `collection_control_grid_table` | Dense table-like Collection records. |
 | `collection_control_grid_table_with_multiselect` | Dense table-like Collection records with checkbox selection and bulk operations. |
-| `collection_control_grid_table_with_search` | Dense table-like Collection records with search/fulltext filtering. |
 | `Event Pipeline Grid-Table` | High-fidelity primary Dashboard operations/pipeline/work-queue table based on the Event Portfolio Golden Reference. |
 
 No other Dashboard Collection presentation pattern is generated-final eligible unless explicitly marked `export-learning-required` and blocked from signing/install.
@@ -49,11 +48,11 @@ Validator scope rule: this gate parses canonical Dashboard record-display / data
 - Choose `collection_control_card_with_multiselect_toolbar` when card records need multi-select bulk actions.
 - Choose `collection_control_grid_table` for dense operational records without bulk selection.
 - Choose `collection_control_grid_table_with_multiselect` for dense operational records with multi-row selection and batch operations. Projects Center / Project Tasks is the export-proven source reference only, not a business-domain restriction.
-- Choose `collection_control_grid_table_with_search` when the dense table also requires free-text search/fulltext filtering.
 - Choose `Event Pipeline Grid-Table` for the primary high-fidelity Dashboard work queue, pipeline, or portfolio table.
+- Free-text search/fulltext filtering is a behavior on an approved Collection template, not a separate approved Collection template ID. Use `collection_control_grid_table`, `collection_control_grid_table_with_multiselect`, `collection_control_responsive_card_grid`, `collection_control_card_with_multiselect_toolbar`, or `Event Pipeline Grid-Table` according to the business presentation pattern, then map any needed search filter/fulltext binding inside that selected template's editable toolbar/filter region.
 - Do not choose a template just because it is visually attractive. The selected template must match the business signals: card browsing, dense row/column scanning, free-text search, multiselect/bulk operation, or high-fidelity primary operations table.
 - If more than one reference seems possible, the App Plan must pick exactly one for that dataset region and state why the other options were not chosen at business level. Do not defer the choice to resource generation.
-- Template IDs must be parsed as exact tokens. `collection_control_grid_table_with_multiselect` and `collection_control_grid_table_with_search` are distinct approved templates and must not be counted as also selecting `collection_control_grid_table`.
+- Template IDs must be parsed as exact tokens. `collection_control_grid_table_with_multiselect` must not be counted as also selecting `collection_control_grid_table`, and retired IDs such as `collection_control_grid_table_with_search` must fail as unknown.
 
 ## Responsive Card Grid Template
 
@@ -150,7 +149,7 @@ Recommended editable behavior:
 - Generation must dispatch each Dashboard dataset region by the App Plan's selected template ID. Do not route all Dashboard Collections through `Event Pipeline Grid-Table`, generic grid-table, card fallback, or any other single default builder unless that exact template was selected for that exact region.
 - Do not create generic repeated cards, fake grid tables, simplified Data table lookalikes, or ad hoc Collection item templates.
 - Grid-table references must preserve the approved template wrapper, header `flex_grid`, Collection body, repeated item `flex_grid`, matching columns, mobile item-grid behavior, and valid source list bindings.
-- Grid-table-specific validation applies only to grid-table references: `collection_control_grid_table`, `collection_control_grid_table_with_multiselect`, `collection_control_grid_table_with_search`, and `Event Pipeline Grid-Table`. It must not be applied to card references such as `collection_control_card_with_multiselect_toolbar` or `collection_control_responsive_card_grid`.
+- Grid-table-specific validation applies only to grid-table references: `collection_control_grid_table`, `collection_control_grid_table_with_multiselect`, and `Event Pipeline Grid-Table`. It must not be applied to card references such as `collection_control_card_with_multiselect_toolbar` or `collection_control_responsive_card_grid`.
 - Row/card detail open metadata is required only when the selected template or App Plan declares row/card open behavior. If no open behavior is planned, generation must emit explicit no-open metadata instead of leaving unresolved links or placeholder layout IDs.
 - Row/card edit or open actions that depend on a custom detail layout must be rewritten to the selected source list's concrete Type `1` layout. If no concrete detail layout exists, remove the edit/open action and any button that points to it instead of leaving an empty, default, or placeholder layout reference.
 - Multiselect references must preserve selected state, selected count, checkbox icons, bulk toolbar/actions, `ListDataID`, and `__ctx_coll` current-item context.

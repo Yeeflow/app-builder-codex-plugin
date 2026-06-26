@@ -35,7 +35,6 @@ const DATA_ANALYTICS_TEMPLATE_PATHS = {
 const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = Object.freeze(Object.keys(DATA_ANALYTICS_TEMPLATE_PATHS));
 const COLLECTION_TEMPLATE_PATHS = {
   collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
-  collection_control_grid_table_with_search: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   "Event Pipeline Grid-Table": path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   collection_control_grid_table_with_multiselect: path.join(ROOT, "docs/reference/collection-control-grid-table-with-multiselect.template.json"),
   collection_control_card_with_multiselect_toolbar: path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json"),
@@ -44,10 +43,13 @@ const COLLECTION_TEMPLATE_PATHS = {
 const APPROVED_COLLECTION_TEMPLATE_IDS = Object.freeze(Object.keys(COLLECTION_TEMPLATE_PATHS));
 const GRID_TABLE_TEMPLATE_IDS = new Set([
   "collection_control_grid_table",
-  "collection_control_grid_table_with_search",
   "collection_control_grid_table_with_multiselect",
   "Event Pipeline Grid-Table",
 ]);
+const SOURCE_COLLECTION_TEMPLATE_IDS = {
+  listSetIds: new Set(["2058726109535285249", "2058571956842409984"]),
+  listIds: new Set(["2058726119586017281", "2058571966637289476"]),
+};
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -1505,7 +1507,9 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
   if (analyticsControl) {
     const groupingField = resolveAnalyticsField(listMeta, record.groupingFields) || fieldsForDynamicControls(listMeta)[0];
     const valueField = resolveAnalyticsField(listMeta, record.valueFields) || groupingField || fieldsForDynamicControls(listMeta)[0];
-    analyticsControl.id = analyticsControl.id || deterministicUuid(`${dashboardName}:${record.selectedTemplateId}:${instanceIndex}:analytics-control`);
+    if (!analyticsControl.id || !UUID_CONTROL_ID_RE.test(String(analyticsControl.id))) {
+      analyticsControl.id = deterministicUuid(`${dashboardName}:${record.selectedTemplateId}:${instanceIndex}:analytics-control`);
+    }
     analyticsControl.dataAnalyticsTemplateId = record.selectedTemplateId;
     analyticsControl.derivedFromDataAnalyticsGoldenReference = record.selectedTemplateId;
     analyticsControl.runtimeModelProven = true;
@@ -1831,6 +1835,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     collection.attrs.data.opentype = "slide";
     collection.attrs.data.modalsize = 2;
   }
+  rewriteCollectionTemplateRuntimeRefs(root, { rootListSetId, listId, detailLayoutId });
   const bindableFields = fieldsForDynamicControls(listMeta);
   let dynamicIndex = 0;
   for (const control of findDescendants(root, (node) => String(node?.type || "").startsWith("dynamic-"))) {
@@ -2009,10 +2014,48 @@ function uniqueByName(items) {
 function loadCollectionTemplate(templateId) {
   const templatePath = COLLECTION_TEMPLATE_PATHS[templateId] || COLLECTION_TEMPLATE_PATHS.collection_control_grid_table;
   const template = JSON.parse(fs.readFileSync(templatePath, "utf8"));
-  if (templateId === "collection_control_grid_table_with_search" || templateId === "Event Pipeline Grid-Table") {
+  if (templateId === "Event Pipeline Grid-Table") {
     return { ...template, templateId };
   }
   return template;
+}
+
+function rewriteCollectionTemplateRuntimeRefs(node, { rootListSetId, listId, detailLayoutId }) {
+  const rootId = stringId(rootListSetId);
+  const sourceListId = stringId(listId);
+  const layoutId = stringId(detailLayoutId);
+  const visit = (value, key = "") => {
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) value[index] = visit(value[index], key);
+      return value;
+    }
+    if (!value || typeof value !== "object") {
+      if (typeof value !== "string") return value;
+      let out = value
+        .replaceAll("{{ListSetID}}", rootId)
+        .replaceAll("{{ListID}}", sourceListId)
+        .replaceAll("{{DetailLayoutID}}", layoutId);
+      for (const oldId of SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds) out = out.replaceAll(oldId, rootId);
+      for (const oldId of SOURCE_COLLECTION_TEMPLATE_IDS.listIds) out = out.replaceAll(oldId, sourceListId);
+      if ((/^(?:link|layout|LayoutID|layoutId|PageID|pageId)$/i.test(key) || /\{\{DetailLayoutID\}\}/.test(value)) && !layoutId) {
+        return "";
+      }
+      return out;
+    }
+    for (const [childKey, child] of Object.entries(value)) {
+      if (/^ListSetID$/i.test(childKey) && typeof child === "string" && (SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds.has(child) || /\{\{ListSetID\}\}/.test(child))) {
+        value[childKey] = rootId;
+      } else if (/^ListID$/i.test(childKey) && typeof child === "string" && (SOURCE_COLLECTION_TEMPLATE_IDS.listIds.has(child) || /\{\{ListID\}\}/.test(child))) {
+        value[childKey] = sourceListId;
+      } else if (/^(?:link|layout|LayoutID|layoutId|PageID|pageId)$/i.test(childKey) && typeof child === "string" && /\{\{DetailLayoutID\}\}/.test(child)) {
+        value[childKey] = layoutId;
+      } else {
+        value[childKey] = visit(child, childKey);
+      }
+    }
+    return value;
+  };
+  return visit(node);
 }
 
 function ensureCollectionActions(actions) {

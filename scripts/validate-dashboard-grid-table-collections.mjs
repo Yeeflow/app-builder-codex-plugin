@@ -8,7 +8,6 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk, walk } from "./lib/
 const GRID_TABLE_TEMPLATE_IDS = new Set([
   "collection_control_grid_table",
   "collection_control_grid_table_with_multiselect",
-  "collection_control_grid_table_with_search",
   "Event Pipeline Grid-Table",
 ]);
 

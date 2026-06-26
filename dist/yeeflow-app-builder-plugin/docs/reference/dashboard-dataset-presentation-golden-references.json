@@ -7,7 +7,6 @@
     "collection_control_card_with_multiselect_toolbar",
     "collection_control_grid_table",
     "collection_control_grid_table_with_multiselect",
-    "collection_control_grid_table_with_search",
     "Event Pipeline Grid-Table"
   ],
   "references": [
@@ -126,7 +125,7 @@
       ],
       "whenNotToUse": [
         "The dataset needs multi-row selection and batch actions; use collection_control_grid_table_with_multiselect.",
-        "The dataset needs a dedicated fulltext/search presentation; use collection_control_grid_table_with_search.",
+        "The dataset primarily needs card browsing, bulk selection, or high-fidelity primary operations treatment.",
         "The data should be shown as cards, Kanban, timeline, grouped, nested, or gallery.",
         "The region is display-only and a native Data table was explicitly requested instead of a Collection."
       ],
@@ -227,41 +226,6 @@
         "grid_table_col_item_select",
         "grid_table_col_body"
       ]
-    },
-    {
-      "templateId": "collection_control_grid_table_with_search",
-      "displayName": "Collection Grid-Table With Search",
-      "sourceReference": "Projects Center grid-table search/fulltext export study",
-      "category": "collection-grid-table-search",
-      "suitableSourceResourceTypes": [
-        "Data List",
-        "Form Report",
-        "Document Library metadata list"
-      ],
-      "whenToUse": [
-        "Users need dense row/column scanning and free-text search.",
-        "The dashboard region is a document library, request history, audit list, or operational table with many records."
-      ],
-      "whenNotToUse": [
-        "No search/fulltext business need exists.",
-        "Only fixed dropdown filters are required.",
-        "The region should be a card list."
-      ],
-      "requiredBusinessSignals": [
-        "search",
-        "fulltext",
-        "quick find",
-        "document lookup",
-        "history search"
-      ],
-      "requiredAppPlanDeclaration": "Select collection_control_grid_table_with_search and name the fields/search purpose.",
-      "generationProof": [
-        "grid-table structure",
-        "search-filter",
-        "Collection attrs.data.fulltext[]",
-        "valid searchable fields"
-      ],
-      "proofBoundary": "Search linkage is structural proof; runtime before/after search proof remains separate."
     },
     {
       "templateId": "Event Pipeline Grid-Table",
