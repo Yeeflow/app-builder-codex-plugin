@@ -1983,6 +1983,7 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Ac
 function buildCollectionTemplateInstance({ templateId, dashboardName, datasetRegion, listName, rootListSetId, listId, listMeta, detailLayoutId, filterBindings, collectionId }) {
   const template = loadCollectionTemplate(templateId);
   const root = clone(template?.templateResource?.rootContainer || {});
+  reinstantiateTemplateUuidValues(root);
   root.id = `${collectionId}_${slugify(templateId)}_wrapper`;
   root.name = datasetRegion;
   root.datasetRegion = datasetRegion;
@@ -2103,6 +2104,27 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   };
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
   return root;
+}
+
+function reinstantiateTemplateUuidValues(root) {
+  const replacements = new Map();
+  const visit = (node) => {
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    for (const [key, value] of Object.entries(node)) {
+      if (typeof value === "string" && UUID_CONTROL_ID_RE.test(value)) {
+        if (!replacements.has(value)) replacements.set(value, crypto.randomUUID());
+        node[key] = replacements.get(value);
+      } else {
+        visit(value);
+      }
+    }
+  };
+  visit(root);
+  return replacements;
 }
 
 function sanitizeCollectionRuntimeReferences(root, { rootListSetId, listId, detailLayoutId }) {

@@ -155,6 +155,7 @@ Recommended editable behavior:
 - Multiselect references must preserve selected state, selected count, checkbox icons, bulk toolbar/actions, `ListDataID`, and `__ctx_coll` current-item context.
 - `collection_control_card_with_multiselect_toolbar` must preserve the full `card_with_multiselect_toolbar_wrapper` subtree, all non-editable style/layout/typography properties, page-level dependencies, Collection root actions, and the locked `card_col_item_multi_select` control.
 - `collection_control_grid_table_with_multiselect` must preserve the full `grid_table_col_multiselect_wrapper` subtree, all non-editable style/layout/typography properties, page-level dependencies, Collection root actions, the locked `grid_table_col_item_select` control, and matched `grid_table_col_header` / `grid_col_item` column definitions. The wrapper, caption, and content containers must remain full width in all Designer-relevant width layers: `width = "full"`, `attrs.style.widthtype = [null, "1"]`, and `attrs.common.positioning.widthtype = [null, "1"]`.
+- `collection_control_grid_table_with_multiselect` must preserve the real Collection control as the runtime dataset root. The generated Collection root must retain the template identity `grid_table_col_body` through `id`, `name`, `label`, `nav_label`, `nv_label`, or an approved provenance field. It is not valid to materialize only the inner `grid_col_item`, `flex_grid`, checkbox column, or visual wrapper and lose the selectable Collection root.
 - `collection_control_grid_table_with_multiselect` locked spacing values must be cloned from the source template and must not be overwritten by normalizers. At minimum, preserve gap settings for `grid_table_col_multiselect_wrapper`, `grid_table_col_caption`, `grid_table_col_content`, `op_normal`, `op_multipleselected`, `selected_items_amount_wrapper`, and `multiple_operations_wrapper`.
 - `collection_control_grid_table_with_multiselect` must replace source-domain text such as `All tasks`, `Search tasks`, `Add Task`, `Mark as completed`, `Assignee`, `Completion (%)`, and `Progress bar` with current-app business labels, placeholders, fields, and actions. Keeping Projects/Tasks wording in a non-task app is a generated-final blocker.
 - `grid_table_col_item_select` is locked and must keep a valid select/toggle action binding that resolves to a preserved Collection or page action. Static checkbox icons without action wiring do not satisfy the template.
@@ -170,6 +171,8 @@ Recommended editable behavior:
 `collection_control_grid_table_with_multiselect` is backed by the full export-shaped template artifact at `docs/reference/collection-control-grid-table-with-multiselect.template.json`. The source is Projects Center_1 v1.6, Dashboard page `All Tasks - multiple select`, component root `grid_table_col_multiselect_wrapper`. Projects Center / Project Tasks is the export-proven source reference only; the template can be selected for any Dashboard dataset that needs dense table scanning plus multi-row selection and batch operations.
 
 Generation must copy `grid_table_col_multiselect_wrapper` and all descendants as the component root. It is not enough to create a generic grid-table Collection, add a checkbox column, or add a separate toolbar.
+
+When cloning any approved Dashboard Collection template, the generator must recursively re-instantiate template-internal UUID-like values and keep repeated references consistent inside that single cloned subtree. Do not let UUIDs from the source template repeat across Dashboard pages, repeated sections, controls, actions, or style references. Runtime list/layout IDs and approved semantic IDs must still be replaced by the target app's resolved IDs, not random UUIDs.
 
 Only these regions are editable:
 
@@ -203,6 +206,7 @@ Run `scripts/validate-dashboard-dataset-presentation-golden-references.mjs` for:
 - generated package absence of unproven page-level select-filter variables consumed by Collection `op`/`operator = "9"` runtime conditions
 - App Plan-to-package region-level template conformance when both `--app-plan` and `--package` are provided
 - grid-table multiselect full-width, locked spacing, source-text replacement, row-select action wiring, and Designer-compatible filter condition shape
+- grid-table multiselect preservation of the real `grid_table_col_body` Collection root identity
 - KPI wrapper materialization from approved KPI row/card modules instead of helper-created lookalikes
 
 This gate is included in first-generation YAPK preflight and dashboard hard gates. A package that fails this gate is not eligible for signing, install/import, upgrade, runtime proof, or handoff.

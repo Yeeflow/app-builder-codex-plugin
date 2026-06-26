@@ -1273,6 +1273,14 @@ function validateGridMultiselect(entry, page, findings) {
     findings.push(error("DASH_DATASET_GRID_MULTISELECT_WRAPPER_MISSING", "collection_control_grid_table_with_multiselect must be generated from the full grid_table_col_multiselect_wrapper subtree, not a simplified grid-table or checkbox-column control.", { page: page.title, path: entry.pointer }));
     return;
   }
+  const entryIdentities = identityCandidates(entry.control).map(normalizeIdentity);
+  if (!entryIdentities.includes(normalizeIdentity("grid_table_col_body"))) {
+    findings.push(error("DASH_DATASET_GRID_MULTISELECT_COLLECTION_ROOT_IDENTITY_MISSING", "collection_control_grid_table_with_multiselect must preserve the real Collection root identity grid_table_col_body so Designer/runtime selects the dataset control, not an inner grid row.", {
+      page: page.title,
+      path: entry.pointer,
+      identities: identityCandidates(entry.control),
+    }));
+  }
 
   const requiredSlots = [
     "grid_table_col_title_wrapper",

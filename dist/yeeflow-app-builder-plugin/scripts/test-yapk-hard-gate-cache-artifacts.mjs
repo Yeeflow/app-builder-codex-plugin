@@ -195,6 +195,7 @@ const requiredDocs = [
   "docs/training/dashboard-filter-runtime-upgrade-proof-training-report.md",
   "docs/training/dashboard-collection-search-retirement-and-analytics-identity-hardening-training-report.md",
   "docs/training/collection-action-layout-approval-field-fidelity-training-report.md",
+  "docs/training/dashboard-collection-pie-golden-rebuild-training-report.md",
   "docs/training/repo-root-hygiene-compatibility-training-report.md",
   "docs/reference/dashboard-golden-references.json",
   "docs/reference/dashboard-dataset-presentation-golden-references.json",

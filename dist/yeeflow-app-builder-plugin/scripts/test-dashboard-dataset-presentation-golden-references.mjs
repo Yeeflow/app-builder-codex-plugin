@@ -327,6 +327,12 @@ Dashboard validator commands used during validation:
   simplifiedGridMultiselectPages[2].children[0].children[0].children[0].children[1].children = [simplifiedBulkCollection];
   expectCode("grid-table multiselect without export-shaped wrapper fails", ["--package", writePackage("simplified-grid-multiselect", simplifiedGridMultiselectPages)], "DASH_DATASET_GRID_MULTISELECT_WRAPPER_MISSING");
 
+  const missingGridRootIdentityPages = validPages();
+  const missingGridRootIdentityCollection = findControl(missingGridRootIdentityPages[2], "bulk_reminders_collection");
+  delete missingGridRootIdentityCollection.nv_label;
+  missingGridRootIdentityCollection.name = "Bulk Reminders Collection";
+  expectCode("grid-table multiselect Collection root identity must be preserved", ["--package", writePackage("grid-multiselect-root-identity-missing", missingGridRootIdentityPages)], "DASH_DATASET_GRID_MULTISELECT_COLLECTION_ROOT_IDENTITY_MISSING");
+
   const badGridMultiselectColumnsPages = validPages();
   const badItemGrid = findControl(badGridMultiselectColumnsPages[2], "grid_col_item");
   badItemGrid.attrs.columns["1"].list = [[46, "px"], [3, "fr"], [1, "fr"]];
@@ -736,6 +742,7 @@ function gridMultiselectSection(prefix) {
     container("grid_table_col_content", [
       gridHeader("grid_table_col_header", columns),
       collection(`${prefix}_collection`, "collection_control_grid_table_with_multiselect", {
+        nv_label: "grid_table_col_body",
         children: [gridItem("grid_col_item", columns, [
           container("grid_table_col_item_select", [
             { id: "grid_item_unchecked", type: "icon", attrs: { icon: "fa-regular fa-square" } },
@@ -873,6 +880,9 @@ function gridTableSection(prefix, templateId, options = {}) {
         } : {}),
       },
     });
+  if (templateId === "collection_control_grid_table_with_multiselect") {
+    body.nv_label = "grid_table_col_body";
+  }
   if (templateId !== "collection_control_grid_table") {
     return container(`${prefix}_content_card_wrapper`, [
       gridHeader(`${prefix}_header_grid`, columns),
@@ -939,17 +949,19 @@ function gridTableSection(prefix, templateId, options = {}) {
 }
 
 function collection(id, templateId, overrides = {}) {
+  const { attrs, children, ...topLevel } = overrides;
   return {
     id,
     type: "collection",
     label: "Collection",
+    ...topLevel,
     attrs: {
       datasetPresentationTemplateId: templateId,
       data: { list: { ListID: "list_loans" } },
       layout: { col: [null, 1] },
-      ...(overrides.attrs || {}),
+      ...(attrs || {}),
     },
-    children: overrides.children || [],
+    children: children || [],
   };
 }
 
