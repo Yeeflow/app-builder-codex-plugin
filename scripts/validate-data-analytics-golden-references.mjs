@@ -10,6 +10,13 @@ const REGISTRY_PATH = path.join(ROOT, "docs/reference/data-analytics-golden-refe
 const DASHBOARD_V11_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table"]);
 const APPROVED_DASHBOARD_V11_SECTION_IDS = new Set(["2_columns_section", "3_columns_section"]);
+const RUNTIME_CATEGORY = "___Pivot___";
+const CONTROL_KEY_BY_TYPE = {
+  "pie-chart": "pie-chart",
+  "bar-chart": "bar-chart",
+  "line-chart": "line-chart",
+  "pivot-table": "PivotTable",
+};
 const REQUIRED_GUIDANCE_KEYS = [
   "summary",
   "suitableSourceResourceTypes",
@@ -119,11 +126,11 @@ function validatePackage(packagePath, context) {
 
   for (const page of collectDashboardPages(decoded)) {
     resources.push({ surface: "dashboard", title: page.title, resource: page.resource });
-    validateResource(page.resource, { surface: "dashboard", pageTitle: page.title, findings: context.findings, references: context.references });
+    validateResource(page.resource, { surface: "dashboard", pageTitle: page.title, findings: context.findings, references: context.references, listFieldsById: collectListFieldsById(decoded) });
   }
   for (const form of collectDataListForms(decoded)) {
     resources.push({ surface: "data-list-form", title: form.title, resource: form.resource });
-    validateResource(form.resource, { surface: "data-list-form", pageTitle: form.title, findings: context.findings, references: context.references });
+    validateResource(form.resource, { surface: "data-list-form", pageTitle: form.title, findings: context.findings, references: context.references, listFieldsById: collectListFieldsById(decoded) });
   }
   for (const form of collectApprovalForms(decoded)) {
     resources.push({ surface: "approval-form", title: form.title, resource: form.resource });
@@ -289,7 +296,100 @@ function validateResource(resource, context) {
     if (isDashboardV11 && !hasAncestorInSet(entry, APPROVED_DASHBOARD_V11_SECTION_IDS)) {
       context.findings.push(error("DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID", "Dashboard Page Layouts v1.1 Data Analytics templates must be placed inside 2_columns_section or 3_columns_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_DASHBOARD_V11_SECTION_IDS] }));
     }
+    validateRuntimeBinding(resource, entry, reference, context);
   }
+}
+
+function validateRuntimeBinding(resource, entry, reference, context) {
+  const controlId = analyticsControlId(entry.node);
+  if (!controlId) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_CONTROL_ID_MISSING", "Data Analytics controls must have a stable control id for runtime ReportIds/exts binding.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, type: entry.node?.type }));
+    return;
+  }
+  const reportIds = new Set(asArray(resource.ReportIds).map((value) => String(value || "")));
+  if (!reportIds.has(controlId)) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_REPORT_ID_MISSING", "Data Analytics control id must be registered in Resource.ReportIds[].", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
+  }
+  const exts = asArray(resource.exts);
+  const ext = exts.find((item) => String(item?.i || "") === controlId);
+  if (!ext) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_EXT_MISSING", "Data Analytics control must have a matching Resource.exts[] runtime chart/pivot entry.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
+    return;
+  }
+  const expectedKey = CONTROL_KEY_BY_TYPE[String(reference.controlType || entry.node?.type || "")] || String(reference.controlType || "");
+  if (String(ext.category || "") !== RUNTIME_CATEGORY || String(ext.key || "") !== expectedKey) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_EXT_MISMATCH", "Data Analytics runtime ext must use category ___Pivot___, the expected chart/pivot key, and i equal to the control id.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+      expectedCategory: RUNTIME_CATEGORY,
+      expectedKey,
+      actualCategory: ext.category,
+      actualKey: ext.key,
+      actualI: ext.i,
+    }));
+  }
+  const attr = isObject(ext.attr) ? ext.attr : {};
+  const settings = isObject(attr.settings) ? attr.settings : {};
+  const listId = String(attr.ListID || attr.listId || attr.listID || "");
+  const listSetId = String(attr.ListSetID || attr.listSetId || attr.appListSetID || "");
+  const appId = String(attr.AppID || attr.appId || "");
+  if (!appId || !listId || !listSetId) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_SOURCE_METADATA_MISSING", "Data Analytics runtime ext must include AppID, ListID, and ListSetID source metadata.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId, appId, listId, listSetId }));
+  }
+  if (String(reference.controlType || "") !== "pivot-table" && !String(attr.chartType || "").trim()) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_CHART_TYPE_MISSING", "Chart runtime ext must include attr.chartType.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
+  }
+  const rows = asArray(settings.rows);
+  const values = asArray(settings.values);
+  if (!rows.length) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_ROWS_MISSING", "Data Analytics runtime settings.rows[] must include at least one source field.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
+  }
+  if (!values.length) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_VALUES_MISSING", "Data Analytics runtime settings.values[] must include at least one aggregate/value field.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
+  }
+  const sourceFields = context.listFieldsById?.get(listId) || null;
+  if (sourceFields) {
+    for (const ref of [...rows, ...asArray(settings.columns), ...values].flatMap(runtimeFieldRefs)) {
+      if (!sourceFields.has(ref)) {
+        context.findings.push(error("DATA_ANALYTICS_RUNTIME_FIELD_UNRESOLVED", "Data Analytics runtime settings field reference must resolve to a field on the source list.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId, listId, field: ref }));
+      }
+    }
+  }
+}
+
+function analyticsControlId(node) {
+  return String(node?.id || node?.attrs?.id || "");
+}
+
+function runtimeFieldRefs(value) {
+  if (Array.isArray(value)) return value.flatMap(runtimeFieldRefs);
+  if (!isObject(value)) return [];
+  return [
+    value.FieldName,
+    value.fieldName,
+    value.field,
+    value.id,
+    value.name,
+  ].filter((item) => item !== undefined && item !== null && String(item).trim()).map(String);
+}
+
+function collectListFieldsById(decoded) {
+  const map = new Map();
+  for (const child of asArray(decoded?.Childs || decoded?.Data?.Childs)) {
+    const list = child?.List || child?.ListModel || child;
+    const listId = String(list?.ListID || child?.ListID || "");
+    if (!listId) continue;
+    const fields = new Set(["ListDataID", "Title"]);
+    for (const field of asArray(list?.Defs || child?.Defs || child?.Fields || list?.Fields)) {
+      for (const key of ["FieldName", "fieldName", "Name", "name", "InternalName", "FieldID", "fieldId", "ID", "id"]) {
+        if (field?.[key]) fields.add(String(field[key]));
+      }
+    }
+    map.set(listId, fields);
+  }
+  return map;
 }
 
 function validateUnknownTemplateMarkers(index, context) {

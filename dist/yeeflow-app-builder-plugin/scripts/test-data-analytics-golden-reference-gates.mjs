@@ -24,6 +24,9 @@ try {
   expectCode("Simplified chart without approved wrapper fails", ["--resource", writeJson("missing-wrapper.json", dashboardResource({ missingWrapper: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_WRAPPER_MISSING");
   expectCode("Unknown analytics template ID fails", ["--resource", writeJson("unknown-template.json", dashboardResource({ unknownTemplate: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_UNKNOWN");
   expectCode("Chart-with-title template requires title control", ["--resource", writeJson("missing-title.json", dashboardResource({ missingTitle: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING");
+  expectCode("Visual analytics template without runtime exts fails", ["--resource", writeJson("missing-runtime.json", dashboardResource({ omitRuntimeBindings: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_EXT_MISSING");
+  expectCode("Runtime ext without ReportIds registration fails", ["--resource", writeJson("missing-reportids.json", dashboardResource({ omitReportIds: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_REPORT_ID_MISSING");
+  expectCode("Runtime ext with unresolved source field fails", ["--package", writeYapk("analytics-bad-field.yapk", dashboardResource({ badRuntimeField: true }))], "DATA_ANALYTICS_RUNTIME_FIELD_UNRESOLVED");
   const appPlan = writeText("analytics-app-plan.md", analyticsAppPlan());
   expectPass("Generated package materializes App Plan selected Data Analytics templates", ["--package", writeYapk("analytics-present.yapk", dashboardResource()), "--plan", appPlan]);
   expectCode("Generated package fails when App Plan selected Data Analytics templates are not materialized", ["--package", writeYapk("analytics-missing.yapk", dashboardResource({ noAnalytics: true })), "--plan", appPlan], "DATA_ANALYTICS_PLANNED_TEMPLATE_NOT_MATERIALIZED");
@@ -66,7 +69,7 @@ function dashboardResource(options = {}) {
   if (options.missingTitle) analytics[0].children = analytics[0].children.filter((child) => child.nv_label !== "pie_chart_title");
   if (options.noAnalytics) analytics.length = 0;
 
-  return {
+  const resource = {
     type: "page",
     nv_label: "dashboard-page-layouts-v1.1",
     derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-v1.1",
@@ -89,6 +92,8 @@ function dashboardResource(options = {}) {
       },
     ],
   };
+  if (!options.omitRuntimeBindings) addAnalyticsRuntimeBindings(resource, { omitReportIds: options.omitReportIds, badRuntimeField: options.badRuntimeField });
+  return resource;
 }
 
 function analyticsAppPlan() {
@@ -117,7 +122,19 @@ function writeYapk(name, dashboard) {
         LayoutInResources: [{ Resource: JSON.stringify(dashboard) }],
       },
     ],
-    Childs: [],
+    Childs: [
+      {
+        List: {
+          ListID: "list_assets",
+          Title: "Tickets",
+          Defs: [
+            { FieldName: "ListDataID", FieldID: "field_listdataid", FieldType: "Text" },
+            { FieldName: "Status", FieldID: "field_status", FieldType: "Text" },
+            { FieldName: "Created", FieldID: "field_created", FieldType: "Datetime" },
+          ],
+        },
+      },
+    ],
     Forms: [],
     FormNewReports: [],
     DataReports: [],
@@ -135,7 +152,7 @@ function writeYapk(name, dashboard) {
 }
 
 function dataListFormResource() {
-  return {
+  const resource = {
     type: "form",
     nv_label: "Asset Analytics Form",
     children: [
@@ -144,6 +161,8 @@ function dataListFormResource() {
       pivotModule(),
     ],
   };
+  addAnalyticsRuntimeBindings(resource);
+  return resource;
 }
 
 function approvalFormResource() {
@@ -185,7 +204,7 @@ function chartModule(templateId, wrapperId, titleId, controlId, controlType) {
     children: [
       { type: "text", nv_label: titleId, attrs: { headc: { title: { value: "Business-specific title" } } } },
       { type: "container", nv_label: wrapperId.replace("_with_title_wrapper", "_container"), children: [
-        { type: controlType, nv_label: controlId, attrs: { dataAnalyticsTemplateId: templateId, data: { list: { ListID: "list_assets" } } } },
+        { type: controlType, id: controlId, nv_label: controlId, attrs: { dataAnalyticsTemplateId: templateId, data: { list: { ListID: "list_assets" } } } },
       ] },
     ],
   };
@@ -194,9 +213,54 @@ function chartModule(templateId, wrapperId, titleId, controlId, controlType) {
 function pivotModule() {
   return {
     type: "pivot-table",
+    id: "pivot_table_control",
     nv_label: "pivot_table_standard",
     attrs: { dataAnalyticsTemplateId: "data_analytics_pivot_table_standard", rows: {}, columns: {}, values: {} },
   };
+}
+
+function addAnalyticsRuntimeBindings(resource, options = {}) {
+  const controls = [];
+  visit(resource, (node) => {
+    if (["pie-chart", "bar-chart", "line-chart", "pivot-table"].includes(String(node?.type || ""))) controls.push(node);
+  });
+  const reportIds = [];
+  const exts = [];
+  for (const control of controls) {
+    const id = control.id;
+    if (!id) continue;
+    if (!options.omitReportIds) reportIds.push(id);
+    const key = control.type === "pivot-table" ? "PivotTable" : control.type;
+    const fieldName = options.badRuntimeField ? "MissingField" : (id.includes("line") || id.includes("area") ? "Created" : "Status");
+    exts.push({
+      i: id,
+      category: "___Pivot___",
+      key,
+      attr: {
+        AppID: 41,
+        ListID: "list_assets",
+        ListSetID: "app_1",
+        chartType: control.type === "pivot-table" ? undefined : control.type,
+        settings: {
+          rows: [{ field: fieldName, fieldName, FieldName: fieldName }],
+          columns: [],
+          values: [{ field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", func: "COUNT" }],
+        },
+      },
+    });
+  }
+  resource.ReportIds = reportIds;
+  resource.exts = exts;
+}
+
+function visit(node, callback) {
+  if (!node || typeof node !== "object") return;
+  if (Array.isArray(node)) {
+    for (const item of node) visit(item, callback);
+    return;
+  }
+  callback(node);
+  for (const value of Object.values(node)) visit(value, callback);
 }
 
 function writeJson(name, value) {

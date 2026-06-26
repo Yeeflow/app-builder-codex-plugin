@@ -1246,11 +1246,12 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
     };
     contentArea.children = [collectionRoot];
   }
-  materializeDashboardAnalytics(resource, {
+  const analyticsRuntimeContracts = materializeDashboardAnalytics(resource, {
     analyticsRecords: dashboardAnalytics,
     fallbackListMeta: sourceListMeta,
     listMetaByName,
     dashboardName: name,
+    rootListSetId,
   });
   const summaries = kpiContracts.map((contract) => buildSummaryControl({
     summaryId: contract.summaryId,
@@ -1288,8 +1289,7 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
     { name: "var_SelectedItemsAmount", type: "number", source: collectionId },
     { name: "var_isDeleteConfirmed", type: "boolean", source: "delete-confirmation" },
   ]);
-  resource.ReportIds = kpiContracts.map((contract) => contract.summaryId);
-  resource.exts = kpiContracts.map((contract) => ({
+  const summaryRuntimeExts = kpiContracts.map((contract) => ({
     i: contract.summaryId,
     id: contract.summaryId,
     category: "___Pivot___",
@@ -1301,6 +1301,14 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
       },
     },
   }));
+  resource.ReportIds = unique([
+    ...kpiContracts.map((contract) => contract.summaryId),
+    ...analyticsRuntimeContracts.map((contract) => contract.controlId),
+  ]);
+  resource.exts = [
+    ...summaryRuntimeExts,
+    ...analyticsRuntimeContracts.map((contract) => contract.ext),
+  ];
   resource.actions = normalizeDependencyArray(templateDependencies.actions);
   resource.formAction = normalizeDependencyArray(templateDependencies.formAction);
   resource.LayoutID = layoutId;
@@ -1441,23 +1449,27 @@ function buildDashboardSelectFilter({ filter, listName, listId, id, datasetRegio
   };
 }
 
-function materializeDashboardAnalytics(resource, { analyticsRecords, fallbackListMeta, listMetaByName, dashboardName }) {
+function materializeDashboardAnalytics(resource, { analyticsRecords, fallbackListMeta, listMetaByName, dashboardName, rootListSetId }) {
   const records = analyticsRecords || [];
-  if (!records.length) return;
+  if (!records.length) return [];
   const slots = findDashboardAnalyticsSlots(resource);
-  if (!slots.length) return;
+  if (!slots.length) return [];
+  const runtimeContracts = [];
   records.forEach((record, index) => {
     const sourceMeta = listMetaByName?.get(normKey(record.sourceResource)) || fallbackListMeta;
-    const module = buildDataAnalyticsTemplateInstance({
+    const { root: module, runtimeContract } = buildDataAnalyticsTemplateInstance({
       record,
       listMeta: sourceMeta,
       dashboardName,
       instanceIndex: index,
+      rootListSetId,
     });
     const slot = slots[index % slots.length];
     slot.children = Array.isArray(slot.children) ? slot.children : [];
     slot.children.push(module);
+    if (runtimeContract) runtimeContracts.push(runtimeContract);
   });
+  return runtimeContracts;
 }
 
 function findDashboardAnalyticsSlots(resource) {
@@ -1470,7 +1482,7 @@ function findDashboardAnalyticsSlots(resource) {
   return slots;
 }
 
-function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, instanceIndex }) {
+function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, instanceIndex, rootListSetId }) {
   const reference = dataAnalyticsReference(record.selectedTemplateId);
   const template = JSON.parse(fs.readFileSync(DATA_ANALYTICS_TEMPLATE_PATHS[record.selectedTemplateId], "utf8"));
   const root = clone(template._ak_c || template.templateResource || template);
@@ -1489,9 +1501,11 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
   const analyticsControl = reference.controlType === String(root.type || "")
     ? root
     : findFirstByType(root, reference.controlType);
+  let runtimeContract = null;
   if (analyticsControl) {
     const groupingField = resolveAnalyticsField(listMeta, record.groupingFields) || fieldsForDynamicControls(listMeta)[0];
     const valueField = resolveAnalyticsField(listMeta, record.valueFields) || groupingField || fieldsForDynamicControls(listMeta)[0];
+    analyticsControl.id = analyticsControl.id || deterministicUuid(`${dashboardName}:${record.selectedTemplateId}:${instanceIndex}:analytics-control`);
     analyticsControl.dataAnalyticsTemplateId = record.selectedTemplateId;
     analyticsControl.derivedFromDataAnalyticsGoldenReference = record.selectedTemplateId;
     analyticsControl.runtimeModelProven = true;
@@ -1535,8 +1549,63 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
       columns: analyticsControl.attrs?.columns || { fields: [] },
       values: analyticsControl.attrs?.values || [{ field: valueField.fieldName, aggregate: "COUNT" }],
     };
+    runtimeContract = buildDataAnalyticsRuntimeContract({
+      controlId: analyticsControl.id,
+      reference,
+      listMeta,
+      rootListSetId,
+      groupingField,
+      valueField,
+      title,
+    });
   }
-  return root;
+  return { root, runtimeContract };
+}
+
+function buildDataAnalyticsRuntimeContract({ controlId, reference, listMeta, rootListSetId, groupingField, valueField, title }) {
+  const controlType = String(reference.controlType || "");
+  const extKey = controlType === "pivot-table" ? "PivotTable" : controlType;
+  const chartType = String(reference.semanticChartKind || controlType || "");
+  const rowField = runtimeFieldRef(groupingField, "row");
+  const valueRef = {
+    ...runtimeFieldRef(valueField, "value"),
+    func: "COUNT",
+    aggregate: "COUNT",
+    label: title,
+  };
+  const settings = {
+    rows: [rowField],
+    columns: [],
+    values: [valueRef],
+  };
+  const attr = {
+    AppID: 41,
+    ListID: stringId(listMeta.listId),
+    ListSetID: stringId(rootListSetId),
+    settings,
+  };
+  if (controlType !== "pivot-table") attr.chartType = chartType;
+  return {
+    controlId,
+    ext: {
+      i: controlId,
+      category: "___Pivot___",
+      key: extKey,
+      attr,
+    },
+  };
+}
+
+function runtimeFieldRef(field, role) {
+  const fieldName = String(field?.fieldName || field?.FieldName || "ListDataID");
+  return {
+    field: fieldName,
+    fieldName,
+    FieldName: fieldName,
+    id: String(field?.fieldId || field?.FieldID || fieldName),
+    label: String(field?.displayName || field?.DisplayName || fieldName),
+    role,
+  };
 }
 
 function normalizeAnalyticsContainerContracts(root) {
