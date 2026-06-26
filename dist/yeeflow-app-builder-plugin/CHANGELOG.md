@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.55
+
+- Release Data Analytics runtime binding hard gates from PR #248.
+- Require generated Pie, Column, Bar, Line, Area, and Pivot templates to include matching `Resource.ReportIds[]` and `Resource.exts[]` runtime registrations.
+- Enforce chart/pivot runtime entries with `category: "___Pivot___"`, expected `key`, `i` equal to the visible control ID, source `AppID/ListID/ListSetID`, chart type when applicable, and source-field-backed `settings.rows[]` / `settings.values[]`.
+- Update full-app materialization so generated Dashboard Data Analytics templates emit runtime contracts instead of provenance-only visual wrappers.
+- Add focused regression coverage for missing runtime `exts[]`, missing `ReportIds[]`, and unresolved analytics source fields before signing readiness.
+
 ## 0.8.54
 
 - Release Dashboard filter runtime and full-upgrade proof gates from PR #246.

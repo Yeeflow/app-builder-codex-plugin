@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.54`
+`0.8.55`
+
+Version `0.8.55` releases Data Analytics runtime binding hard gates from PR #248. Generated Pie, Column, Bar, Line, Area, and Pivot templates must not stop at visible controls and template provenance: every chart or pivot control must be registered in the host layout resource `ReportIds[]` and paired with a matching `exts[]` runtime entry using `category: "___Pivot___"`, the expected chart/pivot key, source `AppID/ListID/ListSetID`, chart type when applicable, and source-field-backed rows/values settings. Provenance-only chart wrappers are now blocked before signing readiness because they can render as blank runtime charts.
 
 Version `0.8.54` releases Dashboard filter runtime and full-upgrade proof gates from PR #246. Generated Dashboards must not use unproven page-level select-filter variables consumed by Collection `In` (`op/operator = 9`) conditions because empty select-filter state can clear all Collection rows at runtime. Until an export-proven empty-value bypass contract exists, generated dashboards should prefer search-filter/fulltext Collection display or visible unfiltered Collections. Dashboard-only upgrades for existing complete apps must be full upgrade packages with non-Dashboard resources preserved and unchanged-diff proof, and runtime proof must verify business rows, no `No data`, no `[object Object]`, real Data List bindings, search-filter behavior, exact PackageId Version Management `Succeed`, and captured error logs when upgrade processing fails.
 
