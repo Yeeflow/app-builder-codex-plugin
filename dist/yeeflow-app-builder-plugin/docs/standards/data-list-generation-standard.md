@@ -26,10 +26,12 @@ Every generated data list must include:
 6. Populated options for every choice field.
 7. Complete lookup field rules for every cross-list relationship.
 8. Sample data when the application is intended for runtime testing.
-9. Custom forms or default form routing that can load correctly.
+9. Custom New/Edit/View forms assigned through list display settings; generated business lists must not use default form routing.
 10. Export-shaped default view metadata that materializes columns in the runtime UI.
 
 ## Custom Data List Form Layout Templates
+
+Every generated business Data List or Document Library must have custom Data List forms assigned for New Item, Edit Item, and View Item. Default layouts are not signing-ready for generated business lists.
 
 Generated custom Data List forms must use Data List Form Layouts v1.1 when they are planned as New Item, Edit Item, or View Item forms.
 
@@ -41,6 +43,8 @@ Approved page-level templates:
 The source registry is `docs/reference/data-list-form-layout-templates.json`.
 
 Generators must clone the selected export-shaped template first and then place business-specific fields, actions, analytics, or related data only inside approved business-content slots. They must not generate title-only, flat, or ad hoc custom Data List form layouts.
+
+`ListModel.LayoutView.add`, `ListModel.LayoutView.edit`, and `ListModel.LayoutView.view` must each point to a Type `1` custom form layout owned by the same list. The literal value `default`, missing display settings, unresolved layout IDs, or Type `0` data views used as form routes must fail generated-final validation. System/support lists may skip this requirement only with an explicit App Plan exemption and generated package policy marker.
 
 Current-record Data List fields inside generated New/Edit/View custom forms must use the field-layout golden reference `data_list_form_fields_grid_v1_1` from `docs/reference/data-list-form-field-layout-templates.json`. The generator must clone `form_grid_fields_wrapper` into the page-level template's `section_content_area`, place field controls inside that Grid, set every field control margin to zero, assign each field control a business-specific `nv_label`/`nav_label`, keep Multiple line/Rich text/Sub list controls as full-row controls, and keep responsive column spans bounded by the parent Grid's columns. Sub list field controls must clone the control-level `data_list_form_control_sublist_v1_1` template from `docs/reference/data-list-form-control-sublist.template.json` and preserve its locked style/table/header/card settings while mapping business field metadata.
 

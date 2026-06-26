@@ -21,6 +21,9 @@ try {
   expectPass("New/Edit template resource with marker passes", ["--resource", writeJson("new-edit-valid.json", newEditResource()), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"]);
   expectPass("View item template resource with marker passes", ["--resource", writeJson("view-valid.json", viewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"]);
   expectPass("generated package with New/Edit and View templates passes", ["--package", writePackage("valid-package.yapk", decodedPackage())]);
+  expectCode("generated package using default New/Edit/View layouts fails", ["--package", writePackage("default-layout-package.yapk", decodedPackage({ layoutView: { add: "default", edit: "default", view: "default" }, layouts: [{ LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] }] }))], "DATA_LIST_FORM_LAYOUT_DEFAULT_USAGE_FORBIDDEN");
+  expectCode("generated package missing View custom form assignment fails", ["--package", writePackage("missing-view-assignment.yapk", decodedPackage({ layoutView: { add: "layout-new-edit", edit: "layout-new-edit" } }))], "DATA_LIST_FORM_LAYOUT_USAGE_MISSING");
+  expectCode("generated package with display setting pointing to Type 0 layout fails", ["--package", writePackage("type0-form-assignment.yapk", decodedPackage({ layoutView: { add: "layout-default", edit: "layout-new-edit", view: "layout-view" } }))], "DATA_LIST_FORM_LAYOUT_USAGE_NOT_CUSTOM_FORM");
 
   const newEditWithAnalytics = newEditResource();
   firstSlot(newEditWithAnalytics).children.push({ type: "pie-chart", nv_label: "pie_chart_control", attrs: { dataAnalyticsTemplateId: "data_analytics_pie_chart_with_title" } });
@@ -38,6 +41,8 @@ try {
   expectCode("generated package form missing template marker fails", ["--package", writePackage("missing-marker.yapk", decodedPackage({ viewResource: markerMissing }))], "DATA_LIST_FORM_LAYOUT_TEMPLATE_MARKER_MISSING");
 
   expectCode("App Plan custom form without layout selection table fails", ["--plan", writeText("plan-missing-selection.md", appPlan({ omitSelection: true }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING");
+  expectCode("App Plan data list missing New/Edit custom form plan fails", ["--plan", writeText("plan-missing-new-edit.md", appPlan({ omitNewEditSelection: true }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_FORM_REQUIRED");
+  expectCode("App Plan data list missing View custom form plan fails", ["--plan", writeText("plan-missing-view.md", appPlan({ omitViewSelection: true }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_FORM_REQUIRED");
   expectCode("App Plan New/Edit selecting View template fails", ["--plan", writeText("plan-new-edit-wrong-template.md", appPlan({ newEditTemplate: VIEW_TEMPLATE_ID }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_TEMPLATE_MISMATCH");
   expectCode("App Plan View selecting New/Edit template fails", ["--plan", writeText("plan-view-wrong-template.md", appPlan({ viewTemplate: NEW_EDIT_TEMPLATE_ID }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH");
   expectPass("App Plan custom form layout selections pass", ["--plan", writeText("plan-valid.md", appPlan())]);
@@ -87,17 +92,19 @@ function viewResource(options = {}) {
 function decodedPackage(options = {}) {
   const newEdit = options.newEditResource || newEditResource();
   const view = options.viewResource || viewResource();
+  const layouts = options.layouts || [
+    { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
+    { LayoutID: "layout-new-edit", Title: "New and Edit form", Type: 1, LayoutInResources: [{ ID: "layout-new-edit", RefId: "layout-new-edit", Resource: JSON.stringify(newEdit) }] },
+    { LayoutID: "layout-view", Title: "View item", Type: 1, LayoutInResources: [{ ID: "layout-view", RefId: "layout-view", Resource: JSON.stringify(view) }] },
+  ];
+  const layoutView = options.layoutView || { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view" };
   return {
     ListSet: { ListID: "1909200000000000001", Title: "Data List Form Layout Test" },
     Childs: [
       {
-        List: { ListID: "1909200000000000100", Title: "Assets", LayoutView: JSON.stringify({ add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view" }) },
+        List: { ListID: "1909200000000000100", Title: "Assets", LayoutView: JSON.stringify(layoutView) },
         Fields: [{ FieldName: "Title", DisplayName: "Asset Name", FieldType: "Text", Type: "input" }],
-        Layouts: [
-          { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
-          { LayoutID: "layout-new-edit", Title: "New and Edit form", Type: 1, LayoutInResources: [{ ID: "layout-new-edit", RefId: "layout-new-edit", Resource: JSON.stringify(newEdit) }] },
-          { LayoutID: "layout-view", Title: "View item", Type: 1, LayoutInResources: [{ ID: "layout-view", RefId: "layout-view", Resource: JSON.stringify(view) }] },
-        ],
+        Layouts: layouts,
       },
     ],
     Pages: [],
@@ -109,14 +116,17 @@ function decodedPackage(options = {}) {
   };
 }
 
-function appPlan({ omitSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID, viewTemplate = VIEW_TEMPLATE_ID } = {}) {
+function appPlan({ omitSelection = false, omitNewEditSelection = false, omitViewSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID, viewTemplate = VIEW_TEMPLATE_ID } = {}) {
+  const selectionRows = [
+    omitNewEditSelection ? "" : `| Assets | Asset New/Edit | New/Edit | ${newEditTemplate} | Current item field sections | None | New/Edit focuses on current item editing | Generated-final validation |`,
+    omitViewSelection ? "" : `| Assets | Asset View | View | ${viewTemplate} | Page title, KPI, current item and related data sections | Related loans and analytics | View item shows current record and related context | Generated-final validation |`,
+  ].filter(Boolean).join("\n");
   const selection = omitSelection ? "" : `
 #### Data List Form Layout Template Selection
 
 | Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Assets | Asset New/Edit | New/Edit | ${newEditTemplate} | Current item field sections | None | New/Edit focuses on current item editing | Generated-final validation |
-| Assets | Asset View | View | ${viewTemplate} | Page title, KPI, current item and related data sections | Related loans and analytics | View item shows current record and related context | Generated-final validation |
+${selectionRows}
 `;
   return `
 # Office Asset Loan Management - Yeeflow App Plan
@@ -124,6 +134,20 @@ function appPlan({ omitSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID
 ## 1. Plan Status
 
 Ready.
+
+## 4. Data Lists and Document Libraries Plan
+
+### 4.1 Assets
+
+- Selected Yeeflow resource type: Data list
+- Description: Office asset catalog.
+- Business purpose: Track loanable assets.
+
+#### Fields
+
+| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Description |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Asset Name | Title | Title | Title | input control | plugin-known field/control type | validator-backed | N/A | Yes | No | | Enter asset name | | | | | | Native title field |
 
 ## 10. Custom Data List Forms Plan
 

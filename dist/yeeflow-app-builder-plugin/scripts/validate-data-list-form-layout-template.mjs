@@ -18,6 +18,7 @@ const REQUIRED_NEW_EDIT_REGIONS = ["main", "content", "1_columns_section", "cont
 const REQUIRED_VIEW_REGIONS = ["main", "content", "page_title_section", "page_title_content", "page_title_text", "page_title_description", "kpi_metrics_wrapper", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area"];
 const DATA_ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table", "summary"]);
 const DATASET_TYPES = new Set(["collection", "data-table", "datatable", "data-list", "kanban", "timeline-v", "timeline-h", "document-library"]);
+const FORM_USAGES = ["add", "edit", "view"];
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -100,6 +101,7 @@ function validatePackage(packagePath, context) {
     return;
   }
   const usageByLayoutId = buildUsageByLayoutId(decoded);
+  validateListDisplayAssignments(decoded, context);
   let customFormCount = 0;
   for (const form of collectDataListForms(decoded)) {
     customFormCount += 1;
@@ -122,6 +124,7 @@ function validateAppPlan(planPath, findings) {
     return;
   }
   const text = fs.readFileSync(planPath, "utf8");
+  validateAppPlanListCoverage(text, findings);
   const section = extractSection(text, /^##\s+10\.\s+Custom Data List Forms Plan/im);
   if (!section.trim()) return;
   const hasCustomForms = /New\/Edit|New|Edit|View|Detail|Custom Data List Forms Plan/i.test(section) && /\|/.test(section);
@@ -140,6 +143,30 @@ function validateAppPlan(planPath, findings) {
     }
     if (/\bview\b/.test(lower) && !line.includes(VIEW_TEMPLATE_ID)) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH", "View custom Data List forms must select data_list_form_layout_view_item_v1_1.", { row: line }));
+    }
+  }
+}
+
+function validateAppPlanListCoverage(text, findings) {
+  const plannedLists = parsePlannedDataLists(text);
+  if (!plannedLists.length) return;
+  const section = extractSection(text, /^##\s+10\.\s+Custom Data List Forms Plan/im);
+  if (!section.trim()) {
+    for (const list of plannedLists) {
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_LIST_FORMS_MISSING", "Every planned Data List or Document Library must plan custom New/Edit and View forms, or explicitly declare a system/support-list exemption.", { list }));
+    }
+    return;
+  }
+  for (const list of plannedLists) {
+    const listRows = tableRows(section).map((row) => row.raw).filter((line) => lineMentionsList(line, list));
+    const sectionBody = subsectionForList(section, list);
+    const evidence = [...listRows, sectionBody].join("\n");
+    if (hasExplicitFormExemption(evidence)) continue;
+    if (!hasNewEditPlan(evidence)) {
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_FORM_REQUIRED", "Every planned Data List or Document Library must plan a New/Edit custom form using data_list_form_layout_new_edit_v1_1. Default New/Edit layouts are not generation-ready.", { list }));
+    }
+    if (!hasViewPlan(evidence)) {
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_FORM_REQUIRED", "Every planned Data List or Document Library must plan a View custom form using data_list_form_layout_view_item_v1_1. Default View layouts are not generation-ready.", { list }));
     }
   }
 }
@@ -259,6 +286,55 @@ function collectDataListForms(decoded) {
     }
   }
   return forms;
+}
+
+function validateListDisplayAssignments(decoded, context) {
+  for (const [childIndex, child] of asArray(decoded?.Childs || decoded?.Data?.Childs).entries()) {
+    if (isExplicitListExempt(child)) continue;
+    const listTitle = child?.List?.Title || child?.ListModel?.Title || child?.Title || child?.Name || `Childs[${childIndex}]`;
+    const layoutViewValue = child?.List?.LayoutView || child?.ListModel?.LayoutView || child?.LayoutView;
+    const layoutView = parseJsonMaybe(layoutViewValue);
+    if (!isObject(layoutView)) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_DISPLAY_SETTINGS_MISSING", "Every generated business Data List must assign New/Edit/View to custom Data List forms through LayoutView.add/edit/view. Default layouts are not allowed.", { list: listTitle, childIndex }));
+      continue;
+    }
+    const layouts = new Map(asArray(child?.Layouts || child?.Item?.Layouts).map((layout) => [String(layout?.LayoutID || ""), layout]));
+    for (const usage of FORM_USAGES) {
+      const value = layoutView?.[usage];
+      if (value === undefined || value === null || String(value).trim() === "") {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_USAGE_MISSING", "Every generated business Data List must assign add/edit/view to custom Data List form layout IDs.", { list: listTitle, usage, childIndex }));
+        continue;
+      }
+      const layoutId = String(value);
+      if (layoutId.toLowerCase() === "default") {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_DEFAULT_USAGE_FORBIDDEN", "Generated business Data Lists must not use Yeeflow default layout for New Item, Edit Item, or View Item. Generate and assign custom Data List forms instead.", { list: listTitle, usage, actual: layoutId, childIndex }));
+        continue;
+      }
+      const layout = layouts.get(layoutId);
+      if (!layout) {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_USAGE_UNRESOLVED", "Data List form display setting points to a layout ID that does not belong to this list.", { list: listTitle, usage, layoutId, childIndex }));
+        continue;
+      }
+      if (Number(layout?.Type) !== 1) {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_USAGE_NOT_CUSTOM_FORM", "Data List form display setting must point to a Type 1 custom Data List form layout.", { list: listTitle, usage, layoutId, actualType: layout?.Type ?? null, childIndex }));
+      }
+    }
+  }
+}
+
+function isExplicitListExempt(child) {
+  const candidates = [
+    child?.dataListFormLayoutPolicy,
+    child?.customFormPolicy,
+    child?.formLayoutPolicy,
+    child?.List?.dataListFormLayoutPolicy,
+    child?.List?.customFormPolicy,
+    child?.List?.formLayoutPolicy,
+    child?.ListModel?.dataListFormLayoutPolicy,
+    child?.ListModel?.customFormPolicy,
+    child?.ListModel?.formLayoutPolicy,
+  ].map((value) => String(value || "").toLowerCase());
+  return Boolean(child?.IsSystem || child?.List?.IsSystem || child?.ListModel?.IsSystem || candidates.some((value) => /system-support-exempt|support-exempt|custom-forms-exempt|exempt/.test(value)));
 }
 
 function buildUsageByLayoutId(decoded) {
@@ -390,6 +466,75 @@ function tableRows(text) {
     rows.push({ raw: line.trim() });
   }
   return rows;
+}
+
+function parsePlannedDataLists(text) {
+  const section = extractSection(text, /^##\s+4\.\s+Data Lists and Document Libraries Plan/im);
+  if (!section.trim()) return [];
+  const names = [];
+  for (const match of section.matchAll(/^###\s+4\.[x0-9]+\s+(.+?)\s*$/gim)) {
+    const name = cleanName(match[1]);
+    if (!name || isPlaceholderName(name)) continue;
+    names.push(name);
+  }
+  return unique(names);
+}
+
+function lineMentionsList(line, list) {
+  const lineKey = norm(line);
+  const listKey = norm(list);
+  return Boolean(listKey && (lineKey.includes(listKey) || listKey.includes(lineKey)));
+}
+
+function subsectionForList(section, list) {
+  const headings = [...section.matchAll(/^###\s+10\.[x0-9]+\s+(.+?)\s*$/gim)];
+  for (let index = 0; index < headings.length; index += 1) {
+    const match = headings[index];
+    const name = cleanName(match[1]);
+    if (!lineMentionsList(name, list)) continue;
+    const next = headings[index + 1]?.index ?? section.length;
+    return section.slice(match.index, next);
+  }
+  return "";
+}
+
+function hasExplicitFormExemption(text) {
+  return /custom\s+data\s+list\s+forms?\s+(?:not\s+required|not\s+applicable|n\/a)|(?:system|support|technical|hidden)\s+(?:list|resource)[^.\n|]*(?:exempt|no\s+custom\s+forms|not\s+required)|form\s+layout\s+exemption/i.test(text || "");
+}
+
+function hasNewEditPlan(text) {
+  const body = String(text || "");
+  return body.includes(NEW_EDIT_TEMPLATE_ID) && /new\s*\/\s*edit|\bnew\b|\bedit\b/i.test(body);
+}
+
+function hasViewPlan(text) {
+  const body = String(text || "");
+  return body.includes(VIEW_TEMPLATE_ID) && /\bview\b|detail/i.test(body);
+}
+
+function cleanName(value) {
+  return String(value ?? "").replace(/<[^>]+>/g, "").replace(/`/g, "").replace(/\s+/g, " ").trim();
+}
+
+function isPlaceholderName(value) {
+  const text = cleanName(value);
+  return !text || /^x$/i.test(text) || /^<.*>$/.test(String(value || "").trim()) || /^(list|library|data list|document library|name)$/i.test(text);
+}
+
+function norm(value) {
+  return cleanName(value).replace(/[_-]+/g, " ").replace(/[^\p{L}\p{N} ]/gu, "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function unique(values) {
+  const seen = new Set();
+  const out = [];
+  for (const value of values) {
+    const key = norm(value);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(value);
+  }
+  return out;
 }
 
 function extractSection(text, marker) {
