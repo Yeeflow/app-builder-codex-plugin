@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.55`
+- Version: `0.8.56`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.55` releases Data Analytics runtime binding hard gates from PR #248: generated Pie, Column, Bar, Line, Area, and Pivot templates must register matching `Resource.ReportIds[]` and `Resource.exts[]` runtime entries with source metadata, chart type, rows/values settings, and resolvable source fields so provenance-only chart wrappers cannot reach signing readiness as blank runtime charts.
+Current release `0.8.56` releases Approval Form Fields Grid v1.1 golden references from PR #250: generated Approval form submission/task form field groups must clone either `approval_form_fields_grid_2col_v1_1` or `approval_form_fields_grid_3col_v1_1`, keep field controls inside `content_card_wrapper > section_content_area`, preserve responsive column/span safety, set field margins to zero, and carry business-specific field `nav_label` metadata before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.55
+Version: 0.8.56
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.55
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.56
 ```
 
 ## What Is Included

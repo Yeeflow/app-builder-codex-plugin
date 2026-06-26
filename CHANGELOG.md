@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.56
+
+- Release Approval Form Fields Grid v1.1 golden references from PR #250.
+- Register `approval_form_fields_grid_2col_v1_1` and `approval_form_fields_grid_3col_v1_1` as approved Approval form field layout templates.
+- Require App Plans to select an approved Approval form field-grid template for each generated submission/task form field group.
+- Add generated-final and first-generation preflight validation for approved wrapper placement, responsive column limits, zero field margins, full-row span controls, business-specific field `nav_label`, and package-level Approval form field layout conformance.
+- Update Approval form, full-app generation, app builder, and package-validator guidance so generated Approval form fields clone the approved field-grid templates inside `content_card_wrapper > section_content_area`.
+
 ## 0.8.55
 
 - Release Data Analytics runtime binding hard gates from PR #248.

@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.55`
+`0.8.56`
+
+Version `0.8.56` releases Approval Form Fields Grid v1.1 golden references from PR #250. Generated Approval form submission/task form field groups must use `approval_form_fields_grid_2col_v1_1` or `approval_form_fields_grid_3col_v1_1`, App Plans must select the chosen field-grid template per form field group, and generated-final preflight blocks Approval form field controls outside approved wrappers, nonzero field margins, invalid responsive column counts, full-row control span mismatches, and missing business-specific field `nav_label` metadata.
 
 Version `0.8.55` releases Data Analytics runtime binding hard gates from PR #248. Generated Pie, Column, Bar, Line, Area, and Pivot templates must not stop at visible controls and template provenance: every chart or pivot control must be registered in the host layout resource `ReportIds[]` and paired with a matching `exts[]` runtime entry using `category: "___Pivot___"`, the expected chart/pivot key, source `AppID/ListID/ListSetID`, chart type when applicable, and source-field-backed rows/values settings. Provenance-only chart wrappers are now blocked before signing readiness because they can render as blank runtime charts.
 
