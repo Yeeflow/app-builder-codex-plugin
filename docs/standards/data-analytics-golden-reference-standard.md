@@ -57,6 +57,22 @@ For chart-with-title templates, the outer wrapper and all descendants are locked
 
 For the pivot table template, the exported pivot-table style settings are locked. Only legal rows, columns, values, filters, and data-source binding may change.
 
+## Runtime Binding Contract
+
+Visible Data Analytics controls are not runtime-ready unless the containing layout resource also registers the Yeeflow chart or pivot runtime model. For every generated Pie, Column, Bar, Line, Area, or Pivot template instance:
+
+- the visible chart or pivot control must have a stable control ID;
+- `Resource.ReportIds[]` must include that exact control ID;
+- `Resource.exts[]` must include an entry whose `i` equals that exact control ID;
+- the entry must use `category: "___Pivot___"`;
+- the entry `key` must be `pie-chart`, `bar-chart`, `line-chart`, or `PivotTable` according to the generated control type;
+- `attr.AppID`, `attr.ListID`, and `attr.ListSetID` must identify the source app/list/root;
+- chart entries must include `attr.chartType`;
+- `attr.settings.rows[]` and `attr.settings.values[]` must be non-empty;
+- every row, column, and value field reference must resolve to a real field on the selected source list/report.
+
+Template provenance without this runtime contract is only visual materialization and must fail generated-final preflight. A blank chart area caused by missing `exts[]`, missing `ReportIds[]`, or unresolved runtime field metadata is a generator defect and a signing blocker.
+
 Generated-final validation must fail when:
 
 - A Data Analytics control has no approved template provenance.
@@ -65,3 +81,4 @@ Generated-final validation must fail when:
 - A template appears on an Approval form.
 - A Dashboard v1.1 page places an analytics template outside `2_columns_section` or `3_columns_section`.
 - A generator emits an ad hoc chart/pivot control instead of cloning the approved template.
+- A visible chart or pivot control is missing its `Resource.ReportIds[]` registration, matching `Resource.exts[]` runtime entry, source metadata, chart type, runtime settings, or resolvable source fields.

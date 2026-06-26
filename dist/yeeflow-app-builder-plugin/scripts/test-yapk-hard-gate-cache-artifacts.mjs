@@ -174,6 +174,7 @@ const requiredDocs = [
   "docs/training/yapk-bit-switch-root-identity-signing-gates-training-report.md",
   "docs/training/root-icon-dashboard-empty-section-filter-hard-gates-training-report.md",
   "docs/training/full-app-data-analytics-materialization-runtime-gates-training-report.md",
+  "docs/training/data-analytics-runtime-binding-hard-gates-training-report.md",
   "docs/training/data-filter-standard-filter-group-training-report.md",
   "docs/training/dashboard-filter-runtime-upgrade-proof-training-report.md",
   "docs/reference/dashboard-golden-references.json",
