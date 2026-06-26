@@ -297,6 +297,7 @@ function validateResource(resource, context) {
     if (reference.titleControlId && !findByIdentity(index, reference.titleControlId)) {
       context.findings.push(error("DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING", "Chart-with-title templates must include the approved title Text control.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, titleControlId: reference.titleControlId }));
     }
+    validateGeneratedTemplateContract(entry, reference, context);
     if (isDataListFormNewEdit) {
       context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_NEW_EDIT_FORBIDDEN", "Data Analytics templates must not be used on Data List Form Layouts v1.1 New/Edit forms.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId }));
     }
@@ -367,6 +368,94 @@ function validateRuntimeBinding(resource, entry, reference, context) {
       }
     }
   }
+  validateRuntimeModelSurfaceAlignment({ entry, reference, context, controlId, rows, values, settings });
+}
+
+function validateGeneratedTemplateContract(entry, reference, context) {
+  const dataAnalyticsTemplateIds = [entry.node?.dataAnalyticsTemplateId, entry.node?.attrs?.dataAnalyticsTemplateId].filter(hasText).map(String);
+  const templateIds = [entry.node?.templateId, entry.node?.attrs?.templateId].filter(hasText).map(String);
+  if (!dataAnalyticsTemplateIds.length || !templateIds.length || dataAnalyticsTemplateIds.some((id) => id !== reference.templateId) || templateIds.some((id) => id !== reference.templateId)) {
+    context.findings.push(error("DATA_ANALYTICS_TEMPLATE_ID_CONTRACT_MISSING", "Generated Data Analytics controls must carry both dataAnalyticsTemplateId and templateId equal to the approved golden reference ID.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      dataAnalyticsTemplateIds,
+      controlTemplateIds: templateIds,
+    }));
+  }
+  const runtimeModelProven = entry.node?.runtimeModelProven === true || entry.node?.attrs?.runtimeModelProven === true;
+  if (!runtimeModelProven) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_MODEL_PROVEN_MISSING", "Generated Data Analytics controls must explicitly declare runtimeModelProven only after the wrapper, ReportIds, exts, source fields, and cross-surface model contract are materialized.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+    }));
+  }
+}
+
+function validateRuntimeModelSurfaceAlignment({ entry, reference, context, controlId, rows, values, settings }) {
+  const runtimeCategoryFields = new Set(rows.flatMap(primaryRuntimeFieldRefs));
+  const runtimeValueFields = new Set(values.flatMap(primaryRuntimeFieldRefs));
+  const surfaces = collectAnalyticsModelSurfaceRefs(entry.node);
+  const allRuntimeRefs = [...rows, ...asArray(settings.columns), ...values].flatMap(runtimeFieldRefs);
+  for (const field of [...allRuntimeRefs, ...surfaces.categoryFields, ...surfaces.valueFields]) {
+    if (/_COUNT\b/i.test(String(field || ""))) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_DERIVED_FIELD_ID_INVALID", "Data Analytics runtime models must use real source fields plus aggregate metadata, not derived field IDs such as ListDataID_COUNT.", {
+        page: context.pageTitle,
+        path: entry.pointer,
+        templateId: reference.templateId,
+        controlId,
+        field,
+      }));
+    }
+  }
+  for (const field of surfaces.categoryFields) {
+    if (runtimeCategoryFields.size && !runtimeCategoryFields.has(field)) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_MODEL_SURFACE_MISMATCH", "Data Analytics category/grouping surfaces must match Resource.exts[].attr.settings.rows[].", {
+        page: context.pageTitle,
+        path: entry.pointer,
+        templateId: reference.templateId,
+        controlId,
+        field,
+        runtimeRows: [...runtimeCategoryFields],
+      }));
+    }
+  }
+  for (const field of surfaces.valueFields) {
+    if (runtimeValueFields.size && !runtimeValueFields.has(field)) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_MODEL_SURFACE_MISMATCH", "Data Analytics value/measure surfaces must match Resource.exts[].attr.settings.values[].", {
+        page: context.pageTitle,
+        path: entry.pointer,
+        templateId: reference.templateId,
+        controlId,
+        field,
+        runtimeValues: [...runtimeValueFields],
+      }));
+    }
+  }
+}
+
+function collectAnalyticsModelSurfaceRefs(node) {
+  const attrs = isObject(node?.attrs) ? node.attrs : {};
+  const data = isObject(attrs.data) ? attrs.data : {};
+  const model = isObject(attrs.model) ? attrs.model : {};
+  const categoryFields = [
+    data.groupBy,
+    data.axisField,
+    data.categoryField,
+    model.categoryField,
+    ...asArray(attrs.series).map((item) => item?.categoryField),
+  ].filter((value) => value !== undefined && value !== null && String(value).trim()).map(String);
+  const valueFields = [
+    data.valueField,
+    model.valueField,
+    ...asArray(attrs.series).map((item) => item?.valueField),
+    ...asArray(attrs.values).flatMap(primaryRuntimeFieldRefs),
+  ].filter((value) => value !== undefined && value !== null && String(value).trim()).map(String);
+  return {
+    categoryFields: uniqueStrings(categoryFields),
+    valueFields: uniqueStrings(valueFields),
+  };
 }
 
 function analyticsControlId(node) {
@@ -383,6 +472,26 @@ function runtimeFieldRefs(value) {
     value.id,
     value.name,
   ].filter((item) => item !== undefined && item !== null && String(item).trim()).map(String);
+}
+
+function primaryRuntimeFieldRefs(value) {
+  if (Array.isArray(value)) return value.flatMap(primaryRuntimeFieldRefs);
+  if (!isObject(value)) return [];
+  return [
+    value.FieldName,
+    value.fieldName,
+    value.field,
+    value.id,
+    value.name,
+  ].filter((item) => item !== undefined && item !== null && String(item).trim()).map(String).slice(0, 1);
+}
+
+function hasText(value) {
+  return value !== undefined && value !== null && String(value).trim() !== "";
+}
+
+function uniqueStrings(values) {
+  return [...new Set(values.map((value) => String(value || "")).filter(Boolean))];
 }
 
 function collectListFieldsById(decoded) {
