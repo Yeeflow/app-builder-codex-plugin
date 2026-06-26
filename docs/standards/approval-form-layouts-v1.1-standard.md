@@ -93,6 +93,10 @@ Within `section_content_area`, generated resources may insert Approval form fiel
 
 Approval form field controls must use the Approval Form Field Layouts v1.1 templates from `docs/reference/approval-form-field-layout-templates.json`. Select `approval_form_fields_grid_2col_v1_1` or `approval_form_fields_grid_3col_v1_1`, then place the cloned `form_grid_fields_2col_wrapper` or `form_grid_fields_3col_wrapper` only inside `content_card_wrapper > section_content_area`.
 
+Approval form field planning is a generation contract, not descriptive prose. When the App Plan includes `Submission Form Fields` or `Task Form Fields`, generated `Forms[].DefResource.pageurls[].formdef` must materialize those planned business fields inside the approved Approval Form Field Layout wrapper. A generated Approval form that only replaces page titles, preserves the layout shell, or leaves source-template domain labels without injecting planned field controls is incomplete and must fail before signing readiness.
+
+Generated Approval form field controls must carry business-specific labels, field names/bindings, and `nv_label` or `nav_label` values derived from the App Plan. Task form fields should be readonly unless the App Plan explicitly states that assignees must edit them. Field controls must use zero margin, full-row spans for Multiple line, Rich text, and Sub List fields, and appropriate control families for the planned field type.
+
 Approval forms must not use Data Analytics controls, Data Analytics golden reference templates, chart templates, pivot table templates, Summary/KPI analytics, or `kpi_metrics_wrapper`.
 
 If an Approval submission page, Approval task page, Data list workflow task form, or Schedule workflow task form contains two or more page-level Data Filter controls, those filters must be grouped inside `dashboard_standard_filter_group` from `docs/reference/data-filter-standard-filter-group.template.json`. The group must be placed inside an approved `section_content_area` and must preserve the standard filter-group wrapper and child filter visual contract.
@@ -177,6 +181,7 @@ Generated-final `.yapk` packages must also pass:
 
 ```bash
 node scripts/validate-approval-form-layout-template.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>
+node scripts/validate-approval-form-fields-template.mjs --package <app.yapk> --plan <yeeflow-app-plan.md>
 ```
 
-First-generation preflight invokes this gate before signing readiness. Signing, install/import, upgrade, Version Management, and runtime proof must remain blocked when generated Approval form pages violate this standard.
+First-generation preflight invokes these gates before signing readiness. Signing, install/import, upgrade, Version Management, and runtime proof must remain blocked when generated Approval form pages violate this standard or when planned Approval form fields are missing from the decoded `DefResource.pageurls[].formdef`.

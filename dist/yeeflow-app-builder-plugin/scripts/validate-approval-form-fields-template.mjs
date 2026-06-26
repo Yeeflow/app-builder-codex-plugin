@@ -58,6 +58,7 @@ export function validateApprovalFormFieldsTemplate(options = {}) {
   const registryPath = path.resolve(options.registry || REGISTRY_PATH);
   const registry = readJson(registryPath, findings, "APPROVAL_FORM_FIELDS_REGISTRY_MISSING");
   validateRegistry(registry, findings, registryPath);
+  let plannedApprovalFields = {};
 
   if (options.resource) {
     const resource = readJson(path.resolve(options.resource), findings, "APPROVAL_FORM_FIELDS_RESOURCE_MISSING");
@@ -69,8 +70,8 @@ export function validateApprovalFormFieldsTemplate(options = {}) {
     });
   }
 
-  if (options.package) validatePackage(path.resolve(options.package), { findings });
-  if (options.plan) validateAppPlan(path.resolve(options.plan), findings);
+  if (options.plan) plannedApprovalFields = validateAppPlan(path.resolve(options.plan), findings);
+  if (options.package) validatePackage(path.resolve(options.package), { findings, plannedApprovalFields });
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
@@ -125,13 +126,17 @@ function validatePackage(packagePath, context) {
     context.findings.push(error("APPROVAL_FORM_FIELDS_PACKAGE_DECODE_FAILED", `Could not decode package Resource: ${err.message}`, { package: packagePath }));
     return;
   }
-  for (const form of collectApprovalFormPages(decoded)) {
+  const formPages = collectApprovalFormPages(decoded);
+  for (const form of formPages) {
     validateResource(form.resource, {
       findings: context.findings,
       source: form.source,
       requirePlacement: true,
       requireWrapperWhenFieldsExist: true,
     });
+  }
+  if (context.plannedApprovalFields && Object.keys(context.plannedApprovalFields).length) {
+    validatePlannedApprovalFieldsMaterialized(formPages, context.plannedApprovalFields, context.findings);
   }
 }
 
@@ -142,22 +147,24 @@ function validateAppPlan(planPath, findings) {
   }
   const text = fs.readFileSync(planPath, "utf8");
   const section = extractSection(text, /^##\s+5\.\s+Approval Forms Plan/im);
-  if (!section.trim()) return;
+  if (!section.trim()) return {};
+  const plannedApprovalFields = collectPlannedApprovalFields(section);
   const hasApprovalFieldPlanning = /Submission Form Fields|Task Form Fields|Approval Form Fields Layout Template Selection/i.test(section) && /\|/.test(section);
-  if (!hasApprovalFieldPlanning) return;
-  if (/intentionally has no approval form field controls/i.test(section)) return;
+  if (!hasApprovalFieldPlanning) return plannedApprovalFields;
+  if (/intentionally has no approval form field controls/i.test(section)) return plannedApprovalFields;
   if (!/Approval Form Fields Layout Template Selection/i.test(section)) {
     findings.push(error("APPROVAL_FORM_FIELDS_APP_PLAN_SELECTION_TABLE_MISSING", "Approval Forms Plan must include an Approval Form Fields Layout Template Selection table when approval forms display fields."));
-    return;
+    return plannedApprovalFields;
   }
   const selectionBlock = section.split(/#### Form Actions and Temp Variables|#### Sub List List Actions|##\s+6\./i)[0].split(/#### Approval Form Fields Layout Template Selection/i)[1] || "";
   const rows = tableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row.raw));
   const selectedRows = rows.filter((row) => [...TEMPLATE_IDS].some((id) => row.raw.includes(id)));
   if (!selectedRows.length) {
     findings.push(error("APPROVAL_FORM_FIELDS_APP_PLAN_TEMPLATE_SELECTION_REQUIRED", "Approval Form Fields Layout Template Selection must select an approved approval form field-grid template for each generated field group."));
-    return;
+    return plannedApprovalFields;
   }
   for (const row of selectedRows) validateAppPlanFieldGridRow(row.raw, findings);
+  return plannedApprovalFields;
 }
 
 function validateAppPlanFieldGridRow(row, findings) {
@@ -276,14 +283,121 @@ function validateFullRowSpan(hostControl, columnCounts, context, gridLabel, orig
   }
 }
 
+function collectPlannedApprovalFields(section) {
+  const planned = {};
+  const lines = section.split(/\r?\n/);
+  let currentApprovalForm = "";
+  let currentRole = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) {
+      currentApprovalForm = cleanCell(heading[1]);
+      currentRole = "";
+      if (currentApprovalForm && !planned[norm(currentApprovalForm)]) planned[norm(currentApprovalForm)] = { submission: [], task: [] };
+      continue;
+    }
+    if (/^#{4,6}\s+Submission Form Fields\s*$/i.test(lines[index])) {
+      currentRole = "submission";
+      continue;
+    }
+    if (/^#{4,6}\s+Task Form Fields\s*$/i.test(lines[index])) {
+      currentRole = "task";
+      continue;
+    }
+    if (!currentApprovalForm || !currentRole || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableCells(lines[index]).map(norm);
+    const displayIndex = findHeaderIndex(headers, ["business label", "display name", "field name", "label", "name"]);
+    if (displayIndex === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableCells(lines[rowIndex]);
+      const displayName = cleanCell(cells[displayIndex]);
+      if (displayName && !isPlaceholderFieldName(displayName)) {
+        const target = planned[norm(currentApprovalForm)]?.[currentRole] || [];
+        if (!target.some((field) => norm(field.displayName) === norm(displayName))) target.push({ displayName });
+        planned[norm(currentApprovalForm)][currentRole] = target;
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  for (const [formKey, roles] of Object.entries(planned)) {
+    if (!roles.task.length && roles.submission.length) roles.task = roles.submission.map((field) => ({ ...field, inheritedFromSubmission: true }));
+    if (!roles.submission.length && !roles.task.length) delete planned[formKey];
+  }
+  return planned;
+}
+
+function validatePlannedApprovalFieldsMaterialized(formPages, plannedApprovalFields, findings) {
+  for (const [plannedFormKey, roles] of Object.entries(plannedApprovalFields)) {
+    const matchingPages = formPages.filter((page) => page.formKey === plannedFormKey || page.sourceKey === plannedFormKey || page.formKey.includes(plannedFormKey) || plannedFormKey.includes(page.formKey));
+    if (!matchingPages.length) continue;
+    for (const role of ["submission", "task"]) {
+      const plannedFields = roles[role] || [];
+      if (!plannedFields.length) continue;
+      const page = matchingPages.find((candidate) => candidate.role === role) || (role === "task" ? matchingPages.find((candidate) => candidate.role === "submission") : null);
+      if (!page) {
+        findings.push(error("APPROVAL_FORM_FIELDS_PLANNED_PAGE_MISSING", "A planned Approval form page with field controls was not materialized in DefResource.pageurls[].formdef.", { approvalForm: plannedFormKey, role }));
+        continue;
+      }
+      const materializedFields = collectMaterializedFieldNames(page.resource);
+      if (!materializedFields.length) {
+        findings.push(error("APPROVAL_FORM_FIELDS_PLANNED_FIELDS_MISSING", "Approval form page is only a template shell; planned field controls were not materialized.", { source: page.source, approvalForm: plannedFormKey, role, plannedFields: plannedFields.map((field) => field.displayName) }));
+        continue;
+      }
+      for (const plannedField of plannedFields) {
+        if (!materializedFields.some((actual) => fieldNameMatches(actual, plannedField.displayName))) {
+          findings.push(error("APPROVAL_FORM_FIELDS_PLANNED_FIELD_NOT_MATERIALIZED", "A field planned in the Approval Forms Plan is missing from DefResource.pageurls[].formdef.", { source: page.source, approvalForm: plannedFormKey, role, field: plannedField.displayName, materializedFields }));
+        }
+      }
+    }
+  }
+}
+
+function collectMaterializedFieldNames(resource) {
+  const names = [];
+  for (const entry of flatten(resource)) {
+    const node = entry.node;
+    if (!isFieldControl(node)) continue;
+    const candidates = [
+      node.label,
+      node.name,
+      node.title,
+      node.DisplayName,
+      node.displayName,
+      node.fieldName,
+      node.binding,
+      node.attrs?.label,
+      node.attrs?.title,
+      node.attrs?.data?.displayName,
+      node.attrs?.data?.fieldName,
+      node.attrs?.data?.field,
+    ].filter(Boolean).map(cleanCell).filter(Boolean);
+    for (const candidate of candidates) {
+      if (!names.some((name) => norm(name) === norm(candidate))) names.push(candidate);
+    }
+  }
+  return names;
+}
+
+function fieldNameMatches(actual, expected) {
+  const left = norm(actual);
+  const right = norm(expected);
+  return left === right || left.includes(right) || right.includes(left);
+}
+
 function collectApprovalFormPages(decoded) {
   const forms = [];
   for (const [formIndex, form] of asArray(decoded?.Forms || decoded?.Data?.Forms).entries()) {
     const def = decodeDefResource(form?.DefResource);
     for (const [pageIndex, page] of asArray(def?.pageurls).entries()) {
       if (!isObject(page?.formdef)) continue;
+      const role = Number(page?.type) === 1 ? "submission" : Number(page?.type) === 2 ? "task" : "";
       forms.push({
         source: `${form?.Name || form?.Title || `Forms[${formIndex}]`} / ${page?.title || page?.name || `pageurls[${pageIndex}]`}`,
+        formKey: norm(form?.Name || form?.Title || form?.Key || ""),
+        sourceKey: norm(def?.name || def?.title || def?.key || def?.defkey || ""),
+        role,
         resource: page.formdef,
       });
     }
@@ -294,6 +408,9 @@ function collectApprovalFormPages(decoded) {
       if (Number(page?.type) !== 2 || !isObject(page?.formdef)) continue;
       forms.push({
         source: `${workflow.source} / ${page?.title || page?.name || `task page ${pageIndex + 1}`}`,
+        formKey: norm(workflow.source),
+        sourceKey: norm(workflow.source),
+        role: "task",
         resource: page.formdef,
       });
     }
@@ -489,6 +606,33 @@ function tableRows(text) {
     .filter((line) => line.startsWith("|") && line.endsWith("|"))
     .filter((line) => !/^\|\s*:?-{3,}:?/.test(line))
     .map((raw) => ({ raw }));
+}
+
+function isTableLine(line) {
+  return /^\s*\|.+\|\s*$/.test(line || "");
+}
+
+function splitTableCells(line) {
+  return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(cleanCell);
+}
+
+function cleanCell(value) {
+  return String(value || "").replace(/`/g, "").replace(/\*\*/g, "").trim();
+}
+
+function norm(value) {
+  return cleanCell(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function findHeaderIndex(headers, candidates) {
+  const wanted = candidates.map(norm);
+  return headers.findIndex((header) => wanted.includes(header));
+}
+
+function isPlaceholderFieldName(value) {
+  const text = cleanCell(value);
+  if (!text || /^<.+>$/.test(text)) return true;
+  return /^(not applicable|n\/a|none|no|deferred|field|fields?|business label|display name|placeholder)$/i.test(text);
 }
 
 function extractSection(text, headingPattern) {
