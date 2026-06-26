@@ -35,6 +35,12 @@
   "lockedContainers": [
     "action_panel_flow_history_wrapper"
   ],
+  "generatedCleanupRules": {
+    "unusedCopiedModulesMustBeRemoved": true,
+    "operationsWithoutConfiguredActionsMustBeRemoved": true,
+    "emptyContentCardSectionsMustBeRemoved": true,
+    "lockedActionPanelFlowHistoryWrapperMustRemain": true
+  },
   "forbiddenComponentFamilies": [
     "Data Analytics templates",
     "KPI metrics wrapper",

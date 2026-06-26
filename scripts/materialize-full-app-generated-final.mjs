@@ -2391,13 +2391,33 @@ function removeEmptyBusinessSections(root) {
   visit(root);
 }
 
+function removeUnusedApprovalTemplateSections(root) {
+  const removableModules = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      if (![...removableModules].some((identity) => hasIdentity(child, identity))) return true;
+      if (findFirstByIdentity(child, "action_panel_flow_history_wrapper")) return true;
+      return hasMeaningfulBusinessContent(child);
+    });
+  };
+  visit(root);
+}
+
 function hasMeaningfulBusinessContent(node) {
-  if (!node || !Array.isArray(node.children) || node.children.length === 0) return false;
+  if (!node || typeof node !== "object") return false;
+  if (node.approvalFormNoFieldsNotice === true) return true;
+  if (!Array.isArray(node.children) || node.children.length === 0) return false;
   return findDescendants(node, (control) => {
     const type = String(control?.type || "");
+    if (control?.approvalFormNoFieldsNotice === true) return true;
     if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(control)) return true;
     if (hasIdentity(control, "form_grid_fields_wrapper")) return true;
+    if (hasIdentity(control, "form_grid_fields_2col_wrapper")) return true;
+    if (hasIdentity(control, "form_grid_fields_3col_wrapper")) return true;
+    if (["input", "textarea", "richtext", "rich-text", "radio", "checkbox", "switch", "date", "datetime", "number", "input_number", "lookup", "people", "user"].includes(type)) return true;
     return false;
   }).length > 0;
 }
@@ -2428,11 +2448,12 @@ function findFirstByIdentity(root, expected) {
 }
 
 function findBusinessSectionContentArea(root) {
-  const approvedWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
-  const contentCardWrappers = findDescendants(root, (node) => [...approvedWrappers].some((identity) => hasIdentity(node, identity)));
-  for (const wrapper of contentCardWrappers) {
-    const slot = findFirstByIdentity(wrapper, "section_content_area");
-    if (slot) return slot;
+  for (const wrapperId of ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]) {
+    const contentCardWrappers = findDescendants(root, (node) => hasIdentity(node, wrapperId));
+    for (const wrapper of contentCardWrappers) {
+      const slot = findFirstByIdentity(wrapper, "section_content_area");
+      if (slot) return slot;
+    }
   }
   return findFirstByIdentity(root, "section_content_area");
 }
@@ -2721,6 +2742,9 @@ function approvalFormDef(id, title, role, fields = []) {
   setTemplateText(resource, "section_title_text", role === "task" ? "Review Details" : "Request Details");
   setTemplateText(resource, "section_title_description", role === "task" ? `Review submitted ${title} information before taking action.` : `Complete the required ${title} information.`);
   materializeApprovalFieldControls(resource, { fields, title, role });
+  ensureApprovalBusinessSection(resource, { title, role });
+  removeOperationsWithoutActions(resource);
+  removeUnusedApprovalTemplateSections(resource);
   scrubApprovalSourceDomainResidue(resource, title);
   instantiateDashboardControlUuids(resource, `${slugify(title)}-${role}-approval-form`);
   return resource;
@@ -2753,10 +2777,42 @@ function scrubApprovalSourceDomainResidue(node, title) {
 
 function materializeApprovalFieldControls(resource, { fields, title, role }) {
   const normalizedFields = uniqueApprovalFieldSpecs(fields);
-  if (!normalizedFields.length) return;
   const slot = findBusinessSectionContentArea(resource);
   if (!slot) return;
-  slot.children = [buildApprovalFormFieldsGrid({ fields: normalizedFields, formName: title, role })];
+  slot.children = normalizedFields.length
+    ? [buildApprovalFormFieldsGrid({ fields: normalizedFields, formName: title, role })]
+    : [buildApprovalNoFieldsNotice({ title, role })];
+}
+
+function ensureApprovalBusinessSection(resource, { title, role }) {
+  const wrappers = findDescendants(resource, (node) => hasIdentity(node, "content_card_wrapper"));
+  if (wrappers.some((wrapper) => hasMeaningfulBusinessContent(wrapper))) return;
+  const wrapper = wrappers[0];
+  const slot = wrapper ? findFirstByIdentity(wrapper, "section_content_area") : findBusinessSectionContentArea(resource);
+  if (!slot) return;
+  slot.children = [buildApprovalNoFieldsNotice({ title, role })];
+}
+
+function buildApprovalNoFieldsNotice({ title, role }) {
+  return {
+    id: deterministicUuid(`${slugify(title)}-${role}-approval-no-additional-fields`),
+    name: "No additional fields required",
+    title: "No additional fields required",
+    label: "No additional fields required",
+    nv_label: "approval_no_additional_fields_required",
+    type: "heading",
+    approvalFormNoFieldsNotice: true,
+    attrs: {
+      heads: { ty: [null, "body-medium"], color: "#64748b" },
+      headc: {
+        title: {
+          value: role === "task"
+            ? "No additional task fields are required. Use the action panel below to complete the workflow task."
+            : "No additional submission fields are required for this approval form.",
+        },
+      },
+    },
+  };
 }
 
 function buildApprovalFormFieldsGrid({ fields, formName, role }) {

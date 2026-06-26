@@ -43,6 +43,13 @@ try {
   content(inventedRoot).children.push({ id: "loose-control", type: "input", nv_label: "loose_business_input", attrs: {} });
   expectCode("business control directly under approval Content fails", ["--resource", writeJson("submission-root-business.json", inventedRoot), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"], "APPROVAL_FORM_LAYOUT_INVENTED_ROOT_MODULE");
 
+  const operationsWithoutActions = submissionResource({ clean: false, materializeFields: true });
+  expectCode("generated approval form Operations without real actions fail", ["--resource", writeJson("submission-operations-without-actions.json", operationsWithoutActions), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"], "APPROVAL_FORM_LAYOUT_OPERATIONS_WITHOUT_ACTIONS");
+
+  const emptyCopiedSections = submissionResource({ clean: false, materializeFields: true });
+  removeOperationsWithoutActions(emptyCopiedSections);
+  expectCode("generated approval form empty copied business sections fail", ["--resource", writeJson("submission-empty-copied-sections.json", emptyCopiedSections), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"], "APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
+
   expectCode("App Plan approval form without layout selection table fails", ["--plan", writeText("plan-missing-selection.md", appPlan({ omitSelection: true }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING");
   expectCode("App Plan submission selecting task template fails", ["--plan", writeText("plan-submission-wrong.md", appPlan({ submissionTemplate: TASK_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_SUBMISSION_TEMPLATE_MISMATCH");
   expectCode("App Plan task selecting submission template fails", ["--plan", writeText("plan-task-wrong.md", appPlan({ taskTemplate: SUBMISSION_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_TASK_TEMPLATE_MISMATCH");
@@ -91,11 +98,39 @@ function template(file, templateId, marker = true) {
 }
 
 function submissionResource(options = {}) {
-  return template("approval-form-layout-submission.template.json", SUBMISSION_TEMPLATE_ID, options.marker !== false);
+  const resource = template("approval-form-layout-submission.template.json", SUBMISSION_TEMPLATE_ID, options.marker !== false);
+  if (options.clean !== false) materializeAndCleanGeneratedResource(resource);
+  else if (options.materializeFields) materializeGeneratedFieldGrid(resource);
+  return resource;
 }
 
 function taskResource(options = {}) {
-  return template("approval-form-layout-task.template.json", TASK_TEMPLATE_ID, options.marker !== false);
+  const resource = template("approval-form-layout-task.template.json", TASK_TEMPLATE_ID, options.marker !== false);
+  if (options.clean !== false) materializeAndCleanGeneratedResource(resource);
+  else if (options.materializeFields) materializeGeneratedFieldGrid(resource);
+  return resource;
+}
+
+function materializeAndCleanGeneratedResource(resource) {
+  materializeGeneratedFieldGrid(resource);
+  removeOperationsWithoutActions(resource);
+  removeUnusedBusinessSections(resource);
+  return resource;
+}
+
+function materializeGeneratedFieldGrid(resource) {
+  const slot = firstSectionSlot(resource);
+  slot.children = [
+    {
+      id: "form_grid_fields_2col_wrapper",
+      name: "form_grid_fields_2col_wrapper",
+      type: "grid",
+      attrs: {},
+      children: [
+        { id: "approval_field_request_title", name: "Request Title", type: "input", nv_label: "approval_field_request_title", attrs: {} },
+      ],
+    },
+  ];
 }
 
 function decodedPackage(options = {}) {
@@ -339,7 +374,61 @@ function content(resource) {
 }
 
 function firstSectionSlot(resource) {
+  for (const wrapperId of ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]) {
+    const wrapper = find(resource, wrapperId);
+    const slot = wrapper ? find(wrapper, "section_content_area") : null;
+    if (slot) return slot;
+  }
   return find(resource, "section_content_area");
+}
+
+function removeOperationsWithoutActions(root) {
+  const visitNode = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      if (ids(child).includes("Operations") && !hasActionConfiguration(child)) return false;
+      visitNode(child);
+      return true;
+    });
+  };
+  visitNode(root);
+}
+
+function removeUnusedBusinessSections(root) {
+  const removable = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+  const visitNode = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visitNode(child);
+      if (!ids(child).some((id) => removable.has(id))) return true;
+      if (find(child, "action_panel_flow_history_wrapper")) return true;
+      return hasMeaningfulBusinessContent(child);
+    });
+  };
+  visitNode(root);
+}
+
+function hasMeaningfulBusinessContent(node) {
+  const meaningfulTypes = new Set(["input", "textarea", "richtext", "rich-text", "radio", "checkbox", "switch", "date", "datetime", "number", "input_number", "lookup", "people", "user", "collection", "dynamic-field", "dynamic-user"]);
+  let found = false;
+  visit(node, (current) => {
+    if (found) return;
+    if (meaningfulTypes.has(String(current?.type || ""))) found = true;
+    if (ids(current).some((id) => ["form_grid_fields_wrapper", "form_grid_fields_2col_wrapper", "form_grid_fields_3col_wrapper"].includes(id))) found = true;
+  });
+  return found;
+}
+
+function hasActionConfiguration(node) {
+  let found = false;
+  visit(node, (current) => {
+    if (found) return;
+    const attrs = current?.attrs || {};
+    if (attrs.control_action || attrs.action || attrs["action-type"] || attrs.actionType) found = true;
+    if (Array.isArray(attrs.actions) && attrs.actions.length) found = true;
+    if (Array.isArray(current?.actions) && current.actions.length) found = true;
+  });
+  return found;
 }
 
 function find(node, identity) {
