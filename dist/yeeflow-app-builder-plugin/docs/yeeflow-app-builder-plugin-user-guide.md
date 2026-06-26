@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.67`
+`0.8.68`
+
+Version `0.8.68` releases Dashboard Collection and Pie/Data Analytics golden rebuild gates from PR #275. Generated multiselect grid-table Collections preserve the real `grid_table_col_body` Collection root while rebuilding approved template internals, cloned Dashboard template UUID-like values are re-instantiated per page, Pie/Data Analytics controls clone the full approved wrapper instead of simplified chart shells, chart runtime `attrs.data`, `attrs.model`, `attrs.series[]`, and `attrs.values[]` stay aligned with host `Resource.ReportIds[]` and `Resource.exts[]` settings, and COUNT analytics use real source fields with aggregate metadata instead of derived pseudo-field IDs.
 
 Version `0.8.67` releases Approval workflow condition and upgrade proof gates from PR #273. Generated Approval workflows now use Designer-readable `left/op/right` Completion condition metadata for Approved and Rejected outcomes, line-manager assignment is bound through `ApplicantUserID`, canonical end-node routing is enforced, and Approval workflow upgrades require live Designer/DefBlob proof after Version Management `Succeed`.
 
