@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.65`
+- Version: `0.8.66`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.65` releases repository root hygiene and compatibility gates from PR #269: historical root generator helpers now live under `tools/generators/`, runtime proof studies under `docs/studies/root-runtime-proofs/`, and runtime test specifications under `fixtures/runtime-test-specs/`; public root CLI/validator/wrapper entrypoints remain stable; source/dist reference paths are aligned; and `scripts/test-repo-root-hygiene.mjs` prevents root-level proof and generator clutter from returning.
+Current release `0.8.66` releases collection action layout and approval field fidelity gates from PR #271: Dashboard Collection template actions now rewrite or remove unresolved layout placeholders such as `{{layout}}`; Approval form field validation requires App Plan planned visible labels such as `Loan Number` to survive materialization instead of accepting technical-only bindings; source approval layout templates are included as cache artifacts; and focused clean-checkout regression coverage prevents source/dist template drift.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.65
+Version: 0.8.66
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.65
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.66
 ```
 
 ## What Is Included

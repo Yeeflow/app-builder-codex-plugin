@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.66
+
+- Release collection action layout and approval field fidelity gates from PR #271.
+- Rewrite or remove unresolved Dashboard Collection action layout placeholders such as `{{layout}}` before signing readiness.
+- Require Approval form field materialization to preserve App Plan planned visible labels, so technical-only bindings such as `LoanNumber` cannot mask label drift from `Loan Number`.
+- Include source approval layout templates in cache artifacts and clean-checkout regression coverage so materializer and cache gates no longer depend on local ignored JSON files.
+- Keep source/dist template mirrors aligned without changing signing, install, API, or runtime-proof behavior.
+
 ## 0.8.65
 
 - Release repository root hygiene and compatibility gates from PR #269.

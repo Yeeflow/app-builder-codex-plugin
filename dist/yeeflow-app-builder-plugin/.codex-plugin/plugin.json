@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.65",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with repository root hygiene gates, live E2E install readiness gates, validator-entrypoint drift checks, and YAP/YAPK hard gates.",
+  "version": "0.8.66",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with collection action layout and approval field fidelity gates.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
