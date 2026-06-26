@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -17,6 +18,7 @@ const LIVE_INSTALL_READINESS_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-
 const DATA_LIST_SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-data-list-system-schema.mjs");
 const BIT_FIELD_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-bit-field-controls.mjs");
 const EXPORT_SHAPE_VALIDATOR = path.join(ROOT, "scripts/validate-generated-yapk-export-shape.mjs");
+const APPROVAL_FORM_FIELDS_VALIDATOR = path.join(ROOT, "scripts/validate-approval-form-fields-template.mjs");
 const DASHBOARD_LAYOUT_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-page-layout-template.mjs");
 const DASHBOARD_DATASET_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
 const DATA_ANALYTICS_VALIDATOR = path.join(ROOT, "scripts/validate-data-analytics-golden-references.mjs");
@@ -145,6 +147,34 @@ try {
     "## 5. Approval Forms Plan",
     "",
     "### 5.1 Asset Loan Request",
+    "",
+    "##### Submission Form Fields",
+    "",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- |",
+    "| 1 | Requester | Requester | User | identity-picker | Generated-final validation |",
+    "| 2 | Asset | Asset | Text | input | Generated-final validation |",
+    "| 3 | Business Purpose | BusinessPurpose | Multiple line | textarea | Generated-final validation |",
+    "",
+    "##### Task Form Fields",
+    "",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Read Only | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | Requester | Requester | User | identity-picker | Yes | Generated-final validation |",
+    "| 2 | Asset | Asset | Text | input | Yes | Generated-final validation |",
+    "| 3 | Business Purpose | BusinessPurpose | Multiple line | textarea | Yes | Generated-final validation |",
+    "",
+    "#### Approval Form Fields Layout Template Selection",
+    "| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Asset Loan Request | Submission form | Request fields | approval_form_fields_grid_2col_v1_1 | Submission fields | 2 | 2 | 1 | Business Purpose | None | Generated-final validation |",
+    "| Asset Loan Request | Coordinator task form | Review fields | approval_form_fields_grid_2col_v1_1 | Task fields | 2 | 2 | 1 | Business Purpose | None | Generated-final validation |",
+    "",
+    "#### Approval Form Layout Template Selection",
+    "| Approval Form | Form Page | Page Role | Selected Approval Form Layout Template | Business Sections Needed | Related Data Needed | Selection Reason | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Asset Loan Request | Submission form | Submission | approval_form_layout_submission_v1_1 | Page title and request fields | Current request data only | Submission captures requester-entered approval fields | Generated-final validation |",
+    "| Asset Loan Request | Coordinator task form | Task | approval_form_layout_task_v1_1 | Page title, readonly request context, action/history section | Related loan context | Task reviewers need consistent readonly context and workflow action area | Generated-final validation |",
     "",
     "### 5.2 Asset Return Review",
     "",
@@ -316,6 +346,12 @@ try {
   assert.equal(decodedResource.FormNewReports.length, 1, "planned form reports are materialized");
   assert.equal(decodedResource.Pages.length, 2, "planned dashboards are materialized");
   assert.equal(decodedResource.Pages.some((page) => page.Title === "Getting Started Dashboard"), false, "nontrivial path must not emit placeholder dashboard");
+  const assetLoanDef = decodeDefResource(decodedResource.Forms.find((form) => form.Name === "Asset Loan Request").DefResource);
+  const assetLoanDefText = JSON.stringify(assetLoanDef);
+  assert.match(assetLoanDefText, /Requester/, "approval submission/task formdef materializes planned Requester field");
+  assert.match(assetLoanDefText, /Asset/, "approval submission/task formdef materializes planned Asset field");
+  assert.match(assetLoanDefText, /Business Purpose/, "approval submission/task formdef materializes planned Business Purpose field");
+  assert.doesNotMatch(assetLoanDefText, /\b(?:Loan Status|Active Loan Pipeline)\b/, "approval formdef must not retain unrelated source-template business labels");
   assert.equal(new Set(decodedResource.Childs.map((child) => String(child.List.ListID))).size, decodedResource.Childs.length, "data list IDs must not collapse through JavaScript number precision");
   assert.equal(new Set(decodedResource.Pages.map((page) => String(page.LayoutID))).size, decodedResource.Pages.length, "dashboard LayoutIDs must be unique");
   const officeAssets = decodedResource.Childs.find((child) => child.List.Title === "Office Assets");
@@ -396,6 +432,11 @@ try {
   expectPass("nontrivial generated package passes generated YAPK export-shape validation", [
     EXPORT_SHAPE_VALIDATOR,
     "--package", resourceReport.outputs.package,
+  ]);
+  expectPass("nontrivial generated package materializes App Plan approval form fields", [
+    APPROVAL_FORM_FIELDS_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+    "--plan", resourcePlan,
   ]);
   expectPass("nontrivial generated package passes Dashboard Page Layouts v1.1 validation", [
     DASHBOARD_LAYOUT_VALIDATOR,
@@ -484,4 +525,13 @@ function collectObjectIdUuids(root) {
   };
   visit(root);
   return out;
+}
+
+function decodeDefResource(value) {
+  const raw = Buffer.from(value, "base64");
+  const prefix = Buffer.from("::brotli::", "utf8");
+  const payload = raw.subarray(0, prefix.length).equals(prefix)
+    ? zlib.brotliDecompressSync(raw.subarray(prefix.length)).toString("utf8")
+    : zlib.brotliDecompressSync(raw).toString("utf8");
+  return JSON.parse(payload);
 }

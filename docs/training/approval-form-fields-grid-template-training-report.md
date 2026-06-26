@@ -54,6 +54,10 @@ The generator must preserve:
 - full-row span for Multiple line, Rich text, and Sub list controls;
 - one direct control per Grid cell unless a Container or nested Grid is used as the cell host.
 
+The App Plan field tables are mandatory generation inputs. When `Submission Form Fields` or `Task Form Fields` are present, generated `Forms[].DefResource.pageurls[].formdef` must contain those business fields inside the selected field-grid wrapper. A package that only materializes the Approval form layout shell, workflow skeleton, titles, or route is incomplete even if `DefResource` decodes and the page opens in Form Builder.
+
+The generator must remove or rewrite source-template business text that is not part of the target app domain. Template labels such as source loan/pipeline wording must not remain in unrelated Approval form pages after business fields have been materialized.
+
 ## App Plan Contract
 
 The App Plan Approval Forms Plan must include an `Approval Form Fields Layout Template Selection` table when Approval forms display submission or task fields. Each field group must select `approval_form_fields_grid_2col_v1_1` or `approval_form_fields_grid_3col_v1_1` and state PC/laptop, tablet, and mobile column intent.
@@ -69,6 +73,8 @@ New focused regression suite:
 `scripts/test-approval-form-fields-template-gates.mjs`
 
 First-generation preflight now invokes the approval form field-grid gate after Approval Form Layouts v1.1 validation and before dashboard gates.
+
+The field-grid validator now also accepts `--plan` together with `--package` and verifies that planned Approval form fields appear in each generated submission/task `formdef`. Missing planned pages, missing planned field groups, or missing individual business fields are hard failures.
 
 ## Safety
 

@@ -60,6 +60,8 @@ try {
   expectCode("App Plan missing approval field layout selection fails", ["--plan", writeText("plan-missing-field-layout.md", appPlan({ omitFieldSelection: true }))], "APPROVAL_FORM_FIELDS_APP_PLAN_SELECTION_TABLE_MISSING");
   expectCode("App Plan tablet columns above PC fails", ["--plan", writeText("plan-bad-tablet.md", appPlan({ pc: 2, tablet: 3, mobile: 1 }))], "APPROVAL_FORM_FIELDS_APP_PLAN_TABLET_COLUMNS_INVALID");
   expectPass("App Plan approval field layout selection passes", ["--plan", writeText("plan-valid.md", appPlan())]);
+  expectPass("Package materializes App Plan approval form fields", ["--package", writePackage("package-with-planned-fields.yapk", decodedPackage(approvalFormResource())), "--plan", writeText("plan-valid-with-fields.md", appPlan())]);
+  expectCode("Package missing planned approval form field fails", ["--package", writePackage("package-missing-planned-field.yapk", decodedPackage(approvalFormResource())), "--plan", writeText("plan-extra-field.md", appPlan({ extraSubmissionField: "Traveler" }))], "APPROVAL_FORM_FIELDS_PLANNED_FIELD_NOT_MATERIALIZED");
 
   console.log(JSON.stringify({ status: "pass", results }, null, 2));
 } finally {
@@ -209,8 +211,8 @@ function decodedPackage(resource) {
     Forms: [
       {
         Key: "APPROVAL-FIELDS-TEST",
-        Name: "Approval Fields Test",
-        Title: "Approval Fields Test",
+        Name: "Asset Loan Approval",
+        Title: "Asset Loan Approval",
         WorkflowType: 2,
         DefResource: encodeDefResource(def),
       },
@@ -227,7 +229,7 @@ function encodeDefResource(def) {
   return payload.toString("base64");
 }
 
-function appPlan({ omitFieldSelection = false, pc = 2, tablet = 2, mobile = 1 } = {}) {
+function appPlan({ omitFieldSelection = false, pc = 2, tablet = 2, mobile = 1, extraSubmissionField = "" } = {}) {
   const fieldSelection = omitFieldSelection ? "" : `
 #### Approval Form Fields Layout Template Selection
 
@@ -236,6 +238,7 @@ function appPlan({ omitFieldSelection = false, pc = 2, tablet = 2, mobile = 1 } 
 | Asset Loan Approval | Submission form | Request information | ${TEMPLATE_2COL_ID} | Submission fields | ${pc} | ${tablet} | ${mobile} | Business Justification, Requested Items | None | Generated-final validation |
 | Asset Loan Approval | Coordinator task form | Review context | ${TEMPLATE_3COL_ID} | Task fields | 3 | 2 | 1 | Requested Items | None | Generated-final validation |
 `;
+  const extraRow = extraSubmissionField ? `| 4 | ${extraSubmissionField} | ${extraSubmissionField.replace(/\W+/g, "")} | Text | input | Generated-final validation |` : "";
   return `
 # Office Asset Loan Management - Yeeflow App Plan
 
@@ -244,6 +247,25 @@ function appPlan({ omitFieldSelection = false, pc = 2, tablet = 2, mobile = 1 } 
 | Approval Form | Business Purpose | Submission Form Fields | Task Form Fields | Task Forms | ContentList Persistence | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- |
 | Asset Loan Approval | Route asset requests | Requester Name, Business Justification, Requested Items | Readonly request context | Coordinator task form | Loan Requests | Generated-final validation |
+
+### 5.1 Asset Loan Approval
+
+##### Submission Form Fields
+
+| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Proof Label |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Requester Name | RequesterName | Text | input | Generated-final validation |
+| 2 | Business Justification | BusinessJustification | Multiple line | textarea | Generated-final validation |
+| 3 | Requested Items | RequestedItems | Sub list | list | Generated-final validation |
+${extraRow}
+
+##### Task Form Fields
+
+| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Read Only | Proof Label |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Requester Name | RequesterName | Text | input | Yes | Generated-final validation |
+| 2 | Business Justification | BusinessJustification | Multiple line | textarea | Yes | Generated-final validation |
+| 3 | Requested Items | RequestedItems | Sub list | list | Yes | Generated-final validation |
 
 ${fieldSelection}
 

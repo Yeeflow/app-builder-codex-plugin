@@ -285,6 +285,7 @@ function analyzeAppPlanResourceDemand(planText) {
     navigationItemsByGroup,
     dataListFieldSpecs: collectDataListFieldSpecs(planText),
     customFormRecords: collectCustomFormRecords(planText),
+    approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     dashboardFilterRecords: collectDashboardFilterRecords(planText),
     dashboardDatasetRecords: collectDashboardDatasetRecords(planText),
     dashboardAnalyticsRecords: collectDashboardAnalyticsRecords(planText),
@@ -474,6 +475,60 @@ function collectCustomFormRecords(planText) {
     index = rowIndex;
   }
   return records;
+}
+
+function collectApprovalFormFieldSpecs(planText) {
+  const section = extractNumberedSection(planText, /^##\s+5\.\s+Approval Forms Plan/im);
+  const byForm = {};
+  if (!section.trim()) return byForm;
+  const lines = section.split(/\r?\n/);
+  let currentApprovalForm = "";
+  let currentRole = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const approvalHeading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (approvalHeading) {
+      currentApprovalForm = cleanResourceName(approvalHeading[1]);
+      currentRole = "";
+      if (currentApprovalForm && !byForm[normKey(currentApprovalForm)]) byForm[normKey(currentApprovalForm)] = { submission: [], task: [] };
+      continue;
+    }
+    if (/^#{4,6}\s+Submission Form Fields\s*$/i.test(lines[index])) {
+      currentRole = "submission";
+      continue;
+    }
+    if (/^#{4,6}\s+Task Form Fields\s*$/i.test(lines[index])) {
+      currentRole = "task";
+      continue;
+    }
+    if (!currentApprovalForm || !currentRole || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const displayColumn = findHeaderIndex(normalizedHeaders, ["business label", "display name", "field name", "label", "name"]);
+    const keyColumn = findHeaderIndex(normalizedHeaders, ["field name", "field id / variable id", "variable id", "field key", "internal id field key"]);
+    const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow variable type", "exact yeeflow field type", "field type", "variable type", "type"]);
+    const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "control type", "control"]);
+    if (displayColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const displayName = cleanResourceName(cells[displayColumn]);
+      if (!displayName || isNonResourceName(displayName)) {
+        rowIndex += 1;
+        continue;
+      }
+      const list = byForm[normKey(currentApprovalForm)]?.[currentRole] || [];
+      list.push({
+        displayName,
+        fieldName: cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, cleanResourceName(cells[fieldTypeColumn]) || "Text", list.length),
+        fieldType: cleanResourceName(cells[fieldTypeColumn]) || "Text",
+        controlType: cleanResourceName(cells[controlTypeColumn]),
+      });
+      byForm[normKey(currentApprovalForm)][currentRole] = uniqueApprovalFieldSpecs(list);
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return byForm;
 }
 
 function collectDashboardFilterRecords(planText) {
@@ -670,6 +725,36 @@ function fieldSpecsForList(planDemand, listName) {
   };
   add({ displayName: "Title", fieldName: "Title", fieldType: "Text", controlType: "input" });
   for (const spec of specs) add(spec);
+  return normalized.slice(0, 16);
+}
+
+function approvalFieldSpecsForForm(planDemand, formName) {
+  const planned = planDemand.approvalFormFieldSpecs?.[normKey(formName)] || {};
+  const submission = uniqueApprovalFieldSpecs(Array.isArray(planned.submission) ? planned.submission : []);
+  const task = uniqueApprovalFieldSpecs(Array.isArray(planned.task) ? planned.task : []);
+  return {
+    submission,
+    task: task.length ? task : submission,
+  };
+}
+
+function uniqueApprovalFieldSpecs(fields) {
+  const normalized = [];
+  const seen = new Set();
+  for (const field of fields) {
+    const displayName = cleanResourceName(field?.displayName);
+    if (!displayName || isNonResourceName(displayName)) continue;
+    const fieldName = cleanResourceName(field?.fieldName || inferFieldKey(displayName, field?.fieldType || "Text", normalized.length));
+    const key = normKey(fieldName || displayName);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push({
+      displayName,
+      fieldName,
+      fieldType: cleanResourceName(field?.fieldType) || "Text",
+      controlType: cleanResourceName(field?.controlType) || inferControlType(field?.fieldType || ""),
+    });
+  }
   return normalized.slice(0, 16);
 }
 
@@ -1141,6 +1226,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
   const forms = planDemand.resources.approvalForms.map((name, index) => {
     const key = stringId(ids[`decoded.Forms[${index}].Key`]);
     const defId = stringId(ids[`decoded.Forms[${index}].DefResourceID`]);
+    const approvalFieldSpecs = approvalFieldSpecsForForm(planDemand, name);
     return {
       Category: "",
       Name: name,
@@ -1152,7 +1238,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       Description: "",
       Ext: "",
       DefResourceID: defId,
-      DefResource: exportResource(buildApprovalDefResource({ name, formKey: key, defId })),
+      DefResource: exportResource(buildApprovalDefResource({ name, formKey: key, defId, approvalFieldSpecs })),
       Status: 1,
       DeployedDefID: defId,
       WorkflowType: 2,
@@ -2566,7 +2652,7 @@ function exportResource(resource) {
   return Buffer.concat([prefix, compressed]).toString("base64");
 }
 
-function buildApprovalDefResource({ name, formKey, defId }) {
+function buildApprovalDefResource({ name, formKey, defId, approvalFieldSpecs = {} }) {
   const submissionPageId = `${defId}_submission`;
   const taskPageId = `${defId}_task`;
   const startId = `${defId}_start`;
@@ -2586,13 +2672,13 @@ function buildApprovalDefResource({ name, formKey, defId }) {
     ProcModelAppID: 41,
     ProcModelListID: defId,
     ProcModelListSetID: formKey,
-    variables: [{ name: "requestTitle", type: "text", source: "Title" }],
+    variables: buildApprovalVariables(approvalFieldSpecs),
     graphposition: { x: 0, y: 0 },
     graphzoom: 1,
     graphver: "1.0",
     pageurls: [
-      { id: submissionPageId, pageUrl: submissionPageId, url: submissionPageId, type: 1, title: "Submission form", formdef: approvalFormDef(submissionPageId, name, "submission") },
-      { id: taskPageId, pageUrl: taskPageId, url: taskPageId, type: 2, title: "Task form", formdef: approvalFormDef(taskPageId, name, "task") },
+      { id: submissionPageId, pageUrl: submissionPageId, url: submissionPageId, type: 1, title: "Submission form", formdef: approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || []) },
+      { id: taskPageId, pageUrl: taskPageId, url: taskPageId, type: 2, title: "Task form", formdef: approvalFormDef(taskPageId, name, "task", approvalFieldSpecs.task || approvalFieldSpecs.submission || []) },
     ],
     childshapes: [
       { id: startId, resourceid: startId, stencil: { id: "StartNoneEvent" }, incoming: [], outgoing: [{ resourceid: flowId }], properties: { name: "Start" }, bounds: { upperLeft: { x: 100, y: 100 }, lowerRight: { x: 130, y: 130 } } },
@@ -2605,7 +2691,21 @@ function buildApprovalDefResource({ name, formKey, defId }) {
   };
 }
 
-function approvalFormDef(id, title, role) {
+function buildApprovalVariables(approvalFieldSpecs = {}) {
+  const fields = uniqueApprovalFieldSpecs([...(approvalFieldSpecs.submission || []), ...(approvalFieldSpecs.task || [])]);
+  const variables = [{ name: "requestTitle", type: "text", source: "Title" }];
+  for (const field of fields) {
+    variables.push({
+      name: field.fieldName,
+      label: field.displayName,
+      type: approvalVariableType(field),
+      source: field.fieldName,
+    });
+  }
+  return variables;
+}
+
+function approvalFormDef(id, title, role, fields = []) {
   const templateId = role === "task" ? APPROVAL_FORM_TEMPLATE_IDS.task : APPROVAL_FORM_TEMPLATE_IDS.submission;
   const templatePath = role === "task" ? APPROVAL_FORM_TEMPLATE_PATHS.task : APPROVAL_FORM_TEMPLATE_PATHS.submission;
   const raw = JSON.parse(fs.readFileSync(templatePath, "utf8"));
@@ -2618,8 +2718,133 @@ function approvalFormDef(id, title, role) {
   resource.approvalFormLayoutRole = role;
   setTemplateText(resource, "page_title_text", resource.title);
   setTemplateText(resource, "page_title_description", role === "task" ? `Review and act on ${title}.` : `Submit ${title}.`);
+  setTemplateText(resource, "section_title_text", role === "task" ? "Review Details" : "Request Details");
+  setTemplateText(resource, "section_title_description", role === "task" ? `Review submitted ${title} information before taking action.` : `Complete the required ${title} information.`);
+  materializeApprovalFieldControls(resource, { fields, title, role });
+  scrubApprovalSourceDomainResidue(resource, title);
   instantiateDashboardControlUuids(resource, `${slugify(title)}-${role}-approval-form`);
   return resource;
+}
+
+function scrubApprovalSourceDomainResidue(node, title) {
+  const replacements = [
+    [/Active Loan Pipeline/g, `${title} Details`],
+    [/Loan Status/g, "Request Status"],
+    [/\bPipeline\b/g, "Workflow"],
+  ];
+  if (!/loan/i.test(title)) replacements.push([/\bLoan\b/g, "Request"]);
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) value[index] = visit(value[index]);
+      return value;
+    }
+    if (!value || typeof value !== "object") {
+      if (typeof value !== "string") return value;
+      return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), value);
+    }
+    for (const [key, child] of Object.entries(value)) {
+      if (key === "id") continue;
+      value[key] = visit(child);
+    }
+    return value;
+  };
+  visit(node);
+}
+
+function materializeApprovalFieldControls(resource, { fields, title, role }) {
+  const normalizedFields = uniqueApprovalFieldSpecs(fields);
+  if (!normalizedFields.length) return;
+  const slot = findBusinessSectionContentArea(resource);
+  if (!slot) return;
+  slot.children = [buildApprovalFormFieldsGrid({ fields: normalizedFields, formName: title, role })];
+}
+
+function buildApprovalFormFieldsGrid({ fields, formName, role }) {
+  const useThreeColumns = fields.length >= 8;
+  const templateId = useThreeColumns ? "approval_form_fields_grid_3col_v1_1" : "approval_form_fields_grid_2col_v1_1";
+  const templatePath = useThreeColumns
+    ? path.join(ROOT, "docs/reference/approval-form-fields-grid-3col.template.json")
+    : path.join(ROOT, "docs/reference/approval-form-fields-grid-2col.template.json");
+  const raw = JSON.parse(fs.readFileSync(templatePath, "utf8"));
+  const wrapper = clone(raw._ak_c || raw.templateResource || raw);
+  const wrapperIdentity = useThreeColumns ? "form_grid_fields_3col_wrapper" : "form_grid_fields_2col_wrapper";
+  wrapper.id = deterministicUuid(`${slugify(formName)}-${role}-${wrapperIdentity}`);
+  wrapper.nv_label = wrapperIdentity;
+  wrapper.approvalFormFieldsTemplateId = templateId;
+  wrapper.derivedFromApprovalFormFieldsTemplate = templateId;
+  wrapper.children = fields.map((field, index) => buildApprovalFormFieldControl({ field, index, formName, role, columns: useThreeColumns ? 3 : 2 }));
+  return wrapper;
+}
+
+function buildApprovalFormFieldControl({ field, index, formName, role, columns }) {
+  const type = normalizeApprovalControlType(field);
+  const fullRow = isFullRowApprovalField(field, type);
+  const control = {
+    type,
+    id: deterministicUuid(`${slugify(formName)}-${role}-approval-field-${index + 1}-${field.fieldName}`),
+    name: field.displayName,
+    title: field.displayName,
+    label: field.displayName,
+    displayLabel: [null, true],
+    nv_label: `approval_field_${slugify(field.displayName).replace(/-/g, "_")}`,
+    binding: field.fieldName,
+    fieldName: field.fieldName,
+    approvalFieldMaterializedFromPlan: true,
+    attrs: {
+      common: {
+        margin: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
+      },
+      placeholder: `Enter ${field.displayName}`,
+      data: {
+        field: field.fieldName,
+        fieldName: field.fieldName,
+        displayName: field.displayName,
+        variableType: field.fieldType,
+      },
+    },
+  };
+  if (role === "task") {
+    control.attrs.readonly = true;
+    control.attrs.readOnly = true;
+  }
+  if (type === "radio" || type === "select") {
+    control.attrs.displayStyle = "dropdown";
+    control.attrs.choices = inferChoiceValues(field);
+    control.attrs.color_choices = control.attrs.choices.map((value) => ({ value, key: deterministicUuid(`${control.id}-${value}`) }));
+  }
+  if (fullRow) control.attrs.common.grid = { position: [null, { cSpan: columns }, { cSpan: Math.min(columns, 2) }, { cSpan: 1 }] };
+  return control;
+}
+
+function normalizeApprovalControlType(field) {
+  const raw = normKey(`${field?.controlType || ""} ${field?.fieldType || ""} ${field?.displayName || ""}`);
+  if (/sub\s*list|detail\s*list|line\s*items?/.test(raw)) return "list";
+  if (/rich\s*text|html/.test(raw)) return "richtext";
+  if (/multi(?:ple)?\s*line|long\s*text|paragraph|purpose|justification|description|notes?/.test(raw)) return "textarea";
+  if (/user|identity|people|person|traveler|requester|approver|manager/.test(raw)) return "identity-picker";
+  if (/image|photo|picture/.test(raw)) return "image-upload";
+  if (/file|attachment|document/.test(raw)) return "file-upload";
+  if (/date|datetime|time/.test(raw)) return "datepicker";
+  if (/currency|cost|amount|budget|price|fee/.test(raw)) return "currency";
+  if (/decimal|number|integer|quantity|count|hours?/.test(raw)) return "input_number";
+  if (/bit|boolean|yes\/no|switch/.test(raw)) return "switch";
+  if (/choice|select|dropdown|radio|status|category|type|priority/.test(raw)) return "radio";
+  return "input";
+}
+
+function approvalVariableType(field) {
+  const type = normalizeApprovalControlType(field);
+  if (type === "datepicker") return "date";
+  if (type === "currency" || type === "input_number") return "number";
+  if (type === "switch") return "boolean";
+  if (type === "identity-picker") return "user";
+  if (type === "list") return "sublist";
+  return "text";
+}
+
+function isFullRowApprovalField(field, controlType) {
+  const raw = normKey(`${field?.fieldType || ""} ${field?.controlType || ""} ${field?.displayName || ""}`);
+  return controlType === "textarea" || controlType === "richtext" || controlType === "list" || /business purpose|justification|description|notes?/.test(raw);
 }
 
 function listInfo({ listId, title, type, ext2 = "", iconUrl = "", layoutView = null }) {
