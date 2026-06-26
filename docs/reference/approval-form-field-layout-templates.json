@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "registryId": "approval-form-field-layouts-v1.1",
+  "description": "Approved field-layout golden reference templates for Yeeflow Approval form submission and task pages. These templates are used inside Approval Form Layouts v1.1 section_content_area slots to display approval form fields in responsive Grid layouts.",
+  "approvedTemplateIds": [
+    "approval_form_fields_grid_2col_v1_1",
+    "approval_form_fields_grid_3col_v1_1"
+  ],
+  "approvedRootWrapperIds": [
+    "form_grid_fields_2col_wrapper",
+    "form_grid_fields_3col_wrapper"
+  ],
+  "templates": [
+    {
+      "templateId": "approval_form_fields_grid_2col_v1_1",
+      "displayName": "Approval Form Fields Grid 2-column v1.1",
+      "sourceTemplate": "docs/reference/approval-form-fields-grid-2col.template.json",
+      "rootWrapperId": "form_grid_fields_2col_wrapper",
+      "rootControlType": "flex_grid",
+      "defaultPcLaptopColumns": 2,
+      "allowedSurfaces": [
+        "approval-form-submission",
+        "approval-form-task"
+      ],
+      "requiredPlacementWhenUsingApprovalFormLayoutsV11": "content_card_wrapper > section_content_area",
+      "allowedEditableAreas": [
+        "Approval field controls inside form_grid_fields_2col_wrapper",
+        "Column count and column sizing metadata on form_grid_fields_2col_wrapper or nested field-group grids",
+        "Column span on field controls and grouping containers, bounded by the parent Grid column count",
+        "Dynamic display rules on grouped Container/Grid controls",
+        "Custom validation and action properties on supported approval form field controls"
+      ],
+      "lockedAreas": [
+        "All non-column Grid style properties",
+        "Root wrapper identity and control type",
+        "Field-control zero-margin contract",
+        "Responsive column-span safety contract"
+      ],
+      "requiredFullRowControlTypes": [
+        "textarea",
+        "richtext",
+        "list"
+      ],
+      "appPlanUse": "Select approval_form_fields_grid_2col_v1_1 when an Approval form field group should use the standard two-column desktop layout. The App Plan should describe group purpose, fields included, desktop/tablet/mobile column counts, full-row field controls, and dynamic-display grouping needs without generated runtime IDs or copied JSON."
+    },
+    {
+      "templateId": "approval_form_fields_grid_3col_v1_1",
+      "displayName": "Approval Form Fields Grid 3-column v1.1",
+      "sourceTemplate": "docs/reference/approval-form-fields-grid-3col.template.json",
+      "rootWrapperId": "form_grid_fields_3col_wrapper",
+      "rootControlType": "flex_grid",
+      "defaultPcLaptopColumns": 3,
+      "allowedSurfaces": [
+        "approval-form-submission",
+        "approval-form-task"
+      ],
+      "requiredPlacementWhenUsingApprovalFormLayoutsV11": "content_card_wrapper > section_content_area",
+      "allowedEditableAreas": [
+        "Approval field controls inside form_grid_fields_3col_wrapper",
+        "Column count and column sizing metadata on form_grid_fields_3col_wrapper or nested field-group grids",
+        "Column span on field controls and grouping containers, bounded by the parent Grid column count",
+        "Dynamic display rules on grouped Container/Grid controls",
+        "Custom validation and action properties on supported approval form field controls"
+      ],
+      "lockedAreas": [
+        "All non-column Grid style properties",
+        "Root wrapper identity and control type",
+        "Field-control zero-margin contract",
+        "Responsive column-span safety contract"
+      ],
+      "requiredFullRowControlTypes": [
+        "textarea",
+        "richtext",
+        "list"
+      ],
+      "appPlanUse": "Select approval_form_fields_grid_3col_v1_1 when an Approval form field group benefits from a denser three-column desktop layout. Tablet columns must not exceed desktop columns and mobile must collapse to one column."
+    }
+  ],
+  "rules": {
+    "fieldMargin": "Every generated Approval form field control inside an approved field-grid wrapper must set margin to zero.",
+    "fieldNavLabel": "Every generated Approval form field control inside an approved field-grid wrapper must have a business-specific nv_label/nav_label derived from the Approval form field or grouped field purpose.",
+    "fullRowControls": "Multiple line, Rich text, and Sub list controls must span the full parent Grid width on every responsive breakpoint.",
+    "gridCellContent": "A Grid cell may contain one direct control. When multiple controls are needed in one cell, place a Container or nested Grid in that cell and put the controls inside it.",
+    "responsiveColumns": "PC/laptop columns should be 2 or 3, tablet columns must not exceed PC/laptop columns, and mobile columns should be 1.",
+    "placement": "When used inside approval-form-layouts-v1.1, approval form field-grid wrappers must be placed only inside content_card_wrapper > section_content_area."
+  }
+}

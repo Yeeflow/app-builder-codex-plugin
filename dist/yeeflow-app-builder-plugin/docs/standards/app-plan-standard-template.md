@@ -204,6 +204,24 @@ Approval form layout rules:
 - Approval form pages must not select Data Analytics templates, chart templates, pivot table templates, Summary/KPI analytics, or `kpi_metrics_wrapper`.
 - Task form field controls should be readonly unless this table or the Task Form Fields table states a business reason for assignee-editable fields.
 
+#### Approval Form Fields Layout Template Selection
+
+Required for every generated Approval form submission or task page that displays Approval form fields.
+
+| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Approval form> | <Submission or task form> | <Field group> | approval_form_fields_grid_2col_v1_1 or approval_form_fields_grid_3col_v1_1 | Submission fields or task fields | 2 or 3 | <= PC/laptop | 1 | Multiple line / Rich text / Sub list fields | <None or grouping rule> | Generated-final validation |
+
+Approval form field-layout rules:
+
+- Select `approval_form_fields_grid_2col_v1_1` or `approval_form_fields_grid_3col_v1_1` from `docs/reference/approval-form-field-layout-templates.json` for every generated field group on an Approval form submission or task page.
+- Field-grid template selection is required in addition to the page-level Approval Form Layout Template Selection table.
+- When the form page uses Approval Form Layouts v1.1, place the selected field-grid wrapper only inside `content_card_wrapper > section_content_area`.
+- Every generated Approval form field control inside the selected field-grid wrapper must explicitly set margin to zero and must use a business-specific `nv_label` or `nav_label`.
+- Multiple line, Rich text, and Sub list controls must span the full parent Grid width on every responsive breakpoint.
+- Tablet columns must not exceed PC/laptop columns; mobile columns must be one.
+- App Plan selection is a business/layout decision only. It must not include generated `ListID`, `FormID`, `ProcModelID`, `FlowKey`, field runtime IDs, JSON property paths, placeholder IDs, copied control JSON, or runtime payload fields.
+
 #### Form Actions and Temp Variables
 
 | Action Name | Host Form | Trigger Location | Trigger Type | Temp Variables | Steps | Data Read | Data Write | Bound Controls | Notes |

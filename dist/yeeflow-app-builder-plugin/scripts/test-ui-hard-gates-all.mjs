@@ -79,6 +79,16 @@ const childTests = [
     ],
   },
   {
+    name: "Approval Form Fields Grid v1.1 golden-reference regression suite",
+    command: ["scripts/test-approval-form-fields-template-gates.mjs"],
+    validators: [
+      "validate-approval-form-fields-template",
+      "form_grid_fields_2col_wrapper and form_grid_fields_3col_wrapper field layout templates",
+      "responsive Grid columns and column-span safety",
+      "field-control zero-margin and content_card_wrapper section_content_area placement",
+    ],
+  },
+  {
     name: "Full-app generation entrypoint contract regression suite",
     command: ["scripts/test-full-app-generation-entrypoint-gates.mjs"],
     validators: [

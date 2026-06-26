@@ -368,6 +368,19 @@ Assignment task update: `Test ABC.yap` proves `MultiAssignmentTask.properties.us
 
 Use the Visitor Access Management v11 baseline as the current generated proof for richer approval form fields.
 
+## Approval Form Field Layout Templates
+
+When generating Approval form submission or task fields inside Approval Form Layouts v1.1, use the approved field-grid templates from `docs/reference/approval-form-field-layout-templates.json`.
+
+Approved template IDs:
+
+- `approval_form_fields_grid_2col_v1_1`
+- `approval_form_fields_grid_3col_v1_1`
+
+The root wrappers are `form_grid_fields_2col_wrapper` and `form_grid_fields_3col_wrapper`. Clone the selected wrapper and all descendants before mapping business fields. Place the wrapper only inside `content_card_wrapper > section_content_area`. Preserve all non-column Grid properties and template styling. Every field control must set margin to zero and have a business-specific `nv_label` or `nav_label`. Multiple line, Rich text, and Sub List controls must span the full parent Grid width on every responsive breakpoint. Tablet columns must not exceed PC/laptop columns; mobile columns must be one.
+
+The App Plan must include an Approval Form Fields Layout Template Selection table for every generated field group before package generation. Run `scripts/validate-approval-form-fields-template.mjs --package <package.yapk> --plan <yeeflow-app-plan.md>` before signing readiness.
+
 Number fields:
 
 - workflow variable `type = "number"`

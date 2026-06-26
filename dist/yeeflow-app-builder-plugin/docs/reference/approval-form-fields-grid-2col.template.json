@@ -1,0 +1,370 @@
+{
+    "_ak_c": {
+        "id": "4d76990f-c2f9-404a-b3a9-aca004079be7",
+        "type": "flex_grid",
+        "label": "Section 1   General Information",
+        "displayLabel": [
+            null,
+            false
+        ],
+        "attrs": {
+            "ver": 1,
+            "canFold": true,
+            "columns": {
+                "1": {
+                    "list": [
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        },
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        }
+                    ],
+                    "last": {
+                        "value": 1,
+                        "unit": "fr"
+                    }
+                },
+                "3": {
+                    "list": [
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        }
+                    ],
+                    "last": {
+                        "value": 1,
+                        "unit": "fr"
+                    }
+                }
+            },
+            "rows": {
+                "1": {
+                    "list": [
+                        {
+                            "unit": "auto"
+                        }
+                    ],
+                    "last": {
+                        "unit": "auto"
+                    }
+                }
+            },
+            "cgap": {
+                "1": 24
+            },
+            "cgapU": {
+                "1": "px"
+            },
+            "rgap": [
+                null,
+                12
+            ],
+            "rgapU": [
+                null,
+                "px"
+            ]
+        },
+        "children": [
+            {
+                "id": "dc1bc65e-2d34-41ae-89af-aa240d2b13f7",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            0
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "127c33fd-a827-4464-a537-50ea5a8ed610",
+                        "type": "input",
+                        "label": "Legal Business Name",
+                        "displayLabel": [
+                            null,
+                            true
+                        ],
+                        "attrs": {
+                            "placeholder": "e.g., Global Supplies Inc.",
+                            "required": true,
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            }
+                        },
+                        "binding": "business_LegalName",
+                        "parentCol": 1
+                    },
+                    {
+                        "id": "c6660d2c-6c87-47b5-b25b-36bda5a6589a",
+                        "type": "heading",
+                        "label": "Text",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "The official name of the supplier company.",
+                                    "variable": null
+                                },
+                                "align": [
+                                    null,
+                                    "right"
+                                ]
+                            },
+                            "heads": {
+                                "color": "rgba(7, 22, 56, 0.6)",
+                                "ty": {
+                                    "size": [
+                                        null,
+                                        10
+                                    ]
+                                }
+                            }
+                        },
+                        "parentCol": 1
+                    }
+                ],
+                "parentCol": 1
+            },
+            {
+                "id": "7eb66c95-929c-4278-9d58-23e595748cf4",
+                "type": "radio",
+                "label": "Supplier Tier",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "choices": [
+                        "Tier 1 - Direct Supplier",
+                        "Tier 2 - Secondary Supplier",
+                        "Tier 3 - Tertiary Supplier",
+                        "Not Applicable/Unknown"
+                    ],
+                    "ver": 1,
+                    "show_color": false,
+                    "displayStyle": "dropdown",
+                    "placeholder": "Select the tier that best describes the supplier's position",
+                    "color_choices": [
+                        {
+                            "value": "Tier 1 - Direct Supplier",
+                            "key": "33a99372-1972-4185-9224-d6b691f53569"
+                        },
+                        {
+                            "value": "Tier 2 - Secondary Supplier",
+                            "key": "90f63aee-a8a1-4eac-a365-329e0330b66c"
+                        },
+                        {
+                            "value": "Tier 3 - Tertiary Supplier",
+                            "key": "f79029ac-a532-4d46-97c5-42ce0543c4c0"
+                        },
+                        {
+                            "value": "Not Applicable/Unknown",
+                            "key": "b7c1baf0-40f3-42fb-a827-1ea21bd7e2e9"
+                        }
+                    ],
+                    "required": true,
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    }
+                },
+                "binding": "supplier_tier",
+                "parentCol": 1
+            },
+            {
+                "id": "de3a463c-0dbe-4f99-b03f-729fec5a26de",
+                "type": "container",
+                "label": "Container",
+                "displayLabel": true,
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            0
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "092c6021-4b23-4aa8-a8ee-2c7ea9d676aa",
+                        "type": "input",
+                        "label": "Business Street Address",
+                        "displayLabel": [
+                            null,
+                            true
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "placeholder": "e.g., 1234 Supply Chain Blvd.",
+                            "required": true
+                        },
+                        "binding": "business_StreetAddress",
+                        "parentCol": 1
+                    }
+                ],
+                "parentCol": 1
+            },
+            {
+                "id": "d27caad5-adef-4608-90cf-0a4a8e1af6a7",
+                "type": "input",
+                "label": "City/State",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., Supply City, SC",
+                    "required": true
+                },
+                "binding": "business_CityState",
+                "parentCol": 1
+            },
+            {
+                "id": "9673aa84-a54c-4e88-a749-6b9c5e7bae9d",
+                "type": "input",
+                "label": "Country of the Supplier",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., Supply City, SC",
+                    "required": true
+                },
+                "binding": "business_Country",
+                "parentCol": 1
+            },
+            {
+                "id": "fabf64a5-cedb-496a-a3b5-beb679a278f9",
+                "type": "input",
+                "label": "Zip/Postal Code",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., 12345",
+                    "required": true
+                },
+                "binding": "business_ZipCode",
+                "parentCol": 1
+            },
+            {
+                "id": "65b2dd3e-401c-43a4-8cd3-1aac37fecfcf",
+                "type": "input",
+                "label": "Phone Number",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., (555) 123-4567"
+                },
+                "binding": "business_PhoneNumber",
+                "parentCol": 1
+            },
+            {
+                "id": "b4b48457-21f9-4039-bd75-d25d367e55ba",
+                "type": "input",
+                "label": "Fax Number",
+                "displayLabel": [
+                    null,
+                    true
+                ],
+                "attrs": {
+                    "common": {
+                        "margin": [
+                            null,
+                            {
+                                "top": "--sp--s0",
+                                "right": "--sp--s0",
+                                "bottom": "--sp--s0",
+                                "left": "--sp--s0"
+                            }
+                        ]
+                    },
+                    "placeholder": "e.g., (555) 765-4321 (optional)"
+                },
+                "binding": "business_FaxNumber",
+                "parentCol": 1
+            }
+        ],
+        "nv_label": "form_grid_fields_2col_wrapper"
+    },
+    "_ak_c_opt": {}
+}
