@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.58
+
+- Release Data List custom form default-layout hard gates from PR #254.
+- Require every generated business Data List and Document Library to plan and assign custom New/Edit/View custom forms instead of Yeeflow default layouts.
+- Block missing, `default`, unresolved, cross-list, or Type 0 form routing before signing readiness.
+- Require App Plan Section 10 to cover every Section 4 business list/library with `data_list_form_layout_new_edit_v1_1` and `data_list_form_layout_view_item_v1_1` selections unless an explicit system/support-list exemption is declared.
+- Align full-app materialization, generated data-list schema validation, and default YAPK package validation with export-resolved same-list Type 1 custom form routing.
+
 ## 0.8.57
 
 - Release Dashboard Collection search-template retirement and analytics identity hardening from PR #252.
