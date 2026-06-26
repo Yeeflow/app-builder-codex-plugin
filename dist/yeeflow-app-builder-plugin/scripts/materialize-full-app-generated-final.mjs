@@ -1227,6 +1227,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const key = stringId(ids[`decoded.Forms[${index}].Key`]);
     const defId = stringId(ids[`decoded.Forms[${index}].DefResourceID`]);
     const approvalFieldSpecs = approvalFieldSpecsForForm(planDemand, name);
+    const pageIds = approvalWorkflowIds(defId, key);
     return {
       Category: "",
       Name: name,
@@ -1238,12 +1239,12 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       Description: "",
       Ext: "",
       DefResourceID: defId,
-      DefResource: exportResource(buildApprovalDefResource({ name, formKey: key, defId, approvalFieldSpecs })),
+      DefResource: exportResource(buildApprovalDefResource({ name, formKey: key, defId, rootListSetId: rootListId, approvalFieldSpecs })),
       Status: 1,
       DeployedDefID: defId,
       WorkflowType: 2,
       Settings: JSON.stringify({
-        taskurl: `${defId}_task`,
+        taskurl: pageIds.taskPageId,
         actions: [
           { name: "Submit", type: "form_action" },
           { name: "Approve", type: "form_action" },
@@ -2673,15 +2674,41 @@ function exportResource(resource) {
   return Buffer.concat([prefix, compressed]).toString("base64");
 }
 
-function buildApprovalDefResource({ name, formKey, defId, approvalFieldSpecs = {} }) {
-  const submissionPageId = `${defId}_submission`;
-  const taskPageId = `${defId}_task`;
-  const startId = `${defId}_start`;
-  const flowId = `${defId}_flow_start_task`;
-  const taskId = `${defId}_task_node`;
-  const approvedFlowId = `${defId}_flow_approved`;
-  const rejectedFlowId = `${defId}_flow_rejected`;
-  const endId = `${defId}_end`;
+function workflowUserLineManagerExpression(variableId, label) {
+  return `<input type="button" data="\${ &quot;type&quot;:&quot;user&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;\${\\&quot;type\\&quot;:\\&quot;variable\\&quot;, \\&quot;param\\&quot;:{\\&quot;id\\&quot;:\\&quot;${variableId}\\&quot;}}&quot;},&quot;prop&quot;:&quot;LineManager&quot;}" expr="__" tabindex="-1" value="Workflow Variables:${label}:Line Manager">`;
+}
+
+function approvalWorkflowIds(defId, formKey) {
+  const seed = `${defId}:${formKey}`;
+  return {
+    submissionPageId: deterministicUuid(`${seed}:submission-page`),
+    taskPageId: deterministicUuid(`${seed}:task-page`),
+    startId: deterministicUuid(`${seed}:start`),
+    flowId: deterministicUuid(`${seed}:flow-start-task`),
+    taskId: deterministicUuid(`${seed}:assignment-task`),
+    approvedFlowId: deterministicUuid(`${seed}:flow-approved`),
+    rejectedFlowId: deterministicUuid(`${seed}:flow-rejected`),
+    endId: deterministicUuid(`${seed}:end-approved`),
+    rejectEndId: deterministicUuid(`${seed}:end-rejected`),
+  };
+}
+
+function flowRef(resourceid) {
+  return { id: resourceid, resourceid };
+}
+
+function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {} }) {
+  const {
+    submissionPageId,
+    taskPageId,
+    startId,
+    flowId,
+    taskId,
+    approvedFlowId,
+    rejectedFlowId,
+    endId,
+    rejectEndId,
+  } = approvalWorkflowIds(defId, formKey);
   return {
     id: defId,
     key: formKey,
@@ -2689,41 +2716,167 @@ function buildApprovalDefResource({ name, formKey, defId, approvalFieldSpecs = {
     name,
     title: name,
     workflowType: 2,
-    AppListSetID: "generated-final-app-listset",
+    AppListSetID: stringId(rootListSetId),
     ProcModelAppID: 41,
-    ProcModelListID: defId,
-    ProcModelListSetID: formKey,
+    ProcModelListID: "0",
+    ProcModelListSetID: stringId(rootListSetId),
+    ext: {},
+    lineType: "orthogonal",
+    iconURL: "",
+    flowPage: [],
     variables: buildApprovalVariables(approvalFieldSpecs),
-    graphposition: { x: 0, y: 0 },
+    graphposition: { x: 0, y: 0, width: 960, height: 420 },
     graphzoom: 1,
-    graphver: "1.0",
+    graphver: 1,
     pageurls: [
-      { id: submissionPageId, pageUrl: submissionPageId, url: submissionPageId, type: 1, title: "Submission form", formdef: approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || []) },
-      { id: taskPageId, pageUrl: taskPageId, url: taskPageId, type: 2, title: "Task form", formdef: approvalFormDef(taskPageId, name, "task", approvalFieldSpecs.task || approvalFieldSpecs.submission || []) },
+      {
+        id: submissionPageId,
+        key: submissionPageId,
+        pageUrl: submissionPageId,
+        pageurl: submissionPageId,
+        PageUrl: submissionPageId,
+        url: submissionPageId,
+        type: 1,
+        pagetype: 1,
+        name: "Submission form",
+        title: "Submission form",
+        formdef: approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || []),
+      },
+      {
+        id: taskPageId,
+        key: taskPageId,
+        pageUrl: taskPageId,
+        pageurl: taskPageId,
+        PageUrl: taskPageId,
+        url: taskPageId,
+        type: 2,
+        pagetype: 1,
+        name: "Task form",
+        title: "Task form",
+        formdef: approvalFormDef(taskPageId, name, "task", approvalFieldSpecs.task || approvalFieldSpecs.submission || []),
+      },
     ],
     childshapes: [
-      { id: startId, resourceid: startId, stencil: { id: "StartNoneEvent" }, incoming: [], outgoing: [{ resourceid: flowId }], properties: { name: "Start" }, bounds: { upperLeft: { x: 100, y: 100 }, lowerRight: { x: 130, y: 130 } } },
-      { id: flowId, resourceid: flowId, stencil: { id: "SequenceFlow" }, source: { resourceid: startId }, target: { resourceid: taskId }, incoming: [{ resourceid: startId }], outgoing: [{ resourceid: taskId }], properties: { name: "Submit" }, dockers: [{ x: 130, y: 115 }, { x: 220, y: 115 }] },
-      { id: taskId, resourceid: taskId, stencil: { id: "MultiAssignmentTask" }, incoming: [{ resourceid: flowId }], outgoing: [{ resourceid: approvedFlowId }, { resourceid: rejectedFlowId }], properties: { name: "Review", taskurl: taskPageId, usertaskassignment: { mode: "initiator-manager", users: [] } }, bounds: { upperLeft: { x: 220, y: 80 }, lowerRight: { x: 340, y: 150 } } },
-      { id: approvedFlowId, resourceid: approvedFlowId, stencil: { id: "SequenceFlow" }, source: { resourceid: taskId }, target: { resourceid: endId }, incoming: [{ resourceid: taskId }], outgoing: [{ resourceid: endId }], properties: { name: "Approved", conditioninfo: "approved" }, dockers: [{ x: 340, y: 105 }, { x: 440, y: 105 }] },
-      { id: rejectedFlowId, resourceid: rejectedFlowId, stencil: { id: "SequenceFlow" }, source: { resourceid: taskId }, target: { resourceid: endId }, incoming: [{ resourceid: taskId }], outgoing: [{ resourceid: endId }], properties: { name: "Rejected", conditioninfo: "rejected" }, dockers: [{ x: 340, y: 135 }, { x: 440, y: 135 }] },
-      { id: endId, resourceid: endId, stencil: { id: "EndNoneEvent" }, incoming: [{ resourceid: approvedFlowId }, { resourceid: rejectedFlowId }], outgoing: [], properties: { name: "End" }, bounds: { upperLeft: { x: 440, y: 100 }, lowerRight: { x: 470, y: 130 } } },
+      {
+        id: startId,
+        resourceid: startId,
+        stencil: { id: "StartNoneEvent" },
+        position: { x: 100, y: 150 },
+        incoming: [],
+        outgoing: [flowRef(flowId)],
+        properties: { name: "Start", taskurl: submissionPageId, taskUrl: submissionPageId, TaskUrl: submissionPageId },
+      },
+      {
+        id: flowId,
+        resourceid: flowId,
+        stencil: { id: "SequenceFlow" },
+        source: flowRef(startId),
+        target: flowRef(taskId),
+        incoming: [flowRef(startId)],
+        outgoing: [flowRef(taskId)],
+        properties: { name: "Submit" },
+        dockers: [{ x: 130, y: 165 }, { x: 360, y: 145 }],
+      },
+      {
+        id: taskId,
+        resourceid: taskId,
+        stencil: { id: "MultiAssignmentTask" },
+        position: { x: 360, y: 110 },
+        incoming: [flowRef(flowId)],
+        outgoing: [flowRef(approvedFlowId), flowRef(rejectedFlowId)],
+        properties: {
+          name: "Review",
+          pagetype: 1,
+          taskurl: taskPageId,
+          taskUrl: taskPageId,
+          TaskUrl: taskPageId,
+          approveway: "anyapprove",
+          approvepercentage: 100,
+          usertaskassignment: [
+            {
+              type: "user",
+              method: "expression",
+              title: `User:${workflowUserLineManagerExpression("Applicant", "Applicant")}`,
+              value: workflowUserLineManagerExpression("Applicant", "Applicant"),
+            },
+          ],
+        },
+      },
+      {
+        id: approvedFlowId,
+        resourceid: approvedFlowId,
+        stencil: { id: "SequenceFlow" },
+        source: flowRef(taskId),
+        target: flowRef(endId),
+        incoming: [flowRef(taskId)],
+        outgoing: [flowRef(endId)],
+        properties: { name: "Approved", conditioninfo: [{ label: "Task outcome:Approved", value: "Approved" }] },
+        dockers: [{ x: 480, y: 130 }, { x: 700, y: 100 }],
+      },
+      {
+        id: rejectedFlowId,
+        resourceid: rejectedFlowId,
+        stencil: { id: "SequenceFlow" },
+        source: flowRef(taskId),
+        target: flowRef(rejectEndId),
+        incoming: [flowRef(taskId)],
+        outgoing: [flowRef(rejectEndId)],
+        properties: { name: "Rejected", conditioninfo: [{ label: "Task outcome:Rejected", value: "Rejected" }] },
+        dockers: [{ x: 480, y: 170 }, { x: 700, y: 240 }],
+      },
+      {
+        id: endId,
+        resourceid: endId,
+        stencil: { id: "EndNoneEvent" },
+        position: { x: 700, y: 80 },
+        incoming: [flowRef(approvedFlowId)],
+        outgoing: [],
+        properties: { name: "End" },
+      },
+      {
+        id: rejectEndId,
+        resourceid: rejectEndId,
+        stencil: { id: "EndRejectEvent" },
+        position: { x: 700, y: 220 },
+        incoming: [flowRef(rejectedFlowId)],
+        outgoing: [],
+        properties: { name: "Rejected" },
+      },
     ],
   };
 }
 
 function buildApprovalVariables(approvalFieldSpecs = {}) {
   const fields = uniqueApprovalFieldSpecs([...(approvalFieldSpecs.submission || []), ...(approvalFieldSpecs.task || [])]);
-  const variables = [{ name: "requestTitle", type: "text", source: "Title" }];
+  const basic = [
+    { id: "Applicant", idx: "Applicant", name: "Applicant", title: "Applicant", type: "user", source: "Applicant" },
+    { id: "requestTitle", idx: "requestTitle", name: "requestTitle", title: "Request Title", type: "text", source: "Title" },
+  ];
   for (const field of fields) {
-    variables.push({
-      name: field.fieldName,
+    const id = String(field.fieldName || slugify(field.displayName));
+    basic.push({
+      id,
+      idx: id,
+      name: id,
+      title: field.displayName,
       label: field.displayName,
       type: approvalVariableType(field),
       source: field.fieldName,
     });
   }
-  return variables;
+  return { basic: uniqueVariablesById(basic), listref: [], filter: [], tempVars: [] };
+}
+
+function uniqueVariablesById(variables) {
+  const seen = new Set();
+  const out = [];
+  for (const variable of variables) {
+    const key = String(variable?.id || "");
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(variable);
+  }
+  return out;
 }
 
 function approvalFormDef(id, title, role, fields = []) {
@@ -2747,6 +2900,7 @@ function approvalFormDef(id, title, role, fields = []) {
   removeUnusedApprovalTemplateSections(resource);
   scrubApprovalSourceDomainResidue(resource, title);
   instantiateDashboardControlUuids(resource, `${slugify(title)}-${role}-approval-form`);
+  resource.id = id;
   return resource;
 }
 

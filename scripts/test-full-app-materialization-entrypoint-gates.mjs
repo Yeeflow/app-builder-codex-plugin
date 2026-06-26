@@ -19,6 +19,7 @@ const DATA_LIST_SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-data-list-s
 const BIT_FIELD_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-bit-field-controls.mjs");
 const EXPORT_SHAPE_VALIDATOR = path.join(ROOT, "scripts/validate-generated-yapk-export-shape.mjs");
 const APPROVAL_FORM_FIELDS_VALIDATOR = path.join(ROOT, "scripts/validate-approval-form-fields-template.mjs");
+const APPROVAL_WORKFLOW_VALIDATOR = path.join(ROOT, "scripts/validate-approval-workflow-publish-readiness.mjs");
 const DASHBOARD_LAYOUT_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-page-layout-template.mjs");
 const DASHBOARD_DATASET_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
 const DATA_ANALYTICS_VALIDATOR = path.join(ROOT, "scripts/validate-data-analytics-golden-references.mjs");
@@ -352,6 +353,30 @@ try {
   assert.match(assetLoanDefText, /Asset/, "approval submission/task formdef materializes planned Asset field");
   assert.match(assetLoanDefText, /Business Purpose/, "approval submission/task formdef materializes planned Business Purpose field");
   assert.doesNotMatch(assetLoanDefText, /\b(?:Loan Status|Active Loan Pipeline)\b/, "approval formdef must not retain unrelated source-template business labels");
+  assert.equal(Array.isArray(assetLoanDef.flowPage), true, "approval workflow includes flowPage for Designer publish readiness");
+  assert.equal(Array.isArray(assetLoanDef.variables?.basic), true, "approval workflow variables.basic is an array");
+  assert.equal(Array.isArray(assetLoanDef.variables?.listref), true, "approval workflow variables.listref is an array");
+  assert.equal(Array.isArray(assetLoanDef.variables?.filter), true, "approval workflow variables.filter is an array");
+  const submissionPage = assetLoanDef.pageurls.find((page) => Number(page.type) === 1);
+  const taskPage = assetLoanDef.pageurls.find((page) => Number(page.type) === 2);
+  const startNode = assetLoanDef.childshapes.find((shape) => shape?.stencil?.id === "StartNoneEvent");
+  const taskNode = assetLoanDef.childshapes.find((shape) => shape?.stencil?.id === "MultiAssignmentTask");
+  assert.equal(startNode.properties.taskurl, submissionPage.id, "StartNoneEvent taskurl references submission page");
+  assert.equal(startNode.properties.taskUrl, submissionPage.id, "StartNoneEvent taskUrl alias mirrors submission page");
+  assert.equal(startNode.properties.TaskUrl, submissionPage.id, "StartNoneEvent TaskUrl alias mirrors submission page");
+  assert.equal(taskNode.properties.taskurl, taskPage.id, "MultiAssignmentTask taskurl references task page");
+  assert.equal(taskNode.properties.taskUrl, taskPage.id, "MultiAssignmentTask taskUrl alias mirrors task page");
+  assert.equal(taskNode.properties.TaskUrl, taskPage.id, "MultiAssignmentTask TaskUrl alias mirrors task page");
+  assert.equal(Array.isArray(taskNode.properties.usertaskassignment), true, "MultiAssignmentTask usertaskassignment is array-shaped");
+  assert.equal(Boolean(taskNode.properties.approveway), true, "MultiAssignmentTask approveway metadata is present");
+  assert.equal(taskNode.properties.approvepercentage, 100, "MultiAssignmentTask approvepercentage metadata is present");
+  const shapeById = new Map(assetLoanDef.childshapes.map((shape) => [shape.resourceid || shape.id, shape]));
+  const rejectedFlow = assetLoanDef.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow" && /Rejected/i.test(JSON.stringify(shape?.properties?.conditioninfo || [])));
+  assert.equal(shapeById.get(rejectedFlow.target.resourceid).stencil.id, "EndRejectEvent", "Rejected workflow path targets EndRejectEvent");
+  const workflowPositionKeys = assetLoanDef.childshapes
+    .filter((shape) => shape?.stencil?.id !== "SequenceFlow")
+    .map((shape) => `${shape.position?.x},${shape.position?.y}`);
+  assert.equal(new Set(workflowPositionKeys).size, workflowPositionKeys.length, "workflow node canvas positions do not collide");
   assert.equal(new Set(decodedResource.Childs.map((child) => String(child.List.ListID))).size, decodedResource.Childs.length, "data list IDs must not collapse through JavaScript number precision");
   assert.equal(new Set(decodedResource.Pages.map((page) => String(page.LayoutID))).size, decodedResource.Pages.length, "dashboard LayoutIDs must be unique");
   const officeAssets = decodedResource.Childs.find((child) => child.List.Title === "Office Assets");
@@ -437,6 +462,10 @@ try {
     APPROVAL_FORM_FIELDS_VALIDATOR,
     "--package", resourceReport.outputs.package,
     "--plan", resourcePlan,
+  ]);
+  expectPass("nontrivial generated package passes Approval workflow publish-readiness validation", [
+    APPROVAL_WORKFLOW_VALIDATOR,
+    "--package", resourceReport.outputs.package,
   ]);
   expectPass("nontrivial generated package passes Dashboard Page Layouts v1.1 validation", [
     DASHBOARD_LAYOUT_VALIDATOR,
