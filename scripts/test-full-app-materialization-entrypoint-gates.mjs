@@ -180,6 +180,33 @@ try {
     "",
     "### 5.2 Asset Return Review",
     "",
+    "##### Submission Form Fields",
+    "",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- |",
+    "| 1 | Loan Number | LoanNumber | Text | input | Generated-final validation |",
+    "| 2 | Return Condition | ReturnCondition | Choice | radio | Generated-final validation |",
+    "",
+    "##### Task Form Fields",
+    "",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Read Only | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | Loan Number | LoanNumber | Text | input | Yes | Generated-final validation |",
+    "| 2 | Return Condition | ReturnCondition | Choice | radio | Yes | Generated-final validation |",
+    "| 3 | Reviewer Decision | ReviewerDecision | Choice | radio | No | Generated-final validation |",
+    "",
+    "#### Approval Form Fields Layout Template Selection",
+    "| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Asset Return Review | Submission form | Return fields | approval_form_fields_grid_2col_v1_1 | Submission fields | 2 | 2 | 1 | None | None | Generated-final validation |",
+    "| Asset Return Review | Coordinator task form | Review fields | approval_form_fields_grid_2col_v1_1 | Task fields | 2 | 2 | 1 | None | None | Generated-final validation |",
+    "",
+    "#### Approval Form Layout Template Selection",
+    "| Approval Form | Form Page | Page Role | Selected Approval Form Layout Template | Business Sections Needed | Related Data Needed | Selection Reason | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Asset Return Review | Submission form | Submission | approval_form_layout_submission_v1_1 | Page title and return fields | Current return data only | Submission captures asset return details | Generated-final validation |",
+    "| Asset Return Review | Coordinator task form | Task | approval_form_layout_task_v1_1 | Page title, readonly return context, action/history section | Related return context | Task reviewers need consistent readonly context and workflow action area | Generated-final validation |",
+    "",
     "## 6. Form Reports Plan",
     "",
     "| Form Report Name | Related Approval Form | Purpose |",
@@ -358,6 +385,11 @@ try {
   assert.match(assetLoanDefText, /Asset/, "approval submission/task formdef materializes planned Asset field");
   assert.match(assetLoanDefText, /Business Purpose/, "approval submission/task formdef materializes planned Business Purpose field");
   assert.doesNotMatch(assetLoanDefText, /\b(?:Loan Status|Active Loan Pipeline)\b/, "approval formdef must not retain unrelated source-template business labels");
+  const assetReturnDef = decodeDefResource(decodedResource.Forms.find((form) => form.Name === "Asset Return Review").DefResource);
+  const assetReturnDefText = JSON.stringify(assetReturnDef);
+  assert.match(assetReturnDefText, /Loan Number/, "approval formdef preserves planned Loan Number visible label");
+  assert.match(assetReturnDefText, /LoanNumber/, "approval formdef preserves planned LoanNumber field binding");
+  assert.doesNotMatch(assetReturnDefText, /Request Number/, "approval source-domain cleanup must not rewrite planned Loan Number into Request Number");
   assert.equal(Array.isArray(assetLoanDef.flowPage), true, "approval workflow includes flowPage for Designer publish readiness");
   assert.equal(Array.isArray(assetLoanDef.variables?.basic), true, "approval workflow variables.basic is an array");
   assert.equal(Array.isArray(assetLoanDef.variables?.listref), true, "approval workflow variables.listref is an array");
@@ -409,7 +441,7 @@ try {
   const decodedText = JSON.stringify(decodedResource);
   assert.match(decodedText, /data_analytics_pie_chart_with_title/, "planned pie chart analytics template is materialized");
   assert.match(decodedText, /data_analytics_line_chart_with_title/, "planned line chart analytics template is materialized");
-  assert.doesNotMatch(decodedText, /\{\{(?:DetailLayoutID|ListSetID|ListID|FieldID|ListDataID)[^}]*\}\}/, "materialized generated-final package must not retain template action/reference placeholders");
+  assert.doesNotMatch(decodedText, /\{\{(?:DetailLayoutID|ListSetID|ListID|FieldID|ListDataID|LayoutID|layoutId|layout|PageID|pageId)[^}]*\}\}/, "materialized generated-final package must not retain template action/reference placeholders");
   assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
   const resourceFixtureOut = path.join(tempDir, "resource-plan-fixture");
   const resourceFixtureRun = expectPass("nontrivial fixture mode allocates enough synthetic API-shaped IDs", [

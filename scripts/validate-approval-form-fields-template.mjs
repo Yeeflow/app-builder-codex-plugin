@@ -365,13 +365,9 @@ function collectMaterializedFieldNames(resource) {
       node.title,
       node.DisplayName,
       node.displayName,
-      node.fieldName,
-      node.binding,
       node.attrs?.label,
       node.attrs?.title,
       node.attrs?.data?.displayName,
-      node.attrs?.data?.fieldName,
-      node.attrs?.data?.field,
     ].filter(Boolean).map(cleanCell).filter(Boolean);
     for (const candidate of candidates) {
       if (!names.some((name) => norm(name) === norm(candidate))) names.push(candidate);
