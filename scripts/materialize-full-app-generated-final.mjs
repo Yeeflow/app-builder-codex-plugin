@@ -2776,6 +2776,24 @@ function workflowUserLineManagerExpression(variableId, label) {
   return `<input type="button" data="\${ &quot;type&quot;:&quot;user&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;\${\\&quot;type\\&quot;:\\&quot;variable\\&quot;, \\&quot;param\\&quot;:{\\&quot;id\\&quot;:\\&quot;${variableId}\\&quot;}}&quot;},&quot;prop&quot;:&quot;LineManager&quot;}" expr="__" tabindex="-1" value="Workflow Variables:${label}:Line Manager">`;
 }
 
+function workflowTaskOutcomeExpression(taskId, taskLabel) {
+  return `<input type="button" data="\${ &quot;type&quot;:&quot;task&quot;, &quot;param&quot;:{&quot;defid&quot;:&quot;${taskId}&quot;}, &quot;prop&quot;:&quot;Outcome&quot;}" expr="__" tabindex="-1" value="${taskLabel}:Outcome">`;
+}
+
+function workflowOutcomeButton(outcome) {
+  return `<input type="button" data="${outcome}" value="Task outcome:${outcome}">`;
+}
+
+function workflowOutcomeCondition({ key, taskId, taskLabel, outcome }) {
+  return {
+    key,
+    pre: "and",
+    left: workflowTaskOutcomeExpression(taskId, taskLabel),
+    op: "s.=",
+    right: workflowOutcomeButton(outcome),
+  };
+}
+
 function approvalWorkflowIds(defId, formKey) {
   const seed = `${defId}:${formKey}`;
   return {
@@ -2807,6 +2825,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     endId,
     rejectEndId,
   } = approvalWorkflowIds(defId, formKey);
+  const taskName = "Line manager approval";
   return {
     id: defId,
     key: formKey,
@@ -2883,7 +2902,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
         incoming: [flowRef(flowId)],
         outgoing: [flowRef(approvedFlowId), flowRef(rejectedFlowId)],
         properties: {
-          name: "Review",
+          name: taskName,
           pagetype: 1,
           taskurl: taskPageId,
           taskUrl: taskPageId,
@@ -2894,8 +2913,8 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
             {
               type: "user",
               method: "expression",
-              title: `User:${workflowUserLineManagerExpression("Applicant", "Applicant")}`,
-              value: workflowUserLineManagerExpression("Applicant", "Applicant"),
+              title: `User:${workflowUserLineManagerExpression("ApplicantUserID", "Applicant")}`,
+              value: workflowUserLineManagerExpression("ApplicantUserID", "Applicant"),
             },
           ],
         },
@@ -2908,7 +2927,11 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
         target: flowRef(endId),
         incoming: [flowRef(taskId)],
         outgoing: [flowRef(endId)],
-        properties: { name: "Approved", conditioninfo: [{ label: "Task outcome:Approved", value: "Approved" }] },
+        properties: {
+          name: "Approved",
+          linetype: "rounded",
+          conditioninfo: [workflowOutcomeCondition({ key: approvedFlowId, taskId, taskLabel: taskName, outcome: "Approved" })],
+        },
         dockers: [{ x: 480, y: 130 }, { x: 700, y: 100 }],
       },
       {
@@ -2919,7 +2942,11 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
         target: flowRef(rejectEndId),
         incoming: [flowRef(taskId)],
         outgoing: [flowRef(rejectEndId)],
-        properties: { name: "Rejected", conditioninfo: [{ label: "Task outcome:Rejected", value: "Rejected" }] },
+        properties: {
+          name: "Rejected",
+          linetype: "rounded",
+          conditioninfo: [workflowOutcomeCondition({ key: rejectedFlowId, taskId, taskLabel: taskName, outcome: "Rejected" })],
+        },
         dockers: [{ x: 480, y: 170 }, { x: 700, y: 240 }],
       },
       {
@@ -2954,6 +2981,7 @@ function buildApprovalVariables(approvalFieldSpecs = {}) {
   const fields = uniqueApprovalFieldSpecs([...(approvalFieldSpecs.submission || []), ...(approvalFieldSpecs.task || [])]);
   const basic = [
     { id: "Applicant", idx: "Applicant", name: "Applicant", title: "Applicant", type: "user", source: "Applicant" },
+    { id: "ApplicantUserID", idx: "ApplicantUserID", name: "ApplicantUserID", title: "Applicant", type: "user", source: "ApplicantUserID" },
     { id: "requestTitle", idx: "requestTitle", name: "requestTitle", title: "Request Title", type: "text", source: "Title" },
   ];
   for (const field of fields) {

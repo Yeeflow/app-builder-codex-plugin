@@ -48,6 +48,18 @@ try {
   }), "APPROVAL_WORKFLOW_ASSIGNMENT_SHAPE_INVALID");
   cases.push({ case: "fail: assignment object instead of array", status: "pass" });
 
+  expectCode("legacy outcome condition shape fails", mutateResource(validDef, (def) => {
+    const approvedFlow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow" && /Approved/i.test(JSON.stringify(shape?.properties || {})));
+    approvedFlow.properties.conditioninfo = [{ label: "Task outcome:Approved", value: "Approved" }];
+  }), "APPROVAL_WORKFLOW_OUTCOME_CONDITION_LEGACY_SHAPE");
+  cases.push({ case: "fail: simplified label/value outcome condition", status: "pass" });
+
+  expectCode("outcome condition missing current task reference fails", mutateResource(validDef, (def) => {
+    const approvedFlow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow" && /Approved/i.test(JSON.stringify(shape?.properties || {})));
+    approvedFlow.properties.conditioninfo[0].left = approvedFlow.properties.conditioninfo[0].left.replace(/defid&quot;:&quot;[^&]+/, "defid&quot;:&quot;wrong-task-id");
+  }), "APPROVAL_WORKFLOW_OUTCOME_CONDITION_INVALID");
+  cases.push({ case: "fail: outcome condition does not reference current task id", status: "pass" });
+
   expectCode("rejected transition to normal end fails", mutateResource(validDef, (def) => {
     const normalEnd = def.childshapes.find((shape) => shape?.stencil?.id === "EndNoneEvent");
     const rejectedFlow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow" && /Rejected/i.test(JSON.stringify(shape?.properties?.conditioninfo || [])));
