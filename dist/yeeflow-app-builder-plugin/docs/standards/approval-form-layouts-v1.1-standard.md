@@ -130,6 +130,10 @@ Copied modules must preserve the template's structure, hierarchy, control types,
 
 Generated forms must not keep empty copied business sections. A copied `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` is valid only when its `section_content_area` contains real business content such as an approved Approval Form Field Layout wrapper, a configured Collection template, a data filter group, Dynamic controls, or an action button with real Yeeflow action configuration. A copied `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` that does not contain real business content must be removed. The locked `action_panel_flow_history_wrapper` is the exception and must remain intact.
 
+Task forms must mirror the Submission form business fields by default. Every generated Approval task form must include every field/control that appears on the Submission form so reviewers can see the submitted request context. Omit a Submission field from a specific task form only when the Functional Specification or App Plan explicitly says that field must be hidden from that task. Task forms may add extra task-only decision/input fields only when the Functional Specification or App Plan explicitly requires them.
+
+Task form field controls must be readonly by default. If a reviewer needs to edit a submitted field or enter a task-only field, the Functional Specification or App Plan must explicitly name that field and explain why it is editable for that task. Otherwise generated task form field controls must carry explicit readonly settings.
+
 ## App Plan Requirements
 
 When the app includes Approval forms, the App Plan Approval Forms Plan must select the correct Approval Form Layout template for every generated submission and task page.
@@ -147,6 +151,8 @@ Rules:
 - Task pages must select `approval_form_layout_task_v1_1`.
 - Do not include generated `ListID`, `FormID`, `ProcModelID`, `FlowKey`, `DefResourceID`, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
 - If a task page needs assignee-editable fields, the App Plan must state that business reason; otherwise task fields should be generated readonly.
+- Task pages must list all Submission form business fields as readonly review context unless a row explicitly documents a field-level omission.
+- Task pages may include additional task-only fields only when the App Plan identifies the business purpose and editability requirement for each extra field.
 - Approval form pages may use approved Collection templates and current-record field layout templates in allowed slots, but must not select Data Analytics templates.
 
 The Approval Forms Plan must also include an Approval Form Fields Layout Template Selection table for each generated field group that displays submission or task fields:

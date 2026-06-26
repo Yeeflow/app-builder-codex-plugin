@@ -39,7 +39,7 @@ export function inspectRuntimeEvidence({ evidence: evidencePath, claimHighQualit
   if (/\bStart to build with Components\b/i.test(visibleText) || /\bADD NEW COMPONENT\b/i.test(visibleText)) {
     addFinding(findings, "error", "YAPK_RUNTIME_EMPTY_COMPONENT_SHELL_BLOCKER", "Runtime proof must fail when the installed app opens to Yeeflow's empty Components builder shell instead of generated app content.");
   }
-  if (/\bInstall failed\b/i.test(visibleText) || /failed/i.test(String(evidence.appTileStatus || evidence.installTileStatus || ""))) {
+  if (runtimeTargetShowsInstallFailed(evidence, visibleText)) {
     addFinding(findings, "error", "YAPK_RUNTIME_INSTALL_FAILED_TILE", "Runtime proof must fail when the installed app tile or page reports Install failed.");
   }
 
@@ -47,6 +47,57 @@ export function inspectRuntimeEvidence({ evidence: evidencePath, claimHighQualit
     screenshot: evidence.screenshot || evidence.screenshotPath ? path.basename(evidence.screenshot || evidence.screenshotPath) : "redacted",
     runtimeScreenshotCaptured: evidence.runtimeScreenshotCaptured === true,
   });
+}
+
+function runtimeTargetShowsInstallFailed(evidence, visibleText) {
+  const targetTitle = normalizeTitle(evidence.targetAppTitle || evidence.expectedAppTitle || evidence.appTitle || evidence.packageTitle || evidence.title);
+  const tileEntries = collectAppTiles(evidence);
+  if (targetTitle && tileEntries.length) {
+    const matchingTiles = tileEntries.filter((tile) => tileMatchesTarget(tile, targetTitle));
+    if (matchingTiles.length) {
+      return matchingTiles.some((tile) => /install failed|failed/i.test(tileText(tile)));
+    }
+  }
+  return /\bInstall failed\b/i.test(visibleText) || /failed/i.test(String(evidence.appTileStatus || evidence.installTileStatus || ""));
+}
+
+function collectAppTiles(evidence) {
+  const tiles = [];
+  for (const key of ["appTiles", "tiles", "applicationTiles", "workspaceTiles"]) {
+    if (Array.isArray(evidence[key])) tiles.push(...evidence[key]);
+  }
+  if (evidence.appTile && typeof evidence.appTile === "object") tiles.push(evidence.appTile);
+  if (evidence.installTile && typeof evidence.installTile === "object") tiles.push(evidence.installTile);
+  return tiles.filter((tile) => tile && typeof tile === "object");
+}
+
+function tileMatchesTarget(tile, normalizedTargetTitle) {
+  return [
+    tile.title,
+    tile.name,
+    tile.appName,
+    tile.label,
+    tile.text,
+    tile.visibleText,
+    tile.ariaLabel,
+  ].some((value) => normalizeTitle(value) === normalizedTargetTitle);
+}
+
+function tileText(tile) {
+  return [
+    tile.title,
+    tile.name,
+    tile.status,
+    tile.appTileStatus,
+    tile.installTileStatus,
+    tile.text,
+    tile.visibleText,
+    tile.bodyText,
+  ].filter((value) => value !== undefined && value !== null).map(String).join("\n");
+}
+
+function normalizeTitle(value) {
+  return String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
 }
 
 function collectVisibleRuntimeText(evidence) {

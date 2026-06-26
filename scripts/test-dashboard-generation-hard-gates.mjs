@@ -314,7 +314,14 @@ function findBusinessSectionContentArea(root) {
 }
 
 function pruneEmptyContentCardWrappers(root) {
-  const removable = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+  const removable = new Set([
+    "content_card_wrapper",
+    "content_card_60_wrapper",
+    "content_card_40_wrapper",
+    "2_columns_section",
+    "3_columns_section",
+    "2_columns_60/40_section",
+  ]);
   const isRemovableWrapper = (node) => ids(node).some((id) => removable.has(id));
   const hasMaterializedSectionContent = (node) => {
     const slot = find(node, "section_content_area");
@@ -323,7 +330,10 @@ function pruneEmptyContentCardWrappers(root) {
   const prune = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     for (const child of node.children) prune(child);
-    node.children = node.children.filter((child) => !isRemovableWrapper(child) || hasMaterializedSectionContent(child));
+    node.children = node.children.filter((child) => {
+      if (ids(child).includes("section_content_area") && (!Array.isArray(child.children) || child.children.length === 0)) return false;
+      return !isRemovableWrapper(child) || hasMaterializedSectionContent(child);
+    });
   };
   prune(root);
 }

@@ -104,6 +104,12 @@ function validateRegistry(registry, template, findings) {
       findings.push(error("DASH_LAYOUT_TEMPLATE_SECTION_TYPE_MISSING", "Dashboard Page Layouts v1.1 registry must document every standard section type.", { sectionType }));
     }
   }
+  const cleanup = template.generatedCleanupRules || {};
+  for (const key of ["unusedCopiedModulesMustBeRemoved", "operationsWithoutConfiguredActionsMustBeRemoved", "emptySectionContentAreaForbidden", "titleOnlyCopiedSectionsForbidden", "emptyKpiMetricsWrapperForbidden", "kpiCardsMustMatchPlannedMetrics", "repeatableModulesMayBeReordered"]) {
+    if (cleanup[key] !== true) {
+      findings.push(error("DASH_LAYOUT_TEMPLATE_CLEANUP_RULE_MISSING", "Dashboard Page Layouts v1.1 registry must document generated cleanup hard rules.", { rule: key }));
+    }
+  }
 }
 
 function validatePackage(packagePath, template, findings) {
@@ -189,6 +195,7 @@ function validatePageShell(resource, findings, context) {
     }
   }
   if (!context.allowTemplateOperations) validateOperations(resource, findings, context.page);
+  if (!context.allowTemplateOperations) validateGeneratedSectionCleanup(resource, findings, context.page);
   validateControlledSlotsAndRepeatableModules(resource, findings, context);
 }
 
@@ -204,6 +211,71 @@ function validateOperations(resource, findings, page) {
       findings.push(error("DASH_LAYOUT_VISUAL_ACTION_WITHOUT_BINDING", "Visual button/action-looking controls must include valid Yeeflow action configuration.", { page, control: firstIdentity(visualOnly) || null }));
     }
   }
+}
+
+function validateGeneratedSectionCleanup(resource, findings, page) {
+  const plannedKpiCount = plannedDashboardKpiCount(resource);
+  for (const entry of flattenControls(resource)) {
+    const control = entry.control;
+    if (hasIdentity(control, "section_content_area") && !hasMeaningfulDashboardContent(control)) {
+      findings.push(error("DASH_LAYOUT_EMPTY_SECTION_CONTENT_AREA", "Generated Dashboard v1.1 must not keep an empty section_content_area anywhere in the page; remove the empty slot or its owning copied section.", { page, pointer: entry.pointer, control: firstIdentity(control) || null }));
+    }
+    if (hasAnyIdentity(control, ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"])) {
+      const slot = findFirstByIdentity(control, "section_content_area");
+      if (slot && !hasMeaningfulDashboardContent(slot)) {
+        findings.push(error("DASH_LAYOUT_EMPTY_SECTION_CONTENT_AREA", "Generated Dashboard v1.1 sections must not keep an empty section_content_area; remove the unused section module instead of leaving a title-only card.", { page, pointer: entry.pointer, control: firstIdentity(control) || null }));
+      }
+    }
+    if (hasAnyIdentity(control, ["2_columns_section", "3_columns_section", "2_columns_60/40_section"]) && !hasMeaningfulDashboardContent(control)) {
+      findings.push(error("DASH_LAYOUT_UNUSED_SECTION_MODULE", "Generated Dashboard v1.1 repeatable section modules must be removed when they contain no real business content.", { page, pointer: entry.pointer, control: firstIdentity(control) || null }));
+    }
+    if (hasIdentity(control, "kpi_metrics_wrapper")) {
+      const kpiCards = collectDashboardKpiCards(control);
+      if (!hasMeaningfulDashboardContent(control)) {
+        findings.push(error("DASH_LAYOUT_EMPTY_KPI_METRICS_WRAPPER", "Generated Dashboard v1.1 must remove kpi_metrics_wrapper when no KPI cards are planned or materialized.", { page, pointer: entry.pointer, control: firstIdentity(control) || null }));
+      }
+      if (plannedKpiCount === 0 && kpiCards.length > 0) {
+        findings.push(error("DASH_LAYOUT_UNPLANNED_KPI_CARD_PRESENT", "Generated Dashboard must not include Event Portfolio KPI cards unless Functional Spec/App Plan planned KPI metrics for this page.", { page, pointer: entry.pointer, plannedKpiCount, actualKpiCards: kpiCards.length }));
+      } else if (Number.isInteger(plannedKpiCount) && plannedKpiCount > 0 && kpiCards.length !== plannedKpiCount) {
+        findings.push(error("DASH_LAYOUT_KPI_CARD_COUNT_MISMATCH", "Generated Dashboard KPI card count must match the planned KPI/Summary Metrics count; do not keep unused source-template KPI cards.", { page, pointer: entry.pointer, plannedKpiCount, actualKpiCards: kpiCards.length }));
+      }
+    }
+  }
+}
+
+function plannedDashboardKpiCount(resource) {
+  const candidates = [
+    resource?.generatedFinalDashboardMaterialization?.kpiCount,
+    resource?.plannedControls?.kpiCount,
+    resource?.plannedKpiCount,
+  ];
+  for (const value of candidates) {
+    if (Number.isInteger(value) && value >= 0) return value;
+    if (typeof value === "string" && /^\d+$/.test(value)) return Number(value);
+  }
+  if (resource?.generatedFinalDashboardMaterialization && resource?.plannedControls?.kpis === false) return 0;
+  return null;
+}
+
+function collectDashboardKpiCards(root) {
+  return flattenControls(root)
+    .map((entry) => entry.control)
+    .filter((control) => hasAnyIdentity(control, ["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"]));
+}
+
+function hasMeaningfulDashboardContent(node) {
+  if (!isObject(node)) return false;
+  return flattenControls(node).some((entry) => {
+    const control = entry.control;
+    if (control === node) return false;
+    if (isBusinessContentControl(control)) return true;
+    const type = String(control?.type || "").toLowerCase();
+    if (["pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file", "search-filter"].includes(type)) return true;
+    if (control?.attrs?.dataAnalyticsTemplateId || control?.dataAnalyticsTemplateId) return true;
+    if (control?.attrs?.dashboardDatasetTemplateId || control?.dashboardDatasetTemplateId) return true;
+    if (hasAnyIdentity(control, ["kpi_cards_kpi_row", "event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"])) return true;
+    return false;
+  });
 }
 
 function validateControlledSlotsAndRepeatableModules(resource, findings, context) {

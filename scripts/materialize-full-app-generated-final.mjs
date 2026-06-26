@@ -287,6 +287,7 @@ function analyzeAppPlanResourceDemand(planText) {
     customFormRecords: collectCustomFormRecords(planText),
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     dashboardFilterRecords: collectDashboardFilterRecords(planText),
+    dashboardSummaryMetricRecords: collectDashboardSummaryMetricRecords(planText),
     dashboardDatasetRecords: collectDashboardDatasetRecords(planText),
     dashboardAnalyticsRecords: collectDashboardAnalyticsRecords(planText),
     evidence,
@@ -561,6 +562,46 @@ function collectDashboardFilterRecords(planText) {
         filterName,
         sourceResource: sourceColumn === -1 ? "" : cleanResourceName(cells[sourceColumn]),
         fieldDisplayName: cleanResourceName(cells[fieldColumn]),
+      });
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return records;
+}
+
+function collectDashboardSummaryMetricRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
+  const records = [];
+  if (!section.trim()) return records;
+  const lines = section.split(/\r?\n/);
+  let currentDashboardPage = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const metricColumn = findHeaderIndex(normalizedHeaders, ["metric name", "kpi name", "summary metric", "summary metric name"]);
+    if (metricColumn === -1) continue;
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name"]);
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source data list", "source resource", "data source", "source"]);
+    const fieldColumn = findHeaderIndex(normalizedHeaders, ["source field(s)", "source fields", "source field", "field"]);
+    const logicColumn = findHeaderIndex(normalizedHeaders, ["calculation logic", "logic", "aggregation"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const metricName = cleanResourceName(cells[metricColumn]);
+      if (!metricName || isNonResourceName(metricName) || /not applicable|n\/a|none/i.test(metricName)) {
+        rowIndex += 1;
+        continue;
+      }
+      records.push({
+        dashboardPage: cleanResourceName(cells[pageColumn]) || currentDashboardPage,
+        metricName,
+        sourceResource: sourceColumn === -1 ? "" : cleanResourceName(cells[sourceColumn]),
+        sourceFields: fieldColumn === -1 ? "" : cleanResourceName(cells[fieldColumn]),
+        calculationLogic: logicColumn === -1 ? "" : cleanResourceName(cells[logicColumn]),
       });
       rowIndex += 1;
     }
@@ -897,6 +938,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   if (slot) {
     slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
+  removeEmptyBusinessSections(resource);
   return resource;
 }
 
@@ -1277,6 +1319,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const firstListId = firstListMeta.listId || dataListByName.get(normKey(firstListName)) || dataListByName.values().next().value || rootListId;
     const dashboardFilters = selectDashboardFiltersForPage({ planDemand, pageName: name, datasetRecord, fallbackListName: firstListName });
     const dashboardAnalytics = selectDashboardAnalyticsForPage({ planDemand, pageName: name, pageIndex: index });
+    const dashboardSummaryMetrics = selectDashboardSummaryMetricsForPage({ planDemand, pageName: name, pageIndex: index });
     return {
       ListID: rootListId,
       LayoutID: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
@@ -1301,6 +1344,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
             datasetRecord,
             dashboardFilters,
             dashboardAnalytics,
+            dashboardSummaryMetrics,
             summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
             filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
             collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
@@ -1348,9 +1392,17 @@ function selectDashboardAnalyticsForPage({ planDemand, pageName, pageIndex }) {
   return records.filter((record) => !record.dashboardPage).filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
 }
 
-function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecord, dashboardFilters, dashboardAnalytics, summaryId, filterId, collectionId }) {
+function selectDashboardSummaryMetricsForPage({ planDemand, pageName, pageIndex }) {
+  const records = planDemand.dashboardSummaryMetricRecords || [];
+  if (!records.length) return [];
+  const pageMatches = records.filter((record) => dashboardNameMatches(pageName, record.dashboardPage));
+  if (pageMatches.length) return pageMatches;
+  return records.filter((record) => !record.dashboardPage).filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
+}
+
+function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecord, dashboardFilters, dashboardAnalytics, dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
-  const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar });
+  const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar, plannedMetrics: dashboardSummaryMetrics });
   const resource = buildDashboardV11Shell({ name, layoutId });
   const sourceResource = datasetRecord?.sourceResource || listName;
   const selectedTemplateId = datasetRecord?.selectedTemplateId || "collection_control_grid_table";
@@ -1389,6 +1441,7 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
     dashboardName: name,
     rootListSetId,
   });
+  materializeDashboardKpiCards(resource, kpiContracts);
   const summaries = kpiContracts.map((contract) => buildSummaryControl({
     summaryId: contract.summaryId,
     tempVar: contract.tempVar,
@@ -1396,9 +1449,11 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
     listId,
     label: contract.label,
   }));
-  const summaryHostParent = contentArea || findFirstByIdentity(resource, "Content") || resource;
-  summaryHostParent.children = Array.isArray(summaryHostParent.children) ? summaryHostParent.children : [];
-  summaryHostParent.children.push(buildHiddenSummaryHost({ dashboardName: name, summaries }));
+  if (summaries.length) {
+    const summaryHostParent = contentArea || findFirstByIdentity(resource, "Content") || resource;
+    summaryHostParent.children = Array.isArray(summaryHostParent.children) ? summaryHostParent.children : [];
+    summaryHostParent.children.push(buildHiddenSummaryHost({ dashboardName: name, summaries }));
+  }
   materializeDashboardFilters(resource, {
     filters: normalizedFilters,
     listName: sourceResource,
@@ -1448,17 +1503,19 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
   resource.actions = normalizeDependencyArray(templateDependencies.actions);
   resource.formAction = normalizeDependencyArray(templateDependencies.formAction);
   resource.LayoutID = layoutId;
-  resource.plannedControls = { kpis: true, gridTable: true };
+  resource.plannedControls = { kpis: kpiContracts.length > 0, kpiCount: kpiContracts.length, gridTable: true };
   resource.generatedFinalDashboardMaterialization = {
     shellTemplate: PAGE_LAYOUT_TEMPLATE_ID,
     datasetRegion,
     selectedCollectionTemplateId: selectedTemplateId,
     selectedDataAnalyticsTemplateIds: (dashboardAnalytics || []).map((record) => record.selectedTemplateId),
     sourceResource,
+    kpiCount: kpiContracts.length,
+    kpis: kpiContracts.map((contract) => ({ key: contract.key, label: contract.label, tempVar: contract.tempVar, summaryId: contract.summaryId })),
     filters: normalizedFilters.map((filter) => ({ name: filter.filterName, fieldName: filter.fieldName })),
   };
   normalizeGeneratedDashboardControls(resource, name);
-  removeEmptyBusinessSections(resource);
+  removeEmptyDashboardBusinessSections(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
   return resource;
 }
@@ -1508,7 +1565,7 @@ function deterministicUuid(seed) {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-${variant}${hex.slice(18, 20)}-${hex.slice(20, 32)}`;
 }
 
-function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar }) {
+function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar, plannedMetrics = [] }) {
   const pageSlug = slugify(pageName).replace(/-/g, "_");
   const specs = [
     ["planned_events", "Active Records"],
@@ -1516,11 +1573,31 @@ function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar })
     ["registration_rate", "Completion Signal"],
     ["lead_follow_up", "Follow-up Queue"],
   ];
-  return specs.map(([key, label], index) => {
+  return plannedMetrics.slice(0, specs.length).map((metric, index) => {
+    const [key, fallbackLabel] = specs[index];
+    const label = metric.metricName || fallbackLabel;
     const tempVar = index === 0 ? primaryTempVar : `tmp_${pageSlug}_${key}_count`;
     const summaryId = index === 0 ? summaryIdBase : `${summaryIdBase}_${key}`;
     return { key, label, tempVar, summaryId };
   });
+}
+
+function materializeDashboardKpiCards(resource, kpiContracts = []) {
+  const wrapper = findFirstByIdentity(resource, "kpi_metrics_wrapper") || findFirstByIdentity(resource, "kpi_cards_wrapper");
+  if (!wrapper) return;
+  const cardIds = ["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"];
+  const allowedKeys = new Set(kpiContracts.map((contract) => contract.key));
+  const prune = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      prune(child);
+      const matchedCardId = cardIds.find((id) => hasIdentity(child, id));
+      if (!matchedCardId) return true;
+      const key = matchedCardId.replace("event_portfolio_kpi_", "");
+      return allowedKeys.has(key);
+    });
+  };
+  prune(wrapper);
 }
 
 function normalizeDashboardFilters({ filters, listMeta, dashboardName }) {
@@ -2380,14 +2457,27 @@ function removeOperationsWithoutActions(root) {
 }
 
 function removeEmptyBusinessSections(root) {
-  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
+  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
   const visit = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       visit(child);
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
-      const slot = findFirstByIdentity(child, "section_content_area");
-      return hasMeaningfulBusinessContent(slot);
+      return hasMeaningfulBusinessContent(child);
+    });
+  };
+  visit(root);
+}
+
+function removeEmptyDashboardBusinessSections(root) {
+  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper"]);
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
+      if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
+      return hasMeaningfulBusinessContent(child);
     });
   };
   visit(root);
@@ -2416,6 +2506,7 @@ function hasMeaningfulBusinessContent(node) {
     if (control?.approvalFormNoFieldsNotice === true) return true;
     if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(control)) return true;
+    if (["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"].some((identity) => hasIdentity(control, identity))) return true;
     if (hasIdentity(control, "form_grid_fields_wrapper")) return true;
     if (hasIdentity(control, "form_grid_fields_2col_wrapper")) return true;
     if (hasIdentity(control, "form_grid_fields_3col_wrapper")) return true;
@@ -2754,7 +2845,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
         pagetype: 1,
         name: "Task form",
         title: "Task form",
-        formdef: approvalFormDef(taskPageId, name, "task", approvalFieldSpecs.task || approvalFieldSpecs.submission || []),
+        formdef: approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs)),
       },
     ],
     childshapes: [
@@ -2845,6 +2936,12 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
       },
     ],
   };
+}
+
+function approvalTaskFieldSpecs(approvalFieldSpecs = {}) {
+  const submissionFields = Array.isArray(approvalFieldSpecs.submission) ? approvalFieldSpecs.submission : [];
+  const taskOnlyFields = Array.isArray(approvalFieldSpecs.task) ? approvalFieldSpecs.task : [];
+  return uniqueApprovalFieldSpecs([...submissionFields, ...taskOnlyFields]);
 }
 
 function buildApprovalVariables(approvalFieldSpecs = {}) {

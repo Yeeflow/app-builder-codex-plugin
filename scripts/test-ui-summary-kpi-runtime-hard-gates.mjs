@@ -137,6 +137,19 @@ function run() {
   expectFail("Hidden Summary visible in evidence fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-hidden-visible.json", runtimeEvidence({ hiddenSummaryVisible: true })), claimHighQualityUi: true }), "RUNTIME_HIDDEN_SUMMARY_VISIBLE");
   expectFail("Empty Components shell runtime proof fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-empty-components-shell.json", runtimeEvidence({ bodyText: "Start to build with Components ADD NEW COMPONENT" })), claimHighQualityUi: true }), "YAPK_RUNTIME_EMPTY_COMPONENT_SHELL_BLOCKER");
   expectFail("Install failed tile runtime proof fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-install-failed-tile.json", runtimeEvidence({ appTileStatus: "Install failed" })), claimHighQualityUi: true }), "YAPK_RUNTIME_INSTALL_FAILED_TILE");
+  expectPass("Unrelated old Install failed tile does not fail scoped target runtime proof", inspectRuntimeEvidence({ evidence: writeJson("runtime-unrelated-install-failed-tile.json", runtimeEvidence({
+    targetAppTitle: "Current Office Asset Loan",
+    visibleText: "Old Office Asset Loan Install failed\nCurrent Office Asset Loan Installed",
+    appTiles: [
+      { title: "Old Office Asset Loan", status: "Install failed" },
+      { title: "Current Office Asset Loan", status: "Installed" },
+    ],
+  })), claimHighQualityUi: true }));
+  expectFail("Target app Install failed tile still fails scoped runtime proof", inspectRuntimeEvidence({ evidence: writeJson("runtime-target-install-failed-tile.json", runtimeEvidence({
+    targetAppTitle: "Current Office Asset Loan",
+    visibleText: "Current Office Asset Loan Install failed",
+    appTiles: [{ title: "Current Office Asset Loan", status: "Install failed" }],
+  })), claimHighQualityUi: true }), "YAPK_RUNTIME_INSTALL_FAILED_TILE");
 
   expectFail("Grid-table planned but missing columns fails", inspectGridTableQuality({ package: writeJson("grid-missing-columns.json", decoded({ grid: "missing-columns" })), requireGridTable: true }), "GRID_TABLE_COLUMNS_MISSING");
   expectPass("Grid-table complete Collection passes", inspectGridTableQuality({ package: writeJson("grid-valid.json", decoded({ grid: "valid" })), requireGridTable: true }));

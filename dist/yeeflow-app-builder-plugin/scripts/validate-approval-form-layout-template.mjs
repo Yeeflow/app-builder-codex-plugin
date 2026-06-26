@@ -112,7 +112,7 @@ function validateRegistry(registry, references, findings, registryPath) {
     findings.push(error("APPROVAL_FORM_LAYOUT_LOCKED_ACTION_HISTORY_MISSING", "Registry must lock action_panel_flow_history_wrapper.", {}));
   }
   const cleanup = registry.generatedCleanupRules || {};
-  for (const key of ["unusedCopiedModulesMustBeRemoved", "operationsWithoutConfiguredActionsMustBeRemoved", "emptyContentCardSectionsMustBeRemoved", "lockedActionPanelFlowHistoryWrapperMustRemain"]) {
+  for (const key of ["unusedCopiedModulesMustBeRemoved", "operationsWithoutConfiguredActionsMustBeRemoved", "emptyContentCardSectionsMustBeRemoved", "lockedActionPanelFlowHistoryWrapperMustRemain", "taskFormsMirrorSubmissionFieldsByDefault", "taskFieldsReadonlyByDefault"]) {
     if (cleanup[key] !== true) {
       findings.push(error("APPROVAL_FORM_LAYOUT_CLEANUP_RULE_MISSING", "Registry must document generated Approval form cleanup hard rules.", { rule: key }));
     }
@@ -173,6 +173,7 @@ function validatePackage(packagePath, context) {
       });
       if (role === "task") validateTaskReadonlyGuidance(page.formdef, context.findings, `${formIndex}.${pageIndex}`);
     }
+    validateTaskSubmissionFieldParity(submissionPages, pages, context.findings, form?.Name || form?.Title || `Forms[${formIndex}]`);
   }
   for (const workflow of collectWorkflowTaskDefResources(decoded)) {
     const def = decodeDefResource(workflow.defResource);
@@ -214,7 +215,7 @@ function validateAppPlan(planPath, findings) {
     findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING", "Approval Forms Plan must include an Approval Form Layout Template Selection table when approval forms are planned."));
     return;
   }
-  const selectionBlock = section.split(/#### Form Actions and Temp Variables|#### Sub List List Actions|##\s+6\./i)[0].split(/#### Approval Form Layout Template Selection/i)[1] || "";
+  const selectionBlock = subsectionAfterHeading(section, /####\s+Approval Form Layout Template Selection/i);
   const rows = tableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row.raw));
   const selectedIds = [];
   for (const row of rows) {
@@ -236,6 +237,13 @@ function validateAppPlan(planPath, findings) {
   if (!selectedIds.length) {
     findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_TEMPLATE_SELECTION_REQUIRED", "Approval Forms Plan must select approved templates for submission and task forms.", {}));
   }
+}
+
+function subsectionAfterHeading(section, headingPattern) {
+  const match = headingPattern.exec(section);
+  if (!match) return "";
+  const after = section.slice(match.index + match[0].length);
+  return after.split(/\n####\s+/)[0] || "";
 }
 
 function validateWorkflowTaskAppPlanSelection(text, findings, sectionName, expectedSurface) {
@@ -410,12 +418,58 @@ function hasActionConfiguration(control) {
 function validateTaskReadonlyGuidance(resource, findings, source) {
   for (const entry of flatten(resource)) {
     const type = String(entry.node?.type || "");
-    if (!/^(input|textarea|rich-text|radio|checkbox|switch|date|datetime|number|input_number|lookup|people|user)$/i.test(type)) continue;
+    if (!/^(input|textarea|richtext|rich-text|radio|checkbox|switch|date|datetime|datepicker|number|input_number|currency|lookup|people|user|identity-picker|image-upload|file-upload|list)$/i.test(type)) continue;
     const readonly = firstDefined(entry.node?.attrs?.readonly, entry.node?.attrs?.readOnly, entry.node?.readonly, entry.node?.readOnly);
-    if (readonly === false) {
-      findings.push(error("APPROVAL_FORM_LAYOUT_TASK_FIELD_READONLY_REQUIRED", "Task form field controls should be readonly unless the App Plan declares assignee input is required.", { source, path: entry.pointer, type }));
+    if (readonly !== true) {
+      findings.push(error("APPROVAL_FORM_LAYOUT_TASK_FIELD_READONLY_REQUIRED", "Task form field controls must be explicitly readonly unless the App Plan declares assignee input is required.", { source, path: entry.pointer, type }));
     }
   }
+}
+
+function validateTaskSubmissionFieldParity(submissionPages, pages, findings, source) {
+  const submissionPage = submissionPages.find((page) => isObject(page?.formdef));
+  if (!submissionPage) return;
+  const submissionFields = collectMaterializedApprovalFields(submissionPage.formdef);
+  if (!submissionFields.length) return;
+  const taskPages = asArray(pages).filter((page) => Number(page?.type) === 2 && isObject(page?.formdef));
+  for (const [taskIndex, taskPage] of taskPages.entries()) {
+    const taskFields = collectMaterializedApprovalFields(taskPage.formdef);
+    const taskKeys = new Set(taskFields.map((field) => field.key));
+    const missing = submissionFields.filter((field) => !taskKeys.has(field.key));
+    if (missing.length) {
+      findings.push(error("APPROVAL_FORM_LAYOUT_TASK_SUBMISSION_FIELD_MISSING", "Approval task forms must include every Submission form business field as readonly review context unless the App Plan explicitly excludes that field for that task.", {
+        source,
+        taskPage: taskPage.title || taskPage.name || `task page ${taskIndex + 1}`,
+        missingFields: missing.map((field) => field.label),
+      }));
+    }
+  }
+}
+
+function collectMaterializedApprovalFields(resource) {
+  const fields = [];
+  const seen = new Set();
+  for (const entry of flatten(resource)) {
+    const node = entry.node;
+    const key = approvalFieldKey(node);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    fields.push({ key, label: node?.displayLabel || node?.title || node?.label || node?.name || node?.attrs?.data?.displayName || key });
+  }
+  return fields;
+}
+
+function approvalFieldKey(node) {
+  if (!isObject(node)) return "";
+  if (node.approvalFormNoFieldsNotice === true) return "";
+  const type = String(node.type || "");
+  if (!/^(input|textarea|richtext|rich-text|radio|checkbox|switch|date|datetime|datepicker|number|input_number|currency|lookup|people|user|identity-picker|image-upload|file-upload|list)$/i.test(type)) return "";
+  const key = firstDefined(node.binding, node.fieldName, node.attrs?.data?.fieldName, node.attrs?.data?.field, node.attrs?.fieldName, node.attrs?.field);
+  return normalizeFieldKey(key);
+}
+
+function normalizeFieldKey(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
 function decodeDefResource(value) {

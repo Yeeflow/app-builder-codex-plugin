@@ -51,6 +51,7 @@ export function validateYapkLiveInstallReadiness(options = {}) {
   const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, "utf8")) : null;
   const manifestIds = manifest ? idSetFromManifest(manifest) : null;
 
+  validateWrapperTenant({ wrapper, findings });
   validateRootIdentity({ wrapper, decoded, findings });
   const parsedDashboardResources = validateDashboardResources({ decoded, manifestIds, findings });
   validateApprovalDefResources({ decoded, manifestIds, findings });
@@ -72,6 +73,21 @@ export function validateYapkLiveInstallReadiness(options = {}) {
       versionEvidence: options.versionEvidence ? path.resolve(options.cwd || ROOT, options.versionEvidence) : null,
     },
   });
+}
+
+function validateWrapperTenant({ wrapper, findings }) {
+  const tenantId = stringId(wrapper?.TenantID).trim();
+  if (/^0+$/.test(tenantId)) {
+    findings.push(error("YAPK_WRAPPER_TENANTID_ZERO_BEFORE_SIGNING", "Wrapper TenantID \"0\" is a placeholder and must be replaced with the target tenant ID before signing/install readiness.", {
+      tenantId,
+    }));
+    return;
+  }
+  if (!tenantId || !LARGE_ID_RE.test(tenantId)) {
+    findings.push(error("YAPK_WRAPPER_TENANTID_INVALID_BEFORE_SIGNING", "Wrapper TenantID must be a real tenant LongAsString before signing/install readiness is claimed.", {
+      tenantId: tenantId || null,
+    }));
+  }
 }
 
 function validateRootIdentity({ wrapper, decoded, findings }) {
@@ -341,6 +357,7 @@ Validates live-install readiness boundaries that generic schema checks cannot pr
 - per-page dashboard template control UUID re-instantiation;
 - API-issued provenance for IDs embedded inside dashboard JSON and approval DefResource;
 - approval DefResource key/defkey alignment after fresh-ID remap;
+- wrapper TenantID must be a real target-tenant LongAsString, never "0";
 - install API submitted-only status versus final Version Management Succeed proof.`);
 }
 

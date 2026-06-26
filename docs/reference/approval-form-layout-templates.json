@@ -39,7 +39,9 @@
     "unusedCopiedModulesMustBeRemoved": true,
     "operationsWithoutConfiguredActionsMustBeRemoved": true,
     "emptyContentCardSectionsMustBeRemoved": true,
-    "lockedActionPanelFlowHistoryWrapperMustRemain": true
+    "lockedActionPanelFlowHistoryWrapperMustRemain": true,
+    "taskFormsMirrorSubmissionFieldsByDefault": true,
+    "taskFieldsReadonlyByDefault": true
   },
   "forbiddenComponentFamilies": [
     "Data Analytics templates",

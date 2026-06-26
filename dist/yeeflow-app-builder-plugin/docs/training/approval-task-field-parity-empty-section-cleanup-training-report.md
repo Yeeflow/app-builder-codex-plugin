@@ -1,0 +1,57 @@
+# Approval Task Field Parity and Empty Section Cleanup Training Report
+
+## Scope
+
+This training hardens generated Approval form task pages and v1.1 layout cleanup behavior after runtime testing showed two related defects:
+
+- Approval task forms could contain only task-specific fields, leaving approvers unable to see the submitted request information.
+- Generated v1.1 pages could retain copied template section cards whose `section_content_area` had no business content.
+
+The fix applies to:
+
+- Approval Form Layouts v1.1 submission and task pages.
+- Dashboard Page Layouts v1.1 generated Dashboard pages.
+- Data List Form Layouts v1.1 generated New/Edit and View Item forms.
+
+## Generator Rules
+
+Approval task forms now default to the Submission form field set plus any task-only fields planned for the task. A task page may omit a Submission field only when the Functional Specification or App Plan explicitly names the omitted field and explains why that task must hide it.
+
+Task field controls must be explicitly readonly by default. Task-only editable fields require an explicit Functional Specification or App Plan requirement.
+
+Generated v1.1 pages must remove unused copied modules instead of rendering empty cards. If a `section_content_area` would be empty, the owning copied section/card module must be removed from generated output.
+
+Dashboard v1.1 cleanup is now stricter than the first cleanup pass. Empty `section_content_area` containers are forbidden anywhere in generated Dashboard resources, including page-title or copied multi-column sections. Empty `content_card_wrapper`, `2_columns_section`, `3_columns_section`, `2_columns_60/40_section`, and `kpi_metrics_wrapper` containers must be removed. KPI cards are generated only when App Plan Summary Metrics/KPI requirements exist, and the generated KPI card count must match the planned metric count instead of retaining all four Event Portfolio source cards.
+
+Approved Dashboard repeatable modules may be reordered to match the business information hierarchy. Reordering is allowed only among registered modules and must not create new layout container shapes.
+
+## Hard Gates
+
+The Approval Form Layouts v1.1 validator now fails packages when:
+
+- a task form is missing a Submission form business field;
+- a task field control lacks explicit readonly settings;
+- an empty copied Approval form section remains in generated output.
+
+The Dashboard Page Layouts v1.1 validator now fails packages when a generated Dashboard keeps an empty `section_content_area` or an unused repeatable section module.
+
+The Dashboard Page Layouts v1.1 validator also fails packages when generated Dashboards keep an empty `kpi_metrics_wrapper`, keep Event Portfolio KPI cards with no planned KPI demand, or keep more KPI cards than the planned Summary Metrics count.
+
+Data List Form Layouts v1.1 already enforces the same generated cleanup behavior and remains part of the aggregate UI hard gates.
+
+## Regression Coverage
+
+Focused regression coverage includes:
+
+- generated Approval form package with mirrored submission/task fields passing;
+- task form missing a Submission form field failing;
+- task form field without explicit readonly failing;
+- generated Dashboard with empty `section_content_area` failing;
+- generated Dashboard with an empty page-title `section_content_area` failing;
+- generated Dashboard with empty KPI wrapper or unplanned/extra KPI cards failing;
+- full-app materializer output proving dashboards with no Summary Metrics remove KPI wrappers/cards;
+- full-app materializer output proving task forms include Submission fields plus task-only fields and keep task fields readonly.
+
+## Safety
+
+This training does not change plugin metadata, release docs, stable branches, package signing, live install/import, or runtime mutation behavior.

@@ -164,6 +164,7 @@ try {
     "| 1 | Requester | Requester | User | identity-picker | Yes | Generated-final validation |",
     "| 2 | Asset | Asset | Text | input | Yes | Generated-final validation |",
     "| 3 | Business Purpose | BusinessPurpose | Multiple line | textarea | Yes | Generated-final validation |",
+    "| 4 | Decision Comment | DecisionComment | Text | input | Yes | Generated-final validation |",
     "",
     "#### Approval Form Fields Layout Template Selection",
     "| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | Field Source | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |",
@@ -299,6 +300,7 @@ try {
     "--app-plan", resourcePlan,
     "--out-dir", resourceOut,
     "--api-id-manifest", apiIdManifest,
+    "--tenant-id", "1234567890123456",
     "--json",
   ]);
   const resourceReport = JSON.parse(resourceRun.stdout);
@@ -334,6 +336,8 @@ try {
   const dashboardUuids = new Set();
   for (const page of decodedResource.Pages) {
     const parsedDashboard = JSON.parse(page.LayoutInResources[0].Resource);
+    assert.equal(hasControlIdentity(parsedDashboard, "kpi_metrics_wrapper"), false, "dashboards without planned Summary Metrics must not keep empty KPI wrapper");
+    assert.equal(hasControlIdentity(parsedDashboard, "event_portfolio_kpi_planned_events"), false, "dashboards without planned Summary Metrics must not keep source KPI cards");
     for (const value of collectObjectIdUuids(parsedDashboard)) {
       assert.equal(dashboardUuids.has(value), false, `dashboard UUID ${value} must be unique across generated dashboard pages`);
       dashboardUuids.add(value);
@@ -360,6 +364,16 @@ try {
   assert.equal(Array.isArray(assetLoanDef.variables?.filter), true, "approval workflow variables.filter is an array");
   const submissionPage = assetLoanDef.pageurls.find((page) => Number(page.type) === 1);
   const taskPage = assetLoanDef.pageurls.find((page) => Number(page.type) === 2);
+  const submissionFieldKeys = collectApprovalFieldKeys(submissionPage.formdef);
+  const taskFieldKeys = collectApprovalFieldKeys(taskPage.formdef);
+  for (const key of ["requester", "asset", "businesspurpose"]) {
+    assert.equal(submissionFieldKeys.has(key), true, `submission page includes ${key}`);
+    assert.equal(taskFieldKeys.has(key), true, `task page mirrors submission field ${key}`);
+  }
+  assert.equal(taskFieldKeys.has("decisioncomment"), true, "task page may add planned task-only field");
+  for (const field of collectApprovalFieldControls(taskPage.formdef)) {
+    assert.equal(field.readonly, true, `task field ${field.key} is explicitly readonly`);
+  }
   const startNode = assetLoanDef.childshapes.find((shape) => shape?.stencil?.id === "StartNoneEvent");
   const taskNode = assetLoanDef.childshapes.find((shape) => shape?.stencil?.id === "MultiAssignmentTask");
   assert.equal(startNode.properties.taskurl, submissionPage.id, "StartNoneEvent taskurl references submission page");
@@ -586,6 +600,60 @@ function collectObjectIdUuids(root) {
     if (!node || typeof node !== "object") return;
     if (typeof node.id === "string" && uuidRe.test(node.id)) out.push(node.id);
     for (const child of Object.values(node)) visit(child);
+  };
+  visit(root);
+  return out;
+}
+
+function hasControlIdentity(root, identity) {
+  let found = false;
+  const visit = (node) => {
+    if (found) return;
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    const candidates = [
+      node.id,
+      node.name,
+      node.label,
+      node.nav_label,
+      node.nv_label,
+      node.attrs?.name,
+      node.attrs?.label,
+      node.attrs?.nav_label,
+      node.attrs?.nv_label,
+      node.attrs?.data?.templateId,
+      node.attrs?.data?.sourceTemplateId,
+      node.derivedFromDashboardPageLayoutTemplate,
+      node.dataAnalyticsTemplateId,
+      node.collectionTemplateId,
+    ].filter(Boolean).map(String);
+    if (candidates.includes(identity)) {
+      found = true;
+      return;
+    }
+    for (const child of node.children || []) visit(child);
+  };
+  visit(root);
+  return found;
+}
+
+function collectApprovalFieldKeys(root) {
+  return new Set(collectApprovalFieldControls(root).map((field) => field.key));
+}
+
+function collectApprovalFieldControls(root) {
+  const out = [];
+  const visit = (node) => {
+    if (!node || typeof node !== "object") return;
+    const type = String(node.type || "");
+    if (/^(input|textarea|richtext|rich-text|radio|checkbox|switch|date|datetime|datepicker|number|input_number|currency|lookup|people|user|identity-picker|image-upload|file-upload|list)$/i.test(type)) {
+      const key = String(node.binding || node.fieldName || node.attrs?.data?.fieldName || node.attrs?.data?.field || "").trim().toLowerCase();
+      if (key) out.push({ key, readonly: node.attrs?.readonly === true || node.attrs?.readOnly === true || node.readonly === true || node.readOnly === true });
+    }
+    for (const child of node.children || []) visit(child);
   };
   visit(root);
   return out;

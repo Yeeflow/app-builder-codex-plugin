@@ -382,6 +382,10 @@ Dashboard validator commands used during validation:
   findControl(missingCardActionPages[3], "card_bulk_add_button").attrs.control_action = "";
   expectCode("card multiselect Add button without action fails", ["--package", writePackage("card-multiselect-missing-action", missingCardActionPages)], "DASH_DATASET_CARD_MULTISELECT_BUTTON_ACTION_MISSING");
 
+  const unresolvedCardLayoutPages = validPages();
+  findControl(unresolvedCardLayoutPages[3], "card_item_edit").attrs.control_action = { type: "open-detail", layout: "{{layout}}" };
+  expectCode("card multiselect unresolved layout placeholder fails", ["--package", writePackage("card-multiselect-unresolved-layout-placeholder", unresolvedCardLayoutPages)], "DASH_DATASET_COLLECTION_TEMPLATE_PLACEHOLDER_UNRESOLVED");
+
   const noItemOperationsPages = validPages();
   const cardItem = findControl(noItemOperationsPages[3], "card_col_item");
   cardItem.children = cardItem.children.filter((child) => child.id !== "card_col_item_operations");

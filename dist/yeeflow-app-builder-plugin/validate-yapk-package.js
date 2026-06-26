@@ -4,7 +4,10 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 const zlib = require("zlib");
-const { validatePackageWrapperIcon } = require("./scripts/lib/application-icon-validation.cjs");
+const { validatePackageWrapperIcon } = require(resolveLocalModule([
+  path.join(__dirname, "scripts/lib/application-icon-validation.cjs"),
+  path.join(__dirname, "lib/application-icon-validation.cjs"),
+]));
 
 const WRAPPER_REQUIRED = [
   "PackageId",
@@ -81,6 +84,13 @@ const STORAGE_FAMILY_BY_PREFIX = new Map([
   ["Datetime", "Datetime"],
   ["Bit", "Bit"],
 ]);
+
+function resolveLocalModule(candidates) {
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  throw new Error(`Cannot resolve required local module from: ${candidates.join(", ")}`);
+}
 
 function usage() {
   console.error("Usage: node validate-yapk-package.js <package.yapk> [--baseline <baseline.yapk>]");
