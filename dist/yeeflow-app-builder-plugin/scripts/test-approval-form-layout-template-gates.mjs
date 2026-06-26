@@ -55,6 +55,7 @@ try {
   expectCode("App Plan task selecting submission template fails", ["--plan", writeText("plan-task-wrong.md", appPlan({ taskTemplate: SUBMISSION_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_TASK_TEMPLATE_MISMATCH");
   expectCode("App Plan schedule workflow task without layout table fails", ["--plan", writeText("plan-schedule-task-missing.md", appPlan({ omitScheduleTaskSelection: true }))], "APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_SELECTION_TABLE_MISSING");
   expectCode("App Plan data-list workflow task selecting submission template fails", ["--plan", writeText("plan-data-list-task-wrong.md", appPlan({ dataListWorkflowTaskTemplate: SUBMISSION_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_WORKFLOW_TASK_TEMPLATE_UNKNOWN");
+  expectPass("App Plan approval page layout selection ignores following field-grid section", ["--plan", writeText("plan-layout-followed-by-fields.md", appPlanWithApprovalFieldGridSection())]);
 
   const workflowTaskWrong = taskResource();
   workflowTaskWrong.approvalFormLayoutTemplateId = SUBMISSION_TEMPLATE_ID;
@@ -367,6 +368,18 @@ Placeholder.
 ## 23. Recommended Next Prompt
 Placeholder.
 `;
+}
+
+function appPlanWithApprovalFieldGridSection() {
+  return appPlan().replace("## 6. Form Reports Plan", `
+#### Approval Form Fields Layout Template Selection
+
+| Approval Form | Form Page | Field Group | Selected Approval Form Fields Layout Template | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Asset Loan Approval | Submission form | Request details | approval_form_fields_grid_2col_v1_1 | 2 | 2 | 1 | Business Purpose | None | Generated-final validation |
+| Asset Loan Approval | Coordinator task form | Request details | approval_form_fields_grid_2col_v1_1 | 2 | 2 | 1 | Business Purpose | None | Generated-final validation |
+
+## 6. Form Reports Plan`);
 }
 
 function encodeDefResource(def) {

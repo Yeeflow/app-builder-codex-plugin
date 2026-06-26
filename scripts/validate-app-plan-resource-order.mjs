@@ -628,7 +628,7 @@ function validateApprovalFormLayoutTemplateSelection(text, findings) {
   const dataRows = splitTableRows(approvalForms).filter((row) => !/^\|\s*(Approval Form|Field Order|Step Order|Task Form Name|Action Name|Host Form)\s*\|/i.test(row));
   const hasApprovalRows = dataRows.some((row) => /\b(Submission|Task|Workflow|Review|Approve|Reject|approval_form_layout_)\b/i.test(row));
   if (!hasApprovalRows) return;
-  const selectionBlock = approvalForms.split(/##\s+6\./i)[0].split(/#### Approval Form Layout Template Selection/i)[1] || "";
+  const selectionBlock = subsectionAfterHeading(approvalForms, /####\s+Approval Form Layout Template Selection/i);
   const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row));
   const selectedIds = [];
   for (const row of rows) {
@@ -668,6 +668,13 @@ function validateApprovalFormLayoutTemplateSelection(text, findings) {
       message: "Approval Forms Plan must select approved Approval Form Layouts v1.1 templates for generated submission and task pages.",
     });
   }
+}
+
+function subsectionAfterHeading(section, headingPattern) {
+  const match = headingPattern.exec(section);
+  if (!match) return "";
+  const after = section.slice(match.index + match[0].length);
+  return after.split(/\n####\s+/)[0] || "";
 }
 
 function validateWorkflowTaskLayoutTemplateSelection(text, findings, sectionName, expectedSurface) {

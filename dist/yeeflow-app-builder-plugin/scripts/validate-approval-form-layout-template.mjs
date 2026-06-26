@@ -215,7 +215,7 @@ function validateAppPlan(planPath, findings) {
     findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING", "Approval Forms Plan must include an Approval Form Layout Template Selection table when approval forms are planned."));
     return;
   }
-  const selectionBlock = section.split(/#### Form Actions and Temp Variables|#### Sub List List Actions|##\s+6\./i)[0].split(/#### Approval Form Layout Template Selection/i)[1] || "";
+  const selectionBlock = subsectionAfterHeading(section, /####\s+Approval Form Layout Template Selection/i);
   const rows = tableRows(selectionBlock).filter((row) => !/^\|\s*(Approval Form|---)\s*\|/i.test(row.raw));
   const selectedIds = [];
   for (const row of rows) {
@@ -237,6 +237,13 @@ function validateAppPlan(planPath, findings) {
   if (!selectedIds.length) {
     findings.push(error("APPROVAL_FORM_LAYOUT_APP_PLAN_TEMPLATE_SELECTION_REQUIRED", "Approval Forms Plan must select approved templates for submission and task forms.", {}));
   }
+}
+
+function subsectionAfterHeading(section, headingPattern) {
+  const match = headingPattern.exec(section);
+  if (!match) return "";
+  const after = section.slice(match.index + match[0].length);
+  return after.split(/\n####\s+/)[0] || "";
 }
 
 function validateWorkflowTaskAppPlanSelection(text, findings, sectionName, expectedSurface) {

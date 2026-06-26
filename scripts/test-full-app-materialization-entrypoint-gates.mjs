@@ -300,6 +300,7 @@ try {
     "--app-plan", resourcePlan,
     "--out-dir", resourceOut,
     "--api-id-manifest", apiIdManifest,
+    "--tenant-id", "1234567890123456",
     "--json",
   ]);
   const resourceReport = JSON.parse(resourceRun.stdout);

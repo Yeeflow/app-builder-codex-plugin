@@ -155,6 +155,11 @@ try {
   expectPass("valid live-install readiness", [VALIDATOR, "--package", valid.file, "--id-provenance", valid.manifestFile, "--json"]);
   cases.push("valid generated-final package passes live install readiness");
 
+  const tenantZeroDecoded = baseDecoded();
+  const tenantZero = writePackage(tempDir, "tenant-zero", tenantZeroDecoded, { TenantID: "0" });
+  expectCode("placeholder TenantID zero blocks signing readiness", [VALIDATOR, "--package", tenantZero.file, "--id-provenance", tenantZero.manifestFile, "--json"], "YAPK_WRAPPER_TENANTID_ZERO_BEFORE_SIGNING");
+  cases.push("wrapper TenantID zero placeholder fails before signing readiness");
+
   const rootMismatchDecoded = baseDecoded();
   const rootMismatch = writePackage(tempDir, "root-mismatch", rootMismatchDecoded, { ListID: id(900) });
   expectCode("root mismatch", [VALIDATOR, "--package", rootMismatch.file, "--id-provenance", rootMismatch.manifestFile, "--json"], "YAPK_ROOT_LISTID_MISMATCH");
