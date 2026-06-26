@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.64`
+`0.8.65`
+
+Version `0.8.65` releases repository root hygiene and compatibility gates from PR #269. Historical root generator helpers now live under `tools/generators/`, runtime proof studies under `docs/studies/root-runtime-proofs/`, and runtime test specifications under `fixtures/runtime-test-specs/`; public root CLI/validator/wrapper entrypoints remain stable, source/dist reference paths are aligned, and `scripts/test-repo-root-hygiene.mjs` prevents root-level proof and generator clutter from returning.
 
 Version `0.8.64` releases layout cleanup, live install readiness, and validator-entrypoint alignment gates from PR #267. Generated Dashboard, Data List form, and Approval form layouts must prune unused copied sections; Approval task forms keep Submission form business fields as readonly review context unless the App Plan explicitly excludes or makes them editable; generated-final signing readiness rejects placeholder `TenantID: "0"`; runtime proof scopes `Install failed` tiles to the target app; and public YAPK validator entrypoints stay byte-aligned to prevent duplicate-rule drift.
 

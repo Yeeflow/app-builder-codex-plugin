@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.65
+
+- Release repository root hygiene and compatibility gates from PR #269.
+- Move historical root generator helpers under `tools/generators/`, runtime proof studies under `docs/studies/root-runtime-proofs/`, and runtime test specifications under `fixtures/runtime-test-specs/`.
+- Keep public root CLI/validator/wrapper entrypoints stable while reducing root-level proof and generator clutter.
+- Add `scripts/test-repo-root-hygiene.mjs` plus cache artifact coverage so source and dist plugin roots cannot regress back to root-level proof/generator files.
+- Update source/dist references and mirror paths without changing generation, validation, signing, install, or API behavior.
+
 ## 0.8.64
 
 - Release layout cleanup, live install readiness, and validator-entrypoint alignment gates from PR #267.

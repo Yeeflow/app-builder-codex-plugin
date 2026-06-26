@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.64`
+- Version: `0.8.65`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.64` releases layout cleanup, live install readiness, and validator-entrypoint alignment gates from PR #267: generated Dashboard, Data List form, and Approval form layouts prune unused copied sections; Approval task forms preserve Submission form business fields as readonly context unless explicitly overridden; YAPK signing readiness rejects placeholder `TenantID: "0"`; runtime proof scopes `Install failed` tiles to the target app; and public YAPK validator entrypoints are byte-aligned to prevent duplicate-rule drift.
+Current release `0.8.65` releases repository root hygiene and compatibility gates from PR #269: historical root generator helpers now live under `tools/generators/`, runtime proof studies under `docs/studies/root-runtime-proofs/`, and runtime test specifications under `fixtures/runtime-test-specs/`; public root CLI/validator/wrapper entrypoints remain stable; source/dist reference paths are aligned; and `scripts/test-repo-root-hygiene.mjs` prevents root-level proof and generator clutter from returning.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.64
+Version: 0.8.65
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.64
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.65
 ```
 
 ## What Is Included
