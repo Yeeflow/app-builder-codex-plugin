@@ -135,6 +135,7 @@ function validatePackage(packagePath, context) {
       requireWrapperWhenFieldsExist: true,
     });
   }
+  validateTaskReadonlyMirrors(formPages, context.findings);
   if (context.plannedApprovalFields && Object.keys(context.plannedApprovalFields).length) {
     validatePlannedApprovalFieldsMaterialized(formPages, context.plannedApprovalFields, context.findings);
   }
@@ -273,6 +274,70 @@ function validateFieldControl(control, context) {
   }
 }
 
+function validateTaskReadonlyMirrors(formPages, findings) {
+  const grouped = new Map();
+  for (const page of formPages) {
+    const key = page.formKey || page.sourceKey || norm(page.source);
+    if (!key) continue;
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(page);
+  }
+
+  for (const pages of grouped.values()) {
+    const submissionPages = pages.filter((page) => page.role === "submission");
+    const taskPages = pages.filter((page) => page.role === "task");
+    if (!submissionPages.length || !taskPages.length) continue;
+    const submissionFieldNames = new Set();
+    for (const page of submissionPages) {
+      for (const name of collectMaterializedFieldNames(page.resource)) submissionFieldNames.add(norm(name));
+    }
+    if (!submissionFieldNames.size) continue;
+    for (const taskPage of taskPages) {
+      for (const entry of flatten(taskPage.resource)) {
+        const control = entry.node;
+        if (!isFieldControl(control)) continue;
+        const names = fieldControlNames(control).map(norm).filter(Boolean);
+        if (!names.some((name) => submissionFieldNames.has(name))) continue;
+        if (!hasRuntimeReadonlyShape(control)) {
+          findings.push(error("APPROVAL_TASK_CONTEXT_FIELD_READONLY_MISSING", "Approval task forms must render Submission form business fields as runtime-effective readonly review context unless the App Plan explicitly marks them editable.", {
+            source: taskPage.source,
+            control: identityCandidates(control),
+            type: control.type,
+            readonly: control.readonly ?? null,
+            readOnly: control.readOnly ?? null,
+            attrsReadonly: control.attrs?.readonly ?? null,
+            attrsReadOnly: control.attrs?.readOnly ?? null,
+          }));
+        }
+      }
+    }
+  }
+}
+
+function fieldControlNames(control) {
+  return [
+    control?.label,
+    control?.name,
+    control?.title,
+    control?.DisplayName,
+    control?.displayName,
+    control?.binding,
+    control?.fieldName,
+    control?.FieldName,
+    control?.attrs?.label,
+    control?.attrs?.title,
+    control?.attrs?.data?.displayName,
+    control?.attrs?.data?.fieldName,
+    control?.attrs?.data?.field,
+  ].filter(Boolean).map(cleanCell);
+}
+
+function hasRuntimeReadonlyShape(control) {
+  const topLevel = control?.readonly === true || control?.readOnly === true;
+  const attrsLevel = control?.attrs?.readonly === true || control?.attrs?.readOnly === true;
+  return topLevel && attrsLevel;
+}
+
 function validateFullRowSpan(hostControl, columnCounts, context, gridLabel, originalControl = hostControl) {
   const span = responsiveColumnSpan(hostControl);
   for (const [breakpoint, count] of columnCounts.entries()) {
@@ -359,16 +424,7 @@ function collectMaterializedFieldNames(resource) {
   for (const entry of flatten(resource)) {
     const node = entry.node;
     if (!isFieldControl(node)) continue;
-    const candidates = [
-      node.label,
-      node.name,
-      node.title,
-      node.DisplayName,
-      node.displayName,
-      node.attrs?.label,
-      node.attrs?.title,
-      node.attrs?.data?.displayName,
-    ].filter(Boolean).map(cleanCell).filter(Boolean);
+    const candidates = fieldControlNames(node).filter(Boolean);
     for (const candidate of candidates) {
       if (!names.some((name) => norm(name) === norm(candidate))) names.push(candidate);
     }

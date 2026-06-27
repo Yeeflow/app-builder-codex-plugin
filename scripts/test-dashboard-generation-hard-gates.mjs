@@ -32,6 +32,22 @@ function field(FieldName, FieldType, Type, FieldID = FieldName) {
   return { FieldID, FieldName, InternalName: FieldName, DisplayName: FieldName, FieldType, Type };
 }
 
+function dynamicField(name, type, fieldName) {
+  return {
+    type,
+    name,
+    field: fieldName,
+    FieldName: fieldName,
+    attrs: {
+      source: "3",
+      "obj-f": fieldName,
+      field: fieldName,
+      data: { field: fieldName, fieldName },
+      ...(type === "dynamic-user" ? { user: { field: fieldName, fieldName } } : {}),
+    },
+  };
+}
+
 function filterControl(patch = {}) {
   return {
     type: "select-filter",
@@ -259,7 +275,7 @@ function pageResource(flags = {}) {
       derivedFromGoldenReference: "Event Pipeline Grid-Table",
       attrs: {
         datasetPresentationTemplateId: "Event Pipeline Grid-Table",
-        data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } },
+        data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, sort: [{ SortName: "Title", SortByDesc: false }] },
         filterBindings: filterTokens.filter(Boolean),
       },
       children: [
@@ -270,10 +286,10 @@ function pageResource(flags = {}) {
           displayLabel: [null, false],
           attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } } },
           children: [
-            { type: "dynamic-field", name: "Request Title", attrs: { source: "3", "obj-f": "Title" } },
-            { type: "dynamic-field", name: "Priority", attrs: { source: "3", "obj-f": "Text1" } },
-            { type: "dynamic-user", name: "Owner", attrs: { source: "3", "obj-f": "User1" } },
-            { type: "dynamic-field", name: "Status", attrs: { source: "3", "obj-f": "Text2" } },
+            dynamicField("Request Title", "dynamic-field", "Title"),
+            dynamicField("Priority", "dynamic-field", "Text1"),
+            dynamicField("Owner", "dynamic-user", "User1"),
+            dynamicField("Status", "dynamic-field", "Text2"),
           ],
         },
       ],
@@ -358,6 +374,8 @@ function decodedWithResource(resource) {
         field("ListDataID", "Text", "input"),
         field("Title", "Text", "input"),
         field("Text1", "Text", "select"),
+        field("User1", "Text", "identity-picker"),
+        field("Text2", "Text", "select"),
         field("Decimal1", "Decimal", "input_number", "field-decimal-1"),
       ],
       Layouts: [],
@@ -451,7 +469,7 @@ function eventPipelineGridTableRegion() {
         nv_label: "event_pipeline_grid_table_collection",
         attrs: {
           datasetPresentationTemplateId: "Event Pipeline Grid-Table",
-          data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" } },
+          data: { list: { ListID: LIST_ID, Title: "Maintenance Requests" }, sort: [{ SortName: "Title", SortByDesc: false }] },
           filterBindings: ["Text1", "ListDataID"],
         },
         children: [
@@ -462,10 +480,10 @@ function eventPipelineGridTableRegion() {
             displayLabel: [null, false],
             attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } } },
             children: [
-              { type: "dynamic-field", name: "Request Title", attrs: { source: "3", "obj-f": "Title" } },
-              { type: "dynamic-field", name: "Priority", attrs: { source: "3", "obj-f": "Text1" } },
-              { type: "dynamic-user", name: "Owner", attrs: { source: "3", "obj-f": "User1" } },
-              { type: "dynamic-field", name: "Status", attrs: { source: "3", "obj-f": "Text2" } },
+              dynamicField("Request Title", "dynamic-field", "Title"),
+              dynamicField("Priority", "dynamic-field", "Text1"),
+              dynamicField("Owner", "dynamic-user", "User1"),
+              dynamicField("Status", "dynamic-field", "Text2"),
             ],
           },
         ],

@@ -2074,6 +2074,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
         datasetRegion,
         datasetPresentationTemplateId: templateId,
         field: primaryFieldName(listMeta),
+        sort: [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }],
         filter: filterConditions,
         fulltext: fullTextConditions,
         link: detailLink,
@@ -2104,6 +2105,10 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     control.type = dynamicControlTypeForField(field);
     control.attrs = {
       ...(control.attrs || {}),
+      source: "3",
+      "obj-f": field.fieldName,
+      field: field.fieldName,
+      fieldName: field.fieldName,
       data: {
         ...(control.attrs?.data || {}),
         ListID: stringId(listId),
@@ -2111,9 +2116,16 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
         field: field.fieldName,
         fieldName: field.fieldName,
       },
-      field: field.fieldName,
-      fieldName: field.fieldName,
     };
+    control.field = field.fieldName;
+    control.FieldName = field.fieldName;
+    if (control.type === "dynamic-user") {
+      control.attrs.user = {
+        ...(control.attrs.user || {}),
+        field: field.fieldName,
+        fieldName: field.fieldName,
+      };
+    }
     control.name = field.displayName;
     control.title = field.displayName;
     control.label = field.displayName;
@@ -3217,6 +3229,8 @@ function buildApprovalFormFieldControl({ field, index, formName, role, columns }
     },
   };
   if (role === "task") {
+    control.readonly = true;
+    control.readOnly = true;
     control.attrs.readonly = true;
     control.attrs.readOnly = true;
   }
@@ -3389,10 +3403,11 @@ function normalizeControlType(controlType) {
 }
 
 function dynamicControlTypeForField(field) {
-  const normalized = normKey(`${field?.FieldType || ""} ${field?.Type || ""} ${field?.fieldType || ""} ${field?.controlType || ""} ${field?.DisplayName || ""} ${field?.displayName || ""} ${field?.FieldName || ""} ${field?.fieldName || ""}`);
-  if (/user|identity|people|person|owner|assignee|assigned|requester|reviewer|approver|coordinator/.test(normalized)) return "dynamic-user";
-  if (/image|photo|picture/.test(normalized)) return "dynamic-image";
-  if (/file|attachment/.test(normalized)) return "dynamic-file";
+  const typeShape = normKey(`${field?.FieldType || ""} ${field?.Type || ""} ${field?.fieldType || ""} ${field?.controlType || ""}`);
+  const fieldName = normKey(`${field?.FieldName || ""} ${field?.fieldName || ""}`);
+  if (/user|identity|people|person/.test(typeShape) || /^(user|identity|person|people)\d*$/.test(fieldName)) return "dynamic-user";
+  if (/image|photo|picture/.test(typeShape) || /^(image|photo|picture)\d*$/.test(fieldName)) return "dynamic-image";
+  if (/file|attachment/.test(typeShape) || /^(file|attachment)\d*$/.test(fieldName)) return "dynamic-file";
   return "dynamic-field";
 }
 
@@ -3411,6 +3426,13 @@ function fieldsForDynamicControls(listMeta) {
 function primaryFieldName(listMeta) {
   const fields = fieldsForDynamicControls(listMeta);
   return (fields.find((field) => field.fieldName === "Title") || fields[0]).fieldName;
+}
+
+function primarySortFieldName(listMeta) {
+  const fields = fieldsForDynamicControls(listMeta);
+  const dateField = fields.find((field) => /datetime|date|modified|created|due|start|end/i.test(`${field.fieldName} ${field.displayName} ${field.fieldType} ${field.controlType}`));
+  if (dateField) return dateField.fieldName;
+  return primaryFieldName(listMeta);
 }
 
 function resolveFieldSpec(listMeta, requestedName) {

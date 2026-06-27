@@ -716,6 +716,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
     return;
   }
 
+  validateCollectionRuntimeBindings(entry, page, findings, context);
   if (GRID_TABLE_IDS.has(provenance.templateId)) validateGridTable(entry, page, provenance.templateId, findings);
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
@@ -723,6 +724,140 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
   if (provenance.templateId === "collection_control_grid_table_with_multiselect") validateGridMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
+}
+
+function validateCollectionRuntimeBindings(entry, page, findings, context = {}) {
+  const fieldInfo = resolveCollectionFieldCatalog(entry, context.fieldCatalog);
+  if (!fieldInfo) {
+    findings.push(error("DASH_DATASET_COLLECTION_LIST_UNRESOLVED", "Dashboard Collection data source must resolve to a generated Data List before signing.", {
+      page: page.title,
+      path: entry.pointer,
+      list: entry.control?.attrs?.data?.list || null,
+    }));
+    return;
+  }
+
+  const data = entry.control?.attrs?.data || {};
+  const sortRows = asArray(data.sort);
+  if (!sortRows.length) {
+    findings.push(error("DASH_DATASET_COLLECTION_SORT_MISSING", "Dashboard Collection Primary order must be configured with a real field from the selected data list.", {
+      page: page.title,
+      path: `${entry.pointer}.attrs.data.sort`,
+      listId: fieldInfo.listId || null,
+    }));
+  }
+  for (const [index, sort] of sortRows.entries()) {
+    const sortName = String(sort?.SortName || sort?.field || sort?.FieldName || "").trim();
+    if (!sortName || !fieldInfo.fields.has(normalizeIdentity(sortName))) {
+      findings.push(error("DASH_DATASET_COLLECTION_SORT_FIELD_UNRESOLVED", "Dashboard Collection Primary order field must resolve to a field internal name on the selected data list.", {
+        page: page.title,
+        path: `${entry.pointer}.attrs.data.sort[${index}]`,
+        sortName: sortName || null,
+        listId: fieldInfo.listId || null,
+        listTitle: fieldInfo.title || null,
+      }));
+    }
+  }
+
+  for (const [index, fulltext] of asArray(data.fulltext).entries()) {
+    for (const fieldName of asArray(fulltext?.fields || fulltext?.field || fulltext?.FieldName)) {
+      const value = String(fieldName || "").trim();
+      if (value && !fieldInfo.fields.has(normalizeIdentity(value))) {
+        findings.push(error("DASH_DATASET_COLLECTION_FULLTEXT_FIELD_UNRESOLVED", "Dashboard Collection fulltext fields must resolve to the selected data list schema.", {
+          page: page.title,
+          path: `${entry.pointer}.attrs.data.fulltext[${index}]`,
+          field: value,
+          listId: fieldInfo.listId || null,
+        }));
+      }
+    }
+  }
+
+  for (const control of findDescendants(entry.control, (node) => String(node?.type || "").startsWith("dynamic-"))) {
+    validateCollectionDynamicControlBinding(control, entry, page, fieldInfo, findings);
+  }
+}
+
+function validateCollectionDynamicControlBinding(control, entry, page, fieldInfo, findings) {
+  const surfaces = dynamicBindingSurfaces(control);
+  const present = surfaces.filter((surface) => surface.value);
+  const identity = identityCandidates(control)[0] || control.id || null;
+  if (!present.length) {
+    findings.push(error("DASH_DATASET_DYNAMIC_CONTROL_FIELD_MISSING", "Every visible Dynamic control inside a Dashboard Collection item must select a field from the Collection data source.", {
+      page: page.title,
+      path: entry.pointer,
+      control: identity,
+      controlType: control.type || null,
+    }));
+    return;
+  }
+
+  const normalizedValues = new Set(present.map((surface) => normalizeIdentity(surface.value)).filter(Boolean));
+  if (normalizedValues.size > 1) {
+    findings.push(error("DASH_DATASET_DYNAMIC_CONTROL_FIELD_SURFACE_MISMATCH", "Dynamic control field binding surfaces must agree after Collection template clone-and-map.", {
+      page: page.title,
+      path: entry.pointer,
+      control: identity,
+      controlType: control.type || null,
+      surfaces: present,
+    }));
+    return;
+  }
+
+  const missingRequired = requiredDynamicBindingSurfaces(control).filter((name) => !surfaces.some((surface) => surface.name === name && surface.value));
+  if (missingRequired.length) {
+    findings.push(error("DASH_DATASET_DYNAMIC_CONTROL_FIELD_SURFACE_MISSING", "Dynamic controls must include runtime/designer field binding surfaces, not only a single template-era obj-f value.", {
+      page: page.title,
+      path: entry.pointer,
+      control: identity,
+      controlType: control.type || null,
+      missingRequiredSurfaces: missingRequired,
+    }));
+  }
+
+  const fieldName = present[0]?.value || "";
+  const field = fieldInfo.fields.get(normalizeIdentity(fieldName));
+  if (!field) {
+    findings.push(error("DASH_DATASET_DYNAMIC_CONTROL_FIELD_UNRESOLVED", "Dynamic control field binding must resolve to the selected Collection data source schema.", {
+      page: page.title,
+      path: entry.pointer,
+      control: identity,
+      controlType: control.type || null,
+      field: fieldName,
+      listId: fieldInfo.listId || null,
+      listTitle: fieldInfo.title || null,
+    }));
+    return;
+  }
+
+  const expected = expectedDynamicControlType(field);
+  if (String(control.type || "") !== expected) {
+    findings.push(error("DASH_DATASET_DYNAMIC_CONTROL_TYPE_MISMATCH", "Dynamic control type must match the selected data source field type.", {
+      page: page.title,
+      path: entry.pointer,
+      control: identity,
+      field: fieldName,
+      fieldKind: inferFieldKind(field),
+      expectedControlType: expected,
+      actualControlType: control.type || null,
+    }));
+  }
+}
+
+function dynamicBindingSurfaces(control) {
+  return [
+    ["attrs.obj-f", control?.attrs?.["obj-f"]],
+    ["attrs.data.field", control?.attrs?.data?.field],
+    ["attrs.field", control?.attrs?.field],
+    ["field", control?.field],
+    ["attrs.user.field", control?.attrs?.user?.field],
+  ].map(([name, value]) => ({ name, value: String(value || "").trim() }));
+}
+
+function requiredDynamicBindingSurfaces(control) {
+  const required = ["attrs.obj-f", "attrs.data.field", "attrs.field", "field"];
+  if (String(control?.type || "") === "dynamic-user") required.push("attrs.user.field");
+  return required;
 }
 
 function validateDashboardTemplatePlaceholders(page, findings) {
@@ -1693,7 +1828,7 @@ function inferFieldKind(field) {
     field?.FieldName,
     field?.Name,
   ].map((value) => String(value || "").toLowerCase()).join(" ");
-  if (/\b(user|people|person|member|owner|assignee|requester|employee)\b/.test(values)) return "user";
+  if (/\b(user|identity|people|person|member|owner|assignee|requester|employee)\b/.test(values)) return "user";
   if (/\b(image|picture|photo|thumbnail|avatar)\b/.test(values)) return "image";
   if (/\b(file|attachment|document|upload)\b/.test(values)) return "file";
   return "field";
