@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.69
+
+- Release the Workbench Dashboard page layout template from PR #277.
+- Register `dashboard-page-layouts-workbench` alongside `dashboard-page-layouts-v1.1` and preserve the full parsed Workbench Dashboard page resource as an independent JSON template.
+- Require App Plans to select the Dashboard page layout template per Dashboard so generation can choose between the general v1.1 shell and the Workbench shell by business fit.
+- Enforce Workbench-specific layout rules for `primary_working_area`, optional/removable `right_side_panel`, repeatable/removable section modules, and `chart_cards_section`.
+- Allow Data Analytics golden reference templates in Workbench only inside `chart_cards_section`, cap each chart section at three analytics templates, and reject empty chart sections before handoff.
+
 ## 0.8.68
 
 - Release Dashboard Collection and Pie/Data Analytics golden rebuild gates from PR #275.
