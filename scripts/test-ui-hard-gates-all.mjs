@@ -59,6 +59,16 @@ const childTests = [
     ],
   },
   {
+    name: "Data Table golden-reference regression suite",
+    command: ["scripts/test-data-table-golden-reference-gates.mjs"],
+    validators: [
+      "validate-data-table-golden-references",
+      "approved Data table standard scroll, standard no-scroll, and caption scroll templates",
+      "Data table locked style, column-width, caption, source, and display-column contracts",
+      "App Plan Data Table Template Selection materialization",
+    ],
+  },
+  {
     name: "Data List Form Layouts v1.1 golden-reference regression suite",
     command: ["scripts/test-data-list-form-layout-template-gates.mjs"],
     validators: [
