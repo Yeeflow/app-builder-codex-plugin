@@ -170,6 +170,27 @@ Dashboard validator commands used during validation:
 
   expectPass("synthetic app using all approved Dashboard Collection references passes", ["--package", writePackage("valid-all", validPages())]);
 
+  const missingSortPages = validPages();
+  delete findControl(missingSortPages[1], "active_loans_collection").attrs.data.sort;
+  expectCode("Collection without Primary order sort fails", ["--package", writePackage("collection-sort-missing", missingSortPages)], "DASH_DATASET_COLLECTION_SORT_MISSING");
+
+  const wrongSortPages = validPages();
+  findControl(wrongSortPages[1], "active_loans_collection").attrs.data.sort = [{ SortName: "Primary order", SortByDesc: false }];
+  expectCode("Collection Primary order must resolve to selected list schema", ["--package", writePackage("collection-sort-unresolved", wrongSortPages)], "DASH_DATASET_COLLECTION_SORT_FIELD_UNRESOLVED");
+
+  const missingDynamicSurfacePages = validPages();
+  delete findControl(missingDynamicSurfacePages[1], "active_loans_title").attrs.data.field;
+  expectCode("Dynamic field missing runtime binding surface fails", ["--package", writePackage("dynamic-field-surface-missing", missingDynamicSurfacePages)], "DASH_DATASET_DYNAMIC_CONTROL_FIELD_SURFACE_MISSING");
+
+  const mismatchedDynamicSurfacePages = validPages();
+  findControl(mismatchedDynamicSurfacePages[1], "active_loans_title").attrs.data.field = "Text2";
+  expectCode("Dynamic field binding surfaces must agree", ["--package", writePackage("dynamic-field-surface-mismatch", mismatchedDynamicSurfacePages)], "DASH_DATASET_DYNAMIC_CONTROL_FIELD_SURFACE_MISMATCH");
+
+  const userAsDynamicFieldPages = validPages();
+  const owner = findControl(userAsDynamicFieldPages[1], "active_loans_owner");
+  owner.type = "dynamic-field";
+  expectCode("User field rendered as dynamic-field fails", ["--package", writePackage("dynamic-user-type-mismatch", userAsDynamicFieldPages)], "DASH_DATASET_DYNAMIC_CONTROL_TYPE_MISMATCH");
+
   const actionPlaceholderPages = validPages();
   const responsiveCollection = findControl(actionPlaceholderPages[0], "card_col_body");
   responsiveCollection.attrs.actions[0].steps[0].attrs = {
@@ -679,7 +700,7 @@ function responsiveCardGridSection() {
       attrs: {
         data: {
           list: { ListID: "list_assets", Title: "Assets" },
-          sort: [{ SortName: "Created", SortByDesc: true }],
+          sort: [{ SortName: "Title", SortByDesc: true }],
           ps: 9,
           filter: [],
           fulltext: [{ fields: ["Title", "Text1"], value: [{ exprType: "variable", valueType: "string", id: "__filter_filter_keywords", type: "expr", name: "filter_keywords" }] }],
@@ -812,14 +833,14 @@ function cardMultiselectSection() {
     collection("card_bulk_collection", "collection_control_card_with_multiselect_toolbar", {
       children: [
         container("card_col_item", [
-          { id: "card_item_image", type: "dynamic-image", attrs: { source: "3", "obj-f": "Image1" } },
-          { id: "card_item_subject", type: "dynamic-field", nv_label: "Survey Program name", attrs: { source: "3", "obj-f": "Title", typography: "large-semi-bold" } },
+          dynamic("card_item_image", "dynamic-image", "Image1"),
+          dynamic("card_item_subject", "dynamic-field", "Title", { nv_label: "Survey Program name", attrs: { typography: "large-semi-bold" } }),
           container("card_col_item_multi_select", [
             { id: "card_item_unchecked", type: "icon", attrs: { icon: "fa-regular fa-square" } },
             { id: "card_item_checked", type: "icon", attrs: { icon: "fa-regular fa-square-check" } },
           ]),
-          { id: "card_item_owner", type: "dynamic-user", attrs: { source: "3", "obj-f": "User1" } },
-          { id: "card_item_file", type: "dynamic-file", attrs: { source: "3", "obj-f": "File1" } },
+          dynamic("card_item_owner", "dynamic-user", "User1"),
+          dynamic("card_item_file", "dynamic-file", "File1"),
           container("card_col_item_operations", [
             { id: "card_item_edit", type: "action_button", label: "Edit", attrs: { control_action: "item_edit_action" } },
           ]),
@@ -950,6 +971,11 @@ function gridTableSection(prefix, templateId, options = {}) {
 
 function collection(id, templateId, overrides = {}) {
   const { attrs, children, ...topLevel } = overrides;
+  const data = {
+    list: { ListID: "list_loans" },
+    sort: [{ SortName: "Title", SortByDesc: false }],
+    ...((attrs || {}).data || {}),
+  };
   return {
     id,
     type: "collection",
@@ -957,9 +983,10 @@ function collection(id, templateId, overrides = {}) {
     ...topLevel,
     attrs: {
       datasetPresentationTemplateId: templateId,
-      data: { list: { ListID: "list_loans" } },
+      data,
       layout: { col: [null, 1] },
       ...(attrs || {}),
+      data,
     },
     children: children || [],
   };
@@ -1053,14 +1080,25 @@ function heading(id, value, extras = {}) {
 }
 
 function dynamic(id, type, field, extras = {}) {
+  const user = type === "dynamic-user" ? { user: { field, fieldName: field } } : {};
   return {
     id,
     type,
+    field,
+    FieldName: field,
     ...extras,
     attrs: {
       ...(extras.attrs || {}),
       source: "3",
       "obj-f": field,
+      field,
+      fieldName: field,
+      data: {
+        ...(extras.attrs?.data || {}),
+        field,
+        fieldName: field,
+      },
+      ...user,
     },
   };
 }

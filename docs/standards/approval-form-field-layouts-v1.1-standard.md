@@ -52,6 +52,23 @@ Use `approval_form_fields_grid_3col_v1_1` when the field group is dense enough t
 
 Both templates may be used on submission forms and task forms. Task forms should render fields readonly unless the App Plan states a business reason for assignee-editable fields.
 
+## Task Form Review Context And Runtime Readonly
+
+Task forms are review pages by default. Every business field shown on the Submission form must be mirrored on each Task form as reviewer context unless the Functional Specification or App Plan explicitly excludes that field from a specific task.
+
+Task form mirror fields must be runtime-effective readonly unless the Functional Specification or App Plan explicitly states that the task assignee may edit that field. Setting only `attrs.readonly` or `attrs.readOnly` is not sufficient. The generated control must set both levels:
+
+```text
+control.readonly = true
+control.readOnly = true
+control.attrs.readonly = true
+control.attrs.readOnly = true
+```
+
+Task forms may add task-specific fields such as decision comments, review notes, reassignment fields, finance/admin updates, or completion metadata only when the App Plan declares the business purpose. Those added task fields may be editable when the App Plan says so; copied Submission form context fields remain readonly.
+
+Upgrade proof boundary: after a task-form readonly fix is upgraded into a live app, existing in-process task instances may still use an older deployed page snapshot. Runtime proof must create a fresh request and open a newly generated task instance before claiming the task field readonly behavior is fixed.
+
 ## Responsive Grid Columns
 
 The root field-grid wrapper and any nested field-group Grid controls may adjust only column count and column sizing metadata. All other exported Grid layout, spacing, style, and identity settings must remain template-derived.

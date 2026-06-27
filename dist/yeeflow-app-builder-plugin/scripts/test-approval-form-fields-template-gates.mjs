@@ -63,6 +63,26 @@ try {
   expectPass("Package materializes App Plan approval form fields", ["--package", writePackage("package-with-planned-fields.yapk", decodedPackage(approvalFormResource())), "--plan", writeText("plan-valid-with-fields.md", appPlan())]);
   expectCode("Package missing planned approval form field fails", ["--package", writePackage("package-missing-planned-field.yapk", decodedPackage(approvalFormResource())), "--plan", writeText("plan-extra-field.md", appPlan({ extraSubmissionField: "Traveler" }))], "APPROVAL_FORM_FIELDS_PLANNED_FIELD_NOT_MATERIALIZED");
 
+  const attrsOnlyReadonlyPackage = decodedPackage(approvalFormResource());
+  const attrsOnlyDef = decodeDefResource(attrsOnlyReadonlyPackage.Forms[0].DefResource);
+  const taskRequester = find(attrsOnlyDef.pageurls[1].formdef, "input-requester-name");
+  delete taskRequester.readonly;
+  delete taskRequester.readOnly;
+  taskRequester.attrs.readonly = true;
+  taskRequester.attrs.readOnly = true;
+  attrsOnlyReadonlyPackage.Forms[0].DefResource = encodeDefResource(attrsOnlyDef);
+  expectCode("Task form mirror fields require runtime-effective top-level readonly", ["--package", writePackage("package-task-attrs-only-readonly.yapk", attrsOnlyReadonlyPackage)], "APPROVAL_TASK_CONTEXT_FIELD_READONLY_MISSING");
+
+  const editableTaskPackage = decodedPackage(approvalFormResource());
+  const editableTaskDef = decodeDefResource(editableTaskPackage.Forms[0].DefResource);
+  const taskBusinessJustification = find(editableTaskDef.pageurls[1].formdef, "richtext-business-justification");
+  delete taskBusinessJustification.readonly;
+  delete taskBusinessJustification.readOnly;
+  delete taskBusinessJustification.attrs.readonly;
+  delete taskBusinessJustification.attrs.readOnly;
+  editableTaskPackage.Forms[0].DefResource = encodeDefResource(editableTaskDef);
+  expectCode("Task form mirror fields cannot remain editable without plan override", ["--package", writePackage("package-task-editable-mirror.yapk", editableTaskPackage)], "APPROVAL_TASK_CONTEXT_FIELD_READONLY_MISSING");
+
   const loanNumberResource = approvalFormResource();
   firstWrapper(loanNumberResource).children.push(fieldControl({ type: "input", label: "Loan Number" }));
   expectPass("Package preserves planned Approval field visible label with Loan terminology", ["--package", writePackage("package-loan-number-field.yapk", decodedPackage(loanNumberResource)), "--plan", writeText("plan-loan-number-field.md", appPlan({ extraSubmissionField: "Loan Number" }))]);
@@ -208,13 +228,14 @@ function find(node, identity) {
 }
 
 function decodedPackage(resource) {
+  const taskResource = markTaskReadonly(approvalFormResource({ templateId: TEMPLATE_3COL_ID, columns: 3 }));
   const def = {
     key: "APPROVAL-FIELDS-TEST",
     defkey: "APPROVAL-FIELDS-TEST",
     workflowType: 2,
     pageurls: [
       { id: "submission-page", type: 1, title: "Submission form", pagetype: 1, formdef: resource },
-      { id: "task-page", type: 2, title: "Task form", pagetype: 1, formdef: approvalFormResource({ templateId: TEMPLATE_3COL_ID, columns: 3 }) },
+      { id: "task-page", type: 2, title: "Task form", pagetype: 1, formdef: taskResource },
     ],
   };
   return {
@@ -234,6 +255,36 @@ function decodedPackage(resource) {
     DataReports: [],
     IconUrl: "{\"b\":\"#0f766e\",\"i\":\"fa-solid fa-clipboard-check\",\"c\":\"#ffffff\"}",
   };
+}
+
+function markTaskReadonly(resource) {
+  for (const control of fieldControls(resource)) {
+    control.readonly = true;
+    control.readOnly = true;
+    control.attrs = control.attrs || {};
+    control.attrs.readonly = true;
+    control.attrs.readOnly = true;
+  }
+  return resource;
+}
+
+function fieldControls(root) {
+  const out = [];
+  const visit = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (["input", "textarea", "richtext", "list"].includes(String(node.type || ""))) out.push(node);
+    for (const child of node.children || []) visit(child);
+  };
+  visit(root);
+  return out;
+}
+
+function decodeDefResource(value) {
+  const raw = Buffer.from(value, "base64");
+  const payload = raw.subarray(0, 10).toString("utf8") === "::brotli::"
+    ? zlib.brotliDecompressSync(raw.subarray(10)).toString("utf8")
+    : zlib.brotliDecompressSync(raw).toString("utf8");
+  return JSON.parse(payload);
 }
 
 function encodeDefResource(def) {
