@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.68`
+- Version: `0.8.69`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.68` releases Dashboard Collection and Pie/Data Analytics golden rebuild gates from PR #275: generated multiselect grid-table Collections preserve the real `grid_table_col_body` Collection root while rebuilding approved template internals, cloned Dashboard template UUID-like values are re-instantiated per page, Pie/Data Analytics controls clone the full approved wrapper instead of simplified chart shells, chart runtime `attrs/model/series/values` stay aligned with `ReportIds`/`exts` settings, and COUNT analytics use real source fields with aggregate metadata instead of derived pseudo-field IDs.
+Current release `0.8.69` releases the Workbench Dashboard page layout template from PR #277: the plugin registers `dashboard-page-layouts-workbench` alongside `dashboard-page-layouts-v1.1`, preserves the full parsed Workbench Dashboard page resource as an independent JSON template, requires App Plans to choose the dashboard page layout per Dashboard, and validates Workbench-specific `primary_working_area`, optional `right_side_panel`, and `chart_cards_section` rules for Data Analytics placement.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.68
+Version: 0.8.69
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.68
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.69
 ```
 
 ## What Is Included

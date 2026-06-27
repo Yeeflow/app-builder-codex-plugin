@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.68`
+`0.8.69`
+
+Version `0.8.69` releases the Workbench Dashboard page layout template from PR #277. The plugin now registers `dashboard-page-layouts-workbench` alongside `dashboard-page-layouts-v1.1`, keeps the full parsed Workbench Dashboard resource as an independent JSON template, requires App Plans to select the Dashboard page layout per Dashboard, and validates Workbench-specific `primary_working_area`, optional `right_side_panel`, and `chart_cards_section` rules for Data Analytics placement.
 
 Version `0.8.68` releases Dashboard Collection and Pie/Data Analytics golden rebuild gates from PR #275. Generated multiselect grid-table Collections preserve the real `grid_table_col_body` Collection root while rebuilding approved template internals, cloned Dashboard template UUID-like values are re-instantiated per page, Pie/Data Analytics controls clone the full approved wrapper instead of simplified chart shells, chart runtime `attrs.data`, `attrs.model`, `attrs.series[]`, and `attrs.values[]` stay aligned with host `Resource.ReportIds[]` and `Resource.exts[]` settings, and COUNT analytics use real source fields with aggregate metadata instead of derived pseudo-field IDs.
 
