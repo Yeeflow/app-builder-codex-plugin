@@ -460,6 +460,22 @@ Dashboard page identity:
 | --- | --- | --- | --- | --- | --- |
 | <Dashboard> | <Purpose> | <Functional Spec section/requirement> | <Lists/objects> | <Navigation group/item> | <Page Function Plan path or not applicable> |
 
+#### Dashboard Page Layout Template Selection
+
+Required for every generated Dashboard page.
+
+| Dashboard Page | Selected Dashboard Page Layout Template | Business Layout Need | Primary Regions Needed | Right Side Panel Needed | Chart Cards Section Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Dashboard> | dashboard-page-layouts-v1.1 or dashboard-page-layouts-workbench | General overview / operational workbench | <Sections/regions> | Yes/No | Yes/No | <Reason using template guidance> | Generated-final validation |
+
+Rules:
+
+- Select exactly one Dashboard page layout template per Dashboard page from `docs/reference/dashboard-page-layout-templates.json`.
+- Use `dashboard-page-layouts-v1.1` for general overview dashboards, report-style dashboards, and section-first pages.
+- Use `dashboard-page-layouts-workbench` for operational workbench pages that need a primary working area, optional right-side panel, top filters, KPI cards, grouped analytics, and queue/list regions.
+- If `dashboard-page-layouts-workbench` is selected, state whether `right_side_panel` and `chart_cards_section` are needed. Empty Workbench right-side panels and empty chart sections must be removed during generation.
+- The App Plan may state selected template and business regions, but must not include copied control JSON, generated IDs, or low-level style/property payloads.
+
 #### Dashboard Sections
 
 | Section Order | Section Name | Business Purpose | Source Data List or Business Object | Required Fields or Metrics | Selected Yeeflow Control Type Category | Why This Control Type Is Appropriate | User Actions Needed | Proof Boundary or Deferred Note |
@@ -514,7 +530,9 @@ Rules:
 - Select exactly one approved Data Analytics template per analytics region. Do not list multiple possible templates for the same region and do not leave the template choice to generation.
 - App Plan selection is a business decision only. It must not include generated `ListID`, `LayoutID`, `PageID`, action type codes, JSON property paths, placeholder IDs, or runtime payload fields in this table.
 - Data Analytics templates are allowed only on Dashboard pages and Data List forms. They must not be planned for Approval forms.
-- On Dashboard Page Layouts v1.1 pages, generated resources must place Data Analytics templates only inside `2_columns_section` or `3_columns_section`; the App Plan may state this placement requirement without prescribing low-level container properties.
+- On Dashboard Page Layouts v1.1 pages, generated resources may place Data Analytics templates inside `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`.
+- On Workbench Dashboard pages, grouped analytics should use `chart_cards_section` under `primary_working_area` or `right_side_panel`; one `chart_cards_section` should contain no more than three Data Analytics templates.
+- The App Plan may state the selected placement family, but must not prescribe low-level container properties.
 
 #### Dashboard Actions
 
