@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.70
+
+- Release the Data List Form Workbench View Item layout template from PR #279.
+- Register `data_list_form_layout_workbench` as a full-page Data List View Item custom form template alongside the existing New/Edit and standard View Item layouts.
+- Preserve the full parsed `Workbench item details` form resource as an independent JSON template and cache artifact.
+- Require App Plans to declare Full page opening when selecting the Workbench View template, and require generated packages to route `ListModel.LayoutView.view` to a same-list Type 1 custom form with `opentype.view = "new"`.
+- Enforce Workbench-specific rules for `primary_working_area`, optional/removable `right_side_panel`, removable `chart_cards_section`, and Data Analytics placement inside Workbench `chart_cards_section`.
+
 ## 0.8.69
 
 - Release the Workbench Dashboard page layout template from PR #277.
