@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.71`
+`0.8.72`
+
+Version `0.8.72` releases Collection runtime visibility and Approval task readonly gates from PR #283. Generated Dashboard Collections now include resolved Primary order/sort metadata, fulltext field validation, and Dynamic field/Dynamic user binding surfaces that must resolve against the selected source list schema. Approval task forms now mirror submitted business fields as runtime-effective readonly review context unless explicitly excluded or made editable in the App Plan, using both top-level and attrs readonly/readOnly flags.
 
 Version `0.8.71` releases Data table control golden reference templates from PR #281. The plugin now registers `data_table_control_standard_scroll`, `data_table_control_standard_no_scroll`, and `data_table_control_caption_scroll`, requires App Plans to select approved Data table templates for planned Data table regions, preserves locked Data table style, layout, typography, column-width, caption/search/add/more toolbar, source, and display-column binding contracts, and validates generated Dashboard, custom Data List form, Approval form, workflow task form, and Approval print-page usage before signing readiness.
 

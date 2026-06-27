@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.71`
+- Version: `0.8.72`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.71` releases Data table control golden reference templates from PR #281: the plugin registers `data_table_control_standard_scroll`, `data_table_control_standard_no_scroll`, and `data_table_control_caption_scroll`, requires App Plans to select approved Data table templates for planned Data table regions, preserves locked Data table style/layout/column-width/caption contracts, and validates generated Dashboard, custom Data List form, Approval form, workflow task form, and Approval print-page usage before signing readiness.
+Current release `0.8.72` releases Collection runtime visibility and Approval task readonly gates from PR #283: generated Dashboard Collections now require resolved Primary order/sort, fulltext, and dynamic control field-binding surfaces against the selected source list schema, and Approval task forms must mirror submitted business fields as runtime-effective readonly review context using both top-level and attrs readonly flags.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.71
+Version: 0.8.72
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.71
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.72
 ```
 
 ## What Is Included
