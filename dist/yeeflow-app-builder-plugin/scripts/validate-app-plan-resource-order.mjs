@@ -189,6 +189,12 @@ const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = new Set([
   "data_analytics_pivot_table_standard",
 ]);
 
+const APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
+  "dashboard-page-layouts-v1.1",
+  "dashboard-page-layouts-workbench",
+  "dashboard-page-layout-templates",
+]);
+
 const APPROVED_DATA_LIST_FORM_LAYOUT_TEMPLATE_IDS = new Set([
   "data_list_form_layout_new_edit_v1_1",
   "data_list_form_layout_view_item_v1_1",
@@ -468,8 +474,9 @@ function validateDashboardPagesPlan(text, findings) {
     }
   }
 
+  const implementationPolicyText = maskApprovedDashboardTemplateIds(policyText);
   for (const [code, pattern] of DASHBOARD_FORBIDDEN_IMPLEMENTATION_PATTERNS) {
-    const match = policyText.match(pattern);
+    const match = implementationPolicyText.match(pattern);
     if (match) {
       findings.push({
         level: "error",
@@ -479,6 +486,14 @@ function validateDashboardPagesPlan(text, findings) {
       });
     }
   }
+}
+
+function maskApprovedDashboardTemplateIds(text) {
+  let masked = String(text || "");
+  for (const id of APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS) {
+    masked = masked.replaceAll(id, id.replaceAll("-", "_").replaceAll(".", "_"));
+  }
+  return masked;
 }
 
 function validateDashboardDataAnalyticsTemplateSelection(dashboard, findings) {

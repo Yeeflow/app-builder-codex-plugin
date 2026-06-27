@@ -18,12 +18,14 @@ try {
   expectCode("Registry missing App Plan selection guidance fails", ["--registry", writeJson("registry-missing-guidance.json", registryMissingGuidance())], "DATA_ANALYTICS_REFERENCE_GUIDANCE_INCOMPLETE");
   expectPass("Dashboard v1.1 analytics inside approved content card and multi-column sections pass", ["--resource", writeJson("valid-dashboard.json", dashboardResource()), "--surface", "dashboard"]);
   expectPass("Dashboard v1.1 analytics inside 60/40 section pass", ["--resource", writeJson("valid-dashboard-6040.json", dashboardResource({ only6040: true })), "--surface", "dashboard"]);
+  expectPass("Workbench dashboard analytics inside chart_cards_section pass", ["--resource", writeJson("valid-workbench-dashboard.json", workbenchDashboardResource()), "--surface", "dashboard"]);
   expectPass("Data List View Item form analytics inside approved content card and multi-column sections pass", ["--resource", writeJson("valid-data-list-form.json", dataListFormResource()), "--surface", "data-list-form"]);
   expectPass("Data List View Item form analytics inside 60/40 section pass", ["--resource", writeJson("valid-data-list-form-6040.json", dataListFormResource({ only6040: true })), "--surface", "data-list-form"]);
 
   expectCode("Approval form analytics usage is forbidden", ["--resource", writeJson("approval-form.json", approvalFormResource()), "--surface", "approval-form"], "DATA_ANALYTICS_APPROVAL_FORM_FORBIDDEN");
   expectCode("Data List New/Edit form analytics usage is forbidden", ["--resource", writeJson("new-edit-data-list-form.json", dataListFormResource({ newEdit: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_NEW_EDIT_FORBIDDEN");
   expectCode("Dashboard v1.1 analytics outside approved content card or multi-column sections fail", ["--resource", writeJson("outside-section.json", dashboardResource({ outsideSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID");
+  expectCode("Workbench dashboard analytics outside chart_cards_section fail", ["--resource", writeJson("outside-workbench-chart-section.json", workbenchDashboardResource({ outsideChartSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_WORKBENCH_CHART_SECTION_PLACEMENT_INVALID");
   expectCode("Data List View Item form analytics outside approved content card or multi-column sections fail", ["--resource", writeJson("outside-data-list-form-section.json", dataListFormResource({ outsideSection: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_VIEW_V11_SECTION_PLACEMENT_INVALID");
   expectCode("Simplified chart without approved wrapper fails", ["--resource", writeJson("missing-wrapper.json", dashboardResource({ missingWrapper: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_WRAPPER_MISSING");
   expectCode("Unknown analytics template ID fails", ["--resource", writeJson("unknown-template.json", dashboardResource({ unknownTemplate: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_UNKNOWN");
@@ -113,6 +115,60 @@ function dashboardResource(options = {}) {
     ],
   };
   if (!options.omitRuntimeBindings) addAnalyticsRuntimeBindings(resource, { omitReportIds: options.omitReportIds, badRuntimeField: options.badRuntimeField });
+  return resource;
+}
+
+function workbenchDashboardResource(options = {}) {
+  const analytics = [
+    chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
+    chartModule("data_analytics_column_chart_with_title", "column_chart_with_title_wrapper", "column_chart_title", "column_chart_control", "bar-chart"),
+  ];
+  const analyticsHost = options.outsideChartSection
+    ? analytics
+    : [
+        {
+          type: "container",
+          nv_label: "chart_cards_section",
+          children: analytics,
+        },
+      ];
+  const resource = {
+    type: "page",
+    nv_label: "dashboard-page-layouts-workbench",
+    derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-workbench",
+    children: [
+      {
+        type: "container",
+        nv_label: "main",
+        children: [
+          {
+            type: "container",
+            nv_label: "content",
+            children: [
+              {
+                type: "container",
+                nv_label: "main_work_queue_section",
+                children: [
+                  {
+                    type: "container",
+                    nv_label: "main_work_queue_wrapper",
+                    children: [
+                      {
+                        type: "container",
+                        nv_label: "primary_working_area",
+                        children: analyticsHost,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  addAnalyticsRuntimeBindings(resource);
   return resource;
 }
 
