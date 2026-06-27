@@ -535,6 +535,24 @@ Rules:
 - On Workbench Dashboard pages, grouped analytics should use `chart_cards_section` under `primary_working_area` or `right_side_panel`; one `chart_cards_section` should contain no more than three Data Analytics templates.
 - The App Plan may state the selected placement family, but must not prescribe low-level container properties.
 
+#### Data Table Template Selection
+
+Required for every Dashboard, Custom Data List form, Approval form page, workflow task form, or Approval print page section that uses a native Data table control.
+
+| Host Surface | Page/Form | Region | Source Resource | Business Purpose | Selected Data Table Template | Column Width Mode | Caption/Search/Actions | Display Columns | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Dashboard / Custom Data List form / Approval submission / Approval task / Approval print / Data List workflow task / Schedule workflow task> | <Name> | <Section> | <Data List / Document Library metadata list / Form Report / Data Report> | <Why a native Data table is needed> | <approved Data table template ID> | Default scroll / Auto no-scroll | <None or caption title/search/add/import/export> | <Business field labels only, no runtime IDs> | <Reason using template guidance> | <Local/runtime proof boundary> |
+
+Rules:
+
+- The Selected Data Table Template must be one of `data_table_control_standard_scroll`, `data_table_control_standard_no_scroll`, or `data_table_control_caption_scroll` from `docs/reference/data-table-golden-references.json`.
+- Select exactly one approved Data table template per Data table region. Do not list multiple possible templates for the same region and do not leave the template choice to generation.
+- Use `data_table_control_standard_scroll` when many columns need readable widths and horizontal scrolling is acceptable.
+- Use `data_table_control_standard_no_scroll` when the table has a small number of columns and should fit inside the current control without horizontal scrolling.
+- Use `data_table_control_caption_scroll` when the Data table needs caption title, built-in search, add item, and import/export more-menu behavior.
+- The App Plan selection is a business decision only. It must not include generated `ListID`, `ListSetID`, field storage IDs, JSON property paths, copied control payloads, or placeholder IDs.
+- Use Data table for lightweight tabular display. Use approved Collection/Kanban/Timeline templates instead when the requirement needs rich cards, multi-select state, complex row operations, kanban boards, or timeline presentation.
+
 #### Dashboard Actions
 
 | Action Name | Business Purpose | Source/Target Business Object | Expected User Outcome | Supported Yeeflow Action Category When Known | Proof Boundary or Deferred Note |

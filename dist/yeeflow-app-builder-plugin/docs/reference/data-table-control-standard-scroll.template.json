@@ -1,0 +1,301 @@
+{
+    "_ak_c": {
+        "id": "ee37e2e1-fd24-4f5a-bcc1-6ebe962c588b",
+        "type": "data-list",
+        "label": "Data table",
+        "attrs": {
+            "table": {
+                "br": {
+                    "top": "--sp--s075",
+                    "right": "--sp--s075",
+                    "bottom": "--sp--s075",
+                    "left": "--sp--s075"
+                },
+                "bdt": "1",
+                "bdw": [
+                    null,
+                    {
+                        "top": "--sp--s012",
+                        "right": "--sp--s012",
+                        "bottom": "--sp--s012",
+                        "left": "--sp--s012"
+                    }
+                ],
+                "bdc": "var(--c--neutral-light-active)",
+                "cwt": [
+                    null,
+                    "0"
+                ],
+                "sortable": true
+            },
+            "header": {
+                "pd": [
+                    null,
+                    {
+                        "top": "--sp--s100",
+                        "right": "--sp--s100",
+                        "bottom": "--sp--s100",
+                        "left": "--sp--s100"
+                    }
+                ],
+                "bdt": "1",
+                "bdw": [
+                    null,
+                    {
+                        "top": "--sp--s0",
+                        "right": "--sp--s012",
+                        "bottom": "--sp--s012",
+                        "left": "--sp--s012"
+                    }
+                ],
+                "bdc": "var(--c--neutral-light-active)",
+                "ty": [
+                    null,
+                    "s-semi-bold"
+                ],
+                "normal": {
+                    "bgcolor": "var(--c--neutral-light)"
+                }
+            },
+            "body": {
+                "bdt": "1",
+                "bdw": [
+                    null,
+                    {
+                        "top": "--sp--s0",
+                        "right": "--sp--s012",
+                        "bottom": "--sp--s012",
+                        "left": "--sp--s012"
+                    }
+                ],
+                "bdc": "var(--c--neutral-light-active)"
+            },
+            "cardCont": {
+                "border": {
+                    "type": "1",
+                    "width": [
+                        null,
+                        {
+                            "top": "--sp--s012",
+                            "right": "--sp--s012",
+                            "bottom": "--sp--s012",
+                            "left": "--sp--s012"
+                        }
+                    ],
+                    "color": "var(--c--neutral-light-active)",
+                    "radius": [
+                        null,
+                        {
+                            "top": "--sp--s100",
+                            "right": "--sp--s100",
+                            "bottom": "--sp--s100",
+                            "left": "--sp--s100"
+                        }
+                    ]
+                },
+                "cp": [
+                    null,
+                    {
+                        "top": "--sp--s150",
+                        "right": "--sp--s150",
+                        "bottom": "--sp--s150",
+                        "left": "--sp--s150"
+                    },
+                    null,
+                    {
+                        "top": "",
+                        "right": "",
+                        "bottom": "",
+                        "left": ""
+                    }
+                ],
+                "title": {
+                    "ty": [
+                        null,
+                        "s-semi-bold"
+                    ]
+                },
+                "value": {
+                    "ty": [
+                        null,
+                        "s-light"
+                    ],
+                    "linkcolor": "var(--c--primary)"
+                },
+                "pd": [
+                    null,
+                    null,
+                    null,
+                    {
+                        "top": "--sp--s100",
+                        "right": "--sp--s100",
+                        "bottom": "--sp--s100",
+                        "left": "--sp--s100"
+                    }
+                ]
+            },
+            "caption-style": {
+                "pd": [
+                    null,
+                    {
+                        "top": "--sp--s100",
+                        "right": "--sp--s100",
+                        "bottom": "--sp--s100",
+                        "left": "--sp--s100"
+                    }
+                ],
+                "title": {
+                    "ty": [
+                        null,
+                        "l-medium"
+                    ]
+                },
+                "search": {
+                    "normal": {
+                        "border": {
+                            "radius": [
+                                null,
+                                {
+                                    "top": "--sp--s075",
+                                    "right": "--sp--s075",
+                                    "bottom": "--sp--s075",
+                                    "left": "--sp--s075"
+                                }
+                            ]
+                        }
+                    },
+                    "pd": [
+                        null,
+                        {
+                            "top": "--sp--s100",
+                            "right": "--sp--s100",
+                            "bottom": "--sp--s100",
+                            "left": "--sp--s100"
+                        }
+                    ],
+                    "pcolor": "var(--c--neutral-hover)"
+                },
+                "more": {
+                    "pd": [
+                        null,
+                        {
+                            "top": "--sp--s100",
+                            "right": "--sp--s100",
+                            "bottom": "--sp--s100",
+                            "left": "--sp--s100"
+                        }
+                    ]
+                },
+                "add": {
+                    "normal": {
+                        "border": {
+                            "radius": [
+                                null,
+                                {
+                                    "top": "--sp--s075",
+                                    "right": "--sp--s075",
+                                    "bottom": "--sp--s075",
+                                    "left": "--sp--s075"
+                                }
+                            ]
+                        }
+                    },
+                    "pd": [
+                        null,
+                        {
+                            "top": "--sp--s100",
+                            "right": "--sp--s100",
+                            "bottom": "--sp--s100",
+                            "left": "--sp--s100"
+                        }
+                    ]
+                },
+                "border": {
+                    "radius": [
+                        null,
+                        {
+                            "top": "--sp--s150",
+                            "right": "--sp--s150",
+                            "bottom": "--sp--s150",
+                            "left": "--sp--s150"
+                        }
+                    ],
+                    "type": "1",
+                    "width": [
+                        null,
+                        {
+                            "top": "--sp--s012",
+                            "right": "--sp--s012",
+                            "bottom": "--sp--s012",
+                            "left": "--sp--s012"
+                        }
+                    ],
+                    "color": "var(--c--neutral-light-active)"
+                },
+                "mar": [
+                    null,
+                    {
+                        "top": "--sp--s0",
+                        "right": "--sp--s0",
+                        "bottom": "--sp--s150",
+                        "left": "--sp--s0"
+                    }
+                ]
+            },
+            "data": {
+                "list": {
+                    "AppID": 41,
+                    "ListID": "2070000590090153984",
+                    "Type": 1,
+                    "Title": "Data list page layouts",
+                    "ListSetID": "2068895004036448257"
+                }
+            },
+            "listarr": [
+                {
+                    "DisplayName": "",
+                    "FieldName": "Title",
+                    "Field": "Title",
+                    "Attrs": {
+                        "table": {
+                            "cw": [
+                                null,
+                                ""
+                            ],
+                            "cwu": [
+                                null,
+                                "px"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "DisplayName": "",
+                    "FieldName": "Id",
+                    "Field": "ListDataID"
+                },
+                {
+                    "DisplayName": "",
+                    "FieldName": "Created By",
+                    "Field": "CreatedBy"
+                },
+                {
+                    "DisplayName": "",
+                    "FieldName": "Created Time",
+                    "Field": "Created"
+                },
+                {
+                    "DisplayName": "",
+                    "FieldName": "Modified By",
+                    "Field": "ModifiedBy"
+                },
+                {
+                    "DisplayName": "",
+                    "FieldName": "Modified Time",
+                    "Field": "Modified"
+                }
+            ]
+        }
+    },
+    "_ak_c_opt": {}
+}

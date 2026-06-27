@@ -80,6 +80,12 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     "--package",
     resolvedPackage,
   ]));
+  gates.push(runGate("data-table-golden-references", [
+    "scripts/validate-data-table-golden-references.mjs",
+    "--package",
+    resolvedPackage,
+    ...(plan ? ["--plan", plan] : []),
+  ]));
   gates.push(runGate("data-list-form-layouts-v1.1", [
     "scripts/validate-data-list-form-layout-template.mjs",
     "--package",

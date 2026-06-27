@@ -1,0 +1,176 @@
+{
+  "version": "1.0.0",
+  "registryId": "data-table-golden-references",
+  "description": "Approved Data table golden reference templates for lightweight tabular record display on Dashboard pages, custom Data List forms, Approval form submission/task/print pages, Data List workflow task forms, and Schedule workflow task forms. Generated Data table controls must select one template by business need, clone the approved export-shaped data-list control, preserve locked style settings, and map only approved data-source, display-column, and caption text regions.",
+  "approvedTemplateIds": [
+    "data_table_control_standard_scroll",
+    "data_table_control_standard_no_scroll",
+    "data_table_control_caption_scroll"
+  ],
+  "allowedSurfaces": [
+    "dashboard",
+    "data-list-form",
+    "approval-form-submission",
+    "approval-form-task",
+    "approval-form-print-page",
+    "data-list-workflow-task",
+    "schedule-workflow-task"
+  ],
+  "references": [
+    {
+      "templateId": "data_table_control_standard_scroll",
+      "displayName": "Data Table Standard With Horizontal Scroll",
+      "sourceTemplate": "docs/reference/data-table-control-standard-scroll.template.json",
+      "controlType": "data-list",
+      "rootControlLabel": "Data table",
+      "columnWidthMode": "default-scroll",
+      "expectedTableCwt": [
+        null,
+        "0"
+      ],
+      "caption": false,
+      "editableRegions": [
+        "attrs.data.list",
+        "attrs.listarr"
+      ],
+      "lockedRule": "The Data table control style/layout settings must strictly preserve the exported standard-scroll template. Only the source list binding and display columns may change.",
+      "summary": "Standard Data table without caption, using Default column width so many fields may extend horizontally with a scrollbar.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report",
+        "Data Report"
+      ],
+      "whenToUse": [
+        "Use for lightweight tabular data display when users need more columns than comfortably fit in the visible width.",
+        "Use when preserving readable column width is more important than keeping every column visible at once.",
+        "Use when no built-in Data table caption/search/add/import/export toolbar is needed."
+      ],
+      "whenNotToUse": [
+        "Do not use for rich row cards, bulk-selection workflows, kanban boards, or timeline views.",
+        "Do not use when users need Data table caption search/add/import/export actions; use data_table_control_caption_scroll.",
+        "Do not use for small-column tables where a no-scroll fit is visually preferred; use data_table_control_standard_no_scroll."
+      ],
+      "requiredBusinessSignals": [
+        "tabular display",
+        "many fields",
+        "horizontal scroll acceptable",
+        "no caption toolbar",
+        "lightweight grid"
+      ],
+      "requiredAppPlanDeclaration": "Select data_table_control_standard_scroll when a Dashboard/form/workflow page needs a native Data table with enough columns that horizontal scrolling is acceptable. Declare the source object, visible business columns, no-caption reason, and proof boundary.",
+      "generationProof": [
+        "data-list Data table control cloned from docs/reference/data-table-control-standard-scroll.template.json",
+        "attrs.table.cwt preserved as [null,\"0\"]",
+        "caption display not enabled",
+        "attrs.data.list mapped to a legal source",
+        "attrs.listarr includes meaningful display columns with Field and FieldName"
+      ],
+      "proofBoundary": "Export-shaped Data table visual/control template only; not proof for Collection item templates, multi-select bulk tooling, kanban, timeline, chart, or pivot runtime behavior."
+    },
+    {
+      "templateId": "data_table_control_standard_no_scroll",
+      "displayName": "Data Table Standard No Horizontal Scroll",
+      "sourceTemplate": "docs/reference/data-table-control-standard-no-scroll.template.json",
+      "controlType": "data-list",
+      "rootControlLabel": "Data table",
+      "columnWidthMode": "auto-fit",
+      "expectedTableCwt": [
+        null,
+        "1"
+      ],
+      "caption": false,
+      "editableRegions": [
+        "attrs.data.list",
+        "attrs.listarr"
+      ],
+      "lockedRule": "The Data table control style/layout settings must strictly preserve the exported standard-no-scroll template. Only the source list binding and display columns may change.",
+      "summary": "Standard Data table without caption, using Auto column width so all columns fit within the control without horizontal scrolling.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list",
+        "Form Report",
+        "Data Report"
+      ],
+      "whenToUse": [
+        "Use for lightweight tabular display with a small number of columns, usually seven or fewer.",
+        "Use when avoiding a horizontal scrollbar is more important than preserving wide individual columns.",
+        "Use when no built-in Data table caption/search/add/import/export toolbar is needed."
+      ],
+      "whenNotToUse": [
+        "Do not use when the business table needs many columns and auto-fit would make each column cramped.",
+        "Do not use when users need Data table caption search/add/import/export actions; use data_table_control_caption_scroll.",
+        "Do not use for rich card, multi-select, kanban, or timeline presentation needs."
+      ],
+      "requiredBusinessSignals": [
+        "tabular display",
+        "few fields",
+        "no horizontal scroll",
+        "auto-fit columns",
+        "lightweight grid"
+      ],
+      "requiredAppPlanDeclaration": "Select data_table_control_standard_no_scroll when a Dashboard/form/workflow page needs a compact native Data table with a small column count and no horizontal scrolling. Declare the source object, visible business columns, no-caption reason, and proof boundary.",
+      "generationProof": [
+        "data-list Data table control cloned from docs/reference/data-table-control-standard-no-scroll.template.json",
+        "attrs.table.cwt preserved as [null,\"1\"]",
+        "caption display not enabled",
+        "attrs.data.list mapped to a legal source",
+        "attrs.listarr includes meaningful display columns with Field and FieldName"
+      ],
+      "proofBoundary": "Export-shaped Data table visual/control template only; not proof for dense many-column tables, Collection item templates, multi-select bulk tooling, kanban, timeline, chart, or pivot runtime behavior."
+    },
+    {
+      "templateId": "data_table_control_caption_scroll",
+      "displayName": "Data Table With Caption And Horizontal Scroll",
+      "sourceTemplate": "docs/reference/data-table-control-caption-scroll.template.json",
+      "controlType": "data-list",
+      "rootControlLabel": "Data table",
+      "columnWidthMode": "default-scroll",
+      "expectedTableCwt": [
+        null,
+        "0"
+      ],
+      "caption": true,
+      "editableRegions": [
+        "attrs.data.list",
+        "attrs.listarr",
+        "attrs.caption.title",
+        "attrs.caption.placeholder",
+        "attrs.caption.addtext"
+      ],
+      "lockedRule": "The Data table control style/layout settings and caption toolbar shape must strictly preserve the exported caption-scroll template. Only source binding, display columns, caption title, search placeholder, and add button text may change.",
+      "summary": "Data table with caption title, built-in search box, add item button, and more menu for import/export operations, using Default column width with horizontal scroll.",
+      "suitableSourceResourceTypes": [
+        "Data List",
+        "Document Library metadata list"
+      ],
+      "whenToUse": [
+        "Use when users need a native Data table plus table-level search.",
+        "Use when the Data table should expose add-record behavior.",
+        "Use when import/export actions are needed through the built-in more menu."
+      ],
+      "whenNotToUse": [
+        "Do not use for Form Report or Data Report display-only datasets unless add/import/export actions are intentionally disabled by an export-proven variant.",
+        "Do not use when the page only needs passive read-only tabular display; choose a standard Data table template.",
+        "Do not use for rich card, multi-select, kanban, or timeline presentation needs."
+      ],
+      "requiredBusinessSignals": [
+        "tabular display",
+        "search table",
+        "add record",
+        "import export",
+        "caption toolbar"
+      ],
+      "requiredAppPlanDeclaration": "Select data_table_control_caption_scroll when a Dashboard/form/workflow page needs a native Data table with caption title, search, add item, and import/export menu. Declare the source object, visible business columns, caption title, search placeholder, add button text, supported actions, and proof boundary.",
+      "generationProof": [
+        "data-list Data table control cloned from docs/reference/data-table-control-caption-scroll.template.json",
+        "attrs.table.cwt preserved as [null,\"0\"]",
+        "attrs.caption.display/search/add/showmore preserved as true",
+        "attrs.caption.title, placeholder, and addtext mapped to business text",
+        "attrs.data.list mapped to a legal source",
+        "attrs.listarr includes meaningful display columns with Field and FieldName"
+      ],
+      "proofBoundary": "Export-shaped Data table visual/control template only; not proof for custom action execution, Collection item templates, multi-select bulk tooling, kanban, timeline, chart, or pivot runtime behavior."
+    }
+  ]
+}
