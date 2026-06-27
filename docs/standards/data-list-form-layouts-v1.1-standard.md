@@ -16,18 +16,20 @@ Approved template ids:
 
 - `data_list_form_layout_new_edit_v1_1`
 - `data_list_form_layout_view_item_v1_1`
+- `data_list_form_layout_workbench`
 
 Source template files:
 
 - `docs/reference/data-list-form-layout-new-edit.template.json`
 - `docs/reference/data-list-form-layout-view-item.template.json`
+- `docs/reference/data-list-form-layout-workbench.template.json`
 
 Current-record field layout template:
 
 - `data_list_form_fields_grid_v1_1` from `docs/reference/data-list-form-field-layout-templates.json`
 - source file `docs/reference/data-list-form-fields-grid.template.json`
 
-The templates were parsed from the user-provided `Data list page layouts.ydl` export. The source Data List is `Data list page layouts`, with `New and Edit form` assigned to New Item/Edit Item and `View item` assigned to View Item.
+The templates were parsed from the user-provided `Data list page layouts.ydl` and `Data list page layouts (1).ydl` exports. The source Data List is `Data list page layouts`, with `New and Edit form` assigned to New Item/Edit Item, `View item` available for standard View Item pages, and `Workbench item details` available for full-page Workbench View Item pages.
 
 ## Template Selection
 
@@ -41,7 +43,7 @@ Do not use the Yeeflow built-in `default` layout for any generated business Data
 
 Use `data_list_form_layout_new_edit_v1_1` for every custom Data List form used as New Item or Edit Item. If a list uses separate New and Edit custom forms, both forms must use this template as their page layout source.
 
-Use `data_list_form_layout_view_item_v1_1` for every custom Data List form used as View Item.
+Use `data_list_form_layout_view_item_v1_1` for standard View Item custom forms. Use `data_list_form_layout_workbench` for View Item custom forms that need a full-page workbench with a primary working area, optional right-side panel, chart card sections, richer related datasets, KPI cards, and explicit record actions. Workbench View Item forms must be assigned to `ListModel.LayoutView.view` and opened as Full page; they must never be used for New Item or Edit Item.
 
 System/support lists may skip custom forms only when the App Plan explicitly declares a system/support-list form-layout exemption with the reason, runtime impact, and proof boundary. Silent omission, empty `LayoutView`, missing `add`/`edit`/`view`, or literal `default` is not generation-ready.
 
@@ -75,6 +77,9 @@ Supported section patterns:
 - 60/40 2-column section
 - KPI metrics wrapper on View Item forms
 - page title section on View Item forms
+- Workbench full-page item-detail shell
+- optional right-side Workbench panel
+- Workbench chart cards section
 
 Each content card must preserve:
 
@@ -94,6 +99,9 @@ Business-specific content may be added or changed only inside these containers:
 - `section_content_area`
 - `section_title_header`
 - `kpi_card_wrapper`
+- `primary_working_area`
+- `right_side_panel`
+- `chart_cards_section`
 
 Within `page_title_content`, the text of `page_title_text` and `page_title_description` may change to match the current Data List form purpose.
 
@@ -104,6 +112,8 @@ Within `Operations`, generated controls must be real configured action controls.
 Within `section_content_area`, generated resources may insert current-record field controls, Dynamic user/image/file/field controls, related record display components, approved Collection templates, approved Data Analytics templates, or other plugin-supported controls appropriate to the form type. For Data List Form Layouts v1.1, these business-content `section_content_area` regions must belong to an approved content card wrapper: `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`.
 
 On View Item forms, Data Analytics golden reference templates from `docs/reference/data-analytics-golden-references.json` may be placed in `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`. The generator must clone the full approved template subtree, preserve locked style/layout/typography properties, and map only the approved title/data-binding editable regions. New/Edit forms must not use Data Analytics templates.
+
+On `data_list_form_layout_workbench`, Data Analytics golden reference templates should be placed inside `chart_cards_section` under `primary_working_area` or `right_side_panel`. A single `chart_cards_section` should contain no more than three Data Analytics templates. If more analytics modules are needed, copy another `chart_cards_section` from the Workbench template. If no Data Analytics or business content is planned for a `chart_cards_section`, remove that section. If the entire `right_side_panel` has no real business content, remove `right_side_panel`.
 
 Current-record Data List fields must be placed inside the approved `data_list_form_fields_grid_v1_1` field-layout template. Do not place field controls directly in `section_content_area`. If the form has many fields, create multiple approved content-card sections and put one `form_grid_fields_wrapper` inside each section's `section_content_area`. The approved host wrappers are `content_card_wrapper`, `content_card_60_wrapper`, and `content_card_40_wrapper`. Field controls inside the wrapper must receive business-specific `nv_label`/`nav_label` values. Sub list fields must use the control-level `data_list_form_control_sublist_v1_1` template and preserve its locked style/table/header/card settings.
 
@@ -122,6 +132,12 @@ Generated forms must remove unused modules. New modules may only be created by c
 - `2_columns_60/40_section`
 - `kpi_metrics_wrapper`
 - `kpi_card_wrapper`
+- `kpi_cards_kpi_row`
+- `1_row_section`
+- `2_rows_section`
+- `3_rows_section`
+- `chart_cards_section`
+- `right_side_panel`
 
 Copied modules must preserve the template's structure, hierarchy, control types, width, padding, direction, gap, background, typography, and required children. Do not invent new form layout modules.
 
@@ -158,7 +174,7 @@ They must not contain:
 
 ## View Item Form Rules
 
-View Item forms must use `data_list_form_layout_view_item_v1_1`.
+Standard View Item forms must use `data_list_form_layout_view_item_v1_1`.
 
 They must include:
 
@@ -180,6 +196,34 @@ They may contain:
 
 Dashboard Page Layouts v1.1 and Dashboard component golden references remain component sources only. Do not copy a Dashboard page root shell into a Data List form as a competing root shell.
 
+## Workbench View Item Form Rules
+
+Workbench View Item forms must use `data_list_form_layout_workbench`.
+
+They must include:
+
+- `page_title_header`
+- `page_title_content`
+- `page_title_text`
+- `page_title_description`
+- `main_work_queue_section`
+- `main_work_queue_wrapper`
+- `primary_working_area`
+
+They may contain:
+
+- current item display fields
+- related business data
+- approved Dashboard Collection templates
+- approved Data Analytics templates inside `chart_cards_section`
+- Summary-backed KPI cards
+- filters grouped in approved filter regions
+- configured record action controls such as edit/delete buttons
+
+They must preserve `attrs.hideop = true` so the generated full-page item details view hides default operation buttons. Any visible operation controls must be generated explicitly and must carry real Yeeflow actions. `ListModel.LayoutView.view` must point to the Workbench Type `1` layout, and `ListModel.LayoutView.opentype.view` must open it as Full page.
+
+Workbench `right_side_panel` is optional. Keep it only when it contains real business content. Workbench `chart_cards_section` is optional. Keep it only when it contains Data Analytics templates or other planned business content, and prefer creating another `chart_cards_section` when more than three analytics modules are required.
+
 ## App Plan Requirements
 
 The App Plan Custom Data List Forms Plan must select the correct Data List Form Layout template for each Data List or Document Library from Section 4, unless the list is explicitly documented as a system/support-list exemption.
@@ -195,7 +239,8 @@ Rules:
 - Every business Data List or Document Library planned in Section 4 must have New/Edit and View custom form rows in Section 10.
 - Select exactly one approved template per custom Data List form.
 - New/Edit forms must select `data_list_form_layout_new_edit_v1_1`.
-- View forms must select `data_list_form_layout_view_item_v1_1`.
+- Standard View forms must select `data_list_form_layout_view_item_v1_1`.
+- Full-page Workbench View forms must select `data_list_form_layout_workbench` and declare Open in: Full page.
 - Default New/Edit/View layouts are forbidden for generated business lists.
 - System/support-list exemptions must be explicit and must include a reason, user impact, fallback, and proof boundary.
 - Do not include generated `ListID`, `LayoutID`, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
@@ -227,7 +272,8 @@ The package gate must fail when a generated business list:
 - assigns any of those usages to literal `default`
 - points any usage to a missing layout or a non-Type `1` layout
 - assigns New/Edit to a form that does not carry `data_list_form_layout_new_edit_v1_1`
-- assigns View to a form that does not carry `data_list_form_layout_view_item_v1_1`
+- assigns View to a form that does not carry `data_list_form_layout_view_item_v1_1` or `data_list_form_layout_workbench`
+- assigns `data_list_form_layout_workbench` to New/Edit or to a View form that is not configured to open as Full page
 - keeps an empty `section_content_area` inside a visible content card wrapper
 - keeps a copied section module that has only template title/description text and no real business content
 - retains unrelated source-template labels in generated form sections instead of mapping them to the current Data List purpose

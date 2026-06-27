@@ -12,6 +12,7 @@ const DASHBOARD_V11_TEMPLATE_PATH = path.join(ROOT, "docs/reference/dashboard-pa
 const DATA_LIST_FORM_TEMPLATE_PATHS = {
   newEdit: path.join(ROOT, "docs/reference/data-list-form-layout-new-edit.template.json"),
   view: path.join(ROOT, "docs/reference/data-list-form-layout-view-item.template.json"),
+  workbench: path.join(ROOT, "docs/reference/data-list-form-layout-workbench.template.json"),
 };
 const APPROVAL_FORM_TEMPLATE_PATHS = {
   submission: path.join(ROOT, "docs/reference/approval-form-layout-submission.template.json"),
@@ -453,6 +454,10 @@ function collectCustomFormRecords(planText) {
     const normalizedHeaders = headers.map((header) => normKey(header));
     const formColumn = findHeaderIndex(normalizedHeaders, ["form name", "custom form name"]);
     const typeColumn = findHeaderIndex(normalizedHeaders, ["form type", "type", "purpose"]);
+    const usageColumn = findHeaderIndex(normalizedHeaders, ["form usage", "usage"]);
+    const templateColumn = findHeaderIndex(normalizedHeaders, ["selected data list form layout template", "data list form layout template", "selected layout template"]);
+    const openColumn = findHeaderIndex(normalizedHeaders, ["open in", "open mode", "display mode"]);
+    const reasonColumn = findHeaderIndex(normalizedHeaders, ["selection reason", "proof boundary", "business sections needed"]);
     if (formColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
@@ -463,13 +468,24 @@ function collectCustomFormRecords(planText) {
         continue;
       }
       const key = `${normKey(currentList)}::${normKey(formName)}`;
+      const selectedTemplate = templateColumn === -1 ? "" : cleanResourceName(cells[templateColumn]);
+      const openIn = openColumn === -1 ? "" : cleanResourceName(cells[openColumn]);
+      const reason = reasonColumn === -1 ? "" : cleanResourceName(cells[reasonColumn]);
+      const formType = typeColumn === -1 ? (usageColumn === -1 ? "" : cleanResourceName(cells[usageColumn])) : cleanResourceName(cells[typeColumn]);
+      const record = {
+        listName: currentList,
+        formName,
+        formType,
+        selectedTemplate,
+        openIn,
+        selectionReason: reason,
+      };
       if (!seen.has(key)) {
         seen.add(key);
-        records.push({
-          listName: currentList,
-          formName,
-          formType: typeColumn === -1 ? "" : cleanResourceName(cells[typeColumn]),
-        });
+        records.push(record);
+      } else if (selectedTemplate || openIn || reason) {
+        const existing = records.find((item) => `${normKey(item.listName)}::${normKey(item.formName)}` === key);
+        if (existing) Object.assign(existing, Object.fromEntries(Object.entries(record).filter(([, value]) => value)));
       }
       rowIndex += 1;
     }
@@ -844,18 +860,31 @@ function customFormUsage(record) {
 
 function buildDataListFormDisplaySettings({ customLayoutsForList, ids }) {
   const byUsage = new Map();
+  const viewAssignmentById = new Map();
   for (const assignment of customLayoutsForList) {
     const usage = customFormUsage(assignment);
     if (!usage || byUsage.has(usage)) continue;
-    byUsage.set(usage, stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]));
+    const layoutId = stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]);
+    byUsage.set(usage, layoutId);
+    if (usage === "view") viewAssignmentById.set(layoutId, assignment);
   }
   const newEditLayoutId = byUsage.get("newEdit") || byUsage.get("view") || "";
   const viewLayoutId = byUsage.get("view") || newEditLayoutId;
-  return {
+  const settings = {
     add: newEditLayoutId,
     edit: newEditLayoutId,
     view: viewLayoutId,
   };
+  if (isWorkbenchCustomForm(viewAssignmentById.get(viewLayoutId))) {
+    settings.opentype = { view: "new" };
+    settings.modalsize = {};
+  }
+  return settings;
+}
+
+function isWorkbenchCustomForm(record) {
+  const text = `${record?.formType || ""} ${record?.formName || ""} ${record?.selectedTemplate || ""} ${record?.openIn || ""}`.toLowerCase();
+  return /\bworkbench\b/.test(text) || text.includes("data_list_form_layout_workbench");
 }
 
 function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
@@ -897,8 +926,8 @@ function defaultValueForFieldType(fieldType) {
 }
 
 function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", fields }) {
-  const templateKind = /\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit";
-  const templateId = templateKind === "view" ? "data_list_form_layout_view_item_v1_1" : "data_list_form_layout_new_edit_v1_1";
+  const templateKind = isWorkbenchCustomForm({ formName, formType }) ? "workbench" : (/\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit");
+  const templateId = templateKind === "workbench" ? "data_list_form_layout_workbench" : (templateKind === "view" ? "data_list_form_layout_view_item_v1_1" : "data_list_form_layout_new_edit_v1_1");
   const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields });
   const resourceJson = JSON.stringify(resource);
   return {
@@ -929,8 +958,8 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   resource.title = formName;
   removeOperationsWithoutActions(resource);
   setTemplateText(resource, "section_title_text", formName);
-  setTemplateText(resource, "section_title_description", templateKind === "view" ? `Review ${listName} details and related context.` : `Capture and maintain ${listName} item details.`);
-  if (templateKind === "view") {
+  setTemplateText(resource, "section_title_description", templateKind === "newEdit" ? `Capture and maintain ${listName} item details.` : `Review ${listName} details and related context.`);
+  if (templateKind === "view" || templateKind === "workbench") {
     setTemplateText(resource, "page_title_text", formName);
     setTemplateText(resource, "page_title_description", `View ${listName} record details and related operational context.`);
   }
@@ -954,7 +983,7 @@ function buildDataListFormFieldsGrid({ fields, formName, listId, listName, templ
 }
 
 function buildDataListFormFieldControl({ field, index, formName, listId, listName, templateKind }) {
-  const type = templateKind === "view" && !isSubListFormField(field) ? dynamicControlTypeForField(field) : normalizeControlType(field.Type || field.FieldType || field.DisplayName);
+  const type = (templateKind === "view" || templateKind === "workbench") && !isSubListFormField(field) ? dynamicControlTypeForField(field) : normalizeControlType(field.Type || field.FieldType || field.DisplayName);
   if (isSubListFormField(field, type)) {
     return buildDataListFormSubListControl({ field, index, formName, listId, listName });
   }
@@ -2504,11 +2533,12 @@ function removeOperationsWithoutActions(root) {
 }
 
 function removeEmptyBusinessSections(root) {
-  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
   const visit = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       visit(child);
+      if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });

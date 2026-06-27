@@ -11,6 +11,7 @@ const DASHBOARD_V11_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_WORKBENCH_TEMPLATE_ID = "dashboard-page-layouts-workbench";
 const DATA_LIST_FORM_NEW_EDIT_TEMPLATE_ID = "data_list_form_layout_new_edit_v1_1";
 const DATA_LIST_FORM_VIEW_TEMPLATE_ID = "data_list_form_layout_view_item_v1_1";
+const DATA_LIST_FORM_WORKBENCH_TEMPLATE_ID = "data_list_form_layout_workbench";
 const ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table"]);
 const APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS = new Set(["content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
 const APPROVED_WORKBENCH_ANALYTICS_HOST_IDS = new Set(["chart_cards_section"]);
@@ -280,6 +281,7 @@ function validateResource(resource, context) {
   const isDashboardWorkbench = context.surface === "dashboard" && resourceHasIdentity(resource, DASHBOARD_WORKBENCH_TEMPLATE_ID);
   const isDataListFormNewEdit = context.surface === "data-list-form" && resourceHasIdentity(resource, DATA_LIST_FORM_NEW_EDIT_TEMPLATE_ID);
   const isDataListFormView = context.surface === "data-list-form" && resourceHasIdentity(resource, DATA_LIST_FORM_VIEW_TEMPLATE_ID);
+  const isDataListFormWorkbench = context.surface === "data-list-form" && resourceHasIdentity(resource, DATA_LIST_FORM_WORKBENCH_TEMPLATE_ID);
   for (const entry of analyticsControls) {
     const provenance = resolveTemplateProvenance(entry, index, context.references);
     if (!provenance.templateId) {
@@ -312,6 +314,9 @@ function validateResource(resource, context) {
     }
     if (isDataListFormView && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
       context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_VIEW_V11_SECTION_PLACEMENT_INVALID", "Data List Form Layouts v1.1 View Item Data Analytics templates must be placed inside content_card_wrapper, 2_columns_section, 3_columns_section, or 2_columns_60/40_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS] }));
+    }
+    if (isDataListFormWorkbench && !hasAncestorInSet(entry, APPROVED_WORKBENCH_ANALYTICS_HOST_IDS)) {
+      context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_WORKBENCH_CHART_SECTION_PLACEMENT_INVALID", "Workbench Data List View Item Data Analytics templates must be placed inside chart_cards_section under primary_working_area or right_side_panel.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_WORKBENCH_ANALYTICS_HOST_IDS] }));
     }
     validateRuntimeBinding(resource, entry, reference, context);
   }

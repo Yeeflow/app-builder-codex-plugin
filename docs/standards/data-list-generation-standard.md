@@ -38,7 +38,8 @@ Generated custom Data List forms must use Data List Form Layouts v1.1 when they 
 Approved page-level templates:
 
 - `data_list_form_layout_new_edit_v1_1` for New Item and Edit Item forms
-- `data_list_form_layout_view_item_v1_1` for View Item forms
+- `data_list_form_layout_view_item_v1_1` for standard View Item forms
+- `data_list_form_layout_workbench` for full-page Workbench View Item forms
 
 The source registry is `docs/reference/data-list-form-layout-templates.json`.
 
