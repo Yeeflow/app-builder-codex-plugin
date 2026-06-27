@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.72
+
+- Release Collection runtime visibility and Approval task readonly gates from PR #283.
+- Require generated Dashboard Collections to include resolved Primary order/sort metadata so initial runtime data visibility is deterministic.
+- Require Collection fulltext and Dynamic control field-binding surfaces to resolve against the selected source list schema, including `dynamic-user` controls for user/identity fields.
+- Update full-app materialization to write `attrs.source`, `attrs["obj-f"]`, `attrs.data.field`, `attrs.user.field`, and top-level field surfaces consistently for generated Dynamic field and Dynamic user controls.
+- Require Approval task forms to mirror Submission form business fields as runtime-effective readonly review context unless an App Plan explicitly excludes or makes fields editable, using both top-level and attrs readonly/readOnly flags.
+
 ## 0.8.71
 
 - Release Data table control golden reference templates from PR #281.
