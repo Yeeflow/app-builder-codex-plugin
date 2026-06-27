@@ -7,16 +7,20 @@ import { asArray, isObject, parseJsonMaybe, readDecodedYapk } from "./lib/yapk-d
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/data-list-form-layout-templates.json");
-const TEMPLATE_IDS = new Set(["data_list_form_layout_new_edit_v1_1", "data_list_form_layout_view_item_v1_1"]);
+const TEMPLATE_IDS = new Set(["data_list_form_layout_new_edit_v1_1", "data_list_form_layout_view_item_v1_1", "data_list_form_layout_workbench"]);
 const NEW_EDIT_TEMPLATE_ID = "data_list_form_layout_new_edit_v1_1";
 const VIEW_TEMPLATE_ID = "data_list_form_layout_view_item_v1_1";
+const WORKBENCH_TEMPLATE_ID = "data_list_form_layout_workbench";
+const VIEW_TEMPLATE_IDS = new Set([VIEW_TEMPLATE_ID, WORKBENCH_TEMPLATE_ID]);
 const BACKGROUND = "#f4f7fb";
 const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" };
-const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header", "kpi_card_wrapper"]);
-const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper", "kpi_card_wrapper"]);
-const REMOVABLE_SECTION_MODULES = new Set(["1_columns_section", "content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header", "kpi_card_wrapper", "primary_working_area", "right_side_panel", "chart_cards_section"]);
+const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper", "kpi_card_wrapper", "kpi_cards_kpi_row", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
+const REMOVABLE_SECTION_MODULES = new Set(["1_columns_section", "content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
 const REQUIRED_NEW_EDIT_REGIONS = ["main", "content", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area"];
 const REQUIRED_VIEW_REGIONS = ["main", "content", "page_title_section", "page_title_content", "page_title_text", "page_title_description", "kpi_metrics_wrapper", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area"];
+const REQUIRED_WORKBENCH_REGIONS = ["main", "content", "page_title_header", "page_title_content", "page_title_text", "page_title_description", "main_work_queue_section", "main_work_queue_wrapper", "primary_working_area"];
+const WORKBENCH_ROOT_MODULES = new Set(["page_title_header", "section_content_area", "kpi_cards_kpi_row", "main_work_queue_section"]);
 const DATA_ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table", "summary"]);
 const DATASET_TYPES = new Set(["collection", "data-table", "datatable", "data-list", "kanban", "timeline-v", "timeline-h", "document-library"]);
 const FORM_USAGES = ["add", "edit", "view"];
@@ -156,8 +160,11 @@ function validateAppPlan(planPath, findings) {
     if (/(new|edit)/.test(lower) && !line.includes(NEW_EDIT_TEMPLATE_ID)) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_TEMPLATE_MISMATCH", "New/Edit custom Data List forms must select data_list_form_layout_new_edit_v1_1.", { row: line }));
     }
-    if (/\bview\b/.test(lower) && !line.includes(VIEW_TEMPLATE_ID)) {
-      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH", "View custom Data List forms must select data_list_form_layout_view_item_v1_1.", { row: line }));
+    if (/\bview\b/.test(lower) && ![...VIEW_TEMPLATE_IDS].some((id) => line.includes(id))) {
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH", "View custom Data List forms must select data_list_form_layout_view_item_v1_1 or data_list_form_layout_workbench.", { row: line }));
+    }
+    if (line.includes(WORKBENCH_TEMPLATE_ID) && !/full\s*page/i.test(line)) {
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_WORKBENCH_FULL_PAGE_REQUIRED", "Workbench View custom Data List forms must declare Full page opening in the App Plan.", { row: line }));
     }
   }
 }
@@ -181,7 +188,7 @@ function validateAppPlanListCoverage(text, findings) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_FORM_REQUIRED", "Every planned Data List or Document Library must plan a New/Edit custom form using data_list_form_layout_new_edit_v1_1. Default New/Edit layouts are not generation-ready.", { list }));
     }
     if (!hasViewPlan(evidence)) {
-      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_FORM_REQUIRED", "Every planned Data List or Document Library must plan a View custom form using data_list_form_layout_view_item_v1_1. Default View layouts are not generation-ready.", { list }));
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_FORM_REQUIRED", "Every planned Data List or Document Library must plan a View custom form using data_list_form_layout_view_item_v1_1 or data_list_form_layout_workbench. Default View layouts are not generation-ready.", { list }));
     }
   }
 }
@@ -229,7 +236,8 @@ function validateRootShell(resource, context) {
 function validateUsageContract(resource, templateId, context) {
   const expected = String(context.formUsage || "").toLowerCase();
   const newEditExpected = templateId === NEW_EDIT_TEMPLATE_ID || /new|edit/.test(expected);
-  const viewExpected = templateId === VIEW_TEMPLATE_ID || /\bview\b/.test(expected);
+  const workbenchExpected = templateId === WORKBENCH_TEMPLATE_ID;
+  const viewExpected = !workbenchExpected && (templateId === VIEW_TEMPLATE_ID || /\bview\b/.test(expected));
   if (newEditExpected) {
     for (const id of REQUIRED_NEW_EDIT_REGIONS) requireIdentity(resource, id, context, "DATA_LIST_FORM_LAYOUT_NEW_EDIT_REQUIRED_REGION_MISSING");
     for (const id of ["page_title_section", "kpi_metrics_wrapper"]) {
@@ -247,9 +255,19 @@ function validateUsageContract(resource, templateId, context) {
   if (viewExpected) {
     for (const id of REQUIRED_VIEW_REGIONS) requireIdentity(resource, id, context, "DATA_LIST_FORM_LAYOUT_VIEW_REQUIRED_REGION_MISSING");
   }
+  if (workbenchExpected) {
+    for (const id of REQUIRED_WORKBENCH_REGIONS) requireIdentity(resource, id, context, "DATA_LIST_FORM_LAYOUT_WORKBENCH_REQUIRED_REGION_MISSING");
+    if (/new|edit/.test(expected)) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_FORBIDDEN_NEW_EDIT", "data_list_form_layout_workbench may only be used for View Item custom forms, never New Item or Edit Item.", { source: context.source, formUsage: context.formUsage || "" }));
+    }
+    if (resource?.attrs?.hideop !== true) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_HIDE_DEFAULT_OPERATIONS_REQUIRED", "Workbench View forms must keep hide default operation buttons enabled and expose only explicitly configured operation controls.", { source: context.source, actual: resource?.attrs?.hideop ?? null }));
+    }
+  }
 }
 
 function validateBusinessSlots(resource, context) {
+  const workbenchContext = (context.templateId || resolveTemplateId(resource)) === WORKBENCH_TEMPLATE_ID;
   for (const card of findAllByIdentity(resource, "content_card_wrapper")) {
     if (!findFirstByIdentity(card, "section_title_area")) {
       context.findings.push(error("DATA_LIST_FORM_LAYOUT_SECTION_TITLE_AREA_MISSING", "Every content_card_wrapper must preserve section_title_area.", { source: context.source }));
@@ -262,6 +280,11 @@ function validateBusinessSlots(resource, context) {
     }
   }
   if (!context.registryMode) {
+    for (const area of findAllByIdentity(resource, "section_content_area")) {
+      if (!hasMeaningfulBusinessContent(area)) {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA", "Generated Data List form section_content_area containers must be removed when they do not contain real business content.", { source: context.source, path: pointerForNode(resource, area) }));
+      }
+    }
     for (const entry of flatten(resource)) {
       const ids = identityCandidates(entry.node);
       const isRemovableModule = ids.some((id) => REMOVABLE_SECTION_MODULES.has(id));
@@ -291,16 +314,35 @@ function validateBusinessSlots(resource, context) {
   const content = findFirstByIdentity(resource, "content") || findFirstByIdentity(resource, "Content");
   for (const child of asArray(content?.children)) {
     const ids = identityCandidates(child);
-    const knownSection = ids.some((id) => REPEATABLE_MODULES.has(id) || id === "page_title_section");
+    const knownSection = ids.some((id) => REPEATABLE_MODULES.has(id) || id === "page_title_section" || (workbenchContext && WORKBENCH_ROOT_MODULES.has(id)));
     if (!knownSection) {
       context.findings.push(error("DATA_LIST_FORM_LAYOUT_INVENTED_ROOT_MODULE", "Business controls or invented layout modules must not be direct children of root Content; copy an approved section module and place business content in an allowed slot.", { source: context.source, identities: ids }));
     }
   }
+  if (workbenchContext) validateWorkbenchBusinessRules(resource, context);
   for (const entry of flatten(resource)) {
     const type = String(entry.node?.type || "");
     if (!isBusinessControlType(type)) continue;
     if (isInsideAllowedBusinessSlot(entry, resource)) continue;
     context.findings.push(error("DATA_LIST_FORM_LAYOUT_BUSINESS_CONTROL_OUTSIDE_ALLOWED_SLOT", "Business controls must be placed only inside approved Data List Form v1.1 business-content slots.", { source: context.source, path: entry.pointer, type, identities: identityCandidates(entry.node) }));
+  }
+}
+
+function validateWorkbenchBusinessRules(resource, context) {
+  if (context.registryMode) return;
+  for (const section of findAllByIdentity(resource, "chart_cards_section")) {
+    if (!hasMeaningfulBusinessContent(section)) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_CHART_CARDS_SECTION", "Workbench chart_cards_section is optional and must be removed when no Data Analytics or other business content is materialized.", { source: context.source, path: pointerForNode(resource, section) }));
+    }
+    const analyticsCount = flatten(section).filter((entry) => DATA_ANALYTICS_TYPES.has(String(entry.node?.type || ""))).length;
+    if (analyticsCount > 3) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_CHART_CARDS_SECTION_TOO_MANY_ANALYTICS", "Workbench chart_cards_section should contain no more than three Data Analytics templates; create another chart_cards_section when more are needed.", { source: context.source, path: pointerForNode(resource, section), analyticsCount }));
+    }
+  }
+  for (const panel of findAllByIdentity(resource, "right_side_panel")) {
+    if (!hasMeaningfulBusinessContent(panel)) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_RIGHT_SIDE_PANEL", "Workbench right_side_panel is optional and must be removed when it has no real business content.", { source: context.source, path: pointerForNode(resource, panel) }));
+    }
   }
 }
 
@@ -436,6 +478,14 @@ function validateListDisplayAssignments(decoded, context) {
       if (Number(layout?.Type) !== 1) {
         context.findings.push(error("DATA_LIST_FORM_LAYOUT_USAGE_NOT_CUSTOM_FORM", "Data List form display setting must point to a Type 1 custom Data List form layout.", { list: listTitle, usage, layoutId, actualType: layout?.Type ?? null, childIndex }));
       }
+      const layoutResource = parseResource(asArray(layout?.LayoutInResources)[0]?.Resource || layout?.LayoutView);
+      const selectedTemplate = resolveTemplateId(layoutResource);
+      if (selectedTemplate === WORKBENCH_TEMPLATE_ID && usage !== "view") {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_FORBIDDEN_DISPLAY_USAGE", "data_list_form_layout_workbench can only be assigned to ListModel.LayoutView.view.", { list: listTitle, usage, layoutId, childIndex }));
+      }
+      if (usage === "view" && selectedTemplate === WORKBENCH_TEMPLATE_ID && String(layoutView?.opentype?.view || "").toLowerCase() !== "new") {
+        context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_VIEW_FULL_PAGE_REQUIRED", "Workbench item-detail View forms must be opened as Full page through ListModel.LayoutView.opentype.view.", { list: listTitle, usage, layoutId, expectedOpenType: "new", actualOpenType: layoutView?.opentype?.view ?? null, childIndex }));
+      }
     }
   }
 }
@@ -472,6 +522,10 @@ function buildUsageByLayoutId(decoded) {
 
 function inferExpectedTemplate(form, usages) {
   const title = String(form.title || "").toLowerCase();
+  const marker = resolveTemplateId(form.resource) || resolveTemplateId(form.layoutViewResource);
+  if (marker === WORKBENCH_TEMPLATE_ID || /\bworkbench\b/.test(title)) return { templateId: WORKBENCH_TEMPLATE_ID, formUsage: "view" };
+  if (marker === VIEW_TEMPLATE_ID) return { templateId: VIEW_TEMPLATE_ID, formUsage: "view" };
+  if (marker === NEW_EDIT_TEMPLATE_ID) return { templateId: NEW_EDIT_TEMPLATE_ID, formUsage: "new/edit" };
   if (usages.includes("view") || /\bview\b|detail/.test(title)) return { templateId: VIEW_TEMPLATE_ID, formUsage: "view" };
   if (usages.includes("add") || usages.includes("edit") || /new|edit|create/.test(title)) return { templateId: NEW_EDIT_TEMPLATE_ID, formUsage: "new/edit" };
   return { templateId: "", formUsage: "" };
@@ -631,7 +685,7 @@ function hasNewEditPlan(text) {
 
 function hasViewPlan(text) {
   const body = String(text || "");
-  return body.includes(VIEW_TEMPLATE_ID) && /\bview\b|detail/i.test(body);
+  return [...VIEW_TEMPLATE_IDS].some((id) => body.includes(id)) && /\bview\b|detail/i.test(body);
 }
 
 function cleanName(value) {

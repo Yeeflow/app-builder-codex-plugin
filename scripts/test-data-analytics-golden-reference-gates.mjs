@@ -21,12 +21,14 @@ try {
   expectPass("Workbench dashboard analytics inside chart_cards_section pass", ["--resource", writeJson("valid-workbench-dashboard.json", workbenchDashboardResource()), "--surface", "dashboard"]);
   expectPass("Data List View Item form analytics inside approved content card and multi-column sections pass", ["--resource", writeJson("valid-data-list-form.json", dataListFormResource()), "--surface", "data-list-form"]);
   expectPass("Data List View Item form analytics inside 60/40 section pass", ["--resource", writeJson("valid-data-list-form-6040.json", dataListFormResource({ only6040: true })), "--surface", "data-list-form"]);
+  expectPass("Workbench Data List View Item form analytics inside chart_cards_section pass", ["--resource", writeJson("valid-workbench-data-list-form.json", dataListFormWorkbenchResource()), "--surface", "data-list-form"]);
 
   expectCode("Approval form analytics usage is forbidden", ["--resource", writeJson("approval-form.json", approvalFormResource()), "--surface", "approval-form"], "DATA_ANALYTICS_APPROVAL_FORM_FORBIDDEN");
   expectCode("Data List New/Edit form analytics usage is forbidden", ["--resource", writeJson("new-edit-data-list-form.json", dataListFormResource({ newEdit: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_NEW_EDIT_FORBIDDEN");
   expectCode("Dashboard v1.1 analytics outside approved content card or multi-column sections fail", ["--resource", writeJson("outside-section.json", dashboardResource({ outsideSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID");
   expectCode("Workbench dashboard analytics outside chart_cards_section fail", ["--resource", writeJson("outside-workbench-chart-section.json", workbenchDashboardResource({ outsideChartSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_WORKBENCH_CHART_SECTION_PLACEMENT_INVALID");
   expectCode("Data List View Item form analytics outside approved content card or multi-column sections fail", ["--resource", writeJson("outside-data-list-form-section.json", dataListFormResource({ outsideSection: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_VIEW_V11_SECTION_PLACEMENT_INVALID");
+  expectCode("Workbench Data List View Item form analytics outside chart_cards_section fail", ["--resource", writeJson("outside-workbench-data-list-form-section.json", dataListFormWorkbenchResource({ outsideChartSection: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_WORKBENCH_CHART_SECTION_PLACEMENT_INVALID");
   expectCode("Simplified chart without approved wrapper fails", ["--resource", writeJson("missing-wrapper.json", dashboardResource({ missingWrapper: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_WRAPPER_MISSING");
   expectCode("Unknown analytics template ID fails", ["--resource", writeJson("unknown-template.json", dashboardResource({ unknownTemplate: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_UNKNOWN");
   expectCode("Chart-with-title template requires title control", ["--resource", writeJson("missing-title.json", dashboardResource({ missingTitle: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING");
@@ -243,6 +245,33 @@ function dataListFormResource(options = {}) {
         section("2_columns_section", analytics.slice(1, 2)),
         section("3_columns_section", analytics.slice(2)),
       ]),
+    ],
+  };
+  addAnalyticsRuntimeBindings(resource);
+  return resource;
+}
+
+function dataListFormWorkbenchResource(options = {}) {
+  const analytics = [
+    chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
+    chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
+  ];
+  const resource = {
+    type: "form",
+    nv_label: "data_list_form_layout_workbench",
+    templateId: "data_list_form_layout_workbench",
+    children: options.outsideChartSection ? analytics : [
+      {
+        type: "container",
+        nv_label: "primary_working_area",
+        children: [
+          {
+            type: "container",
+            nv_label: "chart_cards_section",
+            children: analytics,
+          },
+        ],
+      },
     ],
   };
   addAnalyticsRuntimeBindings(resource);

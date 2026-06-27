@@ -325,13 +325,14 @@ Required for every Section 4 Data List or Document Library. Each business list m
 
 Rules:
 
-- The Selected Data List Form Layout Template must be one of `data_list_form_layout_new_edit_v1_1` or `data_list_form_layout_view_item_v1_1` from `docs/reference/data-list-form-layout-templates.json`.
+- The Selected Data List Form Layout Template must be one of `data_list_form_layout_new_edit_v1_1`, `data_list_form_layout_view_item_v1_1`, or `data_list_form_layout_workbench` from `docs/reference/data-list-form-layout-templates.json`.
 - New Item and Edit Item custom forms must select `data_list_form_layout_new_edit_v1_1`. If New and Edit use separate forms, both must still select this template.
-- View Item custom forms must select `data_list_form_layout_view_item_v1_1`.
+- Standard View Item custom forms must select `data_list_form_layout_view_item_v1_1`.
+- Full-page Workbench View Item custom forms must select `data_list_form_layout_workbench` and explicitly state `Open in: Full page` in the row's business sections, selection reason, or proof boundary.
 - Default New/Edit/View layouts are forbidden for generated business Data Lists and Document Libraries.
 - System/support-list exemptions must be explicit; silent omission of custom forms is not generation-ready.
 - New/Edit forms focus on the current list item and must not plan related Collection/Data Analytics/KPI regions.
-- View Item forms may plan current-record display plus related business data, approved Collection templates, approved Data Analytics templates, and KPI regions inside the v1.1 allowed slots. Field-grid and Collection templates may use the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` depending on the required section width.
+- View Item forms may plan current-record display plus related business data, approved Collection templates, approved Data Analytics templates, and KPI regions inside the v1.1 allowed slots. Field-grid and Collection templates may use the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` depending on the required section width. Workbench View Item forms may use `primary_working_area`, optional `right_side_panel`, and `chart_cards_section`; empty Workbench right panels or chart sections must be pruned.
 - App Plan selection is a business/layout decision only. It must not include generated `ListID`, `LayoutID`, action type codes, JSON property paths, placeholder IDs, copied control JSON, or runtime payload fields.
 
 #### Form Fields

@@ -13,7 +13,7 @@ For every generated Type `1` custom form layout on a Data List or Document Libra
 - `Layout.LayoutView` and `LayoutInResources[0].Resource` must be semantically equivalent after stable JSON normalization.
 - The rendered form resource must contain the actual form tree, including `children`, the selected Data List Form Layouts v1.1 template provenance, and business field controls.
 - New/Edit forms must use `data_list_form_layout_new_edit_v1_1`.
-- View forms must use `data_list_form_layout_view_item_v1_1`.
+- Standard View forms must use `data_list_form_layout_view_item_v1_1`. Full-page Workbench View forms must use `data_list_form_layout_workbench` and `ListModel.LayoutView.opentype.view` must open them as Full page.
 
 ## Forbidden Patterns
 

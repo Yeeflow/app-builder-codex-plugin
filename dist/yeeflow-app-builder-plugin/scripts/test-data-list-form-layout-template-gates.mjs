@@ -12,6 +12,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPT = path.join(ROOT, "scripts/validate-data-list-form-layout-template.mjs");
 const NEW_EDIT_TEMPLATE_ID = "data_list_form_layout_new_edit_v1_1";
 const VIEW_TEMPLATE_ID = "data_list_form_layout_view_item_v1_1";
+const WORKBENCH_TEMPLATE_ID = "data_list_form_layout_workbench";
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "data-list-form-layout-v11-"));
 const results = [];
 
@@ -20,7 +21,9 @@ try {
 
   expectPass("New/Edit template resource with marker passes", ["--resource", writeJson("new-edit-valid.json", newEditResource()), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"]);
   expectPass("View item template resource with marker passes", ["--resource", writeJson("view-valid.json", viewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"]);
+  expectPass("Workbench item details template resource with marker passes", ["--resource", writeJson("workbench-valid.json", workbenchResource()), "--template", WORKBENCH_TEMPLATE_ID, "--form-usage", "view"]);
   expectPass("generated package with New/Edit and View templates passes", ["--package", writePackage("valid-package.yapk", decodedPackage())]);
+  expectPass("generated package with full-page Workbench View template passes", ["--package", writePackage("workbench-package.yapk", decodedPackage({ viewResource: workbenchResource(), viewTitle: "Asset Workbench Details", layoutView: { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view", opentype: { view: "new" }, modalsize: {} } }))]);
   expectCode("generated package with Type 1 form LayoutView placeholder fails", ["--package", writePackage("layoutview-placeholder.yapk", decodedPackage({ layouts: [
     { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
     formLayout("layout-new-edit", "New and Edit form", newEditResource(), { layoutView: { source: "minimal-resource-graph", formName: "New and Edit form", listName: "Assets" } }),
@@ -48,6 +51,17 @@ try {
   removeByIdentity(viewMissingTitle, "page_title_section");
   expectCode("View form missing page title section fails", ["--resource", writeJson("view-missing-title.json", viewMissingTitle), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_VIEW_REQUIRED_REGION_MISSING");
 
+  const workbenchAsEdit = workbenchResource();
+  expectCode("Workbench template used as New/Edit fails", ["--resource", writeJson("workbench-as-edit.json", workbenchAsEdit), "--template", WORKBENCH_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_WORKBENCH_FORBIDDEN_NEW_EDIT");
+
+  expectCode("Workbench View form without full-page display setting fails", ["--package", writePackage("workbench-not-full-page.yapk", decodedPackage({ viewResource: workbenchResource(), viewTitle: "Asset Workbench Details", layoutView: { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view" } }))], "DATA_LIST_FORM_LAYOUT_WORKBENCH_VIEW_FULL_PAGE_REQUIRED");
+
+  const emptyWorkbenchChartSection = workbenchResource({ emptyChartSection: true });
+  expectCode("Workbench empty chart cards section fails", ["--resource", writeJson("workbench-empty-chart-section.json", emptyWorkbenchChartSection), "--template", WORKBENCH_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_CHART_CARDS_SECTION");
+
+  const emptyWorkbenchRightPanel = workbenchResource({ emptyRightPanel: true });
+  expectCode("Workbench empty right side panel fails", ["--resource", writeJson("workbench-empty-right-panel.json", emptyWorkbenchRightPanel), "--template", WORKBENCH_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_RIGHT_SIDE_PANEL");
+
   const directRootBusinessControl = viewResource();
   content(directRootBusinessControl).children.push({ type: "collection", nv_label: "loose_collection", attrs: { data: { list: { ListID: "list-1" } } } });
   expectCode("business control directly under Content fails", ["--resource", writeJson("view-root-business.json", directRootBusinessControl), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_INVENTED_ROOT_MODULE");
@@ -68,6 +82,8 @@ try {
   expectCode("App Plan data list missing View custom form plan fails", ["--plan", writeText("plan-missing-view.md", appPlan({ omitViewSelection: true }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_FORM_REQUIRED");
   expectCode("App Plan New/Edit selecting View template fails", ["--plan", writeText("plan-new-edit-wrong-template.md", appPlan({ newEditTemplate: VIEW_TEMPLATE_ID }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_TEMPLATE_MISMATCH");
   expectCode("App Plan View selecting New/Edit template fails", ["--plan", writeText("plan-view-wrong-template.md", appPlan({ viewTemplate: NEW_EDIT_TEMPLATE_ID }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH");
+  expectCode("App Plan Workbench View without Full page fails", ["--plan", writeText("plan-workbench-missing-full-page.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Workbench related context" }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_WORKBENCH_FULL_PAGE_REQUIRED");
+  expectPass("App Plan Workbench View layout selection passes", ["--plan", writeText("plan-workbench-valid.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Open in: Full page Workbench related context" }))]);
   expectPass("App Plan custom form layout selections pass", ["--plan", writeText("plan-valid.md", appPlan())]);
 
   console.log(JSON.stringify({ status: "pass", results }, null, 2));
@@ -118,13 +134,45 @@ function viewResource(options = {}) {
   return template("data-list-form-layout-view-item.template.json", VIEW_TEMPLATE_ID, options.marker !== false);
 }
 
+function workbenchResource(options = {}) {
+  const resource = template("data-list-form-layout-workbench.template.json", WORKBENCH_TEMPLATE_ID, options.marker !== false);
+  removeByIdentity(resource, "Operations");
+  setTemplateText(resource, "page_title_text", "Asset Workbench Details");
+  setTemplateText(resource, "page_title_description", "Review asset record details and related operational context.");
+  const primary = find(resource, "primary_working_area");
+  if (primary) {
+    primary.children = [...(primary.children || []), {
+      type: "container",
+      id: "chart_cards_section",
+      nv_label: "chart_cards_section",
+      children: options.emptyChartSection ? [] : [
+        { type: "pie-chart", id: "asset_status_chart", nv_label: "asset_status_chart", dataAnalyticsTemplateId: "data_analytics_pie_chart_with_title", templateId: "data_analytics_pie_chart_with_title", runtimeModelProven: true },
+      ],
+    }];
+  }
+  const queueWrapper = find(resource, "main_work_queue_wrapper");
+  if (queueWrapper) {
+    queueWrapper.children = [...(queueWrapper.children || []), {
+      type: "container",
+      id: "right_side_panel",
+      nv_label: "right_side_panel",
+      children: options.emptyRightPanel ? [] : [
+        { type: "container", id: "chart_cards_section", nv_label: "chart_cards_section", children: [
+          { type: "bar-chart", id: "asset_workbench_bar", nv_label: "asset_workbench_bar", dataAnalyticsTemplateId: "data_analytics_bar_chart_with_title", templateId: "data_analytics_bar_chart_with_title", runtimeModelProven: true },
+        ] },
+      ],
+    }];
+  }
+  return resource;
+}
+
 function decodedPackage(options = {}) {
   const newEdit = options.newEditResource || newEditResource();
   const view = options.viewResource || viewResource();
   const layouts = options.layouts || [
     { LayoutID: "layout-default", Title: "All Items", Type: 0, LayoutInResources: [] },
     formLayout("layout-new-edit", "New and Edit form", newEdit),
-    formLayout("layout-view", "View item", view),
+    formLayout("layout-view", options.viewTitle || "View item", view),
   ];
   const layoutView = options.layoutView || { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view" };
   return {
@@ -157,10 +205,10 @@ function formLayout(layoutId, title, resource, options = {}) {
   };
 }
 
-function appPlan({ omitSelection = false, omitNewEditSelection = false, omitViewSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID, viewTemplate = VIEW_TEMPLATE_ID } = {}) {
+function appPlan({ omitSelection = false, omitNewEditSelection = false, omitViewSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID, viewTemplate = VIEW_TEMPLATE_ID, viewReason = "View item shows current record and related context" } = {}) {
   const selectionRows = [
     omitNewEditSelection ? "" : `| Assets | Asset New/Edit | New/Edit | ${newEditTemplate} | Current item field sections | None | New/Edit focuses on current item editing | Generated-final validation |`,
-    omitViewSelection ? "" : `| Assets | Asset View | View | ${viewTemplate} | Page title, KPI, current item and related data sections | Related loans and analytics | View item shows current record and related context | Generated-final validation |`,
+    omitViewSelection ? "" : `| Assets | Asset View | View | ${viewTemplate} | Page title, KPI, current item and related data sections | Related loans and analytics | ${viewReason} | Generated-final validation |`,
   ].filter(Boolean).join("\n");
   const selection = omitSelection ? "" : `
 #### Data List Form Layout Template Selection
@@ -287,11 +335,12 @@ function addEmptyCopiedContentCard(resource) {
 }
 
 function removeEmptyBusinessSections(root) {
-  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
+  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
   const visitAndFilter = (node) => {
     if (!node || typeof node !== "object" || !Array.isArray(node.children)) return;
     node.children.forEach(visitAndFilter);
     node.children = node.children.filter((child) => {
+      if (ids(child).includes("section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
       if (![...removableWrappers].some((identity) => ids(child).includes(identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
