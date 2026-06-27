@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.69`
+`0.8.70`
+
+Version `0.8.70` releases the Data List Form Workbench View Item layout template from PR #279. The plugin now registers `data_list_form_layout_workbench` alongside the existing Data List Form Layouts v1.1 New/Edit and standard View templates, keeps the full parsed Workbench item details form resource as an independent JSON template, requires App Plans to mark Workbench View forms as Full page, and validates Workbench-specific `primary_working_area`, optional `right_side_panel`, removable `chart_cards_section`, and Data Analytics placement rules.
 
 Version `0.8.69` releases the Workbench Dashboard page layout template from PR #277. The plugin now registers `dashboard-page-layouts-workbench` alongside `dashboard-page-layouts-v1.1`, keeps the full parsed Workbench Dashboard resource as an independent JSON template, requires App Plans to select the Dashboard page layout per Dashboard, and validates Workbench-specific `primary_working_area`, optional `right_side_panel`, and `chart_cards_section` rules for Data Analytics placement.
 
