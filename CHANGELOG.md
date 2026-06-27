@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.71
+
+- Release Data table control golden reference templates from PR #281.
+- Register `data_table_control_standard_scroll`, `data_table_control_standard_no_scroll`, and `data_table_control_caption_scroll` as the approved Data table presentation templates.
+- Preserve the exported Data table style, layout, typography, column-width mode, caption/search/add/more toolbar contracts, and display-column binding requirements as locked template contracts.
+- Require App Plans to select approved Data table templates for planned Data table regions and generated packages to materialize the selected templates.
+- Enforce Data table usage across Dashboard pages, custom Data List forms, Approval submission/task forms, Data list workflow task forms, Schedule workflow task forms, and Approval print pages before signing readiness.
+
 ## 0.8.70
 
 - Release the Data List Form Workbench View Item layout template from PR #279.

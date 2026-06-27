@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.70`
+`0.8.71`
+
+Version `0.8.71` releases Data table control golden reference templates from PR #281. The plugin now registers `data_table_control_standard_scroll`, `data_table_control_standard_no_scroll`, and `data_table_control_caption_scroll`, requires App Plans to select approved Data table templates for planned Data table regions, preserves locked Data table style, layout, typography, column-width, caption/search/add/more toolbar, source, and display-column binding contracts, and validates generated Dashboard, custom Data List form, Approval form, workflow task form, and Approval print-page usage before signing readiness.
 
 Version `0.8.70` releases the Data List Form Workbench View Item layout template from PR #279. The plugin now registers `data_list_form_layout_workbench` alongside the existing Data List Form Layouts v1.1 New/Edit and standard View templates, keeps the full parsed Workbench item details form resource as an independent JSON template, requires App Plans to mark Workbench View forms as Full page, and validates Workbench-specific `primary_working_area`, optional `right_side_panel`, removable `chart_cards_section`, and Data Analytics placement rules.
 

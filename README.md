@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.70`
+- Version: `0.8.71`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.70` releases the Data List Form Workbench View Item layout template from PR #279: the plugin registers `data_list_form_layout_workbench` alongside the existing Data List Form Layouts v1.1 New/Edit and standard View templates, preserves the full parsed Workbench item details form resource as an independent JSON template, requires App Plans to mark Workbench View forms as Full page, and validates Workbench-specific `primary_working_area`, optional `right_side_panel`, removable `chart_cards_section`, and Data Analytics placement rules.
+Current release `0.8.71` releases Data table control golden reference templates from PR #281: the plugin registers `data_table_control_standard_scroll`, `data_table_control_standard_no_scroll`, and `data_table_control_caption_scroll`, requires App Plans to select approved Data table templates for planned Data table regions, preserves locked Data table style/layout/column-width/caption contracts, and validates generated Dashboard, custom Data List form, Approval form, workflow task form, and Approval print-page usage before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.70
+Version: 0.8.71
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.70
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.71
 ```
 
 ## What Is Included
