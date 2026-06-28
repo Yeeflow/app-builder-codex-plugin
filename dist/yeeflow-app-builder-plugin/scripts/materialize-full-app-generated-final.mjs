@@ -849,7 +849,35 @@ function extractApprovedCollectionTemplateId(text) {
     const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
   }
-  return "";
+  return inferApprovedCollectionTemplateId(text);
+}
+
+function inferApprovedCollectionTemplateId(text) {
+  const value = String(text || "").toLowerCase();
+  const candidates = [
+    {
+      templateId: "collection_control_grid_table_with_multiselect",
+      patterns: [/grid[-\s]*table.*multi\s*select/, /multi\s*select.*grid[-\s]*table/, /batch.*selected/, /selected\s+records/],
+    },
+    {
+      templateId: "collection_control_card_with_multiselect_toolbar",
+      patterns: [/card.*multi\s*select/, /multi\s*select.*card/, /selected\s+follow[-\s]*up/, /personal\s+loan\s+cards/],
+    },
+    {
+      templateId: "collection_control_responsive_card_grid",
+      patterns: [/responsive\s+cards?/, /visual\s+asset\s+brows/, /asset\s+card\s+browser/, /cards?\s+match\s+asset/],
+    },
+    {
+      templateId: "Event Pipeline Grid-Table",
+      patterns: [/event\s+pipeline\s+grid[-\s]*table/, /rich\s+operations\s+pipeline/, /primary\s+operations\s+layout/],
+    },
+    {
+      templateId: "collection_control_grid_table",
+      patterns: [/dense\s+grid[-\s]*table/, /dense\s+escalation/, /grid[-\s]*table\s+suits/, /dense\s+queue/],
+    },
+  ];
+  const matched = candidates.filter((candidate) => candidate.patterns.some((pattern) => pattern.test(value)));
+  return matched.length === 1 ? matched[0].templateId : "";
 }
 
 function extractApprovedDataAnalyticsTemplateId(text) {
@@ -1831,10 +1859,10 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
     host: contentArea,
   });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
-  resource.filterVars = uniqueByName([
+  resource.filterVars = filterConsumedDashboardFilterVars(resource, uniqueByName([
     ...normalizeDependencyArray(templateDependencies.filterVars),
     ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
-  ]);
+  ]));
   resource.tempVars = uniqueByName([
     ...normalizeDependencyArray(templateDependencies.tempVars),
     ...kpiContracts.map((contract) => ({
@@ -2723,6 +2751,22 @@ function normalizeDependencyArray(value) {
   if (Array.isArray(value)) return clone(value);
   if (value && typeof value === "object") return Object.entries(value).map(([name, config]) => ({ name, ...(config && typeof config === "object" ? config : { value: config }) }));
   return [];
+}
+
+function filterConsumedDashboardFilterVars(resource, filterVars) {
+  const candidateVars = uniqueByName(filterVars).filter((item) => String(item?.name || item?.id || "").trim());
+  if (!candidateVars.length) return [];
+  const withoutDeclarations = clone(resource);
+  withoutDeclarations.filterVars = [];
+  const text = JSON.stringify(withoutDeclarations);
+  return candidateVars.filter((item) => {
+    const name = String(item.name || item.id || "").trim();
+    return text.includes(`__filter_${name}`)
+      || text.includes(`"filterVar":"${name}"`)
+      || text.includes(`"filterVarId":"${name}"`)
+      || text.includes(`"filterVariable":"${name}"`)
+      || text.includes(`"binding":"${name}"`);
+  });
 }
 
 function uniqueByName(items) {

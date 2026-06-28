@@ -66,6 +66,8 @@ function decodedDashboard({ summary = {}, filter = {}, visualOnly = false } = {}
       ],
     }],
   };
+  const fields = [field("Title"), field("Category", "lookup"), field("Owner")];
+  if (!summary.omitListDataIdFromSchema) fields.splice(1, 0, field("ListDataID"));
   return {
     ListSet: { LayoutView: JSON.stringify({ sort: [{ Title: "Overview", Type: 103, LayoutID: "overview" }] }) },
     Pages: [{
@@ -77,7 +79,7 @@ function decodedDashboard({ summary = {}, filter = {}, visualOnly = false } = {}
     }],
     Childs: [{
       List: { ListID: "resources", Title: "Resources" },
-      Fields: [field("Title"), field("ListDataID"), field("Category", "lookup"), field("Owner")],
+      Fields: fields,
       Layouts: [],
       RemindRules: [],
       PublicForms: [],
@@ -103,6 +105,7 @@ expectCode("summary missing field", validateDashboardBindings(decodedDashboard({
 expectCode("summary missing ext", validateDashboardBindings(decodedDashboard({ summary: { noExt: true }, filter: { consumer: true } })), "DASHBOARD_SUMMARY_MISSING_EXT");
 expectCode("summary ext missing values", validateDashboardBindings(decodedDashboard({ summary: { noValues: true }, filter: { summaryConsumes: true, consumer: true } })), "DASHBOARD_SUMMARY_MISSING_VALUES");
 expectCode("summary missing report id", validateDashboardBindings(decodedDashboard({ summary: { noReportId: true }, filter: { summaryConsumes: true, consumer: true } })), "DASHBOARD_SUMMARY_MISSING_REPORT_ID");
+assert.equal(validateDashboardBindings(decodedDashboard({ summary: { omitListDataIdFromSchema: true }, filter: { summaryConsumes: true, consumer: true } })).filter((finding) => finding.severity === "error").length, 0, "ListDataID Summary count is a system field and does not need to appear in business Fields[]");
 expectCode("declared filter not consumed", validateDashboardBindings(decodedDashboard()), "DASHBOARD_FILTER_VAR_DECLARED_NOT_CONSUMED");
 expectCode("filter control without var", validateDashboardBindings(decodedDashboard({ filter: { noBinding: true } })), "DASHBOARD_FILTER_CONTROL_WITHOUT_FILTER_VAR");
 expectCode("consumer invalid field", validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true, invalidField: true } })), "DASHBOARD_FILTER_CONSUMER_INVALID_FIELD");
