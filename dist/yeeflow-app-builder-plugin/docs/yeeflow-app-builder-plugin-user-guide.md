@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.77`
+`0.8.78`
+
+Version `0.8.78` releases Approval ContentList target and application-selection gates from PR #295. Generated Approval `ContentList` / Set Data List action nodes now resolve App Plan `Data Read/Write` targets to concrete child Data Lists, emit Designer-safe `listtype: "select"`, `appid: 41`, current app `listsetid`, and target child Data List `listid`, and fail generated-final publish readiness when a system-write node points at the root ListSet, an unknown list, `listtype: "current"`, a wrong `appid`, or a wrong `listsetid`.
 
 Version `0.8.77` releases full-app materializer template E2E gap closure from PR #293. Generated-final materialization now fails closed instead of emitting `TenantID: "0"`, ignores generic dashboard planning support sections, preserves App Plan-selected Dashboard Collection/Data Analytics/Data Table template mapping, keeps Summary runtime registration aligned across `save_var` and `saveVar`, preserves approval fields such as `Purpose`, and aligns validators with the same generated-final contract before signing readiness.
 
