@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.79`
+- Version: `0.8.80`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.79` releases generated-final preflight App Plan/runtime alignment from PR #297: canonical Dashboard Collection exact-ID App Plan tables are authoritative over earlier prose support tables, approved Collection template IDs are inferred only when legacy prose is unambiguous, unused copied Dashboard filter variables are pruned during materialization, `ListDataID` is treated as a Yeeflow system field for Summary count validation, and Data List Form layout planning remains strict for custom New/Edit and View/Workbench Full page rows.
+Current release `0.8.80` releases search-filter placeholder runtime shape hardening from PR #299: generated Dashboard `search-filter.attrs.placeholder` now stays as primitive input text, object-shaped search-filter placeholders are rejected before signing readiness because they render as `[object Object]`, and the runtime boundary between search-filter placeholder text and separate placeholder style metadata is documented.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.79
+Version: 0.8.80
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.79
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.80
 ```
 
 ## What Is Included

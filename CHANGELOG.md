@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.80
+
+- Release search-filter placeholder runtime shape hardening from PR #299.
+- Keep generated Dashboard `search-filter.attrs.placeholder` as primitive input text instead of object-shaped values.
+- Reject object-shaped `search-filter` placeholders before signing readiness because they render as `[object Object]` at runtime.
+- Document the runtime boundary between search-filter placeholder text and separate placeholder style metadata.
+
 ## 0.8.79
 
 - Release generated-final preflight App Plan/runtime alignment from PR #297.
