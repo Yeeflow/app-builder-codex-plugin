@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.83`
+`0.8.84`
+
+Version `0.8.84` releases workflow layout golden reference gates from PR #307. Generated Approval form, Data list workflow, and Scheduled workflow diagrams now use export-derived workflow layout guidance, validate readable node spacing and graph bounds, preserve rounded/routed sequence-flow lines for cross-lane, rejected, and long paths, and block overlapping workflow diagrams before signing readiness.
 
 Version `0.8.83` releases Soft outline application control style default gates from PR #305. Generated applications now include the export-backed Soft outline controls Application Custom Control Style in `Themes[]`, set it as the application default through the Type 0 `application style` theme, validate stringified style config and default linkage before signing readiness, and keep full-app materializer regression coverage aligned with the package schema-safe generated-final shape.
 

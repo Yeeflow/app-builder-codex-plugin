@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.84
+
+- Release workflow layout golden reference gates from PR #307.
+- Register export-derived workflow layout references from eMemo and expense reimbursement workflow examples for generated Approval form, Data list workflow, and Scheduled workflow diagrams.
+- Add generated-final validation for readable workflow node spacing, graph bounds, rounded line style, routed cross-lane/rejected/long flows, and node-overlap prevention.
+- Teach the full-app materializer to emit lane-based Approval workflow positions and routed sequence-flow vertices instead of overlapping workflow nodes.
+- Wire workflow layout validation into first-generation preflight and cache artifact expectations before signing readiness.
+
 ## 0.8.83
 
 - Release Soft outline application control style default gates from PR #305.
