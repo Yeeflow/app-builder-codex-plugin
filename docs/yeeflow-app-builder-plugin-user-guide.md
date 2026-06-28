@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.81`
+`0.8.82`
+
+Version `0.8.82` releases Dashboard filter variable consumer materialization from PR #303. Generated Dashboard `search-filter` variables are now wired to Collection `attrs.data.fulltext[]` consumers, producer controls no longer count as consumption, stale producer bindings and unconsumed `filterVars[]` entries are pruned, and full-app materializer regression coverage blocks generated Dashboards whose filter variables or search-filter bindings are not backed by real Summary, Collection, Data table, chart, or pivot consumers.
 
 Version `0.8.81` releases generated-final preflight contract gap alignment from PR #301. Runtime binding validation now credits every consumed Dashboard filter variable across filter/fulltext metadata, Approval runtime-surface checks decode encoded `DefResource.pageurls[]`, Data List Form layout validation can use package-proven custom form assignments when older App Plan wording is stale, and full-app materializer regression coverage enforces primitive string `search-filter.attrs.placeholder` values.
 

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.81`
+- Version: `0.8.82`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.81` releases generated-final preflight contract gap alignment from PR #301: runtime binding validation now credits multiple consumed Dashboard filter variables, Approval runtime-surface checks decode encoded DefResource page registrations, Data List Form layout validation can use package-proven custom form assignments when older App Plan wording is stale, and full-app materializer regression tests enforce primitive search-filter placeholder text.
+Current release `0.8.82` releases Dashboard filter variable consumer materialization from PR #303: generated Dashboard search-filter variables are wired to Collection `attrs.data.fulltext[]` consumers, producer controls no longer count as consumption, stale producer bindings and unconsumed `filterVars[]` entries are pruned, and full-app materializer regression coverage blocks generated Dashboards whose filter variables or search-filter bindings are not backed by real Summary, Collection, Data table, chart, or pivot consumers.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.81
+Version: 0.8.82
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.81
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.82
 ```
 
 ## What Is Included
