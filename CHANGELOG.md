@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.78
+
+- Release Approval ContentList target and application-selection gates from PR #295.
+- Parse App Plan workflow `Data Read/Write` values for generated Approval `ContentList` action nodes and resolve targets to concrete child Data Lists in the current application.
+- Emit Designer-safe `ContentList` target metadata with `listtype: "select"`, `appid: 41`, current app `listsetid`, and the target child Data List `listid` so Set Data List nodes do not show `Uncategorized` or point at the root ListSet.
+- Fail generated-final publish readiness when `ContentList` targets the root application ListSet, an unknown list, `listtype: "current"`, a wrong `appid`, or a wrong `listsetid`.
+- Keep public YAPK validator entrypoints byte-aligned with the canonical validator to prevent duplicate-rule drift.
+
 ## 0.8.77
 
 - Release full-app materializer template E2E gap closure from PR #293.
