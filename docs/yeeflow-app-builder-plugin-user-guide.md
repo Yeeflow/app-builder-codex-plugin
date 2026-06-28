@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.86`
+`0.8.87`
+
+Version `0.8.87` releases the Application Layout Sidebar Workspace golden reference from PR #313. Generated applications now use `application-layout-sidebar-workspace-1` as the default application layout template, preserve the export-derived 46px header, 18px semibold header title typography, header colors, vertical navigation layout, navigation colors, and application appearance settings, require App Plan template selection, and reject generated navigation groups or menu items that do not have business-appropriate FontAwesome icons before signing readiness.
 
 Version `0.8.86` releases Approval form page-title empty section cleanup from PR #311. Generated Approval submission/task pages and Data List/Schedule workflow task forms now remove empty `section_content_area` slots outside real business content, including `page_title_section` empty slots, while preserving locked workflow panel/history surfaces. The Approval form layout gate now rejects those empty generated slots before signing readiness through `APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA`.
 

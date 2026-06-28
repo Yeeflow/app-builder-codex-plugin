@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.87
+
+- Release the Application Layout Sidebar Workspace golden reference from PR #313.
+- Register `application-layout-sidebar-workspace-1` as the default application layout template for generated applications.
+- Preserve the export-derived application header height, title typography, header colors, vertical navigation layout, navigation colors, and appearance settings instead of inventing application chrome.
+- Require App Plans to declare the selected application layout template and reject unknown application layout IDs before generation.
+- Require every generated navigation menu group and menu item to carry a business-appropriate FontAwesome icon before signing readiness.
+- Add source/dist registry, standard, materializer, validator, and focused regression coverage for application layout template usage.
+
 ## 0.8.86
 
 - Release Approval form page-title empty section cleanup from PR #311.
