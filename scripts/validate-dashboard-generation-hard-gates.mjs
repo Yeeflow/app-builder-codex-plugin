@@ -21,6 +21,11 @@ const DASHBOARD_DATASET_TEMPLATE_ROOT_IDS = new Set([
   "collection_control_responsive_card_wrapper",
   "Event Pipeline Grid-Table",
 ]);
+const APPROVED_DATA_TABLE_TEMPLATE_IDS = new Set([
+  "data_table_control_standard_scroll",
+  "data_table_control_standard_no_scroll",
+  "data_table_control_caption_scroll",
+]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -101,6 +106,7 @@ function validateDashboardBusinessRuntime(page, listIndex, findings) {
   const summaries = page.controls.filter((entry) => String(entry.control?.type || "") === "summary");
 
   for (const entry of dataTables) {
+    if (hasApprovedDataTableTemplateProvenance(entry.control)) continue;
     findings.push(error("DASH_RECORD_REGION_COLLECTION_REQUIRED", "Dashboard record-list regions must use Collection/grid-table structures unless a plan explicitly exempts the page; Data table/data-list lookalikes are not the default golden dashboard record pattern.", {
       page: page.title,
       path: entry.pointer,
@@ -130,6 +136,16 @@ function validateDashboardBusinessRuntime(page, listIndex, findings) {
   validateNonEmptyBusinessSections(page, findings);
   validateIndependentContentCardWrappers(page, collections, findings);
   validateDynamicUserFieldTypes(page, listIndex, findings);
+}
+
+function hasApprovedDataTableTemplateProvenance(control) {
+  const candidates = [
+    control?.templateId,
+    control?.dataTableTemplateId,
+    control?.attrs?.templateId,
+    control?.attrs?.dataTableTemplateId,
+  ].filter(Boolean).map(String);
+  return candidates.some((candidate) => APPROVED_DATA_TABLE_TEMPLATE_IDS.has(candidate));
 }
 
 function validateFilter(entry, page, listIndex, findings) {
@@ -277,6 +293,7 @@ function hasMeaningfulBusinessContent(control) {
   const descendants = collectDescendants(control, "$");
   return descendants.some((entry) => {
     const type = String(entry.control?.type || "");
+    if (["data-table", "datatable", "data-list"].includes(type) && hasApprovedDataTableTemplateProvenance(entry.control)) return true;
     if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(entry.control)) return true;
     if (matchesSemanticId(entry.control, "form_grid_fields_wrapper")) return true;
