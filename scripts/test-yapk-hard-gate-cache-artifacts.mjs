@@ -187,6 +187,7 @@ const requiredDocs = [
   "docs/training/dashboard-summary-hidden-host-field-metadata-training-report.md",
   "docs/training/data-list-form-layouts-v1.1-golden-reference-training-report.md",
   "docs/training/data-list-form-workbench-layout-template-training-report.md",
+  "docs/training/data-list-form-workbench-app-plan-registry-drift-training-report.md",
   "docs/training/data-list-form-fields-grid-template-training-report.md",
   "docs/training/data-list-form-unused-section-cleanup-training-report.md",
   "docs/training/approval-task-field-parity-empty-section-cleanup-training-report.md",
