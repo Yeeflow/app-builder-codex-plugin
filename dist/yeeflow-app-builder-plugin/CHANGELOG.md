@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.77
+
+- Release full-app materializer template E2E gap closure from PR #293.
+- Fail closed when non-fixture full-app materialization lacks tenant identity instead of emitting generated-final packages with `TenantID: "0"`.
+- Ignore generic Dashboard planning support headings and coverage/decision tables when deriving real Dashboard page requirements.
+- Preserve App Plan-selected Dashboard Collection, Data Analytics, and Data Table template mapping without rotating scoped records across unrelated pages.
+- Keep Dashboard Summary runtime registration aligned across `save_var` and `saveVar` surfaces and classify Summary controls by type rather than business labels.
+- Preserve approval business fields such as `Purpose`, normalize service-action workflow nodes, and reduce Data List form/App Plan validator false positives before signing readiness.
+
 ## 0.8.76
 
 - Release Approval workflow node parity gates from PR #291.

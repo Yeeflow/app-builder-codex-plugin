@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.76`
+- Version: `0.8.77`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.76` releases Approval workflow node parity gates from PR #291: generated-final materialization now consumes App Plan Approval Workflow Nodes, materializes planned review/approval tasks and planned action nodes instead of collapsing workflows to one baseline task, and generated-final preflight blocks missing or mismatched planned workflow nodes before signing readiness.
+Current release `0.8.77` releases full-app materializer template E2E gap closure from PR #293: generated-final materialization now fails closed instead of emitting `TenantID: "0"`, ignores generic dashboard planning support sections, preserves App Plan-selected Dashboard Collection/Data Analytics/Data Table template mapping, keeps Summary runtime registration aligned across `save_var` and `saveVar`, preserves approval fields such as `Purpose`, and aligns validators with the same generated-final contract before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.76
+Version: 0.8.77
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.76
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.77
 ```
 
 ## What Is Included

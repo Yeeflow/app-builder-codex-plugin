@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.76`
+`0.8.77`
+
+Version `0.8.77` releases full-app materializer template E2E gap closure from PR #293. Generated-final materialization now fails closed instead of emitting `TenantID: "0"`, ignores generic dashboard planning support sections, preserves App Plan-selected Dashboard Collection/Data Analytics/Data Table template mapping, keeps Summary runtime registration aligned across `save_var` and `saveVar`, preserves approval fields such as `Purpose`, and aligns validators with the same generated-final contract before signing readiness.
 
 Version `0.8.76` releases Approval workflow node parity gates from PR #291. Generated-final materialization now parses App Plan Approval Workflow Nodes, materializes planned review/approval task nodes and planned action nodes, and first-generation preflight blocks packages where planned Approval workflow nodes are missing, mismatched, or collapsed to a single baseline task before signing readiness.
 
