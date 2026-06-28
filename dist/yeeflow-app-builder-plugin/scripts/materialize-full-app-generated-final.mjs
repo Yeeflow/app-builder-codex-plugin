@@ -679,6 +679,7 @@ function collectApprovalWorkflowNodeSpecs(planText) {
     const strategyColumn = findHeaderIndex(normalizedHeaders, ["assignment strategy", "strategy"]);
     const outcomesColumn = findHeaderIndex(normalizedHeaders, ["outcomes", "outcome"]);
     const conditionColumn = findHeaderIndex(normalizedHeaders, ["condition/branch", "condition", "branch"]);
+    const dataColumn = findHeaderIndex(normalizedHeaders, ["data read/write", "data read write", "data source", "read/write", "read write"]);
     const proofColumn = findHeaderIndex(normalizedHeaders, ["proof boundary", "proof"]);
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
@@ -697,6 +698,7 @@ function collectApprovalWorkflowNodeSpecs(planText) {
         assignmentStrategy: strategyColumn === -1 ? "" : cleanResourceName(cells[strategyColumn]),
         outcomes: outcomesColumn === -1 ? "" : cleanResourceName(cells[outcomesColumn]),
         conditionBranch: conditionColumn === -1 ? "" : cleanResourceName(cells[conditionColumn]),
+        dataReadWrite: dataColumn === -1 ? "" : cleanResourceName(cells[dataColumn]),
         proofBoundary: proofColumn === -1 ? "" : cleanResourceName(cells[proofColumn]),
       });
       rowIndex += 1;
@@ -1045,6 +1047,7 @@ function uniqueApprovalWorkflowNodes(nodes) {
       assignmentStrategy: cleanResourceName(node?.assignmentStrategy),
       outcomes: cleanResourceName(node?.outcomes),
       conditionBranch: cleanResourceName(node?.conditionBranch),
+      dataReadWrite: cleanResourceName(node?.dataReadWrite),
       proofBoundary: cleanResourceName(node?.proofBoundary),
     });
   }
@@ -1596,7 +1599,15 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       Description: "",
       Ext: "",
       DefResourceID: defId,
-      DefResource: exportResource(buildApprovalDefResource({ name, formKey: key, defId, rootListSetId: rootListId, approvalFieldSpecs, approvalWorkflowNodes })),
+      DefResource: exportResource(buildApprovalDefResource({
+        name,
+        formKey: key,
+        defId,
+        rootListSetId: rootListId,
+        approvalFieldSpecs,
+        approvalWorkflowNodes,
+        dataListMetas: Array.from(listMetaByName.values()),
+      })),
       Status: 1,
       DeployedDefID: defId,
       WorkflowType: 2,
@@ -3343,7 +3354,7 @@ function refId(ref) {
   return String(ref.resourceid || ref.resourceId || ref.id || "");
 }
 
-function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [] }) {
+function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [] }) {
   const {
     submissionPageId,
     taskPageId,
@@ -3370,6 +3381,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     endId,
     rejectEndId,
     workflowSteps,
+    dataListMetas,
   });
   return {
     id: defId,
@@ -3426,11 +3438,11 @@ function approvalWorkflowExecutionSteps(nodes) {
   return uniqueApprovalWorkflowNodes(nodes).filter((node) => !["StartNoneEvent", "EndNoneEvent", "EndRejectEvent", "SequenceFlow"].includes(node.nodeType));
 }
 
-function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submissionPageId, taskPageId, startId, endId, rejectEndId, workflowSteps }) {
+function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submissionPageId, taskPageId, startId, endId, rejectEndId, workflowSteps, dataListMetas = [] }) {
   const seed = `${defId}:${formKey}:workflow`;
   const stepNodes = workflowSteps.map((step, index) => {
     const id = deterministicUuid(`${seed}:step:${index + 1}:${step.nodeType}:${step.nodeName}`);
-    return buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId });
+    return buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas });
   });
   const startToFirstFlowId = deterministicUuid(`${seed}:flow:start-to-first`);
   const startShape = {
@@ -3537,7 +3549,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
   ];
 }
 
-function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId }) {
+function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas = [] }) {
   const stencil = step.nodeType === "CandidateTask" ? "CandidateTask" : step.nodeType === "ContentList" ? "ContentList" : "MultiAssignmentTask";
   const base = {
     id,
@@ -3557,13 +3569,15 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     },
   };
   if (stencil === "ContentList") {
+    const targetList = resolveContentListTargetList({ step, dataListMetas });
     base.properties = {
       ...base.properties,
       type: "add",
       appid: 41,
       listsetid: stringId(rootListSetId),
-      listid: stringId(rootListSetId),
-      listtype: "current",
+      listid: stringId(targetList?.listId || rootListSetId),
+      listtype: targetList?.listId ? "select" : "current",
+      plannedTargetListName: targetList?.listName || "",
       listdatas: [],
     };
     return base;
@@ -3587,6 +3601,51 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     ],
   };
   return base;
+}
+
+function resolveContentListTargetList({ step, dataListMetas = [] }) {
+  const metas = dataListMetas.filter((meta) => meta?.listId && meta?.listName);
+  if (!metas.length) return null;
+  const text = [
+    step?.nodeName,
+    step?.description,
+    step?.dataReadWrite,
+    step?.conditionBranch,
+  ].map(cleanResourceName).join(" ");
+  const normalizedText = normKey(text);
+  const textTokens = tokenSet(text);
+  let best = null;
+  for (const meta of metas) {
+    const listTokens = tokenSet(meta.listName);
+    const overlap = [...listTokens].filter((token) => textTokens.has(token)).length;
+    const exact = normalizedText.includes(normKey(meta.listName)) ? 10 : 0;
+    const score = exact + overlap;
+    if (!best || score > best.score) best = { meta, score };
+  }
+  if (best && best.score > 0) return best.meta;
+  return null;
+}
+
+function tokenSet(value) {
+  return new Set(normKey(value)
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((token) => token.replace(/s$/, ""))
+    .filter((token) => ![
+      "create",
+      "update",
+      "archive",
+      "persist",
+      "related",
+      "list",
+      "record",
+      "data",
+      "write",
+      "read",
+      "field",
+      "fields",
+      "master",
+    ].includes(token)));
 }
 
 function approvalTaskFieldSpecs(approvalFieldSpecs = {}) {

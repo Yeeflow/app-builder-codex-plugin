@@ -61,6 +61,17 @@ Required end paths:
 - Rejected transitions must reach `EndRejectEvent`.
 - A rejected transition that points to a normal end event is not publish-ready.
 
+Required `ContentList` action node:
+
+- Planned system write nodes such as `Create Vendor Master` must materialize as `ContentList` nodes, not as omitted comments or generic placeholders.
+- The generator must resolve the App Plan `Data Read/Write` target to a concrete child Data List in the current application. For example, `Vendor Master create` must target the `Vendor Master` child list, not the root application ListSet.
+- `properties.listid` must be the target child Data List ID.
+- `properties.listid` must not equal the root application `ListSet.ListID` or `ListSet.ListSetID`.
+- `properties.listtype` must be `select`. `current` is not acceptable for generated-final packages because Designer can show the Application selector as `Uncategorized`.
+- `properties.appid` must be `41`.
+- `properties.listsetid` must equal the current application ListSet ID.
+- If the target child list cannot be resolved from the App Plan and generated resource graph, the generator must fail before signing readiness instead of silently using the root ListSet or `listtype: current`.
+
 Required Designer graph metadata:
 
 - Every workflow node and sequence flow must include `id` and `resourceid`, and they must match.

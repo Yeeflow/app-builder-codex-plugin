@@ -25,8 +25,17 @@ try {
     .filter((shape) => shape?.stencil?.id === "MultiAssignmentTask")
     .map((shape) => shape?.properties?.name);
   assert.deepEqual(materializedTaskNames, ["Department Manager Review", "Finance Review"], "materializer must preserve planned approval task nodes");
-  assert.equal(materializedDef.childshapes.some((shape) => shape?.stencil?.id === "ContentList" && shape?.properties?.name === "Create Travel Record"), true, "materializer must preserve planned action nodes");
-  cases.push({ case: "pass: App Plan workflow nodes materialize into DefResource graph", status: "pass" });
+  const packageDecoded = readDecodedYapk(packagePath).decoded;
+  const rootListSetId = String(packageDecoded.ListSet.ListID);
+  const travelRecordsListId = String(packageDecoded.Childs.find((child) => child?.List?.Title === "Travel Records")?.List?.ListID || "");
+  const contentListNode = materializedDef.childshapes.find((shape) => shape?.stencil?.id === "ContentList" && shape?.properties?.name === "Create Travel Record");
+  assert.ok(contentListNode, "materializer must preserve planned action nodes");
+  assert.equal(String(contentListNode.properties.listid), travelRecordsListId, "ContentList target listid resolves to the planned child data list");
+  assert.notEqual(String(contentListNode.properties.listid), rootListSetId, "ContentList target listid must not use the root application ListSet");
+  assert.equal(contentListNode.properties.listtype, "select", "ContentList uses select application mode instead of current/Uncategorized");
+  assert.equal(String(contentListNode.properties.listsetid), rootListSetId, "ContentList listsetid resolves to the current application ListSet");
+  assert.equal(contentListNode.properties.appid, 41, "ContentList appid resolves to the current Yeeflow application context");
+  cases.push({ case: "pass: App Plan workflow nodes and ContentList target selection materialize into DefResource graph", status: "pass" });
 
   expectCode("planned workflow node parity fails when a planned task is missing", mutateResource(materializedDef, (def) => {
     def.childshapes = def.childshapes.filter((shape) => shape?.properties?.name !== "Finance Review");
@@ -86,6 +95,22 @@ try {
   }), "APPROVAL_WORKFLOW_NODE_POSITION_COLLISION");
   cases.push({ case: "fail: stacked workflow node coordinates", status: "pass" });
 
+  expectPackageCode("ContentList root ListSet target fails package validation", mutatePackage(packagePath, (decoded) => {
+    const def = decodeDefResource(decoded.Forms[0].DefResource);
+    const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");
+    action.properties.listid = String(decoded.ListSet.ListID);
+    decoded.Forms[0].DefResource = encodeDefResource(def);
+  }), "APPROVAL_WORKFLOW_CONTENTLIST_TARGET_ROOT_LISTSET");
+  cases.push({ case: "fail: ContentList targets root application ListSet", status: "pass" });
+
+  expectPackageCode("ContentList current application mode fails package validation", mutatePackage(packagePath, (decoded) => {
+    const def = decodeDefResource(decoded.Forms[0].DefResource);
+    const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");
+    action.properties.listtype = "current";
+    decoded.Forms[0].DefResource = encodeDefResource(def);
+  }), "APPROVAL_WORKFLOW_CONTENTLIST_APPLICATION_SELECTION_INVALID");
+  cases.push({ case: "fail: ContentList listtype current would show Uncategorized", status: "pass" });
+
   console.log(JSON.stringify({
     status: "pass",
     test: path.basename(fileURLToPath(import.meta.url)),
@@ -144,6 +169,13 @@ function approvalPlanMarkdown() {
     "| Destination | Text | Travel destination. |",
     "| Estimated Cost | Decimal | Estimated travel cost. |",
     "",
+    "### 4.2 Travel Records",
+    "",
+    "| Field Name | Type | Purpose |",
+    "| --- | --- | --- |",
+    "| Destination | Text | Approved travel destination. |",
+    "| Estimated Cost | Decimal | Approved travel cost. |",
+    "",
     "## 5. Approval Forms Plan",
     "",
     "### 5.1 Business Travel Request Approval",
@@ -183,7 +215,7 @@ function approvalPlanMarkdown() {
     "| 1 | Start | StartNoneEvent | Request submission starts the process. | Requester | Submission | Submitted | Always | Read submission fields | Generated-final validation |",
     "| 2 | Department Manager Review | MultiAssignmentTask | Manager reviews business purpose. | Department Manager | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
     "| 3 | Finance Review | MultiAssignmentTask | Finance reviews estimated cost. | Finance | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
-    "| 4 | Create Travel Record | ContentList | Persist accepted travel request. | System | System action | Complete | Approved path only | Create related list record | Generated-final validation |",
+    "| 4 | Create Travel Record | ContentList | Persist accepted travel request. | System | System action | Complete | Approved path only | Travel Records create | Generated-final validation |",
     "| 5 | End | EndNoneEvent | Approved process ends. | System | End | Complete | Approved path | No data write | Generated-final validation |",
     "",
     "## 6. Form Reports Plan",
@@ -230,6 +262,30 @@ function mutateResource(baseDef, mutate) {
   return file;
 }
 
+function mutatePackage(basePackagePath, mutateDecoded) {
+  const { decoded, wrapper } = readDecodedYapk(basePackagePath);
+  mutateDecoded(decoded);
+  const file = path.join(tempDir, `package-${Math.random().toString(16).slice(2)}.yapk`);
+  const nextWrapper = {
+    ...wrapper,
+    Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64"),
+  };
+  fs.writeFileSync(file, `${JSON.stringify(nextWrapper, null, 2)}\n`);
+  return file;
+}
+
+function decodeDefResource(value) {
+  const bytes = Buffer.from(value, "base64");
+  const prefix = Buffer.from("::brotli::", "utf8");
+  const payload = bytes.subarray(0, prefix.length).equals(prefix) ? bytes.subarray(prefix.length) : bytes;
+  return JSON.parse(zlib.brotliDecompressSync(payload).toString("utf8"));
+}
+
+function encodeDefResource(def) {
+  const payload = zlib.brotliCompressSync(Buffer.from(JSON.stringify(def), "utf8"));
+  return Buffer.concat([Buffer.from("::brotli::", "utf8"), payload]).toString("base64");
+}
+
 function expectPass(label, args) {
   const result = runValidator(args);
   assert.equal(result.status, 0, `${label}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`);
@@ -238,6 +294,12 @@ function expectPass(label, args) {
 
 function expectCode(label, resourcePath, code, extraArgs = []) {
   const result = runValidator(["--resource", resourcePath, ...extraArgs]);
+  assert.notEqual(result.status, 0, `${label} should fail`);
+  assert.match(`${result.stdout}\n${result.stderr}`, new RegExp(code), label);
+}
+
+function expectPackageCode(label, packagePath, code, extraArgs = []) {
+  const result = runValidator(["--package", packagePath, ...extraArgs]);
   assert.notEqual(result.status, 0, `${label} should fail`);
   assert.match(`${result.stdout}\n${result.stderr}`, new RegExp(code), label);
 }
