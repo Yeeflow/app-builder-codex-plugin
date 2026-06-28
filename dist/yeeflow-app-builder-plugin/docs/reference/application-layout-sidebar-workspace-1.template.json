@@ -1,0 +1,70 @@
+{
+  "templateId": "application-layout-sidebar-workspace-1",
+  "name": "Sidebar Workspace Application Layout",
+  "baseApplicationLayoutType": "application-layout-1-vertical-nav",
+  "runtimeMenuPosition": "left",
+  "source": {
+    "package": "Business Travel Request 0.8.85 Codex Lite Fresh - Yeeflow App Plan-v1.1.yapk",
+    "extractedFrom": "decoded.ListSet.LayoutView"
+  },
+  "requiredLayoutView": {
+    "sortVer": 1,
+    "attrs": {
+      "appearance": {
+        "bgc": "var(--c--primary-dark-hover)",
+        "color": "var(--c--background)",
+        "height": 46,
+        "ty": [
+          null,
+          "h6-semi-bold"
+        ]
+      },
+      "navigator-menu": {
+        "bgc": "var(--c--primary-dark)",
+        "color": "var(--c--background)",
+        "position": "left",
+        "active": {}
+      },
+      "CustomColors": [
+        {
+          "id": "extra-color-1",
+          "label": "Extra Color 1",
+          "value": "#F9C434"
+        },
+        {
+          "id": "extra-color-2",
+          "label": "Extra Color 2",
+          "value": "#F61515"
+        }
+      ],
+      "CustomFonts": [
+        {
+          "id": "3708306f-951b-40d5-b459-26c717e8f187",
+          "label": "Extra font 1"
+        },
+        {
+          "id": "dc50649a-28d3-42ec-9714-e32cf78de678",
+          "label": "Extra font 2"
+        }
+      ]
+    }
+  },
+  "navigationIconRules": {
+    "visibleBusinessGroupsRequireFontAwesomeIcon": true,
+    "visibleBusinessItemsRequireFontAwesomeIcon": true,
+    "fontAwesomeClassPattern": "^fa-(solid|regular|light|duotone|brands)\\s+fa-[a-z0-9-]+$",
+    "hiddenProcessIconException": "Hidden process/task navigation entries may retain Yeeflow built-in process icons such as wait-task, receive-task, done-task, and apply-task."
+  },
+  "appPlanRequirements": {
+    "mustDeclareTemplateId": true,
+    "templateId": "application-layout-sidebar-workspace-1",
+    "section": "Application Navigation Plan"
+  },
+  "usageRules": [
+    "Generated applications must use this template as the default application layout unless another approved Yeeflow application layout is explicitly selected.",
+    "The package must materialize the template through decoded.ListSet.LayoutView.sortVer and decoded.ListSet.LayoutView.attrs.",
+    "The header height, typography, text color, background color, navigation position, navigation text color, and navigation background color must match this template.",
+    "Visible menu groups and menu items must include suitable FontAwesome icons selected for the business resource.",
+    "Application layout chrome must remain separate from the application control style Themes contract."
+  ]
+}
