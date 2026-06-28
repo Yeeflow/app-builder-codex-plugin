@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.73
+
+- Release New Vendor Approval field and tenant readiness gates from PR #285.
+- Remove the full-app materializer's internal Approval form field cap so long App Plan `Submission Form Fields` and `Task Form Fields` tables are fully materialized into `DefResource.pageurls[].formdef`.
+- Add regression coverage for longer Approval form field tables, including tax, bank, risk, and attachment fields that previously could be truncated.
+- Resolve generated-final wrapper `TenantID` from explicit, profile-scoped, or global Yeeflow tenant metadata when available while keeping placeholder `TenantID: "0"` blocked before signing readiness.
+- Update Approval form and live-install readiness standards plus generator skills with the no-truncation and tenant-readiness contracts.
+
 ## 0.8.72
 
 - Release Collection runtime visibility and Approval task readonly gates from PR #283.

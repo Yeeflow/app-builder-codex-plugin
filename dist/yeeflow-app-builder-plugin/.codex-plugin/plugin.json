@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.72",
+  "version": "0.8.73",
   "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with Approval workflow condition and upgrade proof gates.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
