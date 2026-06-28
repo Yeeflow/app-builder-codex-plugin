@@ -34,6 +34,12 @@ const DATA_ANALYTICS_TEMPLATE_PATHS = {
   data_analytics_pivot_table_standard: path.join(ROOT, "docs/reference/data-analytics-pivot-table-standard.template.json"),
 };
 const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = Object.freeze(Object.keys(DATA_ANALYTICS_TEMPLATE_PATHS));
+const DATA_TABLE_TEMPLATE_PATHS = {
+  data_table_control_standard_scroll: path.join(ROOT, "docs/reference/data-table-control-standard-scroll.template.json"),
+  data_table_control_standard_no_scroll: path.join(ROOT, "docs/reference/data-table-control-standard-no-scroll.template.json"),
+  data_table_control_caption_scroll: path.join(ROOT, "docs/reference/data-table-control-caption-scroll.template.json"),
+};
+const APPROVED_DATA_TABLE_TEMPLATE_IDS = Object.freeze(Object.keys(DATA_TABLE_TEMPLATE_PATHS));
 const COLLECTION_TEMPLATE_PATHS = {
   collection_control_grid_table: path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
   "Event Pipeline Grid-Table": path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"),
@@ -292,6 +298,7 @@ function analyzeAppPlanResourceDemand(planText) {
     dashboardSummaryMetricRecords: collectDashboardSummaryMetricRecords(planText),
     dashboardDatasetRecords: collectDashboardDatasetRecords(planText),
     dashboardAnalyticsRecords: collectDashboardAnalyticsRecords(planText),
+    dashboardDataTableRecords: collectDashboardDataTableRecords(planText),
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
   };
@@ -388,6 +395,58 @@ function collectDashboardDatasetRecords(planText) {
     index = rowIndex;
   }
   return records;
+}
+
+function collectDashboardDataTableRecords(planText) {
+  const section = String(planText || "");
+  if (!section.trim()) return [];
+  const lines = section.split(/\r?\n/);
+  const records = [];
+  let currentDashboardPage = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const templateColumn = findHeaderIndex(normalizedHeaders, [
+      "selected data table template",
+      "data table template",
+      "selected table template",
+      "table template",
+    ]);
+    if (templateColumn === -1) continue;
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name", "page/form"]);
+    const regionColumn = findHeaderIndex(normalizedHeaders, ["region", "dataset region", "section", "section name", "analytics region"]);
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
+    const displayColumn = findHeaderIndex(normalizedHeaders, ["display columns", "visible columns", "columns", "fields"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const selectedTemplateId = extractApprovedDataTableTemplateId(lines[rowIndex]);
+      if (selectedTemplateId) {
+        records.push({
+          dashboardPage: cleanResourceName(cells[pageColumn]) || currentDashboardPage,
+          region: cleanResourceName(cells[regionColumn]) || "Data table",
+          sourceResource: cleanResourceName(cells[sourceColumn]),
+          displayColumns: cleanResourceName(cells[displayColumn]),
+          selectedTemplateId,
+          raw: lines[rowIndex].trim(),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return records;
+}
+
+function extractApprovedDataTableTemplateId(text) {
+  for (const templateId of APPROVED_DATA_TABLE_TEMPLATE_IDS) {
+    const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
+  }
+  return "";
 }
 
 function collectDataListFieldSpecs(planText) {
@@ -690,13 +749,9 @@ function buildIdPaths(planDemand) {
     });
     paths.push(`decoded.Childs[${index}].Layouts[0].LayoutID`);
   });
-  for (const assignment of assignCustomFormLayoutPositions(planDemand, planDemand.resources.dataLists)) {
+  for (const assignment of assignAllCustomFormLayoutPositions(planDemand, planDemand.resources.dataLists)) {
     paths.push(`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`);
   }
-  const assignedFormNames = new Set(planDemand.customFormRecords.map((record) => normKey(record.formName)));
-  planDemand.resources.customForms.filter((name) => !assignedFormNames.has(normKey(name))).forEach((name, index) => {
-    paths.push(`decoded.Childs[0].Layouts[${index + 1}].LayoutID`);
-  });
   planDemand.resources.approvalForms.forEach((name, index) => {
     paths.push(`decoded.Forms[${index}].Key`);
     paths.push(`decoded.Forms[${index}].DefResourceID`);
@@ -707,7 +762,7 @@ function buildIdPaths(planDemand) {
   planDemand.resources.dashboards.forEach((name, index) => {
     paths.push(`decoded.Pages[${index}].LayoutID`);
   });
-  planDemand.resources.navigationGroups.forEach((name, index) => {
+  navigationGroupNames(planDemand).forEach((name, index) => {
     paths.push(`decoded.ListSet.LayoutView.sort[${index}].ID`);
   });
   return paths;
@@ -836,6 +891,36 @@ function assignCustomFormLayoutPositions(planDemand, dataListNames) {
     });
 }
 
+function assignAllCustomFormLayoutPositions(planDemand, dataListNames) {
+  const assignments = assignCustomFormLayoutPositions(planDemand, dataListNames);
+  const assignedFormNames = new Set(assignments.map((assignment) => normKey(assignment.formName)));
+  const offsetsByList = new Map();
+  for (const assignment of assignments) {
+    offsetsByList.set(assignment.listIndex, Math.max(offsetsByList.get(assignment.listIndex) || 0, assignment.layoutIndex));
+  }
+  const fallbackAssignments = [];
+  for (const formName of planDemand.resources.customForms.filter((name) => !assignedFormNames.has(normKey(name)))) {
+    const listIndex = 0;
+    const next = (offsetsByList.get(listIndex) || 0) + 1;
+    offsetsByList.set(listIndex, next);
+    fallbackAssignments.push({
+      listName: dataListNames[0],
+      formName,
+      formType: "",
+      selectedTemplate: "",
+      openIn: "",
+      generatedByPolicy: "fallback-custom-form-from-resource-list",
+      listIndex,
+      layoutIndex: next,
+    });
+  }
+  return assignments.concat(fallbackAssignments);
+}
+
+function navigationGroupNames(planDemand) {
+  return planDemand.resources.navigationGroups.length ? planDemand.resources.navigationGroups : ["Workspace"];
+}
+
 function ensureRequiredCustomFormRecords(planDemand, dataListNames) {
   const records = [...(planDemand.customFormRecords || [])];
   for (const listName of dataListNames) {
@@ -934,8 +1019,8 @@ function defaultValueForFieldType(fieldType) {
   return fieldType === "Bit" ? "0" : "";
 }
 
-function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", fields }) {
-  const templateKind = isWorkbenchCustomForm({ formName, formType }) ? "workbench" : (/\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit");
+function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", selectedTemplate = "", openIn = "", fields }) {
+  const templateKind = isWorkbenchCustomForm({ formName, formType, selectedTemplate, openIn }) ? "workbench" : (/\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit");
   const templateId = templateKind === "workbench" ? "data_list_form_layout_workbench" : (templateKind === "view" ? "data_list_form_layout_view_item_v1_1" : "data_list_form_layout_new_edit_v1_1");
   const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields });
   const resourceJson = JSON.stringify(resource);
@@ -976,6 +1061,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   if (slot) {
     slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
+  removeAllByIdentity(resource, "Operations");
   removeEmptyBusinessSections(resource);
   return resource;
 }
@@ -1238,12 +1324,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
   const dataListNames = planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`];
   const dataListByName = new Map();
   const listMetaByName = new Map();
-  const customFormAssignments = assignCustomFormLayoutPositions(planDemand, dataListNames);
-  const assignedFormNames = new Set(customFormAssignments.map((assignment) => normKey(assignment.formName)));
-  const fallbackCustomForms = planDemand.resources.customForms
-    .filter((name) => !assignedFormNames.has(normKey(name)))
-    .map((formName, index) => ({ listName: dataListNames[0], formName, formType: "", listIndex: 0, layoutIndex: index + 1 }));
-  const allCustomFormAssignments = customFormAssignments.concat(fallbackCustomForms);
+  const allCustomFormAssignments = assignAllCustomFormLayoutPositions(planDemand, dataListNames);
   const childs = dataListNames.map((name, index) => {
     const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
     dataListByName.set(normKey(name), listId);
@@ -1289,7 +1370,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     ];
     for (const assignment of customLayoutsForList) {
       const layoutId = stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]);
-      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, fields }));
+      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, selectedTemplate: assignment.selectedTemplate, openIn: assignment.openIn, fields }));
     }
     const displayLayoutView = buildDataListFormDisplaySettings({ customLayoutsForList, ids });
     const detailLayoutId = displayLayoutView.view || displayLayoutView.edit || displayLayoutView.add || "";
@@ -1351,7 +1432,8 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
   }));
 
   const pages = planDemand.resources.dashboards.map((name, index) => {
-    const datasetRecord = selectDashboardDatasetRecord({ planDemand, pageName: name, pageIndex: index });
+    const datasetRecords = selectDashboardDatasetRecordsForPage({ planDemand, pageName: name, pageIndex: index });
+    const datasetRecord = datasetRecords[0] || null;
     const firstListName = datasetRecord?.sourceResource || dataListNames[index % dataListNames.length];
     const firstListMeta = listMetaByName.get(normKey(firstListName)) || listMetaByName.values().next().value || { listName: firstListName, listId: rootListId, fields: fieldSpecsForList(planDemand, firstListName), detailLayoutId: "" };
     const firstListId = firstListMeta.listId || dataListByName.get(normKey(firstListName)) || dataListByName.values().next().value || rootListId;
@@ -1379,9 +1461,10 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
               listId: firstListId,
               listMeta: firstListMeta,
               listMetaByName,
-            datasetRecord,
+            datasetRecords,
             dashboardFilters,
             dashboardAnalytics,
+            dashboardDataTables: selectDashboardDataTablesForPage({ planDemand, pageName: name, pageIndex: index }),
             dashboardSummaryMetrics,
             summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
             filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
@@ -1422,6 +1505,26 @@ function selectDashboardDatasetRecord({ planDemand, pageName, pageIndex }) {
     || records[0];
 }
 
+function selectDashboardDatasetRecordsForPage({ planDemand, pageName, pageIndex }) {
+  const records = planDemand.dashboardDatasetRecords || [];
+  if (!records.length) return [];
+  const pageMatches = records.filter((record) => dashboardNameMatches(pageName, record.dashboardPage));
+  if (pageMatches.length) return pageMatches;
+  const unscoped = records.filter((record) => !record.dashboardPage);
+  if (unscoped.length) return unscoped.filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
+  return [records[pageIndex % records.length] || records[0]].filter(Boolean);
+}
+
+function selectDashboardDataTablesForPage({ planDemand, pageName, pageIndex }) {
+  const records = planDemand.dashboardDataTableRecords || [];
+  if (!records.length) return [];
+  const pageMatches = records.filter((record) => dashboardNameMatches(pageName, record.dashboardPage));
+  if (pageMatches.length) return pageMatches;
+  const unscoped = records.filter((record) => !record.dashboardPage);
+  if (unscoped.length) return unscoped.filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
+  return records.filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
+}
+
 function selectDashboardAnalyticsForPage({ planDemand, pageName, pageIndex }) {
   const records = planDemand.dashboardAnalyticsRecords || [];
   if (!records.length) return [];
@@ -1438,42 +1541,63 @@ function selectDashboardSummaryMetricsForPage({ planDemand, pageName, pageIndex 
   return records.filter((record) => !record.dashboardPage).filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
 }
 
-function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecord, dashboardFilters, dashboardAnalytics, dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
+function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecords = [], dashboardFilters, dashboardAnalytics, dashboardDataTables = [], dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar, plannedMetrics: dashboardSummaryMetrics });
   const resource = buildDashboardV11Shell({ name, layoutId });
-  const sourceResource = datasetRecord?.sourceResource || listName;
-  const selectedTemplateId = datasetRecord?.selectedTemplateId || "collection_control_grid_table";
-  const datasetRegion = datasetRecord?.datasetRegion || `${sourceResource} records`;
+  const primaryDatasetRecord = (datasetRecords || [])[0] || null;
+  const sourceResource = primaryDatasetRecord?.sourceResource || listName;
+  const selectedTemplateId = primaryDatasetRecord?.selectedTemplateId || "collection_control_grid_table";
+  const datasetRegion = primaryDatasetRecord?.datasetRegion || `${sourceResource} records`;
   const sourceListMeta = listMeta || { listName: sourceResource, listId, fields: [{ fieldName: "Title", displayName: "Title", fieldType: "Text", controlType: "input" }], detailLayoutId: "" };
   const normalizedFilters = normalizeDashboardFilters({ filters: dashboardFilters, listMeta: sourceListMeta, dashboardName: name });
-  const collectionRoot = buildCollectionTemplateInstance({
-    templateId: selectedTemplateId,
-    dashboardName: name,
-    datasetRegion,
-    listName: sourceResource,
-    rootListSetId,
-    listId,
-    listMeta: sourceListMeta,
-    detailLayoutId: sourceListMeta.detailLayoutId,
-    filterBindings: normalizedFilters,
-    collectionId,
-  });
-  const templateDependencies = collectionRoot.pageLevelDependencies || {};
-  const contentArea = findBusinessSectionContentArea(resource);
-  if (contentArea) {
-    contentArea.datasetRegion = datasetRegion;
-    contentArea.datasetRegionName = datasetRegion;
-    contentArea.attrs = {
-      ...(contentArea.attrs || {}),
-      datasetRegion,
-      datasetRegionName: datasetRegion,
-      appPlanDatasetRegion: datasetRegion,
-    };
-    contentArea.children = [collectionRoot];
+  const collectionRoots = [];
+  const effectiveDatasetRecords = (datasetRecords || []).length ? datasetRecords : [{ selectedTemplateId, sourceResource, datasetRegion }];
+  for (const [index, record] of effectiveDatasetRecords.entries()) {
+    const recordListMeta = listMetaByName?.get(normKey(record.sourceResource)) || (index === 0 ? sourceListMeta : null) || sourceListMeta;
+    const recordListName = recordListMeta.listName || record.sourceResource || sourceResource;
+    const recordListId = recordListMeta.listId || listId;
+    const recordRegion = record.datasetRegion || `${recordListName} records`;
+    collectionRoots.push(buildCollectionTemplateInstance({
+      templateId: record.selectedTemplateId || "collection_control_grid_table",
+      dashboardName: name,
+      datasetRegion: recordRegion,
+      listName: recordListName,
+      rootListSetId,
+      listId: recordListId,
+      listMeta: recordListMeta,
+      detailLayoutId: recordListMeta.detailLayoutId,
+      filterBindings: index === 0 ? normalizedFilters : [],
+      collectionId: index === 0 ? collectionId : `${collectionId}_${index + 1}`,
+    }));
   }
+  const templateDependencies = mergePageDependencies(collectionRoots.map((root) => root.pageLevelDependencies || {}));
+  const datasetSlots = findDatasetSlots(resource);
+  for (const [index, collectionRoot] of collectionRoots.entries()) {
+    const slot = datasetSlots[index] || datasetSlots[0] || findBusinessSectionContentArea(resource);
+    if (!slot) continue;
+    slot.datasetRegion = collectionRoot.datasetRegion || datasetRegion;
+    slot.datasetRegionName = collectionRoot.datasetRegionName || collectionRoot.datasetRegion || datasetRegion;
+    slot.attrs = {
+      ...(slot.attrs || {}),
+      datasetRegion: slot.datasetRegion,
+      datasetRegionName: slot.datasetRegionName,
+      appPlanDatasetRegion: slot.datasetRegionName,
+    };
+    slot.children = Array.isArray(slot.children) ? slot.children : [];
+    slot.children = slot.children.filter((child) => hasMeaningfulBusinessContent(child));
+    slot.children.push(collectionRoot);
+  }
+  const contentArea = datasetSlots[0] || findBusinessSectionContentArea(resource);
   const analyticsRuntimeContracts = materializeDashboardAnalytics(resource, {
     analyticsRecords: dashboardAnalytics,
+    fallbackListMeta: sourceListMeta,
+    listMetaByName,
+    dashboardName: name,
+    rootListSetId,
+  });
+  materializeDashboardDataTables(resource, {
+    dataTableRecords: dashboardDataTables,
     fallbackListMeta: sourceListMeta,
     listMetaByName,
     dashboardName: name,
@@ -1546,7 +1670,9 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
     shellTemplate: PAGE_LAYOUT_TEMPLATE_ID,
     datasetRegion,
     selectedCollectionTemplateId: selectedTemplateId,
+    selectedCollectionTemplateIds: collectionRoots.map((root) => root.datasetPresentationTemplateId).filter(Boolean),
     selectedDataAnalyticsTemplateIds: (dashboardAnalytics || []).map((record) => record.selectedTemplateId),
+    selectedDataTableTemplateIds: (dashboardDataTables || []).map((record) => record.selectedTemplateId),
     sourceResource,
     kpiCount: kpiContracts.length,
     kpis: kpiContracts.map((contract) => ({ key: contract.key, label: contract.label, tempVar: contract.tempVar, summaryId: contract.summaryId })),
@@ -1726,11 +1852,101 @@ function materializeDashboardAnalytics(resource, { analyticsRecords, fallbackLis
 function findDashboardAnalyticsSlots(resource) {
   const allowedSectionIds = new Set(["content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
   const slots = [];
+  for (const chartCards of findDescendants(resource, (node) => hasIdentity(node, "chart_cards_section"))) {
+    slots.push(chartCards);
+  }
   for (const section of findDescendants(resource, (node) => [...allowedSectionIds].some((identity) => hasIdentity(node, identity)))) {
     const slot = findFirstByIdentity(section, "section_content_area");
     if (slot) slots.push(slot);
   }
   return slots;
+}
+
+function materializeDashboardDataTables(resource, { dataTableRecords, fallbackListMeta, listMetaByName, dashboardName, rootListSetId }) {
+  const records = dataTableRecords || [];
+  if (!records.length) return;
+  const slots = findDatasetSlots(resource);
+  records.forEach((record, index) => {
+    const sourceMeta = listMetaByName?.get(normKey(record.sourceResource)) || fallbackListMeta;
+    const module = buildDataTableTemplateInstance({
+      record,
+      listMeta: sourceMeta,
+      dashboardName,
+      instanceIndex: index,
+      rootListSetId,
+    });
+    const slot = slots[(index + 1) % Math.max(1, slots.length)] || slots[0] || findBusinessSectionContentArea(resource);
+    if (!slot) return;
+    slot.children = Array.isArray(slot.children) ? slot.children : [];
+    slot.children.push(module);
+  });
+}
+
+function buildDataTableTemplateInstance({ record, listMeta, dashboardName, instanceIndex, rootListSetId }) {
+  const template = JSON.parse(fs.readFileSync(DATA_TABLE_TEMPLATE_PATHS[record.selectedTemplateId], "utf8"));
+  const root = clone(template._ak_c || template.templateResource || template);
+  const fields = selectDataTableFields(listMeta, record.displayColumns);
+  const title = record.region || `${listMeta.listName} table`;
+  root.id = deterministicUuid(`${dashboardName}:${record.selectedTemplateId}:${instanceIndex}:data-table`);
+  root.name = title;
+  root.title = title;
+  root.templateId = record.selectedTemplateId;
+  root.dataTableTemplateId = record.selectedTemplateId;
+  root.derivedFromDataTableGoldenReference = record.selectedTemplateId;
+  root.attrs = {
+    ...(root.attrs || {}),
+    templateId: record.selectedTemplateId,
+    dataTableTemplateId: record.selectedTemplateId,
+    derivedFromDataTableGoldenReference: record.selectedTemplateId,
+    data: {
+      ...(root.attrs?.data || {}),
+      list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) },
+    },
+    listarr: fields.map((field) => ({
+      DisplayName: field.displayName,
+      FieldName: field.displayName,
+      Field: field.fieldName,
+      Attrs: { table: { cw: [null, ""], cwu: [null, "px"] } },
+    })),
+  };
+  if (record.selectedTemplateId === "data_table_control_caption_scroll") {
+    root.attrs.caption = {
+      ...(root.attrs.caption || {}),
+      title,
+      placeholder: `Search ${listMeta.listName}`,
+      addtext: `Add ${listMeta.listName.replace(/s$/i, "") || "item"}`,
+    };
+  }
+  return root;
+}
+
+function selectDataTableFields(listMeta, requestedColumns) {
+  const fields = fieldsForDynamicControls(listMeta);
+  const requested = String(requestedColumns || "").split(/[,;/]+/).map((value) => normKey(value)).filter(Boolean);
+  const selected = requested.length
+    ? fields.filter((field) => requested.some((item) => normKey(field.displayName) === item || normKey(field.fieldName) === item || normKey(field.displayName).includes(item) || item.includes(normKey(field.displayName))))
+    : fields;
+  return (selected.length ? selected : fields).slice(0, 8);
+}
+
+function findDatasetSlots(resource) {
+  const slots = [];
+  const primary = findBusinessSectionContentArea(resource);
+  if (primary) slots.push(primary);
+  for (const section of findDescendants(resource, (node) => ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"].some((identity) => hasIdentity(node, identity)))) {
+    const slot = findFirstByIdentity(section, "section_content_area");
+    if (slot && !slots.includes(slot)) slots.push(slot);
+  }
+  return slots;
+}
+
+function mergePageDependencies(dependencies) {
+  return {
+    tempVars: dependencies.flatMap((item) => normalizeDependencyArray(item.tempVars)),
+    filterVars: dependencies.flatMap((item) => normalizeDependencyArray(item.filterVars)),
+    actions: dependencies.flatMap((item) => normalizeDependencyArray(item.actions)),
+    formAction: dependencies.flatMap((item) => normalizeDependencyArray(item.formAction)),
+  };
 }
 
 function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, instanceIndex, rootListSetId }) {
@@ -2445,11 +2661,19 @@ function replaceTemplateResidue(root, { datasetRegion, listName }) {
     ["Completion (%)", "Status"],
     ["Progress bar", "Status"],
   ]);
+  const regexReplacements = [
+    [/\bEvent\s+Pipeline\b/gi, datasetRegion],
+    [/\bPipeline\b/gi, "Workflow"],
+  ];
   const visit = (node) => {
     if (!node || typeof node !== "object") return;
     for (const [key, value] of Object.entries(node)) {
-      if (typeof value === "string" && replacements.has(value)) node[key] = replacements.get(value);
-      else if (value && typeof value === "object") visit(value);
+      if (typeof value === "string") {
+        if (/^(?:id|templateId|dataTableTemplateId|dataAnalyticsTemplateId|datasetPresentationTemplateId|derivedFrom|derivedFromDatasetPresentationTemplate|derivedFromDataTableGoldenReference|derivedFromDataAnalyticsGoldenReference)$/i.test(key)) continue;
+        let next = replacements.has(value) ? replacements.get(value) : value;
+        for (const [pattern, replacement] of regexReplacements) next = next.replace(pattern, replacement);
+        node[key] = next;
+      } else if (value && typeof value === "object") visit(value);
     }
   };
   visit(root);
@@ -2553,6 +2777,18 @@ function removeOperationsWithoutActions(root) {
   visit(root);
 }
 
+function removeAllByIdentity(root, identity) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      if (hasIdentity(child, identity)) return false;
+      visit(child);
+      return true;
+    });
+  };
+  visit(root);
+}
+
 function removeEmptyBusinessSections(root) {
   const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
   const visit = (node) => {
@@ -2602,7 +2838,7 @@ function hasMeaningfulBusinessContent(node) {
   return findDescendants(node, (control) => {
     const type = String(control?.type || "");
     if (control?.approvalFormNoFieldsNotice === true) return true;
-    if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
+    if (["collection", "data-list", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(control)) return true;
     if (["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"].some((identity) => hasIdentity(control, identity))) return true;
     if (hasIdentity(control, "form_grid_fields_wrapper")) return true;
@@ -2813,7 +3049,7 @@ function buildLegacyMaterialDashboardResource({ name, layoutId, listName, listId
 }
 
 function buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName, forms, pages }) {
-  const groups = planDemand.resources.navigationGroups.length ? planDemand.resources.navigationGroups : ["Workspace"];
+  const groups = navigationGroupNames(planDemand);
   const dashboardItems = pages.map((page) => ({ Title: page.Title, Type: 103, Target: page.Title, ListID: page.LayoutID, LayoutID: page.LayoutID }));
   const formItems = forms.map((form) => ({ Title: form.Name, Type: 105, Target: form.Name, ListID: form.Key }));
   const listItems = planDemand.resources.dataLists.map((name) => ({ Title: name, Type: 1, Target: name, ListID: dataListByName.get(normKey(name)) }));

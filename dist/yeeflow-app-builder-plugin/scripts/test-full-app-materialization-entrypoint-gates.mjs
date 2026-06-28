@@ -23,6 +23,7 @@ const APPROVAL_WORKFLOW_VALIDATOR = path.join(ROOT, "scripts/validate-approval-w
 const DASHBOARD_LAYOUT_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-page-layout-template.mjs");
 const DASHBOARD_DATASET_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
 const DATA_ANALYTICS_VALIDATOR = path.join(ROOT, "scripts/validate-data-analytics-golden-references.mjs");
+const DATA_TABLE_VALIDATOR = path.join(ROOT, "scripts/validate-data-table-golden-references.mjs");
 const DASHBOARD_GOLDEN_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-golden-reference-conformance.mjs");
 const DASHBOARD_HARD_GATES_VALIDATOR = path.join(ROOT, "scripts/validate-dashboard-generation-hard-gates.mjs");
 const SUMMARY_CONTRACT_VALIDATOR = path.join(ROOT, "scripts/inspect-dashboard-summary-control-contract.mjs");
@@ -241,20 +242,20 @@ try {
     "| Form Name | Form Type | Purpose |",
     "| --- | --- | --- |",
     "| Asset New/Edit Form | New/Edit item | Create and maintain office asset records. |",
-    "| Asset Quick View | View item | Compact asset details. |",
-    "| Asset Quick View | 1 | Title field row that must not create a duplicate form. |",
+    "| Asset Workbench Details | View item | Full-page workbench asset details. |",
+    "| Asset Workbench Details | 1 | Title field row that must not create a duplicate form. |",
     "",
     "#### Data List Form Layout Template Selection",
     "| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |",
     "| --- | --- | --- | --- | --- | --- | --- | --- |",
     "| Office Assets | Asset New/Edit Form | New/Edit | data_list_form_layout_new_edit_v1_1 | Current item edit fields | None | New/Edit item requires governed custom form routing | Generated-final validation |",
-    "| Office Assets | Asset Quick View | View | data_list_form_layout_view_item_v1_1 | Page title, KPI, current item details | Related loan context | View item requires current record and related context | Generated-final validation |",
+    "| Office Assets | Asset Workbench Details | View | data_list_form_layout_workbench | Page title, primary working area, right-side context | Related loan context and analytics | View item needs Full page workbench details | Generated-final validation |",
     "",
     "#### Form Fields Layout Template Selection",
     "| Data List or Library | Custom Form | Field Group | Selected Form Fields Layout Template | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |",
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     "| Office Assets | Asset New/Edit Form | Basic information | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |",
-    "| Office Assets | Asset Quick View | Basic information | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |",
+    "| Office Assets | Asset Workbench Details | Basic information | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |",
     "",
     "### 10.2 Loan Transactions",
     "",
@@ -323,12 +324,21 @@ try {
     "| --- | --- | --- |",
     "| Active loans | Loan Transactions | collection_control_grid_table_with_multiselect |",
     "| Availability cards | Office Assets | collection_control_responsive_card_grid |",
+    "| Batch card selection | Office Assets | collection_control_card_with_multiselect_toolbar |",
+    "| Asset categories work queue | Asset Categories | collection_control_grid_table |",
     "",
     "#### Data Analytics Template Selection",
     "| Dashboard Page | Analytics Region | Source Resource | Business Question | Selected Data Analytics Template | Grouping Field | Value Field |",
     "| --- | --- | --- | --- | --- | --- | --- |",
     "| Asset Loan Operations Dashboard | Loan status mix | Loan Transactions | Loan transactions by status | data_analytics_pie_chart_with_title | Status | ListDataID |",
     "| Asset Loan Operations Dashboard | Loan volume trend | Loan Transactions | Loan transactions over time | data_analytics_line_chart_with_title | Due Date | ListDataID |",
+    "",
+    "#### Data Table Template Selection",
+    "| Host Surface | Page/Form | Region | Source Resource | Selected Data Table Template | Display Columns | Selection Rationale | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Dashboard | Asset Loan Operations Dashboard | Loan transaction table | Loan Transactions | data_table_control_standard_scroll | Title, Due Date, Status | Many fields, horizontal scrolling acceptable | Generated-final validation |",
+    "| Dashboard | Asset Loan Operations Dashboard | Asset availability compact table | Office Assets | data_table_control_standard_no_scroll | Title, Assigned To, Requires Approval | Few fields, no horizontal scroll preferred | Generated-final validation |",
+    "| Dashboard | Overdue Monitor | Return inspections managed table | Return Inspections | data_table_control_caption_scroll | Title, Status | Caption search/add/import/export toolbar needed | Generated-final validation |",
     "",
     "### 14.2 Overdue Monitor",
     "",
@@ -377,6 +387,8 @@ try {
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dataLists, ["Office Assets", "Loan Transactions", "Asset Categories", "Return Inspections"]);
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.resources.dashboards, ["Asset Loan Operations Dashboard", "Overdue Monitor"]);
   assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardAnalyticsRecords.length, 2, "planned Data Analytics template selections are parsed");
+  assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardDatasetRecords.length, 4, "planned Dashboard Collection template selections are parsed");
+  assert.equal(resourceGenerationReport.plannedResourceDemand.dashboardDataTableRecords.length, 3, "planned Data Table template selections are parsed");
   const decodedResource = JSON.parse(fs.readFileSync(resourceReport.outputs.decodedResource, "utf8"));
   const resourceWrapper = JSON.parse(fs.readFileSync(resourceReport.outputs.package, "utf8"));
   assert.equal(String(resourceWrapper.ListID), String(decodedResource.ListSet.ListID), "wrapper.ListID must equal decoded ListSet.ListID");
@@ -472,8 +484,16 @@ try {
     assert.equal(String(page.LayoutInResources[0].RefId), String(page.LayoutID), "dashboard LayoutInResources[0].RefId must equal LayoutID");
   }
   const decodedText = JSON.stringify(decodedResource);
+  assert.match(decodedText, /data_list_form_layout_workbench/, "planned Workbench data-list form layout template is materialized");
+  assert.match(decodedText, /collection_control_grid_table_with_multiselect/, "planned grid-table multiselect collection template is materialized");
+  assert.match(decodedText, /collection_control_responsive_card_grid/, "planned responsive card collection template is materialized");
+  assert.match(decodedText, /collection_control_card_with_multiselect_toolbar/, "planned card multiselect toolbar collection template is materialized");
+  assert.match(decodedText, /collection_control_grid_table/, "planned grid-table collection template is materialized");
   assert.match(decodedText, /data_analytics_pie_chart_with_title/, "planned pie chart analytics template is materialized");
   assert.match(decodedText, /data_analytics_line_chart_with_title/, "planned line chart analytics template is materialized");
+  assert.match(decodedText, /data_table_control_standard_scroll/, "planned standard-scroll Data Table template is materialized");
+  assert.match(decodedText, /data_table_control_standard_no_scroll/, "planned standard-no-scroll Data Table template is materialized");
+  assert.match(decodedText, /data_table_control_caption_scroll/, "planned caption-scroll Data Table template is materialized");
   assert.doesNotMatch(decodedText, /\{\{(?:DetailLayoutID|ListSetID|ListID|FieldID|ListDataID|LayoutID|layoutId|layout|PageID|pageId)[^}]*\}\}/, "materialized generated-final package must not retain template action/reference placeholders");
   assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
   const resourceFixtureOut = path.join(tempDir, "resource-plan-fixture");
@@ -558,6 +578,11 @@ try {
   ]);
   expectPass("nontrivial generated package passes Data Analytics template materialization validation", [
     DATA_ANALYTICS_VALIDATOR,
+    "--package", resourceReport.outputs.package,
+    "--plan", resourcePlan,
+  ]);
+  expectPass("nontrivial generated package passes Data Table template materialization validation", [
+    DATA_TABLE_VALIDATOR,
     "--package", resourceReport.outputs.package,
     "--plan", resourcePlan,
   ]);
