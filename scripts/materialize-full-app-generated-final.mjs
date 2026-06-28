@@ -2595,7 +2595,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   for (const search of findDescendants(root, (node) => String(node?.type || "") === "search-filter")) {
     search.attrs = {
       ...(search.attrs || {}),
-      placeholder: { value: `Search ${listName}` },
+      placeholder: `Search ${listName}`,
       data: {
         ...(search.attrs?.data || {}),
         list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },

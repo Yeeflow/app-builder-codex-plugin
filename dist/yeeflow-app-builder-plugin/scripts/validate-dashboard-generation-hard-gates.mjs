@@ -200,10 +200,10 @@ function validateFilter(entry, page, listIndex, findings) {
 
 function validateSearchFilter(entry, page, findings) {
   const attrs = entry.control?.attrs || {};
-  validatePlaceholderShape(attrs.placeholder, `${entry.pointer}.attrs.placeholder`, page, findings, { codePrefix: "DASH_SEARCH_FILTER", required: true });
+  validatePlaceholderShape(attrs.placeholder, `${entry.pointer}.attrs.placeholder`, page, findings, { codePrefix: "DASH_SEARCH_FILTER", required: true, stringOnly: true });
 }
 
-function validatePlaceholderShape(value, pointer, page, findings, { codePrefix, required }) {
+function validatePlaceholderShape(value, pointer, page, findings, { codePrefix, required, stringOnly = false }) {
   if (!present(value)) {
     if (required) findings.push(error(`${codePrefix}_PLACEHOLDER_VALUE_MISSING`, "Generated filter controls must include an export-proven placeholder text value.", { page: page.title, path: pointer }));
     return;
@@ -212,6 +212,10 @@ function validatePlaceholderShape(value, pointer, page, findings, { codePrefix, 
     if (value.trim() === "[object Object]") {
       findings.push(error(`${codePrefix}_PLACEHOLDER_OBJECT_STRING_FORBIDDEN`, "Generated filter placeholder must not render as [object Object].", { page: page.title, path: pointer, value }));
     }
+    return;
+  }
+  if (stringOnly) {
+    findings.push(error(`${codePrefix}_PLACEHOLDER_OBJECT_FORBIDDEN`, "Generated search-filter attrs.placeholder must be a primitive string; object-shaped placeholder values render as [object Object] in the runtime input.", { page: page.title, path: pointer, value }));
     return;
   }
   if (!isObject(value)) {

@@ -634,7 +634,16 @@ try {
     name: "Search Requests",
     attrs: { placeholder: { 0: "S", 1: "e", value: "Search Requests" } },
   });
-  expectCode("search filter placeholder string-spread numeric keys fail", ["--package", writePackage(tempDir, "search-placeholder-numeric-keys", decodedWithResource(searchPlaceholderObject))], "DASH_SEARCH_FILTER_PLACEHOLDER_NUMERIC_KEYS_FORBIDDEN");
+  expectCode("search filter placeholder string-spread numeric keys fail", ["--package", writePackage(tempDir, "search-placeholder-numeric-keys", decodedWithResource(searchPlaceholderObject))], "DASH_SEARCH_FILTER_PLACEHOLDER_OBJECT_FORBIDDEN");
+
+  const searchPlaceholderValueObject = validV11Resource();
+  findBusinessSectionContentArea(searchPlaceholderValueObject).children.unshift({
+    type: "search-filter",
+    id: "search_filter_value_object_placeholder",
+    name: "Search Requests",
+    attrs: { placeholder: { value: "Search Requests" } },
+  });
+  expectCode("search filter placeholder value object fails", ["--package", writePackage(tempDir, "search-placeholder-value-object", decodedWithResource(searchPlaceholderValueObject))], "DASH_SEARCH_FILTER_PLACEHOLDER_OBJECT_FORBIDDEN");
 
   const emptyContentCard = validV11Resource();
   find(emptyContentCard, "Content").children.push({
