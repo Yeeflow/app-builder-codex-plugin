@@ -68,6 +68,26 @@ try {
 `);
   expectPass("App Plan with approved dataset presentation references passes", ["--app-plan", validPlan]);
 
+  const mixedLegacyAndCanonicalPlan = write("mixed-legacy-canonical-plan.md", `# Yeeflow App Plan
+
+## Dashboard Pages Plan
+
+#### Record Display Control Selection
+
+| Section | Data Source | Display Need | Selected Record Display Control | Selection Reason | Detail/Open Behavior | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- |
+| Batch loan queue | Loan Transactions | Dense selectable queue | Collection | Grid-table with multiselect supports batch operations | Open current loan and selected-state actions | Runtime collection proof |
+| Asset card browser | Office Assets | Visual asset browsing | Collection | Responsive cards match asset scanning | Open current asset | Runtime collection proof |
+
+### 14.1.2 Record Display Control Selection
+
+| Dashboard | Dataset Region | Selected Record Display Control | Selected Yeeflow Control Type Category | Selected Template | Source List | Selection Reason |
+| --- | --- | --- | --- | --- | --- | --- |
+| Asset Loan Operations Dashboard | Batch loan queue | Collection | Collection | collection_control_grid_table_with_multiselect | Loan Transactions | Coordinator needs dense multi-row batch selection |
+| Asset Availability and Utilization Dashboard | Asset card browser | Collection | Collection | collection_control_responsive_card_grid | Office Assets | Asset browsing benefits from responsive cards |
+`);
+  expectPass("App Plan canonical exact-ID table overrides earlier legacy prose dataset table", ["--app-plan", mixedLegacyAndCanonicalPlan]);
+
   const retiredSearchPlan = write("retired-search-plan.md", `# Yeeflow App Plan
 
 ## Dashboard Pages Plan

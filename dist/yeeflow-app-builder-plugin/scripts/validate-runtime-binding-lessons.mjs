@@ -8,6 +8,7 @@ const API_ISSUED_ID_RE = /^\d{16,}$/;
 const DASHBOARD_CONSUMER_TYPES = new Set(["summary", "collection", "data-list", "pivot-table", "pie-chart", "bar-chart", "line-chart"]);
 const DATA_FILTER_TYPES = new Set(["search", "select", "checkbox", "radio", "date", "range", "check-range", "relative-period", "hierarchy", "sorting"]);
 const LOOKUP_CONTROL_TYPES = new Set(["lookup", "organization-picker", "identity-picker"]);
+const SYSTEM_DASHBOARD_FIELDS = new Set(["ListDataID", "Created", "CreatedBy", "Modified", "ModifiedBy"]);
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -71,6 +72,11 @@ function normalizeFieldName(value) {
 
 function fieldKey(field) {
   return normalizeFieldName(field?.FieldName || field?.InternalName || field?.DisplayName || field?.field || field?.Field);
+}
+
+function listHasField(list, fieldName) {
+  const normalized = normalizeFieldName(fieldName);
+  return Boolean(normalized && (list?.fields?.has(normalized) || SYSTEM_DASHBOARD_FIELDS.has(normalized)));
 }
 
 function collectLists(decoded) {
@@ -167,7 +173,7 @@ function validateConsumerConditions({ findings, pageName, layoutId, control, poi
   ];
   for (const [index, condition] of conditions.entries()) {
     const fieldName = conditionField(condition);
-    if (fieldName && list && !list.fields.has(fieldName)) {
+    if (fieldName && list && !listHasField(list, fieldName)) {
       add(findings, "error", "DASHBOARD_FILTER_CONSUMER_INVALID_FIELD", "Dashboard filter consumer condition references a field that is not on the consumer source list.", {
         page: pageName,
         controlId: safeString(control?.id),
@@ -215,6 +221,7 @@ export function validateDashboardBindings(decoded, options = {}) {
     const extByControlId = new Map(exts.map((ext) => [safeString(ext?.i), ext]));
     const reportIds = new Set([
       ...rootReportIds,
+      ...asArray(page?.ReportIds).map(safeString),
       ...asArray(layout?.ReportIds).map(safeString),
       ...asArray(resource?.ReportIds).map(safeString),
     ].filter(Boolean));
@@ -233,7 +240,7 @@ export function validateDashboardBindings(decoded, options = {}) {
         const detail = { page: pageName, controlId, controlTitle: controlTitle(node), sourceList: list?.title || listId, sourceField: fieldName };
         if (!listId) add(findings, "error", "DASHBOARD_SUMMARY_MISSING_DATA_LIST", "Summary controls must configure attrs.data.list.", { ...detail, recommendedFix: "Set attrs.data.list to the source list." });
         if (!fieldName) add(findings, "error", "DASHBOARD_SUMMARY_MISSING_FIELD", "Summary controls must configure attrs.field or attrs.data.field.", { ...detail, recommendedFix: "Bind Summary to a resolvable aggregate field." });
-        if (fieldName && list && !list.fields.has(fieldName)) add(findings, "error", "DASHBOARD_FILTER_CONSUMER_INVALID_FIELD", "Summary source field does not resolve on the source list.", { ...detail, recommendedFix: "Use a field present on the Summary source list." });
+        if (fieldName && list && !listHasField(list, fieldName)) add(findings, "error", "DASHBOARD_FILTER_CONSUMER_INVALID_FIELD", "Summary source field does not resolve on the source list.", { ...detail, recommendedFix: "Use a field present on the Summary source list." });
         const ext = extByControlId.get(controlId);
         if (!ext) {
           add(findings, "error", "DASHBOARD_SUMMARY_MISSING_EXT", "Summary controls require a matching page.exts[] entry.", { ...detail, recommendedFix: "Add a category ___Pivot___, key summary ext with i equal to the Summary control id." });

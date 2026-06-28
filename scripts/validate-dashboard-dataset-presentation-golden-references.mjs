@@ -529,6 +529,9 @@ function collectDashboardDatasetPlanLines(text) {
   const dashboard = extractDashboardPagesPlanSection(text);
   if (!dashboard.trim()) return [];
 
+  const structuredRecords = collectDashboardDatasetPlanRecords(text, APPROVED_IDS);
+  if (structuredRecords.length) return structuredRecords.map((record) => record.raw);
+
   const rows = [];
   for (const table of markdownTables(dashboard)) {
     const headers = table.headers.map(normalizeTableCell);
