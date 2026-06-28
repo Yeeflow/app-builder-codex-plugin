@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.81
+
+- Release generated-final preflight contract gap alignment from PR #301.
+- Credit every Dashboard filter variable consumed by Collection/Data table filter and fulltext metadata instead of marking secondary consumers as unconsumed.
+- Decode encoded Approval `DefResource.pageurls[]` when checking request/task page URL and workflow panel/history runtime surfaces.
+- Use package-proven custom Data List form assignments to avoid stale App Plan wording false positives while keeping plan-only validation strict.
+- Enforce primitive string `search-filter.attrs.placeholder` in full-app materializer regression coverage so object-shaped placeholders cannot render as `[object Object]`.
+
 ## 0.8.80
 
 - Release search-filter placeholder runtime shape hardening from PR #299.
