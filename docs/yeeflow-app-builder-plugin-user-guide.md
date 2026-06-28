@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.82`
+`0.8.83`
+
+Version `0.8.83` releases Soft outline application control style default gates from PR #305. Generated applications now include the export-backed Soft outline controls Application Custom Control Style in `Themes[]`, set it as the application default through the Type 0 `application style` theme, validate stringified style config and default linkage before signing readiness, and keep full-app materializer regression coverage aligned with the package schema-safe generated-final shape.
 
 Version `0.8.82` releases Dashboard filter variable consumer materialization from PR #303. Generated Dashboard `search-filter` variables are now wired to Collection `attrs.data.fulltext[]` consumers, producer controls no longer count as consumption, stale producer bindings and unconsumed `filterVars[]` entries are pruned, and full-app materializer regression coverage blocks generated Dashboards whose filter variables or search-filter bindings are not backed by real Summary, Collection, Data table, chart, or pivot consumers.
 

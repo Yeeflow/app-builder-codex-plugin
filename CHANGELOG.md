@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.83
+
+- Release Soft outline application control style default gates from PR #305.
+- Register `application_control_style_soft_outline_controls` as the export-backed Application Custom Control Style golden reference for generated applications.
+- Emit the Soft outline Type 1 control style theme and Type 0 `application style` default binding in generated full-app `Themes[]` output.
+- Add generated-final preflight validation for default control style linkage, stringified config fidelity, and schema-safe package shape before signing readiness.
+- Add focused regression coverage for exported reference validation, missing/default-link drift failures, config drift, and materializer output.
+
 ## 0.8.82
 
 - Release Dashboard filter variable consumer materialization from PR #303.

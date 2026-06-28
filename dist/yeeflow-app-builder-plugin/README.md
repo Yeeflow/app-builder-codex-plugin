@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.82`
+- Version: `0.8.83`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.82` releases Dashboard filter variable consumer materialization from PR #303: generated Dashboard search-filter variables are wired to Collection `attrs.data.fulltext[]` consumers, producer controls no longer count as consumption, stale producer bindings and unconsumed `filterVars[]` entries are pruned, and full-app materializer regression coverage blocks generated Dashboards whose filter variables or search-filter bindings are not backed by real Summary, Collection, Data table, chart, or pivot consumers.
+Current release `0.8.83` releases Soft outline application control style default gates from PR #305: generated applications now include the export-backed Soft outline controls Application Custom Control Style in `Themes[]`, set it as the application default through the Type 0 `application style` theme, validate stringified style config and default linkage before signing readiness, and keep full-app materializer regression coverage aligned with the package schema-safe generated-final shape.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.82
+Version: 0.8.83
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.82
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.83
 ```
 
 ## What Is Included
