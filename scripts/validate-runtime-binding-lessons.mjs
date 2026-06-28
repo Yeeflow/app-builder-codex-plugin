@@ -4,6 +4,7 @@ import fs from "node:fs";
 import zlib from "node:zlib";
 
 const GZIP_PREFIX = "[______gizp______]";
+const BROTLI_PREFIX = Buffer.from("::brotli::", "utf8");
 const API_ISSUED_ID_RE = /^\d{16,}$/;
 const DASHBOARD_CONSUMER_TYPES = new Set(["summary", "collection", "data-list", "pivot-table", "pie-chart", "bar-chart", "line-chart"]);
 const DATA_FILTER_TYPES = new Set(["search", "select", "checkbox", "radio", "date", "range", "check-range", "relative-period", "hierarchy", "sorting"]);
@@ -198,12 +199,13 @@ function validateConsumerConditions({ findings, pageName, layoutId, control, poi
       });
     }
   }
+  const consumed = [];
   for (const filterVar of filterVars) {
     if (containsFilterVar(data.filter, filterVar) || containsFilterVar(data.fulltext, filterVar) || containsFilterVar(data.sortingfilter, filterVar)) {
-      return filterVar;
+      consumed.push(filterVar);
     }
   }
-  return "";
+  return consumed;
 }
 
 export function validateDashboardBindings(decoded, options = {}) {
@@ -279,7 +281,7 @@ export function validateDashboardBindings(decoded, options = {}) {
 
       if (DASHBOARD_CONSUMER_TYPES.has(type) && type !== "summary") {
         const consumed = validateConsumerConditions({ findings, pageName, layoutId, control: node, pointer, filterVars, lists });
-        if (consumed) consumedVars.set(consumed, [...(consumedVars.get(consumed) || []), controlId || type]);
+        for (const consumedVar of consumed) consumedVars.set(consumedVar, [...(consumedVars.get(consumedVar) || []), controlId || type]);
       }
     });
 
@@ -409,8 +411,26 @@ function planRequiresApprovalForms(plan = {}, options = {}) {
   return /\bapproval\b|\bworkflow\b|\brequest\s+form\b|\btask\s+page\b/i.test(text);
 }
 
+function decodeDefResource(value) {
+  if (isObject(value)) return value;
+  if (typeof value !== "string" || !value.trim()) return null;
+  const parsed = parseMaybeJson(value);
+  if (isObject(parsed)) return parsed;
+  try {
+    const raw = Buffer.from(value, "base64");
+    const payload = raw.subarray(0, BROTLI_PREFIX.length).equals(BROTLI_PREFIX)
+      ? zlib.brotliDecompressSync(raw.subarray(BROTLI_PREFIX.length)).toString("utf8")
+      : zlib.brotliDecompressSync(raw).toString("utf8");
+    const decoded = JSON.parse(payload);
+    return isObject(decoded) ? decoded : null;
+  } catch {
+    return null;
+  }
+}
+
 function formPages(form) {
-  const pages = asArray(form?.pageurls || form?.PageUrls || form?.pages);
+  const def = decodeDefResource(form?.DefResource || form?.defResource || form?.WorkflowResource || form?.workflowResource) || {};
+  const pages = asArray(form?.pageurls || form?.PageUrls || form?.pages || def?.pageurls || def?.PageUrls || def?.pages);
   return pages.map((page) => ({ outer: page, formdef: isObject(page?.formdef) ? page.formdef : parseMaybeJson(page?.formdef) || page }));
 }
 

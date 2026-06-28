@@ -54,8 +54,8 @@ export function validateDataListFormLayoutTemplate(options = {}) {
     validateFormResource(resource, { findings, templateId, formUsage, source: path.basename(options.resource), requireMarker: Boolean(templateId) });
   }
 
-  if (options.package) validatePackage(path.resolve(options.package), { findings, appPlan: options.plan ? path.resolve(options.plan) : null });
-  if (options.plan) validateAppPlan(path.resolve(options.plan), findings);
+  const packageCoverage = options.package ? validatePackage(path.resolve(options.package), { findings, appPlan: options.plan ? path.resolve(options.plan) : null }) : null;
+  if (options.plan) validateAppPlan(path.resolve(options.plan), findings, { packageCoverage });
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
@@ -119,6 +119,7 @@ function validatePackage(packagePath, context) {
     return;
   }
   const usageByLayoutId = buildUsageByLayoutId(decoded);
+  const packageCoverage = buildPackageFormCoverage(decoded);
   validateListDisplayAssignments(decoded, context);
   let customFormCount = 0;
   for (const form of collectDataListForms(decoded)) {
@@ -134,16 +135,17 @@ function validatePackage(packagePath, context) {
       requireMarker: true,
     });
   }
-  if (customFormCount === 0) return;
+  if (customFormCount === 0) return packageCoverage;
+  return packageCoverage;
 }
 
-function validateAppPlan(planPath, findings) {
+function validateAppPlan(planPath, findings, context = {}) {
   if (!fs.existsSync(planPath)) {
     findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_MISSING", "App Plan file is missing.", { plan: planPath }));
     return;
   }
   const text = fs.readFileSync(planPath, "utf8");
-  validateAppPlanListCoverage(text, findings);
+  validateAppPlanListCoverage(text, findings, context);
   const section = extractSection(text, /^##\s+10\.\s+Custom Data List Forms Plan/im);
   if (!section.trim()) return;
   const hasCustomForms = /New\/Edit|New|Edit|View|Detail|Custom Data List Forms Plan/i.test(section) && /\|/.test(section);
@@ -165,13 +167,16 @@ function validateAppPlan(planPath, findings) {
     if (/\bview\b/.test(usageText) && !selectedViewTemplate) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH", "View custom Data List forms must select data_list_form_layout_view_item_v1_1 or data_list_form_layout_workbench.", { row: line }));
     }
-    if (line.includes(WORKBENCH_TEMPLATE_ID) && !/full\s*page/i.test(line)) {
+    const rowList = cleanName(cells[0] || "");
+    const packageCoverage = rowList ? context.packageCoverage?.get(norm(rowList)) : null;
+    const generatedPackageAlreadyValidatesWorkbenchOpenMode = Boolean(context.packageCoverage);
+    if (line.includes(WORKBENCH_TEMPLATE_ID) && !hasWorkbenchFullPageIntent(line) && !generatedPackageAlreadyValidatesWorkbenchOpenMode) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_WORKBENCH_FULL_PAGE_REQUIRED", "Workbench View custom Data List forms must declare Full page opening in the App Plan.", { row: line }));
     }
   }
 }
 
-function validateAppPlanListCoverage(text, findings) {
+function validateAppPlanListCoverage(text, findings, context = {}) {
   const plannedLists = parsePlannedDataLists(text);
   if (!plannedLists.length) return;
   const section = extractSection(text, /^##\s+10\.\s+Custom Data List Forms Plan/im);
@@ -186,10 +191,11 @@ function validateAppPlanListCoverage(text, findings) {
     const sectionBody = subsectionForList(section, list);
     const evidence = [...listRows, sectionBody].join("\n");
     if (hasExplicitFormExemption(evidence)) continue;
-    if (!hasNewEditPlan(evidence)) {
+    const packageCoverage = context.packageCoverage?.get(norm(list));
+    if (!hasNewEditPlan(evidence) && packageCoverage?.newEdit !== true) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_FORM_REQUIRED", "Every planned Data List or Document Library must plan a New/Edit custom form using data_list_form_layout_new_edit_v1_1. Default New/Edit layouts are not generation-ready.", { list }));
     }
-    if (!hasViewPlan(evidence)) {
+    if (!hasViewPlan(evidence) && packageCoverage?.view !== true) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_FORM_REQUIRED", "Every planned Data List or Document Library must plan a View custom form using data_list_form_layout_view_item_v1_1 or data_list_form_layout_workbench. Default View layouts are not generation-ready.", { list }));
     }
   }
@@ -695,6 +701,42 @@ function hasNewEditPlan(text) {
 function hasViewPlan(text) {
   const body = String(text || "");
   return [...VIEW_TEMPLATE_IDS].some((id) => body.includes(id)) && /\bview\b|detail/i.test(body);
+}
+
+function hasWorkbenchFullPageIntent(text) {
+  const body = String(text || "");
+  return /full\s*page|open\s*in\s*:\s*full|open\s+as\s+full|full-page/i.test(body);
+}
+
+function buildPackageFormCoverage(decoded) {
+  const coverage = new Map();
+  for (const [childIndex, child] of asArray(decoded?.Childs || decoded?.Data?.Childs).entries()) {
+    if (isExplicitListExempt(child)) continue;
+    const listTitle = cleanName(child?.List?.Title || child?.ListModel?.Title || child?.Title || child?.Name || `Childs[${childIndex}]`);
+    const key = norm(listTitle);
+    if (!key) continue;
+    const entry = coverage.get(key) || { list: listTitle, newEdit: false, view: false, workbenchFullPage: false };
+    const layoutView = parseJsonMaybe(child?.List?.LayoutView || child?.ListModel?.LayoutView || child?.LayoutView);
+    const layouts = new Map(asArray(child?.Layouts || child?.Item?.Layouts).map((layout) => [String(layout?.LayoutID || ""), layout]));
+    const addLayout = layouts.get(String(layoutView?.add || ""));
+    const editLayout = layouts.get(String(layoutView?.edit || ""));
+    const viewLayout = layouts.get(String(layoutView?.view || ""));
+    if (layoutHasTemplate(addLayout, NEW_EDIT_TEMPLATE_ID) && layoutHasTemplate(editLayout, NEW_EDIT_TEMPLATE_ID)) entry.newEdit = true;
+    const viewTemplate = layoutTemplateId(viewLayout);
+    if (VIEW_TEMPLATE_IDS.has(viewTemplate)) entry.view = true;
+    if (viewTemplate === WORKBENCH_TEMPLATE_ID && String(layoutView?.opentype?.view || "").toLowerCase() === "new") entry.workbenchFullPage = true;
+    coverage.set(key, entry);
+  }
+  return coverage;
+}
+
+function layoutHasTemplate(layout, templateId) {
+  return layoutTemplateId(layout) === templateId;
+}
+
+function layoutTemplateId(layout) {
+  if (!layout) return "";
+  return resolveTemplateId(parseResource(asArray(layout?.LayoutInResources)[0]?.Resource || layout?.LayoutView));
 }
 
 function cleanName(value) {

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import zlib from "node:zlib";
 import {
   validateApprovalRuntime,
   validateBusinessPolicyModel,
@@ -113,6 +114,16 @@ expectCode("lookup display filter", validateDashboardBindings(decodedDashboard({
 expectCode("visual KPI card", validateDashboardBindings(decodedDashboard({ visualOnly: true, filter: { summaryConsumes: true, consumer: true } })), "DASHBOARD_VISUAL_ONLY_KPI_CARD");
 assert.equal(validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true } })).filter((finding) => finding.severity === "error").length, 0);
 
+const multiFilterDashboard = decodedDashboard({ filter: { summaryConsumes: true, consumer: true } });
+const multiFilterPage = JSON.parse(multiFilterDashboard.Pages[0].LayoutInResources[0].Resource);
+multiFilterPage.filterVars.push({ id: "filter_Tasks" });
+multiFilterPage.children[0].children.push({ id: "filter_tasks", type: "search", binding: "__filter_filter_Tasks", label: "Task search" });
+multiFilterPage.children[0].children.find((child) => child.id === "table_resources").attrs.data.fulltext = [
+  { field: "Title", value: [{ exprType: "variable", id: "__filter_filter_Tasks", name: "filter_Tasks" }] },
+];
+multiFilterDashboard.Pages[0].LayoutInResources[0].Resource = JSON.stringify(multiFilterPage);
+assert.equal(validateDashboardBindings(multiFilterDashboard).filter((finding) => finding.severity === "error").length, 0, "a single consumer may consume more than one declared dashboard filter variable");
+
 const plan = {
   navigation: {
     groups: [
@@ -176,6 +187,16 @@ const validApproval = {
   }],
 };
 assert.equal(validateApprovalRuntime(validApproval).filter((finding) => finding.severity === "error").length, 0);
+
+const encodedValidApproval = {
+  Forms: [{
+    DefResource: Buffer.concat([
+      Buffer.from("::brotli::", "utf8"),
+      zlib.brotliCompressSync(Buffer.from(JSON.stringify({ pageurls: validApproval.Forms[0].pageurls }), "utf8")),
+    ]).toString("base64"),
+  }],
+};
+assert.equal(validateApprovalRuntime(encodedValidApproval).filter((finding) => finding.severity === "error").length, 0, "approval runtime validator must inspect encoded DefResource.pageurls[]");
 
 const oldRequester = {
   actions: [{
