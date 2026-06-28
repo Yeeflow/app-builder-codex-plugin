@@ -73,6 +73,8 @@ export function validateApprovalWorkflowPublishReadiness(options = {}) {
       source: resource.source || `approval-resource-${index}`,
       formName: resource.formName || `Approval form ${index + 1}`,
       plannedWorkflowNodes: plannedWorkflowNodesByForm[normKey(resource.formName)] || [],
+      rootListSetId: resource.rootListSetId || "",
+      childListIds: resource.childListIds || new Set(),
     });
   }
 
@@ -112,10 +114,16 @@ function collectPackageApprovalDefs(packagePath, resources, findings) {
       }));
       continue;
     }
+    const rootListSetId = String(decoded?.ListSet?.ListSetID || decoded?.ListSet?.ListID || "");
+    const childListIds = new Set(asArray(decoded?.Childs || decoded?.Data?.Childs)
+      .map((child) => String(child?.List?.ListID || child?.ListID || ""))
+      .filter(Boolean));
     resources.push({
       source,
       formName: form?.Name || form?.Title || form?.Key || `Forms[${formIndex}]`,
       formKey: form?.Key || "",
+      rootListSetId,
+      childListIds,
       def: decodedDef,
     });
   }
@@ -147,6 +155,7 @@ function validateOneDef(def, context) {
   validateRejectedPath(def, context);
   validateNodePositions(def, context);
   validateGraphRefs(def, context);
+  validateContentListTargetSelection(def, context);
   validatePlanWorkflowNodeParity(def, context);
 }
 
@@ -422,6 +431,72 @@ function validateGraphRefs(def, context) {
           }));
         }
       }
+    }
+  }
+}
+
+function validateContentListTargetSelection(def, context) {
+  const rootListSetId = String(context.rootListSetId || "");
+  const childListIds = context.childListIds instanceof Set ? context.childListIds : new Set();
+  for (const [shapeIndex, shape] of asArray(def.childshapes).entries()) {
+    if (stencilId(shape) !== "ContentList") continue;
+    const props = shape.properties || {};
+    const listId = String(props.listid || props.ListID || props.listId || "");
+    const listSetId = String(props.listsetid || props.ListSetID || props.listSetId || "");
+    const listType = String(props.listtype || props.listType || "");
+    const appId = Number(props.appid || props.AppID || props.appId || 0);
+    const pathPrefix = `$.childshapes[${shapeIndex}].properties`;
+
+    if (!listId) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_CONTENTLIST_TARGET_LIST_MISSING", "ContentList workflow action must resolve a concrete target data list id.", {
+        source: context.source,
+        path: `${pathPrefix}.listid`,
+        nodeName: props.name || "",
+      }));
+      continue;
+    }
+    if (rootListSetId && listId === rootListSetId) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_CONTENTLIST_TARGET_ROOT_LISTSET", "ContentList workflow action must target a child data list, not the root application ListSet.", {
+        source: context.source,
+        path: `${pathPrefix}.listid`,
+        nodeName: props.name || "",
+        listid: listId,
+        rootListSetId,
+      }));
+    }
+    if (childListIds.size && !childListIds.has(listId)) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_CONTENTLIST_TARGET_LIST_UNKNOWN", "ContentList workflow action target listid must resolve to a generated child data list.", {
+        source: context.source,
+        path: `${pathPrefix}.listid`,
+        nodeName: props.name || "",
+        listid: listId,
+        knownChildListIds: [...childListIds],
+      }));
+    }
+    if (listType !== "select") {
+      context.findings.push(issue("APPROVAL_WORKFLOW_CONTENTLIST_APPLICATION_SELECTION_INVALID", "ContentList workflow action must use listtype \"select\" so Designer shows the current application instead of Uncategorized.", {
+        source: context.source,
+        path: `${pathPrefix}.listtype`,
+        nodeName: props.name || "",
+        listtype: listType || null,
+      }));
+    }
+    if (appId !== 41) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_CONTENTLIST_APPID_INVALID", "ContentList workflow action must set appid to 41 for the current Yeeflow application package context.", {
+        source: context.source,
+        path: `${pathPrefix}.appid`,
+        nodeName: props.name || "",
+        appid: props.appid || null,
+      }));
+    }
+    if (rootListSetId && listSetId !== rootListSetId) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_CONTENTLIST_LISTSETID_INVALID", "ContentList workflow action must set listsetid to the current application ListSetID.", {
+        source: context.source,
+        path: `${pathPrefix}.listsetid`,
+        nodeName: props.name || "",
+        listsetid: listSetId || null,
+        rootListSetId,
+      }));
     }
   }
 }
