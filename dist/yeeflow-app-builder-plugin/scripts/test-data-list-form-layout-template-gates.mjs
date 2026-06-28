@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPT = path.join(ROOT, "scripts/validate-data-list-form-layout-template.mjs");
+const RESOURCE_ORDER_SCRIPT = path.join(ROOT, "scripts/validate-app-plan-resource-order.mjs");
 const NEW_EDIT_TEMPLATE_ID = "data_list_form_layout_new_edit_v1_1";
 const VIEW_TEMPLATE_ID = "data_list_form_layout_view_item_v1_1";
 const WORKBENCH_TEMPLATE_ID = "data_list_form_layout_workbench";
@@ -84,6 +85,10 @@ try {
   expectCode("App Plan View selecting New/Edit template fails", ["--plan", writeText("plan-view-wrong-template.md", appPlan({ viewTemplate: NEW_EDIT_TEMPLATE_ID }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH");
   expectCode("App Plan Workbench View without Full page fails", ["--plan", writeText("plan-workbench-missing-full-page.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Workbench related context" }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_WORKBENCH_FULL_PAGE_REQUIRED");
   expectPass("App Plan Workbench View layout selection passes", ["--plan", writeText("plan-workbench-valid.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Open in: Full page Workbench related context" }))]);
+  expectResourceOrderOmitsCodes("resource-order validator accepts registered Workbench View layout", writeText("plan-resource-order-workbench-valid.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Open in: Full page Workbench related context" })), [
+    "APP_PLAN_DATA_LIST_FORM_LAYOUT_TEMPLATE_UNKNOWN",
+    "APP_PLAN_DATA_LIST_FORM_LAYOUT_VIEW_TEMPLATE_MISMATCH",
+  ]);
   expectPass("App Plan custom form layout selections pass", ["--plan", writeText("plan-valid.md", appPlan())]);
 
   console.log(JSON.stringify({ status: "pass", results }, null, 2));
@@ -93,6 +98,10 @@ try {
 
 function run(args) {
   return spawnSync(process.execPath, [SCRIPT, ...args], { cwd: ROOT, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+}
+
+function runResourceOrder(file) {
+  return spawnSync(process.execPath, [RESOURCE_ORDER_SCRIPT, file, "--json"], { cwd: ROOT, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
 }
 
 function expectPass(name, args) {
@@ -107,6 +116,15 @@ function expectCode(name, args, code) {
   results.push({ name, status: result.status !== 0 && output.includes(code) ? "pass" : "fail", args, expectedCode: code, stdout: result.stdout.slice(0, 1000), stderr: result.stderr.slice(0, 1000) });
   assert.notEqual(result.status, 0, `${name} should fail`);
   assert.match(output, new RegExp(code), `${name} should include ${code}\n${output}`);
+}
+
+function expectResourceOrderOmitsCodes(name, file, codes) {
+  const result = runResourceOrder(file);
+  const output = `${result.stdout}\n${result.stderr}`;
+  results.push({ name, status: codes.every((code) => !output.includes(code)) ? "pass" : "fail", file, forbiddenCodes: codes, stdout: result.stdout.slice(0, 1000), stderr: result.stderr.slice(0, 1000) });
+  for (const code of codes) {
+    assert.doesNotMatch(output, new RegExp(code), `${name} should not include ${code}\n${output}`);
+  }
 }
 
 function template(file, templateId, marker = true) {

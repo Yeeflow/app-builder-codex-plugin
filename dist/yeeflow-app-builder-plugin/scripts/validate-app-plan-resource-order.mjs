@@ -4,6 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+const PLUGIN_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
 const REQUIRED_HEADINGS = [
   "## 1. Plan Status",
   "## 2. Requirement-to-Yeeflow Resource Mapping Summary",
@@ -195,10 +197,11 @@ const APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
   "dashboard-page-layout-templates",
 ]);
 
-const APPROVED_DATA_LIST_FORM_LAYOUT_TEMPLATE_IDS = new Set([
-  "data_list_form_layout_new_edit_v1_1",
-  "data_list_form_layout_view_item_v1_1",
-]);
+const DATA_LIST_FORM_LAYOUT_TEMPLATE_REGISTRY = loadDataListFormLayoutTemplateRegistry();
+const APPROVED_DATA_LIST_FORM_LAYOUT_TEMPLATE_IDS = new Set(DATA_LIST_FORM_LAYOUT_TEMPLATE_REGISTRY.approvedTemplateIds);
+const DATA_LIST_FORM_LAYOUT_TEMPLATES_BY_ID = new Map(
+  DATA_LIST_FORM_LAYOUT_TEMPLATE_REGISTRY.templates.map((template) => [template.templateId, template]),
+);
 
 const APPROVED_DATA_LIST_FORM_FIELDS_TEMPLATE_IDS = new Set([
   "data_list_form_fields_grid_v1_1",
@@ -534,6 +537,8 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
   const rows = splitTableRows(selectionBlock).filter((row) => !/^\|\s*Workflow\s*\|/i.test(row));
   const selectedIds = [];
   for (const row of rows) {
+    const cells = row.split("|").slice(1, -1).map((cell) => cell.trim());
+    const formUsage = cells[2] || row;
     const ids = [...row.matchAll(/\bdata_list_form_layout_[a-z0-9_]+\b/g)].map((match) => match[0]);
     for (const id of ids) {
       selectedIds.push(id);
@@ -546,19 +551,19 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
         });
       }
     }
-    if (/\b(?:new|edit|new\/edit)\b/i.test(row) && !row.includes("data_list_form_layout_new_edit_v1_1")) {
+    if (/\b(?:new|edit|new\/edit)\b/i.test(formUsage) && !ids.some((id) => dataListFormLayoutTemplateSupports(id, "new") || dataListFormLayoutTemplateSupports(id, "edit"))) {
       findings.push({
         level: "error",
         code: "APP_PLAN_DATA_LIST_FORM_LAYOUT_NEW_EDIT_TEMPLATE_MISMATCH",
-        message: "New/Edit custom Data List forms must select data_list_form_layout_new_edit_v1_1.",
+        message: "New/Edit custom Data List forms must select an approved Data List Form Layout template that supports New/Edit usage.",
         row,
       });
     }
-    if (/\bview\b/i.test(row) && !row.includes("data_list_form_layout_view_item_v1_1")) {
+    if (/\bview\b/i.test(formUsage) && !ids.some((id) => dataListFormLayoutTemplateSupports(id, "view"))) {
       findings.push({
         level: "error",
         code: "APP_PLAN_DATA_LIST_FORM_LAYOUT_VIEW_TEMPLATE_MISMATCH",
-        message: "View Item custom Data List forms must select data_list_form_layout_view_item_v1_1.",
+        message: "View Item custom Data List forms must select an approved Data List Form Layout template that supports View usage.",
         row,
       });
     }
@@ -570,6 +575,45 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
       message: "Custom Data List Forms Plan must select an approved Data List Form Layouts v1.1 template for generated New/Edit/View forms.",
     });
   }
+}
+
+function loadDataListFormLayoutTemplateRegistry() {
+  const fallback = {
+    approvedTemplateIds: [
+      "data_list_form_layout_new_edit_v1_1",
+      "data_list_form_layout_view_item_v1_1",
+      "data_list_form_layout_workbench",
+    ],
+    templates: [
+      { templateId: "data_list_form_layout_new_edit_v1_1", requiredForFormTypes: ["new", "edit"], forbiddenForFormTypes: ["view"] },
+      { templateId: "data_list_form_layout_view_item_v1_1", requiredForFormTypes: ["view"], forbiddenForFormTypes: ["new", "edit"] },
+      { templateId: "data_list_form_layout_workbench", requiredForFormTypes: ["view"], forbiddenForFormTypes: ["new", "edit"], requiredOpenIn: "Full page" },
+    ],
+  };
+  const registryPath = path.join(PLUGIN_ROOT, "docs/reference/data-list-form-layout-templates.json");
+  try {
+    const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+    const templates = Array.isArray(registry.templates)
+      ? registry.templates.filter((template) => template && typeof template.templateId === "string")
+      : [];
+    const approvedTemplateIds = Array.isArray(registry.approvedTemplateIds)
+      ? registry.approvedTemplateIds.filter((id) => typeof id === "string")
+      : templates.map((template) => template.templateId);
+    if (approvedTemplateIds.length && templates.length) return { approvedTemplateIds, templates };
+  } catch {
+    // Keep the validator fail-closed to the last known registry IDs when the registry cannot be read.
+  }
+  return fallback;
+}
+
+function dataListFormLayoutTemplateSupports(templateId, formType) {
+  const template = DATA_LIST_FORM_LAYOUT_TEMPLATES_BY_ID.get(templateId);
+  if (!template) return false;
+  const normalized = String(formType).toLowerCase();
+  const forbidden = new Set((template.forbiddenForFormTypes || []).map((value) => String(value).toLowerCase()));
+  if (forbidden.has(normalized)) return false;
+  const required = (template.requiredForFormTypes || []).map((value) => String(value).toLowerCase());
+  return required.length === 0 || required.includes(normalized);
 }
 
 function validateDataListFormFieldsTemplateSelection(text, findings) {
