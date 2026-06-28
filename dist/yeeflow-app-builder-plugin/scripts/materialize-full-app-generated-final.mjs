@@ -3154,6 +3154,7 @@ function removeUnusedApprovalTemplateSections(root) {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       visit(child);
+      if (hasIdentity(child, "section_content_area") && !findFirstByIdentity(child, "action_panel_flow_history_wrapper") && !hasWorkflowSurface(child) && !hasMeaningfulBusinessContent(child)) return false;
       if (![...removableModules].some((identity) => hasIdentity(child, identity))) return true;
       if (findFirstByIdentity(child, "action_panel_flow_history_wrapper")) return true;
       return hasMeaningfulBusinessContent(child);
@@ -3178,6 +3179,11 @@ function hasMeaningfulBusinessContent(node) {
     if (["input", "textarea", "richtext", "rich-text", "radio", "checkbox", "switch", "date", "datetime", "number", "input_number", "lookup", "people", "user"].includes(type)) return true;
     return false;
   }).length > 0;
+}
+
+function hasWorkflowSurface(node) {
+  if (!node || typeof node !== "object") return false;
+  return findDescendants(node, (control) => ["workflowControlPanel", "workflowHistory"].includes(String(control?.type || ""))).length > 0;
 }
 
 function hasActionConfiguration(control) {

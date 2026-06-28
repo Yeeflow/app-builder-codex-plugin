@@ -50,6 +50,14 @@ try {
   removeOperationsWithoutActions(emptyCopiedSections);
   expectCode("generated approval form empty copied business sections fail", ["--resource", writeJson("submission-empty-copied-sections.json", emptyCopiedSections), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"], "APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
 
+  const submissionEmptyPageTitleSlot = submissionResource();
+  addEmptyPageTitleSectionContentArea(submissionEmptyPageTitleSlot);
+  expectCode("generated submission form empty page title section content area fails", ["--resource", writeJson("submission-empty-page-title-slot.json", submissionEmptyPageTitleSlot), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"], "APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
+
+  const taskEmptyPageTitleSlot = taskResource();
+  addEmptyPageTitleSectionContentArea(taskEmptyPageTitleSlot);
+  expectCode("generated task form empty page title section content area fails", ["--resource", writeJson("task-empty-page-title-slot.json", taskEmptyPageTitleSlot), "--template", TASK_TEMPLATE_ID, "--page-role", "task"], "APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
+
   expectCode("App Plan approval form without layout selection table fails", ["--plan", writeText("plan-missing-selection.md", appPlan({ omitSelection: true }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_SELECTION_TABLE_MISSING");
   expectCode("App Plan submission selecting task template fails", ["--plan", writeText("plan-submission-wrong.md", appPlan({ submissionTemplate: TASK_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_SUBMISSION_TEMPLATE_MISMATCH");
   expectCode("App Plan task selecting submission template fails", ["--plan", writeText("plan-task-wrong.md", appPlan({ taskTemplate: SUBMISSION_TEMPLATE_ID }))], "APPROVAL_FORM_LAYOUT_APP_PLAN_TASK_TEMPLATE_MISMATCH");
@@ -424,12 +432,26 @@ function removeUnusedBusinessSections(root) {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       visitNode(child);
+      if (ids(child).includes("section_content_area") && !find(child, "action_panel_flow_history_wrapper") && !hasWorkflowSurface(child) && !hasMeaningfulBusinessContent(child)) return false;
       if (!ids(child).some((id) => removable.has(id))) return true;
       if (find(child, "action_panel_flow_history_wrapper")) return true;
       return hasMeaningfulBusinessContent(child);
     });
   };
   visitNode(root);
+}
+
+function addEmptyPageTitleSectionContentArea(root) {
+  const pageTitle = find(root, "page_title_section");
+  assert.ok(pageTitle, "page_title_section should exist");
+  pageTitle.children ||= [];
+  pageTitle.children.push({
+    id: "empty_page_title_section_content_area",
+    name: "section_content_area",
+    type: "container",
+    nv_label: "section_content_area",
+    children: []
+  });
 }
 
 function hasMeaningfulBusinessContent(node) {
@@ -439,6 +461,14 @@ function hasMeaningfulBusinessContent(node) {
     if (found) return;
     if (meaningfulTypes.has(String(current?.type || ""))) found = true;
     if (ids(current).some((id) => ["form_grid_fields_wrapper", "form_grid_fields_2col_wrapper", "form_grid_fields_3col_wrapper"].includes(id))) found = true;
+  });
+  return found;
+}
+
+function hasWorkflowSurface(node) {
+  let found = false;
+  visit(node, (current) => {
+    if (["workflowControlPanel", "workflowHistory"].includes(String(current?.type || ""))) found = true;
   });
   return found;
 }

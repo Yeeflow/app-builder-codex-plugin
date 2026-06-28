@@ -17,7 +17,6 @@ const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", l
 const CONTENT_WIDTH = 1280;
 const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header"]);
 const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "content_card_60_wrapper", "content_card_40_wrapper"]);
-const CONTENT_WRAPPER_MODULES = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"]);
 const SECTION_MODULES = new Set(["1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
 const REQUIRED_REGIONS = ["main", "content", "page_title_section", "page_title_content", "page_title_text", "page_title_description", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area", "action_panel_flow_history_wrapper"];
 const DATA_ANALYTICS_TYPES = new Set(["pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "summary"]);
@@ -375,11 +374,8 @@ function validateGeneratedModuleCleanup(resource, context) {
     if (hasIdentity(entry.node, "Operations") && !hasActionConfiguration(entry.node)) {
       context.findings.push(error("APPROVAL_FORM_LAYOUT_OPERATIONS_WITHOUT_ACTIONS", "Generated Approval form Operations containers must be removed unless they contain real configured Yeeflow actions.", { source: context.source, path: entry.pointer }));
     }
-    if (identityCandidates(entry.node).some((id) => CONTENT_WRAPPER_MODULES.has(id))) {
-      const slot = findFirstByIdentity(entry.node, "section_content_area");
-      if (!hasMeaningfulBusinessContent(slot)) {
-        context.findings.push(error("APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA", "Generated Approval form content card wrappers must not keep empty copied template sections; remove unused sections or materialize real business content.", { source: context.source, path: entry.pointer }));
-      }
+    if (hasIdentity(entry.node, "section_content_area") && !containsLockedActionHistory(entry.node) && !hasWorkflowSurface(entry.node) && !hasMeaningfulBusinessContent(entry.node)) {
+      context.findings.push(error("APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA", "Generated Approval form section_content_area containers must be removed unless they contain real business content.", { source: context.source, path: entry.pointer }));
     }
     if (identityCandidates(entry.node).some((id) => SECTION_MODULES.has(id)) && !containsLockedActionHistory(entry.node) && !hasMeaningfulBusinessContent(entry.node)) {
       context.findings.push(error("APPROVAL_FORM_LAYOUT_UNUSED_SECTION_MODULE", "Generated Approval form section modules must be removed when they do not contain real business content.", { source: context.source, path: entry.pointer }));
@@ -389,6 +385,10 @@ function validateGeneratedModuleCleanup(resource, context) {
 
 function containsLockedActionHistory(node) {
   return Boolean(findFirstByIdentity(node, "action_panel_flow_history_wrapper"));
+}
+
+function hasWorkflowSurface(node) {
+  return flatten(node).some((entry) => ["workflowControlPanel", "workflowHistory"].includes(String(entry.node?.type || "")));
 }
 
 function hasMeaningfulBusinessContent(node) {
