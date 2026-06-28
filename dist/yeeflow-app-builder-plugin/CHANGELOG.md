@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.75
+
+- Release full-app materializer template coverage hardening from PR #289.
+- Materialize all App Plan-selected Dashboard Collection records for a page instead of collapsing to one selected dataset/template.
+- Add App Plan Data Table template extraction and generated-final Data Table template materialization for `data_table_control_standard_scroll`, `data_table_control_standard_no_scroll`, and `data_table_control_caption_scroll`.
+- Align generated custom form layout ID allocation and provenance paths with actual decoded layout positions, including Workbench View Item form selections.
+- Add default navigation group ID provenance when an App Plan omits explicit navigation groups.
+- Allow approved Data Table controls to satisfy Dashboard business-content hard gates and prune unplanned Data List form operation containers.
+
 ## 0.8.74
 
 - Release Data List Form Workbench App Plan registry-drift alignment from PR #287.
