@@ -207,6 +207,8 @@ Data Filter static package validation and runtime filter linkage proof remain se
 
 When an approved App Plan declares Dashboard Summary/KPI metrics or filters, generation must materialize those declarations as real controls in the v1.1 shell. A generated Dashboard that contains only a Collection template, or only component provenance, fails even if the Collection template itself is valid. Planned metrics require Summary/KPI controls with source list, aggregate field/function, `exts`, `ReportIds`, `tempVars`, `save_var`, and visible bound KPI text. Planned filters require Data Filter/search/select/radio controls with source field, variable, display/value mapping, visual label/placeholder metadata, and at least one downstream Collection/table/KPI consumer.
 
+Search filter placeholder values are runtime input text, not style objects. Generated `search-filter.attrs.placeholder` must be a primitive string such as `"Search Vendor Requests"`. Object-shaped values such as `{ "value": "Search Vendor Requests" }` are forbidden because Yeeflow runtime renders them as `[object Object]`. Keep placeholder color/style metadata in supported edit/style properties instead of the runtime placeholder text field.
+
 ## Runtime Route
 
 Runtime proof must use:
