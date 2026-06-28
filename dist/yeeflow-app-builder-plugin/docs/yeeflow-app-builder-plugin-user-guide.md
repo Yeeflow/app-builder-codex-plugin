@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.84`
+`0.8.85`
+
+Version `0.8.85` releases application control style fresh ID remap from PR #309. Generated fresh `.yapk` packages now clone the Soft outline Type 1 control style theme with a fresh package-local UUID, keep the Type 0 `application style` theme linked through `Ext.controlDefaultId`, reject reused exported template style IDs or non-UUID control style IDs before signing readiness, and preserve style tokens, colors, layout settings, and ordinary configuration values unchanged.
 
 Version `0.8.84` releases workflow layout golden reference gates from PR #307. Generated Approval form, Data list workflow, and Scheduled workflow diagrams now use export-derived workflow layout guidance, validate readable node spacing and graph bounds, preserve rounded/routed sequence-flow lines for cross-lane, rejected, and long paths, and block overlapping workflow diagrams before signing readiness.
 

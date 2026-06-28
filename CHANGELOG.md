@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.85
+
+- Release application control style fresh ID remap from PR #309.
+- Clone the Soft outline Type 1 control style theme with a fresh package-local UUID for each fresh generated `.yapk` package instead of reusing the exported template UUID.
+- Keep the Type 0 `application style` theme shape and update `Ext.controlDefaultId` to point at the fresh Type 1 control style ID.
+- Reject fresh packages that reuse the exported Soft outline control style UUID or emit non-UUID control style IDs before signing readiness.
+- Document that only package-local theme identity and style ID fields are remapped; style tokens, colors, layout settings, and ordinary configuration values remain unchanged.
+- Add focused regression coverage for fresh style ID remap and per-package materializer uniqueness.
+
 ## 0.8.84
 
 - Release workflow layout golden reference gates from PR #307.
