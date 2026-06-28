@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.74`
+`0.8.75`
+
+Version `0.8.75` releases full-app materializer template coverage hardening from PR #289. Generated-final materialization now consumes all App Plan-selected Dashboard Collection records for a page, materializes approved Data Table templates, preserves Workbench custom form selections, aligns custom form ID provenance paths with decoded layout positions, emits default navigation group ID provenance when needed, and treats approved Data Table controls as valid Dashboard business content.
 
 Version `0.8.74` releases Data List Form Workbench App Plan registry-drift alignment from PR #287. The App Plan resource-order validator now reads approved Data List Form Layout template IDs from `docs/reference/data-list-form-layout-templates.json`, accepts `data_list_form_layout_workbench` for full-page View Item custom forms, and keeps New/Edit template validation aligned with registry usage metadata.
 
