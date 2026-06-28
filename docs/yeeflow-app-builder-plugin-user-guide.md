@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.80`
+`0.8.81`
+
+Version `0.8.81` releases generated-final preflight contract gap alignment from PR #301. Runtime binding validation now credits every consumed Dashboard filter variable across filter/fulltext metadata, Approval runtime-surface checks decode encoded `DefResource.pageurls[]`, Data List Form layout validation can use package-proven custom form assignments when older App Plan wording is stale, and full-app materializer regression coverage enforces primitive string `search-filter.attrs.placeholder` values.
 
 Version `0.8.80` releases search-filter placeholder runtime shape hardening from PR #299. Generated Dashboard `search-filter.attrs.placeholder` now stays as primitive input text, object-shaped search-filter placeholders are rejected before signing readiness because they render as `[object Object]`, and placeholder style metadata remains separate from the runtime placeholder text field.
 
