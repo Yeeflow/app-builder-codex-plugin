@@ -3478,6 +3478,75 @@ function refId(ref) {
   return String(ref.resourceid || ref.resourceId || ref.id || "");
 }
 
+function workflowLayoutForSteps(workflowSteps) {
+  const mainLaneY = 220;
+  const actionLaneY = 360;
+  const rejectLaneY = 520;
+  const startX = 100;
+  const firstStepX = 420;
+  const columnGap = 300;
+  const stepPositions = workflowSteps.map((step, index) => ({
+    x: firstStepX + index * columnGap,
+    y: step.nodeType === "ContentList" ? actionLaneY : mainLaneY,
+  }));
+  const endX = firstStepX + Math.max(1, workflowSteps.length) * columnGap;
+  return {
+    start: { x: startX, y: mainLaneY },
+    stepPositions,
+    end: { x: endX, y: mainLaneY },
+    rejectEnd: { x: endX, y: rejectLaneY },
+  };
+}
+
+function workflowVerticesBetween(sourcePosition, targetPosition, options = {}) {
+  if (!sourcePosition || !targetPosition) return [];
+  const dx = Math.abs(targetPosition.x - sourcePosition.x);
+  const dy = Math.abs(targetPosition.y - sourcePosition.y);
+  if (!options.force && dy < 80 && dx < 520) return [];
+  const bendX = sourcePosition.x + Math.max(120, Math.round(dx / 2));
+  return [
+    { x: bendX, y: sourcePosition.y },
+    { x: bendX, y: targetPosition.y },
+  ];
+}
+
+function workflowRejectedVertices(sourcePosition, rejectPosition) {
+  if (!sourcePosition || !rejectPosition) return [];
+  const bendX = sourcePosition.x + Math.max(120, Math.round(Math.abs(rejectPosition.x - sourcePosition.x) / 2));
+  return [
+    { x: bendX, y: sourcePosition.y },
+    { x: bendX, y: rejectPosition.y },
+    { x: rejectPosition.x - 120, y: rejectPosition.y },
+  ];
+}
+
+function workflowStraightDockers(sourcePosition, targetPosition) {
+  if (!sourcePosition || !targetPosition) return [];
+  return [
+    { x: sourcePosition.x + 120, y: sourcePosition.y },
+    { x: targetPosition.x - 120, y: targetPosition.y },
+  ];
+}
+
+function workflowGraphPosition(childshapes) {
+  const positions = childshapes
+    .filter((shape) => shape?.stencil?.id !== "SequenceFlow")
+    .map((shape) => shape?.position)
+    .filter((position) => Number.isFinite(position?.x) && Number.isFinite(position?.y));
+  if (!positions.length) return { x: 0, y: 0, width: 960, height: 420 };
+  const minX = Math.min(...positions.map((position) => position.x));
+  const maxX = Math.max(...positions.map((position) => position.x));
+  const minY = Math.min(...positions.map((position) => position.y));
+  const maxY = Math.max(...positions.map((position) => position.y));
+  const margin = 160;
+  return {
+    x: Math.min(0, minX - margin),
+    y: Math.min(0, minY - margin),
+    width: Math.max(960, maxX - minX + margin * 2),
+    height: Math.max(620, maxY - minY + margin * 2),
+  };
+}
+
 function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [] }) {
   const {
     submissionPageId,
@@ -3523,7 +3592,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     iconURL: "",
     flowPage: [],
     variables: buildApprovalVariables(approvalFieldSpecs),
-    graphposition: { x: 0, y: 0, width: 960, height: 420 },
+    graphposition: workflowGraphPosition(childshapes),
     graphzoom: 1,
     graphver: 1,
     pageurls: [
@@ -3564,16 +3633,23 @@ function approvalWorkflowExecutionSteps(nodes) {
 
 function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submissionPageId, taskPageId, startId, endId, rejectEndId, workflowSteps, dataListMetas = [] }) {
   const seed = `${defId}:${formKey}:workflow`;
+  const layout = workflowLayoutForSteps(workflowSteps);
   const stepNodes = workflowSteps.map((step, index) => {
     const id = deterministicUuid(`${seed}:step:${index + 1}:${step.nodeType}:${step.nodeName}`);
-    return buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas });
+    return buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas, position: layout.stepPositions[index] });
   });
+  const positionById = new Map([
+    [startId, layout.start],
+    [endId, layout.end],
+    [rejectEndId, layout.rejectEnd],
+    ...stepNodes.map((node) => [node.id, node.position]),
+  ]);
   const startToFirstFlowId = deterministicUuid(`${seed}:flow:start-to-first`);
   const startShape = {
     id: startId,
     resourceid: startId,
     stencil: { id: "StartNoneEvent" },
-    position: { x: 100, y: 150 },
+    position: layout.start,
     incoming: [],
     outgoing: [flowRef(startToFirstFlowId)],
     properties: { name: "Start", taskurl: submissionPageId, taskUrl: submissionPageId, TaskUrl: submissionPageId },
@@ -3581,7 +3657,10 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
   const flowShapes = [];
   const endIncoming = [];
   const rejectIncoming = [];
-  const addFlow = ({ id, sourceId, targetId, name, conditioninfo = null, y = 130 }) => {
+  const addFlow = ({ id, sourceId, targetId, name, conditioninfo = null, vertices = [] }) => {
+    const sourcePosition = positionById.get(sourceId);
+    const targetPosition = positionById.get(targetId);
+    const dockers = vertices.length ? vertices : workflowStraightDockers(sourcePosition, targetPosition);
     const flow = {
       id,
       resourceid: id,
@@ -3591,8 +3670,9 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       incoming: [flowRef(sourceId)],
       outgoing: [flowRef(targetId)],
       properties: conditioninfo ? { name, linetype: "rounded", conditioninfo } : { name, linetype: "rounded" },
-      dockers: [{ x: 140, y }, { x: 260, y }],
+      dockers,
     };
+    if (vertices.length) flow.vertices = vertices;
     flowShapes.push(flow);
     return flowRef(id);
   };
@@ -3601,7 +3681,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
     sourceId: startId,
     targetId: stepNodes[0]?.id || endId,
     name: "Submit",
-    y: 150,
+    vertices: workflowVerticesBetween(layout.start, stepNodes[0]?.position || layout.end),
   });
   for (const [index, node] of stepNodes.entries()) {
     const nextNode = stepNodes[index + 1];
@@ -3609,13 +3689,14 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       const approvedFlowId = deterministicUuid(`${seed}:flow:${index + 1}:approved`);
       const rejectedFlowId = deterministicUuid(`${seed}:flow:${index + 1}:rejected`);
       const approvedTargetId = nextNode?.id || endId;
+      const approvedTargetPosition = nextNode?.position || layout.end;
       const approvedRef = addFlow({
         id: approvedFlowId,
         sourceId: node.id,
         targetId: approvedTargetId,
         name: "Approved",
         conditioninfo: [workflowOutcomeCondition({ key: approvedFlowId, taskId: node.id, taskLabel: node.properties.name, outcome: "Approved" })],
-        y: 130,
+        vertices: workflowVerticesBetween(node.position, approvedTargetPosition),
       });
       const rejectedRef = addFlow({
         id: rejectedFlowId,
@@ -3623,7 +3704,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
         targetId: rejectEndId,
         name: "Rejected",
         conditioninfo: [workflowOutcomeCondition({ key: rejectedFlowId, taskId: node.id, taskLabel: node.properties.name, outcome: "Rejected" })],
-        y: 250,
+        vertices: workflowRejectedVertices(node.position, layout.rejectEnd),
       });
       node.outgoing = [approvedRef, rejectedRef];
       if (!nextNode) endIncoming.push(approvedRef);
@@ -3631,12 +3712,13 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
     } else {
       const completeFlowId = deterministicUuid(`${seed}:flow:${index + 1}:complete`);
       const targetId = nextNode?.id || endId;
+      const targetPosition = nextNode?.position || layout.end;
       const completeRef = addFlow({
         id: completeFlowId,
         sourceId: node.id,
         targetId,
         name: "Complete",
-        y: 130,
+        vertices: workflowVerticesBetween(node.position, targetPosition),
       });
       node.outgoing = [completeRef];
       if (!nextNode) endIncoming.push(completeRef);
@@ -3647,7 +3729,6 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
     node.incoming = index === 0 ? [flowRef(startToFirstFlowId)] : incomingFlows;
   }
   if (!stepNodes.length) endIncoming.push(flowRef(startToFirstFlowId));
-  const endX = 360 + Math.max(1, stepNodes.length) * 260;
   return [
     startShape,
     ...flowShapes,
@@ -3656,7 +3737,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       id: endId,
       resourceid: endId,
       stencil: { id: "EndNoneEvent" },
-      position: { x: endX, y: 80 },
+      position: layout.end,
       incoming: endIncoming,
       outgoing: [],
       properties: { name: "End" },
@@ -3665,7 +3746,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       id: rejectEndId,
       resourceid: rejectEndId,
       stencil: { id: "EndRejectEvent" },
-      position: { x: endX, y: 250 },
+      position: layout.rejectEnd,
       incoming: rejectIncoming,
       outgoing: [],
       properties: { name: "Rejected" },
@@ -3673,13 +3754,13 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
   ];
 }
 
-function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas = [] }) {
+function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas = [], position = null }) {
   const stencil = step.nodeType === "CandidateTask" ? "CandidateTask" : step.nodeType === "ContentList" ? "ContentList" : "MultiAssignmentTask";
   const base = {
     id,
     resourceid: id,
     stencil: { id: stencil },
-    position: { x: 360 + index * 260, y: stencil === "ContentList" ? 120 : 110 },
+    position: position || { x: 420 + index * 300, y: stencil === "ContentList" ? 360 : 220 },
     incoming: [],
     outgoing: [],
     properties: {

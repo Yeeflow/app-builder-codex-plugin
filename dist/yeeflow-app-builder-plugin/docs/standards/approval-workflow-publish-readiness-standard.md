@@ -79,6 +79,25 @@ Required Designer graph metadata:
 - Non-sequence nodes must not share identical coordinates. Stacked nodes can render as a single visible node and hide required configuration errors.
 - Sequence flows must include source and target references that resolve to existing workflow node IDs.
 
+## Visual Layout Readability
+
+Approval workflow publish-readiness is paired with the workflow layout golden-reference gate. Generated workflows must be readable in Designer, not merely valid JSON.
+
+Additional layout requirements:
+
+- Main-path nodes should progress left-to-right with stable column spacing.
+- System/action nodes such as `ContentList` should use a separate action lane when that improves readability.
+- Rejected/cancel/exception paths should route to a lower reject lane and must include explicit `vertices`.
+- Cross-lane and long SequenceFlow edges must include explicit `vertices`; diagonal lines that cross several nodes are not acceptable.
+- Generated workflows must not emit compressed graphs where many nodes fit into a small rectangle or sit near enough to visually overlap.
+
+Before signing readiness, run both workflow gates:
+
+```bash
+node scripts/validate-approval-workflow-publish-readiness.mjs --package <generated-final.yapk> --plan <yeeflow-app-plan.md>
+node scripts/validate-workflow-layout-golden-reference.mjs --package <generated-final.yapk>
+```
+
 ## Hard Gate
 
 Before signing readiness, run:
@@ -87,7 +106,7 @@ Before signing readiness, run:
 node scripts/validate-approval-workflow-publish-readiness.mjs --package <generated-final.yapk> --plan <yeeflow-app-plan.md>
 ```
 
-`yapk-first-generation-preflight.mjs` must include this gate and pass the App Plan path whenever one is available. A failure blocks signing, `setsign`, `verifysign`, install/import, upgrade, Version Management handoff, and browser runtime proof.
+`yapk-first-generation-preflight.mjs` must include this gate and the workflow layout golden-reference gate, and must pass the App Plan path to publish-readiness whenever one is available. A failure blocks signing, `setsign`, `verifysign`, install/import, upgrade, Version Management handoff, and browser runtime proof.
 
 New parity failure codes include:
 
