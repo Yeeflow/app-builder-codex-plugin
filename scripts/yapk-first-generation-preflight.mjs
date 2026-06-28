@@ -50,6 +50,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
 
   gates.push(runGate("canonical-schema", ["scripts/validate-standard-package-schema.mjs", resolvedPackage]));
   gates.push(runGate("application-fontawesome-icon", ["scripts/validate-application-icon.js", "--package", resolvedPackage]));
+  gates.push(runGate("application-control-style-template", ["scripts/validate-application-control-style-template.mjs", "--package", resolvedPackage]));
   gates.push(runGate("decoded-app-package-runtime", ["validate-yapk-package.js", resolvedPackage]));
   gates.push(runGate("data-list-system-schema", ["scripts/validate-data-list-system-schema.mjs", resolvedPackage, "--strict-generated-list", "--json"]));
   gates.push(runGate("data-list-bit-field-controls", ["scripts/validate-yapk-bit-field-controls.mjs", "--package", resolvedPackage]));

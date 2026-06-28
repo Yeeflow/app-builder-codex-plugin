@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MATERIALIZER = path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs");
 const SCHEMA_VALIDATOR = path.join(ROOT, "scripts/validate-standard-package-schema.mjs");
+const APPLICATION_CONTROL_STYLE_VALIDATOR = path.join(ROOT, "scripts/validate-application-control-style-template.mjs");
 const COMPLETENESS_VALIDATOR = path.join(ROOT, "scripts/validate-generated-final-resource-completeness.mjs");
 const ID_PROVENANCE_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-id-provenance.mjs");
 const NAVIGATION_VALIDATOR = path.join(ROOT, "scripts/validate-yapk-navigation-runtime-metadata.mjs");
@@ -86,6 +87,10 @@ try {
     report.outputs.package,
     "--schema-only",
   ]);
+  expectPass("materialized package includes default Soft outline application control style", [
+    APPLICATION_CONTROL_STYLE_VALIDATOR,
+    "--package", report.outputs.package,
+  ]);
 
   const wrapper = JSON.parse(fs.readFileSync(report.outputs.package, "utf8"));
   assert.equal(wrapper.Sign, "", "materializer must not sign package");
@@ -115,6 +120,10 @@ try {
   assert.equal(JSON.parse(fs.readFileSync(apiReport.outputs.package, "utf8")).TenantID, "1234567890123456");
   assert.match(fs.readFileSync(apiReport.outputs.generationReport, "utf8"), /Generated-final preflight is required before any signing request/);
   assert.match(fs.readFileSync(apiReport.outputs.idProvenance, "utf8"), /"allocationSource": "api-generated"/);
+  expectPass("API materialized package includes default Soft outline application control style", [
+    APPLICATION_CONTROL_STYLE_VALIDATOR,
+    "--package", apiReport.outputs.package,
+  ]);
   cases.push("API ID manifest mode writes schema-smoke artifacts without signing");
 
   const envTenantOut = path.join(tempDir, "env-tenant-materialized");

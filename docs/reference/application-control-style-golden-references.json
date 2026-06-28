@@ -1,0 +1,19 @@
+{
+  "version": "v1.0",
+  "approvedTemplateIds": [
+    "application_control_style_soft_outline_controls"
+  ],
+  "defaultTemplateId": "application_control_style_soft_outline_controls",
+  "references": [
+    {
+      "templateId": "application_control_style_soft_outline_controls",
+      "displayName": "Soft outline controls",
+      "sourceTemplate": "docs/reference/application-control-style-soft-outline-controls.template.json",
+      "summary": "Application Custom Control Style used as the default style for generated Yeeflow applications.",
+      "whenToUse": "Use for every newly generated Yeeflow application unless the user explicitly requests a different control style.",
+      "whenNotToUse": "Do not use as a tenant-global style reference, a system style pointer, or an approval-specific/page-specific component template.",
+      "generationProof": "Decoded Themes[] contains a Type 1 style theme with stringified Config and a Type 0 application style theme whose Ext.controlDefaultId points to that style theme.",
+      "proofBoundary": "Export-backed package-shape reference for application-level control style registration and default style binding. This reference does not assert live Designer/runtime rendering without a separate runtime proof."
+    }
+  ]
+}

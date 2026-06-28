@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
+const APPLICATION_CONTROL_STYLE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/application-control-style-soft-outline-controls.template.json");
 const DASHBOARD_V11_TEMPLATE_PATH = path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json");
 const DATA_LIST_FORM_TEMPLATE_PATHS = {
   newEdit: path.join(ROOT, "docs/reference/data-list-form-layout-new-edit.template.json"),
@@ -267,6 +268,31 @@ function parseJsonMaybe(value) {
   } catch {
     return null;
   }
+}
+
+function buildDefaultApplicationControlStyles({ rootListId }) {
+  const template = JSON.parse(fs.readFileSync(APPLICATION_CONTROL_STYLE_TEMPLATE_PATH, "utf8"));
+  const styleContract = template.requiredThemes?.controlStyleTheme || {};
+  const appContract = template.requiredThemes?.applicationStyleTheme || {};
+  const controlStyleId = String(styleContract.ID || "");
+  return [
+    {
+      ID: controlStyleId,
+      Type: 1,
+      Name: styleContract.Name || "Soft outline controls (Codex)",
+      Description: styleContract.Description || "",
+      Config: JSON.stringify(template.packageMaterializedConfig || template.sourceYcsConfig || {}),
+      Ext: "",
+    },
+    {
+      ID: `41_${rootListId}`,
+      Type: 0,
+      Name: appContract.Name || "application style",
+      Description: "",
+      Config: "",
+      Ext: JSON.stringify({ controlDefaultId: controlStyleId }),
+    },
+  ];
 }
 
 function analyzeAppPlanResourceDemand(planText) {
@@ -1539,7 +1565,7 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
     Agents: [],
     Connections: [],
     Knowledges: [],
-    Themes: [],
+    Themes: buildDefaultApplicationControlStyles({ rootListId }),
     Components: [],
     Childs: [],
   };
@@ -1725,7 +1751,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     Agents: [],
     Connections: [],
     Knowledges: [],
-    Themes: [],
+    Themes: buildDefaultApplicationControlStyles({ rootListId }),
     Components: [],
     Childs: childs,
   };
