@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -21,10 +22,16 @@ try {
 
   const validPackage = writePackage("valid.yapk", buildDecoded());
   expectPass("valid package carries Soft outline default style", [VALIDATOR, "--package", validPackage]);
-  cases.push("valid generated package carries default control style contract");
+  cases.push("valid generated package carries default control style contract with a fresh package-local style ID");
 
   const missingThemes = writePackage("missing-themes.yapk", { ListSet: { ListID: "1001" } });
   expectCode("missing Themes fails", [VALIDATOR, "--package", missingThemes], "APPLICATION_CONTROL_STYLE_THEMES_MISSING");
+
+  const reusedTemplateId = buildDecoded({ controlStyleId: TEMPLATE.requiredThemes.controlStyleTheme.ID });
+  expectCode("reused template control style UUID fails", [VALIDATOR, "--package", writePackage("reused-template-id.yapk", reusedTemplateId)], "APPLICATION_CONTROL_STYLE_TEMPLATE_ID_REUSED");
+
+  const nonUuidStyleId = buildDecoded({ controlStyleId: "style-local-1" });
+  expectCode("non-UUID control style ID fails", [VALIDATOR, "--package", writePackage("non-uuid-style-id.yapk", nonUuidStyleId)], "APPLICATION_CONTROL_STYLE_THEME_ID_NOT_UUID");
 
   const wrongLink = buildDecoded();
   wrongLink.Themes.find((theme) => Number(theme.Type) === 0).Ext = JSON.stringify({ controlDefaultId: "wrong-style-id" });
@@ -55,6 +62,21 @@ try {
   ]);
   const materializerReport = JSON.parse(materialized.stdout);
   expectPass("materializer package passes control style validator", [VALIDATOR, "--package", materializerReport.outputs.package]);
+  const materializedStyleId = getControlStyleId(readDecodedPackage(materializerReport.outputs.package));
+  assert.notEqual(materializedStyleId, TEMPLATE.requiredThemes.controlStyleTheme.ID, "materializer must remap the template control style UUID");
+  assert.match(materializedStyleId, /^[0-9a-f-]{36}$/i, "materializer must emit a UUID-shaped control style ID");
+
+  const materializedAgain = expectPass("materializer remaps control style ID for each fresh package", [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", plan,
+    "--out-dir", path.join(tempDir, "materialized-again"),
+    "--allow-fixture-api-ids-for-tests",
+    "--json",
+  ]);
+  const materializerReportAgain = JSON.parse(materializedAgain.stdout);
+  const materializedStyleIdAgain = getControlStyleId(readDecodedPackage(materializerReportAgain.outputs.package));
+  assert.notEqual(materializedStyleIdAgain, materializedStyleId, "each fresh package should get a distinct control style package-local ID");
   cases.push("materializer output includes default Soft outline control style");
 
   console.log(JSON.stringify({ status: "pass", cases }, null, 2));
@@ -62,14 +84,14 @@ try {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
 
-function buildDecoded() {
+function buildDecoded({ controlStyleId = crypto.randomUUID() } = {}) {
   const rootListId = "1001";
   const style = TEMPLATE.requiredThemes.controlStyleTheme;
   return {
     ListSet: { ListID: rootListId, Title: "Control Style Smoke" },
     Themes: [
       {
-        ID: style.ID,
+        ID: controlStyleId,
         Type: 1,
         Name: style.Name,
         Description: style.Description,
@@ -82,7 +104,7 @@ function buildDecoded() {
         Name: "application style",
         Description: null,
         Config: null,
-        Ext: JSON.stringify({ controlDefaultId: style.ID }),
+        Ext: JSON.stringify({ controlDefaultId: controlStyleId }),
       },
     ],
   };
@@ -112,6 +134,19 @@ function expectCode(label, args, code) {
   const result = runNode(args);
   assert.notEqual(result.status, 0, `${label} should fail`);
   assert.match(`${result.stdout}\n${result.stderr}`, new RegExp(code), label);
+}
+
+function readDecodedPackage(packagePath) {
+  const wrapper = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+  return JSON.parse(zlib.brotliDecompressSync(Buffer.from(wrapper.Resource, "base64")).toString("utf8"));
+}
+
+function getControlStyleId(decoded) {
+  const appTheme = decoded.Themes.find((theme) => Number(theme.Type) === 0);
+  const controlDefaultId = JSON.parse(appTheme.Ext).controlDefaultId;
+  const styleTheme = decoded.Themes.find((theme) => Number(theme.Type) === 1 && theme.ID === controlDefaultId);
+  assert.ok(styleTheme, "Type 0 application style must point at a Type 1 style theme");
+  return styleTheme.ID;
 }
 
 function runNode(args, options = {}) {

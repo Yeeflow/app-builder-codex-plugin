@@ -274,7 +274,7 @@ function buildDefaultApplicationControlStyles({ rootListId }) {
   const template = JSON.parse(fs.readFileSync(APPLICATION_CONTROL_STYLE_TEMPLATE_PATH, "utf8"));
   const styleContract = template.requiredThemes?.controlStyleTheme || {};
   const appContract = template.requiredThemes?.applicationStyleTheme || {};
-  const controlStyleId = String(styleContract.ID || "");
+  const controlStyleId = crypto.randomUUID();
   return [
     {
       ID: controlStyleId,

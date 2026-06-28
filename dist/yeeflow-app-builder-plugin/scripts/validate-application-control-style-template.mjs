@@ -141,8 +141,11 @@ function validateDecodedPackage(decoded, template, findings) {
     findings.push(error("APPLICATION_CONTROL_STYLE_THEME_MISSING", "Application style Ext.controlDefaultId must point to a Type 1 control style theme in the same package.", { controlDefaultId: defaultId }));
     return;
   }
-  if (String(styleTheme.ID || "") !== String(styleContract.ID || "")) {
-    findings.push(error("APPLICATION_CONTROL_STYLE_THEME_ID_MISMATCH", "Generated control style theme ID must match the golden reference.", { expected: styleContract.ID || null, actual: styleTheme.ID || null }));
+  if (!isUuid(styleTheme.ID)) {
+    findings.push(error("APPLICATION_CONTROL_STYLE_THEME_ID_NOT_UUID", "Generated Type 1 control style theme ID must be a UUID-shaped package-local style ID.", { actual: styleTheme.ID || null }));
+  }
+  if (String(styleTheme.ID || "") === String(styleContract.ID || "")) {
+    findings.push(error("APPLICATION_CONTROL_STYLE_TEMPLATE_ID_REUSED", "Fresh generated packages must not reuse the golden reference control style UUID; clone the style with a fresh package-local style ID and update Ext.controlDefaultId.", { templateId: styleContract.ID || null }));
   }
   if (String(styleTheme.Name || "") !== String(styleContract.Name || "")) {
     findings.push(error("APPLICATION_CONTROL_STYLE_THEME_NAME_MISMATCH", "Generated control style theme name must match the golden reference.", { expected: styleContract.Name || null, actual: styleTheme.Name || null }));
@@ -241,6 +244,10 @@ function isObject(value) {
 
 function shouldStrictlyValidateAppThemeId(rootListId) {
   return typeof rootListId === "string" || Number.isSafeInteger(rootListId);
+}
+
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
 }
 
 function error(code, message, detail = {}) {

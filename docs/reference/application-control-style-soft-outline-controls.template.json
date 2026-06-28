@@ -43,7 +43,8 @@
   "packageMaterializedConfigIsAuthoritative": true,
   "usageRules": [
     "Every newly generated application must include the Soft outline controls style as an Application Custom Control Style in decoded Themes[].",
-    "Every newly generated application must set the application default control style through a Type 0 application style theme whose Ext JSON controlDefaultId points to this Type 1 style theme.",
+    "Every newly generated application must clone this Type 1 style with a fresh package-local UUID instead of reusing the exported template UUID, then set the application default control style through a Type 0 application style theme whose Ext JSON controlDefaultId points to the fresh Type 1 style theme ID.",
+    "Only package-local theme identity and style ID fields are remapped. Do not rewrite ordinary style tokens, color values, control configuration values, or other non-ID settings inside the style Config.",
     "Do not depend on tenant-global or system control style IDs for generated packages; the package must carry the Application Custom Control Style itself.",
     "Do not emit the style Config as an object. Yeeflow package export shape stores Theme.Config as a stringified JSON object.",
     "Full-app upgrades must preserve this default style unless the user explicitly requests a different application control style."

@@ -21,7 +21,13 @@ The uploaded `.ycs` file contains the authoring control-style configuration. The
 
 The reference app proves that Yeeflow package export shape stores the control style `Config` as a stringified JSON object, not as an inline object.
 
-Generated-final package schema requires `AppThemeInfo.Description`, `AppThemeInfo.Config`, and `AppThemeInfo.Ext` to be strings. The generator therefore normalizes nullable exported-reference fields to empty strings while preserving the same Type `1` style theme, Type `0` application style theme, and `Ext.controlDefaultId` default-style linkage.
+Generated-final package schema requires `AppThemeInfo.Description`, `AppThemeInfo.Config`, and `AppThemeInfo.Ext` to be strings. The generator therefore normalizes nullable exported-reference fields to empty strings while preserving the same Type `1` style theme contract, Type `0` application style theme, and `Ext.controlDefaultId` default-style linkage.
+
+## Fresh Package ID Finding
+
+Follow-up install A/B testing showed that `Themes[]` itself is install-safe when the style identity is cloned correctly. The install failure was caused by reusing the exported template Type `1` control style UUID in fresh generated applications. A minimal data-list-only package with `Themes[]` and the fixed template UUID failed install, while the same package succeeded when the Type `1` control style ID was replaced with a fresh package-local UUID and the Type `0` application style `Ext.controlDefaultId` was updated to the new UUID.
+
+Fresh generation must therefore treat the exported control style UUID as a reference identity only. The package must clone the Type `1` theme with a new UUID per fresh package. Only package-local theme identity and style ID fields are remapped; ordinary style tokens, colors, and control-style config values must not be rewritten.
 
 ## Normalization Finding
 
@@ -39,6 +45,8 @@ The full-app materializer now emits two required `Themes[]` records for generate
 - the Type `1` Application Custom Control Style theme
 - the Type `0` application style theme that sets the Type `1` style as the default
 
+The Type `1` theme ID is generated fresh for each fresh `.yapk` package. The Type `0` application style theme keeps the `41_<decoded.ListSet.ListID>` ID shape and links to the fresh Type `1` style ID through `Ext.controlDefaultId`.
+
 This applies to both schema-smoke generated packages and full resource-graph generated packages.
 
 ## Validator Changes
@@ -52,6 +60,8 @@ The new validator checks:
 - Type `1` control style theme presence
 - Type `0` application style theme presence
 - default `Ext.controlDefaultId` linkage
+- rejection of reused exported template control style UUIDs in fresh packages
+- UUID shape for generated package-local Type `1` style IDs
 - stringified `Config` shape
 - exact package-materialized config match
 - application style ID pattern `41_<decoded.ListSet.ListID>`
@@ -68,9 +78,11 @@ The regression test covers:
 - valid generated package theme contract
 - missing theme failures
 - wrong default-style linkage failures
+- reused template UUID failures
+- non-UUID control style ID failures
 - object-shaped config rejection
 - config drift rejection
-- materializer output validation
+- materializer output validation and per-package fresh style ID remapping
 
 ## Safety Boundary
 
