@@ -1,0 +1,1602 @@
+{
+  "templateId": "application_control_style_soft_outline_controls",
+  "version": "v1.0",
+  "displayName": "Soft outline controls",
+  "scope": "application-custom-control-style-default",
+  "sourceFiles": [
+    "Soft outline controls.ycs",
+    "New Vendor Onboarding - Yeeflow App Plan-v1.3.yapk"
+  ],
+  "proofBoundary": "Export-backed package-shape reference for application-level control style registration and default style binding. This reference does not assert live Designer/runtime rendering without a separate runtime proof.",
+  "sourceYcsConfigSha256": "b2b21aa637c6417ccf0966fde467ff7e227bb5559327cc4d47d5eb88ef8ad2c0",
+  "packageMaterializedConfigSha256": "e2e0edac95d43b4a2129a36539dd43b7727acded71be2f6f12cae4f0cf1fd5d0",
+  "sourceYcsTopLevelKeys": [
+    "ap_title",
+    "edit",
+    "reonly",
+    "lab",
+    "title",
+    "sty-selfield",
+    "table",
+    "dropdown",
+    "button",
+    "cont_selfield",
+    "sty_selfield",
+    "tab",
+    "file"
+  ],
+  "packageMaterializedTopLevelKeys": [
+    "ap_title",
+    "edit",
+    "reonly",
+    "lab",
+    "title",
+    "sty-selfield",
+    "table",
+    "dropdown",
+    "button",
+    "cont_selfield",
+    "sty_selfield",
+    "tab",
+    "file"
+  ],
+  "packageMaterializedConfigIsAuthoritative": true,
+  "usageRules": [
+    "Every newly generated application must include the Soft outline controls style as an Application Custom Control Style in decoded Themes[].",
+    "Every newly generated application must set the application default control style through a Type 0 application style theme whose Ext JSON controlDefaultId points to this Type 1 style theme.",
+    "Do not depend on tenant-global or system control style IDs for generated packages; the package must carry the Application Custom Control Style itself.",
+    "Do not emit the style Config as an object. Yeeflow package export shape stores Theme.Config as a stringified JSON object.",
+    "Full-app upgrades must preserve this default style unless the user explicitly requests a different application control style."
+  ],
+  "requiredThemes": {
+    "controlStyleTheme": {
+      "ID": "b044df34-e0f9-4985-9989-65d235811998",
+      "Type": 1,
+      "Name": "Soft outline controls (Codex)",
+      "Description": "A clean, low-noise form control style for enterprise data-entry workflows, using rounded white input fields, subtle light-gray borders, and gentle blue accents for interactive actions. ",
+      "ConfigShape": "stringified-json",
+      "Ext": null
+    },
+    "applicationStyleTheme": {
+      "IDPattern": "41_<decoded.ListSet.ListID>",
+      "Type": 0,
+      "Name": "application style",
+      "Description": null,
+      "Config": null,
+      "ExtShape": {
+        "controlDefaultId": "b044df34-e0f9-4985-9989-65d235811998"
+      }
+    }
+  },
+  "sourceYcsConfig": {
+    "ap_title": {
+      "lablay": [
+        null,
+        "top"
+      ]
+    },
+    "edit": {
+      "normal": {
+        "color": "var(--c--text)",
+        "border": {
+          "radius": [
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ],
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral-light-active)"
+        },
+        "bgColor": "var(--c--background)"
+      },
+      "ty": "s-regular",
+      "pd": [
+        null,
+        {
+          "top": "--sp--s100",
+          "right": "--sp--s100",
+          "bottom": "--sp--s100",
+          "left": "--sp--s100"
+        }
+      ],
+      "pcolor": "var(--c--neutral-dark-hover)",
+      "select": {
+        "normal": {
+          "bgColor": "var(--c--background)",
+          "color": "var(--c--text)",
+          "border": {
+            "type": "1",
+            "radius": [
+              null,
+              {
+                "top": "--sp--s100",
+                "right": "--sp--s100",
+                "bottom": "--sp--s100",
+                "left": "--sp--s100"
+              }
+            ],
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)"
+          }
+        },
+        "pd": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      },
+      "operation": {
+        "normal": {
+          "bgColor": "var(--c--neutral-light)"
+        },
+        "hover": {
+          "bgColor": "var(--c--neutral-light-hover)"
+        }
+      },
+      "focus": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral)"
+        }
+      }
+    },
+    "reonly": {
+      "select": {
+        "normal": {
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)",
+            "radius": [
+              null,
+              {
+                "top": "--sp--s050",
+                "right": "--sp--s050",
+                "bottom": "--sp--s050",
+                "left": "--sp--s050"
+              }
+            ]
+          }
+        },
+        "pd": [
+          null,
+          {
+            "top": "--sp--s050",
+            "right": "--sp--s075",
+            "bottom": "--sp--s050",
+            "left": "--sp--s075"
+          }
+        ]
+      },
+      "pd": [
+        null,
+        {
+          "top": "--sp--s0",
+          "right": "--sp--s0",
+          "bottom": "--sp--s0",
+          "left": "--sp--s0"
+        }
+      ],
+      "border": {
+        "type": "0",
+        "radius": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s0",
+            "bottom": "--sp--s0",
+            "left": "--sp--s0"
+          }
+        ]
+      }
+    },
+    "lab": {
+      "ty": [
+        null,
+        "s-medium"
+      ],
+      "color": "var(--c--neutral-dark-hover)"
+    },
+    "title": {
+      "background": {
+        "type": "classic",
+        "classic": {}
+      },
+      "ty": "l-medium",
+      "border": {
+        "type": "99",
+        "width": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s0",
+            "bottom": "--sp--s0",
+            "left": "--sp--s050"
+          }
+        ],
+        "boxShadow": {
+          "color": "rgba(193, 193, 193, 0.25)",
+          "x": -4,
+          "y": 4,
+          "blur": 8,
+          "spread": 0,
+          "position": "outline"
+        }
+      },
+      "mar": [
+        null,
+        {
+          "top": null,
+          "right": null,
+          "bottom": null,
+          "left": null
+        }
+      ],
+      "pd": [
+        null,
+        {
+          "top": null,
+          "right": null,
+          "bottom": null,
+          "left": null
+        }
+      ]
+    },
+    "sty-selfield": {
+      "normal": {
+        "bgColor": "var(--c--accent)",
+        "color": "var(--c--background)"
+      }
+    },
+    "table": {
+      "body": {
+        "normal": {
+          "stripedrow": false,
+          "linkcolor": "var(--c--primary)"
+        },
+        "bdt": "1",
+        "bdw": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "bdc": "var(--c--neutral-light-active)",
+        "hover": {},
+        "pd": [
+          null,
+          {
+            "top": "",
+            "right": "",
+            "bottom": "",
+            "left": ""
+          }
+        ],
+        "ty": {}
+      },
+      "header": {
+        "normal": {
+          "bgcolor": "var(--c--neutral-light)"
+        },
+        "bdt": "1",
+        "bdw": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "bdc": "var(--c--neutral-light-active)",
+        "ty": [
+          null,
+          "s-semi-bold"
+        ],
+        "pd": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      },
+      "table": {
+        "bdt": "1",
+        "bdw": [
+          null,
+          {
+            "top": "--sp--s012",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "bdc": "var(--c--neutral-light-active)",
+        "cwt": [
+          null,
+          "1"
+        ],
+        "br": {
+          "top": "--sp--s075",
+          "right": "--sp--s075",
+          "bottom": "--sp--s075",
+          "left": "--sp--s075"
+        }
+      },
+      "cardCont": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral-light-active)",
+          "radius": [
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ]
+        },
+        "cp": [
+          null,
+          {
+            "top": "--sp--s150",
+            "right": "--sp--s150",
+            "bottom": "--sp--s150",
+            "left": "--sp--s150"
+          }
+        ],
+        "title": {
+          "ty": [
+            null,
+            "s-semi-bold"
+          ]
+        },
+        "value": {
+          "ty": [
+            null,
+            "s-light"
+          ],
+          "linkcolor": "var(--c--primary)"
+        }
+      },
+      "card": {
+        "summary": {
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)",
+            "radius": [
+              null,
+              {
+                "top": "--sp--s100",
+                "right": "--sp--s100",
+                "bottom": "--sp--s100",
+                "left": "--sp--s100"
+              }
+            ]
+          },
+          "title": {
+            "ty": [
+              null,
+              "s-medium"
+            ]
+          },
+          "value": {
+            "ty": [
+              null,
+              "s-medium"
+            ]
+          }
+        }
+      }
+    },
+    "dropdown": {
+      "border": {
+        "boxShadow": {
+          "color": "rgba(193, 193, 193, 0.25)",
+          "x": 0,
+          "y": 0,
+          "blur": 20,
+          "spread": 0,
+          "position": "outline"
+        },
+        "type": "1",
+        "width": [
+          null,
+          {
+            "top": "--sp--s012",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "color": "var(--c--neutral)",
+        "radius": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      },
+      "hover": {
+        "bgColor": "var(--c--neutral-light)"
+      },
+      "active": {
+        "bgColor": "var(--c--neutral-light-hover)"
+      }
+    },
+    "button": {
+      "normal": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--primary)",
+          "radius": [
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ]
+        },
+        "c": "var(--c--primary)"
+      },
+      "hover": {
+        "c": "var(--c--primary-hover)",
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--primary-hover)"
+        }
+      },
+      "ins": [
+        null,
+        {
+          "top": "--sp--s075",
+          "right": "--sp--s100",
+          "bottom": "--sp--s075",
+          "left": "--sp--s100"
+        }
+      ],
+      "click": {
+        "c": "var(--c--primary-active)",
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--primary-active)"
+        }
+      },
+      "ty": "s-regular"
+    },
+    "cont_selfield": {
+      "show_control": false
+    },
+    "sty_selfield": {
+      "ty": "s-regular",
+      "normal": {
+        "border": {
+          "type": "1",
+          "radius": [
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ],
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral-light-active)"
+        },
+        "cs": {
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral)"
+          }
+        },
+        "bgColor": "var(--c--background)"
+      },
+      "active": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--primary)",
+          "radius": [
+            null,
+            {
+              "top": "",
+              "right": "",
+              "bottom": "",
+              "left": ""
+            }
+          ]
+        },
+        "cs": {
+          "border": {
+            "radius": [
+              null,
+              {
+                "top": "--sp--s075",
+                "right": "--sp--s075",
+                "bottom": "--sp--s075",
+                "left": "--sp--s075"
+              }
+            ],
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--primary)"
+          }
+        },
+        "color": "var(--c--primary)"
+      },
+      "pd": [
+        null,
+        {
+          "top": "--sp--s100",
+          "right": "--sp--s100",
+          "bottom": "--sp--s100",
+          "left": "--sp--s100"
+        }
+      ]
+    },
+    "tab": {
+      "tabs": {
+        "bt": "1",
+        "bw": [
+          null,
+          {
+            "top": null,
+            "right": null,
+            "bottom": "--sp--s012",
+            "left": null
+          }
+        ],
+        "bc": "var(--c--neutral-light-active)",
+        "pd": [
+          null,
+          {
+            "top": null,
+            "right": "--sp--s150",
+            "bottom": null,
+            "left": "--sp--s150"
+          }
+        ]
+      },
+      "item": {
+        "normal": {
+          "pd": [
+            null,
+            {
+              "top": "--sp--s075",
+              "right": "--sp--s150",
+              "bottom": "--sp--s075",
+              "left": "--sp--s150"
+            }
+          ],
+          "mar": [
+            null,
+            {
+              "top": null,
+              "right": "--sp--s100",
+              "bottom": "--sp--s075",
+              "left": null
+            }
+          ],
+          "bt": "0",
+          "type": "classic",
+          "classic": {
+            "color": "var(--c--neutral-light)"
+          },
+          "ty": "s-medium",
+          "tc": "var(--c--neutral-dark-hover)",
+          "br": [
+            null,
+            {
+              "top": "--sp--s075",
+              "right": "--sp--s075",
+              "bottom": "--sp--s075",
+              "left": "--sp--s075"
+            }
+          ]
+        },
+        "hover": {
+          "type": "classic",
+          "classic": {
+            "color": "var(--c--neutral-dark-hover)"
+          },
+          "tc": "var(--c--background)",
+          "ty": {},
+          "ic": "var(--c--background)"
+        },
+        "active": {
+          "type": "classic",
+          "classic": {
+            "color": "var(--c--neutral-darker)"
+          },
+          "tc": "var(--c--background)",
+          "bt": "99",
+          "ic": "var(--c--background)",
+          "is": [
+            null,
+            "--sp--s150"
+          ]
+        },
+        "iconpos": "2",
+        "iconm": [
+          null,
+          {
+            "top": null,
+            "right": "--sp--s075",
+            "bottom": null,
+            "left": null
+          }
+        ],
+        "imam": [
+          null,
+          {
+            "top": null,
+            "right": "--sp--s075",
+            "bottom": null,
+            "left": null
+          }
+        ]
+      }
+    },
+    "file": {
+      "content": {
+        "iconsize": [
+          null,
+          24
+        ],
+        "normal": {
+          "border": {
+            "radius": [
+              null,
+              {
+                "top": "--sp--s100",
+                "right": "--sp--s100",
+                "bottom": "--sp--s100",
+                "left": "--sp--s100"
+              }
+            ],
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)"
+          }
+        },
+        "hover": {
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral)"
+          }
+        },
+        "pd": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      }
+    }
+  },
+  "packageMaterializedConfig": {
+    "ap_title": {
+      "lablay": [
+        null,
+        "top"
+      ]
+    },
+    "edit": {
+      "normal": {
+        "color": "var(--c--text)",
+        "border": {
+          "radius": [
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ],
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral-light-active)"
+        },
+        "bgColor": "var(--c--background)"
+      },
+      "ty": "s-regular",
+      "pd": [
+        null,
+        {
+          "top": "--sp--s100",
+          "right": "--sp--s100",
+          "bottom": "--sp--s100",
+          "left": "--sp--s100"
+        }
+      ],
+      "pcolor": "var(--c--neutral-dark-hover)",
+      "select": {
+        "normal": {
+          "bgColor": "var(--c--background)",
+          "color": "var(--c--text)",
+          "border": {
+            "type": "1",
+            "radius": [
+              null,
+              {
+                "top": "--sp--s100",
+                "right": "--sp--s100",
+                "bottom": "--sp--s100",
+                "left": "--sp--s100"
+              }
+            ],
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)"
+          }
+        },
+        "pd": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      },
+      "operation": {
+        "normal": {
+          "bgColor": "var(--c--neutral-light)"
+        },
+        "hover": {
+          "bgColor": "var(--c--neutral-light-hover)"
+        }
+      },
+      "focus": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral)"
+        }
+      }
+    },
+    "reonly": {
+      "select": {
+        "normal": {
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)",
+            "radius": [
+              null,
+              {
+                "top": "--sp--s050",
+                "right": "--sp--s050",
+                "bottom": "--sp--s050",
+                "left": "--sp--s050"
+              }
+            ]
+          }
+        },
+        "pd": [
+          null,
+          {
+            "top": "--sp--s050",
+            "right": "--sp--s075",
+            "bottom": "--sp--s050",
+            "left": "--sp--s075"
+          }
+        ]
+      },
+      "pd": [
+        null,
+        {
+          "top": "--sp--s0",
+          "right": "--sp--s0",
+          "bottom": "--sp--s0",
+          "left": "--sp--s0"
+        }
+      ],
+      "border": {
+        "type": "0",
+        "radius": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s0",
+            "bottom": "--sp--s0",
+            "left": "--sp--s0"
+          }
+        ]
+      }
+    },
+    "lab": {
+      "ty": [
+        null,
+        "s-medium"
+      ],
+      "color": "var(--c--neutral-dark-hover)"
+    },
+    "title": {
+      "background": {
+        "type": "classic",
+        "classic": {}
+      },
+      "ty": "l-medium",
+      "border": {
+        "type": "99",
+        "width": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s0",
+            "bottom": "--sp--s0",
+            "left": "--sp--s050"
+          }
+        ],
+        "boxShadow": {
+          "color": "rgba(193, 193, 193, 0.25)",
+          "x": -4,
+          "y": 4,
+          "blur": 8,
+          "spread": 0,
+          "position": "outline"
+        }
+      },
+      "mar": [
+        null,
+        {
+          "top": null,
+          "right": null,
+          "bottom": null,
+          "left": null
+        }
+      ],
+      "pd": [
+        null,
+        {
+          "top": null,
+          "right": null,
+          "bottom": null,
+          "left": null
+        }
+      ]
+    },
+    "sty-selfield": {
+      "normal": {
+        "bgColor": "var(--c--accent)",
+        "color": "var(--c--background)"
+      }
+    },
+    "table": {
+      "body": {
+        "normal": {
+          "stripedrow": false,
+          "linkcolor": "var(--c--primary)"
+        },
+        "bdt": "1",
+        "bdw": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "bdc": "var(--c--neutral-light-active)",
+        "hover": {},
+        "pd": [
+          null,
+          {
+            "top": "",
+            "right": "",
+            "bottom": "",
+            "left": ""
+          }
+        ],
+        "ty": {}
+      },
+      "header": {
+        "normal": {
+          "bgcolor": "var(--c--neutral-light)"
+        },
+        "bdt": "1",
+        "bdw": [
+          null,
+          {
+            "top": "--sp--s0",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "bdc": "var(--c--neutral-light-active)",
+        "ty": [
+          null,
+          "s-semi-bold"
+        ],
+        "pd": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      },
+      "table": {
+        "bdt": "1",
+        "bdw": [
+          null,
+          {
+            "top": "--sp--s012",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "bdc": "var(--c--neutral-light-active)",
+        "cwt": [
+          null,
+          "1"
+        ],
+        "br": {
+          "top": "--sp--s075",
+          "right": "--sp--s075",
+          "bottom": "--sp--s075",
+          "left": "--sp--s075"
+        }
+      },
+      "cardCont": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral-light-active)",
+          "radius": [
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ]
+        },
+        "cp": [
+          null,
+          {
+            "top": "--sp--s150",
+            "right": "--sp--s150",
+            "bottom": "--sp--s150",
+            "left": "--sp--s150"
+          }
+        ],
+        "title": {
+          "ty": [
+            null,
+            "s-semi-bold"
+          ]
+        },
+        "value": {
+          "ty": [
+            null,
+            "s-light"
+          ],
+          "linkcolor": "var(--c--primary)"
+        }
+      },
+      "card": {
+        "summary": {
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)",
+            "radius": [
+              null,
+              {
+                "top": "--sp--s100",
+                "right": "--sp--s100",
+                "bottom": "--sp--s100",
+                "left": "--sp--s100"
+              }
+            ]
+          },
+          "title": {
+            "ty": [
+              null,
+              "s-medium"
+            ]
+          },
+          "value": {
+            "ty": [
+              null,
+              "s-medium"
+            ]
+          }
+        }
+      }
+    },
+    "dropdown": {
+      "border": {
+        "boxShadow": {
+          "color": "rgba(193, 193, 193, 0.25)",
+          "x": 0,
+          "y": 0,
+          "blur": 20,
+          "spread": 0,
+          "position": "outline"
+        },
+        "type": "1",
+        "width": [
+          null,
+          {
+            "top": "--sp--s012",
+            "right": "--sp--s012",
+            "bottom": "--sp--s012",
+            "left": "--sp--s012"
+          }
+        ],
+        "color": "var(--c--neutral)",
+        "radius": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      },
+      "hover": {
+        "bgColor": "var(--c--neutral-light)"
+      },
+      "active": {
+        "bgColor": "var(--c--neutral-light-hover)"
+      }
+    },
+    "button": {
+      "normal": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--primary)",
+          "radius": [
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ]
+        },
+        "c": "var(--c--primary)",
+        "bg": "var(--c--background)"
+      },
+      "hover": {
+        "c": "var(--c--primary-hover)",
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--primary-hover)"
+        }
+      },
+      "ins": [
+        null,
+        {
+          "top": "--sp--s075",
+          "right": "--sp--s100",
+          "bottom": "--sp--s075",
+          "left": "--sp--s100"
+        }
+      ],
+      "click": {
+        "c": "var(--c--primary-active)",
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--primary-active)"
+        }
+      },
+      "ty": "s-regular"
+    },
+    "cont_selfield": {
+      "show_control": false
+    },
+    "sty_selfield": {
+      "ty": "s-regular",
+      "normal": {
+        "color": "var(--c--text)",
+        "border": {
+          "type": "1",
+          "radius": [
+            null,
+            {
+              "top": "--sp--s100",
+              "right": "--sp--s100",
+              "bottom": "--sp--s100",
+              "left": "--sp--s100"
+            }
+          ],
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--neutral-light-active)"
+        },
+        "cs": {
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral)"
+          }
+        }
+      },
+      "active": {
+        "border": {
+          "type": "1",
+          "width": [
+            null,
+            {
+              "top": "--sp--s012",
+              "right": "--sp--s012",
+              "bottom": "--sp--s012",
+              "left": "--sp--s012"
+            }
+          ],
+          "color": "var(--c--primary)",
+          "radius": [
+            null,
+            {
+              "top": "",
+              "right": "",
+              "bottom": "",
+              "left": ""
+            }
+          ]
+        },
+        "cs": {
+          "border": {
+            "radius": [
+              null,
+              {
+                "top": "--sp--s075",
+                "right": "--sp--s075",
+                "bottom": "--sp--s075",
+                "left": "--sp--s075"
+              }
+            ],
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--primary)"
+          }
+        },
+        "color": "var(--c--primary)"
+      },
+      "pd": [
+        null,
+        {
+          "top": "--sp--s100",
+          "right": "--sp--s100",
+          "bottom": "--sp--s100",
+          "left": "--sp--s100"
+        }
+      ]
+    },
+    "tab": {
+      "tabs": {
+        "bt": "1",
+        "bw": [
+          null,
+          {
+            "top": null,
+            "right": null,
+            "bottom": "--sp--s012",
+            "left": null
+          }
+        ],
+        "bc": "var(--c--neutral-light-active)",
+        "pd": [
+          null,
+          {
+            "top": null,
+            "right": "--sp--s150",
+            "bottom": null,
+            "left": "--sp--s150"
+          }
+        ]
+      },
+      "item": {
+        "normal": {
+          "pd": [
+            null,
+            {
+              "top": "--sp--s075",
+              "right": "--sp--s150",
+              "bottom": "--sp--s075",
+              "left": "--sp--s150"
+            }
+          ],
+          "mar": [
+            null,
+            {
+              "top": null,
+              "right": "--sp--s100",
+              "bottom": "--sp--s075",
+              "left": null
+            }
+          ],
+          "bt": "0",
+          "type": "classic",
+          "classic": {
+            "color": "var(--c--neutral-light)"
+          },
+          "ty": "s-medium",
+          "tc": "var(--c--neutral-dark-hover)",
+          "br": [
+            null,
+            {
+              "top": "--sp--s075",
+              "right": "--sp--s075",
+              "bottom": "--sp--s075",
+              "left": "--sp--s075"
+            }
+          ]
+        },
+        "hover": {
+          "type": "classic",
+          "classic": {
+            "color": "var(--c--neutral-dark-hover)"
+          },
+          "tc": "var(--c--background)",
+          "ty": {},
+          "ic": "var(--c--background)"
+        },
+        "active": {
+          "type": "classic",
+          "classic": {
+            "color": "var(--c--neutral-darker)"
+          },
+          "tc": "var(--c--background)",
+          "bt": "99",
+          "ic": "var(--c--background)",
+          "is": [
+            null,
+            "--sp--s150"
+          ]
+        },
+        "iconpos": "2",
+        "iconm": [
+          null,
+          {
+            "top": null,
+            "right": "--sp--s075",
+            "bottom": null,
+            "left": null
+          }
+        ],
+        "imam": [
+          null,
+          {
+            "top": null,
+            "right": "--sp--s075",
+            "bottom": null,
+            "left": null
+          }
+        ]
+      }
+    },
+    "file": {
+      "content": {
+        "iconsize": [
+          null,
+          24
+        ],
+        "normal": {
+          "border": {
+            "radius": [
+              null,
+              {
+                "top": "--sp--s100",
+                "right": "--sp--s100",
+                "bottom": "--sp--s100",
+                "left": "--sp--s100"
+              }
+            ],
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)"
+          },
+          "bgColor": "var(--c--neutral-light)"
+        },
+        "hover": {
+          "bgColor": "var(--c--neutral-light-hover)",
+          "border": {
+            "type": "1",
+            "width": [
+              null,
+              {
+                "top": "--sp--s012",
+                "right": "--sp--s012",
+                "bottom": "--sp--s012",
+                "left": "--sp--s012"
+              }
+            ],
+            "color": "var(--c--neutral-light-active)"
+          }
+        },
+        "pd": [
+          null,
+          {
+            "top": "--sp--s100",
+            "right": "--sp--s100",
+            "bottom": "--sp--s100",
+            "left": "--sp--s100"
+          }
+        ]
+      }
+    }
+  },
+  "generatedFinalSchemaNormalization": {
+    "controlStyleTheme": {
+      "Ext": ""
+    },
+    "applicationStyleTheme": {
+      "Description": "",
+      "Config": ""
+    },
+    "note": "The exported reference can use null for these fields, but schemas/yapk-schema.json requires AppThemeInfo Description, Config, and Ext to be strings in generated-final packages. Generated packages therefore normalize nullable fields to empty strings while preserving the default-style linkage and Config JSON."
+  }
+}
