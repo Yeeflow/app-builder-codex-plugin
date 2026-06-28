@@ -116,6 +116,19 @@ try {
   assert.match(fs.readFileSync(apiReport.outputs.idProvenance, "utf8"), /"allocationSource": "api-generated"/);
   cases.push("API ID manifest mode writes schema-smoke artifacts without signing");
 
+  const envTenantOut = path.join(tempDir, "env-tenant-materialized");
+  const envTenantRun = expectPass("materializer uses YEEFLOW_TENANT_ID when --tenant-id is omitted", [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", plan,
+    "--out-dir", envTenantOut,
+    "--api-id-manifest", apiIdManifest,
+    "--json",
+  ], { env: { ...process.env, YEEFLOW_TENANT_ID: "1234567890999999" } });
+  const envTenantReport = JSON.parse(envTenantRun.stdout);
+  assert.equal(JSON.parse(fs.readFileSync(envTenantReport.outputs.package, "utf8")).TenantID, "1234567890999999");
+  cases.push("materializer resolves target TenantID from environment when explicitly available");
+
   const resourcePlan = path.join(tempDir, "resource-yeeflow-app-plan.md");
   fs.writeFileSync(resourcePlan, [
     "# Yeeflow App Plan: Office Asset Loan Management",
@@ -156,6 +169,14 @@ try {
     "| 1 | Requester | Requester | User | identity-picker | Generated-final validation |",
     "| 2 | Asset | Asset | Text | input | Generated-final validation |",
     "| 3 | Business Purpose | BusinessPurpose | Multiple line | textarea | Generated-final validation |",
+    "| 4 | Payment Terms | PaymentTerms | Text | radio dropdown | Generated-final validation |",
+    "| 5 | Tax Number | TaxNumber | Text | input | Generated-final validation |",
+    "| 6 | Bank Name | BankName | Text | input | Generated-final validation |",
+    "| 7 | Bank Account | BankAccount | Text | input | Generated-final validation |",
+    "| 8 | Risk Self Assessment | RiskSelfAssessment | Text | radio dropdown | Generated-final validation |",
+    "| 9 | Risk Explanation | RiskExplanation | Multiple line | textarea | Generated-final validation |",
+    "| 10 | Business License Attachment | BusinessLicenseAttachment | File | file upload | Generated-final validation |",
+    "| 11 | Bank Proof Attachment | BankProofAttachment | File | file upload | Generated-final validation |",
     "",
     "##### Task Form Fields",
     "",
@@ -398,7 +419,19 @@ try {
   const taskPage = assetLoanDef.pageurls.find((page) => Number(page.type) === 2);
   const submissionFieldKeys = collectApprovalFieldKeys(submissionPage.formdef);
   const taskFieldKeys = collectApprovalFieldKeys(taskPage.formdef);
-  for (const key of ["requester", "asset", "businesspurpose"]) {
+  for (const key of [
+    "requester",
+    "asset",
+    "businesspurpose",
+    "paymentterms",
+    "taxnumber",
+    "bankname",
+    "bankaccount",
+    "riskselfassessment",
+    "riskexplanation",
+    "businesslicenseattachment",
+    "bankproofattachment",
+  ]) {
     assert.equal(submissionFieldKeys.has(key), true, `submission page includes ${key}`);
     assert.equal(taskFieldKeys.has(key), true, `task page mirrors submission field ${key}`);
   }
@@ -568,23 +601,23 @@ try {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
 
-function expectPass(name, args) {
-  const result = run(args);
+function expectPass(name, args, options = {}) {
+  const result = run(args, options);
   assert.equal(result.status, 0, `${name} should pass\nstdout=${result.stdout}\nstderr=${result.stderr}`);
   cases.push(name);
   return result;
 }
 
-function expectCode(name, args, code) {
-  const result = run(args);
+function expectCode(name, args, code, options = {}) {
+  const result = run(args, options);
   assert.notEqual(result.status, 0, `${name} should fail`);
   assert.match(`${result.stdout}\n${result.stderr}`, new RegExp(code), `${name} should include ${code}`);
   cases.push(name);
   return result;
 }
 
-function run(args) {
-  return spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+function run(args, options = {}) {
+  return spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", maxBuffer: 16 * 1024 * 1024, env: options.env || process.env });
 }
 
 function assertDataListCustomFormRuntimeSources(decodedResource) {

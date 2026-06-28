@@ -92,6 +92,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   const ids = allocateIds(idSource.ids, idPaths, findings);
   if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
   const appIconUrl = options.iconUrl || DEFAULT_ICON;
+  const materializationTenantId = resolveMaterializationTenantId(options);
 
   const decoded = planDemand.hasMaterialResources
     ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl })
@@ -106,7 +107,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   const resource = zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64");
   const wrapper = {
     PackageId: stringId(ids["wrapper.PackageId"]),
-    TenantID: options.tenantId ? String(options.tenantId) : "0",
+    TenantID: materializationTenantId || "0",
     AppID: 41,
     ListID: stringId(ids["decoded.ListSet.ListID"]),
     Title: appTitle,
@@ -812,7 +813,15 @@ function uniqueApprovalFieldSpecs(fields) {
       controlType: cleanResourceName(field?.controlType) || inferControlType(field?.fieldType || ""),
     });
   }
-  return normalized.slice(0, 16);
+  return normalized;
+}
+
+function resolveMaterializationTenantId(options = {}) {
+  const explicit = cleanResourceName(options.tenantId);
+  if (explicit) return explicit;
+  const profile = cleanResourceName(process.env.YEEFLOW_PROFILE).toUpperCase().replace(/[^A-Z0-9_]/g, "_");
+  const profileTenant = profile ? cleanResourceName(process.env[`YEEFLOW_${profile}_TENANT_ID`]) : "";
+  return profileTenant || cleanResourceName(process.env.YEEFLOW_TENANT_ID);
 }
 
 function assignCustomFormLayoutPositions(planDemand, dataListNames) {

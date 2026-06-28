@@ -383,6 +383,8 @@ The root wrappers are `form_grid_fields_2col_wrapper` and `form_grid_fields_3col
 
 The App Plan must include an Approval Form Fields Layout Template Selection table for every generated field group before package generation. Run `scripts/validate-approval-form-fields-template.mjs --package <package.yapk> --plan <yeeflow-app-plan.md>` before signing readiness.
 
+Approval form `Submission Form Fields` and `Task Form Fields` tables are mandatory generation input, not summaries. Do not cap, truncate, or silently drop planned fields when a table is long; every planned submission and task field must appear in `Forms[].DefResource.pageurls[].formdef` unless the App Plan explicitly marks that field unsupported, deferred, or omitted for the specific form page.
+
 Number fields:
 
 - workflow variable `type = "number"`
