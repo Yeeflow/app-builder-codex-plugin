@@ -25,7 +25,7 @@ The live install readiness gate exists to block packages that can pass local sha
 ## Generator Requirements
 
 - The full-app materializer must use a single API-issued root identity for both wrapper and decoded root surfaces.
-- The package handoff must replace placeholder tenant metadata before signing. Do not sign or install packages whose wrapper still has `TenantID: "0"`.
+- The package handoff must replace placeholder tenant metadata before signing. The materializer may resolve the target tenant from an explicit `--tenant-id`, profile-scoped `YEEFLOW_<PROFILE>_TENANT_ID`, or `YEEFLOW_TENANT_ID` when those values are safely available. Do not sign or install packages whose wrapper still has `TenantID: "0"`.
 - Template-cloned Dashboard resources must regenerate UUID-shaped control IDs per page while preserving semantic container IDs used by validators and templates.
 - Fresh-ID remap must include nested dashboard JSON strings and encoded approval `DefResource` payloads.
 - The materializer may remain signing-ineligible as a generation handoff, but generated-final preflight must produce the signing-readiness handoff when all local hard gates pass.
