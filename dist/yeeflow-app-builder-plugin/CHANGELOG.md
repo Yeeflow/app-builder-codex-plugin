@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.82
+
+- Release Dashboard filter variable consumer materialization from PR #303.
+- Wire cloned Dashboard `search-filter` variables to Collection `attrs.data.fulltext[]` consumers so keyword filter variables are backed by runtime-visible data controls.
+- Treat filter producer controls as producers only; they no longer count as real consumption for `filterVars[]` runtime-binding validation.
+- Prune stale generated producer bindings and unconsumed `filterVars[]` entries instead of carrying declared-but-unused Dashboard filter variables into generated-final packages.
+- Add full-app materializer regression coverage that blocks generated Dashboards when `filterVars[]` entries or `search-filter` bindings are not backed by Summary, Collection, Data table, chart, or pivot consumers.
+
 ## 0.8.81
 
 - Release generated-final preflight contract gap alignment from PR #301.
