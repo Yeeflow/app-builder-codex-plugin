@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.79
+
+- Release generated-final preflight App Plan/runtime alignment from PR #297.
+- Treat canonical Dashboard Collection exact-ID App Plan tables as authoritative over earlier prose support tables.
+- Infer approved Collection template IDs for legacy prose where unambiguous and prune unused copied Dashboard filter variables during materialization.
+- Treat `ListDataID` as a Yeeflow system field for Summary count validation while preserving Summary `ReportIds`, `exts`, and `tempVars` requirements.
+- Keep Data List Form layout planning strict for custom New/Edit and View/Workbench Full page rows before signing readiness.
+
 ## 0.8.78
 
 - Release Approval ContentList target and application-selection gates from PR #295.
