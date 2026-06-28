@@ -508,6 +508,20 @@ try {
   for (const search of findNodes(decodedResource, (node) => String(node?.type || "") === "search-filter")) {
     assert.equal(typeof search.attrs?.placeholder, "string", "generated search-filter attrs.placeholder must be a primitive string");
   }
+  for (const page of decodedResource.Pages) {
+    const parsedDashboard = JSON.parse(page.LayoutInResources[0].Resource);
+    const consumedFilterVars = consumedDashboardFilterVars(parsedDashboard);
+    for (const filterVar of parsedDashboard.filterVars || []) {
+      const name = String(filterVar?.name || filterVar?.id || "").trim();
+      assert.equal(consumedFilterVars.has(name), true, `${page.Title} filterVars[] entry ${name} must be consumed by a data/analytics control`);
+    }
+    for (const search of findNodes(parsedDashboard, (node) => String(node?.type || "") === "search-filter")) {
+      const binding = String(search?.binding || search?.attrs?.binding || "");
+      if (!binding.startsWith("__filter_")) continue;
+      const name = binding.slice("__filter_".length);
+      assert.equal(consumedFilterVars.has(name), true, `${page.Title} search-filter ${name} must feed a real consumer fulltext/filter contract`);
+    }
+  }
   assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
   const resourceFixtureOut = path.join(tempDir, "resource-plan-fixture");
   const resourceFixtureRun = expectPass("nontrivial fixture mode allocates enough synthetic API-shaped IDs", [
@@ -645,6 +659,24 @@ function findNodes(root, predicate, found = []) {
   }
   for (const value of Object.values(root)) findNodes(value, predicate, found);
   return found;
+}
+
+function consumedDashboardFilterVars(root) {
+  const consumed = new Set();
+  const consumerTypes = new Set(["summary", "collection", "data-list", "data-table", "pivot-table", "pie-chart", "bar-chart", "column-chart", "line-chart", "area-chart"]);
+  const inspect = (value) => {
+    const text = JSON.stringify(value || {});
+    for (const match of text.matchAll(/__filter_([A-Za-z0-9_-]+)/g)) consumed.add(match[1]);
+  };
+  for (const node of findNodes(root, (item) => consumerTypes.has(String(item?.type || "")), [])) {
+    inspect(node?.attrs?.data?.filter);
+    inspect(node?.attrs?.data?.fulltext);
+    inspect(node?.attrs?.data?.sortingfilter);
+    inspect(node?.attrs?.data?.Conditions);
+    inspect(node?.attrs?.data?.conditions);
+  }
+  for (const ext of Array.isArray(root?.exts) ? root.exts : []) inspect(ext?.attr?.settings?.Conditions);
+  return consumed;
 }
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });

@@ -38,8 +38,17 @@ Every declared `filterVars[]` entry must be consumed by at least one downstream 
 Consumer wiring:
 
 - Summary controls consume filters through `exts[].attr.settings.Conditions[]`
-- Collection and Data table controls consume filters through `attrs.data.filter[]`
+- Collection and Data table controls consume exact filters through `attrs.data.filter[]`
+- Collection and Data table controls consume keyword/search filters through `attrs.data.fulltext[]`
 - chart and pivot consumers use their export-proven condition/filter structures
+
+Filter producer controls do not count as consumers. A `search-filter`, `select-filter`,
+or other Data Filter control with `binding = "__filter_<name>"` only declares/produces
+the variable value. The generated page must either wire that variable into at least
+one Summary, Collection, Data table, chart, or pivot consumer, or remove the unused
+binding and omit the `filterVars[]` declaration. Generated-final packages must not
+retain template-copied `filterVars[]` entries that are only referenced by filter
+producer controls.
 
 Every consumer condition must reference a valid field on the consumer source list. For lookup-backed fields, compare record ids/ListDataID-style values, not display labels.
 
