@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.79`
+`0.8.80`
+
+Version `0.8.80` releases search-filter placeholder runtime shape hardening from PR #299. Generated Dashboard `search-filter.attrs.placeholder` now stays as primitive input text, object-shaped search-filter placeholders are rejected before signing readiness because they render as `[object Object]`, and placeholder style metadata remains separate from the runtime placeholder text field.
 
 Version `0.8.79` releases generated-final preflight App Plan/runtime alignment from PR #297. Canonical Dashboard Collection exact-ID App Plan tables are authoritative over earlier prose support tables, approved Collection template IDs are inferred only when legacy prose is unambiguous, unused copied Dashboard filter variables are pruned during materialization, `ListDataID` is treated as a Yeeflow system field for Summary count validation, and Data List Form layout planning remains strict for custom New/Edit and View/Workbench Full page rows.
 
