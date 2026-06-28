@@ -32,6 +32,20 @@ The failure was not caused by duplicate control IDs. It was caused by incomplete
 - Added focused regression coverage in `scripts/test-approval-workflow-publish-readiness-gates.mjs`.
 - Extended full-app materializer regression coverage so nontrivial generated-final packages must pass the new gate.
 
+## Workflow Node Parity Extension
+
+New Vendor Onboarding validation later found a different Approval workflow defect: the Functional Specification and App Plan required a multi-node approval process, but the generated `DefResource` contained only one `MultiAssignmentTask` named `Line manager approval`. That package could pass shell, field, and publish-structure checks, but it did not satisfy the planned business process.
+
+The generator and gates now treat the App Plan `Approval Workflow Nodes` table as a materialization contract:
+
+- The full-app materializer parses planned workflow nodes from `## 5. Approval Forms Plan`.
+- Every planned review/approval/task node is generated as a named `MultiAssignmentTask`.
+- Planned action nodes such as `ContentList` are preserved as named workflow nodes instead of being silently omitted.
+- Approved paths may chain through the planned nodes and must eventually reach the normal End node.
+- Rejected paths from approval tasks must still reach `EndRejectEvent`.
+- `yapk-first-generation-preflight.mjs` passes `--plan` into the Approval workflow publish-readiness gate so plan-to-package parity is checked before signing readiness.
+- Focused regression coverage now fails if a planned task node is missing from `DefResource`.
+
 ## Hard-Gate Contract
 
 Generated-final Approval workflow packages must fail before signing when any of these are true:
@@ -45,6 +59,7 @@ Generated-final Approval workflow packages must fail before signing when any of 
 - Workflow nodes stack on identical coordinates.
 - Graph IDs, source refs, or target refs are incomplete.
 - `validate-ywf-def.js --mode final` reports final-mode workflow errors.
+- The App Plan has planned workflow nodes that are not materialized by name and type in `Forms[].DefResource`.
 
 ## Proof Boundary
 

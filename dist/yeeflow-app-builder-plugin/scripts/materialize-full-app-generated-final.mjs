@@ -294,6 +294,7 @@ function analyzeAppPlanResourceDemand(planText) {
     dataListFieldSpecs: collectDataListFieldSpecs(planText),
     customFormRecords: collectCustomFormRecords(planText),
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
+    approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
     dashboardFilterRecords: collectDashboardFilterRecords(planText),
     dashboardSummaryMetricRecords: collectDashboardSummaryMetricRecords(planText),
     dashboardDatasetRecords: collectDashboardDatasetRecords(planText),
@@ -608,6 +609,57 @@ function collectApprovalFormFieldSpecs(planText) {
   return byForm;
 }
 
+function collectApprovalWorkflowNodeSpecs(planText) {
+  const section = extractNumberedSection(planText, /^##\s+5\.\s+Approval Forms Plan/im);
+  const byForm = {};
+  if (!section.trim()) return byForm;
+  const lines = section.split(/\r?\n/);
+  let currentApprovalForm = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const approvalHeading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (approvalHeading) {
+      currentApprovalForm = cleanResourceName(approvalHeading[1]);
+      if (currentApprovalForm && !byForm[normKey(currentApprovalForm)]) byForm[normKey(currentApprovalForm)] = [];
+      continue;
+    }
+    if (!currentApprovalForm || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const nameColumn = findHeaderIndex(normalizedHeaders, ["node name", "workflow node", "step name", "approval step", "task name"]);
+    const typeColumn = findHeaderIndex(normalizedHeaders, ["node type", "workflow node type", "stencil", "type"]);
+    if (nameColumn === -1 || typeColumn === -1) continue;
+    const descriptionColumn = findHeaderIndex(normalizedHeaders, ["description", "purpose"]);
+    const assigneeColumn = findHeaderIndex(normalizedHeaders, ["assignee/role", "assignee", "role", "owner"]);
+    const strategyColumn = findHeaderIndex(normalizedHeaders, ["assignment strategy", "strategy"]);
+    const outcomesColumn = findHeaderIndex(normalizedHeaders, ["outcomes", "outcome"]);
+    const conditionColumn = findHeaderIndex(normalizedHeaders, ["condition/branch", "condition", "branch"]);
+    const proofColumn = findHeaderIndex(normalizedHeaders, ["proof boundary", "proof"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const nodeName = cleanResourceName(cells[nameColumn]);
+      const nodeType = cleanResourceName(cells[typeColumn]);
+      if (!nodeName || isNonResourceName(nodeName) || !nodeType) {
+        rowIndex += 1;
+        continue;
+      }
+      byForm[normKey(currentApprovalForm)].push({
+        nodeName,
+        nodeType,
+        description: descriptionColumn === -1 ? "" : cleanResourceName(cells[descriptionColumn]),
+        assigneeRole: assigneeColumn === -1 ? "" : cleanResourceName(cells[assigneeColumn]),
+        assignmentStrategy: strategyColumn === -1 ? "" : cleanResourceName(cells[strategyColumn]),
+        outcomes: outcomesColumn === -1 ? "" : cleanResourceName(cells[outcomesColumn]),
+        conditionBranch: conditionColumn === -1 ? "" : cleanResourceName(cells[conditionColumn]),
+        proofBoundary: proofColumn === -1 ? "" : cleanResourceName(cells[proofColumn]),
+      });
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return Object.fromEntries(Object.entries(byForm).map(([key, nodes]) => [key, uniqueApprovalWorkflowNodes(nodes)]));
+}
+
 function collectDashboardFilterRecords(planText) {
   const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
   const records = [];
@@ -851,6 +903,10 @@ function approvalFieldSpecsForForm(planDemand, formName) {
   };
 }
 
+function approvalWorkflowNodeSpecsForForm(planDemand, formName) {
+  return uniqueApprovalWorkflowNodes(planDemand.approvalWorkflowNodeSpecs?.[normKey(formName)] || []);
+}
+
 function uniqueApprovalFieldSpecs(fields) {
   const normalized = [];
   const seen = new Set();
@@ -869,6 +925,45 @@ function uniqueApprovalFieldSpecs(fields) {
     });
   }
   return normalized;
+}
+
+function uniqueApprovalWorkflowNodes(nodes) {
+  const normalized = [];
+  const seen = new Set();
+  for (const node of nodes || []) {
+    const nodeName = cleanResourceName(node?.nodeName);
+    const nodeType = normalizeApprovalWorkflowNodeType(node?.nodeType);
+    if (!nodeName || !nodeType || isNonResourceName(nodeName)) continue;
+    const key = `${normKey(nodeName)}::${nodeType.toLowerCase()}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalized.push({
+      ...node,
+      nodeName,
+      nodeType,
+      description: cleanResourceName(node?.description),
+      assigneeRole: cleanResourceName(node?.assigneeRole),
+      assignmentStrategy: cleanResourceName(node?.assignmentStrategy),
+      outcomes: cleanResourceName(node?.outcomes),
+      conditionBranch: cleanResourceName(node?.conditionBranch),
+      proofBoundary: cleanResourceName(node?.proofBoundary),
+    });
+  }
+  return normalized;
+}
+
+function normalizeApprovalWorkflowNodeType(value) {
+  const text = cleanResourceName(value);
+  const key = normKey(text);
+  if (!key) return "";
+  if (/^start/.test(key)) return "StartNoneEvent";
+  if (/end\s*reject|reject\s*end/.test(key)) return "EndRejectEvent";
+  if (/^end/.test(key)) return "EndNoneEvent";
+  if (/sequence|flow|transition/.test(key)) return "SequenceFlow";
+  if (/content\s*list|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
+  if (/candidate/.test(key)) return "CandidateTask";
+  if (/assignment|approval|review|task|multi/.test(key) || text === "MultiAssignmentTask" || text === "AssignmentTask") return "MultiAssignmentTask";
+  return text.replace(/[^A-Za-z0-9_]/g, "") || "MultiAssignmentTask";
 }
 
 function resolveMaterializationTenantId(options = {}) {
@@ -1389,6 +1484,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const key = stringId(ids[`decoded.Forms[${index}].Key`]);
     const defId = stringId(ids[`decoded.Forms[${index}].DefResourceID`]);
     const approvalFieldSpecs = approvalFieldSpecsForForm(planDemand, name);
+    const approvalWorkflowNodes = approvalWorkflowNodeSpecsForForm(planDemand, name);
     const pageIds = approvalWorkflowIds(defId, key);
     return {
       Category: "",
@@ -1401,7 +1497,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       Description: "",
       Ext: "",
       DefResourceID: defId,
-      DefResource: exportResource(buildApprovalDefResource({ name, formKey: key, defId, rootListSetId: rootListId, approvalFieldSpecs })),
+      DefResource: exportResource(buildApprovalDefResource({ name, formKey: key, defId, rootListSetId: rootListId, approvalFieldSpecs, approvalWorkflowNodes })),
       Status: 1,
       DeployedDefID: defId,
       WorkflowType: 2,
@@ -3141,19 +3237,40 @@ function flowRef(resourceid) {
   return { id: resourceid, resourceid };
 }
 
-function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {} }) {
+function refId(ref) {
+  if (!ref) return "";
+  if (typeof ref === "string") return ref;
+  return String(ref.resourceid || ref.resourceId || ref.id || "");
+}
+
+function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [] }) {
   const {
     submissionPageId,
     taskPageId,
     startId,
-    flowId,
-    taskId,
-    approvedFlowId,
-    rejectedFlowId,
     endId,
     rejectEndId,
   } = approvalWorkflowIds(defId, formKey);
-  const taskName = "Line manager approval";
+  const plannedSteps = approvalWorkflowExecutionSteps(approvalWorkflowNodes);
+  const workflowSteps = plannedSteps.length ? plannedSteps : [{
+    nodeName: "Line manager approval",
+    nodeType: "MultiAssignmentTask",
+    assigneeRole: "Applicant line manager",
+    assignmentStrategy: "Line manager expression",
+    outcomes: "Approved; Rejected",
+    generatedByPolicy: "single-node-fallback",
+  }];
+  const childshapes = buildApprovalWorkflowShapes({
+    defId,
+    formKey,
+    rootListSetId,
+    submissionPageId,
+    taskPageId,
+    startId,
+    endId,
+    rejectEndId,
+    workflowSteps,
+  });
   return {
     id: defId,
     key: formKey,
@@ -3201,102 +3318,175 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
         formdef: approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs)),
       },
     ],
-    childshapes: [
-      {
-        id: startId,
-        resourceid: startId,
-        stencil: { id: "StartNoneEvent" },
-        position: { x: 100, y: 150 },
-        incoming: [],
-        outgoing: [flowRef(flowId)],
-        properties: { name: "Start", taskurl: submissionPageId, taskUrl: submissionPageId, TaskUrl: submissionPageId },
-      },
-      {
-        id: flowId,
-        resourceid: flowId,
-        stencil: { id: "SequenceFlow" },
-        source: flowRef(startId),
-        target: flowRef(taskId),
-        incoming: [flowRef(startId)],
-        outgoing: [flowRef(taskId)],
-        properties: { name: "Submit" },
-        dockers: [{ x: 130, y: 165 }, { x: 360, y: 145 }],
-      },
-      {
-        id: taskId,
-        resourceid: taskId,
-        stencil: { id: "MultiAssignmentTask" },
-        position: { x: 360, y: 110 },
-        incoming: [flowRef(flowId)],
-        outgoing: [flowRef(approvedFlowId), flowRef(rejectedFlowId)],
-        properties: {
-          name: taskName,
-          pagetype: 1,
-          taskurl: taskPageId,
-          taskUrl: taskPageId,
-          TaskUrl: taskPageId,
-          approveway: "anyapprove",
-          approvepercentage: 100,
-          usertaskassignment: [
-            {
-              type: "user",
-              method: "expression",
-              title: `User:${workflowUserLineManagerExpression("ApplicantUserID", "Applicant")}`,
-              value: workflowUserLineManagerExpression("ApplicantUserID", "Applicant"),
-            },
-          ],
-        },
-      },
-      {
+    childshapes,
+  };
+}
+
+function approvalWorkflowExecutionSteps(nodes) {
+  return uniqueApprovalWorkflowNodes(nodes).filter((node) => !["StartNoneEvent", "EndNoneEvent", "EndRejectEvent", "SequenceFlow"].includes(node.nodeType));
+}
+
+function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submissionPageId, taskPageId, startId, endId, rejectEndId, workflowSteps }) {
+  const seed = `${defId}:${formKey}:workflow`;
+  const stepNodes = workflowSteps.map((step, index) => {
+    const id = deterministicUuid(`${seed}:step:${index + 1}:${step.nodeType}:${step.nodeName}`);
+    return buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId });
+  });
+  const startToFirstFlowId = deterministicUuid(`${seed}:flow:start-to-first`);
+  const startShape = {
+    id: startId,
+    resourceid: startId,
+    stencil: { id: "StartNoneEvent" },
+    position: { x: 100, y: 150 },
+    incoming: [],
+    outgoing: [flowRef(startToFirstFlowId)],
+    properties: { name: "Start", taskurl: submissionPageId, taskUrl: submissionPageId, TaskUrl: submissionPageId },
+  };
+  const flowShapes = [];
+  const endIncoming = [];
+  const rejectIncoming = [];
+  const addFlow = ({ id, sourceId, targetId, name, conditioninfo = null, y = 130 }) => {
+    const flow = {
+      id,
+      resourceid: id,
+      stencil: { id: "SequenceFlow" },
+      source: flowRef(sourceId),
+      target: flowRef(targetId),
+      incoming: [flowRef(sourceId)],
+      outgoing: [flowRef(targetId)],
+      properties: conditioninfo ? { name, linetype: "rounded", conditioninfo } : { name, linetype: "rounded" },
+      dockers: [{ x: 140, y }, { x: 260, y }],
+    };
+    flowShapes.push(flow);
+    return flowRef(id);
+  };
+  addFlow({
+    id: startToFirstFlowId,
+    sourceId: startId,
+    targetId: stepNodes[0]?.id || endId,
+    name: "Submit",
+    y: 150,
+  });
+  for (const [index, node] of stepNodes.entries()) {
+    const nextNode = stepNodes[index + 1];
+    if (node.stencil.id === "MultiAssignmentTask" || node.stencil.id === "CandidateTask") {
+      const approvedFlowId = deterministicUuid(`${seed}:flow:${index + 1}:approved`);
+      const rejectedFlowId = deterministicUuid(`${seed}:flow:${index + 1}:rejected`);
+      const approvedTargetId = nextNode?.id || endId;
+      const approvedRef = addFlow({
         id: approvedFlowId,
-        resourceid: approvedFlowId,
-        stencil: { id: "SequenceFlow" },
-        source: flowRef(taskId),
-        target: flowRef(endId),
-        incoming: [flowRef(taskId)],
-        outgoing: [flowRef(endId)],
-        properties: {
-          name: "Approved",
-          linetype: "rounded",
-          conditioninfo: [workflowOutcomeCondition({ key: approvedFlowId, taskId, taskLabel: taskName, outcome: "Approved" })],
-        },
-        dockers: [{ x: 480, y: 130 }, { x: 700, y: 100 }],
-      },
-      {
+        sourceId: node.id,
+        targetId: approvedTargetId,
+        name: "Approved",
+        conditioninfo: [workflowOutcomeCondition({ key: approvedFlowId, taskId: node.id, taskLabel: node.properties.name, outcome: "Approved" })],
+        y: 130,
+      });
+      const rejectedRef = addFlow({
         id: rejectedFlowId,
-        resourceid: rejectedFlowId,
-        stencil: { id: "SequenceFlow" },
-        source: flowRef(taskId),
-        target: flowRef(rejectEndId),
-        incoming: [flowRef(taskId)],
-        outgoing: [flowRef(rejectEndId)],
-        properties: {
-          name: "Rejected",
-          linetype: "rounded",
-          conditioninfo: [workflowOutcomeCondition({ key: rejectedFlowId, taskId, taskLabel: taskName, outcome: "Rejected" })],
-        },
-        dockers: [{ x: 480, y: 170 }, { x: 700, y: 240 }],
-      },
+        sourceId: node.id,
+        targetId: rejectEndId,
+        name: "Rejected",
+        conditioninfo: [workflowOutcomeCondition({ key: rejectedFlowId, taskId: node.id, taskLabel: node.properties.name, outcome: "Rejected" })],
+        y: 250,
+      });
+      node.outgoing = [approvedRef, rejectedRef];
+      if (!nextNode) endIncoming.push(approvedRef);
+      rejectIncoming.push(rejectedRef);
+    } else {
+      const completeFlowId = deterministicUuid(`${seed}:flow:${index + 1}:complete`);
+      const targetId = nextNode?.id || endId;
+      const completeRef = addFlow({
+        id: completeFlowId,
+        sourceId: node.id,
+        targetId,
+        name: "Complete",
+        y: 130,
+      });
+      node.outgoing = [completeRef];
+      if (!nextNode) endIncoming.push(completeRef);
+    }
+  }
+  for (const [index, node] of stepNodes.entries()) {
+    const incomingFlows = flowShapes.filter((flow) => refId(flow.target) === node.id).map((flow) => flowRef(flow.id));
+    node.incoming = index === 0 ? [flowRef(startToFirstFlowId)] : incomingFlows;
+  }
+  if (!stepNodes.length) endIncoming.push(flowRef(startToFirstFlowId));
+  const endX = 360 + Math.max(1, stepNodes.length) * 260;
+  return [
+    startShape,
+    ...flowShapes,
+    ...stepNodes,
+    {
+      id: endId,
+      resourceid: endId,
+      stencil: { id: "EndNoneEvent" },
+      position: { x: endX, y: 80 },
+      incoming: endIncoming,
+      outgoing: [],
+      properties: { name: "End" },
+    },
+    {
+      id: rejectEndId,
+      resourceid: rejectEndId,
+      stencil: { id: "EndRejectEvent" },
+      position: { x: endX, y: 250 },
+      incoming: rejectIncoming,
+      outgoing: [],
+      properties: { name: "Rejected" },
+    },
+  ];
+}
+
+function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId }) {
+  const stencil = step.nodeType === "CandidateTask" ? "CandidateTask" : step.nodeType === "ContentList" ? "ContentList" : "MultiAssignmentTask";
+  const base = {
+    id,
+    resourceid: id,
+    stencil: { id: stencil },
+    position: { x: 360 + index * 260, y: stencil === "ContentList" ? 120 : 110 },
+    incoming: [],
+    outgoing: [],
+    properties: {
+      name: step.nodeName,
+      plannedWorkflowNodeName: step.nodeName,
+      plannedWorkflowNodeType: step.nodeType,
+      plannedAssigneeRole: step.assigneeRole || "",
+      plannedAssignmentStrategy: step.assignmentStrategy || "",
+      plannedConditionBranch: step.conditionBranch || "",
+      plannedProofBoundary: step.proofBoundary || "",
+    },
+  };
+  if (stencil === "ContentList") {
+    base.properties = {
+      ...base.properties,
+      type: "add",
+      appid: 41,
+      listsetid: stringId(rootListSetId),
+      listid: stringId(rootListSetId),
+      listtype: "current",
+      listdatas: [],
+    };
+    return base;
+  }
+  base.properties = {
+    ...base.properties,
+    pagetype: 1,
+    taskurl: taskPageId,
+    taskUrl: taskPageId,
+    TaskUrl: taskPageId,
+    approveway: "anyapprove",
+    approvepercentage: 100,
+    usertaskassignment: [
       {
-        id: endId,
-        resourceid: endId,
-        stencil: { id: "EndNoneEvent" },
-        position: { x: 700, y: 80 },
-        incoming: [flowRef(approvedFlowId)],
-        outgoing: [],
-        properties: { name: "End" },
-      },
-      {
-        id: rejectEndId,
-        resourceid: rejectEndId,
-        stencil: { id: "EndRejectEvent" },
-        position: { x: 700, y: 220 },
-        incoming: [flowRef(rejectedFlowId)],
-        outgoing: [],
-        properties: { name: "Rejected" },
+        type: "user",
+        method: "expression",
+        title: `User:${workflowUserLineManagerExpression("ApplicantUserID", "Applicant")}`,
+        value: workflowUserLineManagerExpression("ApplicantUserID", "Applicant"),
+        plannedAssigneeRole: step.assigneeRole || "",
       },
     ],
   };
+  return base;
 }
 
 function approvalTaskFieldSpecs(approvalFieldSpecs = {}) {

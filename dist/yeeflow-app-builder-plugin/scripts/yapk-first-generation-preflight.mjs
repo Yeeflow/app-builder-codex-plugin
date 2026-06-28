@@ -114,6 +114,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     "scripts/validate-approval-workflow-publish-readiness.mjs",
     "--package",
     resolvedPackage,
+    ...(plan ? ["--plan", plan] : []),
   ]));
   gates.push(runGate("dashboard-generation-hard-gates", [
     "scripts/validate-dashboard-generation-hard-gates.mjs",

@@ -17,8 +17,22 @@ Required root sections:
 - `flowPage` as an array.
 - `variables.basic`, `variables.listref`, and `variables.filter` as arrays.
 - `pageurls[]` with exactly one submission/request page and at least one task page.
-- `childshapes[]` with a complete Start -> Assignment Task -> Approved End and Rejected End workflow graph.
+- `childshapes[]` with a complete Start -> planned workflow node(s) -> Approved End and Rejected End workflow graph.
 - `graphposition`, `graphzoom`, and `graphver` metadata.
+
+## App Plan Workflow Node Parity
+
+When the App Plan includes an `Approval Workflow Nodes` table, the generated `Forms[].DefResource` must materialize that table. The generator must not collapse a multi-node approval process to a single baseline task such as `Line manager approval`.
+
+Required parity rules:
+
+- Every planned human review or approval node must appear as a workflow task node with the same business node name.
+- Planned `AssignmentTask`, review, approval, and task nodes must materialize as `MultiAssignmentTask` unless the App Plan explicitly selects a separately proven task stencil.
+- Planned system/action nodes such as `ContentList` steps must appear as named workflow nodes in the graph. If the generator cannot safely bind the write target yet, it must fail before signing rather than silently omitting the step.
+- Planned Start and End nodes may be represented by the canonical generated Start and End nodes, but they must not be used as a reason to omit intermediate planned nodes.
+- Approved paths may move from one planned task to the next planned task or action node before eventually reaching `EndNoneEvent`.
+- Rejected paths from approval tasks must still terminate at `EndRejectEvent`.
+- The generated node positions must remain non-overlapping across every planned node.
 
 Required Start node:
 
@@ -43,7 +57,7 @@ Required Assignment Task node:
 
 Required end paths:
 
-- Approved transitions must reach `EndNoneEvent`.
+- Approved transitions must target a valid next planned workflow node or `EndNoneEvent`, and the approved path must eventually reach `EndNoneEvent`.
 - Rejected transitions must reach `EndRejectEvent`.
 - A rejected transition that points to a normal end event is not publish-ready.
 
@@ -59,10 +73,16 @@ Required Designer graph metadata:
 Before signing readiness, run:
 
 ```bash
-node scripts/validate-approval-workflow-publish-readiness.mjs --package <generated-final.yapk>
+node scripts/validate-approval-workflow-publish-readiness.mjs --package <generated-final.yapk> --plan <yeeflow-app-plan.md>
 ```
 
-`yapk-first-generation-preflight.mjs` must include this gate. A failure blocks signing, `setsign`, `verifysign`, install/import, upgrade, Version Management handoff, and browser runtime proof.
+`yapk-first-generation-preflight.mjs` must include this gate and pass the App Plan path whenever one is available. A failure blocks signing, `setsign`, `verifysign`, install/import, upgrade, Version Management handoff, and browser runtime proof.
+
+New parity failure codes include:
+
+- `APPROVAL_WORKFLOW_PLANNED_TASK_COUNT_MISMATCH`
+- `APPROVAL_WORKFLOW_PLANNED_NODE_NOT_MATERIALIZED`
+- `APPROVAL_WORKFLOW_PLANNED_NODE_TYPE_MISMATCH`
 
 ## Runtime Proof Boundary
 

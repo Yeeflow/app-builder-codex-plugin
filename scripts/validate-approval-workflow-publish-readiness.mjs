@@ -26,14 +26,16 @@ if (isMainModule()) {
 export function validateApprovalWorkflowPublishReadiness(options = {}) {
   const findings = [];
   const resources = [];
+  const plannedWorkflowNodesByForm = options.plan ? collectPlannedWorkflowNodes(options.plan, findings) : {};
 
   if (options.resource) {
     const resourcePath = path.resolve(options.resource);
     try {
+      const def = JSON.parse(fs.readFileSync(resourcePath, "utf8").replace(/^\uFEFF/, ""));
       resources.push({
         source: resourcePath,
-        formName: path.basename(resourcePath),
-        def: JSON.parse(fs.readFileSync(resourcePath, "utf8").replace(/^\uFEFF/, "")),
+        formName: def?.name || def?.title || path.basename(resourcePath),
+        def,
       });
     } catch (error) {
       findings.push(issue("APPROVAL_WORKFLOW_RESOURCE_DECODE_FAILED", `Approval workflow resource JSON could not be read: ${error.message}`, { resource: resourcePath }));
@@ -70,6 +72,7 @@ export function validateApprovalWorkflowPublishReadiness(options = {}) {
       findings,
       source: resource.source || `approval-resource-${index}`,
       formName: resource.formName || `Approval form ${index + 1}`,
+      plannedWorkflowNodes: plannedWorkflowNodesByForm[normKey(resource.formName)] || [],
     });
   }
 
@@ -79,6 +82,7 @@ export function validateApprovalWorkflowPublishReadiness(options = {}) {
     resource: options.resource ? path.resolve(options.resource) : null,
     summary: {
       approvalWorkflowResources: resources.length,
+      plannedWorkflowParityChecked: Boolean(options.plan),
       errors: findings.filter((finding) => finding.level === "error").length,
       warnings: findings.filter((finding) => finding.level === "warning").length,
     },
@@ -143,6 +147,7 @@ function validateOneDef(def, context) {
   validateRejectedPath(def, context);
   validateNodePositions(def, context);
   validateGraphRefs(def, context);
+  validatePlanWorkflowNodeParity(def, context);
 }
 
 function validateFlowPage(def, context) {
@@ -302,12 +307,64 @@ function validateSequenceFlowOutcomeConditions(def, context) {
       }
       const target = shapeById.get(refId(flow.target));
       if (outcome === "Approved" && stencilId(target) !== "EndNoneEvent") {
-        context.findings.push(issue("APPROVAL_WORKFLOW_APPROVED_PATH_NOT_END", "Approved approval transition must target EndNoneEvent.", {
+        if (stencilId(target) === "EndRejectEvent" || !stencilId(target)) {
+          context.findings.push(issue("APPROVAL_WORKFLOW_APPROVED_PATH_NOT_VALID_STEP", "Approved approval transition must target a valid next workflow node or EndNoneEvent.", {
           source: context.source,
           path: workflowShapePath(shapes, flow, "target"),
           targetStencil: stencilId(target) || null,
-        }));
+          }));
+        }
       }
+    }
+  }
+}
+
+function validatePlanWorkflowNodeParity(def, context) {
+  const planned = asArray(context.plannedWorkflowNodes)
+    .filter((node) => !["StartNoneEvent", "EndNoneEvent", "EndRejectEvent", "SequenceFlow"].includes(node.nodeType));
+  if (!planned.length) return;
+  const actualNodes = asArray(def.childshapes)
+    .filter((shape) => !["StartNoneEvent", "EndNoneEvent", "EndRejectEvent", "SequenceFlow"].includes(stencilId(shape)))
+    .map((shape, index) => ({
+      index,
+      id: shapeId(shape),
+      name: cleanResourceName(shape?.properties?.name || shape?.name || shape?.label),
+      stencil: stencilId(shape),
+    }));
+  const actualByName = new Map(actualNodes.map((node) => [normKey(node.name), node]));
+  const plannedTasks = planned.filter((node) => node.nodeType === "MultiAssignmentTask" || node.nodeType === "CandidateTask");
+  const actualTasks = actualNodes.filter((node) => node.stencil === "MultiAssignmentTask" || node.stencil === "CandidateTask");
+  if (plannedTasks.length > actualTasks.length) {
+    context.findings.push(issue("APPROVAL_WORKFLOW_PLANNED_TASK_COUNT_MISMATCH", "Generated Approval workflow must materialize every planned task node from the App Plan instead of collapsing to a single baseline task.", {
+      source: context.source,
+      formName: context.formName,
+      plannedTaskCount: plannedTasks.length,
+      actualTaskCount: actualTasks.length,
+      plannedTaskNames: plannedTasks.map((node) => node.nodeName),
+      actualTaskNames: actualTasks.map((node) => node.name),
+    }));
+  }
+  for (const node of planned) {
+    const actual = actualByName.get(normKey(node.nodeName));
+    if (!actual) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_PLANNED_NODE_NOT_MATERIALIZED", "Generated Approval workflow is missing a node required by the App Plan workflow node table.", {
+        source: context.source,
+        formName: context.formName,
+        plannedNodeName: node.nodeName,
+        plannedNodeType: node.nodeType,
+        actualNodeNames: actualNodes.map((item) => item.name),
+      }));
+      continue;
+    }
+    if (!workflowNodeTypeMatches(node.nodeType, actual.stencil)) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_PLANNED_NODE_TYPE_MISMATCH", "Generated Approval workflow node type must match the App Plan workflow node table.", {
+        source: context.source,
+        formName: context.formName,
+        plannedNodeName: node.nodeName,
+        plannedNodeType: node.nodeType,
+        actualNodeType: actual.stencil,
+        actualNodeId: actual.id,
+      }));
     }
   }
 }
@@ -428,6 +485,121 @@ function isDesignerOutcomeCondition(condition, taskId, outcome) {
     && /Task outcome/i.test(right);
 }
 
+function workflowNodeTypeMatches(plannedType, actualType) {
+  if (plannedType === actualType) return true;
+  if (plannedType === "MultiAssignmentTask" && actualType === "AssignmentTask") return true;
+  if (plannedType === "AssignmentTask" && actualType === "MultiAssignmentTask") return true;
+  return false;
+}
+
+function collectPlannedWorkflowNodes(planPath, findings) {
+  const resolved = path.resolve(planPath);
+  const byForm = {};
+  if (!fs.existsSync(resolved)) {
+    findings.push(issue("APPROVAL_WORKFLOW_PLAN_MISSING", "App Plan file is missing for approval workflow node parity validation.", { plan: resolved }));
+    return byForm;
+  }
+  let text = "";
+  try {
+    text = fs.readFileSync(resolved, "utf8");
+  } catch (error) {
+    findings.push(issue("APPROVAL_WORKFLOW_PLAN_READ_FAILED", `App Plan could not be read: ${error.message}`, { plan: resolved }));
+    return byForm;
+  }
+  const section = extractNumberedSection(text, /^##\s+5\.\s+Approval Forms Plan/im);
+  if (!section.trim()) return byForm;
+  const lines = section.split(/\r?\n/);
+  let currentApprovalForm = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const approvalHeading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (approvalHeading) {
+      currentApprovalForm = cleanResourceName(approvalHeading[1]);
+      if (currentApprovalForm && !byForm[normKey(currentApprovalForm)]) byForm[normKey(currentApprovalForm)] = [];
+      continue;
+    }
+    if (!currentApprovalForm || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const nameColumn = findHeaderIndex(normalizedHeaders, ["node name", "workflow node", "step name", "approval step", "task name"]);
+    const typeColumn = findHeaderIndex(normalizedHeaders, ["node type", "workflow node type", "stencil", "type"]);
+    if (nameColumn === -1 || typeColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const nodeName = cleanResourceName(cells[nameColumn]);
+      const nodeType = normalizeWorkflowNodeType(cells[typeColumn]);
+      if (nodeName && nodeType && !isNonResourceName(nodeName)) {
+        byForm[normKey(currentApprovalForm)].push({ nodeName, nodeType });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return Object.fromEntries(Object.entries(byForm).map(([key, nodes]) => [key, uniqueWorkflowNodes(nodes)]));
+}
+
+function extractNumberedSection(text, marker) {
+  const match = marker.exec(text);
+  if (!match) return "";
+  const start = match.index;
+  const next = text.slice(start + match[0].length).search(/\n##\s+\d+\.\s+/);
+  return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
+}
+
+function findHeaderIndex(normalizedHeaders, candidates) {
+  const normalizedCandidates = candidates.map(normKey);
+  return normalizedHeaders.findIndex((header) => normalizedCandidates.includes(header));
+}
+
+function isTableLine(line) {
+  return /^\s*\|.+\|\s*$/.test(line || "");
+}
+
+function splitTableLine(line) {
+  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cleanResourceName(cell));
+}
+
+function cleanResourceName(value) {
+  return String(value || "").replace(/`/g, "").replace(/\*\*/g, "").trim();
+}
+
+function isNonResourceName(value) {
+  const text = cleanResourceName(value);
+  if (!text) return true;
+  if (/^(not applicable|n\/a|none|no|deferred|status|resource type|purpose|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  return false;
+}
+
+function normKey(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function normalizeWorkflowNodeType(value) {
+  const text = cleanResourceName(value);
+  const key = normKey(text);
+  if (!key) return "";
+  if (/^start/.test(key)) return "StartNoneEvent";
+  if (/end\s*reject|reject\s*end/.test(key)) return "EndRejectEvent";
+  if (/^end/.test(key)) return "EndNoneEvent";
+  if (/sequence|flow|transition/.test(key)) return "SequenceFlow";
+  if (/content\s*list|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
+  if (/candidate/.test(key)) return "CandidateTask";
+  if (/assignment|approval|review|task|multi/.test(key) || text === "MultiAssignmentTask" || text === "AssignmentTask") return "MultiAssignmentTask";
+  return text.replace(/[^A-Za-z0-9_]/g, "") || "MultiAssignmentTask";
+}
+
+function uniqueWorkflowNodes(nodes) {
+  const seen = new Set();
+  const out = [];
+  for (const node of nodes) {
+    const key = `${normKey(node.nodeName)}::${node.nodeType}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(node);
+  }
+  return out;
+}
+
 function workflowShapePath(shapes, targetShape, suffix = "") {
   const index = shapes.findIndex((shape) => shape === targetShape || shapeId(shape) === shapeId(targetShape));
   return `$.childshapes[${index < 0 ? "?" : index}]${suffix ? `.${suffix}` : ""}`;
@@ -460,6 +632,9 @@ function parseArgs(argv) {
     } else if (token === "--resource") {
       args.resource = argv[i + 1];
       i += 1;
+    } else if (token === "--plan") {
+      args.plan = argv[i + 1];
+      i += 1;
     } else if (token === "--json") {
       args.json = true;
     } else if (!args.package && token.endsWith(".yapk")) {
@@ -474,7 +649,7 @@ function parseArgs(argv) {
 function printUsage() {
   console.error([
     "Usage:",
-    "  node scripts/validate-approval-workflow-publish-readiness.mjs --package <generated-final.yapk>",
+    "  node scripts/validate-approval-workflow-publish-readiness.mjs --package <generated-final.yapk> [--plan <yeeflow-app-plan.md>]",
     "  node scripts/validate-approval-workflow-publish-readiness.mjs --resource <decoded-approval-def.json>",
     "",
     "This gate validates approval workflow Designer publish readiness before signing.",

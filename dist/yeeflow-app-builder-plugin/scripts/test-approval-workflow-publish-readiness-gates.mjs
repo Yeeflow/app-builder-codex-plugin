@@ -16,9 +16,22 @@ const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "approval-workflow-publish
 const cases = [];
 
 try {
-  const packagePath = materializeApprovalPackage();
-  expectPass("materialized Approval workflow package passes publish-readiness gate", ["--package", packagePath]);
+  const { packagePath, planPath } = materializeApprovalPackage();
+  expectPass("materialized Approval workflow package passes publish-readiness gate", ["--package", packagePath, "--plan", planPath]);
   cases.push({ case: "pass: materialized package workflow is publish-ready", status: "pass" });
+
+  const materializedDef = decodeFirstApprovalDef(packagePath);
+  const materializedTaskNames = materializedDef.childshapes
+    .filter((shape) => shape?.stencil?.id === "MultiAssignmentTask")
+    .map((shape) => shape?.properties?.name);
+  assert.deepEqual(materializedTaskNames, ["Department Manager Review", "Finance Review"], "materializer must preserve planned approval task nodes");
+  assert.equal(materializedDef.childshapes.some((shape) => shape?.stencil?.id === "ContentList" && shape?.properties?.name === "Create Travel Record"), true, "materializer must preserve planned action nodes");
+  cases.push({ case: "pass: App Plan workflow nodes materialize into DefResource graph", status: "pass" });
+
+  expectCode("planned workflow node parity fails when a planned task is missing", mutateResource(materializedDef, (def) => {
+    def.childshapes = def.childshapes.filter((shape) => shape?.properties?.name !== "Finance Review");
+  }), "APPROVAL_WORKFLOW_PLANNED_NODE_NOT_MATERIALIZED", ["--plan", planPath]);
+  cases.push({ case: "fail: missing planned workflow task node", status: "pass" });
 
   expectPass("package without Approval forms is a no-op pass", ["--package", writeNoApprovalPackage()]);
   cases.push({ case: "pass: package without Approval workflows is not blocked", status: "pass" });
@@ -111,7 +124,7 @@ function materializeApprovalPackage() {
   const report = JSON.parse(result.stdout);
   assert.equal(report.status, "pass");
   assert.equal(fs.existsSync(report.outputs.package), true);
-  return report.outputs.package;
+  return { packagePath: report.outputs.package, planPath: plan };
 }
 
 function approvalPlanMarkdown() {
@@ -163,6 +176,16 @@ function approvalPlanMarkdown() {
     "| Business Travel Request Approval | Submission form | Request fields | approval_form_fields_grid_2col_v1_1 | Submission fields | 2 | 2 | 1 | Business Purpose | None | Generated-final validation |",
     "| Business Travel Request Approval | Review task form | Review fields | approval_form_fields_grid_2col_v1_1 | Task fields | 2 | 2 | 1 | Business Purpose | None | Generated-final validation |",
     "",
+    "#### Approval Workflow Nodes",
+    "",
+    "| Step | Node Name | Node Type | Description | Assignee/Role | Assignment Strategy | Outcomes | Condition/Branch | Data Read/Write | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | Start | StartNoneEvent | Request submission starts the process. | Requester | Submission | Submitted | Always | Read submission fields | Generated-final validation |",
+    "| 2 | Department Manager Review | MultiAssignmentTask | Manager reviews business purpose. | Department Manager | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
+    "| 3 | Finance Review | MultiAssignmentTask | Finance reviews estimated cost. | Finance | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
+    "| 4 | Create Travel Record | ContentList | Persist accepted travel request. | System | System action | Complete | Approved path only | Create related list record | Generated-final validation |",
+    "| 5 | End | EndNoneEvent | Approved process ends. | System | End | Complete | Approved path | No data write | Generated-final validation |",
+    "",
     "## 6. Form Reports Plan",
     "",
     "| Form Report Name | Related Approval Form | Purpose |",
@@ -213,8 +236,8 @@ function expectPass(label, args) {
   return JSON.parse(result.stdout);
 }
 
-function expectCode(label, resourcePath, code) {
-  const result = runValidator(["--resource", resourcePath]);
+function expectCode(label, resourcePath, code, extraArgs = []) {
+  const result = runValidator(["--resource", resourcePath, ...extraArgs]);
   assert.notEqual(result.status, 0, `${label} should fail`);
   assert.match(`${result.stdout}\n${result.stderr}`, new RegExp(code), label);
 }
