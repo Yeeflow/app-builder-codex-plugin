@@ -505,6 +505,9 @@ try {
   assert.match(decodedText, /data_table_control_standard_no_scroll/, "planned standard-no-scroll Data Table template is materialized");
   assert.match(decodedText, /data_table_control_caption_scroll/, "planned caption-scroll Data Table template is materialized");
   assert.doesNotMatch(decodedText, /\{\{(?:DetailLayoutID|ListSetID|ListID|FieldID|ListDataID|LayoutID|layoutId|layout|PageID|pageId)[^}]*\}\}/, "materialized generated-final package must not retain template action/reference placeholders");
+  for (const search of findNodes(decodedResource, (node) => String(node?.type || "") === "search-filter")) {
+    assert.equal(typeof search.attrs?.placeholder, "string", "generated search-filter attrs.placeholder must be a primitive string");
+  }
   assert.match(decodedResource.ListSet.LayoutView, /Dashboards/);
   const resourceFixtureOut = path.join(tempDir, "resource-plan-fixture");
   const resourceFixtureRun = expectPass("nontrivial fixture mode allocates enough synthetic API-shaped IDs", [
@@ -631,7 +634,18 @@ try {
   cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, live install readiness, data-list schema, YAPK package, export-shape, Dashboard v1.1, Dashboard Collection template, Golden Reference, aggregate Dashboard hard gates, Summary contract, and first-generation preflight");
   cases.push("preflight pass emits signing-readiness handoff fields without changing materializer signing boundary");
 
-  console.log(JSON.stringify({ status: "pass", cases }, null, 2));
+console.log(JSON.stringify({ status: "pass", cases }, null, 2));
+
+function findNodes(root, predicate, found = []) {
+  if (!root || typeof root !== "object") return found;
+  if (predicate(root)) found.push(root);
+  if (Array.isArray(root)) {
+    for (const item of root) findNodes(item, predicate, found);
+    return found;
+  }
+  for (const value of Object.values(root)) findNodes(value, predicate, found);
+  return found;
+}
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
