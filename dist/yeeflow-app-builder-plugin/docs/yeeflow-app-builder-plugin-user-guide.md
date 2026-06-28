@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.73`
+`0.8.74`
+
+Version `0.8.74` releases Data List Form Workbench App Plan registry-drift alignment from PR #287. The App Plan resource-order validator now reads approved Data List Form Layout template IDs from `docs/reference/data-list-form-layout-templates.json`, accepts `data_list_form_layout_workbench` for full-page View Item custom forms, and keeps New/Edit template validation aligned with registry usage metadata.
 
 Version `0.8.73` releases New Vendor Approval field and tenant readiness gates from PR #285. The full-app materializer no longer truncates long Approval form `Submission Form Fields` or `Task Form Fields` tables, so planned tax, bank, risk, attachment, and task-only fields must materialize into decoded `DefResource.pageurls[].formdef`. Generated-final wrapper TenantID can now resolve from explicit, profile-scoped, or global Yeeflow tenant metadata when available, while placeholder `TenantID: "0"` remains blocked before signing readiness.
 

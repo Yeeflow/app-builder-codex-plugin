@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.73`
+- Version: `0.8.74`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.73` releases New Vendor Approval field and tenant readiness gates from PR #285: generated Approval forms no longer truncate long planned field tables, and generated-final wrapper TenantID can be resolved from explicit or safe Yeeflow environment metadata while placeholder `TenantID: "0"` remains blocked before signing readiness.
+Current release `0.8.74` releases Data List Form Workbench App Plan registry-drift alignment from PR #287: the App Plan resource-order validator now derives approved Data List Form Layout template IDs from the registry and accepts `data_list_form_layout_workbench` as a valid full-page View Item layout selection.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.73
+Version: 0.8.74
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.73
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.74
 ```
 
 ## What Is Included

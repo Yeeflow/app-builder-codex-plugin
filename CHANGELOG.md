@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.74
+
+- Release Data List Form Workbench App Plan registry-drift alignment from PR #287.
+- Derive App Plan resource-order Data List Form Layout template allowlists from `docs/reference/data-list-form-layout-templates.json` instead of a stale private hard-coded list.
+- Allow registered View-capable Data List Form Layout templates, including `data_list_form_layout_workbench`, for View Item custom form rows while keeping New/Edit rows constrained by registry usage metadata.
+- Add focused regression coverage so `data_list_form_layout_workbench` cannot regress to `APP_PLAN_DATA_LIST_FORM_LAYOUT_TEMPLATE_UNKNOWN` or `APP_PLAN_DATA_LIST_FORM_LAYOUT_VIEW_TEMPLATE_MISMATCH`.
+- Preserve source/dist mirror parity and cache artifact coverage for the new training report.
+
 ## 0.8.73
 
 - Release New Vendor Approval field and tenant readiness gates from PR #285.
