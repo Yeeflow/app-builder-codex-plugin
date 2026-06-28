@@ -208,7 +208,7 @@ function collectPlannedDataAnalyticsTemplates(planText, references) {
   let currentDashboardPage = "";
   for (let index = 0; index < lines.length; index += 1) {
     const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
-    if (heading) currentDashboardPage = cleanMarkdownCell(heading[1]);
+    if (heading) currentDashboardPage = dashboardHeadingPageName(heading[1]);
     if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map(normKey);
@@ -224,14 +224,20 @@ function collectPlannedDataAnalyticsTemplates(planText, references) {
     const sectionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "section", "section name", "region"]);
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
     let rowIndex = index + 2;
+    if (pageColumn === -1 && !currentDashboardPage) continue;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
       const raw = lines[rowIndex];
       const templateId = extractApprovedDataAnalyticsTemplateId(raw, references);
+      const dashboardPage = cleanMarkdownCell(cells[pageColumn]) || currentDashboardPage;
+      if (!dashboardPage) {
+        rowIndex += 1;
+        continue;
+      }
       if (templateId) {
         records.push({
           templateId,
-          dashboardPage: cleanMarkdownCell(cells[pageColumn]) || currentDashboardPage,
+          dashboardPage,
           surface: surfaceColumn === -1 ? "" : cleanMarkdownCell(cells[surfaceColumn]),
           analyticsRegion: sectionColumn === -1 ? "" : cleanMarkdownCell(cells[sectionColumn]),
           sourceResource: sourceColumn === -1 ? "" : cleanMarkdownCell(cells[sourceColumn]),
@@ -243,6 +249,16 @@ function collectPlannedDataAnalyticsTemplates(planText, references) {
     index = rowIndex;
   }
   return records;
+}
+
+function dashboardHeadingPageName(value) {
+  const name = cleanMarkdownCell(value);
+  if (!name) return "";
+  const key = normKey(name);
+  if (key === "business decision gates") return "";
+  if (key === "dashboard template coverage matrix") return "";
+  if (/^(dashboard|record display|item template|collection|kanban|dashboard generation)/.test(key)) return "";
+  return name;
 }
 
 function extractApprovedDataAnalyticsTemplateId(text, references) {

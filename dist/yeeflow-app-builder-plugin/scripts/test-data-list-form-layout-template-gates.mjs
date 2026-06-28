@@ -85,6 +85,7 @@ try {
   expectCode("App Plan View selecting New/Edit template fails", ["--plan", writeText("plan-view-wrong-template.md", appPlan({ viewTemplate: NEW_EDIT_TEMPLATE_ID }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH");
   expectCode("App Plan Workbench View without Full page fails", ["--plan", writeText("plan-workbench-missing-full-page.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Workbench related context" }))], "DATA_LIST_FORM_LAYOUT_APP_PLAN_WORKBENCH_FULL_PAGE_REQUIRED");
   expectPass("App Plan Workbench View layout selection passes", ["--plan", writeText("plan-workbench-valid.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Open in: Full page Workbench related context" }))]);
+  expectPass("App Plan View row with edit allowed wording does not trigger New/Edit template mismatch", ["--plan", writeText("plan-view-edit-wording-valid.md", appPlan({ viewReason: "View item shows current record; edit allowed by role from a separate action" }))]);
   expectResourceOrderOmitsCodes("resource-order validator accepts registered Workbench View layout", writeText("plan-resource-order-workbench-valid.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Open in: Full page Workbench related context" })), [
     "APP_PLAN_DATA_LIST_FORM_LAYOUT_TEMPLATE_UNKNOWN",
     "APP_PLAN_DATA_LIST_FORM_LAYOUT_VIEW_TEMPLATE_MISMATCH",

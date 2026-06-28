@@ -172,6 +172,7 @@ function parseDashboards(text) {
     const next = dashboardMatches[index + 1]?.index ?? section.length;
     const body = section.slice(match.index, next);
     const name = cleanName(extractBullet(body, "Page name") || firstTableValue(body, "Dashboard Page Name") || match[1]);
+    if (!isDashboardPageName(name)) continue;
     dashboards.push({
       name,
       category: "dashboards",
@@ -209,7 +210,16 @@ function parseDashboards(text) {
       });
     }
   }
-  return dashboards.filter((item) => !isPlaceholder(item.name));
+  return dashboards.filter((item) => !isPlaceholder(item.name) && isDashboardPageName(item.name));
+}
+
+function isDashboardPageName(value) {
+  const name = cleanName(value);
+  if (!name || isPlaceholder(name)) return false;
+  const lower = name.toLowerCase();
+  if (/\b(template coverage|coverage matrix|selection matrix|business decision gate|business decision gates|dataset presentation plan|collection template selection|data analytics template selection|data table template selection)\b/.test(lower)) return false;
+  if (/^(dashboard|record display|item template|collection|kanban|dashboard generation|dashboard template coverage matrix)$/i.test(name)) return false;
+  return true;
 }
 
 function parseNavigation(text) {

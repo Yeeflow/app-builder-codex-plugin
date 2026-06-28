@@ -99,6 +99,10 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
   const appIconUrl = options.iconUrl || DEFAULT_ICON;
   const materializationTenantId = resolveMaterializationTenantId(options);
+  if (!fixtureMode && !materializationTenantId) {
+    findings.push(error("FULL_APP_MATERIALIZATION_TENANT_ID_REQUIRED", "Generated-final materialization requires a real TenantID from --tenant-id, YEEFLOW_TENANT_ID, or profile-specific tenant environment. Refusing to emit TenantID \"0\"."));
+    return buildFailure(findings, { outDir, specPath, planPath });
+  }
 
   const decoded = planDemand.hasMaterialResources
     ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl })
@@ -113,7 +117,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   const resource = zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64");
   const wrapper = {
     PackageId: stringId(ids["wrapper.PackageId"]),
-    TenantID: materializationTenantId || "0",
+    TenantID: materializationTenantId || "1000000000000000000",
     AppID: 41,
     ListID: stringId(ids["decoded.ListSet.ListID"]),
     Title: appTitle,
@@ -287,6 +291,34 @@ function analyzeAppPlanResourceDemand(planText) {
     resources[key] = names;
     if (count > 0) evidence.push({ section: key, outputSurface, plannedItems: count, names });
   }
+  const dashboardFilterRecords = collectDashboardFilterRecords(planText);
+  const dashboardSummaryMetricRecords = collectDashboardSummaryMetricRecords(planText);
+  const dashboardDatasetRecords = collectDashboardDatasetRecords(planText);
+  const dashboardAnalyticsRecords = collectDashboardAnalyticsRecords(planText);
+  const dashboardDataTableRecords = collectDashboardDataTableRecords(planText);
+  const dashboardNamesFromTemplates = [
+    ...dashboardFilterRecords,
+    ...dashboardSummaryMetricRecords,
+    ...dashboardDatasetRecords,
+    ...dashboardAnalyticsRecords,
+    ...dashboardDataTableRecords,
+  ].map((record) => cleanResourceName(record.dashboardPage)).filter((name) => name && !isNonResourceName(name));
+  if (dashboardNamesFromTemplates.length) {
+    resources.dashboards = unique([...(resources.dashboards || []), ...dashboardNamesFromTemplates]);
+    counts.dashboards = resources.dashboards.length;
+    const existing = evidence.find((item) => item.section === "dashboards");
+    if (existing) {
+      existing.plannedItems = counts.dashboards;
+      existing.names = resources.dashboards;
+    } else {
+      evidence.push({
+        section: "dashboards",
+        outputSurface: "$.Pages[] Type 103",
+        plannedItems: counts.dashboards,
+        names: resources.dashboards,
+      });
+    }
+  }
   return {
     counts,
     resources,
@@ -295,11 +327,11 @@ function analyzeAppPlanResourceDemand(planText) {
     customFormRecords: collectCustomFormRecords(planText),
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
-    dashboardFilterRecords: collectDashboardFilterRecords(planText),
-    dashboardSummaryMetricRecords: collectDashboardSummaryMetricRecords(planText),
-    dashboardDatasetRecords: collectDashboardDatasetRecords(planText),
-    dashboardAnalyticsRecords: collectDashboardAnalyticsRecords(planText),
-    dashboardDataTableRecords: collectDashboardDataTableRecords(planText),
+    dashboardFilterRecords,
+    dashboardSummaryMetricRecords,
+    dashboardDatasetRecords,
+    dashboardAnalyticsRecords,
+    dashboardDataTableRecords,
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
   };
@@ -313,30 +345,39 @@ function collectDashboardAnalyticsRecords(planText) {
   let currentDashboardPage = "";
   for (let index = 0; index < lines.length; index += 1) {
     const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
-    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (heading) currentDashboardPage = dashboardHeadingPageName(heading[1]);
     if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
     const templateColumn = findHeaderIndex(normalizedHeaders, [
+      "selected template",
+      "selected golden reference template",
+      "template id",
       "selected data analytics template",
       "data analytics template",
       "selected analytics template",
       "analytics template",
     ]);
     if (templateColumn === -1) continue;
-    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name"]);
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
     const regionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "section", "section name", "region"]);
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
     const questionColumn = findHeaderIndex(normalizedHeaders, ["business question", "question", "title", "analytics title"]);
     const groupColumn = findHeaderIndex(normalizedHeaders, ["grouping field", "grouping/axis fields", "axis field", "category field", "row fields"]);
     const valueColumn = findHeaderIndex(normalizedHeaders, ["value field", "value/aggregate fields", "aggregate field", "measure field", "values"]);
+    if (pageColumn === -1 && !currentDashboardPage) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
       const selectedTemplateId = extractApprovedDataAnalyticsTemplateId(lines[rowIndex]);
+      const dashboardPage = cleanResourceName(cells[pageColumn]) || currentDashboardPage;
+      if (!dashboardPage) {
+        rowIndex += 1;
+        continue;
+      }
       if (selectedTemplateId) {
         records.push({
-          dashboardPage: cleanResourceName(cells[pageColumn]) || currentDashboardPage,
+          dashboardPage,
           analyticsRegion: cleanResourceName(cells[regionColumn]),
           sourceResource: cleanResourceName(cells[sourceColumn]),
           businessQuestion: cleanResourceName(cells[questionColumn]) || cleanResourceName(cells[regionColumn]),
@@ -350,7 +391,7 @@ function collectDashboardAnalyticsRecords(planText) {
     }
     index = rowIndex;
   }
-  return records;
+  return uniqueDashboardAnalyticsRecords(records);
 }
 
 function collectDashboardDatasetRecords(planText) {
@@ -361,21 +402,22 @@ function collectDashboardDatasetRecords(planText) {
   let currentDashboardPage = "";
   for (let index = 0; index < lines.length; index += 1) {
     const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
-    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (heading) currentDashboardPage = dashboardHeadingPageName(heading[1]);
     if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
     const templateColumn = findHeaderIndex(normalizedHeaders, [
+      "selected template",
+      "selected golden reference template",
+      "template id",
       "selected collection presentation reference",
       "selected record display control",
       "selected collection template",
       "collection template",
-      "record display control",
-      "control",
     ]);
-    const regionColumn = findHeaderIndex(normalizedHeaders, ["dataset region", "section", "section name", "region"]);
-    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
-    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name"]);
+    const regionColumn = findHeaderIndex(normalizedHeaders, ["dataset region", "planned dashboard / region", "section", "section name", "region"]);
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source list", "source resource", "data source", "source data", "source"]);
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
     if (templateColumn === -1 || regionColumn === -1 || sourceColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
@@ -395,7 +437,7 @@ function collectDashboardDatasetRecords(planText) {
     }
     index = rowIndex;
   }
-  return records;
+  return uniqueDashboardTemplateRecords(records);
 }
 
 function collectDashboardDataTableRecords(planText) {
@@ -406,21 +448,25 @@ function collectDashboardDataTableRecords(planText) {
   let currentDashboardPage = "";
   for (let index = 0; index < lines.length; index += 1) {
     const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
-    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (heading) currentDashboardPage = dashboardHeadingPageName(heading[1]);
     if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
     const templateColumn = findHeaderIndex(normalizedHeaders, [
+      "selected template",
+      "selected golden reference template",
+      "template id",
       "selected data table template",
       "data table template",
       "selected table template",
       "table template",
     ]);
     if (templateColumn === -1) continue;
-    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name", "page/form"]);
-    const regionColumn = findHeaderIndex(normalizedHeaders, ["region", "dataset region", "section", "section name", "analytics region"]);
-    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name", "page/form"]);
+    const regionColumn = findHeaderIndex(normalizedHeaders, ["region", "dataset region", "planned dashboard / region", "section", "section name", "analytics region"]);
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source list", "source resource", "data source", "source data", "source"]);
     const displayColumn = findHeaderIndex(normalizedHeaders, ["display columns", "visible columns", "columns", "fields"]);
+    if (sourceColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
@@ -439,7 +485,7 @@ function collectDashboardDataTableRecords(planText) {
     }
     index = rowIndex;
   }
-  return records;
+  return uniqueDashboardTemplateRecords(records);
 }
 
 function extractApprovedDataTableTemplateId(text) {
@@ -668,14 +714,14 @@ function collectDashboardFilterRecords(planText) {
   let currentDashboardPage = "";
   for (let index = 0; index < lines.length; index += 1) {
     const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
-    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (heading) currentDashboardPage = dashboardHeadingPageName(heading[1]);
     if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
     const filterColumn = findHeaderIndex(normalizedHeaders, ["filter name", "filter", "control label"]);
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
     const fieldColumn = findHeaderIndex(normalizedHeaders, ["field", "filter field", "source field", "filter field display name"]);
-    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name"]);
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
     if (filterColumn === -1 || fieldColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
@@ -706,13 +752,13 @@ function collectDashboardSummaryMetricRecords(planText) {
   let currentDashboardPage = "";
   for (let index = 0; index < lines.length; index += 1) {
     const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
-    if (heading) currentDashboardPage = cleanResourceName(heading[1]);
+    if (heading) currentDashboardPage = dashboardHeadingPageName(heading[1]);
     if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
     const metricColumn = findHeaderIndex(normalizedHeaders, ["metric name", "kpi name", "summary metric", "summary metric name"]);
     if (metricColumn === -1) continue;
-    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name"]);
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source data list", "source resource", "data source", "source"]);
     const fieldColumn = findHeaderIndex(normalizedHeaders, ["source field(s)", "source fields", "source field", "field"]);
     const logicColumn = findHeaderIndex(normalizedHeaders, ["calculation logic", "logic", "aggregation"]);
@@ -741,6 +787,59 @@ function collectDashboardSummaryMetricRecords(planText) {
 function findHeaderIndex(normalizedHeaders, candidates) {
   const normalizedCandidates = candidates.map(normKey);
   return normalizedHeaders.findIndex((header) => normalizedCandidates.includes(header));
+}
+
+function dashboardHeadingPageName(value) {
+  const name = cleanResourceName(value);
+  if (!name) return "";
+  const key = normKey(name);
+  if (key === "business decision gates") return "";
+  if (key === "dashboard template coverage matrix") return "";
+  if (/^(dashboard|record display|item template|collection|kanban|dashboard generation)/.test(key)) return "";
+  return name;
+}
+
+function uniqueDashboardTemplateRecords(records) {
+  const out = [];
+  const indexByKey = new Map();
+  for (const record of records || []) {
+    const key = [
+      normKey(record.dashboardPage),
+      normKey(record.selectedTemplateId),
+      normKey(record.sourceResource),
+    ].join("::");
+    if (indexByKey.has(key)) {
+      const existingIndex = indexByKey.get(key);
+      const existing = out[existingIndex];
+      if (!existing.sourceResource && record.sourceResource) out[existingIndex] = record;
+      continue;
+    }
+    indexByKey.set(key, out.length);
+    out.push(record);
+  }
+  return out;
+}
+
+function uniqueDashboardAnalyticsRecords(records) {
+  const out = [];
+  const indexByKey = new Map();
+  for (const record of records || []) {
+    const key = [
+      normKey(record.dashboardPage),
+      normKey(record.selectedTemplateId),
+    ].join("::");
+    if (indexByKey.has(key)) {
+      const existingIndex = indexByKey.get(key);
+      const existing = out[existingIndex];
+      const existingScore = [existing.sourceResource, existing.groupingFields, existing.valueFields].filter(Boolean).length;
+      const recordScore = [record.sourceResource, record.groupingFields, record.valueFields].filter(Boolean).length;
+      if (recordScore > existingScore) out[existingIndex] = record;
+      continue;
+    }
+    indexByKey.set(key, out.length);
+    out.push(record);
+  }
+  return out;
 }
 
 function extractApprovedCollectionTemplateId(text) {
@@ -833,7 +932,7 @@ function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = 
   const headingNames = [...section.matchAll(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/gim)]
     .map((match) => cleanResourceName(match[1]))
     .filter((name) => !isNonResourceName(name));
-  if (headingNames.length && key !== "customForms") return unique(headingNames);
+  if (headingNames.length && key !== "customForms" && key !== "dashboards") return unique(headingNames);
 
   const tableNames = [];
   for (const table of parseMarkdownTables(section)) {
@@ -960,7 +1059,7 @@ function normalizeApprovalWorkflowNodeType(value) {
   if (/end\s*reject|reject\s*end/.test(key)) return "EndRejectEvent";
   if (/^end/.test(key)) return "EndNoneEvent";
   if (/sequence|flow|transition/.test(key)) return "SequenceFlow";
-  if (/content\s*list|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
+  if (/content\s*list|service\s*action|serviceaction|action\s*node|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
   if (/candidate/.test(key)) return "CandidateTask";
   if (/assignment|approval|review|task|multi/.test(key) || text === "MultiAssignmentTask" || text === "AssignmentTask") return "MultiAssignmentTask";
   return text.replace(/[^A-Za-z0-9_]/g, "") || "MultiAssignmentTask";
@@ -1350,7 +1449,7 @@ function cleanResourceName(value) {
 function isNonResourceName(value) {
   const text = cleanResourceName(value);
   if (!text) return true;
-  if (/^(not applicable|n\/a|none|no|deferred|status|resource type|purpose|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (/^(not applicable|n\/a|none|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
   if (/^no custom\b/i.test(text)) return true;
   if (/^(dashboard page name|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
   return false;
@@ -1608,7 +1707,7 @@ function selectDashboardDatasetRecordsForPage({ planDemand, pageName, pageIndex 
   if (pageMatches.length) return pageMatches;
   const unscoped = records.filter((record) => !record.dashboardPage);
   if (unscoped.length) return unscoped.filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
-  return [records[pageIndex % records.length] || records[0]].filter(Boolean);
+  return [];
 }
 
 function selectDashboardDataTablesForPage({ planDemand, pageName, pageIndex }) {
@@ -1618,7 +1717,7 @@ function selectDashboardDataTablesForPage({ planDemand, pageName, pageIndex }) {
   if (pageMatches.length) return pageMatches;
   const unscoped = records.filter((record) => !record.dashboardPage);
   if (unscoped.length) return unscoped.filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
-  return records.filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
+  return [];
 }
 
 function selectDashboardAnalyticsForPage({ planDemand, pageName, pageIndex }) {
@@ -1634,7 +1733,7 @@ function selectDashboardSummaryMetricsForPage({ planDemand, pageName, pageIndex 
   if (!records.length) return [];
   const pageMatches = records.filter((record) => dashboardNameMatches(pageName, record.dashboardPage));
   if (pageMatches.length) return pageMatches;
-  return records.filter((record) => !record.dashboardPage).filter((_, index) => index % Math.max(1, planDemand.resources.dashboards.length || 1) === pageIndex);
+  return records.filter((record) => !record.dashboardPage).slice(0, 4);
 }
 
 function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecords = [], dashboardFilters, dashboardAnalytics, dashboardDataTables = [], dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
@@ -2344,8 +2443,10 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Ac
       fieldInfo: fieldMetadata,
       allowAllRecords: true,
       save_var: saveVariable,
+      saveVar: saveVariable,
     },
     save_var: saveVariable,
+    saveVar: saveVariable,
   };
 }
 
@@ -2759,7 +2860,6 @@ function replaceTemplateResidue(root, { datasetRegion, listName }) {
   ]);
   const regexReplacements = [
     [/\bEvent\s+Pipeline\b/gi, datasetRegion],
-    [/\bPipeline\b/gi, "Workflow"],
   ];
   const visit = (node) => {
     if (!node || typeof node !== "object") return;

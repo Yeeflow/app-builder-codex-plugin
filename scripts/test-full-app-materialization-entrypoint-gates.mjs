@@ -170,14 +170,15 @@ try {
     "| 1 | Requester | Requester | User | identity-picker | Generated-final validation |",
     "| 2 | Asset | Asset | Text | input | Generated-final validation |",
     "| 3 | Business Purpose | BusinessPurpose | Multiple line | textarea | Generated-final validation |",
-    "| 4 | Payment Terms | PaymentTerms | Text | radio dropdown | Generated-final validation |",
-    "| 5 | Tax Number | TaxNumber | Text | input | Generated-final validation |",
-    "| 6 | Bank Name | BankName | Text | input | Generated-final validation |",
-    "| 7 | Bank Account | BankAccount | Text | input | Generated-final validation |",
-    "| 8 | Risk Self Assessment | RiskSelfAssessment | Text | radio dropdown | Generated-final validation |",
-    "| 9 | Risk Explanation | RiskExplanation | Multiple line | textarea | Generated-final validation |",
-    "| 10 | Business License Attachment | BusinessLicenseAttachment | File | file upload | Generated-final validation |",
-    "| 11 | Bank Proof Attachment | BankProofAttachment | File | file upload | Generated-final validation |",
+    "| 4 | Purpose | Purpose | Multiple line text | textarea | Generated-final validation |",
+    "| 5 | Payment Terms | PaymentTerms | Text | radio dropdown | Generated-final validation |",
+    "| 6 | Tax Number | TaxNumber | Text | input | Generated-final validation |",
+    "| 7 | Bank Name | BankName | Text | input | Generated-final validation |",
+    "| 8 | Bank Account | BankAccount | Text | input | Generated-final validation |",
+    "| 9 | Risk Self Assessment | RiskSelfAssessment | Text | radio dropdown | Generated-final validation |",
+    "| 10 | Risk Explanation | RiskExplanation | Multiple line | textarea | Generated-final validation |",
+    "| 11 | Business License Attachment | BusinessLicenseAttachment | File | file upload | Generated-final validation |",
+    "| 12 | Bank Proof Attachment | BankProofAttachment | File | file upload | Generated-final validation |",
     "",
     "##### Task Form Fields",
     "",
@@ -317,6 +318,14 @@ try {
     "",
     "## 14. Dashboard Pages Plan",
     "",
+    "### 14.0 Dashboard Template Coverage Matrix",
+    "",
+    "#### Data Analytics Template Selection",
+    "| Section | Surface | Data Source | Business Question | Selected Data Analytics Template | Grouping/Axis Fields | Value/Aggregate Fields |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| Loan status mix | Dashboard | Loan Transactions | Loan transactions by status | data_analytics_pie_chart_with_title | Status | Count ListDataID |",
+    "| Loan volume trend | Dashboard | Loan Transactions | Loan transactions over time | data_analytics_line_chart_with_title | Due Date | Count ListDataID |",
+    "",
     "### 14.1 Asset Loan Operations Dashboard",
     "",
     "#### Dashboard Sections",
@@ -417,6 +426,7 @@ try {
   assert.match(assetLoanDefText, /Requester/, "approval submission/task formdef materializes planned Requester field");
   assert.match(assetLoanDefText, /Asset/, "approval submission/task formdef materializes planned Asset field");
   assert.match(assetLoanDefText, /Business Purpose/, "approval submission/task formdef materializes planned Business Purpose field");
+  assert.match(assetLoanDefText, /Purpose/, "approval submission/task formdef preserves literal planned Purpose field labels");
   assert.doesNotMatch(assetLoanDefText, /\b(?:Loan Status|Active Loan Pipeline)\b/, "approval formdef must not retain unrelated source-template business labels");
   const assetReturnDef = decodeDefResource(decodedResource.Forms.find((form) => form.Name === "Asset Return Review").DefResource);
   const assetReturnDefText = JSON.stringify(assetReturnDef);

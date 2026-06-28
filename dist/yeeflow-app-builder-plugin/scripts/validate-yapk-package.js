@@ -1061,7 +1061,8 @@ function isDefaultControlName(control) {
 }
 
 function isSummaryControl(control) {
-  return String(control?.type || "").toLowerCase() === "summary" || /summary/i.test(controlName(control));
+  const type = String(control?.type || control?.Type || "").toLowerCase();
+  return type === "summary" || type === "summary-card" || type === "summary_control" || type === "report-summary";
 }
 
 function isLikelyKpiNumber(control) {
