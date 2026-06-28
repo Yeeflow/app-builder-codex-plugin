@@ -117,6 +117,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("workflow-layout-golden-reference", [
+    "scripts/validate-workflow-layout-golden-reference.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("dashboard-generation-hard-gates", [
     "scripts/validate-dashboard-generation-hard-gates.mjs",
     "--package",

@@ -1,0 +1,237 @@
+#!/usr/bin/env node
+
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const VALIDATOR = path.join(ROOT, "scripts/validate-workflow-layout-golden-reference.mjs");
+const MATERIALIZER = path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs");
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "workflow-layout-golden-reference-"));
+const cases = [];
+
+try {
+  expectPass("reference registry passes standalone validation", ["--reference-only"]);
+  cases.push({ case: "pass: workflow layout reference registry is complete", status: "pass" });
+
+  expectPass("readable workflow resource passes layout gate", ["--resource", writeResource("good-workflow.json", readableWorkflow())]);
+  cases.push({ case: "pass: readable lane-based workflow resource", status: "pass" });
+
+  expectCode("duplicate node coordinates fail", mutateReadable("duplicate-position.json", (def) => {
+    const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
+    nodes[2].position = { ...nodes[1].position };
+  }), "WORKFLOW_LAYOUT_NODE_POSITION_COLLISION");
+  cases.push({ case: "fail: duplicate workflow node positions", status: "pass" });
+
+  expectCode("near-collision node coordinates fail", mutateReadable("near-position.json", (def) => {
+    const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
+    nodes[2].position = { x: nodes[1].position.x + 20, y: nodes[1].position.y + 20 };
+  }), "WORKFLOW_LAYOUT_NODE_POSITION_TOO_CLOSE");
+  cases.push({ case: "fail: near-collision workflow node positions", status: "pass" });
+
+  expectCode("rejected flow without vertices fails", mutateReadable("rejected-no-vertices.json", (def) => {
+    const rejected = def.childshapes.find((shape) => shape.stencil.id === "SequenceFlow" && shape.properties.name === "Rejected");
+    delete rejected.vertices;
+  }), "WORKFLOW_LAYOUT_REJECTED_FLOW_VERTICES_MISSING");
+  cases.push({ case: "fail: rejected flow missing vertices", status: "pass" });
+
+  expectCode("cross-lane flow without vertices fails", mutateReadable("cross-lane-no-vertices.json", (def) => {
+    const crossLane = def.childshapes.find((shape) => shape.stencil.id === "SequenceFlow" && shape.properties.name === "Approved");
+    delete crossLane.vertices;
+  }), "WORKFLOW_LAYOUT_CROSS_LANE_FLOW_VERTICES_MISSING");
+  cases.push({ case: "fail: cross-lane flow missing vertices", status: "pass" });
+
+  expectCode("compressed complex graph fails", mutateReadable("compressed.json", (def) => {
+    const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
+    nodes.forEach((node, index) => {
+      node.position = { x: 100 + index * 30, y: 220 };
+    });
+  }), "WORKFLOW_LAYOUT_GRAPH_TOO_COMPRESSED");
+  cases.push({ case: "fail: complex graph compressed into unreadable span", status: "pass" });
+
+  const packagePath = materializeApprovalPackage();
+  expectPass("materialized generated-final package passes workflow layout gate", ["--package", packagePath]);
+  cases.push({ case: "pass: materializer emits lane-based readable Approval workflow layout", status: "pass" });
+
+  console.log(JSON.stringify({
+    status: "pass",
+    test: path.basename(fileURLToPath(import.meta.url)),
+    cases,
+  }, null, 2));
+} finally {
+  fs.rmSync(tempDir, { recursive: true, force: true });
+}
+
+function expectPass(label, args) {
+  const result = runValidator(args);
+  assert.equal(result.status, 0, `${label}\nstdout=${result.stdout}\nstderr=${result.stderr}`);
+}
+
+function expectCode(label, resourcePath, expectedCode) {
+  const result = runValidator(["--resource", resourcePath]);
+  assert.notEqual(result.status, 0, `${label} should fail`);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.status, "fail", label);
+  assert.ok(report.findings.some((finding) => finding.code === expectedCode), `${label} expected ${expectedCode}\n${result.stdout}`);
+}
+
+function runValidator(args) {
+  return spawnSync(process.execPath, [VALIDATOR, ...args], {
+    cwd: ROOT,
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+  });
+}
+
+function mutateReadable(fileName, mutate) {
+  const resource = readableWorkflow();
+  mutate(resource);
+  return writeResource(fileName, resource);
+}
+
+function writeResource(fileName, resource) {
+  const filePath = path.join(tempDir, fileName);
+  fs.writeFileSync(filePath, JSON.stringify(resource, null, 2));
+  return filePath;
+}
+
+function readableWorkflow() {
+  const nodes = {
+    start: node("start", "StartNoneEvent", "Start", 100, 220),
+    review: node("review", "MultiAssignmentTask", "Review", 420, 220),
+    create: node("create", "ContentList", "Create record", 720, 360),
+    end: node("end", "EndNoneEvent", "End", 1020, 220),
+    reject: node("reject", "EndRejectEvent", "Rejected", 1020, 520),
+  };
+  return {
+    graphposition: { x: -60, y: 60, width: 1240, height: 640 },
+    childshapes: [
+      nodes.start,
+      flow("flow-submit", nodes.start, nodes.review, "Submit"),
+      flow("flow-approved", nodes.review, nodes.create, "Approved", [{ x: 560, y: 220 }, { x: 560, y: 360 }]),
+      flow("flow-rejected", nodes.review, nodes.reject, "Rejected", [{ x: 720, y: 220 }, { x: 720, y: 520 }, { x: 900, y: 520 }]),
+      flow("flow-complete", nodes.create, nodes.end, "Complete", [{ x: 870, y: 360 }, { x: 870, y: 220 }]),
+      nodes.review,
+      nodes.create,
+      nodes.end,
+      nodes.reject,
+    ],
+  };
+}
+
+function node(id, stencil, name, x, y) {
+  return {
+    id,
+    resourceid: id,
+    stencil: { id: stencil },
+    position: { x, y },
+    incoming: [],
+    outgoing: [],
+    properties: { name },
+  };
+}
+
+function flow(id, source, target, name, vertices = []) {
+  const resource = {
+    id,
+    resourceid: id,
+    stencil: { id: "SequenceFlow" },
+    source: { id: source.id, resourceid: source.id },
+    target: { id: target.id, resourceid: target.id },
+    properties: { name, linetype: "rounded" },
+    incoming: [{ id: source.id, resourceid: source.id }],
+    outgoing: [{ id: target.id, resourceid: target.id }],
+    dockers: vertices,
+  };
+  if (vertices.length) resource.vertices = vertices;
+  source.outgoing.push({ id, resourceid: id });
+  target.incoming.push({ id, resourceid: id });
+  return resource;
+}
+
+function materializeApprovalPackage() {
+  const spec = path.join(tempDir, "functional-specification.md");
+  const plan = path.join(tempDir, "yeeflow-app-plan.md");
+  const outDir = path.join(tempDir, "out");
+  const idManifest = path.join(tempDir, "api-issued-ids.json");
+  fs.writeFileSync(spec, [
+    "# Functional Specification: Workflow Layout Test",
+    "",
+    "| Application Name | Workflow Layout Test |",
+    "",
+    "Business defaults approval status: user-default-approved-for-generation.",
+  ].join("\n"));
+  fs.writeFileSync(plan, approvalPlanMarkdown());
+  fs.writeFileSync(idManifest, JSON.stringify({
+    ids: Array.from({ length: 180 }, (_, index) => String(970000000000000001n + BigInt(index))),
+  }, null, 2));
+  const result = spawnSync(process.execPath, [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", plan,
+    "--out-dir", outDir,
+    "--api-id-manifest", idManifest,
+    "--tenant-id", "1234567890123456",
+    "--json",
+  ], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.status, "pass");
+  assert.equal(fs.existsSync(report.outputs.package), true);
+  return report.outputs.package;
+}
+
+function approvalPlanMarkdown() {
+  return [
+    "# Yeeflow App Plan: Workflow Layout Test",
+    "",
+    "## Plan Status",
+    "",
+    "Business defaults approval status: user-default-approved-for-generation.",
+    "",
+    "## 4. Data Lists and Document Libraries Plan",
+    "",
+    "### 4.1 Vendor Requests",
+    "",
+    "| Field Name | Type | Purpose |",
+    "| --- | --- | --- |",
+    "| Vendor Name | Text | Vendor identity. |",
+    "",
+    "### 4.2 Vendor Master",
+    "",
+    "| Field Name | Type | Purpose |",
+    "| --- | --- | --- |",
+    "| Vendor Name | Text | Approved vendor. |",
+    "",
+    "## 5. Approval Forms Plan",
+    "",
+    "### 5.1 Vendor Approval",
+    "",
+    "##### Submission Form Fields",
+    "",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- |",
+    "| 1 | Vendor Name | VendorName | Text | input | Generated-final validation |",
+    "",
+    "##### Task Form Fields",
+    "",
+    "| Field Order | Business Label | Field Name | Exact Yeeflow Variable Type | Exact Yeeflow Control Type | Read Only | Proof Label |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | Vendor Name | VendorName | Text | input | Yes | Generated-final validation |",
+    "",
+    "#### Approval Workflow Nodes",
+    "",
+    "| Step | Node Name | Node Type | Description | Assignee/Role | Assignment Strategy | Outcomes | Condition/Branch | Data Read/Write | Proof Boundary |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| 1 | Department Manager Review | MultiAssignmentTask | Manager review. | Department Manager | Role based | Approved; Rejected | Always | Read request | Generated-final validation |",
+    "| 2 | Procurement Review | MultiAssignmentTask | Procurement review. | Procurement | Role based | Approved; Rejected | Always | Read request | Generated-final validation |",
+    "| 3 | Create Vendor Master | ContentList | Create approved vendor record. | System | System action | Complete | Approved path only | Vendor Master create | Generated-final validation |",
+  ].join("\n");
+}
+
+function isMainModule() {
+  return process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+}
