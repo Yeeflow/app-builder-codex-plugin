@@ -429,12 +429,12 @@ function collectDashboardDatasetPlanRecords(text, approvedIds) {
   const records = [];
   for (const table of markdownTablesWithHeadings(dashboard)) {
     const headers = table.headers.map(normalizeTableCell);
-    const selectedReferenceIndex = headers.findIndex((header) => header === "selected collection presentation reference");
+    const selectedReferenceIndex = headers.findIndex(isDatasetTemplateSelectionHeader);
     const genericControlIndex = headers.findIndex((header) => header === "control" || header === "selected control");
     const selectedControlIndex = headers.findIndex((header) => header === "selected record display control");
-    const dashboardPageIndex = headers.findIndex((header) => header === "dashboard page" || header === "dashboard page name");
-    const datasetRegionIndex = headers.findIndex((header) => header === "dataset region" || header === "section");
-    const sourceIndex = headers.findIndex((header) => header === "source resource" || header === "data source");
+    const dashboardPageIndex = headers.findIndex((header) => header === "dashboard" || header === "dashboard page" || header === "dashboard page name");
+    const datasetRegionIndex = headers.findIndex((header) => header === "dataset region" || header === "section" || header === "region");
+    const sourceIndex = headers.findIndex((header) => header === "source list" || header === "source resource" || header === "data source" || header === "source");
 
     const canonicalDatasetReferenceTable =
       datasetRegionIndex !== -1
@@ -448,7 +448,7 @@ function collectDashboardDatasetPlanRecords(text, approvedIds) {
       if (/not applicable|n\/a|deferred|no dashboard dataset/i.test(row.raw)) continue;
       const selectedControl = row.cells[selectedControlIndex] || row.cells[genericControlIndex] || "";
       if ((selectedControlIndex !== -1 || genericControlIndex !== -1) && !/\bcollection\b/i.test(selectedControl)) continue;
-      if (selectedReferenceIndex === -1 && !/\bcollection\b/i.test(selectedControl)) continue;
+      if (selectedReferenceIndex === -1) continue;
       const selected = extractApprovedTemplateIds(row.raw, approvedIds);
       if (selected.length !== 1) continue;
       records.push({
@@ -532,12 +532,12 @@ function collectDashboardDatasetPlanLines(text) {
   const rows = [];
   for (const table of markdownTables(dashboard)) {
     const headers = table.headers.map(normalizeTableCell);
-    const selectedReferenceIndex = headers.findIndex((header) => header === "selected collection presentation reference");
+    const selectedReferenceIndex = headers.findIndex(isDatasetTemplateSelectionHeader);
     const genericControlIndex = headers.findIndex((header) => header === "control" || header === "selected control");
     const selectedControlIndex = headers.findIndex((header) => header === "selected record display control");
-    const dashboardPageIndex = headers.findIndex((header) => header === "dashboard page" || header === "dashboard page name");
-    const datasetRegionIndex = headers.findIndex((header) => header === "dataset region" || header === "section");
-    const sourceIndex = headers.findIndex((header) => header === "source resource" || header === "data source");
+    const dashboardPageIndex = headers.findIndex((header) => header === "dashboard" || header === "dashboard page" || header === "dashboard page name");
+    const datasetRegionIndex = headers.findIndex((header) => header === "dataset region" || header === "section" || header === "region");
+    const sourceIndex = headers.findIndex((header) => header === "source list" || header === "source resource" || header === "data source" || header === "source");
 
     const canonicalDatasetReferenceTable =
       datasetRegionIndex !== -1
@@ -549,7 +549,6 @@ function collectDashboardDatasetPlanLines(text) {
     for (const row of table.rows) {
       const selectedControl = row.cells[selectedControlIndex] || row.cells[genericControlIndex] || "";
       if ((selectedControlIndex !== -1 || genericControlIndex !== -1) && !/\bcollection\b/i.test(selectedControl)) continue;
-      if (selectedReferenceIndex === -1 && !/\bcollection\b/i.test(selectedControl)) continue;
       rows.push(row.raw);
     }
   }
@@ -631,6 +630,15 @@ function splitMarkdownRow(row) {
 
 function normalizeTableCell(value) {
   return String(value || "").toLowerCase().replace(/`/g, "").replace(/\s+/g, " ").trim();
+}
+
+function isDatasetTemplateSelectionHeader(header) {
+  return [
+    "selected collection presentation reference",
+    "selected template",
+    "selected golden reference template",
+    "template id",
+  ].includes(header);
 }
 
 function extractApprovedTemplateIds(line, approvedIds) {
@@ -1702,6 +1710,10 @@ function identityCandidates(node) {
     node.attrs?.title,
     node.attrs?.nv_label,
     node.attrs?.nav_label,
+    node.datasetPresentationTemplateId,
+    node.derivedFromDatasetPresentationTemplate,
+    node.attrs?.datasetPresentationTemplateId,
+    node.attrs?.derivedFromDatasetPresentationTemplate,
   ].map((value) => String(value || "").trim()).filter(Boolean);
 }
 

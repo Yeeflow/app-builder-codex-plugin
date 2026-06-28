@@ -156,11 +156,13 @@ function validateAppPlan(planPath, findings) {
     const line = row.raw;
     const found = [...TEMPLATE_IDS].filter((id) => line.includes(id));
     if (!found.length) continue;
-    const lower = line.toLowerCase();
-    if (/(new|edit)/.test(lower) && !line.includes(NEW_EDIT_TEMPLATE_ID)) {
+    const cells = splitTableLine(line);
+    const usageText = cleanName(cells[2] || line).toLowerCase();
+    const selectedViewTemplate = [...VIEW_TEMPLATE_IDS].some((id) => line.includes(id));
+    if (/(new|edit)/.test(usageText) && !line.includes(NEW_EDIT_TEMPLATE_ID)) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_TEMPLATE_MISMATCH", "New/Edit custom Data List forms must select data_list_form_layout_new_edit_v1_1.", { row: line }));
     }
-    if (/\bview\b/.test(lower) && ![...VIEW_TEMPLATE_IDS].some((id) => line.includes(id))) {
+    if (/\bview\b/.test(usageText) && !selectedViewTemplate) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_TEMPLATE_MISMATCH", "View custom Data List forms must select data_list_form_layout_view_item_v1_1 or data_list_form_layout_workbench.", { row: line }));
     }
     if (line.includes(WORKBENCH_TEMPLATE_ID) && !/full\s*page/i.test(line)) {
@@ -642,6 +644,13 @@ function tableRows(text) {
     rows.push({ raw: line.trim() });
   }
   return rows;
+}
+
+function splitTableLine(line) {
+  let trimmed = String(line || "").trim();
+  if (trimmed.startsWith("|")) trimmed = trimmed.slice(1);
+  if (trimmed.endsWith("|")) trimmed = trimmed.slice(0, -1);
+  return trimmed.split("|").map((cell) => cell.trim());
 }
 
 function parsePlannedDataLists(text) {

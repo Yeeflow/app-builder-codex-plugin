@@ -207,6 +207,7 @@ const requiredDocs = [
   "docs/training/collection-record-visibility-task-readonly-runtime-training-report.md",
   "docs/training/dashboard-collection-pie-golden-rebuild-training-report.md",
   "docs/training/repo-root-hygiene-compatibility-training-report.md",
+  "docs/training/full-app-materializer-template-e2e-gap-closure-training-report.md",
   "docs/reference/dashboard-golden-references.json",
   "docs/reference/dashboard-dataset-presentation-golden-references.json",
   "docs/reference/data-analytics-golden-references.json",

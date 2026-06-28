@@ -582,7 +582,7 @@ function normalizeWorkflowNodeType(value) {
   if (/end\s*reject|reject\s*end/.test(key)) return "EndRejectEvent";
   if (/^end/.test(key)) return "EndNoneEvent";
   if (/sequence|flow|transition/.test(key)) return "SequenceFlow";
-  if (/content\s*list|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
+  if (/content\s*list|service\s*action|serviceaction|action\s*node|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
   if (/candidate/.test(key)) return "CandidateTask";
   if (/assignment|approval|review|task|multi/.test(key) || text === "MultiAssignmentTask" || text === "AssignmentTask") return "MultiAssignmentTask";
   return text.replace(/[^A-Za-z0-9_]/g, "") || "MultiAssignmentTask";

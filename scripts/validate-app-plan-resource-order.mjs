@@ -456,6 +456,7 @@ function validateDashboardPagesPlan(text, findings) {
   for (const line of policyText.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || /^\|?\s*:?-{3,}:?\s*\|?/.test(trimmed)) continue;
+    if (isTemplatePlaceholderOrInstructionLine(trimmed)) continue;
     if (/No custom (actions|Sub List actions|required)|No Collection\/Kanban item actions required/i.test(trimmed)) continue;
     if (isNegativeGuardrailLine(trimmed)) continue;
     const unsupported = DASHBOARD_UNSUPPORTED_CONTROL_HINTS.find((pattern) => pattern.test(trimmed));
@@ -489,6 +490,14 @@ function validateDashboardPagesPlan(text, findings) {
       });
     }
   }
+}
+
+function isTemplatePlaceholderOrInstructionLine(line) {
+  const trimmed = String(line || "").trim();
+  if (!trimmed) return false;
+  if (/<[^>]+>/.test(trimmed)) return true;
+  if (/^Required for every\b/i.test(trimmed)) return true;
+  return false;
 }
 
 function maskApprovedDashboardTemplateIds(text) {
