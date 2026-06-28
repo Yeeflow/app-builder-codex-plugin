@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.76",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with Approval workflow condition and upgrade proof gates.",
+  "version": "0.8.77",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with full-app materializer template E2E gap closure gates.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
