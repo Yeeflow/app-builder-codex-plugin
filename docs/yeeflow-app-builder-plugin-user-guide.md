@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.78`
+`0.8.79`
+
+Version `0.8.79` releases generated-final preflight App Plan/runtime alignment from PR #297. Canonical Dashboard Collection exact-ID App Plan tables are authoritative over earlier prose support tables, approved Collection template IDs are inferred only when legacy prose is unambiguous, unused copied Dashboard filter variables are pruned during materialization, `ListDataID` is treated as a Yeeflow system field for Summary count validation, and Data List Form layout planning remains strict for custom New/Edit and View/Workbench Full page rows.
 
 Version `0.8.78` releases Approval ContentList target and application-selection gates from PR #295. Generated Approval `ContentList` / Set Data List action nodes now resolve App Plan `Data Read/Write` targets to concrete child Data Lists, emit Designer-safe `listtype: "select"`, `appid: 41`, current app `listsetid`, and target child Data List `listid`, and fail generated-final publish readiness when a system-write node points at the root ListSet, an unknown list, `listtype: "current"`, a wrong `appid`, or a wrong `listsetid`.
 
