@@ -1863,6 +1863,7 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
     ...normalizeDependencyArray(templateDependencies.filterVars),
     ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
   ]));
+  pruneUnconsumedDashboardFilterProducerBindings(resource, resource.filterVars.map((item) => String(item?.name || item?.id || "").trim()).filter(Boolean));
   resource.tempVars = uniqueByName([
     ...normalizeDependencyArray(templateDependencies.tempVars),
     ...kpiContracts.map((contract) => ({
@@ -2603,6 +2604,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
       },
     };
   }
+  wireTemplateSearchFiltersToCollection(root, { listMeta });
   if (templateId === "collection_control_grid_table_with_multiselect") {
     enforceFullWidth(root, ["grid_table_col_multiselect_wrapper", "grid_table_col_caption", "grid_table_col_content"]);
   }
@@ -2625,6 +2627,30 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   };
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
   return root;
+}
+
+function wireTemplateSearchFiltersToCollection(root, { listMeta }) {
+  const searches = findDescendants(root, (node) => String(node?.type || "") === "search-filter");
+  const collection = findFirstByType(root, "collection");
+  if (!searches.length || !collection) return;
+  collection.attrs = collection.attrs || {};
+  collection.attrs.data = collection.attrs.data || {};
+  collection.attrs.data.fulltext = Array.isArray(collection.attrs.data.fulltext) ? collection.attrs.data.fulltext : [];
+  for (const search of searches) {
+    const binding = String(search?.binding || search?.attrs?.binding || "").trim();
+    const variable = binding.startsWith("__filter_") ? binding.slice("__filter_".length) : "";
+    if (!variable) continue;
+    const fieldName = String(search?.attrs?.data?.field || primaryFieldName(listMeta) || "Title");
+    const alreadyFulltext = collection.attrs.data.fulltext.some((item) => JSON.stringify(item).includes(`__filter_${variable}`) || JSON.stringify(item).includes(`"name":"${variable}"`));
+    if (!alreadyFulltext) {
+      collection.attrs.data.fulltext.push({
+        fields: [fieldName],
+        field: fieldName,
+        value: [{ exprType: "variable", valueType: "string", id: `__filter_${variable}`, type: "expr", name: variable }],
+        sourceFilterId: search.id || search.attrs?.id || variable,
+      });
+    }
+  }
 }
 
 function reinstantiateTemplateUuidValues(root) {
@@ -2756,17 +2782,45 @@ function normalizeDependencyArray(value) {
 function filterConsumedDashboardFilterVars(resource, filterVars) {
   const candidateVars = uniqueByName(filterVars).filter((item) => String(item?.name || item?.id || "").trim());
   if (!candidateVars.length) return [];
-  const withoutDeclarations = clone(resource);
-  withoutDeclarations.filterVars = [];
-  const text = JSON.stringify(withoutDeclarations);
+  const consumed = collectConsumedDashboardFilterVarNames(resource);
   return candidateVars.filter((item) => {
     const name = String(item.name || item.id || "").trim();
-    return text.includes(`__filter_${name}`)
-      || text.includes(`"filterVar":"${name}"`)
-      || text.includes(`"filterVarId":"${name}"`)
-      || text.includes(`"filterVariable":"${name}"`)
-      || text.includes(`"binding":"${name}"`);
+    return consumed.has(name);
   });
+}
+
+function collectConsumedDashboardFilterVarNames(resource) {
+  const consumed = new Set();
+  const consumerTypes = new Set(["summary", "collection", "data-list", "data-table", "pivot-table", "pie-chart", "bar-chart", "column-chart", "line-chart", "area-chart"]);
+  const inspect = (value) => {
+    const text = JSON.stringify(value || {});
+    for (const match of text.matchAll(/__filter_([A-Za-z0-9_-]+)/g)) consumed.add(match[1]);
+    for (const match of text.matchAll(/"name"\s*:\s*"([A-Za-z0-9_-]+)"/g)) {
+      if (text.includes(`__filter_${match[1]}`)) consumed.add(match[1]);
+    }
+  };
+  for (const node of findDescendants(resource, (item) => consumerTypes.has(String(item?.type || "")))) {
+    inspect(node?.attrs?.data?.filter);
+    inspect(node?.attrs?.data?.fulltext);
+    inspect(node?.attrs?.data?.sortingfilter);
+    inspect(node?.attrs?.data?.Conditions);
+    inspect(node?.attrs?.data?.conditions);
+  }
+  for (const ext of Array.isArray(resource?.exts) ? resource.exts : []) {
+    inspect(ext?.attr?.settings?.Conditions);
+  }
+  return consumed;
+}
+
+function pruneUnconsumedDashboardFilterProducerBindings(resource, consumedVars) {
+  const consumed = new Set(consumedVars);
+  for (const node of findDescendants(resource, (item) => String(item?.binding || item?.attrs?.binding || "").startsWith("__filter_"))) {
+    const binding = String(node.binding || node.attrs?.binding || "");
+    const filterVar = binding.slice("__filter_".length);
+    if (consumed.has(filterVar)) continue;
+    if (node.binding === binding) delete node.binding;
+    if (node.attrs?.binding === binding) delete node.attrs.binding;
+  }
 }
 
 function uniqueByName(items) {
