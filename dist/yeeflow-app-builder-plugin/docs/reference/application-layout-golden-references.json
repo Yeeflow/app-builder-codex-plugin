@@ -1,0 +1,21 @@
+{
+  "version": "application-layout-golden-references.v1",
+  "defaultTemplateId": "application-layout-sidebar-workspace-1",
+  "approvedTemplateIds": [
+    "application-layout-sidebar-workspace-1"
+  ],
+  "references": [
+    {
+      "templateId": "application-layout-sidebar-workspace-1",
+      "name": "Sidebar Workspace Application Layout",
+      "baseApplicationLayoutType": "application-layout-1-vertical-nav",
+      "sourceTemplate": "docs/reference/application-layout-sidebar-workspace-1.template.json",
+      "summary": "Default Yeeflow application chrome for generated apps using a compact 46px top header and a persistent left navigation menu.",
+      "whenToUse": "Use for all newly generated Yeeflow business applications unless the user explicitly selects another Yeeflow application layout.",
+      "whenNotToUse": "Do not use when the user explicitly requests horizontal navigation, header navigation, or a no-navigation application shell.",
+      "businessUse": "Best for operational workspaces with grouped data lists, dashboards, approval forms, and reports that need stable left-side navigation.",
+      "generationProof": "Generated packages must materialize this template into decoded ListSet.LayoutView and must assign FontAwesome icons to every visible business navigation group and item.",
+      "proofBoundary": "This reference governs application LayoutView chrome and navigation icon contracts. It does not replace the Soft outline controls control-style Themes template."
+    }
+  ]
+}

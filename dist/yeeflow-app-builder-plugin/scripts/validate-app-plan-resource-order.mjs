@@ -74,6 +74,7 @@ const REQUIRED_PATTERNS = [
   ["DASHBOARD_ACTIONS", /Dashboard Actions/i],
   ["ITEM_TEMPLATE_DYNAMIC_CONTROLS", /Item Template Dynamic Controls/i],
   ["COLLECTION_KANBAN_ACTIONS", /Collection (and|\/) Kanban Item Actions|Collection\/Kanban item actions/i],
+  ["APPLICATION_LAYOUT_TEMPLATE_SELECTION", /Application layout template:\s*`?application-layout-sidebar-workspace-1`?/i],
   ["SUB_LIST_ACTIONS", /Sub List List Actions|No custom Sub List actions required|No Sub List actions are needed|Sub List actions are not required/i],
   [
     "PLUGIN_SUPPORTED_TYPE_PROPERTY_RULE",
@@ -586,6 +587,41 @@ function validateDataListFormLayoutTemplateSelection(text, findings) {
   }
 }
 
+function validateApplicationLayoutTemplateSelection(text, findings) {
+  const sections = extractSections(text);
+  const navigation = sectionBody(sections, "Application Navigation Plan");
+  if (!navigation.trim()) return;
+  if (!/Application layout template:\s*`?application-layout-sidebar-workspace-1`?/i.test(navigation)) {
+    findings.push({
+      level: "error",
+      code: "APP_PLAN_APPLICATION_LAYOUT_TEMPLATE_SELECTION_REQUIRED",
+      message: "Application Navigation Plan must declare the default application layout template: application-layout-sidebar-workspace-1.",
+    });
+  }
+  for (const row of splitTableRows(navigation)) {
+    if (!/\|\s*yes\s*\|/i.test(row)) continue;
+    const cells = row.split("|").slice(1, -1).map((cell) => cell.trim());
+    if (cells.length < 7) continue;
+    const icon = cells[6] || "";
+    if (!icon || /^<.*>$/.test(icon)) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_APPLICATION_NAV_VISIBLE_ICON_MISSING",
+        message: "Every visible Application Navigation Plan menu group/item row must select a suitable FontAwesome icon.",
+        row,
+      });
+    } else if (!/^fa-(solid|regular|light|duotone|brands)\s+fa-[a-z0-9-]+$/i.test(icon)) {
+      findings.push({
+        level: "error",
+        code: "APP_PLAN_APPLICATION_NAV_VISIBLE_ICON_NOT_FONTAWESOME",
+        message: "Application Navigation Plan visible icons must use FontAwesome class names.",
+        icon,
+        row,
+      });
+    }
+  }
+}
+
 function loadDataListFormLayoutTemplateRegistry() {
   const fallback = {
     approvedTemplateIds: [
@@ -853,6 +889,7 @@ export function validate(file) {
   validateApprovalFormLayoutTemplateSelection(text, findings);
   validateDataListFormLayoutTemplateSelection(text, findings);
   validateDataListFormFieldsTemplateSelection(text, findings);
+  validateApplicationLayoutTemplateSelection(text, findings);
   validateDashboardPagesPlan(text, findings);
   validateRequiredTableSchemas(extractSections(text), findings);
 

@@ -9,6 +9,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
 const APPLICATION_CONTROL_STYLE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/application-control-style-soft-outline-controls.template.json");
+const APPLICATION_LAYOUT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/application-layout-sidebar-workspace-1.template.json");
 const DASHBOARD_V11_TEMPLATE_PATH = path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json");
 const DATA_LIST_FORM_TEMPLATE_PATHS = {
   newEdit: path.join(ROOT, "docs/reference/data-list-form-layout-new-edit.template.json"),
@@ -1017,9 +1018,10 @@ function collectNavigationItemsByGroup(section) {
       const item = cleanResourceName(row.Item || row["Target Resource"]);
       const target = cleanResourceName(row["Target Resource"] || item);
       const type = cleanResourceName(row["Yeeflow Resource Type"] || row.Type || "");
+      const icon = cleanResourceName(row.Icon || "");
       if (!group || !item || isNonResourceName(group) || isNonResourceName(item)) continue;
       if (!byGroup[group]) byGroup[group] = [];
-      byGroup[group].push({ title: item, target: target || item, type });
+      byGroup[group].push({ title: item, target: target || item, type, icon });
     }
   }
   return byGroup;
@@ -3386,11 +3388,12 @@ function buildLegacyMaterialDashboardResource({ name, layoutId, listName, listId
 }
 
 function buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName, forms, pages }) {
+  const layoutContract = buildApplicationLayoutContract();
   const groups = navigationGroupNames(planDemand);
-  const dashboardItems = pages.map((page) => ({ Title: page.Title, Type: 103, Target: page.Title, ListID: page.LayoutID, LayoutID: page.LayoutID }));
-  const formItems = forms.map((form) => ({ Title: form.Name, Type: 105, Target: form.Name, ListID: form.Key }));
-  const listItems = planDemand.resources.dataLists.map((name) => ({ Title: name, Type: 1, Target: name, ListID: dataListByName.get(normKey(name)) }));
-  const reportItems = planDemand.resources.formReports.map((name) => ({ Title: name, Type: 105, Target: name, ListID: forms[0]?.Key || "" }));
+  const dashboardItems = pages.map((page) => ({ Title: page.Title, Type: 103, Target: page.Title, ListID: page.LayoutID, LayoutID: page.LayoutID, Icon: inferNavigationIcon({ title: page.Title, type: 103 }) }));
+  const formItems = forms.map((form) => ({ Title: form.Name, Type: 105, Target: form.Name, ListID: form.Key, Icon: inferNavigationIcon({ title: form.Name, type: 105 }) }));
+  const listItems = planDemand.resources.dataLists.map((name) => ({ Title: name, Type: 1, Target: name, ListID: dataListByName.get(normKey(name)), Icon: inferNavigationIcon({ title: name, type: 1 }) }));
+  const reportItems = planDemand.resources.formReports.map((name) => ({ Title: name, Type: 105, Target: name, ListID: forms[0]?.Key || "", Icon: inferNavigationIcon({ title: name, type: 105 }) }));
   const allItems = dashboardItems.concat(formItems, listItems, reportItems);
   const itemsByGroup = planDemand.navigationItemsByGroup || {};
   const targetByName = new Map(allItems.flatMap((item) => [[normKey(item.Target), item], [normKey(item.Title), item]]));
@@ -3400,14 +3403,17 @@ function buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName
     ListSetID: stringId(rootListId),
     Title: groupName,
     Type: "classes",
-    Icon: "fa-solid fa-folder",
+    Icon: inferNavigationIcon({ title: groupName, type: "classes" }),
     list: (itemsByGroup[groupName] || []).length
-      ? itemsByGroup[groupName].map((item) => toRuntimeNavigationItem(targetByName.get(normKey(item.title)) || targetByName.get(normKey(item.target)) || { Title: item.title, Type: inferNavigationType(item.type), ListID: "" }, rootListId))
+      ? itemsByGroup[groupName].map((item) => {
+        const target = targetByName.get(normKey(item.title)) || targetByName.get(normKey(item.target)) || { Title: item.title, Type: inferNavigationType(item.type), ListID: "" };
+        return toRuntimeNavigationItem({ ...target, Icon: normalizeFontAwesomeIcon(item.icon) || target.Icon || inferNavigationIcon({ title: item.title, type: target.Type }) }, rootListId);
+      })
         .filter(Boolean)
       : allItems.filter((item, itemIndex) => itemIndex % groups.length === index).map((item) => toRuntimeNavigationItem(item, rootListId)),
   }));
   if (sort.length && sort.every((group) => !group.list.length)) sort[0].list = allItems.map((item) => toRuntimeNavigationItem(item, rootListId)).filter(Boolean);
-  return JSON.stringify({ sortVer: 1, sort });
+  return JSON.stringify({ sortVer: layoutContract.sortVer, sort, attrs: layoutContract.attrs });
 }
 
 function toRuntimeNavigationItem(item, rootListId) {
@@ -3419,9 +3425,72 @@ function toRuntimeNavigationItem(item, rootListId) {
     Type: item.Type,
     ListID: stringId(item.ListID || ""),
     ListSetID: stringId(rootListId),
+    Icon: normalizeFontAwesomeIcon(item.Icon) || inferNavigationIcon({ title: item.Title, type: item.Type }),
   };
   if (String(item.Type) === "103") out.LayoutID = stringId(item.LayoutID || item.ListID || "");
   return out;
+}
+
+function buildApplicationLayoutContract() {
+  try {
+    const template = JSON.parse(fs.readFileSync(APPLICATION_LAYOUT_TEMPLATE_PATH, "utf8"));
+    const required = template.requiredLayoutView || {};
+    return {
+      sortVer: Number(required.sortVer) || 1,
+      attrs: JSON.parse(JSON.stringify(required.attrs || defaultApplicationLayoutAttrs())),
+    };
+  } catch {
+    return { sortVer: 1, attrs: defaultApplicationLayoutAttrs() };
+  }
+}
+
+function defaultApplicationLayoutAttrs() {
+  return {
+    appearance: {
+      bgc: "var(--c--primary-dark-hover)",
+      color: "var(--c--background)",
+      height: 46,
+      ty: [null, "h6-semi-bold"],
+    },
+    "navigator-menu": {
+      bgc: "var(--c--primary-dark)",
+      color: "var(--c--background)",
+      position: "left",
+      active: {},
+    },
+    CustomColors: [
+      { id: "extra-color-1", label: "Extra Color 1", value: "#F9C434" },
+      { id: "extra-color-2", label: "Extra Color 2", value: "#F61515" },
+    ],
+    CustomFonts: [
+      { id: "3708306f-951b-40d5-b459-26c717e8f187", label: "Extra font 1" },
+      { id: "dc50649a-28d3-42ec-9714-e32cf78de678", label: "Extra font 2" },
+    ],
+  };
+}
+
+function normalizeFontAwesomeIcon(value) {
+  const icon = String(value || "").trim();
+  return /^fa-(solid|regular|light|duotone|brands)\s+fa-[a-z0-9-]+$/i.test(icon) ? icon : "";
+}
+
+function inferNavigationIcon({ title = "", type = "" } = {}) {
+  const text = String(title || "").toLowerCase();
+  const resourceType = String(type || "");
+  if (resourceType === "classes") {
+    if (/approval|review|task/.test(text)) return "fa-solid fa-clipboard-check";
+    if (/report|analytics|dashboard/.test(text)) return "fa-solid fa-chart-line";
+    if (/admin|setting|config/.test(text)) return "fa-solid fa-gear";
+    if (/operation|workbench|workspace/.test(text)) return "fa-solid fa-briefcase";
+    return "fa-solid fa-folder";
+  }
+  if (resourceType === "103" || /dashboard|analytics|monitor|overview/.test(text)) return "fa-solid fa-chart-pie";
+  if (resourceType === "105" || /approval|request|review/.test(text)) return "fa-regular fa-paste";
+  if (/report/.test(text)) return "fa-regular fa-file-lines";
+  if (/document|file|attachment/.test(text)) return "fa-regular fa-folder-open";
+  if (/vendor|supplier|customer|user|employee/.test(text)) return "fa-regular fa-address-card";
+  if (/loan|asset|inventory|item|record|list/.test(text)) return "fa-regular fa-table-list";
+  return "fa-regular fa-circle";
 }
 
 function inferNavigationType(value) {

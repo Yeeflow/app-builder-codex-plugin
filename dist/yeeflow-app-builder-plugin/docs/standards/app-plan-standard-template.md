@@ -622,12 +622,17 @@ Rules:
 
 ## 15. Application Navigation Plan
 
+Application layout template: `application-layout-sidebar-workspace-1`.
+
 | Navigation Order | Group | Item | Yeeflow Resource Type | Target Resource | Visible | Icon | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | <Group> | <Item> | Data list / Dashboard / Approval form / Report | <Resource> | Yes/No | <Icon> | <Notes> |
 
 Runtime navigation rules:
 
+- New generated apps use the `application-layout-sidebar-workspace-1` golden reference by default unless the user explicitly selects another approved Yeeflow application layout.
+- The package must materialize the template through `ListSet.LayoutView.sortVer` and `ListSet.LayoutView.attrs`, including the 46px header, `h6-semi-bold` title typography, left navigation menu, and reference header/navigation colors.
+- Every visible business navigation group and menu item must include a suitable FontAwesome icon. Do not leave the `Icon` cell blank for visible menu entries.
 - Groups use `Type: "classes"` with `list`.
 - Dashboards/pages use `Type: 103`.
 - Approval forms use `Type: 105` with `ListID = Forms[].Key`.
