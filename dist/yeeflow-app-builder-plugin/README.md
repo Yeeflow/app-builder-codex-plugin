@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.72`
+- Version: `0.8.73`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.72` releases Collection runtime visibility and Approval task readonly gates from PR #283: generated Dashboard Collections now require resolved Primary order/sort, fulltext, and dynamic control field-binding surfaces against the selected source list schema, and Approval task forms must mirror submitted business fields as runtime-effective readonly review context using both top-level and attrs readonly flags.
+Current release `0.8.73` releases New Vendor Approval field and tenant readiness gates from PR #285: generated Approval forms no longer truncate long planned field tables, and generated-final wrapper TenantID can be resolved from explicit or safe Yeeflow environment metadata while placeholder `TenantID: "0"` remains blocked before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.72
+Version: 0.8.73
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.72
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.73
 ```
 
 ## What Is Included

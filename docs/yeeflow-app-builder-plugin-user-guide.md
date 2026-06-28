@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.72`
+`0.8.73`
+
+Version `0.8.73` releases New Vendor Approval field and tenant readiness gates from PR #285. The full-app materializer no longer truncates long Approval form `Submission Form Fields` or `Task Form Fields` tables, so planned tax, bank, risk, attachment, and task-only fields must materialize into decoded `DefResource.pageurls[].formdef`. Generated-final wrapper TenantID can now resolve from explicit, profile-scoped, or global Yeeflow tenant metadata when available, while placeholder `TenantID: "0"` remains blocked before signing readiness.
 
 Version `0.8.72` releases Collection runtime visibility and Approval task readonly gates from PR #283. Generated Dashboard Collections now include resolved Primary order/sort metadata, fulltext field validation, and Dynamic field/Dynamic user binding surfaces that must resolve against the selected source list schema. Approval task forms now mirror submitted business fields as runtime-effective readonly review context unless explicitly excluded or made editable in the App Plan, using both top-level and attrs readonly/readOnly flags.
 
