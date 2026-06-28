@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.85`
+`0.8.86`
+
+Version `0.8.86` releases Approval form page-title empty section cleanup from PR #311. Generated Approval submission/task pages and Data List/Schedule workflow task forms now remove empty `section_content_area` slots outside real business content, including `page_title_section` empty slots, while preserving locked workflow panel/history surfaces. The Approval form layout gate now rejects those empty generated slots before signing readiness through `APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA`.
 
 Version `0.8.85` releases application control style fresh ID remap from PR #309. Generated fresh `.yapk` packages now clone the Soft outline Type 1 control style theme with a fresh package-local UUID, keep the Type 0 `application style` theme linked through `Ext.controlDefaultId`, reject reused exported template style IDs or non-UUID control style IDs before signing readiness, and preserve style tokens, colors, layout settings, and ordinary configuration values unchanged.
 

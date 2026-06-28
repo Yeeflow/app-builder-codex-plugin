@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.85`
+- Version: `0.8.86`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.85` releases application control style fresh ID remap from PR #309: generated fresh `.yapk` packages now clone the Soft outline Type 1 control style theme with a fresh package-local UUID, update the Type 0 `application style` default binding to that ID, and reject reused exported template style IDs before signing readiness while preserving the locked style tokens and ordinary configuration values.
+Current release `0.8.86` releases Approval form page-title empty section cleanup from PR #311: generated Approval submission/task pages and Data List/Schedule workflow task forms now prune empty `section_content_area` slots outside real business content, including `page_title_section` empty slots, while preserving locked workflow panel/history surfaces and enforcing the cleanup through `APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA` hard gates.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.85
+Version: 0.8.86
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.85
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.86
 ```
 
 ## What Is Included

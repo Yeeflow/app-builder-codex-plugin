@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.86
+
+- Release Approval form page-title empty section cleanup from PR #311.
+- Generated Approval submission/task pages and Data List/Schedule workflow task forms now remove empty `section_content_area` slots outside real business content, including `page_title_section` empty slots.
+- Approval form layout validation now applies `APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA` to any generated empty section content slot while preserving locked workflow panel/history surfaces.
+- Add source/dist regression coverage and training guidance for the cleanup contract.
+
 ## 0.8.85
 
 - Release application control style fresh ID remap from PR #309.
