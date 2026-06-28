@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.75`
+`0.8.76`
+
+Version `0.8.76` releases Approval workflow node parity gates from PR #291. Generated-final materialization now parses App Plan Approval Workflow Nodes, materializes planned review/approval task nodes and planned action nodes, and first-generation preflight blocks packages where planned Approval workflow nodes are missing, mismatched, or collapsed to a single baseline task before signing readiness.
 
 Version `0.8.75` releases full-app materializer template coverage hardening from PR #289. Generated-final materialization now consumes all App Plan-selected Dashboard Collection records for a page, materializes approved Data Table templates, preserves Workbench custom form selections, aligns custom form ID provenance paths with decoded layout positions, emits default navigation group ID provenance when needed, and treats approved Data Table controls as valid Dashboard business content.
 

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.76
+
+- Release Approval workflow node parity gates from PR #291.
+- Parse App Plan `Approval Workflow Nodes` during generated-final materialization and preserve the planned workflow node graph instead of collapsing nontrivial approval processes to a single baseline `Line manager approval` task.
+- Materialize planned review/approval nodes as named `MultiAssignmentTask` workflow tasks and planned action nodes as named `ContentList` workflow actions.
+- Extend Approval workflow publish-readiness validation to accept the App Plan and fail generated-final packages when planned workflow nodes are missing, mismatched, or have the wrong workflow node type.
+- Pass App Plan context through first-generation preflight so workflow-node parity is enforced before signing readiness.
+
 ## 0.8.75
 
 - Release full-app materializer template coverage hardening from PR #289.
