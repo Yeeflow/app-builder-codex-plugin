@@ -624,6 +624,24 @@ Rules:
 
 Application layout template: `application-layout-sidebar-workspace-1`.
 
+#### Application Color Pattern Selection
+
+| Color Role | Base Color | Light Model | Source / Rationale |
+| --- | --- | --- | --- |
+| Primary | #0065FF | Luminance | Default Yeeflow brand primary or project-approved brand primary |
+| Secondary | #00D1FF | Luminance | Default Yeeflow brand secondary or project-approved brand secondary |
+| Neutral | #B3B7C0 | Luminance | Default neutral UI state base or project-approved neutral |
+
+Rules:
+
+- Every App Plan must choose the application color pattern used by the Type `0` `application style` theme in `Themes[]`.
+- Only Primary, Secondary, and Neutral base colors are selected here. Success, warning, and danger remain Yeeflow semantic colors and must stay green, yellow, and red.
+- `Light Model` must be exactly `Luminance` for Primary, Secondary, and Neutral.
+- Primary and Secondary base colors must not be too light or too dark. Prefer OKLCH lightness `0.42-0.68`; values outside `0.35-0.82` are not generation-ready.
+- Neutral must remain low-chroma. It must use OKLCH lightness `0.65-0.88` and chroma no greater than `0.06`.
+- If the user does not request custom branding, keep the default base colors above.
+- Generated packages must write these selected base colors into the Type `0` `application style.Config` stringified JSON and preserve the Soft outline controls default control style binding.
+
 | Navigation Order | Group | Item | Yeeflow Resource Type | Target Resource | Visible | Icon | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | <Group> | <Item> | Data list / Dashboard / Approval form / Report | <Resource> | Yes/No | <Icon> | <Notes> |

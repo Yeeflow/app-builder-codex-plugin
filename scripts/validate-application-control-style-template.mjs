@@ -8,6 +8,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/application-control-style-golden-references.json");
 const DEFAULT_TEMPLATE_PATH = path.join(ROOT, "docs/reference/application-control-style-soft-outline-controls.template.json");
+const DEFAULT_APPLICATION_COLOR_PATTERN = {
+  primary: { value: "#0065FF", lightmodel: "Luminance" },
+  secondary: { value: "#00D1FF", lightmodel: "Luminance" },
+  neutral: { value: "#B3B7C0", lightmodel: "Luminance" },
+  typography: { fontfamily: "Default", fontweight: "regular", basevalue: 14, scale: "1.125", lineheight: 1.6 },
+};
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -26,6 +32,9 @@ export function validateApplicationControlStyleTemplate(options = {}) {
   const templatePath = path.resolve(options.template && options.template !== true ? options.template : DEFAULT_TEMPLATE_PATH);
   const registry = readJson(registryPath, findings, "APPLICATION_CONTROL_STYLE_REGISTRY_MISSING");
   const template = readJson(templatePath, findings, "APPLICATION_CONTROL_STYLE_TEMPLATE_MISSING");
+  const planPath = options.plan ? path.resolve(options.plan) : "";
+  const planText = planPath ? readText(planPath, findings, "APPLICATION_CONTROL_STYLE_APP_PLAN_MISSING") : "";
+  const plannedColorPattern = planText ? extractApplicationColorPatternFromPlan(planText) : null;
   validateRegistry(registry, templatePath, findings);
   validateTemplate(template, findings);
 
@@ -38,7 +47,7 @@ export function validateApplicationControlStyleTemplate(options = {}) {
     packagePath = path.resolve(options.decoded);
     decoded = readJson(packagePath, findings, "APPLICATION_CONTROL_STYLE_DECODED_MISSING");
   }
-  if (decoded) validateDecodedPackage(decoded, template, findings);
+  if (decoded) validateDecodedPackage(decoded, template, findings, { plannedColorPattern });
 
   return {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
@@ -46,6 +55,7 @@ export function validateApplicationControlStyleTemplate(options = {}) {
     template: templatePath,
     package: options.package ? packagePath : null,
     decoded: options.decoded ? packagePath : null,
+    plan: planPath || null,
     findings,
   };
 }
@@ -98,6 +108,7 @@ function validateTemplate(template, findings) {
   if (app.ExtShape?.controlDefaultId !== style.ID) {
     findings.push(error("APPLICATION_CONTROL_STYLE_TEMPLATE_DEFAULT_LINK_INVALID", "Application style ExtShape.controlDefaultId must point to the control style theme ID.", { expected: style.ID, actual: app.ExtShape?.controlDefaultId || null }));
   }
+  validateApplicationColorPatternConfig(app.Config || template.applicationColorPattern?.defaults || DEFAULT_APPLICATION_COLOR_PATTERN, findings, { source: "template" });
   if (!isObject(template.packageMaterializedConfig)) {
     findings.push(error("APPLICATION_CONTROL_STYLE_TEMPLATE_CONFIG_MISSING", "Soft outline controls template must include packageMaterializedConfig."));
   }
@@ -106,7 +117,7 @@ function validateTemplate(template, findings) {
   }
 }
 
-function validateDecodedPackage(decoded, template, findings) {
+function validateDecodedPackage(decoded, template, findings, options = {}) {
   if (!isObject(template)) return;
   const themes = asArray(decoded?.Themes);
   if (!Array.isArray(decoded?.Themes)) {
@@ -127,8 +138,11 @@ function validateDecodedPackage(decoded, template, findings) {
   } else if (expectedAppThemeId && !shouldStrictlyValidateAppThemeId(rootListId) && !/^41_\d+$/.test(String(appTheme.ID || ""))) {
     findings.push(error("APPLICATION_CONTROL_STYLE_DEFAULT_ID_INVALID", "Application style theme ID must use the 41_<root list set id> numeric shape.", { actual: appTheme.ID || null }));
   }
-  if (appTheme.Config !== null && appTheme.Config !== "") {
-    findings.push(error("APPLICATION_CONTROL_STYLE_DEFAULT_CONFIG_INVALID", "Application style theme Config must be null in exported references or an empty string in generated-final schema-safe packages.", { actualType: typeof appTheme.Config }));
+  const appStyleConfig = parseApplicationStyleConfig(appTheme.Config, findings);
+  const expectedColorPattern = buildExpectedApplicationColorPattern(template, options.plannedColorPattern);
+  if (appStyleConfig) {
+    validateApplicationColorPatternConfig(appStyleConfig, findings, { source: "package" });
+    compareApplicationColorPattern(appStyleConfig, expectedColorPattern, findings);
   }
   const appExt = parseJsonString(appTheme.Ext, findings, "APPLICATION_CONTROL_STYLE_DEFAULT_EXT_INVALID", "Application style theme Ext must be a JSON string.");
   const defaultId = appExt?.controlDefaultId;
@@ -166,6 +180,82 @@ function validateDecodedPackage(decoded, template, findings) {
     if (!Object.prototype.hasOwnProperty.call(config, key)) {
       findings.push(error("APPLICATION_CONTROL_STYLE_CONFIG_KEY_MISSING", "Control style theme Config is missing a required top-level style group.", { missing: key }));
     }
+  }
+}
+
+function parseApplicationStyleConfig(value, findings) {
+  if (value === null || value === "") {
+    findings.push(error("APPLICATION_COLOR_PATTERN_CONFIG_MISSING", "Application style theme Config must be a stringified JSON object with primary, secondary, neutral, and typography settings."));
+    return null;
+  }
+  if (typeof value !== "string") {
+    findings.push(error("APPLICATION_COLOR_PATTERN_CONFIG_NOT_STRING", "Application style theme Config must be a stringified JSON object.", { actualType: typeof value }));
+    return null;
+  }
+  return parseJsonString(value, findings, "APPLICATION_COLOR_PATTERN_CONFIG_INVALID_JSON", "Application style theme Config must parse as JSON.");
+}
+
+function buildExpectedApplicationColorPattern(template, plannedColorPattern = null) {
+  const expected = JSON.parse(JSON.stringify(template?.requiredThemes?.applicationStyleTheme?.Config || template?.applicationColorPattern?.defaults || DEFAULT_APPLICATION_COLOR_PATTERN));
+  for (const role of ["primary", "secondary", "neutral"]) {
+    if (!plannedColorPattern?.[role]) continue;
+    expected[role] = {
+      value: plannedColorPattern[role].value,
+      lightmodel: plannedColorPattern[role].lightmodel || "Luminance",
+    };
+  }
+  expected.typography = expected.typography || DEFAULT_APPLICATION_COLOR_PATTERN.typography;
+  return expected;
+}
+
+function compareApplicationColorPattern(actual, expected, findings) {
+  for (const role of ["primary", "secondary", "neutral"]) {
+    const actualRole = actual?.[role];
+    const expectedRole = expected?.[role];
+    if (!actualRole || !expectedRole) continue;
+    if (normalizeHexColor(actualRole.value) !== normalizeHexColor(expectedRole.value) || String(actualRole.lightmodel || "") !== String(expectedRole.lightmodel || "")) {
+      findings.push(error("APPLICATION_COLOR_PATTERN_APP_PLAN_MISMATCH", "Application style theme Config must match the App Plan color pattern selection or default application color pattern.", {
+        role,
+        expected: expectedRole,
+        actual: actualRole,
+      }));
+    }
+  }
+}
+
+function validateApplicationColorPatternConfig(config, findings, { source }) {
+  if (!isObject(config)) {
+    findings.push(error("APPLICATION_COLOR_PATTERN_CONFIG_INVALID", "Application color pattern Config must be an object.", { source }));
+    return;
+  }
+  for (const role of ["primary", "secondary", "neutral"]) {
+    const entry = config[role];
+    if (!isObject(entry)) {
+      findings.push(error("APPLICATION_COLOR_PATTERN_ROLE_MISSING", "Application color pattern Config must include primary, secondary, and neutral role objects.", { role, source }));
+      continue;
+    }
+    const color = normalizeHexColor(entry.value);
+    if (!color) {
+      findings.push(error("APPLICATION_COLOR_PATTERN_HEX_INVALID", "Application color pattern base color must be a #RRGGBB hex color.", { role, value: entry.value ?? null, source }));
+      continue;
+    }
+    if (String(entry.lightmodel || "") !== "Luminance") {
+      findings.push(error("APPLICATION_COLOR_PATTERN_LIGHTMODEL_INVALID", "Application color pattern lightmodel must be exactly \"Luminance\".", { role, actual: entry.lightmodel ?? null, source }));
+    }
+    const oklch = hexToOklch(color);
+    if (!oklch) continue;
+    if (role === "neutral") {
+      if (oklch.l < 0.65) findings.push(error("APPLICATION_COLOR_PATTERN_BASE_TOO_DARK", "Neutral base color is too dark for readable generated applications.", { role, value: color, lightness: round(oklch.l), minimum: 0.65, source }));
+      if (oklch.l > 0.88) findings.push(error("APPLICATION_COLOR_PATTERN_BASE_TOO_LIGHT", "Neutral base color is too light to preserve visible neutral state differences.", { role, value: color, lightness: round(oklch.l), maximum: 0.88, source }));
+      if (oklch.c > 0.06) findings.push(error("APPLICATION_COLOR_PATTERN_NEUTRAL_CHROMA_INVALID", "Neutral base color must stay low-chroma so it remains a neutral palette.", { role, value: color, chroma: round(oklch.c), maximum: 0.06, source }));
+    } else {
+      if (oklch.l < 0.35) findings.push(error("APPLICATION_COLOR_PATTERN_BASE_TOO_DARK", "Primary and secondary base colors are too dark to generate distinguishable dark variants.", { role, value: color, lightness: round(oklch.l), minimum: 0.35, source }));
+      if (oklch.l > 0.82) findings.push(error("APPLICATION_COLOR_PATTERN_BASE_TOO_LIGHT", "Primary and secondary base colors are too light for readable brand controls.", { role, value: color, lightness: round(oklch.l), maximum: 0.82, source }));
+      if (oklch.l > 0.72) findings.push(warning("APPLICATION_COLOR_PATTERN_BASE_LIGHT_WARNING", "Primary or secondary base color is valid but light; prefer 0.42-0.68 OKLCH lightness for stronger contrast.", { role, value: color, lightness: round(oklch.l), source }));
+    }
+  }
+  if (!isObject(config.typography)) {
+    findings.push(error("APPLICATION_COLOR_PATTERN_TYPOGRAPHY_MISSING", "Application style theme Config must preserve typography settings.", { source }));
   }
 }
 
@@ -221,6 +311,14 @@ function readJson(filePath, findings, code) {
   }
 }
 
+function readText(filePath, findings, code) {
+  if (!fs.existsSync(filePath)) {
+    findings.push(error(code, "File is missing.", { path: filePath }));
+    return "";
+  }
+  return fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
+}
+
 function parseJsonString(value, findings, code, message) {
   if (typeof value !== "string") {
     findings.push(error(code, message, { actualType: typeof value }));
@@ -232,6 +330,115 @@ function parseJsonString(value, findings, code, message) {
     findings.push(error(code, `${message} ${err.message}`));
     return null;
   }
+}
+
+function extractApplicationColorPatternFromPlan(planText) {
+  const out = {};
+  const section = extractNamedSection(planText, "Application Color Pattern Selection") || String(planText || "");
+  for (const table of parseMarkdownTables(section)) {
+    for (const row of table.rows) {
+      const normalized = normalizeRowKeys(row);
+      const role = normalizeColorRole(normalized["color role"] || normalized.role || normalized.token || normalized["color pattern"]);
+      const value = normalizeHexColor(normalized["base color"] || normalized.value || normalized.color || normalized["normal color"]);
+      const lightmodel = String(normalized["light model"] || normalized.lightmodel || "Luminance").trim();
+      if (role && value) out[role] = { value, lightmodel: lightmodel || "Luminance" };
+    }
+  }
+  const regex = /\b(primary|secondary|neutral)\b[^\n#]{0,80}(#[0-9a-f]{6})/gi;
+  let match;
+  while ((match = regex.exec(section))) {
+    const role = normalizeColorRole(match[1]);
+    if (role && !out[role]) out[role] = { value: normalizeHexColor(match[2]), lightmodel: "Luminance" };
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+function extractNamedSection(text, heading) {
+  const pattern = new RegExp(`^#{2,6}\\s+${escapeRegExp(heading)}\\s*$`, "im");
+  const match = pattern.exec(String(text || ""));
+  if (!match) return "";
+  const start = match.index + match[0].length;
+  const rest = String(text || "").slice(start);
+  const next = /\n#{2,6}\s+/.exec(rest);
+  return next ? rest.slice(0, next.index) : rest;
+}
+
+function parseMarkdownTables(section) {
+  const lines = String(section || "").split(/\r?\n/);
+  const tables = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const rows = [];
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const row = {};
+      headers.forEach((header, cellIndex) => { row[header] = cells[cellIndex] || ""; });
+      rows.push(row);
+      rowIndex += 1;
+    }
+    tables.push({ headers, rows });
+    index = rowIndex;
+  }
+  return tables;
+}
+
+function isTableLine(line) {
+  return /^\s*\|.+\|\s*$/.test(line || "");
+}
+
+function splitTableLine(line) {
+  return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => String(cell || "").replace(/`/g, "").trim());
+}
+
+function normalizeRowKeys(row) {
+  const out = {};
+  for (const [key, value] of Object.entries(row || {})) out[String(key || "").trim().toLowerCase()] = value;
+  return out;
+}
+
+function normalizeColorRole(value) {
+  const text = String(value || "").replace(/`/g, "").trim().toLowerCase();
+  if (text === "primary") return "primary";
+  if (text === "secondary") return "secondary";
+  if (text === "neutral") return "neutral";
+  return "";
+}
+
+function normalizeHexColor(value) {
+  const match = String(value || "").trim().match(/^#[0-9a-f]{6}$/i);
+  return match ? match[0].toUpperCase() : "";
+}
+
+function hexToOklch(hex) {
+  const match = normalizeHexColor(hex).match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (!match) return null;
+  const r = srgbToLinear(parseInt(match[1], 16) / 255);
+  const g = srgbToLinear(parseInt(match[2], 16) / 255);
+  const b = srgbToLinear(parseInt(match[3], 16) / 255);
+  const l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
+  const m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
+  const s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+  const l_ = Math.cbrt(l);
+  const m_ = Math.cbrt(m);
+  const s_ = Math.cbrt(s);
+  const okL = 0.2104542553 * l_ + 0.793617785 * m_ - 0.0040720468 * s_;
+  const okA = 1.9779984951 * l_ - 2.428592205 * m_ + 0.4505937099 * s_;
+  const okB = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.808675766 * s_;
+  return { l: okL, c: Math.sqrt(okA * okA + okB * okB) };
+}
+
+function srgbToLinear(value) {
+  return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+}
+
+function round(value) {
+  return Math.round(Number(value) * 1000) / 1000;
+}
+
+function escapeRegExp(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function asArray(value) {
@@ -254,6 +461,10 @@ function error(code, message, detail = {}) {
   return { level: "error", code, message, ...detail };
 }
 
+function warning(code, message, detail = {}) {
+  return { level: "warning", code, message, ...detail };
+}
+
 function parseArgs(argv) {
   const args = {};
   for (let i = 0; i < argv.length; i += 1) {
@@ -263,6 +474,7 @@ function parseArgs(argv) {
     else if (arg === "--template") args.template = argv[i + 1] && !argv[i + 1].startsWith("--") ? argv[++i] : true;
     else if (arg === "--package") args.package = argv[++i];
     else if (arg === "--decoded") args.decoded = argv[++i];
+    else if (arg === "--plan" || arg === "--app-plan") args.plan = argv[++i];
     else throw new Error(`Unknown argument: ${arg}`);
   }
   return args;
@@ -271,8 +483,8 @@ function parseArgs(argv) {
 function printUsage() {
   console.log(`Usage:
   node scripts/validate-application-control-style-template.mjs --registry
-  node scripts/validate-application-control-style-template.mjs --package app.generated-final.yapk
-  node scripts/validate-application-control-style-template.mjs --decoded decoded.json
+  node scripts/validate-application-control-style-template.mjs --package app.generated-final.yapk [--plan yeeflow-app-plan.md]
+  node scripts/validate-application-control-style-template.mjs --decoded decoded.json [--plan yeeflow-app-plan.md]
 `);
 }
 

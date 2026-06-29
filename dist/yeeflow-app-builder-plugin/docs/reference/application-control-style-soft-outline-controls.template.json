@@ -47,6 +47,8 @@
     "Only package-local theme identity and style ID fields are remapped. Do not rewrite ordinary style tokens, color values, control configuration values, or other non-ID settings inside the style Config.",
     "Do not depend on tenant-global or system control style IDs for generated packages; the package must carry the Application Custom Control Style itself.",
     "Do not emit the style Config as an object. Yeeflow package export shape stores Theme.Config as a stringified JSON object.",
+    "The Type 0 application style Config must be a stringified JSON object containing primary, secondary, neutral, and typography settings. Primary, secondary, and neutral must each store a base #RRGGBB color and lightmodel exactly equal to Luminance.",
+    "The App Plan may select Primary, Secondary, and Neutral base colors. If it does not, generated packages must use the default base colors in this template. Success, warning, danger, background, text, and accent remain the standard Yeeflow semantic color system.",
     "Full-app upgrades must preserve this default style unless the user explicitly requests a different application control style."
   ],
   "requiredThemes": {
@@ -63,9 +65,65 @@
       "Type": 0,
       "Name": "application style",
       "Description": null,
-      "Config": null,
+      "ConfigShape": "stringified-json",
+      "Config": {
+        "primary": {
+          "value": "#0065FF",
+          "lightmodel": "Luminance"
+        },
+        "secondary": {
+          "value": "#00D1FF",
+          "lightmodel": "Luminance"
+        },
+        "neutral": {
+          "value": "#B3B7C0",
+          "lightmodel": "Luminance"
+        },
+        "typography": {
+          "fontfamily": "Default",
+          "fontweight": "regular",
+          "basevalue": 14,
+          "scale": "1.125",
+          "lineheight": 1.6
+        }
+      },
       "ExtShape": {
         "controlDefaultId": "b044df34-e0f9-4985-9989-65d235811998"
+      }
+    }
+  },
+  "applicationColorPattern": {
+    "defaults": {
+      "primary": {
+        "value": "#0065FF",
+        "lightmodel": "Luminance"
+      },
+      "secondary": {
+        "value": "#00D1FF",
+        "lightmodel": "Luminance"
+      },
+      "neutral": {
+        "value": "#B3B7C0",
+        "lightmodel": "Luminance"
+      },
+      "typography": {
+        "fontfamily": "Default",
+        "fontweight": "regular",
+        "basevalue": 14,
+        "scale": "1.125",
+        "lineheight": 1.6
+      }
+    },
+    "lightmodel": "Luminance",
+    "baseColorGuidance": {
+      "primarySecondary": {
+        "recommendedOklchLightness": "0.42-0.68",
+        "validOklchLightness": "0.35-0.82",
+        "warningAbove": 0.72
+      },
+      "neutral": {
+        "validOklchLightness": "0.65-0.88",
+        "maxOklchChroma": 0.06
       }
     }
   },

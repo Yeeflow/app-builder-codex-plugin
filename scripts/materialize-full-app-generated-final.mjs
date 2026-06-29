@@ -107,7 +107,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   }
 
   const decoded = planDemand.hasMaterialResources
-    ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl })
+    ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl, appPlanText: planText })
     : buildDecodedPackage({
       appTitle,
       rootListId: numberId(ids["decoded.ListSet.ListID"]),
@@ -115,6 +115,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
       layoutResourceId: numberId(ids["decoded.Pages[0].LayoutInResources[0].ID"]),
       layoutResourceRefId: numberId(ids["decoded.Pages[0].LayoutInResources[0].RefId"]),
       iconUrl: appIconUrl,
+      appPlanText: planText,
     });
   const resource = zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64");
   const wrapper = {
@@ -271,11 +272,19 @@ function parseJsonMaybe(value) {
   }
 }
 
-function buildDefaultApplicationControlStyles({ rootListId }) {
+const DEFAULT_APPLICATION_COLOR_PATTERN = {
+  primary: { value: "#0065FF", lightmodel: "Luminance" },
+  secondary: { value: "#00D1FF", lightmodel: "Luminance" },
+  neutral: { value: "#B3B7C0", lightmodel: "Luminance" },
+  typography: { fontfamily: "Default", fontweight: "regular", basevalue: 14, scale: "1.125", lineheight: 1.6 },
+};
+
+function buildDefaultApplicationControlStyles({ rootListId, appPlanText = "" }) {
   const template = JSON.parse(fs.readFileSync(APPLICATION_CONTROL_STYLE_TEMPLATE_PATH, "utf8"));
   const styleContract = template.requiredThemes?.controlStyleTheme || {};
   const appContract = template.requiredThemes?.applicationStyleTheme || {};
   const controlStyleId = crypto.randomUUID();
+  const appStyleConfig = buildApplicationColorPatternConfig(appPlanText, template);
   return [
     {
       ID: controlStyleId,
@@ -290,10 +299,79 @@ function buildDefaultApplicationControlStyles({ rootListId }) {
       Type: 0,
       Name: appContract.Name || "application style",
       Description: "",
-      Config: "",
+      Config: JSON.stringify(appStyleConfig),
       Ext: JSON.stringify({ controlDefaultId: controlStyleId }),
     },
   ];
+}
+
+function buildApplicationColorPatternConfig(appPlanText, template = {}) {
+  const defaults = template.requiredThemes?.applicationStyleTheme?.Config || template.applicationColorPattern?.defaults || DEFAULT_APPLICATION_COLOR_PATTERN;
+  const config = JSON.parse(JSON.stringify(defaults));
+  const planned = extractApplicationColorPatternFromPlan(appPlanText);
+  for (const role of ["primary", "secondary", "neutral"]) {
+    if (!planned[role]) continue;
+    config[role] = {
+      value: planned[role].value,
+      lightmodel: planned[role].lightmodel || "Luminance",
+    };
+  }
+  config.typography = config.typography || DEFAULT_APPLICATION_COLOR_PATTERN.typography;
+  return config;
+}
+
+function extractApplicationColorPatternFromPlan(planText) {
+  const out = {};
+  const section = extractNamedSection(planText, "Application Color Pattern Selection") || String(planText || "");
+  for (const table of parseMarkdownTables(section)) {
+    for (const row of table.rows) {
+      const normalized = normalizeRowKeys(row);
+      const role = normalizeColorRole(normalized["color role"] || normalized.role || normalized.token || normalized["color pattern"]);
+      const value = normalizeHexColor(normalized["base color"] || normalized.value || normalized.color || normalized["normal color"]);
+      const lightmodel = cleanResourceName(normalized["light model"] || normalized.lightmodel || normalized["lightmodel"] || "Luminance");
+      if (role && value) out[role] = { value, lightmodel: lightmodel || "Luminance" };
+    }
+  }
+  const regex = /\b(primary|secondary|neutral)\b[^\n#]{0,80}(#[0-9a-f]{6})/gi;
+  let match;
+  while ((match = regex.exec(section))) {
+    const role = normalizeColorRole(match[1]);
+    if (role && !out[role]) out[role] = { value: normalizeHexColor(match[2]), lightmodel: "Luminance" };
+  }
+  return out;
+}
+
+function extractNamedSection(text, heading) {
+  const pattern = new RegExp(`^#{2,6}\\s+${escapeRegExp(heading)}\\s*$`, "im");
+  const match = pattern.exec(String(text || ""));
+  if (!match) return "";
+  const start = match.index + match[0].length;
+  const rest = String(text || "").slice(start);
+  const next = /\n#{2,6}\s+/.exec(rest);
+  return next ? rest.slice(0, next.index) : rest;
+}
+
+function normalizeRowKeys(row) {
+  const out = {};
+  for (const [key, value] of Object.entries(row || {})) out[String(key || "").trim().toLowerCase()] = value;
+  return out;
+}
+
+function normalizeColorRole(value) {
+  const text = cleanResourceName(value).toLowerCase();
+  if (text === "primary") return "primary";
+  if (text === "secondary") return "secondary";
+  if (text === "neutral") return "neutral";
+  return "";
+}
+
+function normalizeHexColor(value) {
+  const match = String(value || "").trim().match(/^#[0-9a-f]{6}$/i);
+  return match ? match[0].toUpperCase() : "";
+}
+
+function escapeRegExp(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function analyzeAppPlanResourceDemand(planText) {
@@ -1514,7 +1592,7 @@ function isNonResourceName(value) {
   return false;
 }
 
-function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId, iconUrl = DEFAULT_ICON }) {
+function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId, iconUrl = DEFAULT_ICON, appPlanText = "" }) {
   return {
     ListSet: listInfo({ listId: rootListId, title: appTitle, type: 1024, ext2: "{\"src\":true}", iconUrl }),
     Pages: [
@@ -1567,13 +1645,13 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
     Agents: [],
     Connections: [],
     Knowledges: [],
-    Themes: buildDefaultApplicationControlStyles({ rootListId }),
+    Themes: buildDefaultApplicationControlStyles({ rootListId, appPlanText }),
     Components: [],
     Childs: [],
   };
 }
 
-function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON }) {
+function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON, appPlanText = "" }) {
   const dataListNames = planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`];
   const dataListByName = new Map();
   const listMetaByName = new Map();
@@ -1753,7 +1831,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     Agents: [],
     Connections: [],
     Knowledges: [],
-    Themes: buildDefaultApplicationControlStyles({ rootListId }),
+    Themes: buildDefaultApplicationControlStyles({ rootListId, appPlanText }),
     Components: [],
     Childs: childs,
   };
