@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.91
+
+- Release business-semantic application color palette selection from PR #322.
+- App Plans now choose Primary, Secondary, and Neutral base colors from explicit user branding or a business-domain-specific palette instead of silently falling back to the generic Yeeflow default palette.
+- Materialize domain-inferred palettes into the Type 0 `application style.Config` while preserving `lightmodel: "Luminance"` and the Soft outline controls default binding.
+- Reject identifiable business-domain applications that still use the generic default Primary/Secondary/Neutral palette without explicit user approval before signing readiness.
+- Add focused regression coverage for travel/vendor/asset/finance/people palette inference, explicit override preservation, and App Plan-to-package color matching.
+
 ## 0.8.90
 
 - Release Dashboard runtime data binding hardening from PR #319.
