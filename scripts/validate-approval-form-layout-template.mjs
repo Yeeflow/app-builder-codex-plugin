@@ -13,6 +13,7 @@ const TASK_TEMPLATE_ID = "approval_form_layout_task_v1_1";
 const TEMPLATE_IDS = new Set([SUBMISSION_TEMPLATE_ID, TASK_TEMPLATE_ID]);
 const TASK_WORKFLOW_SURFACES = new Set(["approval-form-task", "data-list-workflow-task", "schedule-workflow-task"]);
 const BACKGROUND = "#f4f7fb";
+const SECTION_CONTENT_AREA_GAP = "--sp--s200";
 const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" };
 const CONTENT_WIDTH = 1280;
 const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header"]);
@@ -294,7 +295,18 @@ function validateFormResource(resource, context) {
   validateRootShell(resource, context);
   validateRequiredRegions(resource, context);
   validateForbiddenFamilies(resource, context);
+  validateSectionContentAreaGap(resource, context);
   validateBusinessSlots(resource, context);
+}
+
+function validateSectionContentAreaGap(resource, context) {
+  for (const entry of flatten(resource)) {
+    if (!hasIdentity(entry.node, "section_content_area")) continue;
+    const gap = entry.node?.attrs?.style?.gap;
+    if (tupleValue(gap) !== SECTION_CONTENT_AREA_GAP) {
+      context.findings.push(error("APPROVAL_FORM_LAYOUT_SECTION_CONTENT_AREA_GAP_INVALID", "section_content_area must preserve attrs.style.gap [null,\"--sp--s200\"] in Approval Form golden reference templates and generated forms.", { source: context.source, path: entry.pointer, actual: gap ?? null }));
+    }
+  }
 }
 
 function validateRootShell(resource, context) {

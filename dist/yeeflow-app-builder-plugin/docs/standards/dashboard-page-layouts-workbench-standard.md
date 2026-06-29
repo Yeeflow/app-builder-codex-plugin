@@ -150,6 +150,8 @@ Live KPI values require the same Summary-backed runtime contract as other Dashbo
 
 Approved Dashboard Collection templates may be placed inside Workbench business content slots such as a `section_content_area` in the primary working area or right-side panel. Clone the selected Collection template exactly and map only approved editable regions.
 
+Every `section_content_area` copied from the Workbench Dashboard golden reference must preserve `attrs.style.gap = [null, "--sp--s200"]`. Do not keep or regenerate the legacy `--sp--s0` gap for Workbench content slots.
+
 Approved Data Analytics templates may be placed inside Workbench `chart_cards_section` or other planned Workbench content slots when the page design requires it. `chart_cards_section` is preferred for grouped analytics.
 
 ## Validation

@@ -204,6 +204,10 @@ try {
   find(missingContent, "content_card_wrapper").children = find(missingContent, "content_card_wrapper").children.filter((child) => !ids(child).includes("section_content_area"));
   expectCode("section card missing section_content_area fails", ["--package", writePackage(tempDir, "missing-content-area", decoded(missingContent))], "DASH_LAYOUT_RESOURCE_SECTION_CONTENT_AREA_MISSING");
 
+  const legacySectionGap = templateResource();
+  find(find(legacySectionGap, "content_card_wrapper"), "section_content_area").attrs.style.gap = [null, "--sp--s0"];
+  expectCode("section_content_area legacy zero gap fails", ["--package", writePackage(tempDir, "legacy-section-content-area-gap", decoded(legacySectionGap))], "DASH_LAYOUT_RESOURCE_SECTION_CONTENT_AREA_GAP_INVALID");
+
   const emptyContentArea = templateResource();
   find(find(emptyContentArea, "content_card_wrapper"), "section_content_area").children = [];
   expectCode("generated dashboard empty section_content_area fails", ["--package", writePackage(tempDir, "empty-section-content-area", decoded(emptyContentArea))], "DASH_LAYOUT_EMPTY_SECTION_CONTENT_AREA");

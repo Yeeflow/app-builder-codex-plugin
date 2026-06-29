@@ -10,6 +10,7 @@ const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-page-layout-temp
 const TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const WORKBENCH_TEMPLATE_ID = "dashboard-page-layouts-workbench";
 const BACKGROUND = "#f4f7fb";
+const SECTION_CONTENT_AREA_GAP = "--sp--s200";
 const DEFAULT_REQUIRED_FULL_WIDTH_IDS = [
   "main",
   "content",
@@ -244,6 +245,7 @@ function validatePageShell(resource, findings, context) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_BACKGROUND_CONFLICT`, "Dashboard content container must not override the full-page #f4f7fb background continuity.", { page: context.page, actual: content.attrs?.background || content.attrs?.style?.background || null }));
   }
   validateContentPaddingContract(content, findings, context);
+  validateSectionContentAreaGap(resource, findings, context);
   for (const id of rules.requiredFullWidthIds) {
     for (const entry of findAllByIdentity(resource, id)) {
       if (!isFullWidth(entry)) {
@@ -266,6 +268,17 @@ function validatePageShell(resource, findings, context) {
   if (!context.allowTemplateOperations) validateOperations(resource, findings, context.page);
   if (!context.allowTemplateOperations) validateGeneratedSectionCleanup(resource, findings, context.page, context);
   validateControlledSlotsAndRepeatableModules(resource, findings, context);
+}
+
+function validateSectionContentAreaGap(resource, findings, context) {
+  for (const entry of flattenControls(resource, templateRules(context.template))) {
+    const control = entry.control;
+    if (!hasIdentity(control, "section_content_area")) continue;
+    const gap = control?.attrs?.style?.gap;
+    if (!isSectionContentAreaGap(gap)) {
+      findings.push(error(`DASH_LAYOUT_${context.layer}_SECTION_CONTENT_AREA_GAP_INVALID`, "section_content_area must preserve attrs.style.gap [null,\"--sp--s200\"] in Dashboard golden reference templates and generated pages.", { page: context.page, pointer: entry.pointer, actual: gap ?? null }));
+    }
+  }
 }
 
 function validateOperations(resource, findings, page) {
@@ -785,6 +798,10 @@ function isFullWidth(control) {
 
 function isFullWidthType(value) {
   return Array.isArray(value) && value[0] === null && String(value[1]) === "1";
+}
+
+function isSectionContentAreaGap(value) {
+  return Array.isArray(value) && value[0] === null && value[1] === SECTION_CONTENT_AREA_GAP;
 }
 
 function isColumnLayout(control) {
