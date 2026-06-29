@@ -2330,7 +2330,7 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
       runtimeModelProven: true,
       data: {
         ...(analyticsControl.attrs?.data || {}),
-        list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName },
+        list: { AppID: 41, ListID: stringId(listMeta.listId), ListSetID: stringId(rootListSetId), Type: 1, Title: listMeta.listName },
         source: listMeta.listName,
         sourceResourceType: "Data list",
         fields: [
@@ -2345,7 +2345,7 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
         title,
       },
       model: {
-        source: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName },
+        source: { AppID: 41, ListID: stringId(listMeta.listId), ListSetID: stringId(rootListSetId), Type: 1, Title: listMeta.listName },
         categoryField: groupingField.fieldName,
         valueField: valueField.fieldName,
         aggregate: "COUNT",
@@ -2361,7 +2361,13 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
       ],
       rows: analyticsControl.attrs?.rows || { fields: [groupingField.fieldName] },
       columns: analyticsControl.attrs?.columns || { fields: [] },
-      values: analyticsControl.attrs?.values || [{ field: valueField.fieldName, aggregate: "COUNT" }],
+      values: analyticsControl.attrs?.values || [{
+        field: valueField.fieldName,
+        fieldName: valueField.fieldName,
+        FieldName: valueField.fieldName,
+        id: valueField.fieldName,
+        aggregate: "COUNT",
+      }],
     };
     runtimeContract = buildDataAnalyticsRuntimeContract({
       controlId: analyticsControl.id,
@@ -2416,7 +2422,7 @@ function runtimeFieldRef(field, role) {
     field: fieldName,
     fieldName,
     FieldName: fieldName,
-    id: String(field?.fieldId || field?.FieldID || fieldName),
+    id: role === "value" ? fieldName : String(field?.fieldId || field?.FieldID || fieldName),
     label: String(field?.displayName || field?.DisplayName || fieldName),
     role,
   };

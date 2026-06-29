@@ -72,9 +72,10 @@ Visible Data Analytics controls are not runtime-ready unless the containing layo
 - chart entries must include `attr.chartType`;
 - `attr.settings.rows[]` and `attr.settings.values[]` must be non-empty;
 - every row, column, and value field reference must resolve to a real field on the selected source list/report;
+- the visible control's `attrs.data.list` and `attrs.model.source` must both include `AppID`, `ListID`, and `ListSetID`, and those values must match the same source metadata in `Resource.exts[]`;
 - the visible control's `attrs.data.groupBy`, `attrs.data.axisField`, `attrs.data.categoryField`, `attrs.model.categoryField`, and `attrs.series[].categoryField` must match `Resource.exts[].attr.settings.rows[]`;
 - the visible control's `attrs.data.valueField`, `attrs.model.valueField`, `attrs.series[].valueField`, and `attrs.values[].field` must match `Resource.exts[].attr.settings.values[]`;
-- count charts must use a real source field such as `ListDataID` plus aggregate metadata such as `COUNT`; generated field IDs such as `ListDataID_COUNT` are invalid.
+- count charts must use the runtime-proven real source field identity `ListDataID` plus aggregate metadata such as `COUNT`; `settings.values[]` entries for COUNT must set `field`, `fieldName`, `FieldName`, and `id` to `ListDataID`; generated field IDs or aliases such as `ListDataID_COUNT`, source field UUIDs, or display labels are invalid.
 
 Template provenance without this runtime contract is only visual materialization and must fail generated-final preflight. A blank chart area caused by missing `exts[]`, missing `ReportIds[]`, or unresolved runtime field metadata is a generator defect and a signing blocker.
 
@@ -87,4 +88,4 @@ Generated-final validation must fail when:
 - A Dashboard v1.1 page places an analytics template outside `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`.
 - A generator emits an ad hoc chart/pivot control instead of cloning the approved template.
 - A visible chart or pivot control is missing its `Resource.ReportIds[]` registration, matching `Resource.exts[]` runtime entry, source metadata, chart type, runtime settings, or resolvable source fields.
-- A visible chart or pivot control has template marker drift, missing `runtimeModelProven`, stale `attrs.model`/`attrs.series`/`attrs.values` field references, or derived aggregate field IDs instead of real source fields plus aggregate metadata.
+- A visible chart or pivot control has template marker drift, missing `runtimeModelProven`, missing or mismatched `attrs.data.list` / `attrs.model.source` source metadata, stale `attrs.model`/`attrs.series`/`attrs.values` field references, empty row/value model entries, or derived aggregate field IDs instead of real source fields plus aggregate metadata.

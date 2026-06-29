@@ -35,6 +35,10 @@ try {
   expectCode("Visual analytics template without runtime exts fails", ["--resource", writeJson("missing-runtime.json", dashboardResource({ omitRuntimeBindings: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_EXT_MISSING");
   expectCode("Runtime ext without ReportIds registration fails", ["--resource", writeJson("missing-reportids.json", dashboardResource({ omitReportIds: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_REPORT_ID_MISSING");
   expectCode("Runtime ext with unresolved source field fails", ["--package", writeYapk("analytics-bad-field.yapk", dashboardResource({ badRuntimeField: true }))], "DATA_ANALYTICS_RUNTIME_FIELD_UNRESOLVED");
+  expectCode("Visible analytics source without ListSetID fails", ["--resource", writeJson("visible-source-missing-listset.json", dashboardResource({ missingVisibleListSetId: true })), "--surface", "dashboard"], "DATA_ANALYTICS_VISIBLE_SOURCE_METADATA_MISSING");
+  expectCode("Visible analytics source mismatch fails", ["--resource", writeJson("visible-source-mismatch.json", dashboardResource({ mismatchedVisibleSource: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_SOURCE_SURFACE_MISMATCH");
+  expectCode("COUNT analytics values must use ListDataID identity", ["--resource", writeJson("count-identity-mismatch.json", dashboardResource({ countValueUsesTitle: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_COUNT_FIELD_ID_INVALID");
+  expectCode("Pivot runtime values cannot be empty objects", ["--resource", writeJson("pivot-empty-value.json", dashboardResource({ emptyPivotValueObject: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_VALUE_FIELD_MISSING");
   expectCode("Generated chart without runtimeModelProven fails", ["--resource", writeJson("missing-runtime-model-proven.json", dashboardResource({ missingRuntimeModelProven: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_MODEL_PROVEN_MISSING");
   expectCode("Generated chart without both template IDs fails", ["--resource", writeJson("template-id-mismatch.json", dashboardResource({ templateIdMismatch: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_ID_CONTRACT_MISSING");
   expectCode("Generated chart with derived COUNT field ID fails", ["--resource", writeJson("derived-count-field.json", dashboardResource({ derivedValueField: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DERIVED_FIELD_ID_INVALID");
@@ -87,6 +91,16 @@ function dashboardResource(options = {}) {
   if (firstControl && options.templateIdMismatch) firstControl.attrs.templateId = "data_analytics_line_chart_with_title";
   if (firstControl && options.derivedValueField) firstControl.attrs.values = [{ field: "ListDataID_COUNT", aggregate: "COUNT" }];
   if (firstControl && options.staleValueSurface) firstControl.attrs.model.valueField = "Title";
+  if (firstControl && options.missingVisibleListSetId) {
+    delete firstControl.attrs.data.list.ListSetID;
+    delete firstControl.attrs.model.source.ListSetID;
+  }
+  if (firstControl && options.mismatchedVisibleSource) firstControl.attrs.model.source.ListID = "list_other";
+  if (firstControl && options.countValueUsesTitle) firstControl.attrs.values = [{ field: "Title", fieldName: "Title", FieldName: "Title", id: "Title", aggregate: "COUNT" }];
+  if (options.emptyPivotValueObject) {
+    const pivot = analytics.find((item) => item?.type === "pivot-table");
+    if (pivot) pivot.attrs.values = [{}];
+  }
   if (options.noAnalytics) analytics.length = 0;
 
   const resource = {
@@ -116,7 +130,12 @@ function dashboardResource(options = {}) {
       },
     ],
   };
-  if (!options.omitRuntimeBindings) addAnalyticsRuntimeBindings(resource, { omitReportIds: options.omitReportIds, badRuntimeField: options.badRuntimeField });
+  if (!options.omitRuntimeBindings) addAnalyticsRuntimeBindings(resource, {
+    omitReportIds: options.omitReportIds,
+    badRuntimeField: options.badRuntimeField,
+    countValueUsesTitle: options.countValueUsesTitle,
+    emptyPivotValueObject: options.emptyPivotValueObject,
+  });
   return resource;
 }
 
@@ -344,10 +363,10 @@ function chartModule(templateId, wrapperId, titleId, controlId, controlType) {
             dataAnalyticsTemplateId: templateId,
             templateId,
             runtimeModelProven: true,
-            data: { list: { ListID: "list_assets" }, groupBy: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", axisField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID" },
-            model: { categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID", aggregate: "COUNT", runtimeModelProven: true },
+            data: { list: { AppID: 41, ListID: "list_assets", ListSetID: "app_1" }, groupBy: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", axisField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID" },
+            model: { source: { AppID: 41, ListID: "list_assets", ListSetID: "app_1" }, categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID", aggregate: "COUNT", runtimeModelProven: true },
             series: [{ name: "Business-specific title", categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID", aggregate: "COUNT" }],
-            values: [{ field: "ListDataID", aggregate: "COUNT" }],
+            values: [{ field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", id: "ListDataID", aggregate: "COUNT" }],
           },
         },
       ] },
@@ -363,7 +382,16 @@ function pivotModule() {
     dataAnalyticsTemplateId: "data_analytics_pivot_table_standard",
     templateId: "data_analytics_pivot_table_standard",
     runtimeModelProven: true,
-    attrs: { dataAnalyticsTemplateId: "data_analytics_pivot_table_standard", templateId: "data_analytics_pivot_table_standard", runtimeModelProven: true, rows: {}, columns: {}, values: [{ field: "ListDataID", aggregate: "COUNT" }] },
+    attrs: {
+      dataAnalyticsTemplateId: "data_analytics_pivot_table_standard",
+      templateId: "data_analytics_pivot_table_standard",
+      runtimeModelProven: true,
+      data: { list: { AppID: 41, ListID: "list_assets", ListSetID: "app_1" } },
+      model: { source: { AppID: 41, ListID: "list_assets", ListSetID: "app_1" } },
+      rows: {},
+      columns: {},
+      values: [{ field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", id: "ListDataID", aggregate: "COUNT" }],
+    },
   };
 }
 
@@ -388,6 +416,11 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
     if (!options.omitReportIds) reportIds.push(id);
     const key = control.type === "pivot-table" ? "PivotTable" : control.type;
     const fieldName = options.badRuntimeField ? "MissingField" : (id.includes("line") || id.includes("area") ? "Created" : "Status");
+    const valueEntry = options.emptyPivotValueObject && control.type === "pivot-table"
+      ? {}
+      : options.countValueUsesTitle
+        ? { field: "Title", fieldName: "Title", FieldName: "Title", id: "Title", func: "COUNT" }
+        : { field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", id: "ListDataID", func: "COUNT" };
     exts.push({
       i: id,
       category: "___Pivot___",
@@ -400,7 +433,7 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
         settings: {
           rows: [{ field: fieldName, fieldName, FieldName: fieldName }],
           columns: [],
-          values: [{ field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", func: "COUNT" }],
+          values: [valueEntry],
         },
       },
     });
