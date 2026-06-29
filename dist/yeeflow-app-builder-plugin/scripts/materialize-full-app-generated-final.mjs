@@ -137,7 +137,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   const planText = fs.readFileSync(planPath, "utf8");
   const planDemand = analyzeAppPlanResourceDemand(planText);
   fs.mkdirSync(outDir, { recursive: true });
-  const appTitle = sanitizeTitle(options.title || extractTitle(planText) || extractTitle(specText) || "Generated Yeeflow Application");
+  const appTitle = sanitizeTitle(options.title || extractApplicationName(planText) || extractTitle(planText) || extractTitle(specText) || "Generated Yeeflow Application");
   const slug = slugify(appTitle);
   const idPaths = buildIdPaths(planDemand);
   const ids = allocateIds(idSource.ids, idPaths, findings);
@@ -4367,8 +4367,28 @@ function allocateIds(ids, paths, findings) {
 
 function extractTitle(text) {
   const heading = text.match(/^#\s+(.+)$/m)?.[1];
-  if (heading) return heading.replace(/^(Functional Specification|Yeeflow App Plan)\s*[:\-]\s*/i, "").trim();
+  if (heading) {
+    return stripPlanningDocumentSuffix(heading)
+      .replace(/^(Functional Specification|Yeeflow App Plan)\s*[:\-]\s*/i, "")
+      .trim();
+  }
   return text.match(/\|\s*(?:Application|App) Name\s*\|\s*([^|]+)\|/i)?.[1]?.trim() || "";
+}
+
+function extractApplicationName(text) {
+  const markdown = String(text || "");
+  const bullet = markdown.match(/^\s*[-*]\s*(?:Application|App)\s+name\s*:\s*(.+?)\s*$/im)?.[1];
+  if (bullet) return stripPlanningDocumentSuffix(bullet).trim();
+  const table = markdown.match(/\|\s*(?:Application|App) Name\s*\|\s*([^|]+)\|/i)?.[1];
+  if (table) return stripPlanningDocumentSuffix(table).trim();
+  return "";
+}
+
+function stripPlanningDocumentSuffix(value) {
+  return String(value || "")
+    .replace(/\s+[-–—]\s+Yeeflow App Plan\s*$/i, "")
+    .replace(/\s+Yeeflow App Plan\s*$/i, "")
+    .trim();
 }
 
 function resolveRequiredPath(cwd, requested, fallbackName) {

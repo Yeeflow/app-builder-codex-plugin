@@ -14,6 +14,7 @@ if (isMainModule()) {
     process.exit(args.help ? 0 : 1);
   }
   const result = runYapkFirstGenerationPreflight(args.package, {
+    cwd: process.cwd(),
     plan: args.plan,
     idProvenance: args.idProvenance,
     upgrade: args.upgrade,
@@ -27,9 +28,10 @@ if (isMainModule()) {
 }
 
 export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
-  const resolvedPackage = path.resolve(options.cwd || ROOT, packagePath);
-  const plan = options.plan ? path.resolve(options.cwd || ROOT, options.plan) : "";
-  const idProvenance = options.idProvenance ? path.resolve(options.cwd || ROOT, options.idProvenance) : defaultIdProvenancePath(resolvedPackage);
+  const invocationCwd = path.resolve(options.cwd || process.cwd());
+  const resolvedPackage = path.resolve(invocationCwd, packagePath);
+  const plan = options.plan ? path.resolve(invocationCwd, options.plan) : "";
+  const idProvenance = options.idProvenance ? path.resolve(invocationCwd, options.idProvenance) : defaultIdProvenancePath(resolvedPackage);
   const gates = [];
   if (!resolvedPackage.endsWith(".yapk")) {
     return {
@@ -150,7 +152,7 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   if (options.upgrade || options.previousPackage || options.previousManifest || options.newManifest) {
     gates.push(runUpgradeIdStabilityGate({
       resolvedPackage,
-      cwd: options.cwd || ROOT,
+      cwd: invocationCwd,
       previousPackage: options.previousPackage,
       previousManifest: options.previousManifest,
       newManifest: options.newManifest,
