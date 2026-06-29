@@ -376,6 +376,7 @@ function validateRuntimeBinding(resource, entry, reference, context) {
   if (!appId || !listId || !listSetId) {
     context.findings.push(error("DATA_ANALYTICS_RUNTIME_SOURCE_METADATA_MISSING", "Data Analytics runtime ext must include AppID, ListID, and ListSetID source metadata.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId, appId, listId, listSetId }));
   }
+  validateVisibleRuntimeSourceIdentity({ entry, reference, context, controlId, appId, listId, listSetId });
   if (String(reference.controlType || "") !== "pivot-table" && !String(attr.chartType || "").trim()) {
     context.findings.push(error("DATA_ANALYTICS_RUNTIME_CHART_TYPE_MISSING", "Chart runtime ext must include attr.chartType.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
   }
@@ -387,6 +388,7 @@ function validateRuntimeBinding(resource, entry, reference, context) {
   if (!values.length) {
     context.findings.push(error("DATA_ANALYTICS_RUNTIME_VALUES_MISSING", "Data Analytics runtime settings.values[] must include at least one aggregate/value field.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
   }
+  validateRuntimeRowsAndValuesShape({ entry, reference, context, controlId, rows, columns: asArray(settings.columns), values });
   const sourceFields = context.listFieldsById?.get(listId) || null;
   if (sourceFields) {
     for (const ref of [...rows, ...asArray(settings.columns), ...values].flatMap(runtimeFieldRefs)) {
@@ -396,6 +398,109 @@ function validateRuntimeBinding(resource, entry, reference, context) {
     }
   }
   validateRuntimeModelSurfaceAlignment({ entry, reference, context, controlId, rows, values, settings });
+}
+
+function validateVisibleRuntimeSourceIdentity({ entry, reference, context, controlId, appId, listId, listSetId }) {
+  const attrs = isObject(entry.node?.attrs) ? entry.node.attrs : {};
+  const data = isObject(attrs.data) ? attrs.data : {};
+  const model = isObject(attrs.model) ? attrs.model : {};
+  const dataList = isObject(data.list) ? data.list : {};
+  const modelSource = isObject(model.source) ? model.source : {};
+  const visibleSources = [
+    { name: "attrs.data.list", value: dataList },
+    { name: "attrs.model.source", value: modelSource },
+  ];
+  for (const source of visibleSources) {
+    const visibleAppId = String(source.value.AppID || source.value.appId || "");
+    const visibleListId = String(source.value.ListID || source.value.listId || source.value.listID || "");
+    const visibleListSetId = String(source.value.ListSetID || source.value.listSetId || source.value.appListSetID || "");
+    if (!visibleAppId || !visibleListId || !visibleListSetId) {
+      context.findings.push(error("DATA_ANALYTICS_VISIBLE_SOURCE_METADATA_MISSING", "Visible Data Analytics controls must carry AppID, ListID, and ListSetID on attrs.data.list and attrs.model.source, not only in Resource.exts[].", {
+        page: context.pageTitle,
+        path: entry.pointer,
+        templateId: reference.templateId,
+        controlId,
+        surface: source.name,
+        appId: visibleAppId,
+        listId: visibleListId,
+        listSetId: visibleListSetId,
+      }));
+      continue;
+    }
+    if (visibleAppId !== appId || visibleListId !== listId || visibleListSetId !== listSetId) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_SOURCE_SURFACE_MISMATCH", "Visible Data Analytics source metadata must match the Resource.exts[] runtime source metadata.", {
+        page: context.pageTitle,
+        path: entry.pointer,
+        templateId: reference.templateId,
+        controlId,
+        surface: source.name,
+        expected: { appId, listId, listSetId },
+        actual: { appId: visibleAppId, listId: visibleListId, listSetId: visibleListSetId },
+      }));
+    }
+  }
+}
+
+function validateRuntimeRowsAndValuesShape({ entry, reference, context, controlId, rows, columns, values }) {
+  for (const [index, row] of rows.entries()) {
+    if (!primaryRuntimeFieldRefs(row).length) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_ROW_FIELD_MISSING", "Data Analytics runtime settings.rows[] entries must identify a real source field.", {
+        page: context.pageTitle,
+        path: `${entry.pointer}.exts.rows[${index}]`,
+        templateId: reference.templateId,
+        controlId,
+      }));
+    }
+  }
+  for (const [index, column] of columns.entries()) {
+    if (isObject(column) && !primaryRuntimeFieldRefs(column).length) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_COLUMN_FIELD_MISSING", "Data Analytics runtime settings.columns[] entries must identify a real source field when columns are used.", {
+        page: context.pageTitle,
+        path: `${entry.pointer}.exts.columns[${index}]`,
+        templateId: reference.templateId,
+        controlId,
+      }));
+    }
+  }
+  for (const [index, value] of values.entries()) {
+    const refs = primaryRuntimeFieldRefs(value);
+    if (!refs.length) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_VALUE_FIELD_MISSING", "Data Analytics runtime settings.values[] entries must identify a real source field.", {
+        page: context.pageTitle,
+        path: `${entry.pointer}.exts.values[${index}]`,
+        templateId: reference.templateId,
+        controlId,
+      }));
+      continue;
+    }
+    if (isCountAggregate(value)) {
+      const allRefs = runtimeFieldRefs(value);
+      const requiredKeys = ["field", "fieldName", "FieldName", "id"];
+      const missingKeys = requiredKeys.filter((key) => String(value?.[key] || "") !== "ListDataID");
+      const nonListDataIdRefs = allRefs.filter((ref) => ref !== "ListDataID");
+      if (missingKeys.length || nonListDataIdRefs.length) {
+        context.findings.push(error("DATA_ANALYTICS_RUNTIME_COUNT_FIELD_ID_INVALID", "COUNT Data Analytics values must use the proven real source field identity ListDataID for field, fieldName, FieldName, and id; generated aliases or derived IDs can render blank charts.", {
+          page: context.pageTitle,
+          path: `${entry.pointer}.exts.values[${index}]`,
+          templateId: reference.templateId,
+          controlId,
+          missingKeys,
+          refs: allRefs,
+        }));
+      }
+    }
+  }
+}
+
+function isCountAggregate(value) {
+  if (!isObject(value)) return false;
+  return [
+    value.func,
+    value.aggregate,
+    value.function,
+    value.summaryFunc,
+    value.agg,
+  ].some((candidate) => String(candidate || "").toUpperCase() === "COUNT");
 }
 
 function validateGeneratedTemplateContract(entry, reference, context) {

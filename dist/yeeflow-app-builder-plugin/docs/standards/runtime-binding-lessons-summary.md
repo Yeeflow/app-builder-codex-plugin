@@ -27,6 +27,16 @@ Dashboard filters must be wired end to end:
 - consumer conditions reference fields that exist on the consumer source list
 - lookup-backed filters compare record ids/ListDataID-style values, not display labels
 
+Generated Data Analytics controls must also be wired end to end:
+
+- the visible chart or pivot control must be cloned from an approved Data Analytics golden reference, not rebuilt as a shell
+- the same layout resource must register the control id in `Resource.ReportIds[]`
+- the same layout resource must include a matching `Resource.exts[]` entry with `category: "___Pivot___"` and the expected chart or pivot `key`
+- visible `attrs.data.list` and `attrs.model.source` must include `AppID`, `ListID`, and `ListSetID`, and must match the source metadata in `Resource.exts[]`
+- `settings.rows[]` and `settings.values[]` must contain real source field identities, not empty objects or display-only labels
+- COUNT analytics must use the proven `ListDataID` identity on `field`, `fieldName`, `FieldName`, and `id`; aliases such as `ListDataID_COUNT` or field UUIDs can pass static shape checks but render blank charts
+- `runtimeModelProven: true` is allowed only after the wrapper, visible source metadata, `ReportIds[]`, `exts[]`, row/value fields, and visible model surfaces are aligned
+
 ## Leave Request Runtime Lesson
 
 Schema validity, package acceptance, signing HTTP status, and API upgrade status are separate proof boundaries. None of them alone proves runtime-visible application completeness.
