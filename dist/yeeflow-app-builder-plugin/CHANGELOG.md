@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.88
+
+- Release `section_content_area` gap s200 golden-reference enforcement from PR #315.
+- Update committed Dashboard Page Layouts, Workbench Dashboard, Data List Form Layouts, Data List Form Workbench, and Approval Form Layouts golden-reference templates so real `section_content_area` controls preserve `attrs.style.gap = [null, "--sp--s200"]`.
+- Reject generated or registry resources that regress `section_content_area` controls to the obsolete `--sp--s0` gap before signing readiness.
+- Add focused Dashboard, Data List Form, and Approval Form layout regression coverage, standards guidance, training report, and source/dist mirrors for the new spacing contract.
+
 ## 0.8.87
 
 - Release the Application Layout Sidebar Workspace golden reference from PR #313.

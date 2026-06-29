@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.87`
+`0.8.88`
+
+Version `0.8.88` releases `section_content_area` gap s200 golden-reference enforcement from PR #315. Dashboard Page Layouts, Workbench Dashboard, Data List Form Layouts, Data List Form Workbench, and Approval Form Layouts golden-reference templates now preserve `attrs.style.gap = [null, "--sp--s200"]` on real `section_content_area` controls, and generated or registry resources that regress to the obsolete `--sp--s0` gap are rejected before signing readiness.
 
 Version `0.8.87` releases the Application Layout Sidebar Workspace golden reference from PR #313. Generated applications now use `application-layout-sidebar-workspace-1` as the default application layout template, preserve the export-derived 46px header, 18px semibold header title typography, header colors, vertical navigation layout, navigation colors, and application appearance settings, require App Plan template selection, and reject generated navigation groups or menu items that do not have business-appropriate FontAwesome icons before signing readiness.
 
