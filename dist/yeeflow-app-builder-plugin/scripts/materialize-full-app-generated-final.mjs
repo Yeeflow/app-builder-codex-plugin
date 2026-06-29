@@ -1074,6 +1074,7 @@ function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = 
     const nameHeader = tableHeaders.find((header) => table.headers.includes(header));
     if (!nameHeader) continue;
     for (const row of table.rows) {
+      if (isNonPlannedResourceRow(row)) continue;
       const name = cleanResourceName(row[nameHeader]);
       if (!isNonResourceName(name)) tableNames.push(name);
     }
@@ -1092,6 +1093,7 @@ function collectNavigationItemsByGroup(section) {
   for (const table of parseMarkdownTables(section)) {
     if (!table.headers.includes("Group") || !table.headers.includes("Item")) continue;
     for (const row of table.rows) {
+      if (isNonPlannedResourceRow(row)) continue;
       const group = cleanResourceName(row.Group);
       const item = cleanResourceName(row.Item || row["Target Resource"]);
       const target = cleanResourceName(row["Target Resource"] || item);
@@ -1586,10 +1588,33 @@ function cleanResourceName(value) {
 function isNonResourceName(value) {
   const text = cleanResourceName(value);
   if (!text) return true;
-  if (/^(not applicable|n\/a|none|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (/^(not planned|not required|not applicable|n\/a|na|none|null|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (/^(no (?:form report|dashboard|data report|custom form|approval form|data list|document library|workflow|navigation item)s?)$/i.test(text)) return true;
   if (/^no custom\b/i.test(text)) return true;
   if (/^(dashboard page name|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
   return false;
+}
+
+function isNonPlannedResourceRow(row) {
+  const normalized = normalizeRowKeys(row);
+  const requiredValue = cleanResourceName(firstDefined(
+    normalized.required,
+    normalized["required?"],
+    normalized["is required"],
+    normalized["include"],
+    normalized["include?"],
+    normalized["generate"],
+    normalized["generate?"],
+    normalized["in package"],
+    normalized["in navigation"],
+    normalized["navigation visibility"],
+  ));
+  if (/^(no|false|not planned|not required|n\/a|na|none)$/i.test(requiredValue)) return true;
+  return Object.values(normalized).some((value) => isNonResourceName(value) && /^(not planned|not required|no form report|no dashboard|no data report)$/i.test(cleanResourceName(value)));
+}
+
+function firstDefined(...values) {
+  return values.find((value) => value !== undefined && value !== null && String(value).trim() !== "");
 }
 
 function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId, iconUrl = DEFAULT_ICON, appPlanText = "" }) {

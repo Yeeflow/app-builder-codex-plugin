@@ -160,7 +160,9 @@ function parseCustomForms(text) {
   const section = extractSection(text, /^##\s+10\.\s+Custom Data List Forms Plan/i);
   return parseMarkdownTables(section)
     .filter((table) => table.headers.includes("Form Name"))
-    .flatMap((table) => table.rows.map((row) => plannedItem(row["Form Name"], section, row.__index, "customForms", { host: row["Used By"] || row["Form Type"] || "" })));
+    .flatMap((table) => table.rows
+      .filter((row) => !isNonPlannedRow(row))
+      .map((row) => plannedItem(row["Form Name"], section, row.__index, "customForms", { host: row["Used By"] || row["Form Type"] || "" })));
 }
 
 function parseDashboards(text) {
@@ -252,7 +254,9 @@ function parseTableItems(text, headingPattern, nameHeader, category) {
   if (!section) return [];
   return parseMarkdownTables(section)
     .filter((table) => table.headers.includes(nameHeader))
-    .flatMap((table) => table.rows.map((row) => plannedItem(row[nameHeader], section, row.__index, category, { row })));
+    .flatMap((table) => table.rows
+      .filter((row) => !isNonPlannedRow(row))
+      .map((row) => plannedItem(row[nameHeader], section, row.__index, category, { row })));
 }
 
 function parseDashboardScopedItems(text, headingPattern, dashboardName, nameHeader, category) {
@@ -711,7 +715,28 @@ function cleanName(value) {
 
 function isPlaceholder(value) {
   const text = cleanName(value);
-  return !text || /^x$/i.test(text) || /^(name|dashboard|form|report|workflow|section|filter|metric|list|library|item)$/i.test(text) || /^<.*>$/.test(String(value || "").trim());
+  return !text
+    || /^x$/i.test(text)
+    || /^(not planned|not required|not applicable|n\/a|na|none|null|no)$/i.test(text)
+    || /^no (?:form report|dashboard|data report|custom form|approval form|data list|document library|workflow|navigation item)s?$/i.test(text)
+    || /^(name|dashboard|form|report|workflow|section|filter|metric|list|library|item)$/i.test(text)
+    || /^<.*>$/.test(String(value || "").trim());
+}
+
+function isNonPlannedRow(row) {
+  const requiredValue = cleanName([
+    row.Required,
+    row["Required?"],
+    row["Is Required"],
+    row.Include,
+    row["Include?"],
+    row.Generate,
+    row["Generate?"],
+    row["In Package"],
+    row["In Navigation"],
+    row["Navigation Visibility"],
+  ].find((value) => value !== undefined && value !== null && String(value).trim() !== ""));
+  return /^(no|false|not planned|not required|n\/a|na|none)$/i.test(requiredValue);
 }
 
 function norm(value) {

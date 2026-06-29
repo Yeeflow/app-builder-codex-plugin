@@ -21,6 +21,8 @@ The live install readiness gate exists to block packages that can pass local sha
 9. Install/import API `apiStatus: 0` is submitted/accepted only. It is not final success.
 10. Final install success requires Version Management evidence for the exact submitted `PackageId` with status `Succeed`.
 11. A failed Version Management row blocks fresh-install retry with the same failed `PackageId` / `ListSetID` family. Use a fresh API-issued ID family for a fresh install retry after package mutation.
+12. Planning placeholders such as `Not planned`, `N/A`, `None`, `Not applicable`, or `No form report` must never materialize as real package resources or visible navigation entries.
+13. Navigation must not contain duplicate entries that target the same package-local resource ID and type, such as two Type `105` entries pointing at the same approval/form-report target.
 
 ## Generator Requirements
 
@@ -29,6 +31,8 @@ The live install readiness gate exists to block packages that can pass local sha
 - Template-cloned Dashboard resources must regenerate UUID-shaped control IDs per page while preserving semantic container IDs used by validators and templates.
 - Fresh-ID remap must include nested dashboard JSON strings and encoded approval `DefResource` payloads.
 - The materializer may remain signing-ineligible as a generation handoff, but generated-final preflight must produce the signing-readiness handoff when all local hard gates pass.
+- App Plan rows marked `Required = No`, `Include = No`, `Generate = No`, `Not planned`, `N/A`, or `None` are explicit non-resources. The generator must not create `FormNewReports[]`, `DataReports[]`, pages, forms, lists, layouts, navigation entries, permissions, sample rows, workflow bindings, or hidden helper resources from those placeholders.
+- Visible navigation must be planned-resource only. Do not generate a navigation item for a row whose target resource is a placeholder, whose visibility is `No`, or whose resource was omitted because it was not planned.
 
 ## Proof Boundary
 
