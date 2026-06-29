@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.90
+
+- Release Dashboard runtime data binding hardening from PR #319.
+- Require visible Data Analytics chart and pivot source metadata to match the corresponding `Resource.exts[]` runtime source metadata before signing readiness.
+- Require COUNT analytics values to use `ListDataID` consistently across `field`, `fieldName`, `FieldName`, and `id` instead of display fields, source UUIDs, or derived pseudo fields.
+- Materialize generated Data Analytics controls with export-proven visible source surfaces and COUNT value identity, and add regression coverage for missing source metadata, source drift, invalid COUNT fields, and incomplete pivot rows/values.
+
 ## 0.8.89
 
 - Release application color pattern theme config from PR #317.

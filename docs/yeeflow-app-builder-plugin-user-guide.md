@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.89`
+`0.8.90`
+
+Version `0.8.90` releases Dashboard runtime data binding hardening from PR #319. Generated Data Analytics controls now emit visible chart/pivot source metadata that matches `Resource.exts[]`, COUNT analytics use `ListDataID` consistently across runtime value identity fields, and hard gates reject source drift or incomplete rows/values that can render blank charts at runtime.
 
 Version `0.8.89` releases application color pattern theme config from PR #317. App Plans now select Primary, Secondary, and Neutral base colors, generated packages materialize them into the Type 0 application style `Config` with `lightmodel` set to `Luminance`, and application-control-style/preflight gates validate stringified config shape, readable base color ranges, low-chroma Neutral, and App Plan-to-package color matching before signing readiness.
 
