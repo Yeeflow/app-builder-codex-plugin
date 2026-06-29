@@ -189,6 +189,31 @@ try {
   expectCode("approval DefResource key mismatch", [VALIDATOR, "--package", defMismatch.file, "--id-provenance", defMismatch.manifestFile, "--json"], "APPROVAL_DEFRESOURCE_KEY_MISMATCH");
   cases.push("approval DefResource key mismatch fails");
 
+  const placeholderReportDecoded = baseDecoded();
+  placeholderReportDecoded.FormNewReports = [{ ID: id(40), Name: "Not planned", DefKey: id(30), Settings: "{}" }];
+  const placeholderReport = writePackage(tempDir, "placeholder-report", placeholderReportDecoded);
+  expectCode("planning placeholder resource blocks install readiness", [VALIDATOR, "--package", placeholderReport.file, "--id-provenance", placeholderReport.manifestFile, "--json"], "YAPK_PLACEHOLDER_RESOURCE_MATERIALIZED");
+  cases.push("planning placeholder resource names fail");
+
+  const placeholderNavDecoded = baseDecoded();
+  placeholderNavDecoded.ListSet.LayoutView = JSON.stringify({
+    sort: [{ Title: "Reports", Type: "classes", list: [{ Title: "Not planned", Type: 105, ListID: id(30) }] }],
+  });
+  const placeholderNav = writePackage(tempDir, "placeholder-nav", placeholderNavDecoded);
+  expectCode("planning placeholder navigation item blocks install readiness", [VALIDATOR, "--package", placeholderNav.file, "--id-provenance", placeholderNav.manifestFile, "--json"], "YAPK_PLACEHOLDER_NAVIGATION_ITEM");
+  cases.push("planning placeholder navigation entries fail");
+
+  const duplicateNavDecoded = baseDecoded();
+  duplicateNavDecoded.ListSet.LayoutView = JSON.stringify({
+    sort: [
+      { Title: "Requests", Type: "classes", list: [{ Title: "Approval", Type: 105, ListID: id(30) }] },
+      { Title: "Reports", Type: "classes", list: [{ Title: "Approval", Type: 105, ListID: id(30) }] },
+    ],
+  });
+  const duplicateNav = writePackage(tempDir, "duplicate-nav", duplicateNavDecoded);
+  expectCode("duplicate package-local navigation target blocks install readiness", [VALIDATOR, "--package", duplicateNav.file, "--id-provenance", duplicateNav.manifestFile, "--json"], "YAPK_DUPLICATE_NAVIGATION_TARGET");
+  cases.push("duplicate navigation targets fail");
+
   const apiAcceptedOnly = path.join(tempDir, "api-accepted-only.json");
   fs.writeFileSync(apiAcceptedOnly, JSON.stringify({ apiStatus: 0, packageId: id(100) }, null, 2));
   expectCode("API submitted is not final success", [VALIDATOR, "--package", valid.file, "--id-provenance", valid.manifestFile, "--version-evidence", apiAcceptedOnly, "--package-id", id(100), "--json"], "INSTALL_API_ACCEPTANCE_NOT_FINAL_SUCCESS");

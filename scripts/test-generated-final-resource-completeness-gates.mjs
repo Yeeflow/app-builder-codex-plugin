@@ -246,6 +246,16 @@ try {
   expectPass("complete generated-final package", output.report);
   results.push({ case: "pass: generated-final includes planned forms, dashboards, navigation, reports, lists", status: "pass" });
 
+  const notPlannedReportPlan = writeFile(tempDir, "not-planned-report-plan.md", plan().replace(
+    "| Asset Loan Request Report | Asset Loan Request | Loan approval reporting | No | Requester, asset, status | Current FormNewReports schema | Required |",
+    "| Not planned | Asset Loan Request | Not required for this application | No | N/A | N/A | No |",
+  ));
+  output = run(notPlannedReportPlan, writeFile(tempDir, "not-planned-report-omitted.json", decoded({ reports: false })));
+  if (codes(output.report).has("GENERATED_FINAL_FORMNEWREPORT_MISSING") || codes(output.report).has("GENERATED_FINAL_FORMNEWREPORTS_EMPTY_WITH_PLANNED_REPORTS")) {
+    throw new Error(`Required=No / Not planned form report rows must not demand FormNewReports: ${JSON.stringify(output.report.findings, null, 2)}`);
+  }
+  results.push({ case: "pass: Required=No / Not planned Form Reports row does not demand FormNewReports", status: "pass" });
+
   const deferredPlan = writeFile(tempDir, "deferred-plan.md", plan({ deferred: true }));
   output = run(deferredPlan, writeFile(tempDir, "deferred-report.json", decoded({ reports: false })));
   const findingCodes = codes(output.report);

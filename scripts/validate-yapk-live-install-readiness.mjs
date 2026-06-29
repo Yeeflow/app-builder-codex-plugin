@@ -17,6 +17,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const LARGE_ID_RE = /^\d{16,}$/;
 const BROTLI_PREFIX = Buffer.from("::brotli::", "utf8");
+const PLANNING_PLACEHOLDER_RE = /^(?:not planned|not required|not applicable|n\/a|na|none|null|no|no form report|no dashboard|no data report|no custom form|no approval form)$/i;
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -53,6 +54,8 @@ export function validateYapkLiveInstallReadiness(options = {}) {
 
   validateWrapperTenant({ wrapper, findings });
   validateRootIdentity({ wrapper, decoded, findings });
+  validateNoPlaceholderResources({ decoded, findings });
+  validateNavigationTargets({ decoded, findings });
   const parsedDashboardResources = validateDashboardResources({ decoded, manifestIds, findings });
   validateApprovalDefResources({ decoded, manifestIds, findings });
   if (options.versionEvidence) validateVersionEvidence({
@@ -112,6 +115,89 @@ function validateRootIdentity({ wrapper, decoded, findings }) {
       }));
     }
   }
+}
+
+function validateNoPlaceholderResources({ decoded, findings }) {
+  const checks = [
+    ...asArray(decoded?.FormNewReports).map((item, index) => ({
+      value: titleOf(item),
+      path: `$.FormNewReports[${index}].Name`,
+      surface: "FormNewReports",
+    })),
+    ...asArray(decoded?.DataReports).map((item, index) => ({
+      value: titleOf(item),
+      path: `$.DataReports[${index}].Name`,
+      surface: "DataReports",
+    })),
+    ...asArray(decoded?.Pages).map((item, index) => ({
+      value: titleOf(item),
+      path: `$.Pages[${index}].Title`,
+      surface: "Pages",
+    })),
+    ...asArray(decoded?.Childs).map((item, index) => ({
+      value: titleOf(item?.List || item?.ListModel || item),
+      path: `$.Childs[${index}].List.Title`,
+      surface: "Childs",
+    })),
+    ...asArray(decoded?.Forms).map((item, index) => ({
+      value: titleOf(item),
+      path: `$.Forms[${index}].Name`,
+      surface: "Forms",
+    })),
+  ];
+  for (const item of checks) {
+    if (isPlanningPlaceholder(item.value)) {
+      findings.push(error("YAPK_PLACEHOLDER_RESOURCE_MATERIALIZED", "Planning placeholders such as Not planned, N/A, or None must not be materialized as package resources.", {
+        path: item.path,
+        surface: item.surface,
+        value: item.value,
+      }));
+    }
+  }
+}
+
+function validateNavigationTargets({ decoded, findings }) {
+  const layoutView = parseJsonMaybe(decoded?.ListSet?.LayoutView);
+  if (!isObject(layoutView)) return;
+  const seenTargets = new Map();
+  const visit = (items, path) => {
+    for (const [index, item] of asArray(items).entries()) {
+      if (!isObject(item)) continue;
+      const itemPath = `${path}[${index}]`;
+      const title = titleOf(item);
+      if (isPlanningPlaceholder(title)) {
+        findings.push(error("YAPK_PLACEHOLDER_NAVIGATION_ITEM", "Planning placeholders must not be generated as visible navigation groups or items.", {
+          path: `${itemPath}.Title`,
+          value: title,
+        }));
+      }
+      const children = asArray(item.list || item.children || item.items || item.Childs);
+      if (children.length || String(item.Type) === "classes") {
+        visit(children, `${itemPath}.list`);
+        continue;
+      }
+      const targetId = stringId(firstDefined(item.ListID, item.LayoutID, item.PageID, item.ProcKey, item.Key));
+      const type = stringId(item.Type);
+      if (!targetId || !type) continue;
+      const key = `${type}:${targetId}`;
+      const previous = seenTargets.get(key);
+      const duplicateTitle = normalizeTitle(previous?.title) === normalizeTitle(title);
+      const allowedType105Fallback = type === "105" && !duplicateTitle;
+      if (previous && !allowedType105Fallback) {
+        findings.push(error("YAPK_DUPLICATE_NAVIGATION_TARGET", "Generated navigation must not contain duplicate entries targeting the same package-local resource.", {
+          firstPath: previous.path,
+          duplicatePath: itemPath,
+          type,
+          targetId,
+          firstTitle: previous.title,
+          duplicateTitle: title,
+        }));
+      } else {
+        seenTargets.set(key, { path: itemPath, title });
+      }
+    }
+  };
+  visit(layoutView.sort || layoutView.list || [], "$.ListSet.LayoutView.sort");
 }
 
 function validateDashboardResources({ decoded, manifestIds, findings }) {
@@ -282,6 +368,19 @@ function idSetFromManifest(manifest) {
 
 function firstDefined(...values) {
   return values.find((value) => value !== undefined && value !== null && String(value).trim() !== "");
+}
+
+function titleOf(value) {
+  if (!isObject(value)) return stringId(value).trim();
+  return stringId(value.Title || value.title || value.Name || value.name || value.DisplayName || value.displayName || value.ReportName || value.ListName || value.Key || value.key).trim();
+}
+
+function isPlanningPlaceholder(value) {
+  return PLANNING_PLACEHOLDER_RE.test(stringId(value).replace(/\s+/g, " ").trim());
+}
+
+function normalizeTitle(value) {
+  return stringId(value).replace(/[_-]+/g, " ").replace(/[^\p{L}\p{N} ]/gu, "").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 function summarizeRow(row) {
