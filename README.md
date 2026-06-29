@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.88`
+- Version: `0.8.89`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.88` releases `section_content_area` gap s200 golden-reference enforcement from PR #315: Dashboard, Workbench Dashboard, Data List Form, Data List Form Workbench, and Approval Form layout templates now preserve `attrs.style.gap = [null, "--sp--s200"]`, and generated or registry resources that regress to the obsolete `--sp--s0` gap fail before signing readiness.
+Current release `0.8.89` releases application color pattern theme config from PR #317: App Plans now select Primary, Secondary, and Neutral base colors, generated packages materialize them into the Type 0 application style `Config` with `lightmodel` set to `Luminance`, and application-control-style/preflight gates validate stringified config shape, readable base color ranges, low-chroma Neutral, and App Plan-to-package color matching before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.88
+Version: 0.8.89
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.88
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.89
 ```
 
 ## What Is Included

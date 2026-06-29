@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.89
+
+- Release application color pattern theme config from PR #317.
+- Add App Plan `Application Color Pattern Selection` for Primary, Secondary, and Neutral base colors.
+- Materialize selected base colors into the Type 0 `application style.Config` while preserving the Soft outline controls default binding and fresh Type 1 style UUID remapping.
+- Validate stringified color config shape, `Luminance` lightmodel, base-color readability ranges, low-chroma Neutral, and App Plan-to-package color matching before signing readiness.
+
 ## 0.8.88
 
 - Release `section_content_area` gap s200 golden-reference enforcement from PR #315.
