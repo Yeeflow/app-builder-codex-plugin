@@ -44,11 +44,19 @@ The plan selects only:
 
 Each selected color must use `Light Model` exactly `Luminance`.
 
-If no custom brand colors are requested, generated packages use the defaults:
+If no user-supplied brand colors are requested, the App Plan still must select colors from the business context instead of blindly keeping the generic defaults. The generic defaults are fallback values only when the business domain cannot be inferred or when the user explicitly requests the Yeeflow default palette:
 
-- Primary: `#0065FF`
-- Secondary: `#00D1FF`
-- Neutral: `#B3B7C0`
+- Primary fallback: `#0065FF`
+- Secondary fallback: `#00D1FF`
+- Neutral fallback: `#B3B7C0`
+
+For example, a Business Travel Request / approval / reimbursement app should prefer:
+
+- Primary: `#1E40AF`
+- Secondary: `#0F766E`
+- Neutral: `#94A3B8`
+
+The rationale column in `Application Color Pattern Selection` must describe the business reason for the palette, such as enterprise travel approval, compliance, safety, procurement, asset operations, finance, or workforce management.
 
 Success, warning, and danger remain semantic Yeeflow colors and are not derived from project branding colors.
 
@@ -81,6 +89,7 @@ The generator still clones the Type `1` Soft outline controls style with a fresh
 - base colors pass readability ranges
 - neutral is low-chroma
 - package colors match the App Plan when `--plan` is supplied
+- business-identifiable apps do not keep the generic default palette unless the App Plan explicitly says the user approved the default Yeeflow colors
 
 `scripts/yapk-first-generation-preflight.mjs` now passes the App Plan into the application control style validator when available.
 
@@ -95,7 +104,9 @@ The generator still clones the Type `1` Soft outline controls style with a fresh
 - too-light or too-dark brand colors
 - high-chroma neutral colors
 - App Plan-to-package color mismatch
+- business-domain default-palette misuse
 - materializer default color output
+- materializer business-semantic fallback color output when no explicit color table exists
 - materializer custom App Plan color output
 - fresh Type `1` control style UUID remapping per package
 

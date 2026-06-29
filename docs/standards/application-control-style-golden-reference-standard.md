@@ -54,7 +54,13 @@ The Type `0` `application style` theme stores application color patterns in `Con
 - `primary.lightmodel`, `secondary.lightmodel`, and `neutral.lightmodel`: exactly `Luminance`
 - `typography`: preserve the exported application style typography block
 
-The App Plan may select custom Primary, Secondary, and Neutral base colors. The generator must copy those exact base colors into Type `0` `Config`. If the App Plan does not select custom base colors, use the defaults above.
+The App Plan must select Primary, Secondary, and Neutral base colors. The generator must copy those exact base colors into Type `0` `Config`. If the user provides approved brand colors, use them when they pass the readability ranges. If the user does not provide brand colors, choose a business-appropriate palette from the application purpose and explain the rationale in the App Plan. The defaults above are fallback values only when the business domain cannot be inferred or when the user explicitly requests/approves the Yeeflow default palette.
+
+Recommended business-derived examples:
+
+- Business Travel / approval / reimbursement: Primary `#1E40AF`, Secondary `#0F766E`, Neutral `#94A3B8`
+- Vendor / supplier / procurement onboarding: Primary `#0F766E`, Secondary `#1D4ED8`, Neutral `#94A3B8`
+- Asset / operations / service management: Primary `#1D4ED8`, Secondary `#0F766E`, Neutral `#94A3B8`
 
 Do not generate success, warning, or danger from App Plan brand colors. Those remain semantic Yeeflow colors: success is green, warning is yellow, and danger is red.
 
@@ -66,7 +72,7 @@ Base color constraints:
 
 ## Hard Gate
 
-`scripts/validate-application-control-style-template.mjs` must pass before a generated-final package is eligible for signing. The validator checks the registry, package `Themes[]`, default-style linkage, stringified config shape, exact package-materialized style config, Type `0` application color pattern config, `Luminance` lightmodel, base color ranges, and App Plan-to-package color matching when an App Plan is supplied.
+`scripts/validate-application-control-style-template.mjs` must pass before a generated-final package is eligible for signing. The validator checks the registry, package `Themes[]`, default-style linkage, stringified config shape, exact package-materialized style config, Type `0` application color pattern config, `Luminance` lightmodel, base color ranges, App Plan-to-package color matching when an App Plan is supplied, and business-identifiable plans that incorrectly keep the generic default palette without explicit user approval.
 
 ## Proof Boundary
 
