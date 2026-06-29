@@ -48,7 +48,8 @@
     "Do not depend on tenant-global or system control style IDs for generated packages; the package must carry the Application Custom Control Style itself.",
     "Do not emit the style Config as an object. Yeeflow package export shape stores Theme.Config as a stringified JSON object.",
     "The Type 0 application style Config must be a stringified JSON object containing primary, secondary, neutral, and typography settings. Primary, secondary, and neutral must each store a base #RRGGBB color and lightmodel exactly equal to Luminance.",
-    "The App Plan may select Primary, Secondary, and Neutral base colors. If it does not, generated packages must use the default base colors in this template. Success, warning, danger, background, text, and accent remain the standard Yeeflow semantic color system.",
+    "The App Plan must select Primary, Secondary, and Neutral base colors. If the user provides approved brand colors, use those values when they pass readability ranges. If the user does not provide brand colors, infer a business-appropriate palette from the application purpose and write the rationale in the App Plan. Do not keep the generic defaults only because the user was silent.",
+    "The generic fallback base colors in this template may be used only when the business domain cannot be inferred or when the user explicitly requests or approves the Yeeflow default palette. Success, warning, danger, background, text, and accent remain the standard Yeeflow semantic color system.",
     "Full-app upgrades must preserve this default style unless the user explicitly requests a different application control style."
   ],
   "requiredThemes": {

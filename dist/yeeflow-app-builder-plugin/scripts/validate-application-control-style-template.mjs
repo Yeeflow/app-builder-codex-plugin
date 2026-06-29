@@ -14,6 +14,43 @@ const DEFAULT_APPLICATION_COLOR_PATTERN = {
   neutral: { value: "#B3B7C0", lightmodel: "Luminance" },
   typography: { fontfamily: "Default", fontweight: "regular", basevalue: 14, scale: "1.125", lineheight: 1.6 },
 };
+const BUSINESS_APPLICATION_COLOR_PALETTE_RULES = Object.freeze([
+  {
+    id: "business-travel-approval",
+    keywords: ["travel", "trip", "journey", "itinerary", "visa", "flight", "hotel", "expense", "reimbursement"],
+    primary: { value: "#1E40AF", lightmodel: "Luminance" },
+    secondary: { value: "#0F766E", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+  {
+    id: "vendor-procurement-onboarding",
+    keywords: ["vendor", "supplier", "procurement", "purchase", "sourcing", "contract", "onboarding"],
+    primary: { value: "#0F766E", lightmodel: "Luminance" },
+    secondary: { value: "#1D4ED8", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+  {
+    id: "asset-operations-service",
+    keywords: ["asset", "loan", "inventory", "maintenance", "facility", "operations", "service", "ticket", "work order"],
+    primary: { value: "#1D4ED8", lightmodel: "Luminance" },
+    secondary: { value: "#0F766E", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+  {
+    id: "finance-risk-compliance",
+    keywords: ["finance", "budget", "invoice", "payment", "audit", "risk", "compliance", "policy"],
+    primary: { value: "#1E3A8A", lightmodel: "Luminance" },
+    secondary: { value: "#7C3AED", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+  {
+    id: "people-hr-workforce",
+    keywords: ["employee", "hr", "human resources", "recruit", "candidate", "onboarding", "training", "performance"],
+    primary: { value: "#6D28D9", lightmodel: "Luminance" },
+    secondary: { value: "#0F766E", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -35,6 +72,7 @@ export function validateApplicationControlStyleTemplate(options = {}) {
   const planPath = options.plan ? path.resolve(options.plan) : "";
   const planText = planPath ? readText(planPath, findings, "APPLICATION_CONTROL_STYLE_APP_PLAN_MISSING") : "";
   const plannedColorPattern = planText ? extractApplicationColorPatternFromPlan(planText) : null;
+  if (planText) validateBusinessSemanticColorSelection(planText, plannedColorPattern, findings);
   validateRegistry(registry, templatePath, findings);
   validateTemplate(template, findings);
 
@@ -139,10 +177,10 @@ function validateDecodedPackage(decoded, template, findings, options = {}) {
     findings.push(error("APPLICATION_CONTROL_STYLE_DEFAULT_ID_INVALID", "Application style theme ID must use the 41_<root list set id> numeric shape.", { actual: appTheme.ID || null }));
   }
   const appStyleConfig = parseApplicationStyleConfig(appTheme.Config, findings);
-  const expectedColorPattern = buildExpectedApplicationColorPattern(template, options.plannedColorPattern);
+  const expectedColorPattern = options.plannedColorPattern ? buildExpectedApplicationColorPattern(template, options.plannedColorPattern) : null;
   if (appStyleConfig) {
     validateApplicationColorPatternConfig(appStyleConfig, findings, { source: "package" });
-    compareApplicationColorPattern(appStyleConfig, expectedColorPattern, findings);
+    if (expectedColorPattern) compareApplicationColorPattern(appStyleConfig, expectedColorPattern, findings);
   }
   const appExt = parseJsonString(appTheme.Ext, findings, "APPLICATION_CONTROL_STYLE_DEFAULT_EXT_INVALID", "Application style theme Ext must be a JSON string.");
   const defaultId = appExt?.controlDefaultId;
@@ -221,6 +259,19 @@ function compareApplicationColorPattern(actual, expected, findings) {
       }));
     }
   }
+}
+
+function validateBusinessSemanticColorSelection(planText, plannedColorPattern, findings) {
+  const semanticPalette = selectBusinessApplicationColorPalette(planText);
+  if (!semanticPalette || !plannedColorPattern) return;
+  if (!isDefaultApplicationColorPattern(plannedColorPattern) || hasExplicitDefaultColorApproval(planText)) return;
+  findings.push(error("APPLICATION_COLOR_PATTERN_BUSINESS_DEFAULT_USED", "Application Color Pattern Selection must use a business-appropriate palette when the business domain is identifiable; do not keep the generic Yeeflow default colors unless the user explicitly requested those defaults.", {
+    recommended: {
+      primary: semanticPalette.primary,
+      secondary: semanticPalette.secondary,
+      neutral: semanticPalette.neutral,
+    },
+  }));
 }
 
 function validateApplicationColorPatternConfig(config, findings, { source }) {
@@ -353,6 +404,35 @@ function extractApplicationColorPatternFromPlan(planText) {
   return Object.keys(out).length ? out : null;
 }
 
+function selectBusinessApplicationColorPalette(text) {
+  const haystack = normKey(text);
+  let best = null;
+  for (const rule of BUSINESS_APPLICATION_COLOR_PALETTE_RULES) {
+    const score = rule.keywords.reduce((total, keyword) => total + (haystack.includes(normKey(keyword)) ? 1 : 0), 0);
+    if (score > 0 && (!best || score > best.score)) best = { score, rule };
+  }
+  if (!best) return null;
+  return {
+    primary: best.rule.primary,
+    secondary: best.rule.secondary,
+    neutral: best.rule.neutral,
+  };
+}
+
+function isDefaultApplicationColorPattern(pattern, defaults = DEFAULT_APPLICATION_COLOR_PATTERN) {
+  return ["primary", "secondary", "neutral"].every((role) => {
+    if (!pattern?.[role]) return false;
+    return normalizeHexColor(pattern[role].value) === normalizeHexColor(defaults?.[role]?.value)
+      && String(pattern[role].lightmodel || "Luminance") === String(defaults?.[role]?.lightmodel || "Luminance");
+  });
+}
+
+function hasExplicitDefaultColorApproval(text) {
+  const section = extractNamedSection(text, "Application Color Pattern Selection") || String(text || "");
+  return /\b(user|customer|client|admin|stakeholder|business)\s+(explicitly\s+)?(approved|requested|selected|confirmed)\b[^.\n]{0,120}\b(default|yeeflow default|standard yeeflow)\b/i.test(section)
+    || /\b(default|yeeflow default|standard yeeflow)\b[^.\n]{0,120}\b(user|customer|client|admin|stakeholder|business)\s+(approved|requested|selected|confirmed)\b/i.test(section);
+}
+
 function extractNamedSection(text, heading) {
   const pattern = new RegExp(`^#{2,6}\\s+${escapeRegExp(heading)}\\s*$`, "im");
   const match = pattern.exec(String(text || ""));
@@ -409,6 +489,10 @@ function normalizeColorRole(value) {
 function normalizeHexColor(value) {
   const match = String(value || "").trim().match(/^#[0-9a-f]{6}$/i);
   return match ? match[0].toUpperCase() : "";
+}
+
+function normKey(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
 function hexToOklch(hex) {

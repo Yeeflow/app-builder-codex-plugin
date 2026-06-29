@@ -628,9 +628,9 @@ Application layout template: `application-layout-sidebar-workspace-1`.
 
 | Color Role | Base Color | Light Model | Source / Rationale |
 | --- | --- | --- | --- |
-| Primary | #0065FF | Luminance | Default Yeeflow brand primary or project-approved brand primary |
-| Secondary | #00D1FF | Luminance | Default Yeeflow brand secondary or project-approved brand secondary |
-| Neutral | #B3B7C0 | Luminance | Default neutral UI state base or project-approved neutral |
+| Primary | <business-appropriate #RRGGBB> | Luminance | Business-domain primary rationale, such as travel approval, procurement, asset operations, finance, or workforce management |
+| Secondary | <business-appropriate #RRGGBB> | Luminance | Business-domain secondary/accent rationale that complements the primary color |
+| Neutral | <low-chroma #RRGGBB> | Luminance | Neutral UI-state rationale for forms, borders, read-only fields, and subtle backgrounds |
 
 Rules:
 
@@ -639,7 +639,10 @@ Rules:
 - `Light Model` must be exactly `Luminance` for Primary, Secondary, and Neutral.
 - Primary and Secondary base colors must not be too light or too dark. Prefer OKLCH lightness `0.42-0.68`; values outside `0.35-0.82` are not generation-ready.
 - Neutral must remain low-chroma. It must use OKLCH lightness `0.65-0.88` and chroma no greater than `0.06`.
-- If the user does not request custom branding, keep the default base colors above.
+- If the user provides approved brand colors, use those colors when they pass readability ranges.
+- If the user does not provide brand colors, choose Primary, Secondary, and Neutral from the business function and explain the rationale. Do not keep the generic Yeeflow defaults only because the user was silent.
+- The generic fallback palette `#0065FF` / `#00D1FF` / `#B3B7C0` may be used only when the business domain cannot be inferred or when the user explicitly requests/approves the Yeeflow default palette.
+- Recommended examples: Business Travel / approval / reimbursement apps can use Primary `#1E40AF`, Secondary `#0F766E`, Neutral `#94A3B8`; procurement/vendor apps can use Primary `#0F766E`, Secondary `#1D4ED8`, Neutral `#94A3B8`; asset/operations apps can use Primary `#1D4ED8`, Secondary `#0F766E`, Neutral `#94A3B8`.
 - Generated packages must write these selected base colors into the Type `0` `application style.Config` stringified JSON and preserve the Soft outline controls default control style binding.
 
 | Navigation Order | Group | Item | Yeeflow Resource Type | Target Resource | Visible | Icon | Notes |

@@ -62,6 +62,49 @@ const SOURCE_COLLECTION_TEMPLATE_IDS = {
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const DEFAULT_APPLICATION_COLOR_PATTERN = {
+  primary: { value: "#0065FF", lightmodel: "Luminance" },
+  secondary: { value: "#00D1FF", lightmodel: "Luminance" },
+  neutral: { value: "#B3B7C0", lightmodel: "Luminance" },
+  typography: { fontfamily: "Default", fontweight: "regular", basevalue: 14, scale: "1.125", lineheight: 1.6 },
+};
+const BUSINESS_APPLICATION_COLOR_PALETTE_RULES = Object.freeze([
+  {
+    id: "business-travel-approval",
+    keywords: ["travel", "trip", "journey", "itinerary", "visa", "flight", "hotel", "expense", "reimbursement"],
+    primary: { value: "#1E40AF", lightmodel: "Luminance" },
+    secondary: { value: "#0F766E", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+  {
+    id: "vendor-procurement-onboarding",
+    keywords: ["vendor", "supplier", "procurement", "purchase", "sourcing", "contract", "onboarding"],
+    primary: { value: "#0F766E", lightmodel: "Luminance" },
+    secondary: { value: "#1D4ED8", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+  {
+    id: "asset-operations-service",
+    keywords: ["asset", "loan", "inventory", "maintenance", "facility", "operations", "service", "ticket", "work order"],
+    primary: { value: "#1D4ED8", lightmodel: "Luminance" },
+    secondary: { value: "#0F766E", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+  {
+    id: "finance-risk-compliance",
+    keywords: ["finance", "budget", "invoice", "payment", "audit", "risk", "compliance", "policy"],
+    primary: { value: "#1E3A8A", lightmodel: "Luminance" },
+    secondary: { value: "#7C3AED", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+  {
+    id: "people-hr-workforce",
+    keywords: ["employee", "hr", "human resources", "recruit", "candidate", "onboarding", "training", "performance"],
+    primary: { value: "#6D28D9", lightmodel: "Luminance" },
+    secondary: { value: "#0F766E", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  },
+]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -272,13 +315,6 @@ function parseJsonMaybe(value) {
   }
 }
 
-const DEFAULT_APPLICATION_COLOR_PATTERN = {
-  primary: { value: "#0065FF", lightmodel: "Luminance" },
-  secondary: { value: "#00D1FF", lightmodel: "Luminance" },
-  neutral: { value: "#B3B7C0", lightmodel: "Luminance" },
-  typography: { fontfamily: "Default", fontweight: "regular", basevalue: 14, scale: "1.125", lineheight: 1.6 },
-};
-
 function buildDefaultApplicationControlStyles({ rootListId, appPlanText = "" }) {
   const template = JSON.parse(fs.readFileSync(APPLICATION_CONTROL_STYLE_TEMPLATE_PATH, "utf8"));
   const styleContract = template.requiredThemes?.controlStyleTheme || {};
@@ -309,11 +345,15 @@ function buildApplicationColorPatternConfig(appPlanText, template = {}) {
   const defaults = template.requiredThemes?.applicationStyleTheme?.Config || template.applicationColorPattern?.defaults || DEFAULT_APPLICATION_COLOR_PATTERN;
   const config = JSON.parse(JSON.stringify(defaults));
   const planned = extractApplicationColorPatternFromPlan(appPlanText);
+  const semanticPalette = selectBusinessApplicationColorPalette(appPlanText);
+  const useSemanticPalette = semanticPalette
+    && (!Object.keys(planned).length || (isDefaultApplicationColorPattern(planned, defaults) && !hasExplicitDefaultColorApproval(appPlanText)));
   for (const role of ["primary", "secondary", "neutral"]) {
-    if (!planned[role]) continue;
+    const selected = useSemanticPalette ? semanticPalette[role] : planned[role];
+    if (!selected) continue;
     config[role] = {
-      value: planned[role].value,
-      lightmodel: planned[role].lightmodel || "Luminance",
+      value: selected.value,
+      lightmodel: selected.lightmodel || "Luminance",
     };
   }
   config.typography = config.typography || DEFAULT_APPLICATION_COLOR_PATTERN.typography;
@@ -339,6 +379,35 @@ function extractApplicationColorPatternFromPlan(planText) {
     if (role && !out[role]) out[role] = { value: normalizeHexColor(match[2]), lightmodel: "Luminance" };
   }
   return out;
+}
+
+function selectBusinessApplicationColorPalette(text) {
+  const haystack = normKey(text);
+  let best = null;
+  for (const rule of BUSINESS_APPLICATION_COLOR_PALETTE_RULES) {
+    const score = rule.keywords.reduce((total, keyword) => total + (haystack.includes(normKey(keyword)) ? 1 : 0), 0);
+    if (score > 0 && (!best || score > best.score)) best = { score, rule };
+  }
+  if (!best) return null;
+  return {
+    primary: best.rule.primary,
+    secondary: best.rule.secondary,
+    neutral: best.rule.neutral,
+  };
+}
+
+function isDefaultApplicationColorPattern(pattern, defaults = DEFAULT_APPLICATION_COLOR_PATTERN) {
+  return ["primary", "secondary", "neutral"].every((role) => {
+    if (!pattern?.[role]) return false;
+    return normalizeHexColor(pattern[role].value) === normalizeHexColor(defaults?.[role]?.value)
+      && String(pattern[role].lightmodel || "Luminance") === String(defaults?.[role]?.lightmodel || "Luminance");
+  });
+}
+
+function hasExplicitDefaultColorApproval(text) {
+  const section = extractNamedSection(text, "Application Color Pattern Selection") || String(text || "");
+  return /\b(user|customer|client|admin|stakeholder|business)\s+(explicitly\s+)?(approved|requested|selected|confirmed)\b[^.\n]{0,120}\b(default|yeeflow default|standard yeeflow)\b/i.test(section)
+    || /\b(default|yeeflow default|standard yeeflow)\b[^.\n]{0,120}\b(user|customer|client|admin|stakeholder|business)\s+(approved|requested|selected|confirmed)\b/i.test(section);
 }
 
 function extractNamedSection(text, heading) {

@@ -90,6 +90,45 @@ try {
   const mismatchColorPackage = writePackage("custom-color-mismatch.yapk", buildDecoded({ appStyleConfig: DEFAULT_APP_STYLE_CONFIG }));
   expectCode("App Plan color mismatch fails", [VALIDATOR, "--package", mismatchColorPackage, "--plan", customPlan], "APPLICATION_COLOR_PATTERN_APP_PLAN_MISMATCH");
 
+  const businessTravelDefaultPlan = path.join(tempDir, "business-travel-default-color-plan.md");
+  fs.writeFileSync(businessTravelDefaultPlan, buildPlan(undefined, {
+    title: "Business Travel Request",
+    rationale: {
+      primary: "Default Yeeflow brand primary.",
+      secondary: "Default Yeeflow brand secondary.",
+      neutral: "Default neutral UI state base.",
+    },
+    extraBody: "Business Travel Request approval for employee trips, expenses, and reimbursement control.",
+  }));
+  expectCode("business app cannot keep default colors without explicit approval", [
+    VALIDATOR,
+    "--package",
+    writePackage("business-travel-default-colors.yapk", buildDecoded({ appStyleConfig: DEFAULT_APP_STYLE_CONFIG })),
+    "--plan",
+    businessTravelDefaultPlan,
+  ], "APPLICATION_COLOR_PATTERN_BUSINESS_DEFAULT_USED");
+
+  const businessTravelPlan = path.join(tempDir, "business-travel-color-plan.md");
+  fs.writeFileSync(businessTravelPlan, buildPlan({
+    primary: "#1E40AF",
+    secondary: "#0F766E",
+    neutral: "#94A3B8",
+  }, {
+    title: "Business Travel Request",
+    rationale: {
+      primary: "Enterprise travel and approval primary blue.",
+      secondary: "Compliance and safe-trip supporting teal.",
+      neutral: "Slate neutral for forms, borders, and read-only states.",
+    },
+    extraBody: "Business Travel Request approval for employee trips, expenses, and reimbursement control.",
+  }));
+  const businessTravelPackage = writePackage("business-travel-colors.yapk", buildDecoded({ appStyleConfig: patchAppStyle({
+    primary: { value: "#1E40AF", lightmodel: "Luminance" },
+    secondary: { value: "#0F766E", lightmodel: "Luminance" },
+    neutral: { value: "#94A3B8", lightmodel: "Luminance" },
+  }) }));
+  expectPass("business semantic App Plan color selection passes", [VALIDATOR, "--package", businessTravelPackage, "--plan", businessTravelPlan]);
+
   const spec = path.join(tempDir, "functional-specification.md");
   const plan = path.join(tempDir, "yeeflow-app-plan.md");
   fs.writeFileSync(spec, ["# Functional Specification: Control Style Smoke", "", "| Application Name | Control Style Smoke |"].join("\n"));
@@ -124,6 +163,33 @@ try {
   assert.equal(customConfig.primary.value, "#1618E6", "materializer must use App Plan primary base color");
   assert.equal(customConfig.secondary.value, "#D40BE2", "materializer must use App Plan secondary base color");
   assert.equal(customConfig.neutral.value, "#C0C2C7", "materializer must use App Plan neutral base color");
+
+  const businessPlanWithoutColorTable = path.join(tempDir, "business-travel-no-color-table-plan.md");
+  fs.writeFileSync(businessPlanWithoutColorTable, [
+    "# Business Travel Request - Yeeflow App Plan",
+    "",
+    "## Plan Status",
+    "",
+    "Business defaults approval status: user-default-approved-for-generation.",
+    "",
+    "## Application Navigation Plan",
+    "",
+    "Business Travel Request approval for employee trips, travel policy, expenses, and reimbursement control.",
+    "",
+  ].join("\n"));
+  const businessMaterialized = expectPass("materializer infers business semantic application colors", [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", businessPlanWithoutColorTable,
+    "--out-dir", path.join(tempDir, "materialized-business-colors"),
+    "--allow-fixture-api-ids-for-tests",
+    "--json",
+  ]);
+  const businessMaterializerReport = JSON.parse(businessMaterialized.stdout);
+  const businessConfig = getAppStyleConfig(readDecodedPackage(businessMaterializerReport.outputs.package));
+  assert.equal(businessConfig.primary.value, "#1E40AF", "materializer must infer travel approval primary color when no explicit color table is present");
+  assert.equal(businessConfig.secondary.value, "#0F766E", "materializer must infer travel approval secondary color when no explicit color table is present");
+  assert.equal(businessConfig.neutral.value, "#94A3B8", "materializer must infer travel approval neutral color when no explicit color table is present");
 
   const materializedAgain = expectPass("materializer remaps control style ID for each fresh package", [
     MATERIALIZER,
@@ -181,21 +247,24 @@ function buildPlan(colors = {
   primary: DEFAULT_APP_STYLE_CONFIG.primary.value,
   secondary: DEFAULT_APP_STYLE_CONFIG.secondary.value,
   neutral: DEFAULT_APP_STYLE_CONFIG.neutral.value,
-}) {
+}, options = {}) {
+  const title = options.title || "Control Style Smoke";
+  const rationale = options.rationale || {};
   return [
-    "# Yeeflow App Plan: Control Style Smoke",
+    `# ${title} - Yeeflow App Plan`,
     "",
     "## Plan Status",
     "",
     "Business defaults approval status: user-default-approved-for-generation.",
+    options.extraBody ? `\n${options.extraBody}\n` : "",
     "",
     "#### Application Color Pattern Selection",
     "",
     "| Color Role | Base Color | Light Model | Rationale |",
     "| --- | --- | --- | --- |",
-    `| Primary | ${colors.primary} | Luminance | Brand primary |`,
-    `| Secondary | ${colors.secondary} | Luminance | Brand secondary |`,
-    `| Neutral | ${colors.neutral} | Luminance | Neutral UI states |`,
+    `| Primary | ${colors.primary} | Luminance | ${rationale.primary || "Brand primary"} |`,
+    `| Secondary | ${colors.secondary} | Luminance | ${rationale.secondary || "Brand secondary"} |`,
+    `| Neutral | ${colors.neutral} | Luminance | ${rationale.neutral || "Neutral UI states"} |`,
     "",
   ].join("\n");
 }
