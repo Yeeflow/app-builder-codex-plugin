@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.87`
+- Version: `0.8.88`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.87` releases the Application Layout Sidebar Workspace golden reference from PR #313: generated applications now use `application-layout-sidebar-workspace-1` as the default application layout template, preserve the export-derived header and vertical navigation appearance settings, require App Plan template selection, and enforce FontAwesome icons for every generated navigation menu item before signing readiness.
+Current release `0.8.88` releases `section_content_area` gap s200 golden-reference enforcement from PR #315: Dashboard, Workbench Dashboard, Data List Form, Data List Form Workbench, and Approval Form layout templates now preserve `attrs.style.gap = [null, "--sp--s200"]`, and generated or registry resources that regress to the obsolete `--sp--s0` gap fail before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.87
+Version: 0.8.88
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.87
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.88
 ```
 
 ## What Is Included
