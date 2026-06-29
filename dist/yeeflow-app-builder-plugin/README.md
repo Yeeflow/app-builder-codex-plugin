@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.90`
+- Version: `0.8.91`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.90` releases Dashboard runtime data binding hardening from PR #319: generated Data Analytics controls now emit visible chart/pivot source metadata that matches `Resource.exts[]`, COUNT analytics use `ListDataID` consistently across runtime value identity fields, and hard gates reject source drift or incomplete rows/values that can render blank charts at runtime.
+Current release `0.8.91` releases business-semantic application color palette selection from PR #322: App Plans now choose Primary, Secondary, and Neutral base colors from explicit user branding or a business-domain-specific palette instead of silently falling back to the generic Yeeflow defaults, generated packages materialize the selected palette with `lightmodel: "Luminance"`, and hard gates reject identifiable business-domain apps that still use the generic default palette without explicit user approval.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.90
+Version: 0.8.91
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.90
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.91
 ```
 
 ## What Is Included
