@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.91`
+`0.8.92`
+
+Version `0.8.92` releases E2E helper path, title, and install reporting alignment from PR #324. `yapk-first-generation-preflight` now resolves relative package, App Plan, and ID provenance paths from the caller working directory; full-app materialization uses explicit App Plan application names without planning document suffix leakage; and package API install/import reports separate submitted API acceptance from final Version Management/runtime proof while still exposing safe canonical application links from decoded package root proof when available.
 
 Version `0.8.91` releases business-semantic application color palette selection from PR #322. App Plans now choose Primary, Secondary, and Neutral base colors from explicit user branding or a business-domain-specific palette instead of silently falling back to the generic Yeeflow default palette; generated packages materialize the selected palette into the Type 0 application style `Config` with `lightmodel` set to `Luminance`; and application-control-style/preflight gates reject identifiable business-domain apps that still use the generic default palette without explicit user approval before signing readiness.
 

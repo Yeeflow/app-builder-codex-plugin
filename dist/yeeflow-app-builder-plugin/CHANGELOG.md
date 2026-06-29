@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.92
+
+- Release E2E helper path, title, and install reporting alignment from PR #324.
+- Resolve `yapk-first-generation-preflight` relative package, App Plan, and ID provenance paths from the caller working directory while preserving plugin-root gate execution.
+- Prefer explicit App Plan application names during full-app materialization and strip planning document suffixes such as `- Yeeflow App Plan` from generated app titles.
+- Separate package API request acceptance from final Version Management/runtime success with `apiAccepted`, `finalResultKnown`, `finalSuccess`, and `versionManagementRequired` reporting fields.
+- Emit safe canonical application links for submitted fresh installs when OAuth tenant URL and decoded package root `ListSetID` proof are available, without treating the link as runtime proof.
+
 ## 0.8.91
 
 - Release business-semantic application color palette selection from PR #322.

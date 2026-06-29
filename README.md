@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.91`
+- Version: `0.8.92`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.91` releases business-semantic application color palette selection from PR #322: App Plans now choose Primary, Secondary, and Neutral base colors from explicit user branding or a business-domain-specific palette instead of silently falling back to the generic Yeeflow defaults, generated packages materialize the selected palette with `lightmodel: "Luminance"`, and hard gates reject identifiable business-domain apps that still use the generic default palette without explicit user approval.
+Current release `0.8.92` releases E2E helper path, title, and install reporting alignment from PR #324: first-generation preflight resolves relative package, plan, and provenance paths from the caller working directory; full-app materialization prefers the explicit App Plan application name without appending Markdown document suffixes; and package API install/import reporting separates submitted API acceptance from final Version Management/runtime proof while still emitting safe canonical application links when decoded package root proof is available.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.91
+Version: 0.8.92
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.91
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.92
 ```
 
 ## What Is Included
