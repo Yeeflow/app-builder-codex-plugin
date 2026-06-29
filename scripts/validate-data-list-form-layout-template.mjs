@@ -13,6 +13,7 @@ const VIEW_TEMPLATE_ID = "data_list_form_layout_view_item_v1_1";
 const WORKBENCH_TEMPLATE_ID = "data_list_form_layout_workbench";
 const VIEW_TEMPLATE_IDS = new Set([VIEW_TEMPLATE_ID, WORKBENCH_TEMPLATE_ID]);
 const BACKGROUND = "#f4f7fb";
+const SECTION_CONTENT_AREA_GAP = "--sp--s200";
 const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" };
 const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header", "kpi_card_wrapper", "primary_working_area", "right_side_panel", "chart_cards_section"]);
 const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper", "kpi_card_wrapper", "kpi_cards_kpi_row", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
@@ -216,7 +217,18 @@ function validateFormResource(resource, context) {
   }
   validateRootShell(resource, context);
   validateUsageContract(resource, context.templateId || templateId, context);
+  validateSectionContentAreaGap(resource, context);
   validateBusinessSlots(resource, context);
+}
+
+function validateSectionContentAreaGap(resource, context) {
+  for (const entry of flatten(resource)) {
+    if (!hasIdentity(entry.node, "section_content_area")) continue;
+    const gap = entry.node?.attrs?.style?.gap;
+    if (tupleValue(gap) !== SECTION_CONTENT_AREA_GAP) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_SECTION_CONTENT_AREA_GAP_INVALID", "section_content_area must preserve attrs.style.gap [null,\"--sp--s200\"] in Data List Form golden reference templates and generated forms.", { source: context.source, path: entry.pointer, actual: gap ?? null }));
+    }
+  }
 }
 
 function validateRootShell(resource, context) {

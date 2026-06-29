@@ -50,6 +50,10 @@ try {
   removeOperationsWithoutActions(emptyCopiedSections);
   expectCode("generated approval form empty copied business sections fail", ["--resource", writeJson("submission-empty-copied-sections.json", emptyCopiedSections), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"], "APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
 
+  const legacySectionGap = submissionResource({ materializeFields: true });
+  firstSectionSlot(legacySectionGap).attrs.style.gap = [null, "--sp--s0"];
+  expectCode("Approval form section_content_area legacy zero gap fails", ["--resource", writeJson("submission-legacy-section-gap.json", legacySectionGap), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"], "APPROVAL_FORM_LAYOUT_SECTION_CONTENT_AREA_GAP_INVALID");
+
   const submissionEmptyPageTitleSlot = submissionResource();
   addEmptyPageTitleSectionContentArea(submissionEmptyPageTitleSlot);
   expectCode("generated submission form empty page title section content area fails", ["--resource", writeJson("submission-empty-page-title-slot.json", submissionEmptyPageTitleSlot), "--template", SUBMISSION_TEMPLATE_ID, "--page-role", "submission"], "APPROVAL_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");

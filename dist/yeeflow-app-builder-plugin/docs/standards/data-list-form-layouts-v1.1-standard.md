@@ -141,6 +141,8 @@ Generated forms must remove unused modules. New modules may only be created by c
 
 Copied modules must preserve the template's structure, hierarchy, control types, width, padding, direction, gap, background, typography, and required children. Do not invent new form layout modules.
 
+Every `section_content_area` copied from a Data List Form Layouts golden reference must preserve `attrs.style.gap = [null, "--sp--s200"]`. The legacy `--sp--s0` gap is not valid for generated custom Data List forms or updated template sources.
+
 Generated forms must not keep title-only copied sections. A `content_card_wrapper`, `content_card_60_wrapper`, `content_card_40_wrapper`, `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` is allowed in the final form only when it contains real business content in an approved slot. Empty `section_content_area` containers, copied placeholder section titles such as `Active Loan Pipeline`, and sections that do not contain current-record fields, approved related components, configured actions, or other real business controls must be pruned before generated-final validation.
 
 If a `section_content_area` would have no generated business content, remove the entire copied section/card that owns it. Do not keep an empty `section_content_area` as a spacer or as a future placeholder.

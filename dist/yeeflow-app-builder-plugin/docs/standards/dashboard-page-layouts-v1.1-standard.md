@@ -120,6 +120,8 @@ Allowed repeatable/removable template modules:
 
 Unneeded repeatable modules may be removed. New layout modules may only be added by copying one of the allowed repeatable/removable template modules. Copied modules must preserve template structure, hierarchy, control types, width, padding, direction, gap, background, and required children.
 
+Every `section_content_area` copied from a Dashboard Page Layouts golden reference must preserve `attrs.style.gap = [null, "--sp--s200"]`. The older `--sp--s0` gap is not valid for generated Dashboard pages or updated template sources.
+
 The selected repeatable modules may be reordered to match business priority. For example, `kpi_metrics_wrapper` is usually near the top of an operational Dashboard, but `2_columns_section`, `3_columns_section`, `2_columns_60/40_section`, and `content_card_wrapper` may appear before or after it when the Functional Specification/App Plan makes that order more useful. Reordering is allowed only for approved repeatable modules; it must not create new structural container shapes.
 
 Do not invent new dashboard layout modules. Non-business template containers must remain structurally equivalent to the template. KPI cards may be added only by copying one of the approved KPI card variants: `event_portfolio_kpi_planned_events`, `event_portfolio_kpi_approved_budget`, `event_portfolio_kpi_registration_rate`, or `event_portfolio_kpi_lead_follow_up`, then replacing the allowed KPI business content.

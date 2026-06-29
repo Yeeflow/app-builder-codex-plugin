@@ -130,6 +130,8 @@ Generated Approval form pages must remove unused modules. New modules may only b
 
 Copied modules must preserve the template's structure, hierarchy, control types, width, padding, direction, gap, background, typography, and required children. Do not invent new Approval form layout modules.
 
+Every `section_content_area` copied from an Approval Form Layouts golden reference must preserve `attrs.style.gap = [null, "--sp--s200"]`. The legacy `--sp--s0` gap is not valid for generated Approval submission pages, task pages, Data List workflow task pages, Schedule workflow task pages, or updated template sources.
+
 Generated forms must not keep empty copied business sections. A copied `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` is valid only when its `section_content_area` contains real business content such as an approved Approval Form Field Layout wrapper, a configured Collection template, a data filter group, Dynamic controls, or an action button with real Yeeflow action configuration. A copied `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` that does not contain real business content must be removed. The locked `action_panel_flow_history_wrapper` is the exception and must remain intact.
 
 Generated forms must also remove standalone empty `section_content_area` slots outside copied business sections. This includes the `section_content_area` that may exist under `page_title_section` in the template export. If the generated Submission form or Task form has no page-title-adjacent business controls, filters, or operations for that slot, remove the empty `section_content_area` from `page_title_section` instead of leaving a visible blank designer drop zone.

@@ -73,6 +73,10 @@ try {
   addEmptyCopiedContentCard(emptyCopiedSection);
   expectCode("generated Data List form empty copied business section fails", ["--resource", writeJson("new-edit-empty-copied-section.json", emptyCopiedSection), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_EMPTY_SECTION_CONTENT_AREA");
 
+  const legacySectionGap = newEditResource();
+  firstSlot(legacySectionGap).attrs.style.gap = [null, "--sp--s0"];
+  expectCode("Data List form section_content_area legacy zero gap fails", ["--resource", writeJson("new-edit-legacy-section-gap.json", legacySectionGap), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_SECTION_CONTENT_AREA_GAP_INVALID");
+
   const residualTemplateLabel = newEditResource();
   firstSlot(residualTemplateLabel).children.push({ type: "text", id: "stale_section_text", nv_label: "stale_section_text", text: "Active Loan Pipeline" });
   expectCode("generated Data List form residual template label fails", ["--resource", writeJson("new-edit-residual-template-label.json", residualTemplateLabel), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_TEMPLATE_RESIDUAL_LABEL");
