@@ -44,9 +44,11 @@ try {
     "Business defaults approval status: user-default-approved-for-generation.",
   ].join("\n"));
   fs.writeFileSync(plan, [
-    "# Yeeflow App Plan: Office Asset Loan Management",
+    "# Office Asset Loan Management - Yeeflow App Plan",
     "",
     "## Plan Status",
+    "",
+    "- Application name: Office Asset Loan Management",
     "",
     "Business defaults approval status: user-default-approved-for-generation.",
   ].join("\n"));
@@ -95,8 +97,10 @@ try {
   const wrapper = JSON.parse(fs.readFileSync(report.outputs.package, "utf8"));
   assert.equal(wrapper.Sign, "", "materializer must not sign package");
   assert.equal(wrapper.AppID, 41, "materializer emits Flowcraft YAPK wrapper");
+  assert.equal(wrapper.Title, "Office Asset Loan Management", "materializer must use the App Plan application name instead of the Markdown document title suffix");
   assert.equal(typeof wrapper.Resource, "string");
   cases.push("materializer keeps signing/install boundary clean");
+  cases.push("materializer derives app title from App Plan Application name without appending the document heading suffix");
 
   const apiIdManifest = path.join(tempDir, "api-issued-ids.json");
   fs.writeFileSync(apiIdManifest, JSON.stringify({
@@ -653,9 +657,18 @@ try {
     blockedBy: null,
     nextRequiredStages: ["setsign", "verifysign", "package API install/import or upgrade", "Version Management final success where applicable", "browser/runtime proof"],
   });
+  const relativePreflightRun = expectPass("first-generation preflight resolves relative --plan from caller cwd", [
+    FIRST_GENERATION_PREFLIGHT,
+    "--package", path.relative(tempDir, resourceReport.outputs.package),
+    "--plan", path.relative(tempDir, resourcePlan),
+    "--id-provenance", path.relative(tempDir, resourceReport.outputs.idProvenance),
+    "--json",
+  ], { cwd: tempDir });
+  assert.equal(JSON.parse(relativePreflightRun.stdout).ok, true);
   cases.push("nontrivial App Plan materializes data lists, approval forms, reports, dashboards, custom forms, and navigation without placeholder output");
   cases.push("nontrivial App Plan materialization passes ID provenance, runtime navigation, live install readiness, data-list schema, YAPK package, export-shape, Dashboard v1.1, Dashboard Collection template, Golden Reference, aggregate Dashboard hard gates, Summary contract, and first-generation preflight");
   cases.push("preflight pass emits signing-readiness handoff fields without changing materializer signing boundary");
+  cases.push("first-generation preflight resolves relative package, plan, and provenance paths from the caller working directory");
 
 console.log(JSON.stringify({ status: "pass", cases }, null, 2));
 
@@ -707,7 +720,7 @@ function expectCode(name, args, code, options = {}) {
 }
 
 function run(args, options = {}) {
-  return spawnSync(process.execPath, args, { cwd: ROOT, encoding: "utf8", maxBuffer: 16 * 1024 * 1024, env: options.env || process.env });
+  return spawnSync(process.execPath, args, { cwd: options.cwd || ROOT, encoding: "utf8", maxBuffer: 16 * 1024 * 1024, env: options.env || process.env });
 }
 
 function assertDataListCustomFormRuntimeSources(decodedResource) {

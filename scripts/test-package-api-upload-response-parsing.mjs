@@ -17,6 +17,7 @@ await testPlainIdentifierString();
 testExtractPackageFileAliases();
 await testApplicationListSetExtraction();
 testApplicationAccessLinkBuilder();
+await testInstallSubmittedSemantics();
 testUpgradeCheckClassification();
 
 console.log("package-api-upload-response-parsing tests passed");
@@ -100,7 +101,7 @@ function testApplicationAccessLinkBuilder() {
 
   const packageRoot = buildApplicationAccessReport({
     operation: "install-yapk",
-    responseSummary: { ok: true, applicationListSetId: "999999" },
+    responseSummary: { ok: true, apiAccepted: true, resultClass: "submitted", applicationListSetId: "999999" },
     auth: oauthAuth,
     packageRootProof: { wrapperListId: "123456", decodedListSetId: "123456", rootIdsMatch: true },
   });
@@ -144,6 +145,20 @@ function testApplicationAccessLinkBuilder() {
   });
   assert.equal(rejected.status, "unavailable");
   assert.equal(rejected.link, null);
+}
+
+async function testInstallSubmittedSemantics() {
+  const summary = await summarizeResponse(makeResponse(JSON.stringify({
+    Status: 0,
+    Data: { ID: "install-log-id", Continue: false, Status: 1 },
+  }), "application/json"), "/listset/package/install");
+  assert.equal(summary.resultClass, "submitted");
+  assert.equal(summary.ok, true);
+  assert.equal(summary.apiAccepted, true);
+  assert.equal(summary.finalResultKnown, false);
+  assert.equal(summary.finalSuccess, false);
+  assert.equal(summary.versionManagementRequired, true);
+  assert.match(summary.proofBoundary, /not install\/runtime success/);
 }
 
 function testUpgradeCheckClassification() {

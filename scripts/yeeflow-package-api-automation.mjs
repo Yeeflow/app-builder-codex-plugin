@@ -453,10 +453,17 @@ async function summarizeResponse(response, label, context = {}) {
     message: parsed?.Message ?? parsed?.message ?? "",
     upgradeCheck: context.upgradeCheck,
   });
+  const requestAccepted = isAcceptedApiResultClass(classification.resultClass);
+  const finalResultKnown = isFinalApiResultClass(classification.resultClass);
   const summary = {
     label,
-    ok: classification.resultClass === "success",
+    ok: requestAccepted,
     resultClass: classification.resultClass,
+    apiAccepted: requestAccepted,
+    finalResultKnown,
+    finalSuccess: classification.resultClass === "success" || classification.resultClass === "upgrade_check_passed",
+    versionManagementRequired: classification.resultClass === "submitted" || classification.resultClass === "upgrade_submitted",
+    proofBoundary: classification.proofBoundary || null,
     httpStatus: response.status,
     contentType,
     responseKeys: parsed && typeof parsed === "object" ? Object.keys(parsed).slice(0, 20) : [],
@@ -492,7 +499,8 @@ function buildApplicationAccessReport({ operation = "", responseSummary = {}, au
     : "";
   const unavailableMessage = "Application link: unavailable; ListSetID or tenant URL was not safely resolved.";
   const proofBoundary = "API install/import success is not browser runtime proof; open the application and verify navigation, dashboards, lists, forms, and workflows.";
-  if (responseSummary.ok !== true || !listSetId || !tenantUrl || !["import-yap", "install-yapk"].includes(operation)) {
+  const requestAccepted = responseSummary.ok === true || responseSummary.apiAccepted === true;
+  if (!requestAccepted || !listSetId || !tenantUrl || !["import-yap", "install-yapk"].includes(operation)) {
     return {
       status: "unavailable",
       operation,
@@ -522,6 +530,14 @@ function buildApplicationAccessReport({ operation = "", responseSummary = {}, au
     message: `Application link: ${link}`,
     proofBoundary,
   };
+}
+
+function isAcceptedApiResultClass(resultClass) {
+  return ["success", "submitted", "upgrade_check_passed", "upgrade_submitted"].includes(resultClass);
+}
+
+function isFinalApiResultClass(resultClass) {
+  return resultClass === "success" || resultClass === "upgrade_check_passed";
 }
 
 async function resolveSelectedWorkspaceSummary(options) {
