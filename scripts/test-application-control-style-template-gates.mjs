@@ -13,6 +13,12 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const VALIDATOR = path.join(ROOT, "scripts/validate-application-control-style-template.mjs");
 const MATERIALIZER = path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs");
 const TEMPLATE = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/application-control-style-soft-outline-controls.template.json"), "utf8"));
+const DEFAULT_APP_STYLE_CONFIG = TEMPLATE.requiredThemes.applicationStyleTheme.Config || {
+  primary: { value: "#0065FF", lightmodel: "Luminance" },
+  secondary: { value: "#00D1FF", lightmodel: "Luminance" },
+  neutral: { value: "#B3B7C0", lightmodel: "Luminance" },
+  typography: { fontfamily: "Default", fontweight: "regular", basevalue: 14, scale: "1.125", lineheight: 1.6 },
+};
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "application-control-style-"));
 const cases = [];
 
@@ -48,10 +54,46 @@ try {
   driftedStyle.Config = JSON.stringify(parsed);
   expectCode("drifted Config fails", [VALIDATOR, "--package", writePackage("drifted-config.yapk", driftedConfig)], "APPLICATION_CONTROL_STYLE_CONFIG_MISMATCH");
 
+  const missingAppStyleConfig = buildDecoded();
+  missingAppStyleConfig.Themes.find((theme) => Number(theme.Type) === 0).Config = "";
+  expectCode("missing application color pattern Config fails", [VALIDATOR, "--package", writePackage("missing-app-style-config.yapk", missingAppStyleConfig)], "APPLICATION_COLOR_PATTERN_CONFIG_MISSING");
+
+  const objectAppStyleConfig = buildDecoded();
+  objectAppStyleConfig.Themes.find((theme) => Number(theme.Type) === 0).Config = DEFAULT_APP_STYLE_CONFIG;
+  expectCode("object-shaped application color pattern Config fails", [VALIDATOR, "--package", writePackage("object-app-style-config.yapk", objectAppStyleConfig)], "APPLICATION_COLOR_PATTERN_CONFIG_NOT_STRING");
+
+  const invalidLightmodel = buildDecoded({ appStyleConfig: patchAppStyle({ primary: { value: "#0065FF", lightmodel: "HSV" } }) });
+  expectCode("invalid application color lightmodel fails", [VALIDATOR, "--package", writePackage("invalid-lightmodel.yapk", invalidLightmodel)], "APPLICATION_COLOR_PATTERN_LIGHTMODEL_INVALID");
+
+  const tooLightPrimary = buildDecoded({ appStyleConfig: patchAppStyle({ primary: { value: "#F7F7FF", lightmodel: "Luminance" } }) });
+  expectCode("too-light primary fails", [VALIDATOR, "--package", writePackage("too-light-primary.yapk", tooLightPrimary)], "APPLICATION_COLOR_PATTERN_BASE_TOO_LIGHT");
+
+  const tooDarkPrimary = buildDecoded({ appStyleConfig: patchAppStyle({ primary: { value: "#010011", lightmodel: "Luminance" } }) });
+  expectCode("too-dark primary fails", [VALIDATOR, "--package", writePackage("too-dark-primary.yapk", tooDarkPrimary)], "APPLICATION_COLOR_PATTERN_BASE_TOO_DARK");
+
+  const chromaticNeutral = buildDecoded({ appStyleConfig: patchAppStyle({ neutral: { value: "#60A0FF", lightmodel: "Luminance" } }) });
+  expectCode("chromatic neutral fails", [VALIDATOR, "--package", writePackage("chromatic-neutral.yapk", chromaticNeutral)], "APPLICATION_COLOR_PATTERN_NEUTRAL_CHROMA_INVALID");
+
+  const customPlan = path.join(tempDir, "custom-color-plan.md");
+  fs.writeFileSync(customPlan, buildPlan({
+    primary: "#1618E6",
+    secondary: "#D40BE2",
+    neutral: "#C0C2C7",
+  }));
+  const customColorPackage = writePackage("custom-color.yapk", buildDecoded({ appStyleConfig: patchAppStyle({
+    primary: { value: "#1618E6", lightmodel: "Luminance" },
+    secondary: { value: "#D40BE2", lightmodel: "Luminance" },
+    neutral: { value: "#C0C2C7", lightmodel: "Luminance" },
+  }) }));
+  expectPass("custom App Plan color selection passes", [VALIDATOR, "--package", customColorPackage, "--plan", customPlan]);
+
+  const mismatchColorPackage = writePackage("custom-color-mismatch.yapk", buildDecoded({ appStyleConfig: DEFAULT_APP_STYLE_CONFIG }));
+  expectCode("App Plan color mismatch fails", [VALIDATOR, "--package", mismatchColorPackage, "--plan", customPlan], "APPLICATION_COLOR_PATTERN_APP_PLAN_MISMATCH");
+
   const spec = path.join(tempDir, "functional-specification.md");
   const plan = path.join(tempDir, "yeeflow-app-plan.md");
   fs.writeFileSync(spec, ["# Functional Specification: Control Style Smoke", "", "| Application Name | Control Style Smoke |"].join("\n"));
-  fs.writeFileSync(plan, ["# Yeeflow App Plan: Control Style Smoke", "", "## Plan Status", "", "Business defaults approval status: user-default-approved-for-generation."].join("\n"));
+  fs.writeFileSync(plan, buildPlan());
   const materialized = expectPass("materializer emits default application control style", [
     MATERIALIZER,
     "--functional-spec", spec,
@@ -61,10 +103,27 @@ try {
     "--json",
   ]);
   const materializerReport = JSON.parse(materialized.stdout);
-  expectPass("materializer package passes control style validator", [VALIDATOR, "--package", materializerReport.outputs.package]);
-  const materializedStyleId = getControlStyleId(readDecodedPackage(materializerReport.outputs.package));
+  expectPass("materializer package passes control style validator", [VALIDATOR, "--package", materializerReport.outputs.package, "--plan", plan]);
+  const decodedMaterialized = readDecodedPackage(materializerReport.outputs.package);
+  const materializedStyleId = getControlStyleId(decodedMaterialized);
+  assert.deepEqual(getAppStyleConfig(decodedMaterialized).primary, DEFAULT_APP_STYLE_CONFIG.primary, "materializer must emit default primary color pattern");
   assert.notEqual(materializedStyleId, TEMPLATE.requiredThemes.controlStyleTheme.ID, "materializer must remap the template control style UUID");
   assert.match(materializedStyleId, /^[0-9a-f-]{36}$/i, "materializer must emit a UUID-shaped control style ID");
+
+  const customMaterialized = expectPass("materializer emits App Plan selected application colors", [
+    MATERIALIZER,
+    "--functional-spec", spec,
+    "--app-plan", customPlan,
+    "--out-dir", path.join(tempDir, "materialized-custom-colors"),
+    "--allow-fixture-api-ids-for-tests",
+    "--json",
+  ]);
+  const customMaterializerReport = JSON.parse(customMaterialized.stdout);
+  expectPass("custom color materializer package passes control style validator", [VALIDATOR, "--package", customMaterializerReport.outputs.package, "--plan", customPlan]);
+  const customConfig = getAppStyleConfig(readDecodedPackage(customMaterializerReport.outputs.package));
+  assert.equal(customConfig.primary.value, "#1618E6", "materializer must use App Plan primary base color");
+  assert.equal(customConfig.secondary.value, "#D40BE2", "materializer must use App Plan secondary base color");
+  assert.equal(customConfig.neutral.value, "#C0C2C7", "materializer must use App Plan neutral base color");
 
   const materializedAgain = expectPass("materializer remaps control style ID for each fresh package", [
     MATERIALIZER,
@@ -84,7 +143,7 @@ try {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
 
-function buildDecoded({ controlStyleId = crypto.randomUUID() } = {}) {
+function buildDecoded({ controlStyleId = crypto.randomUUID(), appStyleConfig = DEFAULT_APP_STYLE_CONFIG } = {}) {
   const rootListId = "1001";
   const style = TEMPLATE.requiredThemes.controlStyleTheme;
   return {
@@ -103,11 +162,42 @@ function buildDecoded({ controlStyleId = crypto.randomUUID() } = {}) {
         Type: 0,
         Name: "application style",
         Description: null,
-        Config: null,
+        Config: JSON.stringify(appStyleConfig),
         Ext: JSON.stringify({ controlDefaultId: controlStyleId }),
       },
     ],
   };
+}
+
+function patchAppStyle(patch) {
+  return {
+    ...DEFAULT_APP_STYLE_CONFIG,
+    ...patch,
+    typography: DEFAULT_APP_STYLE_CONFIG.typography,
+  };
+}
+
+function buildPlan(colors = {
+  primary: DEFAULT_APP_STYLE_CONFIG.primary.value,
+  secondary: DEFAULT_APP_STYLE_CONFIG.secondary.value,
+  neutral: DEFAULT_APP_STYLE_CONFIG.neutral.value,
+}) {
+  return [
+    "# Yeeflow App Plan: Control Style Smoke",
+    "",
+    "## Plan Status",
+    "",
+    "Business defaults approval status: user-default-approved-for-generation.",
+    "",
+    "#### Application Color Pattern Selection",
+    "",
+    "| Color Role | Base Color | Light Model | Rationale |",
+    "| --- | --- | --- | --- |",
+    `| Primary | ${colors.primary} | Luminance | Brand primary |`,
+    `| Secondary | ${colors.secondary} | Luminance | Brand secondary |`,
+    `| Neutral | ${colors.neutral} | Luminance | Neutral UI states |`,
+    "",
+  ].join("\n");
 }
 
 function writePackage(name, decoded) {
@@ -147,6 +237,11 @@ function getControlStyleId(decoded) {
   const styleTheme = decoded.Themes.find((theme) => Number(theme.Type) === 1 && theme.ID === controlDefaultId);
   assert.ok(styleTheme, "Type 0 application style must point at a Type 1 style theme");
   return styleTheme.ID;
+}
+
+function getAppStyleConfig(decoded) {
+  const appTheme = decoded.Themes.find((theme) => Number(theme.Type) === 0);
+  return JSON.parse(appTheme.Config);
 }
 
 function runNode(args, options = {}) {

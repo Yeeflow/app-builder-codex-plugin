@@ -25,7 +25,7 @@ Every generated full application package must include:
 2. A Type `0` application style theme:
    - `ID`: `41_<decoded.ListSet.ListID>`
    - `Name`: `application style`
-   - `Config`: `null` in exported references or `""` in generated-final schema-safe packages
+   - `Config`: a stringified JSON object containing `primary`, `secondary`, `neutral`, and `typography`
    - `Ext`: a JSON string with `controlDefaultId` pointing to the Type `1` control style theme ID
 
 Do not rely on Yeeflow System control styles or tenant-global custom style IDs for generated packages. The application package must carry its own Application Custom Control Style and explicitly set it as the default.
@@ -44,9 +44,29 @@ The exported template UUID is a reference identity only. Fresh generated applica
 - Generated-final packages must satisfy `schemas/yapk-schema.json`, which requires `AppThemeInfo.Description`, `AppThemeInfo.Config`, and `AppThemeInfo.Ext` to be strings. Use empty strings for nullable exported-reference fields when generating packages.
 - This control style standard is application-level only. It must not change page layout, data-list, approval, dashboard, collection, analytics, or workflow golden-reference contracts.
 
+## Application Color Pattern
+
+The Type `0` `application style` theme stores application color patterns in `Config` as a stringified JSON object. The generated package must include:
+
+- `primary.value`: base brand primary color, default `#0065FF`
+- `secondary.value`: base brand secondary color, default `#00D1FF`
+- `neutral.value`: base neutral color, default `#B3B7C0`
+- `primary.lightmodel`, `secondary.lightmodel`, and `neutral.lightmodel`: exactly `Luminance`
+- `typography`: preserve the exported application style typography block
+
+The App Plan may select custom Primary, Secondary, and Neutral base colors. The generator must copy those exact base colors into Type `0` `Config`. If the App Plan does not select custom base colors, use the defaults above.
+
+Do not generate success, warning, or danger from App Plan brand colors. Those remain semantic Yeeflow colors: success is green, warning is yellow, and danger is red.
+
+Base color constraints:
+
+- Primary and Secondary should use OKLCH lightness `0.42-0.68`; `0.35-0.82` is the valid hard range, and values above `0.72` should be treated as a warning.
+- Neutral must use OKLCH lightness `0.65-0.88` and chroma no greater than `0.06`.
+- Reject base colors that are too light to read or too dark to produce distinguishable dark variants.
+
 ## Hard Gate
 
-`scripts/validate-application-control-style-template.mjs` must pass before a generated-final package is eligible for signing. The validator checks the registry, package `Themes[]`, default-style linkage, stringified config shape, and exact package-materialized style config.
+`scripts/validate-application-control-style-template.mjs` must pass before a generated-final package is eligible for signing. The validator checks the registry, package `Themes[]`, default-style linkage, stringified config shape, exact package-materialized style config, Type `0` application color pattern config, `Luminance` lightmodel, base color ranges, and App Plan-to-package color matching when an App Plan is supplied.
 
 ## Proof Boundary
 
