@@ -67,7 +67,7 @@ export function validateDashboardGenerationHardGates(options = {}) {
   if (options.package) {
     const golden = validateDashboardGoldenReferenceConformance({ package: options.package });
     findings.push(...asArray(golden.findings));
-    const pageLayout = validateDashboardPageLayoutTemplate({ package: options.package });
+    const pageLayout = validateDashboardPageLayoutTemplate({ package: options.package, appPlan: options.plan });
     findings.push(...asArray(pageLayout.findings));
     const datasetPresentation = validateDashboardDatasetPresentationGoldenReferences({ package: options.package, appPlan: options.plan });
     findings.push(...asArray(datasetPresentation.findings));

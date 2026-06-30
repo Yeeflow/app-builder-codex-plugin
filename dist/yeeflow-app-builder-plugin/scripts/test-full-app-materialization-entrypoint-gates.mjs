@@ -610,6 +610,7 @@ try {
   expectPass("nontrivial generated package passes Dashboard Page Layouts v1.1 validation", [
     DASHBOARD_LAYOUT_VALIDATOR,
     "--package", resourceReport.outputs.package,
+    "--app-plan", resourcePlan,
   ]);
   expectPass("nontrivial generated package passes Dashboard Collection template materialization validation", [
     DASHBOARD_DATASET_VALIDATOR,
