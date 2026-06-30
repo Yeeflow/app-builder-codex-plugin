@@ -1564,6 +1564,8 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
   removeAllByIdentity(resource, "Operations");
+  removeResidualTemplateSectionHeaders(resource);
+  removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
   return resource;
 }
@@ -2159,6 +2161,10 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     host: contentArea,
   });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
+  scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource });
+  if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
+  removeResidualTemplateSectionHeaders(resource);
+  removeEmptySectionTitleAreas(resource);
   resource.filterVars = filterConsumedDashboardFilterVars(resource, uniqueByName([
     ...normalizeDependencyArray(templateDependencies.filterVars),
     ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
@@ -2219,6 +2225,9 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   };
   ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId);
   normalizeGeneratedDashboardControls(resource, name);
+  if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
+  removeResidualTemplateSectionHeaders(resource);
+  removeEmptySectionTitleAreas(resource);
   removeEmptyDashboardBusinessSections(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
   return resource;
@@ -2456,6 +2465,8 @@ function mapDynamicControlsForList(root, listMeta, rootListSetId) {
     control.name = field.displayName;
     control.title = field.displayName;
     control.label = field.displayName;
+    const navLabel = `collection_item_${slugify(field.displayName || field.fieldName || "field")}`.replace(/-/g, "_");
+    setSemanticNavigatorLabel(control, navLabel);
   }
 }
 
@@ -3648,6 +3659,8 @@ function normalizeGeneratedDashboardControls(resource, pageName) {
       const identity = firstMeaningfulIdentity(node);
       if (!identity) node.name = `${pageName} ${node.type} ${index}`;
       else if (isDefaultNavigatorName(node.name) && isDefaultNavigatorName(node.attrs?.nav_label) && isDefaultNavigatorName(node.attrs?.nv_label)) node.name = identity;
+      const semanticLabel = semanticNavigatorLabel(node, pageName, index);
+      if (semanticLabel) setSemanticNavigatorLabel(node, semanticLabel);
       if (String(node.type) === "heading" && String(node.label || "") === "Text") {
         node.attrs = node.attrs || {};
         node.attrs.heads = node.attrs.heads || {};
@@ -3655,12 +3668,80 @@ function normalizeGeneratedDashboardControls(resource, pageName) {
         if (typeof node.attrs.heads.color !== "string" || !node.attrs.heads.color.trim()) node.attrs.heads.color = "#1f2937";
         node.attrs.headc = node.attrs.headc || {};
         node.attrs.headc.title = node.attrs.headc.title || { value: node.name || pageName };
+        normalizeVisibleTextExpression(node, pageName, index);
         if (node.attrs.headc.title.value === undefined && node.attrs.headc.title.variable === undefined) node.attrs.headc.title.value = node.name || pageName;
       }
     }
     for (const child of Array.isArray(node.children) ? node.children : []) visit(child);
   };
   visit(resource);
+}
+
+function semanticNavigatorLabel(control, pageName, index) {
+  const existing = firstMeaningfulIdentity(control);
+  if (existing) return slugifyNavigatorLabel(existing);
+  const text = firstVisibleTextValue(control);
+  if (text && !looksLikeRawVisibleExpression(text)) return slugifyNavigatorLabel(text);
+  const field = String(
+    control?.attrs?.data?.fieldName
+    || control?.attrs?.data?.field
+    || control?.attrs?.fieldName
+    || control?.attrs?.field
+    || control?.fieldName
+    || control?.FieldName
+    || control?.field
+    || "",
+  );
+  if (field) return slugifyNavigatorLabel(`${control.type || "control"} ${field}`);
+  return slugifyNavigatorLabel(`${pageName} ${control.type || "control"} ${index}`);
+}
+
+function setSemanticNavigatorLabel(control, label) {
+  if (!control || !label) return;
+  const normalized = slugifyNavigatorLabel(label);
+  control.attrs = control.attrs || {};
+  if (isDefaultNavigatorName(control.nv_label)) control.nv_label = normalized;
+  if (isDefaultNavigatorName(control.nav_label)) control.nav_label = normalized;
+  if (isDefaultNavigatorName(control.attrs.nv_label)) control.attrs.nv_label = normalized;
+  if (isDefaultNavigatorName(control.attrs.nav_label)) control.attrs.nav_label = normalized;
+}
+
+function slugifyNavigatorLabel(value) {
+  return slugify(value).replace(/-/g, "_");
+}
+
+function normalizeVisibleTextExpression(control, pageName, index) {
+  const title = control?.attrs?.headc?.title;
+  if (!title || title.variable !== undefined || typeof title.value !== "string") return;
+  if (!looksLikeRawVisibleExpression(title.value)) return;
+  const replacement = labelFromRawVisibleExpression(title.value) || firstMeaningfulIdentity(control) || `${pageName} text ${index}`;
+  title.value = replacement;
+  control.name = replacement;
+  control.title = replacement;
+  control.label = control.label && !isDefaultNavigatorName(control.label) ? control.label : "Text";
+  setSemanticNavigatorLabel(control, replacement);
+}
+
+function firstVisibleTextValue(control) {
+  return [
+    control?.attrs?.headc?.title?.value,
+    control?.attrs?.title?.value,
+    control?.value,
+    control?.text,
+    control?.title,
+    control?.name,
+  ].find((value) => typeof value === "string" && value.trim()) || "";
+}
+
+function looksLikeRawVisibleExpression(value) {
+  return /\b(?:iif|dateDiff|dateAdd|formatDate|formatNumber|concat|substring|contains|ifempty)\s*\(/i.test(String(value || ""))
+    || /Collection item:/i.test(String(value || ""));
+}
+
+function labelFromRawVisibleExpression(value) {
+  const match = String(value || "").match(/Collection item:([A-Za-z0-9 _-]+)/i);
+  if (!match) return "";
+  return match[1].replace(/\b(now|day|hour|minute|month|year)\b.*$/i, "").trim() || "";
 }
 
 function firstMeaningfulIdentity(control) {
@@ -3702,6 +3783,7 @@ function removeEmptyBusinessSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
@@ -3731,6 +3813,7 @@ function removeEmptyDashboardBusinessSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
@@ -3745,6 +3828,7 @@ function removeUnusedApprovalTemplateSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !findFirstByIdentity(child, "action_panel_flow_history_wrapper") && !hasWorkflowSurface(child) && !hasMeaningfulBusinessContent(child)) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
       if (![...removableModules].some((identity) => hasIdentity(child, identity))) return true;
       if (findFirstByIdentity(child, "action_panel_flow_history_wrapper")) return true;
       return hasMeaningfulBusinessContent(child);
@@ -3763,13 +3847,111 @@ function hasMeaningfulBusinessContent(node) {
     if (["collection", "data-list", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(control)) return true;
     if (hasIdentity(control, "kpi_card_wrapper") && (control.generatedKpiRuntimeBound === true || control.attrs?.generatedKpiRuntimeBound === true)) return true;
-    if (["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"].some((identity) => hasIdentity(control, identity))) return true;
     if (hasIdentity(control, "form_grid_fields_wrapper")) return true;
     if (hasIdentity(control, "form_grid_fields_2col_wrapper")) return true;
     if (hasIdentity(control, "form_grid_fields_3col_wrapper")) return true;
     if (["input", "textarea", "richtext", "rich-text", "radio", "checkbox", "switch", "date", "datetime", "number", "input_number", "lookup", "people", "user"].includes(type)) return true;
     return false;
   }).length > 0;
+}
+
+function hasSectionTitleAreaContent(node) {
+  const header = findFirstByIdentity(node, "section_title_header");
+  const operations = findFirstByIdentity(node, "Operations");
+  return Boolean(header || (operations && hasActionConfiguration(operations)));
+}
+
+function removeEmptySectionTitleAreas(root) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
+      return true;
+    });
+  };
+  visit(root);
+}
+
+function removeResidualTemplateSectionHeaders(root) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      if (hasIdentity(child, "section_title_header") && hasSourceTemplateResidueText(child)) return false;
+      return true;
+    });
+  };
+  visit(root);
+}
+
+function removeRedundantMasterDetailSectionTitleHeaders(root) {
+  const visit = (node, ancestors = []) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child, ancestors.concat(node));
+      if (!hasIdentity(child, "section_title_header")) return true;
+      const insideContentCard = ancestors.concat(node).some((ancestor) => hasIdentity(ancestor, "content_card_wrapper"));
+      if (!insideContentCard) return true;
+      const titleArea = ancestors.concat(node).reverse().find((ancestor) => hasIdentity(ancestor, "section_title_area"));
+      const operations = titleArea ? findFirstByIdentity(titleArea, "Operations") : null;
+      return Boolean(operations && hasActionConfiguration(operations));
+    });
+  };
+  visit(root);
+}
+
+function scrubDashboardSourceTemplateResidue(root, { listName }) {
+  const replacements = [
+    [/\bActive Loan Pipeline\b/g, `${listName} Details`],
+    [/\bOffice Asset records\b/g, `${listName} records`],
+    [/\bcurrent loan volume\b/gi, "current record volume"],
+    [/\breturn activity signal\b/gi, "activity signal"],
+    [/\bwatch coordinator follow-up\b/gi, "follow-up signal"],
+    [/Coordinator guidance: prioritize overdue items and returns due within the next seven days\./gi, `Review ${listName} records and related activity.`],
+  ];
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) value[index] = visit(value[index]);
+      return value;
+    }
+    if (!value || typeof value !== "object") {
+      if (typeof value !== "string") return value;
+      return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement).trim(), value);
+    }
+    for (const [key, child] of Object.entries(value)) {
+      if (/^(?:id|templateId|dataTableTemplateId|dataAnalyticsTemplateId|datasetPresentationTemplateId|derivedFrom|derivedFromDatasetPresentationTemplate|derivedFromDataTableGoldenReference|derivedFromDataAnalyticsGoldenReference)$/i.test(key)) continue;
+      value[key] = visit(child);
+    }
+    return value;
+  };
+  visit(root);
+}
+
+function hasSourceTemplateResidueText(node) {
+  const text = visibleBusinessText(node);
+  return /\bActive Loan Pipeline\b/i.test(text)
+    || /\bCoordinator guidance: prioritize overdue items and returns/i.test(text)
+    || /\bcurrent loan volume\b/i.test(text)
+    || /\breturn activity signal\b/i.test(text)
+    || /\bwatch coordinator follow-up\b/i.test(text)
+    || /\bOffice Asset records\b/i.test(text);
+}
+
+function visibleBusinessText(node) {
+  const values = [];
+  const visit = (current) => {
+    if (!current || typeof current !== "object") return;
+    for (const key of ["text", "title", "value", "description", "placeholder", "name", "label", "nv_label", "nav_label"]) {
+      const value = current?.[key];
+      if (typeof value === "string" && value.trim()) values.push(value);
+    }
+    const titleValue = current?.attrs?.headc?.title?.value ?? current?.attrs?.title?.value ?? current?.attrs?.text ?? current?.attrs?.value;
+    if (typeof titleValue === "string" && titleValue.trim()) values.push(titleValue);
+    for (const child of Array.isArray(current.children) ? current.children : []) visit(child);
+  };
+  visit(node);
+  return values.join(" ");
 }
 
 function hasWorkflowSurface(node) {

@@ -114,6 +114,14 @@ All other template controls, page temp variables, form actions, layout relations
 
 ## Field Display Rules
 
+The left-panel record item title is mandatory in both workspace templates:
+
+- `left_panel_data_item_space_between` must contain `left_panel_data_item_title`.
+- `left_panel_data_item_title` displays the current Collection item subject/title field.
+- The title control may be a Dynamic user or Dynamic field control depending on the chosen source field type, but the semantic `nv_label`/`nav_label` value must remain `left_panel_data_item_title`.
+- The default date metadata controls inside `left_panel_data_item_space_between` must use `left_panel_data_item_date_wrapper` and `left_panel_data_item_date_value` when retained.
+- Date/age text must use Yeeflow expression binding, not a visible literal formula string.
+
 Use `current_item_fields_grid` for selected-record fields. Standard short fields use `current_item_standard_field` and occupy one grid cell. Large or media fields use `current_item_large_field`, including Multiple line, Rich text, Image, and Attachment/File fields.
 
 When `current_item_large_field` appears inside `current_item_fields_grid`, its column span must equal the parent grid column count at each breakpoint. Column span must never exceed the parent grid column count.
@@ -133,6 +141,8 @@ Dynamic controls must match field type:
 
 `content_card_wrapper`, `2_columns_section`, `3_columns_section`, `2_columns_60/40_section`, and `kpi_metrics_wrapper` may be reordered to match business priority. Remove any copied section module that contains no meaningful business content.
 
+`section_title_header` is optional in generated master-detail content cards. Keep it only when the section needs a distinct business title/description that is not already carried by the nested Collection, Data table, chart, field grid, or related component. If `section_title_header` is omitted and the sibling `Operations` region is also omitted or has no configured actions, remove the owning `section_title_area` as well. Do not keep copied template headers such as `Left Ticket List` or `Active Loan Pipeline` merely because they existed in the source template.
+
 ## Cleanup Rules
 
 Generated pages must remove:
@@ -144,6 +154,7 @@ Generated pages must remove:
 - Unused Operations containers.
 - Title-only copied section modules.
 - Empty optional right/detail panels.
+- Copied source-template business copy from another domain, including loan/Office Asset helper text in non-loan apps.
 
 KPI cards should be generated only when the Functional Specification or App Plan requires KPI metrics. Generate only the planned number of KPI cards.
 

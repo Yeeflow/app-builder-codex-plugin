@@ -28873,9 +28873,13 @@
                                                   "2"
                                                 ]
                                               }
-                                            }
+                                            },
+                                            "nv_label": "left_panel_data_item_title",
+                                            "nav_label": "left_panel_data_item_title"
                                           },
-                                          "parentCol": 1
+                                          "parentCol": 1,
+                                          "nv_label": "left_panel_data_item_title",
+                                          "nav_label": "left_panel_data_item_title"
                                         },
                                         {
                                           "id": "45dea610-efa3-4a1f-90e8-1d14f545a566",
@@ -28915,7 +28919,9 @@
                                                   "left": null
                                                 }
                                               ]
-                                            }
+                                            },
+                                            "nv_label": "left_panel_data_item_date_wrapper",
+                                            "nav_label": "left_panel_data_item_date_wrapper"
                                           },
                                           "children": [
                                             {
@@ -29052,12 +29058,18 @@
                                                       "2"
                                                     ]
                                                   }
-                                                }
+                                                },
+                                                "nv_label": "left_panel_data_item_date_value",
+                                                "nav_label": "left_panel_data_item_date_value"
                                               },
-                                              "parentCol": 1
+                                              "parentCol": 1,
+                                              "nv_label": "left_panel_data_item_date_value",
+                                              "nav_label": "left_panel_data_item_date_value"
                                             }
                                           ],
-                                          "parentCol": 1
+                                          "parentCol": 1,
+                                          "nv_label": "left_panel_data_item_date_wrapper",
+                                          "nav_label": "left_panel_data_item_date_wrapper"
                                         }
                                       ],
                                       "parentCol": 1,
@@ -41969,9 +41981,13 @@
                                                   "2"
                                                 ]
                                               }
-                                            }
+                                            },
+                                            "nv_label": "left_panel_data_item_title",
+                                            "nav_label": "left_panel_data_item_title"
                                           },
-                                          "parentCol": 1
+                                          "parentCol": 1,
+                                          "nv_label": "left_panel_data_item_title",
+                                          "nav_label": "left_panel_data_item_title"
                                         },
                                         {
                                           "id": "45dea610-efa3-4a1f-90e8-1d14f545a566",
@@ -42011,7 +42027,9 @@
                                                   "left": null
                                                 }
                                               ]
-                                            }
+                                            },
+                                            "nv_label": "left_panel_data_item_date_wrapper",
+                                            "nav_label": "left_panel_data_item_date_wrapper"
                                           },
                                           "children": [
                                             {
@@ -42148,12 +42166,18 @@
                                                       "2"
                                                     ]
                                                   }
-                                                }
+                                                },
+                                                "nv_label": "left_panel_data_item_date_value",
+                                                "nav_label": "left_panel_data_item_date_value"
                                               },
-                                              "parentCol": 1
+                                              "parentCol": 1,
+                                              "nv_label": "left_panel_data_item_date_value",
+                                              "nav_label": "left_panel_data_item_date_value"
                                             }
                                           ],
-                                          "parentCol": 1
+                                          "parentCol": 1,
+                                          "nv_label": "left_panel_data_item_date_wrapper",
+                                          "nav_label": "left_panel_data_item_date_wrapper"
                                         }
                                       ],
                                       "parentCol": 1,

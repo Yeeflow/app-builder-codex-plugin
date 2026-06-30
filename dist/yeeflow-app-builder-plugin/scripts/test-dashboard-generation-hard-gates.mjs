@@ -33,12 +33,17 @@ function field(FieldName, FieldType, Type, FieldID = FieldName) {
 }
 
 function dynamicField(name, type, fieldName) {
+  const navLabel = `collection_item_${name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "field"}`;
   return {
     type,
     name,
+    nv_label: navLabel,
+    nav_label: navLabel,
     field: fieldName,
     FieldName: fieldName,
     attrs: {
+      nv_label: navLabel,
+      nav_label: navLabel,
       source: "3",
       "obj-f": fieldName,
       field: fieldName,
@@ -150,7 +155,7 @@ function bindAllKpiValueControls(root, variable) {
 }
 
 function domainString(value) {
-  const replacements = new Map([
+  const replacements = [
     ["Event", "Request"],
     ["Stage", "Priority"],
     ["Region", "Location"],
@@ -158,8 +163,18 @@ function domainString(value) {
     ["Budget", "Cost"],
     ["Events", "Maintenance Requests"],
     ["Event Type", "Request Type"],
-  ]);
-  return replacements.get(value) || value
+    ["Active Loan Pipeline", "Facility Work Queue"],
+    ["current loan volume", "current request volume"],
+    ["return activity signal", "completion activity signal"],
+    ["watch coordinator follow-up", "watch owner follow-up"],
+    ["Live count from Office Asset records.", "Live count from Maintenance Requests records."],
+    ["Live due and utilization signal from Office Asset records.", "Live due signal from Maintenance Requests records."],
+    ["Live return and utilization metric from Office Asset records.", "Live completion metric from Maintenance Requests records."],
+    ["Live coordinator follow-up metric from Office Asset records.", "Live owner follow-up metric from Maintenance Requests records."],
+    ["Coordinator guidance: prioritize overdue items and returns due within the next seven days.", "Coordinator guidance: prioritize open facility requests due within the next seven days."],
+  ];
+  const domainSpecific = replacements.reduce((text, [from, to]) => text.replaceAll(from, to), value);
+  return domainSpecific
     .replaceAll("Event Portfolio", "Facility Operations")
     .replaceAll("Campaign", "Readiness")
     .replaceAll("campaign", "readiness");
@@ -397,6 +412,7 @@ function validV11Resource(flags = {}) {
   root.filterVars = [{ id: "priorityFilter", name: "priorityFilter", field: "Text1" }];
   root.actions = [];
   root.plannedRegions = { filters: true, kpis: true, gridTable: true };
+  adaptReferenceDomain(root);
   removeOperations(root);
   const businessSection = findBusinessSectionContentArea(root);
   businessSection.children = [eventPortfolioFilterGroup(flags.filterPatch || {}), summaryControl(flags.summaryPatch || {}), eventPipelineGridTableRegion()];
@@ -645,6 +661,33 @@ try {
   });
   expectCode("search filter placeholder value object fails", ["--package", writePackage(tempDir, "search-placeholder-value-object", decodedWithResource(searchPlaceholderValueObject))], "DASH_SEARCH_FILTER_PLACEHOLDER_OBJECT_FORBIDDEN");
 
+  const missingCollectionNavLabel = validV11Resource();
+  let navLabelControl = null;
+  visit(missingCollectionNavLabel, (node) => {
+    if (!navLabelControl && node.type === "dynamic-user") navLabelControl = node;
+  });
+  assert.ok(navLabelControl, "Expected valid fixture to contain a dynamic-user control.");
+  delete navLabelControl.nv_label;
+  delete navLabelControl.nav_label;
+  delete navLabelControl.attrs.nv_label;
+  delete navLabelControl.attrs.nav_label;
+  expectCode("collection item internal controls without semantic navigator labels fail", ["--package", writePackage(tempDir, "collection-nav-label-missing", decodedWithResource(missingCollectionNavLabel))], "DASH_DESIGNER_NAV_LABEL_MISSING");
+
+  const rawExpressionText = validV11Resource();
+  let rawExpressionCollection = null;
+  visit(rawExpressionText, (node) => {
+    if (!rawExpressionCollection && node.type === "collection") rawExpressionCollection = node;
+  });
+  assert.ok(rawExpressionCollection, "Expected valid fixture to contain a Collection.");
+  rawExpressionCollection.children.push({
+    type: "heading",
+    name: "Created Age",
+    nv_label: "collection_item_created_age",
+    nav_label: "collection_item_created_age",
+    attrs: { headc: { title: { value: "iif(dateDiff(Collection item:Created Time,now(),Day,) > 0,dateDiff(Collection item:Created Time,now(),Day,) & d,dateDiff(Collection item:Created Time,now(),Hour,) & h)" } } },
+  });
+  expectCode("raw collection expression text fails", ["--package", writePackage(tempDir, "raw-expression-text", decodedWithResource(rawExpressionText))], "DASH_VISIBLE_RAW_EXPRESSION_TEXT");
+
   const emptyContentCard = validV11Resource();
   find(emptyContentCard, "Content").children.push({
     type: "container",
@@ -657,6 +700,33 @@ try {
     ],
   });
   expectCode("empty visible v1.1 content card section fails", ["--package", writePackage(tempDir, "empty-section-content-area", decodedWithResource(emptyContentCard))], "DASH_EMPTY_SECTION_CONTENT_AREA");
+
+  const residualBusinessText = validV11Resource();
+  find(residualBusinessText, "Content").children.push({
+    type: "container",
+    id: "content_card_wrapper",
+    name: "content_card_wrapper",
+    attrs: { style: style([null, "1"]) },
+    children: [
+      { type: "container", id: "section_content_area", name: "section_content_area", attrs: { style: style([null, "1"]) }, children: [
+        { type: "text", name: "stale_kpi_note", attrs: { headc: { title: { value: "Live count from Office Asset records." } } } },
+      ] },
+    ],
+  });
+  expectCode("visible source-template business text residue fails", ["--package", writePackage(tempDir, "source-template-residue", decodedWithResource(residualBusinessText))], "DASH_SOURCE_TEMPLATE_BUSINESS_TEXT_RESIDUE");
+
+  const emptyTitleArea = validV11Resource();
+  find(emptyTitleArea, "Content").children.push({
+    type: "container",
+    id: "content_card_wrapper",
+    name: "content_card_wrapper",
+    attrs: { style: style([null, "1"]) },
+    children: [
+      { type: "container", id: "section_title_area", name: "section_title_area", attrs: { style: style([null, "1"]) }, children: [] },
+      { type: "container", id: "section_content_area", name: "section_content_area", attrs: { style: style([null, "1"]) }, children: [dynamicField("Status", "dynamic-field", "Text2")] },
+    ],
+  });
+  expectCode("empty section_title_area fails", ["--package", writePackage(tempDir, "empty-section-title-area", decodedWithResource(emptyTitleArea))], "DASH_EMPTY_SECTION_TITLE_AREA");
 
   const adHocRootFilterGroup = validV11Resource();
   find(adHocRootFilterGroup, "Content").children.push(eventPortfolioFilterGroup());

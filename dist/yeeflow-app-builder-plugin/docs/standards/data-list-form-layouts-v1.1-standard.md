@@ -84,9 +84,9 @@ Supported section patterns:
 Each content card must preserve:
 
 - `content_card_wrapper`
-- `section_title_area`
-- `section_title_header`
 - `section_content_area`
+
+`section_title_area` and `section_title_header` are optional business modules in generated forms. Keep `section_title_header` only when the section needs a distinct title/description that is not already supplied by the current-record field group, Collection, Data table, chart, or related component. If `section_title_header` is omitted and the sibling `Operations` region is also omitted or has no configured actions, remove `section_title_area` as well. Do not keep copied template headers solely to preserve the source example layout.
 
 The 60/40 section may use the exported 60 and 40 wrapper containers. The percentage values may be changed only when the App Plan's business content requires a different split, and the generated layout must still copy the template section structure.
 
@@ -121,6 +121,8 @@ If a generated custom Data List form contains two or more page-level Data Filter
 
 Within `kpi_card_wrapper`, generated View Item forms may map KPI card text, icons, bindings, and Summary-backed values. New/Edit forms must not use KPI cards.
 
+View Item KPI cards are optional. Generate `kpi_metrics_wrapper` only when the Functional Specification or App Plan explicitly requires record-detail KPI metrics and the generated form includes runtime-bound Summary/KPI values for the current business domain. Supporting lists such as attachments, comments, audit rows, or other lightweight child records must not inherit Dashboard KPI rows by default.
+
 ## Repeatable And Removable Modules
 
 Generated forms must remove unused modules. New modules may only be created by copying one of these approved repeatable/removable modules from the selected template:
@@ -146,6 +148,8 @@ Every `section_content_area` copied from a Data List Form Layouts golden referen
 Generated forms must not keep title-only copied sections. A `content_card_wrapper`, `content_card_60_wrapper`, `content_card_40_wrapper`, `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` is allowed in the final form only when it contains real business content in an approved slot. Empty `section_content_area` containers, copied placeholder section titles such as `Active Loan Pipeline`, and sections that do not contain current-record fields, approved related components, configured actions, or other real business controls must be pruned before generated-final validation.
 
 If a `section_content_area` would have no generated business content, remove the entire copied section/card that owns it. Do not keep an empty `section_content_area` as a spacer or as a future placeholder.
+
+Generated forms must not retain source-template business copy from another domain. For example, a Service Tickets or Ticket Attachments form must not contain loan/Office Asset text such as `Active Loan Pipeline`, `current loan volume`, `return activity signal`, `Office Asset records`, or `Coordinator guidance: prioritize overdue items and returns...`. Map such text to the current domain only when the section has real planned business content; otherwise remove the copied module.
 
 For New/Edit forms, the common case is a single current-record field section. Do not keep the remaining template example sections unless the App Plan explicitly requires additional current-record field groups and those sections are fully materialized with real fields or configured actions.
 
@@ -184,7 +188,6 @@ They must include:
 - `page_title_content`
 - `page_title_text`
 - `page_title_description`
-- `kpi_metrics_wrapper`
 - at least one content section with `section_content_area`
 
 They may contain:
@@ -193,7 +196,7 @@ They may contain:
 - related business data
 - approved Dashboard Collection templates
 - approved Data Analytics templates in `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`
-- Summary-backed KPI cards
+- Summary-backed KPI cards when explicitly planned and runtime-bound
 - configured action buttons
 
 Dashboard Page Layouts v1.1 and Dashboard component golden references remain component sources only. Do not copy a Dashboard page root shell into a Data List form as a competing root shell.

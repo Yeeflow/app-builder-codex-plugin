@@ -18,8 +18,8 @@ const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", l
 const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header", "kpi_card_wrapper", "primary_working_area", "right_side_panel", "chart_cards_section"]);
 const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper", "kpi_card_wrapper", "kpi_cards_kpi_row", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
 const REMOVABLE_SECTION_MODULES = new Set(["1_columns_section", "content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
-const REQUIRED_NEW_EDIT_REGIONS = ["main", "content", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area"];
-const REQUIRED_VIEW_REGIONS = ["main", "content", "page_title_section", "page_title_content", "page_title_text", "page_title_description", "kpi_metrics_wrapper", "1_columns_section", "content_card_wrapper", "section_title_area", "section_title_header", "section_content_area"];
+const REQUIRED_NEW_EDIT_REGIONS = ["main", "content", "1_columns_section", "content_card_wrapper", "section_content_area"];
+const REQUIRED_VIEW_REGIONS = ["main", "content", "page_title_section", "page_title_content", "page_title_text", "page_title_description", "1_columns_section", "content_card_wrapper", "section_content_area"];
 const REQUIRED_WORKBENCH_REGIONS = ["main", "content", "page_title_header", "page_title_content", "page_title_text", "page_title_description", "main_work_queue_section", "main_work_queue_wrapper", "primary_working_area"];
 const WORKBENCH_ROOT_MODULES = new Set(["page_title_header", "section_content_area", "kpi_cards_kpi_row", "main_work_queue_section"]);
 const DATA_ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table", "summary"]);
@@ -28,6 +28,10 @@ const FORM_USAGES = ["add", "edit", "view"];
 const RESIDUAL_TEMPLATE_LABEL_PATTERNS = [
   /\bActive Loan Pipeline\b/i,
   /\bCoordinator guidance: prioritize overdue items and returns/i,
+  /\bcurrent loan volume\b/i,
+  /\breturn activity signal\b/i,
+  /\bwatch coordinator follow-up\b/i,
+  /\bOffice Asset records\b/i,
 ];
 
 if (isMainModule()) {
@@ -289,9 +293,6 @@ function validateUsageContract(resource, templateId, context) {
 function validateBusinessSlots(resource, context) {
   const workbenchContext = (context.templateId || resolveTemplateId(resource)) === WORKBENCH_TEMPLATE_ID;
   for (const card of findAllByIdentity(resource, "content_card_wrapper")) {
-    if (!findFirstByIdentity(card, "section_title_area")) {
-      context.findings.push(error("DATA_LIST_FORM_LAYOUT_SECTION_TITLE_AREA_MISSING", "Every content_card_wrapper must preserve section_title_area.", { source: context.source }));
-    }
     const slot = findFirstByIdentity(card, "section_content_area");
     if (!slot) {
       context.findings.push(error("DATA_LIST_FORM_LAYOUT_SECTION_CONTENT_AREA_MISSING", "Every content_card_wrapper must preserve section_content_area.", { source: context.source }));
@@ -315,6 +316,7 @@ function validateBusinessSlots(resource, context) {
       }
     }
   }
+  validateSectionTitleAreaPolicy(resource, context);
   if (!context.registryMode) {
     for (const entry of flatten(resource)) {
       const text = nodeText(entry.node);
@@ -345,6 +347,19 @@ function validateBusinessSlots(resource, context) {
     if (!isBusinessControlType(type)) continue;
     if (isInsideAllowedBusinessSlot(entry, resource)) continue;
     context.findings.push(error("DATA_LIST_FORM_LAYOUT_BUSINESS_CONTROL_OUTSIDE_ALLOWED_SLOT", "Business controls must be placed only inside approved Data List Form v1.1 business-content slots.", { source: context.source, path: entry.pointer, type, identities: identityCandidates(entry.node) }));
+  }
+}
+
+function validateSectionTitleAreaPolicy(resource, context) {
+  if (context.registryMode) return;
+  for (const entry of flatten(resource)) {
+    if (!hasIdentity(entry.node, "section_title_area")) continue;
+    const hasHeader = Boolean(findFirstByIdentity(entry.node, "section_title_header"));
+    const operations = findFirstByIdentity(entry.node, "Operations");
+    const hasOperations = Boolean(operations && hasActionConfiguration(operations));
+    if (!hasHeader && !hasOperations) {
+      context.findings.push(error("DATA_LIST_FORM_LAYOUT_EMPTY_SECTION_TITLE_AREA", "Generated Data List forms must remove section_title_area when neither section_title_header nor configured Operations are needed.", { source: context.source, path: entry.pointer }));
+    }
   }
 }
 

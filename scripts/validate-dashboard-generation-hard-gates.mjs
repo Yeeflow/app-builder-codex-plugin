@@ -36,6 +36,14 @@ const MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
   "dashboard-page-layouts-two-panel-workspace",
   "dashboard-page-layouts-three-panel-workspace",
 ]);
+const SOURCE_TEMPLATE_RESIDUE_PATTERNS = [
+  /\bActive Loan Pipeline\b/i,
+  /\bCoordinator guidance: prioritize overdue items and returns/i,
+  /\bcurrent loan volume\b/i,
+  /\breturn activity signal\b/i,
+  /\bwatch coordinator follow-up\b/i,
+  /\bOffice Asset records\b/i,
+];
 const PAGE_LAYOUT_STRUCTURAL_CONTAINER_IDS = new Set([
   "Main",
   "main",
@@ -133,6 +141,8 @@ function validateDecodedDashboards(decoded, findings) {
   const listIndex = buildListIndex(decoded);
   for (const page of collectDashboardPages(decoded)) {
     for (const entry of page.controls) {
+      validateDesignerNavigatorLabel(entry, page, findings);
+      validateVisibleTextExpression(entry, page, findings);
       if (FILTER_TYPES.has(String(entry.control?.type || "")) && !isMasterDetailLeftPanelFilter(entry, page)) validateFilter(entry, page, listIndex, findings);
       if (String(entry.control?.type || "") === SEARCH_FILTER_TYPE) validateSearchFilter(entry, page, findings);
       if (String(entry.control?.type || "") === "container") validateContainer(entry, page, findings);
@@ -141,6 +151,7 @@ function validateDecodedDashboards(decoded, findings) {
     validateKpiCards(page, findings);
     validateKpiTempVarReferences(page, findings);
     validateSummaryBindings(page, listIndex, findings);
+    validateMasterDetailWorkspaceItemSemantics(page, findings);
   }
 }
 
@@ -180,6 +191,8 @@ function validateDashboardBusinessRuntime(page, listIndex, findings) {
   }
 
   validatePageTitleSectionPurity(page, findings);
+  validateSourceTemplateResidue(page, findings);
+  validateSectionTitleAreaPolicy(page, findings);
   validateNonEmptyBusinessSections(page, findings);
   validateIndependentContentCardWrappers(page, collections, findings);
   validateDynamicUserFieldTypes(page, listIndex, findings);
@@ -334,6 +347,42 @@ function validateNonEmptyBusinessSections(page, findings) {
   }
 }
 
+function validateSourceTemplateResidue(page, findings) {
+  for (const entry of page.controls) {
+    if (!isTextLike(entry.control)) continue;
+    const text = visibleBusinessText(entry.control);
+    const pattern = SOURCE_TEMPLATE_RESIDUE_PATTERNS.find((candidate) => candidate.test(text));
+    if (!pattern) continue;
+    findings.push(error("DASH_SOURCE_TEMPLATE_BUSINESS_TEXT_RESIDUE", "Generated Dashboards must not retain unrelated source-template business copy such as loan/Office Asset helper text in another app domain. Map the text to the current business domain or remove the unused section.", {
+      page: page.title,
+      path: entry.pointer,
+      text: text.slice(0, 240),
+    }));
+  }
+}
+
+function validateSectionTitleAreaPolicy(page, findings) {
+  for (const entry of page.controls) {
+    if (!matchesSemanticId(entry.control, "section_title_area")) continue;
+    const descendants = collectDescendants(entry.control, entry.pointer);
+    const hasHeader = descendants.some((item) => matchesSemanticId(item.control, "section_title_header"));
+    const operations = descendants.filter((item) => matchesSemanticId(item.control, "Operations"));
+    const hasOperations = operations.some((item) => hasActionConfiguration(item.control));
+    if (!hasHeader && !hasOperations) {
+      findings.push(error("DASH_EMPTY_SECTION_TITLE_AREA", "Generated Dashboards must remove section_title_area when neither section_title_header nor configured Operations are needed.", {
+        page: page.title,
+        path: entry.pointer,
+      }));
+    }
+    if (isMasterDetailWorkspacePage(page) && hasHeader && !hasOperations && findAncestors(page.resource, entry.control).some((node) => matchesSemanticId(node, "content_card_wrapper"))) {
+      findings.push(error("DASH_MASTER_DETAIL_REDUNDANT_SECTION_TITLE_HEADER", "Master-detail Dashboard content_card_wrapper regions should not keep copied section_title_header when there are no configured Operations; the nested related component should carry the business title.", {
+        page: page.title,
+        path: entry.pointer,
+      }));
+    }
+  }
+}
+
 function findDescendantEntry(control, pointer, semanticId) {
   const descendants = collectDescendants(control, pointer);
   return descendants.find((entry) => matchesSemanticId(entry.control, semanticId)) || null;
@@ -347,7 +396,7 @@ function hasMeaningfulBusinessContent(control) {
     if (["data-table", "datatable", "data-list"].includes(type) && hasApprovedDataTableTemplateProvenance(entry.control)) return true;
     if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(entry.control)) return true;
-    if (matchesSemanticId(entry.control, "kpi_card_wrapper")) return true;
+    if (matchesSemanticId(entry.control, "kpi_card_wrapper") && (entry.control?.generatedKpiRuntimeBound === true || entry.control?.attrs?.generatedKpiRuntimeBound === true)) return true;
     if (matchesSemanticId(entry.control, "form_grid_fields_wrapper")) return true;
     return false;
   });
@@ -410,6 +459,101 @@ function validateDynamicUserFieldTypes(page, listIndex, findings) {
       }));
     }
   }
+}
+
+function validateDesignerNavigatorLabel(entry, page, findings) {
+  const type = String(entry.control?.type || "");
+  if (!["container", "heading", "text", "text-editor", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return;
+  if (!isInsideCollectionControl(entry, page)) return;
+  const label = firstNavigatorLabel(entry.control);
+  if (!label || isDefaultNavigatorName(label)) {
+    findings.push(error("DASH_DESIGNER_NAV_LABEL_MISSING", "Designer-visible controls inside Dashboard Collection item templates must have semantic nv_label/nav_label values; default Navigator names like Container, Text, or Dynamic user are not maintainable.", {
+      page: page.title,
+      path: entry.pointer,
+      type,
+      label: label || null,
+    }));
+  }
+}
+
+function validateVisibleTextExpression(entry, page, findings) {
+  if (!isTextLike(entry.control)) return;
+  for (const [pathSuffix, value] of visibleTextValues(entry.control)) {
+    if (typeof value !== "string" || !looksLikeRawVisibleExpression(value)) continue;
+    findings.push(error("DASH_VISIBLE_RAW_EXPRESSION_TEXT", "Generated Dashboard text controls must not render raw formulas or Collection item expressions as visible literal text; use export-proven expression binding or a safe business label.", {
+      page: page.title,
+      path: `${entry.pointer}${pathSuffix}`,
+      value,
+    }));
+  }
+}
+
+function validateMasterDetailWorkspaceItemSemantics(page, findings) {
+  if (!isMasterDetailWorkspacePage(page)) return;
+  const spaceBetweenItems = page.controls.filter((entry) => matchesSemanticId(entry.control, "left_panel_data_item_space_between"));
+  for (const entry of spaceBetweenItems) {
+    const descendants = collectDescendants(entry.control, entry.pointer);
+    const title = descendants.find((descendant) => matchesSemanticId(descendant.control, "left_panel_data_item_title"));
+    if (!title) {
+      findings.push(error("DASH_MASTER_DETAIL_LEFT_ITEM_TITLE_MISSING", "Two-panel and three-panel workspace Dashboard templates must preserve a left_panel_data_item_title control inside left_panel_data_item_space_between. It may be mapped to dynamic-user or dynamic-field based on the source field type, but the semantic title control must exist.", {
+        page: page.title,
+        path: entry.pointer,
+      }));
+      continue;
+    }
+    const titleType = String(title.control?.type || "");
+    if (!["dynamic-user", "dynamic-field"].includes(titleType)) {
+      findings.push(error("DASH_MASTER_DETAIL_LEFT_ITEM_TITLE_TYPE_INVALID", "left_panel_data_item_title must be a dynamic-user or dynamic-field control bound to the selected record title/subject field.", {
+        page: page.title,
+        path: title.pointer,
+        type: titleType || null,
+      }));
+    }
+  }
+}
+
+function isInsideCollectionControl(entry, page) {
+  return findAncestors(page.resource, entry.control).some((ancestor) => String(ancestor?.type || "") === "collection");
+}
+
+function firstNavigatorLabel(control) {
+  return [
+    control?.nv_label,
+    control?.nav_label,
+    control?.attrs?.nv_label,
+    control?.attrs?.nav_label,
+  ].find((value) => typeof value === "string" && value.trim()) || "";
+}
+
+function visibleTextValues(control) {
+  return [
+    [".attrs.headc.title.value", control?.attrs?.headc?.title?.value],
+    [".attrs.title.value", control?.attrs?.title?.value],
+    [".value", control?.value],
+    [".text", control?.text],
+  ];
+}
+
+function visibleBusinessText(control) {
+  if (!control || typeof control !== "object") return "";
+  const values = [];
+  for (const value of visibleTextValues(control).map((entry) => entry[1])) {
+    if (typeof value === "string" && value.trim()) values.push(value);
+  }
+  for (const key of ["text", "title", "value", "description", "placeholder"]) {
+    const value = control?.[key];
+    if (typeof value === "string" && value.trim()) values.push(value);
+  }
+  return values.join(" ");
+}
+
+function looksLikeRawVisibleExpression(value) {
+  return /\b(?:iif|dateDiff|dateAdd|formatDate|formatNumber|concat|substring|contains|ifempty)\s*\(/i.test(String(value || ""))
+    || /Collection item:/i.test(String(value || ""));
+}
+
+function isDefaultNavigatorName(value) {
+  return !value || /^(Container|Grid|Text|Dynamic field|Dynamic user|Dynamic image|Dynamic file|Kanban|Collection|Button|Summary|Icon|Text Editor)(\s*\d+)?$/i.test(String(value).trim());
 }
 
 function validateContainer(entry, page, findings) {
