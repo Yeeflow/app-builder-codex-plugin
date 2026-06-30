@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.92`
+`0.8.93`
+
+Version `0.8.93` releases Dashboard master-detail workspace page layout templates from PR #326 and Dashboard page layout plan conformance from PR #328. App Plans may select `dashboard-page-layouts-v1.1`, `dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, or `dashboard-page-layouts-three-panel-workspace` per Dashboard page. Generated Dashboards must preserve master-detail workspace contracts such as `vCurrentItemID`, left-item selection, right current-item limit/filter binding, editable slots, optional operations, empty-selection state, chart-card regions, and create-capable add-button rules; generated-final validation now also compares every decoded Dashboard page layout against the App Plan-selected layout so missing trace projection or default fallback to v1.1 fails before signing readiness.
 
 Version `0.8.92` releases E2E helper path, title, and install reporting alignment from PR #324. `yapk-first-generation-preflight` now resolves relative package, App Plan, and ID provenance paths from the caller working directory; full-app materialization uses explicit App Plan application names without planning document suffix leakage; and package API install/import reports separate submitted API acceptance from final Version Management/runtime proof while still exposing safe canonical application links from decoded package root proof when available.
 
