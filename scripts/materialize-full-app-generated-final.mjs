@@ -60,6 +60,12 @@ const SOURCE_COLLECTION_TEMPLATE_IDS = {
   listIds: new Set(["2058726119586017281", "2058571966637289476"]),
 };
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
+const DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = Object.freeze([
+  PAGE_LAYOUT_TEMPLATE_ID,
+  "dashboard-page-layouts-workbench",
+  "dashboard-page-layouts-two-panel-workspace",
+  "dashboard-page-layouts-three-panel-workspace",
+]);
 const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DEFAULT_APPLICATION_COLOR_PATTERN = {
@@ -470,7 +476,9 @@ function analyzeAppPlanResourceDemand(planText) {
   const dashboardDatasetRecords = collectDashboardDatasetRecords(planText);
   const dashboardAnalyticsRecords = collectDashboardAnalyticsRecords(planText);
   const dashboardDataTableRecords = collectDashboardDataTableRecords(planText);
+  const dashboardPageLayoutTemplateRecords = collectDashboardPageLayoutTemplateRecords(planText);
   const dashboardNamesFromTemplates = [
+    ...dashboardPageLayoutTemplateRecords,
     ...dashboardFilterRecords,
     ...dashboardSummaryMetricRecords,
     ...dashboardDatasetRecords,
@@ -501,6 +509,7 @@ function analyzeAppPlanResourceDemand(planText) {
     customFormRecords: collectCustomFormRecords(planText),
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
+    dashboardPageLayoutTemplateRecords,
     dashboardFilterRecords,
     dashboardSummaryMetricRecords,
     dashboardDatasetRecords,
@@ -509,6 +518,43 @@ function analyzeAppPlanResourceDemand(planText) {
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
   };
+}
+
+function collectDashboardPageLayoutTemplateRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
+  if (!section.trim()) return [];
+  const lines = section.split(/\r?\n/);
+  const records = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^####\s+Dashboard Page Layout Template Selection\s*$/i.test(lines[index].trim())) continue;
+    let cursor = index + 1;
+    while (cursor < lines.length && !isTableLine(lines[cursor])) {
+      if (/^####\s+/.test(lines[cursor])) break;
+      cursor += 1;
+    }
+    if (!isTableLine(lines[cursor]) || !isTableLine(lines[cursor + 1] || "")) continue;
+    const headers = splitTableLine(lines[cursor]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard", "dashboard page name", "page name"]);
+    const templateColumn = findHeaderIndex(normalizedHeaders, ["selected dashboard page layout template", "dashboard page layout template", "selected layout template", "template id"]);
+    if (pageColumn === -1 || templateColumn === -1) continue;
+    let rowIndex = cursor + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const dashboardPage = cleanResourceName(cells[pageColumn]);
+      const templateId = extractDashboardPageLayoutTemplateId(cells[templateColumn] || lines[rowIndex]);
+      if (dashboardPage && !isNonResourceName(dashboardPage) && templateId) {
+        records.push({
+          dashboardPage,
+          selectedTemplateId: templateId,
+          raw: lines[rowIndex].trim(),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return uniqueDashboardLayoutTemplateRecords(records);
 }
 
 function collectDashboardAnalyticsRecords(planText) {
@@ -996,6 +1042,22 @@ function uniqueDashboardTemplateRecords(records) {
   return out;
 }
 
+function uniqueDashboardLayoutTemplateRecords(records) {
+  const out = [];
+  const indexByKey = new Map();
+  for (const record of records || []) {
+    const key = normKey(record.dashboardPage);
+    if (!key) continue;
+    if (indexByKey.has(key)) {
+      out[indexByKey.get(key)] = record;
+      continue;
+    }
+    indexByKey.set(key, out.length);
+    out.push(record);
+  }
+  return out;
+}
+
 function uniqueDashboardAnalyticsRecords(records) {
   const out = [];
   const indexByKey = new Map();
@@ -1056,6 +1118,14 @@ function inferApprovedCollectionTemplateId(text) {
 
 function extractApprovedDataAnalyticsTemplateId(text) {
   for (const templateId of APPROVED_DATA_ANALYTICS_TEMPLATE_IDS) {
+    const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
+  }
+  return "";
+}
+
+function extractDashboardPageLayoutTemplateId(text) {
+  for (const templateId of DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS) {
     const escaped = templateId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
   }
@@ -1849,6 +1919,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const dashboardFilters = selectDashboardFiltersForPage({ planDemand, pageName: name, datasetRecord, fallbackListName: firstListName });
     const dashboardAnalytics = selectDashboardAnalyticsForPage({ planDemand, pageName: name, pageIndex: index });
     const dashboardSummaryMetrics = selectDashboardSummaryMetricsForPage({ planDemand, pageName: name, pageIndex: index });
+    const dashboardPageLayoutTemplateId = selectDashboardPageLayoutTemplateForPage({ planDemand, pageName: name });
     return {
       ListID: rootListId,
       LayoutID: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
@@ -1865,6 +1936,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
             Resource: JSON.stringify(buildMaterialDashboardResource({
               name,
               layoutId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
+              pageLayoutTemplateId: dashboardPageLayoutTemplateId,
               rootListSetId: rootListId,
               listName: firstListName,
               listId: firstListId,
@@ -1904,6 +1976,12 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     Components: [],
     Childs: childs,
   };
+}
+
+function selectDashboardPageLayoutTemplateForPage({ planDemand, pageName }) {
+  const records = planDemand.dashboardPageLayoutTemplateRecords || [];
+  const match = records.find((record) => dashboardNameMatches(pageName, record.dashboardPage));
+  return match?.selectedTemplateId || PAGE_LAYOUT_TEMPLATE_ID;
 }
 
 function selectDashboardDatasetRecord({ planDemand, pageName, pageIndex }) {
@@ -1950,10 +2028,10 @@ function selectDashboardSummaryMetricsForPage({ planDemand, pageName, pageIndex 
   return records.filter((record) => !record.dashboardPage).slice(0, 4);
 }
 
-function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecords = [], dashboardFilters, dashboardAnalytics, dashboardDataTables = [], dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
+function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId = PAGE_LAYOUT_TEMPLATE_ID, rootListSetId, listName, listId, listMeta, listMetaByName, datasetRecords = [], dashboardFilters, dashboardAnalytics, dashboardDataTables = [], dashboardSummaryMetrics, summaryId, filterId, collectionId }) {
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar, plannedMetrics: dashboardSummaryMetrics });
-  const resource = buildDashboardV11Shell({ name, layoutId });
+  const resource = buildDashboardPageLayoutShell({ name, layoutId, templateId: pageLayoutTemplateId });
   const primaryDatasetRecord = (datasetRecords || [])[0] || null;
   const sourceResource = primaryDatasetRecord?.sourceResource || listName;
   const selectedTemplateId = primaryDatasetRecord?.selectedTemplateId || "collection_control_grid_table";
@@ -2077,7 +2155,8 @@ function buildMaterialDashboardResource({ name, layoutId, rootListSetId, listNam
   resource.LayoutID = layoutId;
   resource.plannedControls = { kpis: kpiContracts.length > 0, kpiCount: kpiContracts.length, gridTable: true };
   resource.generatedFinalDashboardMaterialization = {
-    shellTemplate: PAGE_LAYOUT_TEMPLATE_ID,
+    shellTemplate: pageLayoutTemplateId,
+    dashboardPageLayoutTemplateId: pageLayoutTemplateId,
     datasetRegion,
     selectedCollectionTemplateId: selectedTemplateId,
     selectedCollectionTemplateIds: collectionRoots.map((root) => root.datasetPresentationTemplateId).filter(Boolean),
@@ -2571,23 +2650,25 @@ function buildCollectionFullTextConditions(filters) {
   }));
 }
 
-function buildDashboardV11Shell({ name }) {
+function buildDashboardPageLayoutShell({ name, templateId = PAGE_LAYOUT_TEMPLATE_ID }) {
   const registry = JSON.parse(fs.readFileSync(DASHBOARD_V11_TEMPLATE_PATH, "utf8"));
-  const template = registry.templates?.find((item) => item?.id === PAGE_LAYOUT_TEMPLATE_ID) || registry.templates?.[0];
+  const template = registry.templates?.find((item) => item?.id === templateId) || registry.templates?.find((item) => item?.id === PAGE_LAYOUT_TEMPLATE_ID) || registry.templates?.[0];
+  const selectedTemplateId = template?.id || PAGE_LAYOUT_TEMPLATE_ID;
   const resource = clone(template?.template?.parsedResource || {});
-  resource.id = `${slugify(name)}_dashboard_v11_root`;
+  resource.id = `${slugify(name)}_${slugify(selectedTemplateId)}_root`;
   resource.name = name;
   resource.title = name;
   resource.ver = "1.0.0";
   resource.derivedFromGoldenReference = DASHBOARD_GOLDEN_REFERENCE_ID;
   resource.goldenReferenceId = DASHBOARD_GOLDEN_REFERENCE_ID;
-  resource.templateMarker = PAGE_LAYOUT_TEMPLATE_ID;
-  resource.derivedFromDashboardPageLayoutTemplate = PAGE_LAYOUT_TEMPLATE_ID;
+  resource.templateMarker = selectedTemplateId;
+  resource.derivedFromDashboardPageLayoutTemplate = selectedTemplateId;
   resource.attrs = {
     ...(resource.attrs || {}),
     derivedFromGoldenReference: DASHBOARD_GOLDEN_REFERENCE_ID,
-    templateMarker: PAGE_LAYOUT_TEMPLATE_ID,
-    dashboardPageLayoutTemplateId: PAGE_LAYOUT_TEMPLATE_ID,
+    templateMarker: selectedTemplateId,
+    dashboardPageLayoutTemplateId: selectedTemplateId,
+    derivedFromDashboardPageLayoutTemplate: selectedTemplateId,
   };
   removeOperationsWithoutActions(resource);
   return resource;

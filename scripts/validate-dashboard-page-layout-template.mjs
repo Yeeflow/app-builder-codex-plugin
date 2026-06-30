@@ -88,7 +88,7 @@ export function validateDashboardPageLayoutTemplate(options = {}) {
   const template = findDefaultTemplate(registry);
 
   validateRegistry(registry, template, findings);
-  if (options.package) validatePackage(path.resolve(options.package), template, findings, registry);
+  if (options.package) validatePackage(path.resolve(options.package), template, findings, registry, options.appPlan ? path.resolve(options.appPlan) : null);
   if (options.runtimeProof) validateRuntimeProof(readJson(path.resolve(options.runtimeProof), findings, "DASH_LAYOUT_RUNTIME_PROOF_MISSING"), findings);
   if (options.upgradeScope) validateUpgradeScope(readJson(path.resolve(options.upgradeScope), findings, "DASH_LAYOUT_UPGRADE_SCOPE_MISSING"), findings);
 
@@ -96,6 +96,7 @@ export function validateDashboardPageLayoutTemplate(options = {}) {
     status: findings.some((finding) => finding.level === "error") ? "fail" : "pass",
     registry: registryPath,
     package: options.package ? path.resolve(options.package) : null,
+    appPlan: options.appPlan ? path.resolve(options.appPlan) : null,
     runtimeProof: options.runtimeProof ? path.resolve(options.runtimeProof) : null,
     upgradeScope: options.upgradeScope ? path.resolve(options.upgradeScope) : null,
     findings,
@@ -143,7 +144,7 @@ function validateRegistry(registry, template, findings) {
   }
 }
 
-function validatePackage(packagePath, template, findings, registry) {
+function validatePackage(packagePath, template, findings, registry, appPlanPath = null) {
   if (!fs.existsSync(packagePath)) {
     findings.push(error("DASH_LAYOUT_PACKAGE_MISSING", "Package file is missing.", { package: packagePath }));
     return;
@@ -157,12 +158,58 @@ function validatePackage(packagePath, template, findings, registry) {
   }
   const listIndex = buildListIndex(decoded);
   registry = registry || readJson(REGISTRY_PATH, findings, "DASH_LAYOUT_TEMPLATE_REGISTRY_MISSING") || {};
+  const plannedLayouts = appPlanPath ? collectDashboardPageLayoutTemplateRecordsFromPlan(appPlanPath, findings) : [];
   for (const page of collectDashboardPages(decoded)) {
-    const selectedTemplate = selectTemplateForResource(registry, page.resource) || template;
+    const plannedTemplateId = selectedDashboardLayoutTemplateId(plannedLayouts, page.title);
+    const actualTemplate = selectTemplateForResource(registry, page.resource) || template;
+    const selectedTemplate = plannedTemplateId ? findTemplateById(registry, plannedTemplateId) || actualTemplate : actualTemplate;
+    if (plannedTemplateId && actualTemplate?.id !== plannedTemplateId) {
+      findings.push(error("DASH_LAYOUT_APP_PLAN_TEMPLATE_MISMATCH", "Generated dashboard page layout template must match the App Plan selected Dashboard Page Layout Template Selection row.", {
+        page: page.title,
+        expected: plannedTemplateId,
+        actual: actualTemplate?.id || null,
+        pointer: page.pointer,
+      }));
+    }
     validatePageShell(page.resource, findings, { layer: "RESOURCE", page: page.title, requireDerivedMarker: true, allowTemplateOperations: false, template: selectedTemplate });
     validateBusinessMapping(page.resource, findings, page.title);
     validateDataControls(page, listIndex, findings);
   }
+}
+
+function collectDashboardPageLayoutTemplateRecordsFromPlan(appPlanPath, findings) {
+  if (!fs.existsSync(appPlanPath)) {
+    findings.push(error("DASH_LAYOUT_APP_PLAN_MISSING", "App Plan file is missing for Dashboard page layout plan-to-resource validation.", { appPlan: appPlanPath }));
+    return [];
+  }
+  const text = fs.readFileSync(appPlanPath, "utf8");
+  const section = extractNumberedSection(text, /^##\s+14\.\s+Dashboard Pages Plan/im);
+  const lines = section.split(/\r?\n/);
+  const records = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^####\s+Dashboard Page Layout Template Selection\s*$/i.test(lines[index].trim())) continue;
+    let cursor = index + 1;
+    while (cursor < lines.length && !isTableLine(lines[cursor])) {
+      if (/^####\s+/.test(lines[cursor])) break;
+      cursor += 1;
+    }
+    if (!isTableLine(lines[cursor]) || !isTableLine(lines[cursor + 1] || "")) continue;
+    const headers = splitTableLine(lines[cursor]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard", "dashboard page name", "page name"]);
+    const templateColumn = findHeaderIndex(normalizedHeaders, ["selected dashboard page layout template", "dashboard page layout template", "selected layout template", "template id"]);
+    if (pageColumn === -1 || templateColumn === -1) continue;
+    let rowIndex = cursor + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const dashboardPage = cleanPlanCell(cells[pageColumn]);
+      const selectedTemplateId = extractDashboardPageLayoutTemplateId(cells[templateColumn] || lines[rowIndex]);
+      if (dashboardPage && selectedTemplateId) records.push({ dashboardPage, selectedTemplateId });
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return uniqueDashboardPageLayoutTemplateRecords(records);
 }
 
 function validateRegistryControlledSlotLists(template, findings) {
@@ -836,6 +883,72 @@ function findDefaultTemplate(registry) {
   return templates.find((item) => item?.id === (registry?.defaultDashboardPageLayoutTemplateId || TEMPLATE_ID)) || templates.find((item) => item?.id === TEMPLATE_ID) || null;
 }
 
+function findTemplateById(registry, templateId) {
+  return asArray(registry?.templates).find((item) => item?.id === templateId || item?.version === templateId) || null;
+}
+
+function selectedDashboardLayoutTemplateId(records, pageTitle) {
+  const title = normKey(pageTitle);
+  const match = (records || []).find((record) => {
+    const page = normKey(record.dashboardPage);
+    return page && (page === title || page.includes(title) || title.includes(page));
+  });
+  return match?.selectedTemplateId || "";
+}
+
+function extractNumberedSection(text, marker) {
+  const match = marker.exec(text || "");
+  if (!match) return "";
+  const start = match.index;
+  const next = String(text || "").slice(start + match[0].length).search(/\n##\s+\d+\.\s+/);
+  return next === -1 ? String(text || "").slice(start) : String(text || "").slice(start, start + match[0].length + next);
+}
+
+function isTableLine(line) {
+  return /^\s*\|.+\|\s*$/.test(line || "");
+}
+
+function splitTableLine(line) {
+  return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cleanPlanCell(cell));
+}
+
+function findHeaderIndex(normalizedHeaders, candidates) {
+  const normalizedCandidates = candidates.map(normKey);
+  return normalizedHeaders.findIndex((header) => normalizedCandidates.includes(header));
+}
+
+function cleanPlanCell(value) {
+  return String(value || "").replace(/`/g, "").replace(/\*\*/g, "").trim();
+}
+
+function normKey(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function extractDashboardPageLayoutTemplateId(text) {
+  for (const templateId of REQUIRED_TEMPLATE_IDS) {
+    const escaped = escapeRegExp(templateId);
+    if (new RegExp(`(^|[^A-Za-z0-9_-])${escaped}($|[^A-Za-z0-9_-])`).test(String(text || ""))) return templateId;
+  }
+  return "";
+}
+
+function uniqueDashboardPageLayoutTemplateRecords(records) {
+  const out = [];
+  const indexByPage = new Map();
+  for (const record of records || []) {
+    const key = normKey(record.dashboardPage);
+    if (!key) continue;
+    if (indexByPage.has(key)) {
+      out[indexByPage.get(key)] = record;
+      continue;
+    }
+    indexByPage.set(key, out.length);
+    out.push(record);
+  }
+  return out;
+}
+
 function findFirstByIdentity(root, expected) {
   return findAllByIdentity(root, expected)[0] || null;
 }
@@ -1023,7 +1136,7 @@ function toCamel(value) {
 }
 
 function printUsage() {
-  console.error("Usage: node scripts/validate-dashboard-page-layout-template.mjs --registry docs/reference/dashboard-page-layout-templates.json [--package app.yapk] [--runtime-proof proof.json] [--upgrade-scope scope.json]");
+  console.error("Usage: node scripts/validate-dashboard-page-layout-template.mjs --registry docs/reference/dashboard-page-layout-templates.json [--package app.yapk] [--app-plan yeeflow-app-plan.md] [--runtime-proof proof.json] [--upgrade-scope scope.json]");
 }
 
 function isMainModule() {
