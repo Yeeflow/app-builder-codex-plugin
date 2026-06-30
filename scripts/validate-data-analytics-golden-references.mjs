@@ -9,6 +9,13 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/data-analytics-golden-references.json");
 const DASHBOARD_V11_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_WORKBENCH_TEMPLATE_ID = "dashboard-page-layouts-workbench";
+const DASHBOARD_TWO_PANEL_WORKSPACE_TEMPLATE_ID = "dashboard-page-layouts-two-panel-workspace";
+const DASHBOARD_THREE_PANEL_WORKSPACE_TEMPLATE_ID = "dashboard-page-layouts-three-panel-workspace";
+const DASHBOARD_CHART_SECTION_LAYOUT_TEMPLATE_IDS = new Set([
+  DASHBOARD_WORKBENCH_TEMPLATE_ID,
+  DASHBOARD_TWO_PANEL_WORKSPACE_TEMPLATE_ID,
+  DASHBOARD_THREE_PANEL_WORKSPACE_TEMPLATE_ID,
+]);
 const DATA_LIST_FORM_NEW_EDIT_TEMPLATE_ID = "data_list_form_layout_new_edit_v1_1";
 const DATA_LIST_FORM_VIEW_TEMPLATE_ID = "data_list_form_layout_view_item_v1_1";
 const DATA_LIST_FORM_WORKBENCH_TEMPLATE_ID = "data_list_form_layout_workbench";
@@ -294,7 +301,7 @@ function validateResource(resource, context) {
   }
 
   const isDashboardV11 = context.surface === "dashboard" && resourceHasIdentity(resource, DASHBOARD_V11_TEMPLATE_ID);
-  const isDashboardWorkbench = context.surface === "dashboard" && resourceHasIdentity(resource, DASHBOARD_WORKBENCH_TEMPLATE_ID);
+  const isDashboardChartSectionLayout = context.surface === "dashboard" && [...DASHBOARD_CHART_SECTION_LAYOUT_TEMPLATE_IDS].some((templateId) => resourceHasIdentity(resource, templateId));
   const isDataListFormNewEdit = context.surface === "data-list-form" && resourceHasIdentity(resource, DATA_LIST_FORM_NEW_EDIT_TEMPLATE_ID);
   const isDataListFormView = context.surface === "data-list-form" && resourceHasIdentity(resource, DATA_LIST_FORM_VIEW_TEMPLATE_ID);
   const isDataListFormWorkbench = context.surface === "data-list-form" && resourceHasIdentity(resource, DATA_LIST_FORM_WORKBENCH_TEMPLATE_ID);
@@ -325,8 +332,8 @@ function validateResource(resource, context) {
     if (isDashboardV11 && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
       context.findings.push(error("DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID", "Dashboard Page Layouts v1.1 Data Analytics templates must be placed inside content_card_wrapper, 2_columns_section, 3_columns_section, or 2_columns_60/40_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS] }));
     }
-    if (isDashboardWorkbench && !hasAncestorInSet(entry, APPROVED_WORKBENCH_ANALYTICS_HOST_IDS)) {
-      context.findings.push(error("DATA_ANALYTICS_DASHBOARD_WORKBENCH_CHART_SECTION_PLACEMENT_INVALID", "Workbench Dashboard Data Analytics templates must be placed inside chart_cards_section under primary_working_area or right_side_panel.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_WORKBENCH_ANALYTICS_HOST_IDS] }));
+    if (isDashboardChartSectionLayout && !hasAncestorInSet(entry, APPROVED_WORKBENCH_ANALYTICS_HOST_IDS)) {
+      context.findings.push(error("DATA_ANALYTICS_DASHBOARD_CHART_SECTION_PLACEMENT_INVALID", "Workbench and workspace Dashboard Data Analytics templates must be placed inside chart_cards_section under an approved working-area panel.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_WORKBENCH_ANALYTICS_HOST_IDS] }));
     }
     if (isDataListFormView && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
       context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_VIEW_V11_SECTION_PLACEMENT_INVALID", "Data List Form Layouts v1.1 View Item Data Analytics templates must be placed inside content_card_wrapper, 2_columns_section, 3_columns_section, or 2_columns_60/40_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS] }));

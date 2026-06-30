@@ -467,14 +467,18 @@ Required for every generated Dashboard page.
 
 | Dashboard Page | Selected Dashboard Page Layout Template | Business Layout Need | Primary Regions Needed | Right Side Panel Needed | Chart Cards Section Needed | Selection Reason | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Dashboard> | dashboard-page-layouts-v1.1 or dashboard-page-layouts-workbench | General overview / operational workbench | <Sections/regions> | Yes/No | Yes/No | <Reason using template guidance> | Generated-final validation |
+| <Dashboard> | dashboard-page-layouts-v1.1 / dashboard-page-layouts-workbench / dashboard-page-layouts-two-panel-workspace / dashboard-page-layouts-three-panel-workspace | General overview / operational workbench / master-detail workspace | <Sections/regions> | Yes/No | Yes/No | <Reason using template guidance> | Generated-final validation |
 
 Rules:
 
 - Select exactly one Dashboard page layout template per Dashboard page from `docs/reference/dashboard-page-layout-templates.json`.
 - Use `dashboard-page-layouts-v1.1` for general overview dashboards, report-style dashboards, and section-first pages.
 - Use `dashboard-page-layouts-workbench` for operational workbench pages that need a primary working area, optional right-side panel, top filters, KPI cards, grouped analytics, and queue/list regions.
+- Use `dashboard-page-layouts-two-panel-workspace` when a Dashboard must manage one source dataset with a left record list and a right selected-record detail panel.
+- Use `dashboard-page-layouts-three-panel-workspace` when the selected-record detail needs a main detail panel plus an additional right-side information/action panel.
 - If `dashboard-page-layouts-workbench` is selected, state whether `right_side_panel` and `chart_cards_section` are needed. Empty Workbench right-side panels and empty chart sections must be removed during generation.
+- If a master-detail workspace template is selected, state the source dataset, selected item title/description fields, left-panel filters/search, current-item operations, detail field groups, related-record sections, analytics sections, and whether the empty-selection state should keep or replace the template image/title/description.
+- Master-detail workspace pages must preserve the `vCurrentItemID` temp variable. The left-panel Collection item click action must write the clicked item ID into `vCurrentItemID`, and the current-item detail Collection must limit records to `1` and filter record ID by `vCurrentItemID`.
 - The App Plan may state selected template and business regions, but must not include copied control JSON, generated IDs, or low-level style/property payloads.
 
 #### Dashboard Sections

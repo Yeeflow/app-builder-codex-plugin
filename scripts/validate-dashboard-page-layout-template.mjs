@@ -9,6 +9,23 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-page-layout-templates.json");
 const TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const WORKBENCH_TEMPLATE_ID = "dashboard-page-layouts-workbench";
+const TWO_PANEL_WORKSPACE_TEMPLATE_ID = "dashboard-page-layouts-two-panel-workspace";
+const THREE_PANEL_WORKSPACE_TEMPLATE_ID = "dashboard-page-layouts-three-panel-workspace";
+const REQUIRED_TEMPLATE_IDS = [
+  TEMPLATE_ID,
+  WORKBENCH_TEMPLATE_ID,
+  TWO_PANEL_WORKSPACE_TEMPLATE_ID,
+  THREE_PANEL_WORKSPACE_TEMPLATE_ID,
+];
+const MASTER_DETAIL_WORKSPACE_TEMPLATE_IDS = new Set([
+  TWO_PANEL_WORKSPACE_TEMPLATE_ID,
+  THREE_PANEL_WORKSPACE_TEMPLATE_ID,
+]);
+const WORKBENCH_LIKE_TEMPLATE_IDS = new Set([
+  WORKBENCH_TEMPLATE_ID,
+  TWO_PANEL_WORKSPACE_TEMPLATE_ID,
+  THREE_PANEL_WORKSPACE_TEMPLATE_ID,
+]);
 const BACKGROUND = "#f4f7fb";
 const SECTION_CONTENT_AREA_GAP = "--sp--s200";
 const DEFAULT_REQUIRED_FULL_WIDTH_IDS = [
@@ -95,7 +112,7 @@ function validateRegistry(registry, template, findings) {
     findings.push(error("DASH_LAYOUT_TEMPLATE_DEFAULT_ID_INVALID", "Dashboard Page Layouts registry must keep dashboard-page-layouts-v1.1 as the default while allowing explicit alternate templates.", { actual: registry.defaultDashboardPageLayoutTemplateId || null }));
   }
   const templates = asArray(registry.templates);
-  for (const templateId of [TEMPLATE_ID, WORKBENCH_TEMPLATE_ID]) {
+  for (const templateId of REQUIRED_TEMPLATE_IDS) {
     if (!templates.some((entry) => entry?.id === templateId)) {
       findings.push(error("DASH_LAYOUT_TEMPLATE_ID_MISSING", "Dashboard Page Layout registry must include every approved Dashboard page layout template.", { templateId }));
     }
@@ -174,18 +191,61 @@ function requiredSectionTypes(template) {
       "data analytics chart card section",
     ];
   }
+  if (template?.id === TWO_PANEL_WORKSPACE_TEMPLATE_ID) {
+    return [
+      "left record-list panel",
+      "current item detail panel",
+      "left panel caption/search/action area",
+      "left panel filter group",
+      "current item page title/header",
+      "current item operations area",
+      "current item field grid",
+      "primary working area",
+      "content card section",
+      "1-column content card",
+      "2-column section",
+      "3-column section",
+      "60/40 2-column section",
+      "KPI metrics wrapper",
+      "data analytics chart card section",
+    ];
+  }
+  if (template?.id === THREE_PANEL_WORKSPACE_TEMPLATE_ID) {
+    return [
+      "left record-list panel",
+      "current item main detail panel",
+      "current item additional information panel",
+      "left panel caption/search/action area",
+      "left panel filter group",
+      "current item page title/header",
+      "current item operations area",
+      "current item field grid",
+      "primary working area",
+      "right-side additional working area",
+      "content card section",
+      "1-column content card",
+      "2-column section",
+      "3-column section",
+      "60/40 2-column section",
+      "KPI metrics wrapper",
+      "data analytics chart card section",
+    ];
+  }
   return ["page title/header section", "1-column content card", "2-column section", "3-column section", "60/40 2-column section", "KPI metrics wrapper"];
 }
 
 function requiredCleanupRules(template) {
   const common = ["unusedCopiedModulesMustBeRemoved", "operationsWithoutConfiguredActionsMustBeRemoved", "emptySectionContentAreaForbidden", "titleOnlyCopiedSectionsForbidden", "emptyKpiMetricsWrapperForbidden", "kpiCardsMustMatchPlannedMetrics", "repeatableModulesMayBeReordered"];
   if (template?.id === WORKBENCH_TEMPLATE_ID) return [...common, "emptyChartCardsSectionForbidden", "emptyRightSidePanelMustBeRemoved"];
+  if (MASTER_DETAIL_WORKSPACE_TEMPLATE_IDS.has(template?.id)) {
+    return [...common, "emptyChartCardsSectionForbidden", "emptyFilterGroupsMustBeRemoved", "emptySelectionStateMustBePreserved", "masterDetailTempVariableMustBePreserved", "leftPanelSelectionActionMustSetCurrentItemId", "currentItemCollectionMustLimitToOneAndFilterByCurrentItemId"];
+  }
   return common;
 }
 
 function templateRules(template) {
   const id = template?.id || TEMPLATE_ID;
-  const isWorkbench = id === WORKBENCH_TEMPLATE_ID;
+  const isWorkbench = WORKBENCH_LIKE_TEMPLATE_IDS.has(id);
   const allowedBusinessContentContainers = asArray(template?.allowedBusinessContentContainers).length
     ? asArray(template.allowedBusinessContentContainers)
     : DEFAULT_ALLOWED_BUSINESS_CONTENT_CONTAINERS;
@@ -203,6 +263,11 @@ function templateRules(template) {
     emptySectionModuleIds: isWorkbench
       ? ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section"]
       : ["2_columns_section", "3_columns_section", "2_columns_60/40_section"],
+    chartCardsSectionParentIds: id === THREE_PANEL_WORKSPACE_TEMPLATE_ID
+      ? ["primary_working_area", "current_item_additonal_content", "current_item_additional_content_wrapper", "current_item_additional_panel"]
+      : WORKBENCH_LIKE_TEMPLATE_IDS.has(id)
+        ? ["primary_working_area", "right_side_panel"]
+        : [],
   };
 }
 
@@ -234,17 +299,24 @@ function validatePageShell(resource, findings, context) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_ROOT_PADDING_NONZERO`, "Dashboard page root container padding must be zero.", { page: context.page, actual: resource?.attrs?.container?.padding ?? null }));
   }
   const main = findFirstByIdentity(resource, "main") || findFirstByIdentity(resource, "Main");
-  const content = asArray(main?.children).find((child) => hasIdentity(child, "content") || hasIdentity(child, "Content"));
-  if (!main || !content) {
-    findings.push(error(`DASH_LAYOUT_${context.layer}_MAIN_CONTENT_MISSING`, "Dashboard page must contain main > content.", { page: context.page }));
+  if (!main) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_MAIN_MISSING`, "Dashboard page must contain a main shell container.", { page: context.page }));
     return;
   }
-  if (!isColumnLayout(main)) findings.push(error(`DASH_LAYOUT_${context.layer}_MAIN_COLUMN_MISSING`, "Dashboard main container must use column layout.", { page: context.page }));
-  if (!isColumnLayout(content)) findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_COLUMN_MISSING`, "Dashboard content container must use column layout.", { page: context.page }));
-  if (hasConflictingBackground(content)) {
+  const isMasterDetailWorkspace = MASTER_DETAIL_WORKSPACE_TEMPLATE_IDS.has(rules.id);
+  const content = isMasterDetailWorkspace
+    ? validateMasterDetailWorkspaceShell(resource, main, findings, context)
+    : asArray(main?.children).find((child) => hasIdentity(child, "content") || hasIdentity(child, "Content"));
+  if (!content) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_MAIN_CONTENT_MISSING`, isMasterDetailWorkspace ? "Master-detail workspace Dashboard page must contain main > left_panel and content_panel." : "Dashboard page must contain main > content.", { page: context.page }));
+    return;
+  }
+  if (!isMasterDetailWorkspace && !isColumnLayout(main)) findings.push(error(`DASH_LAYOUT_${context.layer}_MAIN_COLUMN_MISSING`, "Dashboard main container must use column layout.", { page: context.page }));
+  if (!isMasterDetailWorkspace && !isColumnLayout(content)) findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_COLUMN_MISSING`, "Dashboard content container must use column layout.", { page: context.page }));
+  if (!isMasterDetailWorkspace && hasConflictingBackground(content)) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_BACKGROUND_CONFLICT`, "Dashboard content container must not override the full-page #f4f7fb background continuity.", { page: context.page, actual: content.attrs?.background || content.attrs?.style?.background || null }));
   }
-  validateContentPaddingContract(content, findings, context);
+  if (!isMasterDetailWorkspace) validateContentPaddingContract(content, findings, context);
   validateSectionContentAreaGap(resource, findings, context);
   for (const id of rules.requiredFullWidthIds) {
     for (const entry of findAllByIdentity(resource, id)) {
@@ -279,6 +351,52 @@ function validateSectionContentAreaGap(resource, findings, context) {
       findings.push(error(`DASH_LAYOUT_${context.layer}_SECTION_CONTENT_AREA_GAP_INVALID`, "section_content_area must preserve attrs.style.gap [null,\"--sp--s200\"] in Dashboard golden reference templates and generated pages.", { page: context.page, pointer: entry.pointer, actual: gap ?? null }));
     }
   }
+}
+
+function validateMasterDetailWorkspaceShell(resource, main, findings, context) {
+  const page = context.page;
+  const leftPanel = findFirstByIdentity(main, "left_panel");
+  const contentPanel = findFirstByIdentity(main, "content_panel");
+  if (!leftPanel) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_MISSING`, "Master-detail workspace Dashboard must preserve left_panel as the dataset list panel.", { page }));
+  }
+  if (!contentPanel) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_PANEL_MISSING`, "Master-detail workspace Dashboard must preserve content_panel as the selected-record detail panel.", { page }));
+  }
+  const tempVarNames = new Set(asArray(resource?.tempVars).flatMap((entry) => [entry?.id, entry?.name, entry?.Name, entry?.label]).filter(Boolean).map(String));
+  if (!tempVarNames.has("vCurrentItemID") && !tempVarNames.has("__temp_vCurrentItemID")) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_CURRENT_ITEM_TEMPVAR_MISSING`, "Master-detail workspace Dashboard must preserve vCurrentItemID as the selected current item temp variable.", { page }));
+  }
+  const leftCollection = findFirstByIdentity(resource, "left_panel_data_items_wrapper");
+  const currentCollection = findFirstByIdentity(resource, "current_item_wrapper");
+  if (!leftCollection || String(leftCollection?.type || "").toLowerCase() !== "collection") {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_COLLECTION_MISSING`, "Master-detail workspace Dashboard must preserve left_panel_data_items_wrapper as the left list Collection.", { page }));
+  }
+  if (!currentCollection || String(currentCollection?.type || "").toLowerCase() !== "collection") {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_CURRENT_ITEM_COLLECTION_MISSING`, "Master-detail workspace Dashboard must preserve current_item_wrapper as the selected-item detail Collection.", { page }));
+  }
+  if (leftCollection && currentCollection) {
+    const leftList = leftCollection?.attrs?.data?.list || {};
+    const currentList = currentCollection?.attrs?.data?.list || {};
+    if (String(leftList.ListID || "") && String(currentList.ListID || "") && String(leftList.ListID) !== String(currentList.ListID)) {
+      findings.push(error(`DASH_LAYOUT_${context.layer}_MASTER_DETAIL_SOURCE_MISMATCH`, "left_panel_data_items_wrapper and current_item_wrapper must bind to the same source dataset.", { page, leftListId: leftList.ListID, currentListId: currentList.ListID }));
+    }
+    if (String(leftList.ListSetID || "") && String(currentList.ListSetID || "") && String(leftList.ListSetID) !== String(currentList.ListSetID)) {
+      findings.push(error(`DASH_LAYOUT_${context.layer}_MASTER_DETAIL_APP_MISMATCH`, "left_panel_data_items_wrapper and current_item_wrapper must bind to the same application/ListSet.", { page, leftListSetId: leftList.ListSetID, currentListSetId: currentList.ListSetID }));
+    }
+  }
+  const leftCollectionText = stableJson(leftCollection || {});
+  if (leftCollection && !/vCurrentItemID/.test(leftCollectionText)) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_SELECTION_ACTION_MISSING`, "left_panel_data_items_wrapper must preserve a selection action that writes the clicked Collection item ID into vCurrentItemID.", { page }));
+  }
+  const currentData = currentCollection?.attrs?.data || {};
+  if (currentCollection && currentData.limit !== true) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_CURRENT_ITEM_LIMIT_MISSING`, "current_item_wrapper must enable limit records for the selected-item detail Collection.", { page, actual: currentData.limit ?? null }));
+  }
+  if (currentCollection && !/vCurrentItemID/.test(stableJson(currentData.filter || []))) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_CURRENT_ITEM_FILTER_MISSING`, "current_item_wrapper must filter ListDataID by vCurrentItemID so the detail panel shows only the selected record.", { page, actual: currentData.filter || [] }));
+  }
+  return contentPanel || null;
 }
 
 function validateOperations(resource, findings, page) {
@@ -327,8 +445,9 @@ function validateGeneratedSectionCleanup(resource, findings, page, context = {})
       if (!hasMeaningfulDashboardContent(control)) {
         findings.push(error("DASH_LAYOUT_EMPTY_CHART_CARDS_SECTION", "Generated Workbench Dashboard must remove chart_cards_section when no Data Analytics templates are materialized in it.", { page, pointer: entry.pointer, control: firstIdentity(control) || null }));
       }
-      if (!["primary_working_area", "right_side_panel"].includes(entry.parentIdentity)) {
-        findings.push(error("DASH_LAYOUT_CHART_CARDS_SECTION_PARENT_INVALID", "Workbench chart_cards_section may appear only under primary_working_area or right_side_panel.", { page, pointer: entry.pointer, parent: entry.parentIdentity || null }));
+      const approvedParents = rules.chartCardsSectionParentIds || [];
+      if (approvedParents.length && !approvedParents.includes(entry.parentIdentity)) {
+        findings.push(error("DASH_LAYOUT_CHART_CARDS_SECTION_PARENT_INVALID", "Workspace chart_cards_section may appear only under approved selected-layout working-area containers.", { page, pointer: entry.pointer, parent: entry.parentIdentity || null, approvedParents }));
       }
       const analyticsCount = countDataAnalyticsTemplates(control);
       if (analyticsCount > 3) {
@@ -415,10 +534,12 @@ function validateControlledSlotsAndRepeatableModules(resource, findings, context
       findings.push(error("DASH_LAYOUT_BUSINESS_CONTROL_OUTSIDE_ALLOWED_SLOT", "Dashboard business controls such as Collections, filters, KPI values, and actions must be placed inside approved v1.1 business-content containers.", { page: context.page, pointer: entry.pointer, identities: ids.slice(0, 6), type: control.type || null }));
       continue;
     }
-    const outsideSlotText = unexpectedBusinessTextOutsideSlot(control);
-    if (outsideSlotText.length) {
-      findings.push(error("DASH_LAYOUT_BUSINESS_TEXT_OUTSIDE_ALLOWED_SLOT", "Business text changes must stay inside approved v1.1 business-content containers; structural template labels may only use module/control identities.", { page: context.page, pointer: entry.pointer, control: firstIdentity(control) || null, text: outsideSlotText.slice(0, 5) }));
-      continue;
+    if (!context.allowTemplateOperations) {
+      const outsideSlotText = unexpectedBusinessTextOutsideSlot(control);
+      if (outsideSlotText.length) {
+        findings.push(error("DASH_LAYOUT_BUSINESS_TEXT_OUTSIDE_ALLOWED_SLOT", "Business text changes must stay inside approved v1.1 business-content containers; structural template labels may only use module/control identities.", { page: context.page, pointer: entry.pointer, control: firstIdentity(control) || null, text: outsideSlotText.slice(0, 5) }));
+        continue;
+      }
     }
     if (!knownIdentity && looksLikeLayoutModule(control)) {
       findings.push(error("DASH_LAYOUT_INVENTED_LAYOUT_MODULE", "Generated dashboards must not invent new dashboard layout modules outside approved business-content containers. Add layout by copying an allowed repeatable/removable module.", { page: context.page, pointer: entry.pointer, identities: ids.slice(0, 6), type: control.type || null }));
@@ -535,6 +656,7 @@ function normalizeWidthMode(control) {
 function ownVisibleTextSignature(control) {
   const out = [];
   const visibleKeys = new Set(["value", "text", "title", "Title", "label", "displayLabel", "placeholder"]);
+  const nonVisibleKeys = new Set(["actions", "control_display", "displayRules", "formulas", "rules", "validations"]);
   const visit = (node, key = "") => {
     if (Array.isArray(node)) return node.forEach((item) => visit(item, key));
     if (!isObject(node)) {
@@ -543,6 +665,7 @@ function ownVisibleTextSignature(control) {
     }
     for (const [childKey, child] of Object.entries(node)) {
       if (childKey === "children") continue;
+      if (nonVisibleKeys.has(childKey)) continue;
       visit(child, childKey);
     }
   };

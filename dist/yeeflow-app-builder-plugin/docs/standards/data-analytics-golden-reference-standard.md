@@ -48,6 +48,8 @@ Data Analytics templates must not be used on Approval forms because Approval for
 
 When a Dashboard page uses `dashboard-page-layouts-v1.1`, Data Analytics templates must be placed inside one of the approved business section containers: `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`. They must not be placed directly under root `Content`, page title regions, `Operations`, KPI wrappers, Collection-only regions, or copied source-app shells.
 
+When a Dashboard page uses `dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, or `dashboard-page-layouts-three-panel-workspace`, grouped Data Analytics templates must be placed inside `chart_cards_section` under the approved working-area containers for that layout. Each `chart_cards_section` should contain no more than three Data Analytics templates. Remove `chart_cards_section` when no Data Analytics templates are planned.
+
 ## Fidelity Rules
 
 For chart-with-title templates, the outer wrapper and all descendants are locked except:

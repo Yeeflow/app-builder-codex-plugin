@@ -181,7 +181,11 @@ function collectionControl() {
     nv_label: "Asset Loan Work Queue",
     attrs: {
       datasetPresentationTemplateId: "collection_control_grid_table",
-      data: { list: { AppID: 41, ListID: LIST_ID, Type: 1, Title: "Loan Requests", ListSetID: APP_ID } },
+      data: {
+        list: { AppID: 41, ListID: LIST_ID, Type: 1, Title: "Loan Requests", ListSetID: APP_ID },
+        sort: [{ SortName: "Title", SortOrder: "asc" }],
+        fulltext: [{ fields: ["Title"] }],
+      },
       filterBindings: ["LoanStatus"],
     },
     children: [gridItem("loan_work_queue_item_grid")],
@@ -209,11 +213,27 @@ function gridItem(id = "loan_work_queue_item_grid") {
     displayLabel: [null, false],
     attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } } },
     children: [
-      { type: "dynamic-field", name: "Loan Title", attrs: { source: "3", "obj-f": "Title" } },
-      { type: "dynamic-field", name: "Loan Status", attrs: { source: "3", "obj-f": "Text1" } },
-      { type: "dynamic-user", name: "Owner", attrs: { source: "3", "obj-f": "User1" } },
+      dynamicControl("dynamic-field", "Loan Title", "Title"),
+      dynamicControl("dynamic-field", "Loan Status", "Text1"),
+      dynamicControl("dynamic-user", "Owner", "User1"),
     ],
   };
+}
+
+function dynamicControl(type, name, field) {
+  const control = {
+    type,
+    name,
+    field,
+    attrs: {
+      source: "3",
+      "obj-f": field,
+      data: { field },
+      field,
+    },
+  };
+  if (type === "dynamic-user") control.attrs.user = { field };
+  return control;
 }
 
 function summaryControl() {
@@ -252,7 +272,7 @@ function decoded(resource = baseV11Resource()) {
       Ext2: "{\"src\":true}",
       LayoutInResources: [{ ID: "dashboard-layout-1", RefId: "dashboard-layout-1", Resource: JSON.stringify(resource) }],
     }],
-    Childs: [{ List: { ListID: LIST_ID, Title: "Loan Requests" }, Fields: [{ FieldName: "Title" }, { FieldName: "ListDataID", FieldID: "ListDataID", FieldType: "Text" }] }],
+    Childs: [{ List: { ListID: LIST_ID, Title: "Loan Requests" }, Fields: [{ FieldName: "Title", FieldType: "Text" }, { FieldName: "ListDataID", FieldID: "ListDataID", FieldType: "Text" }, { FieldName: "Text1", FieldType: "Text" }, { FieldName: "User1", FieldType: "User" }] }],
     Forms: [],
     FormNewReports: [],
     DataReports: [],

@@ -172,7 +172,7 @@ try {
   expectPass("v1.1 template registry and quality lint pass", ["--registry", "docs/reference/dashboard-page-layout-templates.json"]);
   expectPass("generated dashboard uses v1.1 shell with selected sections and domain content", ["--package", writePackage(tempDir, "valid", decoded())]);
 
-  expectCode("dashboard generated without main > content fails", ["--package", writePackage(tempDir, "missing-main-content", decoded({ attrs: templateResource().attrs, children: [] }))], "DASH_LAYOUT_RESOURCE_MAIN_CONTENT_MISSING");
+  expectCode("dashboard generated without main shell fails", ["--package", writePackage(tempDir, "missing-main-content", decoded({ attrs: templateResource().attrs, children: [] }))], "DASH_LAYOUT_RESOURCE_MAIN_MISSING");
 
   const missingBackground = templateResource();
   missingBackground.attrs.background.classic.color = "#ffffff";
