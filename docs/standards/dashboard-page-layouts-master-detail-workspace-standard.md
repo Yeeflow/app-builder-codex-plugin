@@ -32,6 +32,8 @@ Use `dashboard-page-layouts-three-panel-workspace` when the page needs all two-p
 
 Do not use these templates for simple overview dashboards, report-only dashboards, or pages where the right/detail areas would be placeholder-only.
 
+Dashboard page parsing must be page-name driven. Subsections under a Dashboard page, including `Summary Metrics`, `Dashboard Filters`, `Data Analytics`, `Data Tables`, `Record Display Control Selection`, and similar planning headings, are never standalone Dashboard pages. A generated package must not create extra Dashboard pages from these subsection headings.
+
 ## Runtime Contract
 
 The master-detail runtime contract is mandatory:
@@ -113,6 +115,8 @@ All other template controls, page temp variables, form actions, layout relations
 `left_panel_caption_add_button` may be retained only when the left-panel source supports creating new records, such as a Data list or Document library. When the primary source is a Form report, Data report, or another read-only/reporting source, remove `left_panel_caption_add_button` and its action instead of leaving a visual-only Add button.
 
 `Operations` and operation containers may exist only when they contain real configured action controls. Remove unused Operations regions and visual-only buttons.
+
+Generated master-detail workspace pages must be domain-clean. Do not retain copied source-template business copy such as `Office Asset`, `Active Loan Pipeline`, `current loan volume`, `return activity signal`, or loan-domain guidance on non-loan applications. Map copied text to the current domain only when the section has real planned business content; otherwise remove the copied section/module.
 
 ## Field Display Rules
 

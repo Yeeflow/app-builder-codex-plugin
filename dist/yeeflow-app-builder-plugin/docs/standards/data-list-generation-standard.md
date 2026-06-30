@@ -29,6 +29,8 @@ Every generated data list must include:
 9. Custom New/Edit/View forms assigned through list display settings; generated business lists must not use default form routing.
 10. Export-shaped default view metadata that materializes columns in the runtime UI.
 
+When the App Plan supplies an explicit schema-safe internal field key, the generated field must preserve it. Do not infer or renumber over planned keys such as `Text5`. A planned `Status | Text5` field must materialize as `FieldName = Text5`. Current generated-final YAPK schema stores identity-picker controls on Text-backed storage fields, so planned user/person fields such as `Requester` or `Assigned Agent` must preserve identity-picker control behavior with schema-safe `Text*` field keys rather than regressing to ordinary text inputs. Placeholder filtering for resource names must not be applied to field display names; `Status`, `State`, `Stage`, `Priority`, `Requester`, `Assigned Agent`, and similar domain labels are real fields unless the App Plan explicitly marks them as not planned.
+
 ## Custom Data List Form Layout Templates
 
 Every generated business Data List or Document Library must have custom Data List forms assigned for New Item, Edit Item, and View Item. Default layouts are not signing-ready for generated business lists.

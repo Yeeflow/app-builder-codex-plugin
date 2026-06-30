@@ -157,6 +157,10 @@ For New/Edit forms, the common case is a single current-record field section. Do
 
 For View Item forms, keep only the page title, required view structure, and the sections that are backed by current-record details, related datasets, Data Analytics, KPI cards, filters, or configured actions. Do not keep copied Dashboard or loan/event placeholder section text when no corresponding business content was generated.
 
+Supporting-list View Item forms such as comments, attachments, notes, or history lists must not inherit KPI cards or Dashboard-style summary regions by default. Generate KPI/Summary content on a custom Data List form only when the App Plan explicitly selects form-level KPI content and provides real source fields, Summary runtime binding, and business rationale for that form. Otherwise remove `kpi_metrics_wrapper` and any copied KPI card modules before generated-final validation.
+
+When the App Plan uses a unified Custom Data List Forms table, the `Data List` or host-list column is authoritative. Attach each Type `1` custom form only to that host list. If several data lists exist and a custom form row has no clear host list, generation must fail or skip with a finding; it must not silently attach the form to the first data list.
+
 ## New/Edit Form Rules
 
 New/Edit forms must use `data_list_form_layout_new_edit_v1_1`.
