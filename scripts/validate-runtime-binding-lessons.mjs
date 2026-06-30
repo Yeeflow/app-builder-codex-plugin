@@ -156,6 +156,21 @@ function containsFilterVar(value, filterVar) {
   return found;
 }
 
+function extractFilterVarRefs(value) {
+  const refs = new Set();
+  walk(value, (node) => {
+    if (typeof node === "string") {
+      for (const match of node.matchAll(/__filter_([A-Za-z0-9_-]+)/g)) refs.add(match[1]);
+    } else if (isObject(node)) {
+      const id = safeString(node.id);
+      const name = safeString(node.name);
+      if (id.startsWith("__filter_")) refs.add(id.slice("__filter_".length));
+      if (name && id === `__filter_${name}`) refs.add(name);
+    }
+  });
+  return [...refs];
+}
+
 function validRecordIdLike(value) {
   if (Array.isArray(value)) return value.every(validRecordIdLike);
   if (isObject(value)) return true;
@@ -163,7 +178,7 @@ function validRecordIdLike(value) {
   return !text || API_ISSUED_ID_RE.test(text);
 }
 
-function validateConsumerConditions({ findings, pageName, layoutId, control, pointer, filterVars, lists }) {
+function validateConsumerConditions({ findings, pageName, layoutId, control, pointer, filterVars, lists, filterControlsByVar }) {
   const data = control?.attrs?.data || {};
   const listId = listIdFromControl(control);
   const list = lists.get(listId);
@@ -174,6 +189,33 @@ function validateConsumerConditions({ findings, pageName, layoutId, control, poi
   ];
   for (const [index, condition] of conditions.entries()) {
     const fieldName = conditionField(condition);
+    const filterVarRefs = extractFilterVarRefs(condition);
+    for (const filterVar of filterVarRefs) {
+      if (!filterVars.has(filterVar)) {
+        add(findings, "error", "DASHBOARD_FILTER_CONSUMER_UNDECLARED_FILTER_VAR", "Dashboard consumer filter references a filter variable that is not declared in page.filterVars[].", {
+          page: pageName,
+          controlId: safeString(control?.id),
+          controlTitle: controlTitle(control),
+          pointer: `${pointer}.attrs.data.filter[${index}]`,
+          filterVariable: filterVar,
+          recommendedFix: "Declare page.filterVars[] for the consumed filter variable, or remove the consumer condition.",
+        });
+      }
+      const filterControl = filterControlsByVar.get(filterVar);
+      if (filterControl?.fieldName && fieldName && fieldName !== filterControl.fieldName) {
+        add(findings, "error", "DASHBOARD_FILTER_CONSUMER_FIELD_CONTROL_MISMATCH", "Dashboard consumer filter condition must use the same source field as the filter control that produces the variable.", {
+          page: pageName,
+          controlId: safeString(control?.id),
+          controlTitle: controlTitle(control),
+          pointer: `${pointer}.attrs.data.filter[${index}]`,
+          filterVariable: filterVar,
+          consumerField: fieldName,
+          filterControlId: filterControl.controlId,
+          filterControlField: filterControl.fieldName,
+          recommendedFix: "Bind the consumer condition to the exact generated field used by the filter control.",
+        });
+      }
+    }
     if (fieldName && list && !listHasField(list, fieldName)) {
       add(findings, "error", "DASHBOARD_FILTER_CONSUMER_INVALID_FIELD", "Dashboard filter consumer condition references a field that is not on the consumer source list.", {
         page: pageName,
@@ -196,6 +238,17 @@ function validateConsumerConditions({ findings, pageName, layoutId, control, poi
         sourceField: fieldName,
         severity: "error",
         recommendedFix: "Use the lookup record id/ListDataID value for filter comparisons.",
+      });
+    }
+  }
+  for (const filterVar of extractFilterVarRefs([data.fulltext, data.sortingfilter, data.Conditions, data.conditions])) {
+    if (!filterVars.has(filterVar)) {
+      add(findings, "error", "DASHBOARD_FILTER_CONSUMER_UNDECLARED_FILTER_VAR", "Dashboard consumer references a filter variable that is not declared in page.filterVars[].", {
+        page: pageName,
+        controlId: safeString(control?.id),
+        controlTitle: controlTitle(control),
+        filterVariable: filterVar,
+        recommendedFix: "Declare page.filterVars[] for the consumed filter variable, or remove the consumer binding.",
       });
     }
   }
@@ -229,6 +282,38 @@ export function validateDashboardBindings(decoded, options = {}) {
     ].filter(Boolean));
     const summaryIds = new Set();
     const filterControlVars = new Set();
+    const filterControlsByVar = new Map();
+
+    walk(page, (node) => {
+      if (!isObject(node)) return;
+      const type = safeString(node.type);
+      const controlId = safeString(node.id);
+      if (!(DATA_FILTER_TYPES.has(type) || safeString(node.binding).startsWith("__filter_"))) return;
+      const binding = safeString(node.binding);
+      const filterVar = binding.startsWith("__filter_") ? binding.slice("__filter_".length) : "";
+      const listId = listIdFromControl(node);
+      const list = lists.get(listId);
+      const fieldName = fieldNameFromAny(node?.attrs?.data?.field || node?.attrs?.display_f || node?.attrs?.value_f || node?.display_f || node?.value_f);
+      if (filterVar) {
+        filterControlsByVar.set(filterVar, {
+          controlId,
+          fieldName,
+          listId,
+          sourceList: list?.title || listId,
+        });
+      }
+      if (fieldName && list && !listHasField(list, fieldName)) {
+        add(findings, "error", "DASHBOARD_FILTER_CONTROL_INVALID_FIELD", "Dashboard filter control references a field that is not on its source list.", {
+          page: pageName,
+          controlId,
+          controlTitle: controlTitle(node),
+          sourceList: list.title || listId,
+          sourceField: fieldName,
+          filterVariable: filterVar,
+          recommendedFix: "Bind the filter control to a field present on the source list.",
+        });
+      }
+    });
 
     walk(page, (node, pointer) => {
       if (!isObject(node)) return;
@@ -280,7 +365,7 @@ export function validateDashboardBindings(decoded, options = {}) {
       }
 
       if (DASHBOARD_CONSUMER_TYPES.has(type) && type !== "summary") {
-        const consumed = validateConsumerConditions({ findings, pageName, layoutId, control: node, pointer, filterVars, lists });
+        const consumed = validateConsumerConditions({ findings, pageName, layoutId, control: node, pointer, filterVars, lists, filterControlsByVar });
         for (const consumedVar of consumed) consumedVars.set(consumedVar, [...(consumedVars.get(consumedVar) || []), controlId || type]);
       }
     });

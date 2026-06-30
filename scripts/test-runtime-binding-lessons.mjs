@@ -50,7 +50,17 @@ function decodedDashboard({ summary = {}, filter = {}, visualOnly = false } = {}
       children: [
         summaryControl,
         ...(visualOnly ? [{ id: "kpi_text", type: "text", label: "KPI placeholder 0" }] : []),
-        ...(filter.noControl ? [] : [{ id: "filter_category", type: "select", binding: filter.noBinding ? "" : "__filter_filter_Overview_Category", label: "Category" }]),
+        ...(filter.noControl ? [] : [{
+          id: "filter_category",
+          type: "select",
+          binding: filter.noBinding ? "" : "__filter_filter_Overview_Category",
+          label: "Category",
+          attrs: {
+            data: { list: { ListID: "resources", Title: "Resources" }, field: filter.controlInvalidField ? "MissingField" : (filter.controlField || "Category") },
+            display_f: filter.controlInvalidField ? "MissingField" : (filter.controlField || "Category"),
+            value_f: filter.controlInvalidField ? "MissingField" : (filter.controlField || "Category"),
+          },
+        }]),
         {
           id: "table_resources",
           type: "data-list",
@@ -59,7 +69,7 @@ function decodedDashboard({ summary = {}, filter = {}, visualOnly = false } = {}
             data: {
               list: { ListID: "resources", Title: "Resources" },
               filter: filter.consumer
-                ? [{ field: filter.invalidField ? "MissingField" : "Category", value: filter.lookupDisplayValue ? "Hardware" : [{ exprType: "variable", id: "__filter_filter_Overview_Category", name: "filter_Overview_Category" }] }]
+                ? [{ field: filter.invalidField ? "MissingField" : (filter.consumerField || "Category"), value: filter.lookupDisplayValue ? "Hardware" : [{ exprType: "variable", id: filter.undeclaredConsumerVar ? "__filter_filter_Status" : "__filter_filter_Overview_Category", name: filter.undeclaredConsumerVar ? "filter_Status" : "filter_Overview_Category" }] }]
                 : [],
             },
           },
@@ -109,6 +119,9 @@ expectCode("summary missing report id", validateDashboardBindings(decodedDashboa
 assert.equal(validateDashboardBindings(decodedDashboard({ summary: { omitListDataIdFromSchema: true }, filter: { summaryConsumes: true, consumer: true } })).filter((finding) => finding.severity === "error").length, 0, "ListDataID Summary count is a system field and does not need to appear in business Fields[]");
 expectCode("declared filter not consumed", validateDashboardBindings(decodedDashboard()), "DASHBOARD_FILTER_VAR_DECLARED_NOT_CONSUMED");
 expectCode("filter control without var", validateDashboardBindings(decodedDashboard({ filter: { noBinding: true } })), "DASHBOARD_FILTER_CONTROL_WITHOUT_FILTER_VAR");
+expectCode("filter control invalid field", validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true, controlInvalidField: true } })), "DASHBOARD_FILTER_CONTROL_INVALID_FIELD");
+expectCode("consumer undeclared filter var", validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true, undeclaredConsumerVar: true } })), "DASHBOARD_FILTER_CONSUMER_UNDECLARED_FILTER_VAR");
+expectCode("consumer field control mismatch", validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true, consumerField: "Owner" } })), "DASHBOARD_FILTER_CONSUMER_FIELD_CONTROL_MISMATCH");
 expectCode("consumer invalid field", validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true, invalidField: true } })), "DASHBOARD_FILTER_CONSUMER_INVALID_FIELD");
 expectCode("lookup display filter", validateDashboardBindings(decodedDashboard({ filter: { summaryConsumes: true, consumer: true, lookupDisplayValue: true } })), "DASHBOARD_LOOKUP_FILTER_VALUE_NOT_RECORD_ID");
 expectCode("visual KPI card", validateDashboardBindings(decodedDashboard({ visualOnly: true, filter: { summaryConsumes: true, consumer: true } })), "DASHBOARD_VISUAL_ONLY_KPI_CARD");
