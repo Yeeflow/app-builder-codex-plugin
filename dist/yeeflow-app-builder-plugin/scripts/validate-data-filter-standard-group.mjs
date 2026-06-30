@@ -119,6 +119,10 @@ function validateResource(resource, context) {
   const entries = flattenControls(resource);
   const filters = entries.filter((entry) => DATA_FILTER_TYPES.has(String(entry.node?.type || "")));
   if (filters.length < 2) return;
+  if (isMasterDetailLeftPanelFilterPattern(entries, filters)) {
+    validateLeftPanelFilterGroups(entries, context);
+    return;
+  }
   const groups = entries.filter((entry) => hasIdentity(entry.node, TEMPLATE_ID));
   if (!groups.length) {
     context.findings.push(error("DATA_FILTER_GROUP_REQUIRED_FOR_MULTIPLE_FILTERS", "Pages or forms with two or more page-level Data Filter controls must wrap them in dashboard_standard_filter_group.", {
@@ -140,6 +144,29 @@ function validateResource(resource, context) {
     }
   }
   for (const group of groups) validateGroupContract(group, context);
+}
+
+function isMasterDetailLeftPanelFilterPattern(entries, filters) {
+  const pageLayoutMarkers = new Set(["dashboard-page-layouts-two-panel-workspace", "dashboard-page-layouts-three-panel-workspace"]);
+  const hasMasterDetailMarker = entries.some((entry) => pageLayoutMarkers.has(String(entry.node?.derivedFromDashboardPageLayoutTemplate || entry.node?.templateMarker || entry.node?.attrs?.dashboardPageLayoutTemplateId || "").trim()));
+  if (!hasMasterDetailMarker) return false;
+  return filters.every((filter) => filter.ancestors.some((ancestor) => hasIdentity(ancestor, "left_panel_filter_group")));
+}
+
+function validateLeftPanelFilterGroups(entries, context) {
+  const groups = entries.filter((entry) => hasIdentity(entry.node, "left_panel_filter_group"));
+  for (const group of groups) {
+    const childFilters = flattenControls(group.node)
+      .filter((entry) => entry.node !== group.node && DATA_FILTER_TYPES.has(String(entry.node?.type || "")));
+    if (childFilters.length > 2) {
+      context.findings.push(error("DATA_FILTER_LEFT_PANEL_GROUP_TOO_MANY_FILTERS", "Master-detail workspace left_panel_filter_group may contain at most two Data Filter controls; add another left_panel_filter_group for additional filters.", {
+        surface: context.surface,
+        title: context.title,
+        path: group.pointer,
+        filterCount: childFilters.length,
+      }));
+    }
+  }
 }
 
 function validateGroupContract(group, context) {
@@ -202,7 +229,6 @@ function collectPotentialResources(decoded) {
   }
   walkDecoded(decoded, (value, pointer) => {
     if (!isObject(value)) return;
-    if (Array.isArray(value.children)) add(value, value.Title || value.title || value.name || pointer, inferSurface(pointer, value), pointer);
     for (const key of ["Resource", "DefResource", "formdef", "LayoutView"]) {
       const parsed = parseJsonMaybe(value[key]);
       if (isObject(parsed)) add(parsed?._ak_c || parsed, value.Title || value.title || value.name || key, inferSurface(pointer, value), `${pointer}.${key}`);

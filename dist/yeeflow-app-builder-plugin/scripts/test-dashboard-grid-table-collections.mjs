@@ -24,6 +24,7 @@ function run() {
   assertFails("wrapper missing attrs.container.gap fails", packagePath({ omitContainerGap: true }), "DASHBOARD_GRID_TABLE_WRAPPER_CONTAINER_GAP_MISSING");
   assertFails("Collection without detail link fails", packagePath({ omitDetailLink: true }), "DASHBOARD_COLLECTION_DETAIL_LINK_MISSING");
   assertPass("grid-table Collection may explicitly declare no row detail open behavior", packagePath({ omitDetailLink: true, explicitNoOpen: true }));
+  assertPass("master-detail workspace internal Collection is not validated with grid-table header/detail rules", packagePath({ masterDetailWorkspace: true, omitDetailLink: true }));
   assertPass("card Collection template is not validated with grid-table header/item rules", packagePath({ cardTemplate: true }), { requireGridTableCollections: false });
   assertFails("card Collection template still fails when this run explicitly requires grid-table Collections", packagePath({ cardTemplate: true }), "DASHBOARD_CARD_COLLECTION_WHEN_GRID_TABLE_REQUIRED");
   assertFails("Collection detail link to missing custom layout fails", packagePath({ missingDetailLayout: true }), "DASHBOARD_COLLECTION_DETAIL_LAYOUT_MISSING");
@@ -97,7 +98,13 @@ function decodedPackage(flags) {
 function dashboardResource(flags) {
   return {
     type: "page",
-    attrs: flags.omitHideHeader ? {} : { hideHeaderAll: true },
+    derivedFromDashboardPageLayoutTemplate: flags.masterDetailWorkspace ? "dashboard-page-layouts-two-panel-workspace" : undefined,
+    attrs: flags.omitHideHeader
+      ? {}
+      : {
+          hideHeaderAll: true,
+          ...(flags.masterDetailWorkspace ? { dashboardPageLayoutTemplateId: "dashboard-page-layouts-two-panel-workspace" } : {}),
+        },
     children: [
       titleControl(flags),
       ...recordListControls(flags),
@@ -120,6 +127,7 @@ function titleControl(flags) {
 }
 
 function recordListControls(flags) {
+  if (flags.masterDetailWorkspace) return [collection({ ...flags, templateId: "", masterDetailRole: "left-panel-list" })];
   if (flags.cardTemplate) return [wrapper([collection({ ...flags, templateId: "collection_control_card_with_multiselect_toolbar", omitDetailLink: true })], "card-wrapper", flags)];
   if (flags.useDataList) return [{ type: "data-list", attrs: { data: { list: { ListID: flags.listId } } } }];
   if (flags.separateHeaderWrapper) {
@@ -155,7 +163,12 @@ function collection(flags) {
   if (flags.explicitNoOpen) data.detailOpenBehavior = "none";
   return {
     type: "collection",
-    attrs: { data, ...(flags.templateId ? { datasetPresentationTemplateId: flags.templateId } : {}) },
+    name: flags.masterDetailRole === "left-panel-list" ? "left_panel_data_items_wrapper" : undefined,
+    attrs: {
+      data,
+      ...(flags.templateId ? { datasetPresentationTemplateId: flags.templateId } : {}),
+      ...(flags.masterDetailRole ? { dashboardPageLayoutInternalCollection: true, dashboardWorkspaceCollectionRole: flags.masterDetailRole } : {}),
+    },
     children: [{ type: "flex_grid", attrs: { role: "row" } }],
   };
 }

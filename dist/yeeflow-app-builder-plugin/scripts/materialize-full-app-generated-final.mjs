@@ -56,13 +56,17 @@ const GRID_TABLE_TEMPLATE_IDS = new Set([
   "Event Pipeline Grid-Table",
 ]);
 const SOURCE_COLLECTION_TEMPLATE_IDS = {
-  listSetIds: new Set(["2058726109535285249", "2058571956842409984"]),
-  listIds: new Set(["2058726119586017281", "2058571966637289476"]),
+  listSetIds: new Set(["2058726109535285249", "2058571956842409984", "2054077087595905025"]),
+  listIds: new Set(["2058726119586017281", "2058571966637289476", "2054077096447066112"]),
 };
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = Object.freeze([
   PAGE_LAYOUT_TEMPLATE_ID,
   "dashboard-page-layouts-workbench",
+  "dashboard-page-layouts-two-panel-workspace",
+  "dashboard-page-layouts-three-panel-workspace",
+]);
+const MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
   "dashboard-page-layouts-two-panel-workspace",
   "dashboard-page-layouts-three-panel-workspace",
 ]);
@@ -506,6 +510,7 @@ function analyzeAppPlanResourceDemand(planText) {
     resources,
     navigationItemsByGroup,
     dataListFieldSpecs: collectDataListFieldSpecs(planText),
+    dataListViewRecords: collectDataListViewRecords(planText),
     customFormRecords: collectCustomFormRecords(planText),
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
@@ -1244,6 +1249,33 @@ function collectNavigationItemsByGroup(section) {
   return byGroup;
 }
 
+function collectDataListViewRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+13\.\s+Data List Views Plan/im);
+  if (!section.trim()) return [];
+  const records = [];
+  for (const table of parseMarkdownTables(section)) {
+    const headers = table.headers.map((header) => normKey(header));
+    const viewColumn = findHeaderIndex(headers, ["view name", "view"]);
+    const listColumn = findHeaderIndex(headers, ["data list", "list/library", "list", "library", "data list or library"]);
+    const urlColumn = findHeaderIndex(headers, ["url / route key", "route key", "url"]);
+    if (viewColumn === -1 || listColumn === -1) continue;
+    for (const row of table.rows) {
+      const cells = table.headers.map((header) => row[header] || "");
+      const viewName = cleanResourceName(cells[viewColumn]);
+      const listName = cleanResourceName(cells[listColumn]);
+      if (!viewName || !listName || isNonResourceName(viewName) || isNonResourceName(listName)) continue;
+      records.push({
+        viewName,
+        listName,
+        routeKey: cleanResourceName(cells[urlColumn]) || slugify(viewName),
+      });
+    }
+  }
+  return unique(records.map((record) => `${normKey(record.viewName)}|${normKey(record.listName)}`))
+    .map((key) => records.find((record) => `${normKey(record.viewName)}|${normKey(record.listName)}` === key))
+    .filter(Boolean);
+}
+
 function fieldSpecsForList(planDemand, listName) {
   const specs = planDemand.dataListFieldSpecs?.[normKey(listName)] || [];
   const normalized = [];
@@ -1920,6 +1952,25 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const dashboardAnalytics = selectDashboardAnalyticsForPage({ planDemand, pageName: name, pageIndex: index });
     const dashboardSummaryMetrics = selectDashboardSummaryMetricsForPage({ planDemand, pageName: name, pageIndex: index });
     const dashboardPageLayoutTemplateId = selectDashboardPageLayoutTemplateForPage({ planDemand, pageName: name });
+    const dashboardResource = buildMaterialDashboardResource({
+      name,
+      layoutId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
+      pageLayoutTemplateId: dashboardPageLayoutTemplateId,
+      rootListSetId: rootListId,
+      listName: firstListName,
+      listId: firstListId,
+      listMeta: firstListMeta,
+      listMetaByName,
+      datasetRecords,
+      dashboardFilters,
+      dashboardAnalytics,
+      dashboardDataTables: selectDashboardDataTablesForPage({ planDemand, pageName: name, pageIndex: index }),
+      dashboardSummaryMetrics,
+      summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
+      filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
+      collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
+    });
+    const dashboardResourceJson = JSON.stringify(dashboardResource);
     return {
       ListID: rootListId,
       LayoutID: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
@@ -1933,24 +1984,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         {
           ID: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
           RefId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
-            Resource: JSON.stringify(buildMaterialDashboardResource({
-              name,
-              layoutId: stringId(ids[`decoded.Pages[${index}].LayoutID`]),
-              pageLayoutTemplateId: dashboardPageLayoutTemplateId,
-              rootListSetId: rootListId,
-              listName: firstListName,
-              listId: firstListId,
-              listMeta: firstListMeta,
-              listMetaByName,
-            datasetRecords,
-            dashboardFilters,
-            dashboardAnalytics,
-            dashboardDataTables: selectDashboardDataTablesForPage({ planDemand, pageName: name, pageIndex: index }),
-            dashboardSummaryMetrics,
-            summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
-            filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
-            collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
-          })),
+          Resource: dashboardResourceJson,
         },
       ],
     };
@@ -2032,6 +2066,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar, plannedMetrics: dashboardSummaryMetrics });
   const resource = buildDashboardPageLayoutShell({ name, layoutId, templateId: pageLayoutTemplateId });
+  const isMasterDetailWorkspace = MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.has(pageLayoutTemplateId);
   const primaryDatasetRecord = (datasetRecords || [])[0] || null;
   const sourceResource = primaryDatasetRecord?.sourceResource || listName;
   const selectedTemplateId = primaryDatasetRecord?.selectedTemplateId || "collection_control_grid_table";
@@ -2040,7 +2075,19 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   const normalizedFilters = normalizeDashboardFilters({ filters: dashboardFilters, listMeta: sourceListMeta, dashboardName: name });
   const collectionRoots = [];
   const effectiveDatasetRecords = (datasetRecords || []).length ? datasetRecords : [{ selectedTemplateId, sourceResource, datasetRegion }];
-  for (const [index, record] of effectiveDatasetRecords.entries()) {
+  if (isMasterDetailWorkspace) {
+    const masterRecord = effectiveDatasetRecords[0] || { sourceResource, datasetRegion };
+    const masterListMeta = listMetaByName?.get(normKey(masterRecord.sourceResource)) || sourceListMeta;
+    materializeMasterDetailWorkspaceCollections(resource, {
+      dashboardName: name,
+      rootListSetId,
+      listMeta: masterListMeta,
+      datasetRegion: masterRecord.datasetRegion || datasetRegion,
+      collectionId,
+    });
+  }
+  const recordsForTemplateMaterialization = isMasterDetailWorkspace ? effectiveDatasetRecords.slice(1) : effectiveDatasetRecords;
+  for (const [index, record] of recordsForTemplateMaterialization.entries()) {
     const recordListMeta = listMetaByName?.get(normKey(record.sourceResource)) || (index === 0 ? sourceListMeta : null) || sourceListMeta;
     const recordListName = recordListMeta.listName || record.sourceResource || sourceResource;
     const recordListId = recordListMeta.listId || listId;
@@ -2054,8 +2101,8 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
       listId: recordListId,
       listMeta: recordListMeta,
       detailLayoutId: recordListMeta.detailLayoutId,
-      filterBindings: index === 0 ? normalizedFilters : [],
-      collectionId: index === 0 ? collectionId : `${collectionId}_${index + 1}`,
+      filterBindings: !isMasterDetailWorkspace && index === 0 ? normalizedFilters : [],
+      collectionId: isMasterDetailWorkspace ? `${collectionId}_related_${index + 1}` : index === 0 ? collectionId : `${collectionId}_${index + 1}`,
     }));
   }
   const templateDependencies = mergePageDependencies(collectionRoots.map((root) => root.pageLevelDependencies || {}));
@@ -2126,6 +2173,9 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
       source: contract.summaryId,
       kpiKey: contract.key,
     })),
+    ...(isMasterDetailWorkspace ? [
+      { id: "__temp_vCurrentItemID", name: "vCurrentItemID", type: "string", source: "left_panel_data_items_wrapper" },
+    ] : []),
     { name: "var_SelectedItems", type: "array", source: collectionId },
     { name: "var_SelectedItemsAmount", type: "number", source: collectionId },
     { name: "var_isDeleteConfirmed", type: "boolean", source: "delete-confirmation" },
@@ -2167,10 +2217,246 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     kpis: kpiContracts.map((contract) => ({ key: contract.key, label: contract.label, tempVar: contract.tempVar, summaryId: contract.summaryId })),
     filters: normalizedFilters.map((filter) => ({ name: filter.filterName, fieldName: filter.fieldName })),
   };
+  ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId);
   normalizeGeneratedDashboardControls(resource, name);
   removeEmptyDashboardBusinessSections(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
   return resource;
+}
+
+function ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId) {
+  if (!MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.has(pageLayoutTemplateId)) return;
+  resource.attrs ||= {};
+  resource.attrs.container ||= {};
+  resource.attrs.container.padding = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }];
+  resource.attrs.contentWidth ||= [null, "1"];
+
+  const topChildren = Array.isArray(resource.children) ? resource.children : [];
+  const existingMain = topChildren.find((child) => hasIdentity(child, "Main"));
+  const main = existingMain || topChildren[0];
+  if (!main || !Array.isArray(main.children)) return;
+
+  main.name = "Main";
+  main.title = "Main";
+  main.label = "Main";
+
+  const content = main.children.find((child) => hasIdentity(child, "Content"))
+    || main.children.find((child) => hasIdentity(child, "content_panel"))
+    || main.children.find((child) => hasIdentity(child, "right_side_panel"))
+    || main.children[1]
+    || main.children[0];
+  if (!content) return;
+  content.name = "Content";
+  content.title ||= "Content";
+  content.label ||= "content_panel";
+}
+
+function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, rootListSetId, listMeta, datasetRegion, collectionId }) {
+  const leftCollection = findFirstByIdentity(resource, "left_panel_data_items_wrapper");
+  const currentCollection = findFirstByIdentity(resource, "current_item_wrapper");
+  const leftPanelTitle = findFirstByIdentity(resource, "left_panel_caption_title");
+  const mainContentTitle = findFirstByIdentity(resource, "main_content_page_title");
+  setHeadingText(leftPanelTitle, listMeta.listName || datasetRegion);
+  setHeadingText(mainContentTitle, `${listMeta.listName || datasetRegion} Details`);
+  if (leftCollection) {
+    configureMasterDetailCollection(leftCollection, {
+      role: "left-panel-list",
+      dashboardName,
+      datasetRegion,
+      listMeta,
+      rootListSetId,
+      id: `${collectionId}_left_panel`,
+    });
+    leftCollection.attrs.data.limit = false;
+    leftCollection.attrs.data.ps = leftCollection.attrs.data.ps || 20;
+    leftCollection.attrs.data.filter = masterDetailLeftPanelFilters(resource, listMeta, rootListSetId);
+    leftCollection.attrs.data.fulltext = masterDetailSearchFilters(resource, listMeta);
+    leftCollection.attrs.data.sort = [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }];
+    leftCollection.attrs.actions = ensureMasterDetailSelectionAction(leftCollection.attrs.actions);
+  }
+  if (currentCollection) {
+    configureMasterDetailCollection(currentCollection, {
+      role: "current-item-detail",
+      dashboardName,
+      datasetRegion: `${datasetRegion} selected detail`,
+      listMeta,
+      rootListSetId,
+      id: `${collectionId}_current_item`,
+    });
+    currentCollection.attrs.data.limit = true;
+    currentCollection.attrs.data.disv = false;
+    currentCollection.attrs.data.ps = 1;
+    currentCollection.attrs.data.filter = [{
+      key: deterministicUuid(`${dashboardName}:${listMeta.listName}:current-item-filter`),
+      pre: "and",
+      left: "ListDataID",
+      op: "0",
+      right: [{ exprType: "variable", valueType: "string", id: "__temp_vCurrentItemID", type: "expr", name: "vCurrentItemID" }],
+      showCus: false,
+    }];
+    currentCollection.attrs.data.fulltext = [];
+  }
+  mapMasterDetailFilterControls(resource, listMeta, rootListSetId);
+  mapDynamicControlsForList(resource, listMeta, rootListSetId);
+  rewriteCollectionTemplateRuntimeRefs(resource, {
+    rootListSetId,
+    listId: listMeta.listId,
+    detailLayoutId: listMeta.detailLayoutId,
+  });
+  replaceTemplateResidue(resource, { datasetRegion, listName: listMeta.listName || datasetRegion });
+}
+
+function configureMasterDetailCollection(collection, { role, dashboardName, datasetRegion, listMeta, rootListSetId, id }) {
+  const listName = listMeta.listName || datasetRegion || "Records";
+  collection.id = id;
+  collection.name = role === "left-panel-list" ? `${listName} list` : `${listName} selected item`;
+  collection.title = collection.name;
+  collection.dashboardWorkspaceCollectionRole = role;
+  collection.dashboardPageLayoutInternalCollection = true;
+  collection.datasetRegion = datasetRegion;
+  collection.datasetRegionName = datasetRegion;
+  collection.appPlanDatasetRegion = datasetRegion;
+  collection.attrs = {
+    ...(collection.attrs || {}),
+    dashboardWorkspaceCollectionRole: role,
+    dashboardPageLayoutInternalCollection: true,
+    dashboardPageLayoutTemplateId: collection.attrs?.dashboardPageLayoutTemplateId || null,
+    ...(role === "left-panel-list" ? {
+      datasetPresentationTemplateId: "collection_control_grid_table",
+      derivedFromDatasetPresentationTemplate: "collection_control_grid_table",
+      templateId: "collection_control_grid_table",
+    } : {}),
+    datasetRegion,
+    datasetRegionName: datasetRegion,
+    appPlanDatasetRegion: datasetRegion,
+    data: {
+      ...(collection.attrs?.data || {}),
+      list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listName, ListSetID: stringId(rootListSetId) },
+      source: listName,
+      sourceResourceType: "Data list",
+      datasetRegion,
+      ...(role === "left-panel-list" ? {
+        datasetPresentationTemplateId: "collection_control_grid_table",
+      } : {}),
+      field: primaryFieldName(listMeta),
+      sort: [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }],
+    },
+  };
+  collection.generatedFrom = { dashboardName, sourceResource: listName, dashboardWorkspaceCollectionRole: role };
+}
+
+function masterDetailSearchFilters(resource, listMeta) {
+  const fields = fieldsForDynamicControls(listMeta).slice(0, 5).map((field) => field.fieldName);
+  const searches = findDescendants(resource, (node) => String(node?.type || "") === "search-filter");
+  return searches.map((search) => {
+    const binding = String(search?.binding || search?.attrs?.binding || "__filter_filter_keywords").replace(/^__filter_/, "");
+    return {
+      fields: fields.length ? fields : [primaryFieldName(listMeta)],
+      field: primaryFieldName(listMeta),
+      value: [{ exprType: "variable", valueType: "string", id: `__filter_${binding}`, type: "expr", name: binding }],
+      sourceFilterId: search.id || search.name || "left_panel_search_filter",
+    };
+  });
+}
+
+function masterDetailLeftPanelFilters(resource, listMeta, rootListSetId) {
+  const filters = findDescendants(resource, (node) => hasIdentity(node, "left_panel_filter_control"));
+  return filters.slice(0, 4).map((filter, index) => {
+    const field = fieldsForDynamicControls(listMeta)[index + 1] || fieldsForDynamicControls(listMeta)[0] || { fieldName: "Title" };
+    const variable = String(filter.binding || filter.attrs?.binding || `__filter_filter_${field.displayName || field.fieldName}`).replace(/^__filter_/, "");
+    filter.binding = `__filter_${variable}`;
+    filter.attrs = {
+      ...(filter.attrs || {}),
+      data: {
+        ...(filter.attrs?.data || {}),
+        list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) },
+        field: field.fieldName,
+        filter: [],
+      },
+      display_f: field.fieldName,
+      value_f: field.fieldName,
+      placeholder: filter.attrs?.placeholder || field.displayName || field.fieldName,
+    };
+    return {
+      key: deterministicUuid(`${listMeta.listName}:${field.fieldName}:${variable}:left-panel-filter`),
+      pre: "and",
+      left: field.fieldName,
+      op: "0",
+      right: [{ exprType: "variable", valueType: "string", id: `__filter_${variable}`, type: "expr", name: variable }],
+      showCus: false,
+      sourceFilterId: filter.id || variable,
+    };
+  });
+}
+
+function mapMasterDetailFilterControls(resource, listMeta, rootListSetId) {
+  for (const search of findDescendants(resource, (node) => String(node?.type || "") === "search-filter")) {
+    search.attrs = {
+      ...(search.attrs || {}),
+      placeholder: typeof search.attrs?.placeholder === "string" ? search.attrs.placeholder : `Search ${listMeta.listName}`,
+      data: {
+        ...(search.attrs?.data || {}),
+        list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) },
+        field: primaryFieldName(listMeta),
+      },
+    };
+  }
+}
+
+function ensureMasterDetailSelectionAction(actions) {
+  const out = Array.isArray(actions) ? clone(actions) : [];
+  const text = JSON.stringify(out);
+  if (/vCurrentItemID/.test(text) && /ListDataID/.test(text)) return out;
+  out.push({
+    id: "select-current-item",
+    name: "Select current item",
+    type: "coll",
+    steps: [{
+      type: "setvar",
+      attrs: {
+        setvar_var: { exprType: "variable", valueType: "string", id: "__temp_vCurrentItemID", type: "expr", name: "vCurrentItemID" },
+        setvar_val: [{ exprType: "variable_ctx", valueType: "input", id: "ListDataID", ctx: "__ctx_coll", type: "expr", name: "Collection item:Id" }],
+      },
+    }],
+  });
+  return out;
+}
+
+function mapDynamicControlsForList(root, listMeta, rootListSetId) {
+  const bindableFields = fieldsForDynamicControls(listMeta);
+  let dynamicIndex = 0;
+  for (const control of findDescendants(root, (node) => String(node?.type || "").startsWith("dynamic-"))) {
+    const field = selectFieldForDynamicControl(control, bindableFields, dynamicIndex);
+    dynamicIndex += 1;
+    control.type = dynamicControlTypeForField(field);
+    control.attrs = {
+      ...(control.attrs || {}),
+      source: "3",
+      "obj-f": field.fieldName,
+      field: field.fieldName,
+      fieldName: field.fieldName,
+      data: {
+        ...(control.attrs?.data || {}),
+        ListSetID: stringId(rootListSetId),
+        ListID: stringId(listMeta.listId),
+        list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) },
+        field: field.fieldName,
+        fieldName: field.fieldName,
+      },
+    };
+    control.field = field.fieldName;
+    control.FieldName = field.fieldName;
+    if (control.type === "dynamic-user") {
+      control.attrs.user = {
+        ...(control.attrs.user || {}),
+        field: field.fieldName,
+        fieldName: field.fieldName,
+      };
+    }
+    control.name = field.displayName;
+    control.title = field.displayName;
+    control.label = field.displayName;
+  }
 }
 
 function instantiateDashboardControlUuids(resource, pageSeed) {
@@ -2236,14 +2522,38 @@ function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar, p
 }
 
 function materializeDashboardKpiCards(resource, kpiContracts = []) {
-  const wrapper = findFirstByIdentity(resource, "kpi_metrics_wrapper") || findFirstByIdentity(resource, "kpi_cards_wrapper");
-  if (!wrapper) return;
+  const wrappers = findDescendants(resource, (node) => [
+    "kpi_metrics_wrapper",
+    "kpi_cards_wrapper",
+    "kpi_cards_kpi_row",
+    "kpi_cards_kpi_column",
+  ].some((identity) => hasIdentity(node, identity)));
+  if (!wrappers.length) return;
+  let activeWrapperUsed = false;
+  const processedWrappers = [];
+  for (const wrapper of wrappers) {
+    if (processedWrappers.some((parent) => nodeContains(parent, wrapper))) continue;
+    const contracts = activeWrapperUsed ? [] : kpiContracts;
+    materializeDashboardKpiCardsInWrapper(wrapper, contracts);
+    if (contracts.length) activeWrapperUsed = true;
+    processedWrappers.push(wrapper);
+  }
+}
+
+function materializeDashboardKpiCardsInWrapper(wrapper, kpiContracts = []) {
   const cardIds = ["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"];
   const allowedKeys = new Set(kpiContracts.map((contract) => contract.key));
+  let workbenchKpiIndex = 0;
   const prune = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       prune(child);
+      if (hasIdentity(child, "kpi_card_wrapper")) {
+        const contract = kpiContracts[workbenchKpiIndex++];
+        if (!contract) return false;
+        materializeWorkbenchKpiCard(child, contract);
+        return true;
+      }
       const matchedCardId = cardIds.find((id) => hasIdentity(child, id));
       if (!matchedCardId) return true;
       const key = matchedCardId.replace("event_portfolio_kpi_", "");
@@ -2251,6 +2561,35 @@ function materializeDashboardKpiCards(resource, kpiContracts = []) {
     });
   };
   prune(wrapper);
+}
+
+function nodeContains(root, target) {
+  return findDescendants(root, (node) => node === target).length > 0;
+}
+
+function materializeWorkbenchKpiCard(card, contract) {
+  card.generatedKpiRuntimeBound = true;
+  card.attrs = {
+    ...(card.attrs || {}),
+    generatedKpiRuntimeBound: true,
+  };
+  const title = findFirstByIdentity(card, "kpi_card_summary_title");
+  if (title) setHeadingText(title, contract.label);
+  const value = findFirstByIdentity(card, "kpi_card_summary_value");
+  if (value) {
+    setHeadingText(value, "0");
+    value.attrs = {
+      ...(value.attrs || {}),
+      headc: {
+        ...(value.attrs?.headc || {}),
+        title: {
+          ...(value.attrs?.headc?.title || {}),
+          value: "0",
+          variable: [summarySaveVariable(contract.tempVar)],
+        },
+      },
+    };
+  }
 }
 
 function normalizeDashboardFilters({ filters, listMeta, dashboardName }) {
@@ -3029,9 +3368,9 @@ function replaceUserLikeDynamicFieldText(control, replacement) {
 
 function selectFieldForDynamicControl(control, fields, index) {
   const type = String(control?.type || "");
-  if (type === "dynamic-user") return fields.find((field) => dynamicControlTypeForField(field) === "dynamic-user") || fields[index % fields.length] || fields[0];
-  if (type === "dynamic-image") return fields.find((field) => dynamicControlTypeForField(field) === "dynamic-image") || fields[index % fields.length] || fields[0];
-  if (type === "dynamic-file") return fields.find((field) => dynamicControlTypeForField(field) === "dynamic-file") || fields[index % fields.length] || fields[0];
+  const expectedType = ["dynamic-user", "dynamic-image", "dynamic-file"].includes(type) ? type : "dynamic-field";
+  const compatible = fields.filter((field) => dynamicControlTypeForField(field) === expectedType);
+  if (compatible.length) return compatible[index % compatible.length];
   return fields[index % fields.length] || fields[0];
 }
 
@@ -3371,7 +3710,22 @@ function removeEmptyBusinessSections(root) {
 }
 
 function removeEmptyDashboardBusinessSections(root) {
-  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper"]);
+  const removableWrappers = new Set([
+    "content_card_wrapper",
+    "content_card_60_wrapper",
+    "content_card_40_wrapper",
+    "1_columns_section",
+    "2_columns_section",
+    "3_columns_section",
+    "2_columns_60/40_section",
+    "1_row_section",
+    "2_rows_section",
+    "3_rows_section",
+    "chart_cards_section",
+    "dashboard_standard_filter_group",
+    "right_side_panel",
+    "kpi_metrics_wrapper",
+  ]);
   const visit = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
@@ -3408,6 +3762,7 @@ function hasMeaningfulBusinessContent(node) {
     if (control?.approvalFormNoFieldsNotice === true) return true;
     if (["collection", "data-list", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(control)) return true;
+    if (hasIdentity(control, "kpi_card_wrapper") && (control.generatedKpiRuntimeBound === true || control.attrs?.generatedKpiRuntimeBound === true)) return true;
     if (["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"].some((identity) => hasIdentity(control, identity))) return true;
     if (hasIdentity(control, "form_grid_fields_wrapper")) return true;
     if (hasIdentity(control, "form_grid_fields_2col_wrapper")) return true;
@@ -3627,8 +3982,17 @@ function buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName
   const dashboardItems = pages.map((page) => ({ Title: page.Title, Type: 103, Target: page.Title, ListID: page.LayoutID, LayoutID: page.LayoutID, Icon: inferNavigationIcon({ title: page.Title, type: 103 }) }));
   const formItems = forms.map((form) => ({ Title: form.Name, Type: 105, Target: form.Name, ListID: form.Key, Icon: inferNavigationIcon({ title: form.Name, type: 105 }) }));
   const listItems = planDemand.resources.dataLists.map((name) => ({ Title: name, Type: 1, Target: name, ListID: dataListByName.get(normKey(name)), Icon: inferNavigationIcon({ title: name, type: 1 }) }));
+  const dataListViewItems = (planDemand.dataListViewRecords || []).map((record) => ({
+    Title: record.viewName,
+    Type: 1,
+    Target: record.viewName,
+    ListID: dataListByName.get(normKey(record.listName)),
+    SourceListName: record.listName,
+    Ext1: { Url: record.routeKey || slugify(record.viewName), ViewName: record.viewName },
+    Icon: inferNavigationIcon({ title: record.viewName, type: 1 }),
+  })).filter((item) => item.ListID);
   const reportItems = planDemand.resources.formReports.map((name) => ({ Title: name, Type: 105, Target: name, ListID: forms[0]?.Key || "", Icon: inferNavigationIcon({ title: name, type: 105 }) }));
-  const allItems = dashboardItems.concat(formItems, listItems, reportItems);
+  const allItems = dashboardItems.concat(formItems, listItems, dataListViewItems, reportItems);
   const itemsByGroup = planDemand.navigationItemsByGroup || {};
   const targetByName = new Map(allItems.flatMap((item) => [[normKey(item.Target), item], [normKey(item.Title), item]]));
   const sort = groups.map((groupName, index) => ({
@@ -3661,6 +4025,8 @@ function toRuntimeNavigationItem(item, rootListId) {
     ListSetID: stringId(rootListId),
     Icon: normalizeFontAwesomeIcon(item.Icon) || inferNavigationIcon({ title: item.Title, type: item.Type }),
   };
+  if (item.Ext1) out.Ext1 = item.Ext1;
+  if (item.SourceListName) out.SourceListName = item.SourceListName;
   if (String(item.Type) === "103") out.LayoutID = stringId(item.LayoutID || item.ListID || "");
   return out;
 }
