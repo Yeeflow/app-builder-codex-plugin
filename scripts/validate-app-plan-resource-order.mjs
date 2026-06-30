@@ -195,6 +195,8 @@ const APPROVED_DATA_ANALYTICS_TEMPLATE_IDS = new Set([
 const APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
   "dashboard-page-layouts-v1.1",
   "dashboard-page-layouts-workbench",
+  "dashboard-page-layouts-two-panel-workspace",
+  "dashboard-page-layouts-three-panel-workspace",
   "dashboard-page-layout-templates",
 ]);
 

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.93
+
+- Release Dashboard master-detail workspace page layout templates from PR #326.
+- Register `dashboard-page-layouts-two-panel-workspace` and `dashboard-page-layouts-three-panel-workspace` as approved Dashboard page layout golden references for Outlook-style dataset management pages.
+- Preserve the export-derived left dataset panel, selected-item `vCurrentItemID` temp-variable contract, right current-item Collection limit/filter contract, empty-selection state, page actions, field grids, related-content working areas, and optional chart-card regions.
+- Require create/add actions only for create-capable Data List or Document Library sources, while read-only/reporting sources such as Form Report and Data Report must omit the add button.
+- Align App Plan resource-order validation so approved master-detail layout template IDs are not misclassified as fake placeholder IDs.
+- Add focused regression coverage for two-panel and three-panel layout registry entries, editable-slot rules, locked template regions, empty-section cleanup, Data Analytics placement, and source/dist mirrors.
+
 ## 0.8.92
 
 - Release E2E helper path, title, and install reporting alignment from PR #324.
