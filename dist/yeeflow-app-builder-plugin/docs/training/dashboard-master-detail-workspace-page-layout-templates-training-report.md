@@ -57,6 +57,14 @@ The generated page must preserve the master-detail binding:
 - `current_item_wrapper` must limit records to `1`.
 - `current_item_wrapper` must filter record ID by `vCurrentItemID`.
 
+The left-panel item title contract is also mandatory:
+
+- `left_panel_data_item_space_between` must contain `left_panel_data_item_title`.
+- `left_panel_data_item_title` is the selected source dataset's subject/title display for each Collection item.
+- It may be mapped to Dynamic user or Dynamic field according to the bound source field type.
+- The default date wrapper/value controls are named `left_panel_data_item_date_wrapper` and `left_panel_data_item_date_value`.
+- The date value must keep an export-shaped Yeeflow expression binding; raw formula strings such as `iif(dateDiff(...))` must not be visible text.
+
 ## Editable Empty-Selection State
 
 The user clarified that the empty-selection region is editable business content and applies to both templates:

@@ -114,6 +114,14 @@ All other template controls, page temp variables, form actions, layout relations
 
 ## Field Display Rules
 
+The left-panel record item title is mandatory in both workspace templates:
+
+- `left_panel_data_item_space_between` must contain `left_panel_data_item_title`.
+- `left_panel_data_item_title` displays the current Collection item subject/title field.
+- The title control may be a Dynamic user or Dynamic field control depending on the chosen source field type, but the semantic `nv_label`/`nav_label` value must remain `left_panel_data_item_title`.
+- The default date metadata controls inside `left_panel_data_item_space_between` must use `left_panel_data_item_date_wrapper` and `left_panel_data_item_date_value` when retained.
+- Date/age text must use Yeeflow expression binding, not a visible literal formula string.
+
 Use `current_item_fields_grid` for selected-record fields. Standard short fields use `current_item_standard_field` and occupy one grid cell. Large or media fields use `current_item_large_field`, including Multiple line, Rich text, Image, and Attachment/File fields.
 
 When `current_item_large_field` appears inside `current_item_fields_grid`, its column span must equal the parent grid column count at each breakpoint. Column span must never exceed the parent grid column count.

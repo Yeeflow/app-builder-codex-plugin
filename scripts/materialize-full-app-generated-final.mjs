@@ -2456,6 +2456,8 @@ function mapDynamicControlsForList(root, listMeta, rootListSetId) {
     control.name = field.displayName;
     control.title = field.displayName;
     control.label = field.displayName;
+    const navLabel = `collection_item_${slugify(field.displayName || field.fieldName || "field")}`.replace(/-/g, "_");
+    setSemanticNavigatorLabel(control, navLabel);
   }
 }
 
@@ -3648,6 +3650,8 @@ function normalizeGeneratedDashboardControls(resource, pageName) {
       const identity = firstMeaningfulIdentity(node);
       if (!identity) node.name = `${pageName} ${node.type} ${index}`;
       else if (isDefaultNavigatorName(node.name) && isDefaultNavigatorName(node.attrs?.nav_label) && isDefaultNavigatorName(node.attrs?.nv_label)) node.name = identity;
+      const semanticLabel = semanticNavigatorLabel(node, pageName, index);
+      if (semanticLabel) setSemanticNavigatorLabel(node, semanticLabel);
       if (String(node.type) === "heading" && String(node.label || "") === "Text") {
         node.attrs = node.attrs || {};
         node.attrs.heads = node.attrs.heads || {};
@@ -3655,12 +3659,80 @@ function normalizeGeneratedDashboardControls(resource, pageName) {
         if (typeof node.attrs.heads.color !== "string" || !node.attrs.heads.color.trim()) node.attrs.heads.color = "#1f2937";
         node.attrs.headc = node.attrs.headc || {};
         node.attrs.headc.title = node.attrs.headc.title || { value: node.name || pageName };
+        normalizeVisibleTextExpression(node, pageName, index);
         if (node.attrs.headc.title.value === undefined && node.attrs.headc.title.variable === undefined) node.attrs.headc.title.value = node.name || pageName;
       }
     }
     for (const child of Array.isArray(node.children) ? node.children : []) visit(child);
   };
   visit(resource);
+}
+
+function semanticNavigatorLabel(control, pageName, index) {
+  const existing = firstMeaningfulIdentity(control);
+  if (existing) return slugifyNavigatorLabel(existing);
+  const text = firstVisibleTextValue(control);
+  if (text && !looksLikeRawVisibleExpression(text)) return slugifyNavigatorLabel(text);
+  const field = String(
+    control?.attrs?.data?.fieldName
+    || control?.attrs?.data?.field
+    || control?.attrs?.fieldName
+    || control?.attrs?.field
+    || control?.fieldName
+    || control?.FieldName
+    || control?.field
+    || "",
+  );
+  if (field) return slugifyNavigatorLabel(`${control.type || "control"} ${field}`);
+  return slugifyNavigatorLabel(`${pageName} ${control.type || "control"} ${index}`);
+}
+
+function setSemanticNavigatorLabel(control, label) {
+  if (!control || !label) return;
+  const normalized = slugifyNavigatorLabel(label);
+  control.attrs = control.attrs || {};
+  if (isDefaultNavigatorName(control.nv_label)) control.nv_label = normalized;
+  if (isDefaultNavigatorName(control.nav_label)) control.nav_label = normalized;
+  if (isDefaultNavigatorName(control.attrs.nv_label)) control.attrs.nv_label = normalized;
+  if (isDefaultNavigatorName(control.attrs.nav_label)) control.attrs.nav_label = normalized;
+}
+
+function slugifyNavigatorLabel(value) {
+  return slugify(value).replace(/-/g, "_");
+}
+
+function normalizeVisibleTextExpression(control, pageName, index) {
+  const title = control?.attrs?.headc?.title;
+  if (!title || title.variable !== undefined || typeof title.value !== "string") return;
+  if (!looksLikeRawVisibleExpression(title.value)) return;
+  const replacement = labelFromRawVisibleExpression(title.value) || firstMeaningfulIdentity(control) || `${pageName} text ${index}`;
+  title.value = replacement;
+  control.name = replacement;
+  control.title = replacement;
+  control.label = control.label && !isDefaultNavigatorName(control.label) ? control.label : "Text";
+  setSemanticNavigatorLabel(control, replacement);
+}
+
+function firstVisibleTextValue(control) {
+  return [
+    control?.attrs?.headc?.title?.value,
+    control?.attrs?.title?.value,
+    control?.value,
+    control?.text,
+    control?.title,
+    control?.name,
+  ].find((value) => typeof value === "string" && value.trim()) || "";
+}
+
+function looksLikeRawVisibleExpression(value) {
+  return /\b(?:iif|dateDiff|dateAdd|formatDate|formatNumber|concat|substring|contains|ifempty)\s*\(/i.test(String(value || ""))
+    || /Collection item:/i.test(String(value || ""));
+}
+
+function labelFromRawVisibleExpression(value) {
+  const match = String(value || "").match(/Collection item:([A-Za-z0-9 _-]+)/i);
+  if (!match) return "";
+  return match[1].replace(/\b(now|day|hour|minute|month|year)\b.*$/i, "").trim() || "";
 }
 
 function firstMeaningfulIdentity(control) {
