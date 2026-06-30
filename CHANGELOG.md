@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.96
+
+- Release page-scoped template dependency namespace and Service Tickets E2E regression hardening from PR #334.
+- Rename copied golden-reference filter variables, temp variables, and form actions per generated page/form so multiple templates on the same Dashboard, Data List form, Approval form, Task form, or print page cannot collide at runtime.
+- Preserve planned Service Tickets field contracts, including `Status | Text5` select fields and User/person fields as identity-picker controls with schema-safe Text-backed storage keys.
+- Parse Dashboard page names only from real Dashboard page records so support subsections such as `Summary Metrics`, `Dashboard Filters`, `Data Analytics`, and `Data Tables` do not materialize as unplanned Dashboard pages.
+- Attach custom Data List forms to the explicit host list from App Plan rows, and prevent comments/attachments/supporting-list View Item forms from inheriting unplanned Dashboard KPI rows or source-template title-only sections.
+- Scrub source-template business residue such as `Office Asset`, `Active Loan Pipeline`, `current loan volume`, and `return activity signal` from generated Service Tickets-style Dashboard and custom form resources before signing readiness.
+
 ## 0.8.95
 
 - Release Dashboard navigator-label, expression-binding, and business-residue cleanup hardening from PR #332.

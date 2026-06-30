@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.95`
+`0.8.96`
+
+Version `0.8.96` releases page-scoped template dependency namespace and Service Tickets E2E regression hardening from PR #334. Generated Dashboard pages, custom Data List forms, Approval forms, workflow task forms, and print pages rename copied golden-reference filter variables, temp variables, and form actions per surface so multiple templates on the same page cannot collide. Full-app materialization now preserves planned Service Tickets `Status | Text5` select fields and identity-picker field semantics with schema-safe Text-backed storage, rejects support subsections such as `Summary Metrics` as standalone Dashboard pages, attaches custom Data List forms to their explicit host lists, and removes Office Asset/loan source-template residue from Service Tickets-style Dashboard and View Item resources before signing readiness.
 
 Version `0.8.95` releases Dashboard navigator-label, expression-binding, and business-residue cleanup hardening from PR #332. Generated master-detail workspace pages recursively assign business-specific `nv_label` / `nav_label` metadata inside copied Collection item templates, reject visible raw formula strings in Dashboard text controls, remove source-template loan/Office Asset copy from Service Tickets-style pages, prune optional `section_title_area` modules when both `section_title_header` and configured `Operations` are absent, and prevent supporting custom Data List View forms from inheriting unplanned KPI rows or title-only copied sections before signing readiness.
 
