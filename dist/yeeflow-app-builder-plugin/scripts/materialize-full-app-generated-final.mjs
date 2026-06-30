@@ -2788,6 +2788,122 @@ function mergePageDependencies(dependencies) {
   };
 }
 
+function prepareTemplatePageDependencies(pageDependencies, replacements, scopePrefix) {
+  const replaced = {
+    tempVars: replaceCollectionTemplatePlaceholders(pageDependencies.tempVars || [], replacements),
+    filterVars: replaceCollectionTemplatePlaceholders(pageDependencies.filterVars || [], replacements),
+    actions: replaceCollectionTemplatePlaceholders(pageDependencies.actions || [], replacements),
+    formAction: replaceCollectionTemplatePlaceholders(pageDependencies.formAction || [], replacements),
+  };
+  const maps = buildTemplateDependencyNameMaps(replaced, scopePrefix);
+  return {
+    dependencies: applyDependencyNameMaps(replaced, maps),
+    maps,
+  };
+}
+
+function buildTemplateDependencyNameMaps(pageDependencies, scopePrefix) {
+  const maps = {
+    filterVars: new Map(),
+    tempVars: new Map(),
+    actions: new Map(),
+    formAction: new Map(),
+  };
+  for (const item of normalizeDependencyArray(pageDependencies.filterVars)) {
+    const name = dependencyName(item);
+    if (name) maps.filterVars.set(name, scopedDependencyName("filter", name, scopePrefix));
+  }
+  for (const item of normalizeDependencyArray(pageDependencies.tempVars)) {
+    const name = dependencyName(item);
+    if (name) maps.tempVars.set(name, scopedDependencyName("temp", name, scopePrefix));
+  }
+  for (const item of normalizeDependencyArray(pageDependencies.actions)) {
+    const name = dependencyName(item);
+    if (name) maps.actions.set(name, scopedDependencyName("action", name, scopePrefix));
+  }
+  for (const item of normalizeDependencyArray(pageDependencies.formAction)) {
+    const name = dependencyName(item);
+    if (name) maps.formAction.set(name, scopedDependencyName("formAction", name, scopePrefix));
+  }
+  return maps;
+}
+
+function dependencyName(item) {
+  return String(item?.name || item?.key || item?.id || item?.ID || "").trim();
+}
+
+function scopedDependencyName(kind, name, scopePrefix) {
+  const raw = String(name || "").trim();
+  const scope = slugify(scopePrefix || "template").replace(/-/g, "_").slice(0, 44) || "template";
+  if (!raw) return raw;
+  if (kind === "filter") {
+    const suffix = raw.replace(/^__filter_/, "").replace(/^filter_/, "") || "value";
+    const normalizedSuffix = safeDependencyIdentifier(suffix, { lower: true }) || "value";
+    return `filter_${scope}_${normalizedSuffix}`;
+  }
+  if (kind === "temp") {
+    const suffix = raw.replace(/^__temp_/, "").replace(/^var_/, "") || "value";
+    const normalizedSuffix = safeDependencyIdentifier(suffix) || "value";
+    return `var_${scope}_${normalizedSuffix}`;
+  }
+  const normalizedName = safeDependencyIdentifier(raw) || "action";
+  return `${scope}_${normalizedName}`;
+}
+
+function safeDependencyIdentifier(value, options = {}) {
+  const raw = options.lower ? String(value || "").toLowerCase() : String(value || "");
+  return raw.replace(/[^A-Za-z0-9_]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function applyDependencyNameMaps(value, maps) {
+  const visit = (node) => {
+    if (typeof node === "string") return rewriteDependencyString(node, maps);
+    if (Array.isArray(node)) {
+      for (let index = 0; index < node.length; index += 1) node[index] = visit(node[index]);
+      return node;
+    }
+    if (!node || typeof node !== "object") return node;
+    for (const key of Object.keys(node)) {
+      const mappedKey = rewriteDependencyObjectKey(key, maps);
+      const nextValue = visit(node[key]);
+      if (mappedKey !== key) {
+        delete node[key];
+        node[mappedKey] = nextValue;
+      } else {
+        node[key] = nextValue;
+      }
+    }
+    return node;
+  };
+  return visit(clone(value));
+}
+
+function rewriteDependencyObjectKey(key, maps) {
+  for (const map of [maps.actions, maps.formAction, maps.filterVars, maps.tempVars]) {
+    if (map.has(key)) return map.get(key);
+  }
+  return key;
+}
+
+function rewriteDependencyString(value, maps) {
+  let out = value;
+  for (const [oldName, newName] of maps.filterVars) {
+    if (out === oldName) out = newName;
+    out = out.split(`__filter_${oldName}`).join(`__filter_${newName}`);
+  }
+  for (const [oldName, newName] of maps.tempVars) {
+    if (out === oldName) out = newName;
+    out = out.split(`__temp_${oldName}`).join(`__temp_${newName}`);
+  }
+  for (const [oldName, newName] of maps.actions) {
+    if (out === oldName) out = newName;
+  }
+  for (const [oldName, newName] of maps.formAction) {
+    if (out === oldName) out = newName;
+  }
+  return out;
+}
+
 function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, instanceIndex, rootListSetId }) {
   const reference = dataAnalyticsReference(record.selectedTemplateId);
   const template = JSON.parse(fs.readFileSync(DATA_ANALYTICS_TEMPLATE_PATHS[record.selectedTemplateId], "utf8"));
@@ -3106,6 +3222,15 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   const template = loadCollectionTemplate(templateId);
   const root = clone(template?.templateResource?.rootContainer || {});
   reinstantiateTemplateUuidValues(root);
+  const dependencyScope = `${dashboardName}_${datasetRegion || listName || templateId}_${collectionId}`;
+  const scopedPageDependencies = prepareTemplatePageDependencies(
+    template.pageLevelDependencies || {},
+    { rootListSetId, listId, detailLayoutId },
+    dependencyScope,
+  );
+  const scopedRoot = applyDependencyNameMaps(root, scopedPageDependencies.maps);
+  Object.keys(root).forEach((key) => delete root[key]);
+  Object.assign(root, scopedRoot);
   root.id = `${collectionId}_${slugify(templateId)}_wrapper`;
   root.name = datasetRegion;
   root.datasetRegion = datasetRegion;
@@ -3230,13 +3355,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     listId,
     detailLayoutId,
   });
-  const pageDependencies = template.pageLevelDependencies || {};
-  root.pageLevelDependencies = {
-    tempVars: replaceCollectionTemplatePlaceholders(pageDependencies.tempVars || [], { rootListSetId, listId, detailLayoutId }),
-    filterVars: replaceCollectionTemplatePlaceholders(pageDependencies.filterVars || [], { rootListSetId, listId, detailLayoutId }),
-    actions: replaceCollectionTemplatePlaceholders(pageDependencies.actions || [], { rootListSetId, listId, detailLayoutId }),
-    formAction: replaceCollectionTemplatePlaceholders(pageDependencies.formAction || [], { rootListSetId, listId, detailLayoutId }),
-  };
+  root.pageLevelDependencies = scopedPageDependencies.dependencies;
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
   return root;
 }

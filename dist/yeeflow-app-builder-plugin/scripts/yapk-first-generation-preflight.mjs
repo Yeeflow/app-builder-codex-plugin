@@ -130,6 +130,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     "--package",
     resolvedPackage,
   ]));
+  gates.push(runGate("page-scope-template-dependencies", [
+    "scripts/validate-page-scope-template-dependencies.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("dashboard-generation-hard-gates", [
     "scripts/validate-dashboard-generation-hard-gates.mjs",
     "--package",

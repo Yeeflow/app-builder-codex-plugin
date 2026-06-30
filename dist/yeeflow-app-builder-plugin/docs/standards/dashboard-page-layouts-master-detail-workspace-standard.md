@@ -44,6 +44,8 @@ The master-detail runtime contract is mandatory:
 - `current_item_wrapper` must filter the source record ID by `vCurrentItemID`.
 - The empty-selection state `content_panel_empty` is shown when no record is selected.
 
+`vCurrentItemID` is the page-layout shell contract only. Component templates inserted into the page must not reuse the shell's filter variables, temp variables, action names, or form action names unless they are intentionally part of this shell contract. When adding Collection, Data Table, Data Analytics, KPI/Summary, or filter-group templates inside a master-detail workspace page, namespace every template-owned `filterVars`, `tempVars`, `actions`, and `formAction` entry by page and region before merging them into the host Dashboard, and rewrite every in-template `__filter_...`, `__temp_...`, and action reference. A generated master-detail workspace Dashboard must not contain two value-producing Data Filter/Search controls bound to the same filter variable; for example, the layout's left-panel Search filter and an inserted Collection template's Search filter must not both use `filter_keywords`.
+
 The empty-selection state is editable business content:
 
 - `content_panel_empty_image` may be replaced with a domain-appropriate empty-state image while preserving the Picture control style.
