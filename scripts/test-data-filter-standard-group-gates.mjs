@@ -17,6 +17,7 @@ try {
   expectPass("registry validates", ["--registry"]);
   expectPass("single loose data filter passes", ["--resource", writeJson("single-filter.json", pageResource({ singleLoose: true })), "--surface", "dashboard"]);
   expectPass("dashboard filters inside standard group pass", ["--resource", writeJson("dashboard-filter-group.json", pageResource()), "--surface", "dashboard"]);
+  expectPass("master-detail workspace left panel filter groups pass", ["--resource", writeJson("master-detail-left-panel-filters.json", masterDetailWorkspaceResource()), "--surface", "dashboard"]);
   expectPass("data-list form filters inside standard group pass", ["--resource", writeJson("data-list-form-filter-group.json", pageResource()), "--surface", "data-list-form"]);
   expectPass("approval task filters inside standard group pass", ["--resource", writeJson("approval-task-filter-group.json", pageResource()), "--surface", "approval-form-task"]);
   expectPass("package with dashboard, data-list form, and approval task filter groups passes", ["--package", writeYapk("valid-filter-groups.yapk", { includeAllSurfaces: true })]);
@@ -24,6 +25,7 @@ try {
   expectCode("multiple loose filters fail", ["--resource", writeJson("loose-filters.json", pageResource({ loose: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_REQUIRED_FOR_MULTIPLE_FILTERS");
   expectCode("one filter outside group fails when multiple filters exist", ["--resource", writeJson("mixed-filters.json", pageResource({ mixed: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_FILTER_OUTSIDE_GROUP");
   expectCode("mutated group gap fails", ["--resource", writeJson("mutated-gap.json", pageResource({ mutateGap: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_GAP_INVALID");
+  expectCode("left panel filter group with more than two filters fails", ["--resource", writeJson("left-panel-too-many-filters.json", masterDetailWorkspaceResource({ tooManyFilters: true })), "--surface", "dashboard"], "DATA_FILTER_LEFT_PANEL_GROUP_TOO_MANY_FILTERS");
   expectCode("child scalar label layout fails", ["--resource", writeJson("bad-lablay.json", pageResource({ badLablay: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_CHILD_LABEL_LAYOUT_INVALID");
   expectCode("child missing fixed width fails", ["--resource", writeJson("bad-width.json", pageResource({ badWidth: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_CHILD_FIXED_WIDTH_MISSING");
 
@@ -31,6 +33,41 @@ try {
 } catch (error) {
   results.push({ name: "unexpected test harness error", status: "fail", error: error.message });
   printSummary(1);
+}
+
+function masterDetailWorkspaceResource(options = {}) {
+  const leftPanelGroup = {
+    type: "container",
+    nv_label: "left_panel_filter_group",
+    children: [
+      dataFilter("status_filter", "radio-filter"),
+      dataFilter("priority_filter", "radio-filter"),
+      ...(options.tooManyFilters ? [dataFilter("category_filter", "radio-filter")] : []),
+    ],
+  };
+  return {
+    type: "page",
+    derivedFromDashboardPageLayoutTemplate: "dashboard-page-layouts-two-panel-workspace",
+    attrs: { dashboardPageLayoutTemplateId: "dashboard-page-layouts-two-panel-workspace" },
+    children: [
+      {
+        type: "container",
+        nv_label: "main",
+        children: [
+          {
+            type: "container",
+            nv_label: "left_panel",
+            children: [leftPanelGroup],
+          },
+          {
+            type: "container",
+            nv_label: "content_panel",
+            children: [],
+          },
+        ],
+      },
+    ],
+  };
 }
 
 function expectPass(name, args) {

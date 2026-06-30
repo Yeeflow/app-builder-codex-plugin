@@ -566,6 +566,9 @@ function validateControlledSlotsAndRepeatableModules(resource, findings, context
     if (entry.insideBusinessSlot) continue;
     const ids = identityCandidates(control);
     if (!ids.length) continue;
+    if (isMasterDetailWorkspaceTemplate(context.template) && isMasterDetailRuntimeShellIdentity(control)) {
+      continue;
+    }
     if (isAllowedBusinessSlot(control, rules)) {
       validateTemplateRootStructure(control, templateIndex, findings, context.page);
       validateSpecialModuleChildren(control, findings, context.page);
@@ -594,6 +597,33 @@ function validateControlledSlotsAndRepeatableModules(resource, findings, context
     }
     if (knownIdentity) validateTemplateRootStructure(control, templateIndex, findings, context.page);
   }
+}
+
+function isMasterDetailWorkspaceTemplate(template) {
+  return MASTER_DETAIL_WORKSPACE_TEMPLATE_IDS.has(template?.id);
+}
+
+function isMasterDetailRuntimeShellIdentity(control) {
+  return hasAnyIdentity(control, [
+    "left_panel",
+    "left_panel_caption",
+    "left_panel_caption_title",
+    "left_panel_caption_search_filter",
+    "left_panel_caption_add_button",
+    "left_panel_filter_group",
+    "left_panel_filter_control",
+    "left_panel_data_items_wrapper",
+    "left_panel_data_item",
+    "content_panel",
+    "content_panel_empty",
+    "content_panel_empty_image",
+    "content_panel_empty_title",
+    "content_panel_empty_description",
+    "content_panel_current_item_wrapper",
+    "current_item_wrapper",
+    "current_item_wrapper_content",
+    "current_item_wrapper_item",
+  ]);
 }
 
 function buildTemplateStructureIndex(templateResource) {
@@ -790,6 +820,9 @@ function validateDataControls(page, listIndex, findings) {
       findings.push(error("DASH_LAYOUT_USER_FIELD_DYNAMIC_FIELD", "User/identity fields must render with dynamic-user, not dynamic-field.", { page: page.title, pointer: entry.pointer }));
     }
     if (["select-filter", "radio-filter", "checkbox-filter"].includes(control?.type)) {
+      if (isMasterDetailWorkspaceResource(page.resource) && isMasterDetailLeftPanelFilter(entry, page)) {
+        continue;
+      }
       const data = control?.attrs?.data || {};
       if (!present(control?.binding) && !present(control?.attrs?.save_var) && !present(control?.attrs?.filterVar)) {
         findings.push(error("DASH_LAYOUT_DATA_FILTER_VARIABLE_MISSING", "Data Filters must bind to valid variables.", { page: page.title, pointer: entry.pointer }));
@@ -809,6 +842,16 @@ function validateDataControls(page, listIndex, findings) {
       findings.push(error("DASH_LAYOUT_MODEL_CONTROL_UNPROVEN", "Summary/chart/model controls may be used only when their runtime model contract is export-proven.", { page: page.title, pointer: entry.pointer, type: control.type }));
     }
   }
+}
+
+function isMasterDetailWorkspaceResource(resource) {
+  const identities = identityCandidates(resource);
+  return identities.some((identity) => MASTER_DETAIL_WORKSPACE_TEMPLATE_IDS.has(identity));
+}
+
+function isMasterDetailLeftPanelFilter(entry, page) {
+  if (!hasIdentity(entry.control, "left_panel_filter_control")) return false;
+  return findAncestors(page.resource, entry.control).some((node) => hasIdentity(node, "left_panel_filter_group"));
 }
 
 function validateRuntimeProof(proof, findings) {
@@ -962,6 +1005,25 @@ function findAllByIdentity(root, expected) {
   };
   visit(root);
   return matches;
+}
+
+function findAncestors(root, target) {
+  const out = [];
+  const stack = [];
+  let found = false;
+  const visit = (node) => {
+    if (found || !isObject(node)) return;
+    if (node === target) {
+      out.push(...stack);
+      found = true;
+      return;
+    }
+    stack.push(node);
+    for (const child of asArray(node.children)) visit(child);
+    stack.pop();
+  };
+  visit(root);
+  return out;
 }
 
 function hasIdentity(control, expected) {

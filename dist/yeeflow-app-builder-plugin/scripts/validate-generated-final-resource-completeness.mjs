@@ -114,12 +114,13 @@ function parseAppPlan(file) {
     customForms: parseCustomForms(text),
     dataListWorkflows: parseTableItems(text, /^##\s+11\.\s+Data List Workflows Plan/i, "Workflow Name", "DataListWorkflows"),
     notifications: parseTableItems(text, /^##\s+12\.\s+Notifications Plan/i, "Notification Name", "Notifications"),
+    dataListViews: parseDataListViews(text),
     dashboards: parseDashboards(text),
     navigation: parseNavigation(text),
     deferred,
     explicitFormsEmptyForbidden: /\bForms:\s*\[\]\s*(?:is|are)?\s*(?:forbidden|not allowed|must not|invalid)/i.test(text),
   };
-  for (const bucket of ["dataLists", "approvalForms", "formReports", "scheduleWorkflows", "customForms", "dataListWorkflows", "notifications", "dashboards"]) {
+  for (const bucket of ["dataLists", "approvalForms", "formReports", "scheduleWorkflows", "customForms", "dataListWorkflows", "notifications", "dataListViews", "dashboards"]) {
     plan[bucket] = plan[bucket].filter((item) => !isPlaceholder(item.name)).map((item) => ({
       ...item,
       deferred: item.deferred || isDeferred(plan.deferred, item.name, item.category || bucket),
@@ -131,6 +132,15 @@ function parseAppPlan(file) {
     items: group.items.filter((item) => !isPlaceholder(item.name)).map((item) => ({ ...item, deferred: isDeferred(plan.deferred, item.name, "navigation") })),
   }));
   return plan;
+}
+
+function parseDataListViews(text) {
+  const section = extractSection(text, /^##\s+13\.\s+Data List Views Plan/i);
+  return parseMarkdownTables(section)
+    .filter((table) => table.headers.includes("View Name") && (table.headers.includes("Data List") || table.headers.includes("List/Library") || table.headers.includes("List")))
+    .flatMap((table) => table.rows.map((row) => plannedItem(row["View Name"], section, row.__index, "dataListViews", {
+      host: row["Data List"] || row["List/Library"] || row.List || "",
+    })));
 }
 
 function parseDataListHeadings(text) {
@@ -534,7 +544,11 @@ function validateNavigationCompleteness(plan, inventory, findings) {
           plannedItem: item.item || item.name,
         }));
       }
-      const resourceExists = inventory.dataLists.concat(inventory.approvalForms, inventory.formReports, inventory.pages).some((resource) => norm(resource.name) === norm(item.name) || norm(resource.name) === norm(item.item));
+      const plannedDataListView = plan.dataListViews.find((view) => norm(view.name) === norm(item.name) || norm(view.name) === norm(item.item));
+      const plannedViewHostExists = plannedDataListView
+        ? inventory.dataLists.some((resource) => norm(resource.name) === norm(plannedDataListView.host))
+        : false;
+      const resourceExists = plannedViewHostExists || inventory.dataLists.concat(inventory.approvalForms, inventory.formReports, inventory.pages).some((resource) => norm(resource.name) === norm(item.name) || norm(resource.name) === norm(item.item));
       if (!resourceExists && !/external|not applicable|deferred/i.test(item.type)) {
         findings.push(error("GENERATED_FINAL_NAVIGATION_TARGET_UNRESOLVED", "Navigation item target does not match any generated dashboard/form/list/report resource.", {
           appPlanReference: ref(item),

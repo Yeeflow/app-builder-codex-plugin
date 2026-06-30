@@ -51,7 +51,10 @@ export function validateDashboardGridTableCollections(options) {
     dataListCount += page.controls.filter((entry) => entry.control.type === "data-list").length;
     const collections = page.controls.filter((entry) => entry.control.type === "collection");
     collectionCount += collections.length;
-    collections.forEach((entry) => validateDashboardCollection(entry, page, { options, detailLayouts, findings }));
+    collections.forEach((entry) => {
+      if (isMasterDetailWorkspaceInternalCollection(entry, page)) return;
+      validateDashboardCollection(entry, page, { options, detailLayouts, findings });
+    });
     if (options.requireGridTableCollections) {
       page.controls.filter((entry) => entry.control.type === "data-list").forEach((entry) => {
         findings.push(error("DASHBOARD_DATA_LIST_USED_WHEN_COLLECTION_REQUIRED", "Dashboard record-list section uses data-list where grid-table Collection is required.", { page: page.title, path: entry.pointer }));
@@ -67,6 +70,29 @@ export function validateDashboardGridTableCollections(options) {
     dataListControls: dataListCount,
     findings,
   };
+}
+
+function isMasterDetailWorkspaceInternalCollection(entry, page) {
+  if (!isMasterDetailWorkspacePage(page.resource)) return false;
+  const identities = [
+    ...identityCandidates(entry.control),
+    ...identityCandidates(entry.parent),
+  ].map(normalizeIdentity);
+  return identities.includes("left_panel_data_items_wrapper")
+    || identities.includes("current_item_wrapper")
+    || entry.control?.attrs?.dashboardPageLayoutInternalCollection === true
+    || entry.control?.dashboardPageLayoutInternalCollection === true;
+}
+
+function isMasterDetailWorkspacePage(resource) {
+  const markers = [
+    resource?.derivedFromDashboardPageLayoutTemplate,
+    resource?.templateMarker,
+    resource?.attrs?.dashboardPageLayoutTemplateId,
+    resource?.attrs?.derivedFromDashboardPageLayoutTemplate,
+  ].map((value) => String(value || "").trim());
+  return markers.includes("dashboard-page-layouts-two-panel-workspace")
+    || markers.includes("dashboard-page-layouts-three-panel-workspace");
 }
 
 function validateDashboardPage(page, context) {
@@ -296,6 +322,35 @@ function isTextLike(control) {
 function hasTitleText(control) {
   const text = JSON.stringify(control || {});
   return /title|dashboard|tasks|portfolio|reports|administration/i.test(text);
+}
+
+function identityCandidates(node) {
+  if (!isObject(node)) return [];
+  return [
+    node.id,
+    node.name,
+    node.label,
+    node.title,
+    node.Title,
+    node.nv_label,
+    node.nav_label,
+    node.attrs?.id,
+    node.attrs?.name,
+    node.attrs?.label,
+    node.attrs?.title,
+    node.attrs?.nv_label,
+    node.attrs?.nav_label,
+    node.attrs?.datasetRegion,
+    node.attrs?.dashboardWorkspaceCollectionRole,
+  ].map((value) => String(value || "").trim()).filter(Boolean);
+}
+
+function normalizeIdentity(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
 }
 
 function fail(code, message, details = {}) {

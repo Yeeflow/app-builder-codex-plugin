@@ -32,6 +32,10 @@ const APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
   "dashboard-page-layouts-two-panel-workspace",
   "dashboard-page-layouts-three-panel-workspace",
 ]);
+const MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
+  "dashboard-page-layouts-two-panel-workspace",
+  "dashboard-page-layouts-three-panel-workspace",
+]);
 const PAGE_LAYOUT_STRUCTURAL_CONTAINER_IDS = new Set([
   "Main",
   "main",
@@ -129,7 +133,7 @@ function validateDecodedDashboards(decoded, findings) {
   const listIndex = buildListIndex(decoded);
   for (const page of collectDashboardPages(decoded)) {
     for (const entry of page.controls) {
-      if (FILTER_TYPES.has(String(entry.control?.type || ""))) validateFilter(entry, page, listIndex, findings);
+      if (FILTER_TYPES.has(String(entry.control?.type || "")) && !isMasterDetailLeftPanelFilter(entry, page)) validateFilter(entry, page, listIndex, findings);
       if (String(entry.control?.type || "") === SEARCH_FILTER_TYPE) validateSearchFilter(entry, page, findings);
       if (String(entry.control?.type || "") === "container") validateContainer(entry, page, findings);
     }
@@ -165,6 +169,7 @@ function validateDashboardBusinessRuntime(page, listIndex, findings) {
   }
 
   for (const filter of filters) {
+    if (isMasterDetailLeftPanelFilter(filter, page)) continue;
     if (!collections.some((collection) => filterConsumedByCollection(filter, collection))) {
       findings.push(error("DASH_FILTER_COLLECTION_BINDING_MISSING", "Every dashboard filter must be consumed by at least one Collection query/filter contract; visual filter controls alone do not prove runtime linkage.", {
         page: page.title,
@@ -358,6 +363,7 @@ function hasActionConfiguration(control) {
 
 function validateIndependentContentCardWrappers(page, collections, findings) {
   for (const collection of collections) {
+    if (isMasterDetailWorkspaceInternalCollection(collection, page)) continue;
     const ancestors = findAncestors(page.resource, collection.control);
     const contentWrappers = ancestors.filter((node) => matchesSemanticId(node, "content_card_wrapper"));
     const approvedGridWrappers = ancestors.filter((node) => matchesSemanticId(node, "Event Pipeline Grid-Table") || matchesSemanticId(node, "campaign_readiness_grid_table_container"));
@@ -408,6 +414,7 @@ function validateDynamicUserFieldTypes(page, listIndex, findings) {
 
 function validateContainer(entry, page, findings) {
   if (isInsideDashboardDatasetTemplate(entry, page)) return;
+  if (isMasterDetailWorkspacePage(page)) return;
   const style = entry.control?.attrs?.style || {};
   const widthtype = style.widthtype;
   if ((widthtype === undefined || widthtype === null) && isApprovedPageLayoutStructuralContainer(entry, page)) return;
@@ -438,6 +445,60 @@ function isApprovedPageLayoutStructuralContainer(entry, page) {
   );
   if (!APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.has(templateId)) return false;
   return [...PAGE_LAYOUT_STRUCTURAL_CONTAINER_IDS].some((identity) => matchesSemanticId(entry.control, identity));
+}
+
+function dashboardPageLayoutTemplateId(page) {
+  return String(
+    page.resource?.derivedFromDashboardPageLayoutTemplate
+    || page.resource?.dashboardPageLayoutTemplateId
+    || page.resource?.templateMarker
+    || page.resource?.attrs?.derivedFromDashboardPageLayoutTemplate
+    || page.resource?.attrs?.dashboardPageLayoutTemplateId
+    || page.resource?.attrs?.templateMarker
+    || ""
+  );
+}
+
+function isMasterDetailWorkspacePage(page) {
+  return MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.has(dashboardPageLayoutTemplateId(page));
+}
+
+function isMasterDetailWorkspaceStructuralContainer(entry, page) {
+  if (!isMasterDetailWorkspacePage(page)) return false;
+  return [
+    "Main",
+    "main",
+    "Content",
+    "content",
+    "left_panel",
+    "left_panel_caption",
+    "left_panel_filter_group",
+    "left_panel_data_items_wrapper",
+    "content_panel",
+    "content_panel_empty",
+    "content_panel_current_item_wrapper",
+    "current_item_wrapper",
+    "current_item_wrapper_content",
+    "current_item_wrapper_item",
+    "primary_working_area",
+    "chart_cards_section",
+    "right_side_panel",
+  ].some((identity) => matchesSemanticId(entry.control, identity));
+}
+
+function isMasterDetailLeftPanelFilter(entry, page) {
+  if (!isMasterDetailWorkspacePage(page)) return false;
+  if (!matchesSemanticId(entry.control, "left_panel_filter_control")) return false;
+  return findAncestors(page.resource, entry.control).some((node) => matchesSemanticId(node, "left_panel_filter_group"));
+}
+
+function isMasterDetailWorkspaceInternalCollection(entry, page) {
+  if (!isMasterDetailWorkspacePage(page)) return false;
+  if (String(entry.control?.type || "").toLowerCase() !== "collection") return false;
+  return matchesSemanticId(entry.control, "left_panel_data_items_wrapper")
+    || matchesSemanticId(entry.control, "current_item_wrapper")
+    || entry.control?.dashboardPageLayoutInternalCollection === true
+    || entry.control?.attrs?.dashboardPageLayoutInternalCollection === true;
 }
 
 function isInsideDashboardDatasetTemplate(entry, page) {

@@ -716,6 +716,11 @@ function validatePackage(packagePath, registryInfo, findings) {
 }
 
 function validateCollectionEntry(entry, page, approvedIds, findings, context = {}) {
+  if (isMasterDetailWorkspaceInternalCollection(entry, page)) {
+    validateCollectionRuntimeBindings(entry, page, findings, context);
+    validateMasterDetailWorkspaceCollection(entry, page, findings);
+    return;
+  }
   validateCollectionSlot(entry, page, findings);
   const provenance = resolveTemplateId(entry, page);
   if (!provenance.templateId) {
@@ -735,6 +740,48 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   if (provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCardMultiselect(entry, page, findings);
   if (provenance.templateId === "collection_control_grid_table_with_multiselect") validateGridMultiselect(entry, page, findings);
   if (provenance.templateId === "Event Pipeline Grid-Table") validateEventPipeline(entry, page, findings);
+}
+
+function isMasterDetailWorkspaceInternalCollection(entry, page) {
+  if (!isMasterDetailWorkspacePage(page)) return false;
+  const identities = [
+    ...identityCandidates(entry.control),
+    ...entry.ancestors.flatMap(identityCandidates),
+  ].map(normalizeIdentity);
+  return identities.includes("left panel data items wrapper")
+    || identities.includes("current item wrapper")
+    || entry.control?.attrs?.dashboardPageLayoutInternalCollection === true
+    || entry.control?.dashboardPageLayoutInternalCollection === true;
+}
+
+function isMasterDetailWorkspacePage(page) {
+  const markers = [
+    page?.resource?.derivedFromDashboardPageLayoutTemplate,
+    page?.resource?.templateMarker,
+    page?.resource?.attrs?.dashboardPageLayoutTemplateId,
+    page?.resource?.attrs?.derivedFromDashboardPageLayoutTemplate,
+  ].map((value) => String(value || "").trim());
+  return markers.includes("dashboard-page-layouts-two-panel-workspace")
+    || markers.includes("dashboard-page-layouts-three-panel-workspace");
+}
+
+function validateMasterDetailWorkspaceCollection(entry, page, findings) {
+  const identities = identityCandidates(entry.control).map(normalizeIdentity);
+  const data = entry.control?.attrs?.data || {};
+  if (identities.includes("left panel data items wrapper")) {
+    if (!/vCurrentItemID/.test(JSON.stringify(entry.control?.attrs?.actions || entry.control?.actions || []))) {
+      findings.push(error("DASH_DATASET_MASTER_DETAIL_LEFT_SELECTION_ACTION_MISSING", "Master-detail workspace left_panel_data_items_wrapper must preserve a selection action that writes the clicked item ID to vCurrentItemID.", { page: page.title, path: entry.pointer }));
+    }
+    return;
+  }
+  if (identities.includes("current item wrapper")) {
+    if (data.limit !== true || Number(data.ps) !== 1) {
+      findings.push(error("DASH_DATASET_MASTER_DETAIL_CURRENT_ITEM_LIMIT_INVALID", "Master-detail workspace current_item_wrapper must enable limit records and page size 1.", { page: page.title, path: `${entry.pointer}.attrs.data`, limit: data.limit ?? null, ps: data.ps ?? null }));
+    }
+    if (!/vCurrentItemID/.test(JSON.stringify(data.filter || []))) {
+      findings.push(error("DASH_DATASET_MASTER_DETAIL_CURRENT_ITEM_FILTER_MISSING", "Master-detail workspace current_item_wrapper must filter ListDataID by vCurrentItemID.", { page: page.title, path: `${entry.pointer}.attrs.data.filter` }));
+    }
+  }
 }
 
 function validateCollectionRuntimeBindings(entry, page, findings, context = {}) {
@@ -784,9 +831,21 @@ function validateCollectionRuntimeBindings(entry, page, findings, context = {}) 
     }
   }
 
-  for (const control of findDescendants(entry.control, (node) => String(node?.type || "").startsWith("dynamic-"))) {
+  for (const control of collectDynamicControlsForCollectionRoot(entry.control)) {
     validateCollectionDynamicControlBinding(control, entry, page, fieldInfo, findings);
   }
+}
+
+function collectDynamicControlsForCollectionRoot(root) {
+  const controls = [];
+  const visit = (node, isRoot = false) => {
+    if (!isObject(node)) return;
+    if (!isRoot && String(node?.type || "").toLowerCase() === "collection") return;
+    if (String(node?.type || "").startsWith("dynamic-")) controls.push(node);
+    for (const child of asArray(node.children)) visit(child, false);
+  };
+  visit(root, true);
+  return controls;
 }
 
 function validateCollectionDynamicControlBinding(control, entry, page, fieldInfo, findings) {
@@ -912,12 +971,13 @@ function collectDashboardCollectionRecords(decoded, approvedIds) {
     for (const entry of collections) {
       const provenance = resolveTemplateId(entry, page);
       const explicitTemplateId = resolveExplicitCollectionTemplateId(entry, approvedIds);
+      const masterDetailTemplateId = masterDetailWorkspaceConformanceTemplateId(entry, page);
       records.push({
         pageTitle: page.title,
         regionIdentity: resolveDatasetRegionIdentity(entry),
         path: entry.pointer,
-        templateId: provenance.templateId,
-        explicitTemplateId,
+        templateId: masterDetailTemplateId || provenance.templateId,
+        explicitTemplateId: masterDetailTemplateId || explicitTemplateId,
         identities: [
           ...identityCandidates(entry.control),
           ...entry.ancestors.flatMap(identityCandidates),
@@ -926,6 +986,13 @@ function collectDashboardCollectionRecords(decoded, approvedIds) {
     }
   }
   return records;
+}
+
+function masterDetailWorkspaceConformanceTemplateId(entry, page) {
+  if (!isMasterDetailWorkspaceInternalCollection(entry, page)) return "";
+  const identities = identityCandidates(entry.control).map(normalizeIdentity);
+  if (identities.includes("left panel data items wrapper")) return "collection_control_grid_table";
+  return "";
 }
 
 function validateCollectionSlot(entry, page, findings) {
