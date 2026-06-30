@@ -26,6 +26,48 @@ const APPROVED_DATA_TABLE_TEMPLATE_IDS = new Set([
   "data_table_control_standard_no_scroll",
   "data_table_control_caption_scroll",
 ]);
+const APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
+  "dashboard-page-layouts-v1.1",
+  "dashboard-page-layouts-workbench",
+  "dashboard-page-layouts-two-panel-workspace",
+  "dashboard-page-layouts-three-panel-workspace",
+]);
+const PAGE_LAYOUT_STRUCTURAL_CONTAINER_IDS = new Set([
+  "Main",
+  "main",
+  "Content",
+  "content",
+  "page_title_section",
+  "page_title_header",
+  "page_title_content",
+  "Operations",
+  "section_title_area",
+  "section_title_header",
+  "section_content_area",
+  "content_card_wrapper",
+  "content_card_60_wrapper",
+  "content_card_40_wrapper",
+  "1_columns_section",
+  "2_columns_section",
+  "3_columns_section",
+  "2_columns_60/40_section",
+  "1_row_section",
+  "2_rows_section",
+  "3_rows_section",
+  "main_work_queue_section",
+  "main_work_queue_wrapper",
+  "primary_working_area",
+  "right_side_panel",
+  "content_panel_empty",
+  "chart_cards_section",
+  "dashboard_standard_filter_group",
+  "kpi_metrics_wrapper",
+  "kpi_cards_kpi_row",
+  "kpi_card_wrapper",
+  "kpi_card_content_main",
+  "kpi_card_icon_container",
+  "kpi_card_summary_content",
+]);
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -300,6 +342,7 @@ function hasMeaningfulBusinessContent(control) {
     if (["data-table", "datatable", "data-list"].includes(type) && hasApprovedDataTableTemplateProvenance(entry.control)) return true;
     if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(entry.control)) return true;
+    if (matchesSemanticId(entry.control, "kpi_card_wrapper")) return true;
     if (matchesSemanticId(entry.control, "form_grid_fields_wrapper")) return true;
     return false;
   });
@@ -367,6 +410,7 @@ function validateContainer(entry, page, findings) {
   if (isInsideDashboardDatasetTemplate(entry, page)) return;
   const style = entry.control?.attrs?.style || {};
   const widthtype = style.widthtype;
+  if ((widthtype === undefined || widthtype === null) && isApprovedPageLayoutStructuralContainer(entry, page)) return;
   if (typeof widthtype === "string") {
     findings.push(error("DASH_CONTAINER_WIDTHTYPE_RAW_STRING", "Generated dashboard Container attrs.style.widthtype must use Yeeflow coded array values, not raw strings.", { page: page.title, path: `${entry.pointer}.attrs.style.widthtype`, value: widthtype }));
   } else if (!Array.isArray(widthtype) || widthtype[0] !== null || !CONTAINER_WIDTH_CODES.has(String(widthtype[1] || ""))) {
@@ -380,6 +424,20 @@ function validateContainer(entry, page, findings) {
       findings.push(error(`DASH_CONTAINER_${key.toUpperCase()}_MISSING`, `Generated dashboard Containers must explicitly set attrs.style.${key}.`, { page: page.title, path: `${entry.pointer}.attrs.style.${key}` }));
     }
   }
+}
+
+function isApprovedPageLayoutStructuralContainer(entry, page) {
+  const templateId = String(
+    page.resource?.derivedFromDashboardPageLayoutTemplate
+    || page.resource?.dashboardPageLayoutTemplateId
+    || page.resource?.templateMarker
+    || page.resource?.attrs?.derivedFromDashboardPageLayoutTemplate
+    || page.resource?.attrs?.dashboardPageLayoutTemplateId
+    || page.resource?.attrs?.templateMarker
+    || ""
+  );
+  if (!APPROVED_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.has(templateId)) return false;
+  return [...PAGE_LAYOUT_STRUCTURAL_CONTAINER_IDS].some((identity) => matchesSemanticId(entry.control, identity));
 }
 
 function isInsideDashboardDatasetTemplate(entry, page) {
@@ -662,6 +720,7 @@ function isKpiCard(control) {
   if (/kpi icon container|icon container/i.test(text)) return false;
   return control?.type === "container" && (
     /\bKPI Card\b|metric card|summary card/i.test(text)
+    || matchesSemanticId(control, "kpi_card_wrapper")
     || /event_portfolio_kpi_(planned_events|approved_budget|registration_rate|lead_follow_up)\b/.test(text)
   );
 }

@@ -2236,14 +2236,38 @@ function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar, p
 }
 
 function materializeDashboardKpiCards(resource, kpiContracts = []) {
-  const wrapper = findFirstByIdentity(resource, "kpi_metrics_wrapper") || findFirstByIdentity(resource, "kpi_cards_wrapper");
-  if (!wrapper) return;
+  const wrappers = findDescendants(resource, (node) => [
+    "kpi_metrics_wrapper",
+    "kpi_cards_wrapper",
+    "kpi_cards_kpi_row",
+    "kpi_cards_kpi_column",
+  ].some((identity) => hasIdentity(node, identity)));
+  if (!wrappers.length) return;
+  let activeWrapperUsed = false;
+  const processedWrappers = [];
+  for (const wrapper of wrappers) {
+    if (processedWrappers.some((parent) => nodeContains(parent, wrapper))) continue;
+    const contracts = activeWrapperUsed ? [] : kpiContracts;
+    materializeDashboardKpiCardsInWrapper(wrapper, contracts);
+    if (contracts.length) activeWrapperUsed = true;
+    processedWrappers.push(wrapper);
+  }
+}
+
+function materializeDashboardKpiCardsInWrapper(wrapper, kpiContracts = []) {
   const cardIds = ["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"];
   const allowedKeys = new Set(kpiContracts.map((contract) => contract.key));
+  let workbenchKpiIndex = 0;
   const prune = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       prune(child);
+      if (hasIdentity(child, "kpi_card_wrapper")) {
+        const contract = kpiContracts[workbenchKpiIndex++];
+        if (!contract) return false;
+        materializeWorkbenchKpiCard(child, contract);
+        return true;
+      }
       const matchedCardId = cardIds.find((id) => hasIdentity(child, id));
       if (!matchedCardId) return true;
       const key = matchedCardId.replace("event_portfolio_kpi_", "");
@@ -2251,6 +2275,35 @@ function materializeDashboardKpiCards(resource, kpiContracts = []) {
     });
   };
   prune(wrapper);
+}
+
+function nodeContains(root, target) {
+  return findDescendants(root, (node) => node === target).length > 0;
+}
+
+function materializeWorkbenchKpiCard(card, contract) {
+  card.generatedKpiRuntimeBound = true;
+  card.attrs = {
+    ...(card.attrs || {}),
+    generatedKpiRuntimeBound: true,
+  };
+  const title = findFirstByIdentity(card, "kpi_card_summary_title");
+  if (title) setHeadingText(title, contract.label);
+  const value = findFirstByIdentity(card, "kpi_card_summary_value");
+  if (value) {
+    setHeadingText(value, "0");
+    value.attrs = {
+      ...(value.attrs || {}),
+      headc: {
+        ...(value.attrs?.headc || {}),
+        title: {
+          ...(value.attrs?.headc?.title || {}),
+          value: "0",
+          variable: [summarySaveVariable(contract.tempVar)],
+        },
+      },
+    };
+  }
 }
 
 function normalizeDashboardFilters({ filters, listMeta, dashboardName }) {
@@ -3371,7 +3424,22 @@ function removeEmptyBusinessSections(root) {
 }
 
 function removeEmptyDashboardBusinessSections(root) {
-  const removableWrappers = new Set(["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "1_columns_section", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper"]);
+  const removableWrappers = new Set([
+    "content_card_wrapper",
+    "content_card_60_wrapper",
+    "content_card_40_wrapper",
+    "1_columns_section",
+    "2_columns_section",
+    "3_columns_section",
+    "2_columns_60/40_section",
+    "1_row_section",
+    "2_rows_section",
+    "3_rows_section",
+    "chart_cards_section",
+    "dashboard_standard_filter_group",
+    "right_side_panel",
+    "kpi_metrics_wrapper",
+  ]);
   const visit = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
@@ -3408,6 +3476,7 @@ function hasMeaningfulBusinessContent(node) {
     if (control?.approvalFormNoFieldsNotice === true) return true;
     if (["collection", "data-list", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(control)) return true;
+    if (hasIdentity(control, "kpi_card_wrapper") && (control.generatedKpiRuntimeBound === true || control.attrs?.generatedKpiRuntimeBound === true)) return true;
     if (["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"].some((identity) => hasIdentity(control, identity))) return true;
     if (hasIdentity(control, "form_grid_fields_wrapper")) return true;
     if (hasIdentity(control, "form_grid_fields_2col_wrapper")) return true;

@@ -9,6 +9,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/dashboard-golden-references.json");
 const DEFAULT_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 const DASHBOARD_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
+const ALTERNATE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
+  "dashboard-page-layouts-workbench",
+  "dashboard-page-layouts-two-panel-workspace",
+  "dashboard-page-layouts-three-panel-workspace",
+]);
 const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"]);
 const GRID_TYPES = new Set(["grid", "flex_grid"]);
 const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|employee|person|people|accountid|account id)\b/i;
@@ -225,10 +230,10 @@ function validatePackage(packagePath, context) {
     if (isDashboardPageLayoutsV11(page.resource)) {
       validateNoCompetingGoldenShellAtV11Root(page, context.findings);
     }
-    validateExportShapeParity(page, context);
+    if (!isAlternateDashboardPageLayoutShell(page.resource)) validateExportShapeParity(page, context);
     validateUserFieldControls(page, context.findings);
     const resourceIndex = buildTreeIndex(findFirstByIdentity(page.resource, "Main") || page.resource);
-    if (planned(page.resource, "gridTable") && !hasCollectionInsideRegion(resourceIndex, "Event Pipeline Grid-Table")) {
+    if (!isAlternateDashboardPageLayoutShell(page.resource) && planned(page.resource, "gridTable") && !hasCollectionInsideRegion(resourceIndex, "Event Pipeline Grid-Table")) {
       context.findings.push(error("DASH_GOLDEN_GRID_TABLE_COLLECTION_MISSING", "Planned dashboard table/queue must materialize as a grid-table Collection region derived from Event Pipeline Grid-Table.", { page: page.title }));
     }
     if (unrelatedToMarketing) rejectCopiedMarketingTerms(page.resource, context.findings, "DASH_GOLDEN_MARKETING_FIELD_LEAKAGE", { page: page.title });
@@ -583,6 +588,10 @@ function isDashboardPageLayoutsV11(resource) {
   const main = findFirstByIdentity(resource, "Main");
   const content = asArray(main?.children).find((child) => hasIdentity(child, "Content"));
   return asArray(content?.children).some((child) => hasAnyIdentity(child, V11_ROOT_CONTENT_CHILD_IDS));
+}
+
+function isAlternateDashboardPageLayoutShell(resource) {
+  return [...ALTERNATE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS].some((templateId) => hasIdentity(resource, templateId));
 }
 
 function validateNoCompetingGoldenShellAtV11Root(page, findings) {
