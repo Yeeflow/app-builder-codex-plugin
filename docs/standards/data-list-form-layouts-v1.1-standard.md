@@ -149,11 +149,17 @@ Generated forms must not keep title-only copied sections. A `content_card_wrappe
 
 If a `section_content_area` would have no generated business content, remove the entire copied section/card that owns it. Do not keep an empty `section_content_area` as a spacer or as a future placeholder.
 
+Each generated custom Data List form is a single dependency scope. When cloning approved component templates into New/Edit, View Item, or Workbench Item Details forms, rename template-owned `filterVars`, `tempVars`, `actions`, and `formAction` entries with a form/section namespace before merging them into the form resource, and rewrite every in-template `__filter_...`, `__temp_...`, and action reference. Do not allow two Search/Data Filter controls in one custom form to produce the same filter variable unless they are intentionally the same control instance.
+
 Generated forms must not retain source-template business copy from another domain. For example, a Service Tickets or Ticket Attachments form must not contain loan/Office Asset text such as `Active Loan Pipeline`, `current loan volume`, `return activity signal`, `Office Asset records`, or `Coordinator guidance: prioritize overdue items and returns...`. Map such text to the current domain only when the section has real planned business content; otherwise remove the copied module.
 
 For New/Edit forms, the common case is a single current-record field section. Do not keep the remaining template example sections unless the App Plan explicitly requires additional current-record field groups and those sections are fully materialized with real fields or configured actions.
 
 For View Item forms, keep only the page title, required view structure, and the sections that are backed by current-record details, related datasets, Data Analytics, KPI cards, filters, or configured actions. Do not keep copied Dashboard or loan/event placeholder section text when no corresponding business content was generated.
+
+Supporting-list View Item forms such as comments, attachments, notes, or history lists must not inherit KPI cards or Dashboard-style summary regions by default. Generate KPI/Summary content on a custom Data List form only when the App Plan explicitly selects form-level KPI content and provides real source fields, Summary runtime binding, and business rationale for that form. Otherwise remove `kpi_metrics_wrapper` and any copied KPI card modules before generated-final validation.
+
+When the App Plan uses a unified Custom Data List Forms table, the `Data List` or host-list column is authoritative. Attach each Type `1` custom form only to that host list. If several data lists exist and a custom form row has no clear host list, generation must fail or skip with a finding; it must not silently attach the form to the first data list.
 
 ## New/Edit Form Rules
 

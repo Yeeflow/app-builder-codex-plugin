@@ -666,7 +666,7 @@ function collectDashboardDatasetRecords(planText) {
 }
 
 function collectDashboardDataTableRecords(planText) {
-  const section = String(planText || "");
+  const section = extractNumberedSection(planText, /^##\s+14\.\s+Dashboard Pages Plan/im);
   if (!section.trim()) return [];
   const lines = section.split(/\r?\n/);
   const records = [];
@@ -734,12 +734,12 @@ function collectDataListFieldSpecs(planText) {
       if (currentList && !byList[normKey(currentList)]) byList[normKey(currentList)] = [];
       continue;
     }
-    if (!currentList || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
-    const displayColumn = findHeaderIndex(normalizedHeaders, ["display name", "field name", "name"]);
+    const displayColumn = findHeaderIndex(normalizedHeaders, ["display name", "field display name", "business field", "field name", "name"]);
     const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "field id", "fieldname"]);
-    const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "field type", "type"]);
+    const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "yeeflow field type", "field type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "control type", "control"]);
     const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "options", "values"]);
     if (displayColumn === -1 || fieldTypeColumn === -1) continue;
@@ -747,7 +747,7 @@ function collectDataListFieldSpecs(planText) {
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
       const displayName = cleanResourceName(cells[displayColumn]);
-      if (!displayName || isNonResourceName(displayName)) {
+      if (!displayName || isNonFieldName(displayName)) {
         rowIndex += 1;
         continue;
       }
@@ -784,13 +784,14 @@ function collectCustomFormRecords(planText) {
     if (!currentList || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
+    const listColumn = findHeaderIndex(normalizedHeaders, ["data list", "host list", "list name", "source list", "list/library", "data list name"]);
     const formColumn = findHeaderIndex(normalizedHeaders, ["form name", "custom form name"]);
     const typeColumn = findHeaderIndex(normalizedHeaders, ["form type", "type", "purpose"]);
     const usageColumn = findHeaderIndex(normalizedHeaders, ["form usage", "usage"]);
     const templateColumn = findHeaderIndex(normalizedHeaders, ["selected data list form layout template", "data list form layout template", "selected layout template"]);
     const openColumn = findHeaderIndex(normalizedHeaders, ["open in", "open mode", "display mode"]);
     const reasonColumn = findHeaderIndex(normalizedHeaders, ["selection reason", "proof boundary", "business sections needed"]);
-    if (formColumn === -1) continue;
+    if (formColumn === -1 || (listColumn === -1 && !currentList)) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
@@ -799,13 +800,18 @@ function collectCustomFormRecords(planText) {
         rowIndex += 1;
         continue;
       }
-      const key = `${normKey(currentList)}::${normKey(formName)}`;
+      const hostListName = cleanResourceName(cells[listColumn]) || currentList;
+      if (!hostListName || isNonResourceName(hostListName)) {
+        rowIndex += 1;
+        continue;
+      }
+      const key = `${normKey(hostListName)}::${normKey(formName)}`;
       const selectedTemplate = templateColumn === -1 ? "" : cleanResourceName(cells[templateColumn]);
       const openIn = openColumn === -1 ? "" : cleanResourceName(cells[openColumn]);
       const reason = reasonColumn === -1 ? "" : cleanResourceName(cells[reasonColumn]);
       const formType = typeColumn === -1 ? (usageColumn === -1 ? "" : cleanResourceName(cells[usageColumn])) : cleanResourceName(cells[typeColumn]);
       const record = {
-        listName: currentList,
+        listName: hostListName,
         formName,
         formType,
         selectedTemplate,
@@ -861,7 +867,7 @@ function collectApprovalFormFieldSpecs(planText) {
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
       const displayName = cleanResourceName(cells[displayColumn]);
-      if (!displayName || isNonResourceName(displayName)) {
+      if (!displayName || isNonFieldName(displayName)) {
         rowIndex += 1;
         continue;
       }
@@ -1022,7 +1028,8 @@ function dashboardHeadingPageName(value) {
   const key = normKey(name);
   if (key === "business decision gates") return "";
   if (key === "dashboard template coverage matrix") return "";
-  if (/^(dashboard|record display|item template|collection|kanban|dashboard generation)/.test(key)) return "";
+  if (key === "summary metrics" || key === "dashboard filters" || key === "data analytics" || key === "data tables") return "";
+  if (/^(dashboard|record display|item template|collection|kanban|dashboard generation|summary metric|filter|data table|data analytics)/.test(key)) return "";
   return name;
 }
 
@@ -1280,16 +1287,26 @@ function fieldSpecsForList(planDemand, listName) {
   const specs = planDemand.dataListFieldSpecs?.[normKey(listName)] || [];
   const normalized = [];
   const seen = new Set();
+  const usedFieldNames = new Set();
+  const reservedFieldNames = new Set(specs.map((field) => schemaSafeFieldName(field.fieldName)).filter((fieldName) => fieldName && normKey(fieldName) !== "title").map((fieldName) => normKey(fieldName)));
   const add = (field) => {
-    const fieldName = cleanResourceName(field.fieldName || field.displayName || "Title");
-    const displayName = cleanResourceName(field.displayName || fieldName);
-    const key = normKey(fieldName || displayName);
-    if (!fieldName || seen.has(key)) return;
-    seen.add(key);
+    const explicitFieldName = schemaSafeFieldName(field.fieldName);
+    const displayName = cleanResourceName(field.displayName || explicitFieldName);
+    if (!displayName) return;
+    const displayKey = normKey(displayName);
+    if (seen.has(displayKey)) return;
+    const fieldType = cleanResourceName(field.fieldType) || "Text";
+    let fieldName = explicitFieldName || inferFieldKey(displayName, fieldType, normalized.length);
+    if (normKey(fieldName) !== "title" && usedFieldNames.has(normKey(fieldName))) {
+      fieldName = nextAvailableFieldName(fieldType, usedFieldNames, reservedFieldNames);
+    }
+    if (!fieldName) return;
+    seen.add(displayKey);
+    usedFieldNames.add(normKey(fieldName));
     normalized.push({
       displayName,
       fieldName,
-      fieldType: cleanResourceName(field.fieldType) || "Text",
+      fieldType,
       controlType: cleanResourceName(field.controlType) || inferControlType(field.fieldType),
       choiceValues: cleanResourceName(field.choiceValues),
     });
@@ -1297,6 +1314,15 @@ function fieldSpecsForList(planDemand, listName) {
   add({ displayName: "Title", fieldName: "Title", fieldType: "Text", controlType: "input" });
   for (const spec of specs) add(spec);
   return normalized.slice(0, 16);
+}
+
+function nextAvailableFieldName(fieldType, usedFieldNames, reservedFieldNames = new Set()) {
+  const prefix = fieldPrefix(fieldType);
+  for (let index = 1; index < 200; index += 1) {
+    const candidate = `${prefix}${index}`;
+    if (!usedFieldNames.has(normKey(candidate)) && !reservedFieldNames.has(normKey(candidate))) return candidate;
+  }
+  return `${prefix}${usedFieldNames.size + 1}`;
 }
 
 function approvalFieldSpecsForForm(planDemand, formName) {
@@ -1395,18 +1421,24 @@ function assignCustomFormLayoutPositions(planDemand, dataListNames) {
 
 function assignAllCustomFormLayoutPositions(planDemand, dataListNames) {
   const assignments = assignCustomFormLayoutPositions(planDemand, dataListNames);
-  const assignedFormNames = new Set(assignments.map((assignment) => normKey(assignment.formName)));
+  const assignedFormKeys = new Set(assignments.map((assignment) => `${normKey(assignment.listName)}::${normKey(assignment.formName)}`));
   const offsetsByList = new Map();
   for (const assignment of assignments) {
     offsetsByList.set(assignment.listIndex, Math.max(offsetsByList.get(assignment.listIndex) || 0, assignment.layoutIndex));
   }
   const fallbackAssignments = [];
-  for (const formName of planDemand.resources.customForms.filter((name) => !assignedFormNames.has(normKey(name)))) {
-    const listIndex = 0;
+  for (const formName of planDemand.resources.customForms) {
+    const inferredListName = inferCustomFormHostListName(formName, dataListNames);
+    if (!inferredListName) continue;
+    const formKey = `${normKey(inferredListName)}::${normKey(formName)}`;
+    if (assignedFormKeys.has(formKey)) continue;
+    const listIndex = dataListNames.findIndex((name) => normKey(name) === normKey(inferredListName));
+    if (listIndex < 0) continue;
     const next = (offsetsByList.get(listIndex) || 0) + 1;
     offsetsByList.set(listIndex, next);
+    assignedFormKeys.add(formKey);
     fallbackAssignments.push({
-      listName: dataListNames[0],
+      listName: inferredListName,
       formName,
       formType: "",
       selectedTemplate: "",
@@ -1417,6 +1449,13 @@ function assignAllCustomFormLayoutPositions(planDemand, dataListNames) {
     });
   }
   return assignments.concat(fallbackAssignments);
+}
+
+function inferCustomFormHostListName(formName, dataListNames) {
+  const formKey = normKey(formName);
+  const exact = dataListNames.find((name) => formKey.includes(normKey(name)) || normKey(name).includes(formKey.replace(/\b(new|edit|view|item|form|details?)\b/g, "").trim()));
+  if (exact) return exact;
+  return dataListNames.length === 1 ? dataListNames[0] : "";
 }
 
 function navigationGroupNames(planDemand) {
@@ -1486,15 +1525,16 @@ function isWorkbenchCustomForm(record) {
 function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
   const fieldType = normalizeFieldType(field.fieldType);
   const type = controlTypeForFieldType(field, fieldType);
-  const isTitle = fieldIndex === 0 || field.fieldName === "Title";
-  const fieldName = isTitle ? "Title" : `${fieldType}${fieldIndex}`;
+  const isTitle = fieldIndex === 0 || /^title$/i.test(field.fieldName);
+  const fieldName = isTitle ? "Title" : schemaSafeFieldName(field.fieldName) || `${fieldPrefix(field.fieldType || fieldType)}${fieldIndex}`;
+  const schemaFieldIndex = isTitle ? 0 : fieldIndexFromName(fieldName) || fieldIndex;
   const rules = buildFieldRules({ field, type });
   return {
     FieldID: fieldId,
     ListID: listId,
     FieldName: fieldName,
     FieldType: fieldType,
-    FieldIndex: fieldIndex,
+    FieldIndex: schemaFieldIndex,
     DisplayName: field.displayName,
     InternalName: fieldName,
     Type: type,
@@ -1515,6 +1555,22 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
 function controlTypeForFieldType(field, fieldType) {
   if (fieldType === "Bit") return "switch";
   return normalizeControlType(field.controlType || field.fieldType);
+}
+
+function cleanFieldName(value) {
+  const text = cleanResourceName(value).replace(/[^A-Za-z0-9_]/g, "");
+  return text || "";
+}
+
+function schemaSafeFieldName(value) {
+  const text = cleanFieldName(value);
+  if (/^Title$/i.test(text)) return "Title";
+  return /^(Text|Bit|Decimal|Datetime)[1-9]\d*$/.test(text) ? text : "";
+}
+
+function fieldIndexFromName(value) {
+  const match = String(value || "").match(/(\d+)$/);
+  return match ? Number(match[1]) : 0;
 }
 
 function defaultValueForFieldType(fieldType) {
@@ -1564,6 +1620,8 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
   removeAllByIdentity(resource, "Operations");
+  removeAllByIdentity(resource, "kpi_metrics_wrapper");
+  scrubDashboardSourceTemplateResidue(resource, { listName });
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
@@ -1763,6 +1821,12 @@ function isNonResourceName(value) {
   if (/^no custom\b/i.test(text)) return true;
   if (/^(dashboard page name|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
   return false;
+}
+
+function isNonFieldName(value) {
+  const text = cleanResourceName(value);
+  if (!text) return true;
+  return /^(not applicable|n\/a|none|no|deferred|field name|display name|business label|label|name)$/i.test(text);
 }
 
 function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId, iconUrl = DEFAULT_ICON, appPlanText = "" }) {
@@ -2225,6 +2289,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   };
   ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId);
   normalizeGeneratedDashboardControls(resource, name);
+  scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource });
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
@@ -2788,6 +2853,122 @@ function mergePageDependencies(dependencies) {
   };
 }
 
+function prepareTemplatePageDependencies(pageDependencies, replacements, scopePrefix) {
+  const replaced = {
+    tempVars: replaceCollectionTemplatePlaceholders(pageDependencies.tempVars || [], replacements),
+    filterVars: replaceCollectionTemplatePlaceholders(pageDependencies.filterVars || [], replacements),
+    actions: replaceCollectionTemplatePlaceholders(pageDependencies.actions || [], replacements),
+    formAction: replaceCollectionTemplatePlaceholders(pageDependencies.formAction || [], replacements),
+  };
+  const maps = buildTemplateDependencyNameMaps(replaced, scopePrefix);
+  return {
+    dependencies: applyDependencyNameMaps(replaced, maps),
+    maps,
+  };
+}
+
+function buildTemplateDependencyNameMaps(pageDependencies, scopePrefix) {
+  const maps = {
+    filterVars: new Map(),
+    tempVars: new Map(),
+    actions: new Map(),
+    formAction: new Map(),
+  };
+  for (const item of normalizeDependencyArray(pageDependencies.filterVars)) {
+    const name = dependencyName(item);
+    if (name) maps.filterVars.set(name, scopedDependencyName("filter", name, scopePrefix));
+  }
+  for (const item of normalizeDependencyArray(pageDependencies.tempVars)) {
+    const name = dependencyName(item);
+    if (name) maps.tempVars.set(name, scopedDependencyName("temp", name, scopePrefix));
+  }
+  for (const item of normalizeDependencyArray(pageDependencies.actions)) {
+    const name = dependencyName(item);
+    if (name) maps.actions.set(name, scopedDependencyName("action", name, scopePrefix));
+  }
+  for (const item of normalizeDependencyArray(pageDependencies.formAction)) {
+    const name = dependencyName(item);
+    if (name) maps.formAction.set(name, scopedDependencyName("formAction", name, scopePrefix));
+  }
+  return maps;
+}
+
+function dependencyName(item) {
+  return String(item?.name || item?.key || item?.id || item?.ID || "").trim();
+}
+
+function scopedDependencyName(kind, name, scopePrefix) {
+  const raw = String(name || "").trim();
+  const scope = slugify(scopePrefix || "template").replace(/-/g, "_").slice(0, 44) || "template";
+  if (!raw) return raw;
+  if (kind === "filter") {
+    const suffix = raw.replace(/^__filter_/, "").replace(/^filter_/, "") || "value";
+    const normalizedSuffix = safeDependencyIdentifier(suffix, { lower: true }) || "value";
+    return `filter_${scope}_${normalizedSuffix}`;
+  }
+  if (kind === "temp") {
+    const suffix = raw.replace(/^__temp_/, "").replace(/^var_/, "") || "value";
+    const normalizedSuffix = safeDependencyIdentifier(suffix) || "value";
+    return `var_${scope}_${normalizedSuffix}`;
+  }
+  const normalizedName = safeDependencyIdentifier(raw) || "action";
+  return `${scope}_${normalizedName}`;
+}
+
+function safeDependencyIdentifier(value, options = {}) {
+  const raw = options.lower ? String(value || "").toLowerCase() : String(value || "");
+  return raw.replace(/[^A-Za-z0-9_]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function applyDependencyNameMaps(value, maps) {
+  const visit = (node) => {
+    if (typeof node === "string") return rewriteDependencyString(node, maps);
+    if (Array.isArray(node)) {
+      for (let index = 0; index < node.length; index += 1) node[index] = visit(node[index]);
+      return node;
+    }
+    if (!node || typeof node !== "object") return node;
+    for (const key of Object.keys(node)) {
+      const mappedKey = rewriteDependencyObjectKey(key, maps);
+      const nextValue = visit(node[key]);
+      if (mappedKey !== key) {
+        delete node[key];
+        node[mappedKey] = nextValue;
+      } else {
+        node[key] = nextValue;
+      }
+    }
+    return node;
+  };
+  return visit(clone(value));
+}
+
+function rewriteDependencyObjectKey(key, maps) {
+  for (const map of [maps.actions, maps.formAction, maps.filterVars, maps.tempVars]) {
+    if (map.has(key)) return map.get(key);
+  }
+  return key;
+}
+
+function rewriteDependencyString(value, maps) {
+  let out = value;
+  for (const [oldName, newName] of maps.filterVars) {
+    if (out === oldName) out = newName;
+    out = out.split(`__filter_${oldName}`).join(`__filter_${newName}`);
+  }
+  for (const [oldName, newName] of maps.tempVars) {
+    if (out === oldName) out = newName;
+    out = out.split(`__temp_${oldName}`).join(`__temp_${newName}`);
+  }
+  for (const [oldName, newName] of maps.actions) {
+    if (out === oldName) out = newName;
+  }
+  for (const [oldName, newName] of maps.formAction) {
+    if (out === oldName) out = newName;
+  }
+  return out;
+}
+
 function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, instanceIndex, rootListSetId }) {
   const reference = dataAnalyticsReference(record.selectedTemplateId);
   const template = JSON.parse(fs.readFileSync(DATA_ANALYTICS_TEMPLATE_PATHS[record.selectedTemplateId], "utf8"));
@@ -3106,6 +3287,15 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   const template = loadCollectionTemplate(templateId);
   const root = clone(template?.templateResource?.rootContainer || {});
   reinstantiateTemplateUuidValues(root);
+  const dependencyScope = `${dashboardName}_${datasetRegion || listName || templateId}_${collectionId}`;
+  const scopedPageDependencies = prepareTemplatePageDependencies(
+    template.pageLevelDependencies || {},
+    { rootListSetId, listId, detailLayoutId },
+    dependencyScope,
+  );
+  const scopedRoot = applyDependencyNameMaps(root, scopedPageDependencies.maps);
+  Object.keys(root).forEach((key) => delete root[key]);
+  Object.assign(root, scopedRoot);
   root.id = `${collectionId}_${slugify(templateId)}_wrapper`;
   root.name = datasetRegion;
   root.datasetRegion = datasetRegion;
@@ -3230,13 +3420,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     listId,
     detailLayoutId,
   });
-  const pageDependencies = template.pageLevelDependencies || {};
-  root.pageLevelDependencies = {
-    tempVars: replaceCollectionTemplatePlaceholders(pageDependencies.tempVars || [], { rootListSetId, listId, detailLayoutId }),
-    filterVars: replaceCollectionTemplatePlaceholders(pageDependencies.filterVars || [], { rootListSetId, listId, detailLayoutId }),
-    actions: replaceCollectionTemplatePlaceholders(pageDependencies.actions || [], { rootListSetId, listId, detailLayoutId }),
-    formAction: replaceCollectionTemplatePlaceholders(pageDependencies.formAction || [], { rootListSetId, listId, detailLayoutId }),
-  };
+  root.pageLevelDependencies = scopedPageDependencies.dependencies;
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
   return root;
 }
@@ -3905,6 +4089,7 @@ function scrubDashboardSourceTemplateResidue(root, { listName }) {
   const replacements = [
     [/\bActive Loan Pipeline\b/g, `${listName} Details`],
     [/\bOffice Asset records\b/g, `${listName} records`],
+    [/\bOffice Asset\b/g, listName],
     [/\bcurrent loan volume\b/gi, "current record volume"],
     [/\breturn activity signal\b/gi, "activity signal"],
     [/\bwatch coordinator follow-up\b/gi, "follow-up signal"],
