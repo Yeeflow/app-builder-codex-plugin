@@ -10,6 +10,10 @@
 - Require create/add actions only for create-capable Data List or Document Library sources, while read-only/reporting sources such as Form Report and Data Report must omit the add button.
 - Align App Plan resource-order validation so approved master-detail layout template IDs are not misclassified as fake placeholder IDs.
 - Add focused regression coverage for two-panel and three-panel layout registry entries, editable-slot rules, locked template regions, empty-section cleanup, Data Analytics placement, and source/dist mirrors.
+- Release Dashboard page layout plan conformance from PR #328.
+- Parse App Plan `Dashboard Page Layout Template Selection` records into full-app materialization demand and preserve the selected layout per Dashboard page.
+- Materialize generated Dashboard pages from the App Plan-selected layout template, including `dashboard-page-layouts-v1.1`, `dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, and `dashboard-page-layouts-three-panel-workspace`, instead of silently falling back to v1.1.
+- Make Dashboard layout validation and generated-final preflight compare each decoded Dashboard page layout against the App Plan-selected layout and fail mismatches before signing readiness.
 
 ## 0.8.92
 

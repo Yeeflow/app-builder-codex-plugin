@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
   "version": "0.8.93",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with Dashboard master-detail workspace layout templates.",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with Dashboard workspace layouts and page layout plan conformance.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [

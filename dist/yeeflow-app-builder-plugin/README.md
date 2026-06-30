@@ -13,7 +13,7 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Version: `0.8.93`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.93` releases Dashboard master-detail workspace page layout templates from PR #326: App Plans can select `dashboard-page-layouts-two-panel-workspace` or `dashboard-page-layouts-three-panel-workspace` for Outlook-style dataset workspaces, generated Dashboards must preserve the left-panel selected-item temp-variable contract and right-panel current-item Collection binding, and hard gates validate editable slots, empty-selection state, optional operations, chart-card regions, create-capable add-button usage, and App Plan validator alignment for the new layout IDs.
+Current release `0.8.93` releases Dashboard master-detail workspace page layout templates from PR #326 and Dashboard page layout plan conformance from PR #328: App Plans can select `dashboard-page-layouts-v1.1`, `dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, or `dashboard-page-layouts-three-panel-workspace` per Dashboard page, generated Dashboards must materialize the selected shell instead of silently falling back to v1.1, and hard gates compare App Plan layout selections against decoded Dashboard resources before signing readiness.
 
 ## Install In Codex App
 
