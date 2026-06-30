@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.93`
+`0.8.94`
+
+Version `0.8.94` releases Dashboard master-detail workspace materialization hardening from PR #329. Generated two-panel and three-panel workspace Dashboards now preserve the selected-item `vCurrentItemID` runtime contract, left-panel item selection actions, right-panel current-item Collection `limit` plus `vCurrentItemID` filter binding, source-ID remapping, approved `left_panel_filter_group` usage, and generated-final resource completeness for data-list view navigation targets. Master-detail shell Collections are treated as page-layout runtime components so generic dataset and grid-table validators do not misclassify internal workspace structure as ordinary business dataset modules.
 
 Version `0.8.93` releases Dashboard master-detail workspace page layout templates from PR #326 and Dashboard page layout plan conformance from PR #328. App Plans may select `dashboard-page-layouts-v1.1`, `dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, or `dashboard-page-layouts-three-panel-workspace` per Dashboard page. Generated Dashboards must preserve master-detail workspace contracts such as `vCurrentItemID`, left-item selection, right current-item limit/filter binding, editable slots, optional operations, empty-selection state, chart-card regions, and create-capable add-button rules; generated-final validation now also compares every decoded Dashboard page layout against the App Plan-selected layout so missing trace projection or default fallback to v1.1 fails before signing readiness.
 

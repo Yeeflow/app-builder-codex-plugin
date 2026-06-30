@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.93`
+- Version: `0.8.94`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.93` releases Dashboard master-detail workspace page layout templates from PR #326 and Dashboard page layout plan conformance from PR #328: App Plans can select `dashboard-page-layouts-v1.1`, `dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, or `dashboard-page-layouts-three-panel-workspace` per Dashboard page, generated Dashboards must materialize the selected shell instead of silently falling back to v1.1, and hard gates compare App Plan layout selections against decoded Dashboard resources before signing readiness.
+Current release `0.8.94` releases Dashboard master-detail workspace materialization hardening from PR #329: two-panel and three-panel workspace Dashboards preserve the selected-item `vCurrentItemID` runtime contract, left-panel item selection, right-panel current-item Collection `limit` plus filter binding, left-panel filter group rules, source-ID remapping, and generated-final preflight coverage for Service Tickets-style master-detail pages before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.93
+Version: 0.8.94
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.93
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.94
 ```
 
 ## What Is Included

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.8.94
+
+- Release Dashboard master-detail workspace materialization hardening from PR #329.
+- Materialize two-panel and three-panel workspace Dashboards with the selected-item `vCurrentItemID` runtime contract, left-panel item selection actions, and right-panel current-item Collection `limit` plus `vCurrentItemID` filter binding.
+- Remap cloned master-detail source IDs inside Dashboard templates so left/right panel Collections target the generated page data source instead of source-template IDs.
+- Treat master-detail built-in Collections as page-layout runtime components so generic dataset/grid-table validators do not misclassify internal shell Collections as ordinary business dataset modules.
+- Allow `left_panel_filter_group` as an approved filter host while enforcing the maximum of two Data Filter controls per group.
+- Resolve data-list view navigation targets to their host Data Lists during generated-final resource completeness validation.
+- Add Service Tickets regression coverage proving generated-final preflight passes for the master-detail Dashboard template flow before signing readiness.
+
 ## 0.8.93
 
 - Release Dashboard master-detail workspace page layout templates from PR #326.
