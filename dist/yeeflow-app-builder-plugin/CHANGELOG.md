@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.95
+
+- Release Dashboard navigator-label, expression-binding, and business-residue cleanup hardening from PR #332.
+- Recursively assign stable, business-specific `nv_label` / `nav_label` metadata inside generated Dashboard Collection item templates so Designer Navigator does not fall back to generic `Dynamic user`, `Container`, or `Text` names.
+- Block visible raw formula strings in generated Dashboard text controls, including copied `iif(dateDiff(...))` expressions that should be expression bindings rather than rendered text.
+- Remove source-template loan/Office Asset business copy from generated Service Tickets-style Dashboard and Data List View pages, including `Active Loan Pipeline`, `current loan volume`, `return activity signal`, and `Office Asset records` residue.
+- Treat `section_title_header` and `section_title_area` as optional generated modules: when a section has no distinct business title and no configured `Operations`, generated-final validation now requires the copied title area to be removed.
+- Prevent supporting custom Data List View forms such as comments or attachments from inheriting unplanned Dashboard KPI rows or title-only copied sections before signing readiness.
+
 ## 0.8.94
 
 - Release Dashboard master-detail workspace materialization hardening from PR #329.
