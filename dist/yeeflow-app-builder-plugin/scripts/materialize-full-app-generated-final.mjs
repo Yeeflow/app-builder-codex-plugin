@@ -1280,12 +1280,15 @@ function fieldSpecsForList(planDemand, listName) {
   const specs = planDemand.dataListFieldSpecs?.[normKey(listName)] || [];
   const normalized = [];
   const seen = new Set();
+  const seenDisplay = new Set();
   const add = (field) => {
     const fieldName = cleanResourceName(field.fieldName || field.displayName || "Title");
     const displayName = cleanResourceName(field.displayName || fieldName);
     const key = normKey(fieldName || displayName);
-    if (!fieldName || seen.has(key)) return;
+    const displayKey = normKey(displayName);
+    if (!fieldName || seen.has(key) || seenDisplay.has(displayKey)) return;
     seen.add(key);
+    seenDisplay.add(displayKey);
     normalized.push({
       displayName,
       fieldName,
@@ -1296,7 +1299,65 @@ function fieldSpecsForList(planDemand, listName) {
   };
   add({ displayName: "Title", fieldName: "Title", fieldType: "Text", controlType: "input" });
   for (const spec of specs) add(spec);
+  for (const spec of inferredDashboardFilterFieldSpecs(planDemand, listName)) add(spec);
   return normalized.slice(0, 16);
+}
+
+function inferredDashboardFilterFieldSpecs(planDemand, listName) {
+  const records = planDemand.dashboardFilterRecords || [];
+  if (!records.length || !listName) return [];
+  const listKey = normKey(listName);
+  const singleList = (planDemand.resources?.dataLists || []).length === 1;
+  const relevantDashboardPages = new Set((planDemand.dashboardDatasetRecords || [])
+    .filter((record) => normKey(record.sourceResource) === listKey)
+    .map((record) => normKey(record.dashboardPage))
+    .filter(Boolean));
+  const fieldNames = [];
+  for (const record of records) {
+    const sourceKey = normKey(record.sourceResource);
+    const pageKey = normKey(record.dashboardPage);
+    const sourceMatches = sourceKey ? sourceKey === listKey : (singleList || relevantDashboardPages.has(pageKey));
+    if (!sourceMatches) continue;
+    const rawField = cleanResourceName(record.fieldDisplayName || record.filterName);
+    if (!rawField || isNonResourceName(rawField) || /\b(keyword|keywords|search|free text|full text)\b/i.test(rawField)) continue;
+    for (const part of rawField.split(/\s*(?:,|;|\/|\bor\b|\band\b)\s*/i).map(cleanResourceName).filter(Boolean)) {
+      if (!part || isNonResourceName(part) || /\b(keyword|keywords|search|free text|full text)\b/i.test(part)) continue;
+      fieldNames.push(part);
+    }
+  }
+  return unique(fieldNames.map((name) => normKey(name))).map((key) => {
+    const displayName = fieldNames.find((name) => normKey(name) === key) || key;
+    return {
+      displayName,
+      fieldName: displayName,
+      fieldType: inferDashboardFilterFieldType(displayName),
+      controlType: inferDashboardFilterControlType(displayName),
+      choiceValues: inferDashboardFilterChoiceValues(displayName),
+    };
+  });
+}
+
+function inferDashboardFilterFieldType(displayName) {
+  const normalized = normKey(displayName);
+  if (/\b(owner|requester|assignee|agent|manager|approver|user|traveler)\b/.test(normalized)) return "User";
+  if (/\b(date|time|deadline|due|created|submitted)\b/.test(normalized)) return "Datetime";
+  return "Text";
+}
+
+function inferDashboardFilterControlType(displayName) {
+  const normalized = normKey(displayName);
+  if (/\b(owner|requester|assignee|agent|manager|approver|user|traveler)\b/.test(normalized)) return "identity-picker";
+  if (/\b(date|time|deadline|due|created|submitted)\b/.test(normalized)) return "date";
+  if (/\b(status|state|stage|priority|category|type|severity|urgency)\b/.test(normalized)) return "select";
+  return "input";
+}
+
+function inferDashboardFilterChoiceValues(displayName) {
+  const normalized = normKey(displayName);
+  if (/\bpriority|urgency|severity\b/.test(normalized)) return "Low, Medium, High, Critical";
+  if (/\bstatus|state|stage\b/.test(normalized)) return "New, Open, In Progress, Pending, Resolved, Closed";
+  if (/\bcategory|type\b/.test(normalized)) return "Incident, Service Request, Change Request, Problem";
+  return "";
 }
 
 function approvalFieldSpecsForForm(planDemand, formName) {
@@ -1757,7 +1818,7 @@ function cleanResourceName(value) {
 function isNonResourceName(value) {
   const text = cleanResourceName(value);
   if (!text) return true;
-  if (/^(not applicable|n\/a|none|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (/^(not applicable|n\/a|none|no|deferred|resource type|notes?|used by|actions?|fields?)$/i.test(text)) return true;
   if (/^no custom\b/i.test(text)) return true;
   if (/^(dashboard page name|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
   return false;
@@ -2360,33 +2421,12 @@ function masterDetailSearchFilters(resource, listMeta) {
 }
 
 function masterDetailLeftPanelFilters(resource, listMeta, rootListSetId) {
-  const filters = findDescendants(resource, (node) => hasIdentity(node, "left_panel_filter_control"));
-  return filters.slice(0, 4).map((filter, index) => {
-    const field = fieldsForDynamicControls(listMeta)[index + 1] || fieldsForDynamicControls(listMeta)[0] || { fieldName: "Title" };
-    const variable = String(filter.binding || filter.attrs?.binding || `__filter_filter_${field.displayName || field.fieldName}`).replace(/^__filter_/, "");
-    filter.binding = `__filter_${variable}`;
-    filter.attrs = {
-      ...(filter.attrs || {}),
-      data: {
-        ...(filter.attrs?.data || {}),
-        list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) },
-        field: field.fieldName,
-        filter: [],
-      },
-      display_f: field.fieldName,
-      value_f: field.fieldName,
-      placeholder: filter.attrs?.placeholder || field.displayName || field.fieldName,
-    };
-    return {
-      key: deterministicUuid(`${listMeta.listName}:${field.fieldName}:${variable}:left-panel-filter`),
-      pre: "and",
-      left: field.fieldName,
-      op: "0",
-      right: [{ exprType: "variable", valueType: "string", id: `__filter_${variable}`, type: "expr", name: variable }],
-      showCus: false,
-      sourceFilterId: filter.id || variable,
-    };
-  });
+  // Do not attach select-filter values to the left master-detail Collection until
+  // an export-proven empty-value bypass contract is available. A blank select
+  // variable in Collection filter conditions can make the initial page render as
+  // "No data", even when seed/live rows exist.
+  pruneMasterDetailSelectFilterControls(resource);
+  return [];
 }
 
 function mapMasterDetailFilterControls(resource, listMeta, rootListSetId) {
@@ -2401,6 +2441,20 @@ function mapMasterDetailFilterControls(resource, listMeta, rootListSetId) {
       },
     };
   }
+}
+
+function pruneMasterDetailSelectFilterControls(root) {
+  const shouldRemove = (node) => hasIdentity(node, "left_panel_filter_control") || String(node?.type || "") === "select-filter";
+  const prune = (node) => {
+    if (!node || typeof node !== "object" || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => !shouldRemove(child));
+    for (const child of node.children) prune(child);
+    if (hasIdentity(node, "left_panel_filter_group")) {
+      const hasMeaningfulFilter = node.children.some((child) => String(child?.type || "") === "search-filter" || hasIdentity(child, "left_panel_filter_control"));
+      if (!hasMeaningfulFilter) node.children = [];
+    }
+  };
+  prune(root);
 }
 
 function ensureMasterDetailSelectionAction(actions) {
