@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.94`
+`0.8.95`
+
+Version `0.8.95` releases Dashboard navigator-label, expression-binding, and business-residue cleanup hardening from PR #332. Generated master-detail workspace pages recursively assign business-specific `nv_label` / `nav_label` metadata inside copied Collection item templates, reject visible raw formula strings in Dashboard text controls, remove source-template loan/Office Asset copy from Service Tickets-style pages, prune optional `section_title_area` modules when both `section_title_header` and configured `Operations` are absent, and prevent supporting custom Data List View forms from inheriting unplanned KPI rows or title-only copied sections before signing readiness.
 
 Version `0.8.94` releases Dashboard master-detail workspace materialization hardening from PR #329. Generated two-panel and three-panel workspace Dashboards now preserve the selected-item `vCurrentItemID` runtime contract, left-panel item selection actions, right-panel current-item Collection `limit` plus `vCurrentItemID` filter binding, source-ID remapping, approved `left_panel_filter_group` usage, and generated-final resource completeness for data-list view navigation targets. Master-detail shell Collections are treated as page-layout runtime components so generic dataset and grid-table validators do not misclassify internal workspace structure as ordinary business dataset modules.
 
