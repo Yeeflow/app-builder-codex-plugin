@@ -6,7 +6,7 @@ Dashboard Page Layouts v1.1 is the canonical page-level Dashboard template for n
 
 This page shell is separate from component golden references. The Event Portfolio Dashboard Golden Reference remains the component/region reference for KPI cards, filter groups, grid-table Collections, and visual dashboard patterns. Component references may be placed inside approved v1.1 business-content containers and `section_content_area` regions, but they must not replace or compete with the v1.1 page skeleton.
 
-`dashboard-page-layouts-workbench` is an approved alternate page-level Dashboard template for operational workbench pages. It must be explicitly selected in the App Plan when used, and it follows its own registered shell and cleanup rules in `docs/standards/dashboard-page-layouts-workbench-standard.md`. The default template remains `dashboard-page-layouts-v1.1`.
+`dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, and `dashboard-page-layouts-three-panel-workspace` are approved alternate page-level Dashboard templates. They must be explicitly selected in the App Plan when used. Workbench follows its own registered shell and cleanup rules in `docs/standards/dashboard-page-layouts-workbench-standard.md`; the two master-detail workspace templates follow `docs/standards/dashboard-page-layouts-master-detail-workspace-standard.md`. The default template remains `dashboard-page-layouts-v1.1`.
 
 ## Registry
 
