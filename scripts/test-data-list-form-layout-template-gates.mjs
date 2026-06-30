@@ -81,6 +81,20 @@ try {
   firstSlot(residualTemplateLabel).children.push({ type: "text", id: "stale_section_text", nv_label: "stale_section_text", text: "Active Loan Pipeline" });
   expectCode("generated Data List form residual template label fails", ["--resource", writeJson("new-edit-residual-template-label.json", residualTemplateLabel), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_TEMPLATE_RESIDUAL_LABEL");
 
+  const residualViewKpi = viewResource();
+  content(residualViewKpi).children.push({
+    type: "container",
+    id: "kpi_metrics_wrapper",
+    nv_label: "kpi_metrics_wrapper",
+    children: [{ type: "text", id: "stale_kpi_copy", nv_label: "stale_kpi_copy", text: "Live count from Office Asset records." }],
+  });
+  expectCode("generated View form residual KPI copy fails", ["--resource", writeJson("view-residual-kpi-copy.json", residualViewKpi), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_TEMPLATE_RESIDUAL_LABEL");
+
+  const emptyTitleArea = newEditResource();
+  const card = find(emptyTitleArea, "content_card_wrapper");
+  if (card) card.children.unshift({ type: "container", id: "section_title_area", nv_label: "section_title_area", children: [] });
+  expectCode("generated Data List form empty section_title_area fails", ["--resource", writeJson("new-edit-empty-section-title-area.json", emptyTitleArea), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"], "DATA_LIST_FORM_LAYOUT_EMPTY_SECTION_TITLE_AREA");
+
   const markerMissing = viewResource({ marker: false });
   expectCode("generated package form missing template marker fails", ["--package", writePackage("missing-marker.yapk", decodedPackage({ viewResource: markerMissing }))], "DATA_LIST_FORM_LAYOUT_TEMPLATE_MARKER_MISSING");
 

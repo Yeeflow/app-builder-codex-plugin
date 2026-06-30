@@ -141,6 +141,8 @@ Dynamic controls must match field type:
 
 `content_card_wrapper`, `2_columns_section`, `3_columns_section`, `2_columns_60/40_section`, and `kpi_metrics_wrapper` may be reordered to match business priority. Remove any copied section module that contains no meaningful business content.
 
+`section_title_header` is optional in generated master-detail content cards. Keep it only when the section needs a distinct business title/description that is not already carried by the nested Collection, Data table, chart, field grid, or related component. If `section_title_header` is omitted and the sibling `Operations` region is also omitted or has no configured actions, remove the owning `section_title_area` as well. Do not keep copied template headers such as `Left Ticket List` or `Active Loan Pipeline` merely because they existed in the source template.
+
 ## Cleanup Rules
 
 Generated pages must remove:
@@ -152,6 +154,7 @@ Generated pages must remove:
 - Unused Operations containers.
 - Title-only copied section modules.
 - Empty optional right/detail panels.
+- Copied source-template business copy from another domain, including loan/Office Asset helper text in non-loan apps.
 
 KPI cards should be generated only when the Functional Specification or App Plan requires KPI metrics. Generate only the planned number of KPI cards.
 

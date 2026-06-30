@@ -1564,6 +1564,8 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     slot.children = [buildDataListFormFieldsGrid({ fields: fields.slice(0, 12), formName, listId, listName, templateKind })];
   }
   removeAllByIdentity(resource, "Operations");
+  removeResidualTemplateSectionHeaders(resource);
+  removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
   return resource;
 }
@@ -2159,6 +2161,10 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     host: contentArea,
   });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
+  scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource });
+  if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
+  removeResidualTemplateSectionHeaders(resource);
+  removeEmptySectionTitleAreas(resource);
   resource.filterVars = filterConsumedDashboardFilterVars(resource, uniqueByName([
     ...normalizeDependencyArray(templateDependencies.filterVars),
     ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
@@ -2219,6 +2225,9 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   };
   ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId);
   normalizeGeneratedDashboardControls(resource, name);
+  if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
+  removeResidualTemplateSectionHeaders(resource);
+  removeEmptySectionTitleAreas(resource);
   removeEmptyDashboardBusinessSections(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
   return resource;
@@ -3774,6 +3783,7 @@ function removeEmptyBusinessSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
@@ -3803,6 +3813,7 @@ function removeEmptyDashboardBusinessSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
@@ -3817,6 +3828,7 @@ function removeUnusedApprovalTemplateSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !findFirstByIdentity(child, "action_panel_flow_history_wrapper") && !hasWorkflowSurface(child) && !hasMeaningfulBusinessContent(child)) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
       if (![...removableModules].some((identity) => hasIdentity(child, identity))) return true;
       if (findFirstByIdentity(child, "action_panel_flow_history_wrapper")) return true;
       return hasMeaningfulBusinessContent(child);
@@ -3835,13 +3847,111 @@ function hasMeaningfulBusinessContent(node) {
     if (["collection", "data-list", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(control)) return true;
     if (hasIdentity(control, "kpi_card_wrapper") && (control.generatedKpiRuntimeBound === true || control.attrs?.generatedKpiRuntimeBound === true)) return true;
-    if (["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"].some((identity) => hasIdentity(control, identity))) return true;
     if (hasIdentity(control, "form_grid_fields_wrapper")) return true;
     if (hasIdentity(control, "form_grid_fields_2col_wrapper")) return true;
     if (hasIdentity(control, "form_grid_fields_3col_wrapper")) return true;
     if (["input", "textarea", "richtext", "rich-text", "radio", "checkbox", "switch", "date", "datetime", "number", "input_number", "lookup", "people", "user"].includes(type)) return true;
     return false;
   }).length > 0;
+}
+
+function hasSectionTitleAreaContent(node) {
+  const header = findFirstByIdentity(node, "section_title_header");
+  const operations = findFirstByIdentity(node, "Operations");
+  return Boolean(header || (operations && hasActionConfiguration(operations)));
+}
+
+function removeEmptySectionTitleAreas(root) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
+      return true;
+    });
+  };
+  visit(root);
+}
+
+function removeResidualTemplateSectionHeaders(root) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      if (hasIdentity(child, "section_title_header") && hasSourceTemplateResidueText(child)) return false;
+      return true;
+    });
+  };
+  visit(root);
+}
+
+function removeRedundantMasterDetailSectionTitleHeaders(root) {
+  const visit = (node, ancestors = []) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child, ancestors.concat(node));
+      if (!hasIdentity(child, "section_title_header")) return true;
+      const insideContentCard = ancestors.concat(node).some((ancestor) => hasIdentity(ancestor, "content_card_wrapper"));
+      if (!insideContentCard) return true;
+      const titleArea = ancestors.concat(node).reverse().find((ancestor) => hasIdentity(ancestor, "section_title_area"));
+      const operations = titleArea ? findFirstByIdentity(titleArea, "Operations") : null;
+      return Boolean(operations && hasActionConfiguration(operations));
+    });
+  };
+  visit(root);
+}
+
+function scrubDashboardSourceTemplateResidue(root, { listName }) {
+  const replacements = [
+    [/\bActive Loan Pipeline\b/g, `${listName} Details`],
+    [/\bOffice Asset records\b/g, `${listName} records`],
+    [/\bcurrent loan volume\b/gi, "current record volume"],
+    [/\breturn activity signal\b/gi, "activity signal"],
+    [/\bwatch coordinator follow-up\b/gi, "follow-up signal"],
+    [/Coordinator guidance: prioritize overdue items and returns due within the next seven days\./gi, `Review ${listName} records and related activity.`],
+  ];
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index += 1) value[index] = visit(value[index]);
+      return value;
+    }
+    if (!value || typeof value !== "object") {
+      if (typeof value !== "string") return value;
+      return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement).trim(), value);
+    }
+    for (const [key, child] of Object.entries(value)) {
+      if (/^(?:id|templateId|dataTableTemplateId|dataAnalyticsTemplateId|datasetPresentationTemplateId|derivedFrom|derivedFromDatasetPresentationTemplate|derivedFromDataTableGoldenReference|derivedFromDataAnalyticsGoldenReference)$/i.test(key)) continue;
+      value[key] = visit(child);
+    }
+    return value;
+  };
+  visit(root);
+}
+
+function hasSourceTemplateResidueText(node) {
+  const text = visibleBusinessText(node);
+  return /\bActive Loan Pipeline\b/i.test(text)
+    || /\bCoordinator guidance: prioritize overdue items and returns/i.test(text)
+    || /\bcurrent loan volume\b/i.test(text)
+    || /\breturn activity signal\b/i.test(text)
+    || /\bwatch coordinator follow-up\b/i.test(text)
+    || /\bOffice Asset records\b/i.test(text);
+}
+
+function visibleBusinessText(node) {
+  const values = [];
+  const visit = (current) => {
+    if (!current || typeof current !== "object") return;
+    for (const key of ["text", "title", "value", "description", "placeholder", "name", "label", "nv_label", "nav_label"]) {
+      const value = current?.[key];
+      if (typeof value === "string" && value.trim()) values.push(value);
+    }
+    const titleValue = current?.attrs?.headc?.title?.value ?? current?.attrs?.title?.value ?? current?.attrs?.text ?? current?.attrs?.value;
+    if (typeof titleValue === "string" && titleValue.trim()) values.push(titleValue);
+    for (const child of Array.isArray(current.children) ? current.children : []) visit(child);
+  };
+  visit(node);
+  return values.join(" ");
 }
 
 function hasWorkflowSurface(node) {

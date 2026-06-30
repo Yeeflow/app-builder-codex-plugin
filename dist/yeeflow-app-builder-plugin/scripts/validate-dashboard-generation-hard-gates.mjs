@@ -36,6 +36,14 @@ const MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
   "dashboard-page-layouts-two-panel-workspace",
   "dashboard-page-layouts-three-panel-workspace",
 ]);
+const SOURCE_TEMPLATE_RESIDUE_PATTERNS = [
+  /\bActive Loan Pipeline\b/i,
+  /\bCoordinator guidance: prioritize overdue items and returns/i,
+  /\bcurrent loan volume\b/i,
+  /\breturn activity signal\b/i,
+  /\bwatch coordinator follow-up\b/i,
+  /\bOffice Asset records\b/i,
+];
 const PAGE_LAYOUT_STRUCTURAL_CONTAINER_IDS = new Set([
   "Main",
   "main",
@@ -183,6 +191,8 @@ function validateDashboardBusinessRuntime(page, listIndex, findings) {
   }
 
   validatePageTitleSectionPurity(page, findings);
+  validateSourceTemplateResidue(page, findings);
+  validateSectionTitleAreaPolicy(page, findings);
   validateNonEmptyBusinessSections(page, findings);
   validateIndependentContentCardWrappers(page, collections, findings);
   validateDynamicUserFieldTypes(page, listIndex, findings);
@@ -337,6 +347,42 @@ function validateNonEmptyBusinessSections(page, findings) {
   }
 }
 
+function validateSourceTemplateResidue(page, findings) {
+  for (const entry of page.controls) {
+    if (!isTextLike(entry.control)) continue;
+    const text = visibleBusinessText(entry.control);
+    const pattern = SOURCE_TEMPLATE_RESIDUE_PATTERNS.find((candidate) => candidate.test(text));
+    if (!pattern) continue;
+    findings.push(error("DASH_SOURCE_TEMPLATE_BUSINESS_TEXT_RESIDUE", "Generated Dashboards must not retain unrelated source-template business copy such as loan/Office Asset helper text in another app domain. Map the text to the current business domain or remove the unused section.", {
+      page: page.title,
+      path: entry.pointer,
+      text: text.slice(0, 240),
+    }));
+  }
+}
+
+function validateSectionTitleAreaPolicy(page, findings) {
+  for (const entry of page.controls) {
+    if (!matchesSemanticId(entry.control, "section_title_area")) continue;
+    const descendants = collectDescendants(entry.control, entry.pointer);
+    const hasHeader = descendants.some((item) => matchesSemanticId(item.control, "section_title_header"));
+    const operations = descendants.filter((item) => matchesSemanticId(item.control, "Operations"));
+    const hasOperations = operations.some((item) => hasActionConfiguration(item.control));
+    if (!hasHeader && !hasOperations) {
+      findings.push(error("DASH_EMPTY_SECTION_TITLE_AREA", "Generated Dashboards must remove section_title_area when neither section_title_header nor configured Operations are needed.", {
+        page: page.title,
+        path: entry.pointer,
+      }));
+    }
+    if (isMasterDetailWorkspacePage(page) && hasHeader && !hasOperations && findAncestors(page.resource, entry.control).some((node) => matchesSemanticId(node, "content_card_wrapper"))) {
+      findings.push(error("DASH_MASTER_DETAIL_REDUNDANT_SECTION_TITLE_HEADER", "Master-detail Dashboard content_card_wrapper regions should not keep copied section_title_header when there are no configured Operations; the nested related component should carry the business title.", {
+        page: page.title,
+        path: entry.pointer,
+      }));
+    }
+  }
+}
+
 function findDescendantEntry(control, pointer, semanticId) {
   const descendants = collectDescendants(control, pointer);
   return descendants.find((entry) => matchesSemanticId(entry.control, semanticId)) || null;
@@ -350,7 +396,7 @@ function hasMeaningfulBusinessContent(control) {
     if (["data-table", "datatable", "data-list"].includes(type) && hasApprovedDataTableTemplateProvenance(entry.control)) return true;
     if (["collection", "summary", "data-filter", "select-filter", "radio-filter", "checkbox-filter", "search-filter", "pie-chart", "column-chart", "bar-chart", "line-chart", "area-chart", "pivot-table", "dynamic-field", "dynamic-user", "dynamic-image", "dynamic-file"].includes(type)) return true;
     if (type === "button" && hasActionConfiguration(entry.control)) return true;
-    if (matchesSemanticId(entry.control, "kpi_card_wrapper")) return true;
+    if (matchesSemanticId(entry.control, "kpi_card_wrapper") && (entry.control?.generatedKpiRuntimeBound === true || entry.control?.attrs?.generatedKpiRuntimeBound === true)) return true;
     if (matchesSemanticId(entry.control, "form_grid_fields_wrapper")) return true;
     return false;
   });
@@ -486,6 +532,19 @@ function visibleTextValues(control) {
     [".value", control?.value],
     [".text", control?.text],
   ];
+}
+
+function visibleBusinessText(control) {
+  if (!control || typeof control !== "object") return "";
+  const values = [];
+  for (const value of visibleTextValues(control).map((entry) => entry[1])) {
+    if (typeof value === "string" && value.trim()) values.push(value);
+  }
+  for (const key of ["text", "title", "value", "description", "placeholder"]) {
+    const value = control?.[key];
+    if (typeof value === "string" && value.trim()) values.push(value);
+  }
+  return values.join(" ");
 }
 
 function looksLikeRawVisibleExpression(value) {
