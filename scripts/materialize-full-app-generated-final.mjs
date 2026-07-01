@@ -1565,7 +1565,7 @@ function cleanFieldName(value) {
 function schemaSafeFieldName(value) {
   const text = cleanFieldName(value);
   if (/^Title$/i.test(text)) return "Title";
-  return /^(Text|Bit|Decimal|Datetime)[1-9]\d*$/.test(text) ? text : "";
+  return /^(Text|Bit|Decimal|Datetime|User)[1-9]\d*$/.test(text) ? text : "";
 }
 
 function fieldIndexFromName(value) {
@@ -1621,7 +1621,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   }
   removeAllByIdentity(resource, "Operations");
   removeAllByIdentity(resource, "kpi_metrics_wrapper");
-  scrubDashboardSourceTemplateResidue(resource, { listName });
+  scrubDashboardSourceTemplateResidue(resource, { listName, scrubMetadata: true });
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
@@ -2229,7 +2229,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     host: contentArea,
   });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
-  scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource });
+  scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: isMasterDetailWorkspace });
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
@@ -2245,7 +2245,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
       name: contract.tempVar,
       type: "number",
       source: contract.summaryId,
-      kpiKey: contract.key,
+      kpiKey: contract.businessKey || contract.key,
     })),
     ...(isMasterDetailWorkspace ? [
       { id: "__temp_vCurrentItemID", name: "vCurrentItemID", type: "string", source: "left_panel_data_items_wrapper" },
@@ -2288,18 +2288,29 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     selectedDataTableTemplateIds: (dashboardDataTables || []).map((record) => record.selectedTemplateId),
     sourceResource,
     kpiCount: kpiContracts.length,
-    kpis: kpiContracts.map((contract) => ({ key: contract.key, label: contract.label, tempVar: contract.tempVar, summaryId: contract.summaryId })),
+    kpis: kpiContracts.map((contract) => ({ key: contract.businessKey || contract.key, label: contract.label, tempVar: contract.tempVar, summaryId: contract.summaryId })),
     filters: normalizedFilters.map((filter) => ({ name: filter.filterName, fieldName: filter.fieldName })),
   };
   ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId);
   normalizeGeneratedDashboardControls(resource, name);
-  scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource });
+  scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: isMasterDetailWorkspace });
+  if (isMasterDetailWorkspace) restoreDashboardRootGoldenReferenceProvenance(resource);
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
   removeEmptyDashboardBusinessSections(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
   return resource;
+}
+
+function restoreDashboardRootGoldenReferenceProvenance(resource) {
+  if (!resource || typeof resource !== "object") return;
+  resource.derivedFromGoldenReference = DASHBOARD_GOLDEN_REFERENCE_ID;
+  resource.goldenReferenceId = DASHBOARD_GOLDEN_REFERENCE_ID;
+  resource.attrs = {
+    ...(resource.attrs || {}),
+    derivedFromGoldenReference: DASHBOARD_GOLDEN_REFERENCE_ID,
+  };
 }
 
 function ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId) {
@@ -2444,7 +2455,7 @@ function masterDetailSearchFilters(resource, listMeta) {
 
 function masterDetailLeftPanelFilters(resource, listMeta, rootListSetId) {
   const filters = findDescendants(resource, (node) => hasIdentity(node, "left_panel_filter_control"));
-  return filters.slice(0, 4).map((filter, index) => {
+  for (const [index, filter] of filters.slice(0, 4).entries()) {
     const field = fieldsForDynamicControls(listMeta)[index + 1] || fieldsForDynamicControls(listMeta)[0] || { fieldName: "Title" };
     const variable = String(filter.binding || filter.attrs?.binding || `__filter_filter_${field.displayName || field.fieldName}`).replace(/^__filter_/, "");
     filter.binding = `__filter_${variable}`;
@@ -2460,16 +2471,11 @@ function masterDetailLeftPanelFilters(resource, listMeta, rootListSetId) {
       value_f: field.fieldName,
       placeholder: filter.attrs?.placeholder || field.displayName || field.fieldName,
     };
-    return {
-      key: deterministicUuid(`${listMeta.listName}:${field.fieldName}:${variable}:left-panel-filter`),
-      pre: "and",
-      left: field.fieldName,
-      op: "0",
-      right: [{ exprType: "variable", valueType: "string", id: `__filter_${variable}`, type: "expr", name: variable }],
-      showCus: false,
-      sourceFilterId: filter.id || variable,
-    };
-  });
+  }
+  // Empty select-filter values can clear the left record list at runtime. Keep
+  // filter controls configured for users, but do not apply collection filters
+  // unless a proven safe optional-filter expression is available.
+  return [];
 }
 
 function mapMasterDetailFilterControls(resource, listMeta, rootListSetId) {
@@ -2600,9 +2606,10 @@ function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar, p
   return plannedMetrics.slice(0, specs.length).map((metric, index) => {
     const [key, fallbackLabel] = specs[index];
     const label = metric.metricName || fallbackLabel;
-    const tempVar = index === 0 ? primaryTempVar : `tmp_${pageSlug}_${key}_count`;
-    const summaryId = index === 0 ? summaryIdBase : `${summaryIdBase}_${key}`;
-    return { key, label, tempVar, summaryId };
+    const businessKey = slugify(label).replace(/-/g, "_") || key;
+    const tempVar = index === 0 ? primaryTempVar : `tmp_${pageSlug}_${businessKey}_count`;
+    const summaryId = index === 0 ? summaryIdBase : `${summaryIdBase}_${businessKey}`;
+    return { key, businessKey, label, tempVar, summaryId };
   });
 }
 
@@ -4113,15 +4120,21 @@ function removeRedundantMasterDetailSectionTitleHeaders(root) {
   visit(root);
 }
 
-function scrubDashboardSourceTemplateResidue(root, { listName }) {
+function scrubDashboardSourceTemplateResidue(root, { listName, scrubMetadata = false }) {
+  const safeName = cleanResourceName(listName) || "Records";
+  const safeSlug = slugify(safeName).replace(/-/g, "_") || "records";
   const replacements = [
-    [/\bActive Loan Pipeline\b/g, `${listName} Details`],
-    [/\bOffice Asset records\b/g, `${listName} records`],
-    [/\bOffice Asset\b/g, listName],
+    [/\bevent_portfolio_header_band\b/gi, `${safeSlug}_header_band`],
+    [/\bevent_portfolio_pipeline_section\b/gi, `${safeSlug}_details_section`],
+    [/\bevent_portfolio_dashboard_golden_reference\b/gi, `${safeSlug}_dashboard_reference`],
+    [/\bAsset Loan Operations Header Band\b/g, `${safeName} Header Band`],
+    [/\bActive Loan Pipeline\b/g, `${safeName} Details`],
+    [/\bOffice Asset records\b/g, `${safeName} records`],
+    [/\bOffice Asset\b/g, safeName],
     [/\bcurrent loan volume\b/gi, "current record volume"],
     [/\breturn activity signal\b/gi, "activity signal"],
     [/\bwatch coordinator follow-up\b/gi, "follow-up signal"],
-    [/Coordinator guidance: prioritize overdue items and returns due within the next seven days\./gi, `Review ${listName} records and related activity.`],
+    [/Coordinator guidance: prioritize overdue items and returns due within the next seven days\./gi, `Review ${safeName} records and related activity.`],
   ];
   const visit = (value) => {
     if (Array.isArray(value)) {
@@ -4133,7 +4146,8 @@ function scrubDashboardSourceTemplateResidue(root, { listName }) {
       return replacements.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement).trim(), value);
     }
     for (const [key, child] of Object.entries(value)) {
-      if (/^(?:id|templateId|dataTableTemplateId|dataAnalyticsTemplateId|datasetPresentationTemplateId|derivedFrom|derivedFromDatasetPresentationTemplate|derivedFromDataTableGoldenReference|derivedFromDataAnalyticsGoldenReference)$/i.test(key)) continue;
+      if (!scrubMetadata && /^(?:id|templateId|dataTableTemplateId|dataAnalyticsTemplateId|datasetPresentationTemplateId|goldenReferenceId|derivedFrom|derivedFromGoldenReference|derivedFromDatasetPresentationTemplate|derivedFromDataTableGoldenReference|derivedFromDataAnalyticsGoldenReference)$/i.test(key)) continue;
+      if (scrubMetadata && /^(?:templateId|dataTableTemplateId|dataAnalyticsTemplateId|datasetPresentationTemplateId|dataListFormLayoutTemplateId|derivedFromDataListFormLayoutTemplate)$/i.test(key)) continue;
       value[key] = visit(child);
     }
     return value;
@@ -5250,6 +5264,7 @@ function inferFieldKey(displayName, fieldType, index) {
 
 function fieldPrefix(fieldType) {
   const normalized = normKey(fieldType);
+  if (/user|people|person|identity/.test(normalized)) return "User";
   if (/date|time/.test(normalized)) return "Datetime";
   if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "Decimal";
   if (/boolean|yes no|checkbox|bit/.test(normalized)) return "Bit";
@@ -5270,6 +5285,7 @@ function inferControlType(fieldType) {
 
 function normalizeFieldType(fieldType) {
   const normalized = normKey(fieldType);
+  if (/user|people|person|identity/.test(normalized)) return "User";
   if (/date|time/.test(normalized)) return "Datetime";
   if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "Decimal";
   if (/boolean|yes no|checkbox|bit/.test(normalized)) return "Bit";

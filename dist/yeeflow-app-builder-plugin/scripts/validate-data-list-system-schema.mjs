@@ -45,6 +45,7 @@ const STORAGE_FIELD_TYPES = new Map([
   ["Datetime", "Datetime"],
   ["Bigint", "Bigint"],
   ["Bit", "Bit"],
+  ["User", "User"],
 ]);
 
 function parseArgs(argv) {

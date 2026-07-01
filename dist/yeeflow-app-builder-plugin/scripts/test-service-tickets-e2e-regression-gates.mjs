@@ -119,10 +119,23 @@ assert.ok(tickets, "Tickets data list must materialize");
 const ticketFields = new Map(tickets.Fields.map((field) => [field.DisplayName, field]));
 assert.equal(ticketFields.get("Status")?.FieldName, "Text5", "Status field must preserve its planned field key");
 assert.equal(ticketFields.get("Status")?.Type, "select", "Status field must remain a selectable choice field");
-assert.match(ticketFields.get("Requester")?.FieldName || "", /^Text[1-9]\d*$/, "Requester must use a schema-safe Text-backed field key for identity-picker storage");
+assert.equal(ticketFields.get("Requester")?.FieldName, "User1", "Requester must preserve its planned native User field key");
+assert.equal(ticketFields.get("Requester")?.FieldType, "User", "Requester must materialize as a native User storage field");
 assert.equal(ticketFields.get("Requester")?.Type, "identity-picker", "Requester must use identity-picker control type");
-assert.match(ticketFields.get("Assigned Agent")?.FieldName || "", /^Text[1-9]\d*$/, "Assigned Agent must use a schema-safe Text-backed field key for identity-picker storage");
+assert.equal(ticketFields.get("Assigned Agent")?.FieldName, "User2", "Assigned Agent must preserve its planned native User field key");
+assert.equal(ticketFields.get("Assigned Agent")?.FieldType, "User", "Assigned Agent must materialize as a native User storage field");
 assert.equal(ticketFields.get("Assigned Agent")?.Type, "identity-picker", "Assigned Agent must use identity-picker control type");
+
+const comments = decoded.Childs.find((child) => child.List.Title === "Ticket Comments");
+const attachments = decoded.Childs.find((child) => child.List.Title === "Ticket Attachments");
+assert.ok(comments, "Ticket Comments data list must materialize");
+assert.ok(attachments, "Ticket Attachments data list must materialize");
+const commentFields = new Map(comments.Fields.map((field) => [field.DisplayName, field]));
+const attachmentFields = new Map(attachments.Fields.map((field) => [field.DisplayName, field]));
+assert.equal(commentFields.get("Commented By")?.FieldName, "User1", "Commented By must preserve its planned native User field key");
+assert.equal(commentFields.get("Commented By")?.FieldType, "User", "Commented By must materialize as a native User storage field");
+assert.equal(attachmentFields.get("Uploaded By")?.FieldName, "User1", "Uploaded By must preserve its planned native User field key");
+assert.equal(attachmentFields.get("Uploaded By")?.FieldType, "User", "Uploaded By must materialize as a native User storage field");
 
 const pageTitles = decoded.Pages.map((page) => page.Title);
 assert.deepEqual(pageTitles, ["Service Tickets Dashboard"], "Summary Metrics must not materialize as an extra Dashboard page");
@@ -134,6 +147,9 @@ assert.equal(
 );
 assert.ok(JSON.stringify(dashboardResource).includes("left_panel_data_items_wrapper"), "Two-panel workspace must include the left record-list panel");
 assert.ok(JSON.stringify(dashboardResource).includes("content_panel_current_item_wrapper"), "Two-panel workspace must include the selected-item detail panel");
+const leftCollection = findFirstByIdentity(dashboardResource, "left_panel_data_items_wrapper");
+assert.ok(leftCollection, "Two-panel workspace left collection must be present");
+assert.deepEqual(leftCollection.attrs?.data?.filter || [], [], "Left record-list collection must not apply unsafe empty select-filter conditions");
 
 const pageLayoutValidation = validateDashboardPageLayoutTemplate({ package: packagePath, appPlan: planPath });
 assert.equal(pageLayoutValidation.status, "pass", JSON.stringify(pageLayoutValidation.findings || [], null, 2));
@@ -147,12 +163,14 @@ assert.deepEqual(layoutsByList.get("Ticket Attachments"), ["Ticket Attachments N
 
 const decodedText = JSON.stringify(decoded);
 assert.doesNotMatch(decodedText, /\b(?:Office Asset|Active Loan Pipeline|current loan volume|return activity signal)\b/i, "Service Tickets package must not retain Office Asset/Loan template residue");
+assert.doesNotMatch(decodedText, /\b(?:event_portfolio_header_band|event_portfolio_pipeline_section|Asset Loan Operations Header Band)\b/i, "Service Tickets custom forms must not retain source-template metadata residue");
+assert.doesNotMatch(decodedText, /\b(?:summary_approved_budget|summary_registration_rate|summary_lead_follow_up|approved_budget_count|registration_rate_count|lead_follow_up_count)\b/i, "Generated KPI/Summary runtime identifiers must use business metric names, not source-template identifiers");
 
 console.log(JSON.stringify({
   status: "pass",
   cases: [
     "planned Status field preserved",
-    "planned User fields preserved as identity-picker controls with schema-safe storage keys",
+    "planned User fields preserved as native User storage with identity-picker controls",
     "Summary Metrics not generated as Dashboard",
     "two-panel Dashboard layout matches App Plan selection",
     "dashboard page-layout and hard-gate validators pass",
@@ -160,3 +178,27 @@ console.log(JSON.stringify({
     "template business residue absent",
   ],
 }, null, 2));
+
+function findFirstByIdentity(node, identity) {
+  if (!node || typeof node !== "object") return null;
+  if (hasIdentity(node, identity)) return node;
+  for (const child of node.children || []) {
+    const found = findFirstByIdentity(child, identity);
+    if (found) return found;
+  }
+  return null;
+}
+
+function hasIdentity(node, identity) {
+  const values = [
+    node.id,
+    node.name,
+    node.label,
+    node.title,
+    node.nv_label,
+    node.nav_label,
+    node.attrs?.nv_label,
+    node.attrs?.nav_label,
+  ];
+  return values.some((value) => String(value || "") === identity);
+}
