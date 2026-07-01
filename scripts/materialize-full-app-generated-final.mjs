@@ -2153,6 +2153,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   const tempVar = `tmp_${slugify(name).replace(/-/g, "_")}_count`;
   const kpiContracts = buildDashboardKpiContracts({ pageName: name, summaryIdBase: summaryId, primaryTempVar: tempVar, plannedMetrics: dashboardSummaryMetrics });
   const resource = buildDashboardPageLayoutShell({ name, layoutId, templateId: pageLayoutTemplateId });
+  const pageLayoutDependencies = resource.__pageLayoutDependencies || {};
   const isMasterDetailWorkspace = MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.has(pageLayoutTemplateId);
   const primaryDatasetRecord = (datasetRecords || [])[0] || null;
   const sourceResource = primaryDatasetRecord?.sourceResource || listName;
@@ -2196,7 +2197,11 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
       collectionId: isMasterDetailWorkspace ? `${collectionId}_related_${index + 1}` : index === 0 ? collectionId : `${collectionId}_${index + 1}`,
     }));
   }
-  const templateDependencies = mergePageDependencies(collectionRoots.map((root) => root.pageLevelDependencies || {}));
+  const templateDependencies = mergePageDependencies([
+    pageLayoutDependencies,
+    ...collectionRoots.map((root) => root.pageLevelDependencies || {}),
+  ]);
+  delete resource.__pageLayoutDependencies;
   const datasetSlots = findDatasetSlots(resource);
   for (const [index, collectionRoot] of collectionRoots.entries()) {
     const slot = datasetSlots[index] || datasetSlots[0] || findBusinessSectionContentArea(resource);
@@ -2238,7 +2243,9 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     label: contract.label,
   }));
   if (summaries.length) {
-    const summaryHostParent = contentArea || findFirstByIdentity(resource, "Content") || resource;
+    const summaryHostParent = isMasterDetailWorkspace
+      ? (findFirstByIdentity(resource, "content_panel") || resource)
+      : (findFirstByIdentity(resource, "Content") || resource);
     summaryHostParent.children = Array.isArray(summaryHostParent.children) ? summaryHostParent.children : [];
     summaryHostParent.children.push(buildHiddenSummaryHost({ dashboardName: name, summaries }));
   }
@@ -2298,6 +2305,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   ];
   resource.actions = normalizeDependencyArray(templateDependencies.actions);
   resource.formAction = normalizeDependencyArray(templateDependencies.formAction);
+  removeUnresolvedPageActionControls(resource);
   resource.LayoutID = layoutId;
   resource.plannedControls = { kpis: kpiContracts.length > 0, kpiCount: kpiContracts.length, gridTable: true };
   resource.generatedFinalDashboardMaterialization = {
@@ -2481,7 +2489,7 @@ function masterDetailSearchFilters(resource, listMeta) {
 function masterDetailLeftPanelFilters(resource, listMeta, rootListSetId) {
   const filters = findDescendants(resource, (node) => hasIdentity(node, "left_panel_filter_control"));
   for (const [index, filter] of filters.slice(0, 4).entries()) {
-    const field = fieldsForDynamicControls(listMeta)[index + 1] || fieldsForDynamicControls(listMeta)[0] || { fieldName: "Title" };
+    const field = resolveMasterDetailFilterField(filter, listMeta, index) || fieldsForDynamicControls(listMeta)[index + 1] || fieldsForDynamicControls(listMeta)[0] || { fieldName: "Title" };
     const variable = String(filter.binding || filter.attrs?.binding || `__filter_filter_${field.displayName || field.fieldName}`).replace(/^__filter_/, "");
     filter.binding = `__filter_${variable}`;
     filter.attrs = {
@@ -2501,6 +2509,52 @@ function masterDetailLeftPanelFilters(resource, listMeta, rootListSetId) {
   // filter controls configured for users, but do not apply collection filters
   // unless a proven safe optional-filter expression is available.
   return [];
+}
+
+function resolveMasterDetailFilterField(filter, listMeta, index = 0) {
+  const fields = fieldsForDynamicControls(listMeta);
+  if (!fields.length) return null;
+  const rawHint = [
+    filter?.name,
+    filter?.title,
+    filter?.label,
+    filter?.nv_label,
+    filter?.nav_label,
+    filter?.binding,
+    filter?.attrs?.name,
+    filter?.attrs?.title,
+    filter?.attrs?.label,
+    filter?.attrs?.nv_label,
+    filter?.attrs?.nav_label,
+    filter?.attrs?.placeholder,
+    filter?.attrs?.lab?.value,
+    filter?.attrs?.data?.field,
+    filter?.attrs?.display_f,
+    filter?.attrs?.value_f,
+  ].map((value) => typeof value === "string" ? value : value?.value).filter(Boolean).join(" ");
+  const hint = normKey(rawHint);
+  const tokenPriority = [
+    ["status", /\bstatus\b/i],
+    ["priority", /\bpriority\b/i],
+    ["category", /\bcategory\b/i],
+    ["requester", /\brequester\b/i],
+    ["assigned", /\bassigned|agent|assignee\b/i],
+    ["type", /\btype\b/i],
+  ];
+  for (const [token, pattern] of tokenPriority) {
+    if (!pattern.test(rawHint)) continue;
+    const match = fields.find((field) => {
+      const fieldText = `${field.displayName || ""} ${field.fieldName || ""}`;
+      return new RegExp(`\\b${token}\\b`, "i").test(fieldText);
+    });
+    if (match) return match;
+  }
+  const hinted = fields.find((field) => {
+    const display = normKey(field.displayName);
+    const internal = normKey(field.fieldName);
+    return display && (hint === display || hint.includes(display) || display.includes(hint) || hint === internal);
+  });
+  return hinted || fields[index + 1] || fields[index] || fields[0] || null;
 }
 
 function mapMasterDetailFilterControls(resource, listMeta, rootListSetId) {
@@ -3377,6 +3431,12 @@ function buildDashboardPageLayoutShell({ name, templateId = PAGE_LAYOUT_TEMPLATE
   const template = registry.templates?.find((item) => item?.id === templateId) || registry.templates?.find((item) => item?.id === PAGE_LAYOUT_TEMPLATE_ID) || registry.templates?.[0];
   const selectedTemplateId = template?.id || PAGE_LAYOUT_TEMPLATE_ID;
   const resource = clone(template?.template?.parsedResource || {});
+  resource.__pageLayoutDependencies = {
+    filterVars: clone(template?.template?.parsedResource?.filterVars || template?.filterVars || []),
+    tempVars: clone(template?.template?.parsedResource?.tempVars || template?.tempVars || []),
+    actions: clone(template?.template?.parsedResource?.actions || template?.actions || []),
+    formAction: clone(template?.template?.parsedResource?.formAction || template?.formAction || []),
+  };
   resource.id = `${slugify(name)}_${slugify(selectedTemplateId)}_root`;
   resource.name = name;
   resource.title = name;
@@ -4185,6 +4245,43 @@ function removeEmptyDashboardBusinessSections(root) {
     });
   };
   visit(root);
+}
+
+function removeUnresolvedPageActionControls(root) {
+  const pageActionIds = new Set(normalizeDependencyArray(root?.actions).flatMap(actionIdentityCandidates));
+  for (const item of normalizeDependencyArray(root?.formAction)) {
+    for (const id of actionIdentityCandidates(item)) pageActionIds.add(id);
+  }
+  const visit = (node, ancestors = []) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child, ancestors.concat(node));
+      const actionId = String(child?.attrs?.control_action || child?.attrs?.action || child?.control_action || child?.action || "").trim();
+      if (!actionId) return true;
+      if (pageActionIds.has(actionId)) return true;
+      if (resolvesToLocalCollectionAction(actionId, ancestors.concat(node))) return true;
+      return !isActionControlCandidate(child);
+    });
+  };
+  visit(root, []);
+  removeEmptyDashboardBusinessSections(root);
+}
+
+function resolvesToLocalCollectionAction(actionId, ancestors) {
+  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+    const ancestor = ancestors[index];
+    if (!["collection", "kanban"].includes(String(ancestor?.type || ""))) continue;
+    const localActions = Array.isArray(ancestor?.attrs?.actions) ? ancestor.attrs.actions : [];
+    const localIds = new Set(localActions.flatMap(actionIdentityCandidates));
+    if (localIds.has(actionId)) return true;
+  }
+  return false;
+}
+
+function isActionControlCandidate(control) {
+  const type = String(control?.type || "").toLowerCase();
+  if (["action_button", "button", "icon", "container"].includes(type)) return true;
+  return /button|operation|action|add|search|sidebar|flip|export|open|delete|edit|comment/i.test(identityCandidates(control).join(" "));
 }
 
 function removeUnusedApprovalTemplateSections(root) {

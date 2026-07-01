@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.105
+
+- Release Dashboard master-detail workspace action and filter binding hardening.
+- Preserve `dashboard-page-layouts-two-panel-workspace` and `dashboard-page-layouts-three-panel-workspace` page-layout root `actions`, `formAction`, `tempVars`, and `filterVars` during full-app materialization instead of replacing them with only inserted component-template dependencies.
+- Remove generated visual-only operation/search/add/header controls whose action references do not resolve to a page action/formAction or nearest Collection/Kanban local action.
+- Bind master-detail left-panel filters by business semantics, so `Priority Level` resolves to the source Priority field and `Status` resolves to the source Status field instead of neighboring ticket number/title fields.
+- Keep hidden Summary runtime hosts out of visible master-detail business sections to avoid empty cards below planned KPI rows.
+- Add two-panel and three-panel regression coverage for unresolved page action references and mismatched left-panel filter field bindings.
+
 ## 0.8.104
 
 - Release full-app materializer resource/runtime fixes.

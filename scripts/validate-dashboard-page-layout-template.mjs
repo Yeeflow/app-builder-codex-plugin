@@ -365,6 +365,7 @@ function validatePageShell(resource, findings, context) {
   }
   if (!isMasterDetailWorkspace) validateContentPaddingContract(content, findings, context);
   validateSectionContentAreaGap(resource, findings, context);
+  if (!context.allowTemplateOperations) validateControlActionResolution(resource, findings, context);
   for (const id of rules.requiredFullWidthIds) {
     for (const entry of findAllByIdentity(resource, id)) {
       if (!isFullWidth(entry)) {
@@ -822,6 +823,7 @@ function validateDataControls(page, listIndex, findings) {
     }
     if (["select-filter", "radio-filter", "checkbox-filter"].includes(control?.type)) {
       if (isMasterDetailWorkspaceResource(page.resource) && isMasterDetailLeftPanelFilter(entry, page)) {
+        validateMasterDetailLeftPanelFilterBinding(entry, page, listIndex, findings);
         continue;
       }
       const data = control?.attrs?.data || {};
@@ -911,11 +913,110 @@ function collectControls(node, out, pointer, depth = 0) {
 }
 
 function buildListIndex(decoded) {
-  const ids = new Set();
+  const ids = new Map();
   for (const child of asArray(decoded?.Childs)) {
-    for (const value of [child?.List?.ListID, child?.ListID, child?.Item?.ListID]) if (present(value)) ids.add(String(value));
+    const fields = asArray(child?.Fields || child?.List?.Fields || child?.List?.Defs || child?.Defs);
+    for (const value of [child?.List?.ListID, child?.ListID, child?.Item?.ListID]) {
+      if (present(value)) ids.set(String(value), { title: child?.List?.Title || child?.Title || "", fields });
+    }
   }
   return ids;
+}
+
+function validateControlActionResolution(resource, findings, context) {
+  const pageActionIds = new Set(asArray(resource?.actions).flatMap(actionIdentityCandidates));
+  for (const item of normalizeActionCollection(resource?.formAction)) {
+    for (const id of actionIdentityCandidates(item)) pageActionIds.add(id);
+  }
+  for (const entry of flattenControls(resource, templateRules(context.template))) {
+    const actionId = String(entry.control?.attrs?.control_action || entry.control?.attrs?.action || entry.control?.control_action || entry.control?.action || "").trim();
+    if (!actionId) continue;
+    if (pageActionIds.has(actionId)) continue;
+    if (resolvesToLocalCollectionAction(actionId, resource, entry.control)) continue;
+    findings.push(error(`DASH_LAYOUT_${context.layer}_CONTROL_ACTION_UNRESOLVED`, "Generated Dashboard controls with attrs.control_action must resolve to a page action/formAction or to the nearest Collection/Kanban local action.", {
+      page: context.page,
+      pointer: entry.pointer,
+      control: firstIdentity(entry.control) || null,
+      actionId,
+    }));
+  }
+}
+
+function normalizeActionCollection(value) {
+  if (Array.isArray(value)) return value;
+  if (isObject(value)) return Object.entries(value).map(([name, item]) => ({ name, ...(isObject(item) ? item : { value: item }) }));
+  return [];
+}
+
+function actionIdentityCandidates(action) {
+  return [
+    action?.id,
+    action?.ID,
+    action?.name,
+    action?.Name,
+    action?.key,
+    action?.attrs?.id,
+    action?.attrs?.name,
+    action?.attrs?.control_action,
+  ].filter(present).map(String);
+}
+
+function resolvesToLocalCollectionAction(actionId, resource, control) {
+  const ancestors = findAncestors(resource, control);
+  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+    const ancestor = ancestors[index];
+    if (!["collection", "kanban"].includes(String(ancestor?.type || ""))) continue;
+    const localIds = new Set(asArray(ancestor?.attrs?.actions).flatMap(actionIdentityCandidates));
+    if (localIds.has(actionId)) return true;
+  }
+  return false;
+}
+
+function validateMasterDetailLeftPanelFilterBinding(entry, page, listIndex, findings) {
+  const data = entry.control?.attrs?.data || {};
+  const fieldName = String(data.field || entry.control?.attrs?.display_f || entry.control?.attrs?.value_f || "").trim();
+  if (!fieldName) {
+    findings.push(error("DASH_LAYOUT_MASTER_DETAIL_FILTER_FIELD_MISSING", "Master-detail left-panel filters must bind to a real source field.", { page: page.title, pointer: entry.pointer }));
+    return;
+  }
+  const listId = String(data?.list?.ListID || "");
+  const list = listIndex.get(listId);
+  const field = asArray(list?.fields).find((candidate) => String(candidate?.FieldName || candidate?.fieldName || "") === fieldName || String(candidate?.InternalName || "") === fieldName);
+  if (!field) {
+    findings.push(error("DASH_LAYOUT_MASTER_DETAIL_FILTER_FIELD_UNRESOLVED", "Master-detail left-panel filter field must exist on the bound source list.", { page: page.title, pointer: entry.pointer, listId: listId || null, fieldName }));
+    return;
+  }
+  const hint = [
+    entry.control?.name,
+    entry.control?.title,
+    entry.control?.label,
+    entry.control?.nv_label,
+    entry.control?.attrs?.placeholder,
+    entry.control?.attrs?.lab?.value,
+    entry.control?.binding,
+  ].map((value) => typeof value === "string" ? value : value?.value).filter(Boolean).join(" ");
+  const expectedToken = semanticFilterToken(hint);
+  if (!expectedToken) return;
+  const actualText = `${field?.DisplayName || field?.displayName || ""} ${field?.FieldName || field?.fieldName || ""} ${field?.InternalName || ""}`;
+  if (!new RegExp(`\\b${expectedToken}\\b`, "i").test(actualText)) {
+    findings.push(error("DASH_LAYOUT_MASTER_DETAIL_FILTER_FIELD_MISMATCH", "Master-detail left-panel filter label/placeholder must bind to the matching business field, not a neighboring template field.", {
+      page: page.title,
+      pointer: entry.pointer,
+      expectedToken,
+      actualField: fieldName,
+      actualDisplayName: field?.DisplayName || field?.displayName || null,
+    }));
+  }
+}
+
+function semanticFilterToken(value) {
+  const text = String(value || "");
+  if (/\bstatus\b/i.test(text)) return "status";
+  if (/\bpriority\b/i.test(text)) return "priority";
+  if (/\bcategory\b/i.test(text)) return "category";
+  if (/\brequester\b/i.test(text)) return "requester";
+  if (/\bassigned|agent|assignee\b/i.test(text)) return "assigned|agent|assignee";
+  return "";
 }
 
 function dashboardLayoutIds(value) {

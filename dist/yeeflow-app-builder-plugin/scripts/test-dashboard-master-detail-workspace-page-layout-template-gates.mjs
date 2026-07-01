@@ -46,6 +46,8 @@ function mapTemplateDataSources(resource) {
       };
     }
     if (["select-filter", "radio-filter", "checkbox-filter"].includes(control.type)) {
+      const label = `${control.name || ""} ${control.title || ""} ${control.label || ""} ${control.nv_label || ""} ${control.attrs?.placeholder?.value || control.attrs?.placeholder || ""}`;
+      const field = /\bstatus\b/i.test(label) ? "Status" : /\bpriority\b/i.test(label) ? "Priority" : control.attrs.data.field || "Priority";
       control.attrs.data = {
         ...control.attrs.data,
         list: {
@@ -56,8 +58,10 @@ function mapTemplateDataSources(resource) {
           Type: 1,
           Title: "Support Tickets",
         },
-        field: control.attrs.data.field || "Priority",
+        field,
       };
+      control.attrs.display_f = field;
+      control.attrs.value_f = field;
     }
   });
 }
@@ -109,7 +113,7 @@ function decoded(resource) {
   return {
     ListSet: { ListID: APP_ID, Title: "Service Desk Workspace Test" },
     Pages: [{ Type: 103, Title: "Service Desk Workspace", LayoutID: "dashboard-layout-workspace", LayoutInResources: [{ ID: "dashboard-layout-workspace", RefId: "dashboard-layout-workspace", Resource: JSON.stringify(resource) }] }],
-    Childs: [{ List: { ListID: LIST_ID, Title: "Support Tickets" }, Fields: [{ FieldName: "Title" }, { FieldName: "ListDataID" }, { FieldName: "Priority" }] }],
+    Childs: [{ List: { ListID: LIST_ID, Title: "Support Tickets" }, Fields: [{ FieldName: "Title", DisplayName: "Title" }, { FieldName: "ListDataID", DisplayName: "Record ID" }, { FieldName: "Priority", DisplayName: "Priority" }, { FieldName: "Status", DisplayName: "Status" }] }],
     Forms: [],
     FormNewReports: [],
     DataReports: [],
@@ -160,7 +164,7 @@ function findAll(node, id) {
 function removeOperations(node) {
   if (!node || typeof node !== "object") return;
   if (Array.isArray(node.children)) {
-    node.children = node.children.filter((child) => !ids(child).includes("Operations"));
+    node.children = node.children.filter((child) => !ids(child).some((id) => /^(?:Operations|current_item_.*operations|right_panel_.*operations)$/i.test(id)));
     node.children.forEach(removeOperations);
   }
 }
@@ -188,6 +192,19 @@ try {
   for (const templateId of TEMPLATE_IDS) {
     const valid = workspaceTemplate(templateId);
     expectPass(`${templateId} generated package preserves master-detail shell`, ["--package", writePackage(tempDir, `${templateId}-valid`, decoded(valid))]);
+
+    const unresolvedAction = workspaceTemplate(templateId);
+    const titleHeader = find(unresolvedAction, "page_title_header");
+    titleHeader.children = titleHeader.children || [];
+    titleHeader.children.push({ type: "container", nv_label: "bad_operation_button", attrs: { control_action: "missing_action" }, children: [] });
+    expectCode(`${templateId} unresolved page control action fails`, ["--package", writePackage(tempDir, `${templateId}-unresolved-action`, decoded(unresolvedAction))], "DASH_LAYOUT_RESOURCE_CONTROL_ACTION_UNRESOLVED");
+
+    const badFilterField = workspaceTemplate(templateId);
+    const statusFilter = findAll(badFilterField, "left_panel_filter_control").find((filter) => /status/i.test(JSON.stringify(filter)));
+    statusFilter.attrs.data.field = "Priority";
+    statusFilter.attrs.display_f = "Priority";
+    statusFilter.attrs.value_f = "Priority";
+    expectCode(`${templateId} left panel Status filter bound to Priority fails`, ["--package", writePackage(tempDir, `${templateId}-bad-filter-field`, decoded(badFilterField))], "DASH_LAYOUT_MASTER_DETAIL_FILTER_FIELD_MISMATCH");
 
     const missingTempVar = workspaceTemplate(templateId);
     missingTempVar.tempVars = missingTempVar.tempVars.filter((entry) => entry?.id !== "vCurrentItemID" && entry?.id !== "__temp_vCurrentItemID");
