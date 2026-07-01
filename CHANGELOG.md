@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.100
+
+- Release Dashboard dataset template-selection and v1.1 section-fidelity validator tightening.
+- Validate Dashboard Collection App Plan template choices against the selected rationale/display-need guidance instead of broad row context such as page names or source list names.
+- Reject conflicting template rationale signals, including responsive-card selections justified by dense row/column/table scanning without explicit card-browsing intent.
+- Require copied Dashboard Page Layouts v1.1 `content_card_wrapper` modules to preserve both `section_title_area` and `section_content_area`; no-title content modules must use a separately approved template instead of mutating the canonical wrapper.
+- Keep negative regression fixtures for `DASH_DATASET_APP_PLAN_SELECTION_RATIONALE_MISMATCH` and `DASH_LAYOUT_RESOURCE_SECTION_TITLE_AREA_MISSING` as release gates.
+
 ## 0.8.99
 
 - Release Service Tickets native User, filter, and template-residue hardening.

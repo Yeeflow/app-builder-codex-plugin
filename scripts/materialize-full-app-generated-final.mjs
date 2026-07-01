@@ -4032,7 +4032,7 @@ function removeEmptyDashboardBusinessSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
-      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child) && !hasAnyIdentity(node, ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"])) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
