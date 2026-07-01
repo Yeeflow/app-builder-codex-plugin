@@ -163,6 +163,7 @@ function domainString(value) {
     ["Budget", "Cost"],
     ["Events", "Maintenance Requests"],
     ["Event Type", "Request Type"],
+    ["Active Loans", "Open Requests"],
     ["Active Loan Pipeline", "Facility Work Queue"],
     ["current loan volume", "current request volume"],
     ["return activity signal", "completion activity signal"],
@@ -171,6 +172,7 @@ function domainString(value) {
     ["Live due and utilization signal from Office Asset records.", "Live due signal from Maintenance Requests records."],
     ["Live return and utilization metric from Office Asset records.", "Live completion metric from Maintenance Requests records."],
     ["Live coordinator follow-up metric from Office Asset records.", "Live owner follow-up metric from Maintenance Requests records."],
+    ["Coordinator view of active loans, due dates, checkout status, and return follow-up.", "Coordinator view of open facility requests, due dates, priority, and follow-up."],
     ["Coordinator guidance: prioritize overdue items and returns due within the next seven days.", "Coordinator guidance: prioritize open facility requests due within the next seven days."],
   ];
   const domainSpecific = replacements.reduce((text, [from, to]) => text.replaceAll(from, to), value);

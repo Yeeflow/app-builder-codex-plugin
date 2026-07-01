@@ -29,6 +29,8 @@ function workspaceTemplate(templateId) {
   removeOperations(resource);
   ensureSectionContent(resource);
   ensureChartSections(resource);
+  adaptWorkspaceDomain(resource);
+  bindCurrentItemFields(resource);
   return resource;
 }
 
@@ -59,11 +61,78 @@ function mapTemplateDataSources(resource) {
           Title: "Support Tickets",
         },
         field,
+        optionSourceProven: true,
       };
       control.attrs.display_f = field;
       control.attrs.value_f = field;
+      control.attrs.optionSourceProven = true;
+      control.attrs["choice-options"] = field === "Status"
+        ? ["Open", "In Progress", "Resolved", "Closed"]
+        : ["Low", "Medium", "High", "Critical"];
+      control.attrs.options = control.attrs["choice-options"].map((value) => ({ value, label: value }));
     }
   });
+}
+
+function adaptWorkspaceDomain(node) {
+  const replacements = [
+    ["Active Loans", "Open Tickets"],
+    ["Active Loan Pipeline", "Ticket Work Queue"],
+    ["current loan volume", "current ticket volume"],
+    ["return activity signal", "resolution activity signal"],
+    ["watch coordinator follow-up", "watch support follow-up"],
+    ["Office Asset records", "Support Tickets records"],
+    ["Coordinator view of active loans, due dates, checkout status, and return follow-up.", "Track support ticket status, priority, ownership, and follow-up context."],
+    ["Coordinator guidance: prioritize overdue items and returns due within the next seven days.", "Coordinator guidance: prioritize open tickets due within the next seven days."],
+  ];
+  const visitValue = (value) => {
+    if (Array.isArray(value)) return value.forEach(visitValue);
+    if (!value || typeof value !== "object") return;
+    for (const [key, child] of Object.entries(value)) {
+      if (typeof child === "string" && key !== "id") value[key] = replacements.reduce((text, [from, to]) => text.replaceAll(from, to), child);
+      else visitValue(child);
+    }
+  };
+  visitValue(node);
+}
+
+function bindCurrentItemFields(resource) {
+  const fieldMap = new Map([
+    ["ticket id", { displayName: "Ticket Number", fieldName: "TicketNumber" }],
+    ["ticket number", { displayName: "Ticket Number", fieldName: "TicketNumber" }],
+    ["type of request", { displayName: "Status", fieldName: "Status" }],
+    ["category", { displayName: "Category", fieldName: "Category" }],
+    ["priority", { displayName: "Priority", fieldName: "Priority" }],
+    ["description", { displayName: "Description", fieldName: "Description" }],
+    ["impact level", { displayName: "Impact Level", fieldName: "ImpactLevel" }],
+    ["assigned to", { displayName: "Assigned To", fieldName: "AssignedTo", controlType: "dynamic-user" }],
+    ["created time", { displayName: "Created Time", fieldName: "CreatedTime" }],
+  ]);
+  for (const wrapper of [...findAll(resource, "current_item_standard_field"), ...findAll(resource, "current_item_large_field")]) {
+    const titleControl = find(wrapper, "current_item_standard_field_title") || find(wrapper, "current_item_large_field_title");
+    const label = visibleText(titleControl).toLowerCase();
+    const field = fieldMap.get(label);
+    if (!field) continue;
+    const valueControl = find(wrapper, "current_item_standard_field_value") || find(wrapper, "current_item_large_field_value");
+    if (!valueControl) continue;
+    valueControl.type = field.controlType || "dynamic-field";
+    valueControl.name = field.displayName;
+    valueControl.title = field.displayName;
+    valueControl.label = field.displayName;
+    valueControl.FieldName = field.fieldName;
+    valueControl.field = field.fieldName;
+    valueControl.attrs = {
+      ...(valueControl.attrs || {}),
+      field: field.fieldName,
+      fieldName: field.fieldName,
+      data: {
+        ...(valueControl.attrs?.data || {}),
+        list: { AppID: 41, ListSetID: APP_ID, ListID: LIST_ID, Type: 1, Title: "Support Tickets" },
+        field: field.fieldName,
+        fieldName: field.fieldName,
+      },
+    };
+  }
 }
 
 function ensureSectionContent(resource) {
@@ -113,7 +182,18 @@ function decoded(resource) {
   return {
     ListSet: { ListID: APP_ID, Title: "Service Desk Workspace Test" },
     Pages: [{ Type: 103, Title: "Service Desk Workspace", LayoutID: "dashboard-layout-workspace", LayoutInResources: [{ ID: "dashboard-layout-workspace", RefId: "dashboard-layout-workspace", Resource: JSON.stringify(resource) }] }],
-    Childs: [{ List: { ListID: LIST_ID, Title: "Support Tickets" }, Fields: [{ FieldName: "Title", DisplayName: "Title" }, { FieldName: "ListDataID", DisplayName: "Record ID" }, { FieldName: "Priority", DisplayName: "Priority" }, { FieldName: "Status", DisplayName: "Status" }] }],
+    Childs: [{ List: { ListID: LIST_ID, Title: "Support Tickets" }, Fields: [
+      { FieldName: "Title", DisplayName: "Title" },
+      { FieldName: "ListDataID", DisplayName: "Record ID" },
+      { FieldName: "TicketNumber", DisplayName: "Ticket Number" },
+      { FieldName: "Status", DisplayName: "Status" },
+      { FieldName: "Category", DisplayName: "Category" },
+      { FieldName: "Priority", DisplayName: "Priority" },
+      { FieldName: "Description", DisplayName: "Description" },
+      { FieldName: "ImpactLevel", DisplayName: "Impact Level" },
+      { FieldName: "AssignedTo", DisplayName: "Assigned To" },
+      { FieldName: "CreatedTime", DisplayName: "Created Time" },
+    ] }],
     Forms: [],
     FormNewReports: [],
     DataReports: [],
@@ -159,6 +239,16 @@ function findAll(node, id) {
     if (ids(current).includes(id)) found.push(current);
   });
   return found;
+}
+
+function visibleText(node) {
+  return [
+    node?.attrs?.headc?.title?.value,
+    node?.attrs?.title?.value,
+    node?.title,
+    node?.name,
+    node?.label,
+  ].find((value) => typeof value === "string" && value.trim()) || "";
 }
 
 function removeOperations(node) {

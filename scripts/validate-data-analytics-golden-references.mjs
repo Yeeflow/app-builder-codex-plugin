@@ -236,10 +236,9 @@ function collectPlannedDataAnalyticsTemplates(planText, references) {
     let pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name", "custom form", "form name"]);
     const surfaceColumn = findHeaderIndex(normalizedHeaders, ["surface", "usage surface", "page type", "form usage"]);
     let sectionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "section", "section name", "region"]);
-    const bareSectionColumn = findHeaderIndex(normalizedHeaders, ["section"]);
+    const bareSectionColumn = findHeaderIndex(normalizedHeaders, ["section", "region"]);
     if (pageColumn === -1 && bareSectionColumn !== -1 && surfaceColumn !== -1) {
-      pageColumn = bareSectionColumn;
-      sectionColumn = surfaceColumn;
+      sectionColumn = bareSectionColumn;
     } else if (pageColumn !== -1 && sectionColumn === pageColumn && surfaceColumn !== -1) {
       sectionColumn = surfaceColumn;
     }
@@ -250,7 +249,7 @@ function collectPlannedDataAnalyticsTemplates(planText, references) {
       const cells = splitTableLine(lines[rowIndex]);
       const raw = lines[rowIndex];
       const templateId = extractApprovedDataAnalyticsTemplateId(raw, references);
-      const dashboardPage = cleanMarkdownCell(cells[pageColumn]) || currentDashboardPage;
+      const dashboardPage = pageColumn === -1 ? currentDashboardPage : (cleanMarkdownCell(cells[pageColumn]) || currentDashboardPage);
       if (!dashboardPage) {
         rowIndex += 1;
         continue;

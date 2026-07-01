@@ -114,6 +114,8 @@ All other template controls, page temp variables, form actions, layout relations
 
 Left-panel Data Filter controls must bind by business semantics, not by source-list field order. A filter labeled or placeholdered as `Status` must use the actual Status field from the bound source dataset; a filter labeled or placeholdered as `Priority` or `Priority Level` must use the actual Priority field. Generated packages must not bind these controls to neighboring fields such as ticket number, subject/title, requester, or created date just because those fields appear earlier in the list schema. The filter's option source, display field, value field, and consumer condition must all resolve to the same intended business field.
 
+Left-panel choice filters must also carry a proven option source. For Choice/select fields, materialization must preserve the App Plan choice values and/or exported `Rules.choices`, then write them into the generated filter option contract (`choice-options` / `options`) while keeping `attrs.data.field`, `attrs.display_f`, and `attrs.value_f` aligned to the same business field. A visible filter labeled `Priority Level` with an empty dropdown, or a `Status` filter showing Subject/Ticket values, is a hard failure even when the Collection itself can still show rows.
+
 `left_panel_caption_add_button` may be retained only when the left-panel source supports creating new records, such as a Data list or Document library. When the primary source is a Form report, Data report, or another read-only/reporting source, remove `left_panel_caption_add_button` and its action instead of leaving a visual-only Add button.
 
 `Operations` and operation containers may exist only when they contain real configured action controls. Every generated control that carries `attrs.control_action`, `attrs.action`, `control_action`, or `action` must resolve to a page-level `actions[]` / `formAction[]` entry or to the nearest Collection/Kanban local action list. If a copied operation button, search icon, add button, sidebar toggle, or header icon cannot be resolved after template cloning and namespacing, remove that control and then clean up any now-empty operation container.
@@ -131,6 +133,8 @@ The left-panel record item title is mandatory in both workspace templates:
 - Date/age text must use Yeeflow expression binding, not a visible literal formula string.
 
 Use `current_item_fields_grid` for selected-record fields. Standard short fields use `current_item_standard_field` and occupy one grid cell. Large or media fields use `current_item_large_field`, including Multiple line, Rich text, Image, and Attachment/File fields.
+
+Selected-record detail labels must match the value binding in the same field container. Do not fill `current_item_standard_field` or `current_item_large_field` slots by list order after copying the template. A `Ticket ID` or `Ticket Number` label must bind to the ticket/request number field, `Status` must bind to Status, `Category` must bind to Category, `Priority` must bind to Priority, and `Description` must bind to Description or an equivalent details field. If a planned source list lacks the matching field, either change the label to the actual field or remove the field container; never leave mismatched label/value pairs.
 
 When `current_item_large_field` appears inside `current_item_fields_grid`, its column span must equal the parent grid column count at each breakpoint. Column span must never exceed the parent grid column count.
 
@@ -163,6 +167,7 @@ Generated pages must remove:
 - Title-only copied section modules.
 - Empty optional right/detail panels.
 - Copied source-template business copy from another domain, including loan/Office Asset helper text in non-loan apps.
+- Copied source-template KPI metadata and helper names such as `Active Loans`, `current loan volume`, `return activity signal`, `Office Asset records`, and loan-domain guidance. If KPI cards are planned, rewrite every visible label and Designer metadata field to the current business metric; if they are not planned, remove the KPI wrapper.
 
 KPI cards should be generated only when the Functional Specification or App Plan requires KPI metrics. Generate only the planned number of KPI cards.
 

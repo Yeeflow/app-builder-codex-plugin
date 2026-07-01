@@ -339,6 +339,7 @@ For generated-final app-level `.yapk` packages:
 
 - Do not embed seed/sample rows in `Childs[].List.Items`, `Childs[].ListDatas`, or `Childs[].List.ListDatas`.
 - Emit synthetic seed rows as a separate companion artifact.
+- Seed artifacts for `identity-picker` and `file-upload` fields must be structured live-write instructions, not plain strings. Identity-picker sample values must declare `seedValueType: "identity-picker"` and `requiresLiveUserResolution: true` so the runtime seed step resolves an existing tenant user before writing. File-upload sample values must declare `seedValueType: "file-upload"` and `requiresFileUploadReference: true` so the runtime seed step waits for an uploaded file reference or leaves the field empty. The generated YAPK field shape remains schema-safe `FieldType: "Text"` plus `Type: "identity-picker"` or `Type: "file-upload"`; do not invent unsupported `FieldType: "User"` storage.
 - Run live seed writes only after explicit approval, after install/materialization proof, and with before/after count reporting.
 - Use `TriggerFlow: false` by default for demo/test seed writes unless the user explicitly asks to exercise workflows.
 

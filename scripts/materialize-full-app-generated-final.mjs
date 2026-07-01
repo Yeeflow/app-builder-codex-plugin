@@ -282,6 +282,9 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 function buildSeedDataArtifact(decoded) {
   const lists = (decoded.Childs || []).map((child) => {
     const fields = (child.Fields || []).filter((field) => Number(field.Status) !== 0 || field.FieldName === "Title");
+    const fieldSeedRequirements = fields
+      .map((field) => seedRequirementForField(field))
+      .filter(Boolean);
     const rows = [0, 1, 2].map((rowIndex) => {
       const row = {};
       for (const field of fields.slice(0, 8)) row[field.FieldName] = sampleValueForField(field, rowIndex);
@@ -292,6 +295,7 @@ function buildSeedDataArtifact(decoded) {
       listId: stringId(child.List?.ListID || child.ListID || ""),
       operation: "post-install-seed-only",
       liveWriteRequired: true,
+      fieldSeedRequirements,
       rows,
     };
   });
@@ -308,12 +312,47 @@ function sampleValueForField(field, index) {
   if (field.FieldType === "Bit") return index % 2 === 0 ? "1" : "0";
   if (field.FieldType === "Datetime") return `2026-07-${String(index + 1).padStart(2, "0")}`;
   if (field.FieldType === "Decimal") return String((index + 1) * 10);
-  if (field.Type === "identity-picker") return "";
+  if (field.Type === "identity-picker") return {
+    seedValueType: "identity-picker",
+    value: null,
+    requiresLiveUserResolution: true,
+    resolutionStrategy: "search-existing-tenant-user-before-live-write",
+    displayName: field.DisplayName || field.FieldName,
+  };
+  if (field.Type === "file-upload") return {
+    seedValueType: "file-upload",
+    value: null,
+    requiresFileUploadReference: true,
+    resolutionStrategy: "leave-empty-until-file-upload-reference-is-available",
+    displayName: field.DisplayName || field.FieldName,
+  };
   if (field.Type === "select") {
     const rules = parseJsonMaybe(field.Rules) || {};
     return String(rules.choices?.[index % Math.max(1, rules.choices.length)]?.value || "Active");
   }
   return `${field.DisplayName || field.FieldName} ${index + 1}`;
+}
+
+function seedRequirementForField(field) {
+  if (field?.Type === "identity-picker") {
+    return {
+      fieldName: field.FieldName,
+      displayName: field.DisplayName || field.FieldName,
+      controlType: "identity-picker",
+      requiresLiveUserResolution: true,
+      mustNotUsePlainStringSeed: true,
+    };
+  }
+  if (field?.Type === "file-upload") {
+    return {
+      fieldName: field.FieldName,
+      displayName: field.DisplayName || field.FieldName,
+      controlType: "file-upload",
+      requiresFileUploadReference: true,
+      mustNotUsePlainStringSeed: true,
+    };
+  }
+  return null;
 }
 
 function parseJsonMaybe(value) {
@@ -481,6 +520,7 @@ function analyzeAppPlanResourceDemand(planText) {
   const dashboardAnalyticsRecords = collectDashboardAnalyticsRecords(planText);
   const dashboardDataTableRecords = collectDashboardDataTableRecords(planText);
   const dashboardPageLayoutTemplateRecords = collectDashboardPageLayoutTemplateRecords(planText);
+  const explicitDashboardNames = resources.dashboards || [];
   const dashboardNamesFromTemplates = [
     ...dashboardPageLayoutTemplateRecords,
     ...dashboardFilterRecords,
@@ -489,7 +529,7 @@ function analyzeAppPlanResourceDemand(planText) {
     ...dashboardAnalyticsRecords,
     ...dashboardDataTableRecords,
   ].map((record) => cleanResourceName(record.dashboardPage)).filter((name) => name && !isNonResourceName(name));
-  if (dashboardNamesFromTemplates.length) {
+  if (dashboardNamesFromTemplates.length && explicitDashboardNames.length === 0) {
     resources.dashboards = unique([...(resources.dashboards || []), ...dashboardNamesFromTemplates]);
     counts.dashboards = resources.dashboards.length;
     const existing = evidence.find((item) => item.section === "dashboards");
@@ -586,13 +626,12 @@ function collectDashboardAnalyticsRecords(planText) {
     if (templateColumn === -1) continue;
     let pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
     let regionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "surface", "section name", "region", "section"]);
-    const sectionColumn = findHeaderIndex(normalizedHeaders, ["section"]);
+    const sectionColumn = findHeaderIndex(normalizedHeaders, ["section", "region"]);
     const surfaceColumn = findHeaderIndex(normalizedHeaders, ["surface"]);
-    if (pageColumn === -1 && sectionColumn !== -1 && surfaceColumn !== -1) {
-      pageColumn = sectionColumn;
+    if (pageColumn !== -1 && regionColumn === pageColumn && surfaceColumn !== -1) {
       regionColumn = surfaceColumn;
-    } else if (pageColumn !== -1 && regionColumn === pageColumn && surfaceColumn !== -1) {
-      regionColumn = surfaceColumn;
+    } else if (pageColumn === -1 && sectionColumn !== -1 && surfaceColumn !== -1) {
+      regionColumn = sectionColumn;
     }
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
     const questionColumn = findHeaderIndex(normalizedHeaders, ["business question", "question", "title", "analytics title"]);
@@ -603,7 +642,7 @@ function collectDashboardAnalyticsRecords(planText) {
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
       const selectedTemplateId = extractApprovedDataAnalyticsTemplateId(lines[rowIndex]);
-      const dashboardPage = cleanResourceName(cells[pageColumn]) || currentDashboardPage;
+      const dashboardPage = pageColumn === -1 ? currentDashboardPage : (cleanResourceName(cells[pageColumn]) || currentDashboardPage);
       if (!dashboardPage) {
         rowIndex += 1;
         continue;
@@ -1228,18 +1267,30 @@ function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = 
     .filter((name) => !isNonResourceName(name));
   if (headingNames.length && key !== "customForms" && key !== "dashboards") return unique(headingNames);
 
+  if (key === "dashboards") {
+    const pageNames = [...section.matchAll(/^-\s*Page name:\s*(.+?)\s*$/gim)]
+      .map((match) => cleanResourceName(match[1]))
+      .filter((name) => !isNonResourceName(name));
+    const dashboardHeadings = headingNames.filter((name) => !/\b(?:template|selection|filter|filters|metric|metrics|section|sections|record display|data analytics|data table|navigation)\b/i.test(name));
+    const explicitLayoutTableNames = [];
+    for (const table of parseMarkdownTables(section)) {
+      if (!table.headers.includes("Selected Dashboard Page Layout Template")) continue;
+      const nameHeader = table.headers.find((header) => ["Dashboard Page Name", "Dashboard Page", "Page Name"].includes(header));
+      if (!nameHeader) continue;
+      for (const row of table.rows) {
+        const name = cleanResourceName(row[nameHeader]);
+        if (!isNonResourceName(name)) explicitLayoutTableNames.push(name);
+      }
+    }
+    return unique([...dashboardHeadings, ...pageNames, ...explicitLayoutTableNames]);
+  }
+
   const tableNames = [];
   for (const table of parseMarkdownTables(section)) {
     const nameHeader = tableHeaders.find((header) => table.headers.includes(header));
     if (!nameHeader) continue;
     for (const row of table.rows) {
       const name = cleanResourceName(row[nameHeader]);
-      if (!isNonResourceName(name)) tableNames.push(name);
-    }
-  }
-  if (key === "dashboards") {
-    for (const match of section.matchAll(/^-\s*Page name:\s*(.+?)\s*$/gim)) {
-      const name = cleanResourceName(match[1]);
       if (!isNonResourceName(name)) tableNames.push(name);
     }
   }
@@ -1644,7 +1695,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   removeAllByIdentity(resource, "kpi_metrics_wrapper");
   scrubDashboardSourceTemplateResidue(resource, { listName, scrubMetadata: true });
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource);
+  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
   removeEmptyBusinessSections(resource);
   return resource;
 }
@@ -1840,7 +1891,7 @@ function isNonResourceName(value) {
   if (!text) return true;
   if (/^(not applicable|n\/a|none|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
   if (/^no custom\b/i.test(text)) return true;
-  if (/^(dashboard page name|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
+  if (/^(dashboard|dashboard page|dashboard page name|page|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
   return false;
 }
 
@@ -2261,7 +2312,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: isMasterDetailWorkspace });
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource);
+  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
   resource.filterVars = filterConsumedDashboardFilterVars(resource, uniqueByName([
     ...normalizeDependencyArray(templateDependencies.filterVars),
     ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
@@ -2327,8 +2378,9 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   if (isMasterDetailWorkspace) restoreDashboardRootGoldenReferenceProvenance(resource);
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource);
+  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
   removeEmptyDashboardBusinessSections(resource);
+  ensureDashboardContentCardRequiredSlots(resource);
   ensureVisibleKpiCards(resource, kpiContracts, { listName: sourceResource });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: false });
@@ -2491,19 +2543,40 @@ function masterDetailLeftPanelFilters(resource, listMeta, rootListSetId) {
   for (const [index, filter] of filters.slice(0, 4).entries()) {
     const field = resolveMasterDetailFilterField(filter, listMeta, index) || fieldsForDynamicControls(listMeta)[index + 1] || fieldsForDynamicControls(listMeta)[0] || { fieldName: "Title" };
     const variable = String(filter.binding || filter.attrs?.binding || `__filter_filter_${field.displayName || field.fieldName}`).replace(/^__filter_/, "");
+    const optionValues = choiceValuesForField(field);
+    const label = field.displayName || field.fieldName;
     filter.binding = `__filter_${variable}`;
+    filter.name = label;
+    filter.title = label;
+    filter.label = label;
     filter.attrs = {
       ...(filter.attrs || {}),
+      lab: {
+        ...(filter.attrs?.lab || {}),
+        value: label,
+        ty: filter.attrs?.lab?.ty || [null, "xs-light"],
+      },
+      layout: filter.attrs?.layout || "dropdown",
+      displayStyle: filter.attrs?.displayStyle || "dropdown",
+      "dropdown-enable": true,
       data: {
         ...(filter.attrs?.data || {}),
         list: { AppID: 41, ListID: stringId(listMeta.listId), Type: 1, Title: listMeta.listName, ListSetID: stringId(rootListSetId) },
         field: field.fieldName,
+        displayField: field.fieldName,
+        valueField: field.fieldName,
         filter: [],
+        optionSourceProven: true,
       },
       display_f: field.fieldName,
       value_f: field.fieldName,
-      placeholder: filter.attrs?.placeholder || field.displayName || field.fieldName,
+      ps: filter.attrs?.ps || 20,
+      optionSourceProven: true,
+      "choice-options": optionValues,
+      options: optionValues.map((value) => ({ value, label: value })),
+      placeholder: label,
     };
+    setSemanticNavigatorLabel(filter, `left_panel_filter_${label}`);
   }
   // Empty select-filter values can clear the left record list at runtime. Keep
   // filter controls configured for users, but do not apply collection filters
@@ -2594,7 +2667,7 @@ function mapDynamicControlsForList(root, listMeta, rootListSetId) {
   const bindableFields = fieldsForDynamicControls(listMeta);
   let dynamicIndex = 0;
   for (const control of findDescendants(root, (node) => String(node?.type || "").startsWith("dynamic-"))) {
-    const field = selectFieldForDynamicControl(control, bindableFields, dynamicIndex);
+    const field = selectFieldForDynamicControl(control, bindableFields, dynamicIndex, { root });
     dynamicIndex += 1;
     control.type = dynamicControlTypeForField(field);
     control.attrs = {
@@ -2626,6 +2699,7 @@ function mapDynamicControlsForList(root, listMeta, rootListSetId) {
     control.label = field.displayName;
     const navLabel = `collection_item_${slugify(field.displayName || field.fieldName || "field")}`.replace(/-/g, "_");
     setSemanticNavigatorLabel(control, navLabel);
+    updateMasterDetailFieldLabel(root, control, field);
   }
 }
 
@@ -3812,12 +3886,91 @@ function replaceUserLikeDynamicFieldText(control, replacement) {
   visit(control);
 }
 
-function selectFieldForDynamicControl(control, fields, index) {
+function selectFieldForDynamicControl(control, fields, index, context = {}) {
+  const semanticField = selectSemanticFieldForDynamicControl(control, fields, context);
+  if (semanticField) return semanticField;
   const type = String(control?.type || "");
   const expectedType = ["dynamic-user", "dynamic-image", "dynamic-file"].includes(type) ? type : "dynamic-field";
   const compatible = fields.filter((field) => dynamicControlTypeForField(field) === expectedType);
   if (compatible.length) return compatible[index % compatible.length];
   return fields[index % fields.length] || fields[0];
+}
+
+function selectSemanticFieldForDynamicControl(control, fields, { root } = {}) {
+  if (!fields?.length) return null;
+  if (hasIdentity(control, "current_item_subject") || hasIdentity(control, "left_panel_data_item_title")) {
+    return findFieldBySemanticTokens(fields, ["subject", "title", "name", "number"]) || fields.find((field) => field.fieldName === "Title") || fields[0];
+  }
+  const hint = masterDetailFieldHint(root, control);
+  if (!hint) return null;
+  const tokens = semanticFieldTokensForHint(hint, fields);
+  if (!tokens.length) return null;
+  return findFieldBySemanticTokens(fields, tokens);
+}
+
+function masterDetailFieldHint(root, control) {
+  if (!root || !control) return "";
+  const parent = findParent(root, control);
+  const wrapper = parent && (
+    hasIdentity(parent, "current_item_standard_field") || hasIdentity(parent, "current_item_large_field")
+      ? parent
+      : findParent(root, parent)
+  );
+  if (!wrapper || (!hasIdentity(wrapper, "current_item_standard_field") && !hasIdentity(wrapper, "current_item_large_field"))) return "";
+  const titleControl = findFirstByIdentity(wrapper, "current_item_standard_field_title")
+    || findFirstByIdentity(wrapper, "current_item_large_field_title");
+  return firstVisibleTextValue(titleControl) || visibleBusinessText(titleControl) || "";
+}
+
+function semanticFieldTokensForHint(hint, fields) {
+  const text = normKey(hint);
+  if (!text) return [];
+  if (/\b(ticket|request|loan|review)?\s*(id|number|no)\b/.test(text)) return ["ticket number", "request number", "review number", "loan number", "number", "id", "title"];
+  if (/\b(subject|summary|title|name)\b/.test(text)) return ["subject", "summary", "title", "name"];
+  if (/\btype of request\b|\brequest type\b|\btype\b/.test(text)) {
+    const hasType = fields.some((field) => /\btype\b/i.test(field.displayName || ""));
+    return hasType ? ["type"] : ["status"];
+  }
+  if (/\bcategory\b/.test(text)) return ["category"];
+  if (/\bpriority|urgency|severity\b/.test(text)) return ["priority", "urgency", "severity"];
+  if (/\bstatus|state|stage\b/.test(text)) return ["status", "state", "stage"];
+  if (/\brequester|traveler|applicant\b/.test(text)) return ["requester", "traveler", "applicant"];
+  if (/\bassigned|agent|assignee|owner\b/.test(text)) return ["assigned agent", "assigned", "agent", "assignee", "owner"];
+  if (/\bcreated\b/.test(text)) return ["created date", "created"];
+  if (/\bdue\b/.test(text)) return ["due date", "due"];
+  if (/\bdescription|purpose|details|notes?\b/.test(text)) return ["description", "purpose", "details", "note"];
+  return [text];
+}
+
+function findFieldBySemanticTokens(fields, tokens) {
+  for (const token of tokens) {
+    const tokenKey = normKey(token);
+    const exact = fields.find((field) => normKey(field.displayName) === tokenKey || normKey(field.fieldName) === tokenKey);
+    if (exact) return exact;
+  }
+  for (const token of tokens) {
+    const tokenKey = normKey(token);
+    const partial = fields.find((field) => {
+      const display = normKey(field.displayName);
+      const name = normKey(field.fieldName);
+      return display.includes(tokenKey) || tokenKey.includes(display) || name === tokenKey;
+    });
+    if (partial) return partial;
+  }
+  return null;
+}
+
+function updateMasterDetailFieldLabel(root, control, field) {
+  const hint = masterDetailFieldHint(root, control);
+  if (!hint) return;
+  const parent = findParent(root, control);
+  const wrapper = parent && (
+    hasIdentity(parent, "current_item_standard_field") || hasIdentity(parent, "current_item_large_field")
+      ? parent
+      : findParent(root, parent)
+  );
+  const titleControl = wrapper && (findFirstByIdentity(wrapper, "current_item_standard_field_title") || findFirstByIdentity(wrapper, "current_item_large_field_title"));
+  if (titleControl && field?.displayName) setHeadingText(titleControl, field.displayName);
 }
 
 function normalizeDependencyArray(value) {
@@ -4239,12 +4392,57 @@ function removeEmptyDashboardBusinessSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
-      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child) && !hasAnyIdentity(node, ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"])) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child) && !["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"].some((identity) => hasIdentity(node, identity))) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
   };
   visit(root);
+}
+
+function ensureDashboardContentCardRequiredSlots(root) {
+  const wrappers = findDescendants(root, (node) => ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"].some((identity) => hasIdentity(node, identity)));
+  const headerPrototype = findFirstByIdentity(root, "section_title_header");
+  for (const wrapper of wrappers) {
+    if (!Array.isArray(wrapper.children)) wrapper.children = [];
+    const existingTitleArea = findFirstByIdentity(wrapper, "section_title_area");
+    if (existingTitleArea) {
+      ensureSectionTitleHeader(existingTitleArea, String(wrapper.id || wrapper.nv_label || wrapper.name || "content-card"), headerPrototype);
+      continue;
+    }
+    if (!findFirstByIdentity(wrapper, "section_content_area")) continue;
+    const wrapperSeed = String(wrapper.id || wrapper.nv_label || wrapper.name || "content-card");
+    const titleArea = {
+      id: deterministicUuid(`${wrapperSeed}:section-title-area`),
+      nv_label: "section_title_area",
+      label: "Container",
+      type: "container",
+      attrs: {
+        style: {
+          direction: [null, "row"],
+          gap: [null, "--sp--s200"],
+          justify_content: [null, "space-between"],
+          align_items: [null, "center"],
+        },
+      },
+      children: [],
+    };
+    ensureSectionTitleHeader(titleArea, wrapperSeed, headerPrototype);
+    const contentIndex = wrapper.children.findIndex((child) => hasIdentity(child, "section_content_area"));
+    if (contentIndex === -1) wrapper.children.unshift(titleArea);
+    else wrapper.children.splice(contentIndex, 0, titleArea);
+  }
+}
+
+function ensureSectionTitleHeader(titleArea, seed, headerPrototype = null) {
+  if (!titleArea || typeof titleArea !== "object") return;
+  titleArea.children = Array.isArray(titleArea.children) ? titleArea.children : [];
+  if (findFirstByIdentity(titleArea, "section_title_header")) return;
+  if (headerPrototype) {
+    const header = clone(headerPrototype);
+    header.id = deterministicUuid(`${seed}:section-title-header`);
+    titleArea.children.unshift(header);
+  }
 }
 
 function removeUnresolvedPageActionControls(root) {
@@ -4325,11 +4523,12 @@ function hasSectionTitleAreaContent(node) {
   return Boolean(header || (operations && hasActionConfiguration(operations)));
 }
 
-function removeEmptySectionTitleAreas(root) {
+function removeEmptySectionTitleAreas(root, { preserveContentCardTitleAreas = false } = {}) {
   const visit = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       visit(child);
+      if (preserveContentCardTitleAreas && hasIdentity(child, "section_title_area") && ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"].some((identity) => hasIdentity(node, identity))) return true;
       if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
       return true;
     });
@@ -4373,12 +4572,18 @@ function scrubDashboardSourceTemplateResidue(root, { listName, scrubMetadata = f
     [/\bevent_portfolio_pipeline_section\b/gi, `${safeSlug}_details_section`],
     [/\bevent_portfolio_dashboard_golden_reference\b/gi, `${safeSlug}_dashboard_reference`],
     [/\bAsset Loan Operations Header Band\b/g, `${safeName} Header Band`],
+    [/\bActive Loans Metric Display\b/g, `${safeName} Metric Display`],
+    [/\bActive Loans card content row\b/g, `${safeName} card content row`],
+    [/\bActive Loans KPI Card\b/g, `${safeName} KPI Card`],
+    [/\bActive Loans Text\b/g, `${safeName} Text`],
+    [/\bActive Loans\b/g, `${safeName} records`],
     [/\bActive Loan Pipeline\b/g, `${safeName} Details`],
     [/\bOffice Asset records\b/g, `${safeName} records`],
     [/\bOffice Asset\b/g, safeName],
     [/\bcurrent loan volume\b/gi, "current record volume"],
     [/\breturn activity signal\b/gi, "activity signal"],
     [/\bwatch coordinator follow-up\b/gi, "follow-up signal"],
+    [/Coordinator view of active loans, due dates, checkout status, and return follow-up\./gi, `Track ${safeName} details, status, priority, ownership, and follow-up context.`],
     [/Coordinator guidance: prioritize overdue items and returns due within the next seven days\./gi, `Review ${safeName} records and related activity.`],
   ];
   const visit = (value) => {
@@ -4403,6 +4608,8 @@ function scrubDashboardSourceTemplateResidue(root, { listName, scrubMetadata = f
 function hasSourceTemplateResidueText(node) {
   const text = visibleBusinessText(node);
   return /\bActive Loan Pipeline\b/i.test(text)
+    || /\bActive Loans\b/i.test(text)
+    || /\bCoordinator view of active loans/i.test(text)
     || /\bCoordinator guidance: prioritize overdue items and returns/i.test(text)
     || /\bcurrent loan volume\b/i.test(text)
     || /\breturn activity signal\b/i.test(text)
@@ -5580,8 +5787,19 @@ function fieldsForDynamicControls(listMeta) {
     fieldType: field.FieldType || field.fieldType || "Text",
     controlType: field.Type || field.controlType || "",
     Type: field.Type || field.controlType || "",
+    Rules: field.Rules || field.rules || "",
+    choiceValues: field.choiceValues || "",
   }));
   return fields.length ? fields : [{ fieldName: "Title", displayName: "Title", fieldType: "Text" }];
+}
+
+function choiceValuesForField(field) {
+  const parsed = parseJsonMaybe(field?.Rules) || {};
+  const fromRules = Array.isArray(parsed.choices)
+    ? parsed.choices.map((choice) => String(choice?.value || choice?.label || choice || "").trim()).filter(Boolean)
+    : [];
+  const fromPlan = String(field?.choiceValues || "").split(/[,;]+/).map((value) => value.trim()).filter(Boolean);
+  return unique(fromRules.concat(fromPlan, inferChoiceValues(field))).slice(0, 12);
 }
 
 function primaryFieldName(listMeta) {

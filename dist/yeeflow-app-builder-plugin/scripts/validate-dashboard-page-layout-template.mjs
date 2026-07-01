@@ -67,7 +67,19 @@ const TEMPLATE_TERMS = [
   "Campaign",
   "Registration",
   "Marketing Event",
+  "active loans",
+  "current loan volume",
+  "return follow-up",
+  "checkout status",
+  "Office Asset records",
 ];
+const LOAN_ASSET_DOMAIN_TERMS = new Set([
+  "active loans",
+  "current loan volume",
+  "return follow-up",
+  "checkout status",
+  "Office Asset records",
+]);
 const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|employee|person|people|accountid|account id)\b/i;
 
 if (isMainModule()) {
@@ -790,7 +802,11 @@ function looksLikeUuid(value) {
 
 function validateBusinessMapping(resource, findings, page) {
   const text = collectBusinessText(resource).join("\n");
-  const hits = TEMPLATE_TERMS.filter((term) => new RegExp(`\\b${escapeRegExp(term)}\\b`, "i").test(text));
+  const isLoanAssetPage = /\b(?:loan|asset)\b/i.test(String(page || ""));
+  const hits = TEMPLATE_TERMS.filter((term) => {
+    if (isLoanAssetPage && LOAN_ASSET_DOMAIN_TERMS.has(term)) return false;
+    return new RegExp(`\\b${escapeRegExp(term)}\\b`, "i").test(text);
+  });
   for (const term of hits) {
     findings.push(error("DASH_LAYOUT_TEMPLATE_LABEL_LEAKAGE", "Generated dashboard must replace unrelated template/domain labels with current app domain text.", { page, term }));
   }
@@ -845,6 +861,7 @@ function validateDataControls(page, listIndex, findings) {
       findings.push(error("DASH_LAYOUT_MODEL_CONTROL_UNPROVEN", "Summary/chart/model controls may be used only when their runtime model contract is export-proven.", { page: page.title, pointer: entry.pointer, type: control.type }));
     }
   }
+  validateMasterDetailSelectedItemDetailBindings(page, listIndex, findings);
 }
 
 function isMasterDetailWorkspaceResource(resource) {
@@ -986,6 +1003,22 @@ function validateMasterDetailLeftPanelFilterBinding(entry, page, listIndex, find
     findings.push(error("DASH_LAYOUT_MASTER_DETAIL_FILTER_FIELD_UNRESOLVED", "Master-detail left-panel filter field must exist on the bound source list.", { page: page.title, pointer: entry.pointer, listId: listId || null, fieldName }));
     return;
   }
+  if (!entry.control?.attrs?.optionSourceProven && !entry.control?.attrs?.data?.optionSourceProven) {
+    findings.push(error("DASH_LAYOUT_MASTER_DETAIL_FILTER_OPTION_SOURCE_UNPROVEN", "Master-detail left-panel filters must carry an export-proven option source contract so runtime dropdowns are not empty.", {
+      page: page.title,
+      pointer: entry.pointer,
+      fieldName,
+    }));
+  }
+  if (String(entry.control?.attrs?.display_f || "") !== fieldName || String(entry.control?.attrs?.value_f || "") !== fieldName) {
+    findings.push(error("DASH_LAYOUT_MASTER_DETAIL_FILTER_OPTION_FIELD_MISMATCH", "Master-detail left-panel filters must use the same business field for data.field, display_f, and value_f.", {
+      page: page.title,
+      pointer: entry.pointer,
+      fieldName,
+      display_f: entry.control?.attrs?.display_f || null,
+      value_f: entry.control?.attrs?.value_f || null,
+    }));
+  }
   const hint = [
     entry.control?.name,
     entry.control?.title,
@@ -1007,6 +1040,83 @@ function validateMasterDetailLeftPanelFilterBinding(entry, page, listIndex, find
       actualDisplayName: field?.DisplayName || field?.displayName || null,
     }));
   }
+}
+
+function validateMasterDetailSelectedItemDetailBindings(page, listIndex, findings) {
+  if (!isMasterDetailWorkspaceResource(page.resource)) return;
+  for (const entry of page.controls) {
+    const control = entry.control;
+    if (!["current_item_standard_field", "current_item_large_field"].some((identity) => hasIdentity(control, identity))) continue;
+    const titleControl = findFirstByIdentity(control, "current_item_standard_field_title") || findFirstByIdentity(control, "current_item_large_field_title");
+    const valueControl = findFirstByIdentity(control, "current_item_standard_field_value") || findFirstByIdentity(control, "current_item_large_field_value");
+    const titleText = firstVisibleText(titleControl);
+    if (!titleText || !valueControl) continue;
+    const field = resolveControlBoundField(valueControl, listIndex);
+    if (!field) {
+      findings.push(error("DASH_LAYOUT_MASTER_DETAIL_DETAIL_FIELD_UNRESOLVED", "Master-detail selected-item detail value controls must bind to a field on the current-item source list.", {
+        page: page.title,
+        pointer: entry.pointer,
+        label: titleText,
+      }));
+      continue;
+    }
+    const expectedTokens = semanticDetailTokens(titleText);
+    if (!expectedTokens.length) continue;
+    const actualText = normKey(`${field.DisplayName || field.displayName || ""} ${field.FieldName || field.fieldName || ""} ${field.InternalName || ""}`);
+    const matches = expectedTokens.some((token) => {
+      const tokenKey = normKey(token);
+      return actualText === tokenKey || actualText.includes(tokenKey) || tokenKey.includes(actualText);
+    });
+    if (!matches) {
+      findings.push(error("DASH_LAYOUT_MASTER_DETAIL_DETAIL_FIELD_MISMATCH", "Master-detail selected-item detail labels must bind to matching business fields; do not fill detail slots by field order.", {
+        page: page.title,
+        pointer: entry.pointer,
+        label: titleText,
+        expectedTokens,
+        actualField: field.FieldName || field.fieldName || null,
+        actualDisplayName: field.DisplayName || field.displayName || null,
+      }));
+    }
+  }
+}
+
+function resolveControlBoundField(control, listIndex) {
+  const fieldName = String(control?.attrs?.data?.fieldName || control?.attrs?.data?.field || control?.attrs?.fieldName || control?.attrs?.field || control?.FieldName || control?.fieldName || control?.field || "").trim();
+  if (!fieldName) return null;
+  const listId = String(control?.attrs?.data?.ListID || control?.attrs?.data?.list?.ListID || control?.attrs?.list?.ListID || "").trim();
+  const lists = listId && listIndex.has(listId) ? [listIndex.get(listId)] : Array.from(listIndex.values());
+  for (const list of lists) {
+    const found = asArray(list?.fields).find((field) => String(field?.FieldName || field?.fieldName || "") === fieldName || String(field?.InternalName || "") === fieldName);
+    if (found) return found;
+  }
+  return null;
+}
+
+function semanticDetailTokens(label) {
+  const text = normKey(label);
+  if (!text) return [];
+  if (/\b(ticket|request|loan|review)?\s*(id|number|no)\b/.test(text)) return ["ticket number", "request number", "review number", "loan number", "number", "title"];
+  if (/\b(subject|summary|title|name)\b/.test(text)) return ["subject", "summary", "title", "name"];
+  if (/\btype of request\b|\brequest type\b|\btype\b/.test(text)) return ["type", "status"];
+  if (/\bcategory\b/.test(text)) return ["category"];
+  if (/\bpriority|urgency|severity\b/.test(text)) return ["priority", "urgency", "severity"];
+  if (/\bstatus|state|stage\b/.test(text)) return ["status", "state", "stage"];
+  if (/\brequester|traveler|applicant\b/.test(text)) return ["requester", "traveler", "applicant"];
+  if (/\bassigned|agent|assignee|owner\b/.test(text)) return ["assigned agent", "assigned", "agent", "assignee", "owner"];
+  if (/\bcreated\b/.test(text)) return ["created date", "created"];
+  if (/\bdue\b/.test(text)) return ["due date", "due"];
+  if (/\bdescription|purpose|details|notes?\b/.test(text)) return ["description", "purpose", "detail", "note"];
+  return [];
+}
+
+function firstVisibleText(control) {
+  return [
+    control?.attrs?.headc?.title?.value,
+    control?.attrs?.title?.value,
+    control?.title,
+    control?.name,
+    control?.label,
+  ].find((value) => typeof value === "string" && value.trim()) || "";
 }
 
 function semanticFilterToken(value) {
