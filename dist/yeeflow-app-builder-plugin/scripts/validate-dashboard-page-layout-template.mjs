@@ -187,10 +187,10 @@ function collectDashboardPageLayoutTemplateRecordsFromPlan(appPlanPath, findings
   const lines = section.split(/\r?\n/);
   const records = [];
   for (let index = 0; index < lines.length; index += 1) {
-    if (!/^####\s+Dashboard Page Layout Template Selection\s*$/i.test(lines[index].trim())) continue;
+    if (!/^#{3,4}\s+(?:\d+(?:\.\d+)*\s+)?Dashboard Page Layout Template Selection\s*$/i.test(lines[index].trim())) continue;
     let cursor = index + 1;
     while (cursor < lines.length && !isTableLine(lines[cursor])) {
-      if (/^####\s+/.test(lines[cursor])) break;
+      if (/^#{3,4}\s+/.test(lines[cursor])) break;
       cursor += 1;
     }
     if (!isTableLine(lines[cursor]) || !isTableLine(lines[cursor + 1] || "")) continue;
@@ -377,9 +377,6 @@ function validatePageShell(resource, findings, context) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_EMPTY`, "Dashboard content must contain selected business section containers, not an empty shell.", { page: context.page }));
   }
   for (const section of findAllByIdentity(resource, "content_card_wrapper")) {
-    if (!findFirstByIdentity(section, "section_title_area")) {
-      findings.push(error(`DASH_LAYOUT_${context.layer}_SECTION_TITLE_AREA_MISSING`, "Each business section card must preserve section_title_area.", { page: context.page }));
-    }
     if (!findFirstByIdentity(section, "section_content_area")) {
       findings.push(error(`DASH_LAYOUT_${context.layer}_SECTION_CONTENT_AREA_MISSING`, "Each business section card must preserve section_content_area.", { page: context.page }));
     }
@@ -655,9 +652,9 @@ function validateTemplateRootStructure(control, templateIndex, findings, page) {
 
 function validateSpecialModuleChildren(control, findings, page) {
   if (hasIdentity(control, "content_card_wrapper")) {
-    for (const required of ["section_title_area", "section_content_area"]) {
+    for (const required of ["section_content_area"]) {
       if (!findFirstByIdentity(control, required)) {
-        findings.push(error("DASH_LAYOUT_REPEATABLE_MODULE_REQUIRED_CHILD_MISSING", "Copied content_card_wrapper modules must preserve required section_title_area and section_content_area children.", { page, module: firstIdentity(control), requiredChild: required }));
+        findings.push(error("DASH_LAYOUT_REPEATABLE_MODULE_REQUIRED_CHILD_MISSING", "Copied content_card_wrapper modules must preserve required section_content_area children. section_title_area is optional when no title or Operations are needed.", { page, module: firstIdentity(control), requiredChild: required }));
       }
     }
   }

@@ -6,6 +6,8 @@ import os from "node:os";
 import path from "node:path";
 import { materializeFullAppGeneratedFinal } from "./materialize-full-app-generated-final.mjs";
 import { readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
+import { validateDashboardGenerationHardGates } from "./validate-dashboard-generation-hard-gates.mjs";
+import { validateDashboardPageLayoutTemplate } from "./validate-dashboard-page-layout-template.mjs";
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "service-tickets-regression-"));
 const specPath = path.join(tempDir, "functional-specification.md");
@@ -78,7 +80,7 @@ Not planned.
 ### 14.1 Service Tickets Dashboard
 - Page name: Service Tickets Dashboard
 
-#### Dashboard Page Layout Template Selection
+### 14.3 Dashboard Page Layout Template Selection
 | Dashboard Page | Selected Dashboard Page Layout Template |
 | --- | --- |
 | Service Tickets Dashboard | dashboard-page-layouts-two-panel-workspace |
@@ -89,9 +91,9 @@ Not planned.
 | Open Tickets | Service Tickets Dashboard | Tickets | Status | Count open tickets |
 
 #### Record Display Control Selection
-| Dashboard Page | Dataset Region | Source List | Selected Collection Template |
-| --- | --- | --- | --- |
-| Service Tickets Dashboard | Ticket list | Tickets | collection_control_grid_table |
+| Dashboard Page | Dataset Region | Source List | Selected Collection Template | Selection Reason |
+| --- | --- | --- | --- | --- |
+| Service Tickets Dashboard | Ticket list | Tickets | collection_control_grid_table | Dense operational table for row/column scanning of ticket status, owner, priority, and due date fields. |
 
 ## 15. Application Navigation Plan
 | Group | Item | Target Resource | Yeeflow Resource Type | Icon |
@@ -124,6 +126,19 @@ assert.equal(ticketFields.get("Assigned Agent")?.Type, "identity-picker", "Assig
 
 const pageTitles = decoded.Pages.map((page) => page.Title);
 assert.deepEqual(pageTitles, ["Service Tickets Dashboard"], "Summary Metrics must not materialize as an extra Dashboard page");
+const dashboardResource = JSON.parse(decoded.Pages[0].LayoutInResources[0].Resource);
+assert.equal(
+  dashboardResource.derivedFromDashboardPageLayoutTemplate,
+  "dashboard-page-layouts-two-panel-workspace",
+  "Service Tickets Dashboard must materialize the App Plan-selected two-panel workspace layout",
+);
+assert.ok(JSON.stringify(dashboardResource).includes("left_panel_data_items_wrapper"), "Two-panel workspace must include the left record-list panel");
+assert.ok(JSON.stringify(dashboardResource).includes("content_panel_current_item_wrapper"), "Two-panel workspace must include the selected-item detail panel");
+
+const pageLayoutValidation = validateDashboardPageLayoutTemplate({ package: packagePath, appPlan: planPath });
+assert.equal(pageLayoutValidation.status, "pass", JSON.stringify(pageLayoutValidation.findings || [], null, 2));
+const dashboardHardGates = validateDashboardGenerationHardGates({ package: packagePath, plan: planPath });
+assert.equal(dashboardHardGates.status, "pass", JSON.stringify(dashboardHardGates.findings || [], null, 2));
 
 const layoutsByList = new Map(decoded.Childs.map((child) => [child.List.Title, child.Layouts.filter((layout) => Number(layout.Type) === 1).map((layout) => layout.Title)]));
 assert.deepEqual(layoutsByList.get("Tickets"), ["Tickets New/Edit Form", "Tickets View Item"]);
@@ -139,6 +154,8 @@ console.log(JSON.stringify({
     "planned Status field preserved",
     "planned User fields preserved as identity-picker controls with schema-safe storage keys",
     "Summary Metrics not generated as Dashboard",
+    "two-panel Dashboard layout matches App Plan selection",
+    "dashboard page-layout and hard-gate validators pass",
     "custom forms assigned to correct host lists",
     "template business residue absent",
   ],

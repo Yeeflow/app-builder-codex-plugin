@@ -670,7 +670,7 @@ function lineMatchesReferenceGuidance(line, templateId, reference) {
   ].map(normalizeForMatch).filter(Boolean);
   if (signals.some((signal) => signal && normalized.includes(signal))) return true;
   const fallbackSignals = {
-    collection_control_responsive_card_grid: ["card", "browse", "overview", "portfolio", "asset"],
+    collection_control_responsive_card_grid: ["card", "browse", "overview", "portfolio", "asset", "ticket", "request", "selectable", "selected", "detail", "queue"],
     collection_control_card_with_multiselect_toolbar: ["card", "multi-select", "multiselect", "bulk", "batch", "selected"],
     collection_control_grid_table: ["dense", "row", "column", "work queue", "task list", "record list", "operational table", "scan"],
     collection_control_grid_table_with_multiselect: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection"],
@@ -990,6 +990,8 @@ function collectDashboardCollectionRecords(decoded, approvedIds) {
 
 function masterDetailWorkspaceConformanceTemplateId(entry, page) {
   if (!isMasterDetailWorkspaceInternalCollection(entry, page)) return "";
+  const explicitTemplateId = resolveExplicitCollectionTemplateId(entry, APPROVED_IDS);
+  if (explicitTemplateId) return explicitTemplateId;
   const identities = identityCandidates(entry.control).map(normalizeIdentity);
   if (identities.includes("left panel data items wrapper")) return "collection_control_grid_table";
   return "";
