@@ -34,6 +34,8 @@ try {
   expectCode("Chart-with-title template requires title control", ["--resource", writeJson("missing-title.json", dashboardResource({ missingTitle: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING");
   expectCode("Visual analytics template without runtime exts fails", ["--resource", writeJson("missing-runtime.json", dashboardResource({ omitRuntimeBindings: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_EXT_MISSING");
   expectCode("Runtime ext without ReportIds registration fails", ["--resource", writeJson("missing-reportids.json", dashboardResource({ omitReportIds: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_REPORT_ID_MISSING");
+  expectCode("Runtime chart type semantic strings fail", ["--resource", writeJson("semantic-chart-type-string.json", dashboardResource({ semanticChartTypeString: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_CHART_TYPE_CODE_INVALID");
+  expectCode("Line/area date trend rows without DATE func fail", ["--resource", writeJson("missing-date-trend-func.json", dashboardResource({ omitDateTrendRowFunc: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING");
   expectCode("Runtime ext with unresolved source field fails", ["--package", writeYapk("analytics-bad-field.yapk", dashboardResource({ badRuntimeField: true }))], "DATA_ANALYTICS_RUNTIME_FIELD_UNRESOLVED");
   expectCode("Visible analytics source without ListSetID fails", ["--resource", writeJson("visible-source-missing-listset.json", dashboardResource({ missingVisibleListSetId: true })), "--surface", "dashboard"], "DATA_ANALYTICS_VISIBLE_SOURCE_METADATA_MISSING");
   expectCode("Visible analytics source mismatch fails", ["--resource", writeJson("visible-source-mismatch.json", dashboardResource({ mismatchedVisibleSource: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_SOURCE_SURFACE_MISMATCH");
@@ -135,6 +137,8 @@ function dashboardResource(options = {}) {
     badRuntimeField: options.badRuntimeField,
     countValueUsesTitle: options.countValueUsesTitle,
     emptyPivotValueObject: options.emptyPivotValueObject,
+    semanticChartTypeString: options.semanticChartTypeString,
+    omitDateTrendRowFunc: options.omitDateTrendRowFunc,
   });
   return resource;
 }
@@ -416,6 +420,8 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
     if (!options.omitReportIds) reportIds.push(id);
     const key = control.type === "pivot-table" ? "PivotTable" : control.type;
     const fieldName = options.badRuntimeField ? "MissingField" : (id.includes("line") || id.includes("area") ? "Created" : "Status");
+    const row = { field: fieldName, fieldName, FieldName: fieldName };
+    if ((id.includes("line") || id.includes("area")) && !options.omitDateTrendRowFunc) row.func = "DATE";
     const valueEntry = options.emptyPivotValueObject && control.type === "pivot-table"
       ? {}
       : options.countValueUsesTitle
@@ -429,9 +435,9 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
         AppID: 41,
         ListID: "list_assets",
         ListSetID: "app_1",
-        chartType: control.type === "pivot-table" ? undefined : control.type,
+        chartType: control.type === "pivot-table" ? undefined : (options.semanticChartTypeString ? semanticChartType(control) : runtimeChartTypeCode(control)),
         settings: {
-          rows: [{ field: fieldName, fieldName, FieldName: fieldName }],
+          rows: [row],
           columns: [],
           values: [valueEntry],
         },
@@ -440,6 +446,24 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
   }
   resource.ReportIds = reportIds;
   resource.exts = exts;
+}
+
+function runtimeChartTypeCode(control) {
+  const kind = semanticChartType(control);
+  if (kind === "pie-chart") return "0";
+  if (kind === "line-chart" || kind === "area-chart") return "1";
+  if (kind === "bar-chart" || kind === "column-chart") return "2";
+  return "";
+}
+
+function semanticChartType(control) {
+  const id = String(control?.id || control?.nv_label || "");
+  if (id.includes("pie")) return "pie-chart";
+  if (id.includes("column")) return "column-chart";
+  if (id.includes("bar")) return "bar-chart";
+  if (id.includes("area")) return "area-chart";
+  if (id.includes("line")) return "line-chart";
+  return String(control?.type || "");
 }
 
 function visit(node, callback) {

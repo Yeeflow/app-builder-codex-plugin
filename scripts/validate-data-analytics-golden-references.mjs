@@ -29,6 +29,13 @@ const CONTROL_KEY_BY_TYPE = {
   "line-chart": "line-chart",
   "pivot-table": "PivotTable",
 };
+const RUNTIME_CHART_TYPE_CODE_BY_KIND = {
+  "pie-chart": "0",
+  "line-chart": "1",
+  "area-chart": "1",
+  "bar-chart": "2",
+  "column-chart": "2",
+};
 const REQUIRED_GUIDANCE_KEYS = [
   "summary",
   "suitableSourceResourceTypes",
@@ -384,8 +391,21 @@ function validateRuntimeBinding(resource, entry, reference, context) {
     context.findings.push(error("DATA_ANALYTICS_RUNTIME_SOURCE_METADATA_MISSING", "Data Analytics runtime ext must include AppID, ListID, and ListSetID source metadata.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId, appId, listId, listSetId }));
   }
   validateVisibleRuntimeSourceIdentity({ entry, reference, context, controlId, appId, listId, listSetId });
-  if (String(reference.controlType || "") !== "pivot-table" && !String(attr.chartType || "").trim()) {
-    context.findings.push(error("DATA_ANALYTICS_RUNTIME_CHART_TYPE_MISSING", "Chart runtime ext must include attr.chartType.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
+  if (String(reference.controlType || "") !== "pivot-table") {
+    const expectedChartType = expectedRuntimeChartTypeCode(reference);
+    const actualChartType = String(attr.chartType ?? "");
+    if (!actualChartType.trim()) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_CHART_TYPE_MISSING", "Chart runtime ext must include attr.chartType.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId, expectedChartType }));
+    } else if (actualChartType !== expectedChartType) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_CHART_TYPE_CODE_INVALID", "Chart runtime ext must use Yeeflow runtime chart type codes, not semantic strings such as pie-chart, bar-chart, column-chart, line-chart, or area-chart.", {
+        page: context.pageTitle,
+        path: entry.pointer,
+        templateId: reference.templateId,
+        controlId,
+        expectedChartType,
+        actualChartType,
+      }));
+    }
   }
   const rows = asArray(settings.rows);
   const values = asArray(settings.values);
@@ -458,6 +478,15 @@ function validateRuntimeRowsAndValuesShape({ entry, reference, context, controlI
         controlId,
       }));
     }
+    if (requiresDateTrendRuntimeRow(reference) && String(row?.func || row?.function || "").toUpperCase() !== "DATE") {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING", "Line/area trend charts must mark date grouping rows with func: DATE so Yeeflow can materialize the chart runtime model.", {
+        page: context.pageTitle,
+        path: `${entry.pointer}.exts.rows[${index}]`,
+        templateId: reference.templateId,
+        controlId,
+        actualFunc: row?.func || row?.function || null,
+      }));
+    }
   }
   for (const [index, column] of columns.entries()) {
     if (isObject(column) && !primaryRuntimeFieldRefs(column).length) {
@@ -497,6 +526,16 @@ function validateRuntimeRowsAndValuesShape({ entry, reference, context, controlI
       }
     }
   }
+}
+
+function expectedRuntimeChartTypeCode(reference) {
+  const chartKind = String(reference?.semanticChartKind || reference?.controlType || "").toLowerCase();
+  return RUNTIME_CHART_TYPE_CODE_BY_KIND[chartKind] || "";
+}
+
+function requiresDateTrendRuntimeRow(reference) {
+  const chartKind = String(reference?.semanticChartKind || reference?.controlType || "").toLowerCase();
+  return chartKind === "line-chart" || chartKind === "area-chart";
 }
 
 function isCountAggregate(value) {

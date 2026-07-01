@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.98
+
+- Release Data Analytics runtime chart type code hardening.
+- Materialize Data Analytics chart runtime extensions with Yeeflow runtime chart type codes: pie `0`, line/area `1`, bar/column `2`, while keeping pivot table runtime entries on the `PivotTable` key without semantic chart strings.
+- Add `func: "DATE"` to date-based line/area chart runtime rows so trend charts can materialize after Version Management success and delayed refresh.
+- Reject semantic runtime chart type strings such as `pie-chart`, `bar-chart`, `column-chart`, `line-chart`, and `area-chart` before signing readiness.
+- Add regression coverage proving semantic chart type strings and missing line/area `DATE` row functions fail the Data Analytics golden-reference gate.
+
 ## 0.8.97
 
 - Release KPI Summary / Data Analytics runtime materialization proof hardening from PR #335.
