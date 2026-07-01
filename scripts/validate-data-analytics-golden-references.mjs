@@ -233,9 +233,16 @@ function collectPlannedDataAnalyticsTemplates(planText, references) {
       "analytics template",
     ]);
     if (templateColumn === -1) continue;
-    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard page name", "page name", "custom form", "form name"]);
+    let pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name", "custom form", "form name"]);
     const surfaceColumn = findHeaderIndex(normalizedHeaders, ["surface", "usage surface", "page type", "form usage"]);
-    const sectionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "section", "section name", "region"]);
+    let sectionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "section", "section name", "region"]);
+    const bareSectionColumn = findHeaderIndex(normalizedHeaders, ["section"]);
+    if (pageColumn === -1 && bareSectionColumn !== -1 && surfaceColumn !== -1) {
+      pageColumn = bareSectionColumn;
+      sectionColumn = surfaceColumn;
+    } else if (pageColumn !== -1 && sectionColumn === pageColumn && surfaceColumn !== -1) {
+      sectionColumn = surfaceColumn;
+    }
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
     let rowIndex = index + 2;
     if (pageColumn === -1 && !currentDashboardPage) continue;

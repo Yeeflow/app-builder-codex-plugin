@@ -584,8 +584,16 @@ function collectDashboardAnalyticsRecords(planText) {
       "analytics template",
     ]);
     if (templateColumn === -1) continue;
-    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
-    const regionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "section", "section name", "region"]);
+    let pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard", "dashboard page", "dashboard page name", "page name"]);
+    let regionColumn = findHeaderIndex(normalizedHeaders, ["analytics region", "surface", "section name", "region", "section"]);
+    const sectionColumn = findHeaderIndex(normalizedHeaders, ["section"]);
+    const surfaceColumn = findHeaderIndex(normalizedHeaders, ["surface"]);
+    if (pageColumn === -1 && sectionColumn !== -1 && surfaceColumn !== -1) {
+      pageColumn = sectionColumn;
+      regionColumn = surfaceColumn;
+    } else if (pageColumn !== -1 && regionColumn === pageColumn && surfaceColumn !== -1) {
+      regionColumn = surfaceColumn;
+    }
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
     const questionColumn = findHeaderIndex(normalizedHeaders, ["business question", "question", "title", "analytics title"]);
     const groupColumn = findHeaderIndex(normalizedHeaders, ["grouping field", "grouping/axis fields", "axis field", "category field", "row fields"]);
@@ -1297,6 +1305,19 @@ function fieldSpecsForList(planDemand, listName) {
     if (seen.has(displayKey)) return;
     const fieldType = cleanResourceName(field.fieldType) || "Text";
     let fieldName = explicitFieldName || inferFieldKey(displayName, fieldType, normalized.length);
+    if (normKey(fieldName) === "title") {
+      const existingTitle = normalized.find((item) => normKey(item.fieldName) === "title");
+      if (existingTitle) {
+        if (displayKey !== "title" && normKey(existingTitle.displayName) === "title") {
+          existingTitle.displayName = displayName;
+          existingTitle.fieldType = "Text";
+          existingTitle.controlType = cleanResourceName(field.controlType) || "input";
+          existingTitle.choiceValues = cleanResourceName(field.choiceValues);
+        }
+        seen.add(displayKey);
+        return;
+      }
+    }
     if (normKey(fieldName) !== "title" && usedFieldNames.has(normKey(fieldName))) {
       fieldName = nextAvailableFieldName(fieldType, usedFieldNames, reservedFieldNames);
     }
@@ -2207,7 +2228,8 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     dashboardName: name,
     rootListSetId,
   });
-  materializeDashboardKpiCards(resource, kpiContracts);
+  materializeDashboardKpiCards(resource, kpiContracts, { listName: sourceResource });
+  ensureVisibleKpiCards(resource, kpiContracts, { listName: sourceResource });
   const summaries = kpiContracts.map((contract) => buildSummaryControl({
     summaryId: contract.summaryId,
     tempVar: contract.tempVar,
@@ -2299,6 +2321,9 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
   removeEmptyDashboardBusinessSections(resource);
+  ensureVisibleKpiCards(resource, kpiContracts, { listName: sourceResource });
+  applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
+  scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: false });
   instantiateDashboardControlUuids(resource, slugify(name));
   return resource;
 }
@@ -2613,7 +2638,7 @@ function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar, p
   });
 }
 
-function materializeDashboardKpiCards(resource, kpiContracts = []) {
+function materializeDashboardKpiCards(resource, kpiContracts = [], context = {}) {
   const wrappers = findDescendants(resource, (node) => [
     "kpi_metrics_wrapper",
     "kpi_cards_wrapper",
@@ -2626,15 +2651,16 @@ function materializeDashboardKpiCards(resource, kpiContracts = []) {
   for (const wrapper of wrappers) {
     if (processedWrappers.some((parent) => nodeContains(parent, wrapper))) continue;
     const contracts = activeWrapperUsed ? [] : kpiContracts;
-    materializeDashboardKpiCardsInWrapper(wrapper, contracts);
+    materializeDashboardKpiCardsInWrapper(wrapper, contracts, context);
     if (contracts.length) activeWrapperUsed = true;
     processedWrappers.push(wrapper);
   }
 }
 
-function materializeDashboardKpiCardsInWrapper(wrapper, kpiContracts = []) {
+function materializeDashboardKpiCardsInWrapper(wrapper, kpiContracts = [], context = {}) {
   const cardIds = ["event_portfolio_kpi_planned_events", "event_portfolio_kpi_approved_budget", "event_portfolio_kpi_registration_rate", "event_portfolio_kpi_lead_follow_up"];
-  const allowedKeys = new Set(kpiContracts.map((contract) => contract.key));
+  const contractsByKey = new Map(kpiContracts.map((contract) => [contract.key, contract]));
+  const allowedKeys = new Set(contractsByKey.keys());
   let workbenchKpiIndex = 0;
   const prune = (node) => {
     if (!node || !Array.isArray(node.children)) return;
@@ -2649,10 +2675,84 @@ function materializeDashboardKpiCardsInWrapper(wrapper, kpiContracts = []) {
       const matchedCardId = cardIds.find((id) => hasIdentity(child, id));
       if (!matchedCardId) return true;
       const key = matchedCardId.replace("event_portfolio_kpi_", "");
-      return allowedKeys.has(key);
+      const contract = contractsByKey.get(key);
+      if (!contract || !allowedKeys.has(key)) return false;
+      materializeEventPortfolioKpiCard(child, contract, context);
+      return true;
     });
   };
   prune(wrapper);
+}
+
+function ensureVisibleKpiCards(resource, kpiContracts = [], context = {}) {
+  if (!kpiContracts.length) return;
+  const missingContracts = kpiContracts.filter((contract) => !hasVisibleKpiBinding(resource, summarySaveVariable(contract.tempVar)));
+  if (!missingContracts.length) return;
+  let wrapper = findFirstByIdentity(resource, "kpi_metrics_wrapper") || findFirstByIdentity(resource, "kpi_cards_wrapper") || findFirstByIdentity(resource, "kpi_cards_kpi_row");
+  if (!wrapper) {
+    wrapper = buildGeneratedKpiMetricsWrapper(kpiContracts, context);
+    const content = findFirstByIdentity(resource, "Content") || findFirstByIdentity(resource, "content") || resource;
+    content.children = Array.isArray(content.children) ? content.children : [];
+    const firstBusinessSectionIndex = content.children.findIndex((child) => hasIdentity(child, "content_card_wrapper") || hasIdentity(child, "2_columns_section") || hasIdentity(child, "3_columns_section") || hasIdentity(child, "2_columns_60/40_section"));
+    if (firstBusinessSectionIndex === -1) content.children.push(wrapper);
+    else content.children.splice(firstBusinessSectionIndex, 0, wrapper);
+    return;
+  }
+  materializeDashboardKpiCardsInWrapper(wrapper, kpiContracts, context);
+}
+
+function hasVisibleKpiBinding(root, saveVar) {
+  const saveJson = JSON.stringify(saveVar);
+  return findDescendants(root, (node) => {
+    if (!node || node.type === "summary" || !isGeneratedTextLike(node)) return false;
+    const title = node.attrs?.headc?.title || node.attrs?.title || {};
+    return JSON.stringify(title?.variable ?? null).includes(saveJson) || JSON.stringify(title ?? null).includes(saveJson);
+  }).length > 0;
+}
+
+function isGeneratedTextLike(node) {
+  const type = String(node?.type || "").toLowerCase();
+  const label = String(node?.label || "").toLowerCase();
+  return ["heading", "text"].includes(type) || label === "text";
+}
+
+function buildGeneratedKpiMetricsWrapper(kpiContracts = [], context = {}) {
+  const wrapper = clone(loadApprovedKpiMetricsWrapperTemplate());
+  wrapper.generatedKpiRuntimeBound = true;
+  wrapper.attrs = {
+    ...(wrapper.attrs || {}),
+    generatedKpiRuntimeBound: true,
+  };
+  materializeDashboardKpiCardsInWrapper(wrapper, kpiContracts, context);
+  return wrapper;
+}
+
+function loadApprovedKpiMetricsWrapperTemplate() {
+  const registry = JSON.parse(fs.readFileSync(DASHBOARD_V11_TEMPLATE_PATH, "utf8"));
+  const wrapper = findFirstByRegistryIdentity(registry, "kpi_metrics_wrapper");
+  if (!wrapper) {
+    throw new Error("Approved dashboard KPI metrics wrapper template is missing.");
+  }
+  return wrapper._ak_c || wrapper;
+}
+
+function findFirstByRegistryIdentity(root, expected) {
+  let found = null;
+  const visit = (node) => {
+    if (found || !node || typeof node !== "object") return;
+    const control = node._ak_c || node;
+    if (identityCandidates(control).some((candidate) => candidate === expected)) {
+      found = control;
+      return;
+    }
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
+    }
+    for (const child of Object.values(node)) visit(child);
+  };
+  visit(root);
+  return found;
 }
 
 function nodeContains(root, target) {
@@ -2669,19 +2769,75 @@ function materializeWorkbenchKpiCard(card, contract) {
   if (title) setHeadingText(title, contract.label);
   const value = findFirstByIdentity(card, "kpi_card_summary_value");
   if (value) {
-    setHeadingText(value, "0");
+    const saveVariable = summarySaveVariable(contract.tempVar);
     value.attrs = {
       ...(value.attrs || {}),
       headc: {
         ...(value.attrs?.headc || {}),
         title: {
           ...(value.attrs?.headc?.title || {}),
-          value: "0",
-          variable: [summarySaveVariable(contract.tempVar)],
+          variable: [saveVariable],
         },
       },
     };
+    delete value.attrs.headc.title.value;
   }
+}
+
+function materializeEventPortfolioKpiCard(card, contract, context = {}) {
+  card.generatedKpiRuntimeBound = true;
+  card.attrs = {
+    ...(card.attrs || {}),
+    generatedKpiRuntimeBound: true,
+    kpiKey: contract.businessKey || contract.key,
+    sourceTemplateKpiKey: contract.key,
+  };
+  const sourceName = cleanResourceName(context.listName || context.sourceResource || "Records") || "Records";
+  const label = findFirstByIdentity(card, `event_portfolio_kpi_${contract.key}_label`);
+  if (label) setHeadingText(label, contract.label);
+  const value = findFirstByIdentity(card, `event_portfolio_kpi_${contract.key}_value`);
+  if (value) bindHeadingToSummaryVariable(value, contract);
+  const trend = findFirstByIdentity(card, `event_portfolio_kpi_${contract.key}_trend`);
+  if (trend) setHeadingText(trend, `${contract.label} signal`);
+  const note = findFirstByIdentity(card, `event_portfolio_kpi_${contract.key}_note`);
+  if (note) setHeadingText(note, `Live ${contract.label.toLowerCase()} metric from ${sourceName} records.`);
+  scrubEventPortfolioKpiTemplateVariables(card, contract);
+}
+
+function bindHeadingToSummaryVariable(control, contract) {
+  const saveVariable = summarySaveVariable(contract.tempVar);
+  control.name = `${contract.label} Value`;
+  control.title = `${contract.label} Value`;
+  control.attrs = {
+    ...(control.attrs || {}),
+    headc: {
+      ...(control.attrs?.headc || {}),
+      title: {
+        ...(control.attrs?.headc?.title || {}),
+        variable: [saveVariable],
+      },
+    },
+  };
+  delete control.attrs.headc.title.value;
+}
+
+function scrubEventPortfolioKpiTemplateVariables(root, contract) {
+  const saveVariable = summarySaveVariable(contract.tempVar);
+  const valueControl = findFirstByIdentity(root, `event_portfolio_kpi_${contract.key}_value`);
+  const visit = (node) => {
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    const title = node.attrs?.headc?.title;
+    if (title && Array.isArray(title.variable) && /event_portfolio/i.test(JSON.stringify(title.variable))) {
+      if (node === valueControl) title.variable = [saveVariable];
+      else delete title.variable;
+    }
+    for (const child of Object.values(node)) visit(child);
+  };
+  visit(root);
 }
 
 function normalizeDashboardFilters({ filters, listMeta, dashboardName }) {
@@ -3829,20 +3985,11 @@ function applyDashboardTextMapping(resource, { name, datasetRegion, listName, kp
     const kpiLabel = findFirstByIdentity(resource, `event_portfolio_kpi_${contract.key}_label`);
     setHeadingText(kpiLabel, contract.label);
     const kpiValue = findFirstByIdentity(resource, `event_portfolio_kpi_${contract.key}_value`);
-    if (!kpiValue) continue;
-    const saveVariable = summarySaveVariable(contract.tempVar);
-    setHeadingText(kpiValue, "0");
-    kpiValue.attrs = {
-      ...(kpiValue.attrs || {}),
-      headc: {
-        ...(kpiValue.attrs?.headc || {}),
-        title: {
-          ...(kpiValue.attrs?.headc?.title || {}),
-          value: "0",
-          variable: [saveVariable],
-        },
-      },
-    };
+    if (kpiValue) bindHeadingToSummaryVariable(kpiValue, contract);
+    const kpiTrend = findFirstByIdentity(resource, `event_portfolio_kpi_${contract.key}_trend`);
+    if (kpiTrend) setHeadingText(kpiTrend, `${contract.label} signal`);
+    const kpiNote = findFirstByIdentity(resource, `event_portfolio_kpi_${contract.key}_note`);
+    if (kpiNote) setHeadingText(kpiNote, `Live ${contract.label.toLowerCase()} metric from ${cleanResourceName(listName) || "Records"} records.`);
   }
 }
 
@@ -4058,6 +4205,7 @@ function removeUnusedApprovalTemplateSections(root) {
 
 function hasMeaningfulBusinessContent(node) {
   if (!node || typeof node !== "object") return false;
+  if (node.generatedKpiRuntimeBound === true || node.attrs?.generatedKpiRuntimeBound === true) return true;
   if (node.approvalFormNoFieldsNotice === true) return true;
   if (!Array.isArray(node.children) || node.children.length === 0) return false;
   return findDescendants(node, (control) => {
@@ -5211,14 +5359,25 @@ function allocateIds(ids, paths, findings) {
     return {};
   }
   const out = {};
-  paths.forEach((pathName, index) => {
-    const id = cleanIds[index];
+  let cursor = 0;
+  for (const pathName of paths) {
+    while (cursor < cleanIds.length && looksLikeRoundedGeneratedId(cleanIds[cursor])) cursor += 1;
+    const id = cleanIds[cursor];
+    cursor += 1;
+    if (!id) {
+      findings.push(error("FULL_APP_MATERIALIZATION_API_ID_COUNT_INSUFFICIENT_AFTER_ROUNDED_ID_GUARD", "Not enough non-rounded-looking API-issued IDs for generated-final materialization after preserving lossless-ID hard gates.", { required: paths.length, received: cleanIds.length, assigned: Object.keys(out).length }));
+      break;
+    }
     if (!/^\d{16,}$/.test(id)) {
       findings.push(error("FULL_APP_MATERIALIZATION_API_ID_INVALID", "API-issued IDs must be large numeric strings.", { path: pathName }));
     }
     out[pathName] = id;
-  });
+  }
   return out;
+}
+
+function looksLikeRoundedGeneratedId(id) {
+  return /^\d{16,}$/.test(String(id || "")) && /0000$/.test(String(id || ""));
 }
 
 function extractTitle(text) {

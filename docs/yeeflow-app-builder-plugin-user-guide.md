@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.103`
+`0.8.104`
+
+Version `0.8.104` releases full-app materializer resource/runtime fixes. Generated Data Lists preserve one native `Title` field and reuse it for business title display metadata instead of duplicating `FieldName/InternalName = Title`; materialization rejects rounded 19-digit API IDs; App Plan Data Analytics rows materialize into visible chart/pivot controls plus `ReportIds` and `exts` runtime models; and visible Dashboard KPI values bind to the same Summary `save_var` expression object used by hidden Summary controls before signing readiness.
 
 Version `0.8.103` releases Data List identity-picker storage correction. Generated user/person/requester/assignee fields now materialize as schema-safe `TextN` fields with `FieldType: "Text"` and `Type: "identity-picker"`; legacy `UserN` planning keys are remapped instead of emitted, and Service Tickets regression coverage rejects unsupported `FieldType: "User"` output before signing readiness.
 

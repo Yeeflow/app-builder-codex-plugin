@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.104
+
+- Release full-app materializer resource/runtime fixes.
+- Preserve a single native `Title` field per Data List; business title-like fields such as Asset Tag, Request Number, Loan Number, and Review Number update the existing native Title display metadata instead of creating a second `FieldName/InternalName = Title` field.
+- Guard API-issued content IDs against rounded 19-digit values before generated-final materialization, so unsafe numeric precision loss cannot enter signed packages.
+- Parse App Plan Data Analytics rows that use `Section | Surface | ...` tables, and materialize planned chart/pivot templates into visible controls plus `Resource.ReportIds[]` / `Resource.exts[]` runtime models.
+- Rebind visible Dashboard KPI card values to the same Summary `save_var` expression object used by the hidden Summary runtime control, while removing source-template Event Portfolio KPI variable and text residue.
+- Preserve the corrected identity-picker storage contract: user/person/requester/assignee fields remain schema-safe `TextN` fields with `FieldType: "Text"` and `Type: "identity-picker"`, not `FieldType: "User"`.
+
 ## 0.8.103
 
 - Release Data List identity-picker storage correction.
