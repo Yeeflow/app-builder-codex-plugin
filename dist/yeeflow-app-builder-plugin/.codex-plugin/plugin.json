@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.96",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with page-scoped template dependency and Service Tickets E2E hardening.",
+  "version": "0.8.97",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with KPI/Data Analytics runtime proof hardening.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [

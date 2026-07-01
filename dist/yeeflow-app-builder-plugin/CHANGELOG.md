@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.97
+
+- Release KPI Summary / Data Analytics runtime materialization proof hardening from PR #335.
+- Require delayed/refresh runtime materialization proof before accepting KPI Summary or Data Analytics runtime claims, instead of treating immediate post-install page state as final proof.
+- Reject chart canvas-only evidence: Data Analytics proof must show rendered chart or pivot output in addition to visible controls and Resource.exts runtime model registration.
+- Require visible KPI values to be numeric and backed by Summary runtime evidence, while keeping structural package validation, Version Management success, immediate runtime state, and delayed runtime success as separate proof layers.
+- Block dashboard-only upgrade fixes from expanding to other Dashboard pages until the target page completes the full delayed/refresh runtime proof chain and non-Dashboard resources remain unchanged.
+
 ## 0.8.96
 
 - Release page-scoped template dependency namespace and Service Tickets E2E regression hardening from PR #334.

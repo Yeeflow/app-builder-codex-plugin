@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.96`
+- Version: `0.8.97`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.96` releases page-scoped template dependency namespace and Service Tickets E2E regression hardening from PR #334: generated pages/forms rename copied golden-reference filter variables, temp variables, and form actions per surface to prevent same-page collisions; preserve Service Tickets `Status | Text5` and identity-picker field contracts; prevent support subsections such as `Summary Metrics` from becoming unplanned Dashboards; attach custom Data List forms to their explicit host lists; and scrub Office Asset/loan source-template residue from Service Tickets-style Dashboard and View Item resources before signing readiness.
+Current release `0.8.97` releases KPI Summary / Data Analytics runtime materialization proof hardening from PR #335: generated-final runtime evidence now distinguishes package structure, Version Management success, immediate runtime state, and delayed/refresh materialization success; KPI and chart proof requires delayed refresh evidence, numeric KPI values, and rendered chart output instead of canvas-only presence; and dashboard-only upgrade fixes cannot expand to other Dashboard pages before the target page completes the full proof chain.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.96
+Version: 0.8.97
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.96
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.97
 ```
 
 ## What Is Included
