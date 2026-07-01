@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.98",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with Data Analytics runtime chart type code hardening.",
+  "version": "0.8.99",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with Service Tickets native User, filter, and template-residue hardening.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
@@ -61,5 +61,6 @@
     "brandColor": "#2563EB",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png"
-  }
+  },
+  "longDescription": "v0.8.99 releases Service Tickets native User, filter, and template-residue hardening. Generated User fields preserve native User storage keys with identity-picker controls, master-detail left record lists avoid unsafe empty select-filter Collection conditions, Service Tickets resources scrub unrelated Office Asset/Event Portfolio template residue, and KPI/Summary runtime identifiers use business metric names before signing readiness."
 }

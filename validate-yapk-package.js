@@ -33,7 +33,7 @@ const EMPTY_PORTALINFO_IMPORT_ERROR = "YAPK_PORTALINFO_EMPTY_OBJECT_INVALID";
 const ARRAY_PORTALINFO_IMPORT_ERROR = "YAPK_PORTALINFO_ARRAY_INVALID";
 const LIST_PACKAGE_REQUIRED = ["List", "Fields", "Layouts", "RemindRules", "PublicForms", "FlowMappings"];
 const LIST_TYPE_ENUM = new Set([1, 16, 32, 64, 128, 1024]);
-const FIELD_TYPE_ENUM = new Set(["Text", "Bit", "Decimal", "Datetime"]);
+const FIELD_TYPE_ENUM = new Set(["Text", "Bit", "Decimal", "Datetime", "User"]);
 const FIELD_CONTROL_TYPES = new Set([
   "input",
   "textarea",
@@ -83,6 +83,7 @@ const STORAGE_FAMILY_BY_PREFIX = new Map([
   ["Decimal", "Decimal"],
   ["Datetime", "Datetime"],
   ["Bit", "Bit"],
+  ["User", "User"],
 ]);
 
 function resolveLocalModule(candidates) {

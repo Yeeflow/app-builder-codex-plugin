@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.98`
+- Version: `0.8.99`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.98` releases Data Analytics runtime chart type code hardening: generated chart runtime extensions now use Yeeflow runtime chart type codes for pie, line/area, and bar/column charts; date-based line/area trend rows include `func: "DATE"`; and generated-final validation rejects semantic chart type strings before signing readiness.
+Current release `0.8.99` releases Service Tickets business-regression hardening: generated User fields preserve native User storage keys, master-detail left record lists avoid unsafe empty select-filter Collection conditions, Service Tickets resources scrub unrelated Office Asset/Event Portfolio template residue, and KPI/Summary runtime identifiers use business metric names before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.98
+Version: 0.8.99
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.98
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.99
 ```
 
 ## What Is Included

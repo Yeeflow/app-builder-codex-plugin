@@ -20,9 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.98`
+`0.8.99`
 
-Version `0.8.98` releases Data Analytics runtime chart type code hardening. Generated chart runtime extensions now use Yeeflow runtime chart type codes in `Resource.exts[].attr.chartType`: pie `0`, line/area `1`, and bar/column `2`; pivot tables stay on `key: "PivotTable"` without semantic chart strings. Date-based line/area trend rows include `func: "DATE"`, and generated-final validation rejects semantic chart type strings before signing readiness.
+Version `0.8.99` releases Service Tickets business-regression hardening. Generated User fields now preserve native User storage keys with identity-picker controls, master-detail left record lists avoid unsafe empty select-filter Collection conditions, Service Tickets custom forms and Dashboard business resources scrub unrelated source-template metadata, and KPI/Summary runtime identifiers use planned business metric names.
 
 Version `0.8.97` releases KPI Summary / Data Analytics runtime materialization proof hardening from PR #335. Runtime evidence now separates structural package validation, Version Management Succeed, immediate browser state, and delayed/refresh runtime materialization success. KPI Summary proof requires delayed refresh evidence, numeric visible KPI values, hidden/runtime Summary materialization evidence, and visible heading binding; Data Analytics proof requires rendered chart or pivot output in addition to visible controls and Resource.exts runtime models. Dashboard-only upgrade fixes must keep non-Dashboard resources unchanged and cannot expand to additional Dashboard pages before the target page completes the full delayed/refresh proof chain.
 

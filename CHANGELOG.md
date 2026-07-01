@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.8.99
+
+- Release Service Tickets native User, filter, and template-residue hardening.
+- Preserve planned native User storage fields such as User1/User2 while keeping identity-picker controls for Requester, Assigned Agent, Commented By, and Uploaded By fields.
+- Keep master-detail left record-list Collections free of unsafe empty select-filter conditions until a proven optional-filter runtime contract exists.
+- Scrub unrelated Office Asset/Event Portfolio source-template metadata from Service Tickets generated Dashboard and custom Data List form business resources.
+- Derive KPI/Summary temp variables, Summary IDs, and generated metadata from planned business metric names instead of source golden-reference slot names.
+- Add focused Service Tickets regression coverage for native User fields, left-list filter safety, App Plan selected two-panel layout materialization, custom form host assignment, and template-residue cleanup.
+
+
 ## 0.8.98
 
 - Release Data Analytics runtime chart type code hardening.
