@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.8.101
+
+- Release cache-aware validator-entrypoint smoke hardening.
+- Teach `test-yapk-validator-entrypoint-drift.mjs` to distinguish source checkouts from installed plugin cache roots so cache smoke no longer expects a nested `dist/yeeflow-app-builder-plugin` directory inside the installed payload.
+- Preserve source checkout dist mirror byte-parity checks while validating installed cache-root public validator entrypoints directly.
+
 ## 0.8.100
 
 - Release Dashboard dataset template-selection and v1.1 section-fidelity validator tightening.

@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.100",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with Dashboard dataset-template and v1.1 layout-fidelity hardening.",
+  "version": "0.8.101",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with cache-aware validator-entrypoint smoke hardening.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
@@ -62,5 +62,5 @@
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png"
   },
-  "longDescription": "v0.8.100 releases Dashboard dataset template-selection and v1.1 section-fidelity validator tightening. App Plan Collection template rationales are evaluated from selected rationale/display-need guidance instead of broad row context, conflicting card/grid/multiselect signals are rejected, and copied Dashboard Page Layouts v1.1 content_card_wrapper modules must preserve both section_title_area and section_content_area before signing readiness."
+  "longDescription": "v0.8.101 releases cache-aware validator-entrypoint smoke hardening. The YAPK validator entrypoint drift smoke now distinguishes source checkouts from installed plugin cache roots, so release cache smoke verifies real public validator mirrors without requiring a nested dist/yeeflow-app-builder-plugin directory inside the installed cache payload."
 }
