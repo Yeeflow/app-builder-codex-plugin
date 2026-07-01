@@ -660,23 +660,50 @@ function escapeRegExp(value) {
 }
 
 function lineMatchesReferenceGuidance(line, templateId, reference) {
-  let normalized = normalizeForMatch(line);
+  let normalized = normalizeForMatch(planSelectionGuidanceText(line, templateId));
   normalized = normalized.replaceAll(normalizeForMatch(templateId), " ");
   for (const approvedId of APPROVED_IDS) normalized = normalized.replaceAll(normalizeForMatch(approvedId), " ");
   normalized = normalized.replace(/\s+/g, " ").trim();
+  if (templateGuidanceHasConflicts(normalized, templateId)) return false;
   const signals = [
     ...asArray(reference?.requiredBusinessSignals),
     ...asArray(reference?.whenToUse),
   ].map(normalizeForMatch).filter(Boolean);
   if (signals.some((signal) => signal && normalized.includes(signal))) return true;
   const fallbackSignals = {
-    collection_control_responsive_card_grid: ["card", "browse", "overview", "portfolio", "asset", "ticket", "request", "selectable", "selected", "detail", "queue"],
+    collection_control_responsive_card_grid: ["card", "browse", "overview", "portfolio", "asset cards", "ticket cards", "request cards", "visual", "display first"],
     collection_control_card_with_multiselect_toolbar: ["card", "multi-select", "multiselect", "bulk", "batch", "selected"],
     collection_control_grid_table: ["dense", "row", "column", "work queue", "task list", "record list", "operational table", "scan"],
     collection_control_grid_table_with_multiselect: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection"],
     "Event Pipeline Grid-Table": ["primary", "high-fidelity", "pipeline", "portfolio", "work queue", "health", "status", "progress"],
   };
   return asArray(fallbackSignals[templateId]).some((signal) => normalized.includes(normalizeForMatch(signal)));
+}
+
+function planSelectionGuidanceText(line, templateId) {
+  if (!isMarkdownTableRow(line)) return String(line || "");
+  const cells = splitMarkdownRow(line);
+  const selectedIndex = cells.findIndex((cell) => containsExactTemplateId(cell, templateId));
+  if (selectedIndex === -1) return String(line || "");
+  const guidanceCells = [
+    cells[selectedIndex - 1] || "",
+    ...cells.slice(selectedIndex + 1),
+  ].filter(Boolean);
+  return guidanceCells.join(" | ") || String(line || "");
+}
+
+function templateGuidanceHasConflicts(normalized, templateId) {
+  if (templateId === "collection_control_responsive_card_grid") {
+    const tableSignals = ["dense", "row", "column", "table", "spreadsheet", "work queue", "grid table", "grid-table", "scan", "comparison"];
+    const cardSignals = ["card", "cards", "browse", "visual", "gallery", "profile"];
+    return tableSignals.some((signal) => normalized.includes(normalizeForMatch(signal)))
+      && !cardSignals.some((signal) => normalized.includes(normalizeForMatch(signal)));
+  }
+  if (templateId === "collection_control_grid_table") {
+    const bulkSignals = ["bulk", "batch", "multi select", "multi-select", "multiselect", "selected count", "checkbox"];
+    return bulkSignals.some((signal) => normalized.includes(normalizeForMatch(signal)));
+  }
+  return false;
 }
 
 function normalizeForMatch(value) {
