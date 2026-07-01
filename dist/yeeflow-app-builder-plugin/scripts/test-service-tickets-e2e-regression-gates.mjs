@@ -119,12 +119,14 @@ assert.ok(tickets, "Tickets data list must materialize");
 const ticketFields = new Map(tickets.Fields.map((field) => [field.DisplayName, field]));
 assert.equal(ticketFields.get("Status")?.FieldName, "Text5", "Status field must preserve its planned field key");
 assert.equal(ticketFields.get("Status")?.Type, "select", "Status field must remain a selectable choice field");
-assert.equal(ticketFields.get("Requester")?.FieldName, "User1", "Requester must preserve its planned native User field key");
-assert.equal(ticketFields.get("Requester")?.FieldType, "User", "Requester must materialize as a native User storage field");
+assert.match(ticketFields.get("Requester")?.FieldName || "", /^Text\d+$/, "Requester must materialize on a schema-safe Text-backed storage field");
+assert.equal(ticketFields.get("Requester")?.FieldType, "Text", "Requester must use canonical Text storage for identity-picker fields");
 assert.equal(ticketFields.get("Requester")?.Type, "identity-picker", "Requester must use identity-picker control type");
-assert.equal(ticketFields.get("Assigned Agent")?.FieldName, "User2", "Assigned Agent must preserve its planned native User field key");
-assert.equal(ticketFields.get("Assigned Agent")?.FieldType, "User", "Assigned Agent must materialize as a native User storage field");
+assert.doesNotMatch(ticketFields.get("Requester")?.FieldName || "", /^User\d+$/, "Requester must not emit unsupported User* storage keys");
+assert.match(ticketFields.get("Assigned Agent")?.FieldName || "", /^Text\d+$/, "Assigned Agent must materialize on a schema-safe Text-backed storage field");
+assert.equal(ticketFields.get("Assigned Agent")?.FieldType, "Text", "Assigned Agent must use canonical Text storage for identity-picker fields");
 assert.equal(ticketFields.get("Assigned Agent")?.Type, "identity-picker", "Assigned Agent must use identity-picker control type");
+assert.doesNotMatch(ticketFields.get("Assigned Agent")?.FieldName || "", /^User\d+$/, "Assigned Agent must not emit unsupported User* storage keys");
 
 const comments = decoded.Childs.find((child) => child.List.Title === "Ticket Comments");
 const attachments = decoded.Childs.find((child) => child.List.Title === "Ticket Attachments");
@@ -132,10 +134,14 @@ assert.ok(comments, "Ticket Comments data list must materialize");
 assert.ok(attachments, "Ticket Attachments data list must materialize");
 const commentFields = new Map(comments.Fields.map((field) => [field.DisplayName, field]));
 const attachmentFields = new Map(attachments.Fields.map((field) => [field.DisplayName, field]));
-assert.equal(commentFields.get("Commented By")?.FieldName, "User1", "Commented By must preserve its planned native User field key");
-assert.equal(commentFields.get("Commented By")?.FieldType, "User", "Commented By must materialize as a native User storage field");
-assert.equal(attachmentFields.get("Uploaded By")?.FieldName, "User1", "Uploaded By must preserve its planned native User field key");
-assert.equal(attachmentFields.get("Uploaded By")?.FieldType, "User", "Uploaded By must materialize as a native User storage field");
+assert.match(commentFields.get("Commented By")?.FieldName || "", /^Text\d+$/, "Commented By must materialize on a schema-safe Text-backed storage field");
+assert.equal(commentFields.get("Commented By")?.FieldType, "Text", "Commented By must use canonical Text storage for identity-picker fields");
+assert.equal(commentFields.get("Commented By")?.Type, "identity-picker", "Commented By must use identity-picker control type");
+assert.doesNotMatch(commentFields.get("Commented By")?.FieldName || "", /^User\d+$/, "Commented By must not emit unsupported User* storage keys");
+assert.match(attachmentFields.get("Uploaded By")?.FieldName || "", /^Text\d+$/, "Uploaded By must materialize on a schema-safe Text-backed storage field");
+assert.equal(attachmentFields.get("Uploaded By")?.FieldType, "Text", "Uploaded By must use canonical Text storage for identity-picker fields");
+assert.equal(attachmentFields.get("Uploaded By")?.Type, "identity-picker", "Uploaded By must use identity-picker control type");
+assert.doesNotMatch(attachmentFields.get("Uploaded By")?.FieldName || "", /^User\d+$/, "Uploaded By must not emit unsupported User* storage keys");
 
 const pageTitles = decoded.Pages.map((page) => page.Title);
 assert.deepEqual(pageTitles, ["Service Tickets Dashboard"], "Summary Metrics must not materialize as an extra Dashboard page");
@@ -170,7 +176,7 @@ console.log(JSON.stringify({
   status: "pass",
   cases: [
     "planned Status field preserved",
-    "planned User fields preserved as native User storage with identity-picker controls",
+    "planned user/person fields preserved as Text-backed identity-picker controls",
     "Summary Metrics not generated as Dashboard",
     "two-panel Dashboard layout matches App Plan selection",
     "dashboard page-layout and hard-gate validators pass",

@@ -1565,7 +1565,7 @@ function cleanFieldName(value) {
 function schemaSafeFieldName(value) {
   const text = cleanFieldName(value);
   if (/^Title$/i.test(text)) return "Title";
-  return /^(Text|Bit|Decimal|Datetime|User)[1-9]\d*$/.test(text) ? text : "";
+  return /^(Text|Bit|Decimal|Datetime)[1-9]\d*$/.test(text) ? text : "";
 }
 
 function fieldIndexFromName(value) {
@@ -5264,7 +5264,7 @@ function inferFieldKey(displayName, fieldType, index) {
 
 function fieldPrefix(fieldType) {
   const normalized = normKey(fieldType);
-  if (/user|people|person|identity/.test(normalized)) return "User";
+  if (/user|people|person|identity/.test(normalized)) return "Text";
   if (/date|time/.test(normalized)) return "Datetime";
   if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "Decimal";
   if (/boolean|yes no|checkbox|bit/.test(normalized)) return "Bit";
@@ -5285,7 +5285,7 @@ function inferControlType(fieldType) {
 
 function normalizeFieldType(fieldType) {
   const normalized = normKey(fieldType);
-  if (/user|people|person|identity/.test(normalized)) return "User";
+  if (/user|people|person|identity/.test(normalized)) return "Text";
   if (/date|time/.test(normalized)) return "Datetime";
   if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "Decimal";
   if (/boolean|yes no|checkbox|bit/.test(normalized)) return "Bit";
