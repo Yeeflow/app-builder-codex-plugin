@@ -156,6 +156,18 @@ assert.ok(JSON.stringify(dashboardResource).includes("content_panel_current_item
 const leftCollection = findFirstByIdentity(dashboardResource, "left_panel_data_items_wrapper");
 assert.ok(leftCollection, "Two-panel workspace left collection must be present");
 assert.deepEqual(leftCollection.attrs?.data?.filter || [], [], "Left record-list collection must not apply unsafe empty select-filter conditions");
+const leftFilters = findAllByIdentity(dashboardResource, "left_panel_filter_control");
+const priorityFilter = leftFilters.find((filter) => /priority/i.test(`${filter.name || ""} ${filter.title || ""} ${filter.attrs?.lab?.value || ""}`));
+const statusFilter = leftFilters.find((filter) => /status/i.test(`${filter.name || ""} ${filter.title || ""} ${filter.attrs?.lab?.value || ""}`));
+assert.ok(priorityFilter, "Two-panel workspace must keep a Priority filter control when planned by the template");
+assert.ok(statusFilter, "Two-panel workspace must keep a Status filter control when planned by the template");
+assert.equal(priorityFilter.attrs?.data?.field, ticketFields.get("Priority")?.FieldName, "Priority filter must bind to the planned Priority field");
+assert.equal(priorityFilter.attrs?.display_f, ticketFields.get("Priority")?.FieldName, "Priority filter display field must match the planned Priority field");
+assert.equal(priorityFilter.attrs?.value_f, ticketFields.get("Priority")?.FieldName, "Priority filter value field must match the planned Priority field");
+assert.equal(priorityFilter.attrs?.optionSourceProven, true, "Priority filter must carry an export-proven option source contract");
+assert.ok((priorityFilter.attrs?.["choice-options"] || []).includes("High"), "Priority filter must expose planned choice values instead of an empty dropdown");
+assert.equal(statusFilter.attrs?.data?.field, ticketFields.get("Status")?.FieldName, "Status filter must bind to the planned Status field");
+assert.ok((statusFilter.attrs?.["choice-options"] || []).includes("Open"), "Status filter must expose planned choice values");
 
 const pageLayoutValidation = validateDashboardPageLayoutTemplate({ package: packagePath, appPlan: planPath });
 assert.equal(pageLayoutValidation.status, "pass", JSON.stringify(pageLayoutValidation.findings || [], null, 2));
@@ -167,8 +179,30 @@ assert.deepEqual(layoutsByList.get("Tickets"), ["Tickets New/Edit Form", "Ticket
 assert.deepEqual(layoutsByList.get("Ticket Comments"), ["Ticket Comments New/Edit Form", "Ticket Comments View Item"]);
 assert.deepEqual(layoutsByList.get("Ticket Attachments"), ["Ticket Attachments New/Edit Form", "Ticket Attachments View Item"]);
 
+const seedData = JSON.parse(fs.readFileSync(report.outputs.seedData, "utf8"));
+const ticketSeed = seedData.lists.find((list) => list.listTitle === "Tickets");
+const attachmentSeed = seedData.lists.find((list) => list.listTitle === "Ticket Attachments");
+assert.ok(ticketSeed, "Seed artifact must include Tickets list instructions");
+assert.ok(attachmentSeed, "Seed artifact must include Ticket Attachments list instructions");
+const requesterSeed = ticketSeed.rows[0][ticketFields.get("Requester").FieldName];
+const assignedAgentSeed = ticketSeed.rows[0][ticketFields.get("Assigned Agent").FieldName];
+const fileSeed = attachmentSeed.rows[0][attachmentFields.get("File").FieldName];
+assert.equal(requesterSeed?.seedValueType, "identity-picker", "identity-picker seed values must be structured live-user resolution placeholders, not plain strings");
+assert.equal(requesterSeed?.requiresLiveUserResolution, true, "identity-picker seed values must require live tenant user resolution");
+assert.equal(assignedAgentSeed?.seedValueType, "identity-picker", "Assigned Agent seed values must use the identity-picker seed contract");
+assert.equal(fileSeed?.seedValueType, "file-upload", "file-upload seed values must be structured file reference placeholders, not plain strings");
+assert.equal(fileSeed?.requiresFileUploadReference, true, "file-upload seed values must require a file upload reference before live write");
+assert.ok(
+  ticketSeed.fieldSeedRequirements.some((requirement) => requirement.displayName === "Requester" && requirement.requiresLiveUserResolution),
+  "Seed artifact must declare identity-picker live-user requirements",
+);
+assert.ok(
+  attachmentSeed.fieldSeedRequirements.some((requirement) => requirement.displayName === "File" && requirement.requiresFileUploadReference),
+  "Seed artifact must declare file-upload reference requirements",
+);
+
 const decodedText = JSON.stringify(decoded);
-assert.doesNotMatch(decodedText, /\b(?:Office Asset|Active Loan Pipeline|current loan volume|return activity signal)\b/i, "Service Tickets package must not retain Office Asset/Loan template residue");
+assert.doesNotMatch(decodedText, /\b(?:Office Asset|Active Loans|Active Loan Pipeline|current loan volume|return activity signal|Coordinator view of active loans|checkout status|return follow-up)\b/i, "Service Tickets package must not retain Office Asset/Loan template residue");
 assert.doesNotMatch(decodedText, /\b(?:event_portfolio_header_band|event_portfolio_pipeline_section|Asset Loan Operations Header Band)\b/i, "Service Tickets custom forms must not retain source-template metadata residue");
 assert.doesNotMatch(decodedText, /\b(?:summary_approved_budget|summary_registration_rate|summary_lead_follow_up|approved_budget_count|registration_rate_count|lead_follow_up_count)\b/i, "Generated KPI/Summary runtime identifiers must use business metric names, not source-template identifiers");
 
@@ -179,8 +213,10 @@ console.log(JSON.stringify({
     "planned user/person fields preserved as Text-backed identity-picker controls",
     "Summary Metrics not generated as Dashboard",
     "two-panel Dashboard layout matches App Plan selection",
+    "left-panel Priority/Status filters use proven option sources",
     "dashboard page-layout and hard-gate validators pass",
     "custom forms assigned to correct host lists",
+    "seed artifacts use structured identity-picker and file-upload contracts",
     "template business residue absent",
   ],
 }, null, 2));
@@ -193,6 +229,17 @@ function findFirstByIdentity(node, identity) {
     if (found) return found;
   }
   return null;
+}
+
+function findAllByIdentity(node, identity) {
+  const matches = [];
+  const visit = (current) => {
+    if (!current || typeof current !== "object") return;
+    if (hasIdentity(current, identity)) matches.push(current);
+    for (const child of current.children || []) visit(child);
+  };
+  visit(node);
+  return matches;
 }
 
 function hasIdentity(node, identity) {

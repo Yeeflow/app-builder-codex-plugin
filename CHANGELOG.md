@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.106
+
+- Release Service Tickets runtime semantics, Data Analytics parser alignment, and Dashboard content-card fidelity hardening.
+- Preserve proven option-source choices for master-detail Priority/Status filters, bind those filters to matching business fields, and validate selected-record detail labels against the rendered Dynamic controls.
+- Emit structured seed-data requirements for `identity-picker` and `file-upload` fields while keeping generated storage schema-safe as `FieldType: "Text"` for identity-picker fields.
+- Align Data Analytics App Plan parsing for Region/Surface tables and preserve Dashboard `content_card_wrapper` section title/header slots required by golden-reference fidelity gates.
+- Reject loan/asset source-template copy outside matching business domains so Service Tickets-style pages cannot silently keep unrelated template helper text.
+
 ## 0.8.105
 
 - Release Dashboard master-detail workspace action and filter binding hardening.
