@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.8.102
+
+- Release installed-cache validator mirror smoke alignment.
+- Check the actual installed plugin cache public validator mirrors: `scripts/validate-yapk-package.js` and `skills/yeeflow-application-generator/scripts/validate-yapk-package.js`.
+- Keep source checkout validation strict for root, dist, scripts, installed-skill, and dist-skill byte parity.
+
 ## 0.8.101
 
 - Release cache-aware validator-entrypoint smoke hardening.

@@ -14,7 +14,7 @@ const sourceRootEntrypoints = [
 ];
 const installedCacheRootEntrypoints = [
   "scripts/validate-yapk-package.js",
-  "skills/installed/yeeflow-application-generator/scripts/validate-yapk-package.js",
+  "skills/yeeflow-application-generator/scripts/validate-yapk-package.js",
 ];
 
 const canonicalPath = path.join(ROOT, canonical);
