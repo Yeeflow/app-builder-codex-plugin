@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.101`
+`0.8.102`
+
+Version `0.8.102` releases installed-cache validator mirror smoke alignment. Cache-root entrypoint drift checks now validate the actual installed plugin payload mirrors while source checkouts continue enforcing full dist byte parity.
 
 Version `0.8.101` releases cache-aware validator-entrypoint smoke hardening. Installed plugin cache roots are validated as plugin payloads without requiring nested source checkout dist mirrors.
 

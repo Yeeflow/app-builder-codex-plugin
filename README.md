@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.101`
+- Version: `0.8.102`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.101` releases cache-aware validator-entrypoint smoke hardening: source checkouts still verify dist mirror byte parity, while installed plugin cache roots validate the real public validator mirrors without requiring a nested source checkout dist directory.
+Current release `0.8.102` releases installed-cache validator mirror smoke alignment: cache-root entrypoint drift checks now validate the actual installed plugin payload mirrors, while source checkouts continue enforcing full dist byte parity.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.101
+Version: 0.8.102
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.101
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.102
 ```
 
 ## What Is Included

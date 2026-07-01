@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.101",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with cache-aware validator-entrypoint smoke hardening.",
+  "version": "0.8.102",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with installed-cache validator mirror smoke alignment.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
@@ -62,5 +62,5 @@
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png"
   },
-  "longDescription": "v0.8.101 releases cache-aware validator-entrypoint smoke hardening. The YAPK validator entrypoint drift smoke now distinguishes source checkouts from installed plugin cache roots, so release cache smoke verifies real public validator mirrors without requiring a nested dist/yeeflow-app-builder-plugin directory inside the installed cache payload."
+  "longDescription": "v0.8.102 releases installed-cache validator mirror smoke alignment. The YAPK validator entrypoint drift smoke now checks the actual installed plugin cache public mirrors, including scripts/validate-yapk-package.js and skills/yeeflow-application-generator/scripts/validate-yapk-package.js, while source checkouts still enforce full dist mirror byte parity."
 }
