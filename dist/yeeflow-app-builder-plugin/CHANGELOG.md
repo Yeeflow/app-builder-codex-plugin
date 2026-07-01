@@ -2,6 +2,60 @@
 
 ## Unreleased
 
+## 0.8.104
+
+- Release full-app materializer resource/runtime fixes.
+- Preserve a single native `Title` field per Data List; business title-like fields such as Asset Tag, Request Number, Loan Number, and Review Number update the existing native Title display metadata instead of creating a second `FieldName/InternalName = Title` field.
+- Guard API-issued content IDs against rounded 19-digit values before generated-final materialization, so unsafe numeric precision loss cannot enter signed packages.
+- Parse App Plan Data Analytics rows that use `Section | Surface | ...` tables, and materialize planned chart/pivot templates into visible controls plus `Resource.ReportIds[]` / `Resource.exts[]` runtime models.
+- Rebind visible Dashboard KPI card values to the same Summary `save_var` expression object used by the hidden Summary runtime control, while removing source-template Event Portfolio KPI variable and text residue.
+- Preserve the corrected identity-picker storage contract: user/person/requester/assignee fields remain schema-safe `TextN` fields with `FieldType: "Text"` and `Type: "identity-picker"`, not `FieldType: "User"`.
+
+## 0.8.103
+
+- Release Data List identity-picker storage correction.
+- Generate user/person/requester/assignee/agent/owner fields as schema-safe `TextN` fields with `FieldType: "Text"` and `Type: "identity-picker"`.
+- Remap legacy App Plan `UserN` / `User` field wording to Text-backed identity-picker output instead of emitting unsupported YAPK Data List storage fields.
+- Update Service Tickets regression coverage and training guidance to reject `FieldType: "User"` and `FieldName: "UserN"` generated output before signing readiness.
+
+## 0.8.102
+
+- Release installed-cache validator mirror smoke alignment.
+- Check the actual installed plugin cache public validator mirrors: `scripts/validate-yapk-package.js` and `skills/yeeflow-application-generator/scripts/validate-yapk-package.js`.
+- Keep source checkout validation strict for root, dist, scripts, installed-skill, and dist-skill byte parity.
+
+## 0.8.101
+
+- Release cache-aware validator-entrypoint smoke hardening.
+- Teach `test-yapk-validator-entrypoint-drift.mjs` to distinguish source checkouts from installed plugin cache roots so cache smoke no longer expects a nested `dist/yeeflow-app-builder-plugin` directory inside the installed payload.
+- Preserve source checkout dist mirror byte-parity checks while validating installed cache-root public validator entrypoints directly.
+
+## 0.8.100
+
+- Release Dashboard dataset template-selection and v1.1 section-fidelity validator tightening.
+- Validate Dashboard Collection App Plan template choices against the selected rationale/display-need guidance instead of broad row context such as page names or source list names.
+- Reject conflicting template rationale signals, including responsive-card selections justified by dense row/column/table scanning without explicit card-browsing intent.
+- Require copied Dashboard Page Layouts v1.1 `content_card_wrapper` modules to preserve both `section_title_area` and `section_content_area`; no-title content modules must use a separately approved template instead of mutating the canonical wrapper.
+- Keep negative regression fixtures for `DASH_DATASET_APP_PLAN_SELECTION_RATIONALE_MISMATCH` and `DASH_LAYOUT_RESOURCE_SECTION_TITLE_AREA_MISSING` as release gates.
+
+## 0.8.99
+
+- Release Service Tickets user/person field, filter, and template-residue hardening.
+- Corrected by 0.8.103: user/person fields must use schema-safe `TextN` storage plus `Type: "identity-picker"`; generated `UserN` / `FieldType: "User"` Data List fields are not valid under the current YAPK schema.
+- Keep master-detail left record-list Collections free of unsafe empty select-filter conditions until a proven optional-filter runtime contract exists.
+- Scrub unrelated Office Asset/Event Portfolio source-template metadata from Service Tickets generated Dashboard and custom Data List form business resources.
+- Derive KPI/Summary temp variables, Summary IDs, and generated metadata from planned business metric names instead of source golden-reference slot names.
+- Add focused Service Tickets regression coverage for Text-backed identity-picker fields, left-list filter safety, App Plan selected two-panel layout materialization, custom form host assignment, and template-residue cleanup.
+
+
+## 0.8.98
+
+- Release Data Analytics runtime chart type code hardening.
+- Materialize Data Analytics chart runtime extensions with Yeeflow runtime chart type codes: pie `0`, line/area `1`, bar/column `2`, while keeping pivot table runtime entries on the `PivotTable` key without semantic chart strings.
+- Add `func: "DATE"` to date-based line/area chart runtime rows so trend charts can materialize after Version Management success and delayed refresh.
+- Reject semantic runtime chart type strings such as `pie-chart`, `bar-chart`, `column-chart`, `line-chart`, and `area-chart` before signing readiness.
+- Add regression coverage proving semantic chart type strings and missing line/area `DATE` row functions fail the Data Analytics golden-reference gate.
+
 ## 0.8.97
 
 - Release KPI Summary / Data Analytics runtime materialization proof hardening from PR #335.
