@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.96`
+`0.8.97`
+
+Version `0.8.97` releases KPI Summary / Data Analytics runtime materialization proof hardening from PR #335. Runtime evidence now separates structural package validation, Version Management Succeed, immediate browser state, and delayed/refresh runtime materialization success. KPI Summary proof requires delayed refresh evidence, numeric visible KPI values, hidden/runtime Summary materialization evidence, and visible heading binding; Data Analytics proof requires rendered chart or pivot output in addition to visible controls and Resource.exts runtime models. Dashboard-only upgrade fixes must keep non-Dashboard resources unchanged and cannot expand to additional Dashboard pages before the target page completes the full delayed/refresh proof chain.
 
 Version `0.8.96` releases page-scoped template dependency namespace and Service Tickets E2E regression hardening from PR #334. Generated Dashboard pages, custom Data List forms, Approval forms, workflow task forms, and print pages rename copied golden-reference filter variables, temp variables, and form actions per surface so multiple templates on the same page cannot collide. Full-app materialization now preserves planned Service Tickets `Status | Text5` select fields and identity-picker field semantics with schema-safe Text-backed storage, rejects support subsections such as `Summary Metrics` as standalone Dashboard pages, attaches custom Data List forms to their explicit host lists, and removes Office Asset/loan source-template residue from Service Tickets-style Dashboard and View Item resources before signing readiness.
 
