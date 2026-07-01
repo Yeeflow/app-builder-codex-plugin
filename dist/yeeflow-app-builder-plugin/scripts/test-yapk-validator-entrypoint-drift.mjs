@@ -6,16 +6,23 @@ import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const canonical = "validate-yapk-package.js";
-const mirroredEntrypoints = [
+const sourceRootEntrypoints = [
   "dist/yeeflow-app-builder-plugin/validate-yapk-package.js",
   "dist/yeeflow-app-builder-plugin/scripts/validate-yapk-package.js",
   "skills/installed/yeeflow-application-generator/scripts/validate-yapk-package.js",
   "dist/yeeflow-app-builder-plugin/skills/yeeflow-application-generator/scripts/validate-yapk-package.js",
 ];
+const installedCacheRootEntrypoints = [
+  "scripts/validate-yapk-package.js",
+  "skills/installed/yeeflow-application-generator/scripts/validate-yapk-package.js",
+];
 
 const canonicalPath = path.join(ROOT, canonical);
 assert.equal(fs.existsSync(canonicalPath), true, `${canonical} exists`);
 const canonicalBytes = fs.readFileSync(canonicalPath, "utf8");
+const nestedDistPath = path.join(ROOT, "dist/yeeflow-app-builder-plugin");
+const isSourceRoot = fs.existsSync(nestedDistPath);
+const mirroredEntrypoints = isSourceRoot ? sourceRootEntrypoints : installedCacheRootEntrypoints;
 const checked = [];
 
 for (const entrypoint of mirroredEntrypoints) {

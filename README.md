@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.100`
+- Version: `0.8.101`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.100` releases Dashboard dataset and v1.1 layout validator tightening: App Plan Collection template rationales are evaluated from the selected rationale/display-need text rather than broad row context, conflicting table/card signals are rejected, and copied v1.1 `content_card_wrapper` modules must preserve both `section_title_area` and `section_content_area` before signing readiness.
+Current release `0.8.101` releases cache-aware validator-entrypoint smoke hardening: source checkouts still verify dist mirror byte parity, while installed plugin cache roots validate the real public validator mirrors without requiring a nested source checkout dist directory.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.100
+Version: 0.8.101
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.100
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.101
 ```
 
 ## What Is Included

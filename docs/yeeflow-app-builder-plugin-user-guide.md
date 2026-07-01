@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.100`
+`0.8.101`
+
+Version `0.8.101` releases cache-aware validator-entrypoint smoke hardening. Installed plugin cache roots are validated as plugin payloads without requiring nested source checkout dist mirrors.
 
 Version `0.8.100` releases Dashboard dataset template-selection and v1.1 section-fidelity validator tightening. Dashboard Collection App Plan choices are validated from selected rationale/display-need guidance rather than broad row context, card/grid/multiselect conflict signals are rejected, and copied Dashboard Page Layouts v1.1 `content_card_wrapper` modules must preserve both `section_title_area` and `section_content_area` before signing readiness.
 
