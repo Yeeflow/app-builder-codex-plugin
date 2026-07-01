@@ -146,6 +146,23 @@ try {
   expectFail("dashboard-only sparse upgrade fails", ["scripts/inspect-dashboard-upgrade-runtime-proof.mjs", "--evidence", sparseRuntime], "DASH_FULL_UPGRADE_SPARSE_PACKAGE_FORBIDDEN|DASH_FULL_UPGRADE_NON_DASHBOARD_UNCHANGED_PROOF_MISSING");
   cases.push("fail: dashboard-only sparse upgrade package");
 
+  const prematureExpansion = writeJson(tempDir, "premature-expansion-runtime.json", {
+    packageId: "2070211736924803073",
+    versionManagement: { status: "Succeed" },
+    scopeDiffProof: {
+      status: "pass",
+      unchangedResourceGroups: ["Childs", "Forms", "FormNewReports", "DataReports", "Groups", "Tags", "Metadatas", "Agents", "Connections", "Knowledges", "Themes", "Components", "PortalInfo"],
+    },
+    dashboardExpansion: {
+      expandedDashboardPages: ["Asset Loan Operations Dashboard", "Overdue Monitor"],
+      targetDashboardProof: { status: "fail", reason: "KPI values not visible before refresh" },
+    },
+    runtimeProof: { pages: [{ title: "Asset Loan Operations Dashboard", rowCount: 4, noDataVisible: false, objectObjectPlaceholderFound: false, collectionBoundToRealDataList: true }] },
+    searchFilterProof: { status: "pass", targetRecordVisibleAfter: true, unrelatedRowsRemoved: true },
+  });
+  expectFail("dashboard-only fix expanded before target delayed runtime proof fails", ["scripts/inspect-dashboard-upgrade-runtime-proof.mjs", "--evidence", prematureExpansion], "DASH_DASHBOARD_ONLY_EXPANSION_BEFORE_TARGET_RUNTIME_PROOF");
+  cases.push("fail: dashboard-only fix expands before target page delayed runtime proof");
+
   const validRuntime = writeJson(tempDir, "valid-runtime.json", {
     packageId: "2070211736924803073",
     upgradeCheck: { apiStatus: 0 },
@@ -160,6 +177,10 @@ try {
         { title: "Asset Loan Operations Dashboard", rowCount: 4, noDataVisible: false, objectObjectPlaceholderFound: false, collectionBoundToRealDataList: true },
         { title: "Asset Availability and Utilization Dashboard", businessRowsVisible: true, noDataVisible: false, objectObjectPlaceholderFound: false, collectionBoundToRealDataList: true },
       ],
+    },
+    dashboardExpansion: {
+      expandedDashboardPages: ["Asset Loan Operations Dashboard", "Asset Availability and Utilization Dashboard"],
+      targetDashboardProof: { status: "pass", fullRuntimeProofChainPassed: true },
     },
     searchFilterProof: { status: "pass", targetRecordVisibleAfter: true, unrelatedRowsRemoved: true },
   });

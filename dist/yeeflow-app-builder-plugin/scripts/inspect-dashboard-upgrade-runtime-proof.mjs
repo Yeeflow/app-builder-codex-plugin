@@ -39,6 +39,7 @@ export function inspectDashboardUpgradeRuntimeProof({ evidence } = {}) {
 
   validateUpgradeStatus(data, findings);
   validateScopeDiff(data, findings);
+  validateExpansionPolicy(data, findings);
   validateRuntimePages(data, findings);
   validateSearchProof(data, findings);
 
@@ -80,6 +81,24 @@ function validateScopeDiff(data, findings) {
   }
   if (data.sparsePackage === true || data.packageShape === "dashboard-only-sparse") {
     findings.push(finding("error", "DASH_FULL_UPGRADE_SPARSE_PACKAGE_FORBIDDEN", "Dashboard-only sparse upgrade packages are forbidden because they can drop Data Lists, Forms, reports, and metadata. Build a full upgrade package and prove non-Dashboard resources unchanged."));
+  }
+}
+
+function validateExpansionPolicy(data, findings) {
+  const expansion = data.dashboardExpansion || data.expansionPolicy || data.dashboardOnlyExpansion || {};
+  const expandedPages = asArray(expansion.expandedDashboardPages || expansion.pages || data.expandedDashboardPages);
+  const targetProof = expansion.targetDashboardProof || data.targetDashboardProof || {};
+  const targetStatus = String(targetProof.status || expansion.targetDashboardRuntimeProofStatus || "").trim();
+  const targetPassed = targetStatus === "pass"
+    || targetProof.fullRuntimeProofChainPassed === true
+    || expansion.targetDashboardFullRuntimeProofChainPassed === true;
+  const expandedBeforeProof = expansion.expandedBeforeTargetProof === true
+    || (expandedPages.length > 1 && !targetPassed);
+  if (expandedBeforeProof) {
+    findings.push(finding("error", "DASH_DASHBOARD_ONLY_EXPANSION_BEFORE_TARGET_RUNTIME_PROOF", "Dashboard-only fixes must not be expanded to additional Dashboard pages until one target page passes package gates, signing/verifysign, Version Management Succeed, delayed/refresh runtime proof, and saved screenshot evidence.", {
+      expandedDashboardPages: expandedPages.map(String),
+      targetStatus: targetStatus || null,
+    }));
   }
 }
 
@@ -141,7 +160,7 @@ function buildReport(evidence, findings, summary = {}) {
     status: findings.some((item) => item.level === "error") ? "fail" : "pass",
     evidence,
     summary,
-    proofBoundary: "Local package gates and API submission are not runtime proof. Dashboard upgrade success requires full-package non-Dashboard unchanged proof, Version Management Succeed for the exact PackageId, and browser/runtime evidence showing business rows, no No data state, no [object Object], real Collection binding, and Search filter behavior when generated.",
+    proofBoundary: "Local package gates and API submission are not runtime proof. Dashboard upgrade success requires full-package non-Dashboard unchanged proof, Version Management Succeed for the exact PackageId, and browser/runtime evidence showing business rows, no No data state, no [object Object], real Collection binding, Search filter behavior when generated, and no expansion beyond the target Dashboard before the target page passes the full delayed/refresh runtime proof chain.",
     findings,
   };
 }
