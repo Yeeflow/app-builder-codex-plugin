@@ -134,6 +134,36 @@ function run() {
 
   expectFail("Runtime-evidence missing prevents UI-quality claim", inspectRuntimeEvidence({ evidence: writeJson("runtime-missing.json", { installOrSigningOnly: true }), claimHighQualityUi: true }), "UI_QUALITY_RUNTIME_SCREENSHOT_MISSING");
   expectPass("Runtime evidence with visible KPI/cards/tables passes", inspectRuntimeEvidence({ evidence: writeJson("runtime-valid.json", runtimeEvidence()) , claimHighQualityUi: true }));
+  expectFail("Summary/chart runtime proof without delayed refresh window fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-summary-chart-no-refresh.json", runtimeEvidence({
+    summaryChartRuntimeProofRequired: true,
+    kpis: [{ label: "Active Loans", renderedText: "0" }],
+    charts: [{ name: "Loan Status Pie", renderedOutputVisible: true }],
+  })), claimHighQualityUi: true }), "RUNTIME_ASYNC_REFRESH_WINDOW_MISSING");
+  expectFail("Chart canvas-only runtime proof fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-chart-canvas-only.json", runtimeEvidence({
+    summaryChartRuntimeProofRequired: true,
+    delayedRuntimeMaterializationProofCaptured: true,
+    kpis: [{ label: "Active Loans", renderedText: "0" }],
+    charts: [{ name: "Loan Status Pie", canvasVisible: true }],
+  })), claimHighQualityUi: true }), "RUNTIME_CHART_CANVAS_ONLY_PROOF");
+  expectFail("Delayed runtime proof with non-numeric KPI text fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-summary-nonnumeric-kpi.json", runtimeEvidence({
+    summaryChartRuntimeProofRequired: true,
+    delayedRuntimeMaterializationProofCaptured: true,
+    kpis: [{ label: "Active Loans", renderedText: "loading" }],
+    charts: [{ name: "Loan Status Pie", renderedOutputVisible: true }],
+  })), claimHighQualityUi: true }), "RUNTIME_KPI_NUMERIC_VALUES_MISSING");
+  expectPass("Delayed Summary/chart runtime materialization proof passes", inspectRuntimeEvidence({ evidence: writeJson("runtime-summary-chart-delayed-pass.json", runtimeEvidence({
+    summaryChartRuntimeProofRequired: true,
+    refreshAttempts: [{ delayMs: 5000, outcome: "stale" }, { delayMs: 15000, outcome: "materialized" }],
+    finalRuntimeStateCaptured: true,
+    kpis: [
+      { label: "Active Loans", renderedText: "0" },
+      { label: "Due Soon", renderedText: "20" },
+    ],
+    charts: [
+      { name: "Loan Status Pie", renderedOutputVisible: true, screenshotVisibleOutput: true },
+      { name: "Trend Line", renderedOutputVisible: true },
+    ],
+  })), claimHighQualityUi: true }));
   expectFail("Hidden Summary visible in evidence fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-hidden-visible.json", runtimeEvidence({ hiddenSummaryVisible: true })), claimHighQualityUi: true }), "RUNTIME_HIDDEN_SUMMARY_VISIBLE");
   expectFail("Empty Components shell runtime proof fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-empty-components-shell.json", runtimeEvidence({ bodyText: "Start to build with Components ADD NEW COMPONENT" })), claimHighQualityUi: true }), "YAPK_RUNTIME_EMPTY_COMPONENT_SHELL_BLOCKER");
   expectFail("Install failed tile runtime proof fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-install-failed-tile.json", runtimeEvidence({ appTileStatus: "Install failed" })), claimHighQualityUi: true }), "YAPK_RUNTIME_INSTALL_FAILED_TILE");

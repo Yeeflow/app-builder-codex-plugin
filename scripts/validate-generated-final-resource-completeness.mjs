@@ -175,7 +175,8 @@ function parseCustomForms(text) {
 
 function parseDashboards(text) {
   const section = extractSection(text, /^##\s+14\.\s+Dashboard Pages Plan/i);
-  const dashboardMatches = [...section.matchAll(/^###\s+14\.[x0-9]+\s+(.+?)\s*$/gim)];
+  const dashboardMatches = [...section.matchAll(/^###\s+14\.[x0-9]+\s+(.+?)\s*$/gim)]
+    .filter((match) => isDashboardPageName(cleanName(match[1])));
   const dashboards = [];
   for (let index = 0; index < dashboardMatches.length; index += 1) {
     const match = dashboardMatches[index];
@@ -227,7 +228,7 @@ function isDashboardPageName(value) {
   const name = cleanName(value);
   if (!name || isPlaceholder(name)) return false;
   const lower = name.toLowerCase();
-  if (/\b(template coverage|coverage matrix|selection matrix|business decision gate|business decision gates|dataset presentation plan|collection template selection|data analytics template selection|data table template selection)\b/.test(lower)) return false;
+  if (/\b(template coverage|coverage matrix|selection matrix|business decision gate|business decision gates|dataset presentation plan|dashboard sections|dashboard filters|dashboard actions|summary metrics|record display control selection|dashboard record display|dataset presentation|item template dynamic controls|collection and kanban item actions|collection template selection|dashboard page layout template selection|data analytics template selection|data table template selection)\b/.test(lower)) return false;
   if (/^(dashboard|record display|item template|collection|kanban|dashboard generation|dashboard template coverage matrix)$/i.test(name)) return false;
   return true;
 }

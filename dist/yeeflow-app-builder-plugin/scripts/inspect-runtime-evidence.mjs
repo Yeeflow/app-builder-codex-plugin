@@ -35,6 +35,7 @@ export function inspectRuntimeEvidence({ evidence: evidencePath, claimHighQualit
   if (evidence.tablesGridsNonScaffold !== true) addFinding(findings, "error", "RUNTIME_TABLES_GRIDS_SCAFFOLD", "Tables/grids must not be empty scaffolds in runtime evidence.");
   if (evidence.badgesDistinct !== true) addFinding(findings, "error", "RUNTIME_BADGES_NOT_DISTINCT", "Badges/chips must be visually distinct in runtime evidence.");
   if (evidence.pageLooksPlainScaffold === true) addFinding(findings, "error", "RUNTIME_PAGE_LOOKS_SCAFFOLD", "Runtime page still looks like a plain scaffold.");
+  validateAsyncSummaryChartProof(evidence, findings);
   const visibleText = collectVisibleRuntimeText(evidence);
   if (/\bStart to build with Components\b/i.test(visibleText) || /\bADD NEW COMPONENT\b/i.test(visibleText)) {
     addFinding(findings, "error", "YAPK_RUNTIME_EMPTY_COMPONENT_SHELL_BLOCKER", "Runtime proof must fail when the installed app opens to Yeeflow's empty Components builder shell instead of generated app content.");
@@ -46,7 +47,110 @@ export function inspectRuntimeEvidence({ evidence: evidencePath, claimHighQualit
   return buildReport(evidencePath, findings, {
     screenshot: evidence.screenshot || evidence.screenshotPath ? path.basename(evidence.screenshot || evidence.screenshotPath) : "redacted",
     runtimeScreenshotCaptured: evidence.runtimeScreenshotCaptured === true,
+    refreshAttemptCount: refreshAttemptCount(evidence),
+    delayedRuntimeMaterializationProofCaptured: delayedRuntimeMaterializationProofCaptured(evidence),
   });
+}
+
+function validateAsyncSummaryChartProof(evidence, findings) {
+  const summaryChartProofRequired = evidence.summaryChartRuntimeProofRequired === true
+    || evidence.dashboardRuntimeMaterializationProofRequired === true
+    || evidence.kpiSummaryRuntimeProofRequired === true
+    || evidence.dataAnalyticsRuntimeProofRequired === true;
+  if (!summaryChartProofRequired) return;
+
+  if (!delayedRuntimeMaterializationProofCaptured(evidence)) {
+    addFinding(findings, "error", "RUNTIME_ASYNC_REFRESH_WINDOW_MISSING", "Summary/KPI and Data Analytics runtime proof must include a delayed retry/refresh window before declaring success or failure.");
+  }
+  validateVisibleKpiNumbers(evidence, findings);
+  validateChartOutputProof(evidence, findings);
+}
+
+function delayedRuntimeMaterializationProofCaptured(evidence) {
+  if (evidence.delayedRuntimeMaterializationProofCaptured === true) return true;
+  if (evidence.runtimeMaterialization?.delayedRefreshProofCaptured === true) return true;
+  if (evidence.asyncRefreshWindow?.status === "pass") return true;
+  if (evidence.delayedRuntimeProof?.status === "pass") return true;
+  return refreshAttemptCount(evidence) > 0 && (evidence.finalRuntimeStateCaptured === true || evidence.refreshedRuntimeStateCaptured === true);
+}
+
+function refreshAttemptCount(evidence) {
+  const attempts = evidence.refreshAttempts || evidence.runtimeRefreshAttempts || evidence.asyncRefreshWindow?.attempts || evidence.delayedRuntimeProof?.attempts;
+  if (Array.isArray(attempts)) return attempts.length;
+  const count = Number(evidence.refreshAttemptCount ?? evidence.asyncRefreshWindow?.attemptCount ?? evidence.delayedRuntimeProof?.attemptCount ?? 0);
+  return Number.isFinite(count) ? count : 0;
+}
+
+function validateVisibleKpiNumbers(evidence, findings) {
+  const kpis = collectKpiEntries(evidence);
+  if (!kpis.length) {
+    if (evidence.kpiValuesVisible !== true) {
+      addFinding(findings, "error", "RUNTIME_KPI_NUMERIC_VALUES_MISSING", "Final delayed runtime proof must show visible KPI numbers, not only structural package validation.");
+    }
+    return;
+  }
+  const missing = [];
+  for (const kpi of kpis) {
+    const text = String(kpi.renderedText ?? kpi.text ?? kpi.value ?? "").trim();
+    if (!/\d/.test(text)) missing.push(String(kpi.label || kpi.name || "KPI"));
+  }
+  if (missing.length) {
+    addFinding(findings, "error", "RUNTIME_KPI_NUMERIC_VALUES_MISSING", "Final delayed runtime proof must show visible KPI numbers for every captured KPI.", { kpis: missing });
+  }
+}
+
+function collectKpiEntries(evidence) {
+  const entries = [];
+  if (Array.isArray(evidence.kpis)) entries.push(...evidence.kpis);
+  if (Array.isArray(evidence.runtimeProof?.kpis)) entries.push(...evidence.runtimeProof.kpis);
+  if (Array.isArray(evidence.delayedRuntimeProof?.kpis)) entries.push(...evidence.delayedRuntimeProof.kpis);
+  if (Array.isArray(evidence.finalRuntimeState?.kpis)) entries.push(...evidence.finalRuntimeState.kpis);
+  return entries.filter((item) => item && typeof item === "object");
+}
+
+function validateChartOutputProof(evidence, findings) {
+  const charts = collectChartEntries(evidence);
+  if (!charts.length) {
+    if (evidence.chartCanvasVisible === true || Number(evidence.chartCanvasCount || evidence.canvasCount || 0) > 0) {
+      addFinding(findings, "error", "RUNTIME_CHART_CANVAS_ONLY_PROOF", "Chart canvas existence is not enough; final proof must show visible rendered chart output after refresh.");
+      return;
+    }
+    if (evidence.dataAnalyticsRuntimeProofRequired === true || evidence.summaryChartRuntimeProofRequired === true) {
+      addFinding(findings, "error", "RUNTIME_CHART_OUTPUT_PROOF_MISSING", "Data Analytics runtime proof must include visible rendered chart output evidence after refresh.");
+    }
+    return;
+  }
+  const canvasOnly = [];
+  const missing = [];
+  for (const chart of charts) {
+    const name = String(chart.label || chart.name || chart.type || "chart");
+    const outputVisible = chart.renderedOutputVisible === true
+      || chart.visibleRenderedOutput === true
+      || chart.nonEmptyRenderedOutput === true
+      || chart.screenshotVisibleOutput === true;
+    if (!outputVisible && (chart.canvasVisible === true || Number(chart.canvasCount || 0) > 0)) canvasOnly.push(name);
+    else if (!outputVisible) missing.push(name);
+  }
+  if (canvasOnly.length) {
+    addFinding(findings, "error", "RUNTIME_CHART_CANVAS_ONLY_PROOF", "Chart canvas existence is not enough; final proof must show visible rendered chart output after refresh.", { charts: canvasOnly });
+  }
+  if (missing.length) {
+    addFinding(findings, "error", "RUNTIME_CHART_OUTPUT_PROOF_MISSING", "Data Analytics runtime proof must include visible rendered chart output evidence after refresh.", { charts: missing });
+  }
+}
+
+function collectChartEntries(evidence) {
+  const entries = [];
+  for (const value of [
+    evidence.charts,
+    evidence.dataAnalyticsCharts,
+    evidence.runtimeProof?.charts,
+    evidence.delayedRuntimeProof?.charts,
+    evidence.finalRuntimeState?.charts,
+  ]) {
+    if (Array.isArray(value)) entries.push(...value);
+  }
+  return entries.filter((item) => item && typeof item === "object");
 }
 
 function runtimeTargetShowsInstallFailed(evidence, visibleText) {
@@ -119,7 +223,7 @@ function buildReport(evidencePath, findings, summary = {}) {
     evidence: safePath(evidencePath),
     summary,
     unavailableMessage: "When runtime evidence is unavailable, reports must say: UI runtime proof not completed; dynamic KPI visible binding not proven; install/signing is not visual runtime proof.",
-    proofBoundary: "This gate validates redacted runtime evidence metadata. It does not perform live screenshot capture.",
+    proofBoundary: "This gate validates redacted runtime evidence metadata. It does not perform live screenshot capture. Structural package validation, Version Management Succeed, chart canvas existence, and absence of raw temp-variable text are not final Dashboard runtime proof; Summary/KPI and chart claims require delayed refresh evidence with visible KPI numbers and visible rendered chart output.",
     findings,
   };
 }

@@ -531,10 +531,10 @@ function collectDashboardPageLayoutTemplateRecords(planText) {
   const lines = section.split(/\r?\n/);
   const records = [];
   for (let index = 0; index < lines.length; index += 1) {
-    if (!/^####\s+Dashboard Page Layout Template Selection\s*$/i.test(lines[index].trim())) continue;
+    if (!/^#{3,4}\s+(?:\d+(?:\.\d+)*\s+)?Dashboard Page Layout Template Selection\s*$/i.test(lines[index].trim())) continue;
     let cursor = index + 1;
     while (cursor < lines.length && !isTableLine(lines[cursor])) {
-      if (/^####\s+/.test(lines[cursor])) break;
+      if (/^#{3,4}\s+/.test(lines[cursor])) break;
       cursor += 1;
     }
     if (!isTableLine(lines[cursor]) || !isTableLine(lines[cursor + 1] || "")) continue;
@@ -2143,12 +2143,16 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   const effectiveDatasetRecords = (datasetRecords || []).length ? datasetRecords : [{ selectedTemplateId, sourceResource, datasetRegion }];
   if (isMasterDetailWorkspace) {
     const masterRecord = effectiveDatasetRecords[0] || { sourceResource, datasetRegion };
+    const leftRecord = effectiveDatasetRecords.find((record) => /left[_\s-]*panel|left_panel_data_items_wrapper/i.test(String(record.datasetRegion || ""))) || masterRecord;
+    const currentRecord = effectiveDatasetRecords.find((record) => /current[_\s-]*item|current_item_wrapper|selected/i.test(String(record.datasetRegion || ""))) || effectiveDatasetRecords[1] || masterRecord;
     const masterListMeta = listMetaByName?.get(normKey(masterRecord.sourceResource)) || sourceListMeta;
     materializeMasterDetailWorkspaceCollections(resource, {
       dashboardName: name,
       rootListSetId,
       listMeta: masterListMeta,
       datasetRegion: masterRecord.datasetRegion || datasetRegion,
+      leftTemplateId: leftRecord.selectedTemplateId || masterRecord.selectedTemplateId || selectedTemplateId,
+      currentTemplateId: currentRecord.selectedTemplateId || leftRecord.selectedTemplateId || masterRecord.selectedTemplateId || selectedTemplateId,
       collectionId,
     });
   }
@@ -2325,7 +2329,7 @@ function ensureMasterDetailDashboardRuntimeShell(resource, pageLayoutTemplateId)
   content.label ||= "content_panel";
 }
 
-function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, rootListSetId, listMeta, datasetRegion, collectionId }) {
+function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, rootListSetId, listMeta, datasetRegion, leftTemplateId, currentTemplateId, collectionId }) {
   const leftCollection = findFirstByIdentity(resource, "left_panel_data_items_wrapper");
   const currentCollection = findFirstByIdentity(resource, "current_item_wrapper");
   const leftPanelTitle = findFirstByIdentity(resource, "left_panel_caption_title");
@@ -2339,6 +2343,7 @@ function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, 
       datasetRegion,
       listMeta,
       rootListSetId,
+      selectedTemplateId: leftTemplateId || "collection_control_grid_table",
       id: `${collectionId}_left_panel`,
     });
     leftCollection.attrs.data.limit = false;
@@ -2355,6 +2360,7 @@ function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, 
       datasetRegion: `${datasetRegion} selected detail`,
       listMeta,
       rootListSetId,
+      selectedTemplateId: currentTemplateId || leftTemplateId || "collection_control_grid_table",
       id: `${collectionId}_current_item`,
     });
     currentCollection.attrs.data.limit = true;
@@ -2380,13 +2386,17 @@ function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, 
   replaceTemplateResidue(resource, { datasetRegion, listName: listMeta.listName || datasetRegion });
 }
 
-function configureMasterDetailCollection(collection, { role, dashboardName, datasetRegion, listMeta, rootListSetId, id }) {
+function configureMasterDetailCollection(collection, { role, dashboardName, datasetRegion, listMeta, rootListSetId, selectedTemplateId, id }) {
   const listName = listMeta.listName || datasetRegion || "Records";
+  const templateId = selectedTemplateId || "collection_control_grid_table";
   collection.id = id;
   collection.name = role === "left-panel-list" ? `${listName} list` : `${listName} selected item`;
   collection.title = collection.name;
   collection.dashboardWorkspaceCollectionRole = role;
   collection.dashboardPageLayoutInternalCollection = true;
+  collection.datasetPresentationTemplateId = templateId;
+  collection.derivedFromDatasetPresentationTemplate = templateId;
+  collection.templateId = templateId;
   collection.datasetRegion = datasetRegion;
   collection.datasetRegionName = datasetRegion;
   collection.appPlanDatasetRegion = datasetRegion;
@@ -2395,11 +2405,9 @@ function configureMasterDetailCollection(collection, { role, dashboardName, data
     dashboardWorkspaceCollectionRole: role,
     dashboardPageLayoutInternalCollection: true,
     dashboardPageLayoutTemplateId: collection.attrs?.dashboardPageLayoutTemplateId || null,
-    ...(role === "left-panel-list" ? {
-      datasetPresentationTemplateId: "collection_control_grid_table",
-      derivedFromDatasetPresentationTemplate: "collection_control_grid_table",
-      templateId: "collection_control_grid_table",
-    } : {}),
+    datasetPresentationTemplateId: templateId,
+    derivedFromDatasetPresentationTemplate: templateId,
+    templateId,
     datasetRegion,
     datasetRegionName: datasetRegion,
     appPlanDatasetRegion: datasetRegion,
@@ -2414,6 +2422,7 @@ function configureMasterDetailCollection(collection, { role, dashboardName, data
       } : {}),
       field: primaryFieldName(listMeta),
       sort: [{ SortName: primarySortFieldName(listMeta), SortByDesc: false }],
+      datasetPresentationTemplateId: templateId,
     },
   };
   collection.generatedFrom = { dashboardName, sourceResource: listName, dashboardWorkspaceCollectionRole: role };

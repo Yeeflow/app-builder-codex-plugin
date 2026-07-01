@@ -191,7 +191,7 @@ function validateAppPlan(planPath, findings) {
     findings.push(error("DATA_LIST_FORM_FIELDS_APP_PLAN_SELECTION_TABLE_MISSING", "Custom Data List Forms Plan must include a Form Fields Layout Template Selection table when generated forms display current-record fields."));
     return;
   }
-  const selectionBlock = section.split(/#### Custom Form Actions|#### Sub List List Actions|##\s+11\./i)[0].split(/#### Form Fields Layout Template Selection/i)[1] || "";
+  const selectionBlock = subsectionAfterHeading(section, /^#{3,4}\s+(?:\d+(?:\.\d+)*\s+)?Form Fields Layout Template Selection\s*$/i);
   const rows = tableRows(selectionBlock).filter((row) => row.raw.includes(TEMPLATE_ID));
   if (!rows.length) {
     findings.push(error("DATA_LIST_FORM_FIELDS_APP_PLAN_TEMPLATE_SELECTION_REQUIRED", "Form Fields Layout Template Selection must select data_list_form_fields_grid_v1_1 for generated current-record field groups."));
@@ -201,9 +201,10 @@ function validateAppPlan(planPath, findings) {
 
 function validateAppPlanFieldGridRow(row, findings) {
   const cells = row.split("|").slice(1, -1).map((cell) => cell.trim());
-  const pc = Number(cells[4]);
-  const tablet = Number(cells[5]);
-  const mobile = Number(cells[6]);
+  const templateIndex = cells.findIndex((cell) => cell === TEMPLATE_ID);
+  const pc = Number(cells[templateIndex + 2]);
+  const tablet = Number(cells[templateIndex + 3]);
+  const mobile = Number(cells[templateIndex + 4]);
   if (!Number.isFinite(pc) || pc < 2 || pc > 3) {
     findings.push(error("DATA_LIST_FORM_FIELDS_APP_PLAN_PC_COLUMNS_INVALID", "PC/laptop columns for data_list_form_fields_grid_v1_1 must be 2 or 3.", { row }));
   }
@@ -213,6 +214,27 @@ function validateAppPlanFieldGridRow(row, findings) {
   if (Number.isFinite(mobile) && mobile !== 1) {
     findings.push(error("DATA_LIST_FORM_FIELDS_APP_PLAN_MOBILE_COLUMNS_INVALID", "Mobile columns should be 1 for data_list_form_fields_grid_v1_1.", { row }));
   }
+}
+
+function subsectionAfterHeading(section, headingPattern) {
+  const lines = String(section || "").split(/\r?\n/);
+  const out = [];
+  let active = false;
+  let level = 0;
+  for (const line of lines) {
+    const heading = line.match(/^(#{1,6})\s+(.+?)\s*$/);
+    if (heading) {
+      const currentLevel = heading[1].length;
+      if (active && currentLevel <= level) break;
+      if (!active && headingPattern.test(line.trim())) {
+        active = true;
+        level = currentLevel;
+        continue;
+      }
+    }
+    if (active) out.push(line);
+  }
+  return out.join("\n");
 }
 
 function validateResource(rawResource, context) {
