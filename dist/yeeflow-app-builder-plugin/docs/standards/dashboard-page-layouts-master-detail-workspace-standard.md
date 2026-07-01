@@ -112,9 +112,11 @@ All other template controls, page temp variables, form actions, layout relations
 
 `left_panel_filter_group` is a filter grouping container. Each group should contain no more than two Data Filter controls. If more filters are needed, duplicate another `left_panel_filter_group`.
 
+Left-panel Data Filter controls must bind by business semantics, not by source-list field order. A filter labeled or placeholdered as `Status` must use the actual Status field from the bound source dataset; a filter labeled or placeholdered as `Priority` or `Priority Level` must use the actual Priority field. Generated packages must not bind these controls to neighboring fields such as ticket number, subject/title, requester, or created date just because those fields appear earlier in the list schema. The filter's option source, display field, value field, and consumer condition must all resolve to the same intended business field.
+
 `left_panel_caption_add_button` may be retained only when the left-panel source supports creating new records, such as a Data list or Document library. When the primary source is a Form report, Data report, or another read-only/reporting source, remove `left_panel_caption_add_button` and its action instead of leaving a visual-only Add button.
 
-`Operations` and operation containers may exist only when they contain real configured action controls. Remove unused Operations regions and visual-only buttons.
+`Operations` and operation containers may exist only when they contain real configured action controls. Every generated control that carries `attrs.control_action`, `attrs.action`, `control_action`, or `action` must resolve to a page-level `actions[]` / `formAction[]` entry or to the nearest Collection/Kanban local action list. If a copied operation button, search icon, add button, sidebar toggle, or header icon cannot be resolved after template cloning and namespacing, remove that control and then clean up any now-empty operation container.
 
 Generated master-detail workspace pages must be domain-clean. Do not retain copied source-template business copy such as `Office Asset`, `Active Loan Pipeline`, `current loan volume`, `return activity signal`, or loan-domain guidance on non-loan applications. Map copied text to the current domain only when the section has real planned business content; otherwise remove the copied section/module.
 
