@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.102`
+`0.8.103`
+
+Version `0.8.103` releases Data List identity-picker storage correction. Generated user/person/requester/assignee fields now materialize as schema-safe `TextN` fields with `FieldType: "Text"` and `Type: "identity-picker"`; legacy `UserN` planning keys are remapped instead of emitted, and Service Tickets regression coverage rejects unsupported `FieldType: "User"` output before signing readiness.
 
 Version `0.8.102` releases installed-cache validator mirror smoke alignment. Cache-root entrypoint drift checks now validate the actual installed plugin payload mirrors while source checkouts continue enforcing full dist byte parity.
 
@@ -28,7 +30,7 @@ Version `0.8.101` releases cache-aware validator-entrypoint smoke hardening. Ins
 
 Version `0.8.100` releases Dashboard dataset template-selection and v1.1 section-fidelity validator tightening. Dashboard Collection App Plan choices are validated from selected rationale/display-need guidance rather than broad row context, card/grid/multiselect conflict signals are rejected, and copied Dashboard Page Layouts v1.1 `content_card_wrapper` modules must preserve both `section_title_area` and `section_content_area` before signing readiness.
 
-Version `0.8.99` releases Service Tickets business-regression hardening. Generated User fields now preserve native User storage keys with identity-picker controls, master-detail left record lists avoid unsafe empty select-filter Collection conditions, Service Tickets custom forms and Dashboard business resources scrub unrelated source-template metadata, and KPI/Summary runtime identifiers use planned business metric names.
+Version `0.8.99` releases Service Tickets business-regression hardening. Later corrected by `0.8.103`: generated user/person fields must use schema-safe Text-backed identity-picker storage, not native `UserN` / `FieldType: "User"` output. The rest of the 0.8.99 hardening keeps master-detail left record lists free of unsafe empty select-filter Collection conditions, scrubs unrelated source-template metadata, and derives KPI/Summary runtime identifiers from planned business metric names.
 
 Version `0.8.97` releases KPI Summary / Data Analytics runtime materialization proof hardening from PR #335. Runtime evidence now separates structural package validation, Version Management Succeed, immediate browser state, and delayed/refresh runtime materialization success. KPI Summary proof requires delayed refresh evidence, numeric visible KPI values, hidden/runtime Summary materialization evidence, and visible heading binding; Data Analytics proof requires rendered chart or pivot output in addition to visible controls and Resource.exts runtime models. Dashboard-only upgrade fixes must keep non-Dashboard resources unchanged and cannot expand to additional Dashboard pages before the target page completes the full delayed/refresh proof chain.
 

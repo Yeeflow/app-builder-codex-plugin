@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.8.103
+
+- Release Data List identity-picker storage correction.
+- Generate user/person/requester/assignee/agent/owner fields as schema-safe `TextN` fields with `FieldType: "Text"` and `Type: "identity-picker"`.
+- Remap legacy App Plan `UserN` / `User` field wording to Text-backed identity-picker output instead of emitting unsupported YAPK Data List storage fields.
+- Update Service Tickets regression coverage and training guidance to reject `FieldType: "User"` and `FieldName: "UserN"` generated output before signing readiness.
+
 ## 0.8.102
 
 - Release installed-cache validator mirror smoke alignment.
@@ -24,12 +31,12 @@
 
 ## 0.8.99
 
-- Release Service Tickets native User, filter, and template-residue hardening.
-- Preserve planned native User storage fields such as User1/User2 while keeping identity-picker controls for Requester, Assigned Agent, Commented By, and Uploaded By fields.
+- Release Service Tickets user/person field, filter, and template-residue hardening.
+- Corrected by 0.8.103: user/person fields must use schema-safe `TextN` storage plus `Type: "identity-picker"`; generated `UserN` / `FieldType: "User"` Data List fields are not valid under the current YAPK schema.
 - Keep master-detail left record-list Collections free of unsafe empty select-filter conditions until a proven optional-filter runtime contract exists.
 - Scrub unrelated Office Asset/Event Portfolio source-template metadata from Service Tickets generated Dashboard and custom Data List form business resources.
 - Derive KPI/Summary temp variables, Summary IDs, and generated metadata from planned business metric names instead of source golden-reference slot names.
-- Add focused Service Tickets regression coverage for native User fields, left-list filter safety, App Plan selected two-panel layout materialization, custom form host assignment, and template-residue cleanup.
+- Add focused Service Tickets regression coverage for Text-backed identity-picker fields, left-list filter safety, App Plan selected two-panel layout materialization, custom form host assignment, and template-residue cleanup.
 
 
 ## 0.8.98

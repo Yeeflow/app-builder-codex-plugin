@@ -1,4 +1,4 @@
-# Service Tickets Native User, Filter, and Template Residue Training Report
+# Service Tickets Identity-Picker Text Storage, Filter, and Template Residue Training Report
 
 ## Scope
 
@@ -6,14 +6,17 @@ This training closes the Service Tickets regression found after the 0.8.97 fresh
 
 ## Defects
 
-1. Planned User fields were downgraded to Text storage fields with `identity-picker` controls. `Requester`, `Assigned Agent`, `Commented By`, and `Uploaded By` must preserve native `User1` / `User2` field keys and `FieldType: "User"`.
+1. Planned user/person fields such as `Requester`, `Assigned Agent`, `Commented By`, and `Uploaded By` must preserve identity-picker behavior while using canonical Data List storage: `FieldName: "TextN"`, `FieldType: "Text"`, and `Type: "identity-picker"`. The plugin must not emit unsupported `User1` / `User2` field keys or `FieldType: "User"` in generated YAPK Data List fields.
 2. The master-detail Dashboard left record list carried unsafe select-filter conditions. Empty filter variables can clear the Collection at runtime, so the left list must not apply unproven Collection filters.
 3. Generated Service Tickets resources retained source-template metadata such as `event_portfolio_pipeline_section`, `event_portfolio_header_band`, and `Asset Loan Operations Header Band`.
 4. KPI/Summary runtime IDs reused source template names such as `approved_budget`, `registration_rate`, and `lead_follow_up` instead of business metric names.
 
 ## Required Generator Behavior
 
-- Preserve schema-safe native User field keys (`User1`, `User2`, etc.) and emit `FieldType: "User"` with `Type: "identity-picker"`.
+- Treat `identity-picker` as the Data List field control `Type`, not as a separate Data List storage `FieldType`.
+- Materialize user/person/requester/assignee/agent/owner fields as schema-safe Text-backed identity-picker fields: `FieldName: "TextN"`, `FieldType: "Text"`, `Type: "identity-picker"`.
+- Do not preserve unsupported App Plan field keys such as `User1` or `User2` in generated YAPK Data List fields. If an App Plan uses those legacy keys, remap them to the next safe `TextN` key while preserving the display name and identity-picker rules.
+- Runtime proof for user/person fields must verify identity-picker values can resolve or write existing tenant users, but that runtime proof does not change the generated package storage schema from Text-backed identity-picker fields.
 - Configure visible filter controls for the page, but do not attach Collection filter conditions unless the filter has a proven safe empty-state runtime contract.
 - Business-facing generated resources must not expose source-template IDs, labels, or maintenance metadata from unrelated business domains.
 - KPI Summary IDs, temp variables, and generated metadata must be derived from the planned business metric label, not the source golden-reference slot name.
@@ -23,7 +26,7 @@ This training closes the Service Tickets regression found after the 0.8.97 fresh
 
 `scripts/test-service-tickets-e2e-regression-gates.mjs` now verifies:
 
-- Native User field preservation for Tickets, Ticket Comments, and Ticket Attachments.
+- Text-backed identity-picker field preservation for Tickets, Ticket Comments, and Ticket Attachments, including a regression fixture that starts with legacy `User1` / `User2` planning keys and proves generated output uses `TextN` + `FieldType: "Text"` + `Type: "identity-picker"`.
 - The Service Tickets two-panel Dashboard uses the App Plan selected page layout.
 - The left panel Collection has no unsafe empty select-filter conditions.
 - The generated package does not contain Office Asset, Event Portfolio, or source-template KPI/Summary identifiers in business resources.
