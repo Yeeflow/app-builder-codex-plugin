@@ -3073,8 +3073,9 @@ function buildDataAnalyticsTemplateInstance({ record, listMeta, dashboardName, i
 function buildDataAnalyticsRuntimeContract({ controlId, reference, listMeta, rootListSetId, groupingField, valueField, title }) {
   const controlType = String(reference.controlType || "");
   const extKey = controlType === "pivot-table" ? "PivotTable" : controlType;
-  const chartType = String(reference.semanticChartKind || controlType || "");
+  const chartType = runtimeChartTypeCode(reference);
   const rowField = runtimeFieldRef(groupingField, "row");
+  if (requiresDateTrendRow(reference, groupingField)) rowField.func = "DATE";
   const valueRef = {
     ...runtimeFieldRef(valueField, "value"),
     func: "COUNT",
@@ -3102,6 +3103,24 @@ function buildDataAnalyticsRuntimeContract({ controlId, reference, listMeta, roo
       attr,
     },
   };
+}
+
+function runtimeChartTypeCode(reference) {
+  const chartKind = String(reference?.semanticChartKind || reference?.controlType || "").toLowerCase();
+  if (chartKind === "pie-chart") return "0";
+  if (chartKind === "line-chart" || chartKind === "area-chart") return "1";
+  if (chartKind === "bar-chart" || chartKind === "column-chart") return "2";
+  return "";
+}
+
+function requiresDateTrendRow(reference, field) {
+  const chartKind = String(reference?.semanticChartKind || reference?.controlType || "").toLowerCase();
+  if (chartKind !== "line-chart" && chartKind !== "area-chart") return false;
+  return isDateLikeAnalyticsField(field);
+}
+
+function isDateLikeAnalyticsField(field) {
+  return /date|datetime|time|created|modified|period|month|week|year/i.test(`${field?.fieldName || field?.FieldName || ""} ${field?.displayName || field?.DisplayName || ""} ${field?.fieldType || field?.FieldType || ""} ${field?.controlType || field?.Type || ""}`);
 }
 
 function runtimeFieldRef(field, role) {
