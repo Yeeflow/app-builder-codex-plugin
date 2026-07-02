@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.111`
+- Version: `0.8.112`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.111` hardens Data Analytics runtime export-shape validation and Service Tickets-style workbench Dashboard materialization: chart/pivot runtime rows and values now require export-shaped metadata, and bullet-form Dashboard layout selections such as `dashboard-page-layouts-two-panel-workspace` are preserved through materialization so planned left-list/right-detail workspaces and Priority/Status filters are not replaced by generic table pages.
+Current release `0.8.112` hardens focused Service Tickets master-detail workspace cleanup: generated two-panel and three-panel workspace Dashboards prune empty `section_title_area` containers, avoid v1.1 content-card slot repair on master-detail pages, and preserve exact Priority/Status select-filter option sets from explicit App Plan or field rules without appending generic fallback values.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.111
+Version: 0.8.112
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.111
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.112
 ```
 
 ## What Is Included
