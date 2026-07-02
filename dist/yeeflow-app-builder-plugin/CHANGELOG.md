@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+## 0.8.108
+
+- Release Service Tickets semantic materialization hardening.
+- Parse Dashboard page selection tables that use `Dashboard | Layout template | Dataset presentation` and materialize only the explicitly planned Dashboard page, instead of treating `Left panel work queue`, `Right panel selected ticket detail`, or `Explicit dashboard exclusions` subsections as standalone Dashboard resources.
+- Parse App Plan Data List field tables that use `Internal Name`, `Business Type`, `Yeeflow Type`, and `Choices`, preserving planned Service Tickets fields such as Priority `Text7`, Status `Text5`, and Text-backed `identity-picker` requester/agent fields.
+- Add a focused Service Tickets regression fixture that rejects generic workspace pages, Title-only business Data Lists, and unsupported `FieldType: "User"` output before signing readiness.
+- Save the Service Tickets semantic materialization training report and keep source/dist materializer and regression gates aligned.
+
+## 0.8.107
+
+- Release refreshed Dashboard master-detail workspace YDP templates.
+- Update `dashboard-page-layouts-two-panel-workspace` and `dashboard-page-layouts-three-panel-workspace` from the latest YDP exports, including 520px left panel width, relocated `left_panel_sidebar`, and the editable `left_panel_caption_icon_wrapper` / `left_panel_caption_icon` source icon slot.
+- Add explicit `current_item_main_header_edit_item_button` and `current_item_main_header_delete_item_button` slots while keeping repeatable `current_item_main_header_operations_button` for additional business actions.
+- Prune generated no-action workspace operation containers across current-item and additional-header operation regions, not only generic `Operations` containers.
+- Extend master-detail workspace template gates, plan-conformance tests, and dist mirrors so the updated operation-slot contract is enforced before signing readiness.
+
+## 0.8.106
+
+- Release Service Tickets runtime semantics, Data Analytics parser alignment, and Dashboard content-card fidelity hardening.
+- Preserve proven option-source choices for master-detail Priority/Status filters, bind those filters to matching business fields, and validate selected-record detail labels against the rendered Dynamic controls.
+- Emit structured seed-data requirements for `identity-picker` and `file-upload` fields while keeping generated storage schema-safe as `FieldType: "Text"` for identity-picker fields.
+- Align Data Analytics App Plan parsing for Region/Surface tables and preserve Dashboard `content_card_wrapper` section title/header slots required by golden-reference fidelity gates.
+- Reject loan/asset source-template copy outside matching business domains so Service Tickets-style pages cannot silently keep unrelated template helper text.
+
+## 0.8.105
+
+- Release Dashboard master-detail workspace action and filter binding hardening.
+- Preserve `dashboard-page-layouts-two-panel-workspace` and `dashboard-page-layouts-three-panel-workspace` page-layout root `actions`, `formAction`, `tempVars`, and `filterVars` during full-app materialization instead of replacing them with only inserted component-template dependencies.
+- Remove generated visual-only operation/search/add/header controls whose action references do not resolve to a page action/formAction or nearest Collection/Kanban local action.
+- Bind master-detail left-panel filters by business semantics, so `Priority Level` resolves to the source Priority field and `Status` resolves to the source Status field instead of neighboring ticket number/title fields.
+- Keep hidden Summary runtime hosts out of visible master-detail business sections to avoid empty cards below planned KPI rows.
+- Add two-panel and three-panel regression coverage for unresolved page action references and mismatched left-panel filter field bindings.
+
 ## 0.8.104
 
 - Release full-app materializer resource/runtime fixes.

@@ -581,7 +581,7 @@ function collectDashboardPageLayoutTemplateRecords(planText) {
     const headers = splitTableLine(lines[cursor]);
     const normalizedHeaders = headers.map((header) => normKey(header));
     const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard", "dashboard page name", "page name"]);
-    const templateColumn = findHeaderIndex(normalizedHeaders, ["selected dashboard page layout template", "dashboard page layout template", "selected layout template", "template id"]);
+    const templateColumn = findHeaderIndex(normalizedHeaders, ["selected dashboard page layout template", "dashboard page layout template", "selected layout template", "layout template", "template id"]);
     if (pageColumn === -1 || templateColumn === -1) continue;
     let rowIndex = cursor + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
@@ -598,6 +598,30 @@ function collectDashboardPageLayoutTemplateRecords(planText) {
       rowIndex += 1;
     }
     index = rowIndex;
+  }
+  for (const table of parseMarkdownTables(section)) {
+    const normalizedHeaders = table.headers.map((header) => normKey(header));
+    const pageColumn = findHeaderIndex(normalizedHeaders, ["dashboard page", "dashboard", "dashboard page name", "page name"]);
+    const templateColumn = findHeaderIndex(normalizedHeaders, [
+      "selected dashboard page layout template",
+      "dashboard page layout template",
+      "selected layout template",
+      "layout template",
+      "template id",
+    ]);
+    if (pageColumn === -1 || templateColumn === -1) continue;
+    for (const row of table.rows) {
+      const cells = table.headers.map((header) => row[header] || "");
+      const dashboardPage = cleanResourceName(cells[pageColumn]);
+      const templateId = extractDashboardPageLayoutTemplateId(cells[templateColumn]);
+      if (dashboardPage && !isNonResourceName(dashboardPage) && templateId) {
+        records.push({
+          dashboardPage,
+          selectedTemplateId: templateId,
+          raw: JSON.stringify(row),
+        });
+      }
+    }
   }
   return uniqueDashboardLayoutTemplateRecords(records);
 }
@@ -785,10 +809,10 @@ function collectDataListFieldSpecs(planText) {
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
     const displayColumn = findHeaderIndex(normalizedHeaders, ["display name", "field display name", "business field", "field name", "name"]);
-    const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "field id", "fieldname"]);
-    const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "yeeflow field type", "field type", "type"]);
-    const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "control type", "control"]);
-    const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "options", "values"]);
+    const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "internal name", "field id", "fieldname"]);
+    const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "yeeflow field type", "field type", "business type", "type"]);
+    const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "yeeflow type", "control type", "control"]);
+    const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "values"]);
     if (displayColumn === -1 || fieldTypeColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
@@ -1271,18 +1295,27 @@ function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = 
     const pageNames = [...section.matchAll(/^-\s*Page name:\s*(.+?)\s*$/gim)]
       .map((match) => cleanResourceName(match[1]))
       .filter((name) => !isNonResourceName(name));
-    const dashboardHeadings = headingNames.filter((name) => !/\b(?:template|selection|filter|filters|metric|metrics|section|sections|record display|data analytics|data table|navigation)\b/i.test(name));
     const explicitLayoutTableNames = [];
     for (const table of parseMarkdownTables(section)) {
-      if (!table.headers.includes("Selected Dashboard Page Layout Template")) continue;
-      const nameHeader = table.headers.find((header) => ["Dashboard Page Name", "Dashboard Page", "Page Name"].includes(header));
+      const normalizedHeaders = table.headers.map((header) => normKey(header));
+      const templateColumn = findHeaderIndex(normalizedHeaders, [
+        "selected dashboard page layout template",
+        "dashboard page layout template",
+        "selected layout template",
+        "layout template",
+      ]);
+      if (templateColumn === -1) continue;
+      const nameHeader = table.headers.find((header) => ["Dashboard Page Name", "Dashboard Page", "Page Name", "Dashboard"].includes(header));
       if (!nameHeader) continue;
       for (const row of table.rows) {
         const name = cleanResourceName(row[nameHeader]);
         if (!isNonResourceName(name)) explicitLayoutTableNames.push(name);
       }
     }
-    return unique([...dashboardHeadings, ...pageNames, ...explicitLayoutTableNames]);
+    const explicitNames = unique([...pageNames, ...explicitLayoutTableNames]);
+    if (explicitNames.length) return explicitNames;
+    const dashboardHeadings = headingNames.filter((name) => !/\b(?:template|selection|filter|filters|metric|metrics|section|sections|record display|data analytics|data table|navigation|left panel|right panel|exclusion|exclusions)\b/i.test(name));
+    return unique(dashboardHeadings);
   }
 
   const tableNames = [];
