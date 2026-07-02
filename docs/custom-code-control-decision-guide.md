@@ -1,6 +1,8 @@
 # Custom Code Control Decision Guide
 
-This guide defines when Codex should use Yeeflow custom code controls in generated dashboards, approval forms, data-list custom forms, and public forms, and how to do it safely. The goal is to produce powerful, user-friendly experiences without adding custom code where native Yeeflow configuration is enough.
+This guide defines when Codex should use Yeeflow Custom Code controls in generated dashboards, approval forms, data-list custom forms, and public forms, and how to do it safely. The goal is to produce powerful, user-friendly experiences without adding custom code where native Yeeflow configuration is enough.
+
+This guide is for the **Custom Code control** surface. Form Action Custom Code steps use a separate `execute(...)` runtime contract. See `docs/standards/custom-code-form-action-step-runtime-standard.md`.
 
 ## 1. Purpose
 
@@ -24,6 +26,7 @@ Codex should evaluate requirements in this order:
 | F. Workflow actions | Approval routing, set variable tasks, ContentList persistence, document generation, delay, server/workflow-side decisions. |
 | G. AI actions | Draft summaries, approval suggestions, risk hints, generated details, extraction or classification where AI is explicitly useful. |
 | H. Custom code control | Client-side interaction behavior that cannot be modeled safely with the layers above. |
+| I. Form Action Custom Code step | Action-side custom logic that cannot be modeled with native form action steps. |
 
 Custom code is the last option, not the first tool.
 
@@ -70,7 +73,9 @@ For each business requirement, Codex should classify it before choosing an imple
 - AI assistance
 - custom client-side behavior
 
-Only requirements classified as custom client-side behavior should be candidates for custom code.
+Only requirements classified as custom client-side behavior should be candidates for a Custom Code control.
+
+Requirements classified as action-side execution must be evaluated against native form action steps first. If native steps are insufficient and custom code is explicitly needed inside a form action, use the Form Action Custom Code step standard instead of this control standard.
 
 If a requirement can be implemented as calculation, workflow routing, persistence, lookup, or validation, Codex should use the native Yeeflow model first.
 
@@ -171,6 +176,8 @@ For code generation, use:
 - `render(context, fieldsValues, readonly)`
 - `React.Component` for broad runtime compatibility
 
+Do not require `render(...)` for Form Action Custom Code steps. Those scripts require `execute(context, fieldsValues)` and are governed by `docs/standards/custom-code-form-action-step-runtime-standard.md`.
+
 ## 9. Validation Rules
 
 Recommended validator checks:
@@ -186,6 +193,8 @@ Recommended validator checks:
 - warn or fail when custom code includes external API calls
 - warn when old compiled code appears in a generated new-style template
 - fail final-mode validation if custom code references unresolved placeholders
+- fail when a Custom Code control script has no `render(...)`
+- fail when a Form Action Custom Code step script has no `execute(...)`
 - warn when a Custom Code control is missing a script reference or embedded script
 - warn when required input parameters declared by the script are missing
 - warn when parameter names are duplicated or not declared by the script

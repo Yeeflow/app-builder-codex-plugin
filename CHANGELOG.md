@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.113
+
+- Release Custom Code control versus Form Action Custom Code step contract hardening.
+- Add a dedicated Form Action Custom Code step runtime standard that requires `execute(context, fieldsValues)` and keeps package materialization gated until action-step JSON storage shape is export-proven.
+- Update the Yeeflow Custom Code generator skill and reference standard to classify `control` versus `form_action_step` before generation, preserving `render(...)` only for visible Custom Code controls.
+- Align Custom Code decision guidance and Form Action generation rules so App Plans declare the custom-code surface, host action, parameters, read/write fields, native fallback, and runtime proof boundary.
+- Add focused regression coverage and source/dist mirror checks for Custom Code surface entrypoint drift.
+
 ## 0.8.112
 
 - Release focused Service Tickets master-detail workspace cleanup.

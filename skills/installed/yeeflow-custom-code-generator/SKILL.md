@@ -13,7 +13,16 @@ When custom code participates in a dashboard-heavy generated app, it must not be
 
 Generate Yeeflow custom code and customer-facing documentation that match the runtime structure, coding conventions, data-access patterns, and UI quality shown in the user's working examples. Default to producing a full ready-to-paste Yeeflow code file for code-generation requests. When the user provides existing code and asks what it does, how to use it, or to document it, switch to guide-only documentation-from-code mode. When the user asks to use an existing custom code script inside a Yeeflow application, switch to app-placement mode and produce the Custom Code control configuration, parameter wiring, validation notes, and runtime test plan instead of rewriting the script. When the user explicitly asks for a patch, diff, or changed sections only, switch output mode accordingly.
 
-When participating in full application planning or generation, Custom code is an advanced capability that must be named in the standard app plan. The plan should state why standard Yeeflow controls, expressions, workflow actions, and custom CSS are insufficient; where the Custom Code control is hosted; required parameters; writable outputs; security/privacy notes; maintenance owner; native fallback; and runtime proof requirements. Do not add Custom code as an unplanned shortcut during package generation.
+When participating in full application planning or generation, Custom code is an advanced capability that must be named in the standard app plan. The plan should state why standard Yeeflow controls, expressions, workflow actions, and custom CSS are insufficient; which custom-code surface is used; where the Custom Code control or Form Action Custom Code step is hosted; required parameters; writable outputs; security/privacy notes; maintenance owner; native fallback; and runtime proof requirements. Do not add Custom code as an unplanned shortcut during package generation.
+
+Always classify the target surface before writing code:
+
+| Surface | Host | Required entrypoint |
+| --- | --- | --- |
+| `control` | Page/form control tree, `type: "codein"` | `render(context, fieldsValues, readonly)` |
+| `form_action_step` | `formdef.actions[].steps[]` custom code step | `execute(context, fieldsValues)` |
+
+Do not require `render(...)` for a Form Action Custom Code step. Do not generate a Custom Code control with only `execute(...)`.
 
 ## Workflow
 
@@ -24,6 +33,7 @@ When participating in full application planning or generation, Custom code is an
    - **ui/ux redesign**: improve the current component while preserving business logic.
    - **document existing code / code-to-guide**: inspect an existing Yeeflow custom code file and generate a user guide.
    - **use existing script in app**: inspect an existing `.tsx` script and generate or validate a Yeeflow Custom Code control placement in a dashboard, approval form, data-list custom form, or public form.
+   - **form action custom code step**: generate or validate script intended to run inside a Form Action step, using `execute(...)` instead of `render(...)`.
 2. Extract Yeeflow-specific inputs:
    - input parameters
    - parameter categories and parameter types
@@ -50,14 +60,15 @@ When participating in full application planning or generation, Custom code is an
    - **use existing script in app**: control placement/configuration guidance plus validation/test plan; do not change the script unless requested
    - **if explicitly asked**: diff, patch, or changed sections only
 
-## Two supported modes
+## Supported modes
 
-### A. Generate custom code script
+### A. Generate Custom Code control script
 
-Given a custom code requirement:
+Given a Custom Code control requirement:
 
 - generate a complete `.tsx` file using `export class CodeInApplication implements CodeInComp`
 - define `inputParameters()` with practical ids, Yeeflow parameter types, and descriptions
+- include `render(context, fieldsValues, readonly)`
 - document required inputs, optional inputs, default behavior, supported placements, and runtime assumptions
 - explain any data source, lookup, save target, or writable output behavior
 - include a setup guide and test checklist when building a reusable template
@@ -77,6 +88,20 @@ Given an existing script such as `smart-lookup-picker.tsx`:
 - validate app materialization before component runtime testing; if the imported app opens as an empty shell or data lists have no custom fields, fix `.yap` materialization first instead of debugging the custom code script
 - document fallback behavior and runtime test steps; do not claim runtime support until import/open/interaction/save behavior is observed
 
+### C. Generate Form Action Custom Code step script
+
+Given a requirement for a Form Action Custom Code step:
+
+- generate a complete `.tsx` file using `export default class CodeInApplication implements CodeInComp` or `export class CodeInApplication implements CodeInComp`
+- define `inputParameters()` with practical ids, Yeeflow parameter types, and descriptions
+- include `execute(context, fieldsValues): Promise<void> | void`
+- put the main action-side business flow in `execute(...)` or helper methods called by `execute(...)`
+- do not require or add `render(...)` unless the same file is explicitly being built as a Custom Code control
+- use `context.modules.yeeSDKClient` for Yeeflow system interactions
+- use `getYeeSDKAPIDetails` when SDK method names, parameter shapes, or return shapes are not proven; do not guess mutation APIs
+- document read fields, write targets, parameters, native fallback considered, and runtime proof requirements
+- keep package materialization claims gated until the Custom Code action-step JSON storage shape is export-proven
+
 Export-backed Smart Lookup Picker placement pattern:
 
 - dashboard page: `Item.Layouts[].LayoutInResources[0].Resource` contains a `codein` control; dashboard output targets use `__temp_` temp variables
@@ -86,8 +111,9 @@ Export-backed Smart Lookup Picker placement pattern:
 
 ## Core rules
 
-- Default to `export class CodeInApplication implements CodeInComp`.
-- Include `description()`, `requiredFields(...)`, `inputParameters()`, and `render(...)`.
+- Default to `export class CodeInApplication implements CodeInComp` for controls and compatible scripts.
+- For Custom Code controls, include `description()`, `requiredFields(...)`, `inputParameters()`, and `render(...)`.
+- For Form Action Custom Code steps, include `description()` when useful, `inputParameters()`, and `execute(...)`; `render(...)` is not required for this surface.
 - Read input parameters from `context.params`.
 - Pass parameters into a React class component. Prefer `React.Component` for broad Yeeflow runtime compatibility.
 - Prefer Yeeflow-compatible class components over unrelated standalone React app patterns.
@@ -108,6 +134,9 @@ Before writing `inputParameters()`, classify each parameter by how it will be us
 
 ### Plain text parameters
 Use `type: 'string'` for static copy such as label text, placeholder text, no-result text, static titles, helper copy, and button text that does not need variables.
+
+### Number parameters
+Use `type: 'number'` for numeric configuration when the Yeeflow custom-code runtime supports numeric parameter metadata. Normalize the runtime value before use and provide a safe fallback.
 
 ### Expression editor parameters
 Use `type: 'variable'` when the parameter may come from a form field, variable, temp variable, complex variable, or dynamic expression. Common examples include `dataListId`, `displayField`, `valueField`, dynamic field references, dynamic variable references, dashboard temp variable references, and dynamic booleans such as `multiSelect`, `allowManualEntry`, `showToolbar`, or `enableAutoRefresh`.
@@ -164,7 +193,7 @@ Dashboard temp variables deserve extra care. They may not behave like approval f
 
 ## Yeeflow runtime compatibility rules
 
-Yeeflow custom code may run on an older React/runtime/compiler than a normal local app. When generating reusable customer-facing controls:
+Yeeflow custom code may run on an older React/runtime/compiler than a normal local app. Product-team runtime specs currently identify React 15.6, AntDesign 2.13, and TypeScript as the target runtime. When generating reusable customer-facing controls or action-step scripts:
 
 - Prefer `React.Component` over `React.PureComponent`.
 - Do not use `React.createRef()`. Use callback refs such as `ref={(node) => { this.wrapperRef = node; }}`.
@@ -172,6 +201,11 @@ Yeeflow custom code may run on an older React/runtime/compiler than a normal loc
 - Avoid raw multiline CSS template literals when possible. Some Yeeflow resolvers can misread pasted CSS as script and throw errors such as `Missing semicolon` on CSS lines like `border-radius: 999px;`.
 - For self-contained styles, use a safely quoted string array and join it, for example `const styles = ['.class{...}', '.child{...}'].join('');`.
 - Make sure the pasted file starts with the import/export code and includes `export class CodeInApplication implements CodeInComp`; if only a CSS or component fragment is pasted, Yeeflow may report `No exports found`.
+
+## References
+
+- `references/yeeflow-custom-code-standard.md`
+- `../../../docs/standards/custom-code-form-action-step-runtime-standard.md`
 
 ## Yeeflow list query rules
 

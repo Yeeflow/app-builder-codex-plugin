@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.112`
+- Version: `0.8.113`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.112` hardens focused Service Tickets master-detail workspace cleanup: generated two-panel and three-panel workspace Dashboards prune empty `section_title_area` containers, avoid v1.1 content-card slot repair on master-detail pages, and preserve exact Priority/Status select-filter option sets from explicit App Plan or field rules without appending generic fallback values.
+Current release `0.8.113` separates Yeeflow Custom Code controls from Form Action Custom Code steps: controls keep the `render(...)` contract, action steps use `execute(...)`, App Plans must declare the custom-code surface, and focused gates block cross-surface entrypoint drift before release/cache smoke.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.112
+Version: 0.8.113
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.112
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.113
 ```
 
 ## What Is Included
