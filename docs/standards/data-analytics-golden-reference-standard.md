@@ -73,6 +73,9 @@ Visible Data Analytics controls are not runtime-ready unless the containing layo
 - `attr.AppID`, `attr.ListID`, and `attr.ListSetID` must identify the source app/list/root;
 - chart entries must include `attr.chartType`;
 - `attr.settings.rows[]` and `attr.settings.values[]` must be non-empty;
+- `attr.settings` must preserve export-shaped `preConditions` and `Conditions` keys; `Conditions` must be an array even when no runtime filter is required;
+- every `attr.settings.rows[]` entry must preserve export-shaped field metadata, including `id`, `fieldName`, `fieldType`, `type`, and an `attr` object; a thin `{ field, fieldName, id }` tuple is not runtime-ready;
+- every `attr.settings.values[]` entry must preserve export-shaped field metadata, including `id`, `field`, `fieldName`, `FieldName`, `fieldType`, `type`, and an `attr` object;
 - every row, column, and value field reference must resolve to a real field on the selected source list/report;
 - the visible control's `attrs.data.list` and `attrs.model.source` must both include `AppID`, `ListID`, and `ListSetID`, and those values must match the same source metadata in `Resource.exts[]`;
 - the visible control's `attrs.data.groupBy`, `attrs.data.axisField`, `attrs.data.categoryField`, `attrs.model.categoryField`, and `attrs.series[].categoryField` must match `Resource.exts[].attr.settings.rows[]`;
@@ -90,4 +93,5 @@ Generated-final validation must fail when:
 - A Dashboard v1.1 page places an analytics template outside `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`.
 - A generator emits an ad hoc chart/pivot control instead of cloning the approved template.
 - A visible chart or pivot control is missing its `Resource.ReportIds[]` registration, matching `Resource.exts[]` runtime entry, source metadata, chart type, runtime settings, or resolvable source fields.
+- A runtime chart/pivot model has rows or values that identify fields but omit export-shaped metadata such as `type`, `fieldType`, `attr`, or `Conditions`/`preConditions`.
 - A visible chart or pivot control has template marker drift, missing `runtimeModelProven`, missing or mismatched `attrs.data.list` / `attrs.model.source` source metadata, stale `attrs.model`/`attrs.series`/`attrs.values` field references, empty row/value model entries, or derived aggregate field IDs instead of real source fields plus aggregate metadata.
