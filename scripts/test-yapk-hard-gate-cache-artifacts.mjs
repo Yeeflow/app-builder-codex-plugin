@@ -110,6 +110,7 @@ const hardGateScripts = [
   "scripts/test-ui-control-property-fidelity.mjs",
   "scripts/test-yeeflow-control-property-knowledge-base.mjs",
   "scripts/test-installed-cache-root-path-alignment.mjs",
+  "scripts/test-custom-code-surface-contract-gates.mjs",
   "scripts/test-repo-root-hygiene.mjs",
 ];
 
@@ -145,6 +146,7 @@ const requiredDocs = [
   "docs/standards/approval-form-field-layouts-v1.1-standard.md",
   "docs/standards/approval-workflow-publish-readiness-standard.md",
   "docs/standards/workflow-layout-golden-reference-standard.md",
+  "docs/standards/custom-code-form-action-step-runtime-standard.md",
   "docs/standards/full-app-generation-entrypoint-standard.md",
   "docs/standards/yapk-live-install-readiness-standard.md",
   "docs/standards/dashboard-page-layouts-v1.1-standard.md",
@@ -220,6 +222,7 @@ const requiredDocs = [
   "docs/training/repo-root-hygiene-compatibility-training-report.md",
   "docs/training/full-app-materializer-template-e2e-gap-closure-training-report.md",
   "docs/training/generated-final-preflight-app-plan-runtime-alignment-training-report.md",
+  "docs/training/custom-code-control-form-action-step-contract-training-report.md",
   "docs/reference/application-control-style-golden-references.json",
   "docs/reference/application-control-style-soft-outline-controls.template.json",
   "docs/reference/dashboard-golden-references.json",
