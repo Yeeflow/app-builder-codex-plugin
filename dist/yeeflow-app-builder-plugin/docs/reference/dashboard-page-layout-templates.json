@@ -26817,7 +26817,10 @@
         "chart_cards_section duplication",
         "content_panel_empty may be edited to show the empty-selection state when vCurrentItemID has no selected record.",
         "content_panel_empty_image may be replaced with a domain-appropriate empty-selection image while preserving Picture control style.",
-        "content_panel_empty_title and content_panel_empty_description may be rewritten with domain-specific empty-selection guidance."
+        "content_panel_empty_title and content_panel_empty_description may be rewritten with domain-specific empty-selection guidance.",
+        "left_panel_caption_icon may be rewritten to a business-appropriate FontAwesome icon for the left-panel source dataset while preserving the Icon control style.",
+        "current_item_main_header_edit_item_button",
+        "current_item_main_header_delete_item_button"
       ],
       "forbiddenGeneratedDashboardPatterns": [
         "Do not modify template regions outside the approved business-content containers and repeatable modules.",
@@ -26845,6 +26848,8 @@
       },
       "allowedBusinessContentContainers": [
         "page_title_content",
+        "left_panel_caption_icon_wrapper",
+        "left_panel_caption_icon",
         "left_panel_caption_title",
         "left_panel_caption_add_button",
         "left_panel_filter_group",
@@ -26887,7 +26892,9 @@
         "content_panel_empty_description",
         "current_item_wrapper",
         "current_item_wrapper_content",
-        "current_item_wrapper_item"
+        "current_item_wrapper_item",
+        "current_item_main_header_edit_item_button",
+        "current_item_main_header_delete_item_button"
       ],
       "allowedRepeatableRemovableModules": [
         "left_panel_filter_group",
@@ -26920,12 +26927,15 @@
         "current_item_fields_grid column counts and any current_item_large_field column spans must stay aligned across PC/laptop, tablet, and mobile breakpoints.",
         "chart_cards_section is the preferred group host for multiple Data Analytics templates and must contain no more than three analytics templates.",
         "Copied modules must preserve template hierarchy, control types, widths, padding, direction, gap, background, typography, temp variables, and form-action wiring outside approved business values.",
-        "left_panel_caption_add_button may be retained only for create-capable Data list or Document library sources; remove it for Form report, Data report, or other read-only/reporting sources."
+        "left_panel_caption_add_button may be retained only for create-capable Data list or Document library sources; remove it for Form report, Data report, or other read-only/reporting sources.",
+        "left_panel_caption_icon_wrapper must remain inside left_panel_caption_title_wrapper, and left_panel_caption_icon must be mapped to the left-panel source dataset icon.",
+        "current_item_main_header_edit_item_button and current_item_main_header_delete_item_button are optional current-record edit/delete operation slots; keep them only when a real current selected record edit/delete action is generated.",
+        "current_item_main_header_operations_button is the generic current-record operation slot and may be duplicated for additional business actions when each copy has a resolved action binding."
       ],
       "template": {
-        "sourceExport": "Service Desk Pro.yap",
+        "sourceExport": "Two-Panel Workspace Layout (1).ydp",
         "sourcePageTitle": "Two-Panel Workspace Layout",
-        "sourceLayoutId": "2071825454748938241",
+        "sourceLayoutId": "2071862457432674300",
         "parsedResource": {
           "children": [
             {
@@ -26997,7 +27007,7 @@
                       ],
                       "width": [
                         null,
-                        620
+                        520
                       ],
                       "height": [
                         null,
@@ -27405,7 +27415,7 @@
                               },
                               "children": [
                                 {
-                                  "id": "d82d9c87-0659-4ff9-9376-12452d61caa5",
+                                  "id": "94ba8111-68da-401c-9b31-c60fb8baa84e",
                                   "type": "container",
                                   "label": "Container",
                                   "displayLabel": true,
@@ -27432,7 +27442,7 @@
                                         "center"
                                       ]
                                     },
-                                    "control_action": "da1317f0-fb82-4423-ab5d-7184aa8b0e27",
+                                    "control_action": null,
                                     "control_display": [],
                                     "common": {
                                       "border": {
@@ -27450,7 +27460,7 @@
                                       },
                                       "background": {
                                         "hover": {
-                                          "type": "classic",
+                                          "type": null,
                                           "classic": {
                                             "color": "var(--c--neutral-light-active)"
                                           }
@@ -27469,20 +27479,18 @@
                                   },
                                   "children": [
                                     {
-                                      "id": "a086f7f9-277a-4610-aab3-8fcfb58e1e99",
+                                      "id": "f1c8c094-839f-4f61-9644-0423a974ac49",
                                       "type": "icon",
                                       "label": "Icon",
                                       "displayLabel": true,
                                       "attrs": {
                                         "icon": {
-                                          "icon": "fa-regular fa-sidebar",
+                                          "icon": "fa-regular fa-layer-plus",
                                           "size": [
                                             null,
                                             18
                                           ],
-                                          "normal": {
-                                            "pcolor": "var(--cus-c--TextGrey)"
-                                          }
+                                          "normal": {}
                                         },
                                         "common": {
                                           "positioning": {
@@ -27495,10 +27503,10 @@
                                         }
                                       },
                                       "parentCol": 1,
-                                      "nv_label": "left_panel_sidebar_icon"
+                                      "nv_label": "left_panel_caption_icon"
                                     }
                                   ],
-                                  "nv_label": "left_panel_sidebar"
+                                  "nv_label": "left_panel_caption_icon_wrapper"
                                 },
                                 {
                                   "id": "0a37ec26-e131-45b2-a6f6-a3b1eeec718e",
@@ -28094,8 +28102,8 @@
                                         "data": {
                                           "list": {
                                             "AppID": 41,
-                                            "ListSetID": "2054077087595905025",
-                                            "ListID": "2054077096447066112"
+                                            "ListSetID": "2071862448464072704",
+                                            "ListID": "2071862457508171777"
                                           }
                                         },
                                         "op": "modal"
@@ -28213,10 +28221,10 @@
                                 "data": {
                                   "list": {
                                     "AppID": 41,
-                                    "ListID": "2054077097449504769",
+                                    "ListID": "2071862458707742721",
                                     "Type": 1,
                                     "Title": "SLA Target",
-                                    "ListSetID": "2054077087595905025"
+                                    "ListSetID": "2071862448464072704"
                                   },
                                   "sort": [
                                     {
@@ -28420,10 +28428,10 @@
                                 "data": {
                                   "list": {
                                     "AppID": 41,
-                                    "ListID": "2054077096447066112",
+                                    "ListID": "2071862457508171777",
                                     "Type": 1,
                                     "Title": "Support Tickets",
-                                    "ListSetID": "2054077087595905025"
+                                    "ListSetID": "2071862448464072704"
                                   }
                                 },
                                 "display_f": "Text25",
@@ -28492,10 +28500,10 @@
                             "data": {
                               "list": {
                                 "AppID": 41,
-                                "ListID": "2054077096447066112",
+                                "ListID": "2071862457508171777",
                                 "Type": 1,
                                 "Title": "Support Tickets",
-                                "ListSetID": "2054077087595905025"
+                                "ListSetID": "2071862448464072704"
                               },
                               "filter": [
                                 {
@@ -28626,8 +28634,8 @@
                                     "attrs": {
                                       "querydata_list": {
                                         "AppID": 41,
-                                        "ListSetID": "2054077087595905025",
-                                        "ListID": "2054077096447066112"
+                                        "ListSetID": "2071862448464072704",
+                                        "ListID": "2071862457508171777"
                                       },
                                       "querydata_filters": [
                                         {
@@ -28873,13 +28881,10 @@
                                                   "2"
                                                 ]
                                               }
-                                            },
-                                            "nv_label": "left_panel_data_item_title",
-                                            "nav_label": "left_panel_data_item_title"
+                                            }
                                           },
                                           "parentCol": 1,
-                                          "nv_label": "left_panel_data_item_title",
-                                          "nav_label": "left_panel_data_item_title"
+                                          "nv_label": "left_panel_data_item_title"
                                         },
                                         {
                                           "id": "45dea610-efa3-4a1f-90e8-1d14f545a566",
@@ -28919,9 +28924,7 @@
                                                   "left": null
                                                 }
                                               ]
-                                            },
-                                            "nv_label": "left_panel_data_item_date_wrapper",
-                                            "nav_label": "left_panel_data_item_date_wrapper"
+                                            }
                                           },
                                           "children": [
                                             {
@@ -29058,18 +29061,14 @@
                                                       "2"
                                                     ]
                                                   }
-                                                },
-                                                "nv_label": "left_panel_data_item_date_value",
-                                                "nav_label": "left_panel_data_item_date_value"
+                                                }
                                               },
                                               "parentCol": 1,
-                                              "nv_label": "left_panel_data_item_date_value",
-                                              "nav_label": "left_panel_data_item_date_value"
+                                              "nv_label": "left_panel_data_item_date_value"
                                             }
                                           ],
                                           "parentCol": 1,
-                                          "nv_label": "left_panel_data_item_date_wrapper",
-                                          "nav_label": "left_panel_data_item_date_wrapper"
+                                          "nv_label": "left_panel_data_item_date_wrapper"
                                         }
                                       ],
                                       "parentCol": 1,
@@ -29509,10 +29508,10 @@
                             "data": {
                               "list": {
                                 "AppID": 41,
-                                "ListID": "2054077096447066112",
+                                "ListID": "2071862457508171777",
                                 "Type": 1,
                                 "Title": "Support Tickets",
-                                "ListSetID": "2054077087595905025"
+                                "ListSetID": "2071862448464072704"
                               },
                               "limit": true,
                               "disv": false,
@@ -29980,6 +29979,234 @@
                                               "nv_label": "left_panel_sidebar_flip"
                                             },
                                             {
+                                              "id": "fba92bb8-53bf-4652-8e67-8332c2e6f712",
+                                              "type": "container",
+                                              "label": "Container",
+                                              "displayLabel": true,
+                                              "attrs": {
+                                                "style": {
+                                                  "widthtype": [
+                                                    null,
+                                                    "2"
+                                                  ],
+                                                  "direction": [
+                                                    null,
+                                                    "row"
+                                                  ],
+                                                  "gap": [
+                                                    null,
+                                                    "--sp--s100"
+                                                  ],
+                                                  "align_items": [
+                                                    null,
+                                                    "center"
+                                                  ],
+                                                  "justify_content": [
+                                                    null,
+                                                    "center"
+                                                  ]
+                                                },
+                                                "control_action": "da1317f0-fb82-4423-ab5d-7184aa8b0e27",
+                                                "control_display": [
+                                                  {
+                                                    "id": "7a4fe16d-149c-4daf-ae5e-ce5472bf7f9d",
+                                                    "controlId": "ca3b6911-beb4-40de-b79d-d89fc88ce087",
+                                                    "formulas": [
+                                                      {
+                                                        "type": "func",
+                                                        "func": "clientType",
+                                                        "params": []
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "=="
+                                                      },
+                                                      {
+                                                        "type": "num",
+                                                        "value": "1"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "and"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "("
+                                                      },
+                                                      {
+                                                        "exprType": "variable",
+                                                        "valueType": "string",
+                                                        "id": "__temp_vHideNavigatorPanel",
+                                                        "type": "expr",
+                                                        "name": "vHideNavigatorPanel"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "=="
+                                                      },
+                                                      {
+                                                        "type": "bool",
+                                                        "value": true
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": ")"
+                                                      }
+                                                    ],
+                                                    "actions": {
+                                                      "id": "27479074-805e-4973-b70f-c436579cc69d",
+                                                      "type": 1,
+                                                      "attrs": {
+                                                        "style_regulation_action": "style_regulation_action_hidden",
+                                                        "style_regulation_action_color": null,
+                                                        "action_style": null,
+                                                        "icon_type": null
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "id": "939dc47a-86ae-4d80-9df9-81ae81e89713",
+                                                    "controlId": "ca3b6911-beb4-40de-b79d-d89fc88ce087",
+                                                    "formulas": [
+                                                      {
+                                                        "type": "func",
+                                                        "func": "clientType",
+                                                        "params": []
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "!="
+                                                      },
+                                                      {
+                                                        "type": "num",
+                                                        "value": "1"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "and"
+                                                      },
+                                                      {
+                                                        "exprType": "variable",
+                                                        "valueType": "string",
+                                                        "id": "__temp_vCurrentMobileView",
+                                                        "type": "expr",
+                                                        "name": "vCurrentMobileView"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "!="
+                                                      },
+                                                      {
+                                                        "type": "num",
+                                                        "value": "1"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "and"
+                                                      },
+                                                      {
+                                                        "type": "func",
+                                                        "func": "isNullOrEmpty",
+                                                        "params": [
+                                                          [
+                                                            {
+                                                              "exprType": "variable",
+                                                              "valueType": "string",
+                                                              "id": "__temp_vCurrentMobileView",
+                                                              "type": "expr",
+                                                              "name": "vCurrentMobileView"
+                                                            }
+                                                          ]
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "=="
+                                                      },
+                                                      {
+                                                        "type": "bool",
+                                                        "value": false
+                                                      }
+                                                    ],
+                                                    "actions": {
+                                                      "id": "386588b8-edce-47f5-9386-46948e7840d3",
+                                                      "type": 1,
+                                                      "attrs": {
+                                                        "style_regulation_action": "style_regulation_action_hidden",
+                                                        "style_regulation_action_color": null,
+                                                        "action_style": null,
+                                                        "icon_type": null
+                                                      }
+                                                    }
+                                                  }
+                                                ],
+                                                "common": {
+                                                  "border": {
+                                                    "normal": {
+                                                      "radius": [
+                                                        null,
+                                                        {
+                                                          "top": "--sp--s150",
+                                                          "right": "--sp--s150",
+                                                          "bottom": "--sp--s150",
+                                                          "left": "--sp--s150"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "background": {
+                                                    "hover": {
+                                                      "type": "classic",
+                                                      "classic": {
+                                                        "color": "var(--c--neutral-light-active)"
+                                                      }
+                                                    }
+                                                  },
+                                                  "padding": [
+                                                    null,
+                                                    {
+                                                      "top": "--sp--s075",
+                                                      "right": "--sp--s075",
+                                                      "bottom": "--sp--s075",
+                                                      "left": "--sp--s075"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "children": [
+                                                {
+                                                  "id": "1148ef8a-999d-4953-be64-773de252fc24",
+                                                  "type": "icon",
+                                                  "label": "Icon",
+                                                  "displayLabel": true,
+                                                  "attrs": {
+                                                    "icon": {
+                                                      "icon": "fa-regular fa-sidebar",
+                                                      "size": [
+                                                        null,
+                                                        18
+                                                      ],
+                                                      "normal": {
+                                                        "pcolor": "var(--cus-c--TextGrey)"
+                                                      }
+                                                    },
+                                                    "common": {
+                                                      "positioning": {
+                                                        "widthtype": [
+                                                          null,
+                                                          "2"
+                                                        ]
+                                                      },
+                                                      "css": "selector .icon-cont .icon\n{\n    line-height: 1.25em !important;\n}"
+                                                    }
+                                                  },
+                                                  "parentCol": 1,
+                                                  "nv_label": "left_panel_sidebar_icon"
+                                                }
+                                              ],
+                                              "nv_label": "left_panel_sidebar"
+                                            },
+                                            {
                                               "id": "8772fd93-9873-4c98-8a50-84fa382593d2",
                                               "type": "heading",
                                               "label": "Text",
@@ -30208,7 +30435,7 @@
                                                   "nv_label": "current_item_main_header_operations_button"
                                                 },
                                                 {
-                                                  "id": "2dccbb9e-2063-4364-bb33-c25c01755fbd",
+                                                  "id": "980459a6-1244-43c6-8368-1191a67b3886",
                                                   "type": "container",
                                                   "label": "Container",
                                                   "displayLabel": true,
@@ -30280,25 +30507,34 @@
                                                             }
                                                           ]
                                                         }
+                                                      },
+                                                      "ty": {
+                                                        "normal": {
+                                                          "color": "var(--c--neutral-dark-active)"
+                                                        },
+                                                        "hover": {
+                                                          "color": "var(--c--neutral-darker)"
+                                                        }
                                                       }
-                                                    }
+                                                    },
+                                                    "action-type": "3",
+                                                    "operation": "edit",
+                                                    "op": "modal"
                                                   },
                                                   "children": [
                                                     {
-                                                      "id": "0531cbff-b137-4406-b456-58c8b7c173de",
+                                                      "id": "0683668c-85ea-43ee-af09-3a39909d0890",
                                                       "type": "icon",
                                                       "label": "Icon",
                                                       "displayLabel": true,
                                                       "attrs": {
                                                         "icon": {
-                                                          "icon": "fa-solid fa-envelope-dot",
+                                                          "icon": "fa-regular fa-pen-to-square",
                                                           "size": [
                                                             null,
                                                             12
                                                           ],
-                                                          "normal": {
-                                                            "pcolor": "var(--cus-c--TextGrey)"
-                                                          }
+                                                          "normal": {}
                                                         },
                                                         "common": {
                                                           "positioning": {
@@ -30310,13 +30546,13 @@
                                                         }
                                                       },
                                                       "parentCol": 1,
-                                                      "nv_label": "current_item_main_header_operations_button_icon"
+                                                      "nv_label": "current_item_main_header_edit_item_button_icon"
                                                     }
                                                   ],
-                                                  "nv_label": "current_item_main_header_operations_button"
+                                                  "nv_label": "current_item_main_header_edit_item_button"
                                                 },
                                                 {
-                                                  "id": "8d5cf90f-241d-4503-b000-318e9b87582d",
+                                                  "id": "b496e517-f920-4bf2-a469-40344bd50341",
                                                   "type": "container",
                                                   "label": "Container",
                                                   "displayLabel": true,
@@ -30367,7 +30603,7 @@
                                                         "hover": {
                                                           "type": "classic",
                                                           "classic": {
-                                                            "color": "var(--c--neutral-light-active)"
+                                                            "color": "var(--c--danger-light)"
                                                           }
                                                         }
                                                       },
@@ -30387,26 +30623,35 @@
                                                             }
                                                           ]
                                                         }
+                                                      },
+                                                      "ty": {
+                                                        "hover": {
+                                                          "color": "var(--c--danger-dark)"
+                                                        },
+                                                        "normal": {
+                                                          "color": "var(--c--neutral-dark-active)"
+                                                        }
                                                       }
                                                     },
-                                                    "control_action": "f8282150-bb3f-422d-9920-cccbabf14263"
+                                                    "control_action": "f8282150-bb3f-422d-9920-cccbabf14263",
+                                                    "action-type": "3",
+                                                    "operation": "del"
                                                   },
                                                   "children": [
                                                     {
-                                                      "id": "aa23b776-6e5e-4688-a203-790d20876446",
+                                                      "id": "5f67816f-c730-41fc-9f7f-d4976d144a85",
                                                       "type": "icon",
                                                       "label": "Icon",
                                                       "displayLabel": true,
                                                       "attrs": {
                                                         "icon": {
-                                                          "icon": "fa-solid fa-comment-dots",
+                                                          "icon": "fa-regular fa-trash",
                                                           "size": [
                                                             null,
                                                             12
                                                           ],
-                                                          "normal": {
-                                                            "pcolor": "var(--cus-c--TextGrey)"
-                                                          }
+                                                          "normal": {},
+                                                          "hover": {}
                                                         },
                                                         "common": {
                                                           "positioning": {
@@ -30418,11 +30663,10 @@
                                                         }
                                                       },
                                                       "parentCol": 1,
-                                                      "nv_label": "current_item_main_header_operations_button_icon"
+                                                      "nv_label": "current_item_main_header_delete_item_button_icon"
                                                     }
                                                   ],
-                                                  "parentCol": 1,
-                                                  "nv_label": "current_item_main_header_operations_button"
+                                                  "nv_label": "current_item_main_header_delete_item_button"
                                                 },
                                                 {
                                                   "id": "86fb5dbf-daec-4217-83a8-c9d7b966d270",
@@ -39820,11 +40064,11 @@
                     "data": {
                       "list": {
                         "AppID": 41,
-                        "ListSetID": "2054077087595905025",
-                        "ListID": "2054077096447066112"
+                        "ListSetID": "2071862448464072704",
+                        "ListID": "2071862457508171777"
                       }
                     },
-                    "layout": "2054077096430288897",
+                    "layout": "2071862457441062914",
                     "op": "modal",
                     "modalsize": 2
                   },
@@ -39915,7 +40159,10 @@
         "chart_cards_section duplication",
         "content_panel_empty may be edited to show the empty-selection state when vCurrentItemID has no selected record.",
         "content_panel_empty_image may be replaced with a domain-appropriate empty-selection image while preserving Picture control style.",
-        "content_panel_empty_title and content_panel_empty_description may be rewritten with domain-specific empty-selection guidance."
+        "content_panel_empty_title and content_panel_empty_description may be rewritten with domain-specific empty-selection guidance.",
+        "left_panel_caption_icon may be rewritten to a business-appropriate FontAwesome icon for the left-panel source dataset while preserving the Icon control style.",
+        "current_item_main_header_edit_item_button",
+        "current_item_main_header_delete_item_button"
       ],
       "forbiddenGeneratedDashboardPatterns": [
         "Do not modify template regions outside the approved business-content containers and repeatable modules.",
@@ -39943,6 +40190,8 @@
       },
       "allowedBusinessContentContainers": [
         "page_title_content",
+        "left_panel_caption_icon_wrapper",
+        "left_panel_caption_icon",
         "left_panel_caption_title",
         "left_panel_caption_add_button",
         "left_panel_filter_group",
@@ -39992,7 +40241,9 @@
         "content_panel_empty_description",
         "current_item_wrapper",
         "current_item_wrapper_content",
-        "current_item_wrapper_item"
+        "current_item_wrapper_item",
+        "current_item_main_header_edit_item_button",
+        "current_item_main_header_delete_item_button"
       ],
       "allowedRepeatableRemovableModules": [
         "left_panel_filter_group",
@@ -40028,12 +40279,15 @@
         "current_item_fields_grid column counts and any current_item_large_field column spans must stay aligned across PC/laptop, tablet, and mobile breakpoints.",
         "chart_cards_section is the preferred group host for multiple Data Analytics templates and must contain no more than three analytics templates.",
         "Copied modules must preserve template hierarchy, control types, widths, padding, direction, gap, background, typography, temp variables, and form-action wiring outside approved business values.",
-        "left_panel_caption_add_button may be retained only for create-capable Data list or Document library sources; remove it for Form report, Data report, or other read-only/reporting sources."
+        "left_panel_caption_add_button may be retained only for create-capable Data list or Document library sources; remove it for Form report, Data report, or other read-only/reporting sources.",
+        "left_panel_caption_icon_wrapper must remain inside left_panel_caption_title_wrapper, and left_panel_caption_icon must be mapped to the left-panel source dataset icon.",
+        "current_item_main_header_edit_item_button and current_item_main_header_delete_item_button are optional current-record edit/delete operation slots; keep them only when a real current selected record edit/delete action is generated.",
+        "current_item_main_header_operations_button is the generic current-record operation slot and may be duplicated for additional business actions when each copy has a resolved action binding."
       ],
       "template": {
-        "sourceExport": "Service Desk Pro.yap",
+        "sourceExport": "Three-Panel Workspace Layout (1).ydp",
         "sourcePageTitle": "Three-Panel Workspace Layout",
-        "sourceLayoutId": "2071544927852707840",
+        "sourceLayoutId": "2071862457428480000",
         "parsedResource": {
           "children": [
             {
@@ -40105,7 +40359,7 @@
                       ],
                       "width": [
                         null,
-                        620
+                        520
                       ],
                       "height": [
                         null,
@@ -40540,7 +40794,7 @@
                                         "center"
                                       ]
                                     },
-                                    "control_action": "da1317f0-fb82-4423-ab5d-7184aa8b0e27",
+                                    "control_action": null,
                                     "control_display": [],
                                     "common": {
                                       "border": {
@@ -40558,7 +40812,7 @@
                                       },
                                       "background": {
                                         "hover": {
-                                          "type": "classic",
+                                          "type": null,
                                           "classic": {
                                             "color": "var(--c--neutral-light-active)"
                                           }
@@ -40583,14 +40837,12 @@
                                       "displayLabel": true,
                                       "attrs": {
                                         "icon": {
-                                          "icon": "fa-regular fa-sidebar",
+                                          "icon": "fa-regular fa-layer-plus",
                                           "size": [
                                             null,
                                             18
                                           ],
-                                          "normal": {
-                                            "pcolor": "var(--cus-c--TextGrey)"
-                                          }
+                                          "normal": {}
                                         },
                                         "common": {
                                           "positioning": {
@@ -40603,10 +40855,10 @@
                                         }
                                       },
                                       "parentCol": 1,
-                                      "nv_label": "left_panel_sidebar_icon"
+                                      "nv_label": "left_panel_caption_icon"
                                     }
                                   ],
-                                  "nv_label": "left_panel_sidebar"
+                                  "nv_label": "left_panel_caption_icon_wrapper"
                                 },
                                 {
                                   "id": "0a37ec26-e131-45b2-a6f6-a3b1eeec718e",
@@ -41202,8 +41454,8 @@
                                         "data": {
                                           "list": {
                                             "AppID": 41,
-                                            "ListSetID": "2054077087595905025",
-                                            "ListID": "2054077096447066112"
+                                            "ListSetID": "2071862448464072704",
+                                            "ListID": "2071862457508171777"
                                           }
                                         },
                                         "op": "modal"
@@ -41321,10 +41573,10 @@
                                 "data": {
                                   "list": {
                                     "AppID": 41,
-                                    "ListID": "2054077097449504769",
+                                    "ListID": "2071862458707742721",
                                     "Type": 1,
                                     "Title": "SLA Target",
-                                    "ListSetID": "2054077087595905025"
+                                    "ListSetID": "2071862448464072704"
                                   },
                                   "sort": [
                                     {
@@ -41528,10 +41780,10 @@
                                 "data": {
                                   "list": {
                                     "AppID": 41,
-                                    "ListID": "2054077096447066112",
+                                    "ListID": "2071862457508171777",
                                     "Type": 1,
                                     "Title": "Support Tickets",
-                                    "ListSetID": "2054077087595905025"
+                                    "ListSetID": "2071862448464072704"
                                   }
                                 },
                                 "display_f": "Text25",
@@ -41600,10 +41852,10 @@
                             "data": {
                               "list": {
                                 "AppID": 41,
-                                "ListID": "2054077096447066112",
+                                "ListID": "2071862457508171777",
                                 "Type": 1,
                                 "Title": "Support Tickets",
-                                "ListSetID": "2054077087595905025"
+                                "ListSetID": "2071862448464072704"
                               },
                               "filter": [
                                 {
@@ -41734,8 +41986,8 @@
                                     "attrs": {
                                       "querydata_list": {
                                         "AppID": 41,
-                                        "ListSetID": "2054077087595905025",
-                                        "ListID": "2054077096447066112"
+                                        "ListSetID": "2071862448464072704",
+                                        "ListID": "2071862457508171777"
                                       },
                                       "querydata_filters": [
                                         {
@@ -41981,13 +42233,10 @@
                                                   "2"
                                                 ]
                                               }
-                                            },
-                                            "nv_label": "left_panel_data_item_title",
-                                            "nav_label": "left_panel_data_item_title"
+                                            }
                                           },
                                           "parentCol": 1,
-                                          "nv_label": "left_panel_data_item_title",
-                                          "nav_label": "left_panel_data_item_title"
+                                          "nv_label": "left_panel_data_item_title"
                                         },
                                         {
                                           "id": "45dea610-efa3-4a1f-90e8-1d14f545a566",
@@ -42027,9 +42276,7 @@
                                                   "left": null
                                                 }
                                               ]
-                                            },
-                                            "nv_label": "left_panel_data_item_date_wrapper",
-                                            "nav_label": "left_panel_data_item_date_wrapper"
+                                            }
                                           },
                                           "children": [
                                             {
@@ -42166,18 +42413,14 @@
                                                       "2"
                                                     ]
                                                   }
-                                                },
-                                                "nv_label": "left_panel_data_item_date_value",
-                                                "nav_label": "left_panel_data_item_date_value"
+                                                }
                                               },
                                               "parentCol": 1,
-                                              "nv_label": "left_panel_data_item_date_value",
-                                              "nav_label": "left_panel_data_item_date_value"
+                                              "nv_label": "left_panel_data_item_date_value"
                                             }
                                           ],
                                           "parentCol": 1,
-                                          "nv_label": "left_panel_data_item_date_wrapper",
-                                          "nav_label": "left_panel_data_item_date_wrapper"
+                                          "nv_label": "left_panel_data_item_date_wrapper"
                                         }
                                       ],
                                       "parentCol": 1,
@@ -42617,10 +42860,10 @@
                             "data": {
                               "list": {
                                 "AppID": 41,
-                                "ListID": "2054077096447066112",
+                                "ListID": "2071862457508171777",
                                 "Type": 1,
                                 "Title": "Support Tickets",
-                                "ListSetID": "2054077087595905025"
+                                "ListSetID": "2071862448464072704"
                               },
                               "limit": true,
                               "disv": false,
@@ -43088,6 +43331,234 @@
                                               "nv_label": "left_panel_sidebar_flip"
                                             },
                                             {
+                                              "id": "09a6f430-a9a2-470e-ac78-735306bb91dd",
+                                              "type": "container",
+                                              "label": "Container",
+                                              "displayLabel": true,
+                                              "attrs": {
+                                                "style": {
+                                                  "widthtype": [
+                                                    null,
+                                                    "2"
+                                                  ],
+                                                  "direction": [
+                                                    null,
+                                                    "row"
+                                                  ],
+                                                  "gap": [
+                                                    null,
+                                                    "--sp--s100"
+                                                  ],
+                                                  "align_items": [
+                                                    null,
+                                                    "center"
+                                                  ],
+                                                  "justify_content": [
+                                                    null,
+                                                    "center"
+                                                  ]
+                                                },
+                                                "control_action": "da1317f0-fb82-4423-ab5d-7184aa8b0e27",
+                                                "control_display": [
+                                                  {
+                                                    "id": "7a4fe16d-149c-4daf-ae5e-ce5472bf7f9d",
+                                                    "controlId": "ca3b6911-beb4-40de-b79d-d89fc88ce087",
+                                                    "formulas": [
+                                                      {
+                                                        "type": "func",
+                                                        "func": "clientType",
+                                                        "params": []
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "=="
+                                                      },
+                                                      {
+                                                        "type": "num",
+                                                        "value": "1"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "and"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "("
+                                                      },
+                                                      {
+                                                        "exprType": "variable",
+                                                        "valueType": "string",
+                                                        "id": "__temp_vHideNavigatorPanel",
+                                                        "type": "expr",
+                                                        "name": "vHideNavigatorPanel"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "=="
+                                                      },
+                                                      {
+                                                        "type": "bool",
+                                                        "value": true
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": ")"
+                                                      }
+                                                    ],
+                                                    "actions": {
+                                                      "id": "27479074-805e-4973-b70f-c436579cc69d",
+                                                      "type": 1,
+                                                      "attrs": {
+                                                        "style_regulation_action": "style_regulation_action_hidden",
+                                                        "style_regulation_action_color": null,
+                                                        "action_style": null,
+                                                        "icon_type": null
+                                                      }
+                                                    }
+                                                  },
+                                                  {
+                                                    "id": "939dc47a-86ae-4d80-9df9-81ae81e89713",
+                                                    "controlId": "ca3b6911-beb4-40de-b79d-d89fc88ce087",
+                                                    "formulas": [
+                                                      {
+                                                        "type": "func",
+                                                        "func": "clientType",
+                                                        "params": []
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "!="
+                                                      },
+                                                      {
+                                                        "type": "num",
+                                                        "value": "1"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "and"
+                                                      },
+                                                      {
+                                                        "exprType": "variable",
+                                                        "valueType": "string",
+                                                        "id": "__temp_vCurrentMobileView",
+                                                        "type": "expr",
+                                                        "name": "vCurrentMobileView"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "!="
+                                                      },
+                                                      {
+                                                        "type": "num",
+                                                        "value": "1"
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "and"
+                                                      },
+                                                      {
+                                                        "type": "func",
+                                                        "func": "isNullOrEmpty",
+                                                        "params": [
+                                                          [
+                                                            {
+                                                              "exprType": "variable",
+                                                              "valueType": "string",
+                                                              "id": "__temp_vCurrentMobileView",
+                                                              "type": "expr",
+                                                              "name": "vCurrentMobileView"
+                                                            }
+                                                          ]
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "op",
+                                                        "op": "=="
+                                                      },
+                                                      {
+                                                        "type": "bool",
+                                                        "value": false
+                                                      }
+                                                    ],
+                                                    "actions": {
+                                                      "id": "386588b8-edce-47f5-9386-46948e7840d3",
+                                                      "type": 1,
+                                                      "attrs": {
+                                                        "style_regulation_action": "style_regulation_action_hidden",
+                                                        "style_regulation_action_color": null,
+                                                        "action_style": null,
+                                                        "icon_type": null
+                                                      }
+                                                    }
+                                                  }
+                                                ],
+                                                "common": {
+                                                  "border": {
+                                                    "normal": {
+                                                      "radius": [
+                                                        null,
+                                                        {
+                                                          "top": "--sp--s150",
+                                                          "right": "--sp--s150",
+                                                          "bottom": "--sp--s150",
+                                                          "left": "--sp--s150"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "background": {
+                                                    "hover": {
+                                                      "type": "classic",
+                                                      "classic": {
+                                                        "color": "var(--c--neutral-light-active)"
+                                                      }
+                                                    }
+                                                  },
+                                                  "padding": [
+                                                    null,
+                                                    {
+                                                      "top": "--sp--s075",
+                                                      "right": "--sp--s075",
+                                                      "bottom": "--sp--s075",
+                                                      "left": "--sp--s075"
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "children": [
+                                                {
+                                                  "id": "f01b2939-bb9a-4d80-a08c-4efc4a9680b0",
+                                                  "type": "icon",
+                                                  "label": "Icon",
+                                                  "displayLabel": true,
+                                                  "attrs": {
+                                                    "icon": {
+                                                      "icon": "fa-regular fa-sidebar",
+                                                      "size": [
+                                                        null,
+                                                        18
+                                                      ],
+                                                      "normal": {
+                                                        "pcolor": "var(--cus-c--TextGrey)"
+                                                      }
+                                                    },
+                                                    "common": {
+                                                      "positioning": {
+                                                        "widthtype": [
+                                                          null,
+                                                          "2"
+                                                        ]
+                                                      },
+                                                      "css": "selector .icon-cont .icon\n{\n    line-height: 1.25em !important;\n}"
+                                                    }
+                                                  },
+                                                  "parentCol": 1,
+                                                  "nv_label": "left_panel_sidebar_icon"
+                                                }
+                                              ],
+                                              "nv_label": "left_panel_sidebar"
+                                            },
+                                            {
                                               "id": "8772fd93-9873-4c98-8a50-84fa382593d2",
                                               "type": "heading",
                                               "label": "Text",
@@ -43238,7 +43709,6 @@
                                                         30
                                                       ]
                                                     },
-                                                    "control_action": "f8282150-bb3f-422d-9920-cccbabf14263",
                                                     "common": {
                                                       "padding": [
                                                         null,
@@ -43279,8 +43749,17 @@
                                                             }
                                                           ]
                                                         }
+                                                      },
+                                                      "ty": {
+                                                        "normal": {
+                                                          "color": "var(--c--neutral-dark-active)"
+                                                        },
+                                                        "hover": {
+                                                          "color": "var(--c--neutral-darker)"
+                                                        }
                                                       }
-                                                    }
+                                                    },
+                                                    "control_action": "f8282150-bb3f-422d-9920-cccbabf14263"
                                                   },
                                                   "children": [
                                                     {
@@ -43388,8 +43867,19 @@
                                                             }
                                                           ]
                                                         }
+                                                      },
+                                                      "ty": {
+                                                        "normal": {
+                                                          "color": "var(--c--neutral-dark-active)"
+                                                        },
+                                                        "hover": {
+                                                          "color": "var(--c--neutral-darker)"
+                                                        }
                                                       }
-                                                    }
+                                                    },
+                                                    "action-type": "3",
+                                                    "operation": "edit",
+                                                    "op": "modal"
                                                   },
                                                   "children": [
                                                     {
@@ -43399,14 +43889,12 @@
                                                       "displayLabel": true,
                                                       "attrs": {
                                                         "icon": {
-                                                          "icon": "fa-solid fa-envelope-dot",
+                                                          "icon": "fa-regular fa-pen-to-square",
                                                           "size": [
                                                             null,
                                                             12
                                                           ],
-                                                          "normal": {
-                                                            "pcolor": "var(--cus-c--TextGrey)"
-                                                          }
+                                                          "normal": {}
                                                         },
                                                         "common": {
                                                           "positioning": {
@@ -43418,10 +43906,10 @@
                                                         }
                                                       },
                                                       "parentCol": 1,
-                                                      "nv_label": "current_item_main_header_operations_button_icon"
+                                                      "nv_label": "current_item_main_header_edit_item_button_icon"
                                                     }
                                                   ],
-                                                  "nv_label": "current_item_main_header_operations_button"
+                                                  "nv_label": "current_item_main_header_edit_item_button"
                                                 },
                                                 {
                                                   "id": "8d5cf90f-241d-4503-b000-318e9b87582d",
@@ -43475,7 +43963,7 @@
                                                         "hover": {
                                                           "type": "classic",
                                                           "classic": {
-                                                            "color": "var(--c--neutral-light-active)"
+                                                            "color": "var(--c--danger-light)"
                                                           }
                                                         }
                                                       },
@@ -43495,9 +43983,19 @@
                                                             }
                                                           ]
                                                         }
+                                                      },
+                                                      "ty": {
+                                                        "hover": {
+                                                          "color": "var(--c--danger-dark)"
+                                                        },
+                                                        "normal": {
+                                                          "color": "var(--c--neutral-dark-active)"
+                                                        }
                                                       }
                                                     },
-                                                    "control_action": "f8282150-bb3f-422d-9920-cccbabf14263"
+                                                    "control_action": "f8282150-bb3f-422d-9920-cccbabf14263",
+                                                    "action-type": "3",
+                                                    "operation": "del"
                                                   },
                                                   "children": [
                                                     {
@@ -43507,14 +44005,13 @@
                                                       "displayLabel": true,
                                                       "attrs": {
                                                         "icon": {
-                                                          "icon": "fa-solid fa-comment-dots",
+                                                          "icon": "fa-regular fa-trash",
                                                           "size": [
                                                             null,
                                                             12
                                                           ],
-                                                          "normal": {
-                                                            "pcolor": "var(--cus-c--TextGrey)"
-                                                          }
+                                                          "normal": {},
+                                                          "hover": {}
                                                         },
                                                         "common": {
                                                           "positioning": {
@@ -43526,11 +44023,11 @@
                                                         }
                                                       },
                                                       "parentCol": 1,
-                                                      "nv_label": "current_item_main_header_operations_button_icon"
+                                                      "nv_label": "current_item_main_header_delete_item_button_icon"
                                                     }
                                                   ],
                                                   "parentCol": 1,
-                                                  "nv_label": "current_item_main_header_operations_button"
+                                                  "nv_label": "current_item_main_header_delete_item_button"
                                                 },
                                                 {
                                                   "id": "86fb5dbf-daec-4217-83a8-c9d7b966d270",
@@ -60777,11 +61274,11 @@
                     "data": {
                       "list": {
                         "AppID": 41,
-                        "ListSetID": "2054077087595905025",
-                        "ListID": "2054077096447066112"
+                        "ListSetID": "2071862448464072704",
+                        "ListID": "2071862457508171777"
                       }
                     },
-                    "layout": "2054077096430288897",
+                    "layout": "2071862457441062914",
                     "op": "modal",
                     "modalsize": 2
                   }

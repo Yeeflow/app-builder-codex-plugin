@@ -419,10 +419,14 @@ function validateMasterDetailWorkspaceShell(resource, main, findings, context) {
   const contentPanel = findFirstByIdentity(main, "content_panel");
   if (!leftPanel) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_MISSING`, "Master-detail workspace Dashboard must preserve left_panel as the dataset list panel.", { page }));
+  } else if (!isMasterDetailLeftPanelWidth(leftPanel)) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_WIDTH_INVALID`, "Master-detail workspace Dashboard left_panel must preserve the YDP golden reference custom width of 520px.", { page, actual: leftPanel?.attrs?.style?.width ?? null, widthtype: leftPanel?.attrs?.style?.widthtype ?? null }));
   }
   if (!contentPanel) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_CONTENT_PANEL_MISSING`, "Master-detail workspace Dashboard must preserve content_panel as the selected-record detail panel.", { page }));
   }
+  validateMasterDetailCaptionAndSidebarPlacement(resource, findings, context);
+  validateMasterDetailHeaderOperationTemplateSlots(resource, findings, context);
   const tempVarNames = new Set(asArray(resource?.tempVars).flatMap((entry) => [entry?.id, entry?.name, entry?.Name, entry?.label]).filter(Boolean).map(String));
   if (!tempVarNames.has("vCurrentItemID") && !tempVarNames.has("__temp_vCurrentItemID")) {
     findings.push(error(`DASH_LAYOUT_${context.layer}_CURRENT_ITEM_TEMPVAR_MISSING`, "Master-detail workspace Dashboard must preserve vCurrentItemID as the selected current item temp variable.", { page }));
@@ -459,8 +463,62 @@ function validateMasterDetailWorkspaceShell(resource, main, findings, context) {
   return contentPanel || null;
 }
 
+function validateMasterDetailCaptionAndSidebarPlacement(resource, findings, context) {
+  const page = context.page;
+  const captionTitleWrapper = findFirstByIdentity(resource, "left_panel_caption_title_wrapper");
+  const captionIconWrapper = findFirstByIdentity(resource, "left_panel_caption_icon_wrapper");
+  const captionIcon = findFirstByIdentity(resource, "left_panel_caption_icon");
+  const currentItemMainHeaderLeft = findFirstByIdentity(resource, "current_item_main_header_left");
+  const sidebar = findFirstByIdentity(resource, "left_panel_sidebar");
+  if (!captionTitleWrapper) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_CAPTION_TITLE_WRAPPER_MISSING`, "Master-detail workspace Dashboard must preserve left_panel_caption_title_wrapper.", { page }));
+  }
+  if (!captionIconWrapper) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_CAPTION_ICON_WRAPPER_MISSING`, "Master-detail workspace Dashboard must preserve left_panel_caption_icon_wrapper in the left panel caption title area.", { page }));
+  } else if (captionTitleWrapper && !hasAncestor(resource, captionIconWrapper, "left_panel_caption_title_wrapper")) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_CAPTION_ICON_WRAPPER_PLACEMENT_INVALID`, "left_panel_caption_icon_wrapper must remain inside left_panel_caption_title_wrapper.", { page }));
+  }
+  if (!captionIcon) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_CAPTION_ICON_MISSING`, "Master-detail workspace Dashboard must preserve editable left_panel_caption_icon for the left panel source dataset icon.", { page }));
+  } else if (captionIconWrapper && !hasAncestor(resource, captionIcon, "left_panel_caption_icon_wrapper")) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_CAPTION_ICON_PLACEMENT_INVALID`, "left_panel_caption_icon must remain inside left_panel_caption_icon_wrapper.", { page }));
+  }
+  if (!currentItemMainHeaderLeft) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_CURRENT_ITEM_MAIN_HEADER_LEFT_MISSING`, "Master-detail workspace Dashboard must preserve current_item_main_header_left.", { page }));
+  }
+  if (!sidebar) {
+    findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_SIDEBAR_MISSING`, "Master-detail workspace Dashboard must preserve left_panel_sidebar for the selected-item header area.", { page }));
+  } else {
+    if (captionTitleWrapper && hasAncestor(resource, sidebar, "left_panel_caption_title_wrapper")) {
+      findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_SIDEBAR_PLACEMENT_INVALID`, "left_panel_sidebar must not remain in left_panel_caption_title_wrapper; the YDP golden reference places it in current_item_main_header_left.", { page }));
+    }
+    if (currentItemMainHeaderLeft && !hasAncestor(resource, sidebar, "current_item_main_header_left")) {
+      findings.push(error(`DASH_LAYOUT_${context.layer}_LEFT_PANEL_SIDEBAR_HEADER_PLACEMENT_MISSING`, "left_panel_sidebar must be placed inside current_item_main_header_left.", { page }));
+    }
+  }
+}
+
+function validateMasterDetailHeaderOperationTemplateSlots(resource, findings, context) {
+  if (context.layer !== "TEMPLATE") return;
+  const page = context.page;
+  const operations = findFirstByIdentity(resource, "current_item_main_header_operations");
+  if (!operations) {
+    findings.push(error("DASH_LAYOUT_TEMPLATE_CURRENT_ITEM_MAIN_HEADER_OPERATIONS_MISSING", "Master-detail workspace template must preserve current_item_main_header_operations as the selected-record operation slot host.", { page }));
+    return;
+  }
+  if (!findFirstByIdentity(operations, "current_item_main_header_edit_item_button")) {
+    findings.push(error("DASH_LAYOUT_TEMPLATE_CURRENT_ITEM_MAIN_HEADER_EDIT_BUTTON_MISSING", "Master-detail workspace template must preserve current_item_main_header_edit_item_button as the optional selected-record edit action slot.", { page }));
+  }
+  if (!findFirstByIdentity(operations, "current_item_main_header_delete_item_button")) {
+    findings.push(error("DASH_LAYOUT_TEMPLATE_CURRENT_ITEM_MAIN_HEADER_DELETE_BUTTON_MISSING", "Master-detail workspace template must preserve current_item_main_header_delete_item_button as the optional selected-record delete action slot.", { page }));
+  }
+  if (!findFirstByIdentity(operations, "current_item_main_header_operations_button")) {
+    findings.push(error("DASH_LAYOUT_TEMPLATE_CURRENT_ITEM_MAIN_HEADER_GENERIC_BUTTON_MISSING", "Master-detail workspace template must preserve current_item_main_header_operations_button as the repeatable generic selected-record action slot.", { page }));
+  }
+}
+
 function validateOperations(resource, findings, page) {
-  for (const operations of findAllByIdentity(resource, "Operations")) {
+  for (const operations of flattenControls(resource).map((entry) => entry.control).filter((control) => isOperationContainer(control))) {
     const descendants = collectDescendants(operations);
     const actionable = descendants.filter((control) => hasActionConfiguration(control));
     if (!actionable.length) {
@@ -471,6 +529,15 @@ function validateOperations(resource, findings, page) {
       findings.push(error("DASH_LAYOUT_VISUAL_ACTION_WITHOUT_BINDING", "Visual button/action-looking controls must include valid Yeeflow action configuration.", { page, control: firstIdentity(visualOnly) || null }));
     }
   }
+}
+
+function isOperationContainer(control) {
+  return hasAnyIdentity(control, [
+    "Operations",
+    "current_item_main_header_operations",
+    "current_item_aditional_header_operations",
+    "current_item_additional_header_operations",
+  ]);
 }
 
 function validateGeneratedSectionCleanup(resource, findings, page, context = {}) {
@@ -1236,6 +1303,15 @@ function findAncestors(root, target) {
   };
   visit(root);
   return out;
+}
+
+function hasAncestor(root, target, expectedIdentity) {
+  return findAncestors(root, target).some((ancestor) => hasIdentity(ancestor, expectedIdentity));
+}
+
+function isMasterDetailLeftPanelWidth(leftPanel) {
+  const width = leftPanel?.attrs?.style?.width;
+  return Array.isArray(width) && Number(width[1]) === 520;
 }
 
 function hasIdentity(control, expected) {

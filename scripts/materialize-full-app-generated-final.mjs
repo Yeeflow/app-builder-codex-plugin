@@ -2384,6 +2384,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   ensureVisibleKpiCards(resource, kpiContracts, { listName: sourceResource });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: false });
+  removeOperationsWithoutActions(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
   return resource;
 }
@@ -2429,8 +2430,10 @@ function materializeMasterDetailWorkspaceCollections(resource, { dashboardName, 
   const leftCollection = findFirstByIdentity(resource, "left_panel_data_items_wrapper");
   const currentCollection = findFirstByIdentity(resource, "current_item_wrapper");
   const leftPanelTitle = findFirstByIdentity(resource, "left_panel_caption_title");
+  const leftPanelCaptionIcon = findFirstByIdentity(resource, "left_panel_caption_icon");
   const mainContentTitle = findFirstByIdentity(resource, "main_content_page_title");
   setHeadingText(leftPanelTitle, listMeta.listName || datasetRegion);
+  setIconControlFontAwesome(leftPanelCaptionIcon, inferDatasetFontAwesomeIcon(listMeta.listName || datasetRegion));
   setHeadingText(mainContentTitle, `${listMeta.listName || datasetRegion} Details`);
   if (leftCollection) {
     configureMasterDetailCollection(leftCollection, {
@@ -4229,6 +4232,18 @@ function setHeadingText(control, value) {
   };
 }
 
+function setIconControlFontAwesome(control, icon) {
+  const normalized = normalizeFontAwesomeIcon(icon);
+  if (!control || !normalized) return;
+  control.attrs = {
+    ...(control.attrs || {}),
+    icon: {
+      ...(control.attrs?.icon || {}),
+      icon: normalized,
+    },
+  };
+}
+
 function normalizeGeneratedDashboardControls(resource, pageName) {
   let index = 0;
   const visit = (node) => {
@@ -4335,12 +4350,21 @@ function removeOperationsWithoutActions(root) {
   const visit = (node) => {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
-      if (hasIdentity(child, "Operations") && !hasActionConfiguration(child)) return false;
+      if (isGeneratedOperationContainer(child) && !hasActionConfiguration(child)) return false;
       visit(child);
       return true;
     });
   };
   visit(root);
+}
+
+function isGeneratedOperationContainer(control) {
+  return [
+    "Operations",
+    "current_item_main_header_operations",
+    "current_item_aditional_header_operations",
+    "current_item_additional_header_operations",
+  ].some((identity) => hasIdentity(control, identity));
 }
 
 function removeAllByIdentity(root, identity) {
@@ -4935,6 +4959,20 @@ function normalizeFontAwesomeIcon(value) {
   return /^fa-(solid|regular|light|duotone|brands)\s+fa-[a-z0-9-]+$/i.test(icon) ? icon : "";
 }
 
+function inferDatasetFontAwesomeIcon(title = "") {
+  const text = String(title || "").toLowerCase();
+  if (/ticket|service desk|helpdesk|help desk|incident|support/.test(text)) return "fa-solid fa-headset";
+  if (/project|program|portfolio|milestone/.test(text)) return "fa-solid fa-diagram-project";
+  if (/task|todo|to-do|work item/.test(text)) return "fa-regular fa-square-check";
+  if (/issue|risk|problem|defect|bug/.test(text)) return "fa-solid fa-triangle-exclamation";
+  if (/comment|message|conversation|discussion/.test(text)) return "fa-regular fa-comments";
+  if (/document|file|attachment|library/.test(text)) return "fa-regular fa-folder-open";
+  if (/vendor|supplier|customer|client|account|contact|employee|requester|user/.test(text)) return "fa-regular fa-address-card";
+  if (/loan|asset|inventory|equipment|item/.test(text)) return "fa-regular fa-table-list";
+  if (/request|case|record/.test(text)) return "fa-regular fa-rectangle-list";
+  return "fa-regular fa-table-list";
+}
+
 function inferNavigationIcon({ title = "", type = "" } = {}) {
   const text = String(title || "").toLowerCase();
   const resourceType = String(type || "");
@@ -4947,6 +4985,10 @@ function inferNavigationIcon({ title = "", type = "" } = {}) {
   }
   if (resourceType === "103" || /dashboard|analytics|monitor|overview/.test(text)) return "fa-solid fa-chart-pie";
   if (resourceType === "105" || /approval|request|review/.test(text)) return "fa-regular fa-paste";
+  if (/ticket|service desk|helpdesk|help desk|incident|support/.test(text)) return "fa-solid fa-headset";
+  if (/project|program|portfolio/.test(text)) return "fa-solid fa-diagram-project";
+  if (/task|todo|to-do|work item/.test(text)) return "fa-regular fa-square-check";
+  if (/comment|message|conversation|discussion/.test(text)) return "fa-regular fa-comments";
   if (/report/.test(text)) return "fa-regular fa-file-lines";
   if (/document|file|attachment/.test(text)) return "fa-regular fa-folder-open";
   if (/vendor|supplier|customer|user|employee/.test(text)) return "fa-regular fa-address-card";
