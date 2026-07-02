@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.110
+
+- Release consolidated App Plan Data List schema support.
+- Parse table-driven `List | Field label | Internal field | Field type | Purpose` rows as planned Data List schema, without treating schema headings as real resources.
+- Preserve explicit internal fields such as `Title`, `Text5`, and `Datetime1`; keep identity-picker, lookup, and file-upload fields schema-safe on Text-backed storage.
+- Resolve lookup targets from App Plan purpose text and keep Dashboard Priority/Status filter option sources tied to planned fields.
+- Add focused Service Tickets regression coverage and training documentation for field materialization, dashboard layout selection, custom form host assignment, seed artifacts, and template residue cleanup.
+
 ## 0.8.109
 
 - Release FormNewReports upgrade omission hardening.
