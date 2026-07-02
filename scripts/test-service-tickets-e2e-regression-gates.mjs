@@ -28,34 +28,34 @@ Approved for generated-final validation.
 
 ### 4.1 Tickets
 #### Fields
-| Field Order | Display Name | Internal ID / Field Key | Yeeflow Field Type | Exact Yeeflow Control Type | Choice Values |
+| Order | Display Name | Internal Name | Business Type | Yeeflow Type | Choices |
 | --- | --- | --- | --- | --- | --- |
 | 1 | Ticket Number | Text1 | Text | input | |
 | 2 | Subject | Text2 | Text | input | |
-| 3 | Requester | User1 | User | identity-picker | |
+| 3 | Requester | Text4 | User identity | identity-picker | Existing system user |
 | 4 | Category | Text3 | Choice | select | Hardware, Software, Access |
-| 5 | Priority | Text4 | Choice | select | Low, Medium, High, Critical |
+| 5 | Priority | Text7 | Choice | select | Low, Medium, High, Critical |
 | 6 | Status | Text5 | Choice | select | Open, In Progress, Resolved, Closed |
-| 7 | Assigned Agent | User2 | User | identity-picker | |
+| 7 | Assigned Agent | Text8 | User identity | identity-picker | Existing system user |
 | 8 | Created Date | Datetime1 | Datetime | datepicker | |
 | 9 | Due Date | Datetime2 | Datetime | datepicker | |
 | 10 | Description | Text6 | Text | textarea | |
 
 ### 4.2 Ticket Comments
 #### Fields
-| Field Order | Display Name | Internal ID / Field Key | Yeeflow Field Type | Exact Yeeflow Control Type | Choice Values |
+| Order | Display Name | Internal Name | Business Type | Yeeflow Type | Choices |
 | --- | --- | --- | --- | --- | --- |
 | 1 | Comment | Text1 | Text | textarea | |
 | 2 | Ticket | Lookup1 | Text | lookup | |
-| 3 | Commented By | User1 | User | identity-picker | |
+| 3 | Commented By | Text4 | User identity | identity-picker | |
 
 ### 4.3 Ticket Attachments
 #### Fields
-| Field Order | Display Name | Internal ID / Field Key | Yeeflow Field Type | Exact Yeeflow Control Type | Choice Values |
+| Order | Display Name | Internal Name | Business Type | Yeeflow Type | Choices |
 | --- | --- | --- | --- | --- | --- |
 | 1 | File | File1 | Text | file-upload | |
 | 2 | Ticket | Lookup1 | Text | lookup | |
-| 3 | Uploaded By | User1 | User | identity-picker | |
+| 3 | Uploaded By | Text4 | User identity | identity-picker | |
 
 ## 5. Approval Forms Plan
 Not planned.
@@ -77,13 +77,28 @@ Not planned.
 Not planned.
 
 ## 14. Dashboard Pages Plan
-### 14.1 Service Tickets Dashboard
-- Page name: Service Tickets Dashboard
+Dashboard page selection:
 
-### 14.3 Dashboard Page Layout Template Selection
-| Dashboard Page | Selected Dashboard Page Layout Template |
+| Dashboard | Layout template | Dataset presentation |
+| --- | --- | --- |
+| Service Tickets Dashboard | dashboard-page-layouts-two-panel-workspace | collection_control_grid_table |
+
+Left panel work queue:
+
+| Region | Source | Required bindings |
+| --- | --- | --- |
+| Ticket list | Tickets | Subject \`Text2\`, Requester \`Text4\`, Priority \`Text7\`, Status \`Text5\`, Created Date \`Datetime1\`, Due Date \`Datetime2\` |
+
+Right panel selected ticket detail:
+
+| Visible label | Binding |
 | --- | --- |
-| Service Tickets Dashboard | dashboard-page-layouts-two-panel-workspace |
+| Detail title | Subject / Text2 |
+| Status | Text5 |
+
+Explicit dashboard exclusions:
+
+Do not generate KPI Cards, empty business sections, right-header placeholder buttons, or loan-domain copy.
 
 #### Summary Metrics
 | Metric Name | Dashboard Page | Source Data List | Source Field(s) | Calculation Logic |

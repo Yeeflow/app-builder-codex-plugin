@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.108
+
+- Release Service Tickets semantic materialization hardening.
+- Parse Dashboard page selection tables that use `Dashboard | Layout template | Dataset presentation` and materialize only the explicitly planned Dashboard page, instead of treating `Left panel work queue`, `Right panel selected ticket detail`, or `Explicit dashboard exclusions` subsections as standalone Dashboard resources.
+- Parse App Plan Data List field tables that use `Internal Name`, `Business Type`, `Yeeflow Type`, and `Choices`, preserving planned Service Tickets fields such as Priority `Text7`, Status `Text5`, and Text-backed `identity-picker` requester/agent fields.
+- Add a focused Service Tickets regression fixture that rejects generic workspace pages, Title-only business Data Lists, and unsupported `FieldType: "User"` output before signing readiness.
+- Save the Service Tickets semantic materialization training report and keep source/dist materializer and regression gates aligned.
+
 ## 0.8.107
 
 - Release refreshed Dashboard master-detail workspace YDP templates.

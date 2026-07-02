@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.107`
+- Version: `0.8.108`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.107` releases the refreshed Dashboard master-detail workspace YDP templates: Two-Panel and Three-Panel Workspace layouts preserve the 520px left panel, move `left_panel_sidebar` into `current_item_main_header_left`, add the editable `left_panel_caption_icon_wrapper` / `left_panel_caption_icon` slot, expose explicit current-item edit/delete operation buttons, keep generic operation buttons repeatable, and prune no-action workspace operation containers before signing readiness.
+Current release `0.8.108` hardens Service Tickets semantic materialization: Dashboard page resources now come from explicit page/layout selection tables instead of descriptive subsections, App Plan field tables using `Internal Name`, `Business Type`, and `Yeeflow Type` materialize planned Data List fields, and regression coverage blocks generic workspace pages or Title-only business lists before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.107
+Version: 0.8.108
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.107
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.108
 ```
 
 ## What Is Included
