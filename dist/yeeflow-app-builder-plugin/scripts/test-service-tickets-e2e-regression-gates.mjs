@@ -185,9 +185,9 @@ assert.equal(priorityFilter.attrs?.data?.field, ticketFields.get("Priority")?.Fi
 assert.equal(priorityFilter.attrs?.display_f, ticketFields.get("Priority")?.FieldName, "Priority filter display field must match the planned Priority field");
 assert.equal(priorityFilter.attrs?.value_f, ticketFields.get("Priority")?.FieldName, "Priority filter value field must match the planned Priority field");
 assert.equal(priorityFilter.attrs?.optionSourceProven, true, "Priority filter must carry an export-proven option source contract");
-assert.ok((priorityFilter.attrs?.["choice-options"] || []).includes("High"), "Priority filter must expose planned choice values instead of an empty dropdown");
+assert.deepEqual(priorityFilter.attrs?.["choice-options"] || [], ["Low", "Medium", "High", "Critical"], "Priority filter options must exactly match planned Priority values");
 assert.equal(statusFilter.attrs?.data?.field, ticketFields.get("Status")?.FieldName, "Status filter must bind to the planned Status field");
-assert.ok((statusFilter.attrs?.["choice-options"] || []).includes("Open"), "Status filter must expose planned choice values");
+assert.deepEqual(statusFilter.attrs?.["choice-options"] || [], ["Open", "In Progress", "Resolved", "Closed"], "Status filter options must exactly match planned Status values and must not include generic workflow states");
 
 const pageLayoutValidation = validateDashboardPageLayoutTemplate({ package: packagePath, appPlan: planPath });
 assert.equal(pageLayoutValidation.status, "pass", JSON.stringify(pageLayoutValidation.findings || [], null, 2));
@@ -234,7 +234,7 @@ console.log(JSON.stringify({
     "planned lookup fields resolve to their target list and display field",
     "Summary Metrics not generated as Dashboard",
     "two-panel Dashboard layout matches App Plan selection",
-    "left-panel Priority/Status filters use proven option sources",
+    "left-panel Priority/Status filters use exact planned option sources",
     "dashboard page-layout and hard-gate validators pass",
     "custom forms assigned to correct host lists",
     "seed artifacts use structured identity-picker and file-upload contracts",

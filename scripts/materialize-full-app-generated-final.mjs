@@ -1779,7 +1779,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   removeAllByIdentity(resource, "kpi_metrics_wrapper");
   scrubDashboardSourceTemplateResidue(resource, { listName, scrubMetadata: true });
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
+  removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
   return resource;
 }
@@ -2410,7 +2410,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: isMasterDetailWorkspace });
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
+  removeEmptySectionTitleAreas(resource);
   resource.filterVars = filterConsumedDashboardFilterVars(resource, uniqueByName([
     ...normalizeDependencyArray(templateDependencies.filterVars),
     ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
@@ -2476,9 +2476,9 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   if (isMasterDetailWorkspace) restoreDashboardRootGoldenReferenceProvenance(resource);
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
+  removeEmptySectionTitleAreas(resource);
   removeEmptyDashboardBusinessSections(resource);
-  ensureDashboardContentCardRequiredSlots(resource);
+  if (!isMasterDetailWorkspace) ensureDashboardContentCardRequiredSlots(resource);
   ensureVisibleKpiCards(resource, kpiContracts, { listName: sourceResource });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: false });
@@ -4514,7 +4514,7 @@ function removeEmptyDashboardBusinessSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
-      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child) && !["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"].some((identity) => hasIdentity(node, identity))) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
@@ -5989,7 +5989,9 @@ function choiceValuesForField(field) {
     ? parsed.choices.map((choice) => String(choice?.value || choice?.label || choice || "").trim()).filter(Boolean)
     : [];
   const fromPlan = String(field?.choiceValues || "").split(/[,;]+/).map((value) => value.trim()).filter(Boolean);
-  return unique(fromRules.concat(fromPlan, inferChoiceValues(field))).slice(0, 12);
+  const explicitValues = unique(fromRules.concat(fromPlan));
+  if (explicitValues.length) return explicitValues.slice(0, 12);
+  return unique(inferChoiceValues(field)).slice(0, 12);
 }
 
 function primaryFieldName(listMeta) {
