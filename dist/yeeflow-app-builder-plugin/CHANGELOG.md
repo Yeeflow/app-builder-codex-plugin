@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.109
+
+- Release FormNewReports upgrade omission hardening.
+- Allow Dashboard-only upgrade scope validation to treat `FormNewReports: []` as an omission of unchanged installed Form reports, not a deletion, when report changes are not in scope.
+- Keep real Form report changes blocked unless report scope and update-safe proof are explicitly provided.
+- Add regression coverage for the verified Office Asset Dashboard runtime fix shape where omitting unchanged installed `FormNewReports[]` avoided Version Management duplicate report failure.
+- Save the FormNewReports upgrade omission training report and align the full-app generation standard with the live upgrade boundary.
+
 ## 0.8.108
 
 - Release Service Tickets semantic materialization hardening.
