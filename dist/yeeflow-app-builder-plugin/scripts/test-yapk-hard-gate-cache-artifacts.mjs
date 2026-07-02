@@ -222,6 +222,7 @@ const requiredDocs = [
   "docs/training/repo-root-hygiene-compatibility-training-report.md",
   "docs/training/full-app-materializer-template-e2e-gap-closure-training-report.md",
   "docs/training/generated-final-preflight-app-plan-runtime-alignment-training-report.md",
+  "docs/training/dashboard-deep-id-remap-provenance-training-report.md",
   "docs/training/custom-code-control-form-action-step-contract-training-report.md",
   "docs/reference/application-control-style-golden-references.json",
   "docs/reference/application-control-style-soft-outline-controls.template.json",
