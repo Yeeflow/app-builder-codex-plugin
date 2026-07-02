@@ -369,10 +369,20 @@ function validateRuntimeBinding(resource, entry, reference, context) {
     context.findings.push(error("DATA_ANALYTICS_RUNTIME_REPORT_ID_MISSING", "Data Analytics control id must be registered in Resource.ReportIds[].", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
   }
   const exts = asArray(resource.exts);
-  const ext = exts.find((item) => String(item?.i || "") === controlId);
+  const matchingExts = exts.filter((item) => String(item?.i || "") === controlId);
+  const ext = matchingExts[0] || null;
   if (!ext) {
     context.findings.push(error("DATA_ANALYTICS_RUNTIME_EXT_MISSING", "Data Analytics control must have a matching Resource.exts[] runtime chart/pivot entry.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
     return;
+  }
+  if (matchingExts.length > 1) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_EXT_DUPLICATE", "Data Analytics control must have exactly one matching Resource.exts[] runtime chart/pivot entry; duplicate runtime models can make Yeeflow load the wrong chart model.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+      count: matchingExts.length,
+    }));
   }
   const expectedKey = CONTROL_KEY_BY_TYPE[String(reference.controlType || entry.node?.type || "")] || String(reference.controlType || "");
   if (String(ext.category || "") !== RUNTIME_CATEGORY || String(ext.key || "") !== expectedKey) {
@@ -423,6 +433,16 @@ function validateRuntimeBinding(resource, entry, reference, context) {
   }
   validateRuntimeRowsAndValuesShape({ entry, reference, context, controlId, rows, columns: asArray(settings.columns), values });
   const sourceFields = context.listFieldsById?.get(listId) || null;
+  if (context.listFieldsById && listId && !sourceFields) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_SOURCE_LIST_UNRESOLVED", "Data Analytics runtime source ListID must resolve to a generated package source list before chart/pivot readiness can be claimed.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+      listId,
+      listSetId,
+    }));
+  }
   if (sourceFields) {
     for (const ref of [...rows, ...asArray(settings.columns), ...values].flatMap(runtimeFieldRefs)) {
       if (!sourceFields.has(ref)) {
@@ -581,6 +601,7 @@ function validateRuntimeModelSurfaceAlignment({ entry, reference, context, contr
   const runtimeCategoryFields = new Set(rows.flatMap(primaryRuntimeFieldRefs));
   const runtimeValueFields = new Set(values.flatMap(primaryRuntimeFieldRefs));
   const surfaces = collectAnalyticsModelSurfaceRefs(entry.node);
+  validateVisibleRuntimeModelSurfaces({ entry, reference, context, controlId, surfaces });
   const allRuntimeRefs = [...rows, ...asArray(settings.columns), ...values].flatMap(runtimeFieldRefs);
   for (const field of [...allRuntimeRefs, ...surfaces.categoryFields, ...surfaces.valueFields]) {
     if (/_COUNT\b/i.test(String(field || ""))) {
@@ -616,6 +637,62 @@ function validateRuntimeModelSurfaceAlignment({ entry, reference, context, contr
         runtimeValues: [...runtimeValueFields],
       }));
     }
+  }
+}
+
+function validateVisibleRuntimeModelSurfaces({ entry, reference, context, controlId, surfaces }) {
+  const attrs = isObject(entry.node?.attrs) ? entry.node.attrs : {};
+  const data = isObject(attrs.data) ? attrs.data : {};
+  const model = isObject(attrs.model) ? attrs.model : {};
+  const isPivot = String(reference.controlType || entry.node?.type || "") === "pivot-table";
+  if (!isObject(attrs.data) || !Object.keys(data).length) {
+    context.findings.push(error("DATA_ANALYTICS_VISIBLE_DATA_MODEL_MISSING", "Visible Data Analytics controls must carry attrs.data so Yeeflow can hydrate the chart/pivot from the same source model as Resource.exts[].", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+    }));
+  }
+  if (!isObject(attrs.model) || !Object.keys(model).length) {
+    context.findings.push(error("DATA_ANALYTICS_VISIBLE_MODEL_MISSING", "Visible Data Analytics controls must carry attrs.model aligned with the Resource.exts[] runtime model.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+    }));
+  }
+  if (!asArray(attrs.values).length) {
+    context.findings.push(error("DATA_ANALYTICS_VISIBLE_VALUES_MISSING", "Visible Data Analytics controls must carry attrs.values[] aligned with Resource.exts[].attr.settings.values[].", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+    }));
+  }
+  if (isPivot) return;
+  if (!asArray(attrs.series).length) {
+    context.findings.push(error("DATA_ANALYTICS_VISIBLE_SERIES_MISSING", "Visible chart controls must carry attrs.series[] aligned with the Resource.exts[] rows/values runtime model.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+    }));
+  }
+  if (!surfaces.categoryFields.length) {
+    context.findings.push(error("DATA_ANALYTICS_VISIBLE_CATEGORY_FIELD_MISSING", "Visible chart controls must expose a category/grouping field through attrs.data, attrs.model, or attrs.series; runtime rows alone are not enough.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+    }));
+  }
+  if (!surfaces.valueFields.length) {
+    context.findings.push(error("DATA_ANALYTICS_VISIBLE_VALUE_FIELD_MISSING", "Visible chart controls must expose a value/measure field through attrs.data, attrs.model, attrs.series, or attrs.values; runtime values alone are not enough.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      controlId,
+    }));
   }
 }
 

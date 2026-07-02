@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.110
+
+- Release Chart runtime model contract hardening.
+- Require every generated Data Analytics chart/pivot control to have exactly one matching `Resource.exts[]` runtime entry and a matching `Resource.ReportIds[]` registration.
+- Validate that chart runtime `ListID` values resolve to generated package source lists, and that visible `attrs.data`, `attrs.model`, `attrs.series[]`, and `attrs.values[]` surfaces align with runtime rows/values.
+- Reject Yeeflow chart model-load error text in runtime evidence instead of accepting canvas-only or shell-only chart proof.
+- Save the focused chart runtime model contract training report and align source/dist Data Analytics validators and runtime evidence gates.
+
 ## 0.8.109
 
 - Release FormNewReports upgrade omission hardening.

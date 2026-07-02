@@ -45,6 +45,11 @@ try {
   expectCode("Generated chart without both template IDs fails", ["--resource", writeJson("template-id-mismatch.json", dashboardResource({ templateIdMismatch: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_ID_CONTRACT_MISSING");
   expectCode("Generated chart with derived COUNT field ID fails", ["--resource", writeJson("derived-count-field.json", dashboardResource({ derivedValueField: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DERIVED_FIELD_ID_INVALID");
   expectCode("Generated chart with stale model surface fails", ["--resource", writeJson("stale-model-surface.json", dashboardResource({ staleValueSurface: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_MODEL_SURFACE_MISMATCH");
+  expectCode("Generated chart with duplicate runtime ext fails", ["--resource", writeJson("duplicate-runtime-ext.json", dashboardResource({ duplicateRuntimeExt: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_EXT_DUPLICATE");
+  expectCode("Generated chart with unresolved runtime source list fails", ["--package", writeYapk("analytics-unresolved-source-list.yapk", dashboardResource({ unresolvedSourceList: true }))], "DATA_ANALYTICS_RUNTIME_SOURCE_LIST_UNRESOLVED");
+  expectCode("Generated chart without visible series fails", ["--resource", writeJson("missing-visible-series.json", dashboardResource({ missingVisibleSeries: true })), "--surface", "dashboard"], "DATA_ANALYTICS_VISIBLE_SERIES_MISSING");
+  expectCode("Generated chart without visible values fails", ["--resource", writeJson("missing-visible-values.json", dashboardResource({ missingVisibleValues: true })), "--surface", "dashboard"], "DATA_ANALYTICS_VISIBLE_VALUES_MISSING");
+  expectCode("Generated chart without visible model fields fails", ["--resource", writeJson("missing-visible-model-fields.json", dashboardResource({ missingVisibleModelFields: true })), "--surface", "dashboard"], "DATA_ANALYTICS_VISIBLE_CATEGORY_FIELD_MISSING");
   const appPlan = writeText("analytics-app-plan.md", analyticsAppPlan());
   expectPass("Generated package materializes App Plan selected Data Analytics templates", ["--package", writeYapk("analytics-present.yapk", dashboardResource()), "--plan", appPlan]);
   expectCode("Generated package fails when App Plan selected Data Analytics templates are not materialized", ["--package", writeYapk("analytics-missing.yapk", dashboardResource({ noAnalytics: true })), "--plan", appPlan], "DATA_ANALYTICS_PLANNED_TEMPLATE_NOT_MATERIALIZED");
@@ -93,6 +98,18 @@ function dashboardResource(options = {}) {
   if (firstControl && options.templateIdMismatch) firstControl.attrs.templateId = "data_analytics_line_chart_with_title";
   if (firstControl && options.derivedValueField) firstControl.attrs.values = [{ field: "ListDataID_COUNT", aggregate: "COUNT" }];
   if (firstControl && options.staleValueSurface) firstControl.attrs.model.valueField = "Title";
+  if (firstControl && options.missingVisibleSeries) firstControl.attrs.series = [];
+  if (firstControl && options.missingVisibleValues) firstControl.attrs.values = [];
+  if (firstControl && options.missingVisibleModelFields) {
+    delete firstControl.attrs.data.groupBy;
+    delete firstControl.attrs.data.axisField;
+    delete firstControl.attrs.data.categoryField;
+    delete firstControl.attrs.data.valueField;
+    delete firstControl.attrs.model.categoryField;
+    delete firstControl.attrs.model.valueField;
+    firstControl.attrs.series = [];
+    firstControl.attrs.values = [];
+  }
   if (firstControl && options.missingVisibleListSetId) {
     delete firstControl.attrs.data.list.ListSetID;
     delete firstControl.attrs.model.source.ListSetID;
@@ -139,6 +156,8 @@ function dashboardResource(options = {}) {
     emptyPivotValueObject: options.emptyPivotValueObject,
     semanticChartTypeString: options.semanticChartTypeString,
     omitDateTrendRowFunc: options.omitDateTrendRowFunc,
+    duplicateRuntimeExt: options.duplicateRuntimeExt,
+    unresolvedSourceList: options.unresolvedSourceList,
   });
   return resource;
 }
@@ -427,13 +446,18 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
       : options.countValueUsesTitle
         ? { field: "Title", fieldName: "Title", FieldName: "Title", id: "Title", func: "COUNT" }
         : { field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", id: "ListDataID", func: "COUNT" };
+    const sourceListId = options.unresolvedSourceList && control === controls[0] ? "app_1" : "list_assets";
+    if (options.unresolvedSourceList && control === controls[0]) {
+      control.attrs.data.list.ListID = sourceListId;
+      control.attrs.model.source.ListID = sourceListId;
+    }
     exts.push({
       i: id,
       category: "___Pivot___",
       key,
       attr: {
         AppID: 41,
-        ListID: "list_assets",
+        ListID: sourceListId,
         ListSetID: "app_1",
         chartType: control.type === "pivot-table" ? undefined : (options.semanticChartTypeString ? semanticChartType(control) : runtimeChartTypeCode(control)),
         settings: {
@@ -443,6 +467,9 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
         },
       },
     });
+    if (options.duplicateRuntimeExt && control === controls[0]) {
+      exts.push(JSON.parse(JSON.stringify(exts[exts.length - 1])));
+    }
   }
   resource.ReportIds = reportIds;
   resource.exts = exts;
