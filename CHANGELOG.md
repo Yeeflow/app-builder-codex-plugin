@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.107
+
+- Release refreshed Dashboard master-detail workspace YDP templates.
+- Update `dashboard-page-layouts-two-panel-workspace` and `dashboard-page-layouts-three-panel-workspace` from the latest YDP exports, including 520px left panel width, relocated `left_panel_sidebar`, and the editable `left_panel_caption_icon_wrapper` / `left_panel_caption_icon` source icon slot.
+- Add explicit `current_item_main_header_edit_item_button` and `current_item_main_header_delete_item_button` slots while keeping repeatable `current_item_main_header_operations_button` for additional business actions.
+- Prune generated no-action workspace operation containers across current-item and additional-header operation regions, not only generic `Operations` containers.
+- Extend master-detail workspace template gates, plan-conformance tests, and dist mirrors so the updated operation-slot contract is enforced before signing readiness.
+
 ## 0.8.106
 
 - Release Service Tickets runtime semantics, Data Analytics parser alignment, and Dashboard content-card fidelity hardening.

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.106`
+- Version: `0.8.107`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.106` releases Service Tickets runtime semantics, Data Analytics parser alignment, and Dashboard content-card fidelity hardening: master-detail Priority/Status filters preserve proven option sources and bind to business fields, selected-record detail labels/bindings match source fields, identity-picker and file-upload seed artifacts emit structured live-write requirements, source-template loan/asset copy is blocked outside matching domains, Region/Surface analytics tables resolve to the current Dashboard heading, and generated Dashboard content_card_wrapper modules preserve valid section_title_area/header slots before signing readiness.
+Current release `0.8.107` releases the refreshed Dashboard master-detail workspace YDP templates: Two-Panel and Three-Panel Workspace layouts preserve the 520px left panel, move `left_panel_sidebar` into `current_item_main_header_left`, add the editable `left_panel_caption_icon_wrapper` / `left_panel_caption_icon` slot, expose explicit current-item edit/delete operation buttons, keep generic operation buttons repeatable, and prune no-action workspace operation containers before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.106
+Version: 0.8.107
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.106
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.107
 ```
 
 ## What Is Included

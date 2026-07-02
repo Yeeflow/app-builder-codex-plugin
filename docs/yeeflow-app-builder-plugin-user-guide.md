@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.104`
+`0.8.107`
+
+Version `0.8.107` releases refreshed Dashboard master-detail workspace YDP templates. Two-Panel and Three-Panel Workspace Dashboard layouts preserve the latest exported YDP structure, including the 520px left panel, relocated `left_panel_sidebar`, editable `left_panel_caption_icon_wrapper` / `left_panel_caption_icon`, explicit current-item edit/delete operation buttons, repeatable generic operation buttons, and no-action operation-container pruning before signing readiness.
 
 Version `0.8.104` releases full-app materializer resource/runtime fixes. Generated Data Lists preserve one native `Title` field and reuse it for business title display metadata instead of duplicating `FieldName/InternalName = Title`; materialization rejects rounded 19-digit API IDs; App Plan Data Analytics rows materialize into visible chart/pivot controls plus `ReportIds` and `exts` runtime models; and visible Dashboard KPI values bind to the same Summary `save_var` expression object used by hidden Summary controls before signing readiness.
 
