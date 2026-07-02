@@ -67,14 +67,15 @@ Visible Data Analytics controls are not runtime-ready unless the containing layo
 - the visible chart or pivot control must carry both `dataAnalyticsTemplateId` and `templateId` equal to the selected approved template ID;
 - the visible chart or pivot control may set `runtimeModelProven: true` only after the full wrapper clone, `ReportIds[]`, `exts[]`, source metadata, rows/values field references, and cross-surface model contract have been materialized;
 - `Resource.ReportIds[]` must include that exact control ID;
-- `Resource.exts[]` must include an entry whose `i` equals that exact control ID;
+- `Resource.exts[]` must include exactly one entry whose `i` equals that exact control ID;
 - the entry must use `category: "___Pivot___"`;
 - the entry `key` must be `pie-chart`, `bar-chart`, `line-chart`, or `PivotTable` according to the generated control type;
-- `attr.AppID`, `attr.ListID`, and `attr.ListSetID` must identify the source app/list/root;
+- `attr.AppID`, `attr.ListID`, and `attr.ListSetID` must identify the source app/list/root, and the runtime `ListID` must resolve to the generated package source list/report metadata;
 - chart entries must include `attr.chartType`;
 - `attr.settings.rows[]` and `attr.settings.values[]` must be non-empty;
 - every row, column, and value field reference must resolve to a real field on the selected source list/report;
 - the visible control's `attrs.data.list` and `attrs.model.source` must both include `AppID`, `ListID`, and `ListSetID`, and those values must match the same source metadata in `Resource.exts[]`;
+- visible chart controls must include non-empty `attrs.data`, `attrs.model`, `attrs.series[]`, and `attrs.values[]` surfaces; pivot controls must include non-empty `attrs.data`, `attrs.model`, and `attrs.values[]`;
 - the visible control's `attrs.data.groupBy`, `attrs.data.axisField`, `attrs.data.categoryField`, `attrs.model.categoryField`, and `attrs.series[].categoryField` must match `Resource.exts[].attr.settings.rows[]`;
 - the visible control's `attrs.data.valueField`, `attrs.model.valueField`, `attrs.series[].valueField`, and `attrs.values[].field` must match `Resource.exts[].attr.settings.values[]`;
 - count charts must use the runtime-proven real source field identity `ListDataID` plus aggregate metadata such as `COUNT`; `settings.values[]` entries for COUNT must set `field`, `fieldName`, `FieldName`, and `id` to `ListDataID`; generated field IDs or aliases such as `ListDataID_COUNT`, source field UUIDs, or display labels are invalid.
@@ -91,3 +92,4 @@ Generated-final validation must fail when:
 - A generator emits an ad hoc chart/pivot control instead of cloning the approved template.
 - A visible chart or pivot control is missing its `Resource.ReportIds[]` registration, matching `Resource.exts[]` runtime entry, source metadata, chart type, runtime settings, or resolvable source fields.
 - A visible chart or pivot control has template marker drift, missing `runtimeModelProven`, missing or mismatched `attrs.data.list` / `attrs.model.source` source metadata, stale `attrs.model`/`attrs.series`/`attrs.values` field references, empty row/value model entries, or derived aggregate field IDs instead of real source fields plus aggregate metadata.
+- Runtime evidence contains Yeeflow chart model-load text such as `The model could not be loaded. Please complete or fix the chart configuration.` Canvas existence is not enough to claim Data Analytics success.

@@ -37,6 +37,9 @@ export function inspectRuntimeEvidence({ evidence: evidencePath, claimHighQualit
   if (evidence.pageLooksPlainScaffold === true) addFinding(findings, "error", "RUNTIME_PAGE_LOOKS_SCAFFOLD", "Runtime page still looks like a plain scaffold.");
   validateAsyncSummaryChartProof(evidence, findings);
   const visibleText = collectVisibleRuntimeText(evidence);
+  if (runtimeEvidenceContainsChartModelLoadError(evidence, visibleText)) {
+    addFinding(findings, "error", "RUNTIME_CHART_MODEL_LOAD_ERROR", "Runtime proof must fail when Yeeflow reports that a chart or pivot model could not be loaded.");
+  }
   if (/\bStart to build with Components\b/i.test(visibleText) || /\bADD NEW COMPONENT\b/i.test(visibleText)) {
     addFinding(findings, "error", "YAPK_RUNTIME_EMPTY_COMPONENT_SHELL_BLOCKER", "Runtime proof must fail when the installed app opens to Yeeflow's empty Components builder shell instead of generated app content.");
   }
@@ -151,6 +154,21 @@ function collectChartEntries(evidence) {
     if (Array.isArray(value)) entries.push(...value);
   }
   return entries.filter((item) => item && typeof item === "object");
+}
+
+function runtimeEvidenceContainsChartModelLoadError(evidence, visibleText) {
+  const matcher = /model could not be loaded|complete or fix the chart configuration|chart configuration error|chart model-load/i;
+  if (matcher.test(String(visibleText || ""))) return true;
+  return deepStringValues(evidence).some((value) => matcher.test(value));
+}
+
+function deepStringValues(value, seen = new Set()) {
+  if (typeof value === "string") return [value];
+  if (!value || typeof value !== "object") return [];
+  if (seen.has(value)) return [];
+  seen.add(value);
+  if (Array.isArray(value)) return value.flatMap((item) => deepStringValues(item, seen));
+  return Object.values(value).flatMap((item) => deepStringValues(item, seen));
 }
 
 function runtimeTargetShowsInstallFailed(evidence, visibleText) {

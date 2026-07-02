@@ -202,9 +202,9 @@ function validateAppPlan(planPath, findings) {
 function validateAppPlanFieldGridRow(row, findings) {
   const cells = row.split("|").slice(1, -1).map((cell) => cell.trim());
   const templateIndex = cells.findIndex((cell) => cell === TEMPLATE_ID);
-  const pc = Number(cells[templateIndex + 2]);
-  const tablet = Number(cells[templateIndex + 3]);
-  const mobile = Number(cells[templateIndex + 4]);
+  const pc = Number(cells[templateIndex + 1]);
+  const tablet = Number(cells[templateIndex + 2]);
+  const mobile = Number(cells[templateIndex + 3]);
   if (!Number.isFinite(pc) || pc < 2 || pc > 3) {
     findings.push(error("DATA_LIST_FORM_FIELDS_APP_PLAN_PC_COLUMNS_INVALID", "PC/laptop columns for data_list_form_fields_grid_v1_1 must be 2 or 3.", { row }));
   }

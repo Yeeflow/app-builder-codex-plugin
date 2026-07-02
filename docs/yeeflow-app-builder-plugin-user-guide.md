@@ -20,7 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.8.107`
+`0.8.110`
+
+Version `0.8.110` releases Chart runtime model contract hardening. Generated Data Analytics chart and pivot controls must have exactly one matching `Resource.exts[]` runtime entry plus `Resource.ReportIds[]` registration, source `ListID` metadata must resolve to package source fields, visible `attrs.data`, `attrs.model`, `attrs.series[]`, and `attrs.values[]` surfaces must align with runtime rows/values, and runtime evidence fails when Yeeflow reports chart model-load or chart configuration errors.
 
 Version `0.8.107` releases refreshed Dashboard master-detail workspace YDP templates. Two-Panel and Three-Panel Workspace Dashboard layouts preserve the latest exported YDP structure, including the 520px left panel, relocated `left_panel_sidebar`, editable `left_panel_caption_icon_wrapper` / `left_panel_caption_icon`, explicit current-item edit/delete operation buttons, repeatable generic operation buttons, and no-action operation-container pruning before signing readiness.
 

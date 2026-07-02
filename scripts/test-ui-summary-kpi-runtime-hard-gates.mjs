@@ -145,6 +145,13 @@ function run() {
     kpis: [{ label: "Active Loans", renderedText: "0" }],
     charts: [{ name: "Loan Status Pie", canvasVisible: true }],
   })), claimHighQualityUi: true }), "RUNTIME_CHART_CANVAS_ONLY_PROOF");
+  expectFail("Chart model-load runtime error fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-chart-model-load-error.json", runtimeEvidence({
+    summaryChartRuntimeProofRequired: true,
+    delayedRuntimeMaterializationProofCaptured: true,
+    kpis: [{ label: "Active Loans", renderedText: "0" }],
+    charts: [{ name: "Loan Status Pie", canvasVisible: true }],
+    finalRuntimeState: { visibleText: "The model could not be loaded. Please complete or fix the chart configuration." },
+  })), claimHighQualityUi: true }), "RUNTIME_CHART_MODEL_LOAD_ERROR");
   expectFail("Delayed runtime proof with non-numeric KPI text fails", inspectRuntimeEvidence({ evidence: writeJson("runtime-summary-nonnumeric-kpi.json", runtimeEvidence({
     summaryChartRuntimeProofRequired: true,
     delayedRuntimeMaterializationProofCaptured: true,

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.109`
+- Version: `0.8.110`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.109` hardens Dashboard-only upgrade handling for installed Form reports: unchanged installed `FormNewReports[]` entries may be omitted from Dashboard/runtime-only upgrade payloads to avoid duplicate live report creation, while report mutations still require explicit scope and update-safe proof.
+Current release `0.8.110` hardens Data Analytics chart runtime materialization: generated chart/pivot controls must have exactly one matching `ReportIds[]`/`exts[]` runtime model, visible `attrs.data`/`attrs.model`/`attrs.series`/`attrs.values` surfaces must align with runtime rows/values, source lists must resolve, and runtime proof fails on Yeeflow chart model-load errors.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.109
+Version: 0.8.110
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.109
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.110
 ```
 
 ## What Is Included
