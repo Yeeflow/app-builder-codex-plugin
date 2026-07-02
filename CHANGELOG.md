@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.8.114
+
+- Release Custom Code surface-contract cache-root alignment.
+- Make `test-custom-code-surface-contract-gates.mjs` root-mode aware so the same focused gate validates both source checkouts (`skills/installed/...`) and installed plugin cache roots (`skills/...`).
+- Preserve the 0.8.113 Custom Code control versus Form Action Custom Code step runtime contract while restoring installed-cache smoke coverage.
+
 ## 0.8.113
 
 - Release Custom Code control versus Form Action Custom Code step contract hardening.

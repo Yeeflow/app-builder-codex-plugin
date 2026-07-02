@@ -3,8 +3,14 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { pluginRootMode } from "./lib/plugin-root-layout.mjs";
 
 const ROOT = process.cwd();
+const ROOT_MODE = pluginRootMode(ROOT);
+const SKILL_ROOT =
+  ROOT_MODE === "installed-cache-root"
+    ? "skills/yeeflow-custom-code-generator"
+    : "skills/installed/yeeflow-custom-code-generator";
 
 function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
@@ -20,8 +26,8 @@ const requiredFiles = [
   "docs/custom-code-control-decision-guide.md",
   "docs/yeeflow-form-action-generation-rules.md",
   "docs/training/custom-code-control-form-action-step-contract-training-report.md",
-  "skills/installed/yeeflow-custom-code-generator/SKILL.md",
-  "skills/installed/yeeflow-custom-code-generator/references/yeeflow-custom-code-standard.md",
+  `${SKILL_ROOT}/SKILL.md`,
+  `${SKILL_ROOT}/references/yeeflow-custom-code-standard.md`,
 ];
 
 for (const file of requiredFiles) {
@@ -42,24 +48,24 @@ assertIncludes("docs/standards/custom-code-form-action-step-runtime-standard.md"
 assertIncludes("docs/standards/custom-code-form-action-step-runtime-standard.md", "number");
 assertIncludes("docs/standards/custom-code-form-action-step-runtime-standard.md", "not yet export-proven");
 
-assertIncludes("skills/installed/yeeflow-custom-code-generator/SKILL.md", "form_action_step");
-assertIncludes("skills/installed/yeeflow-custom-code-generator/SKILL.md", "execute(context");
-assertIncludes("skills/installed/yeeflow-custom-code-generator/SKILL.md", "render(context");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "form_action_step");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "execute(context");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "render(context");
 assertIncludes(
-  "skills/installed/yeeflow-custom-code-generator/SKILL.md",
+  `${SKILL_ROOT}/SKILL.md`,
   "docs/standards/custom-code-form-action-step-runtime-standard.md",
 );
 
 assertIncludes(
-  "skills/installed/yeeflow-custom-code-generator/references/yeeflow-custom-code-standard.md",
+  `${SKILL_ROOT}/references/yeeflow-custom-code-standard.md`,
   "Form Action Custom Code step",
 );
 assertIncludes(
-  "skills/installed/yeeflow-custom-code-generator/references/yeeflow-custom-code-standard.md",
+  `${SKILL_ROOT}/references/yeeflow-custom-code-standard.md`,
   "execute(context",
 );
 assertIncludes(
-  "skills/installed/yeeflow-custom-code-generator/references/yeeflow-custom-code-standard.md",
+  `${SKILL_ROOT}/references/yeeflow-custom-code-standard.md`,
   "render(context",
 );
 
@@ -125,10 +131,10 @@ console.log(
     {
       ok: true,
       gate: "custom-code-surface-contract",
+      rootMode: ROOT_MODE,
       checkedFiles: requiredFiles.length,
     },
     null,
     2,
   ),
 );
-
