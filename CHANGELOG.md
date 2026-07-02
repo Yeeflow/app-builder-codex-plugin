@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.112
+
+- Release focused Service Tickets master-detail workspace cleanup.
+- Prune empty `section_title_area` containers inside generated two-panel and three-panel workspace content cards instead of preserving template-only shells.
+- Skip Dashboard v1.1 content-card slot repair on master-detail workspace pages so optional title/action areas remain removable when not backed by business content.
+- Keep Priority/Status select-filter option sets exact when explicit App Plan choices or field rules exist, without appending generic workflow/status fallback values such as Draft, Submitted, or Completed.
+- Add focused Service Tickets regression coverage and training documentation for empty section cleanup and exact filter option-source behavior.
+
 ## 0.8.111
 
 - Release Data Analytics runtime export-shape and Service Tickets workbench Dashboard plan-shape hardening.
