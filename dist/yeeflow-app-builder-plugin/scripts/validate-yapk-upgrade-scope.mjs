@@ -51,6 +51,7 @@ function validateDashboardFullPackageScope(previous, next, rules, findings) {
   if (!isDashboardUpgrade) return;
   const groups = ["Childs", "Forms", "FormNewReports", "DataReports", "Groups", "Tags", "Metadatas", "Agents", "Connections", "Knowledges", "Themes", "Components", "PortalInfo"];
   for (const group of groups) {
+    if (group === "FormNewReports" && isInstalledFormNewReportsOmission(previous, next, rules)) continue;
     if (stableJson(previous?.[group] ?? null) !== stableJson(next?.[group] ?? null)) {
       findings.push(finding("error", "UPGRADE_DASHBOARD_ONLY_NON_DASHBOARD_RESOURCE_MUTATION", "Dashboard-only upgrades must be full upgrade packages and preserve non-Dashboard resource groups unchanged.", { resource: group }));
     }
@@ -144,6 +145,7 @@ function validateUnrelatedCollections(previous, next, rules, findings) {
     const before = stableJson(asArray(previous?.[key]));
     const after = stableJson(asArray(next?.[key]));
     if (before === after) continue;
+    if (key === "FormNewReports" && isInstalledFormNewReportsOmission(previous, next, rules)) continue;
     if (rules.allowedChangeTypes.has(changeType) || rules.allowedChangeTypes.has(key.toLowerCase())) continue;
     if (fieldOnly || rules.disallowedChanges.has(changeType) || rules.disallowedChanges.has(key.toLowerCase())) {
       findings.push(finding("error", "UPGRADE_OUT_OF_SCOPE_RESOURCE_MUTATION", `${label} changed outside declared upgrade scope.`, { resource: key }));
@@ -154,6 +156,15 @@ function validateUnrelatedCollections(previous, next, rules, findings) {
   if (previousNavigation !== nextNavigation && !rules.allowedChangeTypes.has("navigation")) {
     findings.push(finding("error", "UPGRADE_NAVIGATION_MUTATION_OUTSIDE_SCOPE", "Navigation changed outside declared upgrade scope."));
   }
+}
+
+function isInstalledFormNewReportsOmission(previous, next, rules) {
+  const isDashboardUpgrade = rules.upgradeType === "dashboard" || rules.upgradeType === "dashboard-only" || rules.allowedChangeTypes.has("dashboard");
+  if (!isDashboardUpgrade) return false;
+  if (rules.allowedChangeTypes.has("report") || rules.allowedChangeTypes.has("formnewreports")) return false;
+  const previousReports = asArray(previous?.FormNewReports);
+  const nextReports = asArray(next?.FormNewReports);
+  return previousReports.length > 0 && nextReports.length === 0;
 }
 
 function validateApprovalDefResourceScope(previous, next, rules, findings) {

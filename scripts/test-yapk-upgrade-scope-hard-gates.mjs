@@ -196,6 +196,29 @@ try {
   expectPass("report intentionally included with update-safe proof passes", "scripts/validate-yapk-upgrade-report-scope.mjs", ["--previous-package", previousFile, "--new-package", writeJson(tempDir, "with-reports-update-safe.json", withReports), "--scope", reportScope, "--report-proof", reportProof]);
   cases.push("pass: report intentionally included with update-safe proof");
 
+  const previousDashboardWithReport = clone(previous);
+  previousDashboardWithReport.FormNewReports = [{ ID: id(300), Title: "Asset Loan Request Approval Report", DefKey: "asset-loan-approval", Settings: { Fields: [{ FieldName: "Title" }] } }];
+  const dashboardRuntimeFix = clone(previousDashboardWithReport);
+  dashboardRuntimeFix.Pages[0].Title = "Asset Dashboard Runtime Fix";
+  dashboardRuntimeFix.FormNewReports = [];
+  const dashboardScopeFile = writeJson(tempDir, "dashboard-scope.json", scope({
+    upgradeType: "dashboard-only",
+    targetResourceType: "dashboard",
+    targetLists: [],
+    targetPages: [{ Title: "Asset Dashboard" }],
+    allowedResourceTypes: ["dashboard"],
+    allowedChanges: ["replace declared dashboard page"],
+    disallowedChanges: ["data-list", "approval", "workflow", "navigation", "report"],
+  }));
+  expectPass("dashboard-only runtime fix may omit unchanged installed FormNewReports", "scripts/validate-yapk-upgrade-scope.mjs", ["--previous-package", writeJson(tempDir, "previous-dashboard-with-report.json", previousDashboardWithReport), "--new-package", writeJson(tempDir, "dashboard-runtime-fix-omits-formreports.json", dashboardRuntimeFix), "--scope", dashboardScopeFile]);
+  cases.push("pass: dashboard-only runtime fix omits unchanged installed FormNewReports to avoid duplicate live creation");
+
+  const dashboardReportMutation = clone(previousDashboardWithReport);
+  dashboardReportMutation.Pages[0].Title = "Asset Dashboard Runtime Fix";
+  dashboardReportMutation.FormNewReports[0].Title = "Mutated Approval Report";
+  expectFail("dashboard-only upgrade mutating FormNewReports still fails", "scripts/validate-yapk-upgrade-scope.mjs", ["--previous-package", writeJson(tempDir, "previous-dashboard-with-report-mutation.json", previousDashboardWithReport), "--new-package", writeJson(tempDir, "dashboard-report-mutated.json", dashboardReportMutation), "--scope", dashboardScopeFile], "UPGRADE_DASHBOARD_ONLY_NON_DASHBOARD_RESOURCE_MUTATION|UPGRADE_OUT_OF_SCOPE_RESOURCE_MUTATION");
+  cases.push("fail: dashboard-only upgrade mutates FormNewReports instead of omitting unchanged installed reports");
+
   const dashboardChanged = clone(valid);
   dashboardChanged.Pages[0].Title = "Changed Dashboard";
   expectFail("field-only upgrade mutating dashboard fails", "scripts/validate-yapk-upgrade-scope.mjs", ["--previous-package", previousFile, "--new-package", writeJson(tempDir, "dashboard-changed.json", dashboardChanged), "--scope", scopeFile], "UPGRADE_OUT_OF_SCOPE_RESOURCE_MUTATION");
