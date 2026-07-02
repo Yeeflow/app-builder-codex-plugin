@@ -37,13 +37,28 @@ function templateResource(templateId, title) {
     templateMarker: templateId,
   };
   removeOperations(resource);
+  removeFixtureUnresolvedActions(resource);
   mapTemplateDataSources(resource);
   materializeEmptySlots(resource);
   pruneEmptyGeneratedSections(resource);
+  scrubFixtureTemplateResidue(resource);
   return resource;
 }
 
+function removeFixtureUnresolvedActions(resource) {
+  visit(resource, (control) => {
+    if (!control || typeof control !== "object") return;
+    if (control.attrs && typeof control.attrs === "object") {
+      delete control.attrs.control_action;
+      delete control.attrs.action;
+    }
+    delete control.control_action;
+    delete control.action;
+  });
+}
+
 function mapTemplateDataSources(resource) {
+  let leftPanelFilterIndex = 0;
   visit(resource, (control) => {
     const type = String(control?.type || "").toLowerCase();
     if (type === "collection" || type === "data-list") {
@@ -54,16 +69,25 @@ function mapTemplateDataSources(resource) {
       };
     }
     if (["select-filter", "radio-filter", "checkbox-filter", "data-filter"].includes(type)) {
+      const label = `${control.name || ""} ${control.title || ""} ${control.label || ""} ${control.nv_label || ""} ${control.attrs?.placeholder?.value || control.attrs?.placeholder || ""}`;
+      if (control.nv_label === "left_panel_filter_control") leftPanelFilterIndex += 1;
+      const field = control.nv_label === "left_panel_filter_control"
+        ? (leftPanelFilterIndex === 1 ? "Priority" : "Status")
+        : /\bpriority\b/i.test(label) ? "Priority" : /\bstatus\b/i.test(label) ? "Status" : "Status";
       control.attrs = control.attrs || {};
       control.attrs.data = {
         ...(control.attrs.data || {}),
-        field: control.attrs.data?.field || "Status",
-        display_f: control.attrs.data?.display_f || "Status",
-        value_f: control.attrs.data?.value_f || "Status",
+        field,
+        display_f: field,
+        value_f: field,
         list: { AppID: 41, ListSetID: "1909100000000000001", ListID: "1909100000000000100", Type: 1, Title: "Loan Transactions" },
       };
-      control.attrs.display_f = control.attrs.display_f || "Status";
-      control.attrs.value_f = control.attrs.value_f || "Status";
+      control.attrs.display_f = field;
+      control.attrs.value_f = field;
+      control.attrs.optionSourceProven = true;
+      control.attrs.data.optionSourceProven = true;
+      control.attrs["choice-options"] = field === "Priority" ? ["Low", "Medium", "High", "Critical"] : ["Open", "In Progress", "Resolved", "Closed"];
+      control.attrs.options = control.attrs["choice-options"].map((value) => ({ value, label: value }));
     }
   });
 }
@@ -91,6 +115,33 @@ function materializeEmptySlots(resource) {
   }
 }
 
+function scrubFixtureTemplateResidue(node) {
+  const replacements = [
+    ["Active Loans", "Active Records"],
+    ["active loans", "active records"],
+    ["current loan volume", "current record volume"],
+    ["return follow-up", "record follow-up"],
+    ["checkout status", "processing status"],
+    ["Office Asset records", "Loan Transaction records"],
+  ];
+  const rewrite = (value) => replacements.reduce((text, [from, to]) => text.replaceAll(from, to), value);
+  visitValue(node, (parent, key, value) => {
+    if (typeof value === "string" && key !== "id") parent[key] = rewrite(value);
+  });
+}
+
+function visitValue(value, fn, parent = null, key = null) {
+  if (Array.isArray(value)) {
+    value.forEach((child, index) => visitValue(child, fn, value, index));
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  for (const [childKey, childValue] of Object.entries(value)) {
+    fn(value, childKey, childValue);
+    visitValue(childValue, fn, value, childKey);
+  }
+}
+
 function decodedForPage(templateId, title = "Asset Loan Operations Dashboard") {
   return {
     ListSet: { ListID: "1909100000000000001", Title: "Office Asset Loan Management" },
@@ -100,7 +151,7 @@ function decodedForPage(templateId, title = "Asset Loan Operations Dashboard") {
       LayoutID: "dashboard-layout-1",
       LayoutInResources: [{ ID: "dashboard-layout-1", RefId: "dashboard-layout-1", Resource: JSON.stringify(templateResource(templateId, title)) }],
     }],
-    Childs: [{ List: { ListID: "1909100000000000100", Title: "Loan Transactions" }, Fields: [{ FieldName: "Title" }, { FieldName: "ListDataID" }] }],
+    Childs: [{ List: { ListID: "1909100000000000100", Title: "Loan Transactions" }, Fields: [{ FieldName: "Title" }, { FieldName: "ListDataID" }, { FieldName: "Status" }, { FieldName: "Priority" }] }],
     Forms: [],
     FormNewReports: [],
     DataReports: [],
@@ -202,9 +253,18 @@ function findAll(node, id) {
 function removeOperations(node) {
   if (!node || typeof node !== "object") return;
   if (Array.isArray(node.children)) {
-    node.children = node.children.filter((child) => !ids(child).includes("Operations"));
+    node.children = node.children.filter((child) => !isOperationContainer(child));
     node.children.forEach(removeOperations);
   }
+}
+
+function isOperationContainer(node) {
+  return ids(node).some((id) => [
+    "Operations",
+    "current_item_main_header_operations",
+    "current_item_aditional_header_operations",
+    "current_item_additional_header_operations",
+  ].includes(id));
 }
 
 function hasBusinessContent(node) {

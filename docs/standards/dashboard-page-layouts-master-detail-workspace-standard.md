@@ -14,7 +14,15 @@ Use these templates when a Dashboard focuses on one primary source dataset and u
 - `docs/reference/dashboard-page-layout-two-panel-workspace.template.json`
 - `docs/reference/dashboard-page-layout-three-panel-workspace.template.json`
 
-Both templates are registered in `docs/reference/dashboard-page-layout-templates.json` and must be selected explicitly in the App Plan.
+Both templates are registered in `docs/reference/dashboard-page-layout-templates.json` and must be selected explicitly in the App Plan. The canonical source exports are Dashboard `.ydp` files. A `.ydp` Dashboard export is JSON with page metadata (`AppID`, `ListID`, `LayoutID`, `Type`, `Title`, `Ext1`, `Ext2`, `Ext3`, and related flags) plus a stringified `LayoutView` value. Plugin training and template refreshes must parse `LayoutView` and use that parsed page resource as the golden reference template body; the outer `.ydp` app/list/layout IDs are export-instance metadata and must not be copied into generated applications.
+
+The current master-detail workspace YDP refresh requires:
+
+- `left_panel` custom width `attrs.style.width` = `[null, 520]`.
+- `left_panel_caption_title_wrapper` contains `left_panel_caption_icon_wrapper` and `left_panel_caption_title`.
+- `left_panel_caption_icon_wrapper` contains editable `left_panel_caption_icon`.
+- `left_panel_sidebar` is placed in `current_item_main_header_left`, not in `left_panel_caption_title_wrapper`.
+- `current_item_main_header_operations` contains the generic `current_item_main_header_operations_button` slot plus the named current-record operation slots `current_item_main_header_edit_item_button` and `current_item_main_header_delete_item_button`.
 
 ## Selection Rules
 
@@ -58,6 +66,8 @@ The empty-selection state is editable business content:
 
 The following regions may be edited or populated according to the App Plan:
 
+- `left_panel_caption_icon_wrapper`
+- `left_panel_caption_icon`
 - `left_panel_caption_title`
 - `left_panel_caption_add_button`
 - `left_panel_filter_group`
@@ -68,6 +78,8 @@ The following regions may be edited or populated according to the App Plan:
 - `current_item_main_header_operations`
 - `current_item_main_header_operations_button`
 - `current_item_main_header_operations_button_icon`
+- `current_item_main_header_edit_item_button`
+- `current_item_main_header_delete_item_button`
 - `page_title_header`
 - `current_item_subject`
 - `page_title_description`
@@ -108,6 +120,8 @@ The three-panel template also allows:
 
 All other template controls, page temp variables, form actions, layout relationships, and structural style settings must remain template-faithful.
 
+`left_panel_caption_icon` must be rewritten to a business-appropriate FontAwesome icon for the left-panel source dataset. For example, tickets should use a service/helpdesk icon, projects should use a project/briefcase icon, documents should use a file/folder icon, and customers/accounts should use a building/user-group icon. Preserve the Icon control structure and style from the template; only the icon value is business-editable.
+
 ## Filters And Operations
 
 `left_panel_filter_group` is a filter grouping container. Each group should contain no more than two Data Filter controls. If more filters are needed, duplicate another `left_panel_filter_group`.
@@ -119,6 +133,14 @@ Left-panel choice filters must also carry a proven option source. For Choice/sel
 `left_panel_caption_add_button` may be retained only when the left-panel source supports creating new records, such as a Data list or Document library. When the primary source is a Form report, Data report, or another read-only/reporting source, remove `left_panel_caption_add_button` and its action instead of leaving a visual-only Add button.
 
 `Operations` and operation containers may exist only when they contain real configured action controls. Every generated control that carries `attrs.control_action`, `attrs.action`, `control_action`, or `action` must resolve to a page-level `actions[]` / `formAction[]` entry or to the nearest Collection/Kanban local action list. If a copied operation button, search icon, add button, sidebar toggle, or header icon cannot be resolved after template cloning and namespacing, remove that control and then clean up any now-empty operation container.
+
+Inside `current_item_main_header_operations`, the named slots have distinct meanings:
+
+- `current_item_main_header_edit_item_button` is the optional current selected record edit action. Keep it only when the Dashboard generates a valid edit-current-item action for the selected source record.
+- `current_item_main_header_delete_item_button` is the optional current selected record delete action. Keep it only when the Dashboard generates a valid delete-current-item action, including any required confirmation flow.
+- `current_item_main_header_operations_button` is the generic current selected record operation slot. It may be removed when no extra operation is needed, or duplicated when multiple non-edit/delete operations are planned. Every retained copy must have a resolved action binding and a business-appropriate icon.
+
+If no current selected record operations are planned, remove `current_item_main_header_operations` and its now-empty parent operation region rather than leaving visual-only buttons.
 
 Generated master-detail workspace pages must be domain-clean. Do not retain copied source-template business copy such as `Office Asset`, `Active Loan Pipeline`, `current loan volume`, `return activity signal`, or loan-domain guidance on non-loan applications. Map copied text to the current domain only when the section has real planned business content; otherwise remove the copied section/module.
 

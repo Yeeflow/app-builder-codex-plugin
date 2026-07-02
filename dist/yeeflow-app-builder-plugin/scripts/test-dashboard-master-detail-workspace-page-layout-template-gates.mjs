@@ -211,6 +211,12 @@ function writePackage(dir, name, data) {
   return file;
 }
 
+function writeJson(dir, name, data) {
+  const file = path.join(dir, `${name}.json`);
+  fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
+  return file;
+}
+
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -239,6 +245,17 @@ function findAll(node, id) {
     if (ids(current).includes(id)) found.push(current);
   });
   return found;
+}
+
+function removeFirstByIdentity(node, id) {
+  if (!node || typeof node !== "object" || !Array.isArray(node.children)) return null;
+  const index = node.children.findIndex((child) => ids(child).includes(id));
+  if (index !== -1) return node.children.splice(index, 1)[0];
+  for (const child of node.children) {
+    const removed = removeFirstByIdentity(child, id);
+    if (removed) return removed;
+  }
+  return null;
 }
 
 function visibleText(node) {
@@ -280,14 +297,45 @@ try {
   expectPass("registry includes master-detail workspace Dashboard templates", ["--registry", "docs/reference/dashboard-page-layout-templates.json"]);
 
   for (const templateId of TEMPLATE_IDS) {
+    const missingEditSlotRegistry = registry();
+    removeFirstByIdentity(missingEditSlotRegistry.templates.find((entry) => entry.id === templateId).template.parsedResource, "current_item_main_header_edit_item_button");
+    expectCode(`${templateId} registry template without edit slot fails`, ["--registry", writeJson(tempDir, `${templateId}-registry-missing-edit-slot`, missingEditSlotRegistry)], "DASH_LAYOUT_TEMPLATE_CURRENT_ITEM_MAIN_HEADER_EDIT_BUTTON_MISSING");
+
+    const missingDeleteSlotRegistry = registry();
+    removeFirstByIdentity(missingDeleteSlotRegistry.templates.find((entry) => entry.id === templateId).template.parsedResource, "current_item_main_header_delete_item_button");
+    expectCode(`${templateId} registry template without delete slot fails`, ["--registry", writeJson(tempDir, `${templateId}-registry-missing-delete-slot`, missingDeleteSlotRegistry)], "DASH_LAYOUT_TEMPLATE_CURRENT_ITEM_MAIN_HEADER_DELETE_BUTTON_MISSING");
+
     const valid = workspaceTemplate(templateId);
     expectPass(`${templateId} generated package preserves master-detail shell`, ["--package", writePackage(tempDir, `${templateId}-valid`, decoded(valid))]);
+
+    const badLeftPanelWidth = workspaceTemplate(templateId);
+    find(badLeftPanelWidth, "left_panel").attrs.style.width = [null, 620];
+    expectCode(`${templateId} left_panel 620px width fails`, ["--package", writePackage(tempDir, `${templateId}-left-panel-width-620`, decoded(badLeftPanelWidth))], "DASH_LAYOUT_RESOURCE_LEFT_PANEL_WIDTH_INVALID");
+
+    const missingCaptionIcon = workspaceTemplate(templateId);
+    removeFirstByIdentity(missingCaptionIcon, "left_panel_caption_icon_wrapper");
+    expectCode(`${templateId} without left_panel_caption_icon_wrapper fails`, ["--package", writePackage(tempDir, `${templateId}-missing-caption-icon`, decoded(missingCaptionIcon))], "DASH_LAYOUT_RESOURCE_LEFT_PANEL_CAPTION_ICON_WRAPPER_MISSING");
+
+    const misplacedSidebar = workspaceTemplate(templateId);
+    const sidebar = removeFirstByIdentity(misplacedSidebar, "left_panel_sidebar");
+    find(misplacedSidebar, "left_panel_caption_title_wrapper").children.unshift(sidebar);
+    expectCode(`${templateId} sidebar under left caption title wrapper fails`, ["--package", writePackage(tempDir, `${templateId}-sidebar-caption-placement`, decoded(misplacedSidebar))], "DASH_LAYOUT_RESOURCE_LEFT_PANEL_SIDEBAR_PLACEMENT_INVALID");
 
     const unresolvedAction = workspaceTemplate(templateId);
     const titleHeader = find(unresolvedAction, "page_title_header");
     titleHeader.children = titleHeader.children || [];
     titleHeader.children.push({ type: "container", nv_label: "bad_operation_button", attrs: { control_action: "missing_action" }, children: [] });
     expectCode(`${templateId} unresolved page control action fails`, ["--package", writePackage(tempDir, `${templateId}-unresolved-action`, decoded(unresolvedAction))], "DASH_LAYOUT_RESOURCE_CONTROL_ACTION_UNRESOLVED");
+
+    const visualOnlyCurrentOperations = workspaceTemplate(templateId);
+    const headerRight = find(visualOnlyCurrentOperations, "current_item_main_header_right");
+    headerRight.children = headerRight.children || [];
+    headerRight.children.push({
+      type: "container",
+      nv_label: "current_item_main_header_operations",
+      children: [{ type: "container", nv_label: "current_item_main_header_edit_item_button", children: [] }],
+    });
+    expectCode(`${templateId} current item operation container without action fails`, ["--package", writePackage(tempDir, `${templateId}-visual-only-current-ops`, decoded(visualOnlyCurrentOperations))], "DASH_LAYOUT_OPERATIONS_WITHOUT_ACTIONS");
 
     const badFilterField = workspaceTemplate(templateId);
     const statusFilter = findAll(badFilterField, "left_panel_filter_control").find((filter) => /status/i.test(JSON.stringify(filter)));
@@ -317,7 +365,7 @@ try {
   ensureChartSections(tooManyCharts, 4);
   expectCode("too many analytics in chart_cards_section fails for master-detail workspace", ["--package", writePackage(tempDir, "too-many-charts", decoded(tooManyCharts))], "DASH_LAYOUT_CHART_CARDS_SECTION_TOO_MANY_ANALYTICS");
 
-  console.log(JSON.stringify({ status: "pass", templates: TEMPLATE_IDS.length, cases: 10 }, null, 2));
+  console.log(JSON.stringify({ status: "pass", templates: TEMPLATE_IDS.length, cases: 22 }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
