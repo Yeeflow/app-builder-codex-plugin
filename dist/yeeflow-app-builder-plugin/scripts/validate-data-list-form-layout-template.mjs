@@ -690,9 +690,26 @@ function parsePlannedDataLists(text) {
   const section = extractSection(text, /^##\s+4\.\s+Data Lists and Document Libraries Plan/im);
   if (!section.trim()) return [];
   const names = [];
+  const lines = section.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^\s*\|.+\|\s*$/.test(lines[index] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1] || "")) continue;
+    const headers = splitTableLine(lines[index]).map((header) => norm(header));
+    const listColumn = headers.findIndex((header) => ["list", "data list", "list name", "data list name", "document library name"].includes(header));
+    if (listColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && /^\s*\|.+\|\s*$/.test(lines[rowIndex] || "")) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const name = cleanName(cells[listColumn]);
+      if (name && !isPlaceholderName(name)) names.push(name);
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  if (names.length) return unique(names);
   for (const match of section.matchAll(/^###\s+4\.[x0-9]+\s+(.+?)\s*$/gim)) {
     const name = cleanName(match[1]);
     if (!name || isPlaceholderName(name)) continue;
+    if (/\b(?:schema|field|fields|table|selection|template|view|views)\b/i.test(name)) continue;
     names.push(name);
   }
   return unique(names);

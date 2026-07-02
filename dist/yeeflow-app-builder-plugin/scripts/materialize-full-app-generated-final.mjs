@@ -494,7 +494,7 @@ function escapeRegExp(value) {
 
 function analyzeAppPlanResourceDemand(planText) {
   const sections = [
-    { key: "dataLists", marker: /^##\s+4\.\s+Data Lists and Document Libraries Plan/im, tableHeaders: ["List Name", "Data List Name", "Document Library Name"], outputSurface: "$.Childs[]" },
+    { key: "dataLists", marker: /^##\s+4\.\s+Data Lists and Document Libraries Plan/im, tableHeaders: ["List Name", "Data List Name", "Document Library Name", "List", "Data List"], outputSurface: "$.Childs[]" },
     { key: "approvalForms", marker: /^##\s+5\.\s+Approval Forms Plan/im, tableHeaders: ["Approval Form Name", "Form Name"], outputSurface: "$.Forms[]" },
     { key: "formReports", marker: /^##\s+6\.\s+Form Reports Plan/im, tableHeaders: ["Form Report Name"], outputSurface: "$.FormNewReports[]" },
     { key: "customForms", marker: /^##\s+10\.\s+Custom Data List Forms Plan/im, tableHeaders: ["Form Name"], outputSurface: "$.Childs[].Layouts[]" },
@@ -808,29 +808,42 @@ function collectDataListFieldSpecs(planText) {
     if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
-    const displayColumn = findHeaderIndex(normalizedHeaders, ["display name", "field display name", "business field", "field name", "name"]);
-    const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "internal name", "field id", "fieldname"]);
+    const listColumn = findHeaderIndex(normalizedHeaders, ["list", "data list", "data list name", "list name", "document library", "source list"]);
+    const displayColumn = findHeaderIndex(normalizedHeaders, ["display name", "field display name", "business field", "field name", "field label", "label", "name"]);
+    const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "internal name", "internal field", "field id", "fieldname"]);
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "yeeflow field type", "field type", "business type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "yeeflow type", "control type", "control"]);
     const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "values"]);
+    const purposeColumn = findHeaderIndex(normalizedHeaders, ["purpose", "business purpose", "description", "notes"]);
     if (displayColumn === -1 || fieldTypeColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
+      const rowList = listColumn === -1 ? currentList : cleanResourceName(cells[listColumn]);
+      if (!rowList || isNonResourceName(rowList)) {
+        rowIndex += 1;
+        continue;
+      }
+      if (!byList[normKey(rowList)]) byList[normKey(rowList)] = [];
       const displayName = cleanResourceName(cells[displayColumn]);
       if (!displayName || isNonFieldName(displayName)) {
         rowIndex += 1;
         continue;
       }
       const fieldType = cleanResourceName(cells[fieldTypeColumn]) || "Text";
-      const controlType = controlTypeColumn === -1 ? "" : cleanResourceName(cells[controlTypeColumn]);
-      const fieldName = cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, fieldType, byList[normKey(currentList)].length);
-      byList[normKey(currentList)].push({
+      const purpose = purposeColumn === -1 ? "" : cleanResourceName(cells[purposeColumn]);
+      const purposeChoiceValues = choiceValuesFromPurpose({ displayName, fieldType, purpose });
+      const choiceValues = choiceColumn === -1 ? purposeChoiceValues : cleanResourceName(cells[choiceColumn]) || purposeChoiceValues;
+      const explicitControlType = controlTypeColumn === -1 ? "" : cleanResourceName(cells[controlTypeColumn]);
+      const controlType = explicitControlType || inferControlTypeFromFieldPlan({ displayName, fieldType, choiceValues });
+      const fieldName = cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, fieldType, byList[normKey(rowList)].length);
+      byList[normKey(rowList)].push({
         displayName,
         fieldName,
         fieldType,
         controlType,
-        choiceValues: choiceColumn === -1 ? "" : cleanResourceName(cells[choiceColumn]),
+        choiceValues,
+        lookupTarget: lookupTargetFromPurpose(purpose),
       });
       rowIndex += 1;
     }
@@ -1289,7 +1302,7 @@ function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = 
   const headingNames = [...section.matchAll(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/gim)]
     .map((match) => cleanResourceName(match[1]))
     .filter((name) => !isNonResourceName(name));
-  if (headingNames.length && key !== "customForms" && key !== "dashboards") return unique(headingNames);
+  if (headingNames.length && key !== "customForms" && key !== "dashboards" && key !== "dataLists") return unique(headingNames);
 
   if (key === "dashboards") {
     const pageNames = [...section.matchAll(/^-\s*Page name:\s*(.+?)\s*$/gim)]
@@ -1320,13 +1333,17 @@ function collectPlannedResourceNames(section, { tableHeaders = [], key = "" } = 
 
   const tableNames = [];
   for (const table of parseMarkdownTables(section)) {
-    const nameHeader = tableHeaders.find((header) => table.headers.includes(header));
-    if (!nameHeader) continue;
+    const normalizedHeaders = table.headers.map((header) => normKey(header));
+    const nameColumn = findHeaderIndex(normalizedHeaders, tableHeaders);
+    if (nameColumn === -1) continue;
+    const nameHeader = table.headers[nameColumn];
     for (const row of table.rows) {
       const name = cleanResourceName(row[nameHeader]);
       if (!isNonResourceName(name)) tableNames.push(name);
     }
   }
+  if (tableNames.length) return unique(tableNames);
+  if (key === "dataLists") return unique(headingNames.filter((name) => !/\b(?:schema|field|fields|table|selection|template|view|views)\b/i.test(name)));
   return unique(tableNames);
 }
 
@@ -1414,6 +1431,7 @@ function fieldSpecsForList(planDemand, listName) {
       fieldType,
       controlType: cleanResourceName(field.controlType) || inferControlType(field.fieldType),
       choiceValues: cleanResourceName(field.choiceValues),
+      lookupTarget: cleanResourceName(field.lookupTarget),
     });
   };
   add({ displayName: "Title", fieldName: "Title", fieldType: "Text", controlType: "input" });
@@ -1627,13 +1645,13 @@ function isWorkbenchCustomForm(record) {
   return /\bworkbench\b/.test(text) || text.includes("data_list_form_layout_workbench");
 }
 
-function buildFieldRecord({ field, fieldIndex, listId, fieldId }) {
+function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetListId = "" }) {
   const fieldType = normalizeFieldType(field.fieldType);
   const type = controlTypeForFieldType(field, fieldType);
   const isTitle = fieldIndex === 0 || /^title$/i.test(field.fieldName);
   const fieldName = isTitle ? "Title" : schemaSafeFieldName(field.fieldName) || `${fieldPrefix(field.fieldType || fieldType)}${fieldIndex}`;
   const schemaFieldIndex = isTitle ? 0 : fieldIndexFromName(fieldName) || fieldIndex;
-  const rules = buildFieldRules({ field, type });
+  const rules = buildFieldRules({ field, type, lookupTargetListId });
   return {
     FieldID: fieldId,
     ListID: listId,
@@ -1824,7 +1842,17 @@ function fieldNavLabel(field) {
   return `field_${slugify(field?.FieldName || field?.DisplayName || "field")}`.replace(/-/g, "_");
 }
 
-function buildFieldRules({ field, type }) {
+function buildFieldRules({ field, type, lookupTargetListId = "" }) {
+  if (type === "lookup") {
+    if (!lookupTargetListId) return "";
+    return JSON.stringify({
+      listid: stringId(lookupTargetListId),
+      listfield: "Title",
+      displayField: "Title",
+      fieldName: "Title",
+      listtype: "select",
+    });
+  }
   const choiceTypes = new Set(["select", "radio", "checkbox", "tag"]);
   if (!choiceTypes.has(type)) return "";
   const values = (String(field.choiceValues || "")
@@ -1998,6 +2026,9 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
   const dataListByName = new Map();
   const listMetaByName = new Map();
   const allCustomFormAssignments = assignAllCustomFormLayoutPositions(planDemand, dataListNames);
+  dataListNames.forEach((name, index) => {
+    dataListByName.set(normKey(name), stringId(ids[`decoded.Childs[${index}].List.ListID`]));
+  });
   const childs = dataListNames.map((name, index) => {
     const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
     dataListByName.set(normKey(name), listId);
@@ -2007,6 +2038,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       fieldIndex,
       listId,
       fieldId: stringId(ids[`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`]),
+      lookupTargetListId: resolveLookupTargetListId(field, dataListByName),
     }));
     const customLayoutsForList = allCustomFormAssignments.filter((assignment) => assignment.listIndex === index);
     const layouts = [
@@ -5811,14 +5843,63 @@ function fieldPrefix(fieldType) {
 
 function inferControlType(fieldType) {
   const normalized = normKey(fieldType);
-  if (/user|people|person/.test(normalized)) return "identity-picker";
+  if (/user|people|person|identity/.test(normalized)) return "identity-picker";
   if (/date|time/.test(normalized)) return "datepicker";
   if (/number|decimal|currency|amount|percent|integer/.test(normalized)) return "input_number";
   if (/boolean|yes no|checkbox|bit/.test(normalized)) return "switch";
   if (/choice|select|status|category/.test(normalized)) return "select";
+  if (/lookup|reference|relation/.test(normalized)) return "lookup";
   if (/file|attachment/.test(normalized)) return "file-upload";
   if (/image|photo|picture/.test(normalized)) return "icon-upload";
+  if (/text ?area|textarea|multi line|multiline|long text|description/.test(normalized)) return "textarea";
   return "input";
+}
+
+function inferControlTypeFromFieldPlan({ displayName, fieldType, choiceValues }) {
+  if (String(choiceValues || "").trim()) return "select";
+  return inferControlType(fieldType || displayName || "");
+}
+
+function choiceValuesFromPurpose({ displayName, fieldType, purpose }) {
+  const rawPurpose = cleanResourceName(purpose);
+  if (!rawPurpose || !/[,;/]/.test(rawPurpose)) return "";
+  const fieldText = normKey(`${displayName || ""} ${fieldType || ""}`);
+  if (!/(priority|status|state|category|type|choice|select|severity|urgency|stage|phase)/.test(fieldText)) return "";
+  const normalizedPurpose = rawPurpose
+    .replace(/\b(?:e\.g\.|eg|values?|options?|choices?|includes?|such as|one of|allowed|supports?)\b[:：]?\s*/gi, "")
+    .replace(/\.$/, "");
+  const values = normalizedPurpose
+    .split(/[,;/]+|\s+\bor\b\s+/i)
+    .map((value) => cleanResourceName(value).replace(/^(and|or)\s+/i, "").trim())
+    .filter((value) => value && value.length <= 40 && !/[.]/.test(value));
+  return unique(values).slice(0, 12).join(", ");
+}
+
+function lookupTargetFromPurpose(purpose) {
+  const match = cleanResourceName(purpose).match(/\blookup\s+(?:to|for|of)\s+(.+?)\s*$/i);
+  if (!match) return "";
+  return cleanResourceName(match[1]).replace(/[.;:]$/, "");
+}
+
+function resolveLookupTargetListId(field, dataListByName) {
+  const controlType = inferControlTypeFromFieldPlan({
+    displayName: field?.displayName,
+    fieldType: field?.fieldType,
+    choiceValues: field?.choiceValues,
+  });
+  if (normalizeControlType(field?.controlType || controlType) !== "lookup") return "";
+  const candidates = [
+    field?.lookupTarget,
+    field?.displayName,
+    `${field?.displayName || ""}s`,
+  ].map((value) => normKey(value)).filter(Boolean);
+  for (const candidate of candidates) {
+    if (dataListByName.has(candidate)) return dataListByName.get(candidate);
+    const singular = candidate.replace(/s$/, "");
+    const match = [...dataListByName.entries()].find(([name]) => name === singular || name.replace(/s$/, "") === singular);
+    if (match) return match[1];
+  }
+  return "";
 }
 
 function normalizeFieldType(fieldType) {
@@ -5839,6 +5920,7 @@ function normalizeControlType(controlType) {
   if (/switch|bit|boolean|yes no|flag/.test(normalized)) return "switch";
   if (/checkbox/.test(normalized)) return "checkbox";
   if (/select|choice|dropdown/.test(normalized)) return "select";
+  if (/lookup|reference|relation/.test(normalized)) return "lookup";
   if (/file|attachment/.test(normalized)) return "file-upload";
   if (/image|photo|picture|icon/.test(normalized)) return "icon-upload";
   if (/note|textarea|multi line/.test(normalized)) return "textarea";

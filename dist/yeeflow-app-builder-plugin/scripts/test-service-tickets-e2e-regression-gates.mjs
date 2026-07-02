@@ -26,36 +26,30 @@ Approved for generated-final validation.
 
 ## 4. Data Lists and Document Libraries Plan
 
-### 4.1 Tickets
-#### Fields
-| Order | Display Name | Internal Name | Business Type | Yeeflow Type | Choices |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Ticket Number | Text1 | Text | input | |
-| 2 | Subject | Text2 | Text | input | |
-| 3 | Requester | Text4 | User identity | identity-picker | Existing system user |
-| 4 | Category | Text3 | Choice | select | Hardware, Software, Access |
-| 5 | Priority | Text7 | Choice | select | Low, Medium, High, Critical |
-| 6 | Status | Text5 | Choice | select | Open, In Progress, Resolved, Closed |
-| 7 | Assigned Agent | Text8 | User identity | identity-picker | Existing system user |
-| 8 | Created Date | Datetime1 | Datetime | datepicker | |
-| 9 | Due Date | Datetime2 | Datetime | datepicker | |
-| 10 | Description | Text6 | Text | textarea | |
+### 4.1 Data List Schema Table
 
-### 4.2 Ticket Comments
-#### Fields
-| Order | Display Name | Internal Name | Business Type | Yeeflow Type | Choices |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Comment | Text1 | Text | textarea | |
-| 2 | Ticket | Lookup1 | Text | lookup | |
-| 3 | Commented By | Text4 | User identity | identity-picker | |
-
-### 4.3 Ticket Attachments
-#### Fields
-| Order | Display Name | Internal Name | Business Type | Yeeflow Type | Choices |
-| --- | --- | --- | --- | --- | --- |
-| 1 | File | File1 | Text | file-upload | |
-| 2 | Ticket | Lookup1 | Text | lookup | |
-| 3 | Uploaded By | Text4 | User identity | identity-picker | |
+| List | Field label | Internal field | Field type | Purpose |
+| --- | --- | --- | --- | --- |
+| Tickets | Title | Title | Text | Native title mirrors Subject |
+| Tickets | Ticket Number | Text1 | Text | Ticket identifier |
+| Tickets | Subject | Text2 | Text | Primary visible title |
+| Tickets | Requester | Text4 | identity-picker | Existing Yeeflow user |
+| Tickets | Category | Text3 | Text | Access, Hardware, Software |
+| Tickets | Priority | Text7 | Text | Low, Medium, High, Critical |
+| Tickets | Status | Text5 | Text | Open, In Progress, Resolved, Closed |
+| Tickets | Assigned Agent | Text8 | identity-picker | Existing Yeeflow user |
+| Tickets | Created Date | Datetime1 | DateTime | Created date |
+| Tickets | Due Date | Datetime2 | DateTime | SLA due date |
+| Tickets | Description | Text6 | TextArea | Ticket description |
+| Ticket Comments | Title | Title | Text | Comment title |
+| Ticket Comments | Ticket | Text2 | Lookup | Lookup to Tickets |
+| Ticket Comments | Comment | Text1 | TextArea | Comment text |
+| Ticket Comments | Commented By | Text4 | identity-picker | Existing Yeeflow user |
+| Ticket Comments | Comment Date | Datetime1 | DateTime | Comment date |
+| Ticket Attachments | Title | Title | Text | Attachment title |
+| Ticket Attachments | Ticket | Text2 | Lookup | Lookup to Tickets |
+| Ticket Attachments | File | Text3 | File | Uploaded file |
+| Ticket Attachments | Uploaded By | Text4 | identity-picker | Existing Yeeflow user |
 
 ## 5. Approval Forms Plan
 Not planned.
@@ -132,6 +126,7 @@ const { decoded } = readDecodedYapk(packagePath);
 const tickets = decoded.Childs.find((child) => child.List.Title === "Tickets");
 assert.ok(tickets, "Tickets data list must materialize");
 const ticketFields = new Map(tickets.Fields.map((field) => [field.DisplayName, field]));
+assert.equal(ticketFields.get("Ticket Number")?.Type, "input", "Ticket Number is a Text identifier and must not be inferred as a numeric input.");
 assert.equal(ticketFields.get("Status")?.FieldName, "Text5", "Status field must preserve its planned field key");
 assert.equal(ticketFields.get("Status")?.Type, "select", "Status field must remain a selectable choice field");
 assert.match(ticketFields.get("Requester")?.FieldName || "", /^Text\d+$/, "Requester must materialize on a schema-safe Text-backed storage field");
@@ -149,6 +144,14 @@ assert.ok(comments, "Ticket Comments data list must materialize");
 assert.ok(attachments, "Ticket Attachments data list must materialize");
 const commentFields = new Map(comments.Fields.map((field) => [field.DisplayName, field]));
 const attachmentFields = new Map(attachments.Fields.map((field) => [field.DisplayName, field]));
+const commentTicketLookupRules = JSON.parse(commentFields.get("Ticket")?.Rules || "{}");
+const attachmentTicketLookupRules = JSON.parse(attachmentFields.get("Ticket")?.Rules || "{}");
+assert.equal(commentFields.get("Ticket")?.Type, "lookup", "Ticket Comments lookup field must materialize as a lookup control");
+assert.equal(commentTicketLookupRules.listid, tickets.List.ListID, "Ticket Comments lookup must target the Tickets list");
+assert.equal(commentTicketLookupRules.listfield, "Title", "Ticket Comments lookup must use a runtime-resolvable display field");
+assert.equal(attachmentFields.get("Ticket")?.Type, "lookup", "Ticket Attachments lookup field must materialize as a lookup control");
+assert.equal(attachmentTicketLookupRules.listid, tickets.List.ListID, "Ticket Attachments lookup must target the Tickets list");
+assert.equal(attachmentTicketLookupRules.listfield, "Title", "Ticket Attachments lookup must use a runtime-resolvable display field");
 assert.match(commentFields.get("Commented By")?.FieldName || "", /^Text\d+$/, "Commented By must materialize on a schema-safe Text-backed storage field");
 assert.equal(commentFields.get("Commented By")?.FieldType, "Text", "Commented By must use canonical Text storage for identity-picker fields");
 assert.equal(commentFields.get("Commented By")?.Type, "identity-picker", "Commented By must use identity-picker control type");
@@ -226,6 +229,7 @@ console.log(JSON.stringify({
   cases: [
     "planned Status field preserved",
     "planned user/person fields preserved as Text-backed identity-picker controls",
+    "planned lookup fields resolve to their target list and display field",
     "Summary Metrics not generated as Dashboard",
     "two-panel Dashboard layout matches App Plan selection",
     "left-panel Priority/Status filters use proven option sources",

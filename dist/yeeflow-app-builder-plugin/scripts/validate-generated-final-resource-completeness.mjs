@@ -145,11 +145,14 @@ function parseDataListViews(text) {
 
 function parseDataListHeadings(text) {
   const section = extractSection(text, /^##\s+4\.\s+Data Lists and Document Libraries Plan/i);
-  const headingItems = [...section.matchAll(/^###\s+4\.[x0-9]+\s+(.+?)\s*$/gim)].map((match) => plannedItem(match[1], section, match.index, "dataLists"));
-  if (headingItems.length) return headingItems;
-  return parseMarkdownTables(section)
-    .filter((table) => table.headers.includes("List Name") || table.headers.includes("Data List Name") || table.headers.includes("Document Library Name"))
-    .flatMap((table) => table.rows.map((row) => plannedItem(row["List Name"] || row["Data List Name"] || row["Document Library Name"], section, row.__index, "dataLists")));
+  const tableItems = parseMarkdownTables(section)
+    .filter((table) => table.headers.includes("List Name") || table.headers.includes("Data List Name") || table.headers.includes("Document Library Name") || table.headers.includes("List") || table.headers.includes("Data List"))
+    .flatMap((table) => table.rows.map((row) => plannedItem(row["List Name"] || row["Data List Name"] || row["Document Library Name"] || row.List || row["Data List"], section, row.__index, "dataLists")));
+  if (tableItems.length) return uniqueByName(tableItems);
+  const headingItems = [...section.matchAll(/^###\s+4\.[x0-9]+\s+(.+?)\s*$/gim)]
+    .map((match) => plannedItem(match[1], section, match.index, "dataLists"))
+    .filter((item) => !/\b(?:schema|field|fields|table|selection|template|view|views)\b/i.test(item.name));
+  return headingItems;
 }
 
 function parseApprovalForms(text) {
@@ -698,6 +701,18 @@ function uniqueByNorm(values) {
     if (!key || seen.has(key)) continue;
     seen.add(key);
     out.push(value);
+  }
+  return out;
+}
+
+function uniqueByName(items) {
+  const seen = new Set();
+  const out = [];
+  for (const item of items) {
+    const key = norm(item?.name);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
   }
   return out;
 }
