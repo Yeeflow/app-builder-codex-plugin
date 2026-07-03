@@ -111,6 +111,7 @@ const hardGateScripts = [
   "scripts/test-yeeflow-control-property-knowledge-base.mjs",
   "scripts/test-installed-cache-root-path-alignment.mjs",
   "scripts/test-custom-code-surface-contract-gates.mjs",
+  "scripts/test-custom-service-contract-gates.mjs",
   "scripts/test-repo-root-hygiene.mjs",
 ];
 
@@ -147,6 +148,7 @@ const requiredDocs = [
   "docs/standards/approval-workflow-publish-readiness-standard.md",
   "docs/standards/workflow-layout-golden-reference-standard.md",
   "docs/standards/custom-code-form-action-step-runtime-standard.md",
+  "docs/standards/custom-service-nodejs22-runtime-standard.md",
   "docs/standards/full-app-generation-entrypoint-standard.md",
   "docs/standards/yapk-live-install-readiness-standard.md",
   "docs/standards/dashboard-page-layouts-v1.1-standard.md",
@@ -224,6 +226,7 @@ const requiredDocs = [
   "docs/training/generated-final-preflight-app-plan-runtime-alignment-training-report.md",
   "docs/training/dashboard-deep-id-remap-provenance-training-report.md",
   "docs/training/custom-code-control-form-action-step-contract-training-report.md",
+  "docs/training/custom-service-nodejs22-ycs-training-report.md",
   "docs/reference/application-control-style-golden-references.json",
   "docs/reference/application-control-style-soft-outline-controls.template.json",
   "docs/reference/dashboard-golden-references.json",
@@ -249,6 +252,7 @@ const requiredDocs = [
   "docs/reference/approval-form-layout-submission.template.json",
   "docs/reference/approval-form-layout-task.template.json",
   "docs/reference/workflow-layout-golden-references.json",
+  "docs/reference/custom-service-ycs-examples.normalized.json",
   "docs/reference/approval-form-field-layout-templates.json",
   "docs/reference/approval-form-fields-grid-2col.template.json",
   "docs/reference/approval-form-fields-grid-3col.template.json",

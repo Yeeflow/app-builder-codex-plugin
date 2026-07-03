@@ -1,0 +1,68 @@
+{
+  "proofBoundary": "export-proven-normalized-summary",
+  "examples": [
+    {
+      "fileName": "Insert Excel Data to Data List.ycs",
+      "name": "Insert Excel Data to Data List",
+      "description": "Reads an uploaded Excel file, maps columns to target data list fields, creates records in batch, and returns the number of added records.",
+      "topLevelKeys": ["Description", "DraftCode", "DraftConfig", "ExtData", "ImplType", "Name"],
+      "implType": 0,
+      "extData": null,
+      "draftConfig": {
+        "params": [
+          { "id": "Excel file", "type": "file" },
+          { "id": "Data List ID", "type": "text" },
+          { "id": "Mapping JSON", "type": "text" }
+        ],
+        "connections": [],
+        "outputs": [
+          { "id": "Added Number", "type": "number" }
+        ]
+      },
+      "draftCodePattern": {
+        "entrypoint": "export async function main({connections, params, modules}: ServiceContext)",
+        "usesParams": ["Excel file", "Data List ID", "Mapping JSON"],
+        "usesModules": [
+          "modules.yeeSDKClient.files.getContent",
+          "modules.loadScript",
+          "modules.yeeSDKClient.lists.getFields",
+          "modules.yeeSDKClient.lists.createItemsBatch"
+        ],
+        "returns": ["Added Number"]
+      }
+    },
+    {
+      "fileName": "Sub List to HTML Table.ycs",
+      "name": "Sub List to HTML Table",
+      "description": "Generates an email-compatible HTML table from JSON Sub List row data.",
+      "topLevelKeys": ["Description", "DraftCode", "DraftConfig", "ExtData", "ImplType", "Name"],
+      "implType": 0,
+      "extData": null,
+      "draftConfig": {
+        "params": [
+          { "id": "subListJson", "type": "text" }
+        ],
+        "connections": [],
+        "outputs": [
+          { "id": "htmlTable", "type": "text" }
+        ]
+      },
+      "draftCodePattern": {
+        "entrypoint": "export async function main({connections, params, modules}: ServiceContext)",
+        "usesParams": ["subListJson"],
+        "usesModules": [],
+        "returns": ["htmlTable"],
+        "safetyFeatures": ["JSON parse fallback", "HTML escaping", "system field exclusion"]
+      }
+    }
+  ],
+  "learnedRules": [
+    "Custom Service uses main, not render or execute.",
+    "DraftConfig is a JSON string containing params, connections, and outputs.",
+    "DraftCode is stored as a string and should export async function main.",
+    "Returned object keys should match configured output IDs.",
+    "File inputs use YeeSDK file APIs.",
+    "Data-list interactions use modules.yeeSDKClient."
+  ]
+}
+

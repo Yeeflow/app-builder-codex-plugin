@@ -5,6 +5,10 @@ description: generate, update, debug, document, and redesign yeeflow custom code
 
 # Yeeflow Custom Code Generator
 
+## Custom Service Boundary
+
+Use this skill for Custom Code controls and Form Action Custom Code steps. Do not use it for Yeeflow Custom Service `.ycs` backend scripts. Use `yeeflow-custom-service-generator` for Custom Service because that surface uses `main({ connections, params, modules })`, `DraftConfig`, and the Node.js 22 backend sandbox instead of `render(...)` or `execute(...)`.
+
 ## Dashboard Grid-Table Collection Pattern Gate
 
 When custom code participates in a dashboard-heavy generated app, it must not be used to mask a missing native grid-table Collection pattern. Dashboard record-list sections that require that pattern use `collection` plus a paired header `flex_grid` in one zero-gap wrapper, concrete Type `1` custom detail layouts for planned row-click slide details, hidden duplicate dashboard headers when planned, and explicit runtime/designer visual proof. Internal helper metadata must not leak into encoded package objects.

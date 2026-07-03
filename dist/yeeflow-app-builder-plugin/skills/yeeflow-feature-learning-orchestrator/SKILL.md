@@ -30,6 +30,8 @@ Use generator and builder skills for proven generation work. Use this skill when
 
 When reviewing black-box generated-app self-tests, treat the generated apps as evidence only. Do not merge self-test packages as product baselines and do not promote raw `.yap`, `.ydl`, `.ywf`, or `.yapk` artifacts into reusable skills. Classify each finding as a reusable skill/generator rule, validator rule, application-specific design choice, acceptable limitation, or focused runtime-proof need before updating docs, validators, or installed skills.
 
+For Yeeflow Custom Service learning, use `yeeflow-custom-service-generator` after studying real `.ycs` exports and the product runtime spec. Custom Service is a backend Node.js 22 style surface with `main({ connections, params, modules })`; it is not a Custom Code control and not a Form Action Custom Code step. Parse `.ycs` `DraftConfig` as a JSON string, keep `DraftCode` as service code, enforce no Node built-ins, no hardcoded credentials, `modules.yeeSDKClient` for Yeeflow system interactions, and `connections[connectionId]` for authorized external calls. Current Custom Service training is export-proven and validator-backed only; invocation from Form Action, Workflow Action, AI Agent, or Copilot requires future focused integration proof.
+
 ## Skill Boundary
 
 Use `yeeflow-feature-learning-orchestrator` for training Codex on new Yeeflow platform capabilities:
