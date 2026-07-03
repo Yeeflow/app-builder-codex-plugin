@@ -31,6 +31,12 @@ For feature-learning or plugin-training work, also read:
 
 - `../../../docs/training/custom-service-nodejs22-ycs-training-report.md`
 
+For full application planning or generation work, also read:
+
+- `../../../docs/standards/custom-capability-app-plan-planning-standard.md`
+
+Custom Service is an advanced capability and must be planned in the standard App Plan under `Custom Code and Custom Service Planning` before generation. The App Plan must explain why native Yeeflow controls, expressions, form actions, workflow actions, Summary/Data Analytics, data-list operations, or Custom Code are insufficient; which service is needed; where it is invoked; the required connection variables, input variables, output variables, host bindings, queue/waiting UX, downstream actions, security/privacy notes, native fallback, and runtime proof. Do not add Custom Service or `invokeservice` / `InvokeCode` invocation steps as unplanned shortcuts during package generation.
+
 ## Supported Modes
 
 ### A. Generate Custom Service Code
@@ -95,6 +101,8 @@ Host binding rules:
 Dashboard pages do not have data-list field variables; use temp variables for Dashboard Custom Service invocation unless a future export proves another surface.
 
 Data list workflow invocation can also bind current item fields with `exprType: "list_field"` and static string values with `type: 2` token arrays. If the Custom Service returns an external-system ID, write it to a workflow variable first and then use a downstream Set Data List / `ContentList` workflow action to update the current item field.
+
+If no Custom Service is needed, the App Plan should say `Not planned`; placeholder rows such as `Not planned`, `N/A`, `None`, or `Not applicable` must not materialize into service resources, action steps, workflow nodes, variables, navigation items, or package artifacts.
 
 ## Core Rules
 
