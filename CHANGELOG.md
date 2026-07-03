@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.115
+
+- Release Custom Service generator and invocation training.
+- Add a dedicated Yeeflow Custom Service generator skill for Node.js 22 `.ycs` services, including strict `run({ inputs, connections, modules, logger })` guidance, server-side queue execution boundaries, and safe fallback recommendations for client-side Custom Code.
+- Normalize exported Custom Service references for plain input/output services, HTML table generation, Excel-to-Data-List import patterns, and SharePoint OAuth connection-variable usage.
+- Document and gate Custom Service invocation shapes for Approval/Data List/Dashboard form actions, Approval/Data List/Scheduled workflow actions, workflow variables, Data List fields, temp variables, and connection bindings.
+- Add focused source/dist regression coverage so Custom Service examples, invocation contracts, and cache artifacts stay aligned before release/cache smoke.
+
 ## 0.8.114
 
 - Release Custom Code surface-contract cache-root alignment.
