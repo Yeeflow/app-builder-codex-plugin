@@ -695,6 +695,81 @@ Rules:
 - Do not plan invented control shapes, Dynamic control types, field types, variable types, workflow nodes, action schemas, property paths, bindings, or configuration shapes.
 - Unknown shapes must be marked `export-learning-required`, `runtime-proof-required`, or `deferred` and must not be treated as generation-ready.
 
+### Custom Code and Custom Service Planning
+
+Use this section whenever the application may require client-side Custom Code, Form Action Custom Code, or backend Custom Service. If none are required, include one row marked `Not planned` and do not materialize any custom-code or custom-service resource, action step, workflow action, navigation entry, variable, or placeholder artifact from that row.
+
+#### Custom Capability Decision Matrix
+
+| Requirement / Use Case | Native Yeeflow Capability Considered | Why Native Capability Is Enough or Insufficient | Selected Capability | Host Surface | Planning Status | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- |
+| <Business use case> | <Controls/expressions/form action/workflow action/reporting> | <Reason> | None / Custom Code control / Form Action Custom Code step / Custom Service | <Dashboard / approval form / data list form / workflow / scheduled workflow / AI/Copilot future proof> | Planned / Not planned / Deferred / export-learning-required / runtime-proof-required | <Proof required> |
+
+Decision rules:
+
+- Prefer native Yeeflow controls, expressions, Summary/Data Analytics, form actions, workflow actions, and data-list operations when they satisfy the requirement.
+- Use a Custom Code control only for client-side UI behavior or immediate client-side calculation that cannot be built with native controls or expressions.
+- Use a Form Action Custom Code step only for client-side action logic that must run inside a form action and can be proven with `execute(context, fieldsValues)`.
+- Use Custom Service only for backend execution, heavier processing, file processing, server-side Yeeflow SDK operations, or integration with third-party systems through configured connection variables.
+- Treat Custom Service invocation as server-side queued execution. Do not use it when the business requirement needs immediate client-side feedback unless the plan includes a user-facing waiting/progress pattern or a Custom Code fallback.
+- Do not add Custom Code or Custom Service during materialization unless it is planned in the tables below or explicitly marked as a user-approved runtime-proof-required item.
+
+#### Custom Code Plan
+
+| Custom Code Name | Surface | Host Page/Form/Action | Business Purpose | Inputs / Required Fields | Writable Outputs | Native Fallback Considered | Security / Privacy Notes | Runtime Proof Required |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Name> | Custom Code control / Form Action Custom Code step | <Host> | <Purpose> | <Fields/variables/temp variables/parameters> | <Fields/variables/temp variables or None> | <Fallback> | <Notes> | <Proof> |
+
+Custom Code rules:
+
+- Custom Code control scripts must use `render(context, fieldsValues, readonly)` and be hosted as page/form controls.
+- Form Action Custom Code step scripts must use `execute(context, fieldsValues)` and be hosted inside `formdef.actions[].steps[]`.
+- Do not generate `render(...)`-only code for a Form Action Custom Code step.
+- Do not generate `execute(...)`-only code for a Custom Code control.
+- Approval form outputs use form/workflow variables. Data list custom form outputs may use data-list fields or temp variables when export-proven. Dashboard outputs use temp variables.
+
+#### Custom Service Plan
+
+| Custom Service Name | Business Purpose | Connection Variables | Input Variables | Output Variables | Backend / Integration Work | Native Fallback Considered | Security / Privacy Notes | Runtime Proof Required |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Name> | <Purpose> | <Connection IDs and types, or None> | <Text/Number/Boolean/Date-Time/File/Image/Rich text variables> | <Text/Number/Boolean/Date-Time/File/Image/Rich text variables> | <Yeeflow SDK / external API / file processing> | <Fallback> | <Notes> | <Proof> |
+
+Custom Service rules:
+
+- Custom Service code must use `main({ connections, params, modules })`.
+- `DraftConfig` must define `params`, `connections`, and `outputs`; output keys returned by `main` must match configured output IDs.
+- Use connection variables for HTTP API/OAuth 2.0 integrations. Do not hardcode credentials, tokens, tenant-specific secrets, or private/internal URLs.
+- Use `modules.yeeSDKClient` for Yeeflow backend operations when the SDK shape is proven. Use `modules.fetch(..., { connection })` or the export-proven connection shape for third-party calls.
+- Preserve 19-digit Yeeflow IDs as strings.
+
+#### Custom Service Invocation Plan
+
+| Invocation Name | Host Surface | Host Page/Form/Workflow | Service | Input Binding Source | Output Binding Target | Queue / Waiting UX | Follow-up Action | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Name> | Approval form action / Data list form action / Dashboard form action / Approval workflow / Data list workflow / Scheduled workflow / AI Agent or Copilot future proof | <Host> | <Service> | <Variables/list fields/temp variables/static values> | <Variables/temp variables/workflow variables/list update via follow-up> | <Expected wait behavior> | <Set Data List / refresh / notification / none> | <Proof> |
+
+Invocation binding rules:
+
+- Form action invocation uses `type: "invokeservice"`.
+- Workflow invocation uses `stencil.id = "InvokeCode"`.
+- Approval form action input/output bindings use `__variables_`.
+- Custom data list form action inputs may use `__list_` for data-list fields or `__temp_` for temp variables; outputs use `__temp_` unless a focused export proves another target.
+- Dashboard form action inputs and outputs use `__temp_`.
+- Data list workflow invocation may bind current item fields with `exprType: "list_field"` and should write returned external IDs to workflow variables before a downstream Set Data List / `ContentList` action updates the current item.
+- Scheduled workflow and task-form invocation must follow the same export-proven workflow/task-form rules or be marked `runtime-proof-required`.
+
+#### Custom Capability Proof and Runtime Validation Plan
+
+| Capability | Local Validation | Package Validation | Runtime Proof | Failure Handling / Fallback |
+| --- | --- | --- | --- | --- |
+| <Custom Code / Custom Service / invocation> | <Script lint/shape checks> | <Generated package placement/binding checks> | <User interaction/workflow run/service response proof> | <Fallback> |
+
+Proof rules:
+
+- Package schema/signing/install success does not prove Custom Code execution or Custom Service execution.
+- Runtime proof must show parameter binding, output writing, error handling, and any downstream refresh/update behavior.
+- Unknown AI Agent/Copilot invocation of Custom Service remains future-proof-required until a focused export/runtime proof exists.
+
 ## 18. Generation Contract and Hard Gates
 
 ### Output Package
