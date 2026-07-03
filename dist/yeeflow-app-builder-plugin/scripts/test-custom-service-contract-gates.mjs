@@ -48,6 +48,9 @@ assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "__
 assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "__temp_");
 assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "server side");
 assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "backend queue");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "Connection Variable Rules");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "sharePointConnection");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "properties.connections[]");
 
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "yeeflow-custom-service-generator");
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "main({ connections, params, modules }");
@@ -59,23 +62,37 @@ assertIncludes(`${SKILL_ROOT}/SKILL.md`, "Generate Custom Service Code");
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "Plan Or Generate Custom Service Invocation");
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "InvokeCode");
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "invokeservice");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "properties.connections[]");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "exprType: \"list_field\"");
 
 const normalized = JSON.parse(read("docs/reference/custom-service-ycs-examples.normalized.json"));
 assert.equal(normalized.proofBoundary, "export-proven-normalized-summary");
 assert.equal(Array.isArray(normalized.examples), true);
-assert.equal(normalized.examples.length, 2);
+assert.equal(normalized.examples.length, 3);
 assert.deepEqual(
   normalized.examples.map((example) => example.name).sort(),
-  ["Insert Excel Data to Data List", "Sub List to HTML Table"].sort(),
+  ["Add SharePoint Supplier List Item", "Insert Excel Data to Data List", "Sub List to HTML Table"].sort(),
 );
+const sharePointExample = normalized.examples.find((example) => example.name === "Add SharePoint Supplier List Item");
+assert.equal(sharePointExample.draftConfig.connections[0].id, "sharePointConnection");
+assert.equal(sharePointExample.draftConfig.connections[0].type, "http");
+assert.ok(sharePointExample.draftCodePattern.usesConnections.includes("connections?.sharePointConnection"));
+assert.ok(sharePointExample.draftCodePattern.usesModules.includes("modules.fetch"));
+assert.ok(sharePointExample.draftCodePattern.returns.includes("itemId"));
 
 const invocation = JSON.parse(read("docs/reference/custom-service-invocation-examples.normalized.json"));
 assert.equal(invocation.proofBoundary, "export-proven-normalized-summary");
 assert.equal(Array.isArray(invocation.surfaces), true);
-assert.equal(invocation.surfaces.length, 4);
+assert.equal(invocation.surfaces.length, 5);
 
 const surfaces = new Map(invocation.surfaces.map((surface) => [surface.id, surface]));
-for (const surfaceId of ["approval_form_action", "workflow_action", "data_list_form_action", "dashboard_form_action"]) {
+for (const surfaceId of [
+  "approval_form_action",
+  "workflow_action",
+  "data_list_form_action",
+  "dashboard_form_action",
+  "data_list_workflow_action_with_connection",
+]) {
   assert.equal(surfaces.has(surfaceId), true, `${surfaceId} invocation surface exists`);
 }
 
@@ -110,6 +127,18 @@ assert.ok(
   invocation.executionNotes.some((note) => /queued|queue/i.test(note)),
   "Custom Service queue execution note exists",
 );
+
+const dataListWorkflowWithConnection = surfaces.get("data_list_workflow_action_with_connection");
+assert.equal(dataListWorkflowWithConnection.workflowNode.stencilId, "InvokeCode");
+assert.equal(dataListWorkflowWithConnection.workflowNode.connectionsPath, "properties.connections[]");
+assert.equal(dataListWorkflowWithConnection.connectionBindings[0].id, "sharePointConnection");
+assert.equal(dataListWorkflowWithConnection.connectionBindings[0].type, "http");
+assert.equal(typeof dataListWorkflowWithConnection.connectionBindings[0].shape.connectionid, "string");
+assert.equal(dataListWorkflowWithConnection.inputBindings[0].shape.type, 2);
+assert.equal(dataListWorkflowWithConnection.inputBindings[1].shape.type, 1);
+assert.equal(dataListWorkflowWithConnection.inputBindings[1].shape.value.exprType, "list_field");
+assert.equal(dataListWorkflowWithConnection.outputBindings[0].shape.prefix, "__variables_");
+assert.equal(dataListWorkflowWithConnection.downstreamActions[0].stencilId, "ContentList");
 
 function inspectCustomService({ draftCode, draftConfig }) {
   const issues = [];
@@ -159,13 +188,29 @@ function inspectCustomService({ draftCode, draftConfig }) {
 function inspectInvocationStep(surfaceId, stepOrNode) {
   const issues = [];
 
-  if (surfaceId === "workflow_action") {
+  if (surfaceId === "workflow_action" || surfaceId === "data_list_workflow_action_with_connection") {
     if (stepOrNode?.stencil?.id !== "InvokeCode") issues.push("CUSTOM_SERVICE_WORKFLOW_STENCIL_INVALID");
     if (!stepOrNode?.properties?.serviceId) issues.push("CUSTOM_SERVICE_WORKFLOW_SERVICE_ID_MISSING");
     if (!Array.isArray(stepOrNode?.properties?.params)) issues.push("CUSTOM_SERVICE_WORKFLOW_PARAMS_MISSING");
     if (!Array.isArray(stepOrNode?.properties?.outputs)) issues.push("CUSTOM_SERVICE_WORKFLOW_OUTPUTS_MISSING");
+    if (surfaceId === "data_list_workflow_action_with_connection") {
+      if (!Array.isArray(stepOrNode?.properties?.connections)) {
+        issues.push("CUSTOM_SERVICE_WORKFLOW_CONNECTIONS_MISSING");
+      }
+      for (const connection of stepOrNode?.properties?.connections || []) {
+        if (!connection?.id || !connection?.type || !connection?.value?.connectionid) {
+          issues.push("CUSTOM_SERVICE_WORKFLOW_CONNECTION_BINDING_INVALID");
+        }
+      }
+    }
     for (const param of stepOrNode?.properties?.params || []) {
-      if (param?.value?.type !== 1 || param?.value?.value?.exprType !== "variable") {
+      const bindingType = param?.value?.type;
+      const exprType = param?.value?.value?.exprType;
+      const isWorkflowVariable = bindingType === 1 && exprType === "variable";
+      const isListField = surfaceId === "data_list_workflow_action_with_connection" && bindingType === 1 && exprType === "list_field";
+      const isStaticExpression = surfaceId === "data_list_workflow_action_with_connection" && bindingType === 2 && Array.isArray(param?.value?.value);
+      const isOptionalUnbound = surfaceId === "data_list_workflow_action_with_connection" && param?.value === null;
+      if (!isWorkflowVariable && !isListField && !isStaticExpression && !isOptionalUnbound) {
         issues.push("CUSTOM_SERVICE_WORKFLOW_PARAM_VARIABLE_EXPR_INVALID");
       }
     }
@@ -211,6 +256,16 @@ const validService = inspectCustomService({
   draftConfig: JSON.stringify({ params: [], connections: [], outputs: [{ id: "total", type: "number" }] }),
 });
 assert.deepEqual(validService.issues, []);
+
+const validConnectionService = inspectCustomService({
+  draftCode: `export async function main({ connections, params, modules }: ServiceContext) { const conn = connections?.sharePointConnection; if (!conn) throw new Error("Required connection missing: sharePointConnection"); const response = await modules.fetch("https://graph.microsoft.com/v1.0/me", { method: "GET", connection: conn }); return { itemId: "1" }; }`,
+  draftConfig: JSON.stringify({
+    params: [{ id: "siteUrl", type: "text" }],
+    connections: [{ id: "sharePointConnection", type: "http" }],
+    outputs: [{ id: "itemId", type: "text" }],
+  }),
+});
+assert.deepEqual(validConnectionService.issues, []);
 
 const missingMain = inspectCustomService({
   draftCode: `export async function execute(context) { return {}; }`,
@@ -264,6 +319,53 @@ assert.deepEqual(
     },
   }),
   [],
+);
+
+assert.deepEqual(
+  inspectInvocationStep("data_list_workflow_action_with_connection", {
+    stencil: { id: "InvokeCode" },
+    properties: {
+      serviceId: "2072927631207972864",
+      connections: [
+        {
+          id: "sharePointConnection",
+          type: "http",
+          desc: "SharePoint OAuth connection used to authenticate and access the specified SharePoint site and list.",
+          value: { connectionid: "2056384963824988160", userconnectionid: "0" },
+        },
+      ],
+      params: [
+        { id: "siteUrl", value: { type: 2, value: [{ type: "str", value: "https://example.sharepoint.com/" }] } },
+        {
+          id: "supplierName",
+          value: { type: 1, value: { exprType: "list_field", valueType: "input", prop: "Title", id: "Title", type: "expr" } },
+        },
+        { id: "product", value: null },
+      ],
+      outputs: [{ id: "itemId", value: { prefix: "__variables_", value: "Supplier_ID" } }],
+    },
+  }),
+  [],
+);
+
+assert.ok(
+  inspectInvocationStep("data_list_workflow_action_with_connection", {
+    stencil: { id: "InvokeCode" },
+    properties: {
+      serviceId: "2072927631207972864",
+      connections: [],
+      params: [],
+      outputs: [],
+    },
+  }).includes("CUSTOM_SERVICE_WORKFLOW_CONNECTION_BINDING_INVALID") ||
+    inspectInvocationStep("data_list_workflow_action_with_connection", {
+      stencil: { id: "InvokeCode" },
+      properties: {
+        serviceId: "2072927631207972864",
+        params: [],
+        outputs: [],
+      },
+    }).includes("CUSTOM_SERVICE_WORKFLOW_CONNECTIONS_MISSING"),
 );
 
 assert.ok(

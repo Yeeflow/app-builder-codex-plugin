@@ -124,6 +124,18 @@ Observed export-backed parameter and output types include:
 - `file`
 - `number`
 
+Product-supported Custom Service input and output variable types include:
+
+- Text
+- Number
+- Boolean
+- Date/Time
+- File
+- Image
+- Rich text
+
+Connection variables are configured separately from input and output variables. A service may have zero or more connection variables.
+
 Product runtime input definitions may use `string`, `number`, and `variable` when authoring through code interfaces. For `.ycs` export generation, preserve the `.ycs` UI/export type names observed in `DraftConfig`.
 
 Example:
@@ -146,6 +158,47 @@ Rules:
 - Every required runtime input should be declared in `params`.
 - Connections required for external calls should be declared in `connections` and read from `connections[connectionId]`.
 - Do not treat output IDs as ordinary input values.
+
+## Connection Variable Rules
+
+Custom Service connection variables are declared in `DraftConfig.connections[]`:
+
+```json
+{
+  "connections": [
+    {
+      "id": "sharePointConnection",
+      "type": "http",
+      "desc": "SharePoint OAuth connection used to authenticate and access the specified SharePoint site and list."
+    }
+  ]
+}
+```
+
+Runtime code reads the configured connection by ID:
+
+```ts
+const sharePointConnection = connections?.sharePointConnection;
+if (!sharePointConnection) {
+  throw new Error("Required connection missing: sharePointConnection");
+}
+```
+
+Rules:
+
+- Use stable semantic connection IDs such as `sharePointConnection`; do not use display labels as code identifiers.
+- Validate every required connection before calling external systems.
+- Do not hardcode OAuth tokens, API keys, or bearer credentials.
+- Pass the configured connection object to `modules.fetch`:
+
+```ts
+const response = await modules.fetch(url, {
+  method: "GET",
+  connection: sharePointConnection
+});
+```
+
+The SharePoint export proves the pattern for Microsoft Graph calls: resolve the SharePoint site, then create list items through Graph API endpoints using `modules.fetch(..., { connection })`.
 
 ## Invocation Surface Rules
 
@@ -244,7 +297,49 @@ Workflow variable output:
 { "prefix": "__variables_", "value": "EmailHTMLItems" }
 ```
 
-Data list workflows and Scheduled workflows use the same Invoke custom service workflow action shape by platform rule, but this study only had an Approval workflow export. Keep those surfaces product-rule-backed until a focused export or runtime test proves them.
+Data list workflows use the same Invoke custom service workflow action shape. A focused Data list workflow export also proves `properties.connections[]` for connection variable selection:
+
+```json
+{
+  "id": "sharePointConnection",
+  "type": "http",
+  "desc": "SharePoint OAuth connection used to authenticate and access the specified SharePoint site and list.",
+  "value": {
+    "connectionid": "2056384963824988160",
+    "userconnectionid": "0"
+  }
+}
+```
+
+Data list workflow inputs can bind current item fields through list-field expressions:
+
+```json
+{
+  "type": 1,
+  "value": {
+    "exprType": "list_field",
+    "valueType": "input",
+    "prop": "Title",
+    "id": "Title",
+    "type": "expr"
+  }
+}
+```
+
+Static string inputs use expression token arrays:
+
+```json
+{
+  "type": 2,
+  "value": [
+    { "type": "str", "value": "https://example.sharepoint.com/" }
+  ]
+}
+```
+
+After the service returns an output to a workflow variable, a downstream `ContentList` / Set Data List action may write a generated link or value back to the current data list item. The Supplier List export proves this for a SharePoint item URL composed from a static URL prefix plus the returned `Supplier_ID` workflow variable.
+
+Scheduled workflows use the same Invoke custom service workflow action shape by platform rule, but this study did not include a Scheduled workflow export. Keep Scheduled workflow invocation product-rule-backed until a focused export or runtime test proves it.
 
 ## Execution Semantics
 
@@ -296,6 +391,7 @@ When a generated App Plan includes Custom Service, it must state:
 - `Custom Service Surface: custom_service`
 - service name and purpose
 - caller candidates, such as form action, workflow action, AI Agent, or Copilot
+- connection variables and their external system purpose
 - input parameters
 - output parameters
 - connection requirements
@@ -327,6 +423,7 @@ Generators and validators must enforce:
 - Yeeflow data interactions use `modules.yeeSDKClient`.
 - form action Custom Service invocation uses `type = "invokeservice"` with `attrs.serviceId`, `attrs.params[]`, and `attrs.outputs[]`.
 - workflow Custom Service invocation uses `stencil.id = "InvokeCode"` with `properties.serviceId`, `properties.params[]`, and `properties.outputs[]`.
+- workflow Custom Service connection selections use `properties.connections[]` with `id`, `type`, `desc`, and `value.connectionid`.
 - invocation parameter/output binding prefixes match the host surface: `__variables_`, `__list_`, or `__temp_`.
 
 ## Proof Boundary
@@ -338,11 +435,12 @@ This training is **export-proven** for:
 - invoking Custom Service from Approval Submission form Form Action;
 - invoking Custom Service from Approval workflow action;
 - invoking Custom Service from a custom data list form Form Action.
+- declaring and using Custom Service connection variables in `.ycs`;
+- invoking Custom Service from Data list workflow with a selected connection variable and list-field/static parameter bindings.
 
 This training is **product-rule/user-guidance-backed** for:
 
 - invoking Custom Service from Approval task forms;
-- invoking Custom Service from Data list workflow actions;
 - invoking Custom Service from Scheduled workflow actions;
 - invoking Custom Service from Dashboard form actions with temp variables.
 

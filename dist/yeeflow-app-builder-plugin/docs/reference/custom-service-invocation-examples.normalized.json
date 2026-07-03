@@ -8,6 +8,10 @@
     {
       "fileType": ".ydl",
       "description": "Data list export with custom data list form Form Action Invoke custom service."
+    },
+    {
+      "fileType": ".ydl",
+      "description": "Data list export with Data list workflow Invoke custom service node using a SharePoint OAuth/HTTP connection variable and downstream Set Data List action."
     }
   ],
   "surfaces": [
@@ -138,6 +142,106 @@
             "prefix": "__temp_",
             "value": "var_OutputValue"
           }
+        }
+      ]
+    },
+    {
+      "id": "data_list_workflow_action_with_connection",
+      "host": "Data list workflow",
+      "proof": "export-proven",
+      "trigger": {
+        "flowMapping": {
+          "Method": 0,
+          "Setting": "{\"NewTrigger\":true}",
+          "Title": "Save new supplier to SharePoint",
+          "DefKey": "SSTSP",
+          "FieldName": "Text24"
+        }
+      },
+      "workflowNode": {
+        "stencilId": "InvokeCode",
+        "serviceIdPath": "properties.serviceId",
+        "connectionsPath": "properties.connections[]",
+        "paramsPath": "properties.params[]",
+        "outputsPath": "properties.outputs[]"
+      },
+      "connectionBindings": [
+        {
+          "id": "sharePointConnection",
+          "type": "http",
+          "desc": "SharePoint OAuth connection used to authenticate and access the specified SharePoint site and list.",
+          "shape": {
+            "connectionid": "2056384963824988160",
+            "userconnectionid": "0"
+          }
+        }
+      ],
+      "inputBindings": [
+        {
+          "source": "static string expression",
+          "paramId": "siteUrl",
+          "shape": {
+            "type": 2,
+            "value": [
+              {
+                "type": "str",
+                "value": "https://example.sharepoint.com/"
+              }
+            ]
+          }
+        },
+        {
+          "source": "current data list field",
+          "paramId": "supplierName",
+          "shape": {
+            "type": 1,
+            "value": {
+              "exprType": "list_field",
+              "valueType": "input",
+              "prop": "Title",
+              "id": "Title",
+              "type": "expr"
+            }
+          }
+        }
+      ],
+      "outputBindings": [
+        {
+          "target": "workflow variable",
+          "outputId": "itemId",
+          "shape": {
+            "prefix": "__variables_",
+            "value": "Supplier_ID"
+          }
+        }
+      ],
+      "downstreamActions": [
+        {
+          "stencilId": "ContentList",
+          "name": "Set Data List",
+          "listtype": "current",
+          "listdatas": [
+            {
+              "Columns": "Text25",
+              "Data": [
+                {
+                  "type": "str",
+                  "value": "https://example.sharepoint.com/Lists/Supplier%20List/DispForm.aspx?ID="
+                },
+                {
+                  "type": "op",
+                  "op": "&"
+                },
+                {
+                  "exprType": "variable",
+                  "valueType": "text",
+                  "id": "Supplier_ID",
+                  "type": "expr",
+                  "name": "Workflow Variables:Supplier ID"
+                }
+              ]
+            }
+          ]
         }
       ]
     }

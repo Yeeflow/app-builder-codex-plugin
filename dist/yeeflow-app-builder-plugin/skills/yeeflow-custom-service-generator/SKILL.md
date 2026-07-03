@@ -39,7 +39,9 @@ Given a backend service requirement:
 
 - generate a complete Custom Service script using `export async function main({ connections, params, modules }: ServiceContext)`;
 - define the intended `DraftConfig` with `params`, `connections`, and `outputs`;
+- add connection variables in `DraftConfig.connections[]` when the service integrates with a third-party system;
 - validate inputs before use;
+- validate required connections before use;
 - return output keys matching the configured outputs;
 - use `modules.yeeSDKClient` for Yeeflow data/file operations;
 - use `connections[connectionId]` for authorized external calls;
@@ -52,6 +54,7 @@ Given an exported `.ycs`:
 - parse top-level `Name`, `Description`, `ImplType`, `DraftCode`, `DraftConfig`, and `ExtData`;
 - parse `DraftConfig` as a JSON string;
 - list params, connections, outputs, SDK calls, file handling, external calls, and return keys;
+- identify connection variable IDs, connection types, and where `connections?.<id>` is consumed in code;
 - identify security hazards and unproven SDK shapes;
 - produce a practical user guide or training summary.
 
@@ -75,6 +78,7 @@ When asked to configure a form action or workflow action that invokes Custom Ser
 - use `type: "invokeservice"` for form action steps on approval forms, data list custom forms, and dashboard pages;
 - use workflow node `stencil.id: "InvokeCode"` for workflow actions;
 - set `serviceId` from the selected Custom Service resource;
+- map required service connection variables through `properties.connections[]` on workflow nodes when invoking from workflow actions;
 - copy the Custom Service parameter IDs and output IDs exactly from its `DraftConfig`;
 - bind values according to the host surface, not by parameter name alone;
 - avoid generating invocation bindings for a host surface that lacks the target variable or field.
@@ -89,6 +93,8 @@ Host binding rules:
 | Dashboard form action | `value.value.prefix = "__temp_"` | `prefix = "__temp_"` |
 
 Dashboard pages do not have data-list field variables; use temp variables for Dashboard Custom Service invocation unless a future export proves another surface.
+
+Data list workflow invocation can also bind current item fields with `exprType: "list_field"` and static string values with `type: 2` token arrays. If the Custom Service returns an external-system ID, write it to a workflow variable first and then use a downstream Set Data List / `ContentList` workflow action to update the current item field.
 
 ## Core Rules
 
@@ -106,6 +112,7 @@ export async function main({ connections, params, modules }: ServiceContext) {
 - Do not generate `execute(...)` for Custom Service.
 - Return an object whose keys match `DraftConfig.outputs[].id`.
 - Validate every required `params` value before using it.
+- Validate every required `connections` value before using it.
 - Use optional chaining for nested values.
 - Throw clear `Error` messages when blocked.
 - Preserve 19-digit Yeeflow IDs as strings.
@@ -128,6 +135,18 @@ Observed `.ycs` parameter/output types include:
 - `text`
 - `file`
 - `number`
+
+Product-supported input/output variable categories include Text, Number, Boolean, Date/Time, File, Image, and Rich text. Preserve the export/UI type name used by the Custom Service configuration.
+
+Connection variables are not ordinary params or outputs. Declare them in `connections`:
+
+```json
+{
+  "id": "sharePointConnection",
+  "type": "http",
+  "desc": "SharePoint OAuth connection used to authenticate and access the specified SharePoint site and list."
+}
+```
 
 Product runtime type definitions may mention `string`, `number`, and `variable`. For `.ycs` export/config generation, prefer the export/UI type names that match the service configuration being produced.
 
@@ -161,6 +180,7 @@ Export-backed examples include:
 - `modules.yeeSDKClient.lists.getFields(listId)`
 - `modules.yeeSDKClient.lists.createItemsBatch({ listId, items })`
 - `modules.yeeSDKClient.lists.queryItems({ listId, fields, filters, sorts, pageIndex, pageSize })`
+- `modules.fetch(url, { method, headers, body, connection })` for third-party OAuth/HTTP integration through a configured connection.
 
 If a required SDK call is not proven, use `getYeeSDKAPIDetails` when available or mark the implementation as requiring SDK confirmation.
 
@@ -219,7 +239,8 @@ Current Custom Service knowledge is:
 - product-spec-backed for runtime context and sandbox rules;
 - export-proven for `.ycs` top-level shape and DraftConfig layout;
 - export-proven for Submission form Form Action `invokeservice`, Approval workflow `InvokeCode`, and custom data list form Form Action `invokeservice` invocation shapes;
-- product/user-understanding-backed for Task form, Data list workflow, Scheduled workflow, and Dashboard invocation surfaces that share the same known form-action/workflow-action shapes;
+- export-proven for Data list workflow `InvokeCode` invocation with `properties.connections[]`, list-field/static params, workflow-variable output, and downstream Set Data List update;
+- product/user-understanding-backed for Task form, Scheduled workflow, and Dashboard invocation surfaces that share the same known form-action/workflow-action shapes;
 - validator-backed when focused gates pass.
 
 AI Agent or Copilot invocation is future work and must not be claimed as runtime-proven yet.

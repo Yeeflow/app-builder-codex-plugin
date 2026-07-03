@@ -177,6 +177,99 @@ Data list workflow and Scheduled workflow invocation should use the same `Invoke
 
 Custom Service runs on the server side. The caller sends a request to the server, and execution is handled by a backend queue. When an action must provide immediate client-side feedback or simple low-latency calculation, the plugin should prefer a Custom Code control or a Form Action Execute custom code step instead of Custom Service.
 
+## Connection Variable And Data List Workflow Addendum
+
+A SharePoint integration export added evidence for Custom Service connection variables and Data list workflow invocation.
+
+Studied exports:
+
+- `Add SharePoint Supplier List Item.ycs`
+- `Supplier List.ydl`
+
+### Connection Variables
+
+Custom Service connection variables are declared separately from params and outputs:
+
+```json
+{
+  "id": "sharePointConnection",
+  "type": "http",
+  "desc": "SharePoint OAuth connection used to authenticate and access the specified SharePoint site and list."
+}
+```
+
+The service code reads the runtime connection by ID:
+
+```ts
+const sharePointConnection = connections?.sharePointConnection;
+if (!sharePointConnection) {
+  throw new Error("Required connection missing: sharePointConnection");
+}
+```
+
+Third-party calls then pass the connection object to `modules.fetch`:
+
+```ts
+await modules.fetch(graphEndpoint, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+  connection: sharePointConnection
+});
+```
+
+The SharePoint sample proves this pattern for Microsoft Graph site resolution and item creation. The generator must not hardcode OAuth tokens or credentials.
+
+### Data List Workflow Invocation
+
+The `Supplier List.ydl` export proves a Data list workflow stored in `Data.Forms[]` with `WorkflowType = 1` and linked through `FlowMappings[]`.
+
+The workflow is triggered for new items:
+
+```json
+{
+  "Setting": "{\"NewTrigger\":true}",
+  "Title": "Save new supplier to SharePoint",
+  "DefKey": "SSTSP",
+  "FieldName": "Text24"
+}
+```
+
+The workflow `InvokeCode` node includes `properties.connections[]`:
+
+```json
+{
+  "id": "sharePointConnection",
+  "type": "http",
+  "value": {
+    "connectionid": "2056384963824988160",
+    "userconnectionid": "0"
+  }
+}
+```
+
+It also proves three parameter-binding shapes:
+
+- static string parameter: `{ "type": 2, "value": [{ "type": "str", "value": "..." }] }`
+- current item field parameter: `{ "type": 1, "value": { "exprType": "list_field", "prop": "Title", "id": "Title", "type": "expr" } }`
+- optional unbound parameter: `value: null`
+
+The service output `itemId` is saved to a workflow variable:
+
+```json
+{ "prefix": "__variables_", "value": "Supplier_ID" }
+```
+
+Then a downstream Set Data List / `ContentList` workflow action writes a SharePoint display link into the current list item by concatenating a static URL prefix with the returned workflow variable.
+
+### Variable Types
+
+Custom Service supports zero to many variables in each category:
+
+- connection variables for configured HTTP API / OAuth 2.0 connections;
+- input variables with Text, Number, Boolean, Date/Time, File, Image, and Rich text value types;
+- output variables with Text, Number, Boolean, Date/Time, File, Image, and Rich text value types.
+
 ## Proof Boundary
 
 This training is:
@@ -184,6 +277,7 @@ This training is:
 - export-proven for `.ycs` file shape;
 - product-spec-backed for runtime context and sandbox constraints;
 - export-proven for selected Form Action and Workflow Action invocation schemas;
+- export-proven for Custom Service connection variables and Data list workflow invocation with `properties.connections[]`;
 - validator-backed after focused gates pass.
 
 This training is not yet runtime-proven for:

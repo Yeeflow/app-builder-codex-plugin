@@ -54,6 +54,56 @@
         "returns": ["htmlTable"],
         "safetyFeatures": ["JSON parse fallback", "HTML escaping", "system field exclusion"]
       }
+    },
+    {
+      "fileName": "Add SharePoint Supplier List Item.ycs",
+      "name": "Add SharePoint Supplier List Item",
+      "description": "Uses a configured SharePoint OAuth/HTTP connection to create a new item in a SharePoint Supplier List through Microsoft Graph and returns the created item ID.",
+      "topLevelKeys": ["Description", "DraftCode", "DraftConfig", "ExtData", "ImplType", "Name"],
+      "implType": 0,
+      "extData": null,
+      "draftConfig": {
+        "params": [
+          { "id": "siteUrl", "type": "text" },
+          { "id": "supplierListId", "type": "text" },
+          { "id": "supplierName", "type": "text" },
+          { "id": "contact", "type": "text" },
+          { "id": "email", "type": "text" },
+          { "id": "phone", "type": "text" },
+          { "id": "product", "type": "text" },
+          { "id": "unitPrice", "type": "number" },
+          { "id": "quantity", "type": "number" }
+        ],
+        "connections": [
+          {
+            "id": "sharePointConnection",
+            "type": "http",
+            "desc": "SharePoint OAuth connection used to authenticate and access the specified SharePoint site and list."
+          }
+        ],
+        "outputs": [
+          { "id": "itemId", "type": "text" }
+        ]
+      },
+      "draftCodePattern": {
+        "entrypoint": "export async function main({ connections, params, modules }: ServiceContext)",
+        "usesConnections": ["connections?.sharePointConnection"],
+        "usesParams": ["siteUrl", "supplierListId", "supplierName", "contact", "email", "phone", "product", "unitPrice", "quantity"],
+        "usesModules": ["modules.fetch"],
+        "externalApis": [
+          "https://graph.microsoft.com/v1.0/sites/{hostname}:{sitePath}",
+          "https://graph.microsoft.com/v1.0/sites/{siteId}/lists/{supplierListId}/items"
+        ],
+        "returns": ["itemId"],
+        "safetyFeatures": [
+          "required connection validation",
+          "required parameter validation",
+          "numeric parameter validation",
+          "absolute URL validation",
+          "Graph API response status checks",
+          "JSON response parsing checks"
+        ]
+      }
     }
   ],
   "learnedRules": [
@@ -61,8 +111,9 @@
     "DraftConfig is a JSON string containing params, connections, and outputs.",
     "DraftCode is stored as a string and should export async function main.",
     "Returned object keys should match configured output IDs.",
+    "Connection variables are declared in DraftConfig.connections[] and read from the runtime connections object by ID.",
+    "Authorized third-party calls should pass the configured connection object to modules.fetch(..., { connection }).",
     "File inputs use YeeSDK file APIs.",
     "Data-list interactions use modules.yeeSDKClient."
   ]
 }
-
