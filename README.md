@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.115`
+- Version: `0.8.116`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.115` adds Custom Service generator and invocation training for Node.js 22 `.ycs` services, including connection variables and form/workflow invocation contracts.
+Current release `0.8.116` adds Custom Code and Custom Service App Plan planning requirements, including native capability decisions, custom capability plan tables, invocation/proof planning, and placeholder non-materialization gates.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.115
+Version: 0.8.116
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.115
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.116
 ```
 
 ## What Is Included

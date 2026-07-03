@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.116
+
+- Release Custom Capability App Plan planning.
+- Add a standard App Plan `Custom Code and Custom Service Planning` section covering native capability decisions, Custom Code plan rows, Custom Service plan rows, invocation plans, and runtime proof requirements.
+- Add `custom-capability-app-plan-planning-standard.md` and training documentation so Custom Code controls, Form Action Custom Code steps, Custom Service resources, `invokeservice` form actions, and `InvokeCode` workflow actions are planned before generation.
+- Update Custom Code, Custom Service, and Feature Learning skills to block unplanned custom capability shortcuts and prevent `Not planned` / `N/A` / `None` placeholder rows from materializing.
+- Add focused source/dist regression coverage for the custom capability App Plan contract and cache artifact mirrors.
+
 ## 0.8.115
 
 - Release Custom Service generator and invocation training.
