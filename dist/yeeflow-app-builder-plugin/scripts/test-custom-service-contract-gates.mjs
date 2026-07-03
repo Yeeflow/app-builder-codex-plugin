@@ -27,6 +27,7 @@ function assertIncludes(relativePath, needle) {
 const requiredFiles = [
   "docs/standards/custom-service-nodejs22-runtime-standard.md",
   "docs/reference/custom-service-ycs-examples.normalized.json",
+  "docs/reference/custom-service-invocation-examples.normalized.json",
   "docs/training/custom-service-nodejs22-ycs-training-report.md",
   `${SKILL_ROOT}/SKILL.md`,
 ];
@@ -40,6 +41,13 @@ assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "Dr
 assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "modules.yeeSDKClient");
 assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "no `require");
 assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "SSRF");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "type = \"invokeservice\"");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "stencil.id = \"InvokeCode\"");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "__variables_");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "__list_");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "__temp_");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "server side");
+assertIncludes("docs/standards/custom-service-nodejs22-runtime-standard.md", "backend queue");
 
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "yeeflow-custom-service-generator");
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "main({ connections, params, modules }");
@@ -47,6 +55,10 @@ assertIncludes(`${SKILL_ROOT}/SKILL.md`, "Do not generate `render");
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "Do not generate `execute");
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "DraftConfig");
 assertIncludes(`${SKILL_ROOT}/SKILL.md`, "connections[connectionId]");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "Generate Custom Service Code");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "Plan Or Generate Custom Service Invocation");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "InvokeCode");
+assertIncludes(`${SKILL_ROOT}/SKILL.md`, "invokeservice");
 
 const normalized = JSON.parse(read("docs/reference/custom-service-ycs-examples.normalized.json"));
 assert.equal(normalized.proofBoundary, "export-proven-normalized-summary");
@@ -55,6 +67,48 @@ assert.equal(normalized.examples.length, 2);
 assert.deepEqual(
   normalized.examples.map((example) => example.name).sort(),
   ["Insert Excel Data to Data List", "Sub List to HTML Table"].sort(),
+);
+
+const invocation = JSON.parse(read("docs/reference/custom-service-invocation-examples.normalized.json"));
+assert.equal(invocation.proofBoundary, "export-proven-normalized-summary");
+assert.equal(Array.isArray(invocation.surfaces), true);
+assert.equal(invocation.surfaces.length, 4);
+
+const surfaces = new Map(invocation.surfaces.map((surface) => [surface.id, surface]));
+for (const surfaceId of ["approval_form_action", "workflow_action", "data_list_form_action", "dashboard_form_action"]) {
+  assert.equal(surfaces.has(surfaceId), true, `${surfaceId} invocation surface exists`);
+}
+
+const approvalAction = surfaces.get("approval_form_action");
+assert.equal(approvalAction.actionStep.type, "invokeservice");
+assert.equal(approvalAction.actionStep.serviceIdPath, "attrs.serviceId");
+assert.equal(approvalAction.inputBindings[0].shape.value.prefix, "__variables_");
+assert.equal(approvalAction.outputBindings[0].shape.prefix, "__variables_");
+
+const workflowAction = surfaces.get("workflow_action");
+assert.equal(workflowAction.workflowNode.stencilId, "InvokeCode");
+assert.equal(workflowAction.workflowNode.serviceIdPath, "properties.serviceId");
+assert.equal(workflowAction.inputBindings[0].shape.type, 1);
+assert.equal(workflowAction.inputBindings[0].shape.value.exprType, "variable");
+assert.equal(workflowAction.inputBindings[0].shape.value.type, "expr");
+assert.equal(workflowAction.outputBindings[0].shape.prefix, "__variables_");
+
+const dataListAction = surfaces.get("data_list_form_action");
+assert.equal(dataListAction.actionStep.type, "invokeservice");
+assert.equal(dataListAction.inputBindings[0].shape.value.prefix, "__list_");
+assert.equal(dataListAction.outputBindings[0].shape.prefix, "__temp_");
+
+const dashboardAction = surfaces.get("dashboard_form_action");
+assert.equal(dashboardAction.actionStep.type, "invokeservice");
+assert.equal(dashboardAction.inputBindings[0].shape.value.prefix, "__temp_");
+assert.equal(dashboardAction.outputBindings[0].shape.prefix, "__temp_");
+assert.ok(
+  invocation.executionNotes.some((note) => /server-side|server side/i.test(note)),
+  "Custom Service server-side execution note exists",
+);
+assert.ok(
+  invocation.executionNotes.some((note) => /queued|queue/i.test(note)),
+  "Custom Service queue execution note exists",
 );
 
 function inspectCustomService({ draftCode, draftConfig }) {
@@ -102,6 +156,56 @@ function inspectCustomService({ draftCode, draftConfig }) {
   return { issues, parsedConfig };
 }
 
+function inspectInvocationStep(surfaceId, stepOrNode) {
+  const issues = [];
+
+  if (surfaceId === "workflow_action") {
+    if (stepOrNode?.stencil?.id !== "InvokeCode") issues.push("CUSTOM_SERVICE_WORKFLOW_STENCIL_INVALID");
+    if (!stepOrNode?.properties?.serviceId) issues.push("CUSTOM_SERVICE_WORKFLOW_SERVICE_ID_MISSING");
+    if (!Array.isArray(stepOrNode?.properties?.params)) issues.push("CUSTOM_SERVICE_WORKFLOW_PARAMS_MISSING");
+    if (!Array.isArray(stepOrNode?.properties?.outputs)) issues.push("CUSTOM_SERVICE_WORKFLOW_OUTPUTS_MISSING");
+    for (const param of stepOrNode?.properties?.params || []) {
+      if (param?.value?.type !== 1 || param?.value?.value?.exprType !== "variable") {
+        issues.push("CUSTOM_SERVICE_WORKFLOW_PARAM_VARIABLE_EXPR_INVALID");
+      }
+    }
+    return issues;
+  }
+
+  if (stepOrNode?.type !== "invokeservice") issues.push("CUSTOM_SERVICE_FORM_ACTION_STEP_TYPE_INVALID");
+  if (!stepOrNode?.attrs?.serviceId) issues.push("CUSTOM_SERVICE_FORM_ACTION_SERVICE_ID_MISSING");
+  if (!Array.isArray(stepOrNode?.attrs?.params)) issues.push("CUSTOM_SERVICE_FORM_ACTION_PARAMS_MISSING");
+  if (!Array.isArray(stepOrNode?.attrs?.outputs)) issues.push("CUSTOM_SERVICE_FORM_ACTION_OUTPUTS_MISSING");
+
+  for (const param of stepOrNode?.attrs?.params || []) {
+    const prefix = param?.value?.value?.prefix;
+    if (surfaceId === "dashboard_form_action" && prefix !== "__temp_") {
+      issues.push("CUSTOM_SERVICE_DASHBOARD_PARAM_PREFIX_INVALID");
+    }
+    if (surfaceId === "data_list_form_action" && !["__list_", "__temp_"].includes(prefix)) {
+      issues.push("CUSTOM_SERVICE_DATA_LIST_FORM_PARAM_PREFIX_INVALID");
+    }
+    if (surfaceId === "approval_form_action" && prefix !== "__variables_") {
+      issues.push("CUSTOM_SERVICE_APPROVAL_FORM_PARAM_PREFIX_INVALID");
+    }
+  }
+
+  for (const output of stepOrNode?.attrs?.outputs || []) {
+    const prefix = output?.value?.prefix;
+    if (surfaceId === "dashboard_form_action" && prefix !== "__temp_") {
+      issues.push("CUSTOM_SERVICE_DASHBOARD_OUTPUT_PREFIX_INVALID");
+    }
+    if (surfaceId === "data_list_form_action" && prefix !== "__temp_") {
+      issues.push("CUSTOM_SERVICE_DATA_LIST_FORM_OUTPUT_PREFIX_INVALID");
+    }
+    if (surfaceId === "approval_form_action" && prefix !== "__variables_") {
+      issues.push("CUSTOM_SERVICE_APPROVAL_FORM_OUTPUT_PREFIX_INVALID");
+    }
+  }
+
+  return issues;
+}
+
 const validService = inspectCustomService({
   draftCode: `export async function main({ connections, params, modules }: ServiceContext) { return { total: 1 }; }`,
   draftConfig: JSON.stringify({ params: [], connections: [], outputs: [{ id: "total", type: "number" }] }),
@@ -133,6 +237,46 @@ const ssrf = inspectCustomService({
 });
 assert.ok(ssrf.issues.includes("CUSTOM_SERVICE_SSRF_TARGET_FORBIDDEN"));
 
+assert.deepEqual(
+  inspectInvocationStep("data_list_form_action", {
+    type: "invokeservice",
+    attrs: {
+      serviceId: "2072624440809492481",
+      params: [{ id: "subListJson", value: { value: { prefix: "__list_", value: "Text1" }, variable: null } }],
+      outputs: [{ id: "htmlTable", value: { prefix: "__temp_", value: "var_HTMLTable" } }],
+    },
+  }),
+  [],
+);
+
+assert.deepEqual(
+  inspectInvocationStep("workflow_action", {
+    stencil: { id: "InvokeCode" },
+    properties: {
+      serviceId: "2072624440809492481",
+      params: [
+        {
+          id: "subListJson",
+          value: { type: 1, value: { exprType: "variable", valueType: "list", id: "Expense_Details", type: "expr" } },
+        },
+      ],
+      outputs: [{ id: "htmlTable", value: { prefix: "__variables_", value: "EmailHTMLItems" } }],
+    },
+  }),
+  [],
+);
+
+assert.ok(
+  inspectInvocationStep("dashboard_form_action", {
+    type: "invokeservice",
+    attrs: {
+      serviceId: "2072624440809492481",
+      params: [{ id: "subListJson", value: { value: { prefix: "__list_", value: "Text1" }, variable: null } }],
+      outputs: [{ id: "htmlTable", value: { prefix: "__temp_", value: "var_HTMLTable" } }],
+    },
+  }).includes("CUSTOM_SERVICE_DASHBOARD_PARAM_PREFIX_INVALID"),
+);
+
 console.log(
   JSON.stringify(
     {
@@ -141,9 +285,9 @@ console.log(
       rootMode: ROOT_MODE,
       checkedFiles: requiredFiles.length,
       checkedExamples: normalized.examples.length,
+      checkedInvocationSurfaces: invocation.surfaces.length,
     },
     null,
     2,
   ),
 );
-

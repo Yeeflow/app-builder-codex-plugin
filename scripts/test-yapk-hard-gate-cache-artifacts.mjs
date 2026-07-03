@@ -253,6 +253,7 @@ const requiredDocs = [
   "docs/reference/approval-form-layout-task.template.json",
   "docs/reference/workflow-layout-golden-references.json",
   "docs/reference/custom-service-ycs-examples.normalized.json",
+  "docs/reference/custom-service-invocation-examples.normalized.json",
   "docs/reference/approval-form-field-layout-templates.json",
   "docs/reference/approval-form-fields-grid-2col.template.json",
   "docs/reference/approval-form-fields-grid-3col.template.json",

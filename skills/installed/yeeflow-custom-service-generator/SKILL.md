@@ -25,6 +25,7 @@ Before generating or validating Custom Service code, read:
 
 - `../../../docs/standards/custom-service-nodejs22-runtime-standard.md`
 - `../../../docs/reference/custom-service-ycs-examples.normalized.json`
+- `../../../docs/reference/custom-service-invocation-examples.normalized.json`
 
 For feature-learning or plugin-training work, also read:
 
@@ -67,6 +68,28 @@ When a service fails:
 - check guessed SDK calls or unhandled response shapes;
 - return corrected service code quickly.
 
+### D. Plan Or Generate Custom Service Invocation
+
+When asked to configure a form action or workflow action that invokes Custom Service:
+
+- use `type: "invokeservice"` for form action steps on approval forms, data list custom forms, and dashboard pages;
+- use workflow node `stencil.id: "InvokeCode"` for workflow actions;
+- set `serviceId` from the selected Custom Service resource;
+- copy the Custom Service parameter IDs and output IDs exactly from its `DraftConfig`;
+- bind values according to the host surface, not by parameter name alone;
+- avoid generating invocation bindings for a host surface that lacks the target variable or field.
+
+Host binding rules:
+
+| Host | Input binding | Output binding |
+| --- | --- | --- |
+| Approval submission/task form action | `value.value.prefix = "__variables_"` | `prefix = "__variables_"` |
+| Approval/Data list/Scheduled workflow action | `properties.params[].value = { type: 1, value: { exprType: "variable", ... } }` | `prefix = "__variables_"` |
+| Custom data list form action | `value.value.prefix = "__list_"` for data-list fields, or `__temp_` for temp variables | `prefix = "__temp_"` for temp variables |
+| Dashboard form action | `value.value.prefix = "__temp_"` | `prefix = "__temp_"` |
+
+Dashboard pages do not have data-list field variables; use temp variables for Dashboard Custom Service invocation unless a future export proves another surface.
+
 ## Core Rules
 
 - The primary entrypoint is `main`.
@@ -86,6 +109,7 @@ export async function main({ connections, params, modules }: ServiceContext) {
 - Use optional chaining for nested values.
 - Throw clear `Error` messages when blocked.
 - Preserve 19-digit Yeeflow IDs as strings.
+- Treat Custom Service invocation as a server-side queued call. If the user needs immediate client-side calculation or UI reaction, recommend a Custom Code control or a Form Action Execute custom code step instead.
 
 ## DraftConfig Rules
 
@@ -194,6 +218,8 @@ Current Custom Service knowledge is:
 
 - product-spec-backed for runtime context and sandbox rules;
 - export-proven for `.ycs` top-level shape and DraftConfig layout;
+- export-proven for Submission form Form Action `invokeservice`, Approval workflow `InvokeCode`, and custom data list form Form Action `invokeservice` invocation shapes;
+- product/user-understanding-backed for Task form, Data list workflow, Scheduled workflow, and Dashboard invocation surfaces that share the same known form-action/workflow-action shapes;
 - validator-backed when focused gates pass.
 
-Invocation from Form Action, Workflow Action, AI Agent, or Copilot is future work and must not be claimed as runtime-proven yet.
+AI Agent or Copilot invocation is future work and must not be claimed as runtime-proven yet.

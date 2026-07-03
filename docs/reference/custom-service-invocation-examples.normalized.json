@@ -1,0 +1,150 @@
+{
+  "proofBoundary": "export-proven-normalized-summary",
+  "sourceExports": [
+    {
+      "fileType": ".ywf",
+      "description": "Approval form export with Submission form Form Action Invoke custom service and workflow Invoke custom service node."
+    },
+    {
+      "fileType": ".ydl",
+      "description": "Data list export with custom data list form Form Action Invoke custom service."
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "approval_form_action",
+      "host": "Approval form Submission form or Task form",
+      "proof": "export-proven for Submission form action; task form uses the same form action step shape by platform rule",
+      "actionStep": {
+        "type": "invokeservice",
+        "serviceIdPath": "attrs.serviceId",
+        "paramsPath": "attrs.params[]",
+        "outputsPath": "attrs.outputs[]"
+      },
+      "inputBindings": [
+        {
+          "source": "approval variable",
+          "shape": {
+            "value": {
+              "prefix": "__variables_",
+              "value": "Expense_Details"
+            },
+            "variable": null
+          }
+        }
+      ],
+      "outputBindings": [
+        {
+          "target": "approval variable",
+          "shape": {
+            "prefix": "__variables_",
+            "value": "field_SummaryInfo"
+          }
+        }
+      ]
+    },
+    {
+      "id": "workflow_action",
+      "host": "Approval workflow, Data list workflow, or Scheduled workflow",
+      "proof": "export-proven for Approval workflow action; Data list workflow and Scheduled workflow use the same workflow node shape by platform rule",
+      "workflowNode": {
+        "stencilId": "InvokeCode",
+        "serviceIdPath": "properties.serviceId",
+        "paramsPath": "properties.params[]",
+        "outputsPath": "properties.outputs[]"
+      },
+      "inputBindings": [
+        {
+          "source": "workflow variable",
+          "shape": {
+            "type": 1,
+            "value": {
+              "exprType": "variable",
+              "valueType": "list",
+              "id": "Expense_Details",
+              "type": "expr"
+            }
+          }
+        }
+      ],
+      "outputBindings": [
+        {
+          "target": "workflow variable",
+          "shape": {
+            "prefix": "__variables_",
+            "value": "EmailHTMLItems"
+          }
+        }
+      ]
+    },
+    {
+      "id": "data_list_form_action",
+      "host": "Custom data list form",
+      "proof": "export-proven",
+      "actionStep": {
+        "type": "invokeservice",
+        "serviceIdPath": "attrs.serviceId",
+        "paramsPath": "attrs.params[]",
+        "outputsPath": "attrs.outputs[]"
+      },
+      "inputBindings": [
+        {
+          "source": "data list field",
+          "shape": {
+            "value": {
+              "prefix": "__list_",
+              "value": "Text1"
+            },
+            "variable": null
+          }
+        }
+      ],
+      "outputBindings": [
+        {
+          "target": "temp variable",
+          "shape": {
+            "prefix": "__temp_",
+            "value": "var_HTMLTable"
+          }
+        }
+      ]
+    },
+    {
+      "id": "dashboard_form_action",
+      "host": "Dashboard page form action",
+      "proof": "user-provided platform rule; no Dashboard export sample in this study",
+      "actionStep": {
+        "type": "invokeservice",
+        "serviceIdPath": "attrs.serviceId",
+        "paramsPath": "attrs.params[]",
+        "outputsPath": "attrs.outputs[]"
+      },
+      "inputBindings": [
+        {
+          "source": "dashboard temp variable",
+          "shape": {
+            "value": {
+              "prefix": "__temp_",
+              "value": "var_InputValue"
+            },
+            "variable": null
+          }
+        }
+      ],
+      "outputBindings": [
+        {
+          "target": "dashboard temp variable",
+          "shape": {
+            "prefix": "__temp_",
+            "value": "var_OutputValue"
+          }
+        }
+      ]
+    }
+  ],
+  "executionNotes": [
+    "Custom Service runs server-side and is executed through a queued backend request.",
+    "High-volume Custom Service calls can wait longer than client-side code.",
+    "For immediate client-side logic, use a Custom Code control or a Form Action Execute custom code step instead."
+  ]
+}

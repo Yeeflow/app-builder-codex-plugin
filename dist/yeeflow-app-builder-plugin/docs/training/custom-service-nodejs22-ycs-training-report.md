@@ -110,20 +110,86 @@ Create a new `yeeflow-custom-service-generator` skill with:
 - DraftConfig authoring guidance.
 - invocation proof boundaries for Form Action, Workflow Action, AI Agent, and Copilot.
 
+## Invocation Training Addendum
+
+Follow-up exports added focused evidence for invoking Custom Service from Yeeflow actions.
+
+Studied exports:
+
+- an Approval form `.ywf` containing a Submission form Form Action `Invoke custom service` step and an Approval workflow `Invoke custom service` action node;
+- a Data list `.ydl` containing a custom data list form Form Action `Invoke custom service` step.
+
+### Form Action Invocation
+
+Form action invocation uses:
+
+```json
+{
+  "type": "invokeservice",
+  "attrs": {
+    "serviceId": "<custom service id>",
+    "params": [],
+    "outputs": []
+  }
+}
+```
+
+Approval form variable bindings use the `__variables_` prefix for both input and output bindings.
+
+Custom data list form input bindings can point at data list fields with `__list_`, while outputs can write to temp variables with `__temp_`.
+
+Dashboard form actions use the same `invokeservice` step shape, but Dashboard pages only have temp variables in the current product guidance. Use `__temp_` for Dashboard Custom Service inputs and outputs until a Dashboard export proves another binding surface.
+
+### Workflow Invocation
+
+Workflow invocation uses an action node with:
+
+```json
+{
+  "stencil": { "id": "InvokeCode" },
+  "properties": {
+    "serviceId": "<custom service id>",
+    "params": [],
+    "outputs": []
+  }
+}
+```
+
+Workflow variable inputs use expression-wrapper values such as:
+
+```json
+{
+  "type": 1,
+  "value": {
+    "exprType": "variable",
+    "valueType": "list",
+    "id": "Expense_Details",
+    "type": "expr"
+  }
+}
+```
+
+Workflow variable outputs use the `__variables_` prefix.
+
+Data list workflow and Scheduled workflow invocation should use the same `InvokeCode` node shape by platform rule, but this training only had an Approval workflow export.
+
+### Runtime Placement Guidance
+
+Custom Service runs on the server side. The caller sends a request to the server, and execution is handled by a backend queue. When an action must provide immediate client-side feedback or simple low-latency calculation, the plugin should prefer a Custom Code control or a Form Action Execute custom code step instead of Custom Service.
+
 ## Proof Boundary
 
 This training is:
 
 - export-proven for `.ycs` file shape;
 - product-spec-backed for runtime context and sandbox constraints;
+- export-proven for selected Form Action and Workflow Action invocation schemas;
 - validator-backed after focused gates pass.
 
 This training is not yet runtime-proven for:
 
-- Form Action invocation;
-- Workflow Action invocation;
+- backend queue timing or throughput;
 - AI Agent invocation;
 - Copilot invocation;
 - external connection execution;
 - generated app package materialization.
-
