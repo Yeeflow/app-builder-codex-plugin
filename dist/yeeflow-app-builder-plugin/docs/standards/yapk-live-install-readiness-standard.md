@@ -15,7 +15,7 @@ The live install readiness gate exists to block packages that can pass local sha
 3. Every Dashboard page (`Type: 103`) must use the decoded root `ListSet.ListID` as its `ListID`.
 4. Dashboard `LayoutInResources[].Resource` must be parseable JSON.
 5. UUID-shaped dashboard control IDs copied from templates must be re-instantiated per generated page/resource. Cross-page duplicate UUID-shaped control IDs are a hard failure.
-6. Large generated IDs embedded inside dashboard JSON strings must be API-issued IDs listed in the ID provenance manifest.
+6. Large generated IDs embedded inside dashboard JSON strings must be API-issued IDs listed in the ID provenance manifest. This includes deep source references under `attrs.data.list`, `attrs.querydata_list`, Collection/filter option sources, Dashboard action/custom action steps, detail/open targets, and Data Analytics visible/runtime source refs.
 7. Approval `Forms[].DefResource` must decode from the export-shaped `::brotli::` payload and must preserve `key` / `defkey` alignment with `Forms[].Key`.
 8. Large generated IDs embedded inside approval `DefResource` must be API-issued IDs listed in the ID provenance manifest.
 9. Install/import API `apiStatus: 0` is submitted/accepted only. It is not final success.
@@ -27,7 +27,8 @@ The live install readiness gate exists to block packages that can pass local sha
 - The full-app materializer must use a single API-issued root identity for both wrapper and decoded root surfaces.
 - The package handoff must replace placeholder tenant metadata before signing. The materializer may resolve the target tenant from an explicit `--tenant-id`, profile-scoped `YEEFLOW_<PROFILE>_TENANT_ID`, or `YEEFLOW_TENANT_ID` when those values are safely available. Do not sign or install packages whose wrapper still has `TenantID: "0"`.
 - Template-cloned Dashboard resources must regenerate UUID-shaped control IDs per page while preserving semantic container IDs used by validators and templates.
-- Fresh-ID remap must include nested dashboard JSON strings and encoded approval `DefResource` payloads.
+- Fresh-ID remap must include nested dashboard JSON strings and encoded approval `DefResource` payloads. For Dashboard resources, recursively remap package-local IDs in `attrs.data.list`, `attrs.querydata_list`, Collection sources, filter option sources, local actions, custom action steps, detail layout refs, and Data Analytics source refs before serializing `LayoutInResources[].Resource`.
+- Do not repair stale Dashboard template IDs by adding them to the current ID provenance manifest. A source-template `ListSetID`, `ListID`, `LayoutID`, `FieldID`, action target, or filter/query source that cannot be mapped to a current generated resource must be removed or must fail generated-final emission before signing readiness.
 - The materializer may remain signing-ineligible as a generation handoff, but generated-final preflight must produce the signing-readiness handoff when all local hard gates pass.
 
 ## Proof Boundary

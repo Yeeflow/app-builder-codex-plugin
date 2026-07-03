@@ -59,6 +59,10 @@ const SOURCE_COLLECTION_TEMPLATE_IDS = {
   listSetIds: new Set(["2058726109535285249", "2058571956842409984", "2054077087595905025"]),
   listIds: new Set(["2058726119586017281", "2058571966637289476", "2054077096447066112"]),
 };
+const SOURCE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = {
+  listSetIds: new Set(["2071862448464072704"]),
+  listIds: new Set(["2071862457508171777"]),
+};
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = Object.freeze([
   PAGE_LAYOUT_TEMPLATE_ID,
@@ -2484,6 +2488,11 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: false });
   removeOperationsWithoutActions(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
+  rewriteCollectionTemplateRuntimeRefs(resource, {
+    rootListSetId,
+    listId,
+    detailLayoutId: sourceListMeta.detailLayoutId,
+  });
   return resource;
 }
 
@@ -4166,17 +4175,17 @@ function rewriteCollectionTemplateRuntimeRefs(node, { rootListSetId, listId, det
         .replaceAll("{{ListID}}", sourceListId)
         .replaceAll("{{DetailLayoutID}}", layoutId);
       out = replaceLayoutPlaceholders(out);
-      for (const oldId of SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds) out = out.replaceAll(oldId, rootId);
-      for (const oldId of SOURCE_COLLECTION_TEMPLATE_IDS.listIds) out = out.replaceAll(oldId, sourceListId);
+      for (const oldId of allSourceDashboardListSetIds()) out = out.replaceAll(oldId, rootId);
+      for (const oldId of allSourceDashboardListIds()) out = out.replaceAll(oldId, sourceListId);
       if ((isLayoutRefKey(key) || hasLayoutPlaceholder(value)) && !layoutId) {
         return "";
       }
       return out;
     }
     for (const [childKey, child] of Object.entries(value)) {
-      if (/^ListSetID$/i.test(childKey) && typeof child === "string" && (SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds.has(child) || /\{\{ListSetID\}\}/.test(child))) {
+      if (/^ListSetID$/i.test(childKey) && typeof child === "string" && (allSourceDashboardListSetIds().has(child) || /\{\{ListSetID\}\}/.test(child))) {
         value[childKey] = rootId;
-      } else if (/^ListID$/i.test(childKey) && typeof child === "string" && (SOURCE_COLLECTION_TEMPLATE_IDS.listIds.has(child) || /\{\{ListID\}\}/.test(child))) {
+      } else if (/^ListID$/i.test(childKey) && typeof child === "string" && (allSourceDashboardListIds().has(child) || /\{\{ListID\}\}/.test(child))) {
         value[childKey] = sourceListId;
       } else if (isLayoutRefKey(childKey) && typeof child === "string" && hasLayoutPlaceholder(child)) {
         value[childKey] = layoutId ? replaceLayoutPlaceholders(child) : "";
@@ -4187,6 +4196,20 @@ function rewriteCollectionTemplateRuntimeRefs(node, { rootListSetId, listId, det
     return value;
   };
   return visit(node);
+}
+
+function allSourceDashboardListSetIds() {
+  return new Set([
+    ...SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds,
+    ...SOURCE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.listSetIds,
+  ]);
+}
+
+function allSourceDashboardListIds() {
+  return new Set([
+    ...SOURCE_COLLECTION_TEMPLATE_IDS.listIds,
+    ...SOURCE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.listIds,
+  ]);
 }
 
 function ensureCollectionActions(actions) {
