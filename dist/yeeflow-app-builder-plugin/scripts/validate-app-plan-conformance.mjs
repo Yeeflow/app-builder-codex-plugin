@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
+import { readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 
 const GZIP_PREFIX = "[______gizp______]";
 const DEFAULT_GROUPED_NAVIGATION_EXPORT_PROVEN = false;
@@ -122,7 +123,7 @@ function decodePackage(file) {
     return {
       packageType: "yapk",
       wrapperSummary: { hasResource: true, hasSign: Boolean(parsed.Sign) },
-      decoded: JSON.parse(zlib.brotliDecompressSync(Buffer.from(parsed.Resource, "base64")).toString("utf8")),
+      decoded: readDecodedYapk(file).decoded,
     };
   }
   if (typeof parsed?.Resource === "string") {

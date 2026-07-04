@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import zlib from "node:zlib";
+import { readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 
 const VALID_BIT_CONTROL_TYPE = "switch";
 const VALID_BIT_DEFAULT_VALUES = new Set(["0", "1"]);
@@ -192,8 +192,7 @@ function fieldIndexByIdentity(fields, target) {
 function loadDecodedPackage(filePath) {
   const wrapper = JSON.parse(fs.readFileSync(filePath, "utf8"));
   if (wrapper?.Resource && typeof wrapper.Resource === "string") {
-    const inflated = zlib.brotliDecompressSync(Buffer.from(wrapper.Resource, "base64")).toString("utf8");
-    return JSON.parse(inflated);
+    return readDecodedYapk(filePath).decoded;
   }
   if (wrapper?.Data && wrapper.Data.Childs) return wrapper.Data;
   return wrapper;

@@ -108,10 +108,22 @@
             "$ref": "#/$defs/ProcessFormInfo"
           }
         },
+        "FormReports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnyObject"
+          }
+        },
         "FormNewReports": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/ProcNewReportInfo"
+          }
+        },
+        "CustomServices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnyObject"
           }
         },
         "DataReports": {

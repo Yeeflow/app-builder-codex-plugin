@@ -81,6 +81,8 @@ YAP approval designer-shape validation: generated-final approval form YAPs must 
 
 YAPK validation uses `schemas/yapk-schema.json`. YAP validation uses `schemas/yap-schema.json`. Do not hardcode versioned schema filenames in runtime logic. To update a product schema standard later, replace the canonical file contents while keeping these filenames unchanged. Keep YAP and YAPK schema standards separate: YAPK uses `AppExportPackageInfo`, Brotli `AppPackageInfo`, and `Childs[].Fields`; YAP uses the YAP wrapper, `[______gizp______]` gzip `ListExportResult`, `Defs`, and `SimplePortal`.
 
+Current official `.yapk` exports may use a top-level `Resource` Brotli stream that strict sync decode reports as `unexpected end of file`, while tolerant streaming decode emits a complete parseable `AppPackageInfo` JSON payload. Package validators must use the shared tolerant Brotli decode path for top-level `.yapk` `Resource`; strict decode failure alone is not a blocker when tolerant decode parses valid JSON. Generated top-level `.yapk` `Resource` should use the official export-compatible encode shape: `JSON.stringify(AppPackageInfo)` plus trailing JSON-whitespace padding, Brotli quality `1`, final compressed byte omitted. This rule applies only to the top-level wrapper `Resource`, not nested approval `DefResource` encodings.
+
 ## Generated-Final YAP Contract
 
 For existing customer/product exports, use compatibility mode and avoid rejecting historical exports globally. For plugin-generated final/import-qualified YAP packages, enforce both schema validation and `docs/standards/yap-generation-contract.md`.
@@ -114,7 +116,7 @@ YAPK validation uses the effective composed schema loaded through `scripts/lib/l
 
 ## FormNewReports Workflow Report Standard
 
-Product clarification for v0.6.9 and v0.6.18: `FormReports` is the legacy workflow report collection and is not required by the canonical YAPK schema for generated apps. `FormNewReports` is the current workflow report collection when workflow reports are planned or generated. Generated workflow reports must be written to `FormNewReports`; validators must not require `FormReports`. A generated package with workflow report content only in legacy `FormReports` is invalid because current workflow reports must use `FormNewReports`.
+Product clarification for current YAPK generated apps: `FormReports` is still legacy workflow report storage and generated workflow reports must be written to `FormNewReports`, not to legacy `FormReports`. However, current official AppPackageInfo export shape expects `FormReports` to be present as an array, usually empty, and also expects `CustomServices` to be present as an array, usually empty. Generated `.yapk` app packages must include `FormReports: []`, `FormNewReports: []` when no workflow reports are planned, and `CustomServices: []` when no custom services are planned. A generated package with workflow report content only in legacy `FormReports` is invalid because current workflow reports must use `FormNewReports`.
 
 ## v0.6.5 First-Generation YAPK Validation
 

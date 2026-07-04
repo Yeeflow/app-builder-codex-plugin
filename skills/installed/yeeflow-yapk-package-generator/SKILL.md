@@ -80,7 +80,7 @@ YAPK validation uses `schemas/yapk-schema.json`, which now contains v5 schema co
 
 ## FormNewReports Workflow Report Standard
 
-Product clarification for v0.6.9: `FormReports` is the legacy workflow report collection and is not required for generated YAPK apps. `FormNewReports` is the current workflow report collection. Generated workflow reports must be written to `FormNewReports`; validators must not require `FormReports`, but may allow it as legacy when old packages include it. A generated package with workflow report content only in legacy `FormReports` is invalid because current workflow reports must use `FormNewReports`.
+Current YAPK generated-app rule: `FormReports` is legacy workflow report storage and generated workflow reports must be written to `FormNewReports`, but official AppPackageInfo export shape still expects `FormReports` to be present as an array, usually empty. Generated `.yapk` app packages must include `FormReports: []`, `FormNewReports: []` when no workflow reports are planned, and `CustomServices: []` when no custom services are planned. A generated package with workflow report content only in legacy `FormReports` is invalid because current workflow reports must use `FormNewReports`.
 
 ## v0.6.9 Runtime Hardening Gate
 
@@ -258,7 +258,7 @@ Future generation requires all of:
 
 1. Decode `Resource` to schema-valid `AppPackageInfo`. If standard Brotli ends with `Z_BUF_ERROR`, a streaming decoder may be used only when the emitted UTF-8 text parses as complete JSON with the expected `AppPackageInfo` keys.
 2. Edit the decoded object safely.
-3. Brotli encode the updated `AppPackageInfo`.
+3. Brotli encode the updated top-level `.yapk` wrapper `Resource` with the current official export-compatible shape: `JSON.stringify(AppPackageInfo)` plus trailing JSON-whitespace padding, Brotli quality `1`, and the final compressed byte omitted. Validators must decode this through the shared tolerant Brotli path.
 4. Put the encoded Resource into a valid wrapper.
 5. Sign with a product-supported signing path.
 6. Verify the signature.
