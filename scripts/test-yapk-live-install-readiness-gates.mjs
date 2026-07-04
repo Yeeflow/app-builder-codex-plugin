@@ -23,55 +23,15 @@ function exportDefResource(resource) {
   return Buffer.concat([prefix, compressed]).toString("base64");
 }
 
-function listRef(listId = id(20), listSetId = id(1)) {
-  return {
-    AppID: 41,
-    ListID: listId,
-    ListSetID: listSetId,
-    Type: 1,
-    Title: "Records",
-  };
-}
-
-function dashboardResource(uuid, listId = id(20), listSetId = id(1)) {
-  const source = listRef(listId, listSetId);
+function dashboardResource(uuid, listId = id(20)) {
   return {
     type: "dashboard-page",
     id: "Main",
-    attrs: {
-      data: { list: source },
-      querydata_list: source,
-      actions: [
-        {
-          id: `${uuid}_query_action`,
-          steps: [
-            {
-              type: "querydata",
-              attrs: {
-                data: { list: source },
-                querydata_list: source,
-              },
-            },
-            {
-              type: "listitem",
-              attrs: {
-                data: { list: source },
-                targetList: { ListID: listId, ListSetID: listSetId },
-              },
-            },
-          ],
-        },
-      ],
-    },
     children: [
       {
         type: "container",
         id: uuid,
-        attrs: {
-          data: { list: source, ListID: listId, ListSetID: listSetId },
-          querydata_list: source,
-          control_action: `${uuid}_query_action`,
-        },
+        attrs: { data: { ListID: listId } },
         children: [{ type: "heading", id: `${uuid}_title`, attrs: { headc: { title: { value: "Dashboard" } } } }],
       },
     ],
@@ -94,7 +54,7 @@ function baseDecoded() {
         Type: 103,
         Title: "Dashboard One",
         LayoutView: null,
-        LayoutInResources: [{ ID: pageOneId, RefId: pageOneId, Resource: JSON.stringify(dashboardResource(UUID_A, listId, rootId)) }],
+        LayoutInResources: [{ ID: pageOneId, RefId: pageOneId, Resource: JSON.stringify(dashboardResource(UUID_A, listId)) }],
       },
       {
         ListID: rootId,
@@ -102,7 +62,7 @@ function baseDecoded() {
         Type: 103,
         Title: "Dashboard Two",
         LayoutView: null,
-        LayoutInResources: [{ ID: pageTwoId, RefId: pageTwoId, Resource: JSON.stringify(dashboardResource(UUID_B, listId, rootId)) }],
+        LayoutInResources: [{ ID: pageTwoId, RefId: pageTwoId, Resource: JSON.stringify(dashboardResource(UUID_B, listId)) }],
       },
     ],
     Forms: [
@@ -212,16 +172,16 @@ try {
   cases.push("dashboard page root owner mismatch fails");
 
   const duplicateUuidDecoded = baseDecoded();
-  duplicateUuidDecoded.Pages[1].LayoutInResources[0].Resource = JSON.stringify(dashboardResource(UUID_A, id(20), id(1)));
+  duplicateUuidDecoded.Pages[1].LayoutInResources[0].Resource = JSON.stringify(dashboardResource(UUID_A, id(20)));
   const duplicateUuid = writePackage(tempDir, "duplicate-uuid", duplicateUuidDecoded);
   expectCode("cross-page dashboard UUID duplicate", [VALIDATOR, "--package", duplicateUuid.file, "--id-provenance", duplicateUuid.manifestFile, "--json"], "DASHBOARD_CONTROL_UUID_DUPLICATE_ACROSS_PAGES");
   cases.push("cross-page dashboard template UUID duplicate fails");
 
   const embeddedIdDecoded = baseDecoded();
-  embeddedIdDecoded.Pages[0].LayoutInResources[0].Resource = JSON.stringify(dashboardResource(UUID_C, id(999), id(998)));
+  embeddedIdDecoded.Pages[0].LayoutInResources[0].Resource = JSON.stringify(dashboardResource(UUID_C, id(999)));
   const embeddedId = writePackage(tempDir, "embedded-dashboard-id", embeddedIdDecoded);
   expectCode("embedded dashboard ID not in manifest", [VALIDATOR, "--package", embeddedId.file, "--id-provenance", embeddedId.manifestFile, "--json"], "YAPK_EMBEDDED_DASHBOARD_ID_NOT_IN_MANIFEST");
-  cases.push("dashboard JSON list/querydata/action-step large IDs must be manifest-backed");
+  cases.push("dashboard JSON large IDs must be manifest-backed");
 
   const defMismatchDecoded = baseDecoded();
   defMismatchDecoded.Forms[0].DefResource = exportDefResource({ id: id(31), key: id(932), defkey: id(932) });
