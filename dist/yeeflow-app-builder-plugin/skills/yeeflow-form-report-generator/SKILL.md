@@ -23,7 +23,7 @@ Current proof boundary: export-proven and validator-backed only from `docs/studi
 
 ## FormNewReports Workflow Report Standard
 
-Product clarification for v0.6.9: `FormReports` is the legacy workflow report collection and is not required for generated YAPK apps. `FormNewReports` is the current workflow report collection. Generated workflow reports must be written to `FormNewReports`; validators must not require `FormReports`, but may allow it as legacy when old packages include it. A generated package with workflow report content only in legacy `FormReports` is invalid because current workflow reports must use `FormNewReports`.
+Current YAPK generated-app rule: `FormReports` is legacy workflow report storage and generated workflow reports must be written to `FormNewReports`, but official AppPackageInfo export shape still expects `FormReports` to be present as an array, usually empty. Generated `.yapk` app packages must include `FormReports: []`, `FormNewReports: []` when no workflow reports are planned, and `CustomServices: []` when no custom services are planned. A generated package with workflow report content only in legacy `FormReports` is invalid because current workflow reports must use `FormNewReports`.
 
 ## Export-Proven Shape
 

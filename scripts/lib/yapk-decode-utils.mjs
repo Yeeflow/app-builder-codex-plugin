@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { spawnSync } from "node:child_process";
 import zlib from "node:zlib";
 
 export function readYapkWrapper(file) {
@@ -9,13 +10,49 @@ export function readYapkWrapper(file) {
 export function decodeYapkResource(wrapper) {
   if (!wrapper || typeof wrapper !== "object") throw new Error("YAPK wrapper is not an object.");
   if (!wrapper.Resource || typeof wrapper.Resource !== "string") throw new Error("YAPK wrapper Resource is missing.");
-  const decoded = zlib.brotliDecompressSync(Buffer.from(wrapper.Resource, "base64")).toString("utf8");
+  const decoded = decodeBrotliTextTolerant(Buffer.from(wrapper.Resource, "base64"));
   return JSON.parse(quoteLargeJsonIntegers(decoded));
 }
 
 export function readDecodedYapk(file) {
   const wrapper = readYapkWrapper(file);
   return { wrapper, decoded: decodeYapkResource(wrapper) };
+}
+
+export function decodeBrotliTextTolerant(bytes) {
+  try {
+    return zlib.brotliDecompressSync(bytes).toString("utf8");
+  } catch (strictError) {
+    const partial = decodeBrotliTextFromPartialStream(bytes);
+    if (partial) return partial;
+    throw strictError;
+  }
+}
+
+export function encodeYapkResourceOfficial(decoded) {
+  const compressed = zlib.brotliCompressSync(Buffer.from(`${JSON.stringify(decoded)}${" ".repeat(1024)}`, "utf8"), {
+    params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 1 },
+  });
+  const officialExportCompatible = compressed.length > 0 ? compressed.subarray(0, compressed.length - 1) : compressed;
+  return officialExportCompatible.toString("base64");
+}
+
+function decodeBrotliTextFromPartialStream(bytes) {
+  const script = `
+    const zlib = require("zlib");
+    const chunks = [];
+    const stream = zlib.createBrotliDecompress();
+    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("error", () => process.stdout.write(Buffer.concat(chunks).toString("base64")));
+    stream.on("end", () => process.stdout.write(Buffer.concat(chunks).toString("base64")));
+    stream.end(Buffer.from(process.argv[1], "base64"));
+  `;
+  const result = spawnSync(process.execPath, ["-e", script, bytes.toString("base64")], {
+    encoding: "utf8",
+    maxBuffer: 128 * 1024 * 1024,
+  });
+  if (result.status !== 0 || !result.stdout) return "";
+  return Buffer.from(result.stdout, "base64").toString("utf8");
 }
 
 export function isObject(value) {

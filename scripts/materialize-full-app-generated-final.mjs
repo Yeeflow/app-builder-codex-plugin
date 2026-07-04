@@ -5,6 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { encodeYapkResourceOfficial } from "./lib/yapk-decode-utils.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
@@ -174,7 +175,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
       iconUrl: appIconUrl,
       appPlanText: planText,
     });
-  const resource = zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded), "utf8")).toString("base64");
+  const resource = encodeYapkResourceOfficial(decoded);
   const wrapper = {
     PackageId: stringId(ids["wrapper.PackageId"]),
     TenantID: materializationTenantId || "1000000000000000000",
@@ -2043,7 +2044,9 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
       },
     ],
     Forms: [],
+    FormReports: [],
     FormNewReports: [],
+    CustomServices: [],
     DataReports: [],
     PortalInfo: null,
     Groups: [],
@@ -2237,7 +2240,9 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     },
     Pages: pages,
     Forms: forms,
+    FormReports: [],
     FormNewReports: formNewReports,
+    CustomServices: [],
     DataReports: [],
     PortalInfo: null,
     Groups: [],

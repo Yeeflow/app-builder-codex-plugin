@@ -650,6 +650,7 @@ function validateAppPackage(decoded, errors, warnings, appId) {
     forms: 0,
     formReports: 0,
     formNewReports: 0,
+    customServices: 0,
     dataReports: 0,
     childs: 0,
     fields: 0,
@@ -688,11 +689,13 @@ function validateAppPackage(decoded, errors, warnings, appId) {
     validateRootNavigation(decoded, errors);
   }
   counts.pages = asArray(decoded.Pages).length;
-  if (decoded.FormReports !== undefined && !Array.isArray(decoded.FormReports)) add(errors, "FORMREPORTS_LEGACY_INVALID", "Legacy AppPackageInfo.FormReports may be present for old packages, but it must be an array when present and is not required for generated YAPK apps.", { path: "FormReports" });
+  if (!Array.isArray(decoded.FormReports)) add(errors, "FORMREPORTS_EXPORT_SHAPE_REQUIRED", "Official AppPackageInfo export shape requires FormReports to be present as an array, even when empty.", { path: "FormReports" });
   if (!Array.isArray(decoded.FormNewReports)) add(errors, "FORMNEWREPORTS_REQUIRED", "AppPackageInfo.FormNewReports is the current workflow report collection and must be present as an array, even when empty.", { path: "FormNewReports" });
+  if (!Array.isArray(decoded.CustomServices)) add(errors, "CUSTOMSERVICES_EXPORT_SHAPE_REQUIRED", "Official AppPackageInfo export shape requires CustomServices to be present as an array, even when empty.", { path: "CustomServices" });
   if (asArray(decoded.FormReports).length > 0 && asArray(decoded.FormNewReports).length === 0) add(errors, "FORMREPORTS_LEGACY_NOT_CURRENT", "Workflow reports must be generated in FormNewReports. FormReports is legacy and cannot be the only workflow report collection.", { path: "FormReports" });
   counts.formReports = asArray(decoded.FormReports).length;
   counts.formNewReports = asArray(decoded.FormNewReports).length;
+  counts.customServices = asArray(decoded.CustomServices).length;
   counts.dataReports = asArray(decoded.DataReports).length;
   counts.agents = asArray(decoded.Agents).length;
   counts.connections = asArray(decoded.Connections).length;

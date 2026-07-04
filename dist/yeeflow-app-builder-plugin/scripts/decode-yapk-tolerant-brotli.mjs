@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
-import zlib from "node:zlib";
 import { pathToFileURL } from "node:url";
-import { quoteLargeJsonIntegers } from "./lib/yapk-decode-utils.mjs";
+import { decodeBrotliTextTolerant, quoteLargeJsonIntegers } from "./lib/yapk-decode-utils.mjs";
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -24,7 +23,7 @@ export function decodeYapkTolerantBrotli(packagePath) {
     const buffers = candidateBuffers(normalized);
     for (const candidate of buffers) {
       try {
-        const decoded = zlib.brotliDecompressSync(candidate.buffer).toString("utf8");
+        const decoded = decodeBrotliTextTolerant(candidate.buffer);
         const parsed = JSON.parse(quoteLargeJsonIntegers(decoded));
         attempts.push({ mode: candidate.mode, status: "pass" });
         return {
@@ -49,7 +48,7 @@ function normalizeResourceString(resource) {
 }
 
 function candidateBuffers(resource) {
-  const candidates = [{ mode: "base64-strict", buffer: Buffer.from(resource, "base64") }];
+  const candidates = [{ mode: "base64-tolerant", buffer: Buffer.from(resource, "base64") }];
   const padded = resource.padEnd(Math.ceil(resource.length / 4) * 4, "=");
   if (padded !== resource) candidates.push({ mode: "base64-padded", buffer: Buffer.from(padded, "base64") });
   const urlSafe = padded.replace(/-/g, "+").replace(/_/g, "/");

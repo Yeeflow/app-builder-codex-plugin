@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.116`
+- Version: `0.8.117`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.116` adds Custom Code and Custom Service App Plan planning requirements, including native capability decisions, custom capability plan tables, invocation/proof planning, and placeholder non-materialization gates.
+Current release `0.8.117` adds official YAPK Resource export compatibility: generated `.yapk` wrappers use Yeeflow-compatible tolerant Brotli Resource encoding, preserve empty `FormReports: []` and `CustomServices: []` surfaces, and validators use shared tolerant decode for official exports before signing or install readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.116
+Version: 0.8.117
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.116
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.117
 ```
 
 ## What Is Included

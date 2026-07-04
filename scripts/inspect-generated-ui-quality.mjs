@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import zlib from "node:zlib";
+import { readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -107,7 +108,7 @@ function decodeInput(inputPath, findings, largeNumbers) {
   const parsed = parseJson(fs.readFileSync(inputPath, "utf8").replace(/^\uFEFF/, ""), largeNumbers);
   if (typeof parsed?.Resource === "string") {
     if (!parsed.Resource.startsWith(GZIP_PREFIX) && inputPath.toLowerCase().endsWith(".yapk")) {
-      const decoded = parseJson(zlib.brotliDecompressSync(Buffer.from(parsed.Resource, "base64")).toString("utf8"), largeNumbers);
+      const decoded = readDecodedYapk(inputPath).decoded;
       return normalizeYapkAppPackage(decoded);
     }
     if (!parsed.Resource.startsWith(GZIP_PREFIX)) {

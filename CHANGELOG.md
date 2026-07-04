@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.8.117
+
+- Release official YAPK Resource export compatibility.
+- Encode generated `.yapk` wrapper `Resource` values with Yeeflow official-export-compatible tolerant Brotli shape instead of standard complete Node Brotli.
+- Preserve official AppPackageInfo export surfaces by emitting `FormReports: []` and `CustomServices: []` arrays even when no report or custom service resources are planned.
+- Route public package validators and related YAPK inspectors through the shared tolerant Brotli decoder so current Yeeflow official exports do not fail strict decode before package-shape validation.
+- Add focused source/dist regression coverage for official Resource strict-decode failure, tolerant decode success, and required empty `FormReports` / `CustomServices` array gates.
+
 ## 0.8.116
 
 - Release Custom Capability App Plan planning.

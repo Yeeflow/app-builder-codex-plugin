@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import zlib from "node:zlib";
+import { readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 
 const GZIP_PREFIX = "[______gizp______]";
 const BROTLI_PREFIX = Buffer.from("::brotli::", "utf8");
@@ -46,7 +47,7 @@ function walk(value, visitor, pointer = "$") {
 function decodeInput(file) {
   const parsed = JSON.parse(fs.readFileSync(file, "utf8").replace(/^\uFEFF/, ""));
   if (typeof parsed.Resource === "string" && file.toLowerCase().endsWith(".yapk")) {
-    return JSON.parse(zlib.brotliDecompressSync(Buffer.from(parsed.Resource, "base64")).toString("utf8"));
+    return readDecodedYapk(file).decoded;
   }
   if (typeof parsed.Resource === "string" && parsed.Resource.startsWith(GZIP_PREFIX)) {
     const decoded = JSON.parse(zlib.gunzipSync(Buffer.from(parsed.Resource.slice(GZIP_PREFIX.length), "base64")).toString("utf8"));
