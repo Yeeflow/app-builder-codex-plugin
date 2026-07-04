@@ -1061,7 +1061,8 @@
                                     "border": {
                                       "type": "0"
                                     },
-                                    "c": "var(--c--background)"
+                                    "c": "var(--c--background)",
+                                    "bg": "rgba(255, 255, 255, 0)"
                                   },
                                   "ins": [
                                     null,
@@ -1101,7 +1102,8 @@
                                     "border": {
                                       "type": "0"
                                     },
-                                    "c": "var(--c--background)"
+                                    "c": "var(--c--background)",
+                                    "bg": "rgba(255, 255, 255, 0)"
                                   },
                                   "ins": [
                                     null,
@@ -1383,6 +1385,15 @@
                       "space": [
                         null,
                         "--sp--s150"
+                      ],
+                      "pd": [
+                        null,
+                        {
+                          "top": "--sp--s0",
+                          "right": "--sp--s0",
+                          "bottom": "--sp--s0",
+                          "left": "--sp--s0"
+                        }
                       ]
                     },
                     "common": {
@@ -1614,7 +1625,20 @@
         "nv_label": null,
         "label": "Dynamic user",
         "type": "dynamic-user",
-        "field": "Text10"
+        "field": "Text10",
+        "attrs": {
+          "item_style": {
+            "pd": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        }
       },
       {
         "pointer": "$.children[7]",
@@ -2152,7 +2176,20 @@
         "id": "5909e25e-2399-46fc-98df-75f94ed76561",
         "nv_label": null,
         "label": "Dynamic user",
-        "type": "dynamic-user"
+        "type": "dynamic-user",
+        "attrs": {
+          "item_style": {
+            "pd": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        }
       },
       {
         "pointer": "$.children[1].children[0].children[7]",
@@ -2273,7 +2310,20 @@
         "id": "5909e25e-2399-46fc-98df-75f94ed76561",
         "nv_label": null,
         "label": "Dynamic user",
-        "type": "dynamic-user"
+        "type": "dynamic-user",
+        "attrs": {
+          "item_style": {
+            "pd": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        }
       },
       {
         "pointer": "$.children[1].children[0].children[7]",

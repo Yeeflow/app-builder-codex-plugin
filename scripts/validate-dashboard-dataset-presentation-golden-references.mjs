@@ -84,6 +84,14 @@ const GRID_MULTISELECT_TEMPLATE_RESIDUE = [
   "Progress bar",
 ];
 const TEMPLATE_PLACEHOLDER_RE = /\{\{[^{}]+\}\}/g;
+const DYNAMIC_USER_ZERO_ITEM_PADDING = {
+  top: "--sp--s0",
+  right: "--sp--s0",
+  bottom: "--sp--s0",
+  left: "--sp--s0",
+};
+const OP_MENU_BUTTON_TRANSPARENT_BG = "rgba(255, 255, 255, 0)";
+const GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY = [null, "l-medium"];
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -190,6 +198,18 @@ function validateResponsiveCardGridTemplateArtifact(registry, findings, options 
       actual: title?.attrs?.heads ?? null,
     }));
   }
+  validateDynamicUserItemPadding(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_DYNAMIC_USER_ITEM_PADDING_NOT_S0",
+    templateId: "collection_control_responsive_card_grid",
+  });
+  validateOpMenuButtonTransparentBackground(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_OP_MENU_BUTTON_NORMAL_BG_NOT_TRANSPARENT",
+    templateId: "collection_control_responsive_card_grid",
+  });
+  validateGridTableCaptionTitleTypography(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID",
+    templateId: "collection_control_responsive_card_grid",
+  });
 }
 
 function validateCardMultiselectTemplateArtifact(registry, findings, options = {}) {
@@ -227,6 +247,18 @@ function validateCardMultiselectTemplateArtifact(registry, findings, options = {
   }
   validateTemplateTextControls(template, findings, {
     codePrefix: "DASH_DATASET_CARD_MULTISELECT_TEMPLATE",
+    templateId: "collection_control_card_with_multiselect_toolbar",
+  });
+  validateDynamicUserItemPadding(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_DYNAMIC_USER_ITEM_PADDING_NOT_S0",
+    templateId: "collection_control_card_with_multiselect_toolbar",
+  });
+  validateOpMenuButtonTransparentBackground(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_OP_MENU_BUTTON_NORMAL_BG_NOT_TRANSPARENT",
+    templateId: "collection_control_card_with_multiselect_toolbar",
+  });
+  validateGridTableCaptionTitleTypography(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID",
     templateId: "collection_control_card_with_multiselect_toolbar",
   });
 }
@@ -280,6 +312,18 @@ function validateGridTableTemplateArtifact(registry, findings, options = {}) {
   }
   validateTemplateTextControls(template, findings, {
     codePrefix: "DASH_DATASET_GRID_TABLE_TEMPLATE",
+    templateId: "collection_control_grid_table",
+  });
+  validateDynamicUserItemPadding(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_DYNAMIC_USER_ITEM_PADDING_NOT_S0",
+    templateId: "collection_control_grid_table",
+  });
+  validateOpMenuButtonTransparentBackground(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_OP_MENU_BUTTON_NORMAL_BG_NOT_TRANSPARENT",
+    templateId: "collection_control_grid_table",
+  });
+  validateGridTableCaptionTitleTypography(template.templateResource?.rootContainer, findings, {
+    code: "DASH_DATASET_TEMPLATE_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID",
     templateId: "collection_control_grid_table",
   });
 }
@@ -354,6 +398,18 @@ function validateGridMultiselectTemplateArtifact(registry, findings, options = {
   }
   validateTemplateTextControls(template, findings, {
     codePrefix: "DASH_DATASET_GRID_MULTISELECT_TEMPLATE",
+    templateId: "collection_control_grid_table_with_multiselect",
+  });
+  validateDynamicUserItemPadding(root, findings, {
+    code: "DASH_DATASET_TEMPLATE_DYNAMIC_USER_ITEM_PADDING_NOT_S0",
+    templateId: "collection_control_grid_table_with_multiselect",
+  });
+  validateOpMenuButtonTransparentBackground(root, findings, {
+    code: "DASH_DATASET_TEMPLATE_OP_MENU_BUTTON_NORMAL_BG_NOT_TRANSPARENT",
+    templateId: "collection_control_grid_table_with_multiselect",
+  });
+  validateGridTableCaptionTitleTypography(root, findings, {
+    code: "DASH_DATASET_TEMPLATE_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID",
     templateId: "collection_control_grid_table_with_multiselect",
   });
 }
@@ -744,6 +800,7 @@ function validatePackage(packagePath, registryInfo, findings) {
 
 function validateCollectionEntry(entry, page, approvedIds, findings, context = {}) {
   if (isMasterDetailWorkspaceInternalCollection(entry, page)) {
+    validateCollectionStyleContracts(entry, page, findings, { templateId: "master-detail-workspace-internal" });
     validateCollectionRuntimeBindings(entry, page, findings, context);
     validateMasterDetailWorkspaceCollection(entry, page, findings);
     return;
@@ -760,6 +817,7 @@ function validateCollectionEntry(entry, page, approvedIds, findings, context = {
   }
 
   validateCollectionRuntimeBindings(entry, page, findings, context);
+  validateCollectionStyleContracts(entry, page, findings, { templateId: provenance.templateId });
   if (GRID_TABLE_IDS.has(provenance.templateId)) validateGridTable(entry, page, provenance.templateId, findings);
   if (MULTISELECT_IDS.has(provenance.templateId)) validateMultiselect(entry, page, provenance.templateId, findings);
   if (provenance.templateId === "collection_control_responsive_card_grid" || provenance.templateId === "collection_control_card_with_multiselect_toolbar") validateCard(entry, page, findings);
@@ -1750,6 +1808,101 @@ function validateEventPipeline(entry, page, findings) {
   if (!ancestorIds.has("Event Pipeline Grid-Table")) {
     findings.push(error("DASH_DATASET_EVENT_PIPELINE_REGION_MISSING", "Event Pipeline Grid-Table Collections must live inside the Event Pipeline Grid-Table reference region.", { page: page.title, path: entry.pointer }));
   }
+}
+
+function validateCollectionStyleContracts(entry, page, findings, { templateId } = {}) {
+  const roots = [
+    findNearestAncestorByIdentity(entry, "collection_control_responsive_card_wrapper"),
+    findNearestAncestorByIdentity(entry, "card_with_multiselect_toolbar_wrapper"),
+    findNearestAncestorByIdentity(entry, "grid_table_col_wrapper"),
+    findNearestAncestorByIdentity(entry, "grid_table_col_multiselect_wrapper"),
+    findNearestAncestorByIdentity(entry, "Event Pipeline Grid-Table"),
+    entry.control,
+  ].filter(Boolean);
+  const root = roots[0] || entry.control;
+  validateDynamicUserItemPadding(root, findings, {
+    code: "DASH_DATASET_DYNAMIC_USER_ITEM_PADDING_NOT_S0",
+    page: page.title,
+    path: entry.pointer,
+    templateId,
+  });
+  validateOpMenuButtonTransparentBackground(root, findings, {
+    code: "DASH_DATASET_OP_MENU_BUTTON_NORMAL_BG_NOT_TRANSPARENT",
+    page: page.title,
+    path: entry.pointer,
+    templateId,
+  });
+  validateGridTableCaptionTitleTypography(root, findings, {
+    code: "DASH_DATASET_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID",
+    page: page.title,
+    path: entry.pointer,
+    templateId,
+  });
+}
+
+function validateDynamicUserItemPadding(root, findings, context = {}) {
+  for (const control of findDescendants(root, (node) => String(node?.type || "") === "dynamic-user")) {
+    const pd = control?.attrs?.item_style?.pd;
+    if (!isZeroItemPadding(pd)) {
+      findings.push(error(context.code || "DASH_DATASET_DYNAMIC_USER_ITEM_PADDING_NOT_S0", "Dynamic user controls inside Dashboard Collection templates must set attrs.item_style.pd to zero spacing on all sides.", {
+        page: context.page || null,
+        path: context.path || null,
+        templateId: context.templateId || null,
+        control: identityCandidates(control)[0] || control.id || null,
+        expected: [null, DYNAMIC_USER_ZERO_ITEM_PADDING],
+        actual: pd ?? null,
+      }));
+    }
+  }
+}
+
+function validateOpMenuButtonTransparentBackground(root, findings, context = {}) {
+  for (const menu of findDescendants(root, (node) => identityCandidates(node).map(normalizeIdentity).includes(normalizeIdentity("grid_table_col_item_op_menu")))) {
+    for (const button of findDescendants(menu, (node) => ["action_button", "button"].includes(String(node?.type || "")))) {
+      const bg = button?.attrs?.button?.normal?.bg;
+      if (bg !== OP_MENU_BUTTON_TRANSPARENT_BG) {
+        findings.push(error(context.code || "DASH_DATASET_OP_MENU_BUTTON_NORMAL_BG_NOT_TRANSPARENT", "Buttons inside grid_table_col_item_op_menu must use a transparent normal background.", {
+          page: context.page || null,
+          path: context.path || null,
+          templateId: context.templateId || null,
+          button: identityCandidates(button)[0] || button.id || null,
+          expected: OP_MENU_BUTTON_TRANSPARENT_BG,
+          actual: bg ?? null,
+        }));
+      }
+    }
+  }
+}
+
+function isZeroItemPadding(pd) {
+  return Array.isArray(pd)
+    && pd[0] === null
+    && isObject(pd[1])
+    && Object.entries(DYNAMIC_USER_ZERO_ITEM_PADDING).every(([side, value]) => pd[1][side] === value);
+}
+
+function validateGridTableCaptionTitleTypography(root, findings, context = {}) {
+  for (const caption of findDescendants(root, (node) => identityCandidates(node).map(normalizeIdentity).includes(normalizeIdentity("grid_table_col_caption")))) {
+    for (const title of findDescendants(caption, (node) => identityCandidates(node).map(normalizeIdentity).includes(normalizeIdentity("grid_table_col_title")))) {
+      const ty = title?.attrs?.heads?.ty;
+      if (!isGridTableCaptionTitleTypography(ty)) {
+        findings.push(error(context.code || "DASH_DATASET_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID", "grid_table_col_caption > grid_table_col_title must use Large medium typography.", {
+          page: context.page || null,
+          path: context.path || null,
+          templateId: context.templateId || null,
+          control: identityCandidates(title)[0] || title.id || null,
+          expected: GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY,
+          actual: ty ?? null,
+        }));
+      }
+    }
+  }
+}
+
+function isGridTableCaptionTitleTypography(ty) {
+  return Array.isArray(ty)
+    && ty.length === GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY.length
+    && ty.every((value, index) => value === GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY[index]);
 }
 
 function collectDashboardPages(decoded) {

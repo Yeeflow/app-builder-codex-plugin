@@ -243,20 +243,36 @@ assert.deepEqual(layoutsByList.get("Ticket Attachments"), ["Ticket Attachments N
 
 const seedData = JSON.parse(fs.readFileSync(report.outputs.seedData, "utf8"));
 const ticketSeed = seedData.lists.find((list) => list.listTitle === "Tickets");
+const commentSeed = seedData.lists.find((list) => list.listTitle === "Ticket Comments");
 const attachmentSeed = seedData.lists.find((list) => list.listTitle === "Ticket Attachments");
 assert.ok(ticketSeed, "Seed artifact must include Tickets list instructions");
+assert.ok(commentSeed, "Seed artifact must include Ticket Comments list instructions");
 assert.ok(attachmentSeed, "Seed artifact must include Ticket Attachments list instructions");
 const requesterSeed = ticketSeed.rows[0][ticketFields.get("Requester").FieldName];
 const assignedAgentSeed = ticketSeed.rows[0][ticketFields.get("Assigned Agent").FieldName];
+const commentTicketLookupSeed = commentSeed.rows[0][commentFields.get("Ticket").FieldName];
+const attachmentTicketLookupSeed = attachmentSeed.rows[0][attachmentFields.get("Ticket").FieldName];
 const fileSeed = attachmentSeed.rows[0][attachmentFields.get("File").FieldName];
 assert.equal(requesterSeed?.seedValueType, "identity-picker", "identity-picker seed values must be structured live-user resolution placeholders, not plain strings");
 assert.equal(requesterSeed?.requiresLiveUserResolution, true, "identity-picker seed values must require live tenant user resolution");
 assert.equal(assignedAgentSeed?.seedValueType, "identity-picker", "Assigned Agent seed values must use the identity-picker seed contract");
+assert.equal(commentTicketLookupSeed?.seedValueType, "lookup", "Ticket Comments lookup seed values must be structured lookup resolution placeholders, not plain strings");
+assert.equal(commentTicketLookupSeed?.requiresLookupListDataIDResolution, true, "Ticket Comments lookup seed values must require target ListDataID resolution");
+assert.equal(commentTicketLookupSeed?.targetListId, tickets.List.ListID, "Ticket Comments lookup seed must point to the Tickets target list");
+assert.equal(commentTicketLookupSeed?.storedValueField, "ListDataID", "Lookup seed values must store the target record ListDataID");
+assert.equal(commentTicketLookupSeed?.mustNotUseDisplayTextAsStoredValue, true, "Lookup seed values must forbid display-title storage");
+assert.equal(attachmentTicketLookupSeed?.seedValueType, "lookup", "Ticket Attachments lookup seed values must use the lookup seed contract");
+assert.equal(attachmentTicketLookupSeed?.targetListId, tickets.List.ListID, "Ticket Attachments lookup seed must point to the Tickets target list");
+assert.equal(attachmentTicketLookupSeed?.storedValueField, "ListDataID", "Ticket Attachments lookup seed must store ListDataID");
 assert.equal(fileSeed?.seedValueType, "file-upload", "file-upload seed values must be structured file reference placeholders, not plain strings");
 assert.equal(fileSeed?.requiresFileUploadReference, true, "file-upload seed values must require a file upload reference before live write");
 assert.ok(
   ticketSeed.fieldSeedRequirements.some((requirement) => requirement.displayName === "Requester" && requirement.requiresLiveUserResolution),
   "Seed artifact must declare identity-picker live-user requirements",
+);
+assert.ok(
+  commentSeed.fieldSeedRequirements.some((requirement) => requirement.displayName === "Ticket" && requirement.requiresLookupListDataIDResolution && requirement.storedValueField === "ListDataID"),
+  "Seed artifact must declare lookup target ListDataID resolution requirements",
 );
 assert.ok(
   attachmentSeed.fieldSeedRequirements.some((requirement) => requirement.displayName === "File" && requirement.requiresFileUploadReference),
@@ -280,7 +296,7 @@ console.log(JSON.stringify({
     "dashboard page-layout and hard-gate validators pass",
     "generated-final first-generation preflight passes and blocks stale embedded Dashboard IDs before signing",
     "custom forms assigned to correct host lists",
-    "seed artifacts use structured identity-picker and file-upload contracts",
+    "seed artifacts use structured identity-picker, lookup, and file-upload contracts",
     "template business residue absent",
   ],
 }, null, 2));

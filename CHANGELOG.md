@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.3
+
+- Release Dashboard Collection style contract hardening.
+- Enforce approved Collection template style fidelity for dynamic-user zero item padding, transparent operation menu buttons, and Large medium grid-table caption title typography.
+- Add source/dist dataset-presentation regression coverage for Collection template artifact drift and generated package typography drift.
+- Harden App Plan field-table parsing and lookup seed data proof so planned fields and lookup ListDataID storage remain generation/runtime-safe.
+
+
 ## 0.9.2
 
 - Release Dashboard v1.1 Summary host and identity-field hardening.

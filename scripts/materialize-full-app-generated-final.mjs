@@ -56,6 +56,14 @@ const GRID_TABLE_TEMPLATE_IDS = new Set([
   "collection_control_grid_table_with_multiselect",
   "Event Pipeline Grid-Table",
 ]);
+const COLLECTION_DYNAMIC_USER_ZERO_ITEM_PADDING = Object.freeze({
+  top: "--sp--s0",
+  right: "--sp--s0",
+  bottom: "--sp--s0",
+  left: "--sp--s0",
+});
+const COLLECTION_OP_MENU_BUTTON_TRANSPARENT_BG = "rgba(255, 255, 255, 0)";
+const COLLECTION_GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY = Object.freeze([null, "l-medium"]);
 const SOURCE_COLLECTION_TEMPLATE_IDS = {
   listSetIds: new Set(["2058726109535285249", "2058571956842409984", "2054077087595905025"]),
   listIds: new Set(["2058726119586017281", "2058571966637289476", "2054077096447066112"]),
@@ -285,14 +293,15 @@ export function materializeFullAppGeneratedFinal(options = {}) {
 }
 
 function buildSeedDataArtifact(decoded) {
+  const childByListId = new Map((decoded.Childs || []).map((child) => [stringId(child.List?.ListID || child.ListID || ""), child]));
   const lists = (decoded.Childs || []).map((child) => {
     const fields = (child.Fields || []).filter((field) => Number(field.Status) !== 0 || field.FieldName === "Title");
     const fieldSeedRequirements = fields
-      .map((field) => seedRequirementForField(field))
+      .map((field) => seedRequirementForField(field, { childByListId }))
       .filter(Boolean);
     const rows = [0, 1, 2].map((rowIndex) => {
       const row = {};
-      for (const field of fields.slice(0, 8)) row[field.FieldName] = sampleValueForField(field, rowIndex);
+      for (const field of fields.slice(0, 8)) row[field.FieldName] = sampleValueForField(field, rowIndex, { childByListId });
       return row;
     });
     return {
@@ -312,7 +321,7 @@ function buildSeedDataArtifact(decoded) {
   };
 }
 
-function sampleValueForField(field, index) {
+function sampleValueForField(field, index, context = {}) {
   if (field.FieldName === "Title") return `${field.DisplayName || "Item"} ${index + 1}`;
   if (field.FieldType === "Bit") return index % 2 === 0 ? "1" : "0";
   if (field.FieldType === "Datetime") return `2026-07-${String(index + 1).padStart(2, "0")}`;
@@ -331,6 +340,24 @@ function sampleValueForField(field, index) {
     resolutionStrategy: "leave-empty-until-file-upload-reference-is-available",
     displayName: field.DisplayName || field.FieldName,
   };
+  if (field.Type === "lookup") {
+    const rules = parseJsonMaybe(field.Rules) || {};
+    const targetListId = stringId(rules.listid || rules.ListID || "");
+    const targetChild = context.childByListId?.get(targetListId);
+    return {
+      seedValueType: "lookup",
+      value: null,
+      requiresLookupListDataIDResolution: true,
+      resolutionStrategy: "write-target-list-first-readback-listdataid-before-live-write",
+      storedValueField: "ListDataID",
+      targetListId,
+      targetListTitle: targetChild?.List?.Title || targetChild?.List?.Name || "",
+      displayField: cleanResourceName(rules.listfield || rules.displayField || rules.fieldName || "Title") || "Title",
+      displayValueHint: `${targetChild?.List?.Title || targetChild?.List?.Name || "Target record"} ${index + 1}`,
+      mustNotUseDisplayTextAsStoredValue: true,
+      displayName: field.DisplayName || field.FieldName,
+    };
+  }
   if (field.Type === "select") {
     const rules = parseJsonMaybe(field.Rules) || {};
     return String(rules.choices?.[index % Math.max(1, rules.choices.length)]?.value || "Active");
@@ -338,7 +365,7 @@ function sampleValueForField(field, index) {
   return `${field.DisplayName || field.FieldName} ${index + 1}`;
 }
 
-function seedRequirementForField(field) {
+function seedRequirementForField(field, context = {}) {
   if (field?.Type === "identity-picker") {
     return {
       fieldName: field.FieldName,
@@ -355,6 +382,22 @@ function seedRequirementForField(field) {
       controlType: "file-upload",
       requiresFileUploadReference: true,
       mustNotUsePlainStringSeed: true,
+    };
+  }
+  if (field?.Type === "lookup") {
+    const rules = parseJsonMaybe(field.Rules) || {};
+    const targetListId = stringId(rules.listid || rules.ListID || "");
+    const targetChild = context.childByListId?.get(targetListId);
+    return {
+      fieldName: field.FieldName,
+      displayName: field.DisplayName || field.FieldName,
+      controlType: "lookup",
+      requiresLookupListDataIDResolution: true,
+      targetListId,
+      targetListTitle: targetChild?.List?.Title || targetChild?.List?.Name || "",
+      displayField: cleanResourceName(rules.listfield || rules.displayField || rules.fieldName || "Title") || "Title",
+      storedValueField: "ListDataID",
+      mustNotUseDisplayTextAsStoredValue: true,
     };
   }
   return null;
@@ -848,12 +891,12 @@ function collectDataListFieldSpecs(planText) {
     const normalizedHeaders = headers.map((header) => normKey(header));
     const listColumn = findHeaderIndex(normalizedHeaders, ["list", "data list", "data list name", "list name", "document library", "source list"]);
     const displayColumn = findHeaderIndex(normalizedHeaders, ["display name", "field display name", "business field", "field name", "field label", "label", "name"]);
-    const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "internal name", "internal field", "field id", "fieldname"]);
+    const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "internal name", "internal field", "field id", "fieldname", "storage name", "storage field", "storage field name"]);
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "yeeflow field type", "field type", "business type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "yeeflow type", "control type", "control"]);
     const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "values"]);
     const purposeColumn = findHeaderIndex(normalizedHeaders, ["purpose", "business purpose", "description", "notes"]);
-    if (displayColumn === -1 || fieldTypeColumn === -1) continue;
+    if (displayColumn === -1 || (fieldTypeColumn === -1 && controlTypeColumn === -1)) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
@@ -868,11 +911,13 @@ function collectDataListFieldSpecs(planText) {
         rowIndex += 1;
         continue;
       }
-      const fieldType = cleanResourceName(cells[fieldTypeColumn]) || "Text";
+      const explicitControlType = controlTypeColumn === -1 ? "" : cleanResourceName(cells[controlTypeColumn]);
+      const fieldType = fieldTypeColumn === -1
+        ? inferFieldTypeFromControlPlan({ displayName, controlType: explicitControlType })
+        : cleanResourceName(cells[fieldTypeColumn]) || inferFieldTypeFromControlPlan({ displayName, controlType: explicitControlType });
       const purpose = purposeColumn === -1 ? "" : cleanResourceName(cells[purposeColumn]);
       const purposeChoiceValues = choiceValuesFromPurpose({ displayName, fieldType, purpose });
       const choiceValues = choiceColumn === -1 ? purposeChoiceValues : cleanResourceName(cells[choiceColumn]) || purposeChoiceValues;
-      const explicitControlType = controlTypeColumn === -1 ? "" : cleanResourceName(cells[controlTypeColumn]);
       const controlType = explicitControlType || inferControlTypeFromFieldPlan({ displayName, fieldType, choiceValues });
       const fieldName = cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, fieldType, byList[normKey(rowList)].length);
       byList[normKey(rowList)].push({
@@ -2498,6 +2543,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     listId,
     detailLayoutId: sourceListMeta.detailLayoutId,
   });
+  enforceCollectionTemplateStyleContracts(resource);
   return resource;
 }
 
@@ -2808,6 +2854,7 @@ function mapDynamicControlsForList(root, listMeta, rootListSetId) {
         field: field.fieldName,
         fieldName: field.fieldName,
       };
+      applyCollectionDynamicUserItemPadding(control);
     }
     control.name = field.displayName;
     control.title = field.displayName;
@@ -2816,6 +2863,39 @@ function mapDynamicControlsForList(root, listMeta, rootListSetId) {
     setSemanticNavigatorLabel(control, navLabel);
     updateMasterDetailFieldLabel(root, control, field);
   }
+}
+
+function enforceCollectionTemplateStyleContracts(root) {
+  for (const caption of findDescendants(root, (node) => hasIdentity(node, "grid_table_col_caption"))) {
+    for (const title of findDescendants(caption, (node) => hasIdentity(node, "grid_table_col_title"))) {
+      applyGridTableCaptionTitleTypography(title);
+    }
+  }
+  for (const control of findDescendants(root, (node) => String(node?.type || "") === "dynamic-user")) {
+    applyCollectionDynamicUserItemPadding(control);
+  }
+  for (const opMenu of findDescendants(root, (node) => hasIdentity(node, "grid_table_col_item_op_menu"))) {
+    for (const button of findDescendants(opMenu, (node) => ["action_button", "button"].includes(String(node?.type || "")))) {
+      button.attrs = button.attrs || {};
+      button.attrs.button = button.attrs.button || {};
+      button.attrs.button.normal = {
+        ...(button.attrs.button.normal || {}),
+        bg: COLLECTION_OP_MENU_BUTTON_TRANSPARENT_BG,
+      };
+    }
+  }
+}
+
+function applyCollectionDynamicUserItemPadding(control) {
+  control.attrs = control.attrs || {};
+  control.attrs.item_style = control.attrs.item_style || {};
+  control.attrs.item_style.pd = [null, { ...COLLECTION_DYNAMIC_USER_ZERO_ITEM_PADDING }];
+}
+
+function applyGridTableCaptionTitleTypography(control) {
+  control.attrs = control.attrs || {};
+  control.attrs.heads = control.attrs.heads || {};
+  control.attrs.heads.ty = [...COLLECTION_GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY];
 }
 
 function instantiateDashboardControlUuids(resource, pageSeed) {
@@ -3844,6 +3924,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
         field: field.fieldName,
         fieldName: field.fieldName,
       };
+      applyCollectionDynamicUserItemPadding(control);
     }
     control.name = field.displayName;
     control.title = field.displayName;
@@ -3875,6 +3956,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
     listId,
     detailLayoutId,
   });
+  enforceCollectionTemplateStyleContracts(root);
   root.pageLevelDependencies = scopedPageDependencies.dependencies;
   root.generatedFrom = { dashboardName, templateId, sourceResource: listName };
   return root;
@@ -5934,6 +6016,14 @@ function inferControlType(fieldType) {
 function inferControlTypeFromFieldPlan({ displayName, fieldType, choiceValues }) {
   if (String(choiceValues || "").trim()) return "select";
   return inferControlType(fieldType || displayName || "");
+}
+
+function inferFieldTypeFromControlPlan({ displayName, controlType }) {
+  const normalized = normKey(`${controlType || ""} ${displayName || ""}`);
+  if (/date|datetime|timepicker|datepicker/.test(normalized)) return "Datetime";
+  if (/number|decimal|currency|amount|percent|integer|input number|input_number/.test(normalized)) return "Decimal";
+  if (/switch|bit|boolean|yes no|flag|checkbox/.test(normalized)) return "Bit";
+  return "Text";
 }
 
 function choiceValuesFromPurpose({ displayName, fieldType, purpose }) {

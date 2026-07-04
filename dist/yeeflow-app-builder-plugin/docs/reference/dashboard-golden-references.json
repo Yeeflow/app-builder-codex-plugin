@@ -6935,10 +6935,10 @@
                                           "pd": [
                                             null,
                                             {
-                                              "top": 0,
-                                              "right": 0,
-                                              "bottom": 0,
-                                              "left": 0
+                                              "top": "--sp--s0",
+                                              "right": "--sp--s0",
+                                              "bottom": "--sp--s0",
+                                              "left": "--sp--s0"
                                             }
                                           ]
                                         },

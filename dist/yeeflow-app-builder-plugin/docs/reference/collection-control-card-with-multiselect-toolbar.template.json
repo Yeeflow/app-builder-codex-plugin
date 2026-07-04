@@ -2334,6 +2334,15 @@
                       "space": [
                         null,
                         "--sp--s150"
+                      ],
+                      "pd": [
+                        null,
+                        {
+                          "top": "--sp--s0",
+                          "right": "--sp--s0",
+                          "bottom": "--sp--s0",
+                          "left": "--sp--s0"
+                        }
                       ]
                     },
                     "common": {
@@ -2998,7 +3007,20 @@
         "nv_label": null,
         "action": null,
         "binding": "Text10",
-        "children": 0
+        "children": 0,
+        "attrs": {
+          "item_style": {
+            "pd": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        }
       },
       {
         "pointer": "$.children[1].children[0].children[7]",
@@ -3276,7 +3298,20 @@
         "label": "Dynamic user",
         "binding": "Text10",
         "action": null,
-        "children": 0
+        "children": 0,
+        "attrs": {
+          "item_style": {
+            "pd": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        }
       },
       {
         "pointer": "$.children[1].children[0].children[7]",

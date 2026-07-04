@@ -75,10 +75,12 @@ Recommended editable behavior:
 - `card_col_title_wrapper` may change the `card_col_title` Text value to a business title derived from the selected Collection data source.
 - `op_normal` may add/delete normal-mode controls, but should retain the Search filter and Add item button when the selected Data List or Document Library source supports those actions. Search title/placeholder and Add item button text may be changed, but every button must keep a valid action binding.
 - `card_col_item` maps repeated card content to fields from the selected source resource. User fields use `dynamic-user`; image fields use `dynamic-image`; file or attachment fields use `dynamic-file`; all other fields use `dynamic-field`.
+- Every `dynamic-user` inside `card_col_item` must keep `attrs.item_style.pd = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`.
 - Do not emit `dynamic-image` if the selected data source has no image field.
 - `card_col_item` should include one subject-style Dynamic field based on the source `Survey Program name` role and preserve its Large/Semi bold visual role when a title/subject field exists.
 - `card_col_item_multi_select` contains `grid_table_col_item_op_menu` for single-record operations such as Edit or Delete. This region may be omitted when no item operations are needed.
 - Every `grid_table_col_item_op_menu` operation button must bind to a valid Collection action. Edit/Delete buttons require matching Collection actions. Delete requires the template delete-confirmation temp variable and conditional delete continuation before `setdatalist remove`.
+- Every Button/action_button inside `grid_table_col_item_op_menu` must keep `attrs.button.normal.bg = "rgba(255, 255, 255, 0)"`, including any additional business operation buttons generated under that menu.
 - If the region is display-only, `card_col_caption` and its descendants may be omitted.
 - If the source is a Form Report or Data Report, `card_col_caption`, `card_col_item_multi_select`, and item operation controls should not be emitted because report datasets are view-only.
 
@@ -101,12 +103,15 @@ Everything else is locked by default and must strictly preserve the template's e
 Recommended editable behavior:
 
 - `grid_table_col_title_wrapper` may change the `grid_table_col_title` Text value to a business title derived from the selected Collection data source.
+- When `grid_table_col_caption` contains `grid_table_col_title`, the title Text control must keep `attrs.heads.ty = [null, "l-medium"]` (Large medium). Business generation may change only the title value, not this typography token.
 - `op_normal` may add/delete controls, but should retain the Search filter and Add item button when the selected Data List or Document Library source supports those actions. Search placeholder and Add item button text may be changed, but every button must keep a valid action binding.
 - `grid_table_col_header` maps visible column labels to the selected source resource. `grid_col_item` maps repeated row content to fields from the same source resource.
 - User fields use `dynamic-user`; image fields use `dynamic-image`; file or attachment fields use `dynamic-file`; all other fields use `dynamic-field`.
+- Every `dynamic-user` inside `grid_col_item` must keep `attrs.item_style.pd = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }]`.
 - `grid_table_col_header` and `grid_col_item` must always have the same column count, column widths, and compatible grid properties after business mapping. The actual number of columns and whether a progress control is used depends on business fields; six columns and progress bars are not mandatory.
 - Header Text controls inside `grid_table_col_header_title_column` and `grid_table_col_header_column` must describe the corresponding field/content rendered in the matching `grid_col_item` column.
 - `grid_table_col_item_operations` is optional and may contain per-item actions such as Edit or Delete through `grid_table_col_item_op_menu`, but every action control must bind to a valid action. Edit/Delete buttons require matching Collection actions. Delete requires the template delete-confirmation temp variable and conditional delete continuation before `setdatalist remove`.
+- Every Button/action_button inside `grid_table_col_item_op_menu` must keep `attrs.button.normal.bg = "rgba(255, 255, 255, 0)"`, including newly generated business operation buttons.
 - If the region is display-only, `grid_table_col_caption` and its descendants may be omitted when no title/toolbar/actions are needed.
 - If the source is a Form Report or Data Report, `grid_table_col_caption`, `grid_table_col_item_operations`, and operation controls should not be emitted because report datasets are view-only.
 
@@ -129,6 +134,7 @@ Recommended editable behavior:
 - `op_normal` should retain the Search filter and Add item button unless a validated business rule removes one of them. Search placeholder text and Add button text may be changed.
 - `op_multipleselected` should retain a Delete selected items action. `btn_set_items` is optional, and additional batch buttons may be added only when each button has a valid action binding.
 - `card_col_item` maps item content to fields from the selected source resource. User fields use `dynamic-user`; image fields use `dynamic-image`; file or attachment fields use `dynamic-file`; all other fields use `dynamic-field`.
+- Every `dynamic-user` inside `card_col_item` must keep zero item padding on all four sides via `attrs.item_style.pd`.
 - `card_col_item` should include one subject-style Dynamic field based on the source `Survey Program name` control and preserve its Large/Semi bold visual role.
 - `card_col_item_operations` is optional and may contain per-item actions such as Edit or Delete, but every action control must bind to a valid action.
 
@@ -149,6 +155,9 @@ Recommended editable behavior:
 - Generated `search-filter` controls must serialize `attrs.placeholder` as primitive runtime input text, for example `"Search Loan Transactions"`. Do not keep export/helper wrapper objects such as `{ "value": "Search Loan Transactions" }`, and do not spread a string into numeric object keys. Browsers render object-shaped placeholders as `[object Object]`, so object placeholders are generated-final blockers even when the Collection template and fulltext linkage are otherwise valid.
 - Every Dynamic control inside a Collection item template must bind to one real field from the selected Collection data source and must expose the binding on all runtime/designer surfaces the Yeeflow runtime can consume: `attrs["obj-f"]`, `attrs.data.field`, `attrs.field`, and top-level `field`. These surfaces must agree after normalization.
 - User/identity fields must render with `dynamic-user` and must also carry `attrs.user.field`. Image fields use `dynamic-image`, file/attachment fields use `dynamic-file`, and all other display fields use `dynamic-field`. Rendering a user field as `dynamic-field`, or leaving any Dynamic control with a single template-era binding surface, is a generated-final blocker because records can appear blank or lose field context at runtime.
+- Every generated Collection `dynamic-user` must also preserve the zero item-padding style contract: `attrs.item_style.pd` must set top/right/bottom/left to `--sp--s0`.
+- If a generated Collection includes `grid_table_col_item_op_menu`, every inner Button/action_button normal state must use transparent background: `attrs.button.normal.bg = "rgba(255, 255, 255, 0)"`.
+- If a generated Collection includes `grid_table_col_caption > grid_table_col_title`, the title must use Large medium typography: `attrs.heads.ty = [null, "l-medium"]`.
 - Generated Dashboard Collection controls must carry or inherit approved template provenance through a clear field such as `datasetPresentationTemplateId`, `datasetPresentationReferenceId`, `derivedFromDatasetPresentationTemplate`, or the approved Golden Reference region identity.
 - For App Plan-declared Dashboard dataset regions, the generated Collection root must carry explicit template provenance. Ancestor-only inference is not enough for plan-to-package conformance because it can hide template collapse.
 - Generation must dispatch each Dashboard dataset region by the App Plan's selected template ID. Do not route all Dashboard Collections through `Event Pipeline Grid-Table`, generic grid-table, card fallback, or any other single default builder unless that exact template was selected for that exact region.
@@ -211,6 +220,7 @@ Run `scripts/validate-dashboard-dataset-presentation-golden-references.mjs` for:
 - generated package absence of unproven page-level select-filter variables consumed by Collection `op`/`operator = "9"` runtime conditions
 - generated package Collection data source resolution, real `attrs.data.sort[]` / Primary order fields, real fulltext fields, and complete Dynamic control field binding surfaces
 - generated package Dynamic control type compatibility with the selected source field type, including `dynamic-user` for user/identity fields
+- generated package Collection `dynamic-user` zero item padding, `grid_table_col_item_op_menu` transparent button backgrounds, and `grid_table_col_caption > grid_table_col_title` Large medium typography
 - App Plan-to-package region-level template conformance when both `--app-plan` and `--package` are provided
 - grid-table multiselect full-width, locked spacing, source-text replacement, row-select action wiring, and Designer-compatible filter condition shape
 - grid-table multiselect preservation of the real `grid_table_col_body` Collection root identity
