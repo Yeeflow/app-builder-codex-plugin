@@ -91,14 +91,18 @@ function validateAnalyticsControl(item, fieldMaps, findings) {
   const control = item.control;
   const controlId = scalar(control.id || control.ID || control.controlId);
   const label = scalar(control.attrs?.nv_label || control.title || control.name || item.analyticsType);
-  const exportProvenIdShape = control.attrs?.exportProvenRuntimeSafeIdShape === true
+  const exportProvenIdShape = item.analyticsType !== "Summary" && (
+    control.attrs?.exportProvenRuntimeSafeIdShape === true
     || control.exportProvenRuntimeSafeIdShape === true
-    || hasExportProvenSummaryIdShape(item, controlId);
+  );
 
   if (!controlId) {
     addFinding(findings, "error", "ANALYTICS_CONTROL_ID_MISSING", "Data Analytics controls require explicit stable control IDs.", { page: item.page.title, analyticsType: item.analyticsType, control: label });
   } else if (!UUID_RE.test(controlId) && !exportProvenIdShape) {
-    addFinding(findings, "error", "ANALYTICS_CONTROL_ID_NOT_RUNTIME_SAFE", "Data Analytics control IDs must be UUID-based unless an export-proven Yeeflow sample proves another ID shape for that exact control type.", { page: item.page.title, analyticsType: item.analyticsType, controlId });
+    const message = item.analyticsType === "Summary"
+      ? "Generated Summary controls must use UUID IDs; semantic/layout-derived Summary IDs are not runtime-proven for KPI writeback."
+      : "Data Analytics control IDs must be UUID-based unless an export-proven Yeeflow sample proves another ID shape for that exact control type.";
+    addFinding(findings, "error", "ANALYTICS_CONTROL_ID_NOT_RUNTIME_SAFE", message, { page: item.page.title, analyticsType: item.analyticsType, controlId });
   }
 
   const requiredExt = EXTS_REQUIRED.get(item.analyticsType);
@@ -290,20 +294,6 @@ function summaryTempVarDeclared(item, saveVarIds) {
     const candidates = [tempVar.id, tempVar.ID, tempVar.name, tempVar.Name].map(scalar).filter(Boolean);
     return candidates.some((candidate) => saveVarIds.includes(candidate));
   });
-}
-
-function hasExportProvenSummaryIdShape(item, controlId) {
-  if (item.analyticsType !== "Summary" || !controlId || UUID_RE.test(controlId)) return false;
-  const saveVar = item.control.attrs?.save_var || {};
-  const saveVarIds = [saveVar.id, saveVar.name].map(scalar).filter(Boolean);
-  if (!saveVarIds.length || !summaryTempVarDeclared(item, saveVarIds)) return false;
-  const exts = item.page.roots.flatMap((root) => asArray(root.exts || root.Exts));
-  const hasExt = exts.some((entry) =>
-    scalar(entry.i || entry.id || entry.ID) === controlId
-    && scalar(entry.category) === "___Pivot___"
-    && scalar(entry.key) === "summary"
-  );
-  return hasExt && pageOrResourceReportIds(item).includes(controlId);
 }
 
 function analyticsType(control) {

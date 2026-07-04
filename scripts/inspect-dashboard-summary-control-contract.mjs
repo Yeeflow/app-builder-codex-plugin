@@ -80,16 +80,6 @@ function hasExportProvenAlternativeReportIdsRegistration(item, controlId) {
     && item.page.reportIds.includes(controlId);
 }
 
-function hasExportProvenRuntimeSafeSummaryIdShape(item, controlId) {
-  if (!controlId || UUID_RE.test(controlId)) return false;
-  if (item.control.attrs?.exportProvenRuntimeSafeIdShape === true || item.control.exportProvenRuntimeSafeIdShape === true) return true;
-  const saveVar = item.control.attrs?.save_var || {};
-  const saveVarIds = [saveVar.id, saveVar.name].map(scalar).filter(Boolean);
-  return layoutResourceReportIds(item).includes(controlId)
-    && summaryTempVarDeclared(item, saveVarIds)
-    && summaryExtRegistrationExists(item, controlId);
-}
-
 function validateHiddenHost(item, findings) {
   const host = [...item.ancestors].reverse().find((ancestor) => ancestor?.attrs?.common?.hide || ancestor?.attrs?.display?.rule);
   if (!host) {
@@ -120,8 +110,11 @@ function validateSummary(item, pkg, fieldMaps, findings) {
 
   if (!controlId) {
     addFinding(findings, "error", "SUMMARY_CONTROL_ID_MISSING", "Summary controls require explicit stable control IDs.", { page: item.page.title });
-  } else if (!UUID_RE.test(controlId) && !hasExportProvenRuntimeSafeSummaryIdShape(item, controlId)) {
-    addFinding(findings, "error", "SUMMARY_CONTROL_ID_NOT_RUNTIME_SAFE", "Summary control IDs must be UUID-based unless an export-proven Yeeflow sample proves another ID shape for Summary.", { page: item.page.title, summaryId: controlId });
+  } else if (!UUID_RE.test(controlId)) {
+    addFinding(findings, "error", "SUMMARY_CONTROL_ID_NOT_RUNTIME_SAFE", "Generated Summary control IDs must be UUID-based. Semantic/layout-derived Summary IDs are not runtime-proven for dynamic KPI writeback.", { page: item.page.title, summaryId: controlId });
+  }
+  if ((item.control.runtimeModelProven === true || attrs.runtimeModelProven === true) && !UUID_RE.test(controlId)) {
+    addFinding(findings, "error", "SUMMARY_RUNTIME_MODEL_PROVEN_UNSUPPORTED_SHAPE", "Do not mark Summary runtimeModelProven=true unless the generated Summary uses the proven UUID runtime shape.", { page: item.page.title, summaryId: controlId || null });
   }
   validateSummaryExtRegistration(item, controlId, findings);
 
@@ -181,16 +174,44 @@ function summaryFieldMetadataComplete(attrs, fieldName) {
 
 function validateSummaryExtRegistration(item, controlId, findings) {
   if (!controlId) return;
-  if (summaryExtRegistrationExists(item, controlId)) return;
-  addFinding(findings, "error", "SUMMARY_EXTS_REGISTRATION_MISSING", "Summary controls require matching dashboard layout resource exts[] registration with i equal to the Summary control ID, category ___Pivot___, and key summary.", { page: item.page.title, summaryId: controlId || null });
+  const entry = matchingSummaryExtRegistration(item, controlId);
+  if (!entry) {
+    addFinding(findings, "error", "SUMMARY_EXTS_REGISTRATION_MISSING", "Summary controls require matching dashboard layout resource exts[] registration with i and id equal to the Summary control ID, category ___Pivot___, and key summary.", { page: item.page.title, summaryId: controlId || null });
+    return;
+  }
+  if (scalar(entry.i) !== controlId || scalar(entry.id || entry.ID) !== controlId) {
+    addFinding(findings, "error", "SUMMARY_EXTS_ID_MISMATCH", "Summary Resource.exts[] entries must set both i and id to the Summary control UUID.", { page: item.page.title, summaryId: controlId || null });
+  }
+  if (!summaryExtSourceMetadataComplete(entry)) {
+    addFinding(findings, "error", "SUMMARY_EXTS_SOURCE_METADATA_INCOMPLETE", "Summary Resource.exts[].attr must include AppID, ListSetID, ListID, list, source, and export-shaped settings.values metadata.", { page: item.page.title, summaryId: controlId || null });
+  }
 }
 
 function summaryExtRegistrationExists(item, controlId) {
+  return Boolean(matchingSummaryExtRegistration(item, controlId));
+}
+
+function matchingSummaryExtRegistration(item, controlId) {
   const exts = item.page.roots.flatMap((root) => asArray(root.exts || root.Exts));
-  return exts.some((entry) =>
-    scalar(entry.i || entry.id || entry.ID) === controlId
+  return exts.find((entry) =>
+    (scalar(entry.i) === controlId || scalar(entry.id || entry.ID) === controlId)
     && scalar(entry.category) === "___Pivot___"
     && scalar(entry.key).toLowerCase() === "summary"
+  );
+}
+
+function summaryExtSourceMetadataComplete(entry) {
+  const attr = entry?.attr || {};
+  const listId = scalar(attr.ListID || attr.list?.ListID || attr.source?.ListID);
+  const listSetId = scalar(attr.ListSetID || attr.list?.ListSetID || attr.source?.ListSetID);
+  if (!scalar(attr.AppID) || !listId || !listSetId || !isObject(attr.list) || !isObject(attr.source)) return false;
+  if (scalar(attr.list.ListID) !== listId || scalar(attr.source.ListID) !== listId) return false;
+  if (scalar(attr.list.ListSetID) !== listSetId || scalar(attr.source.ListSetID) !== listSetId) return false;
+  const values = asArray(attr.settings?.values || attr.settings?.Values);
+  return values.some((value) =>
+    isObject(value)
+    && scalar(value.field || value.fieldName || value.FieldName) === "ListDataID"
+    && scalar(value.func || value.aggregate).toUpperCase() === "COUNT"
   );
 }
 
@@ -242,9 +263,6 @@ function visibleSummaryBindingStatus(item, saveVarIds) {
   const showsRawVariable = visibleTexts.some((text) => saveVarIds.some((saveVarId) => text.includes(saveVarId)));
   if (showsRawVariable) return { valid: false, mode: "raw-variable-text" };
   if (hasBinding) return { valid: true, mode: "dynamic-variable-binding" };
-  if (hasExportProvenRuntimeSafeSummaryIdShape(item, scalar(item.control.id || item.control.ID || item.control.controlId)) && visibleTexts.length) {
-    return { valid: true, mode: "static-visible-value" };
-  }
   return { valid: false, mode: "missing" };
 }
 
@@ -293,13 +311,12 @@ function resolvesCurrentApp(data, pkg) {
 
 function hasCountShape(data, attrs, item) {
   const candidates = [data.field, attrs.field, attrs.fieldObject, attrs.fieldInfo].filter(isObject);
-  if (hasExportProvenRuntimeSafeSummaryIdShape(item, scalar(item.control.id || item.control.ID || item.control.controlId)) && candidates.length >= 3) return true;
   return candidates.some((field) => scalar(field.FieldName || field.fieldName) === "ListDataID" || scalar(field.ListDataID));
 }
 
 function filtersValid(attrs, fieldMap, item) {
   const filters = asArray(attrs.data?.filter || attrs.data?.filters || attrs.filter || attrs.filters || attrs.exts?.[0]?.attr?.settings?.Conditions);
-  if (!filters.length) return attrs.allowAllRecords === true || attrs.kpiScope === "all-records" || hasExportProvenRuntimeSafeSummaryIdShape(item, scalar(item.control.id || item.control.ID || item.control.controlId));
+  if (!filters.length) return attrs.allowAllRecords === true || attrs.kpiScope === "all-records";
   return filters.every((filter) => {
     const fieldName = scalar(filter.Field || filter.FieldName || filter.field || filter.fieldName || filter.name);
     return fieldName && fieldMap.has(fieldName) && ("Value" in filter || "value" in filter || "Values" in filter || "operator" in filter || "op" in filter);
@@ -312,7 +329,7 @@ function buildReport(packagePath, findings, summary = {}) {
     package: safePath(packagePath),
     summary,
     proofStates: ["designer-configured Summary control", "validator-valid Summary contract", "runtime-proven visible dynamic KPI rendering"],
-    proofBoundary: "This validates designer-shaped Summary configuration. Summary IDs must be registered in LayoutInResources[].Resource.ReportIds; top-level Pages[].ReportIds is optional compatibility metadata. The UUID Summary v1.0.1 package shape is checked only when explicitly claimed; runtime before/after mutation evidence is still required before visible dynamic KPI proof can be claimed.",
+    proofBoundary: "This validates designer-shaped Summary configuration. Generated Summary IDs must be UUID-based, registered in LayoutInResources[].Resource.ReportIds, and backed by Resource.exts[] runtime source metadata; top-level Pages[].ReportIds is optional compatibility metadata. Runtime before/after mutation evidence is still required before visible dynamic KPI proof can be claimed.",
     findings,
   };
 }

@@ -37,7 +37,7 @@ Summary is one Yeeflow Data Analytics control. The broader Data Analytics invent
 - Color block heatmap
 - Pivot table
 
-All generated Data Analytics controls require runtime-safe IDs. Use UUID-based control IDs unless an export-proven Yeeflow sample proves another ID shape is valid for that exact control type. Preserve existing analytics control IDs during upgrades; only newly added analytics controls get newly generated UUID/API-issued IDs. Summary has a proven UUID runtime shape through KPI Runtime Binding Proof v1.0.1. Other analytics controls require export-proven control shapes before a generator can claim runtime correctness, and runtime screenshot/evidence is required before claiming analytics dashboard quality.
+All generated Data Analytics controls require runtime-safe IDs. Use UUID-based control IDs unless an export-proven Yeeflow sample proves another ID shape is valid for that exact non-Summary control type. Generated Summary controls must always use UUID IDs; semantic/layout-derived Summary IDs are not runtime-proven for KPI temp-variable writeback. Preserve existing analytics control IDs during upgrades; only newly added analytics controls get newly generated UUID/API-issued IDs. Summary has a proven UUID runtime shape through KPI Runtime Binding Proof v1.0.1. Other analytics controls require export-proven control shapes before a generator can claim runtime correctness, and runtime screenshot/evidence is required before claiming analytics dashboard quality.
 
 ## Golden Reference
 
@@ -179,6 +179,7 @@ Static placeholder values may only be used in early internal drafts. They must b
 
 Each Summary control must define:
 
+- UUID control ID, never a semantic/layout-derived ID such as `<LayoutID>_summary`.
 - Source data list.
 - Metric type, such as count, sum, average, min, or max.
 - Target field when the metric requires a field.
@@ -189,6 +190,8 @@ Each Summary control must define:
 - `save_var` as a designer-exported expression object, not a plain string.
 - Clear control name in Navigator.
 - Layout-resource `Resource.ReportIds` coverage for the Summary control ID. Top-level `Pages[].ReportIds` is optional compatibility metadata only and is not the primary generated dashboard Summary registration path.
+- Matching layout-resource `Resource.exts[]` entry where both `i` and `id` equal the Summary UUID, `category = "___Pivot___"`, `key = "summary"`, and `attr` includes `AppID`, `ListSetID`, `ListID`, `list`, `source`, and export-shaped `settings.values[]`.
+- No `runtimeModelProven: true` claim unless the UUID Summary shape and runtime metadata above are present.
 
 Examples:
 

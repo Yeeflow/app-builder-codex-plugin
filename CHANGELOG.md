@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.5
+
+- Release Dashboard Collection schema-bound progress binding hardening.
+- Recursively validate Collection item `__ctx_coll` expressions against the selected source Data List schema, including Progress bar percentage expressions and copied template variables.
+- Block Progress bar / progress-circle controls unless App Plan semantics and source schema provide a real numeric/decimal/percent progress metric.
+- Reject duplicate visible grid-table column labels such as copied `Status` / `Status` columns after business field mapping.
+- Add source/dist regression coverage and training guidance for removing source-template `Decimal2` / `Completion percentage` residue before signing readiness.
+
 ## 0.9.4
 
 - Release reverse-related Collection section planning and materialization gates.
