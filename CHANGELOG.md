@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.1
+
+- Release tolerant-Brotli UI hard-gate alignment.
+- Route UI hard-gate package readers through the shared tolerant `.yapk` Resource decoder so Yeeflow official export-compatible payloads do not fail Summary/KPI inspection with strict Brotli `unexpected end of file`.
+- Add source/dist regression coverage for the Summary inspector reading official-style tolerant-Brotli packages.
+- Document post-install seed-writer proof boundaries and remaining Dashboard materialization hard gates after Resource wrapping succeeds.
+
 ## 0.9.0
 
 - Release Service Portal generator training.
