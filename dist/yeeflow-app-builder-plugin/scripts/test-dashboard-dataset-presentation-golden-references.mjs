@@ -11,6 +11,9 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPT = path.join(ROOT, "scripts/validate-dashboard-dataset-presentation-golden-references.mjs");
 const REGISTRY = path.join(ROOT, "docs/reference/dashboard-dataset-presentation-golden-references.json");
+const DYNAMIC_USER_ZERO_ITEM_PADDING = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }];
+const OP_MENU_BUTTON_TRANSPARENT_BG = "rgba(255, 255, 255, 0)";
+const GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY = [null, "l-medium"];
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dashboard-dataset-presentation-"));
 const results = [];
@@ -21,6 +24,14 @@ try {
   const badResponsiveTemplate = structuredClone(responsiveTemplate);
   delete badResponsiveTemplate.extractionIndex.slotPointers.card_col_item;
   expectCode("responsive card grid source template slots are enforced", ["--registry", REGISTRY, "--responsive-card-template", writeJson("bad-responsive-card-template.json", badResponsiveTemplate)], "DASH_DATASET_RESPONSIVE_CARD_TEMPLATE_SLOT_MISSING");
+
+  const badResponsiveDynamicUserTemplate = structuredClone(responsiveTemplate);
+  delete findByType(badResponsiveDynamicUserTemplate.templateResource.rootContainer, "dynamic-user").attrs.item_style.pd;
+  expectCode("responsive card source Dynamic user zero item padding is enforced", ["--registry", REGISTRY, "--responsive-card-template", writeJson("bad-responsive-dynamic-user-padding-template.json", badResponsiveDynamicUserTemplate)], "DASH_DATASET_TEMPLATE_DYNAMIC_USER_ITEM_PADDING_NOT_S0");
+
+  const badResponsiveOpMenuTemplate = structuredClone(responsiveTemplate);
+  findByIdentity(badResponsiveOpMenuTemplate.templateResource.rootContainer, "btn_edit_item").attrs.button.normal.bg = "var(--c--background)";
+  expectCode("responsive card source op-menu button transparent background is enforced", ["--registry", REGISTRY, "--responsive-card-template", writeJson("bad-responsive-op-menu-button-bg-template.json", badResponsiveOpMenuTemplate)], "DASH_DATASET_TEMPLATE_OP_MENU_BUTTON_NORMAL_BG_NOT_TRANSPARENT");
 
   const cardTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-card-with-multiselect-toolbar.template.json"), "utf8"));
   const badCardTextTemplate = structuredClone(cardTemplate);
@@ -38,6 +49,10 @@ try {
   delete badGridTableText.attrs.heads;
   expectCode("grid-table source template Text metadata is enforced", ["--registry", REGISTRY, "--grid-table-template", writeJson("bad-grid-table-text-template.json", badGridTableTextTemplate)], "DASH_DATASET_GRID_TABLE_TEMPLATE_TEXT_HEADS_MISSING");
 
+  const badGridTableTitleTypographyTemplate = structuredClone(gridTableTemplate);
+  findByIdentity(badGridTableTitleTypographyTemplate.templateResource.rootContainer, "grid_table_col_title").attrs.heads.ty = [null, "h5-medium"];
+  expectCode("grid-table source caption title typography is enforced", ["--registry", REGISTRY, "--grid-table-template", writeJson("bad-grid-table-title-typography-template.json", badGridTableTitleTypographyTemplate)], "DASH_DATASET_TEMPLATE_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID");
+
   const badGridTableColumnTemplate = structuredClone(gridTableTemplate);
   badGridTableColumnTemplate.templateResource.itemColumns = badGridTableColumnTemplate.templateResource.itemColumns.slice(0, -1);
   expectCode("grid-table source template header/item column parity is enforced", ["--registry", REGISTRY, "--grid-table-template", writeJson("bad-grid-table-column-template.json", badGridTableColumnTemplate)], "DASH_DATASET_GRID_TABLE_TEMPLATE_COLUMN_PARITY_INVALID");
@@ -53,6 +68,10 @@ try {
   badGridCollection.attrs.data.link = "default";
   delete badGridCollection.attrs.data.opentype;
   expectCode("grid-table multiselect source detail-link contract is enforced", ["--registry", REGISTRY, "--grid-template", writeJson("bad-grid-detail-template.json", badGridDetailTemplate)], "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_DETAIL_LINK_PLACEHOLDER_INVALID");
+
+  const badGridMultiselectTitleTypographyTemplate = structuredClone(gridTemplate);
+  findByIdentity(badGridMultiselectTitleTypographyTemplate.templateResource.rootContainer, "grid_table_col_title").attrs.heads.ty = [null, "h5-medium"];
+  expectCode("grid-table multiselect source caption title typography is enforced", ["--registry", REGISTRY, "--grid-template", writeJson("bad-grid-multiselect-title-typography-template.json", badGridMultiselectTitleTypographyTemplate)], "DASH_DATASET_TEMPLATE_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID");
 
   const validPlan = write("valid-plan.md", `# Yeeflow App Plan
 
@@ -211,6 +230,14 @@ Dashboard validator commands used during validation:
   owner.type = "dynamic-field";
   expectCode("User field rendered as dynamic-field fails", ["--package", writePackage("dynamic-user-type-mismatch", userAsDynamicFieldPages)], "DASH_DATASET_DYNAMIC_CONTROL_TYPE_MISMATCH");
 
+  const missingDynamicUserPaddingPages = validPages();
+  delete findControl(missingDynamicUserPaddingPages[1], "active_loans_owner").attrs.item_style.pd;
+  expectCode("Collection Dynamic user item padding must be zero", ["--package", writePackage("dynamic-user-item-padding-missing", missingDynamicUserPaddingPages)], "DASH_DATASET_DYNAMIC_USER_ITEM_PADDING_NOT_S0");
+
+  const opMenuButtonBackgroundPages = validPages();
+  findControl(opMenuButtonBackgroundPages[1], "btn_edit_item").attrs.button.normal.bg = "var(--c--background)";
+  expectCode("grid_table_col_item_op_menu buttons must keep transparent normal background", ["--package", writePackage("op-menu-button-background", opMenuButtonBackgroundPages)], "DASH_DATASET_OP_MENU_BUTTON_NORMAL_BG_NOT_TRANSPARENT");
+
   const actionPlaceholderPages = validPages();
   const responsiveCollection = findControl(actionPlaceholderPages[0], "card_col_body");
   responsiveCollection.attrs.actions[0].steps[0].attrs = {
@@ -353,6 +380,10 @@ Dashboard validator commands used during validation:
   delete findControl(badBaseGridActionPages[1], "btn_edit_item").attrs.control_action;
   expectCode("base grid-table item operation button without action fails", ["--package", writePackage("base-grid-table-missing-operation-action", badBaseGridActionPages)], "DASH_DATASET_GRID_TABLE_OPERATION_ACTION_MISSING");
 
+  const badBaseGridTitleTypographyPages = validPages();
+  findControl(badBaseGridTitleTypographyPages[1], "grid_table_col_title").attrs.heads.ty = [null, "h5-medium"];
+  expectCode("base grid-table caption title typography drift fails", ["--package", writePackage("base-grid-table-title-typography", badBaseGridTitleTypographyPages)], "DASH_DATASET_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID");
+
   const viewOnlyBaseGridPages = validPages();
   const viewOnlyCollection = findControl(viewOnlyBaseGridPages[1], "active_loans_collection");
   viewOnlyCollection.attrs.data.sourceResourceType = "Form Report";
@@ -382,6 +413,10 @@ Dashboard validator commands used during validation:
   const badGridFullWidthPages = validPages();
   delete findControl(badGridFullWidthPages[2], "grid_table_col_caption").attrs.style.widthtype;
   expectCode("grid-table multiselect structural containers require full width", ["--package", writePackage("bad-grid-multiselect-full-width", badGridFullWidthPages)], "DASH_DATASET_GRID_MULTISELECT_FULL_WIDTH_CONTRACT_MISSING");
+
+  const badGridMultiselectTitleTypographyPages = validPages();
+  findControl(badGridMultiselectTitleTypographyPages[2], "grid_table_col_title").attrs.heads.ty = [null, "h5-medium"];
+  expectCode("grid-table multiselect caption title typography drift fails", ["--package", writePackage("bad-grid-multiselect-title-typography", badGridMultiselectTitleTypographyPages)], "DASH_DATASET_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID");
 
   const badGridResiduePages = validPages();
   findControl(badGridResiduePages[2], "grid_bulk_search").attrs.placeholder = "Search tasks";
@@ -495,6 +530,12 @@ function findByIdentity(root, identity) {
     candidate?.attrs?.nv_label,
   ].map(normalizeIdentity).includes(normalized));
   assert.ok(node, `template has ${identity}`);
+  return node;
+}
+
+function findByType(root, type) {
+  const node = findNode(root, (candidate) => String(candidate?.type || "") === type);
+  assert.ok(node, `template has ${type}`);
   return node;
 }
 
@@ -692,8 +733,8 @@ function responsiveCardGridSection() {
               label: "Drop bar",
               children: [
                 container("grid_table_col_item_op_menu_panel", [
-                  { id: "btn_edit_item", type: "action_button", label: "Edit item", attrs: { control_action: "responsive_edit_item", operation: "edit" } },
-                  { id: "btn_delete_item", type: "action_button", label: "Delete item", attrs: { control_action: "responsive_delete_item", operation: "del" } },
+                  { id: "btn_edit_item", type: "action_button", label: "Edit item", attrs: { control_action: "responsive_edit_item", operation: "edit", button: { normal: { bg: OP_MENU_BUTTON_TRANSPARENT_BG } } } },
+                  { id: "btn_delete_item", type: "action_button", label: "Delete item", attrs: { control_action: "responsive_delete_item", operation: "del", button: { normal: { bg: OP_MENU_BUTTON_TRANSPARENT_BG } } } },
                 ]),
               ],
             },
@@ -974,8 +1015,8 @@ function gridTableSection(prefix, templateId, options = {}) {
             container("grid_table_col_item_operations", [
               container("grid_table_col_item_op_menu", [
                 container("grid_table_col_item_op_menu_panel", [
-                  { id: "btn_edit_item", type: "action_button", label: "Edit item", attrs: { control_action: `${prefix}_edit_item` }, nv_label: "btn_edit_item" },
-                  { id: "btn_delete_item", type: "action_button", label: "Delete item", attrs: { control_action: `${prefix}_delete_item` }, nv_label: "btn_delete_item" },
+                  { id: "btn_edit_item", type: "action_button", label: "Edit item", attrs: { control_action: `${prefix}_edit_item`, button: { normal: { bg: OP_MENU_BUTTON_TRANSPARENT_BG } } }, nv_label: "btn_edit_item" },
+                  { id: "btn_delete_item", type: "action_button", label: "Delete item", attrs: { control_action: `${prefix}_delete_item`, button: { normal: { bg: OP_MENU_BUTTON_TRANSPARENT_BG } } }, nv_label: "btn_delete_item" },
                 ]),
               ]),
             ]),
@@ -1085,11 +1126,15 @@ function lockedContainerDefaults(id) {
 
 function heading(id, value, extras = {}) {
   const title = Array.isArray(value) ? { variable: value } : { value };
+  const defaultAttrs = id === "grid_table_col_title"
+    ? { heads: { ty: structuredClone(GRID_TABLE_CAPTION_TITLE_TYPOGRAPHY) } }
+    : {};
   return {
     id,
     type: "heading",
     ...extras,
     attrs: {
+      ...defaultAttrs,
       ...(extras.attrs || {}),
       headc: {
         ...(extras.attrs?.headc || {}),
@@ -1100,7 +1145,13 @@ function heading(id, value, extras = {}) {
 }
 
 function dynamic(id, type, field, extras = {}) {
-  const user = type === "dynamic-user" ? { user: { field, fieldName: field } } : {};
+  const user = type === "dynamic-user" ? {
+    user: { field, fieldName: field },
+    item_style: {
+      ...(extras.attrs?.item_style || {}),
+      pd: structuredClone(DYNAMIC_USER_ZERO_ITEM_PADDING),
+    },
+  } : {};
   return {
     id,
     type,

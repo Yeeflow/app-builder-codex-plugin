@@ -221,7 +221,7 @@
                     "heads": {
                       "ty": [
                         null,
-                        "h5-medium"
+                        "l-medium"
                       ],
                       "color": "#141b2d"
                     },
@@ -1907,7 +1907,8 @@
                                             "border": {
                                               "type": "0"
                                             },
-                                            "c": "var(--c--background)"
+                                            "c": "var(--c--background)",
+                                            "bg": "rgba(255, 255, 255, 0)"
                                           },
                                           "ins": [
                                             null,
@@ -1947,7 +1948,8 @@
                                             "border": {
                                               "type": "0"
                                             },
-                                            "c": "var(--c--background)"
+                                            "c": "var(--c--background)",
+                                            "bg": "rgba(255, 255, 255, 0)"
                                           },
                                           "ins": [
                                             null,

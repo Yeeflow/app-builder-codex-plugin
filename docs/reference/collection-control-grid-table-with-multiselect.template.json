@@ -641,7 +641,7 @@
                     "heads": {
                       "ty": [
                         null,
-                        "h5-medium"
+                        "l-medium"
                       ],
                       "color": "var(--text-primary)"
                     },
@@ -4970,7 +4970,20 @@
         "type": "dynamic-user",
         "id": "320228b3-f93a-49e7-8302-84d2846a5c9c",
         "nv_label": null,
-        "label": "Dynamic user"
+        "label": "Dynamic user",
+        "attrs": {
+          "item_style": {
+            "pd": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        }
       },
       {
         "pointer": "$.children[1].children[1].children[0].children[3]",
@@ -5238,7 +5251,20 @@
         "type": "dynamic-user",
         "id": "320228b3-f93a-49e7-8302-84d2846a5c9c",
         "nv_label": null,
-        "label": "Dynamic user"
+        "label": "Dynamic user",
+        "attrs": {
+          "item_style": {
+            "pd": [
+              null,
+              {
+                "top": "--sp--s0",
+                "right": "--sp--s0",
+                "bottom": "--sp--s0",
+                "left": "--sp--s0"
+              }
+            ]
+          }
+        }
       },
       {
         "pointer": "$.children[1].children[1].children[0].children[3].children[0]",
