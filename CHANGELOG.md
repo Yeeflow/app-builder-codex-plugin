@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.0
+
+- Release Service Portal generator training.
+- Add a dedicated `yeeflow-service-portal-generator` skill for planning, inspecting, validating, and generating Service Portal payloads in `.yapk` applications.
+- Add export-backed Service Portal standards covering decoded `PortalInfo`, `ListSet.Ext3.externalPortal`, Type `128` portal user system lists, portal user groups, portal source resources, menus, list form routing, portal permissions, and portal-aware dashboard bindings.
+- Add a normalized Supplier Management Service Portal reference and training report while keeping login-page customization export location and exact permission bit semantics marked as open questions.
+- Add `inspect-service-portal-yapk.mjs` plus focused self-tests so packages with Service Portal can validate current-app Data List, Document Library, and Dashboard exposure while blocking unsupported Approval form and Form report portal source resources before signing readiness.
+
 ## 0.8.117
 
 - Release official YAPK Resource export compatibility.

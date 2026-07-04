@@ -1,0 +1,193 @@
+{
+  "referenceName": "Supplier Management Service Portal normalized reference",
+  "sourceExport": "/Users/rengerhu/Downloads/Supplier Management-v1.2.yapk",
+  "proofBoundary": "Export-proven from a current YAPK package. Runtime generation of a new portal package still requires focused install and portal-login proof.",
+  "decodedTopLevel": {
+    "portalKey": "PortalInfo",
+    "noPortalValue": null,
+    "servicePortalValue": "object"
+  },
+  "portalInfo": {
+    "requiredObservedKeys": [
+      "ID",
+      "Type",
+      "Name",
+      "Description",
+      "IconUrl",
+      "LogoUrl",
+      "Settings",
+      "Flag",
+      "Status",
+      "DefaultGroupId",
+      "Domain",
+      "Groups",
+      "Resources",
+      "Perms"
+    ],
+    "typeObserved": 2,
+    "statusObserved": 1,
+    "settingsShape": {
+      "navigator-menu": {
+        "position": "left",
+        "bgc": "var(--c--primary-dark-hover)",
+        "color": "var(--c--background)",
+        "hover.color": "var(--c--background)",
+        "active.color": "var(--c--background)"
+      },
+      "appearance": {
+        "bgc": "var(--c--primary-darker)",
+        "color": "var(--c--background)"
+      }
+    }
+  },
+  "listSetLinkage": {
+    "path": "ListSet.Ext3",
+    "shape": {
+      "externalPortal": {
+        "id": "PortalInfo.ID"
+      }
+    }
+  },
+  "portalUserList": {
+    "resourceType": 128,
+    "observedTitlePattern": "__external_portal_user-<suffix>__",
+    "observedTableCode": "userinfo",
+    "observedSameIdAsPortalInfo": true,
+    "observedFields": [
+      "AppcenterID",
+      "Flag",
+      "Name_CN",
+      "SPAccount",
+      "SPAccount_Short",
+      "DepartmentID",
+      "Email",
+      "Photo",
+      "Deleted",
+      "DelTime",
+      "LastLoginTime"
+    ],
+    "observedExportedItems": 0,
+    "note": "The sample exports the portal user system list and form, but not actual portal user accounts/passwords."
+  },
+  "portalGroups": {
+    "path": "PortalInfo.Groups[]",
+    "observedShape": {
+      "ID": "package-local or API-issued long id",
+      "Code": "uuid",
+      "Name": "group display name",
+      "Description": "nullable string"
+    },
+    "sampleGroupNames": [
+      "Standard users"
+    ]
+  },
+  "portalResources": {
+    "sourceRegistry": {
+      "path": "PortalInfo.Resources[] where Category='portal' and Type='resource'",
+      "contentShape": {
+        "lists": [
+          {
+            "id": "child ListID",
+            "type": "1 for Data List or 16 for Document Library",
+            "title": "resource title",
+            "isHidden": false
+          }
+        ],
+        "dashboards": [
+          {
+            "id": "dashboard LayoutID",
+            "type": 103,
+            "title": "dashboard title",
+            "isHidden": false
+          }
+        ]
+      },
+      "sampleExposedResources": {
+        "dataLists": [
+          "Products and services",
+          "Supplier Contracts",
+          "Supplier List",
+          "Supplier(Real)"
+        ],
+        "documentLibraries": [
+          "DUCS"
+        ],
+        "dashboards": [
+          "Home page"
+        ]
+      }
+    },
+    "menus": {
+      "path": "PortalInfo.Resources[] where Category='portal' and Type='menus'",
+      "contentShape": {
+        "menus": [
+          {
+            "id": "resource id or group uuid",
+            "type": "1, 16, 103, or classes",
+            "title": "visible navigation label",
+            "isHidden": false,
+            "icon": "FontAwesome class",
+            "childs": "only for classes"
+          }
+        ]
+      },
+      "rules": [
+        "Visible portal menu items should have suitable FontAwesome icons.",
+        "Groups use type 'classes' and children under 'childs'.",
+        "Hidden source resources may appear in menus with isHidden true and no icon."
+      ]
+    },
+    "listForms": {
+      "path": "PortalInfo.Resources[] where Type='listforms'",
+      "categoryShape": "41_<target child ListID>",
+      "contentShape": {
+        "forms": [
+          {
+            "type": "add | edit | view",
+            "id": "default or same-list Type 1 custom layout ID",
+            "opentype": {
+              "open": "current",
+              "size": -1
+            }
+          }
+        ]
+      }
+    }
+  },
+  "portalPermissions": {
+    "path": "PortalInfo.Perms[]",
+    "observedShape": {
+      "ID": "permission row id",
+      "ItemType": "1 for list/document library, 2 for dashboard",
+      "ItemID": "child ListID or dashboard LayoutID",
+      "PermType": 3,
+      "PermObjID": "PortalInfo.Groups[].ID or observed special audience 999999",
+      "Perm": "numeric permission bitmask",
+      "Ext": "JSON string with views[] for list/document library resources, or empty string for dashboard"
+    },
+    "observedPermValues": [
+      1,
+      25,
+      249
+    ],
+    "knownBoundary": "The sample proves where permission rows live and how they reference resources, groups, and views. It does not fully prove the semantic meaning of each numeric Perm bitmask."
+  },
+  "unsupportedResources": [
+    "Approval form",
+    "Form report"
+  ],
+  "portalAwarePageBinding": {
+    "observedPath": "Dashboard control attrs.data.list.ExtPortal.id",
+    "shape": {
+      "AppID": 41,
+      "ListID": "portal-exposed child ListID",
+      "Type": 1,
+      "Title": "resource title",
+      "ListSetID": "root app ListSetID",
+      "ExtPortal": {
+        "id": "PortalInfo.ID"
+      }
+    },
+    "note": "Observed on one dashboard Collection binding in the sample export."
+  }
+}
