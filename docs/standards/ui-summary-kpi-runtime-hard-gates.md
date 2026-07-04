@@ -99,9 +99,9 @@ Hidden Summary controls must live in a dedicated hidden container with:
 }
 ```
 
-Each Summary must resolve to the current app, a real list, and real field metadata. `attrs.data.field`, `attrs.field`, `fieldObject`, and `fieldInfo` must be populated consistently. Count summaries require valid count/ListDataID shape where required. Sum and average summaries must use numeric fields. Filters must use designer-compatible condition/filter shapes, unless intentionally documented as an all-record KPI.
+Each generated Summary must use a UUID control ID, resolve to the current app, a real list, and real field metadata. Semantic/layout-derived Summary IDs such as `<LayoutID>_summary` are not runtime-proven and must fail signing readiness even if `ReportIds`, `exts`, and `tempVars` exist. `attrs.data.field`, `attrs.field`, `fieldObject`, and `fieldInfo` must be populated consistently. Count summaries require valid count/ListDataID shape where required. Sum and average summaries must use numeric fields. Filters must use designer-compatible condition/filter shapes, unless intentionally documented as an all-record KPI.
 
-Every Summary must save to a unique temp variable with the designer-exported expression-object `save_var` shape, not a plain string. Summary control IDs must be registered in `Pages[].LayoutInResources[].Resource.ReportIds`. Top-level `Pages[].ReportIds` is optional compatibility metadata and must not be required unless proven by official exports.
+Every Summary must save to a unique temp variable with the designer-exported expression-object `save_var` shape, not a plain string. Summary control IDs must be registered in `Pages[].LayoutInResources[].Resource.ReportIds`. The matching `Resource.exts[]` entry must set both `i` and `id` to the same Summary UUID and include complete runtime source metadata: `AppID`, `ListSetID`, `ListID`, `list`, `source`, and export-shaped `settings.values[]`. Top-level `Pages[].ReportIds` is optional compatibility metadata and must not be required unless proven by official exports. `runtimeModelProven: true` cannot be used to override these package-shape requirements.
 
 Run:
 
@@ -122,7 +122,7 @@ Data Analytics controls must use runtime-safe control identities. This inventory
 - Summary
 - Pivot table
 
-For every generated Data Analytics control, the control ID must be UUID-based unless an export-proven Yeeflow sample proves another ID shape is valid for that exact control type. Do not assume the Summary control shape applies exactly to Pie chart, Column chart, Line chart, Gauge, Funnel chart, Color block heatmap, or Pivot table.
+For every generated Data Analytics control, the control ID must be UUID-based unless an export-proven Yeeflow sample proves another ID shape is valid for that exact non-Summary control type. Generated Summary controls are stricter: use UUID IDs only. Do not assume the Summary control shape applies exactly to Pie chart, Column chart, Line chart, Gauge, Funnel chart, Color block heatmap, or Pivot table.
 
 Every analytics control must satisfy these generated-final rules:
 
@@ -157,7 +157,8 @@ KPI Runtime Binding Proof v1.0.1 proved dynamic visible KPI binding only for thi
 
 - Summary control IDs are UUIDs.
 - Each Summary UUID appears in `Resource.ReportIds[]`.
-- Each Summary UUID has a matching `Resource.exts[]` entry where `i` equals the Summary control ID, `category` is `___Pivot___`, and `key` is `summary`.
+- Each Summary UUID has a matching `Resource.exts[]` entry where both `i` and `id` equal the Summary control ID, `category` is `___Pivot___`, and `key` is `summary`.
+- Each Summary `Resource.exts[].attr` includes `AppID`, `ListSetID`, `ListID`, `list`, `source`, and export-shaped `settings.values[]` metadata for the current app/list.
 - Each Summary control saves to a dashboard temp variable through a designer-shaped `attrs.save_var` expression object.
 - `Resource.tempVars[]` declares the same temp variable ids/names.
 - Visible KPI Heading/Text controls bind through `attrs.headc.title.variable[]`.
@@ -168,7 +169,7 @@ Runtime proof for this shape must include before/after source data mutation evid
 
 Summary recalculation may be asynchronous or cache-delayed. Stale after-evidence that still shows the before values must not be used as the final verdict; capture final evidence only after the refreshed/recalculated runtime state is visible.
 
-This proof does not automatically prove semantic/non-UUID Summary IDs, approval forms, public forms, unsupported surfaces, or other visible KPI binding shapes. Marketing Event dashboards may use this shape, but each generated package must still run its own before/after mutation proof before claiming runtime dynamic KPI success.
+This proof explicitly does not prove semantic/non-UUID Summary IDs, approval forms, public forms, unsupported surfaces, or other visible KPI binding shapes. Semantic/non-UUID Summary IDs must remain signing-readiness failures for generated packages, even when the package includes matching `ReportIds`, `exts`, `tempVars`, and `runtimeModelProven: true`. Marketing Event dashboards may use this shape, but each generated package must still run its own before/after mutation proof before claiming runtime dynamic KPI success.
 
 Run:
 

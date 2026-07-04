@@ -2254,7 +2254,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       dashboardAnalytics,
       dashboardDataTables: selectDashboardDataTablesForPage({ planDemand, pageName: name, pageIndex: index }),
       dashboardSummaryMetrics,
-      summaryId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_summary`,
+      summaryId: deterministicUuid(`${appTitle}:${name}:${stringId(ids[`decoded.Pages[${index}].LayoutID`])}:summary:0`),
       filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
       collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
     });
@@ -2443,6 +2443,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     tempVar: contract.tempVar,
     listName: sourceResource,
     listId,
+    rootListSetId,
     label: contract.label,
   }));
   if (summaries.length) {
@@ -2492,9 +2493,26 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     category: "___Pivot___",
     key: "summary",
     attr: {
+      AppID: 41,
+      ListSetID: stringId(rootListSetId),
       ListID: stringId(listId),
+      list: { AppID: 41, ListID: stringId(listId), ListSetID: stringId(rootListSetId), Type: 1, Title: sourceResource },
+      source: { AppID: 41, ListID: stringId(listId), ListSetID: stringId(rootListSetId), Type: 1, Title: sourceResource },
       settings: {
-        values: [{ fieldName: "ListDataID", field: "ListDataID", id: "ListDataID", func: "COUNT", label: contract.label }],
+        values: [{
+          fieldName: "ListDataID",
+          field: "ListDataID",
+          FieldName: "ListDataID",
+          id: "ListDataID",
+          func: "COUNT",
+          aggregate: "COUNT",
+          label: contract.label,
+          type: "Text",
+          fieldType: "Text",
+          attr: { FieldName: "ListDataID", FieldType: "Text", DisplayName: "Record ID" },
+          preConditions: [],
+          Conditions: [],
+        }],
       },
     },
   }));
@@ -2538,6 +2556,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: false });
   removeOperationsWithoutActions(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
+  normalizeSummaryRuntimeExtIds(resource);
   rewriteCollectionTemplateRuntimeRefs(resource, {
     rootListSetId,
     listId,
@@ -2937,6 +2956,16 @@ function instantiateDashboardControlUuids(resource, pageSeed) {
   replaceReferences(resource);
 }
 
+function normalizeSummaryRuntimeExtIds(resource) {
+  for (const ext of Array.isArray(resource?.exts) ? resource.exts : []) {
+    if (stringId(ext?.category || "") !== "___Pivot___" || stringId(ext?.key || "") !== "summary") continue;
+    const summaryId = stringId(ext.i || "");
+    if (!summaryId) continue;
+    ext.id = summaryId;
+    ext.ID = summaryId;
+  }
+}
+
 function deterministicUuid(seed) {
   const hex = crypto.createHash("sha256").update(seed).digest("hex");
   const variant = ((Number.parseInt(hex.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, "0");
@@ -2956,7 +2985,9 @@ function buildDashboardKpiContracts({ pageName, summaryIdBase, primaryTempVar, p
     const label = metric.metricName || fallbackLabel;
     const businessKey = slugify(label).replace(/-/g, "_") || key;
     const tempVar = index === 0 ? primaryTempVar : `tmp_${pageSlug}_${businessKey}_count`;
-    const summaryId = index === 0 ? summaryIdBase : `${summaryIdBase}_${businessKey}`;
+    const summaryId = index === 0 && UUID_CONTROL_ID_RE.test(String(summaryIdBase || ""))
+      ? summaryIdBase
+      : deterministicUuid(`${pageName}:${businessKey}:summary:${index}`);
     return { key, businessKey, label, tempVar, summaryId };
   });
 }
@@ -3786,9 +3817,10 @@ function findDashboardHiddenSummaryHostParent(resource) {
   return null;
 }
 
-function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Active Records" }) {
+function buildSummaryControl({ summaryId, tempVar, listName, listId, rootListSetId, label = "Active Records" }) {
   const saveVariable = summarySaveVariable(tempVar);
   const fieldMetadata = buildSummaryFieldMetadata();
+  const source = { AppID: 41, ListID: stringId(listId), ListSetID: stringId(rootListSetId), Type: 1, Title: listName };
   return {
     type: "summary",
     id: summaryId,
@@ -3799,7 +3831,11 @@ function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Ac
       runtimeModelProven: true,
       control_display: { hidden: true },
       data: {
-        list: { AppID: 41, ListID: stringId(listId), Type: 1, Title: listName },
+        list: source,
+        source,
+        AppID: 41,
+        ListSetID: stringId(rootListSetId),
+        ListID: stringId(listId),
         aggregation: "COUNT",
         field: fieldMetadata,
         fieldName: "ListDataID",

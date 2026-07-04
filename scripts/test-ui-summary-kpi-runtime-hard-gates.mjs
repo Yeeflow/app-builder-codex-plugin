@@ -85,7 +85,9 @@ function run() {
   expectFail("Count Summary without valid count/ListDataID shape fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-count.json", decoded({ summary: "bad-count" })) }), "SUMMARY_COUNT_FIELD_SHAPE_INVALID");
   expectFail("Sum Summary using non-numeric field fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-sum.json", decoded({ summary: "bad-sum" })) }), "SUMMARY_NUMERIC_FIELD_REQUIRED");
   expectFail("Missing Summary save_var expression object fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-bad-save-var.json", decoded({ summary: "bad-save-var" })) }), "SUMMARY_SAVE_VAR_EXPRESSION_OBJECT_REQUIRED");
-  expectFail("Non-UUID Summary ID fails unless explicitly export-proven", inspectDashboardSummaryControlContract({ package: writeJson("summary-non-uuid.json", decoded({ summary: "non-uuid" })) }), "SUMMARY_CONTROL_ID_NOT_RUNTIME_SAFE");
+  expectFail("Non-UUID Summary ID fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-non-uuid.json", decoded({ summary: "non-uuid" })) }), "SUMMARY_CONTROL_ID_NOT_RUNTIME_SAFE");
+  expectFail("Semantic Summary ID with runtimeModelProven still fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-semantic-runtime-proven.json", decoded({ summary: "semantic-runtime-proven" })) }), "SUMMARY_RUNTIME_MODEL_PROVEN_UNSUPPORTED_SHAPE");
+  expectFail("Summary ext with incomplete source metadata fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-thin-ext-source.json", decoded({ summary: "thin-ext-source" })) }), "SUMMARY_EXTS_SOURCE_METADATA_INCOMPLETE");
   expectFail("Summary missing layout-resource ReportIds fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-reportids.json", decoded({ summary: "missing-reportids" })) }), "SUMMARY_REPORTIDS_MISSING");
   expectFail("Summary missing layout-resource exts match fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-exts.json", decoded({ summary: "missing-exts" })) }), "SUMMARY_EXTS_REGISTRATION_MISSING");
   expectFail("Summary save_var missing from layout-resource tempVars fails", inspectDashboardSummaryControlContract({ package: writeJson("summary-missing-tempvars.json", decoded({ summary: "missing-tempvars" })) }), "SUMMARY_TEMP_VAR_DECLARATION_MISSING");
@@ -103,7 +105,7 @@ function run() {
   expectFail("Data Analytics Summary placeholder field still fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-placeholder-field.json", analyticsDecoded({ type: "summary", id: UUID_SUMMARY_ID, extKey: "summary", reportIds: [UUID_SUMMARY_ID], dataFieldName: "placeholder_field" })) }), "ANALYTICS_PLACEHOLDER_FIELD_REFERENCE");
   expectFail("Non-Summary analytics invalid field still fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-pie-invalid-field.json", analyticsDecoded({ type: "pie-chart", id: "11111111-1111-4111-8111-111111111111", dataFieldName: "MissingField" })) }), "ANALYTICS_FIELD_REFERENCE_INVALID");
   expectPass("Non-Summary analytics series display name is not treated as a source field", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-pie-business-question-series-name.json", analyticsDecoded({ type: "pie-chart", id: "11111111-1111-4111-8111-111111111111", seriesName: "How many loans are in each lifecycle status?" })) }));
-  expectFail("Data Analytics Summary with non-UUID ID fails unless export-proven", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-non-uuid.json", analyticsDecoded({ type: "summary", id: "summary-total" })) }), "ANALYTICS_CONTROL_ID_NOT_RUNTIME_SAFE");
+  expectFail("Data Analytics Summary with non-UUID ID fails", inspectDataAnalyticsControlIdentity({ package: writeJson("analytics-summary-non-uuid.json", analyticsDecoded({ type: "summary", id: "summary-total" })) }), "ANALYTICS_CONTROL_ID_NOT_RUNTIME_SAFE");
   for (const [label, type] of [
     ["Pie chart", "pie-chart"],
     ["Column chart", "column-chart"],
@@ -222,7 +224,7 @@ function decoded(flags = {}) {
     type: "page",
     attrs: dashboardRootAttrs(flags),
     ReportIds: registeredSummaryIds,
-    exts: flags.summary === "missing-exts" || flags.summary === "uuid-proof-no-exts" || flags.summary === "non-uuid" ? [] : summaryIds.map((id) => ({ i: id, category: "___Pivot___", key: "summary" })),
+    exts: flags.summary === "missing-exts" || flags.summary === "uuid-proof-no-exts" || flags.summary === "non-uuid" ? [] : summaryIds.map((id, index) => summaryExt(id, index, flags.summary, listSetId)),
     tempVars: flags.summary === "missing-tempvars" || flags.summary === "uuid-proof-no-tempvars" ? [] : tempVars,
     children: [card, flags.innerPadding ? innerPaddedContainer(flags.innerPadding) : null, summaryHost, ...summaries.map((summary, index) => summaryVisibleKpi(flags.summary, summary, index)), gridControl].filter(Boolean),
   };
@@ -334,14 +336,16 @@ function summaryControl(mode, index = 0) {
   const fieldMeta = mode === "blank-field" ? "" : mode === "bad-sum" ? field("Text1", "Text", "Status") : mode === "bad-count" ? field("Title", "Text", "Event Name") : field("ListDataID", "Text", "Record ID");
   const func = mode === "bad-sum" ? "sum" : "count";
   const metadata = mode === "missing-metadata" ? null : fieldMeta;
-  const id = mode === "non-uuid" ? "summary-planned-events" : summaryUuid(index);
+  const id = mode === "non-uuid" || mode === "semantic-runtime-proven" ? "summary-planned-events" : summaryUuid(index);
   const saveVar = scalar(mode).startsWith("uuid-proof")
     ? { exprType: "variable", valueType: "string", id: "__temp___temp_total_records", type: "expr", name: "__temp_total_records" }
     : { exprType: "variable", valueType: "string", id: `__temp___temp_event_count_${index}`, type: "expr", name: `__temp_event_count_${index}` };
   return {
     id,
     type: "summary",
+    runtimeModelProven: mode === "semantic-runtime-proven" ? true : undefined,
     attrs: {
+      runtimeModelProven: mode === "semantic-runtime-proven" ? true : undefined,
       kpiRuntimeProofShape: scalar(mode).startsWith("uuid-proof") ? "uuid-summary-v1.0.1" : undefined,
       data: { app: { ListID: "1900000000000001001" }, list: { ListID: "events" }, field: fieldMeta, func },
       field: metadata,
@@ -349,6 +353,39 @@ function summaryControl(mode, index = 0) {
       fieldInfo: metadata,
       allowAllRecords: true,
       save_var: mode === "bad-save-var" ? "__temp_event_count" : saveVar,
+    },
+  };
+}
+
+function summaryExt(id, index = 0, mode = "valid", listSetId = "1900000000000001001") {
+  if (mode === "thin-ext-source") return { i: id, id, category: "___Pivot___", key: "summary" };
+  return {
+    i: id,
+    id,
+    category: "___Pivot___",
+    key: "summary",
+    attr: {
+      AppID: 41,
+      ListSetID: listSetId,
+      ListID: "events",
+      list: { AppID: 41, ListSetID: listSetId, ListID: "events", Type: 1, Title: "Events" },
+      source: { AppID: 41, ListSetID: listSetId, ListID: "events", Type: 1, Title: "Events" },
+      settings: {
+        values: [{
+          fieldName: "ListDataID",
+          field: "ListDataID",
+          FieldName: "ListDataID",
+          id: "ListDataID",
+          func: "COUNT",
+          aggregate: "COUNT",
+          label: `Summary ${index + 1}`,
+          type: "Text",
+          fieldType: "Text",
+          attr: { FieldName: "ListDataID", FieldType: "Text", DisplayName: "Record ID" },
+          preConditions: [],
+          Conditions: [],
+        }],
+      },
     },
   };
 }

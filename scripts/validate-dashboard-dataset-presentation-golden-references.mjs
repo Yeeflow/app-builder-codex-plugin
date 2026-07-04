@@ -919,6 +919,7 @@ function validateCollectionRuntimeBindings(entry, page, findings, context = {}) 
   for (const control of collectDynamicControlsForCollectionRoot(entry.control)) {
     validateCollectionDynamicControlBinding(control, entry, page, fieldInfo, findings);
   }
+  validateCollectionSchemaBoundRuntimeReferences(entry, page, fieldInfo, findings);
 }
 
 function collectDynamicControlsForCollectionRoot(root) {
@@ -997,6 +998,119 @@ function validateCollectionDynamicControlBinding(control, entry, page, fieldInfo
       actualControlType: control.type || null,
     }));
   }
+}
+
+function validateCollectionSchemaBoundRuntimeReferences(entry, page, fieldInfo, findings) {
+  const ctxReferences = collectCollectionContextFieldReferences(entry.control);
+  const seenMissing = new Set();
+  for (const reference of ctxReferences) {
+    const fieldName = String(reference.field || "").trim();
+    if (!fieldName || isAllowedCollectionContextSystemField(fieldName)) continue;
+    const field = fieldInfo.fields.get(normalizeIdentity(fieldName));
+    if (!field) {
+      const key = `${normalizeIdentity(fieldName)}|${reference.path}`;
+      if (seenMissing.has(key)) continue;
+      seenMissing.add(key);
+      findings.push(error("DASH_DATASET_COLLECTION_CTX_FIELD_MISSING", "Collection item template expressions must reference fields that exist on the selected Collection data source; source-template fields must be remapped or removed after clone.", {
+        page: page.title,
+        path: reference.path,
+        collection: identityCandidates(entry.control)[0] || entry.control?.id || null,
+        field: fieldName,
+        expressionName: reference.name || null,
+        listId: fieldInfo.listId || null,
+        listTitle: fieldInfo.title || null,
+      }));
+    }
+  }
+
+  for (const progress of collectProgressControlsForCollectionRoot(entry.control)) {
+    const references = collectCollectionContextFieldReferences(progress.node);
+    const collectionFieldReferences = references
+      .map((reference) => ({ ...reference, field: String(reference.field || "").trim() }))
+      .filter((reference) => reference.field && !isAllowedCollectionContextSystemField(reference.field));
+    if (!collectionFieldReferences.length) {
+      findings.push(error("DASH_DATASET_PROGRESS_WITHOUT_PROGRESS_SIGNAL", "Progress bar controls inside Collection item templates require an explicit numeric/percent source field from the selected Collection data source; do not keep decorative template progress bars without a planned progress metric.", {
+        page: page.title,
+        path: progress.path,
+        collection: identityCandidates(entry.control)[0] || entry.control?.id || null,
+        listId: fieldInfo.listId || null,
+        listTitle: fieldInfo.title || null,
+      }));
+      continue;
+    }
+    for (const reference of collectionFieldReferences) {
+      const field = fieldInfo.fields.get(normalizeIdentity(reference.field));
+      if (!field) continue;
+      if (!isNumericProgressField(field)) {
+        findings.push(error("DASH_DATASET_PROGRESS_FIELD_NOT_NUMERIC", "Progress bar controls may only bind to decimal/number/percent fields. Status, choice, lookup, text, or template-era fields must render as dynamic-field/status text instead.", {
+          page: page.title,
+          path: reference.path,
+          control: identityCandidates(progress.node)[0] || progress.node?.id || null,
+          field: reference.field,
+          fieldType: field?.FieldType || field?.fieldType || null,
+          controlType: field?.Type || field?.controlType || null,
+          listId: fieldInfo.listId || null,
+          listTitle: fieldInfo.title || null,
+        }));
+      }
+    }
+  }
+}
+
+function collectCollectionContextFieldReferences(root) {
+  const references = [];
+  function visit(node, path, isRoot = false) {
+    if (Array.isArray(node)) {
+      node.forEach((child, index) => visit(child, `${path}[${index}]`, false));
+      return;
+    }
+    if (!isObject(node)) return;
+    if (!isRoot && String(node?.type || "").toLowerCase() === "collection") return;
+    if (String(node?.exprType || "") === "variable_ctx" && String(node?.ctx || "") === "__ctx_coll") {
+      references.push({
+        path,
+        field: String(node?.id || node?.field || node?.FieldName || "").trim(),
+        name: String(node?.name || "").trim(),
+        valueType: String(node?.valueType || "").trim(),
+      });
+    }
+    for (const [key, value] of Object.entries(node)) visit(value, `${path}.${key}`, false);
+  }
+  visit(root, "$", true);
+  return references;
+}
+
+function collectProgressControlsForCollectionRoot(root) {
+  const matches = [];
+  function visit(node, path, isRoot = false) {
+    if (!isObject(node)) return;
+    if (!isRoot && String(node?.type || "").toLowerCase() === "collection") return;
+    if (/^progress(?:[-_ ]?(bar|circle))?$/i.test(String(node?.type || ""))) matches.push({ node, path });
+    asArray(node.children).forEach((child, index) => visit(child, `${path}.children[${index}]`, false));
+  }
+  visit(root, "$", true);
+  return matches;
+}
+
+function isAllowedCollectionContextSystemField(fieldName) {
+  return ["listdataid", "id", "guid"].includes(normalizeIdentity(fieldName));
+}
+
+function isNumericProgressField(field) {
+  const values = [
+    field?.FieldType,
+    field?.fieldType,
+    field?.Type,
+    field?.controlType,
+    field?.DataType,
+    field?.FieldName,
+    field?.fieldName,
+    field?.DisplayName,
+    field?.displayName,
+  ].map((value) => String(value || "").toLowerCase()).join(" ");
+  if (/\b(text|choice|select|status|lookup|user|identity|file|image|date|datetime|boolean|bit)\b/.test(values)) return false;
+  return /\b(decimal|number|numeric|percent|percentage|progress|rate|ratio|score|currency|money)\b/.test(values)
+    || /^decimal\d*\b/.test(normalizeIdentity(field?.FieldName || field?.fieldName || ""));
 }
 
 function dynamicBindingSurfaces(control) {
@@ -1257,6 +1371,7 @@ function validateBaseGridTableFullTemplate(entry, page, findings) {
       itemColumns,
     }));
   }
+  validateGridTableDuplicateColumnLabels(header, page, entry, findings);
 
   const operations = findDescendantByIdentity(wrapper, "grid_table_col_item_operations");
   const opMenu = findDescendantByIdentity(wrapper, "grid_table_col_item_op_menu");
@@ -1292,6 +1407,50 @@ function validateBaseGridTableFullTemplate(entry, page, findings) {
   if (isViewOnly && (operations || opMenu)) {
     findings.push(error("DASH_DATASET_GRID_TABLE_DISPLAY_ONLY_OPERATION_FORBIDDEN", "Form Report/Data Report display-only grid-table regions must not include item operation menus or edit/delete controls.", { page: page.title, path: entry.pointer, sourceType }));
   }
+}
+
+function validateGridTableDuplicateColumnLabels(header, page, entry, findings) {
+  if (!header) return;
+  const labels = asArray(header.children)
+    .map((child, index) => ({ index, label: extractVisibleHeaderLabel(child) }))
+    .filter((item) => item.label);
+  const byLabel = new Map();
+  for (const item of labels) {
+    const normalized = normalizeIdentity(item.label);
+    if (!normalized) continue;
+    const list = byLabel.get(normalized) || [];
+    list.push(item);
+    byLabel.set(normalized, list);
+  }
+  for (const [normalized, duplicates] of byLabel.entries()) {
+    if (duplicates.length < 2) continue;
+    findings.push(error("DASH_DATASET_COLLECTION_DUPLICATE_COLUMN_LABEL", "Grid-table Collection headers must not contain duplicate visible column labels after business field mapping; progress/status template columns must be removed or renamed to real business fields.", {
+      page: page.title,
+      path: entry.pointer,
+      label: duplicates[0].label,
+      normalizedLabel: normalized,
+      columnIndexes: duplicates.map((item) => item.index),
+    }));
+  }
+}
+
+function extractVisibleHeaderLabel(node) {
+  const candidates = [];
+  for (const item of findDescendants(node, () => true)) {
+    const type = String(item?.type || "").toLowerCase();
+    candidates.push(
+      item?.attrs?.headc?.title?.value,
+      item?.attrs?.text?.value,
+      item?.attrs?.label?.value,
+      item?.attrs?.title?.value,
+    );
+    if (type === "heading" || type === "text") {
+      candidates.push(item?.title);
+    }
+  }
+  return candidates
+    .map((value) => String(value || "").trim())
+    .find((value) => value && !/^[a-f0-9-]{8,}$/i.test(value) && !/^(container|text|heading|label)$/i.test(value)) || "";
 }
 
 function validateMultiselect(entry, page, templateId, findings) {
@@ -2031,7 +2190,7 @@ function collectFieldCatalog(decoded) {
       ...asArray(list?.List?.Fields?.Items),
     ]) {
       if (!isObject(field)) continue;
-      for (const key of [field.FieldName, field.Name, field.Title, field.InternalName, field.ID, field.FieldID]) {
+      for (const key of [field.FieldName, field.Name, field.Title, field.DisplayName, field.InternalName, field.ID, field.FieldID]) {
         const normalized = normalizeIdentity(key);
         if (normalized) fields.set(normalized, field);
       }

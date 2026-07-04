@@ -384,6 +384,25 @@ Dashboard validator commands used during validation:
   findControl(badBaseGridTitleTypographyPages[1], "grid_table_col_title").attrs.heads.ty = [null, "h5-medium"];
   expectCode("base grid-table caption title typography drift fails", ["--package", writePackage("base-grid-table-title-typography", badBaseGridTitleTypographyPages)], "DASH_DATASET_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID");
 
+  const missingProgressFieldPages = validPages();
+  const missingProgressCollection = findControl(missingProgressFieldPages[1], "active_loans_collection");
+  missingProgressCollection.attrs.data.list = { ListID: "list_doctors", Title: "Doctor Profiles" };
+  missingProgressCollection.attrs.data.sort = [{ SortName: "Title", SortByDesc: false }];
+  expectCode("Progress bar bound to missing source-template field fails", ["--package", writePackage("base-grid-table-progress-missing-field", missingProgressFieldPages, {
+    childs: doctorProfileChilds({ includeCompletionPercentage: false }),
+  })], "DASH_DATASET_COLLECTION_CTX_FIELD_MISSING");
+
+  const textProgressFieldPages = validPages();
+  expectCode("Progress bar bound to nonnumeric status/text field fails", ["--package", writePackage("base-grid-table-progress-text-field", textProgressFieldPages, {
+    childs: defaultChilds({ loanDecimalFieldType: "Text" }),
+  })], "DASH_DATASET_PROGRESS_FIELD_NOT_NUMERIC");
+
+  const duplicateColumnLabelPages = validPages();
+  const duplicateHeader = findControl(duplicateColumnLabelPages[1], "grid_table_col_header");
+  duplicateHeader.children[2].attrs.headc.title.value = "Status";
+  duplicateHeader.children[3].attrs.headc.title.value = "Status";
+  expectCode("base grid-table duplicate visible column labels fail", ["--package", writePackage("base-grid-table-duplicate-status-labels", duplicateColumnLabelPages)], "DASH_DATASET_COLLECTION_DUPLICATE_COLUMN_LABEL");
+
   const viewOnlyBaseGridPages = validPages();
   const viewOnlyCollection = findControl(viewOnlyBaseGridPages[1], "active_loans_collection");
   viewOnlyCollection.attrs.data.sourceResourceType = "Form Report";
@@ -560,38 +579,10 @@ function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase().replace(/[\s_/-]+/g, "_");
 }
 
-function writePackage(name, pages) {
+function writePackage(name, pages, options = {}) {
   const decoded = {
     ListSet: { ListID: "synthetic-listset", Title: "Dataset Presentation Test" },
-    Childs: [
-      {
-        ListID: "list_assets",
-        Title: "Assets",
-        Fields: [
-          { FieldName: "Title", FieldType: "Text" },
-          { FieldName: "Text1", FieldType: "Text" },
-          { FieldName: "Text2", FieldType: "Text" },
-          { FieldName: "Decimal2", FieldType: "Number" },
-          { FieldName: "User1", FieldType: "User" },
-          { FieldName: "Image1", FieldType: "Image" },
-          { FieldName: "File1", FieldType: "File" },
-        ],
-      },
-      {
-        ListID: "list_loans",
-        Title: "Loan Requests",
-        Fields: [
-          { FieldName: "Title", FieldType: "Text" },
-          { FieldName: "Text1", FieldType: "Text" },
-          { FieldName: "Text2", FieldType: "Text" },
-          { FieldName: "Decimal2", FieldType: "Number" },
-          { FieldName: "Datetime1", FieldType: "DateTime" },
-          { FieldName: "User1", FieldType: "User" },
-          { FieldName: "Image1", FieldType: "Image" },
-          { FieldName: "File1", FieldType: "File" },
-        ],
-      },
-    ],
+    Childs: options.childs || defaultChilds(),
     Pages: pages.map((resource, index) => ({
       ID: `synthetic-page-${index}`,
       Type: 103,
@@ -604,6 +595,58 @@ function writePackage(name, pages) {
     Resource: zlib.brotliCompressSync(Buffer.from(JSON.stringify(decoded))).toString("base64"),
   };
   return write(`${name}.yapk`, JSON.stringify(wrapper, null, 2));
+}
+
+function defaultChilds(options = {}) {
+  return [
+    {
+      ListID: "list_assets",
+      Title: "Assets",
+      Fields: [
+        { FieldName: "Title", FieldType: "Text" },
+        { FieldName: "Text1", FieldType: "Text" },
+        { FieldName: "Text2", FieldType: "Text" },
+        { FieldName: "Decimal2", FieldType: "Number" },
+        { FieldName: "User1", FieldType: "User" },
+        { FieldName: "Image1", FieldType: "Image" },
+        { FieldName: "File1", FieldType: "File" },
+      ],
+    },
+    {
+      ListID: "list_loans",
+      Title: "Loan Requests",
+      Fields: [
+        { FieldName: "Title", FieldType: "Text" },
+        { FieldName: "Text1", FieldType: "Text" },
+        { FieldName: "Text2", FieldType: "Text" },
+        { FieldName: "Decimal2", FieldType: options.loanDecimalFieldType || "Number" },
+        { FieldName: "Datetime1", FieldType: "DateTime" },
+        { FieldName: "User1", FieldType: "User" },
+        { FieldName: "Image1", FieldType: "Image" },
+        { FieldName: "File1", FieldType: "File" },
+      ],
+    },
+  ];
+}
+
+function doctorProfileChilds({ includeCompletionPercentage } = {}) {
+  return [
+    ...defaultChilds(),
+    {
+      ListID: "list_doctors",
+      Title: "Doctor Profiles",
+      Fields: [
+        { FieldName: "Title", FieldType: "Text", DisplayName: "Doctor Name" },
+        { FieldName: "Text1", FieldType: "Text", DisplayName: "Employee ID" },
+        { FieldName: "Text2", FieldType: "Text", DisplayName: "Department" },
+        { FieldName: "Text3", FieldType: "Text", DisplayName: "Specialty" },
+        { FieldName: "Text4", FieldType: "Text", DisplayName: "Employment Status" },
+        { FieldName: "Text8", FieldType: "Text", DisplayName: "Onboarding Status" },
+        { FieldName: "User1", FieldType: "Text", Type: "identity-picker", DisplayName: "Profile Owner" },
+        ...(includeCompletionPercentage ? [{ FieldName: "Decimal1", FieldType: "Decimal", DisplayName: "Completion Percentage" }] : []),
+      ],
+    },
+  ];
 }
 
 function validPages() {
