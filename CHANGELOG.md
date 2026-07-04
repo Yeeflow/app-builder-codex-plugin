@@ -2,6 +2,51 @@
 
 ## Unreleased
 
+## 0.8.116
+
+- Release Custom Capability App Plan planning.
+- Add a standard App Plan `Custom Code and Custom Service Planning` section covering native capability decisions, Custom Code plan rows, Custom Service plan rows, invocation plans, and runtime proof requirements.
+- Add `custom-capability-app-plan-planning-standard.md` and training documentation so Custom Code controls, Form Action Custom Code steps, Custom Service resources, `invokeservice` form actions, and `InvokeCode` workflow actions are planned before generation.
+- Update Custom Code, Custom Service, and Feature Learning skills to block unplanned custom capability shortcuts and prevent `Not planned` / `N/A` / `None` placeholder rows from materializing.
+- Add focused source/dist regression coverage for the custom capability App Plan contract and cache artifact mirrors.
+
+## 0.8.115
+
+- Release Custom Service generator and invocation training.
+- Add a dedicated Yeeflow Custom Service generator skill for Node.js 22 `.ycs` services, including strict `run({ inputs, connections, modules, logger })` guidance, server-side queue execution boundaries, and safe fallback recommendations for client-side Custom Code.
+- Normalize exported Custom Service references for plain input/output services, HTML table generation, Excel-to-Data-List import patterns, and SharePoint OAuth connection-variable usage.
+- Document and gate Custom Service invocation shapes for Approval/Data List/Dashboard form actions, Approval/Data List/Scheduled workflow actions, workflow variables, Data List fields, temp variables, and connection bindings.
+- Add focused source/dist regression coverage so Custom Service examples, invocation contracts, and cache artifacts stay aligned before release/cache smoke.
+
+## 0.8.114
+
+- Release Custom Code surface-contract cache-root alignment.
+- Make `test-custom-code-surface-contract-gates.mjs` root-mode aware so the same focused gate validates both source checkouts (`skills/installed/...`) and installed plugin cache roots (`skills/...`).
+- Preserve the 0.8.113 Custom Code control versus Form Action Custom Code step runtime contract while restoring installed-cache smoke coverage.
+
+## 0.8.113
+
+- Release Custom Code control versus Form Action Custom Code step contract hardening.
+- Add a dedicated Form Action Custom Code step runtime standard that requires `execute(context, fieldsValues)` and keeps package materialization gated until action-step JSON storage shape is export-proven.
+- Update the Yeeflow Custom Code generator skill and reference standard to classify `control` versus `form_action_step` before generation, preserving `render(...)` only for visible Custom Code controls.
+- Align Custom Code decision guidance and Form Action generation rules so App Plans declare the custom-code surface, host action, parameters, read/write fields, native fallback, and runtime proof boundary.
+- Add focused regression coverage and source/dist mirror checks for Custom Code surface entrypoint drift.
+
+## 0.8.112
+
+- Release focused Service Tickets master-detail workspace cleanup.
+- Prune empty `section_title_area` containers inside generated two-panel and three-panel workspace content cards instead of preserving template-only shells.
+- Skip Dashboard v1.1 content-card slot repair on master-detail workspace pages so optional title/action areas remain removable when not backed by business content.
+- Keep Priority/Status select-filter option sets exact when explicit App Plan choices or field rules exist, without appending generic workflow/status fallback values such as Draft, Submitted, or Completed.
+- Add focused Service Tickets regression coverage and training documentation for empty section cleanup and exact filter option-source behavior.
+
+## 0.8.111
+
+- Release Data Analytics runtime export-shape and Service Tickets workbench Dashboard plan-shape hardening.
+- Reject chart/pivot `Resource.exts[]` runtime rows and values that lack export-shaped metadata required by Yeeflow runtime materialization.
+- Parse bullet-form Dashboard page layout selections under `## 14. Dashboard Pages Plan`, preserving `dashboard-page-layouts-two-panel-workspace` and `dashboard-page-layouts-three-panel-workspace` instead of silently falling back to `dashboard-page-layouts-v1.1`.
+- Add Service Tickets regression coverage for the real App Plan shape that requires a left Ticket list, selected-ticket detail workspace, and Priority/Status filter controls.
+
 ## 0.8.110
 
 - Release consolidated App Plan Data List schema support.

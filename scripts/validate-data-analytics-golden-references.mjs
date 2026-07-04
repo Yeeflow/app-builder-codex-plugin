@@ -415,6 +415,7 @@ function validateRuntimeBinding(resource, entry, reference, context) {
   }
   const rows = asArray(settings.rows);
   const values = asArray(settings.values);
+  validateRuntimeSettingsExportShape({ entry, reference, context, controlId, settings });
   if (!rows.length) {
     context.findings.push(error("DATA_ANALYTICS_RUNTIME_ROWS_MISSING", "Data Analytics runtime settings.rows[] must include at least one source field.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, controlId }));
   }
@@ -431,6 +432,22 @@ function validateRuntimeBinding(resource, entry, reference, context) {
     }
   }
   validateRuntimeModelSurfaceAlignment({ entry, reference, context, controlId, rows, values, settings });
+}
+
+function validateRuntimeSettingsExportShape({ entry, reference, context, controlId, settings }) {
+  const hasPreConditions = Object.prototype.hasOwnProperty.call(settings, "preConditions");
+  const hasConditions = Object.prototype.hasOwnProperty.call(settings, "Conditions");
+  if (!hasPreConditions || !hasConditions || !Array.isArray(settings.Conditions)) {
+    context.findings.push(error("DATA_ANALYTICS_RUNTIME_CONDITIONS_SHAPE_MISSING", "Data Analytics runtime settings must preserve the export-shaped preConditions and Conditions keys used by Yeeflow chart materialization.", {
+      page: context.pageTitle,
+      path: `${entry.pointer}.exts.settings`,
+      templateId: reference.templateId,
+      controlId,
+      hasPreConditions,
+      hasConditions,
+      conditionsType: Array.isArray(settings.Conditions) ? "array" : typeof settings.Conditions,
+    }));
+  }
 }
 
 function validateVisibleRuntimeSourceIdentity({ entry, reference, context, controlId, appId, listId, listSetId }) {
@@ -493,6 +510,16 @@ function validateRuntimeRowsAndValuesShape({ entry, reference, context, controlI
         actualFunc: row?.func || row?.function || null,
       }));
     }
+    const missingExportKeys = missingRuntimeExportKeys(row, ["id", "fieldName", "fieldType", "type", "attr"]);
+    if (missingExportKeys.length) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_ROW_EXPORT_SHAPE_INCOMPLETE", "Data Analytics runtime settings.rows[] entries must preserve export-shaped field metadata, not only a thin field/id tuple.", {
+        page: context.pageTitle,
+        path: `${entry.pointer}.exts.rows[${index}]`,
+        templateId: reference.templateId,
+        controlId,
+        missing: missingExportKeys,
+      }));
+    }
   }
   for (const [index, column] of columns.entries()) {
     if (isObject(column) && !primaryRuntimeFieldRefs(column).length) {
@@ -531,7 +558,30 @@ function validateRuntimeRowsAndValuesShape({ entry, reference, context, controlI
         }));
       }
     }
+    const missingExportKeys = missingRuntimeExportKeys(value, ["id", "field", "fieldName", "FieldName", "fieldType", "type", "attr"]);
+    if (missingExportKeys.length) {
+      context.findings.push(error("DATA_ANALYTICS_RUNTIME_VALUE_EXPORT_SHAPE_INCOMPLETE", "Data Analytics runtime settings.values[] entries must preserve export-shaped field metadata, not only a thin aggregate tuple.", {
+        page: context.pageTitle,
+        path: `${entry.pointer}.exts.values[${index}]`,
+        templateId: reference.templateId,
+        controlId,
+        missing: missingExportKeys,
+      }));
+    }
   }
+}
+
+function missingRuntimeExportKeys(value, requiredKeys) {
+  if (!isObject(value)) return requiredKeys;
+  const missing = [];
+  for (const key of requiredKeys) {
+    if (key === "attr") {
+      if (!isObject(value.attr)) missing.push(key);
+      continue;
+    }
+    if (!hasText(value[key])) missing.push(key);
+  }
+  return missing;
 }
 
 function expectedRuntimeChartTypeCode(reference) {

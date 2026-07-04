@@ -8,11 +8,17 @@ import { materializeFullAppGeneratedFinal } from "./materialize-full-app-generat
 import { readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 import { validateDashboardGenerationHardGates } from "./validate-dashboard-generation-hard-gates.mjs";
 import { validateDashboardPageLayoutTemplate } from "./validate-dashboard-page-layout-template.mjs";
+import { runYapkFirstGenerationPreflight } from "./yapk-first-generation-preflight.mjs";
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "service-tickets-regression-"));
 const specPath = path.join(tempDir, "functional-specification.md");
 const planPath = path.join(tempDir, "yeeflow-app-plan.md");
 const outDir = path.join(tempDir, "dist");
+const apiIdManifestPath = path.join(tempDir, "api-issued-ids.json");
+
+fs.writeFileSync(apiIdManifestPath, `${JSON.stringify({
+  ids: Array.from({ length: 1200 }, (_, index) => String(920000000000000000n + BigInt(index))),
+}, null, 2)}\n`);
 
 fs.writeFileSync(specPath, `# Functional Specification: Service Tickets Management
 
@@ -67,28 +73,52 @@ Not planned.
 | Ticket Attachments | Ticket Attachments New/Edit Form | New/Edit | data_list_form_layout_new_edit_v1_1 | Pop-up window |
 | Ticket Attachments | Ticket Attachments View Item | View | data_list_form_layout_view_item_v1_1 | Pop-up window |
 
+#### Data List Form Layout Template Selection
+
+| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Open in |
+| --- | --- | --- | --- | --- |
+| Tickets | Tickets New/Edit Form | New/Edit | data_list_form_layout_new_edit_v1_1 | Pop-up window |
+| Tickets | Tickets View Item | View | data_list_form_layout_view_item_v1_1 | Pop-up window |
+| Ticket Comments | Ticket Comments New/Edit Form | New/Edit | data_list_form_layout_new_edit_v1_1 | Pop-up window |
+| Ticket Comments | Ticket Comments View Item | View | data_list_form_layout_view_item_v1_1 | Pop-up window |
+| Ticket Attachments | Ticket Attachments New/Edit Form | New/Edit | data_list_form_layout_new_edit_v1_1 | Pop-up window |
+| Ticket Attachments | Ticket Attachments View Item | View | data_list_form_layout_view_item_v1_1 | Pop-up window |
+
+#### Form Fields Layout Template Selection
+
+| Data List or Library | Custom Form | Field Group | Selected Form Fields Layout Template | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Tickets | Tickets New/Edit Form | Request details | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Description | Not needed | generated-final validation |
+| Tickets | Tickets View Item | Ticket details | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Description | Not needed | generated-final validation |
+| Ticket Comments | Ticket Comments New/Edit Form | Comment details | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Comment | Not needed | generated-final validation |
+| Ticket Comments | Ticket Comments View Item | Comment details | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Comment | Not needed | generated-final validation |
+| Ticket Attachments | Ticket Attachments New/Edit Form | Attachment details | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | File | Not needed | generated-final validation |
+| Ticket Attachments | Ticket Attachments View Item | Attachment details | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | File | Not needed | generated-final validation |
+
 ## 13. Data List Views Plan
 Not planned.
 
 ## 14. Dashboard Pages Plan
-Dashboard page selection:
+### 14.1 Service Tickets Dashboard
+- Page name: Service Tickets Dashboard
+- Business purpose: IT support triage workbench with ticket list and selected ticket details.
+- Layout template: dashboard-page-layouts-two-panel-workspace
+- Dataset presentation: collection_control_grid_table
 
-| Dashboard | Layout template | Dataset presentation |
-| --- | --- | --- |
-| Service Tickets Dashboard | dashboard-page-layouts-two-panel-workspace | collection_control_grid_table |
+#### Dashboard Sections
 
-Left panel work queue:
+| Section Order | Section Name | Business Purpose | Source Data List or Business Object | Required Fields or Metrics | Selected Yeeflow Control Type Category | Why This Control Type Is Appropriate | User Actions Needed | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Left ticket list | Show tickets for triage | Tickets | Subject, Requester, Priority, Status, Due Date | Collection | Repeated ticket queue | Select ticket, search, filter, add ticket, collapse panel | runtime-proof-required |
+| 2 | Right ticket detail | Show selected ticket details | Tickets | Ticket Number, Subject, Requester, Category, Priority, Status, Assigned Agent, Created Date, Due Date, Description | Dynamic fields | Current selected ticket context | Read selected ticket | runtime-proof-required |
+| 3 | Related comments and attachments | Show selected ticket activity | Ticket Comments, Ticket Attachments | Comment, Commented By, Comment Date, File, Uploaded By | Collection | Related activity display | Read related records | runtime-proof-required |
 
-| Region | Source | Required bindings |
-| --- | --- | --- |
-| Ticket list | Tickets | Subject \`Text2\`, Requester \`Text4\`, Priority \`Text7\`, Status \`Text5\`, Created Date \`Datetime1\`, Due Date \`Datetime2\` |
+#### Dashboard Filters
 
-Right panel selected ticket detail:
-
-| Visible label | Binding |
-| --- | --- |
-| Detail title | Subject / Text2 |
-| Status | Text5 |
+| Filter Name | Source Data List | Filter Field | Applies-to Dashboard Sections | Selected Yeeflow Filter/Control Type If Known | Default Business Scope | Proof Boundary or Deferred Note |
+| --- | --- | --- | --- | --- | --- | --- |
+| Priority Level | Tickets | Priority / Text7 | Left ticket list | Data Filter | All priorities | runtime-proof-required |
+| Status | Tickets | Status / Text5 | Left ticket list | Data Filter | All statuses | runtime-proof-required |
 
 Explicit dashboard exclusions:
 
@@ -115,7 +145,8 @@ const report = materializeFullAppGeneratedFinal({
   functionalSpec: specPath,
   appPlan: planPath,
   outDir,
-  allowFixtureApiIdsForTests: true,
+  apiIdManifest: apiIdManifestPath,
+  tenantId: "920000000000099999",
   cwd: tempDir,
 });
 
@@ -183,14 +214,27 @@ assert.equal(priorityFilter.attrs?.data?.field, ticketFields.get("Priority")?.Fi
 assert.equal(priorityFilter.attrs?.display_f, ticketFields.get("Priority")?.FieldName, "Priority filter display field must match the planned Priority field");
 assert.equal(priorityFilter.attrs?.value_f, ticketFields.get("Priority")?.FieldName, "Priority filter value field must match the planned Priority field");
 assert.equal(priorityFilter.attrs?.optionSourceProven, true, "Priority filter must carry an export-proven option source contract");
-assert.ok((priorityFilter.attrs?.["choice-options"] || []).includes("High"), "Priority filter must expose planned choice values instead of an empty dropdown");
+assert.deepEqual(priorityFilter.attrs?.["choice-options"] || [], ["Low", "Medium", "High", "Critical"], "Priority filter options must exactly match planned Priority values");
 assert.equal(statusFilter.attrs?.data?.field, ticketFields.get("Status")?.FieldName, "Status filter must bind to the planned Status field");
-assert.ok((statusFilter.attrs?.["choice-options"] || []).includes("Open"), "Status filter must expose planned choice values");
+assert.deepEqual(statusFilter.attrs?.["choice-options"] || [], ["Open", "In Progress", "Resolved", "Closed"], "Status filter options must exactly match planned Status values and must not include generic workflow states");
 
 const pageLayoutValidation = validateDashboardPageLayoutTemplate({ package: packagePath, appPlan: planPath });
 assert.equal(pageLayoutValidation.status, "pass", JSON.stringify(pageLayoutValidation.findings || [], null, 2));
 const dashboardHardGates = validateDashboardGenerationHardGates({ package: packagePath, plan: planPath });
 assert.equal(dashboardHardGates.status, "pass", JSON.stringify(dashboardHardGates.findings || [], null, 2));
+const firstGenerationPreflight = runYapkFirstGenerationPreflight(packagePath, {
+  cwd: tempDir,
+  plan: planPath,
+  idProvenance: report.outputs.idProvenance,
+});
+assert.equal(
+  firstGenerationPreflight.ok,
+  true,
+  JSON.stringify({
+    failedGate: firstGenerationPreflight.failedGate,
+    gates: firstGenerationPreflight.gates?.filter((gate) => !gate.ok),
+  }, null, 2),
+);
 
 const layoutsByList = new Map(decoded.Childs.map((child) => [child.List.Title, child.Layouts.filter((layout) => Number(layout.Type) === 1).map((layout) => layout.Title)]));
 assert.deepEqual(layoutsByList.get("Tickets"), ["Tickets New/Edit Form", "Tickets View Item"]);
@@ -232,8 +276,9 @@ console.log(JSON.stringify({
     "planned lookup fields resolve to their target list and display field",
     "Summary Metrics not generated as Dashboard",
     "two-panel Dashboard layout matches App Plan selection",
-    "left-panel Priority/Status filters use proven option sources",
+    "left-panel Priority/Status filters use exact planned option sources",
     "dashboard page-layout and hard-gate validators pass",
+    "generated-final first-generation preflight passes and blocks stale embedded Dashboard IDs before signing",
     "custom forms assigned to correct host lists",
     "seed artifacts use structured identity-picker and file-upload contracts",
     "template business residue absent",
