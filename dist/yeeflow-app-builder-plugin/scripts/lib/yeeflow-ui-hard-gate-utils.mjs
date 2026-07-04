@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import zlib from "node:zlib";
-import { asArray, isObject, parseJsonMaybe, quoteLargeJsonIntegers } from "./yapk-decode-utils.mjs";
+import { asArray, decodeYapkResource, isObject, parseJsonMaybe, quoteLargeJsonIntegers } from "./yapk-decode-utils.mjs";
 
 export { asArray, isObject };
 
@@ -11,7 +11,7 @@ export function readJsonFile(file) {
 export function readPackageLike(file) {
   const parsed = readJsonFile(file);
   if (isObject(parsed) && typeof parsed.Resource === "string" && !parsed.Resource.startsWith("[______gizp______]")) {
-    const decoded = JSON.parse(quoteLargeJsonIntegers(zlib.brotliDecompressSync(Buffer.from(parsed.Resource, "base64")).toString("utf8")));
+    const decoded = decodeYapkResource(parsed);
     return { wrapper: parsed, decoded };
   }
   if (isObject(parsed) && typeof parsed.Resource === "string" && parsed.Resource.startsWith("[______gizp______]")) {

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.0`
+- Version: `0.9.1`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.0` adds Service Portal generator training: the plugin now includes a Service Portal skill, export-backed `PortalInfo` / portal user / portal group / portal resource / portal menu / permission standards, and a focused Service Portal YAPK inspector based on the Supplier Management export.
+Current release `0.9.1` aligns tolerant-Brotli UI hard gates: UI package readers now use the shared tolerant `.yapk` Resource decoder, Summary/KPI inspectors accept Yeeflow official export-compatible Resource payloads, and package/dashboard/application skills document post-install seed-writer proof boundaries plus remaining Dashboard materialization hard gates.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.0
+Version: 0.9.1
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.0
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.1
 ```
 
 ## What Is Included
