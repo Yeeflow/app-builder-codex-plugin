@@ -71,26 +71,24 @@ Not planned.
 Not planned.
 
 ## 14. Dashboard Pages Plan
-### 14.1 Service Tickets Dashboard
-- Page name: Service Tickets Dashboard
-- Business purpose: IT support triage workbench with ticket list and selected ticket details.
-- Layout template: dashboard-page-layouts-two-panel-workspace
-- Dataset presentation: collection_control_grid_table
+Dashboard page selection:
 
-#### Dashboard Sections
+| Dashboard | Layout template | Dataset presentation |
+| --- | --- | --- |
+| Service Tickets Dashboard | dashboard-page-layouts-two-panel-workspace | collection_control_grid_table |
 
-| Section Order | Section Name | Business Purpose | Source Data List or Business Object | Required Fields or Metrics | Selected Yeeflow Control Type Category | Why This Control Type Is Appropriate | User Actions Needed | Proof Boundary or Deferred Note |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Left ticket list | Show tickets for triage | Tickets | Subject, Requester, Priority, Status, Due Date | Collection | Repeated ticket queue | Select ticket, search, filter, add ticket, collapse panel | runtime-proof-required |
-| 2 | Right ticket detail | Show selected ticket details | Tickets | Ticket Number, Subject, Requester, Category, Priority, Status, Assigned Agent, Created Date, Due Date, Description | Dynamic fields | Current selected ticket context | Read selected ticket | runtime-proof-required |
-| 3 | Related comments and attachments | Show selected ticket activity | Ticket Comments, Ticket Attachments | Comment, Commented By, Comment Date, File, Uploaded By | Collection | Related activity display | Read related records | runtime-proof-required |
+Left panel work queue:
 
-#### Dashboard Filters
+| Region | Source | Required bindings |
+| --- | --- | --- |
+| Ticket list | Tickets | Subject \`Text2\`, Requester \`Text4\`, Priority \`Text7\`, Status \`Text5\`, Created Date \`Datetime1\`, Due Date \`Datetime2\` |
 
-| Filter Name | Source Data List | Filter Field | Applies-to Dashboard Sections | Selected Yeeflow Filter/Control Type If Known | Default Business Scope | Proof Boundary or Deferred Note |
-| --- | --- | --- | --- | --- | --- | --- |
-| Priority Level | Tickets | Priority / Text7 | Left ticket list | Data Filter | All priorities | runtime-proof-required |
-| Status | Tickets | Status / Text5 | Left ticket list | Data Filter | All statuses | runtime-proof-required |
+Right panel selected ticket detail:
+
+| Visible label | Binding |
+| --- | --- |
+| Detail title | Subject / Text2 |
+| Status | Text5 |
 
 Explicit dashboard exclusions:
 
