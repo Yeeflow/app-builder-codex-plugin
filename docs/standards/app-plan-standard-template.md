@@ -335,6 +335,24 @@ Rules:
 - View Item forms may plan current-record display plus related business data, approved Collection templates, approved Data Analytics templates, and KPI regions inside the v1.1 allowed slots. Field-grid and Collection templates may use the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` depending on the required section width. Workbench View Item forms may use `primary_working_area`, optional `right_side_panel`, and `chart_cards_section`; empty Workbench right panels or chart sections must be pruned.
 - App Plan selection is a business/layout decision only. It must not include generated `ListID`, `LayoutID`, action type codes, JSON property paths, placeholder IDs, copied control JSON, or runtime payload fields.
 
+#### Reverse-Related Collection Selection
+
+Required when a parent/detail lookup relationship should be displayed from the parent record's View Item or Workbench View Item form. This table is the plan-to-package contract that tells generation to add a reverse-related Collection section rather than only defining the lookup field.
+
+| Host Data List | View Item Form | Related Child List | Child Lookup Field | Section Title | Collection Template | Search | Add Record | Default Value |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Parent list> | <Parent View Item form> | <Child list> | <Child lookup FieldName> | <Visible section title> | collection_control_grid_table | <Search fields or No> | <Add button label or No> | `<Child lookup FieldName> = current ListDataID` |
+
+Rules:
+
+- Generate reverse-related sections only for View Item or Workbench View Item forms, not New/Edit forms.
+- Use this table when a child list has a lookup to the host list and users need to inspect or create those child records from the host record page.
+- The Collection Template must be an approved grid-table Collection template for list-like child records.
+- The generated Collection must source the child list and filter the child lookup field to the current host record's `ListDataID`.
+- If Search is enabled, the search fields must resolve on the child list and the `search-filter` variable must be consumed by the Collection `fulltext` binding.
+- If Add Record is enabled, the Add action must target the child list and pass the current host `ListDataID` into the child lookup field through default `passvalues`.
+- Run `scripts/validate-data-list-form-layout-template.mjs --package <generated-final.yapk> --plan <yeeflow-app-plan.md>` before signing. A row in this table must fail generated-final validation if the matching reverse-related section is not materialized in the generated package.
+
 #### Form Fields
 
 #### Form Fields Layout Template Selection

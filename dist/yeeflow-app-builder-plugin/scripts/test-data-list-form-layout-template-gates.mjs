@@ -23,7 +23,9 @@ try {
   expectPass("New/Edit template resource with marker passes", ["--resource", writeJson("new-edit-valid.json", newEditResource()), "--template", NEW_EDIT_TEMPLATE_ID, "--form-usage", "new/edit"]);
   expectPass("View item template resource with marker passes", ["--resource", writeJson("view-valid.json", viewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"]);
   expectPass("Workbench item details template resource with marker passes", ["--resource", writeJson("workbench-valid.json", workbenchResource()), "--template", WORKBENCH_TEMPLATE_ID, "--form-usage", "view"]);
+  expectPass("View item reverse-related Collection section with search and Add passvalues passes", ["--resource", writeJson("view-reverse-related-valid.json", reverseRelatedViewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"]);
   expectPass("generated package with New/Edit and View templates passes", ["--package", writePackage("valid-package.yapk", decodedPackage())]);
+  expectPass("App Plan reverse-related Collection selection must match generated package", ["--package", writePackage("reverse-related-package.yapk", decodedPackage({ viewResource: reverseRelatedViewResource(), viewTitle: "Specialties View Item" })), "--plan", writeText("plan-reverse-related-valid.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))]);
   expectPass("generated package with full-page Workbench View template passes", ["--package", writePackage("workbench-package.yapk", decodedPackage({ viewResource: workbenchResource(), viewTitle: "Asset Workbench Details", layoutView: { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view", opentype: { view: "new" }, modalsize: {} } }))]);
   expectPass("generated-final package coverage suppresses stale App Plan missing custom form rows", ["--package", writePackage("valid-package-stale-plan.yapk", decodedPackage()), "--plan", writeText("plan-stale-missing-rows-with-valid-package.md", appPlan({ omitNewEditSelection: true, omitViewSelection: true }))]);
   expectPass("generated-final Workbench package coverage proves Full page even when older App Plan wording omits it", ["--package", writePackage("workbench-package-stale-plan.yapk", decodedPackage({ viewResource: workbenchResource(), viewTitle: "Asset Workbench Details", layoutView: { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view", opentype: { view: "new" }, modalsize: {} } })), "--plan", writeText("plan-workbench-stale-full-page-wording-with-valid-package.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Workbench related context" }))]);
@@ -89,6 +91,13 @@ try {
     children: [{ type: "text", id: "stale_kpi_copy", nv_label: "stale_kpi_copy", text: "Live count from Office Asset records." }],
   });
   expectCode("generated View form residual KPI copy fails", ["--resource", writeJson("view-residual-kpi-copy.json", residualViewKpi), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_TEMPLATE_RESIDUAL_LABEL");
+
+  expectCode("reverse-related Collection section without lookup filter fails", ["--resource", writeJson("view-reverse-related-missing-filter.json", reverseRelatedViewResource({ omitFilter: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_FILTER_MISSING");
+  expectCode("reverse-related Collection search-filter without fulltext consumer fails", ["--resource", writeJson("view-reverse-related-missing-fulltext.json", reverseRelatedViewResource({ omitFulltext: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FULLTEXT_MISSING");
+  expectCode("reverse-related Add button missing passvalues fails", ["--resource", writeJson("view-reverse-related-missing-passvalues.json", reverseRelatedViewResource({ omitPassvalues: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_MISSING");
+  expectCode("reverse-related Add button passvalues must use current ListDataID", ["--resource", writeJson("view-reverse-related-bad-passvalue.json", reverseRelatedViewResource({ badPassvalue: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_VALUE_INVALID");
+  expectCode("App Plan reverse-related Collection selection must be materialized", ["--package", writePackage("reverse-related-missing-package.yapk", decodedPackage()), "--plan", writeText("plan-reverse-related-missing-package.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED");
+  expectCode("App Plan reverse-related default must use current ListDataID", ["--plan", writeText("plan-reverse-related-bad-default.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true, reverseDefaultValue: "Text3 = Specialty Name" }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_DEFAULT_VALUE_INVALID");
 
   const emptyTitleArea = newEditResource();
   const card = find(emptyTitleArea, "content_card_wrapper");
@@ -205,6 +214,97 @@ function workbenchResource(options = {}) {
   return resource;
 }
 
+function reverseRelatedViewResource(options = {}) {
+  const resource = viewResource();
+  firstSlot(resource).children.push(reverseRelatedSection(options));
+  return resource;
+}
+
+function reverseRelatedSection(options = {}) {
+  const searchBinding = "__filter_filter_doctors";
+  const childListId = "1909200000000000200";
+  const lookupField = "Text3";
+  const collection = {
+    type: "collection",
+    id: "doctor_profiles_collection",
+    nv_label: "grid_table_col_body",
+    collectionTemplateId: "collection_control_grid_table",
+    derivedFromCollectionTemplate: "collection_control_grid_table",
+    attrs: {
+      reverseRelatedCollection: true,
+      data: {
+        list: { AppID: 41, ListID: childListId, Type: 1, Title: "Doctor Profiles" },
+        filter: options.omitFilter ? [] : [
+          { left: lookupField, op: "0", right: [listDataIdExpr("Specialties:Id")], showCus: false },
+        ],
+        fulltext: options.omitFulltext ? [] : [
+          { fields: ["Title", "Text5"], value: [variableExpr(searchBinding, "filter_doctors")] },
+        ],
+      },
+    },
+    children: [
+      { type: "container", id: "doctor_profile_row", nv_label: "grid_table_col_item", children: [
+        { type: "dynamic-field", id: "doctor_profile_title", nv_label: "doctor_profile_title", field: "Title", attrs: { field: "Title" } },
+      ] },
+    ],
+  };
+  const addButton = {
+    type: "action_button",
+    id: "add_doctor_profile",
+    label: "Add doctor",
+    nv_label: "btn_add_doctor_profile",
+    attrs: {
+      "action-type": "5",
+      control_action: "action-add-doctor-profile",
+      data: { list: { AppID: 41, ListID: childListId, Type: 1, Title: "Doctor Profiles" } },
+      passvalues: options.omitPassvalues ? [] : [
+        { Name: lookupField, Value: options.badPassvalue ? "Specialty" : [listDataIdExpr("List Fields:Id")] },
+      ],
+    },
+  };
+  return {
+    type: "container",
+    id: "reverse_related_collection_section",
+    nv_label: "reverse_related_collection_section",
+    attrs: {
+      reverseRelatedCollectionSection: true,
+      hostList: "Specialties",
+      childList: "Doctor Profiles",
+      childListId,
+      childLookupField: lookupField,
+      allowAdd: true,
+    },
+    children: [
+      {
+        type: "container",
+        id: "grid_table_col_caption",
+        nv_label: "grid_table_col_caption",
+        children: [
+          { type: "heading", id: "grid_table_col_title", nv_label: "grid_table_col_title", attrs: { headc: { title: { value: "Doctors in this Specialty" } }, heads: { ty: [null, "l-medium"] } } },
+          {
+            type: "container",
+            id: "grid_table_col_operations",
+            nv_label: "grid_table_col_operations",
+            children: [
+              { type: "search-filter", id: "doctor_profile_search", label: "Search items", binding: searchBinding, attrs: { placeholder: "Search doctors" } },
+              addButton,
+            ],
+          },
+        ],
+      },
+      collection,
+    ],
+  };
+}
+
+function listDataIdExpr(name = "List Fields:Id") {
+  return { exprType: "list_field", valueType: "input", prop: "ListDataID", id: "ListDataID", type: "expr", name };
+}
+
+function variableExpr(id, name) {
+  return { exprType: "variable", valueType: "string", id, type: "expr", name };
+}
+
 function decodedPackage(options = {}) {
   const newEdit = options.newEditResource || newEditResource();
   const view = options.viewResource || viewResource();
@@ -244,10 +344,10 @@ function formLayout(layoutId, title, resource, options = {}) {
   };
 }
 
-function appPlan({ omitSelection = false, omitNewEditSelection = false, omitViewSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID, viewTemplate = VIEW_TEMPLATE_ID, viewReason = "View item shows current record and related context" } = {}) {
+function appPlan({ omitSelection = false, omitNewEditSelection = false, omitViewSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID, viewTemplate = VIEW_TEMPLATE_ID, viewReason = "View item shows current record and related context", listName = "Assets", titleFieldLabel = "Asset Name", viewFormName = "Asset View", reverseRelated = false, reverseDefaultValue = "Text3 = current ListDataID" } = {}) {
   const selectionRows = [
-    omitNewEditSelection ? "" : `| Assets | Asset New/Edit | New/Edit | ${newEditTemplate} | Current item field sections | None | New/Edit focuses on current item editing | Generated-final validation |`,
-    omitViewSelection ? "" : `| Assets | Asset View | View | ${viewTemplate} | Page title, KPI, current item and related data sections | Related loans and analytics | ${viewReason} | Generated-final validation |`,
+    omitNewEditSelection ? "" : `| ${listName} | ${listName} New/Edit | New/Edit | ${newEditTemplate} | Current item field sections | None | New/Edit focuses on current item editing | Generated-final validation |`,
+    omitViewSelection ? "" : `| ${listName} | ${viewFormName} | View | ${viewTemplate} | Page title, KPI, current item and related data sections | Related records and analytics | ${viewReason} | Generated-final validation |`,
   ].filter(Boolean).join("\n");
   const selection = omitSelection ? "" : `
 #### Data List Form Layout Template Selection
@@ -256,6 +356,13 @@ function appPlan({ omitSelection = false, omitNewEditSelection = false, omitView
 | --- | --- | --- | --- | --- | --- | --- | --- |
 ${selectionRows}
 `;
+  const reverseRelatedSelection = reverseRelated ? `
+#### Reverse-Related Collection Selection
+
+| Host Data List | View Item Form | Related Child List | Child Lookup Field | Section Title | Collection Template | Search | Add Record | Default Value |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ${listName} | ${viewFormName} | Doctor Profiles | Text3 | Doctors in this Specialty | collection_control_grid_table | Title, Specialty | Add doctor | ${reverseDefaultValue} |
+` : "";
   return `
 # Office Asset Loan Management - Yeeflow App Plan
 
@@ -265,7 +372,7 @@ Ready.
 
 ## 4. Data Lists and Document Libraries Plan
 
-### 4.1 Assets
+### 4.1 ${listName}
 
 - Selected Yeeflow resource type: Data list
 - Description: Office asset catalog.
@@ -275,25 +382,26 @@ Ready.
 
 | Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type | Support Source | Proof Label | Fallback / Deferred Reason | Required | Unique | Default Value | Placeholder | Validation Rules | Choice Values | Lookup Target | Lookup Display Field | Additional Lookup Fields | Description |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Asset Name | Title | Title | Title | input control | plugin-known field/control type | validator-backed | N/A | Yes | No | | Enter asset name | | | | | | Native title field |
+| 1 | ${titleFieldLabel} | Title | Title | Title | input control | plugin-known field/control type | validator-backed | N/A | Yes | No | | Enter name | | | | | | Native title field |
 
 ## 10. Custom Data List Forms Plan
 
-### 10.1 Assets
+### 10.1 ${listName}
 
 | Form Name | Form Type | Purpose | Used By | Layout Pattern | Actions Required | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Asset New/Edit | New/Edit | Create and update assets | Coordinators | Data List Form Layouts v1.1 | Yes | Uses current item fields |
-| Asset View | View | Review asset and related activity | Coordinators | Data List Form Layouts v1.1 | No | Uses related context |
+| ${listName} New/Edit | New/Edit | Create and update records | Coordinators | Data List Form Layouts v1.1 | Yes | Uses current item fields |
+| ${viewFormName} | View | Review record and related activity | Coordinators | Data List Form Layouts v1.1 | No | Uses related context |
 
 ${selection}
+${reverseRelatedSelection}
 
 #### Form Fields Layout Template Selection
 
 | Data List or Library | Custom Form | Field Group | Selected Form Fields Layout Template | PC/Laptop Columns | Tablet Columns | Mobile Columns | Full-Row Field Controls | Dynamic Display Grouping | Proof Boundary |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Assets | Asset New/Edit | Basic fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |
-| Assets | Asset View | Current record fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |
+| ${listName} | ${listName} New/Edit | Basic fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |
+| ${listName} | ${viewFormName} | Current record fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |
 
 ## 11. Data List Workflows Plan
 `;

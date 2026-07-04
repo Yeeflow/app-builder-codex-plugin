@@ -125,6 +125,7 @@ function validatePackage(packagePath, context) {
   }
   const usageByLayoutId = buildUsageByLayoutId(decoded);
   const packageCoverage = buildPackageFormCoverage(decoded);
+  packageCoverage.reverseRelated = buildPackageReverseRelatedCoverage(decoded);
   validateListDisplayAssignments(decoded, context);
   let customFormCount = 0;
   for (const form of collectDataListForms(decoded)) {
@@ -151,6 +152,7 @@ function validateAppPlan(planPath, findings, context = {}) {
   }
   const text = fs.readFileSync(planPath, "utf8");
   validateAppPlanListCoverage(text, findings, context);
+  validateAppPlanReverseRelatedSelections(text, findings, context);
   const section = extractSection(text, /^##\s+10\.\s+Custom Data List Forms Plan/im);
   if (!section.trim()) return;
   const hasCustomForms = /New\/Edit|New|Edit|View|Detail|Custom Data List Forms Plan/i.test(section) && /\|/.test(section);
@@ -177,6 +179,46 @@ function validateAppPlan(planPath, findings, context = {}) {
     const generatedPackageAlreadyValidatesWorkbenchOpenMode = Boolean(context.packageCoverage);
     if (line.includes(WORKBENCH_TEMPLATE_ID) && !hasWorkbenchFullPageIntent(line) && !generatedPackageAlreadyValidatesWorkbenchOpenMode) {
       findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_WORKBENCH_FULL_PAGE_REQUIRED", "Workbench View custom Data List forms must declare Full page opening in the App Plan.", { row: line }));
+    }
+  }
+}
+
+function validateAppPlanReverseRelatedSelections(text, findings, context = {}) {
+  const section = extractSection(text, /^##\s+10\.\s+Custom Data List Forms Plan/im);
+  if (!section.trim()) return;
+  const rows = parseReverseRelatedPlanRows(section);
+  const mentionsReverseRelated = /reverse[-\s]?related|related child list|child lookup field|current ListDataID/i.test(section);
+  if (mentionsReverseRelated && !rows.length) {
+    findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_TABLE_MISSING", "Custom Data List Forms Plan must include a Reverse-Related Collection Selection table when reverse-related View Item sections are planned.", {}));
+    return;
+  }
+  for (const row of rows) {
+    if (!row.hostList || !row.viewItemForm || !row.childList || !row.childLookupField || !row.collectionTemplate) {
+      findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_ROW_INCOMPLETE", "Reverse-Related Collection Selection rows must name host list, View Item form, related child list, child lookup field, and approved Collection template.", { row: row.raw }));
+      continue;
+    }
+    if (!/collection_control_grid_table|grid[-\s]?table/i.test(row.collectionTemplate)) {
+      findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_TEMPLATE_INVALID", "Reverse-related Data List View Item sections must use an approved grid-table Collection template for related child records.", { row: row.raw, actual: row.collectionTemplate }));
+    }
+    if (!/current\s+ListDataID/i.test(row.defaultValue) || !lineMentionsList(row.defaultValue, row.childLookupField)) {
+      findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_DEFAULT_VALUE_INVALID", "Reverse-related Add defaults must declare <child lookup FieldName> = current ListDataID.", { row: row.raw, expectedField: row.childLookupField }));
+    }
+    if (context.packageCoverage?.reverseRelated) {
+      const match = context.packageCoverage.reverseRelated.find((entry) => {
+        const hostMatches = lineMentionsList(entry.hostList, row.hostList);
+        const childMatches = lineMentionsList(entry.childList, row.childList) || (entry.childListId && lineMentionsList(row.childList, entry.childListId));
+        const lookupMatches = norm(entry.childLookupField) === norm(row.childLookupField);
+        return hostMatches && childMatches && lookupMatches;
+      });
+      if (!match) {
+        findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED", "App Plan planned a reverse-related Collection section, but the generated package does not contain the matching View Item section.", {
+          hostList: row.hostList,
+          viewItemForm: row.viewItemForm,
+          childList: row.childList,
+          childLookupField: row.childLookupField,
+          collectionTemplate: row.collectionTemplate,
+        }));
+      }
     }
   }
 }
@@ -223,6 +265,7 @@ function validateFormResource(resource, context) {
   validateUsageContract(resource, context.templateId || templateId, context);
   validateSectionContentAreaGap(resource, context);
   validateBusinessSlots(resource, context);
+  validateReverseRelatedCollectionSections(resource, context);
 }
 
 function validateSectionContentAreaGap(resource, context) {
@@ -379,6 +422,171 @@ function validateWorkbenchBusinessRules(resource, context) {
       context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_RIGHT_SIDE_PANEL", "Workbench right_side_panel is optional and must be removed when it has no real business content.", { source: context.source, path: pointerForNode(resource, panel) }));
     }
   }
+}
+
+function validateReverseRelatedCollectionSections(resource, context) {
+  if (context.registryMode) return;
+  const sections = findReverseRelatedSections(resource);
+  for (const section of sections) {
+    const detail = reverseRelatedSectionDetail(section);
+    const sectionPath = pointerForNode(resource, section);
+    const collection = findReverseRelatedCollection(section);
+    if (!collection) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_MISSING", "Reverse-related View Item form sections must contain a child-list Collection.", { source: context.source, path: sectionPath, detail }));
+      continue;
+    }
+    validateReverseRelatedCollectionFilter(collection, detail, context, resource);
+    validateReverseRelatedSearch(section, collection, context, resource);
+    validateReverseRelatedAddButton(section, collection, detail, context, resource);
+  }
+}
+
+function findReverseRelatedSections(resource) {
+  const explicitSections = flatten(resource)
+    .map((entry) => entry.node)
+    .filter((node) => isReverseRelatedSection(node));
+  const collectionSections = flatten(resource)
+    .map((entry) => entry.node)
+    .filter((node) => isReverseRelatedCollection(node));
+  const sections = [...explicitSections];
+  for (const collection of collectionSections) {
+    if (sections.some((section) => section === collection || flatten(section).some((entry) => entry.node === collection))) continue;
+    sections.push(collection);
+  }
+  return uniqueNodes(sections);
+}
+
+function isReverseRelatedSection(node) {
+  if (!isObject(node)) return false;
+  return Boolean(
+    node.reverseRelatedCollectionSection ||
+    node?.attrs?.reverseRelatedCollectionSection ||
+    identityCandidates(node).some((id) => /reverse[_-]?related[_-]?collection[_-]?section/i.test(id))
+  );
+}
+
+function isReverseRelatedCollection(node) {
+  if (!isObject(node)) return false;
+  if (String(node.type || "") !== "collection") return false;
+  return Boolean(
+    node.reverseRelatedCollection ||
+    node?.attrs?.reverseRelatedCollection ||
+    node?.reverseRelatedCollectionSection ||
+    node?.attrs?.reverseRelatedCollectionSection ||
+    node?.attrs?.reverseRelated ||
+    node?.reverseRelated ||
+    identityCandidates(node).some((id) => /reverse[_-]?related/i.test(id))
+  );
+}
+
+function reverseRelatedSectionDetail(section) {
+  const attrs = section?.attrs || {};
+  const reverse = attrs.reverseRelated || section?.reverseRelated || {};
+  return {
+    hostList: stringValue(attrs.hostList || section?.hostList || reverse.hostList),
+    childList: stringValue(attrs.childList || section?.childList || reverse.childList),
+    childListId: stringValue(attrs.childListId || attrs.childListID || section?.childListId || reverse.childListId || reverse.ListID),
+    childLookupField: stringValue(attrs.childLookupField || section?.childLookupField || reverse.childLookupField || reverse.lookupField || attrs.lookupField),
+    allowAdd: booleanWithDefault(attrs.allowAdd ?? section?.allowAdd ?? reverse.allowAdd, true),
+  };
+}
+
+function findReverseRelatedCollection(section) {
+  const candidates = flatten(section).map((entry) => entry.node).filter((node) => String(node?.type || "") === "collection");
+  return candidates.find((node) => isReverseRelatedCollection(node)) || candidates[0] || null;
+}
+
+function validateReverseRelatedCollectionFilter(collection, detail, context, resource) {
+  const filters = asArray(collection?.attrs?.data?.filter || collection?.attrs?.filter);
+  const path = pointerForNode(resource, collection);
+  if (!filters.length) {
+    context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_FILTER_MISSING", "Reverse-related Collections must filter child records by the child lookup field and current host ListDataID.", { source: context.source, path, detail }));
+    return;
+  }
+  const fieldName = detail.childLookupField;
+  const matchingFieldFilters = fieldName ? filters.filter((filter) => filterFieldName(filter) === fieldName) : filters;
+  if (fieldName && !matchingFieldFilters.length) {
+    context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_LOOKUP_FIELD_MISMATCH", "Reverse-related Collection filter left side must use the child lookup field declared for the section.", { source: context.source, path, expectedField: fieldName, actualFields: filters.map(filterFieldName).filter(Boolean) }));
+    return;
+  }
+  const matchingIdFilter = matchingFieldFilters.find((filter) => containsCurrentListDataIdExpression(filter?.right ?? filter?.value ?? filter?.rightValue ?? filter));
+  if (!matchingIdFilter) {
+    context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_FILTER_VALUE_INVALID", "Reverse-related Collection filter right side must be the current host item ListDataID expression, not parent display text, title, or a hardcoded ID.", { source: context.source, path, expectedField: fieldName || null }));
+  }
+}
+
+function validateReverseRelatedSearch(section, collection, context, resource) {
+  const searchControls = flatten(section).map((entry) => entry.node).filter((node) => String(node?.type || "") === "search-filter");
+  if (!searchControls.length) return;
+  const fulltext = asArray(collection?.attrs?.data?.fulltext || collection?.attrs?.fulltext);
+  const collectionPath = pointerForNode(resource, collection);
+  if (!fulltext.length) {
+    context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FULLTEXT_MISSING", "Reverse-related Collection search-filter controls must be consumed by collection.attrs.data.fulltext.", { source: context.source, path: collectionPath }));
+    return;
+  }
+  for (const search of searchControls) {
+    const binding = stringValue(search?.binding || search?.attrs?.binding || search?.attrs?.filterVariable || search?.attrs?.variable);
+    if (!binding) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_BINDING_MISSING", "Reverse-related search-filter must declare a stable binding variable.", { source: context.source, path: pointerForNode(resource, search) }));
+      continue;
+    }
+    const consumer = fulltext.find((entry) => containsVariableReference(entry?.value ?? entry, binding));
+    if (!consumer) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_BINDING_MISMATCH", "Reverse-related search-filter binding must match a collection.attrs.data.fulltext value expression.", { source: context.source, path: pointerForNode(resource, search), binding }));
+      continue;
+    }
+    if (!asArray(consumer.fields).filter(Boolean).length) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FIELDS_MISSING", "Reverse-related Collection fulltext search must name at least one resolved child-list field.", { source: context.source, path: collectionPath, binding }));
+    }
+  }
+}
+
+function validateReverseRelatedAddButton(section, collection, detail, context, resource) {
+  const addButtons = flatten(section).map((entry) => entry.node).filter(isReverseRelatedAddButton);
+  if (!addButtons.length) {
+    if (detail.allowAdd !== false) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_ADD_BUTTON_MISSING", "Reverse-related Collection sections that allow child creation must include an Add action_button in the operations area.", { source: context.source, path: pointerForNode(resource, section), detail }));
+    }
+    return;
+  }
+  const lookupField = detail.childLookupField;
+  const collectionListId = stringValue(collection?.attrs?.data?.list?.ListID || collection?.attrs?.data?.ListID || collection?.attrs?.list?.ListID);
+  for (const button of addButtons) {
+    const attrs = button?.attrs || {};
+    const buttonPath = pointerForNode(resource, button);
+    const targetListId = stringValue(attrs?.data?.list?.ListID || attrs?.data?.ListID || attrs?.list?.ListID);
+    const expectedChildListId = detail.childListId || collectionListId;
+    if (!targetListId) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_ADD_TARGET_MISSING", "Reverse-related Add buttons must target the child Data List.", { source: context.source, path: buttonPath }));
+    } else if (expectedChildListId && targetListId !== expectedChildListId) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_ADD_TARGET_MISMATCH", "Reverse-related Add button target list must match the related child Collection source list.", { source: context.source, path: buttonPath, expectedChildListId, actualListId: targetListId }));
+    }
+    if (!attrs.control_action && !attrs.action && !button.control_action && !button.action) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_ADD_ACTION_MISSING", "Reverse-related Add buttons must include a runtime action/control_action binding.", { source: context.source, path: buttonPath }));
+    }
+    const passvalues = asArray(attrs.passvalues || attrs.passValues || button.passvalues || button.passValues);
+    if (!passvalues.length) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_MISSING", "Reverse-related Add buttons must pass the current host ListDataID into the child lookup field.", { source: context.source, path: buttonPath, expectedField: lookupField || null }));
+      continue;
+    }
+    const mapping = lookupField ? passvalues.find((item) => stringValue(item?.Name || item?.name || item?.field || item?.FieldName) === lookupField) : passvalues.find((item) => containsCurrentListDataIdExpression(item?.Value ?? item?.value));
+    if (!mapping) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_LOOKUP_FIELD_MISSING", "Reverse-related Add button passvalues must map the child lookup field.", { source: context.source, path: buttonPath, expectedField: lookupField || null, actualFields: passvalues.map((item) => stringValue(item?.Name || item?.name || item?.field || item?.FieldName)).filter(Boolean) }));
+      continue;
+    }
+    if (!containsCurrentListDataIdExpression(mapping?.Value ?? mapping?.value)) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_VALUE_INVALID", "Reverse-related Add button passvalues value must be the current host item ListDataID expression.", { source: context.source, path: buttonPath, expectedField: lookupField || null }));
+    }
+  }
+}
+
+function isReverseRelatedAddButton(node) {
+  if (!isObject(node)) return false;
+  if (String(node.type || "") !== "action_button") return false;
+  const attrs = node.attrs || {};
+  const actionType = stringValue(attrs["action-type"] || attrs.actionType || attrs.operation);
+  const text = identityCandidates(node).concat([node?.label, attrs?.label?.value, attrs?.text?.value]).filter(Boolean).join(" ");
+  return actionType === "5" || /\badd\b|new item|create/i.test(text);
 }
 
 function hasMeaningfulBusinessContent(node) {
@@ -664,6 +872,74 @@ function hasActionConfiguration(node) {
   return Boolean(attrs.control_action || attrs.action || attrs.actions || node?.actions || node?.action || node?.control_action);
 }
 
+function filterFieldName(filter) {
+  return stringValue(filter?.left || filter?.field || filter?.FieldName || filter?.fieldName || filter?.name || filter?.Name);
+}
+
+function containsCurrentListDataIdExpression(value) {
+  let found = false;
+  walkJson(value, (node) => {
+    if (found || !isObject(node)) return;
+    const exprType = stringValue(node.exprType).toLowerCase();
+    const prop = stringValue(node.prop || node.id || node.field || node.FieldName);
+    const name = stringValue(node.name || node.label || node.title);
+    if (exprType === "list_field" && (prop === "ListDataID" || prop === "Id" || /\b(?:List Fields|[^:]+):Id\b/i.test(name))) {
+      found = true;
+    }
+  });
+  return found;
+}
+
+function containsVariableReference(value, binding) {
+  const expected = stringValue(binding);
+  if (!expected) return false;
+  let found = false;
+  walkJson(value, (node) => {
+    if (found) return;
+    if (typeof node === "string" && node === expected) found = true;
+    if (!isObject(node)) return;
+    for (const candidate of [node.id, node.name, node.binding, node.value, node.variable, node.var]) {
+      if (stringValue(candidate) === expected) found = true;
+    }
+  });
+  return found;
+}
+
+function walkJson(value, fn) {
+  fn(value);
+  if (Array.isArray(value)) {
+    for (const item of value) walkJson(item, fn);
+    return;
+  }
+  if (!isObject(value)) return;
+  for (const child of Object.values(value)) walkJson(child, fn);
+}
+
+function booleanWithDefault(value, defaultValue) {
+  if (value === undefined || value === null || value === "") return defaultValue;
+  if (typeof value === "boolean") return value;
+  const text = String(value).trim().toLowerCase();
+  if (["false", "0", "no"].includes(text)) return false;
+  if (["true", "1", "yes"].includes(text)) return true;
+  return defaultValue;
+}
+
+function stringValue(value) {
+  if (value === undefined || value === null) return "";
+  return String(value).trim();
+}
+
+function uniqueNodes(nodes) {
+  const seen = new Set();
+  const out = [];
+  for (const node of nodes) {
+    if (!node || seen.has(node)) continue;
+    seen.add(node);
+    out.push(node);
+  }
+  return out;
+}
+
 function isActionLooking(node) {
   const text = identityCandidates(node).join(" ");
   return /button|btn_|action|save|submit|delete|edit|export|add|create|operation/i.test(text);
@@ -679,11 +955,66 @@ function tableRows(text) {
   return rows;
 }
 
+function parseReverseRelatedPlanRows(section) {
+  const subsection = extractSubsection(section, /Reverse-Related Collection Selection/i);
+  if (!subsection.trim()) return [];
+  const lines = subsection.split(/\r?\n/);
+  const rows = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^\s*\|.+\|\s*$/.test(lines[index] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1] || "")) continue;
+    const headers = splitTableLine(lines[index]).map((header) => norm(header));
+    const column = (...names) => headers.findIndex((header) => names.some((name) => header === norm(name) || header.includes(norm(name))));
+    const hostColumn = column("Host Data List", "Host List", "Parent Data List");
+    const formColumn = column("View Item Form", "View Form", "Custom Form");
+    const childColumn = column("Related Child List", "Child List", "Related List");
+    const lookupColumn = column("Child Lookup Field", "Lookup Field");
+    const titleColumn = column("Section Title", "Title");
+    const templateColumn = column("Collection Template", "Collection Presentation", "Template");
+    const searchColumn = column("Search");
+    const addColumn = column("Add Record", "Add");
+    const defaultColumn = column("Default Value", "Default");
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && /^\s*\|.+\|\s*$/.test(lines[rowIndex] || "")) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const raw = lines[rowIndex].trim();
+      const hostList = cleanName(cells[hostColumn]);
+      const childList = cleanName(cells[childColumn]);
+      const childLookupField = cleanName(cells[lookupColumn]);
+      if (hostList || childList || childLookupField) {
+        rows.push({
+          raw,
+          hostList,
+          viewItemForm: cleanName(cells[formColumn]),
+          childList,
+          childLookupField,
+          sectionTitle: cleanName(cells[titleColumn]),
+          collectionTemplate: cleanName(cells[templateColumn]),
+          search: cleanName(cells[searchColumn]),
+          addRecord: cleanName(cells[addColumn]),
+          defaultValue: cleanName(cells[defaultColumn]),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return rows;
+}
+
 function splitTableLine(line) {
   let trimmed = String(line || "").trim();
   if (trimmed.startsWith("|")) trimmed = trimmed.slice(1);
   if (trimmed.endsWith("|")) trimmed = trimmed.slice(0, -1);
   return trimmed.split("|").map((cell) => cell.trim());
+}
+
+function extractSubsection(text, marker) {
+  const match = marker.exec(text);
+  if (!match) return "";
+  const start = match.index;
+  const remainder = text.slice(start + match[0].length);
+  const next = remainder.search(/\n#{2,4}\s+/);
+  return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
 }
 
 function parsePlannedDataLists(text) {
@@ -772,6 +1103,35 @@ function buildPackageFormCoverage(decoded) {
     coverage.set(key, entry);
   }
   return coverage;
+}
+
+function buildPackageReverseRelatedCoverage(decoded) {
+  const coverage = [];
+  for (const form of collectDataListForms(decoded)) {
+    const resource = form.resource;
+    if (!isObject(resource)) continue;
+    const sections = findReverseRelatedSections(resource);
+    for (const section of sections) {
+      const detail = reverseRelatedSectionDetail(section);
+      const collection = findReverseRelatedCollection(section);
+      const collectionList = collection?.attrs?.data?.list || collection?.attrs?.list || {};
+      coverage.push({
+        hostList: cleanName(detail.hostList || form.listTitle),
+        viewItemForm: cleanName(form.title),
+        childList: cleanName(detail.childList || collectionList.Title || collectionList.Name || ""),
+        childListId: stringValue(detail.childListId || collectionList.ListID || collection?.attrs?.data?.ListID),
+        childLookupField: stringValue(detail.childLookupField),
+        sectionTitle: cleanName(sectionTitleText(section)),
+        collectionTemplate: stringValue(collection?.collectionTemplateId || collection?.derivedFromCollectionTemplate || collection?.attrs?.collectionTemplateId || collection?.attrs?.derivedFromCollectionTemplate),
+      });
+    }
+  }
+  return coverage;
+}
+
+function sectionTitleText(section) {
+  const titleNode = findFirstByIdentity(section, "grid_table_col_title") || findFirstByIdentity(section, "section_title_text") || findFirstByIdentity(section, "section_title_header");
+  return titleNode?.attrs?.headc?.title?.value || titleNode?.attrs?.text?.value || titleNode?.attrs?.title?.value || titleNode?.title || titleNode?.label || "";
 }
 
 function layoutHasTemplate(layout, templateId) {

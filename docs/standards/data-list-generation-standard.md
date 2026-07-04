@@ -267,6 +267,17 @@ Required:
 - Do not point lookup display fields to nonexistent fields such as `Text0` when the target list uses `Title`.
 - Include lookup fields in default views and forms where users need the relationship.
 
+For parent/detail relationships, also plan reverse-related View Item sections. When list B contains a lookup field to list A and users need to inspect B records while viewing A, the parent list A View Item form should include a reverse-related Collection section:
+
+- Host form: parent Data List View Item or Workbench View Item form.
+- Child source: the dependent Data List that owns the lookup field.
+- Read filter: child lookup storage field equals current host item `ListDataID`.
+- Search: `search-filter.binding` must be consumed by `collection.attrs.data.fulltext[].value`, with `fulltext.fields[]` resolving on the child list.
+- Add: if child creation is allowed, the Add `action_button` must target the child list and include `attrs.passvalues[]` mapping the child lookup field `FieldName` to the current host item `ListDataID` expression.
+- Never write the parent title, display name, label, hardcoded ID, or sample row ID as the child lookup value.
+
+This pattern is View-only by default. New/Edit forms must not include reverse-related Collections because a saved current `ListDataID` may not exist yet.
+
 Vendor Onboarding required relationship example:
 
 ```text

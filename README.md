@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.3`
+- Version: `0.9.4`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.3` hardens Dashboard Collection golden-reference style contracts, App Plan field-table parsing, lookup seed proof, and dataset presentation validators. Collection `dynamic-user` controls keep zero item padding, `grid_table_col_item_op_menu` buttons keep transparent normal backgrounds, and grid-table caption titles keep Large medium typography.
+Current release `0.9.4` hardens Data List View Item reverse-related Collection planning and materialization. App Plans must declare parent/child lookup-driven reverse-related sections, approved Collection template usage, search/fulltext behavior, Add button passvalues, and current-record `ListDataID` default values; generated packages must materialize those sections before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.3
+Version: 0.9.4
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.3
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.4
 ```
 
 ## What Is Included
