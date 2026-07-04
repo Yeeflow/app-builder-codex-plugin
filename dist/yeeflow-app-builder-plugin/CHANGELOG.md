@@ -2,6 +2,89 @@
 
 ## Unreleased
 
+## 0.9.2
+
+- Release Dashboard v1.1 Summary host and identity-field hardening.
+- Nest generated v1.1 Dashboard Summary hidden hosts inside approved KPI business slots instead of appending invented `*_kpi_data_host` containers under root `Content` / `content_panel`.
+- Keep identifier labels such as `Employee Number`, `Employee ID`, and `Department Code` as normal `dynamic-field` controls while continuing to require `dynamic-user` for true identity-picker fields.
+- Add focused source/dist regression coverage for the Hospital Doctor Dashboard failure shape and align the v1.1 validator fixture with current navigator-label, action, and source-template-residue gates.
+
+## 0.9.1
+
+- Release tolerant-Brotli UI hard-gate alignment.
+- Route UI hard-gate package readers through the shared tolerant `.yapk` Resource decoder so Yeeflow official export-compatible payloads do not fail Summary/KPI inspection with strict Brotli `unexpected end of file`.
+- Add source/dist regression coverage for the Summary inspector reading official-style tolerant-Brotli packages.
+- Document post-install seed-writer proof boundaries and remaining Dashboard materialization hard gates after Resource wrapping succeeds.
+
+## 0.9.0
+
+- Release Service Portal generator training.
+- Add a dedicated `yeeflow-service-portal-generator` skill for planning, inspecting, validating, and generating Service Portal payloads in `.yapk` applications.
+- Add export-backed Service Portal standards covering decoded `PortalInfo`, `ListSet.Ext3.externalPortal`, Type `128` portal user system lists, portal user groups, portal source resources, menus, list form routing, portal permissions, and portal-aware dashboard bindings.
+- Add a normalized Supplier Management Service Portal reference and training report while keeping login-page customization export location and exact permission bit semantics marked as open questions.
+- Add `inspect-service-portal-yapk.mjs` plus focused self-tests so packages with Service Portal can validate current-app Data List, Document Library, and Dashboard exposure while blocking unsupported Approval form and Form report portal source resources before signing readiness.
+
+## 0.8.117
+
+- Release official YAPK Resource export compatibility.
+- Encode generated `.yapk` wrapper `Resource` values with Yeeflow official-export-compatible tolerant Brotli shape instead of standard complete Node Brotli.
+- Preserve official AppPackageInfo export surfaces by emitting `FormReports: []` and `CustomServices: []` arrays even when no report or custom service resources are planned.
+- Route public package validators and related YAPK inspectors through the shared tolerant Brotli decoder so current Yeeflow official exports do not fail strict decode before package-shape validation.
+- Add focused source/dist regression coverage for official Resource strict-decode failure, tolerant decode success, and required empty `FormReports` / `CustomServices` array gates.
+
+## 0.8.116
+
+- Release Custom Capability App Plan planning.
+- Add a standard App Plan `Custom Code and Custom Service Planning` section covering native capability decisions, Custom Code plan rows, Custom Service plan rows, invocation plans, and runtime proof requirements.
+- Add `custom-capability-app-plan-planning-standard.md` and training documentation so Custom Code controls, Form Action Custom Code steps, Custom Service resources, `invokeservice` form actions, and `InvokeCode` workflow actions are planned before generation.
+- Update Custom Code, Custom Service, and Feature Learning skills to block unplanned custom capability shortcuts and prevent `Not planned` / `N/A` / `None` placeholder rows from materializing.
+- Add focused source/dist regression coverage for the custom capability App Plan contract and cache artifact mirrors.
+
+## 0.8.115
+
+- Release Custom Service generator and invocation training.
+- Add a dedicated Yeeflow Custom Service generator skill for Node.js 22 `.ycs` services, including strict `run({ inputs, connections, modules, logger })` guidance, server-side queue execution boundaries, and safe fallback recommendations for client-side Custom Code.
+- Normalize exported Custom Service references for plain input/output services, HTML table generation, Excel-to-Data-List import patterns, and SharePoint OAuth connection-variable usage.
+- Document and gate Custom Service invocation shapes for Approval/Data List/Dashboard form actions, Approval/Data List/Scheduled workflow actions, workflow variables, Data List fields, temp variables, and connection bindings.
+- Add focused source/dist regression coverage so Custom Service examples, invocation contracts, and cache artifacts stay aligned before release/cache smoke.
+
+## 0.8.114
+
+- Release Custom Code surface-contract cache-root alignment.
+- Make `test-custom-code-surface-contract-gates.mjs` root-mode aware so the same focused gate validates both source checkouts (`skills/installed/...`) and installed plugin cache roots (`skills/...`).
+- Preserve the 0.8.113 Custom Code control versus Form Action Custom Code step runtime contract while restoring installed-cache smoke coverage.
+
+## 0.8.113
+
+- Release Custom Code control versus Form Action Custom Code step contract hardening.
+- Add a dedicated Form Action Custom Code step runtime standard that requires `execute(context, fieldsValues)` and keeps package materialization gated until action-step JSON storage shape is export-proven.
+- Update the Yeeflow Custom Code generator skill and reference standard to classify `control` versus `form_action_step` before generation, preserving `render(...)` only for visible Custom Code controls.
+- Align Custom Code decision guidance and Form Action generation rules so App Plans declare the custom-code surface, host action, parameters, read/write fields, native fallback, and runtime proof boundary.
+- Add focused regression coverage and source/dist mirror checks for Custom Code surface entrypoint drift.
+
+## 0.8.112
+
+- Release focused Service Tickets master-detail workspace cleanup.
+- Prune empty `section_title_area` containers inside generated two-panel and three-panel workspace content cards instead of preserving template-only shells.
+- Skip Dashboard v1.1 content-card slot repair on master-detail workspace pages so optional title/action areas remain removable when not backed by business content.
+- Keep Priority/Status select-filter option sets exact when explicit App Plan choices or field rules exist, without appending generic workflow/status fallback values such as Draft, Submitted, or Completed.
+- Add focused Service Tickets regression coverage and training documentation for empty section cleanup and exact filter option-source behavior.
+
+## 0.8.111
+
+- Release Data Analytics runtime export-shape and Service Tickets workbench Dashboard plan-shape hardening.
+- Reject chart/pivot `Resource.exts[]` runtime rows and values that lack export-shaped metadata required by Yeeflow runtime materialization.
+- Parse bullet-form Dashboard page layout selections under `## 14. Dashboard Pages Plan`, preserving `dashboard-page-layouts-two-panel-workspace` and `dashboard-page-layouts-three-panel-workspace` instead of silently falling back to `dashboard-page-layouts-v1.1`.
+- Add Service Tickets regression coverage for the real App Plan shape that requires a left Ticket list, selected-ticket detail workspace, and Priority/Status filter controls.
+
+## 0.8.110
+
+- Release consolidated App Plan Data List schema support.
+- Parse table-driven `List | Field label | Internal field | Field type | Purpose` rows as planned Data List schema, without treating schema headings as real resources.
+- Preserve explicit internal fields such as `Title`, `Text5`, and `Datetime1`; keep identity-picker, lookup, and file-upload fields schema-safe on Text-backed storage.
+- Resolve lookup targets from App Plan purpose text and keep Dashboard Priority/Status filter option sources tied to planned fields.
+- Add focused Service Tickets regression coverage and training documentation for field materialization, dashboard layout selection, custom form host assignment, seed artifacts, and template residue cleanup.
+
 ## 0.8.109
 
 - Release FormNewReports upgrade omission hardening.

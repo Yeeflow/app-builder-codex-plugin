@@ -73,6 +73,8 @@ function adaptBusinessText(node) {
     if (typeof value === "string" && !["id", "key", "type", "name", "nv_label", "nav_label", "derivedFromGoldenReference"].includes(key)) {
       node[key] = value
         .replaceAll("Marketing Event", "Office Asset Loan")
+        .replaceAll("Active Loan Pipeline", "Asset Operations Queue")
+        .replaceAll("Coordinator guidance: prioritize overdue items and returns due within the next seven days.", "Operations guidance: review active asset requests and follow up on outstanding work.")
         .replaceAll("Campaign", "Loan")
         .replaceAll("Registration", "Checkout")
         .replaceAll("Budget", "Replacement Cost")
@@ -150,7 +152,7 @@ function gridTableWrapper() {
               name: "op_normal",
               children: [
                 { type: "search-filter", id: "loan_work_queue_search", name: "loan_work_queue_search", attrs: { placeholder: "Search loans" } },
-                { type: "action_button", id: "loan_work_queue_add", name: "loan_work_queue_add", label: "Add loan", attrs: { control_action: "loan_work_queue_add_item" } },
+                { type: "action_button", id: "loan_work_queue_add", name: "loan_work_queue_add", label: "Add loan", attrs: {} },
               ],
             }],
           },
@@ -224,8 +226,10 @@ function dynamicControl(type, name, field) {
   const control = {
     type,
     name,
+    nv_label: name,
     field,
     attrs: {
+      nv_label: name,
       source: "3",
       "obj-f": field,
       data: { field },

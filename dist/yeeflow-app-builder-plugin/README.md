@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.8.109`
+- Version: `0.9.2`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.8.109` hardens Dashboard-only upgrade handling for installed Form reports: unchanged installed `FormNewReports[]` entries may be omitted from Dashboard/runtime-only upgrade payloads to avoid duplicate live report creation, while report mutations still require explicit scope and update-safe proof.
+Current release `0.9.2` hardens Dashboard v1.1 Summary and identity-field materialization: generated Summary hidden hosts stay inside approved KPI business slots, Employee Number/Department Code labels remain normal identifier `dynamic-field` controls, true identity-picker fields require `dynamic-user`, and source/dist regression gates cover the verified Hospital Dashboard failure shape.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.8.109
+Version: 0.9.2
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.8.109
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.2
 ```
 
 ## What Is Included

@@ -2401,11 +2401,11 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
     label: contract.label,
   }));
   if (summaries.length) {
-    const summaryHostParent = isMasterDetailWorkspace
-      ? (findFirstByIdentity(resource, "content_panel") || resource)
-      : (findFirstByIdentity(resource, "Content") || resource);
-    summaryHostParent.children = Array.isArray(summaryHostParent.children) ? summaryHostParent.children : [];
-    summaryHostParent.children.push(buildHiddenSummaryHost({ dashboardName: name, summaries }));
+    const summaryHostParent = findDashboardHiddenSummaryHostParent(resource);
+    if (summaryHostParent) {
+      summaryHostParent.children = Array.isArray(summaryHostParent.children) ? summaryHostParent.children : [];
+      summaryHostParent.children.push(buildHiddenSummaryHost({ dashboardName: name, summaries }));
+    }
   }
   materializeDashboardFilters(resource, {
     filters: normalizedFilters,
@@ -3691,6 +3691,21 @@ function buildHiddenSummaryHost({ dashboardName, summaries }) {
   };
 }
 
+function findDashboardHiddenSummaryHostParent(resource) {
+  const kpiSlotIdentities = [
+    "event_portfolio_kpi_planned_events",
+    "event_portfolio_kpi_approved_budget",
+    "event_portfolio_kpi_registration_rate",
+    "event_portfolio_kpi_lead_follow_up",
+    "kpi_card_wrapper",
+  ];
+  for (const identity of kpiSlotIdentities) {
+    const slot = findFirstByIdentity(resource, identity);
+    if (slot) return slot;
+  }
+  return null;
+}
+
 function buildSummaryControl({ summaryId, tempVar, listName, listId, label = "Active Records" }) {
   const saveVariable = summarySaveVariable(tempVar);
   const fieldMetadata = buildSummaryFieldMetadata();
@@ -3991,7 +4006,7 @@ function replaceUserLikeDynamicFieldText(control, replacement) {
   const visit = (node) => {
     if (!node || typeof node !== "object") return;
     for (const [key, value] of Object.entries(node)) {
-      if (typeof value === "string" && /\b(user|owner|assignee|requester|borrower|manager|approver|employee|person|people|accountid|account id)\b/i.test(value)) {
+      if (typeof value === "string" && /\b(user|owner|assignee|requester|borrower|manager|approver|person|people|accountid|account id)\b/i.test(value)) {
         node[key] = replacement;
       } else if (value && typeof value === "object") {
         visit(value);
