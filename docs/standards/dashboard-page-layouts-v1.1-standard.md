@@ -98,6 +98,10 @@ Generated Dashboard pages must preserve the v1.1 template shell and non-business
 
 Generator normalization is allowed for page-shell compatibility: `Main` / `Content` labels may be normalized, root/page background may be refreshed to the required `#f4f7fb`, root page padding may be normalized to zero, Full width may use the supported v1.1 export-coded shape, `actions: []` may be emitted or omitted when no actions exist, and meaningful navigator/control names may replace generic `Container` / `Grid` labels. Content container padding must not be normalized to zero; preserve the canonical v1.1 template padding so the page shell spacing remains stable. These normalizations must not be used to invent layout modules, move business controls outside approved slots, or remove required v1.1 structure.
 
+Summary/KPI hidden source controls are business controls even when visually hidden. A generated Dashboard must not append a new `*_kpi_data_host` or any Summary host directly under root `Content`, `content_panel`, or another structural page-shell container. Place the dedicated hidden Summary host inside an approved KPI business slot such as `event_portfolio_kpi_planned_events`, `event_portfolio_kpi_approved_budget`, `event_portfolio_kpi_registration_rate`, `event_portfolio_kpi_lead_follow_up`, or `kpi_card_wrapper`, and preserve the hidden host runtime contract. If no approved KPI slot is planned/materialized, do not invent a host module.
+
+User/person fields must render with `dynamic-user`, but the detector must be field-metadata aware. Do not classify ordinary identifier fields such as `Employee Number`, `Employee ID`, `Employee Code`, `Department Code`, or staffing targets as user fields merely because their display label contains "Employee" or "Department".
+
 Allowed business-content containers:
 
 - `event_portfolio_pipeline_title_group`

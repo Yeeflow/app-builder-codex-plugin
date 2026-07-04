@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.2
+
+- Release Dashboard v1.1 Summary host and identity-field hardening.
+- Nest generated v1.1 Dashboard Summary hidden hosts inside approved KPI business slots instead of appending invented `*_kpi_data_host` containers under root `Content` / `content_panel`.
+- Keep identifier labels such as `Employee Number`, `Employee ID`, and `Department Code` as normal `dynamic-field` controls while continuing to require `dynamic-user` for true identity-picker fields.
+- Add focused source/dist regression coverage for the Hospital Doctor Dashboard failure shape and align the v1.1 validator fixture with current navigator-label, action, and source-template-residue gates.
+
 ## 0.9.1
 
 - Release tolerant-Brotli UI hard-gate alignment.

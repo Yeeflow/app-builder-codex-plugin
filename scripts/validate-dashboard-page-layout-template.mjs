@@ -80,7 +80,8 @@ const LOAN_ASSET_DOMAIN_TERMS = new Set([
   "checkout status",
   "Office Asset records",
 ]);
-const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|employee|person|people|accountid|account id)\b/i;
+const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|person|people|accountid|account id)\b/i;
+const USER_FIELD_EXCLUSION_HINT = /\b(employee\s*(?:number|no|id|code)|department\s*code|staffing\s*target)\b/i;
 
 if (isMainModule()) {
   const args = parseArgs(process.argv.slice(2));
@@ -1427,6 +1428,7 @@ function isActionLooking(control) {
 
 function isUserLikeControl(control) {
   const text = JSON.stringify({ id: control?.id, name: control?.name, label: control?.label, attrs: control?.attrs, binding: control?.binding, fieldType: control?.fieldType });
+  if (USER_FIELD_EXCLUSION_HINT.test(text)) return false;
   return USER_FIELD_HINT.test(text) || /user|person|identity/i.test(String(control?.attrs?.fieldType || control?.fieldType || ""));
 }
 

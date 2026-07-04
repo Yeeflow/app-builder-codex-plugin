@@ -16,7 +16,8 @@ const ALTERNATE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
 ]);
 const FILTER_TYPES = new Set(["select-filter", "radio-filter", "checkbox-filter"]);
 const GRID_TYPES = new Set(["grid", "flex_grid"]);
-const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|employee|person|people|accountid|account id)\b/i;
+const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|person|people|accountid|account id)\b/i;
+const USER_FIELD_EXCLUSION_HINT = /\b(employee\s*(?:number|no|id|code)|department\s*code|staffing\s*target)\b/i;
 const V11_ROOT_CONTENT_CHILD_IDS = new Set(["page_title_section", "content_card_wrapper", "kpi_metrics_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
 const GOLDEN_TYPOGRAPHY_TOKENS = new Map([
   ["event_portfolio_title", "h2-bold"],
@@ -468,6 +469,7 @@ function validateUserFieldControls(page, findings) {
       binding: entry.control?.binding,
       fieldType: entry.control?.fieldType,
     });
+    if (USER_FIELD_EXCLUSION_HINT.test(text)) continue;
     if (USER_FIELD_HINT.test(text) || /user|person|identity/i.test(String(entry.control?.attrs?.fieldType || entry.control?.fieldType || ""))) {
       findings.push(error("DASH_GOLDEN_USER_FIELD_DYNAMIC_FIELD", "User/identity fields must render with dynamic-user, not dynamic-field.", { page: page.title, pointer: entry.pointer, field: entry.control?.attrs?.field || entry.control?.attrs?.fieldName || entry.control?.name || null }));
     }
