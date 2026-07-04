@@ -113,6 +113,10 @@ Within `section_content_area`, generated resources may insert current-record fie
 
 On View Item forms, Data Analytics golden reference templates from `docs/reference/data-analytics-golden-references.json` may be placed in `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`. The generator must clone the full approved template subtree, preserve locked style/layout/typography properties, and map only the approved title/data-binding editable regions. New/Edit forms must not use Data Analytics templates.
 
+On View Item forms, generate a reverse-related Collection section when the current host list is the parent/lookup target and a child Data List has a lookup field pointing back to it. Place the section inside an approved `section_content_area`, after the current-record details unless the App Plan specifies another order. Use an approved grid-table Collection template for list-like related records, keep the Collection operations area when search or Add record is planned, and mark the generated section/resource as a reverse-related Collection section so validators can enforce the runtime contract.
+
+Reverse-related Collection read behavior must filter the child list by the child lookup storage field on the left and the current host item `ListDataID` expression on the right. Do not use parent title/display text, generated sample IDs, labels, or hardcoded runtime IDs as the filter value. Search behavior must pair each `search-filter.binding` with a matching `collection.attrs.data.fulltext[].value` expression and resolved child-list `fulltext.fields[]`. Add behavior must use an `action_button` targeting the child list and must set `action_button.attrs.passvalues[]` so `Name` is the child lookup field `FieldName` and `Value` is the current host item `ListDataID` expression. The read filter and Add default value are both required when the section supports creation.
+
 On `data_list_form_layout_workbench`, Data Analytics golden reference templates should be placed inside `chart_cards_section` under `primary_working_area` or `right_side_panel`. A single `chart_cards_section` should contain no more than three Data Analytics templates. If more analytics modules are needed, copy another `chart_cards_section` from the Workbench template. If no Data Analytics or business content is planned for a `chart_cards_section`, remove that section. If the entire `right_side_panel` has no real business content, remove `right_side_panel`.
 
 Current-record Data List fields must be placed inside the approved `data_list_form_fields_grid_v1_1` field-layout template. Do not place field controls directly in `section_content_area`. If the form has many fields, create multiple approved content-card sections and put one `form_grid_fields_wrapper` inside each section's `section_content_area`. The approved host wrappers are `content_card_wrapper`, `content_card_60_wrapper`, and `content_card_40_wrapper`. Field controls inside the wrapper must receive business-specific `nv_label`/`nav_label` values. Sub list fields must use the control-level `data_list_form_control_sublist_v1_1` template and preserve its locked style/table/header/card settings.
@@ -257,6 +261,19 @@ Rules:
 - Do not include generated `ListID`, `LayoutID`, runtime IDs, JSON property paths, or copied control payloads in the App Plan.
 - Data Analytics and Collection template choices for View Item related regions must still use their own approved template selection tables when those components are planned.
 - Current-record field groups must also select `data_list_form_fields_grid_v1_1` in a Form Fields Layout Template Selection table.
+
+When parent/child lookup relationships should appear on a parent View Item form, add a Reverse-Related Collection Selection table:
+
+| Host Data List | View Item Form | Related Child List | Child Lookup Field | Section Title | Collection Template | Search | Add Record | Default Value |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Parent list> | <Parent View Item form> | <Child list> | <Child lookup FieldName> | <Visible section title> | <approved grid-table Collection template> | <Search fields or No> | <Add button label or No> | `<Child lookup FieldName> = current ListDataID` |
+
+Rules:
+
+- Generate reverse-related sections only for View Item or Workbench View Item forms, not New/Edit forms.
+- The App Plan must name the host list, child list, child lookup field, and Add default value rule.
+- If Add Record is enabled, the child list must have a concrete New/Edit custom form or safe default Add behavior, and the Add button must pass the current host `ListDataID` into the child lookup field.
+- If Search is enabled, the search fields must resolve on the child list and the search-filter variable must be consumed by the Collection fulltext binding.
 
 ## Required Gates
 

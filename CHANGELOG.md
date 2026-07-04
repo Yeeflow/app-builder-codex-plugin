@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.4
+
+- Release reverse-related Collection section planning and materialization gates.
+- Add App Plan coverage for Data List View Item reverse-related Collection sections, including host list, child list, lookup field, approved Collection template, search/fulltext, Add button, and `ListDataID` passvalues requirements.
+- Validate generated View Item forms against planned reverse-related sections so child-list Collections, lookup filters, search controls, and Add-record default values are materialized before signing readiness.
+- Update application/data-list/package skills and source/dist regression coverage for reverse-related business relationship usage.
+
 ## 0.9.3
 
 - Release Dashboard Collection style contract hardening.
