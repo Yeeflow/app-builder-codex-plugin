@@ -31,13 +31,6 @@ Phase 2 covers:
 - `submit` action steps
 - Save changes submit mode
 
-Custom Code action step status:
-
-- Runtime script contract is documented in `docs/standards/custom-code-form-action-step-runtime-standard.md`.
-- A Form Action Custom Code step uses `execute(context, fieldsValues)` as its business entrypoint.
-- It must not be generated from the Custom Code control `render(...)` contract.
-- The package JSON storage shape for this step type is not yet export-proven in this standard. Until a decoded export proves the step shape, generated package materialization for Custom Code action steps must stay gated and must not be claimed as final-package ready.
-
 ## Form Action Location
 
 Form actions live on a page form definition:

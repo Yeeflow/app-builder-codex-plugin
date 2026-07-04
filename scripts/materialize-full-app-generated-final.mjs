@@ -59,10 +59,6 @@ const SOURCE_COLLECTION_TEMPLATE_IDS = {
   listSetIds: new Set(["2058726109535285249", "2058571956842409984", "2054077087595905025"]),
   listIds: new Set(["2058726119586017281", "2058571966637289476", "2054077096447066112"]),
 };
-const SOURCE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = {
-  listSetIds: new Set(["2071862448464072704"]),
-  listIds: new Set(["2071862457508171777"]),
-};
 const PAGE_LAYOUT_TEMPLATE_ID = "dashboard-page-layouts-v1.1";
 const DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = Object.freeze([
   PAGE_LAYOUT_TEMPLATE_ID,
@@ -1783,7 +1779,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   removeAllByIdentity(resource, "kpi_metrics_wrapper");
   scrubDashboardSourceTemplateResidue(resource, { listName, scrubMetadata: true });
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource);
+  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
   removeEmptyBusinessSections(resource);
   return resource;
 }
@@ -2414,7 +2410,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: isMasterDetailWorkspace });
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource);
+  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
   resource.filterVars = filterConsumedDashboardFilterVars(resource, uniqueByName([
     ...normalizeDependencyArray(templateDependencies.filterVars),
     ...normalizedFilters.map((filter) => ({ name: filter.variable, type: "text", source: filter.controlId })),
@@ -2480,19 +2476,14 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   if (isMasterDetailWorkspace) restoreDashboardRootGoldenReferenceProvenance(resource);
   if (isMasterDetailWorkspace) removeRedundantMasterDetailSectionTitleHeaders(resource);
   removeResidualTemplateSectionHeaders(resource);
-  removeEmptySectionTitleAreas(resource);
+  removeEmptySectionTitleAreas(resource, { preserveContentCardTitleAreas: true });
   removeEmptyDashboardBusinessSections(resource);
-  if (!isMasterDetailWorkspace) ensureDashboardContentCardRequiredSlots(resource);
+  ensureDashboardContentCardRequiredSlots(resource);
   ensureVisibleKpiCards(resource, kpiContracts, { listName: sourceResource });
   applyDashboardTextMapping(resource, { name, datasetRegion, listName: sourceResource, kpiContracts });
   scrubDashboardSourceTemplateResidue(resource, { listName: sourceResource, scrubMetadata: false });
   removeOperationsWithoutActions(resource);
   instantiateDashboardControlUuids(resource, slugify(name));
-  rewriteCollectionTemplateRuntimeRefs(resource, {
-    rootListSetId,
-    listId,
-    detailLayoutId: sourceListMeta.detailLayoutId,
-  });
   return resource;
 }
 
@@ -4175,17 +4166,17 @@ function rewriteCollectionTemplateRuntimeRefs(node, { rootListSetId, listId, det
         .replaceAll("{{ListID}}", sourceListId)
         .replaceAll("{{DetailLayoutID}}", layoutId);
       out = replaceLayoutPlaceholders(out);
-      for (const oldId of allSourceDashboardListSetIds()) out = out.replaceAll(oldId, rootId);
-      for (const oldId of allSourceDashboardListIds()) out = out.replaceAll(oldId, sourceListId);
+      for (const oldId of SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds) out = out.replaceAll(oldId, rootId);
+      for (const oldId of SOURCE_COLLECTION_TEMPLATE_IDS.listIds) out = out.replaceAll(oldId, sourceListId);
       if ((isLayoutRefKey(key) || hasLayoutPlaceholder(value)) && !layoutId) {
         return "";
       }
       return out;
     }
     for (const [childKey, child] of Object.entries(value)) {
-      if (/^ListSetID$/i.test(childKey) && typeof child === "string" && (allSourceDashboardListSetIds().has(child) || /\{\{ListSetID\}\}/.test(child))) {
+      if (/^ListSetID$/i.test(childKey) && typeof child === "string" && (SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds.has(child) || /\{\{ListSetID\}\}/.test(child))) {
         value[childKey] = rootId;
-      } else if (/^ListID$/i.test(childKey) && typeof child === "string" && (allSourceDashboardListIds().has(child) || /\{\{ListID\}\}/.test(child))) {
+      } else if (/^ListID$/i.test(childKey) && typeof child === "string" && (SOURCE_COLLECTION_TEMPLATE_IDS.listIds.has(child) || /\{\{ListID\}\}/.test(child))) {
         value[childKey] = sourceListId;
       } else if (isLayoutRefKey(childKey) && typeof child === "string" && hasLayoutPlaceholder(child)) {
         value[childKey] = layoutId ? replaceLayoutPlaceholders(child) : "";
@@ -4196,20 +4187,6 @@ function rewriteCollectionTemplateRuntimeRefs(node, { rootListSetId, listId, det
     return value;
   };
   return visit(node);
-}
-
-function allSourceDashboardListSetIds() {
-  return new Set([
-    ...SOURCE_COLLECTION_TEMPLATE_IDS.listSetIds,
-    ...SOURCE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.listSetIds,
-  ]);
-}
-
-function allSourceDashboardListIds() {
-  return new Set([
-    ...SOURCE_COLLECTION_TEMPLATE_IDS.listIds,
-    ...SOURCE_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.listIds,
-  ]);
 }
 
 function ensureCollectionActions(actions) {
@@ -4537,7 +4514,7 @@ function removeEmptyDashboardBusinessSections(root) {
     node.children = node.children.filter((child) => {
       visit(child);
       if (hasIdentity(child, "section_content_area") && !hasMeaningfulBusinessContent(child)) return false;
-      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child)) return false;
+      if (hasIdentity(child, "section_title_area") && !hasSectionTitleAreaContent(child) && !["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"].some((identity) => hasIdentity(node, identity))) return false;
       if (![...removableWrappers].some((identity) => hasIdentity(child, identity))) return true;
       return hasMeaningfulBusinessContent(child);
     });
@@ -6012,9 +5989,7 @@ function choiceValuesForField(field) {
     ? parsed.choices.map((choice) => String(choice?.value || choice?.label || choice || "").trim()).filter(Boolean)
     : [];
   const fromPlan = String(field?.choiceValues || "").split(/[,;]+/).map((value) => value.trim()).filter(Boolean);
-  const explicitValues = unique(fromRules.concat(fromPlan));
-  if (explicitValues.length) return explicitValues.slice(0, 12);
-  return unique(inferChoiceValues(field)).slice(0, 12);
+  return unique(fromRules.concat(fromPlan, inferChoiceValues(field))).slice(0, 12);
 }
 
 function primaryFieldName(listMeta) {

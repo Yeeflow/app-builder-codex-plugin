@@ -130,8 +130,6 @@ Left-panel Data Filter controls must bind by business semantics, not by source-l
 
 Left-panel choice filters must also carry a proven option source. For Choice/select fields, materialization must preserve the App Plan choice values and/or exported `Rules.choices`, then write them into the generated filter option contract (`choice-options` / `options`) while keeping `attrs.data.field`, `attrs.display_f`, and `attrs.value_f` aligned to the same business field. A visible filter labeled `Priority Level` with an empty dropdown, or a `Status` filter showing Subject/Ticket values, is a hard failure even when the Collection itself can still show rows.
 
-When the App Plan or generated data-list field metadata gives explicit Choice values, generated filter options must not append generic status/workflow fallbacks. For example, a Service Tickets `Status` filter planned as `Open, In Progress, Resolved, Closed` must not include `Draft`, `Submitted`, or `Completed` unless those values are explicitly present in the App Plan or source field `Rules.choices`. Field binding correctness alone is insufficient; the visible option set is part of the runtime contract.
-
 `left_panel_caption_add_button` may be retained only when the left-panel source supports creating new records, such as a Data list or Document library. When the primary source is a Form report, Data report, or another read-only/reporting source, remove `left_panel_caption_add_button` and its action instead of leaving a visual-only Add button.
 
 `Operations` and operation containers may exist only when they contain real configured action controls. Every generated control that carries `attrs.control_action`, `attrs.action`, `control_action`, or `action` must resolve to a page-level `actions[]` / `formAction[]` entry or to the nearest Collection/Kanban local action list. If a copied operation button, search icon, add button, sidebar toggle, or header icon cannot be resolved after template cloning and namespacing, remove that control and then clean up any now-empty operation container.
@@ -178,8 +176,6 @@ Dynamic controls must match field type:
 `content_card_wrapper`, `2_columns_section`, `3_columns_section`, `2_columns_60/40_section`, and `kpi_metrics_wrapper` may be reordered to match business priority. Remove any copied section module that contains no meaningful business content.
 
 `section_title_header` is optional in generated master-detail content cards. Keep it only when the section needs a distinct business title/description that is not already carried by the nested Collection, Data table, chart, field grid, or related component. If `section_title_header` is omitted and the sibling `Operations` region is also omitted or has no configured actions, remove the owning `section_title_area` as well. Do not keep copied template headers such as `Left Ticket List` or `Active Loan Pipeline` merely because they existed in the source template.
-
-The master-detail materializer must apply this cleanup before generated-final handoff. Do not run Dashboard Page Layouts v1.1 content-card repair logic on `dashboard-page-layouts-two-panel-workspace` or `dashboard-page-layouts-three-panel-workspace` pages, because those layouts allow optional title areas to be removed. Empty `section_title_area` containers inside master-detail content cards are signing-readiness failures.
 
 ## Cleanup Rules
 
