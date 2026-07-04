@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.8.111",
-  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with hardened analytics runtime and workbench Dashboard materialization gates.",
+  "version": "0.8.110",
+  "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with consolidated data-list schema plan support.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
@@ -62,5 +62,5 @@
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png"
   },
-  "longDescription": "v0.8.111 releases Data Analytics runtime export-shape and Service Tickets workbench plan-shape hardening. Data Analytics runtime validation now rejects chart/pivot rows, values, and Conditions metadata that are too thin for Yeeflow runtime materialization, and full-app materialization preserves bullet-form Dashboard Layout template declarations such as dashboard-page-layouts-two-panel-workspace so Service Tickets-style App Plans generate the planned left Ticket list, right selected-ticket detail workspace, and Priority/Status filters instead of falling back to a generic table page. v0.8.109 releases FormNewReports upgrade omission hardening. Dashboard-only upgrade scope validation treats FormNewReports: [] as omission of unchanged installed Form reports, not deletion, when report changes are not in scope; real report mutations still require explicit report scope and update-safe proof before signing readiness."
+  "longDescription": "v0.8.109 releases FormNewReports upgrade omission hardening. Dashboard-only upgrade scope validation treats FormNewReports: [] as omission of unchanged installed Form reports, not deletion, when report changes are not in scope; real report mutations still require explicit report scope and update-safe proof before signing readiness."
 }

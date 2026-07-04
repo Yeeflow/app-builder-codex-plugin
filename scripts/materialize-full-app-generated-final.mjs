@@ -623,39 +623,6 @@ function collectDashboardPageLayoutTemplateRecords(planText) {
       }
     }
   }
-  let currentDashboardPage = "";
-  let currentPageName = "";
-  let currentTemplateId = "";
-  const flushBulletRecord = () => {
-    const dashboardPage = cleanResourceName(currentPageName) || currentDashboardPage;
-    if (dashboardPage && !isNonResourceName(dashboardPage) && currentTemplateId) {
-      records.push({
-        dashboardPage,
-        selectedTemplateId: currentTemplateId,
-        raw: `${dashboardPage} :: ${currentTemplateId}`,
-      });
-    }
-  };
-  for (const line of lines) {
-    const heading = line.match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
-    if (heading) {
-      flushBulletRecord();
-      currentDashboardPage = dashboardHeadingPageName(heading[1]);
-      currentPageName = "";
-      currentTemplateId = "";
-      continue;
-    }
-    if (!currentDashboardPage) continue;
-    const pageName = line.match(/^\s*(?:[-*]\s*)?Page\s+name\s*:\s*(.+?)\s*$/i);
-    if (pageName) {
-      currentPageName = cleanResourceName(pageName[1]);
-      continue;
-    }
-    if (/^\s*(?:[-*]\s*)?Layout\s+template\s*:/i.test(line)) {
-      currentTemplateId = extractDashboardPageLayoutTemplateId(line);
-    }
-  }
-  flushBulletRecord();
   return uniqueDashboardLayoutTemplateRecords(records);
 }
 

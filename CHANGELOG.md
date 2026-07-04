@@ -2,13 +2,6 @@
 
 ## Unreleased
 
-## 0.8.111
-
-- Release Data Analytics runtime export-shape and Service Tickets workbench Dashboard plan-shape hardening.
-- Reject chart/pivot `Resource.exts[]` runtime rows and values that lack export-shaped metadata required by Yeeflow runtime materialization.
-- Parse bullet-form Dashboard page layout selections under `## 14. Dashboard Pages Plan`, preserving `dashboard-page-layouts-two-panel-workspace` and `dashboard-page-layouts-three-panel-workspace` instead of silently falling back to `dashboard-page-layouts-v1.1`.
-- Add Service Tickets regression coverage for the real App Plan shape that requires a left Ticket list, selected-ticket detail workspace, and Priority/Status filter controls.
-
 ## 0.8.110
 
 - Release consolidated App Plan Data List schema support.
