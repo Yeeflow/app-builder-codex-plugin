@@ -36,6 +36,9 @@ try {
   expectCode("Runtime ext without ReportIds registration fails", ["--resource", writeJson("missing-reportids.json", dashboardResource({ omitReportIds: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_REPORT_ID_MISSING");
   expectCode("Runtime chart type semantic strings fail", ["--resource", writeJson("semantic-chart-type-string.json", dashboardResource({ semanticChartTypeString: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_CHART_TYPE_CODE_INVALID");
   expectCode("Line/area date trend rows without DATE func fail", ["--resource", writeJson("missing-date-trend-func.json", dashboardResource({ omitDateTrendRowFunc: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING");
+  expectCode("Runtime row field metadata must be export-shaped", ["--resource", writeJson("thin-runtime-row.json", dashboardResource({ thinRuntimeRow: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_ROW_EXPORT_SHAPE_INCOMPLETE");
+  expectCode("Runtime value field metadata must be export-shaped", ["--resource", writeJson("thin-runtime-value.json", dashboardResource({ thinRuntimeValue: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_VALUE_EXPORT_SHAPE_INCOMPLETE");
+  expectCode("Runtime settings must preserve export-shaped conditions keys", ["--resource", writeJson("missing-runtime-conditions.json", dashboardResource({ omitRuntimeConditions: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_CONDITIONS_SHAPE_MISSING");
   expectCode("Runtime ext with unresolved source field fails", ["--package", writeYapk("analytics-bad-field.yapk", dashboardResource({ badRuntimeField: true }))], "DATA_ANALYTICS_RUNTIME_FIELD_UNRESOLVED");
   expectCode("Visible analytics source without ListSetID fails", ["--resource", writeJson("visible-source-missing-listset.json", dashboardResource({ missingVisibleListSetId: true })), "--surface", "dashboard"], "DATA_ANALYTICS_VISIBLE_SOURCE_METADATA_MISSING");
   expectCode("Visible analytics source mismatch fails", ["--resource", writeJson("visible-source-mismatch.json", dashboardResource({ mismatchedVisibleSource: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_SOURCE_SURFACE_MISMATCH");
@@ -139,6 +142,9 @@ function dashboardResource(options = {}) {
     emptyPivotValueObject: options.emptyPivotValueObject,
     semanticChartTypeString: options.semanticChartTypeString,
     omitDateTrendRowFunc: options.omitDateTrendRowFunc,
+    thinRuntimeRow: options.thinRuntimeRow,
+    thinRuntimeValue: options.thinRuntimeValue,
+    omitRuntimeConditions: options.omitRuntimeConditions,
   });
   return resource;
 }
@@ -420,13 +426,33 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
     if (!options.omitReportIds) reportIds.push(id);
     const key = control.type === "pivot-table" ? "PivotTable" : control.type;
     const fieldName = options.badRuntimeField ? "MissingField" : (id.includes("line") || id.includes("area") ? "Created" : "Status");
-    const row = { field: fieldName, fieldName, FieldName: fieldName };
+    const isDateRow = id.includes("line") || id.includes("area");
+    const row = {
+      type: isDateRow ? "datepicker" : "select",
+      label: isDateRow ? "Created" : "Status",
+      attr: { displayLabel: true, readonly: false },
+      fieldName,
+      fieldType: isDateRow ? "Datetime" : "Text",
+      id: fieldName,
+      field: fieldName,
+      FieldName: fieldName,
+    };
+    if (options.thinRuntimeRow) {
+      delete row.type;
+      delete row.fieldType;
+      delete row.attr;
+    }
     if ((id.includes("line") || id.includes("area")) && !options.omitDateTrendRowFunc) row.func = "DATE";
     const valueEntry = options.emptyPivotValueObject && control.type === "pivot-table"
       ? {}
       : options.countValueUsesTitle
-        ? { field: "Title", fieldName: "Title", FieldName: "Title", id: "Title", func: "COUNT" }
-        : { field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", id: "ListDataID", func: "COUNT" };
+        ? { type: "input", label: "Title", attr: { displayLabel: true, readonly: true }, field: "Title", fieldName: "Title", FieldName: "Title", id: "Title", fieldType: "Text", func: "COUNT", aggregate: "COUNT" }
+        : { type: "input", label: "Id", attr: { displayLabel: true, readonly: true }, field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", id: "ListDataID", fieldType: "Bigint", func: "COUNT", aggregate: "COUNT" };
+    if (options.thinRuntimeValue && valueEntry && Object.keys(valueEntry).length) {
+      delete valueEntry.type;
+      delete valueEntry.fieldType;
+      delete valueEntry.attr;
+    }
     exts.push({
       i: id,
       category: "___Pivot___",
@@ -440,6 +466,7 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
           rows: [row],
           columns: [],
           values: [valueEntry],
+          ...(options.omitRuntimeConditions ? {} : { preConditions: null, Conditions: [] }),
         },
       },
     });
