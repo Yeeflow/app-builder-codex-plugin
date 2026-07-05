@@ -69,6 +69,50 @@ Generation must therefore:
 
 The incorrect lesson is "delete `grid_table_col_item_operations` and the designer is fixed." The correct lesson is "use the official independent reverse-related Collection section runtime shape; row operations/dropbar are one unsafe residue inside that larger shape."
 
+## 0.9.8 Regression Update: Official YDL Shape Must Be Fully Reproduced
+
+The 0.9.8 Hospital Doctor validation showed a partial fix was still not enough. The generated package moved the reverse-related Collection into an independent section and removed row dropbar operations, but `Departments View Item` still loaded forever in the designer because the internal tree did not fully match the official `.ydl` export shape.
+
+The generator must build the reverse-related section as:
+
+```text
+1_columns_section
+  content_card_wrapper
+    section_title_area
+      section_title_header
+    section_content_area
+      related_<child>_<lookup>_collection_wrapper
+        grid_table_col_caption
+          grid_table_col_title_wrapper
+            grid_table_col_title
+          grid_table_col_operations
+            op_normal
+              search-filter
+              reverse_related_add_button
+        grid_table_col_content
+          grid_table_col_header
+          grid_table_col_body (Collection)
+            grid_col_item
+```
+
+Required implementation details learned from the fix1 designer-open proof:
+
+- `section_content_area` keeps the standard `gap = --sp--s200`.
+- The Collection node must keep only official runtime attrs: `data`, `layout`, `actions`, and `pagination`.
+- Generator metadata such as dataset template provenance or reverse-related markers must stay on the owning section/wrapper, not on the Collection node.
+- `collection.attrs.actions` must be an empty array unless a separately export-proven row action pattern exists.
+- Row `dynamic-field` controls must use simple item-context binding only: `attrs.source = "3"` plus `attrs["obj-f"] = <child field>`.
+- Row `dynamic-field` controls must not carry generated extra bindings such as `attrs.field`, `attrs.fieldName`, `attrs.data`, top-level `field`, or top-level `FieldName`.
+- The Add action list context should include the current application `ListSetID` and must set the child lookup field default to current host `ListDataID`.
+- Source-template strings such as `Active Loan Pipeline` must be removed from generated reverse-related sections.
+
+App Plan conformance must distinguish the planned/display lookup name from the runtime storage field. For example, an App Plan row may say `Specialty`, while the generated runtime field is resolved to `Text4`. The generated section should retain both:
+
+- `childLookupFieldResolved`: the actual storage field used in filters and passvalues.
+- `childLookupFieldPlanned`: the original App Plan/display field name.
+
+The validator may match either alias for plan-to-package conformance, but the runtime filter and passvalues checks must continue to require the resolved storage field.
+
 ## App Plan Requirement
 
 When a parent/detail lookup relationship should appear on a parent View Item form, the App Plan should include a Reverse-Related Collection Selection table:
@@ -101,7 +145,11 @@ When a parent/detail lookup relationship should appear on a parent View Item for
 - `DATA_LIST_FORM_REVERSE_RELATED_SECTION_WRAPPER_MISSING`
 - `DATA_LIST_FORM_REVERSE_RELATED_INDEPENDENT_SECTION_REQUIRED`
 - `DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_ATTRS_UNOFFICIAL`
+- `DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH`
+- `DATA_LIST_FORM_REVERSE_RELATED_SEARCH_OFFICIAL_SLOT_MISSING`
+- `DATA_LIST_FORM_REVERSE_RELATED_ADD_OFFICIAL_SLOT_MISSING`
 - `DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_SOURCE_INVALID`
+- `DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_EXTRA_BINDINGS`
 - `DATA_LIST_FORM_REVERSE_RELATED_ITEM_FIELD_MISSING`
 
 The gate is marker-scoped to avoid failing ordinary read-only related Collections. Once the generator declares a section as reverse-related, the full contract must pass.

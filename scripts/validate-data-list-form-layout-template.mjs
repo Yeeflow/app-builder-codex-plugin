@@ -207,7 +207,7 @@ function validateAppPlanReverseRelatedSelections(text, findings, context = {}) {
       const match = context.packageCoverage.reverseRelated.find((entry) => {
         const hostMatches = lineMentionsList(entry.hostList, row.hostList);
         const childMatches = lineMentionsList(entry.childList, row.childList) || (entry.childListId && lineMentionsList(row.childList, entry.childListId));
-        const lookupMatches = norm(entry.childLookupField) === norm(row.childLookupField);
+        const lookupMatches = reverseRelatedLookupMatches(entry, row.childLookupField);
         return hostMatches && childMatches && lookupMatches;
       });
       if (!match) {
@@ -436,6 +436,7 @@ function validateReverseRelatedCollectionSections(resource, context) {
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_MISSING", "Reverse-related View Item form sections must contain a child-list Collection.", { source: context.source, path: sectionPath, detail }));
       continue;
     }
+    validateReverseRelatedOfficialSectionShape(section, collection, detail, context, resource);
     validateReverseRelatedCollectionOfficialShape(collection, detail, context, resource);
     validateReverseRelatedCollectionFilter(collection, detail, context, resource);
     validateReverseRelatedSearch(section, collection, context, resource);
@@ -443,6 +444,75 @@ function validateReverseRelatedCollectionSections(resource, context) {
     validateReverseRelatedCollectionHasNoRowOperations(collection, detail, context, resource);
     validateReverseRelatedCollectionItemContext(collection, detail, context, resource);
   }
+}
+
+function validateReverseRelatedOfficialSectionShape(section, collection, detail, context, resource) {
+  const sectionPath = pointerForNode(resource, section);
+  const contentCard = findFirstByIdentity(section, "content_card_wrapper");
+  const sectionContent = findFirstByIdentity(section, "section_content_area");
+  const collectionWrapper = findReverseRelatedCollectionWrapper(section);
+  const caption = collectionWrapper ? findFirstByIdentity(collectionWrapper, "grid_table_col_caption") : null;
+  const operations = collectionWrapper ? findFirstByIdentity(collectionWrapper, "grid_table_col_operations") : null;
+  const opNormal = operations ? findFirstByIdentity(operations, "op_normal") : null;
+  const content = collectionWrapper ? findFirstByIdentity(collectionWrapper, "grid_table_col_content") : null;
+  const header = content ? findFirstByIdentity(content, "grid_table_col_header") : null;
+  const itemGrid = collection ? findFirstByIdentity(collection, "grid_col_item") : null;
+  const missing = [];
+  if (!contentCard) missing.push("content_card_wrapper");
+  if (!sectionContent) missing.push("section_content_area");
+  if (!collectionWrapper) missing.push("related_collection_wrapper");
+  if (!caption) missing.push("grid_table_col_caption");
+  if (!operations) missing.push("grid_table_col_operations");
+  if (!opNormal) missing.push("op_normal");
+  if (!content) missing.push("grid_table_col_content");
+  if (!header) missing.push("grid_table_col_header");
+  if (!itemGrid) missing.push("grid_col_item");
+  if (missing.length) {
+    context.findings.push(error(
+      "DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH",
+      "Reverse-related View Item Collections must use the official designer-open .ydl section shape: 1_columns_section > content_card_wrapper > section_content_area > related Collection wrapper with caption, operations/op_normal, grid header, and Collection row grid.",
+      { source: context.source, path: sectionPath, detail, missing },
+    ));
+    return;
+  }
+  const searchControls = flatten(opNormal).map((entry) => entry.node).filter((node) => String(node?.type || "") === "search-filter");
+  const addButtons = flatten(opNormal).map((entry) => entry.node).filter(isReverseRelatedAddButton);
+  if (!searchControls.length) {
+    context.findings.push(error(
+      "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_OFFICIAL_SLOT_MISSING",
+      "Reverse-related search-filter controls must live inside grid_table_col_operations > op_normal, matching the official .ydl shape.",
+      { source: context.source, path: pointerForNode(resource, operations || section), detail },
+    ));
+  }
+  if (detail.allowAdd !== false && !addButtons.length) {
+    context.findings.push(error(
+      "DATA_LIST_FORM_REVERSE_RELATED_ADD_OFFICIAL_SLOT_MISSING",
+      "Reverse-related Add buttons must live inside grid_table_col_operations > op_normal, matching the official .ydl shape.",
+      { source: context.source, path: pointerForNode(resource, operations || section), detail },
+    ));
+  }
+}
+
+function findReverseRelatedCollectionWrapper(section) {
+  const wrappers = findAllByIdentity(section, "grid_table_col_caption")
+    .map((caption) => findAncestorWithin(section, caption, (node) => findFirstByIdentity(node, "grid_table_col_content")))
+    .filter(Boolean);
+  return wrappers[0] || null;
+}
+
+function findAncestorWithin(root, target, predicate) {
+  const stack = [{ node: root, ancestors: [] }];
+  while (stack.length) {
+    const { node, ancestors } = stack.pop();
+    if (node === target) {
+      for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+        if (predicate(ancestors[index])) return ancestors[index];
+      }
+      return null;
+    }
+    for (const child of asArray(node?.children)) stack.push({ node: child, ancestors: [...ancestors, node] });
+  }
+  return null;
 }
 
 function validateReverseRelatedSectionPlacement(section, detail, context, resource) {
@@ -516,11 +586,16 @@ function isReverseRelatedCollection(node) {
 function reverseRelatedSectionDetail(section) {
   const attrs = section?.attrs || {};
   const reverse = attrs.reverseRelated || section?.reverseRelated || {};
+  const resolved = stringValue(attrs.childLookupField || section?.childLookupField || reverse.childLookupFieldResolved || reverse.childLookupField || reverse.lookupField || attrs.lookupField);
+  const planned = stringValue(reverse.childLookupFieldPlanned || attrs.childLookupFieldPlanned || section?.childLookupFieldPlanned);
   return {
     hostList: stringValue(attrs.hostList || section?.hostList || reverse.hostList),
     childList: stringValue(attrs.childList || section?.childList || reverse.childList),
     childListId: stringValue(attrs.childListId || attrs.childListID || section?.childListId || reverse.childListId || reverse.ListID),
-    childLookupField: stringValue(attrs.childLookupField || section?.childLookupField || reverse.childLookupField || reverse.lookupField || attrs.lookupField),
+    childLookupField: resolved,
+    childLookupFieldResolved: resolved,
+    childLookupFieldPlanned: planned,
+    childLookupFieldAliases: unique([resolved, planned, stringValue(reverse.childLookupField), stringValue(reverse.lookupField), stringValue(attrs.lookupField)]),
     allowAdd: booleanWithDefault(attrs.allowAdd ?? section?.allowAdd ?? reverse.allowAdd, true),
   };
 }
@@ -664,6 +739,19 @@ function validateReverseRelatedCollectionItemContext(collection, detail, context
         "DATA_LIST_FORM_REVERSE_RELATED_ITEM_FIELD_MISSING",
         "Reverse-related Collection item dynamic-field controls must bind an explicit child-list field.",
         { source: context.source, path: pointerForNode(resource, node), detail },
+      ));
+    }
+    const extraBindingKeys = [];
+    if (Object.prototype.hasOwnProperty.call(attrs, "field")) extraBindingKeys.push("attrs.field");
+    if (Object.prototype.hasOwnProperty.call(attrs, "fieldName")) extraBindingKeys.push("attrs.fieldName");
+    if (Object.prototype.hasOwnProperty.call(attrs, "data")) extraBindingKeys.push("attrs.data");
+    if (Object.prototype.hasOwnProperty.call(node, "field")) extraBindingKeys.push("field");
+    if (Object.prototype.hasOwnProperty.call(node, "FieldName")) extraBindingKeys.push("FieldName");
+    if (extraBindingKeys.length) {
+      context.findings.push(error(
+        "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_EXTRA_BINDINGS",
+        "Reverse-related Collection row dynamic-field controls must use the simple official item-context shape: attrs.source = \"3\" and attrs.obj-f only. Extra generated field/data bindings can make the designer load indefinitely.",
+        { source: context.source, path: pointerForNode(resource, node), detail, extraBindingKeys },
       ));
     }
   }
@@ -1246,12 +1334,25 @@ function buildPackageReverseRelatedCoverage(decoded) {
         childList: cleanName(detail.childList || collectionList.Title || collectionList.Name || ""),
         childListId: stringValue(detail.childListId || collectionList.ListID || collection?.attrs?.data?.ListID),
         childLookupField: stringValue(detail.childLookupField),
+        childLookupFieldResolved: stringValue(detail.childLookupFieldResolved || detail.childLookupField),
+        childLookupFieldPlanned: stringValue(detail.childLookupFieldPlanned),
+        childLookupFieldAliases: asArray(detail.childLookupFieldAliases).filter(Boolean),
         sectionTitle: cleanName(sectionTitleText(section)),
         collectionTemplate: stringValue(collection?.collectionTemplateId || collection?.derivedFromCollectionTemplate || collection?.attrs?.collectionTemplateId || collection?.attrs?.derivedFromCollectionTemplate),
       });
     }
   }
   return coverage;
+}
+
+function reverseRelatedLookupMatches(entry, plannedLookupField) {
+  const candidates = unique([
+    entry?.childLookupField,
+    entry?.childLookupFieldResolved,
+    entry?.childLookupFieldPlanned,
+    ...asArray(entry?.childLookupFieldAliases),
+  ]);
+  return candidates.some((candidate) => norm(candidate) === norm(plannedLookupField));
 }
 
 function sectionTitleText(section) {
