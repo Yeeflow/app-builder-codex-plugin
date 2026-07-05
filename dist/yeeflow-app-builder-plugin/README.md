@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.2`
+- Version: `0.9.6`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.2` hardens Dashboard v1.1 Summary and identity-field materialization: generated Summary hidden hosts stay inside approved KPI business slots, Employee Number/Department Code labels remain normal identifier `dynamic-field` controls, true identity-picker fields require `dynamic-user`, and source/dist regression gates cover the verified Hospital Dashboard failure shape.
+Current release `0.9.6` hardens full-app generated-final preflight closure for schema-bound Collection cleanup and View Item reverse-related sections. The materializer now parses explicit lookup-target columns, materializes planned reverse-related child Collections with search/add/passvalues defaults, omits placeholder Form reports, filters invalid navigation children, and scopes Dashboard UUID duplicate checks to actual control trees while leaving Summary/Data Analytics runtime registration to their dedicated gates.
 
 ## Install In Codex App
 
@@ -30,7 +30,7 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.2
+Version: 0.9.6
 ```
 
 Verify metadata from a checkout:

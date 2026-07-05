@@ -202,9 +202,9 @@ function validateAppPlan(planPath, findings) {
 function validateAppPlanFieldGridRow(row, findings) {
   const cells = row.split("|").slice(1, -1).map((cell) => cell.trim());
   const templateIndex = cells.findIndex((cell) => cell === TEMPLATE_ID);
-  const pc = Number(cells[templateIndex + 2]);
-  const tablet = Number(cells[templateIndex + 3]);
-  const mobile = Number(cells[templateIndex + 4]);
+  const pc = Number(cells[templateIndex + 1]);
+  const tablet = Number(cells[templateIndex + 2]);
+  const mobile = Number(cells[templateIndex + 3]);
   if (!Number.isFinite(pc) || pc < 2 || pc > 3) {
     findings.push(error("DATA_LIST_FORM_FIELDS_APP_PLAN_PC_COLUMNS_INVALID", "PC/laptop columns for data_list_form_fields_grid_v1_1 must be 2 or 3.", { row }));
   }
@@ -244,7 +244,7 @@ function validateResource(rawResource, context) {
     return;
   }
   const wrappers = findAllByIdentity(resource, ROOT_WRAPPER_ID);
-  const fieldControls = flatten(resource).filter((entry) => isFieldControl(entry.node));
+  const fieldControls = flatten(resource).filter((entry) => isFieldControl(entry.node) && !isInsideRelatedCollectionSurface(entry));
   if (!wrappers.length && context.requireWrapperWhenFieldsExist && fieldControls.length) {
     context.findings.push(error("DATA_LIST_FORM_FIELDS_WRAPPER_MISSING", "Generated current-record field controls must be placed inside form_grid_fields_wrapper.", { source: context.source, fieldControlCount: fieldControls.length }));
     return;
@@ -266,6 +266,18 @@ function validateResource(rawResource, context) {
       }
     }
   }
+}
+
+function isInsideRelatedCollectionSurface(entry) {
+  return entry.ancestors.some((ancestor) => (
+    String(ancestor?.type || "") === "collection"
+    || ancestor?.reverseRelatedCollectionSection === true
+    || ancestor?.attrs?.reverseRelatedCollectionSection === true
+    || ancestor?.reverseRelatedCollection === true
+    || ancestor?.attrs?.reverseRelatedCollection === true
+    || ancestor?.attrs?.reverseRelated
+    || ancestor?.reverseRelated
+  ));
 }
 
 function validateWrapper(wrapper, context) {
