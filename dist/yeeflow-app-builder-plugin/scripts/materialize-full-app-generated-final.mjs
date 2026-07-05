@@ -568,6 +568,7 @@ function analyzeAppPlanResourceDemand(planText) {
   const dashboardAnalyticsRecords = collectDashboardAnalyticsRecords(planText);
   const dashboardDataTableRecords = collectDashboardDataTableRecords(planText);
   const dashboardPageLayoutTemplateRecords = collectDashboardPageLayoutTemplateRecords(planText);
+  const reverseRelatedRecords = collectReverseRelatedPlanRows(planText);
   const explicitDashboardNames = resources.dashboards || [];
   const dashboardNamesFromTemplates = [
     ...dashboardPageLayoutTemplateRecords,
@@ -600,6 +601,7 @@ function analyzeAppPlanResourceDemand(planText) {
     dataListFieldSpecs: collectDataListFieldSpecs(planText),
     dataListViewRecords: collectDataListViewRecords(planText),
     customFormRecords: collectCustomFormRecords(planText),
+    reverseRelatedRecords,
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
     dashboardPageLayoutTemplateRecords,
@@ -895,6 +897,7 @@ function collectDataListFieldSpecs(planText) {
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "yeeflow field type", "field type", "business type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "yeeflow type", "control type", "control"]);
     const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "values"]);
+    const lookupTargetColumn = findHeaderIndex(normalizedHeaders, ["lookup target", "target list", "lookup data list", "lookup list", "related list"]);
     const purposeColumn = findHeaderIndex(normalizedHeaders, ["purpose", "business purpose", "description", "notes"]);
     if (displayColumn === -1 || (fieldTypeColumn === -1 && controlTypeColumn === -1)) continue;
     let rowIndex = index + 2;
@@ -926,7 +929,7 @@ function collectDataListFieldSpecs(planText) {
         fieldType,
         controlType,
         choiceValues,
-        lookupTarget: lookupTargetFromPurpose(purpose),
+        lookupTarget: lookupTargetColumn === -1 ? lookupTargetFromPurpose(purpose) : cleanResourceName(cells[lookupTargetColumn]) || lookupTargetFromPurpose(purpose),
       });
       rowIndex += 1;
     }
@@ -1475,6 +1478,56 @@ function collectDataListViewRecords(planText) {
     .filter(Boolean);
 }
 
+function collectReverseRelatedPlanRows(planText) {
+  const section = extractNumberedSection(planText, /^##\s+10\.\s+Custom Data List Forms Plan/im);
+  if (!section.trim() || !/Reverse-Related Collection Selection/i.test(section)) return [];
+  const rows = [];
+  const subsection = extractSubsection(section, /Reverse-Related Collection Selection/i);
+  for (const table of parseMarkdownTables(subsection || section)) {
+    const headers = table.headers.map((header) => normKey(header));
+    const hostColumn = findHeaderIndex(headers, ["host data list", "host list", "parent data list"]);
+    const formColumn = findHeaderIndex(headers, ["view item form", "view form", "custom form"]);
+    const childColumn = findHeaderIndex(headers, ["related child list", "child list", "related list"]);
+    const lookupColumn = findHeaderIndex(headers, ["child lookup field", "lookup field"]);
+    const titleColumn = findHeaderIndex(headers, ["section title", "title"]);
+    const templateColumn = findHeaderIndex(headers, ["collection template", "collection presentation", "template"]);
+    const searchColumn = findHeaderIndex(headers, ["search"]);
+    const addColumn = findHeaderIndex(headers, ["add record", "add"]);
+    const defaultColumn = findHeaderIndex(headers, ["default value", "default"]);
+    if (hostColumn === -1 || childColumn === -1 || lookupColumn === -1) continue;
+    for (const row of table.rows) {
+      const cells = table.headers.map((header) => row[header] || "");
+      const hostList = cleanResourceName(cells[hostColumn]);
+      const childList = cleanResourceName(cells[childColumn]);
+      const childLookupField = cleanResourceName(cells[lookupColumn]);
+      if (!hostList || !childList || !childLookupField || isNonResourceName(hostList) || isNonResourceName(childList) || isNonResourceName(childLookupField)) continue;
+      rows.push({
+        hostList,
+        viewItemForm: cleanResourceName(cells[formColumn]),
+        childList,
+        childLookupField,
+        sectionTitle: cleanResourceName(cells[titleColumn]) || `${childList} Related Records`,
+        collectionTemplate: cleanResourceName(cells[templateColumn]) || "collection_control_grid_table",
+        search: cleanResourceName(cells[searchColumn]),
+        addRecord: cleanResourceName(cells[addColumn]),
+        defaultValue: cleanResourceName(cells[defaultColumn]),
+      });
+    }
+  }
+  return unique(rows.map((record) => `${normKey(record.hostList)}|${normKey(record.viewItemForm)}|${normKey(record.childList)}|${normKey(record.childLookupField)}`))
+    .map((key) => rows.find((record) => `${normKey(record.hostList)}|${normKey(record.viewItemForm)}|${normKey(record.childList)}|${normKey(record.childLookupField)}` === key))
+    .filter(Boolean);
+}
+
+function extractSubsection(text, marker) {
+  const match = marker.exec(text);
+  if (!match) return "";
+  const start = match.index;
+  const remainder = text.slice(start + match[0].length);
+  const next = remainder.search(/\n#{2,4}\s+/);
+  return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
+}
+
 function fieldSpecsForList(planDemand, listName) {
   const specs = planDemand.dataListFieldSpecs?.[normKey(listName)] || [];
   const normalized = [];
@@ -1783,10 +1836,10 @@ function defaultValueForFieldType(fieldType) {
   return fieldType === "Bit" ? "0" : "";
 }
 
-function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", selectedTemplate = "", openIn = "", fields }) {
+function buildCustomFormLayout({ layoutId, listId, listName, formName, formType = "", selectedTemplate = "", openIn = "", fields, planDemand = {}, listMetaByName = new Map(), rootListSetId = "" }) {
   const templateKind = isWorkbenchCustomForm({ formName, formType, selectedTemplate, openIn }) ? "workbench" : (/\bview\b|detail/i.test(`${formType} ${formName}`) ? "view" : "newEdit");
   const templateId = templateKind === "workbench" ? "data_list_form_layout_workbench" : (templateKind === "view" ? "data_list_form_layout_view_item_v1_1" : "data_list_form_layout_new_edit_v1_1");
-  const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields });
+  const resource = materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields, planDemand, listMetaByName, rootListSetId, layoutId });
   const resourceJson = JSON.stringify(resource);
   return {
     ListID: listId,
@@ -1807,7 +1860,7 @@ function buildCustomFormLayout({ layoutId, listId, listName, formName, formType 
   };
 }
 
-function materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields }) {
+function materializeDataListFormResource({ templateKind, templateId, listId, listName, formName, fields, planDemand = {}, listMetaByName = new Map(), rootListSetId = "", layoutId = "" }) {
   const templateFile = DATA_LIST_FORM_TEMPLATE_PATHS[templateKind];
   const template = JSON.parse(fs.readFileSync(templateFile, "utf8"));
   const resource = clone(template.templateResource);
@@ -1827,11 +1880,237 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   }
   removeAllByIdentity(resource, "Operations");
   removeAllByIdentity(resource, "kpi_metrics_wrapper");
+  if (templateKind === "view" || templateKind === "workbench") {
+    appendReverseRelatedCollectionSections(resource, {
+      planDemand,
+      listMetaByName,
+      hostListName: listName,
+      formName,
+      rootListSetId,
+      layoutId,
+    });
+  }
   scrubDashboardSourceTemplateResidue(resource, { listName, scrubMetadata: true });
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
   return resource;
+}
+
+function appendReverseRelatedCollectionSections(resource, { planDemand, listMetaByName, hostListName, formName, rootListSetId, layoutId }) {
+  const records = (planDemand.reverseRelatedRecords || []).filter((record) => {
+    if (normKey(record.hostList) !== normKey(hostListName)) return false;
+    if (!record.viewItemForm) return true;
+    return normKey(record.viewItemForm) === normKey(formName);
+  });
+  if (!records.length) return;
+  const slot = findBusinessSectionContentArea(resource);
+  if (!slot) return;
+  slot.children = Array.isArray(slot.children) ? slot.children : [];
+  for (const [index, record] of records.entries()) {
+    const childMeta = listMetaByName.get(normKey(record.childList));
+    if (!childMeta?.listId) continue;
+    const section = buildReverseRelatedCollectionSection({
+      record,
+      childMeta,
+      hostListName,
+      formName,
+      rootListSetId,
+      detailLayoutId: childMeta.detailLayoutId || layoutId || "",
+      index,
+    });
+    if (section) slot.children.push(section);
+  }
+}
+
+function buildReverseRelatedCollectionSection({ record, childMeta, hostListName, formName, rootListSetId, detailLayoutId, index }) {
+  const templateId = GRID_TABLE_TEMPLATE_IDS.has(record.collectionTemplate) ? record.collectionTemplate : "collection_control_grid_table";
+  const sectionId = `${slugify(formName)}_${slugify(record.childList)}_reverse_related_section_${index + 1}`;
+  const binding = `filter_${slugify(record.childList)}_${index + 1}`.replace(/-/g, "_");
+  const currentIdExpr = currentHostListDataIdExpression();
+  const collectionRoot = buildCollectionTemplateInstance({
+    templateId,
+    dashboardName: formName,
+    datasetRegion: record.sectionTitle || record.childList,
+    listName: record.childList,
+    rootListSetId,
+    listId: childMeta.listId,
+    listMeta: childMeta,
+    detailLayoutId,
+    filterBindings: [],
+    collectionId: `${sectionId}_collection`,
+  });
+  removeDescendantControls(collectionRoot, (node) => (
+    String(node?.type || "") === "search-filter"
+    || isTemplateAddActionButton(node)
+  ));
+  const collection = findFirstByType(collectionRoot, "collection");
+  if (collection) {
+    collection.reverseRelatedCollection = true;
+    collection.attrs = {
+      ...(collection.attrs || {}),
+      reverseRelatedCollection: true,
+      reverseRelated: {
+        hostList: hostListName,
+        childList: record.childList,
+        childListId: stringId(childMeta.listId),
+        childLookupField: record.childLookupField,
+        allowAdd: !/^no|false|not/i.test(record.addRecord || ""),
+      },
+    };
+    collection.attrs.data = {
+      ...(collection.attrs.data || {}),
+      filter: [{
+        left: record.childLookupField,
+        field: record.childLookupField,
+        op: "=",
+        operator: "=",
+        right: [currentIdExpr],
+        value: [currentIdExpr],
+      }],
+      fulltext: [{
+        fields: [primaryFieldName(childMeta)],
+        field: primaryFieldName(childMeta),
+        value: [{ exprType: "variable", valueType: "string", id: `__filter_${binding}`, type: "expr", name: binding }],
+      }],
+    };
+  }
+  const search = {
+    id: `${sectionId}_search`,
+    type: "search-filter",
+    label: "Search",
+    name: `Search ${record.childList}`,
+    title: `Search ${record.childList}`,
+    nv_label: "reverse_related_search_filter",
+    binding,
+    attrs: {
+      binding,
+      placeholder: `Search ${record.childList}`,
+      data: {
+        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList },
+        field: primaryFieldName(childMeta),
+      },
+    },
+  };
+  const operationsChildren = [search];
+  if (!/^no|false|not/i.test(record.addRecord || "")) {
+    operationsChildren.push(buildReverseRelatedAddButton({ record, childMeta, sectionId, currentIdExpr }));
+  }
+  return {
+    id: sectionId,
+    type: "container",
+    label: "Container",
+    name: record.sectionTitle || `${record.childList} Related Records`,
+    title: record.sectionTitle || `${record.childList} Related Records`,
+    nv_label: "reverse_related_collection_section",
+    reverseRelatedCollectionSection: true,
+    attrs: {
+      reverseRelatedCollectionSection: true,
+      reverseRelated: {
+        hostList: hostListName,
+        childList: record.childList,
+        childListId: stringId(childMeta.listId),
+        childLookupField: record.childLookupField,
+        allowAdd: !/^no|false|not/i.test(record.addRecord || ""),
+      },
+      style: {
+        direction: [null, "column"],
+        gap: [null, "--sp--s200"],
+        align_items: [null, "stretch"],
+      },
+    },
+    children: [
+      {
+        id: `${sectionId}_title_area`,
+        type: "container",
+        label: "Container",
+        nv_label: "section_title_area",
+        children: [
+          {
+            id: `${sectionId}_title_header`,
+            type: "container",
+            label: "Container",
+            nv_label: "section_title_header",
+            children: [
+              {
+                id: `${sectionId}_title`,
+                type: "heading",
+                label: "Text",
+                nv_label: "section_title_text",
+                attrs: { headc: { title: { value: record.sectionTitle || `${record.childList} Related Records`, variable: null } }, heads: { ty: [null, "h5-semi-bold"] } },
+              },
+            ],
+          },
+          {
+            id: `${sectionId}_operations`,
+            type: "container",
+            label: "Container",
+            nv_label: "Operations",
+            children: operationsChildren,
+          },
+        ],
+      },
+      collectionRoot,
+    ],
+  };
+}
+
+function removeDescendantControls(root, predicate) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      return !predicate(child);
+    });
+  };
+  visit(root);
+}
+
+function isTemplateAddActionButton(node) {
+  if (!node || String(node.type || "") !== "action_button") return false;
+  const attrs = node.attrs || {};
+  const actionType = String(attrs["action-type"] || attrs.actionType || attrs.operation || "").trim();
+  const text = identityCandidates(node).concat([node?.label, attrs?.label?.value, attrs?.text?.value]).filter(Boolean).join(" ");
+  return actionType === "5" || /\badd\b|new item|create/i.test(text);
+}
+
+function buildReverseRelatedAddButton({ record, childMeta, sectionId, currentIdExpr }) {
+  const actionId = crypto.randomUUID();
+  return {
+    id: `${sectionId}_add_button`,
+    type: "action_button",
+    label: `Add ${record.childList}`,
+    name: `Add ${record.childList}`,
+    title: `Add ${record.childList}`,
+    nv_label: "reverse_related_add_button",
+    attrs: {
+      "action-type": "5",
+      operation: "add",
+      control_action: actionId,
+      data: {
+        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList },
+      },
+      passvalues: [{
+        Name: record.childLookupField,
+        FieldName: record.childLookupField,
+        Value: [clone(currentIdExpr)],
+      }],
+      button: {
+        normal: { border: { type: "0" }, c: "var(--c--background)", bg: "var(--c--primary)" },
+      },
+    },
+  };
+}
+
+function currentHostListDataIdExpression() {
+  return {
+    exprType: "list_field",
+    valueType: "string",
+    id: "ListDataID",
+    prop: "ListDataID",
+    type: "expr",
+    name: "List Fields:Id",
+  };
 }
 
 function buildDataListFormFieldsGrid({ fields, formName, listId, listName, templateKind }) {
@@ -2033,7 +2312,8 @@ function cleanResourceName(value) {
 function isNonResourceName(value) {
   const text = cleanResourceName(value);
   if (!text) return true;
-  if (/^(not applicable|n\/a|none|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (/^(not applicable|not planned|n\/a|none|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (/^no\s+(?:form\s+)?reports?\b/i.test(text)) return true;
   if (/^no custom\b/i.test(text)) return true;
   if (/^(dashboard|dashboard page|dashboard page name|page|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;
   return false;
@@ -2114,9 +2394,9 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
   dataListNames.forEach((name, index) => {
     dataListByName.set(normKey(name), stringId(ids[`decoded.Childs[${index}].List.ListID`]));
   });
-  const childs = dataListNames.map((name, index) => {
+  const fieldRecordsByName = new Map();
+  dataListNames.forEach((name, index) => {
     const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
-    dataListByName.set(normKey(name), listId);
     const fieldSpecs = fieldSpecsForList(planDemand, name);
     const fields = fieldSpecs.map((field, fieldIndex) => buildFieldRecord({
       field,
@@ -2125,6 +2405,13 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       fieldId: stringId(ids[`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`]),
       lookupTargetListId: resolveLookupTargetListId(field, dataListByName),
     }));
+    fieldRecordsByName.set(normKey(name), fields);
+    listMetaByName.set(normKey(name), { listName: name, listId, fields, detailLayoutId: "" });
+  });
+  const childs = dataListNames.map((name, index) => {
+    const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
+    dataListByName.set(normKey(name), listId);
+    const fields = fieldRecordsByName.get(normKey(name)) || [];
     const customLayoutsForList = allCustomFormAssignments.filter((assignment) => assignment.listIndex === index);
     const layouts = [
       {
@@ -2160,11 +2447,13 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     ];
     for (const assignment of customLayoutsForList) {
       const layoutId = stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]);
-      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, selectedTemplate: assignment.selectedTemplate, openIn: assignment.openIn, fields }));
+      layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, selectedTemplate: assignment.selectedTemplate, openIn: assignment.openIn, fields, planDemand, listMetaByName, rootListSetId: rootListId }));
     }
     const displayLayoutView = buildDataListFormDisplaySettings({ customLayoutsForList, ids });
     const detailLayoutId = displayLayoutView.view || displayLayoutView.edit || displayLayoutView.add || "";
-    listMetaByName.set(normKey(name), { listName: name, listId, fields, detailLayoutId });
+    const currentMeta = listMetaByName.get(normKey(name)) || { listName: name, listId, fields };
+    currentMeta.detailLayoutId = detailLayoutId;
+    listMetaByName.set(normKey(name), currentMeta);
     return {
       List: listInfo({ listId, title: name, type: 1, ext2: "{\"generatedFinal\":true}", layoutView: JSON.stringify(displayLayoutView) }),
       Fields: fields,
@@ -2218,7 +2507,8 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     };
   });
 
-  const formNewReports = planDemand.resources.formReports.map((name, index) => ({
+  const plannedFormReports = forms.length ? planDemand.resources.formReports.filter((name) => !isNonResourceName(name)) : [];
+  const formNewReports = plannedFormReports.map((name, index) => ({
     ID: stringId(ids[`decoded.FormNewReports[${index}].ID`]),
     DefKey: forms[0]?.Key || "",
     Name: name,
@@ -3987,6 +4277,7 @@ function buildCollectionTemplateInstance({ templateId, dashboardName, datasetReg
   }
   replaceTemplateResidue(root, { datasetRegion, listName });
   setTitleText(root, datasetRegion);
+  enforceSchemaBoundCollectionTemplate(root, { listMeta });
   sanitizeCollectionRuntimeReferences(root, {
     rootListSetId,
     listId,
@@ -4020,6 +4311,111 @@ function wireTemplateSearchFiltersToCollection(root, { listMeta }) {
       });
     }
   }
+}
+
+function enforceSchemaBoundCollectionTemplate(root, { listMeta }) {
+  const fieldMap = new Map();
+  for (const field of fieldsForDynamicControls(listMeta)) {
+    fieldMap.set(normKey(field.fieldName), field);
+    fieldMap.set(normKey(field.displayName), field);
+  }
+  const allowedFields = new Set([...fieldMap.keys(), "listdataid", "created", "createdby", "modified", "modifiedby", "owner"]);
+  pruneInvalidProgressControls(root, { fieldMap, allowedFields });
+  pruneGridTableColumnsBySchema(root, { fieldMap, allowedFields });
+}
+
+function pruneInvalidProgressControls(root, { fieldMap, allowedFields }) {
+  const visit = (node) => {
+    if (!node || !Array.isArray(node.children)) return;
+    node.children = node.children.filter((child) => {
+      visit(child);
+      if (!isProgressControl(child)) return true;
+      return isProgressControlSchemaValid(child, { fieldMap, allowedFields });
+    });
+  };
+  visit(root);
+}
+
+function pruneGridTableColumnsBySchema(root, { fieldMap, allowedFields }) {
+  const headerRows = findDescendants(root, (node) => hasIdentity(node, "grid_table_col_header"));
+  const itemRows = findDescendants(root, (node) => hasIdentity(node, "grid_col_item"));
+  for (const headerRow of headerRows) {
+    if (!Array.isArray(headerRow.children)) continue;
+    const nearestItemRow = itemRows[0];
+    const seenLabels = new Set();
+    const keepIndexes = [];
+    for (const [index, headerCell] of headerRow.children.entries()) {
+      const itemCell = nearestItemRow?.children?.[index];
+      const label = normalizedColumnLabel(headerCell, index);
+      const duplicateLabel = label && seenLabels.has(label);
+      const invalidHeader = hasInvalidCollectionFieldReference(headerCell, allowedFields);
+      const invalidItem = itemCell ? hasInvalidCollectionFieldReference(itemCell, allowedFields) : false;
+      const invalidProgress = itemCell ? hasInvalidProgressColumn(itemCell, { fieldMap, allowedFields }) : false;
+      if (!duplicateLabel && !invalidHeader && !invalidItem && !invalidProgress) {
+        keepIndexes.push(index);
+        if (label) seenLabels.add(label);
+      }
+    }
+    if (keepIndexes.length && keepIndexes.length < headerRow.children.length) {
+      headerRow.children = keepIndexes.map((index) => headerRow.children[index]).filter(Boolean);
+      if (nearestItemRow && Array.isArray(nearestItemRow.children)) {
+        nearestItemRow.children = keepIndexes.map((index) => nearestItemRow.children[index]).filter(Boolean);
+      }
+    }
+  }
+}
+
+function normalizedColumnLabel(cell, index) {
+  const text = visibleBusinessText(cell) || firstVisibleTextValue(cell) || `column-${index + 1}`;
+  return normKey(text.replace(/\bcollection item:[^ ]+/gi, "").trim()) || `column-${index + 1}`;
+}
+
+function hasInvalidProgressColumn(node, { fieldMap, allowedFields }) {
+  const progressControls = findDescendants(node, (control) => isProgressControl(control));
+  if (!progressControls.length) return false;
+  return progressControls.some((control) => !isProgressControlSchemaValid(control, { fieldMap, allowedFields }));
+}
+
+function isProgressControl(control) {
+  const type = String(control?.type || "").toLowerCase();
+  return type === "progress" || type === "progress-bar" || type === "progress-circle" || /\bprogress\b/i.test(identityCandidates(control).join(" "));
+}
+
+function isProgressControlSchemaValid(control, { fieldMap, allowedFields }) {
+  const refs = collectionContextFieldRefs(control);
+  if (!refs.length) return false;
+  return refs.every((fieldName) => {
+    const key = normKey(fieldName);
+    if (!allowedFields.has(key)) return false;
+    const field = fieldMap.get(key);
+    if (!field) return false;
+    return /decimal|number|percent|input_number|currency|amount/i.test(`${field.fieldType || ""} ${field.controlType || ""} ${field.Type || ""} ${field.displayName || ""}`);
+  });
+}
+
+function hasInvalidCollectionFieldReference(node, allowedFields) {
+  return collectionContextFieldRefs(node).some((fieldName) => !allowedFields.has(normKey(fieldName)));
+}
+
+function collectionContextFieldRefs(node) {
+  const refs = [];
+  const visit = (current) => {
+    if (Array.isArray(current)) {
+      for (const item of current) visit(item);
+      return;
+    }
+    if (!current || typeof current !== "object") return;
+    const ctx = String(current.ctx || current.context || "").trim();
+    if (ctx === "__ctx_coll" || /Collection item:/i.test(String(current.name || ""))) {
+      const id = String(current.id || current.field || current.FieldName || current.fieldName || current.prop || "").trim();
+      if (id) refs.push(id);
+      const nameMatch = String(current.name || "").match(/Collection item:([A-Za-z0-9_ -]+)/i);
+      if (nameMatch) refs.push(nameMatch[1].trim());
+    }
+    for (const child of Object.values(current)) visit(child);
+  };
+  visit(node);
+  return unique(refs.map((value) => cleanResourceName(value)).filter(Boolean));
 }
 
 function reinstantiateTemplateUuidValues(root) {
@@ -5151,11 +5547,16 @@ function buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName
         const target = targetByName.get(normKey(item.title)) || targetByName.get(normKey(item.target)) || { Title: item.title, Type: inferNavigationType(item.type), ListID: "" };
         return toRuntimeNavigationItem({ ...target, Icon: normalizeFontAwesomeIcon(item.icon) || target.Icon || inferNavigationIcon({ title: item.title, type: target.Type }) }, rootListId);
       })
-        .filter(Boolean)
-      : allItems.filter((item, itemIndex) => itemIndex % groups.length === index).map((item) => toRuntimeNavigationItem(item, rootListId)),
+        .filter(isRuntimeNavigationItemObject)
+      : allItems.filter((item, itemIndex) => itemIndex % groups.length === index).map((item) => toRuntimeNavigationItem(item, rootListId)).filter(isRuntimeNavigationItemObject),
   }));
-  if (sort.length && sort.every((group) => !group.list.length)) sort[0].list = allItems.map((item) => toRuntimeNavigationItem(item, rootListId)).filter(Boolean);
+  for (const group of sort) group.list = (group.list || []).filter(isRuntimeNavigationItemObject);
+  if (sort.length && sort.every((group) => !group.list.length)) sort[0].list = allItems.map((item) => toRuntimeNavigationItem(item, rootListId)).filter(isRuntimeNavigationItemObject);
   return JSON.stringify({ sortVer: layoutContract.sortVer, sort, attrs: layoutContract.attrs });
+}
+
+function isRuntimeNavigationItemObject(item) {
+  return Boolean(item && typeof item === "object" && !Array.isArray(item) && item.ListID && item.Title);
 }
 
 function toRuntimeNavigationItem(item, rootListId) {

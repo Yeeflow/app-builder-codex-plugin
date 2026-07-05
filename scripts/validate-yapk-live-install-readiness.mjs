@@ -134,7 +134,7 @@ function validateDashboardResources({ decoded, manifestIds, findings }) {
       walk(parsed, (value, pointer) => {
         if (isObject(value)) {
           const controlId = String(value.id || value.ID || "");
-          if (UUID_RE.test(controlId)) {
+          if (UUID_RE.test(controlId) && !isDashboardRuntimeRegistrationPointer(pointer)) {
             const previous = uuidOwners.get(controlId);
             if (previous) {
               findings.push(error("DASHBOARD_CONTROL_UUID_DUPLICATE_ACROSS_PAGES", "Dashboard template control UUIDs must be re-instantiated per generated page/resource.", {
@@ -159,6 +159,12 @@ function validateDashboardResources({ decoded, manifestIds, findings }) {
     }
   }
   return parsedResources;
+}
+
+function isDashboardRuntimeRegistrationPointer(pointer) {
+  const text = String(pointer || "");
+  return /^\$\.(?:exts|ReportIds|tempVars)(?:\[|\.)/.test(text)
+    || /\/Resource\/(?:exts|ReportIds|tempVars)(?:\/|$)/.test(text);
 }
 
 function validateApprovalDefResources({ decoded, manifestIds, findings }) {

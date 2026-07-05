@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.6
+
+- Release full-app generated-final preflight closure for schema-bound Collection cleanup and reverse-related View Item sections.
+- Parse explicit lookup-target columns in App Plan field tables so Text-backed lookup fields receive target list/rule metadata before data-list schema validation.
+- Materialize planned reverse-related child Collections on Data List View Item forms with lookup filters, search/fulltext bindings, Add-record actions, and current-record `ListDataID` passvalues defaults.
+- Omit placeholder Form reports such as `Not planned`, filter invalid navigation children, and align live-install readiness UUID checks with Summary/Data Analytics runtime registration contracts.
+
 ## 0.9.5
 
 - Release Dashboard Collection schema-bound progress binding hardening.

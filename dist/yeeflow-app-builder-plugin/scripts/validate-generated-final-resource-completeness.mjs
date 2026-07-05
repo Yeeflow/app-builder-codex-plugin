@@ -741,7 +741,12 @@ function cleanName(value) {
 
 function isPlaceholder(value) {
   const text = cleanName(value);
-  return !text || /^x$/i.test(text) || /^(name|dashboard|form|report|workflow|section|filter|metric|list|library|item)$/i.test(text) || /^<.*>$/.test(String(value || "").trim());
+  return !text
+    || /^x$/i.test(text)
+    || /^(not planned|not applicable|n\/a|none|no|deferred)$/i.test(text)
+    || /^no\s+(?:form\s+)?reports?\b/i.test(text)
+    || /^(name|dashboard|form|report|workflow|section|filter|metric|list|library|item)$/i.test(text)
+    || /^<.*>$/.test(String(value || "").trim());
 }
 
 function norm(value) {
