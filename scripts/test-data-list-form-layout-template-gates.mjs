@@ -103,6 +103,10 @@ try {
   expectCode("reverse-related Collection partial generated-style section shape fails", ["--resource", writeJson("view-reverse-related-partial-generated-shape.json", reverseRelatedPartialShapeViewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH");
   expectCode("reverse-related Collection content card missing golden style fails", ["--resource", writeJson("view-reverse-related-card-style-missing.json", reverseRelatedViewResource({ omitContentCardStyle: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_CONTENT_CARD_STYLE_MISMATCH");
   expectCode("reverse-related Collection search-filter visible label fails", ["--resource", writeJson("view-reverse-related-search-label-visible.json", reverseRelatedViewResource({ visibleSearchLabel: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_LABEL_VISIBLE");
+  expectCode("reverse-related Collection search-filter plain binding fails", ["--resource", writeJson("view-reverse-related-search-plain-binding.json", reverseRelatedViewResource({ plainSearchBinding: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FILTER_VAR_CONTRACT_INVALID");
+  expectCode("reverse-related Collection search-filter undeclared filterVar fails", ["--resource", writeJson("view-reverse-related-search-filtervar-missing.json", reverseRelatedViewResource({ omitFilterVarDeclaration: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FILTER_VAR_NOT_DECLARED");
+  expectCode("reverse-related Collection fulltext must consume search system id", ["--resource", writeJson("view-reverse-related-search-fulltext-id-mismatch.json", reverseRelatedViewResource({ fulltextIdMismatch: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FULLTEXT_ID_MISMATCH");
+  expectCode("reverse-related Add button must be inline width", ["--resource", writeJson("view-reverse-related-add-button-full-width.json", reverseRelatedViewResource({ omitAddButtonInlineWidth: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ADD_BUTTON_WIDTH_MISMATCH");
   expectCode("reverse-related Collection item dynamic-field without source 3 fails", ["--resource", writeJson("view-reverse-related-bad-item-source.json", reverseRelatedViewResource({ badItemSource: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_SOURCE_INVALID");
   expectCode("reverse-related Collection item dynamic-field extra generated bindings fail", ["--resource", writeJson("view-reverse-related-extra-item-bindings.json", reverseRelatedViewResource({ extraItemBindings: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_EXTRA_BINDINGS");
   expectCode("App Plan reverse-related Collection selection must be materialized", ["--package", writePackage("reverse-related-missing-package.yapk", decodedPackage()), "--plan", writeText("plan-reverse-related-missing-package.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED");
@@ -226,6 +230,7 @@ function workbenchResource(options = {}) {
 
 function reverseRelatedViewResource(options = {}) {
   const resource = viewResource();
+  if (!options.omitFilterVarDeclaration) resource.filterVars = [{ id: "filter_doctors", idx: "filter-var-doctors" }];
   if (options.nestedInsideDetails) firstSlot(resource).children.push(reverseRelatedSection(options));
   else content(resource).children.push(reverseRelatedSection(options));
   return resource;
@@ -272,7 +277,8 @@ function reverseRelatedPartialShapeViewResource() {
 }
 
 function reverseRelatedSection(options = {}) {
-  const searchBinding = "__filter_filter_doctors";
+  const searchBinding = options.plainSearchBinding ? "filter_doctors" : "__filter_filter_doctors";
+  const fulltextBinding = options.fulltextIdMismatch ? "__filter_filter_wrong" : searchBinding;
   const childListId = "1909200000000000200";
   const lookupField = "Text3";
   const plannedLookupField = options.plannedLookupField || lookupField;
@@ -290,7 +296,7 @@ function reverseRelatedSection(options = {}) {
           { left: lookupField, op: "0", right: [listDataIdExpr("Specialties:Id")], showCus: false },
         ],
         fulltext: options.omitFulltext ? [] : [
-          { fields: ["Title", "Text5"], value: [variableExpr(searchBinding, "filter_doctors")] },
+          { fields: ["Title", "Text5"], value: [variableExpr(fulltextBinding, options.fulltextIdMismatch ? searchBinding : "filter_doctors")] },
         ],
       },
       layout: {},
@@ -331,6 +337,12 @@ function reverseRelatedSection(options = {}) {
       passvalues: options.omitPassvalues ? [] : [
         { Name: lookupField, Value: options.badPassvalue ? "Specialty" : [listDataIdExpr("List Fields:Id")] },
       ],
+      ...(options.omitAddButtonInlineWidth ? {} : {
+        common: {
+          positioning: { widthtype: [null, "2"] },
+          container: { size: [null, "grow", "none"] },
+        },
+      }),
     },
   };
   return {

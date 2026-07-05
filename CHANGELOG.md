@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.12
+
+- Release reverse-related View Item Collection Search variable and Add button contract hardening.
+- Bind reverse-related Search controls to Yeeflow system filter ids such as `__filter_filter_doctor_profiles_1` instead of plain business variable names.
+- Register generated reverse-related Search variables in form `filterVars[]` and make Collection `fulltext` consume the same system id.
+- Preserve the golden reference inline-width Add button positioning with `attrs.common.positioning.widthtype = [null, "2"]` and standard container sizing.
+- Add hard gates for split Search variable contracts, undeclared filterVars, fulltext id drift, and Add buttons that lose inline width.
+
 ## 0.9.11
 
 - Release reverse-related View Item Collection search and card style fidelity.

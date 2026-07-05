@@ -707,10 +707,22 @@ function validateReverseRelatedSearch(section, collection, context, resource) {
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_BINDING_MISSING", "Reverse-related search-filter must declare a stable binding variable.", { source: context.source, path: pointerForNode(resource, search) }));
       continue;
     }
+    if (!isSystemFilterBinding(binding)) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FILTER_VAR_CONTRACT_INVALID", "Reverse-related search-filter binding must use the Yeeflow system filter variable id shape, for example __filter_filter_1. Do not bind the control to a plain business variable name.", { source: context.source, path: pointerForNode(resource, search), binding }));
+      continue;
+    }
+    const filterVarId = filterVarIdFromBinding(binding);
+    if (!isFilterVarDeclared(resource, filterVarId)) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FILTER_VAR_NOT_DECLARED", "Reverse-related search-filter bindings must be registered in the form resource filterVars[] so Designer can resolve the filter variable.", { source: context.source, path: pointerForNode(resource, search), binding, expectedFilterVar: filterVarId }));
+      continue;
+    }
     const consumer = fulltext.find((entry) => containsVariableReference(entry?.value ?? entry, binding));
     if (!consumer) {
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_BINDING_MISMATCH", "Reverse-related search-filter binding must match a collection.attrs.data.fulltext value expression.", { source: context.source, path: pointerForNode(resource, search), binding }));
       continue;
+    }
+    if (!fulltextConsumerUsesSystemFilterId(consumer, binding)) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FULLTEXT_ID_MISMATCH", "Reverse-related Collection fulltext expressions must consume the same system filter variable id as the search-filter binding.", { source: context.source, path: collectionPath, binding }));
     }
     if (!asArray(consumer.fields).filter(Boolean).length) {
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FIELDS_MISSING", "Reverse-related Collection fulltext search must name at least one resolved child-list field.", { source: context.source, path: collectionPath, binding }));
@@ -741,6 +753,9 @@ function validateReverseRelatedAddButton(section, collection, detail, context, r
     if (!attrs.control_action && !attrs.action && !button.control_action && !button.action) {
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_ADD_ACTION_MISSING", "Reverse-related Add buttons must include a runtime action/control_action binding.", { source: context.source, path: buttonPath }));
     }
+    if (!hasInlineActionButtonWidth(button)) {
+      context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_ADD_BUTTON_WIDTH_MISMATCH", "Reverse-related Add buttons must preserve the golden reference inline width setting: attrs.common.positioning.widthtype = [null, \"2\"].", { source: context.source, path: buttonPath }));
+    }
     const passvalues = asArray(attrs.passvalues || attrs.passValues || button.passvalues || button.passValues);
     if (!passvalues.length) {
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_MISSING", "Reverse-related Add buttons must pass the current host ListDataID into the child lookup field.", { source: context.source, path: buttonPath, expectedField: lookupField || null }));
@@ -755,6 +770,34 @@ function validateReverseRelatedAddButton(section, collection, detail, context, r
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_VALUE_INVALID", "Reverse-related Add button passvalues value must be the current host item ListDataID expression.", { source: context.source, path: buttonPath, expectedField: lookupField || null }));
     }
   }
+}
+
+function isSystemFilterBinding(binding) {
+  return /^__filter_filter_[A-Za-z0-9_]+$/.test(stringValue(binding));
+}
+
+function filterVarIdFromBinding(binding) {
+  const text = stringValue(binding);
+  return text.startsWith("__filter_") ? text.slice("__filter_".length) : text;
+}
+
+function isFilterVarDeclared(resource, filterVarId) {
+  const id = stringValue(filterVarId);
+  if (!id) return false;
+  return asArray(resource?.filterVars).some((item) => stringValue(item?.id || item?.name) === id);
+}
+
+function fulltextConsumerUsesSystemFilterId(consumer, binding) {
+  let found = false;
+  walkJson(consumer?.value ?? consumer, (node) => {
+    if (found || !isObject(node)) return;
+    if (stringValue(node.exprType) === "variable" && stringValue(node.id) === binding) found = true;
+  });
+  return found;
+}
+
+function hasInlineActionButtonWidth(button) {
+  return tupleValue(button?.attrs?.common?.positioning?.widthtype) === "2";
 }
 
 function validateReverseRelatedCollectionHasNoRowOperations(collection, detail, context, resource) {

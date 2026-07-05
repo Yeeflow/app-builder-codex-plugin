@@ -181,6 +181,46 @@ Regression fixtures:
 - Negative fixture: Search filter with visible/missing label hiding fails.
 - Negative fixture: reverse-related `content_card_wrapper` with only layout direction/gap and no card background/border/radius/shadow fails.
 
+## 0.9.11 Search Variable And Add Button Width Regression Update
+
+The follow-up Hospital Doctor stylefix validation found two additional reverse-related Collection contract failures after the visible Search label/card-style fix:
+
+- Search filter controls used a plain business binding such as `filter_doctor_profiles_1`.
+- Collection `fulltext` used a different runtime id such as `__filter_filter_doctor_profiles_1`.
+- The form resource did not register the filter variable in `filterVars[]`.
+- Designer could not show or resolve the Search filter variable even though the input rendered.
+- `reverse_related_add_button` preserved the Add action/passvalues but lost the golden reference inline-width positioning, so Designer rendered it as default/full width.
+
+Correct Search filter contract:
+
+- The Search filter control `binding` must be the Yeeflow system filter id, for example `__filter_filter_1` or a namespaced equivalent such as `__filter_filter_doctor_profiles_1`.
+- The owning form resource must declare the corresponding filter variable in `filterVars[]` with the id without the `__filter_` prefix, for example `filter_1` or `filter_doctor_profiles_1`.
+- Collection `attrs.data.fulltext[].value[]` must consume the exact same system id in its expression token: `id = "__filter_filter_1"` and `name = "filter_1"`.
+- Do not split the Search filter control binding, fulltext expression id, and `filterVars[]` declaration across different names.
+
+Correct Add button contract:
+
+- `reverse_related_add_button` must preserve the golden reference inline width setting:
+  `attrs.common.positioning.widthtype = [null, "2"]`.
+- It should also preserve the standard button container sizing:
+  `attrs.common.container.size = [null, "grow", "none"]`.
+- The Add button still must target the child list, include a runtime action/control_action, and pass the current host item `ListDataID` into the child lookup field.
+
+Hard gates:
+
+- `DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FILTER_VAR_CONTRACT_INVALID`: fail if the Search filter binding is a plain business variable instead of a `__filter_filter_*` system id.
+- `DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FILTER_VAR_NOT_DECLARED`: fail if the Search filter variable is not registered in form `filterVars[]`.
+- `DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FULLTEXT_ID_MISMATCH`: fail if the Collection fulltext expression does not consume the same system filter id as the Search filter binding.
+- `DATA_LIST_FORM_REVERSE_RELATED_ADD_BUTTON_WIDTH_MISMATCH`: fail if the Add button loses the golden reference inline-width positioning.
+
+Regression fixtures:
+
+- Positive fixture: Search filter binding, form `filterVars[]`, and Collection fulltext all resolve to the same filter variable; Add button keeps inline width.
+- Negative fixture: Search filter binding is a plain variable name.
+- Negative fixture: Search filter binding is not declared in `filterVars[]`.
+- Negative fixture: Collection fulltext uses the right display name but a different runtime expression id.
+- Negative fixture: Add button has action/passvalues but no inline-width positioning.
+
 ## App Plan Requirement
 
 When a parent/detail lookup relationship should appear on a parent View Item form, the App Plan should include a Reverse-Related Collection Selection table:

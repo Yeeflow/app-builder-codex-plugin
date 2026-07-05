@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.11`
+- Version: `0.9.12`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.11` hardens reverse-related View Item Collection search and card style fidelity. Generated reverse-related child Collections hide Search filter titles with `displayLabel: [null, false]` and preserve the Data List View Item `content_card_wrapper` golden card style instead of copying only the container name.
+Current release `0.9.12` hardens reverse-related View Item Collection Search variable and Add button contracts. Generated reverse-related child Collections now keep Search filter `binding`, Collection `fulltext`, and form `filterVars[]` on the same `__filter_filter_*` variable, and preserve the golden reference inline-width Add button positioning.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.11
+Version: 0.9.12
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.11
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.12
 ```
 
 ## What Is Included
