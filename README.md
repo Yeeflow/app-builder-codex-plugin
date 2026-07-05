@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.14`
+- Version: `0.9.15`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.14` hardens Workflow Assignment Task assignee generation. Generated workflow tasks now use export-backed shapes for applicant Line manager, applicant Department head, workflow user variable, workflow user Line manager, multiple-assignee, and proven Job position assignees, while failing closed instead of copying tenant-local sample Job position IDs.
+Current release `0.9.15` hardens repository hygiene and release packaging safety. The repo hygiene guard now fails on tracked or untracked Finder/copy-style duplicate artifacts such as `name 2.md`, `name 3.json`, `name 4.mjs`, or `SKILL 2.md`, and release packaging must use tracked-file manifests instead of raw working-tree zips.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.14
+Version: 0.9.15
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.14
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.15
 ```
 
 ## What Is Included
