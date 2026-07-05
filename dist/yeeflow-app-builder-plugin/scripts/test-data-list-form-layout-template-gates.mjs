@@ -96,6 +96,7 @@ try {
   expectCode("reverse-related Collection search-filter without fulltext consumer fails", ["--resource", writeJson("view-reverse-related-missing-fulltext.json", reverseRelatedViewResource({ omitFulltext: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_FULLTEXT_MISSING");
   expectCode("reverse-related Add button missing passvalues fails", ["--resource", writeJson("view-reverse-related-missing-passvalues.json", reverseRelatedViewResource({ omitPassvalues: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_MISSING");
   expectCode("reverse-related Add button passvalues must use current ListDataID", ["--resource", writeJson("view-reverse-related-bad-passvalue.json", reverseRelatedViewResource({ badPassvalue: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_VALUE_INVALID");
+  expectCode("reverse-related Collection row dropbar operations fail", ["--resource", writeJson("view-reverse-related-row-dropbar.json", reverseRelatedViewResource({ includeDropbar: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN");
   expectCode("App Plan reverse-related Collection selection must be materialized", ["--package", writePackage("reverse-related-missing-package.yapk", decodedPackage()), "--plan", writeText("plan-reverse-related-missing-package.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED");
   expectCode("App Plan reverse-related default must use current ListDataID", ["--plan", writeText("plan-reverse-related-bad-default.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true, reverseDefaultValue: "Text3 = Specialty Name" }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_DEFAULT_VALUE_INVALID");
 
@@ -245,6 +246,22 @@ function reverseRelatedSection(options = {}) {
     children: [
       { type: "container", id: "doctor_profile_row", nv_label: "grid_table_col_item", children: [
         { type: "dynamic-field", id: "doctor_profile_title", nv_label: "doctor_profile_title", field: "Title", attrs: { field: "Title" } },
+        ...(options.includeDropbar ? [{
+          type: "dropbar",
+          id: "grid_table_col_item_op_menu",
+          nv_label: "grid_table_col_item_op_menu",
+          attrs: { button: { before_icon: "fa-regular fa-ellipsis" } },
+          children: [
+            {
+              type: "container",
+              id: "grid_table_col_item_op_menu_panel",
+              nv_label: "grid_table_col_item_op_menu_panel",
+              children: [
+                { type: "action_button", id: "btn_edit_item", nv_label: "btn_edit_item", label: "Edit item", attrs: { operation: "edit" } },
+              ],
+            },
+          ],
+        }] : []),
       ] },
     ],
   };

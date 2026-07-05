@@ -2,12 +2,41 @@
 
 ## Unreleased
 
+## 0.9.7
+
+- Release reverse-related View Item Collection designer safety hardening.
+- Preserve official-shape toolbar Search/Add controls for reverse-related Collection sections while pruning unproven row `dropbar`, `grid_table_col_item_op_menu`, and copied edit/delete row operation residue from cloned Collection rows.
+- Add `DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN` validation and source/dist regression coverage so reverse-related View Item designer-unsafe row operations fail before signing readiness.
+
 ## 0.9.6
 
 - Release full-app generated-final preflight closure for schema-bound Collection cleanup and reverse-related View Item sections.
 - Parse explicit lookup-target columns in App Plan field tables so Text-backed lookup fields receive target list/rule metadata before data-list schema validation.
 - Materialize planned reverse-related child Collections on Data List View Item forms with lookup filters, search/fulltext bindings, Add-record actions, and current-record `ListDataID` passvalues defaults.
 - Omit placeholder Form reports such as `Not planned`, filter invalid navigation children, and align live-install readiness UUID checks with Summary/Data Analytics runtime registration contracts.
+
+## 0.9.5
+
+- Release Dashboard Collection schema-bound progress binding hardening.
+- Recursively validate Collection item `__ctx_coll` expressions against the selected source Data List schema, including Progress bar percentage expressions and copied template variables.
+- Block Progress bar / progress-circle controls unless App Plan semantics and source schema provide a real numeric/decimal/percent progress metric.
+- Reject duplicate visible grid-table column labels such as copied `Status` / `Status` columns after business field mapping.
+- Add source/dist regression coverage and training guidance for removing source-template `Decimal2` / `Completion percentage` residue before signing readiness.
+
+## 0.9.4
+
+- Release reverse-related Collection section planning and materialization gates.
+- Add App Plan coverage for Data List View Item reverse-related Collection sections, including host list, child list, lookup field, approved Collection template, search/fulltext, Add button, and `ListDataID` passvalues requirements.
+- Validate generated View Item forms against planned reverse-related sections so child-list Collections, lookup filters, search controls, and Add-record default values are materialized before signing readiness.
+- Update application/data-list/package skills and source/dist regression coverage for reverse-related business relationship usage.
+
+## 0.9.3
+
+- Release Dashboard Collection style contract hardening.
+- Enforce approved Collection template style fidelity for dynamic-user zero item padding, transparent operation menu buttons, and Large medium grid-table caption title typography.
+- Add source/dist dataset-presentation regression coverage for Collection template artifact drift and generated package typography drift.
+- Harden App Plan field-table parsing and lookup seed data proof so planned fields and lookup ListDataID storage remain generation/runtime-safe.
+
 
 ## 0.9.2
 
