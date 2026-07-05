@@ -7,6 +7,7 @@
 - Release repo hygiene duplicate-copy guardrails.
 - Add repo hygiene protection for tracked and untracked Finder/copy-style duplicate artifacts such as `name 2.md`, `name 3.json`, `name 4.mjs`, and `SKILL 2.md`.
 - Document that release packaging and cache smoke must use tracked-file manifests instead of raw working-tree zips, so local duplicate artifacts cannot enter plugin releases.
+- Allow the hygiene guard to run from installed plugin cache roots without `.git` metadata while preserving stricter source checkout checks.
 
 ## 0.9.14
 
