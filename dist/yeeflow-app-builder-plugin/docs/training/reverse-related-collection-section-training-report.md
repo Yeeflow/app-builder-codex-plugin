@@ -113,6 +113,45 @@ App Plan conformance must distinguish the planned/display lookup name from the r
 
 The validator may match either alias for plan-to-package conformance, but the runtime filter and passvalues checks must continue to require the resolved storage field.
 
+## 0.9.9 Styling Regression Update: Reverse-Related Collections Must Clone the Full Grid-Table Golden Reference
+
+The 0.9.9 Hospital Doctor follow-up proved that a designer-open reverse-related Collection can still be visually invalid. The generated `Departments View Item` section opened, but the related `Doctors in this Department` area rendered as a plain stacked `Grid`/field list instead of the approved Collection grid-table styling.
+
+Root cause:
+
+- The generator hand-built a shallow Collection-like tree after the designer-loading fix.
+- The shallow tree contained some familiar labels, such as `grid_table_col_caption`, `grid_table_col_header`, `grid_table_col_body`, and `grid_col_item`.
+- It did not preserve the full exported `collection_control_grid_table` root `grid_table_col_wrapper`, locked styles, content wrapper, row spacing, header/body column signatures, and internal control settings.
+
+This is not acceptable. The reverse-related Collection may use a simplified row item context for designer safety, but the Collection wrapper itself must still be cloned from the approved `collection_control_grid_table` golden reference.
+
+Generation must therefore:
+
+- Load `docs/reference/collection-control-grid-table.template.json`.
+- Clone `templateResource.rootContainer` as the reverse-related Collection wrapper.
+- Preserve the root identity `grid_table_col_wrapper`.
+- Stamp `collectionTemplateId = "collection_control_grid_table"` and `derivedFromCollectionTemplate = "collection_control_grid_table"` on the wrapper and Collection node.
+- Replace only approved slots:
+  - `grid_table_col_title`
+  - `op_normal` Search/Add controls
+  - `grid_table_col_body.attrs.data/filter/fulltext`
+  - `grid_table_col_header` column headings
+  - `grid_col_item` item-context cells
+- Remove unproven row operation/dropbar residue unless a separately export-proven row-operation contract is selected.
+- Run the shared Collection style enforcement so Dynamic user padding, operation-menu button backgrounds, and title typography remain aligned with the golden reference.
+
+Validator hardening:
+
+- A reverse-related Collection wrapper that only mimics grid-table labels must fail.
+- `grid_table_col_wrapper` is required.
+- `collection_control_grid_table` provenance marker is required.
+- The existing official section shape gate must reject shallow hand-built grids, even if they have search, add, filter, and passvalues.
+
+Regression expectation:
+
+- Negative fixture: a hand-built reverse-related section with `grid_table_col_caption`, `grid_table_col_content`, and `grid_table_col_body`, but without the cloned `grid_table_col_wrapper`/template marker. Expected failure: `DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH` and/or `DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_TEMPLATE_MARKER_MISSING`.
+- Positive fixture: a reverse-related section cloned from `collection_control_grid_table`, then remapped to the parent/child lookup contract. Expected result: designer-safe, golden-reference-styled, and validator pass.
+
 ## App Plan Requirement
 
 When a parent/detail lookup relationship should appear on a parent View Item form, the App Plan should include a Reverse-Related Collection Selection table:
