@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.14
+
+- Release Workflow Assignment Task assignee golden references.
+- Materialize export-backed assignee shapes for Line manager approval, Department head approval, workflow user variable assignees, workflow user Line manager assignees, and multiple assignee tasks.
+- Support Job position assignees only when a proven existing or newly created Job position ID is available; fail closed instead of copying sample tenant-local IDs.
+- Add assignee golden-reference JSON and training guidance for Approval form, Data list workflow, and Scheduled workflow Assignment Tasks.
+- Extend source/dist guardrails so unsupported or fallback assignee shapes fail before signing readiness.
+
 ## 0.9.13
 
 - Release Workflow layout golden reference v2 hardening.

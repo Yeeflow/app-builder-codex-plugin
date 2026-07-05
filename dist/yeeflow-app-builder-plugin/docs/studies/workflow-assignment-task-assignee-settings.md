@@ -23,6 +23,7 @@ Source export:
 /Users/Renger/Downloads/Test ABC.yap
 /Users/Renger/Downloads/Test ABC (1).yap
 /Users/Renger/Downloads/Test ABC (2).yap
+/Users/rengerhu/Downloads/Workflow actions layout.json
 ```
 
 Reference:
@@ -34,12 +35,13 @@ Reference:
 
 Source priority:
 
-1. `Test ABC (2).yap` is the latest Assignment Task source of truth for task type, Complete task, due-date, and reminder settings.
-2. `Test ABC (1).yap` is the source of truth for multiple-assignee, Appointed Order, approveway, and email notification settings.
-3. `Test ABC.yap` is the previous baseline export for comparison.
-4. Help Center articles are product-behavior and terminology references.
-5. Yeeflow API Operator lookup is only for safe read-only org/reference category support.
-6. Existing validators and skills are implementation references.
+1. `Workflow actions layout.json` is the focused golden-reference source for the common business assignee patterns: applicant line manager, applicant department manager, direct Job Position, workflow user variable, workflow user variable line manager, and multiple assignee entries.
+2. `Test ABC (2).yap` is the latest Assignment Task source of truth for task type, Complete task, due-date, and reminder settings.
+3. `Test ABC (1).yap` is the source of truth for multiple-assignee, Appointed Order, approveway, and email notification settings.
+4. `Test ABC.yap` is the previous baseline export for comparison.
+5. Help Center articles are product-behavior and terminology references.
+6. Yeeflow API Operator lookup is only for safe read-only org/reference category support.
+7. Existing validators and skills are implementation references.
 
 ## Redaction Policy
 
@@ -152,6 +154,35 @@ Not created because not found in this export:
 - selected department manager as a static department manager entry distinct from position-by-department
 
 ## Export-Proven Assignee Patterns
+
+## Workflow Actions Layout Assignee Golden References
+
+`Workflow actions layout.json` adds a focused business-process assignee reference set. The raw export contains tenant-local Job Position IDs; committed references must redact those IDs and preserve only the reusable shape.
+
+Reusable reference file:
+
+```text
+docs/reference/workflow-assignment-task-assignee-golden-references.json
+```
+
+Golden-reference node mapping:
+
+| Business intent | Source node | Required `usertaskassignment[]` shape | Generation rule |
+|---|---|---|---|
+| Applicant line manager approval | `Line manager approval` | one entry with `type="user"`, `method="expression"`, expression-button data `type=user`, `param.id={type:application, prop:ApplicantUserID}`, `prop=LineManager` | Use for “Line manager approval” and “Applicant line manager” approval tasks. Do not model applicant as a workflow variable. |
+| Applicant department manager/head approval | `Department head approval` | one entry with `type="user"`, `method="expression"`, expression-button data `type=org`, `param.id={type:user, param.id={type:application, prop:ApplicantUserID}, prop:OrganizationID}`, `prop=Manager` | Use for “Department manager”, “Department head”, and “Department approval” tasks. |
+| Job Position approval/complete task | `Finance manager approval`, `Casher confirm`, `General manager approval` | one entry with `type="position"`, `method="position"`, `position=<confirmed numeric Job Position ID>`, `title="Job position: <name>"` | Query existing Job Positions through the Yeeflow API when credentials allow. If a matching position is not found, create/update only after explicit system-admin confirmation. If neither is possible, leave the position unresolved and let preflight block signing. Never reuse sample export IDs. |
+| Workflow user variable approval | `Owner approval` | one entry with `type="user"`, `method="expression"`, expression-button data `type=variable`, `param.id=Owner` | Use when the App Plan states the task owner comes from a user-valued workflow variable. |
+| Workflow user variable line manager | `Owner's manager confirm` | one entry with `type="user"`, `method="expression"`, expression-button data `type=user`, `param.id={type:variable, param.id=Owner}`, `prop=LineManager` | Use for tasks assigned to the manager of a workflow user variable. |
+| Multiple assignees | `Owner's manager approval` | two entries in `usertaskassignment[]`: the workflow user variable and that variable's line manager | Preserve array order and both entries when the business plan explicitly requires multiple assignees. |
+
+Generation boundary:
+
+- one Assignment Task may contain one or multiple assignee entries
+- multiple assignees are valid but should be generated only when the App Plan explicitly calls for them
+- Job Position assignees require proof metadata (`requiredJobPositionName`, `source`, `proofStatus`) and a real numeric position ID
+- unresolved Job Position requirements are generation blockers, not a reason to silently fallback to applicant line manager
+- direct user assignment remains tenant-sensitive and should require explicit user mapping
 
 ## API-Assisted Org/Reference Interpretation
 

@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.13`
+- Version: `0.9.14`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.13` hardens Workflow layout golden reference v2. Generated workflow diagrams now enforce same-lane sharing for End with Rejection nodes, split rejection endpoints across different lanes or after three sources, use the roughly 16:9 Designer canvas area for larger workflows, and reject over-wide single-row or over-five-row layouts before signing readiness.
+Current release `0.9.14` hardens Workflow Assignment Task assignee generation. Generated workflow tasks now use export-backed shapes for applicant Line manager, applicant Department head, workflow user variable, workflow user Line manager, multiple-assignee, and proven Job position assignees, while failing closed instead of copying tenant-local sample Job position IDs.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.13
+Version: 0.9.14
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.13
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.14
 ```
 
 ## What Is Included
