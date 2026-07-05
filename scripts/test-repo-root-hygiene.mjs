@@ -68,6 +68,18 @@ function gitLsFiles() {
   return result.stdout.split(/\r?\n/).filter(Boolean);
 }
 
+function gitUntrackedFiles() {
+  const result = spawnSync("git", ["status", "--porcelain", "-z", "--untracked-files=all"], { encoding: "utf8" });
+  if (result.status !== 0) {
+    throw new Error(result.stderr || "git status failed");
+  }
+  return result.stdout
+    .split("\0")
+    .filter(Boolean)
+    .filter((record) => record.startsWith("?? "))
+    .map((record) => record.slice(3));
+}
+
 function isDeprecatedRootArtifact(fileName) {
   return (
     /^generate-/.test(fileName) ||
@@ -80,7 +92,12 @@ function isDeprecatedRootArtifact(fileName) {
   );
 }
 
+function isDuplicateCopyArtifact(file) {
+  return /(^|\/)[^/]* [2-9]\d*(?:\.[^/.]+)?$/.test(file);
+}
+
 const files = gitLsFiles();
+const untrackedFiles = gitUntrackedFiles();
 const findings = [];
 const sourceRootFiles = files.filter((file) => !file.includes("/"));
 const distRootFiles = files
@@ -122,6 +139,22 @@ for (const file of distRootFiles) {
   }
 }
 
+for (const file of files.filter(isDuplicateCopyArtifact)) {
+  findings.push({
+    code: "TRACKED_DUPLICATE_COPY_ARTIFACT",
+    message: "Tracked Finder/copy-style duplicate artifacts such as `name 2.ext` or `name 3.ext` must be renamed deliberately or removed.",
+    file,
+  });
+}
+
+for (const file of untrackedFiles.filter(isDuplicateCopyArtifact)) {
+  findings.push({
+    code: "UNTRACKED_DUPLICATE_COPY_ARTIFACT",
+    message: "Untracked Finder/copy-style duplicate artifacts such as `name 2.ext` or `name 3.ext` must be cleaned before release packaging or cache smoke.",
+    file,
+  });
+}
+
 const requiredDirs = [
   "tools/generators",
   "docs/studies/root-runtime-proofs",
@@ -144,6 +177,8 @@ const report = {
   status: findings.length ? "fail" : "pass",
   sourceRootFileCount: sourceRootFiles.length,
   distRootFileCount: distRootFiles.length,
+  trackedDuplicateCopyCount: files.filter(isDuplicateCopyArtifact).length,
+  untrackedDuplicateCopyCount: untrackedFiles.filter(isDuplicateCopyArtifact).length,
   findings,
 };
 
