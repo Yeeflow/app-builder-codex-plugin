@@ -1078,6 +1078,10 @@ function collectApprovalWorkflowNodeSpecs(planText) {
     const descriptionColumn = findHeaderIndex(normalizedHeaders, ["description", "purpose"]);
     const assigneeColumn = findHeaderIndex(normalizedHeaders, ["assignee/role", "assignee", "role", "owner"]);
     const strategyColumn = findHeaderIndex(normalizedHeaders, ["assignment strategy", "strategy"]);
+    const jobPositionNameColumn = findHeaderIndex(normalizedHeaders, ["required job position", "job position", "job position name", "position name"]);
+    const jobPositionIdColumn = findHeaderIndex(normalizedHeaders, ["job position id", "position id", "assignee position id", "required job position id"]);
+    const jobPositionSourceColumn = findHeaderIndex(normalizedHeaders, ["job position source", "assignee source", "source"]);
+    const jobPositionProofColumn = findHeaderIndex(normalizedHeaders, ["job position proof", "job position proof status", "proof status", "assignee proof"]);
     const outcomesColumn = findHeaderIndex(normalizedHeaders, ["outcomes", "outcome"]);
     const conditionColumn = findHeaderIndex(normalizedHeaders, ["condition/branch", "condition", "branch"]);
     const dataColumn = findHeaderIndex(normalizedHeaders, ["data read/write", "data read write", "data source", "read/write", "read write"]);
@@ -1097,6 +1101,10 @@ function collectApprovalWorkflowNodeSpecs(planText) {
         description: descriptionColumn === -1 ? "" : cleanResourceName(cells[descriptionColumn]),
         assigneeRole: assigneeColumn === -1 ? "" : cleanResourceName(cells[assigneeColumn]),
         assignmentStrategy: strategyColumn === -1 ? "" : cleanResourceName(cells[strategyColumn]),
+        requiredJobPositionName: jobPositionNameColumn === -1 ? "" : cleanResourceName(cells[jobPositionNameColumn]),
+        jobPositionId: jobPositionIdColumn === -1 ? "" : cleanResourceName(cells[jobPositionIdColumn]),
+        jobPositionSource: jobPositionSourceColumn === -1 ? "" : cleanResourceName(cells[jobPositionSourceColumn]),
+        jobPositionProofStatus: jobPositionProofColumn === -1 ? "" : cleanResourceName(cells[jobPositionProofColumn]),
         outcomes: outcomesColumn === -1 ? "" : cleanResourceName(cells[outcomesColumn]),
         conditionBranch: conditionColumn === -1 ? "" : cleanResourceName(cells[conditionColumn]),
         dataReadWrite: dataColumn === -1 ? "" : cleanResourceName(cells[dataColumn]),
@@ -1650,6 +1658,10 @@ function uniqueApprovalWorkflowNodes(nodes) {
       description: cleanResourceName(node?.description),
       assigneeRole: cleanResourceName(node?.assigneeRole),
       assignmentStrategy: cleanResourceName(node?.assignmentStrategy),
+      requiredJobPositionName: cleanResourceName(node?.requiredJobPositionName),
+      jobPositionId: cleanResourceName(node?.jobPositionId),
+      jobPositionSource: cleanResourceName(node?.jobPositionSource),
+      jobPositionProofStatus: cleanResourceName(node?.jobPositionProofStatus),
       outcomes: cleanResourceName(node?.outcomes),
       conditionBranch: cleanResourceName(node?.conditionBranch),
       dataReadWrite: cleanResourceName(node?.dataReadWrite),
@@ -5956,8 +5968,170 @@ function exportResource(resource) {
   return Buffer.concat([prefix, compressed]).toString("base64");
 }
 
-function workflowUserLineManagerExpression(variableId, label) {
-  return `<input type="button" data="\${ &quot;type&quot;:&quot;user&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;\${\\&quot;type\\&quot;:\\&quot;variable\\&quot;, \\&quot;param\\&quot;:{\\&quot;id\\&quot;:\\&quot;${variableId}\\&quot;}}&quot;},&quot;prop&quot;:&quot;LineManager&quot;}" expr="__" tabindex="-1" value="Workflow Variables:${label}:Line Manager">`;
+function workflowExpressionButton(data, label) {
+  const escapedData = JSON.stringify(data).replace(/"/g, "&quot;");
+  return `<input type="button" data="\${${escapedData}}" expr="__" tabindex="-1" value="${label}">`;
+}
+
+function workflowApplicantUserExpression() {
+  return JSON.stringify({ type: "application", prop: "ApplicantUserID" });
+}
+
+function workflowVariableUserReferenceExpression(variableId) {
+  return JSON.stringify({ type: "variable", param: { id: variableId } });
+}
+
+function workflowApplicantLineManagerExpression() {
+  return workflowExpressionButton({
+    type: "user",
+    param: { id: workflowApplicantUserExpression() },
+    prop: "LineManager",
+  }, "Applicant:Line Manager");
+}
+
+function workflowApplicantDepartmentManagerExpression() {
+  return workflowExpressionButton({
+    type: "org",
+    param: {
+      id: JSON.stringify({
+        type: "user",
+        param: { id: workflowApplicantUserExpression() },
+        prop: "OrganizationID",
+      }),
+    },
+    prop: "Manager",
+  }, "Applicant:Department:Manager");
+}
+
+function workflowVariableUserExpression(variableId, label = variableId) {
+  return workflowExpressionButton({
+    type: "variable",
+    param: { id: variableId },
+  }, `Workflow Variables:${label}`);
+}
+
+function workflowVariableUserLineManagerExpression(variableId, label = variableId) {
+  return workflowExpressionButton({
+    type: "user",
+    param: { id: workflowVariableUserReferenceExpression(variableId) },
+    prop: "LineManager",
+  }, `Workflow Variables:${label}:Line Manager`);
+}
+
+function workflowUserExpressionAssignee(value, plannedAssigneeRole = "") {
+  return {
+    type: "user",
+    method: "expression",
+    title: `User: ${value}`,
+    value,
+    plannedAssigneeRole,
+  };
+}
+
+function inferWorkflowVariableAssigneeName(step) {
+  const text = [
+    step?.nodeName,
+    step?.assigneeRole,
+    step?.assignmentStrategy,
+    step?.description,
+  ].map(cleanResourceName).join(" ");
+  const explicit = text.match(/\b(?:workflow\s+variables?|variable)\s*[:=]?\s*([A-Za-z][A-Za-z0-9_]*)\b/i);
+  if (explicit && !/^line|department|manager|user$/i.test(explicit[1])) return explicit[1];
+  if (/\bowner\b/i.test(text)) return "Owner";
+  return "";
+}
+
+function inferRequiredJobPositionName(step) {
+  const text = [
+    step?.assigneeRole,
+    step?.assignmentStrategy,
+    step?.nodeName,
+    step?.description,
+  ].map(cleanResourceName).join(" ");
+  if (/cash(?:i|e)r/i.test(text)) return "Casher";
+  if (/finance/i.test(text)) return "Finance Manager";
+  if (/general\s+manager|\bgm\b/i.test(text)) return "General Manager";
+  const explicit = text.match(/job\s+position\s*[:=]?\s*([^;|,]+)/i);
+  return explicit ? cleanResourceName(explicit[1]) : "";
+}
+
+function buildWorkflowJobPositionAssignee(step) {
+  const positionId = cleanResourceName(step?.jobPositionId || step?.positionId || step?.assigneePositionId || step?.requiredJobPositionId);
+  const requiredJobPositionName = cleanResourceName(step?.requiredJobPositionName || step?.jobPositionName || inferRequiredJobPositionName(step));
+  const source = cleanResourceName(step?.jobPositionSource || step?.assigneeSource || step?.source);
+  const proofStatus = cleanResourceName(step?.jobPositionProofStatus || step?.proofStatus);
+  if (!positionId) {
+    return {
+      type: "position",
+      method: "position",
+      position: "__JOB_POSITION_REQUIRED__",
+      title: requiredJobPositionName ? `Job position: ${requiredJobPositionName}` : "Job position: unresolved",
+      requiredJobPositionName: requiredJobPositionName || "__JOB_POSITION_NAME_REQUIRED__",
+      source: source || "unresolved",
+      proofStatus: proofStatus || "blocked",
+      creationRequired: true,
+      plannedAssigneeRole: step.assigneeRole || "",
+      plannedAssignmentStrategy: step.assignmentStrategy || "",
+    };
+  }
+  return {
+    type: "position",
+    method: "position",
+    position: stringId(positionId),
+    title: `Job position: ${requiredJobPositionName || positionId}`,
+    requiredJobPositionName: requiredJobPositionName || positionId,
+    source: source || "user-selected-existing-job-position",
+    proofStatus: proofStatus || "user-selected",
+    plannedAssigneeRole: step.assigneeRole || "",
+    plannedAssignmentStrategy: step.assignmentStrategy || "",
+  };
+}
+
+function workflowTaskAssigneesForStep(step) {
+  const text = [
+    step?.nodeName,
+    step?.assigneeRole,
+    step?.assignmentStrategy,
+    step?.description,
+  ].map(cleanResourceName).join(" ");
+  const key = text.toLowerCase();
+  const role = step.assigneeRole || "";
+  const assignments = [];
+  const variableName = inferWorkflowVariableAssigneeName(step);
+  const isOwnerManagerApproval = /owner['’]?\s*s?\s+manager\s+approval/i.test(text);
+  const isOwnerManagerOnly = /owner['’]?\s*s?\s+manager|owner\s+line\s+manager|variable.*line\s+manager/i.test(text);
+  const isOwnerDirect = /\bowner\b|workflow\s+variable|user\s+variable/i.test(text);
+  const isDepartmentManager = /department\s+(manager|head|approval)|department\s*:\s*manager/i.test(text);
+  const isLineManager = /line\s+manager|applicant\s+manager/i.test(text);
+  const isJobPosition = /job\s+position|finance\s+manager|general\s+manager|cash(?:i|e)r/i.test(text);
+
+  if (isOwnerManagerApproval && variableName) {
+    assignments.push(workflowUserExpressionAssignee(workflowVariableUserExpression(variableName), role));
+    assignments.push(workflowUserExpressionAssignee(workflowVariableUserLineManagerExpression(variableName), role));
+    return assignments;
+  }
+  if (isOwnerManagerOnly && variableName) {
+    assignments.push(workflowUserExpressionAssignee(workflowVariableUserLineManagerExpression(variableName), role));
+    return assignments;
+  }
+  if (isOwnerDirect && variableName) {
+    assignments.push(workflowUserExpressionAssignee(workflowVariableUserExpression(variableName), role));
+    return assignments;
+  }
+  if (isDepartmentManager) {
+    assignments.push(workflowUserExpressionAssignee(workflowApplicantDepartmentManagerExpression(), role));
+    return assignments;
+  }
+  if (isJobPosition) {
+    assignments.push(buildWorkflowJobPositionAssignee(step));
+    return assignments;
+  }
+  if (isLineManager || key) {
+    assignments.push(workflowUserExpressionAssignee(workflowApplicantLineManagerExpression(), role));
+    return assignments;
+  }
+  assignments.push(workflowUserExpressionAssignee(workflowApplicantLineManagerExpression(), role));
+  return assignments;
 }
 
 function workflowTaskOutcomeExpression(taskId, taskLabel) {
@@ -6301,6 +6475,9 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
       plannedWorkflowNodeType: step.nodeType,
       plannedAssigneeRole: step.assigneeRole || "",
       plannedAssignmentStrategy: step.assignmentStrategy || "",
+      plannedRequiredJobPositionName: step.requiredJobPositionName || "",
+      plannedJobPositionSource: step.jobPositionSource || "",
+      plannedJobPositionProofStatus: step.jobPositionProofStatus || "",
       plannedConditionBranch: step.conditionBranch || "",
       plannedProofBoundary: step.proofBoundary || "",
     },
@@ -6327,15 +6504,7 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     TaskUrl: taskPageId,
     approveway: "anyapprove",
     approvepercentage: 100,
-    usertaskassignment: [
-      {
-        type: "user",
-        method: "expression",
-        title: `User:${workflowUserLineManagerExpression("ApplicantUserID", "Applicant")}`,
-        value: workflowUserLineManagerExpression("ApplicantUserID", "Applicant"),
-        plannedAssigneeRole: step.assigneeRole || "",
-      },
-    ],
+    usertaskassignment: workflowTaskAssigneesForStep(step),
   };
   return base;
 }

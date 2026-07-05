@@ -1,0 +1,123 @@
+{
+  "templateId": "workflow-assignment-task-assignee-golden-references",
+  "source": "Workflow actions layout.json",
+  "proofBoundary": "export-proven-shape-only; tenant-local raw IDs redacted",
+  "patterns": [
+    {
+      "id": "assignment_assignee_applicant_line_manager",
+      "sourceNode": "Line manager approval",
+      "description": "Assign the task to the approval form applicant's line manager.",
+      "usertaskassignment": [
+        {
+          "type": "user",
+          "method": "expression",
+          "titleShape": "User: <expression-button value=\"Applicant:Line Manager\">",
+          "valueShape": {
+            "type": "user",
+            "param": {
+              "id": "{\"type\":\"application\",\"prop\":\"ApplicantUserID\"}"
+            },
+            "prop": "LineManager"
+          }
+        }
+      ]
+    },
+    {
+      "id": "assignment_assignee_applicant_department_manager",
+      "sourceNode": "Department head approval",
+      "description": "Assign the task to the manager of the approval form applicant's department.",
+      "usertaskassignment": [
+        {
+          "type": "user",
+          "method": "expression",
+          "titleShape": "User: <expression-button value=\"Applicant:Department:Manager\">",
+          "valueShape": {
+            "type": "org",
+            "param": {
+              "id": "{\"type\":\"user\",\"param\":{\"id\":\"{\\\"type\\\":\\\"application\\\",\\\"prop\\\":\\\"ApplicantUserID\\\"}\"},\"prop\":\"OrganizationID\"}"
+            },
+            "prop": "Manager"
+          }
+        }
+      ]
+    },
+    {
+      "id": "assignment_assignee_job_position",
+      "sourceNodes": [
+        "Finance manager approval",
+        "Casher confirm",
+        "General manager approval"
+      ],
+      "description": "Assign the task to a resolved Yeeflow Job Position.",
+      "generationPolicy": "Use only a discovered existing, user-selected existing, or admin-created-after-confirmation Job Position ID. Do not reuse sample export IDs and do not invent IDs.",
+      "unresolvedPolicy": "If no suitable Job Position can be proven or created with explicit admin confirmation, leave the position unresolved and let generated-final preflight block signing.",
+      "usertaskassignment": [
+        {
+          "type": "position",
+          "method": "position",
+          "position": "<CONFIRMED_JOB_POSITION_ID>",
+          "titleShape": "Job position: <CONFIRMED_JOB_POSITION_NAME>",
+          "requiredProofFields": [
+            "requiredJobPositionName",
+            "source",
+            "proofStatus"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "assignment_assignee_workflow_user_variable",
+      "sourceNode": "Owner approval",
+      "description": "Assign the task to a user-valued workflow variable.",
+      "usertaskassignment": [
+        {
+          "type": "user",
+          "method": "expression",
+          "titleShape": "User: <expression-button value=\"Workflow Variables:Owner\">",
+          "valueShape": {
+            "type": "variable",
+            "param": {
+              "id": "Owner"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "assignment_assignee_workflow_user_variable_line_manager",
+      "sourceNode": "Owner's manager confirm",
+      "description": "Assign the task to the line manager of a user-valued workflow variable.",
+      "usertaskassignment": [
+        {
+          "type": "user",
+          "method": "expression",
+          "titleShape": "User: <expression-button value=\"Workflow Variables:Owner:Line Manager\">",
+          "valueShape": {
+            "type": "user",
+            "param": {
+              "id": "{\"type\":\"variable\",\"param\":{\"id\":\"Owner\"}}"
+            },
+            "prop": "LineManager"
+          }
+        }
+      ]
+    },
+    {
+      "id": "assignment_assignee_multiple_workflow_variable_and_manager",
+      "sourceNode": "Owner's manager approval",
+      "description": "Assign one task to both a user-valued workflow variable and that user's line manager.",
+      "usertaskassignment": [
+        {
+          "type": "user",
+          "method": "expression",
+          "titleShape": "User: <expression-button value=\"Workflow Variables:Owner\">"
+        },
+        {
+          "type": "user",
+          "method": "expression",
+          "titleShape": "User: <expression-button value=\"Workflow Variables:Owner:Line Manager\">"
+        }
+      ]
+    }
+  ]
+}

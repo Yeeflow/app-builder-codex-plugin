@@ -2,7 +2,7 @@
 
 ## Scope
 
-These rules cover Yeeflow approval workflow `MultiAssignmentTask` assignee, task type, due-date, reminder, and Start-action-adjacent generation guidance learned from `Test ABC.yap`, `Test ABC (1).yap`, `Test ABC (2).yap`, and `Test ABC (3).yap`.
+These rules cover Yeeflow approval workflow `MultiAssignmentTask` assignee, task type, due-date, reminder, and Start-action-adjacent generation guidance learned from `Workflow actions layout.json`, `Test ABC.yap`, `Test ABC (1).yap`, `Test ABC (2).yap`, and `Test ABC (3).yap`.
 
 Proof boundary:
 
@@ -67,13 +67,20 @@ Common task approval settings found alongside assignees:
 Use these rules for generated packages:
 
 - Every generated approval workflow Assignment Task must have an explicit assignee plan before package generation. The plan must list task name, assignment type, required job position name when applicable, source, proof status, fallback, and blocker.
+- Use `docs/reference/workflow-assignment-task-assignee-golden-references.json` as the focused golden reference for common business assignee patterns.
+- “Line manager approval” must use the applicant application context shape: expression data `type=user`, `param.id={type:application, prop:ApplicantUserID}`, `prop=LineManager`.
+- “Department manager”, “Department head”, and “Department approval” must use the applicant department manager shape: expression data `type=org`, `param.id={type:user, param.id={type:application, prop:ApplicantUserID}, prop:OrganizationID}`, `prop=Manager`.
+- Workflow user-variable assignees must use expression data `type=variable`, `param.id=<workflow user variable id>`.
+- Workflow user-variable manager assignees must use expression data `type=user`, `param.id={type:variable, param.id=<workflow user variable id>}`, `prop=LineManager`.
+- Multiple assignees must be represented as multiple objects in `properties.usertaskassignment[]`; do not concatenate them into one expression string.
 - Do not hardcode tenant-specific direct users by default.
 - Use `type=user`, `method=direct` only when the user explicitly supplies or authorizes a valid target-tenant user mapping.
 - Redact private IDs in docs and never commit user/org lookup output.
 - Prefer applicant/current-user expression routing or an explicit user-selection field when a package must be portable across tenants.
 - Use job-position, department, and location assignment only when target-tenant org/reference data is available and authorized.
-- Job-position assignments must use a discovered existing job position, a user-selected existing job position, or a job position created/updated only after explicit confirmation by a confirmed system admin. The generator must not silently choose a job position and must not invent job-position IDs or names.
+- Job-position assignments must use a discovered existing job position, a user-selected existing job position, or a job position created/updated only after explicit confirmation by a confirmed system admin. The generator must not silently choose a job position, must not invent job-position IDs or names, and must not reuse IDs from study exports.
 - If a required job position is missing and system-admin permission is not proven, stop generation and ask the user to have a system admin create/update the job position or provide an existing job position/fallback to use.
+- If a required job position cannot be resolved during materialization, generated-final must carry unresolved proof metadata and preflight must block signing rather than silently replacing the task with applicant line manager.
 - Job-position creation, update, assignment, and removal are write operations and must not be run automatically during workflow generation.
 - Use `yeeflow-api-operator` for read-only org/reference lookup when real users/departments/locations/positions are needed and local credentials are available.
 - API lookup may confirm that static exported values correspond to user, department, location, or position categories, but it does not prove runtime workflow routing.

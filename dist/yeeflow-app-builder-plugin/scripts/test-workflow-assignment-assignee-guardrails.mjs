@@ -62,7 +62,7 @@ function app(assignment) {
           TaskUrl: TASK_PAGE_ID,
           approveway: "anyapprove",
           approvepercentage: 100,
-          usertaskassignment: assignment === null ? [] : [assignment],
+          usertaskassignment: assignment === null ? [] : Array.isArray(assignment) ? assignment : [assignment],
         },
         incoming: [{ resourceid: "flow-start-task" }],
         outgoing: [{ resourceid: "flow-task-end" }],
@@ -123,6 +123,56 @@ function managerExpression(label, value) {
   };
 }
 
+function expressionButton(data, label) {
+  const escapedData = JSON.stringify(data).replace(/"/g, "&quot;");
+  return `<input type="button" data="\${${escapedData}}" expr="__" tabindex="-1" value="${label}">`;
+}
+
+function applicantUserExpr() {
+  return JSON.stringify({ type: "application", prop: "ApplicantUserID" });
+}
+
+function variableUserRef(variableId) {
+  return JSON.stringify({ type: "variable", param: { id: variableId } });
+}
+
+function applicantLineManager() {
+  return managerExpression("User: Applicant:Line Manager", expressionButton({
+    type: "user",
+    param: { id: applicantUserExpr() },
+    prop: "LineManager",
+  }, "Applicant:Line Manager"));
+}
+
+function applicantDepartmentManager() {
+  return managerExpression("User: Applicant:Department:Manager", expressionButton({
+    type: "org",
+    param: {
+      id: JSON.stringify({
+        type: "user",
+        param: { id: applicantUserExpr() },
+        prop: "OrganizationID",
+      }),
+    },
+    prop: "Manager",
+  }, "Applicant:Department:Manager"));
+}
+
+function workflowVariableUser(variableId = "Owner") {
+  return managerExpression(`User: Workflow Variables:${variableId}`, expressionButton({
+    type: "variable",
+    param: { id: variableId },
+  }, `Workflow Variables:${variableId}`));
+}
+
+function workflowVariableUserLineManager(variableId = "Owner") {
+  return managerExpression(`User: Workflow Variables:${variableId}:Line Manager`, expressionButton({
+    type: "user",
+    param: { id: variableUserRef(variableId) },
+    prop: "LineManager",
+  }, `Workflow Variables:${variableId}:Line Manager`));
+}
+
 function directUser(overrides = {}) {
   return {
     type: "user",
@@ -174,9 +224,12 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "workflow-assignee-guardrails-
 
 try {
   expectPass("job-position-discovered", jobPosition());
-  expectPass("line-manager", managerExpression("Applicant:Line Manager", "{{Applicant.LineManager}}"));
-  expectPass("department-manager", managerExpression("Applicant:Department:Manager", "{{Applicant.Department.Manager}}"));
+  expectPass("line-manager", applicantLineManager());
+  expectPass("department-manager", applicantDepartmentManager());
   expectPass("location-manager", managerExpression("Applicant:Location:Manager", "{{Applicant.Location.Manager}}"));
+  expectPass("workflow-variable-user", workflowVariableUser("Owner"));
+  expectPass("workflow-variable-line-manager", workflowVariableUserLineManager("Owner"));
+  expectPass("multiple-workflow-variable-assignees", [workflowVariableUser("Owner"), workflowVariableUserLineManager("Owner")]);
   expectPass("explicit-direct-user", directUser());
 
   expectCode("empty-assignee", null, "TASK_USERTASKASSIGNMENT_EMPTY");
@@ -188,7 +241,7 @@ try {
   expectCode("hardcoded-user-without-request", directUser({ explicitlyRequested: false, userAssignmentExplicitlyRequested: false }), "TASK_DIRECT_USER_REQUIRES_EXPLICIT_REQUEST");
   expectCode("malformed-manager-expression", managerExpression("Reviewer expression", "not an expression"), "TASK_MANAGER_EXPRESSION_MALFORMED");
 
-  console.log(JSON.stringify({ status: "pass", cases: 13 }, null, 2));
+  console.log(JSON.stringify({ status: "pass", cases: 16 }, null, 2));
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });
 }
