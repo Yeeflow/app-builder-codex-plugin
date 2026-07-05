@@ -438,6 +438,7 @@ function validateReverseRelatedCollectionSections(resource, context) {
     validateReverseRelatedCollectionFilter(collection, detail, context, resource);
     validateReverseRelatedSearch(section, collection, context, resource);
     validateReverseRelatedAddButton(section, collection, detail, context, resource);
+    validateReverseRelatedCollectionHasNoRowOperations(collection, detail, context, resource);
   }
 }
 
@@ -578,6 +579,47 @@ function validateReverseRelatedAddButton(section, collection, detail, context, r
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_VALUE_INVALID", "Reverse-related Add button passvalues value must be the current host item ListDataID expression.", { source: context.source, path: buttonPath, expectedField: lookupField || null }));
     }
   }
+}
+
+function validateReverseRelatedCollectionHasNoRowOperations(collection, detail, context, resource) {
+  for (const entry of flatten(collection)) {
+    const node = entry.node;
+    if (!isReverseRelatedRowOperationResidue(node)) continue;
+    context.findings.push(error(
+      "DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN",
+      "Reverse-related View Item Collections must not contain row operation/dropbar controls unless an export-proven row action structure is explicitly supported.",
+      {
+        source: context.source,
+        path: pointerForNode(resource, node),
+        detail,
+        type: node?.type || "",
+        identities: identityCandidates(node),
+      },
+    ));
+  }
+}
+
+function isReverseRelatedRowOperationResidue(node) {
+  if (!isObject(node)) return false;
+  const type = String(node.type || "").toLowerCase();
+  const ids = identityCandidates(node).join(" ");
+  if (type === "dropbar") return true;
+  if (/grid_table_col_item_op_menu|grid_table_col_item_operations|card_col_item_operations|row[_-]?operations/i.test(ids)) return true;
+  if (type === "action_button") {
+    const attrs = node.attrs || {};
+    const text = [
+      ids,
+      node.label,
+      node.title,
+      node.name,
+      attrs.operation,
+      attrs["action-type"],
+      attrs?.label?.value,
+      attrs?.text?.value,
+    ].filter(Boolean).join(" ");
+    return /edit|delete|remove|bulk|selected|row[_-]?operation|op_menu/i.test(text);
+  }
+  return false;
 }
 
 function isReverseRelatedAddButton(node) {

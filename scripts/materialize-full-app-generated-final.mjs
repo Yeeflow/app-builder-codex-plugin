@@ -1943,9 +1943,16 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
   removeDescendantControls(collectionRoot, (node) => (
     String(node?.type || "") === "search-filter"
     || isTemplateAddActionButton(node)
+    || isReverseRelatedOperationResidue(node)
   ));
   const collection = findFirstByType(collectionRoot, "collection");
   if (collection) {
+    delete collection.actions;
+    if (collection.attrs) {
+      delete collection.attrs.actions;
+      delete collection.attrs.control_action;
+      delete collection.attrs.controlActions;
+    }
     collection.reverseRelatedCollection = true;
     collection.attrs = {
       ...(collection.attrs || {}),
@@ -2072,6 +2079,29 @@ function isTemplateAddActionButton(node) {
   const actionType = String(attrs["action-type"] || attrs.actionType || attrs.operation || "").trim();
   const text = identityCandidates(node).concat([node?.label, attrs?.label?.value, attrs?.text?.value]).filter(Boolean).join(" ");
   return actionType === "5" || /\badd\b|new item|create/i.test(text);
+}
+
+function isReverseRelatedOperationResidue(node) {
+  if (!node || typeof node !== "object") return false;
+  const type = String(node.type || "").toLowerCase();
+  const ids = identityCandidates(node).join(" ");
+  if (type === "dropbar") return true;
+  if (/grid_table_col_item_op_menu|grid_table_col_item_operations|card_col_item_operations|row[_-]?operations/i.test(ids)) return true;
+  if (type === "action_button") {
+    const attrs = node.attrs || {};
+    const text = [
+      ids,
+      node.label,
+      node.title,
+      node.name,
+      attrs.operation,
+      attrs["action-type"],
+      attrs?.label?.value,
+      attrs?.text?.value,
+    ].filter(Boolean).join(" ");
+    return /edit|delete|remove|bulk|selected|operation|op_menu/i.test(text);
+  }
+  return false;
 }
 
 function buildReverseRelatedAddButton({ record, childMeta, sectionId, currentIdExpr }) {

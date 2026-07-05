@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.6`
+- Version: `0.9.7`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.6` hardens full-app generated-final preflight closure for schema-bound Collection cleanup and View Item reverse-related sections. The materializer now parses explicit lookup-target columns, materializes planned reverse-related child Collections with search/add/passvalues defaults, omits placeholder Form reports, filters invalid navigation children, and scopes Dashboard UUID duplicate checks to actual control trees while leaving Summary/Data Analytics runtime registration to their dedicated gates.
+Current release `0.9.7` hardens reverse-related View Item Collection designer safety. Generated reverse-related child Collections now preserve official-shape toolbar Search/Add behavior while pruning unproven row dropbar and row operation residue from cloned Collection templates before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.6
+Version: 0.9.7
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.2
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.7
 ```
 
 ## What Is Included

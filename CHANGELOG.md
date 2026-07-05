@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.7
+
+- Release reverse-related View Item Collection designer safety hardening.
+- Preserve official-shape toolbar Search/Add controls for reverse-related Collection sections while pruning unproven row `dropbar`, `grid_table_col_item_op_menu`, and copied edit/delete row operation residue from cloned Collection rows.
+- Add `DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN` validation and source/dist regression coverage so reverse-related View Item designer-unsafe row operations fail before signing readiness.
+
 ## 0.9.6
 
 - Release full-app generated-final preflight closure for schema-bound Collection cleanup and reverse-related View Item sections.

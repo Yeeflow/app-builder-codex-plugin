@@ -44,6 +44,18 @@ Add record:
 
 The read filter alone proves display, but it does not link newly added child records. The `passvalues` default alone links new records, but it does not restrict the displayed Collection. Both are required for a full reverse-related create/view workflow.
 
+## Designer Stability Update 2026-07-05
+
+The Departments View Item designer failure was reclassified after comparing the generated package with a normal Yeeflow `.ydl` export. The working export contains the reverse-related `collection`, toolbar `action_button`, and `search-filter`, but it does not include a row-level `dropbar` or copied row operation menu. The generated package failed because the Collection row template retained unproven source-template operations such as `grid_table_col_item_op_menu` and edit/delete row controls.
+
+Focused live fixes confirmed the boundary:
+
+- Removing toolbar Add/Search while keeping the row operation residue did not resolve the designer failure.
+- Removing the entire reverse-related Collection did resolve the designer failure.
+- Therefore Add/Search are not the root cause; copied row `dropbar` / row operations are the unsafe template residue.
+
+Generation must keep official-shape toolbar Search/Add when planned, but must prune row-level operation/dropbar controls from reverse-related Collection rows unless a separate export-proven row action pattern is explicitly supported by the App Plan.
+
 ## App Plan Requirement
 
 When a parent/detail lookup relationship should appear on a parent View Item form, the App Plan should include a Reverse-Related Collection Selection table:
@@ -72,6 +84,7 @@ When a parent/detail lookup relationship should appear on a parent View Item for
 - `DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_MISSING`
 - `DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_LOOKUP_FIELD_MISSING`
 - `DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_VALUE_INVALID`
+- `DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN`
 
 The gate is marker-scoped to avoid failing ordinary read-only related Collections. Once the generator declares a section as reverse-related, the full contract must pass.
 
