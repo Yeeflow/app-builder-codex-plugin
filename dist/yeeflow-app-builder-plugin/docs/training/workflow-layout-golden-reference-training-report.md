@@ -8,6 +8,7 @@ Train the plugin to generate readable workflow diagrams for Approval form workfl
 
 - `workflow_ref_ememo.json`
 - `workflow_ref_expense_reimbursement.json`
+- `Workflow actions layout.json`
 
 The source files were inspected read-only. Raw exports are not bundled into the plugin.
 
@@ -19,6 +20,47 @@ The source files were inspected read-only. Raw exports are not bundled into the 
 - Nodes carry top-level `position.x` and `position.y`.
 - SequenceFlow elements reference source and target node ids and may include `vertices[]` for routing.
 - Large workflows reserve enough graph area rather than placing all nodes in one small cluster.
+- Approval Assignment Task nodes require at least `Approved` and `Rejected` outgoing SequenceFlows.
+- Complete Assignment Task nodes require canonical `Completed` outcome spelling.
+- Business-field branch fan-out, such as amount thresholds, must use an `InclusiveGateway` before branching.
+- Branch targets from the same Inclusive Gateway should align on one vertical column when they represent sibling choices.
+- A shared `EndRejectEvent` should collect no more than three adjacent Approval Assignment Task rejection paths.
+- A single `EndRejectEvent` should sit vertically above or below the source task, or centered above/below a two- or three-task source group.
+- A shared `EndRejectEvent` may only collect rejected paths from Approval Assignment Tasks on the same horizontal lane. Approval Assignment Tasks on different y lanes require separate rejection endpoints.
+- Workflow diagrams should use the Workflow Designer's roughly 16:9 visible canvas. Complex workflows should use additional rows/layers instead of placing every node on one long horizontal line, and generated workflows should not exceed five vertical rows.
+- Standard forward rejected/cross-lane lines do not require explicit `vertices[]` when the spacing already prevents overlap. Backward/return lines still require vertices.
+
+## Workflow Actions Layout V2 Standard
+
+The focused workflow actions reference establishes these minimum/recommended geometry rules:
+
+| Rule | Standard |
+| --- | --- |
+| Main approval lane | Stable horizontal backbone, commonly around the same `y` value |
+| Start to first task | About 305 px |
+| Task to task | About 335 px |
+| Task to gateway | About 320 px |
+| Gateway to branch targets | About 195 px minimum |
+| Approval task reject end | Above or below by at least 110-125 px |
+| Gateway branch targets | Same `x` column within about 80 px |
+| Shared rejection endpoint | Maximum 3 approval task sources |
+| Shared rejection source lane | All sources must be on the same horizontal lane within about 40 px |
+| Designer canvas usage | Prefer roughly 16:9 visible area instead of one-row sprawl |
+| Maximum vertical rows | 5 rows/layers |
+
+The plugin validator now checks the semantic layout contract, not just visual coordinates:
+
+- `WORKFLOW_LAYOUT_APPROVAL_TASK_OUTCOME_MISSING`
+- `WORKFLOW_LAYOUT_COMPLETE_TASK_OUTCOME_MISSING`
+- `WORKFLOW_LAYOUT_COMPLETE_TASK_OUTCOME_MISSPELLED`
+- `WORKFLOW_LAYOUT_BUSINESS_BRANCH_GATEWAY_MISSING`
+- `WORKFLOW_LAYOUT_GATEWAY_BRANCH_COLUMN_MISMATCH`
+- `WORKFLOW_LAYOUT_BACKWARD_FLOW_VERTICES_MISSING`
+- `WORKFLOW_LAYOUT_END_REJECT_TOO_MANY_SOURCES`
+- `WORKFLOW_LAYOUT_END_REJECT_SOURCE_LANES_MISMATCH`
+- `WORKFLOW_LAYOUT_END_REJECT_POSITION_MISMATCH`
+- `WORKFLOW_LAYOUT_TOO_MANY_VERTICAL_ROWS`
+- `WORKFLOW_LAYOUT_SINGLE_ROW_SPRAWL`
 
 ## Plugin Changes
 
@@ -28,6 +70,10 @@ The source files were inspected read-only. Raw exports are not bundled into the 
 - Added `scripts/test-workflow-layout-golden-reference-gates.mjs`.
 - Added the workflow layout gate to `scripts/yapk-first-generation-preflight.mjs`.
 - Updated full-app materialization so generated approval workflow graphs use spaced lanes and vertex-routed rejected/cross-lane SequenceFlow paths.
+- Updated full-app materialization so generated approval workflow `EndRejectEvent` nodes are placed vertically above the approval source task group instead of being pushed to the far right.
+- Updated the workflow layout gate so standard-spaced rejected/cross-lane lines are allowed without vertices, while explicit return/backward lines still require vertices.
+- Updated the workflow layout gate so shared `EndRejectEvent` nodes can only collect rejected paths from Approval Assignment Tasks on the same horizontal lane.
+- Updated the workflow layout gate so generated diagrams fail when they exceed five vertical rows or when large workflows are collapsed into a single over-wide horizontal row instead of using the 16:9 canvas area.
 - Updated cache artifact expectations and package-validator guidance.
 
 ## Proof Boundary

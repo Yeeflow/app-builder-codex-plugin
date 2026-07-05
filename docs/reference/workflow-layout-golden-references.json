@@ -1,6 +1,6 @@
 {
-  "version": "workflow-layout-golden-references-v1",
-  "proofBoundary": "Export-proven workflow canvas layout guidance derived from two user-provided workflow JSON references. This reference validates node and sequence-flow layout readability only; it does not validate business semantics, assignee correctness, workflow execution, or runtime publishing.",
+  "version": "workflow-layout-golden-references-v2",
+  "proofBoundary": "Export-proven workflow canvas layout guidance derived from user-provided workflow JSON references and screenshots. This reference validates node placement, workflow action layout, outcome SequenceFlow shape, gateway placement, rejection endpoint grouping, and line routing readability only; it does not validate assignee correctness, workflow execution, or runtime publishing.",
   "sourceReferences": [
     {
       "id": "workflow_ref_ememo",
@@ -29,6 +29,23 @@
         "Add vertices to long cross-lane links so lines do not cut through unrelated nodes.",
         "Keep Start/End/reject outcomes visually separated from task/action clusters."
       ]
+    },
+    {
+      "id": "workflow_actions_layout",
+      "description": "Focused workflow action layout reference with Start, Approval Assignment Tasks, Complete Assignment Tasks, Inclusive Gateway amount branches, shared End with Rejection nodes, and one rejected return line using explicit vertices.",
+      "nodeCount": 14,
+      "sequenceFlowCount": 19,
+      "xRange": [-170, 1630],
+      "yRange": [-85, 330],
+      "layoutPatterns": [
+        "Use a fixed main lane around y = 40 for the approval backbone.",
+        "Use about 305-335 px horizontal spacing between Start, Assignment Tasks, Gateways, and End nodes.",
+        "Use Inclusive Gateway nodes for business-field branches such as Amount >= 5000 and Amount < 5000.",
+        "Place multiple gateway branch targets on the same x column with separated y lanes.",
+        "Approval Assignment Tasks must expose Approved and Rejected outcomes; Complete Tasks normally expose Completed only.",
+        "Use shared End with Rejection nodes for one to three adjacent approval tasks, positioned above or below the source task group center.",
+        "Do not force vertices on every rejected or cross-lane line; use vertices only for return/backward lines, overlap avoidance, node crossing, or long reroutes."
+      ]
     }
   ],
   "generatedWorkflowRules": {
@@ -41,26 +58,81 @@
       "Every non-SequenceFlow node must carry a top-level position object with numeric x/y coordinates.",
       "Generated nodes must not share identical or near-identical coordinates.",
       "Complex workflows must reserve enough canvas width and height for the number of planned nodes.",
+      "Approval Assignment Task nodes must include Approved and Rejected outcome SequenceFlows unless the workflow action is explicitly not an approval task.",
+      "Complete Assignment Task nodes must include a Completed outcome SequenceFlow.",
+      "Business-field branches must use an InclusiveGateway rather than direct condition fan-out from an Assignment Task.",
       "Rejected, cancel, and exception paths must use a separate lane from the main approval path.",
-      "Rejected and cross-lane SequenceFlow edges must use rounded routing and explicit vertices where the source and target are far apart or on different lanes.",
+      "A shared EndRejectEvent should collect at most three adjacent Approval Assignment Task Rejected flows.",
+      "A shared EndRejectEvent may only collect Rejected flows from Approval Assignment Tasks on the same horizontal lane. Assignment Tasks on different y lanes must use separate EndRejectEvent nodes.",
+      "Workflow diagrams should use the roughly 16:9 Designer canvas area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line, and generated workflows should not exceed five vertical rows.",
+      "Backward or return SequenceFlow edges must use rounded routing and explicit vertices. Standard-spaced forward rejected or cross-lane edges do not require vertices unless they overlap or cross another node.",
       "SequenceFlow source and target references must resolve to existing workflow node ids.",
       "Generated graphposition should cover the visual node bounds plus padding."
     ],
     "recommendedSpacing": {
-      "mainColumnGap": 300,
+      "mainColumnGap": 335,
       "minimumNearCollisionDeltaX": 40,
       "minimumNearCollisionDeltaY": 40,
-      "mainLaneY": 220,
-      "actionLaneY": 360,
-      "rejectLaneY": 520,
-      "crossLaneVertexRequiredDeltaY": 120,
-      "longFlowVertexRequiredDeltaX": 520
+      "minimumForwardFlowDeltaX": 180,
+      "minimumTaskColumnDeltaX": 305,
+      "mainLaneY": 40,
+      "startToFirstTaskGap": 305,
+      "taskToTaskGap": 335,
+      "taskToGatewayGap": 320,
+      "gatewayToBranchGap": 195,
+      "taskToEndGap": 335,
+      "rejectUpGap": 125,
+      "rejectDownGap": 135,
+      "branchNearGap": 115,
+      "laneGap": 155,
+      "crossLaneVertexRequiredDeltaY": 220,
+      "longFlowVertexRequiredDeltaX": 700,
+      "maximumRejectedSourcesPerEnd": 3,
+      "endRejectCenterToleranceX": 80,
+      "endRejectVerticalSeparationMin": 110,
+      "endRejectSharedLaneToleranceY": 40,
+      "gatewayBranchColumnToleranceX": 80,
+      "workflowRowToleranceY": 60,
+      "targetCanvasAspectRatio": 1.7778,
+      "singleRowSprawlNodeThreshold": 10,
+      "singleRowSprawlAspectRatio": 2.4,
+      "maximumWorkflowRows": 5
     },
     "lineStyle": {
       "default": "rounded",
       "allowed": ["rounded", "normal"],
-      "rejectedPath": "rounded with vertices",
-      "crossLanePath": "rounded with vertices"
+      "rejectedPath": "rounded; vertices required only for backward/return, overlap, node crossing, or long reroute",
+      "crossLanePath": "rounded; vertices required only when spacing cannot prevent overlap"
+    },
+    "assignmentTaskOutcomeRules": {
+      "approvalTask": {
+        "stencil": "MultiAssignmentTask",
+        "tasktype": "empty or not complete",
+        "requiredOutcomes": ["Approved", "Rejected"]
+      },
+      "completeTask": {
+        "stencil": "MultiAssignmentTask",
+        "tasktype": "complete",
+        "requiredOutcomes": ["Completed"]
+      }
+    },
+    "gatewayRules": {
+      "businessConditionBranchesRequireInclusiveGateway": true,
+      "branchTargetsShareColumn": true,
+      "branchTargetColumnToleranceX": 80
+    },
+    "endRejectRules": {
+      "maximumRejectedSourcesPerEnd": 3,
+      "oneSourcePlacement": "align x with source task and place above or below by at least rejectUpGap/rejectDownGap",
+      "twoOrThreeSourcePlacement": "align x near the source task group center and place above or below the group by at least endRejectVerticalSeparationMin",
+      "sharedEndRejectLaneRule": "all approval-task rejected sources connected to the same EndRejectEvent must be on the same horizontal lane within endRejectSharedLaneToleranceY",
+      "splitWhenMoreThanThreeSources": true
+    },
+    "canvasRules": {
+      "targetAspectRatio": "16:9",
+      "maximumWorkflowRows": 5,
+      "useAdditionalRowsForLargeWorkflows": true,
+      "avoidSingleHorizontalSprawl": true
     }
   }
 }

@@ -85,7 +85,25 @@ function readReference(referencePath, findings) {
     const reference = JSON.parse(fs.readFileSync(referencePath, "utf8").replace(/^\uFEFF/, ""));
     const rules = reference.generatedWorkflowRules || {};
     const spacing = rules.recommendedSpacing || {};
-    for (const key of ["mainColumnGap", "minimumNearCollisionDeltaX", "minimumNearCollisionDeltaY", "crossLaneVertexRequiredDeltaY", "longFlowVertexRequiredDeltaX"]) {
+    for (const key of [
+      "mainColumnGap",
+      "minimumNearCollisionDeltaX",
+      "minimumNearCollisionDeltaY",
+      "minimumForwardFlowDeltaX",
+      "minimumTaskColumnDeltaX",
+      "crossLaneVertexRequiredDeltaY",
+      "longFlowVertexRequiredDeltaX",
+      "maximumRejectedSourcesPerEnd",
+      "endRejectCenterToleranceX",
+      "endRejectVerticalSeparationMin",
+      "endRejectSharedLaneToleranceY",
+      "gatewayBranchColumnToleranceX",
+      "workflowRowToleranceY",
+      "targetCanvasAspectRatio",
+      "singleRowSprawlNodeThreshold",
+      "singleRowSprawlAspectRatio",
+      "maximumWorkflowRows",
+    ]) {
       if (!Number.isFinite(Number(spacing[key]))) {
         findings.push(issue("WORKFLOW_LAYOUT_REFERENCE_RULE_MISSING", "Workflow layout reference is missing a required numeric spacing rule.", { reference: referencePath, key }));
       }
@@ -107,8 +125,23 @@ function defaultRules() {
         mainColumnGap: 300,
         minimumNearCollisionDeltaX: 40,
         minimumNearCollisionDeltaY: 40,
+        minimumForwardFlowDeltaX: 180,
+        minimumTaskColumnDeltaX: 305,
+        mainLaneY: 40,
+        rejectUpGap: 125,
+        rejectDownGap: 135,
         crossLaneVertexRequiredDeltaY: 120,
         longFlowVertexRequiredDeltaX: 520,
+        maximumRejectedSourcesPerEnd: 3,
+        endRejectCenterToleranceX: 80,
+        endRejectVerticalSeparationMin: 110,
+        endRejectSharedLaneToleranceY: 40,
+        gatewayBranchColumnToleranceX: 80,
+        workflowRowToleranceY: 60,
+        targetCanvasAspectRatio: 1.7778,
+        singleRowSprawlNodeThreshold: 10,
+        singleRowSprawlAspectRatio: 2.4,
+        maximumWorkflowRows: 5,
       },
       lineStyle: {
         allowed: ["rounded", "normal"],
@@ -199,7 +232,9 @@ function validateOneWorkflow(resource, reference, findings) {
 
   validateNodeSpacing(nodes, spacing, resource, findings);
   validateGraphCompression(nodes, spacing, resource, findings);
+  validateCanvasRows(nodes, spacing, resource, findings);
   validateGraphPosition(resource, nodes, findings);
+  validateWorkflowSemantics(resource, nodes, flows, spacing, findings);
 
   for (const flow of flows) {
     const sourceId = refId(flow.shape.source);
@@ -237,28 +272,29 @@ function validateOneWorkflow(resource, reference, findings) {
     }
 
     const vertices = asArray(flow.shape.vertices);
-    const dx = Math.abs((sourceNode?.position?.x || 0) - (targetNode?.position?.x || 0));
+    const signedDx = (targetNode?.position?.x || 0) - (sourceNode?.position?.x || 0);
+    const dx = Math.abs(signedDx);
     const dy = Math.abs((sourceNode?.position?.y || 0) - (targetNode?.position?.y || 0));
-    const rejected = isRejectedFlow(flow.shape) || stencilId(targetNode?.shape) === "EndRejectEvent";
-    if (rejected && nodes.length >= 3 && !vertices.length) {
-      findings.push(issue("WORKFLOW_LAYOUT_REJECTED_FLOW_VERTICES_MISSING", "Rejected/cancel/exception paths must use explicit vertices so the line is visually separated from the main path.", {
+    const targetStencil = stencilId(targetNode?.shape);
+    if (sourceNode?.position && targetNode?.position && signedDx > 0 && nodes.length >= 5 && targetStencil !== "EndRejectEvent" && dx < Number(spacing.minimumForwardFlowDeltaX)) {
+      findings.push(issue("WORKFLOW_LAYOUT_FORWARD_FLOW_TOO_CLOSE", "Forward SequenceFlow edges should reserve enough horizontal space between workflow action nodes.", {
         source: resource.source,
         workflowName: resource.workflowName,
-        path: `${flowPath}.vertices`,
-        flowId: flow.id,
-        sourceId,
-        targetId,
-      }));
-    }
-    if (!rejected && nodes.length >= 5 && dy >= Number(spacing.crossLaneVertexRequiredDeltaY) && dx >= 120 && !vertices.length) {
-      findings.push(issue("WORKFLOW_LAYOUT_CROSS_LANE_FLOW_VERTICES_MISSING", "Cross-lane SequenceFlow edges in complex workflows must include vertices to avoid diagonal line overlap.", {
-        source: resource.source,
-        workflowName: resource.workflowName,
-        path: `${flowPath}.vertices`,
+        path: flowPath,
         flowId: flow.id,
         sourceId,
         targetId,
         delta: { x: dx, y: dy },
+      }));
+    }
+    if (sourceNode?.position && targetNode?.position && signedDx < 0 && nodes.length >= 3 && targetStencil !== "EndRejectEvent" && (isReturnFlow(flow.shape) || dy < Number(spacing.laneGap || 155)) && !vertices.length) {
+      findings.push(issue("WORKFLOW_LAYOUT_BACKWARD_FLOW_VERTICES_MISSING", "Backward or return SequenceFlow edges must use explicit vertices so the return path does not cut through the main workflow lane.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.vertices`,
+        flowId: flow.id,
+        sourceId,
+        targetId,
       }));
     }
     if (nodes.length >= 8 && dx >= Number(spacing.longFlowVertexRequiredDeltaX) && dy >= 60 && !vertices.length) {
@@ -270,6 +306,145 @@ function validateOneWorkflow(resource, reference, findings) {
         sourceId,
         targetId,
         delta: { x: dx, y: dy },
+      }));
+    }
+  }
+}
+
+function validateWorkflowSemantics(resource, nodes, flows, spacing, findings) {
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const outgoingBySource = new Map();
+  const incomingByTarget = new Map();
+  for (const flow of flows) {
+    const sourceId = refId(flow.shape.source);
+    const targetId = refId(flow.shape.target);
+    if (!outgoingBySource.has(sourceId)) outgoingBySource.set(sourceId, []);
+    if (!incomingByTarget.has(targetId)) incomingByTarget.set(targetId, []);
+    outgoingBySource.get(sourceId).push(flow);
+    incomingByTarget.get(targetId).push(flow);
+  }
+
+  for (const node of nodes) {
+    if (!isAssignmentTask(node)) continue;
+    const outgoing = outgoingBySource.get(node.id) || [];
+    const outcomes = new Set(outgoing.map((flow) => normalizeOutcome(extractTaskOutcome(flow.shape))).filter(Boolean));
+    if (isCompleteAssignmentTask(node)) {
+      const misspelled = outgoing.find((flow) => String(extractTaskOutcome(flow.shape) || "").trim().toLowerCase().replace(/[^a-z]/g, "") === "comepleted");
+      if (misspelled) {
+        findings.push(issue("WORKFLOW_LAYOUT_COMPLETE_TASK_OUTCOME_MISSPELLED", "Complete Assignment Task outcome must use the canonical Completed spelling.", {
+          source: resource.source,
+          workflowName: resource.workflowName,
+          path: `$.childshapes[${misspelled.index}]`,
+          nodeId: node.id,
+          flowId: misspelled.id,
+          invalidOutcome: extractTaskOutcome(misspelled.shape),
+          requiredOutcome: "Completed",
+        }));
+      }
+      if (!outcomes.has("completed")) {
+        findings.push(issue("WORKFLOW_LAYOUT_COMPLETE_TASK_OUTCOME_MISSING", "Complete Assignment Task nodes must expose a Completed outcome SequenceFlow.", {
+          source: resource.source,
+          workflowName: resource.workflowName,
+          path: `$.childshapes[${node.index}]`,
+          nodeId: node.id,
+          nodeName: node.shape.properties?.name || "",
+          outcomes: [...outcomes],
+        }));
+      }
+      continue;
+    }
+
+    for (const requiredOutcome of ["approved", "rejected"]) {
+      if (!outcomes.has(requiredOutcome)) {
+        findings.push(issue("WORKFLOW_LAYOUT_APPROVAL_TASK_OUTCOME_MISSING", "Approval Assignment Task nodes must expose both Approved and Rejected outcome SequenceFlows.", {
+          source: resource.source,
+          workflowName: resource.workflowName,
+          path: `$.childshapes[${node.index}]`,
+          nodeId: node.id,
+          nodeName: node.shape.properties?.name || "",
+          missingOutcome: titleCase(requiredOutcome),
+          outcomes: [...outcomes],
+        }));
+      }
+    }
+
+    const businessBranches = outgoing.filter((flow) => isBusinessConditionFlow(flow.shape));
+    if (businessBranches.length > 1) {
+      findings.push(issue("WORKFLOW_LAYOUT_BUSINESS_BRANCH_GATEWAY_MISSING", "Business-field branch fan-out must be modeled with an InclusiveGateway instead of direct condition fan-out from an Assignment Task.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `$.childshapes[${node.index}]`,
+        nodeId: node.id,
+        branchCount: businessBranches.length,
+      }));
+    }
+  }
+
+  for (const gateway of nodes.filter((node) => stencilId(node.shape) === "InclusiveGateway")) {
+    const outgoing = (outgoingBySource.get(gateway.id) || []).filter((flow) => isBusinessConditionFlow(flow.shape));
+    if (outgoing.length < 2) continue;
+    const targetNodes = outgoing.map((flow) => nodeById.get(refId(flow.shape.target))).filter((target) => target?.position);
+    if (targetNodes.length < 2) continue;
+    const xs = targetNodes.map((target) => target.position.x);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    if (maxX - minX > Number(spacing.gatewayBranchColumnToleranceX)) {
+      findings.push(issue("WORKFLOW_LAYOUT_GATEWAY_BRANCH_COLUMN_MISMATCH", "InclusiveGateway branch targets should share the same vertical column when they represent parallel condition choices.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `$.childshapes[${gateway.index}]`,
+        nodeId: gateway.id,
+        targetColumns: xs,
+        tolerance: Number(spacing.gatewayBranchColumnToleranceX),
+      }));
+    }
+  }
+
+  for (const endReject of nodes.filter((node) => stencilId(node.shape) === "EndRejectEvent")) {
+    const incomingRejected = (incomingByTarget.get(endReject.id) || [])
+      .filter((flow) => isRejectedFlow(flow.shape))
+      .map((flow) => nodeById.get(refId(flow.shape.source)))
+      .filter((sourceNode) => sourceNode?.position && isAssignmentTask(sourceNode) && !isCompleteAssignmentTask(sourceNode));
+    if (!incomingRejected.length || !endReject.position) continue;
+    const maxSources = Number(spacing.maximumRejectedSourcesPerEnd);
+    if (incomingRejected.length > maxSources) {
+      findings.push(issue("WORKFLOW_LAYOUT_END_REJECT_TOO_MANY_SOURCES", "A shared End with Rejection node should collect at most three adjacent Approval Assignment Task rejected paths.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `$.childshapes[${endReject.index}]`,
+        nodeId: endReject.id,
+        incomingRejectedSources: incomingRejected.map((sourceNode) => sourceNode.id),
+        maximum: maxSources,
+      }));
+    }
+    const minX = Math.min(...incomingRejected.map((sourceNode) => sourceNode.position.x));
+    const maxX = Math.max(...incomingRejected.map((sourceNode) => sourceNode.position.x));
+    const centerX = (minX + maxX) / 2;
+    const minY = Math.min(...incomingRejected.map((sourceNode) => sourceNode.position.y));
+    const maxY = Math.max(...incomingRejected.map((sourceNode) => sourceNode.position.y));
+    const sourceYSpan = maxY - minY;
+    if (sourceYSpan > Number(spacing.endRejectSharedLaneToleranceY)) {
+      findings.push(issue("WORKFLOW_LAYOUT_END_REJECT_SOURCE_LANES_MISMATCH", "A shared End with Rejection node may only collect rejected paths from Approval Assignment Tasks on the same horizontal lane.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `$.childshapes[${endReject.index}]`,
+        nodeId: endReject.id,
+        incomingRejectedSources: incomingRejected.map((sourceNode) => ({ id: sourceNode.id, y: sourceNode.position.y })),
+        tolerance: Number(spacing.endRejectSharedLaneToleranceY),
+      }));
+    }
+    const above = endReject.position.y < minY;
+    const below = endReject.position.y > maxY;
+    const verticalSeparation = above ? minY - endReject.position.y : below ? endReject.position.y - maxY : 0;
+    if (Math.abs(endReject.position.x - centerX) > Number(spacing.endRejectCenterToleranceX) || verticalSeparation < Number(spacing.endRejectVerticalSeparationMin)) {
+      findings.push(issue("WORKFLOW_LAYOUT_END_REJECT_POSITION_MISMATCH", "End with Rejection nodes must be vertically above or below their source approval task group and centered on that group.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `$.childshapes[${endReject.index}].position`,
+        nodeId: endReject.id,
+        sourceGroupCenterX: centerX,
+        endRejectPosition: endReject.position,
+        verticalSeparation,
       }));
     }
   }
@@ -334,6 +509,57 @@ function validateGraphCompression(nodes, spacing, resource, findings) {
   }
 }
 
+function validateCanvasRows(nodes, spacing, resource, findings) {
+  const positioned = nodes.filter((node) => node.position);
+  if (positioned.length < 5) return;
+  const xs = positioned.map((node) => node.position.x);
+  const ys = positioned.map((node) => node.position.y);
+  const width = Math.max(...xs) - Math.min(...xs);
+  const height = Math.max(...ys) - Math.min(...ys);
+  const rowTolerance = Number(spacing.workflowRowToleranceY);
+  const rows = clusterRows(positioned, rowTolerance);
+  const maximumRows = Number(spacing.maximumWorkflowRows);
+  if (rows.length > maximumRows) {
+    findings.push(issue("WORKFLOW_LAYOUT_TOO_MANY_VERTICAL_ROWS", "Generated workflow diagrams should use at most five readable vertical rows within the Designer canvas.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      nodeCount: positioned.length,
+      rowCount: rows.length,
+      maximumRows,
+      rowYValues: rows.map((row) => Math.round(row.y)),
+    }));
+  }
+  const sprawlThreshold = Number(spacing.singleRowSprawlNodeThreshold);
+  const maxAspect = Number(spacing.singleRowSprawlAspectRatio);
+  const aspect = width / Math.max(height, 1);
+  if (positioned.length >= sprawlThreshold && rows.length <= 1 && aspect > maxAspect) {
+    findings.push(issue("WORKFLOW_LAYOUT_SINGLE_ROW_SPRAWL", "Large workflows should use the roughly 16:9 Designer canvas area by adding vertical rows instead of placing every node on one long horizontal line.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      nodeCount: positioned.length,
+      rowCount: rows.length,
+      bounds: { width, height },
+      aspectRatio: Number(aspect.toFixed(2)),
+      targetAspectRatio: Number(spacing.targetCanvasAspectRatio),
+      maximumSingleRowAspectRatio: maxAspect,
+    }));
+  }
+}
+
+function clusterRows(positioned, tolerance) {
+  const rows = [];
+  for (const node of [...positioned].sort((left, right) => left.position.y - right.position.y)) {
+    const existing = rows.find((row) => Math.abs(row.y - node.position.y) <= tolerance);
+    if (existing) {
+      existing.nodes.push(node);
+      existing.y = existing.nodes.reduce((sum, item) => sum + item.position.y, 0) / existing.nodes.length;
+    } else {
+      rows.push({ y: node.position.y, nodes: [node] });
+    }
+  }
+  return rows;
+}
+
 function validateGraphPosition(resource, nodes, findings) {
   const graph = resource.def?.graphposition;
   if (!isObject(graph) || nodes.length < 2) return;
@@ -396,6 +622,14 @@ function nodePosition(shape) {
   return null;
 }
 
+function isAssignmentTask(node) {
+  return stencilId(node?.shape) === "MultiAssignmentTask";
+}
+
+function isCompleteAssignmentTask(node) {
+  return String(node?.shape?.properties?.tasktype || "").trim().toLowerCase() === "complete";
+}
+
 function isRejectedFlow(flow) {
   const text = JSON.stringify({
     name: flow?.properties?.name || "",
@@ -403,6 +637,51 @@ function isRejectedFlow(flow) {
     conditioninfo: flow?.properties?.conditioninfo || [],
   }).toLowerCase();
   return /rejected|reject|cancel|deny|decline|revoke|exception/.test(text);
+}
+
+function isReturnFlow(flow) {
+  const text = JSON.stringify({
+    name: flow?.properties?.name || "",
+    documentation: flow?.properties?.documentation || "",
+    conditioninfo: flow?.properties?.conditioninfo || [],
+  }).toLowerCase();
+  return /return|resubmit|rework|send back|back to/.test(text);
+}
+
+function extractTaskOutcome(flow) {
+  const text = JSON.stringify({
+    name: flow?.properties?.name || "",
+    documentation: flow?.properties?.documentation || "",
+    conditioninfo: flow?.properties?.conditioninfo || [],
+  });
+  const taskOutcome = text.match(/Task outcome:([^"<>]+)/i);
+  if (taskOutcome?.[1]) return taskOutcome[1].trim();
+  const dataOutcome = text.match(/data=\\?"(Approved|Rejected|Completed|comepleted)\\?"/i);
+  if (dataOutcome?.[1]) return dataOutcome[1].trim();
+  const plainOutcome = text.match(/\b(Approved|Rejected|Completed|comepleted)\b/i);
+  return plainOutcome?.[1]?.trim() || "";
+}
+
+function normalizeOutcome(value) {
+  const normalized = String(value || "").trim().toLowerCase().replace(/[^a-z]/g, "");
+  if (normalized === "comepleted") return "completed";
+  return normalized;
+}
+
+function isBusinessConditionFlow(flow) {
+  const outcome = normalizeOutcome(extractTaskOutcome(flow));
+  if (["approved", "rejected", "completed"].includes(outcome)) return false;
+  const text = JSON.stringify({
+    name: flow?.properties?.name || "",
+    documentation: flow?.properties?.documentation || "",
+    conditioninfo: flow?.properties?.conditioninfo || [],
+  });
+  return /(?:n\.|s\.|d\.)[<>=!]|[<>]=?|Amount|Total|Budget|Cost|Price|Score|Risk|valueType\\?":\\?"number|valueType":"number/i.test(text);
+}
+
+function titleCase(value) {
+  const text = String(value || "");
+  return text ? text.charAt(0).toUpperCase() + text.slice(1).toLowerCase() : "";
 }
 
 function stencilId(shape) {

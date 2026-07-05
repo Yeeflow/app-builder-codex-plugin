@@ -6005,21 +6005,28 @@ function refId(ref) {
 
 function workflowLayoutForSteps(workflowSteps) {
   const mainLaneY = 220;
-  const actionLaneY = 360;
-  const rejectLaneY = 520;
+  const actionLaneY = 375;
+  const rejectUpGap = 125;
   const startX = 100;
   const firstStepX = 420;
-  const columnGap = 300;
+  const columnGap = 335;
   const stepPositions = workflowSteps.map((step, index) => ({
     x: firstStepX + index * columnGap,
     y: step.nodeType === "ContentList" ? actionLaneY : mainLaneY,
   }));
   const endX = firstStepX + Math.max(1, workflowSteps.length) * columnGap;
+  const approvalStepPositions = stepPositions.filter((_, index) => {
+    const nodeType = workflowSteps[index]?.nodeType || "";
+    return nodeType !== "ContentList" && nodeType !== "StartNoneEvent" && nodeType !== "EndNoneEvent" && nodeType !== "EndRejectEvent" && nodeType !== "SequenceFlow";
+  });
+  const rejectCenterX = approvalStepPositions.length
+    ? (Math.min(...approvalStepPositions.map((position) => position.x)) + Math.max(...approvalStepPositions.map((position) => position.x))) / 2
+    : firstStepX;
   return {
     start: { x: startX, y: mainLaneY },
     stepPositions,
     end: { x: endX, y: mainLaneY },
-    rejectEnd: { x: endX, y: rejectLaneY },
+    rejectEnd: { x: rejectCenterX, y: mainLaneY - rejectUpGap },
   };
 }
 
