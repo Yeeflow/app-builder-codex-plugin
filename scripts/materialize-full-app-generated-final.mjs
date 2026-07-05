@@ -1934,13 +1934,17 @@ function appendReverseRelatedCollectionSections(resource, { planDemand, listMeta
       detailLayoutId: childMeta.detailLayoutId || layoutId || "",
       index,
     });
-    if (section) contentRoot.children.push(section);
+    if (section) {
+      contentRoot.children.push(section);
+      addDataListFormFilterVar(resource, section?.attrs?.reverseRelated?.searchFilterVar);
+    }
   }
 }
 
 function buildReverseRelatedCollectionSection({ record, childMeta, hostListName, formName, rootListSetId, detailLayoutId, index }) {
   const sectionId = `${slugify(formName)}_${slugify(record.childList)}_reverse_related_section_${index + 1}`;
-  const binding = `filter_${slugify(record.childList)}_${index + 1}`.replace(/-/g, "_");
+  const searchFilterVar = `filter_${slugify(record.childList)}_${index + 1}`.replace(/-/g, "_");
+  const binding = `__filter_${searchFilterVar}`;
   const currentIdExpr = currentHostListDataIdExpression();
   const lookupField = resolveFieldSpec(childMeta, record.childLookupField)?.fieldName || record.childLookupField;
   const displayFields = fieldsForDynamicControls(childMeta).slice(0, 6);
@@ -1993,6 +1997,8 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
         childLookupField: lookupField,
         childLookupFieldResolved: lookupField,
         childLookupFieldPlanned: record.childLookupField,
+        searchFilterVar,
+        searchFilterBinding: binding,
         allowAdd: !/^no|false|not/i.test(record.addRecord || ""),
       },
       style: {
@@ -2184,7 +2190,7 @@ function configureReverseRelatedCollectionRuntime(wrapper, { record, childMeta, 
       }],
       fulltext: [{
         fields: searchFields.length ? searchFields : [primaryFieldName(childMeta)],
-        value: [{ exprType: "variable", valueType: "string", id: `__filter_${binding}`, type: "expr", name: binding }],
+        value: [{ exprType: "variable", valueType: "string", id: binding, type: "expr", name: searchFilterNameFromBinding(binding) }],
       }],
       link: "default",
     },
@@ -2357,8 +2363,30 @@ function buildReverseRelatedAddButton({ record, childMeta, sectionId, currentIdE
       button: {
         normal: { border: { type: "0" }, c: "var(--c--background)", bg: "var(--c--primary)" },
       },
+      common: {
+        positioning: {
+          widthtype: [null, "2"],
+        },
+        container: {
+          size: [null, "grow", "none"],
+        },
+      },
     },
   };
+}
+
+function addDataListFormFilterVar(resource, filterVarId) {
+  const id = String(filterVarId || "").trim();
+  if (!id) return;
+  resource.filterVars = Array.isArray(resource.filterVars) ? resource.filterVars : [];
+  if (resource.filterVars.some((item) => String(item?.id || "").trim() === id)) return;
+  resource.filterVars.push({ id, idx: crypto.randomUUID() });
+}
+
+function searchFilterNameFromBinding(binding) {
+  const text = String(binding || "").trim();
+  if (text.startsWith("__filter_")) return text.slice("__filter_".length);
+  return text;
 }
 
 function currentHostListDataIdExpression() {
