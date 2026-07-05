@@ -379,59 +379,101 @@ function reverseRelatedSection(options = {}) {
             nv_label: "section_content_area",
             attrs: { style: { gap: [null, "--sp--s200"] } },
             children: [
-              {
-                type: "container",
-                id: "related_doctor_profiles_collection_wrapper",
-                nv_label: "related_doctor_profiles_collection_wrapper",
-                children: [
-                  {
-                    type: "container",
-                    id: "grid_table_col_caption",
-                    nv_label: "grid_table_col_caption",
-                    children: [
-                      {
-                        type: "container",
-                        id: "grid_table_col_title_wrapper",
-                        nv_label: "grid_table_col_title_wrapper",
-                        children: [
-                          { type: "heading", id: "grid_table_col_title", nv_label: "grid_table_col_title", attrs: { headc: { title: { value: "Doctors in this Specialty" } }, heads: { ty: [null, "l-medium"] } } },
-                        ],
-                      },
-                      {
-                        type: "container",
-                        id: "grid_table_col_operations",
-                        nv_label: "grid_table_col_operations",
-                        children: [
-                          {
-                            type: "container",
-                            id: "op_normal",
-                            nv_label: "op_normal",
-                            children: [
-                              { type: "search-filter", id: "doctor_profile_search", label: "Search items", binding: searchBinding, attrs: { placeholder: "Search doctors" } },
-                              addButton,
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                  {
-                    type: "container",
-                    id: "grid_table_col_content",
-                    nv_label: "grid_table_col_content",
-                    children: [
-                      { type: "flex_grid", id: "grid_table_col_header", nv_label: "grid_table_col_header", children: [] },
-                      collection,
-                    ],
-                  },
-                ],
-              },
+              reverseRelatedGoldenCollectionWrapper({ options, collection, addButton, searchBinding }),
             ],
           },
         ],
       },
     ],
   };
+}
+
+function reverseRelatedGoldenCollectionWrapper({ options = {}, collection, addButton, searchBinding }) {
+  const template = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/collection-control-grid-table.template.json"), "utf8"));
+  const wrapper = clone(template.templateResource.rootContainer);
+  wrapper.collectionTemplateId = "collection_control_grid_table";
+  wrapper.derivedFromCollectionTemplate = "collection_control_grid_table";
+  setHeadingValue(find(wrapper, "grid_table_col_title"), "Doctors in this Specialty");
+  const opNormal = find(wrapper, "op_normal");
+  if (opNormal) {
+    opNormal.children = [
+      { type: "search-filter", id: "doctor_profile_search", label: "Search items", binding: searchBinding, attrs: { placeholder: "Search doctors" } },
+      addButton,
+    ];
+  }
+  const templateCollection = find(wrapper, "grid_table_col_body");
+  if (templateCollection) {
+    templateCollection.collectionTemplateId = "collection_control_grid_table";
+    templateCollection.derivedFromCollectionTemplate = "collection_control_grid_table";
+    templateCollection.attrs = clone(collection.attrs);
+    templateCollection.children = [reverseRelatedGoldenRowGrid({ options })];
+  }
+  const header = find(wrapper, "grid_table_col_header");
+  if (header) header.children = reverseRelatedGoldenHeaderCells();
+  return wrapper;
+}
+
+function reverseRelatedGoldenHeaderCells() {
+  const labels = ["Title", "Employee Number", "Department", "Specialty", "Employment Status", "Credential Status"];
+  return labels.map((label, index) => ({
+    type: "container",
+    id: `header_${index + 1}`,
+    nv_label: index === 0 ? "grid_table_col_header_title_column" : "grid_table_col_header_column",
+    children: [
+      { type: "heading", id: `header_text_${index + 1}`, nv_label: "grid_table_col_header_text", attrs: { headc: { title: { value: label } } } },
+    ],
+  }));
+}
+
+function reverseRelatedGoldenRowGrid({ options = {} } = {}) {
+  const fields = ["Title", "Text1", "Text3", "Text4", "Text5", "Text6"];
+  return {
+    type: "flex_grid",
+    id: "doctor_profile_row",
+    nv_label: "grid_col_item",
+    children: fields.map((field, index) => ({
+      type: "container",
+      id: `doctor_profile_col_${index + 1}`,
+      nv_label: index === 0 ? "grid_table_col_item_title_column" : "grid_table_col_item_column",
+      children: [
+        {
+          type: "dynamic-field",
+          id: `doctor_profile_field_${index + 1}`,
+          nv_label: index === 0 ? "doctor_profile_title" : `doctor_profile_field_${index + 1}`,
+          attrs: {
+            source: options.badItemSource ? "1" : "3",
+            "obj-f": field,
+            ...(options.extraItemBindings ? { field, data: { field } } : {}),
+          },
+        },
+        ...(options.includeDropbar && index === 0 ? [{
+          type: "dropbar",
+          id: "grid_table_col_item_op_menu",
+          nv_label: "grid_table_col_item_op_menu",
+          attrs: { button: { before_icon: "fa-regular fa-ellipsis" } },
+          children: [
+            {
+              type: "container",
+              id: "grid_table_col_item_op_menu_panel",
+              nv_label: "grid_table_col_item_op_menu_panel",
+              children: [
+                { type: "action_button", id: "btn_edit_item", nv_label: "btn_edit_item", label: "Edit item", attrs: { operation: "edit" } },
+              ],
+            },
+          ],
+        }] : []),
+      ],
+    })),
+  };
+}
+
+function setHeadingValue(node, text) {
+  if (!node) return;
+  node.title = text;
+  node.name = text;
+  node.attrs = node.attrs || {};
+  node.attrs.headc = node.attrs.headc || {};
+  node.attrs.headc.title = { ...(node.attrs.headc.title || {}), value: text };
 }
 
 function listDataIdExpr(name = "List Fields:Id") {

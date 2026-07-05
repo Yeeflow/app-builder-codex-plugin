@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.10
+
+- Release reverse-related View Item Collection grid-table golden reference fidelity.
+- Materialize reverse-related child Collections by cloning the full `collection_control_grid_table` `grid_table_col_wrapper` before remapping title, toolbar Search/Add, lookup filters, fulltext, header columns, and item-context fields.
+- Preserve golden-reference Collection style contracts while still pruning unproven row operation/dropbar residue from reverse-related row templates.
+- Add hard gates so shallow hand-built grid-like wrappers without `collection_control_grid_table` provenance fail before signing readiness.
+- Extend the reverse-related Collection training report and source/dist regression coverage for the 0.9.9 styling regression.
+
 ## 0.9.9
 
 - Release reverse-related View Item Collection official YDL shape hardening.

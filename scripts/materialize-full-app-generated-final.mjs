@@ -2089,183 +2089,121 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
 }
 
 function buildOfficialReverseRelatedCollectionWrapper({ sectionId, record, childMeta, rootListSetId, lookupField, currentIdExpr, binding, searchFields, displayFields, sectionTitle, operationsChildren }) {
-  return {
-    id: crypto.randomUUID(),
-    type: "container",
-    label: "Container",
-    name: sectionTitle,
-    title: sectionTitle,
-    nv_label: `related_${slugify(record.childList)}_${slugify(lookupField)}_collection_wrapper`.replace(/-/g, "_"),
-    attrs: {
-      style: {
-        direction: [null, "column"],
-        gap: [null, "--sp--s150"],
-        justify_content: [null, "flex-start"],
-        align_items: [null, "stretch"],
-      },
+  const template = loadCollectionTemplate("collection_control_grid_table");
+  const wrapper = clone(template.templateResource?.rootContainer || template.rootContainer || template);
+  reinstantiateTemplateUuidValues(wrapper);
+  wrapper.name = sectionTitle;
+  wrapper.title = sectionTitle;
+  wrapper.collectionTemplateId = "collection_control_grid_table";
+  wrapper.derivedFromCollectionTemplate = "collection_control_grid_table";
+  wrapper.reverseRelatedCollectionWrapper = true;
+  wrapper.attrs = {
+    ...(wrapper.attrs || {}),
+    reverseRelatedCollectionWrapper: true,
+  };
+
+  removeDescendantControls(wrapper, isReverseRelatedOperationResidue);
+  setTitleText(wrapper, sectionTitle);
+  configureReverseRelatedOperations(wrapper, operationsChildren);
+  configureReverseRelatedCollectionRuntime(wrapper, {
+    record,
+    childMeta,
+    rootListSetId,
+    lookupField,
+    currentIdExpr,
+    binding,
+    searchFields,
+  });
+  configureReverseRelatedGridColumns(wrapper, displayFields);
+  rewriteCollectionTemplateRuntimeRefs(wrapper, {
+    rootListSetId,
+    listId: childMeta.listId,
+    detailLayoutId: "",
+  });
+  enforceCollectionTemplateStyleContracts(wrapper);
+  return wrapper;
+}
+
+function configureReverseRelatedOperations(wrapper, operationsChildren) {
+  const opNormal = findFirstByIdentity(wrapper, "op_normal");
+  if (opNormal) {
+    opNormal.children = operationsChildren;
+  }
+}
+
+function configureReverseRelatedCollectionRuntime(wrapper, { record, childMeta, rootListSetId, lookupField, currentIdExpr, binding, searchFields }) {
+  const collection = findFirstByType(wrapper, "collection");
+  if (!collection) return;
+  collection.collectionTemplateId = "collection_control_grid_table";
+  collection.derivedFromCollectionTemplate = "collection_control_grid_table";
+  collection.reverseRelatedCollection = true;
+  collection.attrs = {
+    data: {
+      list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList, ListSetID: stringId(rootListSetId) },
+      filter: [{
+        key: crypto.randomUUID(),
+        pre: "and",
+        left: lookupField,
+        op: "0",
+        right: [clone(currentIdExpr)],
+        showCus: false,
+      }],
+      fulltext: [{
+        fields: searchFields.length ? searchFields : [primaryFieldName(childMeta)],
+        value: [{ exprType: "variable", valueType: "string", id: `__filter_${binding}`, type: "expr", name: binding }],
+      }],
+      link: "default",
     },
-    children: [
-      {
-        id: crypto.randomUUID(),
-        type: "container",
-        label: "Container",
-        nv_label: "grid_table_col_caption",
-        attrs: {
-          style: {
-            direction: [null, "row"],
-            gap: [null, "--sp--s200"],
-            justify_content: [null, "space-between"],
-            align_items: [null, "center"],
-          },
-        },
-        children: [
-          {
-            id: crypto.randomUUID(),
-            type: "container",
-            label: "Container",
-            nv_label: "grid_table_col_title_wrapper",
-            attrs: { style: { direction: [null, "row"], gap: [null, "--sp--s100"], align_items: [null, "center"] } },
-            children: [
-              {
-                id: crypto.randomUUID(),
-                type: "heading",
-                label: "Text",
-                name: sectionTitle,
-                title: sectionTitle,
-                nv_label: "grid_table_col_title",
-                attrs: {
-                  headc: { title: { value: sectionTitle, variable: null } },
-                  heads: { ty: [null, "l-medium"] },
-                  common: { positioning: { widthtype: [null, "2"] } },
-                },
-              },
-            ],
-          },
-          {
-            id: crypto.randomUUID(),
-            type: "container",
-            label: "Container",
-            nv_label: "grid_table_col_operations",
-            attrs: {
-              style: { direction: [null, "row"], gap: [null, "--sp--s150"], justify_content: [null, "flex-end"], align_items: [null, "center"] },
-              control_display: [],
-            },
-            children: [
-              {
-                id: crypto.randomUUID(),
-                type: "container",
-                label: "Container",
-                nv_label: "op_normal",
-                attrs: { style: { direction: [null, "row"], gap: [null, "--sp--s150"], align_items: [null, "center"] }, control_display: [] },
-                children: operationsChildren,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: crypto.randomUUID(),
-        type: "container",
-        label: "Container",
-        nv_label: "grid_table_col_content",
-        attrs: {
-          style: { direction: [null, "column"], gap: [null, "--sp--s0"], justify_content: [null, "flex-start"], align_items: [null, "stretch"] },
-          control_display: [],
-        },
-        children: [
-          buildReverseRelatedHeaderGrid(displayFields),
-          buildReverseRelatedCollection({
-            record,
-            childMeta,
-            rootListSetId,
-            lookupField,
-            currentIdExpr,
-            binding,
-            searchFields,
-            displayFields,
-          }),
-        ],
-      },
-    ],
+    layout: clone(collection.attrs?.layout || {}),
+    actions: [],
+    pagination: clone(collection.attrs?.pagination || {}),
   };
 }
 
-function buildReverseRelatedHeaderGrid(displayFields) {
-  return {
-    id: crypto.randomUUID(),
-    type: "flex_grid",
-    label: "Grid",
-    nv_label: "grid_table_col_header",
-    attrs: reverseRelatedGridAttrs(displayFields.length),
-    children: displayFields.map((field, index) => ({
-      id: crypto.randomUUID(),
-      type: "container",
-      label: "Container",
-      nv_label: index === 0 ? "grid_table_col_header_title_column" : "grid_table_col_header_column",
-      attrs: { style: { direction: [null, "row"], align_items: [null, "center"] }, common: { positioning: { widthtype: [null, "2"] } } },
-      children: [
-        {
-          id: crypto.randomUUID(),
-          type: "heading",
-          label: "Text",
-          title: field.displayName || field.fieldName,
-          nv_label: "grid_table_col_header_text",
-          attrs: {
-            heads: { ty: [null, "xs-medium"] },
-            headc: { title: { value: field.displayName || field.fieldName, variable: null } },
-            common: { positioning: { widthtype: [null, "2"] } },
-          },
-        },
-      ],
-    })),
+function configureReverseRelatedGridColumns(wrapper, displayFields) {
+  const fields = displayFields.length ? displayFields : [{ fieldName: "Title", displayName: "Title" }];
+  const header = findFirstByIdentity(wrapper, "grid_table_col_header");
+  const collection = findFirstByType(wrapper, "collection");
+  const itemGrid = collection ? findFirstByIdentity(collection, "grid_col_item") : null;
+  if (!header || !itemGrid) return;
+
+  const headerPrototypes = {
+    title: clone(header.children?.find((child) => hasIdentity(child, "grid_table_col_header_title_column")) || header.children?.[0] || {}),
+    standard: clone(header.children?.find((child) => hasIdentity(child, "grid_table_col_header_column")) || header.children?.[1] || header.children?.[0] || {}),
   };
+  const itemPrototypes = {
+    title: clone(itemGrid.children?.find((child) => hasIdentity(child, "grid_table_col_item_title_column")) || itemGrid.children?.[0] || {}),
+    standard: clone(itemGrid.children?.find((child) => hasIdentity(child, "grid_table_col_item_column")) || itemGrid.children?.[1] || itemGrid.children?.[0] || {}),
+  };
+
+  header.children = fields.map((field, index) => buildReverseRelatedHeaderCell(headerPrototypes, field, index));
+  itemGrid.children = fields.map((field, index) => buildReverseRelatedItemCell(itemPrototypes, field, index));
+  normalizeGridColumnDefinition(header, fields.length);
+  normalizeGridColumnDefinition(itemGrid, fields.length);
 }
 
-function buildReverseRelatedCollection({ record, childMeta, rootListSetId, lookupField, currentIdExpr, binding, searchFields, displayFields }) {
-  return {
-    id: crypto.randomUUID(),
-    type: "collection",
-    label: "Collection",
-    nv_label: "grid_table_col_body",
-    attrs: {
-      data: {
-        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList, ListSetID: stringId(rootListSetId) },
-        filter: [{
-          key: crypto.randomUUID(),
-          pre: "and",
-          left: lookupField,
-          op: "0",
-          right: [clone(currentIdExpr)],
-          showCus: false,
-        }],
-        fulltext: [{
-          fields: searchFields.length ? searchFields : [primaryFieldName(childMeta)],
-          value: [{ exprType: "variable", valueType: "string", id: `__filter_${binding}`, type: "expr", name: binding }],
-        }],
-        link: "default",
-      },
-      layout: {},
-      actions: [],
-      pagination: {},
-    },
-    children: [
-      {
-        id: crypto.randomUUID(),
-        type: "flex_grid",
-        label: "Grid",
-        nv_label: "grid_col_item",
-        attrs: reverseRelatedGridAttrs(displayFields.length),
-        children: displayFields.map((field, index) => ({
-          id: crypto.randomUUID(),
-          type: "container",
-          label: "Container",
-          nv_label: index === 0 ? "grid_table_col_item_title_column" : "grid_table_col_item_column",
-          attrs: { style: { direction: [null, "row"], align_items: [null, "center"] }, common: { positioning: { widthtype: [null, "2"] } } },
-          children: [buildReverseRelatedDynamicField(field, index)],
-        })),
-      },
-    ],
-  };
+function buildReverseRelatedHeaderCell(prototypes, field, index) {
+  const cell = clone(index === 0 ? prototypes.title : prototypes.standard);
+  cell.id = crypto.randomUUID();
+  cell.nv_label = index === 0 ? "grid_table_col_header_title_column" : "grid_table_col_header_column";
+  cell.nav_label = cell.nv_label;
+  const heading = findDescendants(cell, (node) => String(node?.type || "") === "heading")[0];
+  if (heading) {
+    heading.id = crypto.randomUUID();
+    heading.nv_label = "grid_table_col_header_text";
+    heading.nav_label = "grid_table_col_header_text";
+    setHeadingText(heading, field.displayName || field.DisplayName || field.fieldName || field.FieldName || "Field");
+  }
+  return cell;
+}
+
+function buildReverseRelatedItemCell(prototypes, field, index) {
+  const cell = clone(index === 0 ? prototypes.title : prototypes.standard);
+  cell.id = crypto.randomUUID();
+  cell.nv_label = index === 0 ? "grid_table_col_item_title_column" : "grid_table_col_item_column";
+  cell.nav_label = cell.nv_label;
+  cell.children = [buildReverseRelatedDynamicField(field, index)];
+  return cell;
 }
 
 function buildReverseRelatedDynamicField(field, index) {
@@ -2290,60 +2228,32 @@ function buildReverseRelatedDynamicField(field, index) {
   };
 }
 
-function reverseRelatedGridAttrs(columnCount) {
+function normalizeGridColumnDefinition(grid, columnCount) {
   const count = Math.max(1, Math.min(6, columnCount || 1));
-  return {
-    ver: "2",
-    canFold: false,
-    columns: Array.from({ length: count }, () => ({ width: "1fr" })),
-    rows: [{ height: "auto" }],
-    cgap: [null, "--sp--s200"],
-    cgapU: "token",
-    rgap: [null, "--sp--s0"],
-    rgapU: "token",
-    content: {},
-  };
-}
-
-function normalizeReverseRelatedCollectionAttrs(attrs = {}) {
-  return {
-    data: clone(attrs.data || {}),
-    layout: clone(attrs.layout || {}),
-    actions: clone(attrs.actions || []),
-    pagination: clone(attrs.pagination || {}),
-  };
-}
-
-function normalizeReverseRelatedCollectionItemContext(collection, childMeta) {
-  const childFields = fieldsForDynamicControls(childMeta);
-  const fallbackField = primaryFieldName(childMeta);
-  for (const fieldControl of findDescendants(collection, (node) => String(node?.type || "") === "dynamic-field")) {
-    const fieldName = String(
-      fieldControl?.attrs?.["obj-f"]
-      || fieldControl?.attrs?.field
-      || fieldControl?.field
-      || fieldControl?.FieldName
-      || fallbackField
-    );
-    const resolved = childFields.find((field) => String(field.fieldName || field.FieldName || "") === fieldName) || childFields[0] || { fieldName: fallbackField, displayName: fallbackField };
-    const resolvedName = String(resolved.fieldName || resolved.FieldName || fallbackField);
-    fieldControl.attrs = {
-      ...(fieldControl.attrs || {}),
-      source: "3",
-      "obj-f": resolvedName,
-      field: resolvedName,
-      data: {
-        ...(fieldControl.attrs?.data || {}),
-        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: childMeta.name || childMeta.listName || "" },
-        field: resolvedName,
-        fieldName: resolvedName,
+  grid.attrs = grid.attrs || {};
+  const first = { value: count > 1 ? 2 : 1, unit: "fr" };
+  const rest = Array.from({ length: Math.max(0, count - 1) }, () => ({ value: 1, unit: "fr" }));
+  const columns = [first, ...rest];
+  if (grid.attrs.columns && !Array.isArray(grid.attrs.columns)) {
+    grid.attrs.columns = {
+      ...grid.attrs.columns,
+      "1": {
+        ...(grid.attrs.columns["1"] || {}),
+        list: clone(columns),
+        last: clone(columns[columns.length - 1]),
       },
     };
-    fieldControl.field = resolvedName;
-    fieldControl.FieldName = resolvedName;
-    fieldControl.name = fieldControl.name || resolved.displayName || resolved.DisplayName || resolvedName;
-    fieldControl.title = fieldControl.title || resolved.displayName || resolved.DisplayName || resolvedName;
-    fieldControl.label = fieldControl.label || resolved.displayName || resolved.DisplayName || resolvedName;
+    if (grid.attrs.columns["3"]) {
+      grid.attrs.columns["3"] = {
+        ...(grid.attrs.columns["3"] || {}),
+        list: [{ value: 1, unit: "fr" }],
+        last: { value: 1, unit: "fr" },
+      };
+    }
+  } else {
+    grid.attrs.columns = {
+      "1": { list: clone(columns), last: clone(columns[columns.length - 1]) },
+    };
   }
 }
 

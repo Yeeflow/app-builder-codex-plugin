@@ -461,6 +461,7 @@ function validateReverseRelatedOfficialSectionShape(section, collection, detail,
   if (!contentCard) missing.push("content_card_wrapper");
   if (!sectionContent) missing.push("section_content_area");
   if (!collectionWrapper) missing.push("related_collection_wrapper");
+  if (collectionWrapper && !hasIdentity(collectionWrapper, "grid_table_col_wrapper")) missing.push("grid_table_col_wrapper");
   if (!caption) missing.push("grid_table_col_caption");
   if (!operations) missing.push("grid_table_col_operations");
   if (!opNormal) missing.push("op_normal");
@@ -474,6 +475,14 @@ function validateReverseRelatedOfficialSectionShape(section, collection, detail,
       { source: context.source, path: sectionPath, detail, missing },
     ));
     return;
+  }
+  const collectionTemplate = stringValue(collection?.collectionTemplateId || collection?.derivedFromCollectionTemplate || collection?.attrs?.collectionTemplateId || collection?.attrs?.derivedFromCollectionTemplate);
+  if (collectionTemplate !== "collection_control_grid_table") {
+    context.findings.push(error(
+      "DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_TEMPLATE_MARKER_MISSING",
+      "Reverse-related View Item Collections must materialize from the full collection_control_grid_table golden reference template, not a hand-built grid-like structure.",
+      { source: context.source, path: pointerForNode(resource, collection), detail, expected: "collection_control_grid_table", actual: collectionTemplate || null },
+    ));
   }
   const searchControls = flatten(opNormal).map((entry) => entry.node).filter((node) => String(node?.type || "") === "search-filter");
   const addButtons = flatten(opNormal).map((entry) => entry.node).filter(isReverseRelatedAddButton);
