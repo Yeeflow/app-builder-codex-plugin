@@ -1482,41 +1482,56 @@ function collectReverseRelatedPlanRows(planText) {
   const section = extractNumberedSection(planText, /^##\s+10\.\s+Custom Data List Forms Plan/im);
   if (!section.trim() || !/Reverse-Related Collection Selection/i.test(section)) return [];
   const rows = [];
-  const subsection = extractSubsection(section, /Reverse-Related Collection Selection/i);
-  for (const table of parseMarkdownTables(subsection || section)) {
-    const headers = table.headers.map((header) => normKey(header));
-    const hostColumn = findHeaderIndex(headers, ["host data list", "host list", "parent data list"]);
-    const formColumn = findHeaderIndex(headers, ["view item form", "view form", "custom form"]);
-    const childColumn = findHeaderIndex(headers, ["related child list", "child list", "related list"]);
-    const lookupColumn = findHeaderIndex(headers, ["child lookup field", "lookup field"]);
-    const titleColumn = findHeaderIndex(headers, ["section title", "title"]);
-    const templateColumn = findHeaderIndex(headers, ["collection template", "collection presentation", "template"]);
-    const searchColumn = findHeaderIndex(headers, ["search"]);
-    const addColumn = findHeaderIndex(headers, ["add record", "add"]);
-    const defaultColumn = findHeaderIndex(headers, ["default value", "default"]);
-    if (hostColumn === -1 || childColumn === -1 || lookupColumn === -1) continue;
-    for (const row of table.rows) {
-      const cells = table.headers.map((header) => row[header] || "");
-      const hostList = cleanResourceName(cells[hostColumn]);
-      const childList = cleanResourceName(cells[childColumn]);
-      const childLookupField = cleanResourceName(cells[lookupColumn]);
-      if (!hostList || !childList || !childLookupField || isNonResourceName(hostList) || isNonResourceName(childList) || isNonResourceName(childLookupField)) continue;
-      rows.push({
-        hostList,
-        viewItemForm: cleanResourceName(cells[formColumn]),
-        childList,
-        childLookupField,
-        sectionTitle: cleanResourceName(cells[titleColumn]) || `${childList} Related Records`,
-        collectionTemplate: cleanResourceName(cells[templateColumn]) || "collection_control_grid_table",
-        search: cleanResourceName(cells[searchColumn]),
-        addRecord: cleanResourceName(cells[addColumn]),
-        defaultValue: cleanResourceName(cells[defaultColumn]),
-      });
+  const subsections = extractSubsections(section, /Reverse-Related Collection Selection/i);
+  for (const subsection of subsections) {
+    for (const table of parseMarkdownTables(subsection)) {
+      const headers = table.headers.map((header) => normKey(header));
+      const hostColumn = findHeaderIndex(headers, ["host data list", "host list", "parent data list"]);
+      const formColumn = findHeaderIndex(headers, ["view item form", "view form", "custom form"]);
+      const childColumn = findHeaderIndex(headers, ["related child list", "child list", "related list"]);
+      const lookupColumn = findHeaderIndex(headers, ["child lookup field", "lookup field"]);
+      const titleColumn = findHeaderIndex(headers, ["section title", "title"]);
+      const templateColumn = findHeaderIndex(headers, ["collection template", "collection presentation", "template"]);
+      const searchColumn = findHeaderIndex(headers, ["search"]);
+      const addColumn = findHeaderIndex(headers, ["add record", "add"]);
+      const defaultColumn = findHeaderIndex(headers, ["default value", "default"]);
+      if (hostColumn === -1 || childColumn === -1 || lookupColumn === -1) continue;
+      for (const row of table.rows) {
+        const cells = table.headers.map((header) => row[header] || "");
+        const hostList = cleanResourceName(cells[hostColumn]);
+        const childList = cleanResourceName(cells[childColumn]);
+        const childLookupField = cleanResourceName(cells[lookupColumn]);
+        if (!hostList || !childList || !childLookupField || isNonResourceName(hostList) || isNonResourceName(childList) || isNonResourceName(childLookupField)) continue;
+        rows.push({
+          hostList,
+          viewItemForm: cleanResourceName(cells[formColumn]),
+          childList,
+          childLookupField,
+          sectionTitle: cleanResourceName(cells[titleColumn]) || `${childList} Related Records`,
+          collectionTemplate: cleanResourceName(cells[templateColumn]) || "collection_control_grid_table",
+          search: cleanResourceName(cells[searchColumn]),
+          addRecord: cleanResourceName(cells[addColumn]),
+          defaultValue: cleanResourceName(cells[defaultColumn]),
+        });
+      }
     }
   }
   return unique(rows.map((record) => `${normKey(record.hostList)}|${normKey(record.viewItemForm)}|${normKey(record.childList)}|${normKey(record.childLookupField)}`))
     .map((key) => rows.find((record) => `${normKey(record.hostList)}|${normKey(record.viewItemForm)}|${normKey(record.childList)}|${normKey(record.childLookupField)}` === key))
     .filter(Boolean);
+}
+
+function extractSubsections(text, marker) {
+  const flags = marker.flags.includes("g") ? marker.flags : `${marker.flags}g`;
+  const globalMarker = new RegExp(marker.source, flags);
+  const matches = [...text.matchAll(globalMarker)];
+  if (!matches.length) return [];
+  return matches.map((match) => {
+    const start = match.index;
+    const remainder = text.slice(start + match[0].length);
+    const next = remainder.search(/\n#{2,4}\s+/);
+    return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
+  });
 }
 
 function extractSubsection(text, marker) {
@@ -1904,9 +1919,9 @@ function appendReverseRelatedCollectionSections(resource, { planDemand, listMeta
     return normKey(record.viewItemForm) === normKey(formName);
   });
   if (!records.length) return;
-  const slot = findBusinessSectionContentArea(resource);
-  if (!slot) return;
-  slot.children = Array.isArray(slot.children) ? slot.children : [];
+  const contentRoot = findFirstByIdentity(resource, "content") || findFirstByIdentity(resource, "Content");
+  if (!contentRoot) return;
+  contentRoot.children = Array.isArray(contentRoot.children) ? contentRoot.children : [];
   for (const [index, record] of records.entries()) {
     const childMeta = listMetaByName.get(normKey(record.childList));
     if (!childMeta?.listId) continue;
@@ -1919,7 +1934,7 @@ function appendReverseRelatedCollectionSections(resource, { planDemand, listMeta
       detailLayoutId: childMeta.detailLayoutId || layoutId || "",
       index,
     });
-    if (section) slot.children.push(section);
+    if (section) contentRoot.children.push(section);
   }
 }
 
@@ -1947,26 +1962,11 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
   ));
   const collection = findFirstByType(collectionRoot, "collection");
   if (collection) {
-    delete collection.actions;
-    if (collection.attrs) {
-      delete collection.attrs.actions;
-      delete collection.attrs.control_action;
-      delete collection.attrs.controlActions;
-    }
     collection.reverseRelatedCollection = true;
-    collection.attrs = {
-      ...(collection.attrs || {}),
-      reverseRelatedCollection: true,
-      reverseRelated: {
-        hostList: hostListName,
-        childList: record.childList,
-        childListId: stringId(childMeta.listId),
-        childLookupField: record.childLookupField,
-        allowAdd: !/^no|false|not/i.test(record.addRecord || ""),
-      },
-    };
+    collection.attrs = normalizeReverseRelatedCollectionAttrs(collection.attrs);
     collection.attrs.data = {
       ...(collection.attrs.data || {}),
+      list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList },
       filter: [{
         left: record.childLookupField,
         field: record.childLookupField,
@@ -1981,6 +1981,7 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
         value: [{ exprType: "variable", valueType: "string", id: `__filter_${binding}`, type: "expr", name: binding }],
       }],
     };
+    normalizeReverseRelatedCollectionItemContext(collection, childMeta);
   }
   const search = {
     id: `${sectionId}_search`,
@@ -2060,6 +2061,48 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
       collectionRoot,
     ],
   };
+}
+
+function normalizeReverseRelatedCollectionAttrs(attrs = {}) {
+  return {
+    data: clone(attrs.data || {}),
+    layout: clone(attrs.layout || {}),
+    actions: clone(attrs.actions || []),
+    pagination: clone(attrs.pagination || {}),
+  };
+}
+
+function normalizeReverseRelatedCollectionItemContext(collection, childMeta) {
+  const childFields = fieldsForDynamicControls(childMeta);
+  const fallbackField = primaryFieldName(childMeta);
+  for (const fieldControl of findDescendants(collection, (node) => String(node?.type || "") === "dynamic-field")) {
+    const fieldName = String(
+      fieldControl?.attrs?.["obj-f"]
+      || fieldControl?.attrs?.field
+      || fieldControl?.field
+      || fieldControl?.FieldName
+      || fallbackField
+    );
+    const resolved = childFields.find((field) => String(field.fieldName || field.FieldName || "") === fieldName) || childFields[0] || { fieldName: fallbackField, displayName: fallbackField };
+    const resolvedName = String(resolved.fieldName || resolved.FieldName || fallbackField);
+    fieldControl.attrs = {
+      ...(fieldControl.attrs || {}),
+      source: "3",
+      "obj-f": resolvedName,
+      field: resolvedName,
+      data: {
+        ...(fieldControl.attrs?.data || {}),
+        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: childMeta.name || childMeta.listName || "" },
+        field: resolvedName,
+        fieldName: resolvedName,
+      },
+    };
+    fieldControl.field = resolvedName;
+    fieldControl.FieldName = resolvedName;
+    fieldControl.name = fieldControl.name || resolved.displayName || resolved.DisplayName || resolvedName;
+    fieldControl.title = fieldControl.title || resolved.displayName || resolved.DisplayName || resolvedName;
+    fieldControl.label = fieldControl.label || resolved.displayName || resolved.DisplayName || resolvedName;
+  }
 }
 
 function removeDescendantControls(root, predicate) {

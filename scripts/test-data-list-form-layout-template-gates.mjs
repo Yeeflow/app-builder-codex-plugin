@@ -97,7 +97,11 @@ try {
   expectCode("reverse-related Add button missing passvalues fails", ["--resource", writeJson("view-reverse-related-missing-passvalues.json", reverseRelatedViewResource({ omitPassvalues: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_MISSING");
   expectCode("reverse-related Add button passvalues must use current ListDataID", ["--resource", writeJson("view-reverse-related-bad-passvalue.json", reverseRelatedViewResource({ badPassvalue: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_VALUE_INVALID");
   expectCode("reverse-related Collection row dropbar operations fail", ["--resource", writeJson("view-reverse-related-row-dropbar.json", reverseRelatedViewResource({ includeDropbar: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN");
+  expectCode("reverse-related Collection nested inside details section fails", ["--resource", writeJson("view-reverse-related-nested-details.json", reverseRelatedViewResource({ nestedInsideDetails: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_INDEPENDENT_SECTION_REQUIRED");
+  expectCode("reverse-related Collection unofficial attrs fail", ["--resource", writeJson("view-reverse-related-unofficial-attrs.json", reverseRelatedViewResource({ unofficialCollectionAttrs: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_ATTRS_UNOFFICIAL");
+  expectCode("reverse-related Collection item dynamic-field without source 3 fails", ["--resource", writeJson("view-reverse-related-bad-item-source.json", reverseRelatedViewResource({ badItemSource: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_SOURCE_INVALID");
   expectCode("App Plan reverse-related Collection selection must be materialized", ["--package", writePackage("reverse-related-missing-package.yapk", decodedPackage()), "--plan", writeText("plan-reverse-related-missing-package.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED");
+  expectCode("App Plan multiple reverse-related Collection sections must all be materialized", ["--package", writePackage("reverse-related-multi-missing-second.yapk", decodedPackage({ listName: "Departments", titleFieldLabel: "Department Name", viewTitle: "Departments View Item", viewResource: reverseRelatedViewResource() })), "--plan", writeText("plan-reverse-related-multi-missing-second.md", multiReverseRelatedAppPlan())], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED");
   expectCode("App Plan reverse-related default must use current ListDataID", ["--plan", writeText("plan-reverse-related-bad-default.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true, reverseDefaultValue: "Text3 = Specialty Name" }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_DEFAULT_VALUE_INVALID");
 
   const emptyTitleArea = newEditResource();
@@ -217,7 +221,8 @@ function workbenchResource(options = {}) {
 
 function reverseRelatedViewResource(options = {}) {
   const resource = viewResource();
-  firstSlot(resource).children.push(reverseRelatedSection(options));
+  if (options.nestedInsideDetails) firstSlot(resource).children.push(reverseRelatedSection(options));
+  else content(resource).children.push(reverseRelatedSection(options));
   return resource;
 }
 
@@ -232,7 +237,7 @@ function reverseRelatedSection(options = {}) {
     collectionTemplateId: "collection_control_grid_table",
     derivedFromCollectionTemplate: "collection_control_grid_table",
     attrs: {
-      reverseRelatedCollection: true,
+      ...(options.unofficialCollectionAttrs ? { reverseRelatedCollection: true, generatedBy: "bad-test" } : {}),
       data: {
         list: { AppID: 41, ListID: childListId, Type: 1, Title: "Doctor Profiles" },
         filter: options.omitFilter ? [] : [
@@ -242,10 +247,13 @@ function reverseRelatedSection(options = {}) {
           { fields: ["Title", "Text5"], value: [variableExpr(searchBinding, "filter_doctors")] },
         ],
       },
+      layout: {},
+      actions: [],
+      pagination: {},
     },
     children: [
       { type: "container", id: "doctor_profile_row", nv_label: "grid_table_col_item", children: [
-        { type: "dynamic-field", id: "doctor_profile_title", nv_label: "doctor_profile_title", field: "Title", attrs: { field: "Title" } },
+        { type: "dynamic-field", id: "doctor_profile_title", nv_label: "doctor_profile_title", field: "Title", attrs: { source: options.badItemSource ? "1" : "3", "obj-f": "Title", field: "Title" } },
         ...(options.includeDropbar ? [{
           type: "dropbar",
           id: "grid_table_col_item_op_menu",
@@ -335,8 +343,8 @@ function decodedPackage(options = {}) {
     ListSet: { ListID: "1909200000000000001", Title: "Data List Form Layout Test" },
     Childs: [
       {
-        List: { ListID: "1909200000000000100", Title: "Assets", LayoutView: JSON.stringify(layoutView) },
-        Fields: [{ FieldName: "Title", DisplayName: "Asset Name", FieldType: "Text", Type: "input" }],
+        List: { ListID: "1909200000000000100", Title: options.listName || "Assets", LayoutView: JSON.stringify(layoutView) },
+        Fields: [{ FieldName: "Title", DisplayName: options.titleFieldLabel || "Asset Name", FieldType: "Text", Type: "input" }],
         Layouts: layouts,
       },
     ],
@@ -421,6 +429,60 @@ ${reverseRelatedSelection}
 | ${listName} | ${viewFormName} | Current record fields | data_list_form_fields_grid_v1_1 | 2 | 2 | 1 | Notes | None | Generated-final validation |
 
 ## 11. Data List Workflows Plan
+`;
+}
+
+function multiReverseRelatedAppPlan() {
+  return `
+# Hospital Doctor Information Management - Yeeflow App Plan
+
+## 4. Data Lists and Document Libraries Plan
+
+### 4.1 Departments
+
+#### Fields
+
+| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Department Name | Title | Title | Title | input control |
+
+### 4.2 Specialties
+
+#### Fields
+
+| Field Order | Business Label | Display Name | Internal ID / Field Key | Exact Yeeflow Field Type | Exact Yeeflow Control Type |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Specialty Name | Title | Title | Title | input control |
+
+## 10. Custom Data List Forms Plan
+
+### 10.1 Departments
+
+#### Data List Form Layout Template Selection
+
+| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Departments | Departments View Item | View | data_list_form_layout_view_item_v1_1 | Department details; Doctors in this Department | Doctor Profiles child records | Parent-detail display | Generated-final validation |
+
+#### Reverse-Related Collection Selection
+
+| Host Data List | View Item Form | Related Child List | Child Lookup Field | Section Title | Collection Template | Search | Add Record | Default Value |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Departments | Departments View Item | Doctor Profiles | Text3 | Doctors in this Department | collection_control_grid_table | Title, Specialty | Add doctor | Text3 = current ListDataID |
+
+### 10.2 Specialties
+
+#### Data List Form Layout Template Selection
+
+| Data List or Library | Custom Form | Form Usage | Selected Data List Form Layout Template | Business Sections Needed | Related Data / Analytics Needed | Selection Reason | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Specialties | Specialties View Item | View | data_list_form_layout_view_item_v1_1 | Specialty details; Doctors in this Specialty | Doctor Profiles child records | Parent-detail display | Generated-final validation |
+
+#### Reverse-Related Collection Selection
+
+| Host Data List | View Item Form | Related Child List | Child Lookup Field | Section Title | Collection Template | Search | Add Record | Default Value |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Specialties | Specialties View Item | Doctor Profiles | Text4 | Doctors in this Specialty | collection_control_grid_table | Title, Department | Add doctor | Text4 = current ListDataID |
 `;
 }
 

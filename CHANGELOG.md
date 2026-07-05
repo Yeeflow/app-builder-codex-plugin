@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.8
+
+- Release reverse-related View Item Collection independent-section hardening.
+- Materialize reverse-related child Collections as independent official-shape `Content.children[]` sections after current-record details instead of nesting them inside details cards, field grids, or `section_content_area`.
+- Preserve official toolbar Search/Add and lookup-filter/passvalues behavior while normalizing child Collection row `dynamic-field` controls to `source: "3"` and explicit child-list fields.
+- Parse every `Reverse-Related Collection Selection` subsection in the Custom Data List Forms plan so multi-parent apps materialize all planned child Collections instead of stopping at the first table.
+- Add hard gates for nested reverse-related Collection sections, unofficial Collection attrs, and missing/invalid child Collection item context before signing readiness.
+
 ## 0.9.7
 
 - Release reverse-related View Item Collection designer safety hardening.
