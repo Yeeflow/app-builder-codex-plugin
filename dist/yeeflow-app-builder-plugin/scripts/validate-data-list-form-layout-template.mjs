@@ -15,8 +15,8 @@ const VIEW_TEMPLATE_IDS = new Set([VIEW_TEMPLATE_ID, WORKBENCH_TEMPLATE_ID]);
 const BACKGROUND = "#f4f7fb";
 const SECTION_CONTENT_AREA_GAP = "--sp--s200";
 const ZERO_PADDING = { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" };
-const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header", "kpi_card_wrapper", "primary_working_area", "right_side_panel", "chart_cards_section"]);
-const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper", "kpi_card_wrapper", "kpi_cards_kpi_row", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
+const ALLOWED_BUSINESS_SLOTS = new Set(["page_title_content", "Operations", "section_content_area", "section_title_header", "kpi_card_wrapper", "primary_working_area", "right_side_panel", "chart_cards_section", "reverse_related_collection_section"]);
+const REPEATABLE_MODULES = new Set(["1_columns_section", "content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "kpi_metrics_wrapper", "kpi_card_wrapper", "kpi_cards_kpi_row", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel", "reverse_related_collection_section"]);
 const REMOVABLE_SECTION_MODULES = new Set(["1_columns_section", "content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section", "1_row_section", "2_rows_section", "3_rows_section", "chart_cards_section", "right_side_panel"]);
 const REQUIRED_NEW_EDIT_REGIONS = ["main", "content", "1_columns_section", "content_card_wrapper", "section_content_area"];
 const REQUIRED_VIEW_REGIONS = ["main", "content", "page_title_section", "page_title_content", "page_title_text", "page_title_description", "1_columns_section", "content_card_wrapper", "section_content_area"];
@@ -430,15 +430,48 @@ function validateReverseRelatedCollectionSections(resource, context) {
   for (const section of sections) {
     const detail = reverseRelatedSectionDetail(section);
     const sectionPath = pointerForNode(resource, section);
+    validateReverseRelatedSectionPlacement(section, detail, context, resource);
     const collection = findReverseRelatedCollection(section);
     if (!collection) {
       context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_MISSING", "Reverse-related View Item form sections must contain a child-list Collection.", { source: context.source, path: sectionPath, detail }));
       continue;
     }
+    validateReverseRelatedCollectionOfficialShape(collection, detail, context, resource);
     validateReverseRelatedCollectionFilter(collection, detail, context, resource);
     validateReverseRelatedSearch(section, collection, context, resource);
     validateReverseRelatedAddButton(section, collection, detail, context, resource);
     validateReverseRelatedCollectionHasNoRowOperations(collection, detail, context, resource);
+    validateReverseRelatedCollectionItemContext(collection, detail, context, resource);
+  }
+}
+
+function validateReverseRelatedSectionPlacement(section, detail, context, resource) {
+  const entry = flatten(resource).find((item) => item.node === section);
+  const sectionPath = entry?.pointer || pointerForNode(resource, section);
+  if (String(section?.type || "") === "collection") {
+    context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_SECTION_WRAPPER_MISSING", "Reverse-related Collections must be wrapped by an independent View Item content section, not emitted as a loose Collection node.", { source: context.source, path: sectionPath, detail }));
+    return;
+  }
+  const parent = entry?.ancestors?.[entry.ancestors.length - 1];
+  const parentIds = identityCandidates(parent);
+  const parentIsContent = parentIds.includes("content") || parentIds.includes("Content");
+  const nestedInCurrentDetails = (entry?.ancestors || []).some((ancestor) => {
+    const ids = identityCandidates(ancestor);
+    return ids.some((id) => [
+      "section_content_area",
+      "content_card_wrapper",
+      "content_card_60_wrapper",
+      "content_card_40_wrapper",
+      "form_grid_fields_wrapper",
+      "current_item_fields_grid",
+    ].includes(id));
+  });
+  if (!parentIsContent || nestedInCurrentDetails) {
+    context.findings.push(error(
+      "DATA_LIST_FORM_REVERSE_RELATED_INDEPENDENT_SECTION_REQUIRED",
+      "Reverse-related View Item Collections must be independent Content child sections after the current-record details section; embedding them inside details cards, field grids, or section_content_area can make the designer load indefinitely.",
+      { source: context.source, path: sectionPath, detail, parentIdentities: parentIds },
+    ));
   }
 }
 
@@ -513,6 +546,19 @@ function validateReverseRelatedCollectionFilter(collection, detail, context, res
   const matchingIdFilter = matchingFieldFilters.find((filter) => containsCurrentListDataIdExpression(filter?.right ?? filter?.value ?? filter?.rightValue ?? filter));
   if (!matchingIdFilter) {
     context.findings.push(error("DATA_LIST_FORM_REVERSE_RELATED_FILTER_VALUE_INVALID", "Reverse-related Collection filter right side must be the current host item ListDataID expression, not parent display text, title, or a hardcoded ID.", { source: context.source, path, expectedField: fieldName || null }));
+  }
+}
+
+function validateReverseRelatedCollectionOfficialShape(collection, detail, context, resource) {
+  const attrs = collection?.attrs || {};
+  const allowedAttrs = new Set(["data", "layout", "actions", "pagination"]);
+  const unexpected = Object.keys(attrs).filter((key) => !allowedAttrs.has(key));
+  if (unexpected.length) {
+    context.findings.push(error(
+      "DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_ATTRS_UNOFFICIAL",
+      "Reverse-related Collection nodes must use the official export runtime attrs surface: data, layout, actions, and pagination only. Generator metadata belongs on the owning section, not the Collection node.",
+      { source: context.source, path: pointerForNode(resource, collection), detail, unexpectedAttrs: unexpected },
+    ));
   }
 }
 
@@ -596,6 +642,30 @@ function validateReverseRelatedCollectionHasNoRowOperations(collection, detail, 
         identities: identityCandidates(node),
       },
     ));
+  }
+}
+
+function validateReverseRelatedCollectionItemContext(collection, detail, context, resource) {
+  for (const entry of flatten(collection)) {
+    const node = entry.node;
+    if (String(node?.type || "") !== "dynamic-field") continue;
+    const attrs = node.attrs || {};
+    const source = stringValue(attrs.source || node.source);
+    const field = stringValue(attrs["obj-f"] || attrs.field || attrs.fieldName || node.field || node.FieldName);
+    if (source !== "3") {
+      context.findings.push(error(
+        "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_SOURCE_INVALID",
+        "Reverse-related Collection item dynamic-field controls must use Collection item context source = \"3\".",
+        { source: context.source, path: pointerForNode(resource, node), detail, actualSource: source || null, field: field || null },
+      ));
+    }
+    if (!field) {
+      context.findings.push(error(
+        "DATA_LIST_FORM_REVERSE_RELATED_ITEM_FIELD_MISSING",
+        "Reverse-related Collection item dynamic-field controls must bind an explicit child-list field.",
+        { source: context.source, path: pointerForNode(resource, node), detail },
+      ));
+    }
   }
 }
 
@@ -998,47 +1068,48 @@ function tableRows(text) {
 }
 
 function parseReverseRelatedPlanRows(section) {
-  const subsection = extractSubsection(section, /Reverse-Related Collection Selection/i);
-  if (!subsection.trim()) return [];
-  const lines = subsection.split(/\r?\n/);
   const rows = [];
-  for (let index = 0; index < lines.length; index += 1) {
-    if (!/^\s*\|.+\|\s*$/.test(lines[index] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1] || "")) continue;
-    const headers = splitTableLine(lines[index]).map((header) => norm(header));
-    const column = (...names) => headers.findIndex((header) => names.some((name) => header === norm(name) || header.includes(norm(name))));
-    const hostColumn = column("Host Data List", "Host List", "Parent Data List");
-    const formColumn = column("View Item Form", "View Form", "Custom Form");
-    const childColumn = column("Related Child List", "Child List", "Related List");
-    const lookupColumn = column("Child Lookup Field", "Lookup Field");
-    const titleColumn = column("Section Title", "Title");
-    const templateColumn = column("Collection Template", "Collection Presentation", "Template");
-    const searchColumn = column("Search");
-    const addColumn = column("Add Record", "Add");
-    const defaultColumn = column("Default Value", "Default");
-    let rowIndex = index + 2;
-    while (rowIndex < lines.length && /^\s*\|.+\|\s*$/.test(lines[rowIndex] || "")) {
-      const cells = splitTableLine(lines[rowIndex]);
-      const raw = lines[rowIndex].trim();
-      const hostList = cleanName(cells[hostColumn]);
-      const childList = cleanName(cells[childColumn]);
-      const childLookupField = cleanName(cells[lookupColumn]);
-      if (hostList || childList || childLookupField) {
-        rows.push({
-          raw,
-          hostList,
-          viewItemForm: cleanName(cells[formColumn]),
-          childList,
-          childLookupField,
-          sectionTitle: cleanName(cells[titleColumn]),
-          collectionTemplate: cleanName(cells[templateColumn]),
-          search: cleanName(cells[searchColumn]),
-          addRecord: cleanName(cells[addColumn]),
-          defaultValue: cleanName(cells[defaultColumn]),
-        });
+  const subsections = extractSubsections(section, /Reverse-Related Collection Selection/i);
+  for (const subsection of subsections) {
+    const lines = subsection.split(/\r?\n/);
+    for (let index = 0; index < lines.length; index += 1) {
+      if (!/^\s*\|.+\|\s*$/.test(lines[index] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1] || "")) continue;
+      const headers = splitTableLine(lines[index]).map((header) => norm(header));
+      const column = (...names) => headers.findIndex((header) => names.some((name) => header === norm(name) || header.includes(norm(name))));
+      const hostColumn = column("Host Data List", "Host List", "Parent Data List");
+      const formColumn = column("View Item Form", "View Form", "Custom Form");
+      const childColumn = column("Related Child List", "Child List", "Related List");
+      const lookupColumn = column("Child Lookup Field", "Lookup Field");
+      const titleColumn = column("Section Title", "Title");
+      const templateColumn = column("Collection Template", "Collection Presentation", "Template");
+      const searchColumn = column("Search");
+      const addColumn = column("Add Record", "Add");
+      const defaultColumn = column("Default Value", "Default");
+      let rowIndex = index + 2;
+      while (rowIndex < lines.length && /^\s*\|.+\|\s*$/.test(lines[rowIndex] || "")) {
+        const cells = splitTableLine(lines[rowIndex]);
+        const raw = lines[rowIndex].trim();
+        const hostList = cleanName(cells[hostColumn]);
+        const childList = cleanName(cells[childColumn]);
+        const childLookupField = cleanName(cells[lookupColumn]);
+        if (hostList || childList || childLookupField) {
+          rows.push({
+            raw,
+            hostList,
+            viewItemForm: cleanName(cells[formColumn]),
+            childList,
+            childLookupField,
+            sectionTitle: cleanName(cells[titleColumn]),
+            collectionTemplate: cleanName(cells[templateColumn]),
+            search: cleanName(cells[searchColumn]),
+            addRecord: cleanName(cells[addColumn]),
+            defaultValue: cleanName(cells[defaultColumn]),
+          });
+        }
+        rowIndex += 1;
       }
-      rowIndex += 1;
+      index = rowIndex;
     }
-    index = rowIndex;
   }
   return rows;
 }
@@ -1057,6 +1128,18 @@ function extractSubsection(text, marker) {
   const remainder = text.slice(start + match[0].length);
   const next = remainder.search(/\n#{2,4}\s+/);
   return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
+}
+
+function extractSubsections(text, marker) {
+  const flags = marker.flags.includes("g") ? marker.flags : `${marker.flags}g`;
+  const globalMarker = new RegExp(marker.source, flags);
+  const matches = [...text.matchAll(globalMarker)];
+  return matches.map((match) => {
+    const start = match.index;
+    const remainder = text.slice(start + match[0].length);
+    const next = remainder.search(/\n#{2,4}\s+/);
+    return next === -1 ? text.slice(start) : text.slice(start, start + match[0].length + next);
+  });
 }
 
 function parsePlannedDataLists(text) {

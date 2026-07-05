@@ -24,7 +24,8 @@
     "kpi_card_wrapper",
     "primary_working_area",
     "right_side_panel",
-    "chart_cards_section"
+    "chart_cards_section",
+    "reverse_related_collection_section"
   ],
   "allowedRepeatableRemovableModules": [
     "1_columns_section",
@@ -39,7 +40,8 @@
     "2_rows_section",
     "3_rows_section",
     "chart_cards_section",
-    "right_side_panel"
+    "right_side_panel",
+    "reverse_related_collection_section"
   ],
   "unusedSectionPolicy": {
     "generatedFinalMustPruneUnusedSections": true,

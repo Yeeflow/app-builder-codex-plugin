@@ -46,15 +46,28 @@ The read filter alone proves display, but it does not link newly added child rec
 
 ## Designer Stability Update 2026-07-05
 
-The Departments View Item designer failure was reclassified after comparing the generated package with a normal Yeeflow `.ydl` export. The working export contains the reverse-related `collection`, toolbar `action_button`, and `search-filter`, but it does not include a row-level `dropbar` or copied row operation menu. The generated package failed because the Collection row template retained unproven source-template operations such as `grid_table_col_item_op_menu` and edit/delete row controls.
+The Departments View Item designer failure was reclassified again after the fix11 live repair. The earlier dropbar finding is still useful, but it is not the complete root cause.
 
-Focused live fixes confirmed the boundary:
+The working official `.ydl` export contains a reverse-related `collection`, toolbar `action_button`, and `search-filter`, but the reverse-related section is an independent `Content.children[]` section after the current-record details section. The official tree is effectively:
 
-- Removing toolbar Add/Search while keeping the row operation residue did not resolve the designer failure.
-- Removing the entire reverse-related Collection did resolve the designer failure.
-- Therefore Add/Search are not the root cause; copied row `dropbar` / row operations are the unsafe template residue.
+```text
+Content.children[0] = header section
+Content.children[1] = current record details section
+Content.children[2] = independent reverse-related child Collection section
+```
 
-Generation must keep official-shape toolbar Search/Add when planned, but must prune row-level operation/dropbar controls from reverse-related Collection rows unless a separate export-proven row action pattern is explicitly supported by the App Plan.
+The generated fix9/fix10 variants removed row operations/dropbar and matched live readback, but the designer still loaded forever because the reverse-related Collection remained nested inside the current-record details card/`section_content_area` and kept a non-official row-template shape. The recovered fix11 package used the official independent section structure and designer opened.
+
+Generation must therefore:
+
+- Place each reverse-related child Collection as an independent `Content` child section, never inside the current-record details card, field grid, or `section_content_area`.
+- Keep official-shape toolbar Search/Add when planned.
+- Keep Collection runtime attrs to the official surface: `data`, `layout`, `actions`, and `pagination`; put generator metadata on the owning section instead of the Collection node.
+- Ensure Collection row `dynamic-field` controls use Collection item context with `attrs.source = "3"` and `attrs["obj-f"] = <child field>`.
+- Prune row-level operation/dropbar controls unless a separate export-proven row action pattern is explicitly supported by the App Plan.
+- Parse every `#### Reverse-Related Collection Selection` subsection under `## 10. Custom Data List Forms Plan`, not only the first occurrence. If multiple host lists plan reverse-related child Collections, every row must be materialized and validated.
+
+The incorrect lesson is "delete `grid_table_col_item_operations` and the designer is fixed." The correct lesson is "use the official independent reverse-related Collection section runtime shape; row operations/dropbar are one unsafe residue inside that larger shape."
 
 ## App Plan Requirement
 
@@ -85,6 +98,11 @@ When a parent/detail lookup relationship should appear on a parent View Item for
 - `DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_LOOKUP_FIELD_MISSING`
 - `DATA_LIST_FORM_REVERSE_RELATED_PASSVALUES_VALUE_INVALID`
 - `DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN`
+- `DATA_LIST_FORM_REVERSE_RELATED_SECTION_WRAPPER_MISSING`
+- `DATA_LIST_FORM_REVERSE_RELATED_INDEPENDENT_SECTION_REQUIRED`
+- `DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_ATTRS_UNOFFICIAL`
+- `DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_SOURCE_INVALID`
+- `DATA_LIST_FORM_REVERSE_RELATED_ITEM_FIELD_MISSING`
 
 The gate is marker-scoped to avoid failing ordinary read-only related Collections. Once the generator declares a section as reverse-related, the full contract must pass.
 
