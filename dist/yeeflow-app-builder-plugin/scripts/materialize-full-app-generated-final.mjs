@@ -1970,6 +1970,7 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
         },
       },
     },
+    displayLabel: [null, false],
   };
   const operationsChildren = [search];
   if (!/^no|false|not/i.test(record.addRecord || "")) {
@@ -2005,14 +2006,7 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
         type: "container",
         label: "Container",
         nv_label: "content_card_wrapper",
-        attrs: {
-          style: {
-            direction: [null, "column"],
-            gap: [null, "--sp--s200"],
-            justify_content: [null, "flex-start"],
-            align_items: [null, "stretch"],
-          },
-        },
+        attrs: standardDataListViewContentCardAttrs(),
         children: [
           {
             id: crypto.randomUUID(),
@@ -2085,6 +2079,46 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
         ],
       },
     ],
+  };
+}
+
+function standardDataListViewContentCardAttrs() {
+  return {
+    style: {
+      gap: [null, "--sp--s200"],
+      direction: [null, "column"],
+      widthtype: [null, "1"],
+      align_items: [null, "stretch"],
+      justify_content: [null, "flex-start"],
+    },
+    common: {
+      padding: [null, { top: 28, right: 28, bottom: 28, left: 28 }],
+      background: {
+        normal: {
+          type: "classic",
+          classic: { color: "#ffffff" },
+        },
+      },
+      border: {
+        normal: {
+          type: "1",
+          width: [null, { top: 1, right: 1, bottom: 1, left: 1 }],
+          color: "#d8e1ef",
+          radius: [null, { top: 16, right: 16, bottom: 16, left: 16 }],
+        },
+      },
+      shadow: {
+        normal: {
+          type: "drop",
+          x: 0,
+          y: 8,
+          blur: 20,
+          spread: 0,
+          color: "rgba(15, 23, 42, 0.06)",
+        },
+      },
+    },
+    fullWidthParityWithGoldenReference: true,
   };
 }
 

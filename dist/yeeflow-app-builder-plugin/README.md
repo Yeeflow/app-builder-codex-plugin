@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.10`
+- Version: `0.9.11`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.10` hardens reverse-related View Item Collection grid-table golden reference fidelity. Generated reverse-related child Collections clone the full `collection_control_grid_table` `grid_table_col_wrapper` before remapping business slots, preserving approved Collection styling while rejecting shallow hand-built grid-like wrappers before signing readiness.
+Current release `0.9.11` hardens reverse-related View Item Collection search and card style fidelity. Generated reverse-related child Collections hide Search filter titles with `displayLabel: [null, false]` and preserve the Data List View Item `content_card_wrapper` golden card style instead of copying only the container name.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.10
+Version: 0.9.11
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.10
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.11
 ```
 
 ## What Is Included

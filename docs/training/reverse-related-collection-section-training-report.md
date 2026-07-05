@@ -152,6 +152,35 @@ Regression expectation:
 - Negative fixture: a hand-built reverse-related section with `grid_table_col_caption`, `grid_table_col_content`, and `grid_table_col_body`, but without the cloned `grid_table_col_wrapper`/template marker. Expected failure: `DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH` and/or `DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_TEMPLATE_MARKER_MISSING`.
 - Positive fixture: a reverse-related section cloned from `collection_control_grid_table`, then remapped to the parent/child lookup contract. Expected result: designer-safe, golden-reference-styled, and validator pass.
 
+## 0.9.10 Search Label And Card Style Regression Update
+
+The 0.9.10 Hospital Doctor style regression showed that cloning the grid-table wrapper is still not sufficient when the surrounding View Item section and toolbar controls are partially hand-built.
+
+Observed invalid output:
+
+- The reverse-related Collection Search filter rendered the label/title `Search items`.
+- The approved `collection_control_grid_table` golden reference hides the Search filter label with `displayLabel: [null, false]`; only the placeholder should be visible.
+- The reverse-related section's outer `content_card_wrapper` had the correct `nv_label`, but did not preserve the Data List View Item golden card styling.
+- The generated card missed the same white background, padding, border, 16px radius, shadow, full-width setting, and full-width parity metadata visible on the current-record details card above it.
+
+Correct generation contract:
+
+- Reverse-related Search filters inside `grid_table_col_operations > op_normal` must serialize `displayLabel: [null, false]`.
+- Do not emit `displayLabel: true`, omit `displayLabel`, or move the title into a visible heading for the Search filter.
+- The reverse-related section's outer `content_card_wrapper` must preserve the same Data List View Item card style contract as the standard View Item `content_card_wrapper`: `style.widthtype = [null, "1"]`, `common.padding = 28px on all sides`, white classic background, `#d8e1ef` border, 16px radius, drop shadow `rgba(15, 23, 42, 0.06)`, and `fullWidthParityWithGoldenReference: true`.
+- The generator may avoid copying source-business metadata such as `Active Loan Pipeline`, but it must not drop the style/common card properties.
+
+Hard gates:
+
+- `DATA_LIST_FORM_REVERSE_RELATED_SEARCH_LABEL_VISIBLE`: fail if any reverse-related Search filter does not have `displayLabel: [null, false]`.
+- `DATA_LIST_FORM_REVERSE_RELATED_CONTENT_CARD_STYLE_MISMATCH`: fail if the owning `content_card_wrapper` lacks the View Item golden card style properties.
+
+Regression fixtures:
+
+- Positive fixture: reverse-related section with hidden Search label and standard `content_card_wrapper` card style passes.
+- Negative fixture: Search filter with visible/missing label hiding fails.
+- Negative fixture: reverse-related `content_card_wrapper` with only layout direction/gap and no card background/border/radius/shadow fails.
+
 ## App Plan Requirement
 
 When a parent/detail lookup relationship should appear on a parent View Item form, the App Plan should include a Reverse-Related Collection Selection table:

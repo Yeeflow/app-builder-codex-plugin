@@ -101,6 +101,8 @@ try {
   expectCode("reverse-related Collection nested inside details section fails", ["--resource", writeJson("view-reverse-related-nested-details.json", reverseRelatedViewResource({ nestedInsideDetails: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_INDEPENDENT_SECTION_REQUIRED");
   expectCode("reverse-related Collection unofficial attrs fail", ["--resource", writeJson("view-reverse-related-unofficial-attrs.json", reverseRelatedViewResource({ unofficialCollectionAttrs: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_ATTRS_UNOFFICIAL");
   expectCode("reverse-related Collection partial generated-style section shape fails", ["--resource", writeJson("view-reverse-related-partial-generated-shape.json", reverseRelatedPartialShapeViewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH");
+  expectCode("reverse-related Collection content card missing golden style fails", ["--resource", writeJson("view-reverse-related-card-style-missing.json", reverseRelatedViewResource({ omitContentCardStyle: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_CONTENT_CARD_STYLE_MISMATCH");
+  expectCode("reverse-related Collection search-filter visible label fails", ["--resource", writeJson("view-reverse-related-search-label-visible.json", reverseRelatedViewResource({ visibleSearchLabel: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_LABEL_VISIBLE");
   expectCode("reverse-related Collection item dynamic-field without source 3 fails", ["--resource", writeJson("view-reverse-related-bad-item-source.json", reverseRelatedViewResource({ badItemSource: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_SOURCE_INVALID");
   expectCode("reverse-related Collection item dynamic-field extra generated bindings fail", ["--resource", writeJson("view-reverse-related-extra-item-bindings.json", reverseRelatedViewResource({ extraItemBindings: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_EXTRA_BINDINGS");
   expectCode("App Plan reverse-related Collection selection must be materialized", ["--package", writePackage("reverse-related-missing-package.yapk", decodedPackage()), "--plan", writeText("plan-reverse-related-missing-package.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED");
@@ -357,6 +359,7 @@ function reverseRelatedSection(options = {}) {
         type: "container",
         id: "reverse_related_content_card_wrapper",
         nv_label: "content_card_wrapper",
+        attrs: options.omitContentCardStyle ? { style: { direction: [null, "column"], gap: [null, "--sp--s200"] } } : reverseRelatedContentCardAttrs(),
         children: [
           {
             type: "container",
@@ -397,7 +400,14 @@ function reverseRelatedGoldenCollectionWrapper({ options = {}, collection, addBu
   const opNormal = find(wrapper, "op_normal");
   if (opNormal) {
     opNormal.children = [
-      { type: "search-filter", id: "doctor_profile_search", label: "Search items", binding: searchBinding, attrs: { placeholder: "Search doctors" } },
+      {
+        type: "search-filter",
+        id: "doctor_profile_search",
+        label: "Search items",
+        binding: searchBinding,
+        displayLabel: options.visibleSearchLabel ? [null, true] : [null, false],
+        attrs: { placeholder: "Search doctors" },
+      },
       addButton,
     ];
   }
@@ -423,6 +433,32 @@ function reverseRelatedGoldenHeaderCells() {
       { type: "heading", id: `header_text_${index + 1}`, nv_label: "grid_table_col_header_text", attrs: { headc: { title: { value: label } } } },
     ],
   }));
+}
+
+function reverseRelatedContentCardAttrs() {
+  return {
+    style: {
+      gap: [null, "--sp--s200"],
+      direction: [null, "column"],
+      widthtype: [null, "1"],
+      align_items: [null, "stretch"],
+      justify_content: [null, "flex-start"],
+    },
+    common: {
+      padding: [null, { top: 28, right: 28, bottom: 28, left: 28 }],
+      background: { normal: { type: "classic", classic: { color: "#ffffff" } } },
+      border: {
+        normal: {
+          type: "1",
+          width: [null, { top: 1, right: 1, bottom: 1, left: 1 }],
+          color: "#d8e1ef",
+          radius: [null, { top: 16, right: 16, bottom: 16, left: 16 }],
+        },
+      },
+      shadow: { normal: { type: "drop", x: 0, y: 8, blur: 20, spread: 0, color: "rgba(15, 23, 42, 0.06)" } },
+    },
+    fullWidthParityWithGoldenReference: true,
+  };
 }
 
 function reverseRelatedGoldenRowGrid({ options = {} } = {}) {
