@@ -476,6 +476,13 @@ function validateReverseRelatedOfficialSectionShape(section, collection, detail,
     ));
     return;
   }
+  if (!hasReverseRelatedStandardContentCardStyle(contentCard)) {
+    context.findings.push(error(
+      "DATA_LIST_FORM_REVERSE_RELATED_CONTENT_CARD_STYLE_MISMATCH",
+      "Reverse-related View Item Collection sections must preserve the Data List View Item content_card_wrapper golden reference card style: full width, white background, padding, border radius, border, and shadow.",
+      { source: context.source, path: pointerForNode(resource, contentCard), detail },
+    ));
+  }
   const collectionTemplate = stringValue(collection?.collectionTemplateId || collection?.derivedFromCollectionTemplate || collection?.attrs?.collectionTemplateId || collection?.attrs?.derivedFromCollectionTemplate);
   if (collectionTemplate !== "collection_control_grid_table") {
     context.findings.push(error(
@@ -493,6 +500,15 @@ function validateReverseRelatedOfficialSectionShape(section, collection, detail,
       { source: context.source, path: pointerForNode(resource, operations || section), detail },
     ));
   }
+  for (const search of searchControls) {
+    if (!isDisplayLabelHidden(search)) {
+      context.findings.push(error(
+        "DATA_LIST_FORM_REVERSE_RELATED_SEARCH_LABEL_VISIBLE",
+        "Reverse-related Collection search-filter controls must preserve the golden reference hidden label shape: displayLabel = [null, false]. The runtime input may show a placeholder, but the Title label must not render.",
+        { source: context.source, path: pointerForNode(resource, search), detail },
+      ));
+    }
+  }
   if (detail.allowAdd !== false && !addButtons.length) {
     context.findings.push(error(
       "DATA_LIST_FORM_REVERSE_RELATED_ADD_OFFICIAL_SLOT_MISSING",
@@ -500,6 +516,36 @@ function validateReverseRelatedOfficialSectionShape(section, collection, detail,
       { source: context.source, path: pointerForNode(resource, operations || section), detail },
     ));
   }
+}
+
+function hasReverseRelatedStandardContentCardStyle(card) {
+  const attrs = card?.attrs || {};
+  const style = attrs.style || {};
+  const common = attrs.common || {};
+  const backgroundColor = common.background?.normal?.classic?.color;
+  const border = common.border?.normal || {};
+  const radius = border.radius?.[1] || {};
+  const shadow = common.shadow?.normal || {};
+  const padding = common.padding?.[1] || {};
+  return style.widthtype?.[1] === "1"
+    && backgroundColor === "#ffffff"
+    && border.type === "1"
+    && border.color === "#d8e1ef"
+    && radius.top === 16
+    && radius.right === 16
+    && radius.bottom === 16
+    && radius.left === 16
+    && padding.top === 28
+    && padding.right === 28
+    && padding.bottom === 28
+    && padding.left === 28
+    && shadow.type === "drop"
+    && shadow.color === "rgba(15, 23, 42, 0.06)";
+}
+
+function isDisplayLabelHidden(node) {
+  const value = node?.displayLabel ?? node?.attrs?.displayLabel;
+  return Array.isArray(value) && value[0] === null && value[1] === false;
 }
 
 function findReverseRelatedCollectionWrapper(section) {

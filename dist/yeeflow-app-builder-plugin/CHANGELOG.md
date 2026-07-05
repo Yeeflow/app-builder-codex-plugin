@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.11
+
+- Release reverse-related View Item Collection search and card style fidelity.
+- Hide reverse-related Collection Search filter titles with `displayLabel: [null, false]` while keeping the placeholder visible.
+- Preserve the Data List View Item `content_card_wrapper` golden card style for reverse-related sections, including white background, 28px padding, `#d8e1ef` border, 16px radius, drop shadow, and full-width parity.
+- Add hard gates for visible reverse-related Search labels and shallow card wrappers that copy `nv_label` without golden card styling.
+- Extend source/dist regression coverage and training guidance for the 0.9.10 partial stylefix failure.
+
 ## 0.9.10
 
 - Release reverse-related View Item Collection grid-table golden reference fidelity.
