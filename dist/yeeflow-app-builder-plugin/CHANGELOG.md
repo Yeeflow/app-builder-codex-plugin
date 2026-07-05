@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.13
+
+- Release Workflow layout golden reference v2 hardening.
+- Enforce same-horizontal-lane grouping for Approval Assignment Task Rejected paths that share one `EndRejectEvent`; tasks on different y lanes must use separate rejection endpoints.
+- Keep the existing maximum of three approval-task rejected sources per shared End with Rejection node and preserve centered above/below placement.
+- Add 16:9 Designer canvas guidance and hard gates that reject large single-row sprawl and workflows with more than five vertical rows.
+- Extend source/dist workflow layout regression fixtures for cross-lane shared rejection, too-many-rows, and single-row-sprawl failures.
+
 ## 0.9.12
 
 - Release reverse-related View Item Collection Search variable and Add button contract hardening.

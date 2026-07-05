@@ -32,17 +32,78 @@ try {
   }), "WORKFLOW_LAYOUT_NODE_POSITION_TOO_CLOSE");
   cases.push({ case: "fail: near-collision workflow node positions", status: "pass" });
 
-  expectCode("rejected flow without vertices fails", mutateReadable("rejected-no-vertices.json", (def) => {
-    const rejected = def.childshapes.find((shape) => shape.stencil.id === "SequenceFlow" && shape.properties.name === "Rejected");
-    delete rejected.vertices;
-  }), "WORKFLOW_LAYOUT_REJECTED_FLOW_VERTICES_MISSING");
-  cases.push({ case: "fail: rejected flow missing vertices", status: "pass" });
+  expectCode("approval task missing rejected outcome fails", mutateReadable("approval-missing-rejected.json", (def) => {
+    def.childshapes = def.childshapes.filter((shape) => shape.id !== "flow-rejected");
+  }), "WORKFLOW_LAYOUT_APPROVAL_TASK_OUTCOME_MISSING");
+  cases.push({ case: "fail: approval assignment task missing rejected outcome", status: "pass" });
 
-  expectCode("cross-lane flow without vertices fails", mutateReadable("cross-lane-no-vertices.json", (def) => {
-    const crossLane = def.childshapes.find((shape) => shape.stencil.id === "SequenceFlow" && shape.properties.name === "Approved");
-    delete crossLane.vertices;
-  }), "WORKFLOW_LAYOUT_CROSS_LANE_FLOW_VERTICES_MISSING");
-  cases.push({ case: "fail: cross-lane flow missing vertices", status: "pass" });
+  expectCode("complete task missing completed outcome fails", mutateReadable("complete-missing-completed.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    review.properties.tasktype = "complete";
+  }), "WORKFLOW_LAYOUT_COMPLETE_TASK_OUTCOME_MISSING");
+  cases.push({ case: "fail: complete assignment task missing completed outcome", status: "pass" });
+
+  expectCode("complete task misspelled completed outcome fails", mutateReadable("complete-misspelled-completed.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    review.properties.tasktype = "complete";
+    def.childshapes.push(flow("flow-misspelled-completed", review, end, "comepleted"));
+  }), "WORKFLOW_LAYOUT_COMPLETE_TASK_OUTCOME_MISSPELLED");
+  cases.push({ case: "fail: complete assignment task outcome misspelling", status: "pass" });
+
+  expectCode("business branch directly from assignment task fails", mutateReadable("direct-business-branch.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    def.childshapes.push(flow("flow-amount-high", review, end, "Amount >= 5000"));
+    def.childshapes.push(flow("flow-amount-low", review, create, "Amount < 5000"));
+  }), "WORKFLOW_LAYOUT_BUSINESS_BRANCH_GATEWAY_MISSING");
+  cases.push({ case: "fail: business condition fan-out bypasses InclusiveGateway", status: "pass" });
+
+  expectCode("backward return flow without vertices fails", mutateReadable("backward-return-no-vertices.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    def.childshapes.push(flow("flow-return", create, review, "Reject and return"));
+  }), "WORKFLOW_LAYOUT_BACKWARD_FLOW_VERTICES_MISSING");
+  cases.push({ case: "fail: backward return flow missing vertices", status: "pass" });
+
+  expectCode("end reject collecting too many sources fails", mutateReadable("end-reject-too-many.json", (def) => {
+    const reject = def.childshapes.find((shape) => shape.id === "reject");
+    for (let index = 0; index < 3; index += 1) {
+      const extra = node(`extra-review-${index}`, "MultiAssignmentTask", `Extra Review ${index + 1}`, 720 + index * 305, 520);
+      def.childshapes.push(extra);
+      def.childshapes.push(flow(`flow-extra-rejected-${index}`, extra, reject, "Rejected"));
+      def.childshapes.push(flow(`flow-extra-approved-${index}`, extra, def.childshapes.find((shape) => shape.id === "end"), "Approved"));
+    }
+  }), "WORKFLOW_LAYOUT_END_REJECT_TOO_MANY_SOURCES");
+  cases.push({ case: "fail: end reject collects more than three approval sources", status: "pass" });
+
+  expectCode("end reject shared across different horizontal lanes fails", mutateReadable("end-reject-cross-lane.json", (def) => {
+    const reject = def.childshapes.find((shape) => shape.id === "reject");
+    const extra = node("extra-review-cross-lane", "MultiAssignmentTask", "Extra Cross Lane Review", 720, 360);
+    def.childshapes.push(extra);
+    def.childshapes.push(flow("flow-extra-cross-lane-rejected", extra, reject, "Rejected", [{ x: 860, y: 360 }, { x: 860, y: 520 }]));
+    def.childshapes.push(flow("flow-extra-cross-lane-approved", extra, def.childshapes.find((shape) => shape.id === "end"), "Approved"));
+  }), "WORKFLOW_LAYOUT_END_REJECT_SOURCE_LANES_MISMATCH");
+  cases.push({ case: "fail: end reject shared by approval tasks on different horizontal lanes", status: "pass" });
+
+  expectCode("workflow using more than five vertical rows fails", mutateReadable("too-many-rows.json", (def) => {
+    for (let index = 0; index < 4; index += 1) {
+      def.childshapes.push(node(`extra-row-${index}`, "ContentList", `Extra Row ${index + 1}`, 100 + index * 320, 700 + index * 120));
+    }
+  }), "WORKFLOW_LAYOUT_TOO_MANY_VERTICAL_ROWS");
+  cases.push({ case: "fail: workflow exceeds five vertical rows", status: "pass" });
+
+  expectCode("large workflow spread on one long horizontal line fails", mutateReadable("single-row-sprawl.json", (def) => {
+    const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
+    nodes.forEach((node, index) => {
+      node.position = { x: 100 + index * 360, y: 220 };
+    });
+    for (let index = 0; index < 6; index += 1) {
+      def.childshapes.push(node(`extra-sprawl-${index}`, "ContentList", `Extra Sprawl ${index + 1}`, 1900 + index * 360, 220));
+    }
+  }), "WORKFLOW_LAYOUT_SINGLE_ROW_SPRAWL");
+  cases.push({ case: "fail: large workflow uses a single over-wide horizontal row", status: "pass" });
 
   expectCode("compressed complex graph fails", mutateReadable("compressed.json", (def) => {
     const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
@@ -104,7 +165,7 @@ function readableWorkflow() {
     review: node("review", "MultiAssignmentTask", "Review", 420, 220),
     create: node("create", "ContentList", "Create record", 720, 360),
     end: node("end", "EndNoneEvent", "End", 1020, 220),
-    reject: node("reject", "EndRejectEvent", "Rejected", 1020, 520),
+    reject: node("reject", "EndRejectEvent", "Rejected", 420, 520),
   };
   return {
     graphposition: { x: -60, y: 60, width: 1240, height: 640 },
