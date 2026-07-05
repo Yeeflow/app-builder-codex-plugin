@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 
 const ROOT_ALLOWLIST = new Set([
@@ -80,6 +81,30 @@ function gitUntrackedFiles() {
     .map((record) => record.slice(3));
 }
 
+function isGitCheckout() {
+  const result = spawnSync("git", ["rev-parse", "--is-inside-work-tree"], { encoding: "utf8" });
+  return result.status === 0 && result.stdout.trim() === "true";
+}
+
+function listFilesFromDisk(root = ".") {
+  const files = [];
+  const skipDirs = new Set([".git", "node_modules"]);
+  function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (skipDirs.has(entry.name)) continue;
+      const fullPath = path.join(dir, entry.name);
+      const relPath = path.relative(root, fullPath).split(path.sep).join("/");
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else if (entry.isFile()) {
+        files.push(relPath);
+      }
+    }
+  }
+  walk(root);
+  return files.sort();
+}
+
 function isDeprecatedRootArtifact(fileName) {
   return (
     /^generate-/.test(fileName) ||
@@ -96,8 +121,9 @@ function isDuplicateCopyArtifact(file) {
   return /(^|\/)[^/]* [2-9]\d*(?:\.[^/.]+)?$/.test(file);
 }
 
-const files = gitLsFiles();
-const untrackedFiles = gitUntrackedFiles();
+const gitCheckout = isGitCheckout();
+const files = gitCheckout ? gitLsFiles() : listFilesFromDisk(".");
+const untrackedFiles = gitCheckout ? gitUntrackedFiles() : [];
 const findings = [];
 const sourceRootFiles = files.filter((file) => !file.includes("/"));
 const distRootFiles = files
@@ -157,10 +183,13 @@ for (const file of untrackedFiles.filter(isDuplicateCopyArtifact)) {
 
 const requiredDirs = [
   "tools/generators",
-  "docs/studies/root-runtime-proofs",
-  "fixtures/runtime-test-specs",
-  "dist/yeeflow-app-builder-plugin/tools/generators",
 ];
+
+if (gitCheckout) {
+  requiredDirs.push("docs/studies/root-runtime-proofs");
+  requiredDirs.push("fixtures/runtime-test-specs");
+  requiredDirs.push("dist/yeeflow-app-builder-plugin/tools/generators");
+}
 
 for (const dir of requiredDirs) {
   const hasTrackedFile = files.some((file) => file.startsWith(`${dir}/`));
@@ -175,6 +204,7 @@ for (const dir of requiredDirs) {
 
 const report = {
   status: findings.length ? "fail" : "pass",
+  mode: gitCheckout ? "source-checkout" : "installed-cache-root",
   sourceRootFileCount: sourceRootFiles.length,
   distRootFileCount: distRootFiles.length,
   trackedDuplicateCopyCount: files.filter(isDuplicateCopyArtifact).length,
