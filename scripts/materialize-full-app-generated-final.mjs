@@ -1939,78 +1939,49 @@ function appendReverseRelatedCollectionSections(resource, { planDemand, listMeta
 }
 
 function buildReverseRelatedCollectionSection({ record, childMeta, hostListName, formName, rootListSetId, detailLayoutId, index }) {
-  const templateId = GRID_TABLE_TEMPLATE_IDS.has(record.collectionTemplate) ? record.collectionTemplate : "collection_control_grid_table";
   const sectionId = `${slugify(formName)}_${slugify(record.childList)}_reverse_related_section_${index + 1}`;
   const binding = `filter_${slugify(record.childList)}_${index + 1}`.replace(/-/g, "_");
   const currentIdExpr = currentHostListDataIdExpression();
-  const collectionRoot = buildCollectionTemplateInstance({
-    templateId,
-    dashboardName: formName,
-    datasetRegion: record.sectionTitle || record.childList,
-    listName: record.childList,
-    rootListSetId,
-    listId: childMeta.listId,
-    listMeta: childMeta,
-    detailLayoutId,
-    filterBindings: [],
-    collectionId: `${sectionId}_collection`,
-  });
-  removeDescendantControls(collectionRoot, (node) => (
-    String(node?.type || "") === "search-filter"
-    || isTemplateAddActionButton(node)
-    || isReverseRelatedOperationResidue(node)
-  ));
-  const collection = findFirstByType(collectionRoot, "collection");
-  if (collection) {
-    collection.reverseRelatedCollection = true;
-    collection.attrs = normalizeReverseRelatedCollectionAttrs(collection.attrs);
-    collection.attrs.data = {
-      ...(collection.attrs.data || {}),
-      list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList },
-      filter: [{
-        left: record.childLookupField,
-        field: record.childLookupField,
-        op: "=",
-        operator: "=",
-        right: [currentIdExpr],
-        value: [currentIdExpr],
-      }],
-      fulltext: [{
-        fields: [primaryFieldName(childMeta)],
-        field: primaryFieldName(childMeta),
-        value: [{ exprType: "variable", valueType: "string", id: `__filter_${binding}`, type: "expr", name: binding }],
-      }],
-    };
-    normalizeReverseRelatedCollectionItemContext(collection, childMeta);
-  }
+  const lookupField = resolveFieldSpec(childMeta, record.childLookupField)?.fieldName || record.childLookupField;
+  const displayFields = fieldsForDynamicControls(childMeta).slice(0, 6);
+  const searchFields = displayFields.map((field) => field.fieldName).filter(Boolean).slice(0, 3);
+  const sectionTitle = record.sectionTitle || `${record.childList} Related Records`;
   const search = {
-    id: `${sectionId}_search`,
+    id: crypto.randomUUID(),
     type: "search-filter",
-    label: "Search",
+    label: "Search items",
     name: `Search ${record.childList}`,
     title: `Search ${record.childList}`,
-    nv_label: "reverse_related_search_filter",
     binding,
     attrs: {
-      binding,
-      placeholder: `Search ${record.childList}`,
-      data: {
-        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList },
-        field: primaryFieldName(childMeta),
+      common: {
+        positioning: {
+          widthtype: [null, "3", "1"],
+          width: [null, 200],
+        },
+      },
+      placeholder: "Search items",
+      edit: {
+        pcolor: "var(--c--neutral-dark-hover)",
+        normal: {
+          border: {
+            radius: [null, { top: "--sp--s100", right: "--sp--s100", bottom: "--sp--s100", left: "--sp--s100" }],
+          },
+        },
       },
     },
   };
   const operationsChildren = [search];
   if (!/^no|false|not/i.test(record.addRecord || "")) {
-    operationsChildren.push(buildReverseRelatedAddButton({ record, childMeta, sectionId, currentIdExpr }));
+    operationsChildren.push(buildReverseRelatedAddButton({ record: { ...record, childLookupField: lookupField }, childMeta, sectionId, currentIdExpr, rootListSetId }));
   }
   return {
-    id: sectionId,
+    id: crypto.randomUUID(),
     type: "container",
     label: "Container",
-    name: record.sectionTitle || `${record.childList} Related Records`,
-    title: record.sectionTitle || `${record.childList} Related Records`,
-    nv_label: "reverse_related_collection_section",
+    name: sectionTitle,
+    title: sectionTitle,
+    nv_label: "1_columns_section",
     reverseRelatedCollectionSection: true,
     attrs: {
       reverseRelatedCollectionSection: true,
@@ -2018,48 +1989,319 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
         hostList: hostListName,
         childList: record.childList,
         childListId: stringId(childMeta.listId),
-        childLookupField: record.childLookupField,
+        childLookupField: lookupField,
+        childLookupFieldResolved: lookupField,
+        childLookupFieldPlanned: record.childLookupField,
         allowAdd: !/^no|false|not/i.test(record.addRecord || ""),
       },
       style: {
         direction: [null, "column"],
         gap: [null, "--sp--s200"],
+      },
+    },
+    children: [
+      {
+        id: crypto.randomUUID(),
+        type: "container",
+        label: "Container",
+        nv_label: "content_card_wrapper",
+        attrs: {
+          style: {
+            direction: [null, "column"],
+            gap: [null, "--sp--s200"],
+            justify_content: [null, "flex-start"],
+            align_items: [null, "stretch"],
+          },
+        },
+        children: [
+          {
+            id: crypto.randomUUID(),
+            type: "container",
+            label: "Container",
+            nv_label: "section_title_area",
+            attrs: {
+              style: {
+                direction: [null, "row"],
+                gap: [null, "--sp--s200"],
+                justify_content: [null, "space-between"],
+                align_items: [null, "center"],
+              },
+            },
+            children: [
+              {
+                id: crypto.randomUUID(),
+                type: "container",
+                label: "Container",
+                nv_label: "section_title_header",
+                attrs: {
+                  style: {
+                    direction: [null, "column"],
+                    gap: [null, "--sp--s075"],
+                    justify_content: [null, "flex-start"],
+                    align_items: [null, "flex-start"],
+                  },
+                },
+                children: [
+                  {
+                    id: crypto.randomUUID(),
+                    type: "heading",
+                    label: "Text",
+                    nv_label: "section_title_text",
+                    attrs: { headc: { title: { value: sectionTitle, variable: null } }, heads: { ty: [null, "h5-semi-bold"] } },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: crypto.randomUUID(),
+            type: "container",
+            label: "Container",
+            nv_label: "section_content_area",
+            attrs: {
+              style: {
+                direction: [null, "column"],
+                gap: [null, "--sp--s200"],
+                justify_content: [null, "flex-start"],
+                align_items: [null, "flex-start"],
+              },
+            },
+            children: [
+              buildOfficialReverseRelatedCollectionWrapper({
+                sectionId,
+                record,
+                childMeta,
+                rootListSetId,
+                lookupField,
+                currentIdExpr,
+                binding,
+                searchFields,
+                displayFields,
+                sectionTitle,
+                operationsChildren,
+              }),
+            ],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function buildOfficialReverseRelatedCollectionWrapper({ sectionId, record, childMeta, rootListSetId, lookupField, currentIdExpr, binding, searchFields, displayFields, sectionTitle, operationsChildren }) {
+  return {
+    id: crypto.randomUUID(),
+    type: "container",
+    label: "Container",
+    name: sectionTitle,
+    title: sectionTitle,
+    nv_label: `related_${slugify(record.childList)}_${slugify(lookupField)}_collection_wrapper`.replace(/-/g, "_"),
+    attrs: {
+      style: {
+        direction: [null, "column"],
+        gap: [null, "--sp--s150"],
+        justify_content: [null, "flex-start"],
         align_items: [null, "stretch"],
       },
     },
     children: [
       {
-        id: `${sectionId}_title_area`,
+        id: crypto.randomUUID(),
         type: "container",
         label: "Container",
-        nv_label: "section_title_area",
+        nv_label: "grid_table_col_caption",
+        attrs: {
+          style: {
+            direction: [null, "row"],
+            gap: [null, "--sp--s200"],
+            justify_content: [null, "space-between"],
+            align_items: [null, "center"],
+          },
+        },
         children: [
           {
-            id: `${sectionId}_title_header`,
+            id: crypto.randomUUID(),
             type: "container",
             label: "Container",
-            nv_label: "section_title_header",
+            nv_label: "grid_table_col_title_wrapper",
+            attrs: { style: { direction: [null, "row"], gap: [null, "--sp--s100"], align_items: [null, "center"] } },
             children: [
               {
-                id: `${sectionId}_title`,
+                id: crypto.randomUUID(),
                 type: "heading",
                 label: "Text",
-                nv_label: "section_title_text",
-                attrs: { headc: { title: { value: record.sectionTitle || `${record.childList} Related Records`, variable: null } }, heads: { ty: [null, "h5-semi-bold"] } },
+                name: sectionTitle,
+                title: sectionTitle,
+                nv_label: "grid_table_col_title",
+                attrs: {
+                  headc: { title: { value: sectionTitle, variable: null } },
+                  heads: { ty: [null, "l-medium"] },
+                  common: { positioning: { widthtype: [null, "2"] } },
+                },
               },
             ],
           },
           {
-            id: `${sectionId}_operations`,
+            id: crypto.randomUUID(),
             type: "container",
             label: "Container",
-            nv_label: "Operations",
-            children: operationsChildren,
+            nv_label: "grid_table_col_operations",
+            attrs: {
+              style: { direction: [null, "row"], gap: [null, "--sp--s150"], justify_content: [null, "flex-end"], align_items: [null, "center"] },
+              control_display: [],
+            },
+            children: [
+              {
+                id: crypto.randomUUID(),
+                type: "container",
+                label: "Container",
+                nv_label: "op_normal",
+                attrs: { style: { direction: [null, "row"], gap: [null, "--sp--s150"], align_items: [null, "center"] }, control_display: [] },
+                children: operationsChildren,
+              },
+            ],
           },
         ],
       },
-      collectionRoot,
+      {
+        id: crypto.randomUUID(),
+        type: "container",
+        label: "Container",
+        nv_label: "grid_table_col_content",
+        attrs: {
+          style: { direction: [null, "column"], gap: [null, "--sp--s0"], justify_content: [null, "flex-start"], align_items: [null, "stretch"] },
+          control_display: [],
+        },
+        children: [
+          buildReverseRelatedHeaderGrid(displayFields),
+          buildReverseRelatedCollection({
+            record,
+            childMeta,
+            rootListSetId,
+            lookupField,
+            currentIdExpr,
+            binding,
+            searchFields,
+            displayFields,
+          }),
+        ],
+      },
     ],
+  };
+}
+
+function buildReverseRelatedHeaderGrid(displayFields) {
+  return {
+    id: crypto.randomUUID(),
+    type: "flex_grid",
+    label: "Grid",
+    nv_label: "grid_table_col_header",
+    attrs: reverseRelatedGridAttrs(displayFields.length),
+    children: displayFields.map((field, index) => ({
+      id: crypto.randomUUID(),
+      type: "container",
+      label: "Container",
+      nv_label: index === 0 ? "grid_table_col_header_title_column" : "grid_table_col_header_column",
+      attrs: { style: { direction: [null, "row"], align_items: [null, "center"] }, common: { positioning: { widthtype: [null, "2"] } } },
+      children: [
+        {
+          id: crypto.randomUUID(),
+          type: "heading",
+          label: "Text",
+          title: field.displayName || field.fieldName,
+          nv_label: "grid_table_col_header_text",
+          attrs: {
+            heads: { ty: [null, "xs-medium"] },
+            headc: { title: { value: field.displayName || field.fieldName, variable: null } },
+            common: { positioning: { widthtype: [null, "2"] } },
+          },
+        },
+      ],
+    })),
+  };
+}
+
+function buildReverseRelatedCollection({ record, childMeta, rootListSetId, lookupField, currentIdExpr, binding, searchFields, displayFields }) {
+  return {
+    id: crypto.randomUUID(),
+    type: "collection",
+    label: "Collection",
+    nv_label: "grid_table_col_body",
+    attrs: {
+      data: {
+        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList, ListSetID: stringId(rootListSetId) },
+        filter: [{
+          key: crypto.randomUUID(),
+          pre: "and",
+          left: lookupField,
+          op: "0",
+          right: [clone(currentIdExpr)],
+          showCus: false,
+        }],
+        fulltext: [{
+          fields: searchFields.length ? searchFields : [primaryFieldName(childMeta)],
+          value: [{ exprType: "variable", valueType: "string", id: `__filter_${binding}`, type: "expr", name: binding }],
+        }],
+        link: "default",
+      },
+      layout: {},
+      actions: [],
+      pagination: {},
+    },
+    children: [
+      {
+        id: crypto.randomUUID(),
+        type: "flex_grid",
+        label: "Grid",
+        nv_label: "grid_col_item",
+        attrs: reverseRelatedGridAttrs(displayFields.length),
+        children: displayFields.map((field, index) => ({
+          id: crypto.randomUUID(),
+          type: "container",
+          label: "Container",
+          nv_label: index === 0 ? "grid_table_col_item_title_column" : "grid_table_col_item_column",
+          attrs: { style: { direction: [null, "row"], align_items: [null, "center"] }, common: { positioning: { widthtype: [null, "2"] } } },
+          children: [buildReverseRelatedDynamicField(field, index)],
+        })),
+      },
+    ],
+  };
+}
+
+function buildReverseRelatedDynamicField(field, index) {
+  return {
+    id: crypto.randomUUID(),
+    type: "dynamic-field",
+    label: "Dynamic field",
+    name: field.displayName || field.fieldName,
+    title: field.displayName || field.fieldName,
+    nv_label: index === 0 ? "reverse_related_item_title" : `reverse_related_item_field_${index + 1}`,
+    attrs: {
+      item_style: {
+        ty: {
+          size: [null, index === 0 ? 14 : 12],
+          wei: index === 0 ? "500" : "0",
+        },
+      },
+      source: "3",
+      "obj-f": field.fieldName,
+      common: { positioning: { widthtype: [null, "2"] } },
+    },
+  };
+}
+
+function reverseRelatedGridAttrs(columnCount) {
+  const count = Math.max(1, Math.min(6, columnCount || 1));
+  return {
+    ver: "2",
+    canFold: false,
+    columns: Array.from({ length: count }, () => ({ width: "1fr" })),
+    rows: [{ height: "auto" }],
+    cgap: [null, "--sp--s200"],
+    cgapU: "token",
+    rgap: [null, "--sp--s0"],
+    rgapU: "token",
+    content: {},
   };
 }
 
@@ -2147,7 +2389,7 @@ function isReverseRelatedOperationResidue(node) {
   return false;
 }
 
-function buildReverseRelatedAddButton({ record, childMeta, sectionId, currentIdExpr }) {
+function buildReverseRelatedAddButton({ record, childMeta, sectionId, currentIdExpr, rootListSetId }) {
   const actionId = crypto.randomUUID();
   return {
     id: `${sectionId}_add_button`,
@@ -2161,7 +2403,7 @@ function buildReverseRelatedAddButton({ record, childMeta, sectionId, currentIdE
       operation: "add",
       control_action: actionId,
       data: {
-        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList },
+        list: { AppID: 41, ListID: stringId(childMeta.listId), Type: 1, Title: record.childList, ListSetID: stringId(rootListSetId) },
       },
       passvalues: [{
         Name: record.childLookupField,

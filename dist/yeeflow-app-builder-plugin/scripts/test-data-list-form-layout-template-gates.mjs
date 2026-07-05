@@ -26,6 +26,7 @@ try {
   expectPass("View item reverse-related Collection section with search and Add passvalues passes", ["--resource", writeJson("view-reverse-related-valid.json", reverseRelatedViewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"]);
   expectPass("generated package with New/Edit and View templates passes", ["--package", writePackage("valid-package.yapk", decodedPackage())]);
   expectPass("App Plan reverse-related Collection selection must match generated package", ["--package", writePackage("reverse-related-package.yapk", decodedPackage({ viewResource: reverseRelatedViewResource(), viewTitle: "Specialties View Item" })), "--plan", writeText("plan-reverse-related-valid.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))]);
+  expectPass("App Plan reverse-related display lookup name may match generated resolved lookup alias", ["--package", writePackage("reverse-related-planned-alias-package.yapk", decodedPackage({ viewResource: reverseRelatedViewResource({ plannedLookupField: "Specialty" }), viewTitle: "Specialties View Item" })), "--plan", writeText("plan-reverse-related-planned-alias-valid.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true, reverseLookupField: "Specialty", reverseDefaultValue: "Specialty = current ListDataID" }))]);
   expectPass("generated package with full-page Workbench View template passes", ["--package", writePackage("workbench-package.yapk", decodedPackage({ viewResource: workbenchResource(), viewTitle: "Asset Workbench Details", layoutView: { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view", opentype: { view: "new" }, modalsize: {} } }))]);
   expectPass("generated-final package coverage suppresses stale App Plan missing custom form rows", ["--package", writePackage("valid-package-stale-plan.yapk", decodedPackage()), "--plan", writeText("plan-stale-missing-rows-with-valid-package.md", appPlan({ omitNewEditSelection: true, omitViewSelection: true }))]);
   expectPass("generated-final Workbench package coverage proves Full page even when older App Plan wording omits it", ["--package", writePackage("workbench-package-stale-plan.yapk", decodedPackage({ viewResource: workbenchResource(), viewTitle: "Asset Workbench Details", layoutView: { add: "layout-new-edit", edit: "layout-new-edit", view: "layout-view", opentype: { view: "new" }, modalsize: {} } })), "--plan", writeText("plan-workbench-stale-full-page-wording-with-valid-package.md", appPlan({ viewTemplate: WORKBENCH_TEMPLATE_ID, viewReason: "Workbench related context" }))]);
@@ -99,7 +100,9 @@ try {
   expectCode("reverse-related Collection row dropbar operations fail", ["--resource", writeJson("view-reverse-related-row-dropbar.json", reverseRelatedViewResource({ includeDropbar: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ROW_OPERATION_UNPROVEN");
   expectCode("reverse-related Collection nested inside details section fails", ["--resource", writeJson("view-reverse-related-nested-details.json", reverseRelatedViewResource({ nestedInsideDetails: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_INDEPENDENT_SECTION_REQUIRED");
   expectCode("reverse-related Collection unofficial attrs fail", ["--resource", writeJson("view-reverse-related-unofficial-attrs.json", reverseRelatedViewResource({ unofficialCollectionAttrs: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_COLLECTION_ATTRS_UNOFFICIAL");
+  expectCode("reverse-related Collection partial generated-style section shape fails", ["--resource", writeJson("view-reverse-related-partial-generated-shape.json", reverseRelatedPartialShapeViewResource()), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_OFFICIAL_SECTION_SHAPE_MISMATCH");
   expectCode("reverse-related Collection item dynamic-field without source 3 fails", ["--resource", writeJson("view-reverse-related-bad-item-source.json", reverseRelatedViewResource({ badItemSource: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_SOURCE_INVALID");
+  expectCode("reverse-related Collection item dynamic-field extra generated bindings fail", ["--resource", writeJson("view-reverse-related-extra-item-bindings.json", reverseRelatedViewResource({ extraItemBindings: true })), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_REVERSE_RELATED_ITEM_CONTEXT_EXTRA_BINDINGS");
   expectCode("App Plan reverse-related Collection selection must be materialized", ["--package", writePackage("reverse-related-missing-package.yapk", decodedPackage()), "--plan", writeText("plan-reverse-related-missing-package.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED");
   expectCode("App Plan multiple reverse-related Collection sections must all be materialized", ["--package", writePackage("reverse-related-multi-missing-second.yapk", decodedPackage({ listName: "Departments", titleFieldLabel: "Department Name", viewTitle: "Departments View Item", viewResource: reverseRelatedViewResource() })), "--plan", writeText("plan-reverse-related-multi-missing-second.md", multiReverseRelatedAppPlan())], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_NOT_MATERIALIZED");
   expectCode("App Plan reverse-related default must use current ListDataID", ["--plan", writeText("plan-reverse-related-bad-default.md", appPlan({ listName: "Specialties", titleFieldLabel: "Specialty Name", viewFormName: "Specialties View Item", reverseRelated: true, reverseDefaultValue: "Text3 = Specialty Name" }))], "DATA_LIST_FORM_REVERSE_RELATED_APP_PLAN_DEFAULT_VALUE_INVALID");
@@ -226,10 +229,51 @@ function reverseRelatedViewResource(options = {}) {
   return resource;
 }
 
+function reverseRelatedPartialShapeViewResource() {
+  const resource = viewResource();
+  const section = reverseRelatedSection();
+  const collection = find(section, "grid_table_col_body");
+  content(resource).children.push({
+    type: "container",
+    id: "reverse_related_collection_section",
+    nv_label: "1_columns_section",
+    attrs: {
+      reverseRelatedCollectionSection: true,
+      hostList: "Specialties",
+      childList: "Doctor Profiles",
+      childListId: "1909200000000000200",
+      childLookupField: "Text3",
+      allowAdd: true,
+    },
+    children: [
+      { type: "container", id: "section_title_area", nv_label: "section_title_area", children: [
+        { type: "container", id: "section_title_header", nv_label: "section_title_header", children: [] },
+        { type: "container", id: "Operations", nv_label: "Operations", children: [
+          { type: "search-filter", id: "doctor_profile_search", label: "Search items", binding: "__filter_filter_doctors", attrs: { placeholder: "Search doctors" } },
+          {
+            type: "action_button",
+            id: "add_doctor_profile",
+            label: "Add doctor",
+            attrs: {
+              "action-type": "5",
+              control_action: "action-add-doctor-profile",
+              data: { list: { AppID: 41, ListID: "1909200000000000200", Type: 1, Title: "Doctor Profiles" } },
+              passvalues: [{ Name: "Text3", Value: [listDataIdExpr("List Fields:Id")] }],
+            },
+          },
+        ] },
+      ] },
+      collection,
+    ],
+  });
+  return resource;
+}
+
 function reverseRelatedSection(options = {}) {
   const searchBinding = "__filter_filter_doctors";
   const childListId = "1909200000000000200";
   const lookupField = "Text3";
+  const plannedLookupField = options.plannedLookupField || lookupField;
   const collection = {
     type: "collection",
     id: "doctor_profiles_collection",
@@ -252,8 +296,8 @@ function reverseRelatedSection(options = {}) {
       pagination: {},
     },
     children: [
-      { type: "container", id: "doctor_profile_row", nv_label: "grid_table_col_item", children: [
-        { type: "dynamic-field", id: "doctor_profile_title", nv_label: "doctor_profile_title", field: "Title", attrs: { source: options.badItemSource ? "1" : "3", "obj-f": "Title", field: "Title" } },
+      { type: "flex_grid", id: "doctor_profile_row", nv_label: "grid_col_item", children: [
+        { type: "dynamic-field", id: "doctor_profile_title", nv_label: "doctor_profile_title", attrs: { source: options.badItemSource ? "1" : "3", "obj-f": "Title", ...(options.extraItemBindings ? { field: "Title", data: { field: "Title" } } : {}) } },
         ...(options.includeDropbar ? [{
           type: "dropbar",
           id: "grid_table_col_item_op_menu",
@@ -290,34 +334,102 @@ function reverseRelatedSection(options = {}) {
   return {
     type: "container",
     id: "reverse_related_collection_section",
-    nv_label: "reverse_related_collection_section",
+    nv_label: "1_columns_section",
     attrs: {
       reverseRelatedCollectionSection: true,
       hostList: "Specialties",
       childList: "Doctor Profiles",
       childListId,
       childLookupField: lookupField,
+      reverseRelated: {
+        hostList: "Specialties",
+        childList: "Doctor Profiles",
+        childListId,
+        childLookupField: lookupField,
+        childLookupFieldResolved: lookupField,
+        childLookupFieldPlanned: plannedLookupField,
+        allowAdd: true,
+      },
       allowAdd: true,
     },
     children: [
       {
         type: "container",
-        id: "grid_table_col_caption",
-        nv_label: "grid_table_col_caption",
+        id: "reverse_related_content_card_wrapper",
+        nv_label: "content_card_wrapper",
         children: [
-          { type: "heading", id: "grid_table_col_title", nv_label: "grid_table_col_title", attrs: { headc: { title: { value: "Doctors in this Specialty" } }, heads: { ty: [null, "l-medium"] } } },
           {
             type: "container",
-            id: "grid_table_col_operations",
-            nv_label: "grid_table_col_operations",
+            id: "reverse_related_section_title_area",
+            nv_label: "section_title_area",
             children: [
-              { type: "search-filter", id: "doctor_profile_search", label: "Search items", binding: searchBinding, attrs: { placeholder: "Search doctors" } },
-              addButton,
+              {
+                type: "container",
+                id: "reverse_related_section_title_header",
+                nv_label: "section_title_header",
+                children: [
+                  { type: "heading", id: "reverse_related_section_title_text", nv_label: "section_title_text", attrs: { headc: { title: { value: "Doctors in this Specialty" } }, heads: { ty: [null, "h5-semi-bold"] } } },
+                ],
+              },
+            ],
+          },
+          {
+            type: "container",
+            id: "reverse_related_section_content_area",
+            nv_label: "section_content_area",
+            attrs: { style: { gap: [null, "--sp--s200"] } },
+            children: [
+              {
+                type: "container",
+                id: "related_doctor_profiles_collection_wrapper",
+                nv_label: "related_doctor_profiles_collection_wrapper",
+                children: [
+                  {
+                    type: "container",
+                    id: "grid_table_col_caption",
+                    nv_label: "grid_table_col_caption",
+                    children: [
+                      {
+                        type: "container",
+                        id: "grid_table_col_title_wrapper",
+                        nv_label: "grid_table_col_title_wrapper",
+                        children: [
+                          { type: "heading", id: "grid_table_col_title", nv_label: "grid_table_col_title", attrs: { headc: { title: { value: "Doctors in this Specialty" } }, heads: { ty: [null, "l-medium"] } } },
+                        ],
+                      },
+                      {
+                        type: "container",
+                        id: "grid_table_col_operations",
+                        nv_label: "grid_table_col_operations",
+                        children: [
+                          {
+                            type: "container",
+                            id: "op_normal",
+                            nv_label: "op_normal",
+                            children: [
+                              { type: "search-filter", id: "doctor_profile_search", label: "Search items", binding: searchBinding, attrs: { placeholder: "Search doctors" } },
+                              addButton,
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    type: "container",
+                    id: "grid_table_col_content",
+                    nv_label: "grid_table_col_content",
+                    children: [
+                      { type: "flex_grid", id: "grid_table_col_header", nv_label: "grid_table_col_header", children: [] },
+                      collection,
+                    ],
+                  },
+                ],
+              },
             ],
           },
         ],
       },
-      collection,
     ],
   };
 }
@@ -369,7 +481,7 @@ function formLayout(layoutId, title, resource, options = {}) {
   };
 }
 
-function appPlan({ omitSelection = false, omitNewEditSelection = false, omitViewSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID, viewTemplate = VIEW_TEMPLATE_ID, viewReason = "View item shows current record and related context", listName = "Assets", titleFieldLabel = "Asset Name", viewFormName = "Asset View", reverseRelated = false, reverseDefaultValue = "Text3 = current ListDataID" } = {}) {
+function appPlan({ omitSelection = false, omitNewEditSelection = false, omitViewSelection = false, newEditTemplate = NEW_EDIT_TEMPLATE_ID, viewTemplate = VIEW_TEMPLATE_ID, viewReason = "View item shows current record and related context", listName = "Assets", titleFieldLabel = "Asset Name", viewFormName = "Asset View", reverseRelated = false, reverseLookupField = "Text3", reverseDefaultValue = "Text3 = current ListDataID" } = {}) {
   const selectionRows = [
     omitNewEditSelection ? "" : `| ${listName} | ${listName} New/Edit | New/Edit | ${newEditTemplate} | Current item field sections | None | New/Edit focuses on current item editing | Generated-final validation |`,
     omitViewSelection ? "" : `| ${listName} | ${viewFormName} | View | ${viewTemplate} | Page title, KPI, current item and related data sections | Related records and analytics | ${viewReason} | Generated-final validation |`,
@@ -386,7 +498,7 @@ ${selectionRows}
 
 | Host Data List | View Item Form | Related Child List | Child Lookup Field | Section Title | Collection Template | Search | Add Record | Default Value |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ${listName} | ${viewFormName} | Doctor Profiles | Text3 | Doctors in this Specialty | collection_control_grid_table | Title, Specialty | Add doctor | ${reverseDefaultValue} |
+| ${listName} | ${viewFormName} | Doctor Profiles | ${reverseLookupField} | Doctors in this Specialty | collection_control_grid_table | Title, Specialty | Add doctor | ${reverseDefaultValue} |
 ` : "";
   return `
 # Office Asset Loan Management - Yeeflow App Plan

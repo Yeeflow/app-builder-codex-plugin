@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.9
+
+- Release reverse-related View Item Collection official YDL shape hardening.
+- Materialize reverse-related child Collections with the official independent section wrapper, caption, toolbar Search/Add slots, content/header/body layers, and official Collection attrs.
+- Resolve planned lookup display names to runtime storage fields for lookup filters and Add passvalues while preserving App Plan conformance through planned/resolved aliases.
+- Normalize reverse-related row `dynamic-field` controls to simple item-context bindings and reject extra generated binding metadata that can keep the View Item designer in Loading.
+- Add hard gates for partial/shallow reverse-related Collection shapes, missing official Search/Add slots, and item-context extra bindings before signing readiness.
+
 ## 0.9.8
 
 - Release reverse-related View Item Collection independent-section hardening.

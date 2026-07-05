@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.8`
+- Version: `0.9.9`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.8` hardens reverse-related View Item Collection designer stability. Generated reverse-related child Collections are materialized as independent official-shape `Content.children[]` sections after current-record details, preserve toolbar Search/Add and lookup-filter/passvalues behavior, normalize row dynamic-field context to the child Collection source, parse every Reverse-Related Collection Selection subsection in the App Plan, and reject nested or unofficial reverse-related Collection shapes before signing readiness.
+Current release `0.9.9` hardens reverse-related View Item Collection official YDL shape fidelity. Generated reverse-related child Collections preserve the official independent section wrapper, caption, toolbar Search/Add slots, content/header/body layers, official Collection attrs, resolved lookup filters and Add passvalues, and simple item-context row dynamic-field bindings while rejecting partial shallow shapes or extra generated field-binding metadata before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.8
+Version: 0.9.9
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.8
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.9
 ```
 
 ## What Is Included
