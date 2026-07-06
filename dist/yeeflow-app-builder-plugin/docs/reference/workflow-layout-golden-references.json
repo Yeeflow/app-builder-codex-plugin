@@ -72,6 +72,10 @@
       "Complex workflow rows should not become dense control strips; split later steps, branch targets, and post-approval actions into upper/lower lanes before row labels and SequenceFlows overlap.",
       "Long gateway branch labels must not share the same horizontal label lane; when two or more sibling condition labels are long, their target nodes should be separated into distinct y lanes.",
       "Backward or return SequenceFlow edges must use rounded routing and explicit vertices. Standard-spaced forward rejected or cross-lane edges do not require vertices unless they overlap or cross another node.",
+      "Direct same-row Start-to-first-task Submitted connectors must not include non-empty vertices.",
+      "Direct same-row adjacent task connectors must not include cosmetic vertices when there is no obstacle.",
+      "When a connector uses a horizontal route segment between two workflow rows, its route y must be the midpoint of the net row gap: (upperRowY + workflowNodeHeight + lowerRowY) / 2.",
+      "Use an external return lane only for long backward/return/cross-lane reroutes where midpoint routing is unsafe or crowded.",
       "SequenceFlow source and target references must resolve to existing workflow node ids.",
       "Generated graphposition should cover the visual node bounds plus padding."
     ],
@@ -108,7 +112,13 @@
       "rowNodeDensityThreshold": 7,
       "endRejectSourceSpanMax": 760,
       "gatewayLabelCongestionMinLength": 16,
-      "gatewayLabelLaneToleranceY": 60
+      "gatewayLabelLaneToleranceY": 60,
+      "workflowNodeWidth": 190,
+      "workflowNodeHeight": 86,
+      "minimumRowGapForMidpointRoute": 60,
+      "minimumRowGapForLabeledMidpointRoute": 40,
+      "rowGapRouteYTolerance": 12,
+      "externalReturnLanePaddingMin": 80
     },
     "lineStyle": {
       "default": "rounded",

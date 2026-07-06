@@ -48,8 +48,11 @@ It does not prove business behavior, assignment correctness, workflow execution,
 19. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
 20. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
 21. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
-22. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
-23. `graphposition` should cover the full node area plus padding.
+22. Direct same-row connectors must rely on rounded auto-routing. In particular, `StartNoneEvent -> first task` connectors labeled `Submitted` / `Submit` must have empty or absent `vertices[]`.
+23. When a connector needs a horizontal segment between two rows, route that segment at the midpoint of the net row gap: `routeY = (upperRowY + workflowNodeHeight + lowerRowY) / 2`.
+24. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap midpoint is unsafe, crowded, or too narrow.
+25. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
+26. `graphposition` should cover the full node area plus padding.
 
 ## Standard Spacing
 
@@ -71,6 +74,11 @@ The `workflow_actions_layout` reference establishes the following default spacin
 | `MAX_ROWS` | `5` | fixed | Maximum generated workflow vertical rows/layers. |
 | `ROW_NODE_DENSITY` | `7` | fixed | Maximum suggested nodes in one complex workflow row before folding into another lane. |
 | `END_REJECT_SOURCE_SPAN` | `760` | fixed | Maximum suggested x-span for approval tasks sharing one rejection endpoint. |
+| `WORKFLOW_NODE_SIZE` | `190 x 86` | fixed | Standard task/gateway/end node size used for connector midpoint geometry. |
+| `ROW_GAP_MIDPOINT_ROUTE_MIN` | `60` | fixed | Preferred minimum net gap for midpoint connector routing. |
+| `ROW_GAP_LABELED_MIN` | `40` | fixed | Below this net gap, do not route labeled long connectors through the row gap. |
+| `ROW_GAP_ROUTE_Y_TOLERANCE` | `12` | fixed | Allowed pixel tolerance when validating routeY against the row-gap midpoint. |
+| `EXTERNAL_RETURN_LANE_PADDING` | `80-120` | fixed | Padding outside workflow node bounds for true external return lanes. |
 | `CANVAS_RATIO` | `16:9` | advisory | Preferred visible Designer canvas usage. |
 
 ## Assignment Task Outcome Rules
@@ -170,17 +178,29 @@ Require vertices when:
 - the line crosses through or too close to another node
 - the route is a long cross-lane reroute that cannot be made readable through spacing alone
 
-For return lines, route above or below the main lane with two vertices:
+Simple direct same-row connectors should not have route vertices:
+
+```text
+vertices = []
+```
+
+This is mandatory for `Start -> first task` / `Submitted` or `Submit` connectors when the source and target are adjacent and unobstructed.
+
+For return lines that can travel in the open space between rows, route the horizontal segment through the midpoint of the net row gap:
 
 ```text
 sourceCenterX = source.x + taskCenterOffset
 targetCenterX = target.x + taskCenterOffset
-routeY = source.y + 110
+upperRowBottom = upperRowY + workflowNodeHeight
+lowerRowTop = lowerRowY
+routeY = upperRowBottom + ((lowerRowTop - upperRowBottom) / 2)
 vertices = [
   { x: sourceCenterX, y: routeY },
   { x: targetCenterX, y: routeY }
 ]
 ```
+
+Use an external return lane below or above the graph only when the row gap is too narrow, already crowded, or the connector spans many logical workflow groups. Do not send short local return lines to arbitrary fixed y values.
 
 ## Generator Guidance
 

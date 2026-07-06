@@ -67,6 +67,28 @@ try {
   }), "WORKFLOW_LAYOUT_BACKWARD_FLOW_VERTICES_MISSING");
   cases.push({ case: "fail: backward return flow missing vertices", status: "pass" });
 
+  expectCode("submitted connector with cosmetic vertices fails", mutateReadable("submitted-with-vertices.json", (def) => {
+    const submit = def.childshapes.find((shape) => shape.id === "flow-submit");
+    submit.properties.name = "Submitted";
+    submit.vertices = [{ x: 260, y: 220 }];
+  }), "WORKFLOW_LAYOUT_SUBMITTED_VERTICES_UNNECESSARY");
+  cases.push({ case: "fail: submitted connector must not carry unnecessary vertices", status: "pass" });
+
+  expectCode("direct same-row forward connector with cosmetic vertices fails", mutateReadable("direct-forward-with-vertices.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const sameRowAction = node("same-row-action", "ContentList", "Same Row Action", 720, 220);
+    def.childshapes.push(sameRowAction);
+    def.childshapes.push(flow("flow-review-to-same-row-action", review, sameRowAction, "Approved", [{ x: 560, y: 220 }, { x: 650, y: 220 }]));
+  }), "WORKFLOW_LAYOUT_DIRECT_FORWARD_VERTICES_UNNECESSARY");
+  cases.push({ case: "fail: direct same-row forward connector should use auto-routing", status: "pass" });
+
+  expectCode("row-gap return route not at midpoint fails", mutateReadable("row-gap-return-not-midpoint.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    def.childshapes.push(flow("flow-return-wrong-route-y", create, review, "Reject and return", [{ x: 815, y: 350 }, { x: 515, y: 350 }]));
+  }), "WORKFLOW_LAYOUT_ROUTE_Y_NOT_ROW_GAP_MIDPOINT");
+  cases.push({ case: "fail: row-gap return route must use midpoint routeY", status: "pass" });
+
   expectCode("end reject collecting too many sources fails", mutateReadable("end-reject-too-many.json", (def) => {
     const reject = def.childshapes.find((shape) => shape.id === "reject");
     for (let index = 0; index < 3; index += 1) {
