@@ -307,6 +307,11 @@ function attrRuntimeValue(value) {
   return Array.isArray(value) ? value[1] : value;
 }
 
+function isNumericStringConfig(value) {
+  const actual = attrRuntimeValue(value);
+  return typeof actual === "string" && /^\d+(?:\.\d+)?$/.test(actual.trim());
+}
+
 function displayLabelDisabled(value) {
   if (value === false) return true;
   return Array.isArray(value) && value[1] === false;
@@ -570,6 +575,11 @@ function controlContains(parent, child) {
 
 function uiStandardWarning(report, code, message, details) {
   issue(report, "warning", code, message, details);
+}
+
+function uiStandardContainerIssue(report, context, code, message, details = {}) {
+  const hard = context && context.surface === "approval form page" && isGeneratedFinal(report);
+  issue(report, hard ? "error" : "warning", code, message, { ...context, ...details });
 }
 
 function issue(report, level, code, message, details = {}) {
@@ -1367,6 +1377,16 @@ function validateGeneratedApprovalDesignerControls(formdef, report, context) {
   for (const { control, pointer } of controls) {
     const type = safeString(control && control.type).toLowerCase();
     const id = generatedControlId(control);
+    if (Object.prototype.hasOwnProperty.call(control || {}, "binding") && control.binding !== undefined && control.binding !== null && typeof control.binding !== "string") {
+      issue(report, generatorFinalSeverity(report), "YAP_FORM_CONTROL_BINDING_NOT_STRING", "Generated approval form controls must store binding as a string variable or field id; object binding values can leave the designer loading.", { ...context, path: `${pointer}.binding`, controlType: control && control.type || null, bindingType: Array.isArray(control && control.binding) ? "array" : typeof (control && control.binding) });
+    }
+    if (type === "date") {
+      issue(report, generatorFinalSeverity(report), "YAP_FORM_DATE_CONTROL_LEGACY", "Generated approval forms must use the export-backed datepicker control type; legacy date controls can fail designer hydration.", { ...context, path: `${pointer}.type`, controlType: control && control.type || null });
+    }
+    const width = control && control.attrs && control.attrs.common && control.attrs.common.positioning && control.attrs.common.positioning.width;
+    if (isNumericStringConfig(width)) {
+      issue(report, generatorFinalSeverity(report), "YAP_FORM_CONTROL_WIDTH_STRING_INVALID", "Generated approval form control widths must use Yeeflow config pair values, for example width: [null, 960] and widthu: [null, \"px\"], not numeric strings.", { ...context, path: `${pointer}.attrs.common.positioning.width`, controlType: control && control.type || null, width });
+    }
     if (!id) {
       issue(report, "error", "YAP_FORM_CONTROL_ID_MISSING", "Generated approval form controls must include unique designer-level id values for designer hydration and single-control selection.", { ...context, path: pointer, controlType: control && control.type || null, label: safeString(control && (control.label || control.name || control.title)) || null });
       issue(report, "error", "YAP_FORM_DESIGNER_SELECTION_RISK", "Missing designer IDs can cause selecting one generated approval form control to select many or all controls.", { ...context, path: pointer, controlType: control && control.type || null });
@@ -3891,6 +3911,33 @@ function validateEmbeddedControlSchema(control, report, context) {
       ...(schemaIssue.detail || {}),
     });
   });
+  if (context.surface === "approval form page" && Object.prototype.hasOwnProperty.call(control || {}, "binding") && control.binding !== undefined && control.binding !== null && typeof control.binding !== "string") {
+    issue(report, generatorFinalSeverity(report), "YAP_FORM_CONTROL_BINDING_NOT_STRING", "Generated approval form controls must store binding as a string variable or field id; object binding values can leave the designer loading.", {
+      surface: context.surface,
+      title: context.title,
+      path: `${context.path}.binding`,
+      controlType: control && control.type || null,
+      bindingType: Array.isArray(control && control.binding) ? "array" : typeof (control && control.binding),
+    });
+  }
+  if (context.surface === "approval form page" && safeString(control && control.type).toLowerCase() === "date") {
+    issue(report, generatorFinalSeverity(report), "YAP_FORM_DATE_CONTROL_LEGACY", "Generated approval forms must use the export-backed datepicker control type; legacy date controls can fail designer hydration.", {
+      surface: context.surface,
+      title: context.title,
+      path: `${context.path}.type`,
+      controlType: control && control.type || null,
+    });
+  }
+  const width = control && control.attrs && control.attrs.common && control.attrs.common.positioning && control.attrs.common.positioning.width;
+  if (context.surface === "approval form page" && isNumericStringConfig(width)) {
+    issue(report, generatorFinalSeverity(report), "YAP_FORM_CONTROL_WIDTH_STRING_INVALID", "Generated approval form control widths must use Yeeflow config pair values, for example width: [null, 960] and widthu: [null, \"px\"], not numeric strings.", {
+      surface: context.surface,
+      title: context.title,
+      path: `${context.path}.attrs.common.positioning.width`,
+      controlType: control && control.type || null,
+      width,
+    });
+  }
   if (
     report.mode === "generator" &&
     report.stage === "final" &&
@@ -4041,6 +4088,12 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
   if (!isObject(def.graphposition)) issue(report, severity, "WORKFLOW_DEF_GRAPHPOSITION_MISSING", "Workflow designer expects DefResource.graphposition metadata.", { form: formName, key });
   if (def.graphzoom === undefined) issue(report, severity, "WORKFLOW_DEF_GRAPHZOOM_MISSING", "Workflow designer expects DefResource.graphzoom metadata.", { form: formName, key });
   if (def.graphver === undefined) issue(report, severity, "WORKFLOW_DEF_GRAPHVER_MISSING", "Workflow designer expects DefResource.graphver metadata.", { form: formName, key });
+  if (def.lineType !== "rounded") {
+    issue(report, severity, "WORKFLOW_DEF_LINETYPE_NOT_ROUNDED", "New workflow designer exports require DefResource.lineType = rounded.", { form: formName, key, actual: def.lineType ?? null, expected: "rounded" });
+  }
+  if (Number(def.graphver) !== 2) {
+    issue(report, severity, "WORKFLOW_DEF_GRAPHVER_NOT_V2", "New workflow designer exports require DefResource.graphver = 2.", { form: formName, key, actual: def.graphver ?? null, expected: 2 });
+  }
 
   const shapes = collectShapes(def);
   const workflowVariables = collectWorkflowVariables(def);
@@ -4058,6 +4111,16 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
       if (!shape.target || !safeString(shape.target.id) || !safeString(shape.target.resourceid)) {
         issue(report, severity, "WORKFLOW_SEQUENCE_TARGET_INVALID", "SequenceFlow target should include id and resourceid.", { form: formName, key, index });
       }
+      if (shape.properties?.linetype !== "rounded") {
+        issue(report, severity, "WORKFLOW_SEQUENCE_LINETYPE_NOT_ROUNDED", "New workflow designer SequenceFlow must set properties.linetype = rounded.", { form: formName, key, index, actual: shape.properties?.linetype ?? null, expected: "rounded" });
+      }
+      if (!Object.prototype.hasOwnProperty.call(shape.properties || {}, "documentation")) {
+        issue(report, severity, "WORKFLOW_SEQUENCE_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow should include properties.documentation, usually an empty string.", { form: formName, key, index });
+      }
+      if (!Array.isArray(shape.dockers) || shape.dockers.length !== 0) {
+        issue(report, severity, "WORKFLOW_SEQUENCE_DOCKERS_NOT_EMPTY", "New workflow designer rounded routing expects SequenceFlow.dockers to be an empty array by default.", { form: formName, key, index, actualLength: Array.isArray(shape.dockers) ? shape.dockers.length : null });
+      }
+      validateWorkflowOutcomeConditionShape(shape, report, { form: formName, key, index });
       validateSequenceFlowConditionVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.conditioninfo` });
     } else if (type === "SetVariableTask") {
       validateSetVariableTaskTargets(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.variablesetting` });
@@ -4065,6 +4128,24 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
       validateTaskAssignmentVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.usertaskassignment` });
     } else if (!isObject(shape.position)) {
       issue(report, severity, "WORKFLOW_NODE_POSITION_MISSING", "Workflow designer expects non-sequence workflow nodes to include position metadata.", { form: formName, key, index, type });
+    }
+  });
+}
+
+function validateWorkflowOutcomeConditionShape(shape, report, context) {
+  const severity = generatorFinalSeverity(report);
+  const conditions = asArray(shape && shape.properties && shape.properties.conditioninfo);
+  conditions.forEach((condition, conditionIndex) => {
+    const text = JSON.stringify(condition || {});
+    const flowLabel = safeString(shape && shape.properties && (shape.properties.name || shape.properties.label || shape.properties.documentation));
+    const labelLooksLikeOutcome = /\b(approved|rejected|completed|approve|reject|complete)\b/i.test(flowLabel) || /\b(approved|rejected|completed|approve|reject|complete)\b/i.test(text);
+    if (!labelLooksLikeOutcome) return;
+    if (!isObject(condition) || condition.left === undefined || condition.right === undefined || !condition.op) {
+      issue(report, severity, "WORKFLOW_OUTCOME_CONDITION_SHAPE_INCOMPLETE", "Approval and complete task outcome transitions must include conditioninfo rows with left, op, and right; label-only condition metadata is not publish-ready.", {
+        ...context,
+        conditionIndex,
+        flowLabel,
+      });
     }
   });
 }
@@ -4704,14 +4785,14 @@ function validateUiStandardContainers(root, report, context = {}) {
   if (!context.requireFormBody && !actionPanel.length && !flowHistory.length) return;
   const formBody = findControlByLabel(root, "Form body");
   const formBottom = findControlByLabel(root, "Form bottom");
-  if (!formBody) uiStandardWarning(report, "UI_STANDARD_FORM_BODY_MISSING", "Approval form pages should put main fields inside a container with nv_label \"Form body\".", context);
-  if (!formBottom) uiStandardWarning(report, "UI_STANDARD_FORM_BOTTOM_MISSING", "Approval form pages should put Action Panel and Flow History inside a container with nv_label \"Form bottom\".", context);
+  if (!formBody) uiStandardContainerIssue(report, context, "UI_STANDARD_FORM_BODY_MISSING", "Approval form pages should put main fields inside a container with nv_label \"Form body\".");
+  if (!formBottom) uiStandardContainerIssue(report, context, "UI_STANDARD_FORM_BOTTOM_MISSING", "Approval form pages should put Action Panel and Flow History inside a container with nv_label \"Form bottom\".");
   if (formBottom) {
     for (const control of actionPanel) {
-      if (!controlContains(formBottom, control)) uiStandardWarning(report, "UI_STANDARD_ACTION_PANEL_NOT_IN_FORM_BOTTOM", "workflowControlPanel should be placed inside Form bottom.", context);
+      if (!controlContains(formBottom, control)) uiStandardContainerIssue(report, context, "UI_STANDARD_ACTION_PANEL_NOT_IN_FORM_BOTTOM", "workflowControlPanel should be placed inside Form bottom.");
     }
     for (const control of flowHistory) {
-      if (!controlContains(formBottom, control)) uiStandardWarning(report, "UI_STANDARD_FLOW_HISTORY_NOT_IN_FORM_BOTTOM", "workflowHistory should be placed inside Form bottom.", context);
+      if (!controlContains(formBottom, control)) uiStandardContainerIssue(report, context, "UI_STANDARD_FLOW_HISTORY_NOT_IN_FORM_BOTTOM", "workflowHistory should be placed inside Form bottom.");
     }
   }
 }

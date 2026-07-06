@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.15`
+- Version: `0.9.16`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.15` hardens repository hygiene and release packaging safety. The repo hygiene guard now fails on tracked or untracked Finder/copy-style duplicate artifacts such as `name 2.md`, `name 3.json`, `name 4.mjs`, or `SKILL 2.md`, and release packaging must use tracked-file manifests instead of raw working-tree zips.
+Current release `0.9.16` hardens Approval YWF form structure and Workflow Designer v2 line-style generation. Approval form packages now fail closed on non-string form-control bindings, legacy date controls, invalid numeric width strings, incomplete form body/bottom regions, misplaced workflow controls, label-only outcome conditions, or missing rounded Workflow Designer v2 line metadata.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.15
+Version: 0.9.16
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.15
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.16
 ```
 
 ## What Is Included

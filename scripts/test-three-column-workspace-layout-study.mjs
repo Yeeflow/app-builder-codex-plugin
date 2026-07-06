@@ -49,7 +49,8 @@ function approvalDef(pageurl) {
     pageurls: [pageurl],
     variables: { basic: [], listref: [], filter: [] },
     flowPage: [],
-    graphver: 1,
+    lineType: "rounded",
+    graphver: 2,
   };
 }
 

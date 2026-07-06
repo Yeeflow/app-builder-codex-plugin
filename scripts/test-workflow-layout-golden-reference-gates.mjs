@@ -168,6 +168,9 @@ function readableWorkflow() {
     reject: node("reject", "EndRejectEvent", "Rejected", 420, 520),
   };
   return {
+    lineType: "rounded",
+    graphver: 2,
+    graphzoom: 1,
     graphposition: { x: -60, y: 60, width: 1240, height: 640 },
     childshapes: [
       nodes.start,
@@ -202,10 +205,10 @@ function flow(id, source, target, name, vertices = []) {
     stencil: { id: "SequenceFlow" },
     source: { id: source.id, resourceid: source.id },
     target: { id: target.id, resourceid: target.id },
-    properties: { name, linetype: "rounded" },
+    properties: { name, linetype: "rounded", documentation: "" },
     incoming: [{ id: source.id, resourceid: source.id }],
     outgoing: [{ id: target.id, resourceid: target.id }],
-    dockers: vertices,
+    dockers: [],
   };
   if (vertices.length) resource.vertices = vertices;
   source.outgoing.push({ id, resourceid: id });

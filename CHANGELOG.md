@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.16
+
+- Release Approval YWF form structure and Workflow Designer v2 line-style hardening.
+- Generated Approval form YWF/YAP resources must use string form-control bindings, current date picker control types, valid numeric width config, and complete `Form body` / `Form bottom` regions.
+- Workflow history and workflow control panel controls must remain inside `Form bottom`, while label-only Approval outcome condition rows now fail before signing readiness.
+- Generated Approval form, Data list workflow, and Scheduled workflow diagrams now emit Workflow Designer v2 properties with root `graphver: 2`, `lineType: "rounded"`, and rounded SequenceFlow metadata while preserving `graphzoom`.
+- Add focused source/dist regression gates for Approval YWF form structure, rounded line style, and workflow layout/assignee guardrail compatibility.
+
 ## 0.9.15
 
 - Release repo hygiene duplicate-copy guardrails.

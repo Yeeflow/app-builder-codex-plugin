@@ -19,6 +19,7 @@ This standard validates visual workflow graph layout only:
 - End with Rejection placement and grouping
 - branch/reject lane separation
 - SequenceFlow line style
+- Workflow Designer v2 graph attributes
 - SequenceFlow vertices for return/backward, overlap, node crossing, and long reroute cases
 - graphposition coverage
 
@@ -41,9 +42,11 @@ It does not prove business behavior, assignment correctness, workflow execution,
 13. Workflow diagrams should use the visible Designer canvas as a roughly `16:9` work area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line.
 14. Generated workflows should not exceed five vertical rows/layers.
 15. Generated SequenceFlow line style should be `rounded` by default for complex graphs.
-16. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
-17. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
-18. `graphposition` should cover the full node area plus padding.
+16. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
+17. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
+18. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
+19. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
+20. `graphposition` should cover the full node area plus padding.
 
 ## Standard Spacing
 
@@ -106,6 +109,20 @@ For Approval Task rejected outcomes:
 - more than three rejected sources: create another `EndRejectEvent`
 
 This prevents many rejected lines from stacking into one crowded endpoint.
+
+## Workflow Designer V2 Line Style Rules
+
+The current Yeeflow Workflow Designer expects generated workflow graphs to use rounded auto-routing metadata:
+
+- root `lineType: "rounded"`
+- root `graphver: 2`
+- each `SequenceFlow.properties.linetype: "rounded"`
+- each `SequenceFlow.properties.documentation` present as a string, with `""` allowed
+- each `SequenceFlow.dockers: []`
+
+Do not generate legacy orthogonal/full-docker routes. Keep `vertices[]` only where explicit routing improves readability, such as return/backward paths, overlap avoidance, node crossing, or long reroutes.
+
+`graphzoom` is not a fidelity gate; keep the reference/default value rather than forcing a new zoom.
 
 ## Canvas Aspect and Row Utilization Rules
 

@@ -41,7 +41,8 @@ function app(assignment) {
     variables: { basic: [], listref: [], filter: [] },
     graphposition: { x: 0, y: 0, width: 800, height: 600 },
     graphzoom: 1,
-    graphver: 1,
+    graphver: 2,
+    lineType: "rounded",
     flowPage: [],
     pageurls: [
       page(REQUEST_PAGE_ID, "ASSIGNMENT_GUARDRAIL_TEST_1", 1, 1),
@@ -49,7 +50,7 @@ function app(assignment) {
     ],
     childshapes: [
       { id: "start", resourceid: "start", stencil: { id: "StartNoneEvent" }, properties: { name: "Start", taskurl: REQUEST_PAGE_ID, taskUrl: REQUEST_PAGE_ID, TaskUrl: REQUEST_PAGE_ID }, outgoing: [{ resourceid: "flow-start-task" }] },
-      { id: "flow-start-task", resourceid: "flow-start-task", stencil: { id: "SequenceFlow" }, source: { id: "start", resourceid: "start" }, target: { id: "task", resourceid: "task" } },
+      { id: "flow-start-task", resourceid: "flow-start-task", stencil: { id: "SequenceFlow" }, source: { id: "start", resourceid: "start" }, target: { id: "task", resourceid: "task" }, properties: { name: "Submit", linetype: "rounded", documentation: "" }, dockers: [] },
       {
         id: "task",
         resourceid: "task",
@@ -67,7 +68,7 @@ function app(assignment) {
         incoming: [{ resourceid: "flow-start-task" }],
         outgoing: [{ resourceid: "flow-task-end" }],
       },
-      { id: "flow-task-end", resourceid: "flow-task-end", stencil: { id: "SequenceFlow" }, source: { id: "task", resourceid: "task" }, target: { id: "end", resourceid: "end" } },
+      { id: "flow-task-end", resourceid: "flow-task-end", stencil: { id: "SequenceFlow" }, source: { id: "task", resourceid: "task" }, target: { id: "end", resourceid: "end" }, properties: { name: "Complete", linetype: "rounded", documentation: "" }, dockers: [] },
       { id: "end", resourceid: "end", stencil: { id: "EndNoneEvent" }, properties: { name: "End" }, incoming: [{ resourceid: "flow-task-end" }] },
     ],
   };

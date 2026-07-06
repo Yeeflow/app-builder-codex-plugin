@@ -6226,14 +6226,6 @@ function workflowRejectedVertices(sourcePosition, rejectPosition) {
   ];
 }
 
-function workflowStraightDockers(sourcePosition, targetPosition) {
-  if (!sourcePosition || !targetPosition) return [];
-  return [
-    { x: sourcePosition.x + 120, y: sourcePosition.y },
-    { x: targetPosition.x - 120, y: targetPosition.y },
-  ];
-}
-
 function workflowGraphPosition(childshapes) {
   const positions = childshapes
     .filter((shape) => shape?.stencil?.id !== "SequenceFlow")
@@ -6294,13 +6286,13 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     ProcModelListID: "0",
     ProcModelListSetID: stringId(rootListSetId),
     ext: {},
-    lineType: "orthogonal",
+    lineType: "rounded",
     iconURL: "",
     flowPage: [],
     variables: buildApprovalVariables(approvalFieldSpecs),
     graphposition: workflowGraphPosition(childshapes),
     graphzoom: 1,
-    graphver: 1,
+    graphver: 2,
     pageurls: [
       {
         id: submissionPageId,
@@ -6364,9 +6356,6 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
   const endIncoming = [];
   const rejectIncoming = [];
   const addFlow = ({ id, sourceId, targetId, name, conditioninfo = null, vertices = [] }) => {
-    const sourcePosition = positionById.get(sourceId);
-    const targetPosition = positionById.get(targetId);
-    const dockers = vertices.length ? vertices : workflowStraightDockers(sourcePosition, targetPosition);
     const flow = {
       id,
       resourceid: id,
@@ -6375,8 +6364,10 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       target: flowRef(targetId),
       incoming: [flowRef(sourceId)],
       outgoing: [flowRef(targetId)],
-      properties: conditioninfo ? { name, linetype: "rounded", conditioninfo } : { name, linetype: "rounded" },
-      dockers,
+      properties: conditioninfo
+        ? { name, linetype: "rounded", documentation: "", conditionsequenceflow: "", conditioninfo }
+        : { name, linetype: "rounded", documentation: "", conditioninfo: [] },
+      dockers: [],
     };
     if (vertices.length) flow.vertices = vertices;
     flowShapes.push(flow);
