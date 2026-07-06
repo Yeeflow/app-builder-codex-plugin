@@ -193,6 +193,9 @@ try {
   }), "WORKFLOW_LAYOUT_MEDIUM_GRAPH_TOO_WIDE");
   cases.push({ case: "fail: medium workflow should not stretch into a very wide strip", status: "pass" });
 
+  expectPass("medium workflow wider than advisory width passes when folded into readable rows", ["--resource", writeResource("medium-readable-wide-folded.json", readableWideFoldedWorkflow())]);
+  cases.push({ case: "pass: medium workflow may exceed advisory width when folded into readable rows", status: "pass" });
+
   expectCode("complex row node density fails", mutateReadable("row-density-too-high.json", (def) => {
     const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
     nodes.forEach((node, index) => {
@@ -221,6 +224,31 @@ try {
     def.childshapes.push(flow("flow-complete-readded", create, end, "Complete", [{ x: 870, y: 360 }, { x: 870, y: 220 }]));
   }), "WORKFLOW_LAYOUT_GATEWAY_BRANCH_LABEL_CONGESTION");
   cases.push({ case: "fail: long gateway branch labels cannot share one lane", status: "pass" });
+
+  expectCode("shared vertical route lane density fails", mutateReadable("vertical-route-lane-density.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    create.position = { x: 720, y: 520 };
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    end.position = { x: 1020, y: 80 };
+    const extra = node("extra-vertical-target", "ContentList", "Extra vertical target", 1020, 520);
+    def.childshapes.push(extra);
+    def.childshapes.push(flow("flow-shared-lane-a", review, create, "Sensitive data", [{ x: 665, y: 140 }, { x: 665, y: 560 }]));
+    def.childshapes.push(flow("flow-shared-lane-b", review, end, "Software license", [{ x: 670, y: 140 }, { x: 670, y: 560 }]));
+    def.childshapes.push(flow("flow-shared-lane-c", create, extra, "Need more information", [{ x: 660, y: 140 }, { x: 660, y: 560 }]));
+  }), "WORKFLOW_LAYOUT_VERTICAL_ROUTE_LANE_DENSITY_TOO_HIGH");
+  cases.push({ case: "fail: long vertical route segments cannot stack into one visual lane", status: "pass" });
+
+  expectCode("long connector labels overlapping each other fail", mutateReadable("connector-label-overlap.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    create.position = { x: 900, y: 220 };
+    end.position = { x: 1280, y: 220 };
+    def.childshapes.push(flow("flow-long-label-a", review, create, "Software License Required = true"));
+    def.childshapes.push(flow("flow-long-label-b", review, end, "Budget Amount <= 1000"));
+  }), "WORKFLOW_LAYOUT_CONNECTOR_LABEL_COLLISION");
+  cases.push({ case: "fail: long connector labels cannot overlap", status: "pass" });
 
   expectCode("compressed complex graph fails", mutateReadable("compressed.json", (def) => {
     const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
@@ -300,6 +328,20 @@ function readableWorkflow() {
       nodes.end,
       nodes.reject,
     ],
+  };
+}
+
+function readableWideFoldedWorkflow() {
+  return {
+    lineType: "rounded",
+    graphver: 2,
+    graphzoom: 1,
+    graphposition: { x: -80, y: 40, width: 3300, height: 760 },
+    childshapes: Array.from({ length: 17 }, (_, index) => {
+      const row = Math.floor(index / 6);
+      const col = index % 6;
+      return node(`folded-${index}`, index === 0 ? "StartNoneEvent" : index === 16 ? "EndNoneEvent" : "ContentList", `Folded Step ${index + 1}`, 100 + col * 560, 140 + row * 170);
+    }),
   };
 }
 

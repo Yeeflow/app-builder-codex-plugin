@@ -105,10 +105,19 @@ function readReference(referencePath, findings) {
       "maximumWorkflowRows",
       "mediumWorkflowNodeThreshold",
       "mediumWorkflowMaxWidth",
+      "mediumWorkflowReadableWidthAllowance",
+      "mediumWorkflowMinRowsForWideAllowance",
       "rowNodeDensityThreshold",
       "endRejectSourceSpanMax",
       "gatewayLabelCongestionMinLength",
       "gatewayLabelLaneToleranceY",
+      "connectorLabelCollisionMinLength",
+      "connectorLabelApproxCharWidth",
+      "connectorLabelPaddingX",
+      "connectorLabelHeight",
+      "connectorLabelNodePadding",
+      "verticalRouteLaneDensityToleranceX",
+      "verticalRouteLaneDensityMaxSegments",
       "workflowNodeWidth",
       "workflowNodeHeight",
       "minimumRowGapForMidpointRoute",
@@ -158,10 +167,19 @@ function defaultRules() {
         maximumWorkflowRows: 5,
         mediumWorkflowNodeThreshold: 14,
         mediumWorkflowMaxWidth: 2600,
+        mediumWorkflowReadableWidthAllowance: 3400,
+        mediumWorkflowMinRowsForWideAllowance: 3,
         rowNodeDensityThreshold: 7,
         endRejectSourceSpanMax: 760,
         gatewayLabelCongestionMinLength: 16,
         gatewayLabelLaneToleranceY: 60,
+        connectorLabelCollisionMinLength: 16,
+        connectorLabelApproxCharWidth: 7,
+        connectorLabelPaddingX: 24,
+        connectorLabelHeight: 24,
+        connectorLabelNodePadding: 8,
+        verticalRouteLaneDensityToleranceX: 18,
+        verticalRouteLaneDensityMaxSegments: 2,
         workflowNodeWidth: 190,
         workflowNodeHeight: 86,
         minimumRowGapForMidpointRoute: 60,
@@ -374,6 +392,8 @@ function validateOneWorkflow(resource, reference, findings) {
       }));
     }
   }
+
+  validateConnectorReadability(resource, nodes, flows, spacing, findings);
 }
 
 function validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, lineStyleRules, findings) {
@@ -668,6 +688,98 @@ function longestVerticalVertexSegment(vertices) {
     if (!best || length > best.length) best = { x: Math.round((top.x + bottom.x) / 2), top: y1, bottom: y2, length };
   }
   return best;
+}
+
+function verticalVertexSegments(vertices) {
+  const points = asArray(vertices)
+    .filter((point) => Number.isFinite(Number(point?.x)) && Number.isFinite(Number(point?.y)))
+    .map((point) => ({ x: Number(point.x), y: Number(point.y) }));
+  const segments = [];
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const top = points[index];
+    const bottom = points[index + 1];
+    if (Math.abs(top.x - bottom.x) > 1) continue;
+    const y1 = Math.min(top.y, bottom.y);
+    const y2 = Math.max(top.y, bottom.y);
+    segments.push({
+      x: Math.round((top.x + bottom.x) / 2),
+      top: y1,
+      bottom: y2,
+      length: y2 - y1,
+    });
+  }
+  return segments;
+}
+
+function connectorLabelBounds(flow, sourceNode, targetNode, spacing) {
+  const label = flowLabel(flow);
+  if (!label) return null;
+  const anchor = connectorLabelAnchor(flow, sourceNode, targetNode);
+  if (!anchor) return null;
+  const width = label.length * Number(spacing.connectorLabelApproxCharWidth || 7) + Number(spacing.connectorLabelPaddingX || 24);
+  const height = Number(spacing.connectorLabelHeight || 24);
+  return {
+    left: anchor.x - width / 2,
+    right: anchor.x + width / 2,
+    top: anchor.y - height / 2,
+    bottom: anchor.y + height / 2,
+  };
+}
+
+function connectorLabelAnchor(flow, sourceNode, targetNode) {
+  const points = asArray(flow?.vertices)
+    .filter((point) => Number.isFinite(Number(point?.x)) && Number.isFinite(Number(point?.y)))
+    .map((point) => ({ x: Number(point.x), y: Number(point.y) }));
+  if (points.length >= 2) {
+    let best = null;
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const left = points[index];
+      const right = points[index + 1];
+      const length = Math.hypot(right.x - left.x, right.y - left.y);
+      if (!best || length > best.length) {
+        best = {
+          length,
+          x: (left.x + right.x) / 2,
+          y: (left.y + right.y) / 2,
+        };
+      }
+    }
+    if (best) return { x: best.x, y: best.y };
+  }
+  if (sourceNode?.position && targetNode?.position) {
+    const source = nodeCenter(sourceNode);
+    const target = nodeCenter(targetNode);
+    return {
+      x: (source.x + target.x) / 2,
+      y: (source.y + target.y) / 2,
+    };
+  }
+  return null;
+}
+
+function boxesIntersect(left, right) {
+  return left.left <= right.right
+    && left.right >= right.left
+    && left.top <= right.bottom
+    && left.bottom >= right.top;
+}
+
+function inflateBox(box, padding) {
+  return {
+    left: box.left - padding,
+    right: box.right + padding,
+    top: box.top - padding,
+    bottom: box.bottom + padding,
+  };
+}
+
+function roundBox(box) {
+  return {
+    left: Math.round(box.left),
+    right: Math.round(box.right),
+    top: Math.round(box.top),
+    bottom: Math.round(box.bottom),
+  };
 }
 
 function validateWorkflowSemantics(resource, nodes, flows, spacing, findings) {
@@ -976,15 +1088,124 @@ function validateCanvasRows(nodes, spacing, resource, findings) {
   }
   const mediumThreshold = Number(spacing.mediumWorkflowNodeThreshold);
   const mediumMaxWidth = Number(spacing.mediumWorkflowMaxWidth);
-  if (positioned.length >= mediumThreshold && positioned.length < 26 && width > mediumMaxWidth) {
+  const readableWidthAllowance = Number(spacing.mediumWorkflowReadableWidthAllowance || mediumMaxWidth);
+  const minRowsForWideAllowance = Number(spacing.mediumWorkflowMinRowsForWideAllowance || 3);
+  const maxRowNodeCount = Math.max(...rows.map((row) => row.nodes.length));
+  const tooWideWithoutReadableFolding = width > mediumMaxWidth
+    && (
+      width > readableWidthAllowance
+      || rows.length < minRowsForWideAllowance
+      || maxRowNodeCount > rowNodeDensityThreshold
+    );
+  if (positioned.length >= mediumThreshold && positioned.length < 26 && tooWideWithoutReadableFolding) {
     findings.push(issue("WORKFLOW_LAYOUT_MEDIUM_GRAPH_TOO_WIDE", "Medium-complexity workflows should fold later branches into upper or lower lanes instead of stretching into a very wide horizontal strip.", {
       source: resource.source,
       workflowName: resource.workflowName,
       nodeCount: positioned.length,
       rowCount: rows.length,
+      maxRowNodeCount,
       bounds: { width, height },
       maximumSuggestedWidth: mediumMaxWidth,
+      readableWidthAllowance,
+      rule: "Width over the suggested limit is allowed only when the graph has readable multi-row folding and no over-dense row.",
     }));
+  }
+}
+
+function validateConnectorReadability(resource, nodes, flows, spacing, findings) {
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  validateVerticalRouteLaneDensity(resource, flows, spacing, findings);
+  validateConnectorLabelReadability(resource, nodes, flows, nodeById, spacing, findings);
+}
+
+function validateVerticalRouteLaneDensity(resource, flows, spacing, findings) {
+  const toleranceX = Number(spacing.verticalRouteLaneDensityToleranceX || 18);
+  const maximumSegments = Number(spacing.verticalRouteLaneDensityMaxSegments || 2);
+  const minimumLength = Number(spacing.workflowNodeHeight || 86);
+  const groups = [];
+  for (const flow of flows) {
+    const vertices = asArray(flow.shape.vertices);
+    for (const segment of verticalVertexSegments(vertices)) {
+      if (segment.length < minimumLength) continue;
+      let group = groups.find((item) => Math.abs(item.x - segment.x) <= toleranceX);
+      if (!group) {
+        group = { x: segment.x, segments: [] };
+        groups.push(group);
+      }
+      group.segments.push({ ...segment, flow });
+      group.x = group.segments.reduce((sum, item) => sum + item.x, 0) / group.segments.length;
+    }
+  }
+  for (const group of groups) {
+    const longSegments = group.segments.filter((segment) => segment.length >= minimumLength);
+    if (longSegments.length <= maximumSegments) continue;
+    const sorted = longSegments.sort((left, right) => left.top - right.top);
+    const laneSpan = {
+      top: Math.min(...sorted.map((segment) => segment.top)),
+      bottom: Math.max(...sorted.map((segment) => segment.bottom)),
+    };
+    findings.push(issue("WORKFLOW_LAYOUT_VERTICAL_ROUTE_LANE_DENSITY_TOO_HIGH", "Too many long vertical connector segments share the same routing lane; use lane offsets or more local routes so the workflow does not render as a vertical line wall.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      routeX: Math.round(group.x),
+      toleranceX,
+      maximumSegments,
+      segmentCount: longSegments.length,
+      laneSpan,
+      segments: sorted.map((segment) => ({
+        flowId: segment.flow.id,
+        sourceId: refId(segment.flow.shape.source),
+        targetId: refId(segment.flow.shape.target),
+        top: segment.top,
+        bottom: segment.bottom,
+      })),
+    }));
+  }
+}
+
+function validateConnectorLabelReadability(resource, nodes, flows, nodeById, spacing, findings) {
+  const minLength = Number(spacing.connectorLabelCollisionMinLength || spacing.gatewayLabelCongestionMinLength || 16);
+  const labels = [];
+  for (const flow of flows) {
+    const label = flowLabel(flow.shape);
+    if (label.length < minLength) continue;
+    const sourceNode = nodeById.get(refId(flow.shape.source));
+    const targetNode = nodeById.get(refId(flow.shape.target));
+    const bbox = connectorLabelBounds(flow.shape, sourceNode, targetNode, spacing);
+    if (!bbox) continue;
+    labels.push({ flow, label, bbox, sourceNode, targetNode });
+    const padded = Number(spacing.connectorLabelNodePadding || 8);
+    const collidingNode = nodes.find((node) => {
+      if (!node.position || node.id === sourceNode?.id || node.id === targetNode?.id) return false;
+      return boxesIntersect(bbox, inflateBox(nodeBounds(node), padded));
+    });
+    if (collidingNode) {
+      findings.push(issue("WORKFLOW_LAYOUT_CONNECTOR_LABEL_NODE_COLLISION", "Long connector labels must not overlap workflow nodes; separate sibling branches vertically, shorten the label, or route the connector through a clearer lane.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `$.childshapes[${flow.index}]`,
+        flowId: flow.id,
+        label,
+        labelBounds: roundBox(bbox),
+        nodeId: collidingNode.id,
+        nodeBounds: roundBox(nodeBounds(collidingNode)),
+      }));
+    }
+  }
+  for (let leftIndex = 0; leftIndex < labels.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < labels.length; rightIndex += 1) {
+      const left = labels[leftIndex];
+      const right = labels[rightIndex];
+      if (left.flow.id === right.flow.id || !boxesIntersect(left.bbox, right.bbox)) continue;
+      findings.push(issue("WORKFLOW_LAYOUT_CONNECTOR_LABEL_COLLISION", "Long connector labels must not overlap each other; use distinct branch lanes, local routes, or shorter labels.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        labels: [
+          { flowId: left.flow.id, label: left.label, bounds: roundBox(left.bbox) },
+          { flowId: right.flow.id, label: right.label, bounds: roundBox(right.bbox) },
+        ],
+      }));
+    }
   }
 }
 
