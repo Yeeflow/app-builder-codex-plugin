@@ -109,6 +109,12 @@ function readReference(referencePath, findings) {
       "endRejectSourceSpanMax",
       "gatewayLabelCongestionMinLength",
       "gatewayLabelLaneToleranceY",
+      "workflowNodeWidth",
+      "workflowNodeHeight",
+      "minimumRowGapForMidpointRoute",
+      "minimumRowGapForLabeledMidpointRoute",
+      "rowGapRouteYTolerance",
+      "externalReturnLanePaddingMin",
     ]) {
       if (!Number.isFinite(Number(spacing[key]))) {
         findings.push(issue("WORKFLOW_LAYOUT_REFERENCE_RULE_MISSING", "Workflow layout reference is missing a required numeric spacing rule.", { reference: referencePath, key }));
@@ -154,6 +160,12 @@ function defaultRules() {
         endRejectSourceSpanMax: 760,
         gatewayLabelCongestionMinLength: 16,
         gatewayLabelLaneToleranceY: 60,
+        workflowNodeWidth: 190,
+        workflowNodeHeight: 86,
+        minimumRowGapForMidpointRoute: 60,
+        minimumRowGapForLabeledMidpointRoute: 40,
+        rowGapRouteYTolerance: 12,
+        externalReturnLanePaddingMin: 80,
       },
       lineStyle: {
         default: "rounded",
@@ -277,6 +289,41 @@ function validateOneWorkflow(resource, reference, findings) {
     const dx = Math.abs(signedDx);
     const dy = Math.abs((sourceNode?.position?.y || 0) - (targetNode?.position?.y || 0));
     const targetStencil = stencilId(targetNode?.shape);
+    const sameRow = sourceNode?.position && targetNode?.position && dy <= Number(spacing.workflowRowToleranceY);
+    const directAdjacentForward = sameRow && signedDx > 0 && dx <= Number(spacing.mainColumnGap || 335) + 120;
+    const sourceStencil = stencilId(sourceNode?.shape);
+    if (sourceStencil === "StartNoneEvent" && directAdjacentForward && isSubmittedFlow(flow.shape) && vertices.length) {
+      findings.push(issue("WORKFLOW_LAYOUT_SUBMITTED_VERTICES_UNNECESSARY", "Direct Start-to-first-task Submitted connectors must use clean rounded auto-routing with empty or absent vertices.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.vertices`,
+        flowId: flow.id,
+        sourceId,
+        targetId,
+        vertices,
+      }));
+    }
+    if (directAdjacentForward && targetStencil !== "EndRejectEvent" && sourceStencil !== "StartNoneEvent" && vertices.length) {
+      findings.push(issue("WORKFLOW_LAYOUT_DIRECT_FORWARD_VERTICES_UNNECESSARY", "Direct adjacent same-row forward connectors must not include cosmetic vertices when no obstacle requires explicit routing.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.vertices`,
+        flowId: flow.id,
+        sourceId,
+        targetId,
+        delta: { x: dx, y: dy },
+      }));
+    }
+    validateFlowRouteY({
+      resource,
+      flow,
+      flowPath,
+      sourceNode,
+      targetNode,
+      vertices,
+      spacing,
+      findings,
+    });
     if (sourceNode?.position && targetNode?.position && signedDx > 0 && nodes.length >= 5 && targetStencil !== "EndRejectEvent" && dx < Number(spacing.minimumForwardFlowDeltaX)) {
       findings.push(issue("WORKFLOW_LAYOUT_FORWARD_FLOW_TOO_CLOSE", "Forward SequenceFlow edges should reserve enough horizontal space between workflow action nodes.", {
         source: resource.source,
@@ -372,6 +419,86 @@ function validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, line
       }));
     }
   }
+}
+
+function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, vertices, spacing, findings }) {
+  if (!sourceNode?.position || !targetNode?.position || !vertices.length) return;
+  if (stencilId(targetNode.shape) === "EndRejectEvent" || stencilId(sourceNode.shape) === "EndRejectEvent") return;
+  const sourceY = Number(sourceNode.position.y);
+  const targetY = Number(targetNode.position.y);
+  const rowDeltaY = Math.abs(sourceY - targetY);
+  if (rowDeltaY <= Number(spacing.workflowRowToleranceY)) return;
+  const horizontal = longestHorizontalVertexSegment(vertices);
+  if (!horizontal) return;
+  const upperRowY = Math.min(sourceY, targetY);
+  const lowerRowY = Math.max(sourceY, targetY);
+  const nodeHeight = Number(spacing.workflowNodeHeight || 86);
+  const upperRowBottom = upperRowY + nodeHeight;
+  const netGap = lowerRowY - upperRowBottom;
+  const routeY = horizontal.y;
+  const isInsideRowGap = routeY > upperRowBottom && routeY < lowerRowY;
+  const minimumGap = Number(spacing.minimumRowGapForLabeledMidpointRoute || 40);
+  const preferredGap = Number(spacing.minimumRowGapForMidpointRoute || 60);
+  const tolerance = Number(spacing.rowGapRouteYTolerance || 12);
+  const expectedRouteY = Math.round((upperRowY + nodeHeight + lowerRowY) / 2);
+  if (isInsideRowGap && netGap >= minimumGap && Math.abs(routeY - expectedRouteY) > tolerance) {
+    findings.push(issue("WORKFLOW_LAYOUT_ROUTE_Y_NOT_ROW_GAP_MIDPOINT", "Cross-row connector horizontal segments in the row gap must route through the midpoint of the net gap between rows.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: `${flowPath}.vertices`,
+      flowId: flow.id,
+      sourceId: refId(flow.shape.source),
+      targetId: refId(flow.shape.target),
+      routeY,
+      expectedRouteY,
+      netGap,
+      tolerance,
+    }));
+  }
+  if (isInsideRowGap && netGap < minimumGap && flowLabel(flow.shape)) {
+    findings.push(issue("WORKFLOW_LAYOUT_ROW_GAP_TOO_SMALL_FOR_LABELED_ROUTE", "Labeled cross-row connectors must not be routed through a row gap that is too small; increase row spacing or use a justified external return lane.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: `${flowPath}.vertices`,
+      flowId: flow.id,
+      sourceId: refId(flow.shape.source),
+      targetId: refId(flow.shape.target),
+      routeY,
+      netGap,
+      minimumGap,
+    }));
+  }
+  const isOutsideRows = routeY <= upperRowY - Number(spacing.externalReturnLanePaddingMin || 80) || routeY >= lowerRowY + nodeHeight + Number(spacing.externalReturnLanePaddingMin || 80);
+  const dx = Math.abs(Number(targetNode.position.x) - Number(sourceNode.position.x));
+  const isBackwardOrReturn = Number(targetNode.position.x) < Number(sourceNode.position.x) || isReturnFlow(flow.shape);
+  if (isOutsideRows && netGap >= preferredGap && dx < Number(spacing.longFlowVertexRequiredDeltaX || 700) && !isBackwardOrReturn) {
+    findings.push(issue("WORKFLOW_LAYOUT_EXTERNAL_RETURN_LANE_UNJUSTIFIED", "External return lanes are reserved for long backward, return, or crowded reroutes; short cross-row connectors should use row-gap midpoint routing or direct auto-routing.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: `${flowPath}.vertices`,
+      flowId: flow.id,
+      sourceId: refId(flow.shape.source),
+      targetId: refId(flow.shape.target),
+      routeY,
+      netGap,
+      deltaX: dx,
+    }));
+  }
+}
+
+function longestHorizontalVertexSegment(vertices) {
+  const points = asArray(vertices)
+    .filter((point) => Number.isFinite(Number(point?.x)) && Number.isFinite(Number(point?.y)))
+    .map((point) => ({ x: Number(point.x), y: Number(point.y) }));
+  let best = null;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const left = points[index];
+    const right = points[index + 1];
+    if (Math.abs(left.y - right.y) > 1) continue;
+    const length = Math.abs(right.x - left.x);
+    if (!best || length > best.length) best = { y: Math.round((left.y + right.y) / 2), length };
+  }
+  return best;
 }
 
 function validateWorkflowSemantics(resource, nodes, flows, spacing, findings) {
@@ -785,7 +912,7 @@ function nodeSize(node) {
       height: Math.max(1, Number(lowerRight.y) - Number(upperLeft.y)),
     };
   }
-  return { width: 190, height: 60 };
+  return { width: 190, height: 86 };
 }
 
 function nodeCenter(node) {
@@ -812,6 +939,15 @@ function isRejectedFlow(flow) {
     conditioninfo: flow?.properties?.conditioninfo || [],
   }).toLowerCase();
   return /rejected|reject|cancel|deny|decline|revoke|exception/.test(text);
+}
+
+function isSubmittedFlow(flow) {
+  const text = JSON.stringify({
+    name: flow?.properties?.name || "",
+    documentation: flow?.properties?.documentation || "",
+    conditioninfo: flow?.properties?.conditioninfo || [],
+  }).toLowerCase();
+  return /\bsubmitted?\b|\bsubmit\b/.test(text);
 }
 
 function isReturnFlow(flow) {

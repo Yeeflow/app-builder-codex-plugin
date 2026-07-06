@@ -6492,8 +6492,8 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
     id: startToFirstFlowId,
     sourceId: startId,
     targetId: stepNodes[0]?.id || endId,
-    name: "Submit",
-    vertices: workflowVerticesBetween(layout.start, stepNodes[0]?.position || layout.end),
+    name: "Submitted",
+    vertices: [],
   });
   for (const [index, node] of stepNodes.entries()) {
     const nextNode = stepNodes[index + 1];
