@@ -65,8 +65,12 @@
       "A shared EndRejectEvent should collect at most three adjacent Approval Assignment Task Rejected flows.",
       "A shared EndRejectEvent may only collect Rejected flows from Approval Assignment Tasks on the same horizontal lane. Assignment Tasks on different y lanes must use separate EndRejectEvent nodes.",
       "A shared EndRejectEvent must be centered by node center points, not top-left coordinates. When three Assignment Tasks share one EndRejectEvent, the EndRejectEvent center x must match the center of the three-task span, normally the middle task center.",
+      "A shared EndRejectEvent must collect only local adjacent sources; if rejected sources are far apart even on the same lane, split them into separate local EndRejectEvent nodes.",
       "If the source Approval Assignment Tasks are on the first workflow row, their shared EndRejectEvent must be placed on the row above them. If the source tasks are on a lower row, the shared EndRejectEvent must be placed on the row below them.",
       "Workflow diagrams should use the roughly 16:9 Designer canvas area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line, and generated workflows should not exceed five vertical rows.",
+      "Medium-complexity workflows should not stretch into a very wide horizontal strip; fold later branches into upper or lower lanes instead of continuing the main path far to the right.",
+      "Complex workflow rows should not become dense control strips; split later steps, branch targets, and post-approval actions into upper/lower lanes before row labels and SequenceFlows overlap.",
+      "Long gateway branch labels must not share the same horizontal label lane; when two or more sibling condition labels are long, their target nodes should be separated into distinct y lanes.",
       "Backward or return SequenceFlow edges must use rounded routing and explicit vertices. Standard-spaced forward rejected or cross-lane edges do not require vertices unless they overlap or cross another node.",
       "SequenceFlow source and target references must resolve to existing workflow node ids.",
       "Generated graphposition should cover the visual node bounds plus padding."
@@ -98,7 +102,13 @@
       "targetCanvasAspectRatio": 1.7778,
       "singleRowSprawlNodeThreshold": 10,
       "singleRowSprawlAspectRatio": 2.4,
-      "maximumWorkflowRows": 5
+      "maximumWorkflowRows": 5,
+      "mediumWorkflowNodeThreshold": 14,
+      "mediumWorkflowMaxWidth": 2600,
+      "rowNodeDensityThreshold": 7,
+      "endRejectSourceSpanMax": 760,
+      "gatewayLabelCongestionMinLength": 16,
+      "gatewayLabelLaneToleranceY": 60
     },
     "lineStyle": {
       "default": "rounded",

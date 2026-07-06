@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.18
+
+- Release complex workflow lane layout hardening.
+- Generated Approval form, Data list workflow, and Scheduled workflow graphs now split complex rejected paths into local `EndRejectEvent` groups instead of routing every rejection into one global endpoint.
+- Medium-complexity workflows now fold later steps into upper/lower lanes before they become over-wide horizontal strips.
+- Long backward reroutes, including request-clarification return paths, must include explicit `vertices[]` instead of relying only on Designer auto-routing.
+- Add source/dist regression coverage for distant same-lane rejection endpoints, dense workflow rows, gateway condition label congestion, and six-approval materializer output with multiple local rejection endpoints.
+
 ## 0.9.17
 
 - Release shared End with Rejection workflow layout hardening.

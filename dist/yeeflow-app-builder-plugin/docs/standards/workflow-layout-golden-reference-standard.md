@@ -39,15 +39,17 @@ It does not prove business behavior, assignment correctness, workflow execution,
 10. A shared `EndRejectEvent` must not collect more than three adjacent Approval Assignment Task rejected flows. Split into additional `EndRejectEvent` nodes after three sources.
 11. A shared `EndRejectEvent` may only collect rejected flows from Approval Assignment Tasks on the same horizontal lane. Assignment Tasks on different y lanes must use separate `EndRejectEvent` nodes.
 12. `EndRejectEvent` placement must follow the source group by node centers, not top-left coordinates: one source aligns with the task center; two or three sources align near the horizontal center of the source task centers.
-13. If the source Approval Assignment Tasks are on the first workflow row, their shared `EndRejectEvent` must sit on the row above them. If the source tasks are not on the first workflow row, their shared `EndRejectEvent` must sit on the row below them.
-14. Workflow diagrams should use the visible Designer canvas as a roughly `16:9` work area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line.
-15. Generated workflows should not exceed five vertical rows/layers.
-16. Generated SequenceFlow line style should be `rounded` by default for complex graphs.
-17. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
-18. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
-19. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
-20. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
-21. `graphposition` should cover the full node area plus padding.
+13. A shared `EndRejectEvent` must collect only local adjacent sources. If two or three rejected sources are far apart on the same lane, split them into separate local `EndRejectEvent` nodes instead of drawing long rejection lines to one global endpoint.
+14. If the source Approval Assignment Tasks are on the first workflow row, their shared `EndRejectEvent` must sit on the row above them. If the source tasks are not on the first workflow row, their shared `EndRejectEvent` must sit on the row below them.
+15. Workflow diagrams should use the visible Designer canvas as a roughly `16:9` work area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line.
+16. Generated workflows should not exceed five vertical rows/layers.
+17. A complex workflow row must not become a dense strip. Fold later actions or branch targets into upper/lower lanes when one row would contain too many nodes or condition labels.
+18. Generated SequenceFlow line style should be `rounded` by default for complex graphs.
+19. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
+20. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
+21. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
+22. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
+23. `graphposition` should cover the full node area plus padding.
 
 ## Standard Spacing
 
@@ -67,6 +69,8 @@ The `workflow_actions_layout` reference establishes the following default spacin
 | `V_LANE` | `155` | `135` | Main lane to lower approval branch lane. |
 | `ROW_TOLERANCE` | `60` | fixed | Nodes within this y delta count as one horizontal lane. |
 | `MAX_ROWS` | `5` | fixed | Maximum generated workflow vertical rows/layers. |
+| `ROW_NODE_DENSITY` | `7` | fixed | Maximum suggested nodes in one complex workflow row before folding into another lane. |
+| `END_REJECT_SOURCE_SPAN` | `760` | fixed | Maximum suggested x-span for approval tasks sharing one rejection endpoint. |
 | `CANVAS_RATIO` | `16:9` | advisory | Preferred visible Designer canvas usage. |
 
 ## Assignment Task Outcome Rules
@@ -110,9 +114,22 @@ For Approval Task rejected outcomes:
 - when source Approval Assignment Tasks are on a lower workflow row, place the shared `EndRejectEvent` below that row
 - shared rejection endpoints are valid only when the source Approval Assignment Tasks are on the same horizontal lane
 - source tasks on different vertical lanes must use separate `EndRejectEvent` nodes, even when there are three or fewer rejected sources
+- source tasks that are too far apart on the same lane should also use separate local `EndRejectEvent` nodes
 - more than three rejected sources: create another `EndRejectEvent`
 
 This prevents many rejected lines from stacking into one crowded endpoint.
+
+## Complex Workflow Lane Strategy
+
+For workflows with many approvals, gateways, and post-approval actions, do not keep extending the main row indefinitely. Use the golden-reference lane pattern:
+
+- main approval backbone on the center row
+- condition-specific review branches on upper or lower rows
+- request clarification / return paths on a lower row with explicit `vertices[]`
+- local rejection endpoints above the first approval row or below lower approval rows
+- later procurement, fulfillment, or archive actions folded into another lane when the main row becomes dense
+
+The target visual width for most generated workflows should stay around `1800-2200px`. Medium-complexity workflows that exceed the hard maximum should be folded into lanes before signing.
 
 ## Workflow Designer V2 Line Style Rules
 

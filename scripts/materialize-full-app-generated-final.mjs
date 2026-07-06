@@ -6187,36 +6187,69 @@ function workflowLayoutForSteps(workflowSteps) {
   const startX = 100;
   const firstStepX = 420;
   const columnGap = 335;
+  const rowGap = 155;
+  const maxColumnsPerRow = 6;
   const stepPositions = workflowSteps.map((step, index) => ({
-    x: firstStepX + index * columnGap,
-    y: step.nodeType === "ContentList" ? actionLaneY : mainLaneY,
+    x: firstStepX + (index % maxColumnsPerRow) * columnGap,
+    y: mainLaneY + Math.floor(index / maxColumnsPerRow) * rowGap + (step.nodeType === "ContentList" ? rowGap : 0),
   }));
-  const endX = firstStepX + Math.max(1, workflowSteps.length) * columnGap;
-  const approvalStepPositions = stepPositions.filter((_, index) => {
+  const lastStepIndex = Math.max(0, workflowSteps.length - 1);
+  const lastStepRow = Math.floor(lastStepIndex / maxColumnsPerRow);
+  const lastStepColumn = lastStepIndex % maxColumnsPerRow;
+  const endX = firstStepX + (lastStepColumn + 1) * columnGap;
+  const endY = mainLaneY + lastStepRow * rowGap;
+  const approvalEntries = stepPositions.map((position, index) => {
     const nodeType = workflowSteps[index]?.nodeType || "";
-    return nodeType !== "ContentList" && nodeType !== "StartNoneEvent" && nodeType !== "EndNoneEvent" && nodeType !== "EndRejectEvent" && nodeType !== "SequenceFlow";
-  });
-  const approvalStepCenters = approvalStepPositions.map((position) => ({
-    x: position.x + workflowNodeWidth / 2,
-    y: position.y,
-  }));
-  const rejectGroupCenterX = approvalStepCenters.length
-    ? (Math.min(...approvalStepCenters.map((position) => position.x)) + Math.max(...approvalStepCenters.map((position) => position.x))) / 2
-    : firstStepX + workflowNodeWidth / 2;
-  const firstApprovalRowY = approvalStepPositions.length ? Math.min(...approvalStepPositions.map((position) => position.y)) : mainLaneY;
-  const rejectSourceRowY = approvalStepPositions.length
-    ? approvalStepPositions.reduce((sum, position) => sum + position.y, 0) / approvalStepPositions.length
-    : mainLaneY;
-  const rejectGoesAbove = Math.abs(rejectSourceRowY - firstApprovalRowY) <= workflowRowToleranceY;
+    const isApproval = nodeType !== "ContentList" && nodeType !== "StartNoneEvent" && nodeType !== "EndNoneEvent" && nodeType !== "EndRejectEvent" && nodeType !== "SequenceFlow";
+    return isApproval ? { index, position } : null;
+  }).filter(Boolean);
+  const approvalRows = workflowLayoutRows(approvalEntries, workflowRowToleranceY);
+  const firstApprovalRowY = approvalRows.length ? Math.min(...approvalRows.map((row) => row.y)) : mainLaneY;
+  const rejectGroups = [];
+  for (const row of approvalRows) {
+    const rowEntries = [...row.entries].sort((left, right) => left.position.x - right.position.x);
+    for (let index = 0; index < rowEntries.length; index += 3) {
+      const chunk = rowEntries.slice(index, index + 3);
+      const centers = chunk.map((entry) => ({ x: entry.position.x + workflowNodeWidth / 2, y: entry.position.y }));
+      const minX = Math.min(...centers.map((center) => center.x));
+      const maxX = Math.max(...centers.map((center) => center.x));
+      const sourceRowY = centers.reduce((sum, center) => sum + center.y, 0) / centers.length;
+      const rejectGoesAbove = Math.abs(sourceRowY - firstApprovalRowY) <= workflowRowToleranceY;
+      const centerX = (minX + maxX) / 2;
+      rejectGroups.push({
+        stepIndexes: chunk.map((entry) => entry.index),
+        position: {
+          x: centerX - workflowNodeWidth / 2,
+          y: rejectGoesAbove ? sourceRowY - rejectUpGap : sourceRowY + rejectDownGap,
+        },
+      });
+    }
+  }
+  const fallbackRejectPosition = {
+    x: firstStepX,
+    y: mainLaneY - rejectUpGap,
+  };
   return {
     start: { x: startX, y: mainLaneY },
     stepPositions,
-    end: { x: endX, y: mainLaneY },
-    rejectEnd: {
-      x: rejectGroupCenterX - workflowNodeWidth / 2,
-      y: rejectGoesAbove ? rejectSourceRowY - rejectUpGap : rejectSourceRowY + rejectDownGap,
-    },
+    end: { x: endX, y: endY },
+    rejectEnd: rejectGroups[0]?.position || fallbackRejectPosition,
+    rejectGroups: rejectGroups.length ? rejectGroups : [{ stepIndexes: [], position: fallbackRejectPosition }],
   };
+}
+
+function workflowLayoutRows(entries, tolerance) {
+  const rows = [];
+  for (const entry of [...entries].sort((left, right) => left.position.y - right.position.y)) {
+    const existing = rows.find((row) => Math.abs(row.y - entry.position.y) <= tolerance);
+    if (existing) {
+      existing.entries.push(entry);
+      existing.y = existing.entries.reduce((sum, item) => sum + item.position.y, 0) / existing.entries.length;
+    } else {
+      rows.push({ y: entry.position.y, entries: [entry] });
+    }
+  }
+  return rows;
 }
 
 function workflowVerticesBetween(sourcePosition, targetPosition, options = {}) {
@@ -6347,6 +6380,15 @@ function approvalWorkflowExecutionSteps(nodes) {
 function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submissionPageId, taskPageId, startId, endId, rejectEndId, workflowSteps, dataListMetas = [] }) {
   const seed = `${defId}:${formKey}:workflow`;
   const layout = workflowLayoutForSteps(workflowSteps);
+  const rejectGroups = layout.rejectGroups.map((group, index) => ({
+    ...group,
+    id: index === 0 ? rejectEndId : deterministicUuid(`${seed}:end-rejected:${index + 1}`),
+    incoming: [],
+  }));
+  const rejectGroupByStepIndex = new Map();
+  for (const group of rejectGroups) {
+    for (const stepIndex of group.stepIndexes) rejectGroupByStepIndex.set(stepIndex, group);
+  }
   const stepNodes = workflowSteps.map((step, index) => {
     const id = deterministicUuid(`${seed}:step:${index + 1}:${step.nodeType}:${step.nodeName}`);
     return buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas, position: layout.stepPositions[index] });
@@ -6354,7 +6396,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
   const positionById = new Map([
     [startId, layout.start],
     [endId, layout.end],
-    [rejectEndId, layout.rejectEnd],
+    ...rejectGroups.map((group) => [group.id, group.position]),
     ...stepNodes.map((node) => [node.id, node.position]),
   ]);
   const startToFirstFlowId = deterministicUuid(`${seed}:flow:start-to-first`);
@@ -6369,7 +6411,6 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
   };
   const flowShapes = [];
   const endIncoming = [];
-  const rejectIncoming = [];
   const addFlow = ({ id, sourceId, targetId, name, conditioninfo = null, vertices = [] }) => {
     const flow = {
       id,
@@ -6410,17 +6451,18 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
         conditioninfo: [workflowOutcomeCondition({ key: approvedFlowId, taskId: node.id, taskLabel: node.properties.name, outcome: "Approved" })],
         vertices: workflowVerticesBetween(node.position, approvedTargetPosition),
       });
+      const rejectGroup = rejectGroupByStepIndex.get(index) || rejectGroups[0];
       const rejectedRef = addFlow({
         id: rejectedFlowId,
         sourceId: node.id,
-        targetId: rejectEndId,
+        targetId: rejectGroup.id,
         name: "Rejected",
         conditioninfo: [workflowOutcomeCondition({ key: rejectedFlowId, taskId: node.id, taskLabel: node.properties.name, outcome: "Rejected" })],
-        vertices: workflowRejectedVertices(node.position, layout.rejectEnd),
+        vertices: workflowRejectedVertices(node.position, rejectGroup.position),
       });
       node.outgoing = [approvedRef, rejectedRef];
       if (!nextNode) endIncoming.push(approvedRef);
-      rejectIncoming.push(rejectedRef);
+      rejectGroup.incoming.push(rejectedRef);
     } else {
       const completeFlowId = deterministicUuid(`${seed}:flow:${index + 1}:complete`);
       const targetId = nextNode?.id || endId;
@@ -6454,15 +6496,15 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       outgoing: [],
       properties: { name: "End" },
     },
-    {
-      id: rejectEndId,
-      resourceid: rejectEndId,
+    ...rejectGroups.map((group, index) => ({
+      id: group.id,
+      resourceid: group.id,
       stencil: { id: "EndRejectEvent" },
-      position: layout.rejectEnd,
-      incoming: rejectIncoming,
+      position: group.position,
+      incoming: group.incoming,
       outgoing: [],
-      properties: { name: "Rejected" },
-    },
+      properties: { name: index === 0 ? "Rejected" : `Rejected ${index + 1}` },
+    })),
   ];
 }
 

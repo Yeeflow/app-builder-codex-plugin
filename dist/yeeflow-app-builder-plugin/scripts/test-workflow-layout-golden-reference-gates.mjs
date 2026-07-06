@@ -109,6 +109,21 @@ try {
   }), "WORKFLOW_LAYOUT_END_REJECT_POSITION_MISMATCH");
   cases.push({ case: "fail: shared end reject must be centered on three source task centers", status: "pass" });
 
+  expectCode("local end reject cannot collect distant same-lane sources", mutateReadable("end-reject-source-span-too-wide.json", (def) => {
+    const reject = def.childshapes.find((shape) => shape.id === "reject");
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    end.position = { x: 2600, y: 220 };
+    const farA = node("far-review-a", "MultiAssignmentTask", "Far Review A", 1120, 220);
+    const farB = node("far-review-b", "MultiAssignmentTask", "Far Review B", 1940, 220);
+    reject.position = { x: 1180, y: 80 };
+    def.childshapes.push(farA, farB);
+    def.childshapes.push(flow("flow-far-a-rejected", farA, reject, "Rejected", [{ x: 1260, y: 220 }, { x: 1260, y: 80 }]));
+    def.childshapes.push(flow("flow-far-a-approved", farA, end, "Approved", [{ x: 1300, y: 220 }, { x: 1300, y: 300 }, { x: 2600, y: 300 }]));
+    def.childshapes.push(flow("flow-far-b-rejected", farB, reject, "Rejected", [{ x: 2080, y: 220 }, { x: 2080, y: 80 }]));
+    def.childshapes.push(flow("flow-far-b-approved", farB, end, "Approved", [{ x: 2120, y: 220 }, { x: 2120, y: 300 }, { x: 2600, y: 300 }]));
+  }), "WORKFLOW_LAYOUT_END_REJECT_SOURCE_SPAN_TOO_WIDE");
+  cases.push({ case: "fail: shared end reject cannot collect distant same-lane sources", status: "pass" });
+
   expectCode("workflow using more than five vertical rows fails", mutateReadable("too-many-rows.json", (def) => {
     for (let index = 0; index < 4; index += 1) {
       def.childshapes.push(node(`extra-row-${index}`, "ContentList", `Extra Row ${index + 1}`, 100 + index * 320, 700 + index * 120));
@@ -126,6 +141,44 @@ try {
     }
   }), "WORKFLOW_LAYOUT_SINGLE_ROW_SPRAWL");
   cases.push({ case: "fail: large workflow uses a single over-wide horizontal row", status: "pass" });
+
+  expectCode("medium workflow stretched too wide fails", mutateReadable("medium-too-wide.json", (def) => {
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    end.position = { x: 3600, y: 220 };
+    for (let index = 0; index < 9; index += 1) {
+      def.childshapes.push(node(`medium-step-${index}`, "ContentList", `Medium Step ${index + 1}`, 1300 + index * 260, index % 2 === 0 ? 220 : 360));
+    }
+  }), "WORKFLOW_LAYOUT_MEDIUM_GRAPH_TOO_WIDE");
+  cases.push({ case: "fail: medium workflow should not stretch into a very wide strip", status: "pass" });
+
+  expectCode("complex row node density fails", mutateReadable("row-density-too-high.json", (def) => {
+    const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
+    nodes.forEach((node, index) => {
+      node.position = { x: 100 + index * 280, y: index % 2 === 0 ? 220 : 360 };
+    });
+    for (let index = 0; index < 10; index += 1) {
+      def.childshapes.push(node(`dense-row-${index}`, "ContentList", `Dense Row ${index + 1}`, 1300 + index * 220, 220));
+    }
+  }), "WORKFLOW_LAYOUT_ROW_NODE_DENSITY_TOO_HIGH");
+  cases.push({ case: "fail: complex workflow row cannot contain too many nodes", status: "pass" });
+
+  expectCode("gateway sibling labels on same lane fail", mutateReadable("gateway-label-congestion.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    const gateway = node("gateway", "InclusiveGateway", "Budget gateway", 720, 220);
+    const security = node("security", "ContentList", "Security Review", 1320, 220);
+    const compliance = node("compliance", "ContentList", "Compliance Review", 1320, 250);
+    def.childshapes = def.childshapes.filter((shape) => !["flow-approved", "flow-complete"].includes(shape.id));
+    def.childshapes.push(gateway, security, compliance);
+    def.childshapes.push(flow("flow-approved-to-gateway", review, gateway, "Approved"));
+    def.childshapes.push(flow("flow-sensitive-data", gateway, security, "Contains Sensitive Data = true"));
+    def.childshapes.push(flow("flow-software-license", gateway, compliance, "Software License Required = true"));
+    def.childshapes.push(flow("flow-security-done", security, create, "Done", [{ x: 1420, y: 220 }, { x: 1420, y: 360 }]));
+    def.childshapes.push(flow("flow-compliance-done", compliance, create, "Done", [{ x: 1480, y: 250 }, { x: 1480, y: 360 }]));
+    def.childshapes.push(flow("flow-complete-readded", create, end, "Complete", [{ x: 870, y: 360 }, { x: 870, y: 220 }]));
+  }), "WORKFLOW_LAYOUT_GATEWAY_BRANCH_LABEL_CONGESTION");
+  cases.push({ case: "fail: long gateway branch labels cannot share one lane", status: "pass" });
 
   expectCode("compressed complex graph fails", mutateReadable("compressed.json", (def) => {
     const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
@@ -315,7 +368,10 @@ function approvalPlanMarkdown() {
     "| 1 | Department Manager Review | MultiAssignmentTask | Manager review. | Department Manager | Role based | Approved; Rejected | Always | Read request | Generated-final validation |",
     "| 2 | Procurement Review | MultiAssignmentTask | Procurement review. | Procurement | Role based | Approved; Rejected | Always | Read request | Generated-final validation |",
     "| 3 | Finance Review | MultiAssignmentTask | Finance approval. | Finance Manager | Job position | Approved; Rejected | Always | Read request | Generated-final validation |",
-    "| 4 | Create Vendor Master | ContentList | Create approved vendor record. | System | System action | Complete | Approved path only | Vendor Master create | Generated-final validation |",
+    "| 4 | Compliance Review | MultiAssignmentTask | Compliance approval. | Compliance Officer | Job position | Approved; Rejected | Always | Read request | Generated-final validation |",
+    "| 5 | Security Review | MultiAssignmentTask | Security approval. | Security Officer | Job position | Approved; Rejected | Always | Read request | Generated-final validation |",
+    "| 6 | Director Approval | MultiAssignmentTask | Director approval. | Director | Job position | Approved; Rejected | Always | Read request | Generated-final validation |",
+    "| 7 | Create Vendor Master | ContentList | Create approved vendor record. | System | System action | Complete | Approved path only | Vendor Master create | Generated-final validation |",
   ].join("\n");
 }
 

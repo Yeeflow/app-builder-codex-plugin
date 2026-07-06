@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.17`
+- Version: `0.9.18`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.17` hardens shared End with Rejection workflow layout. Generated Approval form, Data list workflow, and Scheduled workflow graphs now center shared `EndRejectEvent` nodes by source task center points, place first-row approval rejections above the row and lower-row rejections below the row, and fail generated-final validation when three-source rejection endpoints drift off center or appear on the wrong side of the source row.
+Current release `0.9.18` hardens complex workflow lane layout. Generated Approval form, Data list workflow, and Scheduled workflow graphs now split complex rejected paths into local `EndRejectEvent` groups, fold medium workflows into upper/lower lanes instead of over-wide strips, require vertices for long backward reroutes, and fail generated-final validation for dense rows, distant shared rejection endpoints, and gateway condition label congestion.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.17
+Version: 0.9.18
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.17
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.18
 ```
 
 ## What Is Included

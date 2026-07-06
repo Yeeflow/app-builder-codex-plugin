@@ -103,6 +103,12 @@ function readReference(referencePath, findings) {
       "singleRowSprawlNodeThreshold",
       "singleRowSprawlAspectRatio",
       "maximumWorkflowRows",
+      "mediumWorkflowNodeThreshold",
+      "mediumWorkflowMaxWidth",
+      "rowNodeDensityThreshold",
+      "endRejectSourceSpanMax",
+      "gatewayLabelCongestionMinLength",
+      "gatewayLabelLaneToleranceY",
     ]) {
       if (!Number.isFinite(Number(spacing[key]))) {
         findings.push(issue("WORKFLOW_LAYOUT_REFERENCE_RULE_MISSING", "Workflow layout reference is missing a required numeric spacing rule.", { reference: referencePath, key }));
@@ -142,6 +148,12 @@ function defaultRules() {
         singleRowSprawlNodeThreshold: 10,
         singleRowSprawlAspectRatio: 2.4,
         maximumWorkflowRows: 5,
+        mediumWorkflowNodeThreshold: 14,
+        mediumWorkflowMaxWidth: 2600,
+        rowNodeDensityThreshold: 7,
+        endRejectSourceSpanMax: 760,
+        gatewayLabelCongestionMinLength: 16,
+        gatewayLabelLaneToleranceY: 60,
       },
       lineStyle: {
         default: "rounded",
@@ -276,7 +288,8 @@ function validateOneWorkflow(resource, reference, findings) {
         delta: { x: dx, y: dy },
       }));
     }
-    if (sourceNode?.position && targetNode?.position && signedDx < 0 && nodes.length >= 3 && targetStencil !== "EndRejectEvent" && (isReturnFlow(flow.shape) || dy < Number(spacing.laneGap || 155)) && !vertices.length) {
+    const isLongBackwardFlow = signedDx < 0 && dx >= Number(spacing.longFlowVertexRequiredDeltaX);
+    if (sourceNode?.position && targetNode?.position && signedDx < 0 && nodes.length >= 3 && targetStencil !== "EndRejectEvent" && (isReturnFlow(flow.shape) || isLongBackwardFlow || dy < Number(spacing.laneGap || 155)) && !vertices.length) {
       findings.push(issue("WORKFLOW_LAYOUT_BACKWARD_FLOW_VERTICES_MISSING", "Backward or return SequenceFlow edges must use explicit vertices so the return path does not cut through the main workflow lane.", {
         source: resource.source,
         workflowName: resource.workflowName,
@@ -448,6 +461,29 @@ function validateWorkflowSemantics(resource, nodes, flows, spacing, findings) {
         tolerance: Number(spacing.gatewayBranchColumnToleranceX),
       }));
     }
+    const labelCandidates = outgoing
+      .map((flow) => ({ flow, target: nodeById.get(refId(flow.shape.target)), label: flowLabel(flow.shape) }))
+      .filter((item) => item.target?.position && item.label.length >= Number(spacing.gatewayLabelCongestionMinLength));
+    for (let leftIndex = 0; leftIndex < labelCandidates.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < labelCandidates.length; rightIndex += 1) {
+        const left = labelCandidates[leftIndex];
+        const right = labelCandidates[rightIndex];
+        const targetDeltaY = Math.abs(left.target.position.y - right.target.position.y);
+        if (targetDeltaY <= Number(spacing.gatewayLabelLaneToleranceY)) {
+          findings.push(issue("WORKFLOW_LAYOUT_GATEWAY_BRANCH_LABEL_CONGESTION", "Long InclusiveGateway branch labels must not share the same horizontal label lane; separate sibling branch targets vertically or shorten labels.", {
+            source: resource.source,
+            workflowName: resource.workflowName,
+            path: `$.childshapes[${gateway.index}]`,
+            nodeId: gateway.id,
+            labels: [
+              { flowId: left.flow.id, label: left.label, targetId: refId(left.flow.shape.target), targetY: left.target.position.y },
+              { flowId: right.flow.id, label: right.label, targetId: refId(right.flow.shape.target), targetY: right.target.position.y },
+            ],
+            tolerance: Number(spacing.gatewayLabelLaneToleranceY),
+          }));
+        }
+      }
+    }
   }
 
   const assignmentRows = clusterRows(nodes.filter((node) => node.position && isAssignmentTask(node) && !isCompleteAssignmentTask(node)), Number(spacing.workflowRowToleranceY));
@@ -475,6 +511,18 @@ function validateWorkflowSemantics(resource, nodes, flows, spacing, findings) {
     const minX = Math.min(...sourceCenters.map((center) => center.x));
     const maxX = Math.max(...sourceCenters.map((center) => center.x));
     const centerX = (minX + maxX) / 2;
+    const sourceSpanX = maxX - minX;
+    if (incomingRejected.length > 1 && sourceSpanX > Number(spacing.endRejectSourceSpanMax)) {
+      findings.push(issue("WORKFLOW_LAYOUT_END_REJECT_SOURCE_SPAN_TOO_WIDE", "End with Rejection nodes should collect only local adjacent approval tasks; split distant rejected sources into separate local rejection endpoints.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `$.childshapes[${endReject.index}]`,
+        nodeId: endReject.id,
+        incomingRejectedSources: incomingRejected.map((sourceNode, index) => ({ id: sourceNode.id, centerX: sourceCenters[index].x })),
+        sourceSpanX,
+        maximumSuggestedSpan: Number(spacing.endRejectSourceSpanMax),
+      }));
+    }
     const minY = Math.min(...sourceCenters.map((center) => center.y));
     const maxY = Math.max(...sourceCenters.map((center) => center.y));
     const sourceYSpan = maxY - minY;
@@ -592,6 +640,19 @@ function validateCanvasRows(nodes, spacing, resource, findings) {
   const rowTolerance = Number(spacing.workflowRowToleranceY);
   const rows = clusterRows(positioned, rowTolerance);
   const maximumRows = Number(spacing.maximumWorkflowRows);
+  const rowNodeDensityThreshold = Number(spacing.rowNodeDensityThreshold);
+  for (const row of rows) {
+    if (positioned.length >= Number(spacing.mediumWorkflowNodeThreshold) && row.nodes.length > rowNodeDensityThreshold) {
+      findings.push(issue("WORKFLOW_LAYOUT_ROW_NODE_DENSITY_TOO_HIGH", "A complex workflow row contains too many nodes; split later steps or branch targets into upper/lower lanes so labels and routing stay readable.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        rowY: Math.round(row.y),
+        rowNodeCount: row.nodes.length,
+        maximumSuggestedNodes: rowNodeDensityThreshold,
+        nodeIds: row.nodes.map((node) => node.id),
+      }));
+    }
+  }
   if (rows.length > maximumRows) {
     findings.push(issue("WORKFLOW_LAYOUT_TOO_MANY_VERTICAL_ROWS", "Generated workflow diagrams should use at most five readable vertical rows within the Designer canvas.", {
       source: resource.source,
@@ -615,6 +676,18 @@ function validateCanvasRows(nodes, spacing, resource, findings) {
       aspectRatio: Number(aspect.toFixed(2)),
       targetAspectRatio: Number(spacing.targetCanvasAspectRatio),
       maximumSingleRowAspectRatio: maxAspect,
+    }));
+  }
+  const mediumThreshold = Number(spacing.mediumWorkflowNodeThreshold);
+  const mediumMaxWidth = Number(spacing.mediumWorkflowMaxWidth);
+  if (positioned.length >= mediumThreshold && positioned.length < 26 && width > mediumMaxWidth) {
+    findings.push(issue("WORKFLOW_LAYOUT_MEDIUM_GRAPH_TOO_WIDE", "Medium-complexity workflows should fold later branches into upper or lower lanes instead of stretching into a very wide horizontal strip.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      nodeCount: positioned.length,
+      rowCount: rows.length,
+      bounds: { width, height },
+      maximumSuggestedWidth: mediumMaxWidth,
     }));
   }
 }
@@ -778,7 +851,12 @@ function isBusinessConditionFlow(flow) {
     documentation: flow?.properties?.documentation || "",
     conditioninfo: flow?.properties?.conditioninfo || [],
   });
-  return /(?:n\.|s\.|d\.)[<>=!]|[<>]=?|Amount|Total|Budget|Cost|Price|Score|Risk|valueType\\?":\\?"number|valueType":"number/i.test(text);
+  return /(?:n\.|s\.|d\.|b\.)[<>=!]|[<>]=?|Amount|Total|Budget|Cost|Price|Score|Risk|Required|Sensitive|License|Availability|valueType\\?":\\?"(?:number|boolean|string|text)|valueType":"(?:number|boolean|string|text)/i.test(text);
+}
+
+function flowLabel(flow) {
+  const props = flow?.properties || {};
+  return String(props.documentation || props.name || "").trim();
 }
 
 function titleCase(value) {
