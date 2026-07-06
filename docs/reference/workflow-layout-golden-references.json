@@ -75,6 +75,7 @@
       "Direct same-row Start-to-first-task Submitted connectors must not include non-empty vertices.",
       "Direct same-row adjacent task connectors must not include cosmetic vertices when there is no obstacle.",
       "When a connector uses a horizontal route segment between two workflow rows, its route y must be the midpoint of the net row gap: (upperRowY + workflowNodeHeight + lowerRowY) / 2.",
+      "When a long return/backward connector crosses more than two workflow rows, its horizontal route segment must choose an adjacent open row-gap midpoint and must not run through any intermediate workflow row node bounds.",
       "Use an external return lane only for long backward/return/cross-lane reroutes where midpoint routing is unsafe or crowded.",
       "SequenceFlow source and target references must resolve to existing workflow node ids.",
       "Generated graphposition should cover the visual node bounds plus padding."

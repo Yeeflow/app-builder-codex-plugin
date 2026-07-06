@@ -320,6 +320,7 @@ function validateOneWorkflow(resource, reference, findings) {
       flowPath,
       sourceNode,
       targetNode,
+      nodes,
       vertices,
       spacing,
       findings,
@@ -421,7 +422,7 @@ function validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, line
   }
 }
 
-function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, vertices, spacing, findings }) {
+function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, nodes, vertices, spacing, findings }) {
   if (!sourceNode?.position || !targetNode?.position || !vertices.length) return;
   if (stencilId(targetNode.shape) === "EndRejectEvent" || stencilId(sourceNode.shape) === "EndRejectEvent") return;
   const sourceY = Number(sourceNode.position.y);
@@ -430,17 +431,37 @@ function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, 
   if (rowDeltaY <= Number(spacing.workflowRowToleranceY)) return;
   const horizontal = longestHorizontalVertexSegment(vertices);
   if (!horizontal) return;
+  const nodeHeight = Number(spacing.workflowNodeHeight || 86);
   const upperRowY = Math.min(sourceY, targetY);
   const lowerRowY = Math.max(sourceY, targetY);
-  const nodeHeight = Number(spacing.workflowNodeHeight || 86);
-  const upperRowBottom = upperRowY + nodeHeight;
-  const netGap = lowerRowY - upperRowBottom;
   const routeY = horizontal.y;
-  const isInsideRowGap = routeY > upperRowBottom && routeY < lowerRowY;
   const minimumGap = Number(spacing.minimumRowGapForLabeledMidpointRoute || 40);
   const preferredGap = Number(spacing.minimumRowGapForMidpointRoute || 60);
   const tolerance = Number(spacing.rowGapRouteYTolerance || 12);
-  const expectedRouteY = Math.round((upperRowY + nodeHeight + lowerRowY) / 2);
+  const rowBands = workflowRowBandsBetween(nodes, sourceNode, targetNode, spacing);
+  const occupiedBand = rowBands.find((band) => routeY >= band.top && routeY <= band.bottom);
+  if (occupiedBand) {
+    findings.push(issue("WORKFLOW_LAYOUT_ROUTE_Y_CROSSES_INTERMEDIATE_ROW", "Long cross-row connector horizontal segments must not run through any intermediate workflow row node bounds; route through an adjacent row-gap midpoint or a justified external lane.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: `${flowPath}.vertices`,
+      flowId: flow.id,
+      sourceId: refId(flow.shape.source),
+      targetId: refId(flow.shape.target),
+      routeY,
+      occupiedRow: {
+        top: occupiedBand.top,
+        bottom: occupiedBand.bottom,
+        nodeIds: occupiedBand.nodes.map((node) => node.id),
+      },
+    }));
+    return;
+  }
+  const rowGaps = workflowRowGaps(rowBands);
+  const matchingGap = rowGaps.find((gap) => routeY > gap.top && routeY < gap.bottom);
+  const expectedRouteY = matchingGap ? Math.round((matchingGap.top + matchingGap.bottom) / 2) : Math.round((upperRowY + nodeHeight + lowerRowY) / 2);
+  const netGap = matchingGap ? matchingGap.height : lowerRowY - (upperRowY + nodeHeight);
+  const isInsideRowGap = Boolean(matchingGap);
   if (isInsideRowGap && netGap >= minimumGap && Math.abs(routeY - expectedRouteY) > tolerance) {
     findings.push(issue("WORKFLOW_LAYOUT_ROUTE_Y_NOT_ROW_GAP_MIDPOINT", "Cross-row connector horizontal segments in the row gap must route through the midpoint of the net gap between rows.", {
       source: resource.source,
@@ -452,6 +473,7 @@ function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, 
       routeY,
       expectedRouteY,
       netGap,
+      rowGap: matchingGap ? { top: matchingGap.top, bottom: matchingGap.bottom } : null,
       tolerance,
     }));
   }
@@ -468,7 +490,9 @@ function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, 
       minimumGap,
     }));
   }
-  const isOutsideRows = routeY <= upperRowY - Number(spacing.externalReturnLanePaddingMin || 80) || routeY >= lowerRowY + nodeHeight + Number(spacing.externalReturnLanePaddingMin || 80);
+  const firstBand = rowBands[0] || { top: upperRowY, bottom: upperRowY + nodeHeight };
+  const lastBand = rowBands[rowBands.length - 1] || { top: lowerRowY, bottom: lowerRowY + nodeHeight };
+  const isOutsideRows = routeY <= firstBand.top - Number(spacing.externalReturnLanePaddingMin || 80) || routeY >= lastBand.bottom + Number(spacing.externalReturnLanePaddingMin || 80);
   const dx = Math.abs(Number(targetNode.position.x) - Number(sourceNode.position.x));
   const isBackwardOrReturn = Number(targetNode.position.x) < Number(sourceNode.position.x) || isReturnFlow(flow.shape);
   if (isOutsideRows && netGap >= preferredGap && dx < Number(spacing.longFlowVertexRequiredDeltaX || 700) && !isBackwardOrReturn) {
@@ -484,6 +508,33 @@ function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, 
       deltaX: dx,
     }));
   }
+}
+
+function workflowRowBandsBetween(nodes, sourceNode, targetNode, spacing) {
+  const tolerance = Number(spacing.workflowRowToleranceY || 60);
+  const sourceCenterY = nodeCenter(sourceNode).y;
+  const targetCenterY = nodeCenter(targetNode).y;
+  const minCenterY = Math.min(sourceCenterY, targetCenterY) - tolerance;
+  const maxCenterY = Math.max(sourceCenterY, targetCenterY) + tolerance;
+  return clusterRows(nodes.filter((node) => node.position), tolerance)
+    .map((row) => {
+      const top = Math.min(...row.nodes.map((node) => Number(node.position.y)));
+      const bottom = Math.max(...row.nodes.map((node) => Number(node.position.y) + nodeSize(node).height));
+      const centerY = (top + bottom) / 2;
+      return { top, bottom, centerY, nodes: row.nodes };
+    })
+    .filter((band) => band.centerY >= minCenterY && band.centerY <= maxCenterY)
+    .sort((left, right) => left.top - right.top);
+}
+
+function workflowRowGaps(rowBands) {
+  const gaps = [];
+  for (let index = 0; index < rowBands.length - 1; index += 1) {
+    const top = rowBands[index].bottom;
+    const bottom = rowBands[index + 1].top;
+    if (bottom > top) gaps.push({ top, bottom, height: bottom - top });
+  }
+  return gaps;
 }
 
 function longestHorizontalVertexSegment(vertices) {

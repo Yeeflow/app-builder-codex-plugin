@@ -89,6 +89,16 @@ try {
   }), "WORKFLOW_LAYOUT_ROUTE_Y_NOT_ROW_GAP_MIDPOINT");
   cases.push({ case: "fail: row-gap return route must use midpoint routeY", status: "pass" });
 
+  expectCode("multi-row long return route cannot cross an intermediate row", mutateReadable("multi-row-return-crosses-intermediate-row.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    review.position = { x: 420, y: 160 };
+    const middle = node("middle-review-row", "MultiAssignmentTask", "Middle Review Row", 980, 320);
+    const clarification = node("request-clarification", "MultiAssignmentTask", "Request clarification", 1420, 480);
+    def.childshapes.push(middle, clarification);
+    def.childshapes.push(flow("flow-clarification-completed-crosses-middle-row", clarification, review, "Completed", [{ x: 1550, y: 363 }, { x: 520, y: 363 }]));
+  }), "WORKFLOW_LAYOUT_ROUTE_Y_CROSSES_INTERMEDIATE_ROW");
+  cases.push({ case: "fail: multi-row long return route cannot cross intermediate row bounds", status: "pass" });
+
   expectCode("end reject collecting too many sources fails", mutateReadable("end-reject-too-many.json", (def) => {
     const reject = def.childshapes.find((shape) => shape.id === "reject");
     for (let index = 0; index < 3; index += 1) {

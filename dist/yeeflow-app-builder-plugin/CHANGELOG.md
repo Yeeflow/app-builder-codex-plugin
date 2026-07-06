@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.21
+
+- Release multi-row workflow return-route hardening.
+- Generated Approval form, Data list workflow, and Scheduled workflow graphs now choose a safe open adjacent row-gap lane for long backward/return connectors that cross intermediate rows instead of using only the source/target row midpoint.
+- Add `WORKFLOW_LAYOUT_ROUTE_Y_CROSSES_INTERMEDIATE_ROW` validation so return connector horizontal segments fail when they pass through an intermediate workflow row's node bounds.
+- Extend source/dist regression coverage for multi-row return routing and preserve the Workflow Designer v2 rounded connector contract.
+
 ## 0.9.20
 
 - Release Workflow Designer connector layout hardening.
