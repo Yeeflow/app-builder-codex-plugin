@@ -217,7 +217,7 @@ function hasGraphPosition(shape) {
   return isObject(shape?.bounds)
     || isObject(shape?.position)
     || (present(shape?.x) && present(shape?.y))
-    || (Array.isArray(shape?.dockers) && shape.dockers.length > 0);
+    || Array.isArray(shape?.dockers);
 }
 
 function validateReports(decoded, findings) {

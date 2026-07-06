@@ -5,6 +5,10 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+  approvalVariableTypeForField,
+  buildApprovalFormLayoutDef,
+} from "./lib/approval-form-layout-builder.mjs";
 import { encodeYapkResourceOfficial } from "./lib/yapk-decode-utils.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -2035,6 +2039,7 @@ function buildReverseRelatedCollectionSection({ record, childMeta, hostListName,
               style: {
                 direction: [null, "row"],
                 gap: [null, "--sp--s200"],
+                widthtype: [null, "1"],
                 justify_content: [null, "space-between"],
                 align_items: [null, "center"],
               },
@@ -4192,6 +4197,8 @@ function buildDataAnalyticsRuntimeContract({ controlId, reference, listMeta, roo
     rows: [rowField],
     columns: [],
     values: [valueRef],
+    preConditions: null,
+    Conditions: [],
   };
   const attr = {
     AppID: 41,
@@ -4231,14 +4238,41 @@ function isDateLikeAnalyticsField(field) {
 
 function runtimeFieldRef(field, role) {
   const fieldName = String(field?.fieldName || field?.FieldName || "ListDataID");
+  const fieldType = String(field?.fieldType || field?.FieldType || (fieldName === "ListDataID" ? "Bigint" : "Text"));
+  const type = runtimeFieldControlType(field, fieldName);
+  const attr = runtimeFieldAttr(field, type, fieldName);
   return {
     field: fieldName,
     fieldName,
     FieldName: fieldName,
-    id: role === "value" ? fieldName : String(field?.fieldId || field?.FieldID || fieldName),
+    id: fieldName,
     label: String(field?.displayName || field?.DisplayName || fieldName),
+    fieldType,
+    type,
+    attr,
     role,
   };
+}
+
+function runtimeFieldControlType(field, fieldName) {
+  if (String(fieldName || "") === "ListDataID") return "input";
+  const text = `${field?.controlType || ""} ${field?.Type || ""} ${field?.fieldType || ""} ${field?.FieldType || ""} ${field?.displayName || ""}`.toLowerCase();
+  if (/date|datetime|time/.test(text)) return "datepicker";
+  if (/radio|select|choice|status|category|type|priority/.test(text)) return "radio";
+  if (/identity|user|people|person|owner|assignee/.test(text)) return "identity-picker";
+  if (/number|decimal|currency|amount|percent/.test(text)) return "input_number";
+  return "input";
+}
+
+function runtimeFieldAttr(field, type, fieldName) {
+  if (type === "datepicker") return { displayLabel: true, readonly: true, showtime: true, dateformat: "0" };
+  if (type === "radio") {
+    const choices = Array.isArray(field?.choices) ? field.choices : Array.isArray(field?.Rules?.choices) ? field.Rules.choices : [];
+    return choices.length ? { choices } : {};
+  }
+  if (type === "identity-picker") return { displayLabel: true, readonly: true, "identity-maxselection": field?.Rules?.["identity-maxselection"] || 1 };
+  if (String(fieldName || "") === "ListDataID") return { displayLabel: true, readonly: true };
+  return { displayLabel: true, readonly: true };
 }
 
 function analyticsCountField(listMeta) {
@@ -4618,7 +4652,7 @@ function enforceSchemaBoundCollectionTemplate(root, { listMeta }) {
     fieldMap.set(normKey(field.fieldName), field);
     fieldMap.set(normKey(field.displayName), field);
   }
-  const allowedFields = new Set([...fieldMap.keys(), "listdataid", "created", "createdby", "modified", "modifiedby", "owner"]);
+  const allowedFields = new Set([...fieldMap.keys(), "listdataid", "id", "created", "createdby", "modified", "modifiedby", "owner"]);
   pruneInvalidProgressControls(root, { fieldMap, allowedFields });
   pruneGridTableColumnsBySchema(root, { fieldMap, allowedFields });
 }
@@ -5380,36 +5414,52 @@ function removeEmptyDashboardBusinessSections(root) {
 
 function ensureDashboardContentCardRequiredSlots(root) {
   const wrappers = findDescendants(root, (node) => ["content_card_wrapper", "content_card_60_wrapper", "content_card_40_wrapper"].some((identity) => hasIdentity(node, identity)));
+  const titleAreaPrototype = findFirstByIdentity(root, "section_title_area");
   const headerPrototype = findFirstByIdentity(root, "section_title_header");
   for (const wrapper of wrappers) {
     if (!Array.isArray(wrapper.children)) wrapper.children = [];
     const existingTitleArea = findFirstByIdentity(wrapper, "section_title_area");
     if (existingTitleArea) {
+      ensureDashboardSectionTitleAreaFullWidth(existingTitleArea);
       ensureSectionTitleHeader(existingTitleArea, String(wrapper.id || wrapper.nv_label || wrapper.name || "content-card"), headerPrototype);
       continue;
     }
     if (!findFirstByIdentity(wrapper, "section_content_area")) continue;
     const wrapperSeed = String(wrapper.id || wrapper.nv_label || wrapper.name || "content-card");
-    const titleArea = {
+    const titleArea = titleAreaPrototype ? clone(titleAreaPrototype) : {
       id: deterministicUuid(`${wrapperSeed}:section-title-area`),
       nv_label: "section_title_area",
       label: "Container",
       type: "container",
       attrs: {
         style: {
-          direction: [null, "row"],
-          gap: [null, "--sp--s200"],
-          justify_content: [null, "space-between"],
-          align_items: [null, "center"],
+          gap: [null, "--sp--s150"],
+          direction: [null, "row", null, "column"],
+          align_items: [null, "center", null, "flex-start"],
+          justify_content: [null, "space-between", null, "flex-start"],
+          widthtype: [null, "1"],
         },
       },
       children: [],
     };
+    titleArea.id = deterministicUuid(`${wrapperSeed}:section-title-area`);
+    titleArea.nv_label = "section_title_area";
+    titleArea.nav_label = "section_title_area";
+    titleArea.name = "section_title_area";
+    titleArea.children = [];
+    ensureDashboardSectionTitleAreaFullWidth(titleArea);
     ensureSectionTitleHeader(titleArea, wrapperSeed, headerPrototype);
     const contentIndex = wrapper.children.findIndex((child) => hasIdentity(child, "section_content_area"));
     if (contentIndex === -1) wrapper.children.unshift(titleArea);
     else wrapper.children.splice(contentIndex, 0, titleArea);
   }
+}
+
+function ensureDashboardSectionTitleAreaFullWidth(titleArea) {
+  if (!titleArea || typeof titleArea !== "object") return;
+  titleArea.attrs = titleArea.attrs && typeof titleArea.attrs === "object" ? titleArea.attrs : {};
+  titleArea.attrs.style = titleArea.attrs.style && typeof titleArea.attrs.style === "object" ? titleArea.attrs.style : {};
+  titleArea.attrs.style.widthtype = [null, "1"];
 }
 
 function ensureSectionTitleHeader(titleArea, seed, headerPrototype = null) {
@@ -5432,6 +5482,7 @@ function removeUnresolvedPageActionControls(root) {
     if (!node || !Array.isArray(node.children)) return;
     node.children = node.children.filter((child) => {
       visit(child, ancestors.concat(node));
+      if (isLockedCollectionTemplateStructuralControl(child)) return true;
       const actionId = String(child?.attrs?.control_action || child?.attrs?.action || child?.control_action || child?.action || "").trim();
       if (!actionId) return true;
       if (pageActionIds.has(actionId)) return true;
@@ -5441,6 +5492,14 @@ function removeUnresolvedPageActionControls(root) {
   };
   visit(root, []);
   removeEmptyDashboardBusinessSections(root);
+}
+
+function isLockedCollectionTemplateStructuralControl(control) {
+  return [
+    "grid_table_col_item_select",
+    "grid_table_col_item_op_menu",
+    "grid_table_col_item_op_menu_panel",
+  ].some((identity) => hasIdentity(control, identity));
 }
 
 function resolvesToLocalCollectionAction(actionId, ancestors) {
@@ -6643,28 +6702,7 @@ function uniqueVariablesById(variables) {
 }
 
 function approvalFormDef(id, title, role, fields = []) {
-  const templateId = role === "task" ? APPROVAL_FORM_TEMPLATE_IDS.task : APPROVAL_FORM_TEMPLATE_IDS.submission;
-  const templatePath = role === "task" ? APPROVAL_FORM_TEMPLATE_PATHS.task : APPROVAL_FORM_TEMPLATE_PATHS.submission;
-  const raw = JSON.parse(fs.readFileSync(templatePath, "utf8"));
-  const resource = clone(raw.templateResource);
-  resource.id = id;
-  resource.title = role === "task" ? `${title} Task` : `${title} Submission`;
-  resource.name = resource.title;
-  resource.approvalFormLayoutTemplateId = templateId;
-  resource.derivedFromApprovalFormLayoutTemplate = templateId;
-  resource.approvalFormLayoutRole = role;
-  setTemplateText(resource, "page_title_text", resource.title);
-  setTemplateText(resource, "page_title_description", role === "task" ? `Review and act on ${title}.` : `Submit ${title}.`);
-  setTemplateText(resource, "section_title_text", role === "task" ? "Review Details" : "Request Details");
-  setTemplateText(resource, "section_title_description", role === "task" ? `Review submitted ${title} information before taking action.` : `Complete the required ${title} information.`);
-  materializeApprovalFieldControls(resource, { fields, title, role });
-  ensureApprovalBusinessSection(resource, { title, role });
-  removeOperationsWithoutActions(resource);
-  removeUnusedApprovalTemplateSections(resource);
-  scrubApprovalSourceDomainResidue(resource, title);
-  instantiateDashboardControlUuids(resource, `${slugify(title)}-${role}-approval-form`);
-  resource.id = id;
-  return resource;
+  return buildApprovalFormLayoutDef({ rootDir: ROOT, id, title, role, fields });
 }
 
 function scrubApprovalSourceDomainResidue(node, title) {
@@ -6808,13 +6846,7 @@ function normalizeApprovalControlType(field) {
 }
 
 function approvalVariableType(field) {
-  const type = normalizeApprovalControlType(field);
-  if (type === "datepicker") return "date";
-  if (type === "currency" || type === "input_number") return "number";
-  if (type === "switch") return "boolean";
-  if (type === "identity-picker") return "user";
-  if (type === "list") return "sublist";
-  return "text";
+  return approvalVariableTypeForField(field);
 }
 
 function isFullRowApprovalField(field, controlType) {

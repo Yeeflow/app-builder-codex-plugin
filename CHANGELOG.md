@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.19
+
+- Release shared Approval Form Layouts v1.1 generation for standalone `.ywf` and full `.yapk` paths.
+- Standalone `.ywf` approval pages and packaged Approval form pages now use the same shared layout builder for submission/task templates, field control mapping, task readonly flags, empty-section cleanup, and source-template residue cleanup.
+- Add source/dist regression coverage proving standalone `.ywf` submission and task pages pass the same `approval-form-layouts-v1.1` validator used by packaged applications.
+- Document the shared-builder contract so future Approval layout fixes are made once and apply to both generation paths.
+
 ## 0.9.18
 
 - Release complex workflow lane layout hardening.

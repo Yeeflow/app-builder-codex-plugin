@@ -98,7 +98,7 @@ function flow(id, source, target, positions = true, name = "") {
     incoming: [{ resourceid: source }],
     outgoing: [{ resourceid: target }],
     properties: name ? { name, conditioninfo: [{ label: name }] } : {},
-    ...(positions ? { dockers: [{ x: 120, y: 30 }, { x: 180, y: 30 }] } : {}),
+    ...(positions ? { dockers: [] } : {}),
   };
 }
 
