@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.20`
+- Version: `0.9.21`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.20` hardens Workflow Designer connector layout generation for Approval form, Data list workflow, and Scheduled workflow graphs. Generated workflows now keep direct Submitted and adjacent same-row forward connectors on rounded auto-routing without cosmetic vertices, require row-gap return routes to use the midpoint lane formula, and constrain external return lanes to genuinely long or crowded reroutes.
+Current release `0.9.21` hardens multi-row Workflow Designer return connector layout for Approval form, Data list workflow, and Scheduled workflow graphs. Generated workflows now route long backward/return connectors through an open adjacent row-gap lane instead of crossing intermediate workflow rows, and validation blocks horizontal return segments that pass through an intermediate row's node bounds.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.20
+Version: 0.9.21
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.20
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.21
 ```
 
 ## What Is Included

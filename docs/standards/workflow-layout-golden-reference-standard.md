@@ -49,10 +49,11 @@ It does not prove business behavior, assignment correctness, workflow execution,
 20. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
 21. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
 22. Direct same-row connectors must rely on rounded auto-routing. In particular, `StartNoneEvent -> first task` connectors labeled `Submitted` / `Submit` must have empty or absent `vertices[]`.
-23. When a connector needs a horizontal segment between two rows, route that segment at the midpoint of the net row gap: `routeY = (upperRowY + workflowNodeHeight + lowerRowY) / 2`.
-24. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap midpoint is unsafe, crowded, or too narrow.
-25. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
-26. `graphposition` should cover the full node area plus padding.
+23. When a connector needs a horizontal segment between two adjacent rows, route that segment at the midpoint of the net row gap: `routeY = (upperRowY + workflowNodeHeight + lowerRowY) / 2`.
+24. When a long return/backward connector crosses more than two workflow rows, do not calculate `routeY` from only the source and target rows. Choose an adjacent open row-gap midpoint along the route and ensure the horizontal segment does not pass through any intermediate row's node bounds.
+25. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap midpoint is unsafe, crowded, or too narrow.
+26. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
+27. `graphposition` should cover the full node area plus padding.
 
 ## Standard Spacing
 
@@ -186,7 +187,7 @@ vertices = []
 
 This is mandatory for `Start -> first task` / `Submitted` or `Submit` connectors when the source and target are adjacent and unobstructed.
 
-For return lines that can travel in the open space between rows, route the horizontal segment through the midpoint of the net row gap:
+For return lines that can travel in the open space between adjacent rows, route the horizontal segment through the midpoint of the net row gap:
 
 ```text
 sourceCenterX = source.x + taskCenterOffset
@@ -201,6 +202,8 @@ vertices = [
 ```
 
 Use an external return lane below or above the graph only when the row gap is too narrow, already crowded, or the connector spans many logical workflow groups. Do not send short local return lines to arbitrary fixed y values.
+
+For long return/backward lines that cross multiple workflow rows, first cluster all rows between source and target. The horizontal segment must use an open adjacent row gap, not the midpoint between the source row and target row when an intermediate row exists. For example, if rows occupy `160..246`, `320..406`, and `480..566`, a return from the third row to the first row should use the first open gap midpoint `283`, not `(160 + 86 + 480) / 2 = 363`, because `363` passes through the middle row.
 
 ## Generator Guidance
 

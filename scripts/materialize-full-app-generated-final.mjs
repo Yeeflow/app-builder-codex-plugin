@@ -6294,6 +6294,13 @@ function workflowLayoutForSteps(workflowSteps) {
     end: { x: endX, y: endY },
     rejectEnd: rejectGroups[0]?.position || fallbackRejectPosition,
     rejectGroups: rejectGroups.length ? rejectGroups : [{ stepIndexes: [], position: fallbackRejectPosition }],
+    routeNodes: [
+      { id: "start", position: { x: startX, y: mainLaneY } },
+      { id: "end", position: { x: endX, y: endY } },
+      ...stepPositions.map((position, index) => ({ id: `step-${index + 1}`, position })),
+      ...(rejectGroups.length ? rejectGroups : [{ stepIndexes: [], position: fallbackRejectPosition }])
+        .map((group, index) => ({ id: `end-rejected-${index + 1}`, position: group.position })),
+    ],
   };
 }
 
@@ -6316,11 +6323,73 @@ function workflowVerticesBetween(sourcePosition, targetPosition, options = {}) {
   const dx = Math.abs(targetPosition.x - sourcePosition.x);
   const dy = Math.abs(targetPosition.y - sourcePosition.y);
   if (!options.force && dy < 80 && dx < 520) return [];
+  const routeY = workflowSafeRouteYBetweenRows(sourcePosition, targetPosition, options.routeNodes || []);
+  if (Number.isFinite(routeY)) {
+    const nodeWidth = Number(options.nodeWidth || 190);
+    return [
+      { x: Math.round(sourcePosition.x + nodeWidth / 2), y: routeY },
+      { x: Math.round(targetPosition.x + nodeWidth / 2), y: routeY },
+    ];
+  }
   const bendX = sourcePosition.x + Math.max(120, Math.round(dx / 2));
   return [
     { x: bendX, y: sourcePosition.y },
     { x: bendX, y: targetPosition.y },
   ];
+}
+
+function workflowSafeRouteYBetweenRows(sourcePosition, targetPosition, routeNodes = [], options = {}) {
+  const nodeHeight = Number(options.nodeHeight || 86);
+  const rowTolerance = Number(options.rowTolerance || 60);
+  const minimumGap = Number(options.minimumGap || 40);
+  const externalPadding = Number(options.externalPadding || 100);
+  const sourceY = Number(sourcePosition?.y);
+  const targetY = Number(targetPosition?.y);
+  if (!Number.isFinite(sourceY) || !Number.isFinite(targetY) || Math.abs(sourceY - targetY) <= rowTolerance) return null;
+  const positions = (Array.isArray(routeNodes) ? routeNodes : [])
+    .map((entry) => entry?.position || entry)
+    .filter((position) => Number.isFinite(Number(position?.x)) && Number.isFinite(Number(position?.y)))
+    .map((position) => ({ x: Number(position.x), y: Number(position.y) }));
+  if (positions.length < 2) return null;
+  const sourceCenterY = sourceY + nodeHeight / 2;
+  const targetCenterY = targetY + nodeHeight / 2;
+  const minCenterY = Math.min(sourceCenterY, targetCenterY) - rowTolerance;
+  const maxCenterY = Math.max(sourceCenterY, targetCenterY) + rowTolerance;
+  const rows = workflowPositionRows(positions, rowTolerance)
+    .map((row) => {
+      const top = Math.min(...row.map((position) => position.y));
+      const bottom = Math.max(...row.map((position) => position.y + nodeHeight));
+      return { top, bottom, centerY: (top + bottom) / 2 };
+    })
+    .filter((row) => row.centerY >= minCenterY && row.centerY <= maxCenterY)
+    .sort((left, right) => left.top - right.top);
+  if (rows.length < 2) return null;
+  const gaps = [];
+  for (let index = 0; index < rows.length - 1; index += 1) {
+    const top = rows[index].bottom;
+    const bottom = rows[index + 1].top;
+    if (bottom - top >= minimumGap) gaps.push({ top, bottom, midpoint: Math.round((top + bottom) / 2) });
+  }
+  if (gaps.length) {
+    return sourceY > targetY ? gaps[0].midpoint : gaps[gaps.length - 1].midpoint;
+  }
+  return sourceY > targetY
+    ? Math.round(rows[0].top - externalPadding)
+    : Math.round(rows[rows.length - 1].bottom + externalPadding);
+}
+
+function workflowPositionRows(positions, tolerance) {
+  const rows = [];
+  for (const position of [...positions].sort((left, right) => left.y - right.y)) {
+    const existing = rows.find((row) => Math.abs(rowAverageY(row) - position.y) <= tolerance);
+    if (existing) existing.push(position);
+    else rows.push([position]);
+  }
+  return rows;
+}
+
+function rowAverageY(row) {
+  return row.reduce((sum, position) => sum + position.y, 0) / Math.max(1, row.length);
 }
 
 function workflowRejectedVertices(sourcePosition, rejectPosition) {
@@ -6508,7 +6577,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
         targetId: approvedTargetId,
         name: "Approved",
         conditioninfo: [workflowOutcomeCondition({ key: approvedFlowId, taskId: node.id, taskLabel: node.properties.name, outcome: "Approved" })],
-        vertices: workflowVerticesBetween(node.position, approvedTargetPosition),
+        vertices: workflowVerticesBetween(node.position, approvedTargetPosition, { routeNodes: layout.routeNodes }),
       });
       const rejectGroup = rejectGroupByStepIndex.get(index) || rejectGroups[0];
       const rejectedRef = addFlow({
@@ -6531,7 +6600,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
         sourceId: node.id,
         targetId,
         name: "Complete",
-        vertices: workflowVerticesBetween(node.position, targetPosition),
+        vertices: workflowVerticesBetween(node.position, targetPosition, { routeNodes: layout.routeNodes }),
       });
       node.outgoing = [completeRef];
       if (!nextNode) endIncoming.push(completeRef);

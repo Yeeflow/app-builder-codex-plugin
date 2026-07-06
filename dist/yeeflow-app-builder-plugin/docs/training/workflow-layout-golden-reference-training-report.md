@@ -30,6 +30,7 @@ The source files were inspected read-only. Raw exports are not bundled into the 
 - A shared `EndRejectEvent` may only collect rejected paths from Approval Assignment Tasks on the same horizontal lane. Approval Assignment Tasks on different y lanes require separate rejection endpoints.
 - Workflow diagrams should use the Workflow Designer's roughly 16:9 visible canvas. Complex workflows should use additional rows/layers instead of placing every node on one long horizontal line, and generated workflows should not exceed five vertical rows.
 - Standard forward rejected/cross-lane lines do not require explicit `vertices[]` when the spacing already prevents overlap. Backward/return lines still require vertices.
+- Long return/backward connectors that cross more than two workflow rows must not calculate `routeY` from only the source and target rows. They must use an open adjacent row-gap midpoint and must not place the horizontal segment inside any intermediate row's node bounds.
 
 ## Workflow Actions Layout V2 Standard
 
@@ -62,6 +63,7 @@ The plugin validator now checks the semantic layout contract, not just visual co
 - `WORKFLOW_LAYOUT_END_REJECT_POSITION_MISMATCH`
 - `WORKFLOW_LAYOUT_TOO_MANY_VERTICAL_ROWS`
 - `WORKFLOW_LAYOUT_SINGLE_ROW_SPRAWL`
+- `WORKFLOW_LAYOUT_ROUTE_Y_CROSSES_INTERMEDIATE_ROW`
 
 ## Plugin Changes
 
@@ -75,6 +77,7 @@ The plugin validator now checks the semantic layout contract, not just visual co
 - Updated full-app materialization and validation so shared `EndRejectEvent` placement is calculated from source task center points. Three-source groups now center on the source span center rather than a fixed coordinate or top-left x value.
 - Updated the workflow layout gate so first-row approval tasks require reject endpoints above the row, while lower-row approval tasks require reject endpoints below the row.
 - Updated the workflow layout gate so standard-spaced rejected/cross-lane lines are allowed without vertices, while explicit return/backward lines still require vertices.
+- Updated the workflow layout gate and materializer so multi-row return/backward connectors choose a safe adjacent row-gap midpoint; a route such as `y = 363` is now rejected when it passes through an intermediate row occupying `y = 320..406`.
 - Updated the workflow layout gate so shared `EndRejectEvent` nodes can only collect rejected paths from Approval Assignment Tasks on the same horizontal lane.
 - Updated the workflow layout gate so generated diagrams fail when they exceed five vertical rows or when large workflows are collapsed into a single over-wide horizontal row instead of using the 16:9 canvas area.
 - Updated the workflow designer style gate so generated Approval, Data list, and Scheduled workflow graphs use Workflow Designer v2 attributes: root `lineType = "rounded"`, root `graphver = 2`, each `SequenceFlow.properties.linetype = "rounded"`, each `SequenceFlow.properties.documentation` present as a string, and each `SequenceFlow.dockers = []`. `graphzoom` is intentionally excluded as a hard gate.
