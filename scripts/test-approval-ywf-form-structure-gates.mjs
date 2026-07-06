@@ -1,10 +1,17 @@
 #!/usr/bin/env node
 
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { createRequire } from "node:module";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { buildApprovalFormLayoutDef } from "./lib/approval-form-layout-builder.mjs";
+import { validateApprovalFormLayoutTemplate } from "./validate-approval-form-layout-template.mjs";
 
 const require = createRequire(import.meta.url);
 const { validateDecodedDef } = require("../validate-ywf-def.js");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const IDS = {
   requestPage: "11111111-1111-4111-8111-111111111111",
@@ -20,6 +27,7 @@ const IDS = {
 const cases = [];
 
 expectPass("valid export-shaped approval form workflow");
+expectStandaloneYwfApprovalLayoutPass();
 expectCode("object binding fails", (def) => {
   firstValueControl(def).binding = { value: "RequestTitle" };
 }, "CONTROL_BINDING_NOT_STRING");
@@ -47,6 +55,51 @@ function expectPass(label) {
   const report = validateDecodedDef(validDef(), { mode: "final" });
   assert.equal(report.status, "pass", `${label}\n${JSON.stringify(report, null, 2)}`);
   cases.push({ case: `pass: ${label}`, status: "pass" });
+}
+
+function expectStandaloneYwfApprovalLayoutPass() {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "standalone-ywf-approval-layout-"));
+  const fields = [
+    { displayName: "Request Title", fieldName: "RequestTitle", fieldType: "Text", controlType: "input" },
+    { displayName: "Estimated Amount", fieldName: "EstimatedAmount", fieldType: "Decimal", controlType: "currency" },
+    { displayName: "Business Justification", fieldName: "BusinessJustification", fieldType: "Text", controlType: "textarea" },
+  ];
+  const casesToValidate = [
+    {
+      file: path.join(tmpDir, "submission.formdef.json"),
+      template: "approval_form_layout_submission_v1_1",
+      pageRole: "submission",
+      resource: buildApprovalFormLayoutDef({
+        rootDir: ROOT,
+        id: IDS.requestPage,
+        title: "Standalone Approval Layout Proof",
+        role: "submission",
+        fields,
+      }),
+    },
+    {
+      file: path.join(tmpDir, "task.formdef.json"),
+      template: "approval_form_layout_task_v1_1",
+      pageRole: "task",
+      resource: buildApprovalFormLayoutDef({
+        rootDir: ROOT,
+        id: IDS.taskPage,
+        title: "Standalone Approval Layout Proof",
+        role: "task",
+        fields,
+      }),
+    },
+  ];
+  for (const item of casesToValidate) {
+    fs.writeFileSync(item.file, JSON.stringify(item.resource, null, 2));
+    const report = validateApprovalFormLayoutTemplate({
+      resource: item.file,
+      template: item.template,
+      pageRole: item.pageRole,
+    });
+    assert.equal(report.status, "pass", `standalone .ywf ${item.pageRole} should use ${item.template}\n${JSON.stringify(report, null, 2)}`);
+  }
+  cases.push({ case: "pass: standalone .ywf approval pages use Approval Form Layouts v1.1", status: "pass" });
 }
 
 function expectCode(label, mutate, expectedCode) {

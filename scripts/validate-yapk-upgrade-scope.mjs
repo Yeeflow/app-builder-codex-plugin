@@ -213,7 +213,7 @@ function validateApprovalDef(def, path, findings) {
   for (const [index, shape] of shapes.entries()) {
     const stencil = scalar(shape?.stencil?.id || shape?.type || shape?.Type);
     const isTask = /task/i.test(stencil);
-    if (!isObject(shape?.bounds) && !isObject(shape?.position) && !isObject(shape?.dockers)) {
+    if (!isObject(shape?.bounds) && !isObject(shape?.position) && !Array.isArray(shape?.dockers)) {
       findings.push(finding("error", "UPGRADE_APPROVAL_GRAPH_POSITION_MISSING", "Workflow graph shapes must include positions/bounds/dockers.", { path: `${path}.childshapes[${index}]` }));
     }
     if (isTask) {
