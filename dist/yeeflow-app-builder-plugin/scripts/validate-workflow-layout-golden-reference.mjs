@@ -126,6 +126,16 @@ function readReference(referencePath, findings) {
       "minimumColumnGapForMidpointRoute",
       "columnGapRouteXTolerance",
       "externalReturnLanePaddingMin",
+      "vertexEconomyNodeThreshold",
+      "maxNonReturnVertexFlowRatio",
+      "maxAverageVerticesPerFlow",
+      "connectorDetourRatioMax",
+      "gatewayBranchLocalMaxDeltaX",
+      "endMergeMaxDeltaX",
+      "endMergeVerticalToleranceY",
+      "connectorLabelMaxChars",
+      "localRejectVertexMaxDeltaX",
+      "localRejectVertexMaxDeltaY",
     ]) {
       if (!Number.isFinite(Number(spacing[key]))) {
         findings.push(issue("WORKFLOW_LAYOUT_REFERENCE_RULE_MISSING", "Workflow layout reference is missing a required numeric spacing rule.", { reference: referencePath, key }));
@@ -188,6 +198,16 @@ function defaultRules() {
         minimumColumnGapForMidpointRoute: 48,
         columnGapRouteXTolerance: 12,
         externalReturnLanePaddingMin: 80,
+        vertexEconomyNodeThreshold: 8,
+        maxNonReturnVertexFlowRatio: 0.25,
+        maxAverageVerticesPerFlow: 1.25,
+        connectorDetourRatioMax: 2.35,
+        gatewayBranchLocalMaxDeltaX: 650,
+        endMergeMaxDeltaX: 650,
+        endMergeVerticalToleranceY: 130,
+        connectorLabelMaxChars: 42,
+        localRejectVertexMaxDeltaX: 760,
+        localRejectVertexMaxDeltaY: 260,
       },
       lineStyle: {
         default: "rounded",
@@ -288,6 +308,9 @@ function validateOneWorkflow(resource, reference, findings) {
   validateCanvasRows(nodes, spacing, resource, findings);
   validateGraphPosition(resource, nodes, findings);
   validateWorkflowSemantics(resource, nodes, flows, spacing, findings);
+  validateWorkflowMotifs(resource, nodes, flows, spacing, findings);
+  validateVertexEconomy(resource, nodes, flows, spacing, findings);
+  validateConnectorDetourEconomy(resource, nodes, flows, spacing, findings);
 
   for (const flow of flows) {
     const sourceId = refId(flow.shape.source);
@@ -1107,8 +1130,8 @@ function validateCanvasRows(nodes, spacing, resource, findings) {
       bounds: { width, height },
       maximumSuggestedWidth: mediumMaxWidth,
       readableWidthAllowance,
-      rule: "Width over the suggested limit is allowed only when the graph has readable multi-row folding and no over-dense row.",
-    }));
+      rule: "Width is an advisory readability signal. Do not compress standard node spacing just to satisfy this value; fix real overlap, lane density, and vertex-overuse failures first.",
+    }, "warning"));
   }
 }
 
@@ -1116,6 +1139,209 @@ function validateConnectorReadability(resource, nodes, flows, spacing, findings)
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   validateVerticalRouteLaneDensity(resource, flows, spacing, findings);
   validateConnectorLabelReadability(resource, nodes, flows, nodeById, spacing, findings);
+}
+
+function validateWorkflowMotifs(resource, nodes, flows, spacing, findings) {
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  validateGatewayLocalFanOut(resource, nodes, flows, nodeById, spacing, findings);
+  validateEndMergeLocality(resource, flows, nodeById, spacing, findings);
+  validateLocalRejectVertexEconomy(resource, flows, nodeById, spacing, findings);
+  validateConnectorLabelLength(resource, flows, spacing, findings);
+}
+
+function validateGatewayLocalFanOut(resource, nodes, flows, nodeById, spacing, findings) {
+  const maxDeltaX = Number(spacing.gatewayBranchLocalMaxDeltaX || 650);
+  for (const gateway of nodes.filter((node) => stencilId(node.shape) === "InclusiveGateway" && node.position)) {
+    const gatewayCenter = nodeCenter(gateway);
+    const businessTargets = flows
+      .filter((flow) => refId(flow.shape.source) === gateway.id && isBusinessConditionFlow(flow.shape))
+      .map((flow) => ({ flow, targetNode: nodeById.get(refId(flow.shape.target)) }))
+      .filter(({ targetNode }) => targetNode?.position && !["EndRejectEvent", "EndNoneEvent"].includes(stencilId(targetNode.shape)));
+    if (businessTargets.length < 2) continue;
+    for (const { flow, targetNode } of businessTargets) {
+      const targetCenter = nodeCenter(targetNode);
+      const deltaX = targetCenter.x - gatewayCenter.x;
+      if (deltaX < -Number(spacing.minimumForwardFlowDeltaX || 180) || deltaX > maxDeltaX) {
+        findings.push(issue("WORKFLOW_LAYOUT_GATEWAY_BRANCH_TOO_FAR", "InclusiveGateway branches must fan out into nearby upper/lower lanes like the golden reference; do not send condition branches far across the canvas and repair them with long connectors.", {
+          source: resource.source,
+          workflowName: resource.workflowName,
+          gatewayId: gateway.id,
+          flowId: flow.id,
+          targetId: targetNode.id,
+          label: flowLabel(flow.shape),
+          deltaX: Math.round(deltaX),
+          maximumSuggestedDeltaX: maxDeltaX,
+        }));
+      }
+    }
+  }
+}
+
+function validateEndMergeLocality(resource, flows, nodeById, spacing, findings) {
+  const maxDeltaX = Number(spacing.endMergeMaxDeltaX || 650);
+  const verticalTolerance = Number(spacing.endMergeVerticalToleranceY || 130);
+  const incomingByTarget = new Map();
+  for (const flow of flows) {
+    const targetId = refId(flow.shape.target);
+    if (!incomingByTarget.has(targetId)) incomingByTarget.set(targetId, []);
+    incomingByTarget.get(targetId).push(flow);
+  }
+  for (const [targetId, incoming] of incomingByTarget.entries()) {
+    const endNode = nodeById.get(targetId);
+    if (!endNode?.position || stencilId(endNode.shape) !== "EndNoneEvent" || incoming.length < 2) continue;
+    const sourceNodes = incoming
+      .map((flow) => nodeById.get(refId(flow.shape.source)))
+      .filter((node) => node?.position && stencilId(node.shape) !== "StartNoneEvent");
+    if (sourceNodes.length < 2) continue;
+    const endCenter = nodeCenter(endNode);
+    const sourceCenters = sourceNodes.map((node) => nodeCenter(node));
+    const maxSourceX = Math.max(...sourceCenters.map((center) => center.x));
+    const minSourceY = Math.min(...sourceCenters.map((center) => center.y));
+    const maxSourceY = Math.max(...sourceCenters.map((center) => center.y));
+    const deltaX = endCenter.x - maxSourceX;
+    if (deltaX < -Number(spacing.minimumForwardFlowDeltaX || 180) || deltaX > maxDeltaX) {
+      findings.push(issue("WORKFLOW_LAYOUT_END_MERGE_TOO_FAR", "End nodes with multiple incoming branches should be a local merge beside the incoming source group, not a distant fixed endpoint that creates long wrapping connectors.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        endId: endNode.id,
+        incomingSourceIds: sourceNodes.map((node) => node.id),
+        deltaX: Math.round(deltaX),
+        maximumSuggestedDeltaX: maxDeltaX,
+      }));
+    }
+    if (endCenter.y < minSourceY - verticalTolerance || endCenter.y > maxSourceY + verticalTolerance) {
+      findings.push(issue("WORKFLOW_LAYOUT_END_MERGE_VERTICAL_MISMATCH", "End nodes with multiple incoming branches should be vertically aligned with the incoming branch group so the final merge remains readable.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        endId: endNode.id,
+        incomingSourceIds: sourceNodes.map((node) => node.id),
+        endCenterY: Math.round(endCenter.y),
+        sourceCenterYRange: { min: Math.round(minSourceY), max: Math.round(maxSourceY) },
+        verticalTolerance,
+      }));
+    }
+  }
+}
+
+function validateLocalRejectVertexEconomy(resource, flows, nodeById, spacing, findings) {
+  const maxDeltaX = Number(spacing.localRejectVertexMaxDeltaX || 760);
+  const maxDeltaY = Number(spacing.localRejectVertexMaxDeltaY || 260);
+  for (const flow of flows) {
+    const vertices = asArray(flow.shape.vertices);
+    if (!vertices.length || !isRejectedFlow(flow.shape)) continue;
+    const sourceNode = nodeById.get(refId(flow.shape.source));
+    const targetNode = nodeById.get(refId(flow.shape.target));
+    if (!sourceNode?.position || !targetNode?.position || stencilId(targetNode.shape) !== "EndRejectEvent") continue;
+    const sourceCenter = nodeCenter(sourceNode);
+    const targetCenter = nodeCenter(targetNode);
+    const deltaX = Math.abs(targetCenter.x - sourceCenter.x);
+    const deltaY = Math.abs(targetCenter.y - sourceCenter.y);
+    if (deltaX <= maxDeltaX && deltaY <= maxDeltaY) {
+      findings.push(issue("WORKFLOW_LAYOUT_LOCAL_REJECT_VERTICES_UNNECESSARY", "Local rejected connectors to a nearby End with rejection node should use clean rounded auto-routing with no vertices, matching the golden reference.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        flowId: flow.id,
+        sourceId: sourceNode.id,
+        targetId: targetNode.id,
+        delta: { x: Math.round(deltaX), y: Math.round(deltaY) },
+        vertexCount: vertices.length,
+      }));
+    }
+  }
+}
+
+function validateConnectorLabelLength(resource, flows, spacing, findings) {
+  const maxChars = Number(spacing.connectorLabelMaxChars || 42);
+  for (const flow of flows) {
+    const label = flowLabel(flow.shape);
+    if (!label || label.length <= maxChars || !isBusinessConditionFlow(flow.shape)) continue;
+    findings.push(issue("WORKFLOW_LAYOUT_CONNECTOR_LABEL_TOO_LONG", "Connector display labels should be short like the golden reference; keep full logic in conditioninfo and use concise labels to avoid Designer overlap.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      flowId: flow.id,
+      label,
+      length: label.length,
+      maximumSuggestedLength: maxChars,
+    }));
+  }
+}
+
+function validateVertexEconomy(resource, nodes, flows, spacing, findings) {
+  const threshold = Number(spacing.vertexEconomyNodeThreshold || 8);
+  if (nodes.length < threshold || !flows.length) return;
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const routedFlows = flows
+    .map((flow) => ({ flow, vertices: asArray(flow.shape.vertices) }))
+    .filter((entry) => entry.vertices.length);
+  if (!routedFlows.length) return;
+  const nonReturnRouted = routedFlows.filter(({ flow }) => {
+    const sourceNode = nodeById.get(refId(flow.shape.source));
+    const targetNode = nodeById.get(refId(flow.shape.target));
+    if (!sourceNode?.position || !targetNode?.position) return false;
+    const signedDx = targetNode.position.x - sourceNode.position.x;
+    const sourceStencil = stencilId(sourceNode.shape);
+    const targetStencil = stencilId(targetNode.shape);
+    if (targetStencil === "EndRejectEvent" || sourceStencil === "EndRejectEvent") return false;
+    if (isRejectedFlow(flow.shape) || isReturnFlow(flow.shape) || signedDx < 0) return false;
+    return true;
+  });
+  const maxNonReturn = Math.max(2, Math.floor(flows.length * Number(spacing.maxNonReturnVertexFlowRatio || 0.25)));
+  const averageVerticesPerFlow = routedFlows.reduce((sum, entry) => sum + entry.vertices.length, 0) / flows.length;
+  const maxAverage = Number(spacing.maxAverageVerticesPerFlow || 1.25);
+  if (nonReturnRouted.length > maxNonReturn || averageVerticesPerFlow > maxAverage) {
+    findings.push(issue("WORKFLOW_LAYOUT_VERTICES_OVERUSED", "Workflow layout must be node-placement first: if many non-return connectors need vertices, move nodes into clearer reference-template lanes instead of repairing the diagram with line bends.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      nodeCount: nodes.length,
+      flowCount: flows.length,
+      routedFlowCount: routedFlows.length,
+      nonReturnRoutedFlowCount: nonReturnRouted.length,
+      maxNonReturnRoutedFlowCount: maxNonReturn,
+      averageVerticesPerFlow: Number(averageVerticesPerFlow.toFixed(2)),
+      maxAverageVerticesPerFlow: maxAverage,
+      routedFlows: nonReturnRouted.map(({ flow, vertices }) => ({
+        flowId: flow.id,
+        sourceId: refId(flow.shape.source),
+        targetId: refId(flow.shape.target),
+        vertexCount: vertices.length,
+        label: flowLabel(flow.shape),
+      })),
+    }));
+  }
+}
+
+function validateConnectorDetourEconomy(resource, nodes, flows, spacing, findings) {
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const maxRatio = Number(spacing.connectorDetourRatioMax || 2.35);
+  for (const flow of flows) {
+    const vertices = asArray(flow.shape.vertices);
+    if (!vertices.length) continue;
+    const sourceNode = nodeById.get(refId(flow.shape.source));
+    const targetNode = nodeById.get(refId(flow.shape.target));
+    if (!sourceNode?.position || !targetNode?.position) continue;
+    if (stencilId(targetNode.shape) === "EndRejectEvent" || stencilId(sourceNode.shape) === "EndRejectEvent") continue;
+    const points = [nodeCenter(sourceNode), ...vertices.map((vertex) => ({ x: Number(vertex.x), y: Number(vertex.y) })), nodeCenter(targetNode)]
+      .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y));
+    if (points.length < 3) continue;
+    const direct = Math.max(1, Math.abs(nodeCenter(targetNode).x - nodeCenter(sourceNode).x) + Math.abs(nodeCenter(targetNode).y - nodeCenter(sourceNode).y));
+    const routed = polylineManhattanLength(points);
+    const ratio = routed / direct;
+    if (ratio > maxRatio) {
+      findings.push(issue("WORKFLOW_LAYOUT_CONNECTOR_DETOUR_TOO_HIGH", "Connector vertices must not create a long detour around a poor node layout; move the source/target nodes into a local golden-reference motif instead.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `$.childshapes[${flow.index}].vertices`,
+        flowId: flow.id,
+        sourceId: refId(flow.shape.source),
+        targetId: refId(flow.shape.target),
+        label: flowLabel(flow.shape),
+        directManhattanLength: Math.round(direct),
+        routedManhattanLength: Math.round(routed),
+        detourRatio: Number(ratio.toFixed(2)),
+        maxDetourRatio: maxRatio,
+      }));
+    }
+  }
 }
 
 function validateVerticalRouteLaneDensity(resource, flows, spacing, findings) {
@@ -1339,6 +1565,14 @@ function nodeBounds(node) {
     top,
     bottom: top + size.height,
   };
+}
+
+function polylineManhattanLength(points) {
+  let total = 0;
+  for (let index = 1; index < points.length; index += 1) {
+    total += Math.abs(points[index].x - points[index - 1].x) + Math.abs(points[index].y - points[index - 1].y);
+  }
+  return total;
 }
 
 function isAssignmentTask(node) {

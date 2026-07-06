@@ -78,6 +78,9 @@
       "When a long return/backward connector crosses more than two workflow rows, its horizontal route segment must choose an adjacent open row-gap midpoint and must not run through any intermediate workflow row node bounds.",
       "When a connector uses a vertical route segment between two workflow columns, its route x must be the midpoint of the net column gap: (leftColumnX + workflowNodeWidth + rightColumnX) / 2.",
       "Long connector vertical segments must not run through any intermediate workflow column node bounds. If the target vertical lane would overlap a node, choose an adjacent column-gap midpoint, widen columns, or use a justified external lane.",
+      "Workflow layout is node-placement first and connector-routing second. If many non-return connectors need vertices to become readable, the generated node layout is wrong and must be rebuilt into the golden-reference main lane, branch lane, action lane, and local rejection motifs.",
+      "Vertices are last-mile corrections only. They are allowed for backward/return, rejected, overlap, node-crossing, and genuinely long reroute cases, but must not be used as the primary way to make a workflow diagram readable.",
+      "Connector detours must stay proportionate to the source-target distance. A connector whose routed path is much longer than the direct Manhattan path indicates poor node placement and must fail generated-final validation.",
       "Use an external return lane only for long backward/return/cross-lane reroutes where midpoint routing is unsafe or crowded.",
       "SequenceFlow source and target references must resolve to existing workflow node ids.",
       "Generated graphposition should cover the visual node bounds plus padding."
@@ -132,8 +135,18 @@
       "rowGapRouteYTolerance": 12,
       "minimumColumnGapForMidpointRoute": 48,
       "columnGapRouteXTolerance": 12,
-      "externalReturnLanePaddingMin": 80
-    },
+      "externalReturnLanePaddingMin": 80,
+    "vertexEconomyNodeThreshold": 8,
+    "maxNonReturnVertexFlowRatio": 0.25,
+    "maxAverageVerticesPerFlow": 1.25,
+    "connectorDetourRatioMax": 2.35,
+    "gatewayBranchLocalMaxDeltaX": 650,
+    "endMergeMaxDeltaX": 650,
+    "endMergeVerticalToleranceY": 130,
+    "connectorLabelMaxChars": 42,
+    "localRejectVertexMaxDeltaX": 760,
+    "localRejectVertexMaxDeltaY": 260
+  },
     "lineStyle": {
       "default": "rounded",
       "allowed": ["rounded"],

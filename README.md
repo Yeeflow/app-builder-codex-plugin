@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.23`
+- Version: `0.9.24`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.23` hardens Workflow Designer readability gates. Medium workflow width is now advisory rather than a standalone compression target, so complex approval/list/scheduled workflows should preserve readable column spacing, fold into rows when needed, and fail on label collisions or over-dense vertical routing lanes before signing readiness.
+Current release `0.9.24` hardens Workflow Designer motif fidelity. Generated approval/list/scheduled workflow diagrams now validate local Inclusive Gateway fan-out, local multi-source End merge placement, unnecessary local rejection vertices, and concise business-condition connector labels before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.23
+Version: 0.9.24
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.23
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.24
 ```
 
 ## What Is Included

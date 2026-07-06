@@ -60,6 +60,10 @@ It does not prove business behavior, assignment correctness, workflow execution,
 31. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap/column-gap midpoint is unsafe, crowded, or too narrow.
 32. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
 33. `graphposition` should cover the full node area plus padding.
+34. Inclusive Gateway branches must be local fan-out motifs. Branch targets should sit in a nearby branch column, normally about `195px` from the gateway and never as a far-right target that requires long labels or detour connectors.
+35. Normal End nodes with multiple incoming branches must be local merge points beside the incoming source group. Do not place a final End far from the source group and then wrap long completion connectors into it.
+36. Local rejected connectors to a nearby `EndRejectEvent` should not carry explicit vertices. If the rejection endpoint is correctly placed above/below the source group, rounded auto-routing is sufficient.
+37. Connector display labels must stay concise. Use short visible labels such as `Amount >= 5000`, `Sensitive data`, or `Approved`, and keep the full expression in `conditioninfo`; do not put long business sentences on connector labels.
 
 ## Standard Spacing
 
@@ -92,6 +96,11 @@ The `workflow_actions_layout` reference establishes the following default spacin
 | `COLUMN_GAP_MIDPOINT_ROUTE_MIN` | `48` | fixed | Preferred minimum net gap for vertical connector routing between columns. |
 | `COLUMN_GAP_ROUTE_X_TOLERANCE` | `12` | fixed | Allowed pixel tolerance when validating routeX against the column-gap midpoint. |
 | `EXTERNAL_RETURN_LANE_PADDING` | `80-120` | fixed | Padding outside workflow node bounds for true external return lanes. |
+| `GATEWAY_BRANCH_LOCAL_MAX_X` | `650` | fixed | Maximum suggested center-x distance from an Inclusive Gateway to a business branch target. |
+| `END_MERGE_LOCAL_MAX_X` | `650` | fixed | Maximum suggested center-x distance from the rightmost incoming source to a multi-source normal End node. |
+| `END_MERGE_VERTICAL_TOLERANCE` | `130` | fixed | Allowed y padding around incoming source centers for local End merge placement. |
+| `CONNECTOR_LABEL_MAX` | `42 chars` | fixed | Maximum suggested visible business-condition connector label length. |
+| `LOCAL_REJECT_VERTEX_DELTA` | `760 x 260` | fixed | Local rejected connectors within this x/y distance should not use explicit vertices. |
 | `CANVAS_RATIO` | `16:9` | advisory | Preferred visible Designer canvas usage. |
 
 ## Assignment Task Outcome Rules
@@ -123,6 +132,8 @@ Approval task Approved -> InclusiveGateway -> business condition branches
 
 Do not generate multiple business condition SequenceFlows directly out of an Assignment Task. Place multiple branch target nodes in the same x column when possible, with separate y lanes. This keeps the branch readable and avoids unnecessary vertices.
 
+Gateway branches should remain local. The `workflow_actions_layout` reference places branch targets close to the gateway, then uses upper/lower lanes to express alternative paths. If a branch target is hundreds of pixels beyond the local branch column, move that node into a nearby lane or restructure the section instead of drawing a long condition connector.
+
 ## End With Rejection Rules
 
 For Approval Task rejected outcomes:
@@ -151,6 +162,8 @@ For workflows with many approvals, gateways, and post-approval actions, do not k
 - later procurement, fulfillment, or archive actions folded into another lane when the main row becomes dense
 
 The target visual width for most generated workflows should stay around `1800-2200px`. For medium-complexity workflows, `2600px` is an advisory threshold that should trigger lane folding and readability review. It must not make the generator compress standard column spacing or overlap labels. A wider workflow is acceptable when it uses readable rows, keeps row density under control, avoids connector label collisions, and does not create shared vertical route walls.
+
+The normal End node is also a layout motif. When several branch outcomes complete into the same End, place the End as a local merge beside the incoming source group, similar to the reference `End_1` placement. Avoid a single far-away End that forces multiple long wraparound completion lines.
 
 ## Workflow Designer V2 Line Style Rules
 
@@ -182,7 +195,17 @@ The validator treats five rows as the hard maximum and flags large single-row sp
 
 ## Vertices Rules
 
-Default to no vertices when standard spacing makes the line readable.
+Default to no vertices when standard spacing makes the line readable. The workflow layout standard is node-placement first and connector-routing second.
+
+If a connector needs many vertices to avoid looking chaotic, the source/target nodes are probably in the wrong place. Rebuild the node layout using the golden-reference motifs instead of adding more bends:
+
+- main approval backbone
+- upper/lower branch lanes
+- local gateway fan-out
+- local `End with rejection` endpoints
+- lower action/complete lanes
+
+Vertices are a last-mile correction, not the primary layout mechanism. In generated workflows with eight or more nodes, non-return/non-rejection connectors that require vertices should be rare. A graph with many such routed connectors must fail validation and be regenerated with better node placement.
 
 Require vertices when:
 
@@ -219,6 +242,8 @@ For long return/backward lines that cross multiple workflow rows, first cluster 
 
 For long cross-row connectors that also need a vertical segment, first cluster workflow columns along the route. The vertical segment must use an open adjacent column gap, not a task center or a node edge when that x-coordinate overlaps another node. For example, if one column occupies `1260..1450` and the next occupies `1565..1755`, the vertical lane should use `1508`, the midpoint of the net column gap. A vertical segment at an x-coordinate inside any intermediate node's `left..right` bounds is invalid even when the horizontal `routeY` is correct.
 
+Do not trade readability for a hard width number. The medium-width limit is advisory: it should encourage branch folding, not column compression. Standard node spacing, label readability, and low vertex usage are more important than forcing every medium workflow under `2600px`.
+
 ## Generator Guidance
 
 When materializing App Plan workflow nodes:
@@ -233,6 +258,7 @@ When materializing App Plan workflow nodes:
 - Route return/rework transitions down or up and across with two or more vertices.
 - Use vertices for cross-lane approved/complete transitions only when standard spacing would make a diagonal line overlap other lines or cross nodes.
 - When generating vertices for a long connector, choose both a safe horizontal `routeY` from row-gap midpoint rules and a safe vertical `routeX` from column-gap midpoint rules. Do not leave the vertical segment on a task/gateway center line when that would run through another node's bounds.
+- Before adding vertices, try moving branch/action nodes into the reference motif lanes. If multiple forward or branch connectors need explicit vertices, the layout engine should move nodes, not add bends.
 
 ## Hard Gate
 
@@ -258,3 +284,5 @@ The gate must fail generated packages that contain:
 - medium workflows that exceed the advisory width without readable multi-row folding
 - connector labels overlapping nodes or other long connector labels
 - too many long vertical connector segments sharing one routing lane
+- overuse of vertices on non-return/non-rejection connectors
+- connector paths whose detours are far longer than the direct source-target distance

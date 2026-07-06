@@ -1710,6 +1710,7 @@ function normalizeApprovalWorkflowNodeType(value) {
   if (/end\s*reject|reject\s*end/.test(key)) return "EndRejectEvent";
   if (/^end/.test(key)) return "EndNoneEvent";
   if (/sequence|flow|transition/.test(key)) return "SequenceFlow";
+  if (/gateway|condition|branch|decision/.test(key)) return "InclusiveGateway";
   if (/content\s*list|service\s*action|serviceaction|action\s*node|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
   if (/candidate/.test(key)) return "CandidateTask";
   if (/assignment|approval|review|task|multi/.test(key) || text === "MultiAssignmentTask" || text === "AssignmentTask") return "MultiAssignmentTask";
@@ -6303,26 +6304,26 @@ function refId(ref) {
 }
 
 function workflowLayoutForSteps(workflowSteps) {
-  const mainLaneY = 220;
-  const actionLaneY = 375;
+  const mainLaneY = 40;
+  const actionLaneY = 195;
   const rejectUpGap = 125;
   const rejectDownGap = 135;
   const workflowNodeWidth = 190;
   const workflowRowToleranceY = 60;
-  const startX = 100;
-  const firstStepX = 420;
+  const startX = -170;
+  const firstStepX = 135;
   const columnGap = 335;
   const rowGap = 155;
-  const maxColumnsPerRow = 6;
-  const stepPositions = workflowSteps.map((step, index) => ({
-    x: firstStepX + (index % maxColumnsPerRow) * columnGap,
-    y: mainLaneY + Math.floor(index / maxColumnsPerRow) * rowGap + (step.nodeType === "ContentList" ? rowGap : 0),
-  }));
+  const stepPositions = workflowSteps.map((step, index) => {
+    const isAction = ["ContentList", "CandidateTask"].includes(step.nodeType);
+    return {
+      x: firstStepX + index * columnGap,
+      y: isAction ? actionLaneY : mainLaneY,
+    };
+  });
   const lastStepIndex = Math.max(0, workflowSteps.length - 1);
-  const lastStepRow = Math.floor(lastStepIndex / maxColumnsPerRow);
-  const lastStepColumn = lastStepIndex % maxColumnsPerRow;
-  const endX = firstStepX + (lastStepColumn + 1) * columnGap;
-  const endY = mainLaneY + lastStepRow * rowGap;
+  const endX = firstStepX + (lastStepIndex + 1) * columnGap;
+  const endY = mainLaneY;
   const approvalEntries = stepPositions.map((position, index) => {
     const nodeType = workflowSteps[index]?.nodeType || "";
     const isApproval = nodeType !== "ContentList" && nodeType !== "StartNoneEvent" && nodeType !== "EndNoneEvent" && nodeType !== "EndRejectEvent" && nodeType !== "SequenceFlow";
@@ -6388,7 +6389,9 @@ function workflowVerticesBetween(sourcePosition, targetPosition, options = {}) {
   if (!sourcePosition || !targetPosition) return [];
   const dx = Math.abs(targetPosition.x - sourcePosition.x);
   const dy = Math.abs(targetPosition.y - sourcePosition.y);
+  const signedDx = Number(targetPosition.x) - Number(sourcePosition.x);
   if (!options.force && dy < 80 && dx < 520) return [];
+  if (!options.force && signedDx >= 0 && dx < Number(options.forwardAutoRouteDeltaX || 900)) return [];
   const routeY = workflowSafeRouteYBetweenRows(sourcePosition, targetPosition, options.routeNodes || []);
   if (Number.isFinite(routeY)) {
     const nodeWidth = Number(options.nodeWidth || 190);
@@ -6526,6 +6529,9 @@ function columnAverageX(column) {
 
 function workflowRejectedVertices(sourcePosition, rejectPosition) {
   if (!sourcePosition || !rejectPosition) return [];
+  const dx = Math.abs(rejectPosition.x - sourcePosition.x);
+  const dy = Math.abs(rejectPosition.y - sourcePosition.y);
+  if (dx < 520 && dy < 220) return [];
   const bendX = sourcePosition.x + Math.max(120, Math.round(Math.abs(rejectPosition.x - sourcePosition.x) / 2));
   return [
     { x: bendX, y: sourcePosition.y },
@@ -6769,7 +6775,13 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
 }
 
 function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas = [], position = null }) {
-  const stencil = step.nodeType === "CandidateTask" ? "CandidateTask" : step.nodeType === "ContentList" ? "ContentList" : "MultiAssignmentTask";
+  const stencil = step.nodeType === "CandidateTask"
+    ? "CandidateTask"
+    : step.nodeType === "ContentList"
+      ? "ContentList"
+      : step.nodeType === "InclusiveGateway"
+        ? "InclusiveGateway"
+        : "MultiAssignmentTask";
   const base = {
     id,
     resourceid: id,
@@ -6790,6 +6802,9 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
       plannedProofBoundary: step.proofBoundary || "",
     },
   };
+  if (stencil === "InclusiveGateway") {
+    return base;
+  }
   if (stencil === "ContentList") {
     const targetList = resolveContentListTargetList({ step, dataListMetas });
     base.properties = {
