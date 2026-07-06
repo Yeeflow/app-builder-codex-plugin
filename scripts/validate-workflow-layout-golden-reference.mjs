@@ -114,6 +114,8 @@ function readReference(referencePath, findings) {
       "minimumRowGapForMidpointRoute",
       "minimumRowGapForLabeledMidpointRoute",
       "rowGapRouteYTolerance",
+      "minimumColumnGapForMidpointRoute",
+      "columnGapRouteXTolerance",
       "externalReturnLanePaddingMin",
     ]) {
       if (!Number.isFinite(Number(spacing[key]))) {
@@ -165,6 +167,8 @@ function defaultRules() {
         minimumRowGapForMidpointRoute: 60,
         minimumRowGapForLabeledMidpointRoute: 40,
         rowGapRouteYTolerance: 12,
+        minimumColumnGapForMidpointRoute: 48,
+        columnGapRouteXTolerance: 12,
         externalReturnLanePaddingMin: 80,
       },
       lineStyle: {
@@ -315,6 +319,17 @@ function validateOneWorkflow(resource, reference, findings) {
       }));
     }
     validateFlowRouteY({
+      resource,
+      flow,
+      flowPath,
+      sourceNode,
+      targetNode,
+      nodes,
+      vertices,
+      spacing,
+      findings,
+    });
+    validateFlowRouteX({
       resource,
       flow,
       flowPath,
@@ -510,6 +525,65 @@ function validateFlowRouteY({ resource, flow, flowPath, sourceNode, targetNode, 
   }
 }
 
+function validateFlowRouteX({ resource, flow, flowPath, sourceNode, targetNode, nodes, vertices, spacing, findings }) {
+  if (!sourceNode?.position || !targetNode?.position || !vertices.length) return;
+  if (stencilId(targetNode.shape) === "EndRejectEvent" || stencilId(sourceNode.shape) === "EndRejectEvent") return;
+  const vertical = longestVerticalVertexSegment(vertices);
+  if (!vertical) return;
+  const nodeHeight = Number(spacing.workflowNodeHeight || 86);
+  if (vertical.length < nodeHeight) return;
+  const routeX = vertical.x;
+  const tolerance = Number(spacing.columnGapRouteXTolerance || 12);
+  const minimumGap = Number(spacing.minimumColumnGapForMidpointRoute || 48);
+  const sourceId = refId(flow.shape.source);
+  const targetId = refId(flow.shape.target);
+  const crossingNode = nodes.find((node) => {
+    if (!node.position || node.id === sourceId || node.id === targetId) return false;
+    const bounds = nodeBounds(node);
+    const overlapsY = vertical.bottom >= bounds.top && vertical.top <= bounds.bottom;
+    return overlapsY && routeX >= bounds.left && routeX <= bounds.right;
+  });
+  if (crossingNode) {
+    const bounds = nodeBounds(crossingNode);
+    findings.push(issue("WORKFLOW_LAYOUT_ROUTE_X_CROSSES_INTERMEDIATE_COLUMN", "Long connector vertical segments must not run through intermediate workflow node bounds; route through an adjacent column-gap midpoint or a justified external lane.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: `${flowPath}.vertices`,
+      flowId: flow.id,
+      sourceId,
+      targetId,
+      routeX,
+      verticalSegment: { top: vertical.top, bottom: vertical.bottom },
+      occupiedColumn: {
+        left: bounds.left,
+        right: bounds.right,
+        nodeId: crossingNode.id,
+      },
+    }));
+    return;
+  }
+  const columnBands = workflowColumnBandsBetween(nodes, sourceNode, targetNode, spacing);
+  const columnGaps = workflowColumnGaps(columnBands);
+  const matchingGap = columnGaps.find((gap) => routeX > gap.left && routeX < gap.right);
+  if (!matchingGap || matchingGap.width < minimumGap) return;
+  const expectedRouteX = Math.round((matchingGap.left + matchingGap.right) / 2);
+  if (Math.abs(routeX - expectedRouteX) > tolerance) {
+    findings.push(issue("WORKFLOW_LAYOUT_ROUTE_X_NOT_COLUMN_GAP_MIDPOINT", "Connector vertical segments in a column gap must route through the midpoint of the net gap between adjacent columns.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: `${flowPath}.vertices`,
+      flowId: flow.id,
+      sourceId,
+      targetId,
+      routeX,
+      expectedRouteX,
+      netGap: matchingGap.width,
+      columnGap: { left: matchingGap.left, right: matchingGap.right },
+      tolerance,
+    }));
+  }
+}
+
 function workflowRowBandsBetween(nodes, sourceNode, targetNode, spacing) {
   const tolerance = Number(spacing.workflowRowToleranceY || 60);
   const sourceCenterY = nodeCenter(sourceNode).y;
@@ -527,12 +601,39 @@ function workflowRowBandsBetween(nodes, sourceNode, targetNode, spacing) {
     .sort((left, right) => left.top - right.top);
 }
 
+function workflowColumnBandsBetween(nodes, sourceNode, targetNode, spacing) {
+  const tolerance = Number(spacing.gatewayBranchColumnToleranceX || 80);
+  const sourceCenterX = nodeCenter(sourceNode).x;
+  const targetCenterX = nodeCenter(targetNode).x;
+  const minCenterX = Math.min(sourceCenterX, targetCenterX) - tolerance;
+  const maxCenterX = Math.max(sourceCenterX, targetCenterX) + tolerance;
+  return clusterColumns(nodes.filter((node) => node.position), tolerance)
+    .map((column) => {
+      const left = Math.min(...column.nodes.map((node) => Number(node.position.x)));
+      const right = Math.max(...column.nodes.map((node) => Number(node.position.x) + nodeSize(node).width));
+      const centerX = (left + right) / 2;
+      return { left, right, centerX, nodes: column.nodes };
+    })
+    .filter((band) => band.centerX >= minCenterX && band.centerX <= maxCenterX)
+    .sort((left, right) => left.left - right.left);
+}
+
 function workflowRowGaps(rowBands) {
   const gaps = [];
   for (let index = 0; index < rowBands.length - 1; index += 1) {
     const top = rowBands[index].bottom;
     const bottom = rowBands[index + 1].top;
     if (bottom > top) gaps.push({ top, bottom, height: bottom - top });
+  }
+  return gaps;
+}
+
+function workflowColumnGaps(columnBands) {
+  const gaps = [];
+  for (let index = 0; index < columnBands.length - 1; index += 1) {
+    const left = columnBands[index].right;
+    const right = columnBands[index + 1].left;
+    if (right > left) gaps.push({ left, right, width: right - left });
   }
   return gaps;
 }
@@ -548,6 +649,23 @@ function longestHorizontalVertexSegment(vertices) {
     if (Math.abs(left.y - right.y) > 1) continue;
     const length = Math.abs(right.x - left.x);
     if (!best || length > best.length) best = { y: Math.round((left.y + right.y) / 2), length };
+  }
+  return best;
+}
+
+function longestVerticalVertexSegment(vertices) {
+  const points = asArray(vertices)
+    .filter((point) => Number.isFinite(Number(point?.x)) && Number.isFinite(Number(point?.y)))
+    .map((point) => ({ x: Number(point.x), y: Number(point.y) }));
+  let best = null;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const top = points[index];
+    const bottom = points[index + 1];
+    if (Math.abs(top.x - bottom.x) > 1) continue;
+    const y1 = Math.min(top.y, bottom.y);
+    const y2 = Math.max(top.y, bottom.y);
+    const length = y2 - y1;
+    if (!best || length > best.length) best = { x: Math.round((top.x + bottom.x) / 2), top: y1, bottom: y2, length };
   }
   return best;
 }
@@ -884,6 +1002,20 @@ function clusterRows(positioned, tolerance) {
   return rows;
 }
 
+function clusterColumns(positioned, tolerance) {
+  const columns = [];
+  for (const node of [...positioned].sort((left, right) => left.position.x - right.position.x)) {
+    const existing = columns.find((column) => Math.abs(column.x - node.position.x) <= tolerance);
+    if (existing) {
+      existing.nodes.push(node);
+      existing.x = existing.nodes.reduce((sum, item) => sum + item.position.x, 0) / existing.nodes.length;
+    } else {
+      columns.push({ x: node.position.x, nodes: [node] });
+    }
+  }
+  return columns;
+}
+
 function validateGraphPosition(resource, nodes, findings) {
   const graph = resource.def?.graphposition;
   if (!isObject(graph) || nodes.length < 2) return;
@@ -972,6 +1104,19 @@ function nodeCenter(node) {
   return {
     x: Number(position.x) + size.width / 2,
     y: Number(position.y) + size.height / 2,
+  };
+}
+
+function nodeBounds(node) {
+  const position = node?.position || nodePosition(node?.shape || node) || { x: 0, y: 0 };
+  const size = nodeSize(node);
+  const left = Number(position.x);
+  const top = Number(position.y);
+  return {
+    left,
+    right: left + size.width,
+    top,
+    bottom: top + size.height,
   };
 }
 

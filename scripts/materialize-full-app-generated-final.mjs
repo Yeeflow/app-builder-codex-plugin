@@ -1086,6 +1086,15 @@ function collectApprovalWorkflowNodeSpecs(planText) {
     const jobPositionIdColumn = findHeaderIndex(normalizedHeaders, ["job position id", "position id", "assignee position id", "required job position id"]);
     const jobPositionSourceColumn = findHeaderIndex(normalizedHeaders, ["job position source", "assignee source", "source"]);
     const jobPositionProofColumn = findHeaderIndex(normalizedHeaders, ["job position proof", "job position proof status", "proof status", "assignee proof"]);
+    const jobPositionOauthStatusColumn = findHeaderIndex(normalizedHeaders, ["job position oauth status", "oauth status", "oauth proof status", "oauth readiness status"]);
+    const jobPositionOauthRefreshColumn = findHeaderIndex(normalizedHeaders, ["job position oauth refresh", "oauth refresh status", "oauth refresh attempted"]);
+    const jobPositionLookupStatusColumn = findHeaderIndex(normalizedHeaders, ["job position lookup status", "position lookup status", "api lookup status"]);
+    const jobPositionLookupAttemptedColumn = findHeaderIndex(normalizedHeaders, ["job position lookup attempted", "position lookup attempted", "api lookup attempted"]);
+    const jobPositionCreateAttemptCountColumn = findHeaderIndex(normalizedHeaders, ["job position create attempt count", "position create attempt count", "create attempt count"]);
+    const jobPositionCreateResponseColumn = findHeaderIndex(normalizedHeaders, ["job position create response id recorded", "position create response id recorded", "create response id recorded"]);
+    const jobPositionDuplicateScanColumn = findHeaderIndex(normalizedHeaders, ["job position duplicate scan", "duplicate name scan", "duplicate scan recorded"]);
+    const jobPositionCreationConfirmedColumn = findHeaderIndex(normalizedHeaders, ["job position creation confirmed", "admin creation confirmed", "creation confirmed"]);
+    const jobPositionAdminConfirmedColumn = findHeaderIndex(normalizedHeaders, ["job position admin confirmed", "system admin confirmed", "admin permission confirmed"]);
     const outcomesColumn = findHeaderIndex(normalizedHeaders, ["outcomes", "outcome"]);
     const conditionColumn = findHeaderIndex(normalizedHeaders, ["condition/branch", "condition", "branch"]);
     const dataColumn = findHeaderIndex(normalizedHeaders, ["data read/write", "data read write", "data source", "read/write", "read write"]);
@@ -1109,6 +1118,15 @@ function collectApprovalWorkflowNodeSpecs(planText) {
         jobPositionId: jobPositionIdColumn === -1 ? "" : cleanResourceName(cells[jobPositionIdColumn]),
         jobPositionSource: jobPositionSourceColumn === -1 ? "" : cleanResourceName(cells[jobPositionSourceColumn]),
         jobPositionProofStatus: jobPositionProofColumn === -1 ? "" : cleanResourceName(cells[jobPositionProofColumn]),
+        jobPositionOauthStatus: jobPositionOauthStatusColumn === -1 ? "" : cleanResourceName(cells[jobPositionOauthStatusColumn]),
+        jobPositionOauthRefreshStatus: jobPositionOauthRefreshColumn === -1 ? "" : cleanResourceName(cells[jobPositionOauthRefreshColumn]),
+        jobPositionLookupStatus: jobPositionLookupStatusColumn === -1 ? "" : cleanResourceName(cells[jobPositionLookupStatusColumn]),
+        jobPositionLookupAttempted: jobPositionLookupAttemptedColumn === -1 ? "" : cleanResourceName(cells[jobPositionLookupAttemptedColumn]),
+        jobPositionCreateAttemptCount: jobPositionCreateAttemptCountColumn === -1 ? "" : cleanResourceName(cells[jobPositionCreateAttemptCountColumn]),
+        jobPositionCreateResponseIdRecorded: jobPositionCreateResponseColumn === -1 ? "" : cleanResourceName(cells[jobPositionCreateResponseColumn]),
+        jobPositionDuplicateScanRecorded: jobPositionDuplicateScanColumn === -1 ? "" : cleanResourceName(cells[jobPositionDuplicateScanColumn]),
+        jobPositionCreationConfirmed: jobPositionCreationConfirmedColumn === -1 ? "" : cleanResourceName(cells[jobPositionCreationConfirmedColumn]),
+        jobPositionAdminConfirmed: jobPositionAdminConfirmedColumn === -1 ? "" : cleanResourceName(cells[jobPositionAdminConfirmedColumn]),
         outcomes: outcomesColumn === -1 ? "" : cleanResourceName(cells[outcomesColumn]),
         conditionBranch: conditionColumn === -1 ? "" : cleanResourceName(cells[conditionColumn]),
         dataReadWrite: dataColumn === -1 ? "" : cleanResourceName(cells[dataColumn]),
@@ -1666,6 +1684,15 @@ function uniqueApprovalWorkflowNodes(nodes) {
       jobPositionId: cleanResourceName(node?.jobPositionId),
       jobPositionSource: cleanResourceName(node?.jobPositionSource),
       jobPositionProofStatus: cleanResourceName(node?.jobPositionProofStatus),
+      jobPositionOauthStatus: cleanResourceName(node?.jobPositionOauthStatus),
+      jobPositionOauthRefreshStatus: cleanResourceName(node?.jobPositionOauthRefreshStatus),
+      jobPositionLookupStatus: cleanResourceName(node?.jobPositionLookupStatus),
+      jobPositionLookupAttempted: cleanResourceName(node?.jobPositionLookupAttempted),
+      jobPositionCreateAttemptCount: cleanResourceName(node?.jobPositionCreateAttemptCount),
+      jobPositionCreateResponseIdRecorded: cleanResourceName(node?.jobPositionCreateResponseIdRecorded),
+      jobPositionDuplicateScanRecorded: cleanResourceName(node?.jobPositionDuplicateScanRecorded),
+      jobPositionCreationConfirmed: cleanResourceName(node?.jobPositionCreationConfirmed),
+      jobPositionAdminConfirmed: cleanResourceName(node?.jobPositionAdminConfirmed),
       outcomes: cleanResourceName(node?.outcomes),
       conditionBranch: cleanResourceName(node?.conditionBranch),
       dataReadWrite: cleanResourceName(node?.dataReadWrite),
@@ -6114,11 +6141,48 @@ function inferRequiredJobPositionName(step) {
   return explicit ? cleanResourceName(explicit[1]) : "";
 }
 
+function truthyPlanValue(value) {
+  const text = cleanResourceName(value).toLowerCase();
+  return ["true", "yes", "y", "1", "pass", "passed", "success", "succeed", "confirmed", "recorded", "attempted"].includes(text);
+}
+
+function numericPlanValue(value) {
+  const text = cleanResourceName(value);
+  return /^\d+$/.test(text) ? Number(text) : undefined;
+}
+
+function jobPositionProofMetadata(step) {
+  const metadata = {};
+  const oauthStatus = cleanResourceName(step?.jobPositionOauthStatus || step?.oauthStatus || step?.oauthProofStatus || step?.oauthReadinessStatus);
+  const oauthRefreshStatus = cleanResourceName(step?.jobPositionOauthRefreshStatus || step?.oauthRefreshStatus);
+  const lookupStatus = cleanResourceName(step?.jobPositionLookupStatus || step?.positionLookupStatus || step?.apiLookupStatus);
+  const lookupAttempted = cleanResourceName(step?.jobPositionLookupAttempted || step?.positionLookupAttempted || step?.apiLookupAttempted);
+  const createAttemptCount = numericPlanValue(step?.jobPositionCreateAttemptCount || step?.positionCreateAttemptCount || step?.createAttemptCount);
+  const createResponseIdRecorded = cleanResourceName(step?.jobPositionCreateResponseIdRecorded || step?.positionCreateResponseIdRecorded || step?.createResponseIdRecorded);
+  const duplicateScanRecorded = cleanResourceName(step?.jobPositionDuplicateScanRecorded || step?.duplicateNameScanRecorded || step?.duplicateScanRecorded);
+  const creationConfirmed = cleanResourceName(step?.jobPositionCreationConfirmed || step?.adminCreationConfirmed || step?.creationConfirmed);
+  const adminConfirmed = cleanResourceName(step?.jobPositionAdminConfirmed || step?.systemAdminConfirmed || step?.adminPermissionConfirmed);
+  if (oauthStatus) metadata.oauthStatus = oauthStatus;
+  if (oauthRefreshStatus) {
+    metadata.oauthRefreshStatus = oauthRefreshStatus;
+    metadata.oauthRefreshAttempted = truthyPlanValue(oauthRefreshStatus);
+  }
+  if (lookupStatus) metadata.jobPositionLookupStatus = lookupStatus;
+  if (lookupAttempted) metadata.jobPositionLookupAttempted = truthyPlanValue(lookupAttempted);
+  if (createAttemptCount !== undefined) metadata.jobPositionCreateAttemptCount = createAttemptCount;
+  if (createResponseIdRecorded) metadata.jobPositionCreateResponseIdRecorded = truthyPlanValue(createResponseIdRecorded);
+  if (duplicateScanRecorded) metadata.duplicateNameScanRecorded = truthyPlanValue(duplicateScanRecorded);
+  if (creationConfirmed) metadata.creationConfirmed = truthyPlanValue(creationConfirmed);
+  if (adminConfirmed) metadata.systemAdminConfirmed = truthyPlanValue(adminConfirmed);
+  return metadata;
+}
+
 function buildWorkflowJobPositionAssignee(step) {
   const positionId = cleanResourceName(step?.jobPositionId || step?.positionId || step?.assigneePositionId || step?.requiredJobPositionId);
   const requiredJobPositionName = cleanResourceName(step?.requiredJobPositionName || step?.jobPositionName || inferRequiredJobPositionName(step));
   const source = cleanResourceName(step?.jobPositionSource || step?.assigneeSource || step?.source);
   const proofStatus = cleanResourceName(step?.jobPositionProofStatus || step?.proofStatus);
+  const proofMetadata = jobPositionProofMetadata(step);
   if (!positionId) {
     return {
       type: "position",
@@ -6131,6 +6195,7 @@ function buildWorkflowJobPositionAssignee(step) {
       creationRequired: true,
       plannedAssigneeRole: step.assigneeRole || "",
       plannedAssignmentStrategy: step.assignmentStrategy || "",
+      ...proofMetadata,
     };
   }
   return {
@@ -6143,6 +6208,7 @@ function buildWorkflowJobPositionAssignee(step) {
     proofStatus: proofStatus || "user-selected",
     plannedAssigneeRole: step.assigneeRole || "",
     plannedAssignmentStrategy: step.assignmentStrategy || "",
+    ...proofMetadata,
   };
 }
 
@@ -6326,9 +6392,21 @@ function workflowVerticesBetween(sourcePosition, targetPosition, options = {}) {
   const routeY = workflowSafeRouteYBetweenRows(sourcePosition, targetPosition, options.routeNodes || []);
   if (Number.isFinite(routeY)) {
     const nodeWidth = Number(options.nodeWidth || 190);
+    const nodeHeight = Number(options.nodeHeight || 86);
+    const sourceCenterX = Math.round(sourcePosition.x + nodeWidth / 2);
+    const targetCenterX = Math.round(targetPosition.x + nodeWidth / 2);
+    const sourceCenterY = Math.round(sourcePosition.y + nodeHeight / 2);
+    const routeX = workflowSafeRouteXBetweenColumns(sourcePosition, targetPosition, options.routeNodes || [], options);
+    if (Number.isFinite(routeX) && Math.abs(routeX - sourceCenterX) > 8) {
+      return [
+        { x: routeX, y: sourceCenterY },
+        { x: routeX, y: routeY },
+        { x: targetCenterX, y: routeY },
+      ];
+    }
     return [
-      { x: Math.round(sourcePosition.x + nodeWidth / 2), y: routeY },
-      { x: Math.round(targetPosition.x + nodeWidth / 2), y: routeY },
+      { x: sourceCenterX, y: routeY },
+      { x: targetCenterX, y: routeY },
     ];
   }
   const bendX = sourcePosition.x + Math.max(120, Math.round(dx / 2));
@@ -6378,6 +6456,46 @@ function workflowSafeRouteYBetweenRows(sourcePosition, targetPosition, routeNode
     : Math.round(rows[rows.length - 1].bottom + externalPadding);
 }
 
+function workflowSafeRouteXBetweenColumns(sourcePosition, targetPosition, routeNodes = [], options = {}) {
+  const nodeWidth = Number(options.nodeWidth || 190);
+  const columnTolerance = Number(options.columnTolerance || 80);
+  const minimumGap = Number(options.minimumColumnGap || 48);
+  const externalPadding = Number(options.externalColumnPadding || 100);
+  const sourceX = Number(sourcePosition?.x);
+  const targetX = Number(targetPosition?.x);
+  if (!Number.isFinite(sourceX) || !Number.isFinite(targetX) || Math.abs(sourceX - targetX) <= columnTolerance) return null;
+  const positions = (Array.isArray(routeNodes) ? routeNodes : [])
+    .map((entry) => entry?.position || entry)
+    .filter((position) => Number.isFinite(Number(position?.x)) && Number.isFinite(Number(position?.y)))
+    .map((position) => ({ x: Number(position.x), y: Number(position.y) }));
+  if (positions.length < 2) return null;
+  const sourceCenterX = sourceX + nodeWidth / 2;
+  const targetCenterX = targetX + nodeWidth / 2;
+  const minCenterX = Math.min(sourceCenterX, targetCenterX) - columnTolerance;
+  const maxCenterX = Math.max(sourceCenterX, targetCenterX) + columnTolerance;
+  const columns = workflowPositionColumns(positions, columnTolerance)
+    .map((column) => {
+      const left = Math.min(...column.map((position) => position.x));
+      const right = Math.max(...column.map((position) => position.x + nodeWidth));
+      return { left, right, centerX: (left + right) / 2 };
+    })
+    .filter((column) => column.centerX >= minCenterX && column.centerX <= maxCenterX)
+    .sort((left, right) => left.left - right.left);
+  if (columns.length < 2) return null;
+  const gaps = [];
+  for (let index = 0; index < columns.length - 1; index += 1) {
+    const left = columns[index].right;
+    const right = columns[index + 1].left;
+    if (right - left >= minimumGap) gaps.push({ left, right, midpoint: Math.round((left + right) / 2) });
+  }
+  if (gaps.length) {
+    return sourceX < targetX ? gaps[gaps.length - 1].midpoint : gaps[0].midpoint;
+  }
+  return sourceX < targetX
+    ? Math.round(columns[columns.length - 1].right + externalPadding)
+    : Math.round(columns[0].left - externalPadding);
+}
+
 function workflowPositionRows(positions, tolerance) {
   const rows = [];
   for (const position of [...positions].sort((left, right) => left.y - right.y)) {
@@ -6390,6 +6508,20 @@ function workflowPositionRows(positions, tolerance) {
 
 function rowAverageY(row) {
   return row.reduce((sum, position) => sum + position.y, 0) / Math.max(1, row.length);
+}
+
+function workflowPositionColumns(positions, tolerance) {
+  const columns = [];
+  for (const position of [...positions].sort((left, right) => left.x - right.x)) {
+    const existing = columns.find((column) => Math.abs(columnAverageX(column) - position.x) <= tolerance);
+    if (existing) existing.push(position);
+    else columns.push([position]);
+  }
+  return columns;
+}
+
+function columnAverageX(column) {
+  return column.reduce((sum, position) => sum + position.x, 0) / Math.max(1, column.length);
 }
 
 function workflowRejectedVertices(sourcePosition, rejectPosition) {
