@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.9.24
+
+- Release Workflow Designer motif-first readability hardening.
+- Add local Inclusive Gateway fan-out validation so business branch targets stay near the gateway and use upper/lower lanes instead of distant long connectors.
+- Add local normal End merge validation so multi-source completion paths converge beside the incoming source group.
+- Add local rejection vertex-economy validation so nearby `Rejected -> End with rejection` paths use rounded auto-routing instead of unnecessary `vertices[]`.
+- Add concise connector label validation so full business logic remains in `conditioninfo` while visible labels stay readable.
+- Extend source/dist workflow layout regression coverage for gateway locality, End merge locality, local rejection vertices, and overlong condition labels.
+
 ## 0.9.23
 
 - Release Workflow Designer readability gate hardening.

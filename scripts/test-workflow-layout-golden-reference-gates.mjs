@@ -184,14 +184,8 @@ try {
   }), "WORKFLOW_LAYOUT_SINGLE_ROW_SPRAWL");
   cases.push({ case: "fail: large workflow uses a single over-wide horizontal row", status: "pass" });
 
-  expectCode("medium workflow stretched too wide fails", mutateReadable("medium-too-wide.json", (def) => {
-    const end = def.childshapes.find((shape) => shape.id === "end");
-    end.position = { x: 3600, y: 220 };
-    for (let index = 0; index < 9; index += 1) {
-      def.childshapes.push(node(`medium-step-${index}`, "ContentList", `Medium Step ${index + 1}`, 1300 + index * 260, index % 2 === 0 ? 220 : 360));
-    }
-  }), "WORKFLOW_LAYOUT_MEDIUM_GRAPH_TOO_WIDE");
-  cases.push({ case: "fail: medium workflow should not stretch into a very wide strip", status: "pass" });
+  expectWarning("medium workflow stretched too wide is advisory only", writeResource("medium-too-wide-warning-only.json", mediumWideWarningOnlyWorkflow()), "WORKFLOW_LAYOUT_MEDIUM_GRAPH_TOO_WIDE");
+  cases.push({ case: "warning: medium workflow width is advisory and must not force spacing compression", status: "pass" });
 
   expectPass("medium workflow wider than advisory width passes when folded into readable rows", ["--resource", writeResource("medium-readable-wide-folded.json", readableWideFoldedWorkflow())]);
   cases.push({ case: "pass: medium workflow may exceed advisory width when folded into readable rows", status: "pass" });
@@ -239,6 +233,79 @@ try {
   }), "WORKFLOW_LAYOUT_VERTICAL_ROUTE_LANE_DENSITY_TOO_HIGH");
   cases.push({ case: "fail: long vertical route segments cannot stack into one visual lane", status: "pass" });
 
+  expectCode("gateway branches cannot target distant nodes", mutateReadable("gateway-branch-too-far.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    const gateway = node("local-branch-gateway", "InclusiveGateway", "Budget gateway", 720, 220);
+    const nearTarget = node("near-branch-target", "MultiAssignmentTask", "Near branch target", 1040, 80);
+    const farTarget = node("far-branch-target", "MultiAssignmentTask", "Far branch target", 1840, 360);
+    def.childshapes = def.childshapes.filter((shape) => !["flow-approved"].includes(shape.id));
+    def.childshapes.push(gateway, nearTarget, farTarget);
+    def.childshapes.push(flow("flow-review-to-local-gateway", review, gateway, "Approved"));
+    def.childshapes.push(flow("flow-gateway-near", gateway, nearTarget, "Budget > 1000"));
+    def.childshapes.push(flow("flow-gateway-far", gateway, farTarget, "Sensitive data"));
+    def.childshapes.push(flow("flow-near-target-done", nearTarget, create, "Completed", [{ x: 1150, y: 123 }, { x: 1150, y: 403 }]));
+    def.childshapes.push(flow("flow-far-target-done", farTarget, create, "Completed", [{ x: 1970, y: 403 }, { x: 870, y: 403 }]));
+  }), "WORKFLOW_LAYOUT_GATEWAY_BRANCH_TOO_FAR");
+  cases.push({ case: "fail: gateway fan-out targets must stay local to the gateway", status: "pass" });
+
+  expectCode("multi-source end merge cannot be far from source group", mutateReadable("end-merge-too-far.json", (def) => {
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    const extra = node("extra-end-source", "MultiAssignmentTask", "Extra End Source", 1020, 80);
+    end.position = { x: 2400, y: 220 };
+    def.childshapes.push(extra);
+    def.childshapes.push(flow("flow-extra-end-source-complete", extra, end, "Completed", [{ x: 1160, y: 123 }, { x: 1160, y: 263 }]));
+    def.childshapes.push(flow("flow-create-to-end-readded", create, end, "Completed", [{ x: 870, y: 403 }, { x: 870, y: 263 }]));
+  }), "WORKFLOW_LAYOUT_END_MERGE_TOO_FAR");
+  cases.push({ case: "fail: final End merge must stay local to incoming branches", status: "pass" });
+
+  expectCode("local rejected connector cannot carry unnecessary vertices", mutateReadable("local-reject-with-vertices.json", (def) => {
+    const rejected = def.childshapes.find((shape) => shape.id === "flow-rejected");
+    rejected.vertices = [{ x: 540, y: 220 }, { x: 540, y: 80 }];
+  }), "WORKFLOW_LAYOUT_LOCAL_REJECT_VERTICES_UNNECESSARY");
+  cases.push({ case: "fail: local rejected connector should not use vertices", status: "pass" });
+
+  expectCode("overlong connector display label fails", mutateReadable("connector-label-too-long.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    const gateway = node("label-length-gateway", "InclusiveGateway", "Label length gateway", 720, 220);
+    const security = node("label-length-security", "MultiAssignmentTask", "Security Review", 1040, 80);
+    def.childshapes = def.childshapes.filter((shape) => !["flow-approved"].includes(shape.id));
+    def.childshapes.push(gateway, security);
+    def.childshapes.push(flow("flow-review-to-label-length-gateway", review, gateway, "Approved"));
+    def.childshapes.push(flow("flow-overlong-business-condition-label", gateway, security, "Software License Required And Sensitive Data Is True"));
+    def.childshapes.push(flow("flow-label-length-security-done", security, create, "Completed", [{ x: 1150, y: 123 }, { x: 1150, y: 403 }]));
+  }), "WORKFLOW_LAYOUT_CONNECTOR_LABEL_TOO_LONG");
+  cases.push({ case: "fail: connector display labels must stay short", status: "pass" });
+
+  expectCode("non-return vertices overused fails", mutateReadable("vertices-overused.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    for (let index = 0; index < 7; index += 1) {
+      const target = node(`vertex-overuse-target-${index}`, "ContentList", `Vertex Overuse Target ${index + 1}`, 760 + index * 260, index % 2 === 0 ? 220 : 360);
+      def.childshapes.push(target);
+      def.childshapes.push(flow(`flow-vertex-overuse-${index}`, review, target, `Branch ${index + 1}`, [
+        { x: 600 + index * 20, y: 180 },
+        { x: 680 + index * 40, y: 420 },
+        { x: 820 + index * 90, y: target.position.y },
+      ]));
+    }
+  }), "WORKFLOW_LAYOUT_VERTICES_OVERUSED");
+  cases.push({ case: "fail: generated workflow cannot rely on many non-return connector vertices", status: "pass" });
+
+  expectCode("connector detour too high fails", mutateReadable("connector-detour-too-high.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const create = def.childshapes.find((shape) => shape.id === "create");
+    create.position = { x: 1020, y: 360 };
+    def.childshapes.push(flow("flow-large-detour", review, create, "Sensitive data", [
+      { x: 520, y: -320 },
+      { x: 1900, y: -320 },
+      { x: 1900, y: 760 },
+      { x: 1120, y: 760 },
+    ]));
+  }), "WORKFLOW_LAYOUT_CONNECTOR_DETOUR_TOO_HIGH");
+  cases.push({ case: "fail: connector detours cannot compensate for poor node layout", status: "pass" });
+
   expectCode("long connector labels overlapping each other fail", mutateReadable("connector-label-overlap.json", (def) => {
     const review = def.childshapes.find((shape) => shape.id === "review");
     const create = def.childshapes.find((shape) => shape.id === "create");
@@ -284,6 +351,14 @@ function expectCode(label, resourcePath, expectedCode) {
   assert.ok(report.findings.some((finding) => finding.code === expectedCode), `${label} expected ${expectedCode}\n${result.stdout}`);
 }
 
+function expectWarning(label, resourcePath, expectedCode) {
+  const result = runValidator(["--resource", resourcePath]);
+  assert.equal(result.status, 0, `${label} should pass with warning\nstdout=${result.stdout}\nstderr=${result.stderr}`);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.status, "pass", label);
+  assert.ok(report.findings.some((finding) => finding.level === "warning" && finding.code === expectedCode), `${label} expected warning ${expectedCode}\n${result.stdout}`);
+}
+
 function runValidator(args) {
   return spawnSync(process.execPath, [VALIDATOR, ...args], {
     cwd: ROOT,
@@ -320,9 +395,9 @@ function readableWorkflow() {
     childshapes: [
       nodes.start,
       flow("flow-submit", nodes.start, nodes.review, "Submit"),
-      flow("flow-approved", nodes.review, nodes.create, "Approved", [{ x: 560, y: 220 }, { x: 560, y: 360 }]),
-      flow("flow-rejected", nodes.review, nodes.reject, "Rejected", [{ x: 720, y: 220 }, { x: 720, y: 80 }, { x: 540, y: 80 }]),
-      flow("flow-complete", nodes.create, nodes.end, "Complete", [{ x: 870, y: 360 }, { x: 870, y: 220 }]),
+      flow("flow-approved", nodes.review, nodes.create, "Approved"),
+      flow("flow-rejected", nodes.review, nodes.reject, "Rejected"),
+      flow("flow-complete", nodes.create, nodes.end, "Complete"),
       nodes.review,
       nodes.create,
       nodes.end,
@@ -342,6 +417,22 @@ function readableWideFoldedWorkflow() {
       const col = index % 6;
       return node(`folded-${index}`, index === 0 ? "StartNoneEvent" : index === 16 ? "EndNoneEvent" : "ContentList", `Folded Step ${index + 1}`, 100 + col * 560, 140 + row * 170);
     }),
+  };
+}
+
+function mediumWideWarningOnlyWorkflow() {
+  const childshapes = [];
+  for (let index = 0; index < 14; index += 1) {
+    const row = Math.floor(index / 5);
+    const col = index % 5;
+    childshapes.push(node(`medium-warning-${index}`, index === 0 ? "StartNoneEvent" : index === 13 ? "EndNoneEvent" : "ContentList", `Medium Warning ${index + 1}`, 100 + col * 880, 120 + row * 170));
+  }
+  return {
+    lineType: "rounded",
+    graphver: 2,
+    graphzoom: 1,
+    graphposition: { x: -80, y: 40, width: 3950, height: 760 },
+    childshapes,
   };
 }
 

@@ -31,9 +31,14 @@ The source files were inspected read-only. Raw exports are not bundled into the 
 - Workflow diagrams should use the Workflow Designer's roughly 16:9 visible canvas. Complex workflows should use additional rows/layers instead of placing every node on one long horizontal line, and generated workflows should not exceed five vertical rows.
 - Medium workflow width should be treated as a readability advisory, not a standalone compression target. The generator must not shrink standard column spacing simply to pass a `2600px` width check.
 - Human readability is stricter than geometry-only midpoint routing. A workflow can pass routeX/routeY midpoint checks and still fail if long labels overlap, too many vertical connector segments share the same lane, or branch labels are squeezed into one visual wall.
+- Workflow generation must be motif-first, not vertices-first. The `Workflow actions layout.json` reference is readable because nodes are placed into local approval, gateway, branch, action, and rejection motifs. Most SequenceFlows can then use rounded auto-routing with empty `vertices[]`. If many non-return connectors need vertices, the node layout is wrong.
 - Standard forward rejected/cross-lane lines do not require explicit `vertices[]` when the spacing already prevents overlap. Backward/return lines still require vertices.
 - Long return/backward connectors that cross more than two workflow rows must not calculate `routeY` from only the source and target rows. They must use an open adjacent row-gap midpoint and must not place the horizontal segment inside any intermediate row's node bounds.
 - Long connectors with vertical route segments must also calculate a safe `routeX` from adjacent column gaps. Vertical segments must not pass through intermediate workflow node bounds or sit on a task/gateway center line when a column-gap midpoint is available.
+- Inclusive Gateway branches are local fan-out motifs. Branch targets should stay close to the gateway, distributed into upper/lower lanes, rather than becoming far-away targets repaired with long connectors.
+- Normal End nodes with multiple incoming branches are local merge motifs. Place them beside and vertically within the incoming source group instead of using a distant global End.
+- Local rejected connectors to nearby `EndRejectEvent` nodes should not use explicit vertices. If vertices are needed for a local rejection path, the rejection endpoint is probably placed incorrectly.
+- Visible business-condition connector labels must be short; full logic belongs in `conditioninfo`.
 
 ## Workflow Actions Layout V2 Standard
 
@@ -48,8 +53,12 @@ The focused workflow actions reference establishes these minimum/recommended geo
 | Gateway to branch targets | About 195 px minimum |
 | Approval task reject end | Above or below by at least 110-125 px |
 | Gateway branch targets | Same `x` column within about 80 px |
+| Gateway target locality | Business branch target center should stay within about 650 px of gateway center |
 | Shared rejection endpoint | Maximum 3 approval task sources |
 | Shared rejection source lane | All sources must be on the same horizontal lane within about 40 px |
+| Multi-source normal End | Local merge within about 650 px of incoming source group |
+| Connector label length | Business-condition display label should stay within about 42 chars |
+| Local reject vertices | No vertices for nearby rejected connectors within about 760 x 260 px |
 | Designer canvas usage | Prefer roughly 16:9 visible area instead of one-row sprawl |
 | Maximum vertical rows | 5 rows/layers |
 
@@ -68,6 +77,11 @@ The plugin validator now checks the semantic layout contract, not just visual co
 - `WORKFLOW_LAYOUT_SINGLE_ROW_SPRAWL`
 - `WORKFLOW_LAYOUT_ROUTE_Y_CROSSES_INTERMEDIATE_ROW`
 - `WORKFLOW_LAYOUT_ROUTE_X_CROSSES_INTERMEDIATE_COLUMN`
+- `WORKFLOW_LAYOUT_GATEWAY_BRANCH_TOO_FAR`
+- `WORKFLOW_LAYOUT_END_MERGE_TOO_FAR`
+- `WORKFLOW_LAYOUT_END_MERGE_VERTICAL_MISMATCH`
+- `WORKFLOW_LAYOUT_LOCAL_REJECT_VERTICES_UNNECESSARY`
+- `WORKFLOW_LAYOUT_CONNECTOR_LABEL_TOO_LONG`
 
 ## Plugin Changes
 
@@ -85,6 +99,8 @@ The plugin validator now checks the semantic layout contract, not just visual co
 - Updated the workflow layout gate and materializer so long connector vertical segments choose a safe adjacent column-gap midpoint; vertical route segments are now rejected when they pass through an intermediate node's column bounds.
 - Updated the medium-width workflow gate so `2600px` is no longer an isolated hard blocker. Medium workflows may exceed the advisory width when they are folded into readable rows, row density is acceptable, and no label/lane readability gate fails.
 - Added connector readability gates for long label collisions and over-dense shared vertical route lanes. These gates prevent the 0.9.22-style regression where a graph passed geometry checks but became visually worse because labels and vertical lanes were crowded.
+- Added vertex economy and detour economy gates. Generated workflows now fail when too many non-return/non-rejection connectors carry vertices or when a connector path detours far beyond the direct source-target distance. These gates force the generator to fix node placement instead of hiding layout problems behind increasingly complex `vertices[]`.
+- Added workflow motif gates for local Inclusive Gateway fan-out, local normal End merge placement, local rejected connector vertex economy, and concise connector labels. These gates make the validator compare generated layouts against the readable motifs in `Workflow actions layout.json`, not just individual line geometry.
 - Updated the workflow layout gate so shared `EndRejectEvent` nodes can only collect rejected paths from Approval Assignment Tasks on the same horizontal lane.
 - Updated the workflow layout gate so generated diagrams fail when they exceed five vertical rows or when large workflows are collapsed into a single over-wide horizontal row instead of using the 16:9 canvas area.
 - Updated the workflow designer style gate so generated Approval, Data list, and Scheduled workflow graphs use Workflow Designer v2 attributes: root `lineType = "rounded"`, root `graphver = 2`, each `SequenceFlow.properties.linetype = "rounded"`, each `SequenceFlow.properties.documentation` present as a string, and each `SequenceFlow.dockers = []`. `graphzoom` is intentionally excluded as a hard gate.
