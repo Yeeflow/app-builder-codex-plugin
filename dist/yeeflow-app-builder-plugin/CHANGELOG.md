@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.23
+
+- Release Workflow Designer readability gate hardening.
+- Treat medium workflow width as an advisory readability signal instead of an isolated hard compression target; readable multi-row workflows may exceed 2600px when row density and labels remain clear.
+- Add long connector label collision gates for node overlap and label overlap.
+- Add shared vertical route lane density validation so multiple long vertical connector segments cannot collapse into one visual wall.
+- Add source/dist regression coverage for readable wide folded workflows, label collisions, and vertical route lane density.
+
 ## 0.9.22
 
 - Release standalone export, Job Position assignee, and Workflow Designer vertical-route hardening.

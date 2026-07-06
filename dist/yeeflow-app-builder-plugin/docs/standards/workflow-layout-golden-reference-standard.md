@@ -44,18 +44,22 @@ It does not prove business behavior, assignment correctness, workflow execution,
 15. Workflow diagrams should use the visible Designer canvas as a roughly `16:9` work area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line.
 16. Generated workflows should not exceed five vertical rows/layers.
 17. A complex workflow row must not become a dense strip. Fold later actions or branch targets into upper/lower lanes when one row would contain too many nodes or condition labels.
-18. Generated SequenceFlow line style should be `rounded` by default for complex graphs.
-19. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
-20. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
-21. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
-22. Direct same-row connectors must rely on rounded auto-routing. In particular, `StartNoneEvent -> first task` connectors labeled `Submitted` / `Submit` must have empty or absent `vertices[]`.
-23. When a connector needs a horizontal segment between two adjacent rows, route that segment at the midpoint of the net row gap: `routeY = (upperRowY + workflowNodeHeight + lowerRowY) / 2`.
-24. When a long return/backward connector crosses more than two workflow rows, do not calculate `routeY` from only the source and target rows. Choose an adjacent open row-gap midpoint along the route and ensure the horizontal segment does not pass through any intermediate row's node bounds.
-25. When an explicit connector route includes a vertical segment between workflow columns, route that segment through the midpoint of the net column gap: `routeX = (leftColumnX + workflowNodeWidth + rightColumnX) / 2`.
-26. Long connector vertical segments must not pass through intermediate workflow node bounds. If the column gap is too narrow or occupied, increase column spacing, choose an adjacent column-gap midpoint, or use a justified external lane.
-27. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap/column-gap midpoint is unsafe, crowded, or too narrow.
-28. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
-29. `graphposition` should cover the full node area plus padding.
+18. Do not compress the standard column spacing just to satisfy a fixed medium-workflow width target. For 14-25 node workflows, `2600px` is an advisory width where the generator should prefer lane folding, not a reason to reduce label, node, or connector clearance.
+19. A medium workflow may exceed the advisory width when it uses readable multi-row folding, row density is acceptable, labels do not collide, and connector lanes remain clear. It should fail only when it remains a single/dense horizontal strip, becomes extremely wide, or violates readability gates.
+20. Long connector labels must not overlap workflow nodes or other long connector labels. Use separate lanes, local branch routes, or shorter condition labels instead of relying on Designer auto-placement in crowded areas.
+21. Long vertical route segments must not stack into one visual wall. If more than two long vertical segments need the same column gap, offset lanes or split the branch into local routes.
+22. Generated SequenceFlow line style should be `rounded` by default for complex graphs.
+23. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
+24. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
+25. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
+26. Direct same-row connectors must rely on rounded auto-routing. In particular, `StartNoneEvent -> first task` connectors labeled `Submitted` / `Submit` must have empty or absent `vertices[]`.
+27. When a connector needs a horizontal segment between two adjacent rows, route that segment at the midpoint of the net row gap: `routeY = (upperRowY + workflowNodeHeight + lowerRowY) / 2`.
+28. When a long return/backward connector crosses more than two workflow rows, do not calculate `routeY` from only the source and target rows. Choose an adjacent open row-gap midpoint along the route and ensure the horizontal segment does not pass through any intermediate row's node bounds.
+29. When an explicit connector route includes a vertical segment between workflow columns, route that segment through the midpoint of the net column gap: `routeX = (leftColumnX + workflowNodeWidth + rightColumnX) / 2`.
+30. Long connector vertical segments must not pass through intermediate workflow node bounds. If the column gap is too narrow or occupied, increase column spacing, choose an adjacent column-gap midpoint, or use a justified external lane.
+31. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap/column-gap midpoint is unsafe, crowded, or too narrow.
+32. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
+33. `graphposition` should cover the full node area plus padding.
 
 ## Standard Spacing
 
@@ -76,6 +80,10 @@ The `workflow_actions_layout` reference establishes the following default spacin
 | `ROW_TOLERANCE` | `60` | fixed | Nodes within this y delta count as one horizontal lane. |
 | `MAX_ROWS` | `5` | fixed | Maximum generated workflow vertical rows/layers. |
 | `ROW_NODE_DENSITY` | `7` | fixed | Maximum suggested nodes in one complex workflow row before folding into another lane. |
+| `MEDIUM_WIDTH_ADVISORY` | `2600` | soft | Suggested width where 14-25 node workflows should prefer folding; do not compress columns just to fit it. |
+| `MEDIUM_READABLE_WIDTH_ALLOWANCE` | `3400` | hard-ish | Upper allowance for readable multi-row medium workflows before the width itself becomes a blocker. |
+| `LONG_LABEL_COLLISION_MIN` | `16 chars` | fixed | Minimum connector label length for label collision checks. |
+| `VERTICAL_ROUTE_LANE_MAX` | `2` | fixed | Maximum long vertical connector segments that may share one lane before lane offsets/local routes are required. |
 | `END_REJECT_SOURCE_SPAN` | `760` | fixed | Maximum suggested x-span for approval tasks sharing one rejection endpoint. |
 | `WORKFLOW_NODE_SIZE` | `190 x 86` | fixed | Standard task/gateway/end node size used for connector midpoint geometry. |
 | `ROW_GAP_MIDPOINT_ROUTE_MIN` | `60` | fixed | Preferred minimum net gap for midpoint connector routing. |
@@ -142,7 +150,7 @@ For workflows with many approvals, gateways, and post-approval actions, do not k
 - local rejection endpoints above the first approval row or below lower approval rows
 - later procurement, fulfillment, or archive actions folded into another lane when the main row becomes dense
 
-The target visual width for most generated workflows should stay around `1800-2200px`. Medium-complexity workflows that exceed the hard maximum should be folded into lanes before signing.
+The target visual width for most generated workflows should stay around `1800-2200px`. For medium-complexity workflows, `2600px` is an advisory threshold that should trigger lane folding and readability review. It must not make the generator compress standard column spacing or overlap labels. A wider workflow is acceptable when it uses readable rows, keeps row density under control, avoids connector label collisions, and does not create shared vertical route walls.
 
 ## Workflow Designer V2 Line Style Rules
 
@@ -247,3 +255,6 @@ The gate must fail generated packages that contain:
 - shared End with Rejection nodes collecting sources from different horizontal lanes
 - workflows with more than five vertical rows
 - large workflows compressed into one overly wide horizontal row
+- medium workflows that exceed the advisory width without readable multi-row folding
+- connector labels overlapping nodes or other long connector labels
+- too many long vertical connector segments sharing one routing lane
