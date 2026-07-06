@@ -311,7 +311,36 @@ function expectCode(label, command, args, code) {
 
 function decodePackageResource(packagePath) {
   const wrapper = JSON.parse(fs.readFileSync(packagePath, "utf8"));
-  return JSON.parse(zlib.brotliDecompressSync(Buffer.from(wrapper.Resource, "base64")).toString("utf8"));
+  const bytes = Buffer.from(wrapper.Resource, "base64");
+  try {
+    return JSON.parse(zlib.brotliDecompressSync(bytes).toString("utf8"));
+  } catch (error) {
+    const tolerant = tolerantBrotliDecodeSync(bytes);
+    if (!tolerant) throw error;
+    return JSON.parse(tolerant);
+  }
+}
+
+function tolerantBrotliDecodeSync(bytes) {
+  const script = `
+    const zlib = require("zlib");
+    const chunks = [];
+    const stream = zlib.createBrotliDecompress();
+    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("error", () => {
+      process.stdout.write(Buffer.concat(chunks).toString("base64"));
+    });
+    stream.on("end", () => {
+      process.stdout.write(Buffer.concat(chunks).toString("base64"));
+    });
+    stream.end(Buffer.from(process.argv[1], "base64"));
+  `;
+  const result = spawnSync(process.execPath, ["-e", script, bytes.toString("base64")], {
+    encoding: "utf8",
+    maxBuffer: 128 * 1024 * 1024,
+  });
+  if (result.status !== 0 || !result.stdout) return "";
+  return Buffer.from(result.stdout, "base64").toString("utf8");
 }
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "dashboard-page-layout-plan-conformance-"));

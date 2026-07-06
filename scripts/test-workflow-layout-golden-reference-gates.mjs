@@ -99,6 +99,16 @@ try {
   }), "WORKFLOW_LAYOUT_ROUTE_Y_CROSSES_INTERMEDIATE_ROW");
   cases.push({ case: "fail: multi-row long return route cannot cross intermediate row bounds", status: "pass" });
 
+  expectCode("long vertical route cannot cross an intermediate node column", mutateReadable("vertical-route-crosses-intermediate-column.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    review.position = { x: 420, y: 160 };
+    const middle = node("middle-column-review", "MultiAssignmentTask", "Middle Column Review", 980, 320);
+    const clarification = node("request-clarification", "MultiAssignmentTask", "Request clarification", 1420, 480);
+    def.childshapes.push(middle, clarification);
+    def.childshapes.push(flow("flow-vertical-segment-crosses-middle-column", review, clarification, "Completed", [{ x: 1075, y: 220 }, { x: 1075, y: 520 }]));
+  }), "WORKFLOW_LAYOUT_ROUTE_X_CROSSES_INTERMEDIATE_COLUMN");
+  cases.push({ case: "fail: long vertical route cannot cross intermediate node column bounds", status: "pass" });
+
   expectCode("end reject collecting too many sources fails", mutateReadable("end-reject-too-many.json", (def) => {
     const reject = def.childshapes.find((shape) => shape.id === "reject");
     for (let index = 0; index < 3; index += 1) {

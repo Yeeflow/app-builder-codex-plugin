@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.9.22
+
+- Release standalone export, Job Position assignee, and Workflow Designer vertical-route hardening.
+- Standalone `.ydl` and `.ydp` export generation now shares the same Data List and Dashboard builders, golden reference templates, field/control mapping, filter/action naming, validator gates, and source/dist mirror rules used by full `.yapk` materialization.
+- Workflow Assignment Task Job position routing now requires OAuth refresh attempts, read-only lookup proof, duplicate-name scans, and single-create proof before using an existing or newly created Job Position ID; placeholder assignees remain allowed only as exhausted fallback.
+- Workflow Designer connector layout now applies net-gap midpoint routing to vertical connector segments as well as horizontal return segments.
+- Add `WORKFLOW_LAYOUT_ROUTE_X_CROSSES_INTERMEDIATE_COLUMN` validation so vertical connector lanes fail when they pass through intermediate workflow column node bounds.
+- Add source/dist regression coverage for standalone export shared generation, Job Position assignee guardrails, and vertical workflow routeX lane safety.
+
 ## 0.9.21
 
 - Release multi-row workflow return-route hardening.

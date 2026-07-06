@@ -167,6 +167,8 @@ Submission form rules:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Start | <Node type> | <Purpose> | <Actor> | <Config> | <Branches> | <Conditions> | <Data> | <Notes> |
 
+When an Assignment Task uses a direct Job Position assignee, add or include Job Position proof columns before generation: `Required Job Position`, `Job Position ID`, `Job Position Source`, `Job Position Proof Status`, `Job Position OAuth Status`, `OAuth Refresh Status`, `Job Position Lookup Status`, `Job Position Lookup Attempted`, `Job Position Create Attempt Count`, `Job Position Create Response ID Recorded`, `Job Position Duplicate Scan`, `Job Position Creation Confirmed`, and `Job Position Admin Confirmed`. API-assisted Job Position routing is not generation-ready if OAuth refresh/lookup proof is missing.
+
 Workflow rules:
 
 - Node types must come from the active plugin workflow-node knowledge base.

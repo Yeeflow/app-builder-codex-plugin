@@ -116,6 +116,8 @@ const ASSIGNMENT_LOCAL_ID_RE = /^(?:local|temp|tmp|mock|placeholder|fallback|gen
 const JOB_POSITION_METHODS = new Set(["position", "positionorg", "positionorgexpr", "positionloc", "positionlocexpr"]);
 const JOB_POSITION_PROOF_SOURCES = new Set(["discovered-existing-job-position", "user-selected-existing-job-position", "admin-created-job-position", "explicitly-confirmed-existing-job-position"]);
 const JOB_POSITION_PROOF_STATUSES = new Set(["discovered", "confirmed", "created-after-confirmation", "user-selected"]);
+const JOB_POSITION_OAUTH_AVAILABLE_STATUSES = new Set(["authenticated", "refreshed-authenticated", "valid", "available", "oauth-available"]);
+const JOB_POSITION_LOOKUP_PROVEN_STATUSES = new Set(["queried", "found", "not-found", "not-found-before-create", "matched-existing", "created-readback-confirmed"]);
 const MANAGER_ASSIGNMENT_TYPES = new Set(["line-manager", "department-manager", "location-manager"]);
 const CUSTOM_FORM_DISPLAY_USAGES = ["add", "edit", "view"];
 const PIVOT_TABLE_SOURCE_TYPES = new Map([[1, "Data list"], [16, "Document library"], [32, "Form report"], [64, "Data report"]]);
@@ -442,6 +444,15 @@ function validateJobPositionProof(assignment, report, context) {
   const creationRequired = assignment.creationRequired === true || /create|missing|unresolved/i.test(source) || /unresolved|blocked/i.test(proofStatus);
   const creationConfirmed = assignment.creationConfirmed === true || assignment.adminCreationConfirmed === true;
   const adminConfirmed = assignment.systemAdminConfirmed === true || assignment.adminPermissionConfirmed === true;
+  const apiAssisted = source === "discovered-existing-job-position" || source === "admin-created-job-position";
+  const oauthStatus = safeString(assignment.oauthStatus || assignment.oauthProofStatus || assignment.oauthReadinessStatus);
+  const oauthRefreshAttempted = assignment.oauthRefreshAttempted === true || assignment.oauthRefreshed === true || assignment.oauthRefreshStatus === "attempted" || assignment.oauthRefreshStatus === "success";
+  const oauthRefreshStatus = safeString(assignment.oauthRefreshStatus);
+  const lookupStatus = safeString(assignment.jobPositionLookupStatus || assignment.positionLookupStatus || assignment.apiLookupStatus);
+  const lookupAttempted = assignment.jobPositionLookupAttempted === true || assignment.positionLookupAttempted === true || assignment.apiLookupAttempted === true || JOB_POSITION_LOOKUP_PROVEN_STATUSES.has(lookupStatus);
+  const createAttemptCount = Number(assignment.jobPositionCreateAttemptCount || assignment.positionCreateAttemptCount || assignment.createAttemptCount || 0);
+  const createResponseIdRecorded = assignment.createResponseIdRecorded === true || assignment.positionCreateResponseIdRecorded === true || assignment.jobPositionCreateResponseIdRecorded === true;
+  const duplicateScanRecorded = assignment.duplicateNameScanRecorded === true || assignment.duplicateJobPositionScanRecorded === true;
 
   if (!requiredName || hasAssignmentPlaceholder(requiredName)) {
     issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_NAME_UNCONFIRMED", "Job-position assignment must include a safe required job position name from discovery or explicit user selection; placeholders are not allowed.", context);
@@ -454,6 +465,28 @@ function validateJobPositionProof(assignment, report, context) {
   }
   if (creationRequired && (!creationConfirmed || !adminConfirmed)) {
     issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_MISSING_BLOCKED", "Missing job positions block generation unless a system admin explicitly confirms creation/update and the resulting job position is used.", { ...context, source: source || null, proofStatus: proofStatus || null });
+  }
+  if (apiAssisted) {
+    if (!JOB_POSITION_OAUTH_AVAILABLE_STATUSES.has(oauthStatus)) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_OAUTH_PROOF_MISSING", "API-assisted Job Position assignment must record authenticated OAuth proof before using discovered or created Job Position IDs.", { ...context, source, oauthStatus: oauthStatus || null });
+    }
+    if (/expired/i.test(oauthStatus) && !oauthRefreshAttempted) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_OAUTH_REFRESH_REQUIRED", "Expired OAuth must be refreshed before declaring Job Position lookup unavailable or falling back to placeholders.", { ...context, source, oauthStatus, oauthRefreshStatus: oauthRefreshStatus || null });
+    }
+    if (!lookupAttempted) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_LOOKUP_NOT_PROVEN", "Job Position assignment must prove a read-only positions lookup was attempted before using API-assisted discovered/admin-created proof.", { ...context, source, lookupStatus: lookupStatus || null });
+    }
+  }
+  if (source === "admin-created-job-position") {
+    if (createAttemptCount > 1) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_CREATE_RETRY_UNSAFE", "Job Position creation must not be retried after an accepted create response only because list read-back is eventually consistent.", { ...context, createAttemptCount });
+    }
+    if (!createResponseIdRecorded) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_CREATE_RESPONSE_ID_MISSING", "Admin-created Job Position proof must record the numeric ID returned by POST /positions instead of relying only on immediate list read-back.", { ...context });
+    }
+    if (!duplicateScanRecorded) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_DUPLICATE_SCAN_MISSING", "Admin-created Job Position proof must include a duplicate-name scan before assigning users or using the position in workflow routing.", { ...context });
+    }
   }
 }
 

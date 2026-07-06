@@ -51,9 +51,11 @@ It does not prove business behavior, assignment correctness, workflow execution,
 22. Direct same-row connectors must rely on rounded auto-routing. In particular, `StartNoneEvent -> first task` connectors labeled `Submitted` / `Submit` must have empty or absent `vertices[]`.
 23. When a connector needs a horizontal segment between two adjacent rows, route that segment at the midpoint of the net row gap: `routeY = (upperRowY + workflowNodeHeight + lowerRowY) / 2`.
 24. When a long return/backward connector crosses more than two workflow rows, do not calculate `routeY` from only the source and target rows. Choose an adjacent open row-gap midpoint along the route and ensure the horizontal segment does not pass through any intermediate row's node bounds.
-25. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap midpoint is unsafe, crowded, or too narrow.
-26. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
-27. `graphposition` should cover the full node area plus padding.
+25. When an explicit connector route includes a vertical segment between workflow columns, route that segment through the midpoint of the net column gap: `routeX = (leftColumnX + workflowNodeWidth + rightColumnX) / 2`.
+26. Long connector vertical segments must not pass through intermediate workflow node bounds. If the column gap is too narrow or occupied, increase column spacing, choose an adjacent column-gap midpoint, or use a justified external lane.
+27. Use an external return lane only for long backward/return/cross-row reroutes where the row-gap/column-gap midpoint is unsafe, crowded, or too narrow.
+28. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
+29. `graphposition` should cover the full node area plus padding.
 
 ## Standard Spacing
 
@@ -79,6 +81,8 @@ The `workflow_actions_layout` reference establishes the following default spacin
 | `ROW_GAP_MIDPOINT_ROUTE_MIN` | `60` | fixed | Preferred minimum net gap for midpoint connector routing. |
 | `ROW_GAP_LABELED_MIN` | `40` | fixed | Below this net gap, do not route labeled long connectors through the row gap. |
 | `ROW_GAP_ROUTE_Y_TOLERANCE` | `12` | fixed | Allowed pixel tolerance when validating routeY against the row-gap midpoint. |
+| `COLUMN_GAP_MIDPOINT_ROUTE_MIN` | `48` | fixed | Preferred minimum net gap for vertical connector routing between columns. |
+| `COLUMN_GAP_ROUTE_X_TOLERANCE` | `12` | fixed | Allowed pixel tolerance when validating routeX against the column-gap midpoint. |
 | `EXTERNAL_RETURN_LANE_PADDING` | `80-120` | fixed | Padding outside workflow node bounds for true external return lanes. |
 | `CANVAS_RATIO` | `16:9` | advisory | Preferred visible Designer canvas usage. |
 
@@ -205,6 +209,8 @@ Use an external return lane below or above the graph only when the row gap is to
 
 For long return/backward lines that cross multiple workflow rows, first cluster all rows between source and target. The horizontal segment must use an open adjacent row gap, not the midpoint between the source row and target row when an intermediate row exists. For example, if rows occupy `160..246`, `320..406`, and `480..566`, a return from the third row to the first row should use the first open gap midpoint `283`, not `(160 + 86 + 480) / 2 = 363`, because `363` passes through the middle row.
 
+For long cross-row connectors that also need a vertical segment, first cluster workflow columns along the route. The vertical segment must use an open adjacent column gap, not a task center or a node edge when that x-coordinate overlaps another node. For example, if one column occupies `1260..1450` and the next occupies `1565..1755`, the vertical lane should use `1508`, the midpoint of the net column gap. A vertical segment at an x-coordinate inside any intermediate node's `left..right` bounds is invalid even when the horizontal `routeY` is correct.
+
 ## Generator Guidance
 
 When materializing App Plan workflow nodes:
@@ -218,6 +224,7 @@ When materializing App Plan workflow nodes:
 - Keep End on the right of the last main/action step.
 - Route return/rework transitions down or up and across with two or more vertices.
 - Use vertices for cross-lane approved/complete transitions only when standard spacing would make a diagonal line overlap other lines or cross nodes.
+- When generating vertices for a long connector, choose both a safe horizontal `routeY` from row-gap midpoint rules and a safe vertical `routeX` from column-gap midpoint rules. Do not leave the vertical segment on a task/gateway center line when that would run through another node's bounds.
 
 ## Hard Gate
 

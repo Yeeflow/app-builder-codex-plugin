@@ -76,6 +76,8 @@
       "Direct same-row adjacent task connectors must not include cosmetic vertices when there is no obstacle.",
       "When a connector uses a horizontal route segment between two workflow rows, its route y must be the midpoint of the net row gap: (upperRowY + workflowNodeHeight + lowerRowY) / 2.",
       "When a long return/backward connector crosses more than two workflow rows, its horizontal route segment must choose an adjacent open row-gap midpoint and must not run through any intermediate workflow row node bounds.",
+      "When a connector uses a vertical route segment between two workflow columns, its route x must be the midpoint of the net column gap: (leftColumnX + workflowNodeWidth + rightColumnX) / 2.",
+      "Long connector vertical segments must not run through any intermediate workflow column node bounds. If the target vertical lane would overlap a node, choose an adjacent column-gap midpoint, widen columns, or use a justified external lane.",
       "Use an external return lane only for long backward/return/cross-lane reroutes where midpoint routing is unsafe or crowded.",
       "SequenceFlow source and target references must resolve to existing workflow node ids.",
       "Generated graphposition should cover the visual node bounds plus padding."
@@ -119,6 +121,8 @@
       "minimumRowGapForMidpointRoute": 60,
       "minimumRowGapForLabeledMidpointRoute": 40,
       "rowGapRouteYTolerance": 12,
+      "minimumColumnGapForMidpointRoute": 48,
+      "columnGapRouteXTolerance": 12,
       "externalReturnLanePaddingMin": 80
     },
     "lineStyle": {

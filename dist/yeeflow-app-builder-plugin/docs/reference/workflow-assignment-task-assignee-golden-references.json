@@ -49,8 +49,9 @@
         "General manager approval"
       ],
       "description": "Assign the task to a resolved Yeeflow Job Position.",
-      "generationPolicy": "Use only a discovered existing, user-selected existing, or admin-created-after-confirmation Job Position ID. Do not reuse sample export IDs and do not invent IDs.",
-      "unresolvedPolicy": "If no suitable Job Position can be proven or created with explicit admin confirmation, leave the position unresolved and let generated-final preflight block signing.",
+      "generationPolicy": "Use only a discovered existing, user-selected existing, or admin-created-after-confirmation Job Position ID. Expired OAuth must be refreshed and read-only positions lookup must be attempted before fallback. Do not reuse sample export IDs and do not invent IDs.",
+      "creationPolicy": "Admin-created positions require confirmed admin permission, explicit user approval, one accepted POST /positions response with numeric ID recorded, bounded read-back polling without retrying create, duplicate-name scan, and optional current-user assignment via POST /positions/{id}/users using UserIDs.",
+      "unresolvedPolicy": "If no suitable Job Position can be proven or created with explicit admin confirmation after OAuth recovery and API lookup, leave the position unresolved and let generated-final preflight block signing.",
       "usertaskassignment": [
         {
           "type": "position",
@@ -60,7 +61,16 @@
           "requiredProofFields": [
             "requiredJobPositionName",
             "source",
-            "proofStatus"
+            "proofStatus",
+            "oauthStatus",
+            "jobPositionLookupStatus"
+          ],
+          "adminCreatedRequiredProofFields": [
+            "creationConfirmed",
+            "systemAdminConfirmed",
+            "jobPositionCreateAttemptCount",
+            "jobPositionCreateResponseIdRecorded",
+            "duplicateNameScanRecorded"
           ]
         }
       ]

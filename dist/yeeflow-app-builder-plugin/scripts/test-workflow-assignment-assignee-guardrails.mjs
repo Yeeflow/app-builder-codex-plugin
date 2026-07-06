@@ -111,6 +111,38 @@ function jobPosition(overrides = {}) {
     source: "discovered-existing-job-position",
     proofStatus: "discovered",
     requiredJobPositionName: "Finance Manager",
+    oauthStatus: "refreshed-authenticated",
+    oauthRefreshStatus: "success",
+    oauthRefreshAttempted: true,
+    jobPositionLookupStatus: "found",
+    jobPositionLookupAttempted: true,
+    ...overrides,
+  };
+}
+
+function adminCreatedJobPosition(overrides = {}) {
+  return jobPosition({
+    source: "admin-created-job-position",
+    proofStatus: "created-after-confirmation",
+    creationRequired: true,
+    creationConfirmed: true,
+    systemAdminConfirmed: true,
+    jobPositionCreateAttemptCount: 1,
+    jobPositionCreateResponseIdRecorded: true,
+    duplicateNameScanRecorded: true,
+    ...overrides,
+  });
+}
+
+function userSelectedJobPosition(overrides = {}) {
+  return {
+    type: "position",
+    method: "position",
+    position: "1000000000000000777",
+    title: "Job position: User Selected",
+    source: "user-selected-existing-job-position",
+    proofStatus: "user-selected",
+    requiredJobPositionName: "User Selected Position",
     ...overrides,
   };
 }
@@ -225,6 +257,8 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "workflow-assignee-guardrails-
 
 try {
   expectPass("job-position-discovered", jobPosition());
+  expectPass("job-position-admin-created", adminCreatedJobPosition());
+  expectPass("job-position-user-selected", userSelectedJobPosition());
   expectPass("line-manager", applicantLineManager());
   expectPass("department-manager", applicantDepartmentManager());
   expectPass("location-manager", managerExpression("Applicant:Location:Manager", "{{Applicant.Location.Manager}}"));
@@ -239,10 +273,16 @@ try {
   expectCode("missing-job-position-proof", jobPosition({ source: undefined, proofStatus: undefined }), "TASK_JOB_POSITION_PROOF_MISSING");
   expectCode("missing-job-position-blocked", jobPosition({ source: "unresolved", proofStatus: "blocked", creationRequired: true }), "TASK_JOB_POSITION_MISSING_BLOCKED");
   expectCode("write-not-confirmed", jobPosition({ source: "admin-created-job-position", proofStatus: "created-after-confirmation", creationRequired: true, creationConfirmed: true, systemAdminConfirmed: false }), "TASK_JOB_POSITION_WRITE_NOT_CONFIRMED");
+  expectCode("oauth-expired-not-refreshed", jobPosition({ oauthStatus: "expired", oauthRefreshStatus: "", oauthRefreshAttempted: false }), "TASK_JOB_POSITION_OAUTH_REFRESH_REQUIRED");
+  expectCode("oauth-proof-missing", jobPosition({ oauthStatus: "", oauthRefreshStatus: "", oauthRefreshAttempted: false }), "TASK_JOB_POSITION_OAUTH_PROOF_MISSING");
+  expectCode("lookup-not-proven", jobPosition({ jobPositionLookupStatus: "", jobPositionLookupAttempted: false }), "TASK_JOB_POSITION_LOOKUP_NOT_PROVEN");
+  expectCode("admin-create-retry-unsafe", adminCreatedJobPosition({ jobPositionCreateAttemptCount: 2 }), "TASK_JOB_POSITION_CREATE_RETRY_UNSAFE");
+  expectCode("admin-create-response-id-missing", adminCreatedJobPosition({ jobPositionCreateResponseIdRecorded: false }), "TASK_JOB_POSITION_CREATE_RESPONSE_ID_MISSING");
+  expectCode("admin-create-duplicate-scan-missing", adminCreatedJobPosition({ duplicateNameScanRecorded: false }), "TASK_JOB_POSITION_DUPLICATE_SCAN_MISSING");
   expectCode("hardcoded-user-without-request", directUser({ explicitlyRequested: false, userAssignmentExplicitlyRequested: false }), "TASK_DIRECT_USER_REQUIRES_EXPLICIT_REQUEST");
   expectCode("malformed-manager-expression", managerExpression("Reviewer expression", "not an expression"), "TASK_MANAGER_EXPRESSION_MALFORMED");
 
-  console.log(JSON.stringify({ status: "pass", cases: 16 }, null, 2));
+  console.log(JSON.stringify({ status: "pass", cases: 25 }, null, 2));
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });
 }
