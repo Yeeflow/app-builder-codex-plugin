@@ -25,7 +25,8 @@ The source files were inspected read-only. Raw exports are not bundled into the 
 - Business-field branch fan-out, such as amount thresholds, must use an `InclusiveGateway` before branching.
 - Branch targets from the same Inclusive Gateway should align on one vertical column when they represent sibling choices.
 - A shared `EndRejectEvent` should collect no more than three adjacent Approval Assignment Task rejection paths.
-- A single `EndRejectEvent` should sit vertically above or below the source task, or centered above/below a two- or three-task source group.
+- A single `EndRejectEvent` should sit vertically above or below the source task, or centered above/below a two- or three-task source group by node center points.
+- For first-row Approval Assignment Tasks, the shared `EndRejectEvent` must be placed above the source row. For lower-row Approval Assignment Tasks, the shared `EndRejectEvent` must be placed below the source row.
 - A shared `EndRejectEvent` may only collect rejected paths from Approval Assignment Tasks on the same horizontal lane. Approval Assignment Tasks on different y lanes require separate rejection endpoints.
 - Workflow diagrams should use the Workflow Designer's roughly 16:9 visible canvas. Complex workflows should use additional rows/layers instead of placing every node on one long horizontal line, and generated workflows should not exceed five vertical rows.
 - Standard forward rejected/cross-lane lines do not require explicit `vertices[]` when the spacing already prevents overlap. Backward/return lines still require vertices.
@@ -71,6 +72,8 @@ The plugin validator now checks the semantic layout contract, not just visual co
 - Added the workflow layout gate to `scripts/yapk-first-generation-preflight.mjs`.
 - Updated full-app materialization so generated approval workflow graphs use spaced lanes and vertex-routed rejected/cross-lane SequenceFlow paths.
 - Updated full-app materialization so generated approval workflow `EndRejectEvent` nodes are placed vertically above the approval source task group instead of being pushed to the far right.
+- Updated full-app materialization and validation so shared `EndRejectEvent` placement is calculated from source task center points. Three-source groups now center on the source span center rather than a fixed coordinate or top-left x value.
+- Updated the workflow layout gate so first-row approval tasks require reject endpoints above the row, while lower-row approval tasks require reject endpoints below the row.
 - Updated the workflow layout gate so standard-spaced rejected/cross-lane lines are allowed without vertices, while explicit return/backward lines still require vertices.
 - Updated the workflow layout gate so shared `EndRejectEvent` nodes can only collect rejected paths from Approval Assignment Tasks on the same horizontal lane.
 - Updated the workflow layout gate so generated diagrams fail when they exceed five vertical rows or when large workflows are collapsed into a single over-wide horizontal row instead of using the 16:9 canvas area.

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.17
+
+- Release shared End with Rejection workflow layout hardening.
+- Generated Approval form, Data list workflow, and Scheduled workflow graphs now center shared `EndRejectEvent` nodes by source Assignment Task center points instead of fixed or top-left coordinates.
+- First-row Approval Assignment Task rejection endpoints must be placed above the source row; lower-row Approval Assignment Task rejection endpoints must be placed below the source row.
+- Add source/dist regression coverage for three-source off-center shared rejection endpoints and first-row rejection endpoints incorrectly placed below the source row.
+- Extend the materializer fixture to generate three Approval Assignment Tasks before a system action, proving generated packages satisfy the new center and row-direction gates.
+
 ## 0.9.16
 
 - Release Approval YWF form structure and Workflow Designer v2 line-style hardening.

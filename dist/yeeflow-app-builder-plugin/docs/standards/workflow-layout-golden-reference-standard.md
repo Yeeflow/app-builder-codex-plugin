@@ -38,15 +38,16 @@ It does not prove business behavior, assignment correctness, workflow execution,
 9. Rejected/cancel/exception paths must use a separate lane from the main path.
 10. A shared `EndRejectEvent` must not collect more than three adjacent Approval Assignment Task rejected flows. Split into additional `EndRejectEvent` nodes after three sources.
 11. A shared `EndRejectEvent` may only collect rejected flows from Approval Assignment Tasks on the same horizontal lane. Assignment Tasks on different y lanes must use separate `EndRejectEvent` nodes.
-12. `EndRejectEvent` placement must follow the source group: one source aligns vertically with the task; two or three sources align near the horizontal center of the source tasks and sit above or below the group.
-13. Workflow diagrams should use the visible Designer canvas as a roughly `16:9` work area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line.
-14. Generated workflows should not exceed five vertical rows/layers.
-15. Generated SequenceFlow line style should be `rounded` by default for complex graphs.
-16. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
-17. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
-18. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
-19. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
-20. `graphposition` should cover the full node area plus padding.
+12. `EndRejectEvent` placement must follow the source group by node centers, not top-left coordinates: one source aligns with the task center; two or three sources align near the horizontal center of the source task centers.
+13. If the source Approval Assignment Tasks are on the first workflow row, their shared `EndRejectEvent` must sit on the row above them. If the source tasks are not on the first workflow row, their shared `EndRejectEvent` must sit on the row below them.
+14. Workflow diagrams should use the visible Designer canvas as a roughly `16:9` work area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line.
+15. Generated workflows should not exceed five vertical rows/layers.
+16. Generated SequenceFlow line style should be `rounded` by default for complex graphs.
+17. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
+18. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
+19. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
+20. SequenceFlow `source` and `target` references must resolve to existing workflow node ids.
+21. `graphposition` should cover the full node area plus padding.
 
 ## Standard Spacing
 
@@ -104,6 +105,9 @@ For Approval Task rejected outcomes:
 - one task to one `EndRejectEvent`: align `EndRejectEvent.x` with the task and place it vertically above or below the task
 - two tasks to one `EndRejectEvent`: place it near the horizontal midpoint of the two tasks
 - three tasks to one `EndRejectEvent`: place it near the center of the three tasks, usually near the middle task x
+- calculate the alignment using node center points, not the top-left `position.x`
+- when source Approval Assignment Tasks are on the first workflow row, place the shared `EndRejectEvent` above that row
+- when source Approval Assignment Tasks are on a lower workflow row, place the shared `EndRejectEvent` below that row
 - shared rejection endpoints are valid only when the source Approval Assignment Tasks are on the same horizontal lane
 - source tasks on different vertical lanes must use separate `EndRejectEvent` nodes, even when there are three or fewer rejected sources
 - more than three rejected sources: create another `EndRejectEvent`

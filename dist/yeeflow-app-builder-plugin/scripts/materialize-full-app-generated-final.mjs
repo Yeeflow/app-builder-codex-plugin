@@ -6181,6 +6181,9 @@ function workflowLayoutForSteps(workflowSteps) {
   const mainLaneY = 220;
   const actionLaneY = 375;
   const rejectUpGap = 125;
+  const rejectDownGap = 135;
+  const workflowNodeWidth = 190;
+  const workflowRowToleranceY = 60;
   const startX = 100;
   const firstStepX = 420;
   const columnGap = 335;
@@ -6193,14 +6196,26 @@ function workflowLayoutForSteps(workflowSteps) {
     const nodeType = workflowSteps[index]?.nodeType || "";
     return nodeType !== "ContentList" && nodeType !== "StartNoneEvent" && nodeType !== "EndNoneEvent" && nodeType !== "EndRejectEvent" && nodeType !== "SequenceFlow";
   });
-  const rejectCenterX = approvalStepPositions.length
-    ? (Math.min(...approvalStepPositions.map((position) => position.x)) + Math.max(...approvalStepPositions.map((position) => position.x))) / 2
-    : firstStepX;
+  const approvalStepCenters = approvalStepPositions.map((position) => ({
+    x: position.x + workflowNodeWidth / 2,
+    y: position.y,
+  }));
+  const rejectGroupCenterX = approvalStepCenters.length
+    ? (Math.min(...approvalStepCenters.map((position) => position.x)) + Math.max(...approvalStepCenters.map((position) => position.x))) / 2
+    : firstStepX + workflowNodeWidth / 2;
+  const firstApprovalRowY = approvalStepPositions.length ? Math.min(...approvalStepPositions.map((position) => position.y)) : mainLaneY;
+  const rejectSourceRowY = approvalStepPositions.length
+    ? approvalStepPositions.reduce((sum, position) => sum + position.y, 0) / approvalStepPositions.length
+    : mainLaneY;
+  const rejectGoesAbove = Math.abs(rejectSourceRowY - firstApprovalRowY) <= workflowRowToleranceY;
   return {
     start: { x: startX, y: mainLaneY },
     stepPositions,
     end: { x: endX, y: mainLaneY },
-    rejectEnd: { x: rejectCenterX, y: mainLaneY - rejectUpGap },
+    rejectEnd: {
+      x: rejectGroupCenterX - workflowNodeWidth / 2,
+      y: rejectGoesAbove ? rejectSourceRowY - rejectUpGap : rejectSourceRowY + rejectDownGap,
+    },
   };
 }
 

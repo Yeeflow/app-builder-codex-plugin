@@ -64,6 +64,8 @@
       "Rejected, cancel, and exception paths must use a separate lane from the main approval path.",
       "A shared EndRejectEvent should collect at most three adjacent Approval Assignment Task Rejected flows.",
       "A shared EndRejectEvent may only collect Rejected flows from Approval Assignment Tasks on the same horizontal lane. Assignment Tasks on different y lanes must use separate EndRejectEvent nodes.",
+      "A shared EndRejectEvent must be centered by node center points, not top-left coordinates. When three Assignment Tasks share one EndRejectEvent, the EndRejectEvent center x must match the center of the three-task span, normally the middle task center.",
+      "If the source Approval Assignment Tasks are on the first workflow row, their shared EndRejectEvent must be placed on the row above them. If the source tasks are on a lower row, the shared EndRejectEvent must be placed on the row below them.",
       "Workflow diagrams should use the roughly 16:9 Designer canvas area. Large workflows should add vertical rows instead of putting all nodes on one long horizontal line, and generated workflows should not exceed five vertical rows.",
       "Backward or return SequenceFlow edges must use rounded routing and explicit vertices. Standard-spaced forward rejected or cross-lane edges do not require vertices unless they overlap or cross another node.",
       "SequenceFlow source and target references must resolve to existing workflow node ids.",
@@ -126,9 +128,11 @@
     },
     "endRejectRules": {
       "maximumRejectedSourcesPerEnd": 3,
-      "oneSourcePlacement": "align x with source task and place above or below by at least rejectUpGap/rejectDownGap",
-      "twoOrThreeSourcePlacement": "align x near the source task group center and place above or below the group by at least endRejectVerticalSeparationMin",
+      "oneSourcePlacement": "align EndRejectEvent center x with the source task center x",
+      "twoOrThreeSourcePlacement": "align EndRejectEvent center x near the source task group center by node center points; for three sources this is normally the middle task center",
       "sharedEndRejectLaneRule": "all approval-task rejected sources connected to the same EndRejectEvent must be on the same horizontal lane within endRejectSharedLaneToleranceY",
+      "firstRowPlacement": "place shared EndRejectEvent above first-row Approval Assignment Tasks",
+      "lowerRowPlacement": "place shared EndRejectEvent below Approval Assignment Tasks that are not on the first workflow row",
       "splitWhenMoreThanThreeSources": true
     },
     "canvasRules": {
