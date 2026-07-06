@@ -87,6 +87,28 @@ try {
   }), "WORKFLOW_LAYOUT_END_REJECT_SOURCE_LANES_MISMATCH");
   cases.push({ case: "fail: end reject shared by approval tasks on different horizontal lanes", status: "pass" });
 
+  expectCode("first-row end reject placed below source row fails", mutateReadable("end-reject-first-row-below.json", (def) => {
+    const reject = def.childshapes.find((shape) => shape.id === "reject");
+    reject.position = { x: 420, y: 520 };
+  }), "WORKFLOW_LAYOUT_END_REJECT_ROW_DIRECTION_MISMATCH");
+  cases.push({ case: "fail: first-row approval reject endpoint must be above source row", status: "pass" });
+
+  expectCode("three-source shared end reject not centered fails", mutateReadable("end-reject-three-source-off-center.json", (def) => {
+    const reject = def.childshapes.find((shape) => shape.id === "reject");
+    const end = def.childshapes.find((shape) => shape.id === "end");
+    end.position = { x: 1500, y: 220 };
+    const extraA = node("extra-review-a", "MultiAssignmentTask", "Extra Review A", 720, 220);
+    const extraB = node("extra-review-b", "MultiAssignmentTask", "Extra Review B", 1020, 220);
+    reject.position = { x: 900, y: 80 };
+    def.childshapes.push(extraA);
+    def.childshapes.push(extraB);
+    def.childshapes.push(flow("flow-extra-a-rejected", extraA, reject, "Rejected", [{ x: 860, y: 220 }, { x: 860, y: 80 }]));
+    def.childshapes.push(flow("flow-extra-a-approved", extraA, end, "Approved", [{ x: 900, y: 220 }, { x: 900, y: 300 }, { x: 1500, y: 300 }]));
+    def.childshapes.push(flow("flow-extra-b-rejected", extraB, reject, "Rejected", [{ x: 1160, y: 220 }, { x: 1160, y: 80 }]));
+    def.childshapes.push(flow("flow-extra-b-approved", extraB, end, "Approved", [{ x: 1200, y: 220 }, { x: 1200, y: 300 }, { x: 1500, y: 300 }]));
+  }), "WORKFLOW_LAYOUT_END_REJECT_POSITION_MISMATCH");
+  cases.push({ case: "fail: shared end reject must be centered on three source task centers", status: "pass" });
+
   expectCode("workflow using more than five vertical rows fails", mutateReadable("too-many-rows.json", (def) => {
     for (let index = 0; index < 4; index += 1) {
       def.childshapes.push(node(`extra-row-${index}`, "ContentList", `Extra Row ${index + 1}`, 100 + index * 320, 700 + index * 120));
@@ -165,7 +187,7 @@ function readableWorkflow() {
     review: node("review", "MultiAssignmentTask", "Review", 420, 220),
     create: node("create", "ContentList", "Create record", 720, 360),
     end: node("end", "EndNoneEvent", "End", 1020, 220),
-    reject: node("reject", "EndRejectEvent", "Rejected", 420, 520),
+    reject: node("reject", "EndRejectEvent", "Rejected", 420, 80),
   };
   return {
     lineType: "rounded",
@@ -176,7 +198,7 @@ function readableWorkflow() {
       nodes.start,
       flow("flow-submit", nodes.start, nodes.review, "Submit"),
       flow("flow-approved", nodes.review, nodes.create, "Approved", [{ x: 560, y: 220 }, { x: 560, y: 360 }]),
-      flow("flow-rejected", nodes.review, nodes.reject, "Rejected", [{ x: 720, y: 220 }, { x: 720, y: 520 }, { x: 900, y: 520 }]),
+      flow("flow-rejected", nodes.review, nodes.reject, "Rejected", [{ x: 720, y: 220 }, { x: 720, y: 80 }, { x: 540, y: 80 }]),
       flow("flow-complete", nodes.create, nodes.end, "Complete", [{ x: 870, y: 360 }, { x: 870, y: 220 }]),
       nodes.review,
       nodes.create,
@@ -292,7 +314,8 @@ function approvalPlanMarkdown() {
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     "| 1 | Department Manager Review | MultiAssignmentTask | Manager review. | Department Manager | Role based | Approved; Rejected | Always | Read request | Generated-final validation |",
     "| 2 | Procurement Review | MultiAssignmentTask | Procurement review. | Procurement | Role based | Approved; Rejected | Always | Read request | Generated-final validation |",
-    "| 3 | Create Vendor Master | ContentList | Create approved vendor record. | System | System action | Complete | Approved path only | Vendor Master create | Generated-final validation |",
+    "| 3 | Finance Review | MultiAssignmentTask | Finance approval. | Finance Manager | Job position | Approved; Rejected | Always | Read request | Generated-final validation |",
+    "| 4 | Create Vendor Master | ContentList | Create approved vendor record. | System | System action | Complete | Approved path only | Vendor Master create | Generated-final validation |",
   ].join("\n");
 }
 

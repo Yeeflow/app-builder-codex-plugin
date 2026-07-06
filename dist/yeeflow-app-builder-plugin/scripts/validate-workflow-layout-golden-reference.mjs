@@ -450,6 +450,9 @@ function validateWorkflowSemantics(resource, nodes, flows, spacing, findings) {
     }
   }
 
+  const assignmentRows = clusterRows(nodes.filter((node) => node.position && isAssignmentTask(node) && !isCompleteAssignmentTask(node)), Number(spacing.workflowRowToleranceY));
+  const firstAssignmentRowY = assignmentRows.length ? Math.min(...assignmentRows.map((row) => row.y)) : null;
+
   for (const endReject of nodes.filter((node) => stencilId(node.shape) === "EndRejectEvent")) {
     const incomingRejected = (incomingByTarget.get(endReject.id) || [])
       .filter((flow) => isRejectedFlow(flow.shape))
@@ -467,11 +470,13 @@ function validateWorkflowSemantics(resource, nodes, flows, spacing, findings) {
         maximum: maxSources,
       }));
     }
-    const minX = Math.min(...incomingRejected.map((sourceNode) => sourceNode.position.x));
-    const maxX = Math.max(...incomingRejected.map((sourceNode) => sourceNode.position.x));
+    const sourceCenters = incomingRejected.map((sourceNode) => nodeCenter(sourceNode));
+    const endRejectCenter = nodeCenter(endReject);
+    const minX = Math.min(...sourceCenters.map((center) => center.x));
+    const maxX = Math.max(...sourceCenters.map((center) => center.x));
     const centerX = (minX + maxX) / 2;
-    const minY = Math.min(...incomingRejected.map((sourceNode) => sourceNode.position.y));
-    const maxY = Math.max(...incomingRejected.map((sourceNode) => sourceNode.position.y));
+    const minY = Math.min(...sourceCenters.map((center) => center.y));
+    const maxY = Math.max(...sourceCenters.map((center) => center.y));
     const sourceYSpan = maxY - minY;
     if (sourceYSpan > Number(spacing.endRejectSharedLaneToleranceY)) {
       findings.push(issue("WORKFLOW_LAYOUT_END_REJECT_SOURCE_LANES_MISMATCH", "A shared End with Rejection node may only collect rejected paths from Approval Assignment Tasks on the same horizontal lane.", {
@@ -479,20 +484,38 @@ function validateWorkflowSemantics(resource, nodes, flows, spacing, findings) {
         workflowName: resource.workflowName,
         path: `$.childshapes[${endReject.index}]`,
         nodeId: endReject.id,
-        incomingRejectedSources: incomingRejected.map((sourceNode) => ({ id: sourceNode.id, y: sourceNode.position.y })),
+        incomingRejectedSources: incomingRejected.map((sourceNode, index) => ({ id: sourceNode.id, centerY: sourceCenters[index].y })),
         tolerance: Number(spacing.endRejectSharedLaneToleranceY),
       }));
     }
-    const above = endReject.position.y < minY;
-    const below = endReject.position.y > maxY;
-    const verticalSeparation = above ? minY - endReject.position.y : below ? endReject.position.y - maxY : 0;
-    if (Math.abs(endReject.position.x - centerX) > Number(spacing.endRejectCenterToleranceX) || verticalSeparation < Number(spacing.endRejectVerticalSeparationMin)) {
+    const above = endRejectCenter.y < minY;
+    const below = endRejectCenter.y > maxY;
+    const verticalSeparation = above ? minY - endRejectCenter.y : below ? endRejectCenter.y - maxY : 0;
+    if (firstAssignmentRowY !== null) {
+      const sourceRowY = sourceCenters.reduce((sum, center) => sum + center.y, 0) / sourceCenters.length;
+      const sourceOnFirstAssignmentRow = Math.abs(sourceRowY - firstAssignmentRowY) <= Number(spacing.workflowRowToleranceY);
+      if ((sourceOnFirstAssignmentRow && !above) || (!sourceOnFirstAssignmentRow && !below)) {
+        findings.push(issue("WORKFLOW_LAYOUT_END_REJECT_ROW_DIRECTION_MISMATCH", "End with Rejection nodes must be placed above first-row approval tasks and below approval tasks on lower rows.", {
+          source: resource.source,
+          workflowName: resource.workflowName,
+          path: `$.childshapes[${endReject.index}].position`,
+          nodeId: endReject.id,
+          sourceRowY,
+          firstAssignmentRowY,
+          expectedPlacement: sourceOnFirstAssignmentRow ? "above" : "below",
+          actualPlacement: above ? "above" : below ? "below" : "same-row",
+          endRejectCenter,
+        }));
+      }
+    }
+    if (Math.abs(endRejectCenter.x - centerX) > Number(spacing.endRejectCenterToleranceX) || verticalSeparation < Number(spacing.endRejectVerticalSeparationMin)) {
       findings.push(issue("WORKFLOW_LAYOUT_END_REJECT_POSITION_MISMATCH", "End with Rejection nodes must be vertically above or below their source approval task group and centered on that group.", {
         source: resource.source,
         workflowName: resource.workflowName,
         path: `$.childshapes[${endReject.index}].position`,
         nodeId: endReject.id,
         sourceGroupCenterX: centerX,
+        endRejectCenterX: endRejectCenter.x,
         endRejectPosition: endReject.position,
         verticalSeparation,
       }));
@@ -670,6 +693,35 @@ function nodePosition(shape) {
     return { x: Number(shape.bounds.upperLeft.x), y: Number(shape.bounds.upperLeft.y) };
   }
   return null;
+}
+
+function nodeSize(node) {
+  const shape = node?.shape || node;
+  const upperLeft = shape?.bounds?.upperLeft;
+  const lowerRight = shape?.bounds?.lowerRight;
+  if (
+    isObject(upperLeft)
+    && isObject(lowerRight)
+    && Number.isFinite(Number(upperLeft.x))
+    && Number.isFinite(Number(lowerRight.x))
+    && Number.isFinite(Number(upperLeft.y))
+    && Number.isFinite(Number(lowerRight.y))
+  ) {
+    return {
+      width: Math.max(1, Number(lowerRight.x) - Number(upperLeft.x)),
+      height: Math.max(1, Number(lowerRight.y) - Number(upperLeft.y)),
+    };
+  }
+  return { width: 190, height: 60 };
+}
+
+function nodeCenter(node) {
+  const position = node?.position || nodePosition(node?.shape || node) || { x: 0, y: 0 };
+  const size = nodeSize(node);
+  return {
+    x: Number(position.x) + size.width / 2,
+    y: Number(position.y) + size.height / 2,
+  };
 }
 
 function isAssignmentTask(node) {
