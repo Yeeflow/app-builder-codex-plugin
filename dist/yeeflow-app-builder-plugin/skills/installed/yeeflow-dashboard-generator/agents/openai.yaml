@@ -1,0 +1,4 @@
+version: 1
+display_name: Yeeflow Dashboard Generator
+short_description: Generate and debug Yeeflow dashboard .yap packages from proven export patterns.
+default_prompt: Use the Yeeflow dashboard generator to study the dashboard export pattern, generate the smallest safe dashboard package, validate it, and prepare runtime import testing evidence.

@@ -100,7 +100,10 @@
     },
     "lineStyle": {
       "default": "rounded",
-      "allowed": ["rounded", "normal"],
+      "allowed": ["rounded"],
+      "requiredGraphver": 2,
+      "requireEmptyDockers": true,
+      "requireDocumentation": true,
       "rejectedPath": "rounded; vertices required only for backward/return, overlap, node crossing, or long reroute",
       "crossLanePath": "rounded; vertices required only when spacing cannot prevent overlap"
     },

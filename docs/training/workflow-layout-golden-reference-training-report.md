@@ -74,6 +74,7 @@ The plugin validator now checks the semantic layout contract, not just visual co
 - Updated the workflow layout gate so standard-spaced rejected/cross-lane lines are allowed without vertices, while explicit return/backward lines still require vertices.
 - Updated the workflow layout gate so shared `EndRejectEvent` nodes can only collect rejected paths from Approval Assignment Tasks on the same horizontal lane.
 - Updated the workflow layout gate so generated diagrams fail when they exceed five vertical rows or when large workflows are collapsed into a single over-wide horizontal row instead of using the 16:9 canvas area.
+- Updated the workflow designer style gate so generated Approval, Data list, and Scheduled workflow graphs use Workflow Designer v2 attributes: root `lineType = "rounded"`, root `graphver = 2`, each `SequenceFlow.properties.linetype = "rounded"`, each `SequenceFlow.properties.documentation` present as a string, and each `SequenceFlow.dockers = []`. `graphzoom` is intentionally excluded as a hard gate.
 - Updated cache artifact expectations and package-validator guidance.
 
 ## Proof Boundary

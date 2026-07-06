@@ -121,12 +121,12 @@ function approvalDef({ invalidPage = false, noTask = false } = {}) {
   const shapes = noTask
     ? [
         { id: startId, resourceid: startId, stencil: { id: "StartNoneEvent" }, properties: { name: "Start", taskurl: invalidPage ? "missing" : REQUEST_PAGE_ID, taskUrl: invalidPage ? "missing" : REQUEST_PAGE_ID, TaskUrl: invalidPage ? "missing" : REQUEST_PAGE_ID }, outgoing: [{ id: approveFlowId, resourceid: approveFlowId }] },
-        { id: approveFlowId, resourceid: approveFlowId, stencil: { id: "SequenceFlow" }, source: { id: startId, resourceid: startId }, target: { id: endId, resourceid: endId } },
+        { id: approveFlowId, resourceid: approveFlowId, stencil: { id: "SequenceFlow" }, source: { id: startId, resourceid: startId }, target: { id: endId, resourceid: endId }, properties: { linetype: "rounded", documentation: "" }, dockers: [] },
         { id: endId, resourceid: endId, stencil: { id: "EndNoneEvent" }, incoming: [{ id: approveFlowId, resourceid: approveFlowId }], properties: { name: "End" } },
       ]
     : [
         { id: startId, resourceid: startId, stencil: { id: "StartNoneEvent" }, properties: { name: "Start", taskurl: REQUEST_PAGE_ID, taskUrl: REQUEST_PAGE_ID, TaskUrl: REQUEST_PAGE_ID }, outgoing: [{ id: "flow-start-task", resourceid: "flow-start-task" }] },
-        { id: "flow-start-task", resourceid: "flow-start-task", stencil: { id: "SequenceFlow" }, source: { id: startId, resourceid: startId }, target: { id: taskId, resourceid: taskId } },
+        { id: "flow-start-task", resourceid: "flow-start-task", stencil: { id: "SequenceFlow" }, source: { id: startId, resourceid: startId }, target: { id: taskId, resourceid: taskId }, properties: { linetype: "rounded", documentation: "" }, dockers: [] },
         {
           id: taskId,
           resourceid: taskId,
@@ -144,8 +144,8 @@ function approvalDef({ invalidPage = false, noTask = false } = {}) {
           incoming: [{ id: "flow-start-task", resourceid: "flow-start-task" }],
           outgoing: [{ id: approveFlowId, resourceid: approveFlowId }, { id: rejectFlowId, resourceid: rejectFlowId }],
         },
-        { id: approveFlowId, resourceid: approveFlowId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: endId, resourceid: endId }, properties: { conditioninfo: [{ label: "Approved" }] } },
-        { id: rejectFlowId, resourceid: rejectFlowId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: rejectEndId, resourceid: rejectEndId }, properties: { conditioninfo: [{ label: "Rejected" }] } },
+        { id: approveFlowId, resourceid: approveFlowId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: endId, resourceid: endId }, properties: { linetype: "rounded", documentation: "", conditioninfo: [{ label: "Approved" }] }, dockers: [] },
+        { id: rejectFlowId, resourceid: rejectFlowId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: rejectEndId, resourceid: rejectEndId }, properties: { linetype: "rounded", documentation: "", conditioninfo: [{ label: "Rejected" }] }, dockers: [] },
         { id: endId, resourceid: endId, stencil: { id: "EndNoneEvent" }, incoming: [{ id: approveFlowId, resourceid: approveFlowId }], properties: { name: "End" } },
         { id: rejectEndId, resourceid: rejectEndId, stencil: { id: "EndRejectEvent" }, incoming: [{ id: rejectFlowId, resourceid: rejectFlowId }], properties: { name: "Rejected" } },
       ];
@@ -160,13 +160,13 @@ function approvalDef({ invalidPage = false, noTask = false } = {}) {
     ProcModelListID: "0",
     ProcModelListSetID: "1000000000000000100",
     ext: {},
-    lineType: "orthogonal",
+    lineType: "rounded",
     iconURL: "",
     flowPage: [],
     variables: { basic: [], listref: [], filter: [] },
     graphposition: { x: 0, y: 0, width: 800, height: 600 },
     graphzoom: 1,
-    graphver: 1,
+    graphver: 2,
     pageurls: [requestPage, taskPage],
     childshapes: shapes,
   };

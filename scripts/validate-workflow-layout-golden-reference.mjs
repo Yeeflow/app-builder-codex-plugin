@@ -144,7 +144,11 @@ function defaultRules() {
         maximumWorkflowRows: 5,
       },
       lineStyle: {
-        allowed: ["rounded", "normal"],
+        default: "rounded",
+        allowed: ["rounded"],
+        requiredGraphver: 2,
+        requireEmptyDockers: true,
+        requireDocumentation: true,
       },
     },
   };
@@ -213,10 +217,13 @@ function validateOneWorkflow(resource, reference, findings) {
     .map((shape, index) => ({ shape, index, id: shapeId(shape), stencil: stencilId(shape) }))
     .filter((entry) => entry.stencil === "SequenceFlow");
   const spacing = reference.generatedWorkflowRules.recommendedSpacing;
-  const allowedLineTypes = new Set(reference.generatedWorkflowRules.lineStyle?.allowed || ["rounded", "normal"]);
+  const lineStyleRules = reference.generatedWorkflowRules.lineStyle || {};
+  const allowedLineTypes = new Set(lineStyleRules.allowed || ["rounded"]);
   const ids = new Set(nodes.map((node) => node.id).filter(Boolean));
 
   if (!nodes.length && !flows.length) return;
+
+  validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, lineStyleRules, findings);
 
   for (const node of nodes) {
     if (!node.position) {
@@ -253,24 +260,6 @@ function validateOneWorkflow(resource, reference, findings) {
       }));
       continue;
     }
-    const lineType = String(flow.shape.properties?.linetype || "");
-    if (nodes.length >= 5 && !lineType) {
-      findings.push(issue("WORKFLOW_LAYOUT_COMPLEX_FLOW_LINETYPE_MISSING", "Complex generated workflows must set SequenceFlow properties.linetype so Designer renders intentional routing.", {
-        source: resource.source,
-        workflowName: resource.workflowName,
-        path: `${flowPath}.properties.linetype`,
-        flowId: flow.id,
-      }));
-    } else if (lineType && !allowedLineTypes.has(lineType)) {
-      findings.push(issue("WORKFLOW_LAYOUT_FLOW_LINETYPE_INVALID", "SequenceFlow properties.linetype must use an approved workflow layout line style.", {
-        source: resource.source,
-        workflowName: resource.workflowName,
-        path: `${flowPath}.properties.linetype`,
-        flowId: flow.id,
-        lineType,
-      }));
-    }
-
     const vertices = asArray(flow.shape.vertices);
     const signedDx = (targetNode?.position?.x || 0) - (sourceNode?.position?.x || 0);
     const dx = Math.abs(signedDx);
@@ -306,6 +295,67 @@ function validateOneWorkflow(resource, reference, findings) {
         sourceId,
         targetId,
         delta: { x: dx, y: dy },
+      }));
+    }
+  }
+}
+
+function validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, lineStyleRules, findings) {
+  const def = resource.def || {};
+  if (def.lineType !== "rounded") {
+    findings.push(issue("WORKFLOW_LAYOUT_ROOT_LINETYPE_NOT_ROUNDED", "New workflow designer requires root lineType = rounded for generated Approval, Data List, and Scheduled workflow graphs.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: "$.lineType",
+      actual: def.lineType ?? null,
+      expected: "rounded",
+    }));
+  }
+  const requiredGraphver = Number(lineStyleRules.requiredGraphver || 2);
+  if (Number(def.graphver) !== requiredGraphver) {
+    findings.push(issue("WORKFLOW_LAYOUT_ROOT_GRAPHVER_NOT_V2", "New workflow designer requires root graphver = 2 for generated workflow graphs.", {
+      source: resource.source,
+      workflowName: resource.workflowName,
+      path: "$.graphver",
+      actual: def.graphver ?? null,
+      expected: requiredGraphver,
+    }));
+  }
+  for (const flow of flows) {
+    const flowPath = `$.childshapes[${flow.index}]`;
+    const lineType = String(flow.shape.properties?.linetype || "");
+    if (!lineType) {
+      findings.push(issue("WORKFLOW_LAYOUT_FLOW_LINETYPE_MISSING", "Generated SequenceFlow must set properties.linetype for the new workflow designer.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.properties.linetype`,
+        flowId: flow.id,
+      }));
+    } else if (!allowedLineTypes.has(lineType)) {
+      findings.push(issue("WORKFLOW_LAYOUT_FLOW_LINETYPE_INVALID", "SequenceFlow properties.linetype must use an approved workflow layout line style.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.properties.linetype`,
+        flowId: flow.id,
+        lineType,
+        allowed: [...allowedLineTypes],
+      }));
+    }
+    if (lineStyleRules.requireDocumentation !== false && !Object.prototype.hasOwnProperty.call(flow.shape.properties || {}, "documentation")) {
+      findings.push(issue("WORKFLOW_LAYOUT_FLOW_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow should include properties.documentation, usually an empty string.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.properties.documentation`,
+        flowId: flow.id,
+      }));
+    }
+    if (lineStyleRules.requireEmptyDockers !== false && (!Array.isArray(flow.shape.dockers) || flow.shape.dockers.length !== 0)) {
+      findings.push(issue("WORKFLOW_LAYOUT_FLOW_DOCKERS_NOT_EMPTY", "New workflow designer rounded routing expects SequenceFlow.dockers to be an empty array by default.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.dockers`,
+        flowId: flow.id,
+        actualLength: Array.isArray(flow.shape.dockers) ? flow.shape.dockers.length : null,
       }));
     }
   }

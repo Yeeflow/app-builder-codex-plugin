@@ -9,6 +9,13 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const DIST_MIRROR_PREFIX = fs.existsSync(path.join(ROOT, "dist/yeeflow-app-builder-plugin/scripts/validate-yapk-package.js"))
+  ? "dist/yeeflow-app-builder-plugin/"
+  : "";
+const SOURCE_YAPK_VALIDATOR = "validate-yapk-package.js";
+const DIST_YAPK_VALIDATOR = `${DIST_MIRROR_PREFIX}scripts/validate-yapk-package.js`;
+const SOURCE_SCHEMA_VALIDATOR = "scripts/validate-standard-package-schema.mjs";
+const DIST_SCHEMA_VALIDATOR = `${DIST_MIRROR_PREFIX}scripts/validate-standard-package-schema.mjs`;
 const API_BASE = 1700000000008000n;
 
 function id(offset) {
@@ -32,7 +39,8 @@ function baseDef() {
     deployed: true,
     graphposition: { x: 0, y: 0 },
     graphzoom: 1,
-    graphver: 1,
+    lineType: "rounded",
+    graphver: 2,
     variables: { basic: [], listref: [], filter: [], tempVars: [] },
     pageurls: [
       { id: submitPageId, name: "Submit", title: "Submit", type: 1, pagetype: 1, formdef: { id: submitPageId, title: "Submit", pagetype: 1, ver: 2, children: [] } },
@@ -40,7 +48,7 @@ function baseDef() {
     ],
     childshapes: [
       { resourceid: "start", stencil: { id: "StartNoneEvent" }, properties: { name: "Start", taskurl: submitPageId, taskUrl: submitPageId, TaskUrl: submitPageId }, incoming: [], outgoing: [{ resourceid: flowId }] },
-      { resourceid: flowId, stencil: { id: "SequenceFlow" }, properties: { name: "Submit" }, source: { resourceid: "start" }, target: { resourceid: "task" }, incoming: [{ resourceid: "start" }], outgoing: [{ resourceid: "task" }] },
+      { resourceid: flowId, stencil: { id: "SequenceFlow" }, properties: { name: "Submit", linetype: "rounded", documentation: "" }, source: { resourceid: "start" }, target: { resourceid: "task" }, incoming: [{ resourceid: "start" }], outgoing: [{ resourceid: "task" }], dockers: [] },
       { resourceid: "task", stencil: { id: "MultiAssignmentTask" }, properties: { name: "Review", taskurl: taskPageId, taskUrl: taskPageId, TaskUrl: taskPageId }, incoming: [{ resourceid: flowId }], outgoing: [] },
     ],
   };
@@ -83,7 +91,9 @@ function baseDecoded() {
       NoRule: { Prefix: "REQ-{index}", StartIndex: 1, CustomLength: 4, AutoIncrement: 1 },
       Perms: [],
     }],
+    FormReports: [],
     FormNewReports: [],
+    CustomServices: [],
     DataReports: [],
     Groups: [],
     Tags: [],
@@ -156,25 +166,25 @@ const cases = [
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "yapk-schema-v5-"));
 try {
   const valid = writePackage(tempDir, "valid", baseDecoded());
-  expectPass("source validator valid v5 fixture", ["validate-yapk-package.js", valid]);
-  expectPass("dist validator valid v5 fixture", ["dist/yeeflow-app-builder-plugin/scripts/validate-yapk-package.js", valid]);
-  expectPass("canonical schema validator valid v5 fixture", ["scripts/validate-standard-package-schema.mjs", valid]);
-  expectPass("dist canonical schema validator valid v5 fixture", ["dist/yeeflow-app-builder-plugin/scripts/validate-standard-package-schema.mjs", valid]);
+  expectPass("source validator valid v5 fixture", [SOURCE_YAPK_VALIDATOR, valid]);
+  expectPass("dist validator valid v5 fixture", [DIST_YAPK_VALIDATOR, valid]);
+  expectPass("canonical schema validator valid v5 fixture", [SOURCE_SCHEMA_VALIDATOR, valid]);
+  expectPass("dist canonical schema validator valid v5 fixture", [DIST_SCHEMA_VALIDATOR, valid]);
 
   for (const [label, code, mutate] of cases) {
     const decoded = baseDecoded();
     mutate(decoded);
     const file = writePackage(tempDir, label.replace(/[^a-z0-9]+/gi, "-").toLowerCase(), decoded);
     if (code) {
-      expectCode(`source validator ${label}`, ["validate-yapk-package.js", file], code);
-      expectCode(`dist validator ${label}`, ["dist/yeeflow-app-builder-plugin/scripts/validate-yapk-package.js", file], code);
-      expectCode(`canonical schema validator ${label}`, ["scripts/validate-standard-package-schema.mjs", file], code);
-      expectCode(`dist canonical schema validator ${label}`, ["dist/yeeflow-app-builder-plugin/scripts/validate-standard-package-schema.mjs", file], code);
+      expectCode(`source validator ${label}`, [SOURCE_YAPK_VALIDATOR, file], code);
+      expectCode(`dist validator ${label}`, [DIST_YAPK_VALIDATOR, file], code);
+      expectCode(`canonical schema validator ${label}`, [SOURCE_SCHEMA_VALIDATOR, file], code);
+      expectCode(`dist canonical schema validator ${label}`, [DIST_SCHEMA_VALIDATOR, file], code);
     } else {
-      expectPass(`source validator ${label}`, ["validate-yapk-package.js", file]);
-      expectPass(`dist validator ${label}`, ["dist/yeeflow-app-builder-plugin/scripts/validate-yapk-package.js", file]);
-      expectPass(`canonical schema validator ${label}`, ["scripts/validate-standard-package-schema.mjs", file]);
-      expectPass(`dist canonical schema validator ${label}`, ["dist/yeeflow-app-builder-plugin/scripts/validate-standard-package-schema.mjs", file]);
+      expectPass(`source validator ${label}`, [SOURCE_YAPK_VALIDATOR, file]);
+      expectPass(`dist validator ${label}`, [DIST_YAPK_VALIDATOR, file]);
+      expectPass(`canonical schema validator ${label}`, [SOURCE_SCHEMA_VALIDATOR, file]);
+      expectPass(`dist canonical schema validator ${label}`, [DIST_SCHEMA_VALIDATOR, file]);
     }
   }
 

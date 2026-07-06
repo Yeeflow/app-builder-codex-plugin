@@ -17,6 +17,27 @@ function json(value) {
   return JSON.stringify(value);
 }
 
+function outcomeCondition(outcome) {
+  return {
+    left: {
+      exprType: "variable_ctx",
+      valueType: "string",
+      id: "TaskOutcome",
+      ctx: "__ctx_task",
+      type: "expr",
+      name: "Task outcome:Outcome",
+    },
+    op: "s.=",
+    right: {
+      exprType: "constant",
+      valueType: "string",
+      id: outcome,
+      type: "expr",
+      name: `Task outcome:${outcome}`,
+    },
+  };
+}
+
 function listModel({ listId, title, rootId, tableCode }) {
   return {
     WorkspaceID: id(900),
@@ -177,11 +198,11 @@ function defResource({ formKey, formId, rootId, pageId, taskPageId, startId, seq
     ProcModelListID: "0",
     ProcModelListSetID: rootId,
     ext: {},
-    lineType: "orthogonal",
+    lineType: "rounded",
     iconURL: "",
     graphposition: { x: 0, y: 0 },
     graphzoom: 1,
-    graphver: 1,
+    graphver: 2,
     flowPage: [],
     variables: { basic: [], listref: [], filter: [] },
     pageurls: [
@@ -203,7 +224,7 @@ function defResource({ formKey, formId, rootId, pageId, taskPageId, startId, seq
     ],
     childshapes: [
       { id: startId, resourceid: startId, stencil: { id: "StartNoneEvent" }, position: { x: 100, y: 100 }, outgoing: [{ id: sequenceId, resourceid: sequenceId }], properties: { name: "Start", taskurl: pageId, taskUrl: pageId, TaskUrl: pageId } },
-      { id: sequenceId, resourceid: sequenceId, stencil: { id: "SequenceFlow" }, source: { id: startId, resourceid: startId }, target: { id: taskId, resourceid: taskId }, properties: { name: "Start to review" } },
+      { id: sequenceId, resourceid: sequenceId, stencil: { id: "SequenceFlow" }, source: { id: startId, resourceid: startId }, target: { id: taskId, resourceid: taskId }, properties: { name: "Start to review", linetype: "rounded", documentation: "" }, dockers: [] },
       {
         id: taskId,
         resourceid: taskId,
@@ -222,8 +243,8 @@ function defResource({ formKey, formId, rootId, pageId, taskPageId, startId, seq
           usertaskassignment: [{ type: "user", method: "direct", title: "Sanitized approver", value: "1000000000000000999", explicitlyRequested: true }],
         },
       },
-      { id: approveSequenceId, resourceid: approveSequenceId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: endId, resourceid: endId }, properties: { name: "Approved", conditioninfo: [{ label: "Approved" }] } },
-      { id: rejectSequenceId, resourceid: rejectSequenceId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: rejectEndId, resourceid: rejectEndId }, properties: { name: "Rejected", conditioninfo: [{ label: "Rejected" }] } },
+      { id: approveSequenceId, resourceid: approveSequenceId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: endId, resourceid: endId }, properties: { name: "Approved", linetype: "rounded", documentation: "", conditioninfo: [outcomeCondition("Approved")] }, dockers: [] },
+      { id: rejectSequenceId, resourceid: rejectSequenceId, stencil: { id: "SequenceFlow" }, source: { id: taskId, resourceid: taskId }, target: { id: rejectEndId, resourceid: rejectEndId }, properties: { name: "Rejected", linetype: "rounded", documentation: "", conditioninfo: [outcomeCondition("Rejected")] }, dockers: [] },
       { id: endId, resourceid: endId, stencil: { id: "EndNoneEvent" }, position: { x: 700, y: 80 }, incoming: [{ id: approveSequenceId, resourceid: approveSequenceId }], properties: { name: "End" } },
       { id: rejectEndId, resourceid: rejectEndId, stencil: { id: "EndRejectEvent" }, position: { x: 700, y: 180 }, incoming: [{ id: rejectSequenceId, resourceid: rejectSequenceId }], properties: { name: "Rejected" } },
     ],

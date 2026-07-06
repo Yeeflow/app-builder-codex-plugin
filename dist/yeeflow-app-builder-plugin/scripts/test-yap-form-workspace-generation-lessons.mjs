@@ -107,7 +107,7 @@ function defResource(overrides = {}) {
     childshapes: [
       { stencil: { id: "StartNoneEvent" }, id: startId, resourceid: startId, outgoing: [{ id: seqId, resourceid: seqId }], properties: { name: "Start", taskurl: pageId, taskUrl: pageId, TaskUrl: pageId } },
       { stencil: { id: "EndNoneEvent" }, id: endId, resourceid: endId, incoming: [{ id: seqId, resourceid: seqId }], properties: { name: "End" } },
-      { stencil: { id: "SequenceFlow" }, id: seqId, resourceid: seqId, source: { id: startId, resourceid: startId }, target: { id: endId, resourceid: endId } },
+      { stencil: { id: "SequenceFlow" }, id: seqId, resourceid: seqId, source: { id: startId, resourceid: startId }, target: { id: endId, resourceid: endId }, properties: { linetype: "rounded", documentation: "" }, dockers: [] },
     ],
     pageurls: [{ id: pageId, type: 1, pagetype: 1, formdef: formdef() }],
     variables: [{ name: "workspace_filter_state" }, { name: "selected_ticket_state" }],
@@ -117,12 +117,12 @@ function defResource(overrides = {}) {
     ProcModelListID: "0",
     ProcModelListSetID: "1000000000000000000",
     ext: {},
-    lineType: "orthogonal",
+    lineType: "rounded",
     iconURL: "",
     flowPage: [],
     graphposition: { x: 0, y: 0 },
     graphzoom: 1,
-    graphver: 1,
+    graphver: 2,
     defkey: "SDP-WS-TEST",
     key: "SDP-WS-TEST",
     name: "Workspace",
@@ -238,7 +238,7 @@ editDef(branchedApprovalFixture, (def) => {
   const pageId = "requester-page";
   def.childshapes = [
     { stencil: { id: "StartNoneEvent" }, id: "start", resourceid: "start", outgoing: [{ id: "flow-start-task", resourceid: "flow-start-task" }], properties: { name: "Start", taskurl: pageId, taskUrl: pageId, TaskUrl: pageId } },
-    { stencil: { id: "SequenceFlow" }, id: "flow-start-task", resourceid: "flow-start-task", source: { id: "start", resourceid: "start" }, target: { id: "task", resourceid: "task" } },
+    { stencil: { id: "SequenceFlow" }, id: "flow-start-task", resourceid: "flow-start-task", source: { id: "start", resourceid: "start" }, target: { id: "task", resourceid: "task" }, properties: { linetype: "rounded", documentation: "" }, dockers: [] },
     {
       stencil: { id: "MultiAssignmentTask" },
       id: "task",
@@ -255,8 +255,8 @@ editDef(branchedApprovalFixture, (def) => {
         usertaskassignment: [{ type: "user", method: "expression", title: "Approver", value: "{{Requester.LineManager}}" }],
       },
     },
-    { stencil: { id: "SequenceFlow" }, id: "flow-approve", resourceid: "flow-approve", source: { id: "task", resourceid: "task" }, target: { id: "end", resourceid: "end" } },
-    { stencil: { id: "SequenceFlow" }, id: "flow-reject", resourceid: "flow-reject", source: { id: "task", resourceid: "task" }, target: { id: "reject", resourceid: "reject" } },
+    { stencil: { id: "SequenceFlow" }, id: "flow-approve", resourceid: "flow-approve", source: { id: "task", resourceid: "task" }, target: { id: "end", resourceid: "end" }, properties: { linetype: "rounded", documentation: "" }, dockers: [] },
+    { stencil: { id: "SequenceFlow" }, id: "flow-reject", resourceid: "flow-reject", source: { id: "task", resourceid: "task" }, target: { id: "reject", resourceid: "reject" }, properties: { linetype: "rounded", documentation: "" }, dockers: [] },
     { stencil: { id: "EndNoneEvent" }, id: "end", resourceid: "end", incoming: [{ id: "flow-approve", resourceid: "flow-approve" }], properties: { name: "End" } },
     { stencil: { id: "EndRejectEvent" }, id: "reject", resourceid: "reject", incoming: [{ id: "flow-reject", resourceid: "flow-reject" }], properties: { name: "Rejected" } },
   ];

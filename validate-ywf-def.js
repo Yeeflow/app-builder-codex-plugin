@@ -120,6 +120,11 @@ function controlWidthType(control) {
   return configValue(control && control.attrs && control.attrs.common && control.attrs.common.positioning && control.attrs.common.positioning.widthtype);
 }
 
+function isNumericStringConfig(value) {
+  const actual = configValue(value);
+  return typeof actual === "string" && /^\d+(?:\.\d+)?$/.test(actual.trim());
+}
+
 function isSequenceFlow(shape) {
   return shape && shape.stencil && shape.stencil.id === "SequenceFlow";
 }
@@ -232,6 +237,7 @@ function validateDecodedDef(def, options = {}) {
   validateLookupControls();
   validateTaskUrls();
   validateWorkflowGraph();
+  validateWorkflowDesignerV2Style();
   validateApprovalTasks();
   validateSequenceFlowConditions();
   validateContentLists();
@@ -844,8 +850,9 @@ function validateDecodedDef(def, options = {}) {
     const formHeader = findControlByLabel(formdef, "Form header");
     const requestSummary = findControlByLabel(formdef, "Request summary panel");
     if (panels.length || histories.length || page.type === 1 || page.type === 2) {
-      if (!formBody) addIssue(warnings, "UI_STANDARD_FORM_BODY_MISSING", "Approval pages should place main fields in a container with nv_label \"Form body\"", `${pagePath}.formdef.children`);
-      if (!formBottom) addIssue(warnings, "UI_STANDARD_FORM_BOTTOM_MISSING", "Approval pages should place Action Panel and Flow History in a container with nv_label \"Form bottom\"", `${pagePath}.formdef.children`);
+      const target = mode === "final" ? errors : warnings;
+      if (!formBody) addIssue(target, "UI_STANDARD_FORM_BODY_MISSING", "Approval pages should place main fields in a container with nv_label \"Form body\"", `${pagePath}.formdef.children`);
+      if (!formBottom) addIssue(target, "UI_STANDARD_FORM_BOTTOM_MISSING", "Approval pages should place Action Panel and Flow History in a container with nv_label \"Form bottom\"", `${pagePath}.formdef.children`);
     }
     if (page.type === 1 && requestSummary && !formHeader) {
       addIssue(warnings, "FORM_HEADER_CONTAINER_MISSING", "Submission form request summary should be wrapped by a Form header container so background, border, radius, and overflow are controlled together", `${pagePath}.formdef.children`);
@@ -860,10 +867,12 @@ function validateDecodedDef(def, options = {}) {
     }
     if (formBottom) {
       panels.forEach((panel) => {
-        if (!controlContains(formBottom, panel)) addIssue(warnings, "UI_STANDARD_ACTION_PANEL_NOT_IN_FORM_BOTTOM", "workflowControlPanel should be inside Form bottom", `${pagePath}.formdef.children`);
+        const target = mode === "final" ? errors : warnings;
+        if (!controlContains(formBottom, panel)) addIssue(target, "UI_STANDARD_ACTION_PANEL_NOT_IN_FORM_BOTTOM", "workflowControlPanel should be inside Form bottom", `${pagePath}.formdef.children`);
       });
       histories.forEach((history) => {
-        if (!controlContains(formBottom, history)) addIssue(warnings, "UI_STANDARD_FLOW_HISTORY_NOT_IN_FORM_BOTTOM", "workflowHistory should be inside Form bottom", `${pagePath}.formdef.children`);
+        const target = mode === "final" ? errors : warnings;
+        if (!controlContains(formBottom, history)) addIssue(target, "UI_STANDARD_FLOW_HISTORY_NOT_IN_FORM_BOTTOM", "workflowHistory should be inside Form bottom", `${pagePath}.formdef.children`);
       });
     }
   }
@@ -921,6 +930,31 @@ function validateDecodedDef(def, options = {}) {
     if (!control || !control.type) return;
     const name = controlName(control);
     const attrs = control.attrs || {};
+
+    if (Object.prototype.hasOwnProperty.call(control, "binding") && control.binding !== undefined && control.binding !== null && typeof control.binding !== "string") {
+      const target = mode === "final" ? errors : warnings;
+      addIssue(target, "CONTROL_BINDING_NOT_STRING", "Generated approval form controls must store binding as a string variable or field id; object binding values can leave the designer loading.", `${controlPath}.binding`, {
+        control: name,
+        type: control.type,
+        bindingType: Array.isArray(control.binding) ? "array" : typeof control.binding,
+      });
+    }
+
+    if (control.type === "date") {
+      const target = mode === "final" ? errors : warnings;
+      addIssue(target, "DATE_CONTROL_TYPE_LEGACY", "Generated approval forms must use the export-backed datepicker control type; legacy date controls can fail designer hydration.", `${controlPath}.type`, {
+        control: name,
+      });
+    }
+
+    const positioning = attrs.common && attrs.common.positioning || {};
+    if (isNumericStringConfig(positioning.width)) {
+      const target = mode === "final" ? errors : warnings;
+      addIssue(target, "CONTROL_WIDTH_STRING_INVALID", "Generated approval form control widths must use Yeeflow config pair values, for example width: [null, 960] and widthu: [null, \"px\"], not numeric strings.", `${controlPath}.attrs.common.positioning.width`, {
+        control: name,
+        width: positioning.width,
+      });
+    }
 
     if ((control.type === "heading" || control.type === "text-editor") && controlWidthType(control) !== "2") {
       addIssue(warnings, "TEXT_CONTROL_INLINE_WIDTH_MISSING", "Generated text and heading controls should default to inline width via attrs.common.positioning.widthtype = [null, \"2\"] unless intentionally full-row", controlPath, {
@@ -1588,6 +1622,44 @@ function validateDecodedDef(def, options = {}) {
     }
   }
 
+  function workflowDesignerStyleIssues() {
+    return mode === "final" ? errors : warnings;
+  }
+
+  function validateWorkflowDesignerV2Style() {
+    const issues = workflowDesignerStyleIssues();
+    if (def.lineType !== "rounded") {
+      addIssue(issues, "WORKFLOW_DESIGNER_LINETYPE_NOT_ROUNDED", "New workflow designer exports require root lineType to be rounded.", "$.lineType", {
+        actual: def.lineType ?? null,
+        expected: "rounded",
+      });
+    }
+    if (Number(def.graphver) !== 2) {
+      addIssue(issues, "WORKFLOW_DESIGNER_GRAPHVER_NOT_V2", "New workflow designer exports require graphver = 2.", "$.graphver", {
+        actual: def.graphver ?? null,
+        expected: 2,
+      });
+    }
+    childshapes.forEach((shape, index) => {
+      if (!isSequenceFlow(shape)) return;
+      const p = `$.childshapes[${index}]`;
+      if (shape.properties?.linetype !== "rounded") {
+        addIssue(issues, "WORKFLOW_SEQUENCE_LINETYPE_NOT_ROUNDED", "New workflow designer SequenceFlow must set properties.linetype = rounded.", `${p}.properties.linetype`, {
+          actual: shape.properties?.linetype ?? null,
+          expected: "rounded",
+        });
+      }
+      if (!Object.prototype.hasOwnProperty.call(shape.properties || {}, "documentation")) {
+        addIssue(issues, "WORKFLOW_SEQUENCE_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow should include properties.documentation, usually an empty string.", `${p}.properties.documentation`);
+      }
+      if (!Array.isArray(shape.dockers) || shape.dockers.length !== 0) {
+        addIssue(issues, "WORKFLOW_SEQUENCE_DOCKERS_NOT_EMPTY", "New workflow designer rounded routing expects SequenceFlow.dockers to be an empty array by default.", `${p}.dockers`, {
+          actualLength: Array.isArray(shape.dockers) ? shape.dockers.length : null,
+        });
+      }
+    });
+  }
+
   function validateApprovalTasks() {
     const seqById = new Map(childshapes.filter(isSequenceFlow).map((shape) => [shapeId(shape), shape]));
     childshapes.forEach((shape, index) => {
@@ -1666,6 +1738,14 @@ function validateDecodedDef(def, options = {}) {
       conditions.forEach((condition, conditionIndex) => {
         const p = `$.childshapes[${index}].properties.conditioninfo[${conditionIndex}]`;
         const text = JSON.stringify(condition);
+        const flowLabel = String(shape.properties && (shape.properties.name || shape.properties.label || shape.properties.documentation) || "");
+        const labelLooksLikeOutcome = /\b(approved|rejected|completed|approve|reject|complete)\b/i.test(flowLabel) || /\b(approved|rejected|completed|approve|reject|complete)\b/i.test(text);
+        if (labelLooksLikeOutcome && (!isObject(condition) || condition.left === undefined || condition.right === undefined || !condition.op)) {
+          addIssue(errors, "APPROVAL_CONDITION_SHAPE_INCOMPLETE", "Approval and complete task outcome transitions must include conditioninfo rows with left, op, and right; label-only condition metadata is not publish-ready.", p, {
+            flowLabel,
+          });
+          return;
+        }
         validateOperandWrapper(condition.left, "left", `${p}.left`);
         validateOperandWrapper(condition.right, "right", `${p}.right`);
         const isApprovalOutcome = text.includes("&quot;type&quot;:&quot;task&quot;") || text.includes(":Outcome") || text.includes(":结果");
