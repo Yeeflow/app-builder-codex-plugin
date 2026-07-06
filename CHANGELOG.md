@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.20
+
+- Release Workflow Designer connector layout hardening.
+- Generated Approval form, Data list workflow, and Scheduled workflow graphs now keep direct Submitted and adjacent same-row forward connectors on rounded auto-routing without cosmetic `vertices[]`.
+- Row-gap return connectors must route through the exact midpoint lane between rows, while external return lanes are reserved for genuinely long or crowded reroutes.
+- Add source/dist regression coverage for unnecessary Submitted vertices, unnecessary direct-forward vertices, row-gap midpoint route drift, and reference-only workflow layout validation.
+
 ## 0.9.19
 
 - Release shared Approval Form Layouts v1.1 generation for standalone `.ywf` and full `.yapk` paths.
