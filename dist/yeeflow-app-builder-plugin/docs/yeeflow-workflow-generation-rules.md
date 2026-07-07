@@ -77,20 +77,39 @@ Assignment task output branches are not normal workflow-variable comparisons. Fo
 
 See `docs/studies/workflow-condition-editor-direct-value.md` for the export-backed reference and validation rules.
 
+## Explicit Branch Condition Coverage
+
+Yeeflow workflow does not provide an implicit `else` or `default` SequenceFlow. Every outgoing branch that should be executable must have explicit `conditioninfo[]` coverage.
+
+When a source node branches on a workflow variable:
+
+- cover every known option with equality branches, or
+- add a real complement branch using `AND` not-equals conditions for every equality value already routed.
+
+Example:
+
+```text
+TravelType == type1 -> Branch A
+TravelType == type2 -> Branch B
+TravelType != type1 AND TravelType != type2 -> Branch C
+```
+
+Do not generate a blank/unconditioned SequenceFlow as a default fallback. For multi-condition branches, the complement still must be explicit and may be combined with other business constraints using the two-layer Condition editor shape.
+
 ## Branch Coverage
 
 For every multi-branch node:
 
 - cover all meaningful task outcomes and routing values
-- make routing variables required, auto-derived, or covered by fallback routes
-- include a fallback for empty/null/unexpected values when the variable can be blank
+- make routing variables required, auto-derived, or covered by explicit complement conditions
+- include a conditioned fallback for empty/null/unexpected values when the variable can be blank
 - avoid dead-end workflow branches
 - prefer expression operands for computed routing instead of creating temporary intermediate variables unless the value must be persisted or debugged
 
 Examples:
 
 - HR Review standard route: Approved + `HasCustomPackageProduct == No`
-- HR Review Finance/fallback route: Approved + `HasCustomPackageProduct != No`, covering Yes, empty, and unexpected values
+- HR Review Finance/fallback route: Approved + `HasCustomPackageProduct != No`, covering Yes, empty, and unexpected values. This is a real condition, not an unconditioned default connector.
 - Family quota occupation route: `ApplicationType == Family`
 - Date eligibility route: `dateDiff(ApplicantBoardingDate, now(), "year", []) > 0`
 - Amount threshold route: `TotalApplicationAmount >= ApprovalThreshold`

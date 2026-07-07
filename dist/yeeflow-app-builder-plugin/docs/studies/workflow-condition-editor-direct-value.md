@@ -200,6 +200,7 @@ Generated direct-value workflow conditions must:
 8. Keep visible connector labels concise. Store the full logic in `conditioninfo`.
 9. For Date Time workflow variables such as `EffectiveDate`, use `group: "datetime"` and the `dt.` operator family for equality and ordering comparisons. Use `right: null` for `isNull` / `isNotNull`.
 10. For Assignment task outcome branches, use the task Outcome expression-button shape, not the workflow-variable left wrapper.
+11. For business fan-out branches from the same workflow node, generate explicit coverage for all possible cases. Yeeflow workflow does not have an implicit `else` or `default` branch; an unconditioned outgoing SequenceFlow is not a valid fallback. If a variable such as `TravelType` has options `type1`, `type2`, `type3`, and `type4`, and the planned branches cover only `TravelType == type1` and `TravelType == type2`, generate another conditioned branch such as `TravelType != type1 AND TravelType != type2` to cover the remaining values. If all known options are individually routed, no complement branch is required.
 
 Do not:
 
@@ -212,6 +213,30 @@ Do not:
 - generate group wrapper rows with real `left` operands or literal right operands;
 - generate `left.value.id = "Outcome"` for Approval task `Approved` / `Rejected` / `Completed` branches;
 - materialize a condition that references a missing Workflow variable.
+- rely on a blank/unconditioned SequenceFlow as a workflow `else` / `default` branch;
+- generate variable equality fan-out branches without either covering all known option values or adding an explicit `!= coveredValue` complement branch.
+
+## Branch Coverage Rules
+
+Workflow branch coverage is a logic-safety gate, not a visual layout rule. It applies to Approval form workflows, Data list workflows, and Scheduled workflows.
+
+Required pattern for partial option routing:
+
+```text
+TravelType == type1 -> Branch A
+TravelType == type2 -> Branch B
+TravelType != type1 AND TravelType != type2 -> Branch C
+```
+
+The complement branch must contain real `conditioninfo[]` rows. Do not omit `conditioninfo` and call that line a default branch.
+
+Validation requirements:
+
+- For a source node with multiple business SequenceFlow branches, collect direct equality conditions by workflow variable.
+- If the variable has known choices and every choice has a matching equality branch, the fan-out is covered.
+- If only some choices are covered, at least one outgoing branch must contain `AND` not-equals rows for every already covered equality value.
+- If choices are not known but the generator creates multiple equality branches for a variable, require the explicit not-equals complement branch.
+- Skip Assignment task outcome branches because `Approved`, `Rejected`, and `Completed` are validated by the task outcome condition contract.
 
 ## Proof Boundary
 

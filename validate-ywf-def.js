@@ -9,7 +9,10 @@ const {
   validateControlAgainstSchema,
 } = require("./yeeflow-control-field-schema-utils");
 const { validateExpressionTokens } = require("./yeeflow-expression-utils");
-const { validateWorkflowConditionEditorRows } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
+const {
+  validateWorkflowBranchConditionCoverage,
+  validateWorkflowConditionEditorRows,
+} = require("./scripts/lib/workflow-condition-editor-utils.cjs");
 
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
 const NUMERIC_OPS = new Set(["n.>", "n.>=", "n.<", "n.<=", "n.=", "n.!=", ">", ">=", "<", "<="]);
@@ -1822,6 +1825,14 @@ function validateDecodedDef(def, options = {}) {
         }
       });
     });
+    for (const finding of validateWorkflowBranchConditionCoverage({
+      shapes: childshapes,
+      variablesById: variableById,
+      path: "$.childshapes",
+      workflow: String(def && (def.name || def.title || def.id) || ""),
+    })) {
+      addIssue(errors, finding.code, finding.message, finding.path, finding.detail);
+    }
   }
 
   function validateContentLists() {

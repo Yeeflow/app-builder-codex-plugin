@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.26
+
+- Release explicit Workflow branch condition coverage hardening.
+- Generated Approval form, Data list workflow, and Scheduled workflow fan-out branches now fail generated-final validation when business-variable equality branches do not cover all known choices and no explicit complement branch exists.
+- Treat blank/unconditioned outgoing SequenceFlow branches as invalid fallbacks because Yeeflow workflow has no implicit `else` / `default` branch semantics.
+- Add `WORKFLOW_BRANCH_CONDITION_COVERAGE_INCOMPLETE` and `WORKFLOW_BRANCH_UNCONDITIONAL_DEFAULT_NOT_SUPPORTED` regression coverage for option-variable fan-out cases such as `TravelType == type1`, `TravelType == type2`, and explicit `TravelType != type1 AND TravelType != type2` complements.
+
 ## 0.9.25
 
 - Release Workflow Condition editor grouping and expression-right hardening.

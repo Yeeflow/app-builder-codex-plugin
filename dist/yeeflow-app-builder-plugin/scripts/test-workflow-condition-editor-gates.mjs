@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 const {
+  validateWorkflowBranchConditionCoverage,
   workflowConditionEditorGroupForType,
   validateWorkflowConditionEditorRows,
 } = require("./lib/workflow-condition-editor-utils.cjs");
@@ -24,6 +25,7 @@ const variables = new Map([
   ["MultipleCategories", { id: "MultipleCategories", type: "mutiple-metadata" }],
   ["ESignature", { id: "ESignature", type: "signature" }],
   ["EquipmentType", { id: "EquipmentType", type: "dict" }],
+  ["TravelType", { id: "TravelType", type: "dict", choices: ["type1", "type2", "type3", "type4"] }],
   ["DueDate", { id: "DueDate", type: "datetime" }],
   ["EffectiveDate", { id: "EffectiveDate", type: "date" }],
 ]);
@@ -73,6 +75,35 @@ function issues(rows) {
 function expectCodes(rows, expectedCodes) {
   const actual = issues(rows).map((entry) => entry.code).sort();
   assert.deepEqual(actual, [...expectedCodes].sort());
+}
+
+function flow(id, sourceId, targetId, conditioninfo) {
+  return {
+    id,
+    resourceid: id,
+    stencil: { id: "SequenceFlow" },
+    properties: {
+      linetype: "rounded",
+      name: id,
+      documentation: "",
+      ...(conditioninfo !== undefined ? { conditioninfo } : {}),
+    },
+    source: { id: sourceId, resourceid: sourceId },
+    target: { id: targetId, resourceid: targetId },
+  };
+}
+
+function task(id) {
+  return { id, resourceid: id, stencil: { id: "InclusiveGateway" }, position: { x: 0, y: 0 } };
+}
+
+function branchCoverageCodes(shapes) {
+  return validateWorkflowBranchConditionCoverage({
+    shapes,
+    variablesById: variables,
+    path: "$.childshapes",
+    workflow: "coverage-test",
+  }).map((entry) => entry.code).sort();
 }
 
 assert.equal(workflowConditionEditorGroupForType("user"), "string");
@@ -257,8 +288,59 @@ expectCodes([
   condition("Name", "s.=", "string", { type: 0, value: "ABC" }, "xor"),
 ], ["WORKFLOW_CONDITION_PRE_INVALID"]);
 
+assert.deepEqual(branchCoverageCodes([
+  task("travel-gateway"),
+  flow("branch-type-1", "travel-gateway", "branch-a", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type1" }),
+  ]),
+  flow("branch-type-2", "travel-gateway", "branch-b", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type2" }),
+  ]),
+]), ["WORKFLOW_BRANCH_CONDITION_COVERAGE_INCOMPLETE"]);
+
+assert.deepEqual(branchCoverageCodes([
+  task("travel-gateway"),
+  flow("branch-type-1", "travel-gateway", "branch-a", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type1" }),
+  ]),
+  flow("branch-default", "travel-gateway", "branch-c", undefined),
+]), [
+  "WORKFLOW_BRANCH_CONDITION_COVERAGE_INCOMPLETE",
+  "WORKFLOW_BRANCH_UNCONDITIONAL_DEFAULT_NOT_SUPPORTED",
+].sort());
+
+assert.deepEqual(branchCoverageCodes([
+  task("travel-gateway"),
+  flow("branch-type-1", "travel-gateway", "branch-a", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type1" }),
+  ]),
+  flow("branch-type-2", "travel-gateway", "branch-b", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type2" }),
+  ]),
+  flow("branch-other", "travel-gateway", "branch-c", [
+    condition("TravelType", "s.!=", "string", { type: 0, value: "type1" }),
+    condition("TravelType", "s.!=", "string", { type: 0, value: "type2" }),
+  ]),
+]), []);
+
+assert.deepEqual(branchCoverageCodes([
+  task("travel-gateway"),
+  flow("branch-type-1", "travel-gateway", "branch-a", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type1" }),
+  ]),
+  flow("branch-type-2", "travel-gateway", "branch-b", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type2" }),
+  ]),
+  flow("branch-type-3", "travel-gateway", "branch-c", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type3" }),
+  ]),
+  flow("branch-type-4", "travel-gateway", "branch-d", [
+    condition("TravelType", "s.=", "string", { type: 0, value: "type4" }),
+  ]),
+]), []);
+
 console.log(JSON.stringify({
   status: "pass",
-  cases: 16,
+  cases: 20,
   message: "Workflow condition editor variable condition gates passed",
 }, null, 2));
