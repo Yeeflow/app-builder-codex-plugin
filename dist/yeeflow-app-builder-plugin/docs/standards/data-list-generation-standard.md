@@ -107,6 +107,37 @@ Reviewer
 
 Generated-final validation must fail when a default data view has no display fields.
 
+## Data View Fixed Filters
+
+Every generated data view must follow `docs/standards/data-list-view-filter-standard.md`.
+
+Planning and materialization rules:
+
+- Default/all-record views may use `LayoutView.filter: []`.
+- Business-specific views must materialize their fixed dataset constraints into `LayoutView.filter[]`.
+- User-facing filter/search fields belong in `LayoutView.query[]`; they do not satisfy a fixed filter requirement.
+- `op: "7"` with `right: null` is the export-proven non-empty check.
+- `pre: "and"` and `pre: "or"` are both valid and must be preserved from the App Plan.
+- Business wording such as `Date >= Today` must be converted to the export-proven `now` expression for Data View filters.
+
+Example:
+
+```json
+{
+  "pre": "and",
+  "left": "Datetime1",
+  "op": "3",
+  "right": [
+    {
+      "type": "func",
+      "func": "now",
+      "params": []
+    }
+  ],
+  "showCus": false
+}
+```
+
 ## Default View Runtime Materialization Shape
 
 The default data view must use the export-proven shape that Yeeflow recognizes at runtime. A package can install successfully and still render an empty data view when the view metadata is too simplified.

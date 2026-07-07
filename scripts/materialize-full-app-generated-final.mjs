@@ -896,8 +896,8 @@ function collectDataListFieldSpecs(planText) {
     const headers = splitTableLine(lines[index]);
     const normalizedHeaders = headers.map((header) => normKey(header));
     const listColumn = findHeaderIndex(normalizedHeaders, ["list", "data list", "data list name", "list name", "document library", "source list"]);
-    const displayColumn = findHeaderIndex(normalizedHeaders, ["display name", "field display name", "business field", "field name", "field label", "label", "name"]);
-    const keyColumn = findHeaderIndex(normalizedHeaders, ["internal id field key", "field key", "internal id", "internal name", "internal field", "field id", "fieldname", "storage name", "storage field", "storage field name"]);
+    const displayColumn = findHeaderIndex(normalizedHeaders, ["field label", "display name", "field display name", "business field", "business label", "label", "name", "field name"]);
+    const keyColumn = findHeaderIndex(normalizedHeaders, ["field name", "internal id field key", "field key", "internal id", "internal name", "internal field", "field id", "fieldname", "storage name", "storage field", "storage field name"]);
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow field type", "yeeflow field type", "field type", "business type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "yeeflow type", "control type", "control"]);
     const choiceColumn = findHeaderIndex(normalizedHeaders, ["choice values", "choices", "options", "values"]);
@@ -1389,6 +1389,22 @@ function buildIdPaths(planDemand) {
   for (const assignment of assignAllCustomFormLayoutPositions(planDemand, planDemand.resources.dataLists)) {
     paths.push(`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`);
   }
+  const customLayoutCountByListIndex = new Map();
+  for (const assignment of assignAllCustomFormLayoutPositions(planDemand, planDemand.resources.dataLists)) {
+    customLayoutCountByListIndex.set(
+      assignment.listIndex,
+      Math.max(customLayoutCountByListIndex.get(assignment.listIndex) || 0, assignment.layoutIndex),
+    );
+  }
+  planDemand.resources.dataLists.forEach((name, index) => {
+    const plannedViews = dataListViewRecordsForList(planDemand, name);
+    const defaultViewRecord = selectDefaultDataListViewRecord(plannedViews);
+    const extraViews = plannedViews.filter((record) => record !== defaultViewRecord);
+    const baseIndex = (customLayoutCountByListIndex.get(index) || 0) + 1;
+    extraViews.forEach((record, viewIndex) => {
+      paths.push(`decoded.Childs[${index}].Layouts[${baseIndex + viewIndex}].LayoutID`);
+    });
+  });
   planDemand.resources.approvalForms.forEach((name, index) => {
     paths.push(`decoded.Forms[${index}].Key`);
     paths.push(`decoded.Forms[${index}].DefResourceID`);
@@ -1490,6 +1506,11 @@ function collectDataListViewRecords(planText) {
     const viewColumn = findHeaderIndex(headers, ["view name", "view"]);
     const listColumn = findHeaderIndex(headers, ["data list", "list/library", "list", "library", "data list or library"]);
     const urlColumn = findHeaderIndex(headers, ["url / route key", "route key", "url"]);
+    const filterColumn = findHeaderIndex(headers, ["filter conditions", "fixed filter conditions", "fixed filters", "filter", "data filter", "data filters"]);
+    const displayColumn = findHeaderIndex(headers, ["display fields", "visible fields", "layout fields", "columns"]);
+    const queryColumn = findHeaderIndex(headers, ["query/search fields", "query fields", "search fields", "user filter fields", "user query fields"]);
+    const defaultColumn = findHeaderIndex(headers, ["default", "is default", "default view"]);
+    const sortColumn = findHeaderIndex(headers, ["sort/grouping", "sort", "sorting", "grouping"]);
     if (viewColumn === -1 || listColumn === -1) continue;
     for (const row of table.rows) {
       const cells = table.headers.map((header) => row[header] || "");
@@ -1500,12 +1521,28 @@ function collectDataListViewRecords(planText) {
         viewName,
         listName,
         routeKey: cleanResourceName(cells[urlColumn]) || slugify(viewName),
+        filterConditions: filterColumn === -1 ? "" : cleanResourceName(cells[filterColumn]),
+        displayFields: displayColumn === -1 ? "" : cleanResourceName(cells[displayColumn]),
+        queryFields: queryColumn === -1 ? "" : cleanResourceName(cells[queryColumn]),
+        sortGrouping: sortColumn === -1 ? "" : cleanResourceName(cells[sortColumn]),
+        isDefault: defaultColumn !== -1 && /\b(?:yes|true|default|primary)\b/i.test(cells[defaultColumn]),
       });
     }
   }
   return unique(records.map((record) => `${normKey(record.viewName)}|${normKey(record.listName)}`))
     .map((key) => records.find((record) => `${normKey(record.viewName)}|${normKey(record.listName)}` === key))
     .filter(Boolean);
+}
+
+function dataListViewRecordsForList(planDemand, listName) {
+  return (planDemand.dataListViewRecords || []).filter((record) => normKey(record.listName) === normKey(listName));
+}
+
+function selectDefaultDataListViewRecord(records) {
+  if (!records.length) return null;
+  return records.find((record) => record.isDefault)
+    || records.find((record) => /\b(?:all|all items|all records)\b/i.test(record.viewName))
+    || null;
 }
 
 function collectReverseRelatedPlanRows(planText) {
@@ -1923,6 +1960,183 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
     Ext2: "",
     Ext3: "",
   };
+}
+
+function buildDataListViewLayoutView({ fields, viewRecord = null }) {
+  const layoutFields = resolveDataViewFields(fields, viewRecord?.displayFields).slice(0, 12);
+  const queryFields = resolveDataViewFields(fields, viewRecord?.queryFields);
+  const effectiveQueryFields = queryFields.length ? queryFields : fields;
+  return {
+    layout: layoutFields.map((field, fieldIndex) => buildDataViewLayoutColumn(field, fieldIndex)),
+    filter: parseDataViewFixedFilterConditions(viewRecord?.filterConditions || "", fields),
+    query: [
+      ...effectiveQueryFields.map((field) => buildDataViewQueryField(field)),
+      { FieldName: "ListDataID", field: "ListDataID" },
+      { FieldName: "CreatedBy", field: "CreatedBy" },
+      { FieldName: "ModifiedBy", field: "ModifiedBy" },
+      { FieldName: "Created", field: "Created" },
+      { FieldName: "Modified", field: "Modified" },
+    ],
+    sort: [],
+    rowColor: [],
+  };
+}
+
+function buildDataViewLayoutColumn(field, fieldIndex) {
+  return {
+    FieldID: field.FieldID,
+    FieldName: field.FieldName,
+    DisplayName: field.DisplayName,
+    Type: field.Type,
+    Order: fieldIndex + 1,
+    Mobile: 2,
+    Show: true,
+  };
+}
+
+function buildDataViewQueryField(field) {
+  return {
+    FieldID: field.FieldID,
+    FieldName: field.FieldName,
+    field: field.FieldName,
+    ID: field.FieldID,
+    Name: field.DisplayName,
+    Type: field.Type,
+    Rules: field.Rules || {},
+    InternalName: field.InternalName || field.FieldName,
+  };
+}
+
+function resolveDataViewFields(fields, plannedText) {
+  const tokens = splitPlannedFieldList(plannedText);
+  if (!tokens.length) return fields.slice(0, 8);
+  const out = [];
+  const seen = new Set();
+  for (const token of tokens) {
+    const field = resolveDataViewField(fields, token);
+    if (!field || seen.has(field.FieldName)) continue;
+    seen.add(field.FieldName);
+    out.push(field);
+  }
+  return out.length ? out : fields.slice(0, 8);
+}
+
+function splitPlannedFieldList(value) {
+  const text = cleanResourceName(value)
+    .replace(/\bquery\b|\bsearch\b|\bfields?\b|\bcolumns?\b/gi, " ")
+    .replace(/\s+and\s+/gi, ",");
+  if (!text || isNonResourceName(text) || /^(all|all fields|default)$/i.test(text)) return [];
+  return text.split(/[,;，；、]/)
+    .map((item) => cleanResourceName(item))
+    .filter((item) => item && !isNonResourceName(item));
+}
+
+function resolveDataViewField(fields, requestedName) {
+  const requested = normKey(requestedName);
+  if (!requested) return null;
+  return fields.find((field) => [
+    field.DisplayName,
+    field.FieldName,
+    field.InternalName,
+  ].some((value) => normKey(value) === requested)) || null;
+}
+
+function parseDataViewFixedFilterConditions(value, fields) {
+  const text = cleanResourceName(value);
+  if (!text || isNonResourceName(text) || /(?:no fixed|no filter|not filtered|all records|all items|无固定|不过滤|全集)/i.test(text)) return [];
+  const normalized = text
+    .replace(/\bDate\s*>=\s*Today\b/gi, "Date >= now")
+    .replace(/\bcurrent date\b/gi, "now")
+    .replace(/\btoday\b/gi, "now")
+    .replace(/≥/g, ">=")
+    .replace(/≤/g, "<=");
+  const joiner = /\s+(?:or|OR)\s+|或|任一|any of/i.test(normalized) ? "or" : "and";
+  const splitter = joiner === "or" ? /\s+(?:or|OR)\s+|或|；|;|，|,/ : /\s+(?:and|AND)\s+|且|；|;|，|,/;
+  const parts = normalized.split(splitter)
+    .map((part) => cleanResourceName(part))
+    .filter(Boolean);
+  const conditions = [];
+  for (const [index, part] of parts.entries()) {
+    const condition = parseDataViewFixedFilterConditionPart(part, fields, joiner, index);
+    if (condition) conditions.push(condition);
+  }
+  return conditions;
+}
+
+function parseDataViewFixedFilterConditionPart(part, fields, joiner, index) {
+  const nonEmptyMatch = part.match(/^(.+?)\s+(?:is\s+not\s+empty|is\s+not\s+blank|not\s+empty|has\s+value|有值|非空|不为空)$/i);
+  if (nonEmptyMatch) {
+    const field = resolveDataViewField(fields, nonEmptyMatch[1]);
+    if (!field) return null;
+    return {
+      key: crypto.randomUUID(),
+      pre: joiner,
+      left: field.FieldName,
+      op: "7",
+      right: null,
+    };
+  }
+
+  const dateNowMatch = part.match(/^(.+?)\s*>=\s*(?:now)$/i);
+  if (dateNowMatch) {
+    const field = resolveDataViewField(fields, dateNowMatch[1]);
+    if (!field) return null;
+    return {
+      key: crypto.randomUUID(),
+      pre: index === 0 ? "and" : joiner,
+      left: field.FieldName,
+      op: "3",
+      right: [
+        {
+          type: "func",
+          func: "now",
+          params: [],
+        },
+      ],
+      showCus: false,
+    };
+  }
+
+  const directCompareMatch = part.match(/^(.+?)\s*(>=|<=|!=|=|>|<)\s*(.+)$/);
+  if (directCompareMatch) {
+    const field = resolveDataViewField(fields, directCompareMatch[1]);
+    if (!field) return null;
+    const op = dataViewCompareOperator(field, directCompareMatch[2]);
+    const rawRight = cleanResourceName(directCompareMatch[3]);
+    return {
+      key: crypto.randomUUID(),
+      pre: index === 0 ? "and" : joiner,
+      left: field.FieldName,
+      op,
+      right: coerceDataViewFilterValue(field, rawRight),
+    };
+  }
+
+  return null;
+}
+
+function dataViewCompareOperator(field, comparator) {
+  const opMap = {
+    "=": "0",
+    "!=": "1",
+    ">=": "3",
+    "<=": "4",
+    ">": "5",
+    "<": "6",
+  };
+  return opMap[comparator] || "0";
+}
+
+function coerceDataViewFilterValue(field, value) {
+  if (/^Decimal$/i.test(field.FieldType)) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : value;
+  }
+  if (/^Bit$/i.test(field.FieldType)) return /^(true|yes|1|on)$/i.test(value) ? "true" : "false";
+  if (/^Datetime$/i.test(field.FieldType) && /^now$/i.test(value)) {
+    return [{ type: "func", func: "now", params: [] }];
+  }
+  return value;
 }
 
 function controlTypeForFieldType(field, fieldType) {
@@ -2709,7 +2923,7 @@ function isNonResourceName(value) {
 function isNonFieldName(value) {
   const text = cleanResourceName(value);
   if (!text) return true;
-  return /^(not applicable|n\/a|none|no|deferred|field name|display name|business label|label|name)$/i.test(text);
+  return /^(not applicable|n\/a|none|no|deferred|field name|display name|business label|label)$/i.test(text);
 }
 
 function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutResourceId, layoutResourceRefId, iconUrl = DEFAULT_ICON, appPlanText = "" }) {
@@ -2800,32 +3014,16 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     dataListByName.set(normKey(name), listId);
     const fields = fieldRecordsByName.get(normKey(name)) || [];
     const customLayoutsForList = allCustomFormAssignments.filter((assignment) => assignment.listIndex === index);
+    const plannedViewsForList = dataListViewRecordsForList(planDemand, name);
+    const defaultPlannedView = selectDefaultDataListViewRecord(plannedViewsForList);
     const layouts = [
       {
         ListID: listId,
         LayoutID: stringId(ids[`decoded.Childs[${index}].Layouts[0].LayoutID`]),
-        Title: "Default View",
+        Title: defaultPlannedView?.viewName || "Default View",
         Type: 0,
-        LayoutView: JSON.stringify({
-          layout: fields.slice(0, 8).map((field, fieldIndex) => ({
-            FieldID: field.FieldID,
-            FieldName: field.FieldName,
-            DisplayName: field.DisplayName,
-            Type: field.Type,
-            Order: fieldIndex + 1,
-            Mobile: 2,
-            Show: true,
-          })),
-          query: [
-            ...fields.map((field) => ({ FieldID: field.FieldID, FieldName: field.FieldName, field: field.FieldName })),
-            { FieldName: "ListDataID", field: "ListDataID" },
-            { FieldName: "CreatedBy", field: "CreatedBy" },
-            { FieldName: "ModifiedBy", field: "ModifiedBy" },
-            { FieldName: "Created", field: "Created" },
-            { FieldName: "Modified", field: "Modified" },
-          ],
-        }),
-        Ext1: JSON.stringify({ Url: "default" }),
+        LayoutView: JSON.stringify(buildDataListViewLayoutView({ fields, viewRecord: defaultPlannedView })),
+        Ext1: JSON.stringify({ Url: defaultPlannedView?.routeKey || "default" }),
         IsDefault: true,
         IsItemPerm: false,
         Perms: [],
@@ -2835,6 +3033,23 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     for (const assignment of customLayoutsForList) {
       const layoutId = stringId(ids[`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`]);
       layouts.push(buildCustomFormLayout({ layoutId, listId, listName: name, formName: assignment.formName, formType: assignment.formType, selectedTemplate: assignment.selectedTemplate, openIn: assignment.openIn, fields, planDemand, listMetaByName, rootListSetId: rootListId }));
+    }
+    const extraDataViews = plannedViewsForList.filter((record) => record !== defaultPlannedView);
+    const extraViewBaseIndex = customLayoutsForList.reduce((max, assignment) => Math.max(max, assignment.layoutIndex), 0) + 1;
+    for (const [viewIndex, viewRecord] of extraDataViews.entries()) {
+      const layoutIndex = extraViewBaseIndex + viewIndex;
+      layouts.push({
+        ListID: listId,
+        LayoutID: stringId(ids[`decoded.Childs[${index}].Layouts[${layoutIndex}].LayoutID`]),
+        Title: viewRecord.viewName,
+        Type: 0,
+        LayoutView: JSON.stringify(buildDataListViewLayoutView({ fields, viewRecord })),
+        Ext1: JSON.stringify({ Url: viewRecord.routeKey || slugify(viewRecord.viewName) }),
+        IsDefault: false,
+        IsItemPerm: false,
+        Perms: [],
+        LayoutInResources: [],
+      });
     }
     const displayLayoutView = buildDataListFormDisplaySettings({ customLayoutsForList, ids });
     const detailLayoutId = displayLayoutView.view || displayLayoutView.edit || displayLayoutView.add || "";

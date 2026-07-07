@@ -16,6 +16,7 @@ const {
   validateWorkflowBranchConditionCoverage,
   validateWorkflowConditionEditorRows,
 } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
+const { validateDataViewFixedFilters } = require("./scripts/lib/data-list-view-filter-utils.cjs");
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -3587,12 +3588,14 @@ function validateDataListViewLayout(layout, fieldsByName, pathPrefix, report, re
       issue(report, severity, "DATA_VIEW_SORT_DIRECTION_INVALID", "Data view SortByDesc should be boolean when present.", { title: layout.Title, index });
     }
   });
-  asArray(view.filter).forEach((filter, index) => {
-    const fieldName = safeString(filter.left || filter.FieldName || filter.field);
-    if (fieldName && !fieldsByName.has(fieldName) && !KNOWN_SYSTEM_FIELDS.has(fieldName)) {
-      issue(report, severity, "DATA_VIEW_FILTER_FIELD_NOT_FOUND", "Data view fixed filter field does not resolve to a list field or known system field.", { title: layout.Title, index, fieldName });
-    }
-    if (!safeString(filter.op)) issue(report, "warning", "DATA_VIEW_FILTER_OPERATOR_MISSING", "Data view fixed filter condition should include an operator.", { title: layout.Title, index });
+  validateDataViewFixedFilters({
+    filters: view.filter,
+    fieldsByName,
+    knownSystemFields: KNOWN_SYSTEM_FIELDS,
+    severity,
+    viewTitle: layout.Title || null,
+    pathPrefix: `${pathPrefix}.LayoutView.filter`,
+    addIssue: (severity, code, message, details) => issue(report, severity, code, message, details),
   });
   asArray(view.query).forEach((query, index) => {
     const fieldName = safeString(query.FieldName || query.field || query.Name);
