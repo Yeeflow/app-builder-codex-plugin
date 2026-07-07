@@ -376,6 +376,16 @@ Dashboard validator commands used during validation:
   findControl(badBaseGridColumnsPages[1], "grid_col_item").attrs.columns["1"].list = [[3, "fr"], [1, "fr"]];
   expectCode("base grid-table header/item column mismatch fails", ["--package", writePackage("base-grid-table-column-mismatch", badBaseGridColumnsPages)], "DASH_DATASET_GRID_TABLE_HEADER_ITEM_COLUMN_MISMATCH");
 
+  const staleBaseGridTracksPages = validPages();
+  const staleHeader = findControl(staleBaseGridTracksPages[1], "grid_table_col_header");
+  const staleItem = findControl(staleBaseGridTracksPages[1], "grid_col_item");
+  const staleTracks = [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
+  staleHeader.attrs.columns["1"].list = structuredClone(staleTracks);
+  staleItem.attrs.columns["1"].list = structuredClone(staleTracks);
+  staleHeader.children = staleHeader.children.slice(0, 3);
+  staleItem.children = staleItem.children.slice(0, 3);
+  expectCode("base grid-table stale tracks after column pruning fail", ["--package", writePackage("base-grid-table-stale-tracks", staleBaseGridTracksPages)], "DASH_DATASET_GRID_TABLE_COLUMN_TRACK_COUNT_MISMATCH");
+
   const badBaseGridActionPages = validPages();
   delete findControl(badBaseGridActionPages[1], "btn_edit_item").attrs.control_action;
   expectCode("base grid-table item operation button without action fails", ["--package", writePackage("base-grid-table-missing-operation-action", badBaseGridActionPages)], "DASH_DATASET_GRID_TABLE_OPERATION_ACTION_MISSING");
@@ -428,6 +438,16 @@ Dashboard validator commands used during validation:
   const badItemGrid = findControl(badGridMultiselectColumnsPages[2], "grid_col_item");
   badItemGrid.attrs.columns["1"].list = [[46, "px"], [3, "fr"], [1, "fr"]];
   expectCode("grid-table multiselect header/item column mismatch fails", ["--package", writePackage("bad-grid-multiselect-columns", badGridMultiselectColumnsPages)], "DASH_DATASET_GRID_MULTISELECT_HEADER_ITEM_COLUMN_MISMATCH");
+
+  const staleGridMultiselectTracksPages = validPages();
+  const staleMultiselectHeader = findControl(staleGridMultiselectTracksPages[2], "grid_table_col_header");
+  const staleMultiselectItem = findControl(staleGridMultiselectTracksPages[2], "grid_col_item");
+  const staleMultiselectTracks = [[46, "px"], [2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
+  staleMultiselectHeader.attrs.columns["1"].list = structuredClone(staleMultiselectTracks);
+  staleMultiselectItem.attrs.columns["1"].list = structuredClone(staleMultiselectTracks);
+  staleMultiselectHeader.children = staleMultiselectHeader.children.slice(0, 3);
+  staleMultiselectItem.children = staleMultiselectItem.children.slice(0, 3);
+  expectCode("grid-table multiselect stale tracks after column pruning fail", ["--package", writePackage("bad-grid-multiselect-stale-tracks", staleGridMultiselectTracksPages)], "DASH_DATASET_GRID_MULTISELECT_COLUMN_TRACK_COUNT_MISMATCH");
 
   const badGridFullWidthPages = validPages();
   delete findControl(badGridFullWidthPages[2], "grid_table_col_caption").attrs.style.widthtype;

@@ -4774,8 +4774,10 @@ function pruneGridTableColumnsBySchema(root, { fieldMap, allowedFields }) {
     }
     if (keepIndexes.length && keepIndexes.length < headerRow.children.length) {
       headerRow.children = keepIndexes.map((index) => headerRow.children[index]).filter(Boolean);
+      normalizeGridColumnDefinition(headerRow, headerRow.children.length);
       if (nearestItemRow && Array.isArray(nearestItemRow.children)) {
         nearestItemRow.children = keepIndexes.map((index) => nearestItemRow.children[index]).filter(Boolean);
+        normalizeGridColumnDefinition(nearestItemRow, nearestItemRow.children.length);
       }
     }
   }
