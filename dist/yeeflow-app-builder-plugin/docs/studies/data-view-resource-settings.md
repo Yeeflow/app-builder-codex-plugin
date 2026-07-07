@@ -1,6 +1,6 @@
 # Yeeflow Data View Resource Settings Study
 
-Proof boundary: export-proven, product-documented, and validator-backed only. This pass studied `<downloads>/Data Lists (1).yap` read-only, generated redacted normalized references under `docs/studies/normalized/data-views/`, and did not import, open, execute, mutate, or runtime-test the package.
+Proof boundary: export-proven, product-documented, and validator-backed only. This pass studied `/Users/Renger/Downloads/Data Lists (1).yap` read-only, generated redacted normalized references under `docs/studies/normalized/data-views/`, and did not import, open, execute, mutate, or runtime-test the package.
 
 ## Summary
 
@@ -98,7 +98,21 @@ Fixed data filters live in `LayoutView.filter[]`. Observed condition shape:
 }
 ```
 
-The sample proves flat `and` conditions and fixed literal values. It does not prove nested conditions, current-user filters, date filters, or expression-token operands for data-list views. Empty or absent `filter` means no fixed filter, so all records are eligible subject to permissions and resource behavior.
+The first sample proved flat `and` conditions and fixed literal values. The focused `Event Planning (1).ydl` follow-up extends the export-proven baseline:
+
+- `op: "7"` with `right: null` is used for `is not empty`.
+- `pre: "or"` is valid for any-of business filters, as in `Budget and Vendors`.
+- Date lower-bound requirements such as `Date >= Today` should use the expression token `[{ "type": "func", "func": "now", "params": [] }]`; do not generate unsupported `Today` tokens/functions.
+- Empty or absent `filter` means no fixed filter, so all records are eligible subject to permissions and resource behavior.
+
+Event Planning proof:
+
+| View | Fixed filter proof |
+| --- | --- |
+| `All Events` | `filter: []` |
+| `Schedule Overview` | `Datetime1 op "7" right null` AND `Datetime1 op "3" right now()` |
+| `RSVP Tracker` | `Text3 op "7" right null` AND `Text4 op "7" right null` |
+| `Budget and Vendors` | `Text7 op "7" right null` OR `Decimal1 op "7" right null` |
 
 ## User Filters
 

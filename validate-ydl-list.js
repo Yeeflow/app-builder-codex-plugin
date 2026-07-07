@@ -8,6 +8,7 @@ const {
   loadControlFieldSchemas,
   validateFieldAgainstSchema,
 } = require("./yeeflow-control-field-schema-utils");
+const { validateDataViewFixedFilters } = require("./scripts/lib/data-list-view-filter-utils.cjs");
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -950,16 +951,15 @@ function validateViews(item, fieldByName, report) {
       }
     }
 
-    for (const [filterIndex, filter] of asArray(view.filter || view.query).entries()) {
-      const fieldName = filter.left || filter.field || filter.FieldName;
-      if (fieldName && !fieldByName.has(fieldName) && !KNOWN_SYSTEM_FIELDS.has(fieldName)) {
-        issue(report, "warning", "VIEW_FILTER_FIELD_NOT_FOUND", "View filter references an unknown field.", {
-          viewTitle: layout.Title,
-          filterIndex,
-          fieldName,
-        });
-      }
-    }
+    validateDataViewFixedFilters({
+      filters: view.filter,
+      fieldsByName: fieldByName,
+      knownSystemFields: KNOWN_SYSTEM_FIELDS,
+      severity: generatorFinalSeverity(report),
+      viewTitle: layout.Title || null,
+      pathPrefix: `Item.Layouts[${index}].LayoutView.filter`,
+      addIssue: (severity, code, message, details) => issue(report, severity, code, message, details),
+    });
 
     for (const [sortIndex, sort] of asArray(view.sort).entries()) {
       const fieldName = sort.SortName || sort.field || sort.FieldName;
