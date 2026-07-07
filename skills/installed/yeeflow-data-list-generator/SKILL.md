@@ -156,6 +156,9 @@ Do not build a final `.ydl` when:
 - generated field storage metadata is crossed, such as `Text*` with `FieldType: Datetime`, `Datetime*` with `FieldType: Text`, or `Decimal*` with `FieldType: Text`
 - generated main/list metadata is missing `MainListType` or `ListModel.ListType`
 - duplicate `FieldName` or `InternalName` values exist
+- standalone `.ydl` custom forms are generated from a simplified path instead of the shared Data List Form Layouts v1.1 and Data List Form Fields Grid v1.1 builders
+- a generated standalone `.ydl` reuses one generic custom form for New, Edit, and View instead of concrete New/Edit and View Item layouts
+- current-record custom form fields are placed outside `form_grid_fields_wrapper`
 - lookup targets or target display fields are unresolved
 - sample lookup values are unknown or unsafe
 - sample lookup values do not map to valid referenced target rows
