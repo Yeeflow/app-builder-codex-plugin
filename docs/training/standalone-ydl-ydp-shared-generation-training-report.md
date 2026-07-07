@@ -36,6 +36,21 @@ For `.ydl`:
 - `validate-data-list-form-fields-template.mjs` when current-record field grids exist
 - field/schema/list creation gates when package context exists
 
+Focused follow-up from `Event Planning 2.ydl` on 2026-07-07: standalone `.ydl` final validation must not allow a simplified custom form path to leak out as a generated artifact. The failure shape was one generic `Event Planning Form` assigned to `ListModel.LayoutView.add`, `edit`, and `view`, no separate `Edit Item` and `View Item` forms, no Data List Form Layouts v1.1 `Main` / `Content` / content-card shell, and current-record field controls placed directly in raw containers/flex grids instead of `form_grid_fields_wrapper`. The same artifact also showed that business display labels containing `/` must be sanitized before becoming `InternalName` values.
+
+The validator must therefore treat the following as generator-final hard errors, not warnings:
+
+- `UI_STANDARD_EDIT_ITEM_FORM_MISSING`
+- `UI_STANDARD_VIEW_ITEM_FORM_MISSING`
+- `UI_STANDARD_CONTENT_WIDTH_NOT_FULL`
+- `UI_STANDARD_FORM_PADDING_NOT_ZERO`
+- `UI_STANDARD_MAIN_CONTAINER_MISSING`
+- `UI_STANDARD_CONTENT_CONTAINER_MISSING`
+- `DATA_LIST_FORM_FIELDS_WRAPPER_MISSING`
+- `STANDALONE_YDL_SHARED_GENERATION_BYPASSED`
+
+The regression fixture should fail a standalone `.ydl` shape that hand-builds a generic custom form and reuses it for New/Edit/View. It may pass only after standalone `.ydl` generation uses the shared Data List Form Layouts v1.1 and Data List Form Fields Grid v1.1 builders.
+
 For `.ydp`:
 
 - `validate-dashboard-page-layout-template.mjs`

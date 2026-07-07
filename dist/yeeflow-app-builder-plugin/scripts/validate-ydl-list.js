@@ -381,6 +381,10 @@ function generatorFinalSeverity(report) {
   return report.mode === "generator" && report.stage === "final" ? "error" : "warning";
 }
 
+function isGeneratorFinal(report) {
+  return report.mode === "generator" && report.stage === "final";
+}
+
 function validateAppCreationFieldRules(field, report, context = {}) {
   const severity = generatorFinalSeverity(report);
   const fieldName = safeString(field && field.FieldName);
@@ -1163,20 +1167,21 @@ function validateCustomForms(item, fieldByName, report) {
       const editLayout = customFormsByTitle.get("edit item");
       const viewLayout = customFormsByTitle.get("view item");
       if (report.mode === "generator") {
+        const standardFormSeverity = generatorFinalSeverity(report);
         if (!editLayout) {
-          issue(report, "warning", "UI_STANDARD_EDIT_ITEM_FORM_MISSING", "UI/UX standard generated data lists should include a custom form titled \"Edit Item\".", {});
+          issue(report, standardFormSeverity, "UI_STANDARD_EDIT_ITEM_FORM_MISSING", "UI/UX standard generated data lists should include a custom form titled \"Edit Item\".", {});
         }
         if (!viewLayout) {
-          issue(report, "warning", "UI_STANDARD_VIEW_ITEM_FORM_MISSING", "UI/UX standard generated data lists should include a custom form titled \"View Item\".", {});
+          issue(report, standardFormSeverity, "UI_STANDARD_VIEW_ITEM_FORM_MISSING", "UI/UX standard generated data lists should include a custom form titled \"View Item\".", {});
         }
         if (editLayout && String(parsedLayoutView.value.add) !== String(editLayout.LayoutID)) {
-          issue(report, "warning", "UI_STANDARD_NEW_NOT_USING_EDIT_ITEM_FORM", "UI/UX standard New item display setting should use the Edit Item custom form.", { expectedLayoutId: editLayout.LayoutID, actualLayoutId: parsedLayoutView.value.add });
+          issue(report, standardFormSeverity, "UI_STANDARD_NEW_NOT_USING_EDIT_ITEM_FORM", "UI/UX standard New item display setting should use the Edit Item custom form.", { expectedLayoutId: editLayout.LayoutID, actualLayoutId: parsedLayoutView.value.add });
         }
         if (editLayout && String(parsedLayoutView.value.edit) !== String(editLayout.LayoutID)) {
-          issue(report, "warning", "UI_STANDARD_EDIT_NOT_USING_EDIT_ITEM_FORM", "UI/UX standard Edit item display setting should use the Edit Item custom form.", { expectedLayoutId: editLayout.LayoutID, actualLayoutId: parsedLayoutView.value.edit });
+          issue(report, standardFormSeverity, "UI_STANDARD_EDIT_NOT_USING_EDIT_ITEM_FORM", "UI/UX standard Edit item display setting should use the Edit Item custom form.", { expectedLayoutId: editLayout.LayoutID, actualLayoutId: parsedLayoutView.value.edit });
         }
         if (viewLayout && String(parsedLayoutView.value.view) !== String(viewLayout.LayoutID)) {
-          issue(report, "warning", "UI_STANDARD_VIEW_NOT_USING_VIEW_ITEM_FORM", "UI/UX standard View item display setting should use the View Item custom form.", { expectedLayoutId: viewLayout.LayoutID, actualLayoutId: parsedLayoutView.value.view });
+          issue(report, standardFormSeverity, "UI_STANDARD_VIEW_NOT_USING_VIEW_ITEM_FORM", "UI/UX standard View item display setting should use the View Item custom form.", { expectedLayoutId: viewLayout.LayoutID, actualLayoutId: parsedLayoutView.value.view });
         }
       }
     } else if (report.mode === "generator" && !isDocumentLibrary) {
@@ -1440,25 +1445,54 @@ function validateCustomFormSubListControl(control, fieldByName, report, context)
 }
 
 function validateUiUxStandardListForm(form, report, details) {
+  const severity = generatorFinalSeverity(report);
+  const sharedGenerationBypassReasons = [];
   const container = form && form.attrs && form.attrs.container;
   if (container && container.cw !== "2") {
-    issue(report, "warning", "UI_STANDARD_CONTENT_WIDTH_NOT_FULL", "UI/UX standard custom list forms should use full-width content area: attrs.container.cw = \"2\".", details);
+    sharedGenerationBypassReasons.push("root content width is not full-width");
+    issue(report, severity, "UI_STANDARD_CONTENT_WIDTH_NOT_FULL", "UI/UX standard custom list forms should use full-width content area: attrs.container.cw = \"2\".", details);
   }
   if (!zeroPadding(container && container.padding)) {
-    issue(report, "warning", "UI_STANDARD_FORM_PADDING_NOT_ZERO", "UI/UX standard custom list forms should use zero page padding with --sp--s0 on all sides.", details);
+    sharedGenerationBypassReasons.push("root page padding does not preserve the zero-padding golden reference contract");
+    issue(report, severity, "UI_STANDARD_FORM_PADDING_NOT_ZERO", "UI/UX standard custom list forms should use zero page padding with --sp--s0 on all sides.", details);
   }
   const main = findControlByLabel(form, "Main");
   const content = findControlByLabel(form, "Content");
   if (!main) {
-    issue(report, "warning", "UI_STANDARD_MAIN_CONTAINER_MISSING", "UI/UX standard custom list forms should have a container with nv_label \"Main\".", details);
-    return;
+    sharedGenerationBypassReasons.push("missing Main container from Data List Form Layouts v1.1");
+    issue(report, severity, "UI_STANDARD_MAIN_CONTAINER_MISSING", "UI/UX standard custom list forms should have a container with nv_label \"Main\".", details);
   }
   if (!content) {
-    issue(report, "warning", "UI_STANDARD_CONTENT_CONTAINER_MISSING", "UI/UX standard custom list forms should have a container with nv_label \"Content\".", details);
-    return;
+    sharedGenerationBypassReasons.push("missing Content container from Data List Form Layouts v1.1");
+    issue(report, severity, "UI_STANDARD_CONTENT_CONTAINER_MISSING", "UI/UX standard custom list forms should have a container with nv_label \"Content\".", details);
   }
-  if (!controlContains(main, content)) {
-    issue(report, "warning", "UI_STANDARD_CONTENT_NOT_INSIDE_MAIN", "UI/UX standard custom list form Content container should be inside Main.", details);
+  if (main && content && !controlContains(main, content)) {
+    sharedGenerationBypassReasons.push("Content container is not inside Main");
+    issue(report, severity, "UI_STANDARD_CONTENT_NOT_INSIDE_MAIN", "UI/UX standard custom list form Content container should be inside Main.", details);
+  }
+
+  let currentRecordFieldControlCount = 0;
+  walkControls(form, (control) => {
+    const binding = controlBinding(control);
+    if (!binding || (control.attrs && control.attrs.list_field === true)) return;
+    const type = controlType(control);
+    if (isAllowedUnboundControl(type)) return;
+    currentRecordFieldControlCount += 1;
+  });
+  const fieldGridWrapper = findControlByLabel(form, "form_grid_fields_wrapper");
+  if (currentRecordFieldControlCount > 0 && !fieldGridWrapper) {
+    sharedGenerationBypassReasons.push("current-record field controls are not hosted inside form_grid_fields_wrapper");
+    issue(report, severity, "DATA_LIST_FORM_FIELDS_WRAPPER_MISSING", "Generated current-record field controls must be placed inside form_grid_fields_wrapper.", {
+      ...details,
+      fieldControlCount: currentRecordFieldControlCount,
+    });
+  }
+
+  if (isGeneratorFinal(report) && sharedGenerationBypassReasons.length) {
+    issue(report, "error", "STANDALONE_YDL_SHARED_GENERATION_BYPASSED", "Standalone .ydl custom form generation bypassed the shared full-application Data List Form Layouts v1.1 path.", {
+      ...details,
+      reasons: sharedGenerationBypassReasons,
+    });
   }
 }
 

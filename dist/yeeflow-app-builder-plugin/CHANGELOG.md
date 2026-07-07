@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.9.29
+
+- Release standalone YDL shared form hard gates.
+- Standalone `.ydl` generator-final validation now fails simplified custom form paths that reuse one generic form for New/Edit/View, omit concrete `Edit Item` or `View Item` forms, place current-record field controls outside `form_grid_fields_wrapper`, or bypass the shared Data List Form Layouts v1.1 and Data List Form Fields Grid v1.1 builders used by full `.yapk` materialization.
+- Add regression coverage using a deliberately bad standalone YDL fixture so future standalone exports cannot pass with `Main > Content > Form body`-style hand-built forms instead of golden reference templates.
+
 ## 0.9.28
 
 - Release Workflow action naming and connector Description hardening.
