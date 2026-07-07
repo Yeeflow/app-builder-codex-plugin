@@ -1371,6 +1371,20 @@ function validateBaseGridTableFullTemplate(entry, page, findings) {
       itemColumns,
     }));
   }
+  validateGridColumnTrackCount(header, {
+    page,
+    path: entry.pointer,
+    code: "DASH_DATASET_GRID_TABLE_COLUMN_TRACK_COUNT_MISMATCH",
+    role: "grid_table_col_header",
+    findings,
+  });
+  validateGridColumnTrackCount(itemGrid, {
+    page,
+    path: entry.pointer,
+    code: "DASH_DATASET_GRID_TABLE_COLUMN_TRACK_COUNT_MISMATCH",
+    role: "grid_col_item",
+    findings,
+  });
   validateGridTableDuplicateColumnLabels(header, page, entry, findings);
 
   const operations = findDescendantByIdentity(wrapper, "grid_table_col_item_operations");
@@ -1784,6 +1798,20 @@ function validateGridMultiselect(entry, page, findings) {
       itemColumns,
     }));
   }
+  validateGridColumnTrackCount(header, {
+    page,
+    path: entry.pointer,
+    code: "DASH_DATASET_GRID_MULTISELECT_COLUMN_TRACK_COUNT_MISMATCH",
+    role: "grid_table_col_header",
+    findings,
+  });
+  validateGridColumnTrackCount(itemGrid, {
+    page,
+    path: entry.pointer,
+    code: "DASH_DATASET_GRID_MULTISELECT_COLUMN_TRACK_COUNT_MISMATCH",
+    role: "grid_col_item",
+    findings,
+  });
 
   const opNormal = findDescendantByIdentity(wrapper, "op_normal");
   const normalButtons = findDescendants(opNormal, (node) => String(node?.type || "") === "action_button");
@@ -2314,6 +2342,23 @@ function gridColumnWidths(grid, deviceKey) {
     if (isObject(item)) return `${item.value || item.w || item.width || ""}${item.unit || item.u || ""}`;
     return String(item || "");
   }).filter(Boolean);
+}
+
+function validateGridColumnTrackCount(grid, { page, path, code, role, findings }) {
+  if (!grid) return;
+  const desktopTracks = gridColumnWidths(grid, "1");
+  const childCount = asArray(grid.children).length;
+  if (!desktopTracks.length || childCount < 1) return;
+  if (desktopTracks.length !== childCount) {
+    findings.push(error(code, "Grid-table column tracks must be pruned to match the actual header/item cell count after business field mapping.", {
+      page: page.title,
+      path,
+      role,
+      trackCount: desktopTracks.length,
+      childCount,
+      tracks: desktopTracks,
+    }));
+  }
 }
 
 function readJson(file, findings, missingCode) {
