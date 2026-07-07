@@ -53,6 +53,9 @@ The validator checks:
 - normalized workflow action required properties, enum values, value types, conditional `ContentList`, `QueryData`, `SequenceFlow`, `Loop`, and `Delay` shapes
 - approval form page URLs and task URLs
 - workflow graph references
+- workflow Condition editor variable rows where `left.type = 1` selects a workflow variable and `right.type = 0` stores a fixed literal value or `right.type = 2` stores a non-empty Expression editor token array, including variable resolution, `group` mapping, operator prefix, literal value type checks, and expression-wrapper checks
+- workflow Condition editor group rows with at most two layers: top-level group wrappers must use `left: null`, `op: "isNull"`, `right: null`, and non-empty child `conditions[]`; empty groups, third-level nested groups, and wrappers with real operands fail package validation
+- Assignment task `Approved`, `Rejected`, and `Completed` outgoing conditions, including source-task Outcome expression-button HTML on the left and matching `Task outcome:*` expression-button HTML on the right; generic/simple `Outcome` workflow-variable tokens fail generated-final validation
 - `ContentList` target list/field references
 - `QueryData` target references where parseable
 - lookup field target list/display field resolution

@@ -12,6 +12,7 @@ const {
   validateFieldAgainstSchema,
 } = require("./yeeflow-control-field-schema-utils");
 const { validateExpressionTokens } = require("./yeeflow-expression-utils");
+const { validateWorkflowConditionEditorRows } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -4168,6 +4169,14 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
 function validateWorkflowOutcomeConditionShape(shape, report, context) {
   const severity = generatorFinalSeverity(report);
   const conditions = asArray(shape && shape.properties && shape.properties.conditioninfo);
+  const sourceId = safeString(shape && shape.source && (shape.source.id || shape.source.resourceid));
+  function expectedTaskOutcome(text) {
+    const value = safeString(text);
+    if (/\bapproved\b/i.test(value) || /已同意/.test(value)) return "Approved";
+    if (/\brejected\b/i.test(value) || /已拒绝/.test(value)) return "Rejected";
+    if (/\bcompleted\b/i.test(value) || /已完成/.test(value)) return "Completed";
+    return "";
+  }
   conditions.forEach((condition, conditionIndex) => {
     const text = JSON.stringify(condition || {});
     const flowLabel = safeString(shape && shape.properties && (shape.properties.name || shape.properties.label || shape.properties.documentation));
@@ -4178,6 +4187,46 @@ function validateWorkflowOutcomeConditionShape(shape, report, context) {
         ...context,
         conditionIndex,
         flowLabel,
+      });
+      return;
+    }
+    const isTaskOutcome = text.includes("&quot;type&quot;:&quot;task&quot;") || text.includes(":Outcome") || text.includes(":结果");
+    if (!isTaskOutcome) return;
+    const expectedOutcome = expectedTaskOutcome(flowLabel) || expectedTaskOutcome(text);
+    const leftText = typeof condition.left === "string" ? condition.left : JSON.stringify(condition.left || {});
+    const rightText = typeof condition.right === "string" ? condition.right : JSON.stringify(condition.right || {});
+    if (condition.op !== "s.=") {
+      issue(report, severity, "WORKFLOW_OUTCOME_CONDITION_BAD_OP", "Approval task outcome condition should use op: s.=.", {
+        ...context,
+        conditionIndex,
+        flowLabel,
+      });
+    }
+    if (
+      typeof condition.left !== "string" ||
+      !leftText.includes("<input") ||
+      !leftText.includes("&quot;type&quot;:&quot;task&quot;") ||
+      !leftText.includes("&quot;prop&quot;:&quot;Outcome&quot;") ||
+      (sourceId && !leftText.includes(sourceId))
+    ) {
+      issue(report, severity, "WORKFLOW_OUTCOME_CONDITION_LEFT_TASK_REF_INVALID", "Approval task outcome condition left operand must be an export-style task Outcome expression-button for the source Assignment task, not a generic Outcome variable token.", {
+        ...context,
+        conditionIndex,
+        flowLabel,
+        sourceId,
+      });
+    }
+    if (
+      typeof condition.right !== "string" ||
+      !rightText.includes("<input") ||
+      !rightText.includes("Task outcome:") ||
+      (expectedOutcome && !rightText.includes(`Task outcome:${expectedOutcome}`))
+    ) {
+      issue(report, severity, "WORKFLOW_OUTCOME_CONDITION_RIGHT_RESULT_INVALID", "Approval task outcome condition right operand must be an export-style Task outcome expression-button matching the outgoing branch.", {
+        ...context,
+        conditionIndex,
+        flowLabel,
+        expectedOutcome,
       });
     }
   });
@@ -4195,7 +4244,7 @@ function collectWorkflowVariables(def) {
     if (id) {
       ids.add(id);
       keys.add(id);
-      byId.set(id, { id, idx, name });
+      byId.set(id, { id, idx, name, type: safeString(variable.type), valueType: safeString(variable.valueType) });
     }
     if (idx) keys.add(idx);
     if (name) keys.add(name);
@@ -4214,6 +4263,19 @@ function collectWorkflowVariables(def) {
 
 function validateSequenceFlowConditionVariables(shape, workflowVariables, report, context) {
   const conditions = asArray(shape && shape.properties && shape.properties.conditioninfo);
+  for (const finding of validateWorkflowConditionEditorRows({
+    conditions,
+    variablesById: workflowVariables.byId,
+    path: context.path,
+    node: safeString(shape && shape.properties && shape.properties.name) || shapeId(shape),
+  })) {
+    issue(report, generatorFinalSeverity(report), finding.code, finding.message, {
+      ...context,
+      path: finding.path,
+      node: safeString(shape && shape.properties && shape.properties.name) || shapeId(shape),
+      ...(finding.detail || {}),
+    });
+  }
   conditions.forEach((condition, conditionIndex) => {
     for (const side of ["left", "right"]) {
       const operand = condition && condition[side];

@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+## 0.9.25
+
+- Release Workflow Condition editor grouping and expression-right hardening.
+- Support export-shaped `right.type = 2` Expression editor comparison values for workflow variable conditions while preserving direct `right.type = 0` as the default for fixed literal values.
+- Add two-layer Condition editor group validation so top-level group wrappers use `left: null`, `op: "isNull"`, `right: null`, and non-empty child `conditions[]`.
+- Block third-level nested groups, empty groups, and group wrappers that carry real left/right operands.
+- Strengthen Assignment Task `Approved`, `Rejected`, and `Completed` outcome conditions so generated flows use source-task Outcome expression-button HTML instead of generic `Outcome` variable tokens.
+- Add source/dist regression coverage for direct values, expression-editor values, grouped `and`/`or` child conditions, and task outcome condition shapes.
+- RC install smoke passed from `yeeflow-app-builder-plugin-v0.9.25-rc1`: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.25`, marketplace metadata resolved from the RC snapshot, and installed-cache workflow condition, approval YWF structure, workflow layout, workflow assignee, and standalone export gates passed.
+
+## 0.9.24
+
+- Release Workflow Designer motif-first readability hardening.
+- Add local Inclusive Gateway fan-out validation so business branch targets stay near the gateway and use upper/lower lanes instead of distant long connectors.
+- Add local normal End merge validation so multi-source completion paths converge beside the incoming source group.
+- Add local rejection vertex-economy validation so nearby `Rejected -> End with rejection` paths use rounded auto-routing instead of unnecessary `vertices[]`.
+- Add concise connector label validation so full business logic remains in `conditioninfo` while visible labels stay readable.
+- Extend source/dist workflow layout regression coverage for gateway locality, End merge locality, local rejection vertices, and overlong condition labels.
+
 ## 0.9.23
 
 - Release Workflow Designer readability gate hardening.

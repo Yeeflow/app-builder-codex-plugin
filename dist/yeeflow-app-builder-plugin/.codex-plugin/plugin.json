@@ -1,6 +1,6 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "description": "Yeeflow App Builder Codex plugin for building, validating, testing, and improving Yeeflow applications with workflow motif layout, assignee routing, Custom Code, Custom Service, and Service Portal capability guidance.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",

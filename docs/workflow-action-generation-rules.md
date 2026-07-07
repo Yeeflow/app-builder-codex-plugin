@@ -71,5 +71,21 @@ Example: if `HasCustomPackageProduct` drives Finance/Benefits Review, the standa
 For new generated workflow conditions, prefer these wrapper object shapes over legacy frontend `<input type="button" ...>` expression-button strings. Use `left.type = 1` and `right.type = 0` for simple routing such as `ApplicationType == Family`. Use `type = 2` on whichever side needs an expression editor, such as date tenure, numeric thresholds, calculated quota cycle, or expression-to-expression comparisons.
 
 See `docs/workflow-transition-condition-patterns-study.md` and `docs/yeeflow-workflow-generation-rules.md` for examples.
+
+For direct Workflow-variable-left plus direct-value-right conditions, derive the Condition editor group from the variable type, not from the visible label:
+
+- User, Department/groupselect, Location, Cost Center, Lookup, Metadata, Dictionary, List, and Text variables use `group: "string"` and `s.` operators.
+- Number/currency/percent variables use `group: "number"` and `n.` operators.
+- Boolean variables use `group: "boolean"` and `b.` operators.
+- Date/time variables use `group: "datetime"` and `dt.` operators. Supported direct-value operators are `dt.=`, `dt.!=`, `dt.>=`, `dt.<=`, `dt.>`, `dt.<`, `isNull`, and `isNotNull`; direct right values are date/time strings and null checks use `right: null`.
+- File/Image/Signature variables use `group: "general"` with `isNull` or `isNotNull`.
+
+Use `right.type = 0` for fixed values and `right.type = 2` for Expression editor values. Choose `right.type = 2` only for dynamic or processed comparisons such as string concatenation, numeric calculation, Boolean `iif`, current user, applicant attributes through `getUserAttr`, cross-variable comparison, or date functions such as `dateAdd(now(), "month", 1)`. The `right.value` for type `2` must be a non-empty expression-token array.
+
+For grouped Condition editor logic, generate at most two layers. A top-level condition group row uses `left: null`, `op: "isNull"`, `right: null`, and a non-empty `conditions[]` child array. The parent row's `pre` connects the group to the surrounding top-level rows; child rows use their own `pre` values. Use child `and` rows for grouped range/all-required clauses and child `or` rows for alternative values. Third-level nested `conditions[]` groups are invalid.
+
+For Assignment Task outgoing `Approved`, `Rejected`, and `Completed` lines, do not use a simple Workflow variable named `Outcome`. The left side must be the export-style task Outcome expression-button for the source task (`type = task`, `param.defid = <source task id>`, `prop = Outcome`), `op` must be `s.=`, and the right side must be the matching `Task outcome:*` expression-button.
+
+The focused reference is documented in `docs/studies/workflow-condition-editor-direct-value.md`; generated-final validators should block mismatched group/operator/value shapes before wrapper build.
 - Stop if external/credential actions contain literal secrets or unresolved connection IDs.
 - Do not generate a new app solely from this reference; use it to validate a separately decomposed workflow requirement.

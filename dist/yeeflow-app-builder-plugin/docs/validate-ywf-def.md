@@ -75,5 +75,8 @@ Workflow designer layout readiness includes:
 - Every `SequenceFlow` has explicit `source` and `target` references to existing non-SequenceFlow nodes.
 - Every `SequenceFlow.source` matches the source inferred from node `outgoing`.
 - Every `SequenceFlow.target` node includes the flow in its `incoming`.
+- Workflow Condition editor variable rows with `left.type = 1` and `left.value.exprType = "variable"` resolve the selected workflow variable, use the correct Condition editor `group`, use the matching operator family (`s.`, `n.`, `b.`, `dt.`, or general null checks), and use either `right.type = 0` for compatible direct literal values or `right.type = 2` for non-empty Expression editor token arrays.
+- Workflow Condition editor group rows support at most two layers: top-level `conditioninfo[]` rows plus one child `conditions[]` layer. Group wrapper rows must use `left: null`, `op: "isNull"`, `right: null`, and a non-empty child array. Empty groups, third-level groups, and group wrappers with real left/right operands are invalid.
+- Assignment task `Approved`, `Rejected`, and `Completed` outgoing conditions must use export-style task Outcome expression-button HTML tied to the source task id. Generic/simple `Outcome` workflow-variable tokens fail with `APPROVAL_CONDITION_LEFT_TASK_REF_INVALID`.
 
 It cannot prove that unresolved Yeeflow environment resources are correct. App IDs, ListSetIDs, ListIDs, field internal names, approver IDs, document templates, Agent IDs, and live import behavior must still be verified separately before final `.ywf` generation.
