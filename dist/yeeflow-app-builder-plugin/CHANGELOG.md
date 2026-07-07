@@ -8,7 +8,7 @@
 - Generated Approval form, Data list workflow, and Scheduled workflow action nodes now derive concise business-specific Action names from assignee role, job position, branch purpose, and action type instead of keeping default labels such as `Assignment Task`.
 - Generated SequenceFlow connectors now write non-empty concise business Descriptions in `properties.documentation`, such as `Approved`, `Rejected`, `Completed`, or short branch conditions like `Amount >= 100`.
 - Add hard gates for missing/default/overlong workflow action names and missing/default/overlong connector Descriptions across YWF, YAP/YAPK package validation, and workflow-layout golden-reference tests.
-- RC install smoke pending for `yeeflow-app-builder-plugin-v0.9.28-rc1`.
+- RC install smoke passed from `yeeflow-app-builder-plugin-v0.9.28-rc1`: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.28`, and installed-cache workflow layout, workflow condition, approval YWF structure, workflow assignee, and standalone export gates passed.
 
 ## 0.9.27
 
