@@ -294,6 +294,8 @@ function validateOneWorkflow(resource, reference, findings) {
   if (!nodes.length && !flows.length) return;
 
   validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, lineStyleRules, findings);
+  validateWorkflowActionNames(resource, nodes, spacing, findings);
+  validateWorkflowConnectorDescriptions(resource, flows, spacing, lineStyleRules, findings);
 
   for (const node of nodes) {
     if (!node.position) {
@@ -436,6 +438,88 @@ function validateOneWorkflow(resource, reference, findings) {
   validateConnectorReadability(resource, nodes, flows, spacing, findings);
 }
 
+function validateWorkflowActionNames(resource, nodes, spacing, findings) {
+  const maxChars = Number(spacing.workflowActionNameMaxChars || 48);
+  const actionStencils = new Set(["MultiAssignmentTask", "CandidateTask", "ContentList", "InclusiveGateway"]);
+  for (const node of nodes) {
+    if (!actionStencils.has(node.stencil)) continue;
+    const nodePath = `$.childshapes[${node.index}]`;
+    const name = String(node.shape.properties?.name || node.shape.properties?.title || node.shape.properties?.label || "").trim();
+    if (!name) {
+      findings.push(issue("WORKFLOW_LAYOUT_ACTION_NAME_MISSING", "Workflow action nodes must have a concise business-specific Action name.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${nodePath}.properties.name`,
+        nodeId: node.id,
+        stencil: node.stencil,
+      }));
+      continue;
+    }
+    if (isDefaultWorkflowActionName(name)) {
+      findings.push(issue("WORKFLOW_LAYOUT_ACTION_NAME_DEFAULT", "Workflow action nodes must not keep default Designer names such as Assignment Task; use a business-specific name such as Finance manager approval.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${nodePath}.properties.name`,
+        nodeId: node.id,
+        stencil: node.stencil,
+        name,
+      }));
+    }
+    if (name.length > maxChars) {
+      findings.push(issue("WORKFLOW_LAYOUT_ACTION_NAME_TOO_LONG", "Workflow action names should be short enough to render cleanly on the node card.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${nodePath}.properties.name`,
+        nodeId: node.id,
+        stencil: node.stencil,
+        name,
+        length: name.length,
+        maximum: maxChars,
+      }));
+    }
+  }
+}
+
+function validateWorkflowConnectorDescriptions(resource, flows, spacing, lineStyleRules, findings) {
+  if (lineStyleRules.requireDocumentation === false) return;
+  const maxChars = Number(spacing.workflowFlowDescriptionMaxChars || spacing.connectorLabelMaxChars || 42);
+  for (const flow of flows) {
+    const flowPath = `$.childshapes[${flow.index}]`;
+    const props = flow.shape.properties || {};
+    if (!Object.prototype.hasOwnProperty.call(props, "documentation")) continue;
+    const description = String(props.documentation || "").trim();
+    if (!description) {
+      findings.push(issue("WORKFLOW_LAYOUT_FLOW_DESCRIPTION_MISSING", "SequenceFlow Description must be a short business label such as Approved, Rejected, Completed, or Amount >= 100; an empty string is not acceptable for generated workflows.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.properties.documentation`,
+        flowId: flow.id,
+      }));
+      continue;
+    }
+    if (isDefaultWorkflowConnectorDescription(description)) {
+      findings.push(issue("WORKFLOW_LAYOUT_FLOW_DESCRIPTION_DEFAULT", "SequenceFlow Description must not keep default Designer text such as Sequence flow; use the business outcome or branch condition.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.properties.documentation`,
+        flowId: flow.id,
+        description,
+      }));
+    }
+    if (description.length > maxChars) {
+      findings.push(issue("WORKFLOW_LAYOUT_FLOW_DESCRIPTION_TOO_LONG", "SequenceFlow Description should be concise so connector labels remain readable.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.properties.documentation`,
+        flowId: flow.id,
+        description,
+        length: description.length,
+        maximum: maxChars,
+      }));
+    }
+  }
+}
+
 function isLocalForwardAutoRouteCandidate({ flow, sourceNode, targetNode, spacing }) {
   if (!flow || !sourceNode?.position || !targetNode?.position) return false;
   const sourceStencil = stencilId(sourceNode.shape);
@@ -491,7 +575,7 @@ function validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, line
       }));
     }
     if (lineStyleRules.requireDocumentation !== false && !Object.prototype.hasOwnProperty.call(flow.shape.properties || {}, "documentation")) {
-      findings.push(issue("WORKFLOW_LAYOUT_FLOW_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow should include properties.documentation, usually an empty string.", {
+      findings.push(issue("WORKFLOW_LAYOUT_FLOW_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow must include properties.documentation as a concise business Description.", {
         source: resource.source,
         workflowName: resource.workflowName,
         path: `${flowPath}.properties.documentation`,
@@ -1674,6 +1758,18 @@ function isBusinessConditionFlow(flow) {
 function flowLabel(flow) {
   const props = flow?.properties || {};
   return String(props.documentation || props.name || "").trim();
+}
+
+function isDefaultWorkflowActionName(value) {
+  const text = String(value || "").trim();
+  if (!text) return true;
+  return /^(assignment\s*task|candidate\s*task|claim\s*task|content\s*list|inclusive\s*gateway|gateway|task|workflow\s*task(?:\s*\d+)?|sequence\s*flow(?:[_\s-]*\d+)?)$/i.test(text);
+}
+
+function isDefaultWorkflowConnectorDescription(value) {
+  const text = String(value || "").trim();
+  if (!text) return true;
+  return /^(sequence\s*flow(?:[_\s-]*\d+)?|connector|transition|line)$/i.test(text);
 }
 
 function titleCase(value) {
