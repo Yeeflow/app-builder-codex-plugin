@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.9.32
+
+- Release standalone YDL import-readiness hardening.
+- Standalone Data List exports now fail strict import-ready validation when `Defs[].Rules` is emitted as object-shaped JSON instead of stringified JSON.
+- Block demo `ListDatas` from writing system audit fields such as `Created`, `Modified`, `CreatedBy`, or `ModifiedBy`.
+- Require standalone custom forms to use import-safe `LayoutView: null` with concrete `LayoutInResources[0].Resource`, and keep the default view URL as export-safe `default`.
+- Keep standalone `.ywf`, `.ydl`, and `.ydp` generation on the shared Standalone Artifact Plan -> Trace JSON -> Shared Builder -> Standalone Export -> Plan-vs-Actual Validator path.
+- RC cache smoke passed from `yeeflow-app-builder-plugin-v0.9.32-rc1`: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.32`, and installed-cache YDL strict import-ready, standalone export shared-generation, and Data View fixed-filter gates passed.
+
 ## 0.9.31
 
 - Release Data List view fixed-filter hardening.
