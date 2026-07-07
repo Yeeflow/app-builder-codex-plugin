@@ -38,7 +38,19 @@ The source files were inspected read-only. Raw exports are not bundled into the 
 - Inclusive Gateway branches are local fan-out motifs. Branch targets should stay close to the gateway, distributed into upper/lower lanes, rather than becoming far-away targets repaired with long connectors.
 - Normal End nodes with multiple incoming branches are local merge motifs. Place them beside and vertically within the incoming source group instead of using a distant global End.
 - Local rejected connectors to nearby `EndRejectEvent` nodes should not use explicit vertices. If vertices are needed for a local rejection path, the rejection endpoint is probably placed incorrectly.
+- Local forward/merge connectors, including nearby `Completed` and `Approved` lines between branch/action lanes, should not use explicit vertices merely because they cross y lanes. The generator should default these links to empty `vertices[]`; if they need many bends, the branch or merge nodes are in the wrong place.
 - Visible business-condition connector labels must be short; full logic belongs in `conditioninfo`.
+
+## Bad/Good Design Comparison Update
+
+The July 2026 `workflow bad design.json` and `Workflow good design.json` comparison clarifies the vertex boundary:
+
+- Bad design had four vertex-routed flows; good design kept only two.
+- `IT security check -> Procurement availability` and `Standard accessory check -> Procurement availability` removed vertices because they are nearby forward local merge links.
+- `Vendor quotation -> Asset registration` kept vertices because it is a same-column vertical branch route where explicit right-side routing is clearer.
+- `Request clarification -> Line manager approval` kept vertices because it is a true long backward/return route, but its route lane moved from an excessive external y value into the readable workflow area.
+
+Training conclusion: do not train the generator to remove all vertices. Train it to remove unnecessary vertices from nearby forward local merge links while preserving vertices for same-column vertical branch routes and real long return/backward paths.
 
 ## Workflow Actions Layout V2 Standard
 
@@ -59,6 +71,7 @@ The focused workflow actions reference establishes these minimum/recommended geo
 | Multi-source normal End | Local merge within about 650 px of incoming source group |
 | Connector label length | Business-condition display label should stay within about 42 chars |
 | Local reject vertices | No vertices for nearby rejected connectors within about 760 x 260 px |
+| Local forward/merge vertices | No vertices for nearby Completed/Approved merge connectors within about 1250 x 360 px |
 | Designer canvas usage | Prefer roughly 16:9 visible area instead of one-row sprawl |
 | Maximum vertical rows | 5 rows/layers |
 
@@ -81,6 +94,7 @@ The plugin validator now checks the semantic layout contract, not just visual co
 - `WORKFLOW_LAYOUT_END_MERGE_TOO_FAR`
 - `WORKFLOW_LAYOUT_END_MERGE_VERTICAL_MISMATCH`
 - `WORKFLOW_LAYOUT_LOCAL_REJECT_VERTICES_UNNECESSARY`
+- `WORKFLOW_LAYOUT_LOCAL_FORWARD_VERTICES_UNNECESSARY`
 - `WORKFLOW_LAYOUT_CONNECTOR_LABEL_TOO_LONG`
 
 ## Plugin Changes

@@ -82,6 +82,29 @@ try {
   }), "WORKFLOW_LAYOUT_DIRECT_FORWARD_VERTICES_UNNECESSARY");
   cases.push({ case: "fail: direct same-row forward connector should use auto-routing", status: "pass" });
 
+  expectCode("local cross-lane merge connector with vertices fails", mutateReadable("local-forward-merge-with-vertices.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    const upperLocal = node("upper-local-task", "MultiAssignmentTask", "Upper Local Task", 720, 80);
+    const lowerLocal = node("lower-local-task", "MultiAssignmentTask", "Lower Local Task", 720, 520);
+    const merge = node("local-merge-task", "MultiAssignmentTask", "Local Merge Task", 1180, 360);
+    def.childshapes.push(upperLocal, lowerLocal, merge);
+    def.childshapes.push(flow("flow-upper-local-merge-with-vertices", upperLocal, merge, "Completed", [
+      { x: 870, y: 123 },
+      { x: 1080, y: 270 },
+      { x: 1180, y: 403 },
+    ]));
+    def.childshapes.push(flow("flow-lower-local-merge-with-vertices", lowerLocal, merge, "Completed", [
+      { x: 870, y: 563 },
+      { x: 1080, y: 475 },
+      { x: 1180, y: 403 },
+    ]));
+    def.childshapes.push(flow("flow-review-upper-local", review, upperLocal, "Approved"));
+  }), "WORKFLOW_LAYOUT_LOCAL_FORWARD_VERTICES_UNNECESSARY");
+  cases.push({ case: "fail: local cross-lane forward/merge connectors should use auto-routing", status: "pass" });
+
+  expectPass("same-column vertical branch route may keep vertices", ["--resource", writeResource("same-column-vertical-route-with-vertices.json", sameColumnVerticalRouteWorkflow())]);
+  cases.push({ case: "pass: same-column vertical branch route may use explicit vertices", status: "pass" });
+
   expectCode("row-gap return route not at midpoint fails", mutateReadable("row-gap-return-not-midpoint.json", (def) => {
     const review = def.childshapes.find((shape) => shape.id === "review");
     const create = def.childshapes.find((shape) => shape.id === "create");
@@ -433,6 +456,42 @@ function mediumWideWarningOnlyWorkflow() {
     graphzoom: 1,
     graphposition: { x: -80, y: 40, width: 3950, height: 760 },
     childshapes,
+  };
+}
+
+function sameColumnVerticalRouteWorkflow() {
+  const nodes = {
+    start: node("same-column-start", "StartNoneEvent", "Start", 100, 220),
+    review: node("same-column-review", "MultiAssignmentTask", "Review", 420, 220),
+    upper: node("same-column-upper", "ContentList", "Upper branch", 760, 80),
+    middle: node("same-column-middle", "ContentList", "Middle branch", 760, 240),
+    lower: node("same-column-lower", "ContentList", "Lower branch", 760, 400),
+    end: node("same-column-end", "EndNoneEvent", "End", 1120, 400),
+    reject: node("same-column-reject", "EndRejectEvent", "Rejected", 420, 80),
+  };
+  return {
+    lineType: "rounded",
+    graphver: 2,
+    graphzoom: 1,
+    graphposition: { x: -60, y: 0, width: 1420, height: 680 },
+    childshapes: [
+      nodes.start,
+      flow("same-column-submit", nodes.start, nodes.review, "Submit"),
+      flow("same-column-approved", nodes.review, nodes.middle, "Approved"),
+      flow("same-column-rejected", nodes.review, nodes.reject, "Rejected"),
+      nodes.review,
+      nodes.upper,
+      flow("same-column-upper-to-lower", nodes.upper, nodes.lower, "Completed", [
+        { x: 990, y: 123 },
+        { x: 990, y: 443 },
+      ]),
+      flow("same-column-middle-to-end", nodes.middle, nodes.end, "Completed"),
+      flow("same-column-lower-to-end", nodes.lower, nodes.end, "Completed"),
+      nodes.middle,
+      nodes.lower,
+      nodes.end,
+      nodes.reject,
+    ],
   };
 }
 

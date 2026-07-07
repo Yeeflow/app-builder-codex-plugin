@@ -144,8 +144,10 @@
     "endMergeMaxDeltaX": 650,
     "endMergeVerticalToleranceY": 130,
     "connectorLabelMaxChars": 42,
-    "localRejectVertexMaxDeltaX": 760,
-    "localRejectVertexMaxDeltaY": 260
+      "localRejectVertexMaxDeltaX": 760,
+      "localRejectVertexMaxDeltaY": 260,
+      "localForwardAutoRouteMaxDeltaX": 1250,
+      "localForwardAutoRouteMaxDeltaY": 360
   },
     "lineStyle": {
       "default": "rounded",
