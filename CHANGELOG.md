@@ -9,6 +9,7 @@
 - Add export-shaped fixed-filter support for `and`/`or` combinations, two-level condition groups, non-empty checks, and Schedule-style `Date >= now` expressions.
 - Block unsupported `Today` function/token usage in Data View filters; generated plans should convert business `Today` intent to Yeeflow's export-proven `now` function.
 - Add source/dist regression coverage using the Event Planning Data View filter scenario: `All Events`, `Schedule Overview`, `RSVP Tracker`, and `Budget and Vendors`.
+- RC cache smoke passed from `yeeflow-app-builder-plugin-v0.9.31-rc1`: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.31`, and installed-cache Data View fixed-filter plus standalone export shared-generation gates passed.
 
 ## 0.9.30
 
