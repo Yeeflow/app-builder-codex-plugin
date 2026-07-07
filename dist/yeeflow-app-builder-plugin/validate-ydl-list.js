@@ -158,7 +158,7 @@ const APP_CREATION_PROCESS_KEY_RE = /^[A-Za-z0-9_]+$/;
 function usage(exitCode = 1) {
   const text = [
     "Usage:",
-    "  node validate-ydl-list.js <list.ydl|decoded-data.json> --mode <compatibility|generator> [--stage <draft|final>] [--dependency-map <json>]",
+    "  node validate-ydl-list.js <list.ydl|decoded-data.json> --mode <compatibility|generator> [--stage <draft|final>] [--dependency-map <json>] [--strict-import-ready]",
     "",
     "Examples:",
     "  node validate-ydl-list.js \"./Portfolio Management.ydl\" --mode compatibility",
@@ -171,12 +171,13 @@ function usage(exitCode = 1) {
 
 function parseArgs(argv) {
   if (argv.includes("--help") || argv.includes("-h")) usage(0);
-  const args = { input: null, mode: "generator", stage: "final", dependencyMap: null };
+  const args = { input: null, mode: "generator", stage: "final", dependencyMap: null, strictImportReady: false };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--mode") args.mode = argv[++i];
     else if (arg === "--stage") args.stage = argv[++i];
     else if (arg === "--dependency-map") args.dependencyMap = argv[++i];
+    else if (arg === "--strict-import-ready") args.strictImportReady = true;
     else if (!args.input) args.input = arg;
     else usage();
   }
@@ -1802,6 +1803,81 @@ function validateSampleData(item, fieldByName, report, dependencyMap, externalLo
   }
 }
 
+const STANDALONE_IMPORT_DISALLOWED_SAMPLE_FIELDS = new Set([
+  "Created",
+  "Modified",
+  "CreatedBy",
+  "ModifiedBy",
+  "CreatedByName",
+  "ModifiedByName",
+]);
+
+function parseExtObject(value) {
+  if (isObject(value)) return value;
+  const parsed = tryParseJson(value);
+  return parsed.ok && isObject(parsed.value) ? parsed.value : null;
+}
+
+function validateStandaloneImportReadiness(item, report) {
+  if (!report.strictImportReady) return;
+
+  asArray(item.Defs).forEach((field, index) => {
+    if (!isObject(field)) return;
+    if (field.Rules !== undefined && field.Rules !== null && field.Rules !== "" && typeof field.Rules !== "string") {
+      issue(report, "error", "YDL_IMPORT_FIELD_RULES_NOT_STRINGIFIED", "Standalone import-ready .ydl must keep Defs[].Rules as a JSON string. Object Rules can fail current Yeeflow data-list import.", {
+        location: `Item.Defs[${index}].Rules`,
+        fieldName: field.FieldName || null,
+        displayName: field.DisplayName || null,
+        valueType: Array.isArray(field.Rules) ? "array" : typeof field.Rules,
+      });
+    }
+  });
+
+  for (const [recordId, record] of Object.entries(isObject(item.ListDatas) ? item.ListDatas : {})) {
+    if (!isObject(record)) continue;
+    for (const fieldName of Object.keys(record)) {
+      if (STANDALONE_IMPORT_DISALLOWED_SAMPLE_FIELDS.has(fieldName)) {
+        issue(report, "error", "YDL_IMPORT_SAMPLE_AUDIT_FIELD_PRESENT", "Standalone import-ready demo ListDatas must not write Yeeflow system audit fields. Let the import service populate Created/Modified and user audit metadata.", {
+          location: `Item.ListDatas.${recordId}.${fieldName}`,
+          recordId,
+          fieldName,
+        });
+      }
+    }
+  }
+
+  asArray(item.Layouts).forEach((layout, index) => {
+    if (!isObject(layout)) return;
+    if (layoutType(layout) === "1") {
+      if (layout.LayoutView !== null) {
+        issue(report, "error", "YDL_IMPORT_CUSTOM_FORM_LAYOUTVIEW_NOT_NULL", "Standalone import-ready custom form layouts must use LayoutView: null and carry the form JSON in LayoutInResources[0].Resource.", {
+          location: `Item.Layouts[${index}].LayoutView`,
+          title: layout.Title || null,
+          valueType: layout.LayoutView === undefined ? "undefined" : typeof layout.LayoutView,
+        });
+      }
+      const layoutResource = layout.LayoutInResources && layout.LayoutInResources[0];
+      if (!layoutResource || layoutResource.Resource === undefined || layoutResource.Resource === null || layoutResource.Resource === "") {
+        issue(report, "error", "YDL_IMPORT_CUSTOM_FORM_RESOURCE_MISSING", "Standalone import-ready custom form layouts must include LayoutInResources[0].Resource.", {
+          location: `Item.Layouts[${index}].LayoutInResources[0].Resource`,
+          title: layout.Title || null,
+        });
+      }
+      return;
+    }
+
+    const ext = parseExtObject(layout.Ext1);
+    const url = ext && (ext.Url || ext.url);
+    if (isTruthy(layout.IsDefault) && url !== undefined && String(url) !== "default") {
+      issue(report, "error", "YDL_IMPORT_DEFAULT_VIEW_URL_NOT_DEFAULT", "Standalone import-ready default data view must preserve the export-safe URL key \"default\". Business slugs belong only on non-default views.", {
+        location: `Item.Layouts[${index}].Ext1.Url`,
+        title: layout.Title || null,
+        url: String(url),
+      });
+    }
+  });
+}
+
 function resolvedLookupDependency(lookup, dependencyMap) {
   if (!dependencyMap) return null;
   const dependencies = Array.isArray(dependencyMap.dependencies) ? dependencyMap.dependencies : [];
@@ -1860,11 +1936,12 @@ function collectKnownListIds(data) {
   return ids;
 }
 
-function validate(inputPath, mode, stage, dependencyMapPath = null) {
+function validate(inputPath, mode, stage, dependencyMapPath = null, options = {}) {
   const report = {
     status: "pass",
     mode,
     stage,
+    strictImportReady: options.strictImportReady === true,
     input: path.resolve(inputPath),
     inputKind: null,
     errors: [],
@@ -1908,6 +1985,7 @@ function validate(inputPath, mode, stage, dependencyMapPath = null) {
   validateCustomFormDisplaySettings(item, report);
   validateWorkflows(decoded.data, item, fieldByName, knownListIds, report);
   validateSampleData(item, fieldByName, report, dependencyMap, externalLookupFields, decoded.resource);
+  validateStandaloneImportReadiness(item, report);
   validateLookupRelationships(lookupRelationships, knownListIds, report, dependencyMap);
   validateDesignSystemColorUsage(decoded, report);
 
@@ -1931,7 +2009,7 @@ function finishReport(report) {
 
 function main() {
   const args = parseArgs(process.argv);
-  const report = validate(args.input, args.mode, args.stage, args.dependencyMap);
+  const report = validate(args.input, args.mode, args.stage, args.dependencyMap, { strictImportReady: args.strictImportReady });
   console.log(JSON.stringify(report, null, 2));
   if (report.status === "fail") process.exit(1);
 }
