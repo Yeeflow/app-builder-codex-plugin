@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 const { validateWorkflowActionShapes } = require("./workflow-action-config-validator");
+const { validatePackageWrapperIcon } = require("./scripts/lib/application-icon-validation.cjs");
 const {
   isGeneratedValueControl,
   loadControlFieldSchemas,
@@ -11,6 +12,10 @@ const {
   validateFieldAgainstSchema,
 } = require("./yeeflow-control-field-schema-utils");
 const { validateExpressionTokens } = require("./yeeflow-expression-utils");
+const {
+  validateWorkflowBranchConditionCoverage,
+  validateWorkflowConditionEditorRows,
+} = require("./scripts/lib/workflow-condition-editor-utils.cjs");
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -109,6 +114,15 @@ const CANONICAL_FIELDTYPE_BY_CONTROL_TYPE = new Map([
   ["datepicker", "Datetime"],
 ]);
 const APPROVAL_APPROVEWAYS = new Set(["allapprove", "anyapprove", "anyprocess", "anyreject", "custompercentage", "anyone"]);
+const ASSIGNMENT_PLACEHOLDER_RE = /(?:^|[\s_<{\[])(?:todo|tbd|placeholder|replace[_\s-]?me|sample|dummy|mock|fake|unknown|unresolved|required)(?:[\s_>}\]]|$)/i;
+const ASSIGNMENT_REFERENCE_PLACEHOLDER_RE = /^<[^>]+>$|^\{\{[^}]+\}\}$|^__.*__$|^(?:todo|tbd|placeholder|replace[_-]?me|sample|dummy|mock|fake|unknown|unresolved|required)$/i;
+const ASSIGNMENT_LOCAL_ID_RE = /^(?:local|temp|tmp|mock|placeholder|fallback|generated|test|demo|sample|fake)[-_]/i;
+const JOB_POSITION_METHODS = new Set(["position", "positionorg", "positionorgexpr", "positionloc", "positionlocexpr"]);
+const JOB_POSITION_PROOF_SOURCES = new Set(["discovered-existing-job-position", "user-selected-existing-job-position", "admin-created-job-position", "explicitly-confirmed-existing-job-position"]);
+const JOB_POSITION_PROOF_STATUSES = new Set(["discovered", "confirmed", "created-after-confirmation", "user-selected"]);
+const JOB_POSITION_OAUTH_AVAILABLE_STATUSES = new Set(["authenticated", "refreshed-authenticated", "valid", "available", "oauth-available"]);
+const JOB_POSITION_LOOKUP_PROVEN_STATUSES = new Set(["queried", "found", "not-found", "not-found-before-create", "matched-existing", "created-readback-confirmed"]);
+const MANAGER_ASSIGNMENT_TYPES = new Set(["line-manager", "department-manager", "location-manager"]);
 const CUSTOM_FORM_DISPLAY_USAGES = ["add", "edit", "view"];
 const PIVOT_TABLE_SOURCE_TYPES = new Map([[1, "Data list"], [16, "Document library"], [32, "Form report"], [64, "Data report"]]);
 const PIVOT_TABLE_DATE_GROUPINGS = new Set(["DAY", "MONTH", "QUARTER", "YEAR"]);
@@ -299,6 +313,11 @@ function attrRuntimeValue(value) {
   return Array.isArray(value) ? value[1] : value;
 }
 
+function isNumericStringConfig(value) {
+  const actual = attrRuntimeValue(value);
+  return typeof actual === "string" && /^\d+(?:\.\d+)?$/.test(actual.trim());
+}
+
 function displayLabelDisabled(value) {
   if (value === false) return true;
   return Array.isArray(value) && value[1] === false;
@@ -321,6 +340,22 @@ function taskNodeLabel(type) {
   return type === "CandidateTask" ? "Claim Task" : "Assignment Task";
 }
 
+function isDefaultWorkflowActionName(value) {
+  const text = safeString(value).trim();
+  if (!text) return true;
+  return /^(assignment\s*task|candidate\s*task|claim\s*task|content\s*list|inclusive\s*gateway|gateway|task|workflow\s*task(?:\s*\d+)?|sequence\s*flow(?:[_\s-]*\d+)?)$/i.test(text);
+}
+
+function isDefaultWorkflowConnectorDescription(value) {
+  const text = safeString(value).trim();
+  if (!text) return true;
+  return /^(sequence\s*flow(?:[_\s-]*\d+)?|connector|transition|line)$/i.test(text);
+}
+
+function nodeDisplayName(shape) {
+  return safeString(shape && shape.properties && shape.properties.name) || safeString(shapeId(shape));
+}
+
 function collectTaskUrlAliases(props = {}) {
   return ["taskurl", "taskUrl", "TaskUrl"].map((key) => ({ key, value: safeString(props[key]) }));
 }
@@ -334,6 +369,184 @@ function primaryTaskUrl(props = {}) {
     if (value) return value;
   }
   return "";
+}
+
+function decodeHtmlEntities(value) {
+  return safeString(value)
+    .replace(/&quot;/g, "\"")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function assignmentExpressionData(value) {
+  const decoded = decodeHtmlEntities(value);
+  const marker = 'data="${';
+  const markerIndex = decoded.indexOf(marker);
+  if (markerIndex === -1) return null;
+  const start = markerIndex + 'data="$'.length;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < decoded.length; i += 1) {
+    const ch = decoded[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === "\"") inString = false;
+      continue;
+    }
+    if (ch === "\"") {
+      inString = true;
+      continue;
+    }
+    if (ch === "{") depth += 1;
+    else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        try {
+          return JSON.parse(decoded.slice(start, i + 1));
+        } catch {
+          return null;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function assignmentBlob(assignment) {
+  return `${safeString(assignment && assignment.title)} ${safeString(assignment && assignment.value)} ${JSON.stringify(assignment || {})}`;
+}
+
+function classifyManagerAssignment(assignment) {
+  const text = assignmentBlob(assignment);
+  const expression = assignmentExpressionData(assignment && assignment.value) || {};
+  const type = safeString(expression.type).toLowerCase();
+  const prop = safeString(expression.prop || expression.param && expression.param.prop).toLowerCase();
+  if (/line\s*manager|linemanager|LineManager/i.test(text) || prop === "linemanager") return "line-manager";
+  if (/department\s*:\s*manager|department\s*manager|organization.*manager|OrganizationID.*Manager/i.test(text) || (type.includes("department") && prop === "manager")) return "department-manager";
+  if (/location\s*:\s*manager|location\s*manager|LocationID.*Manager/i.test(text) || (type.includes("location") && prop === "manager")) return "location-manager";
+  return "";
+}
+
+function assignmentReferenceValue(assignment) {
+  if (!isObject(assignment)) return "";
+  if (assignment.type === "position" || JOB_POSITION_METHODS.has(safeString(assignment.method))) return safeString(assignment.position);
+  return safeString(assignment.value);
+}
+
+function hasAssignmentPlaceholder(value) {
+  const text = safeString(value).trim();
+  if (!text) return false;
+  return ASSIGNMENT_REFERENCE_PLACEHOLDER_RE.test(text) || ASSIGNMENT_PLACEHOLDER_RE.test(text);
+}
+
+function validateAssignmentReferenceNotInvented(assignment, report, context, reference, kind) {
+  if (!reference) return;
+  if (hasAssignmentPlaceholder(reference)) {
+    issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_PLACEHOLDER", "Workflow assignment assignee contains placeholder or unresolved assignee text.", { ...context, assigneeKind: kind });
+    return;
+  }
+  if (ASSIGNMENT_LOCAL_ID_RE.test(reference)) {
+    issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_INVENTED_REFERENCE", "Workflow assignment assignee uses a local/mock/generated reference instead of discovered or explicitly confirmed Yeeflow org data.", { ...context, assigneeKind: kind });
+  }
+}
+
+function validateJobPositionProof(assignment, report, context) {
+  const source = safeString(assignment.source || assignment.assigneeSource || assignment.jobPositionSource);
+  const proofStatus = safeString(assignment.proofStatus || assignment.jobPositionProofStatus);
+  const requiredName = safeString(assignment.requiredJobPositionName || assignment.jobPositionName);
+  const creationRequired = assignment.creationRequired === true || /create|missing|unresolved/i.test(source) || /unresolved|blocked/i.test(proofStatus);
+  const creationConfirmed = assignment.creationConfirmed === true || assignment.adminCreationConfirmed === true;
+  const adminConfirmed = assignment.systemAdminConfirmed === true || assignment.adminPermissionConfirmed === true;
+  const apiAssisted = source === "discovered-existing-job-position" || source === "admin-created-job-position";
+  const oauthStatus = safeString(assignment.oauthStatus || assignment.oauthProofStatus || assignment.oauthReadinessStatus);
+  const oauthRefreshAttempted = assignment.oauthRefreshAttempted === true || assignment.oauthRefreshed === true || assignment.oauthRefreshStatus === "attempted" || assignment.oauthRefreshStatus === "success";
+  const oauthRefreshStatus = safeString(assignment.oauthRefreshStatus);
+  const lookupStatus = safeString(assignment.jobPositionLookupStatus || assignment.positionLookupStatus || assignment.apiLookupStatus);
+  const lookupAttempted = assignment.jobPositionLookupAttempted === true || assignment.positionLookupAttempted === true || assignment.apiLookupAttempted === true || JOB_POSITION_LOOKUP_PROVEN_STATUSES.has(lookupStatus);
+  const createAttemptCount = Number(assignment.jobPositionCreateAttemptCount || assignment.positionCreateAttemptCount || assignment.createAttemptCount || 0);
+  const createResponseIdRecorded = assignment.createResponseIdRecorded === true || assignment.positionCreateResponseIdRecorded === true || assignment.jobPositionCreateResponseIdRecorded === true;
+  const duplicateScanRecorded = assignment.duplicateNameScanRecorded === true || assignment.duplicateJobPositionScanRecorded === true;
+
+  if (!requiredName || hasAssignmentPlaceholder(requiredName)) {
+    issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_NAME_UNCONFIRMED", "Job-position assignment must include a safe required job position name from discovery or explicit user selection; placeholders are not allowed.", context);
+  }
+  if (!JOB_POSITION_PROOF_SOURCES.has(source) || !JOB_POSITION_PROOF_STATUSES.has(proofStatus)) {
+    issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_PROOF_MISSING", "Job-position assignment must be backed by a discovered existing, user-selected existing, or admin-created-after-confirmation job position proof status.", { ...context, source: source || null, proofStatus: proofStatus || null });
+  }
+  if (/admin-created/.test(source) && (!creationConfirmed || !adminConfirmed)) {
+    issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_WRITE_NOT_CONFIRMED", "Job-position creation/update is a write operation and must be explicitly confirmed by a system admin before generation can use the resulting position.", { ...context, source, proofStatus });
+  }
+  if (creationRequired && (!creationConfirmed || !adminConfirmed)) {
+    issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_MISSING_BLOCKED", "Missing job positions block generation unless a system admin explicitly confirms creation/update and the resulting job position is used.", { ...context, source: source || null, proofStatus: proofStatus || null });
+  }
+  if (apiAssisted) {
+    if (!JOB_POSITION_OAUTH_AVAILABLE_STATUSES.has(oauthStatus)) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_OAUTH_PROOF_MISSING", "API-assisted Job Position assignment must record authenticated OAuth proof before using discovered or created Job Position IDs.", { ...context, source, oauthStatus: oauthStatus || null });
+    }
+    if (/expired/i.test(oauthStatus) && !oauthRefreshAttempted) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_OAUTH_REFRESH_REQUIRED", "Expired OAuth must be refreshed before declaring Job Position lookup unavailable or falling back to placeholders.", { ...context, source, oauthStatus, oauthRefreshStatus: oauthRefreshStatus || null });
+    }
+    if (!lookupAttempted) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_LOOKUP_NOT_PROVEN", "Job Position assignment must prove a read-only positions lookup was attempted before using API-assisted discovered/admin-created proof.", { ...context, source, lookupStatus: lookupStatus || null });
+    }
+  }
+  if (source === "admin-created-job-position") {
+    if (createAttemptCount > 1) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_CREATE_RETRY_UNSAFE", "Job Position creation must not be retried after an accepted create response only because list read-back is eventually consistent.", { ...context, createAttemptCount });
+    }
+    if (!createResponseIdRecorded) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_CREATE_RESPONSE_ID_MISSING", "Admin-created Job Position proof must record the numeric ID returned by POST /positions instead of relying only on immediate list read-back.", { ...context });
+    }
+    if (!duplicateScanRecorded) {
+      issue(report, generatorFinalSeverity(report), "TASK_JOB_POSITION_DUPLICATE_SCAN_MISSING", "Admin-created Job Position proof must include a duplicate-name scan before assigning users or using the position in workflow routing.", { ...context });
+    }
+  }
+}
+
+function validateWorkflowTaskAssignees(shape, form, report, index, nodeLabel) {
+  const props = shape.properties || {};
+  const assignments = asArray(props.usertaskassignment);
+  const node = nodeDisplayName(shape);
+  if (!assignments.length) {
+    issue(report, generatorFinalSeverity(report), "TASK_USERTASKASSIGNMENT_EMPTY", `${nodeLabel} nodes must include non-empty export-shaped usertaskassignment metadata.`, { form: form.Name, node });
+    return;
+  }
+  assignments.forEach((assignment, assignmentIndex) => {
+    const context = { form: form.Name, node, assignmentIndex, path: `Data.Forms[].DefResource.childshapes[${index}].properties.usertaskassignment[${assignmentIndex}]` };
+    if (!isObject(assignment)) {
+      issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_NOT_OBJECT", "Workflow assignment assignee entries must be objects.", context);
+      return;
+    }
+    const type = safeString(assignment.type);
+    const method = safeString(assignment.method);
+    const ref = assignmentReferenceValue(assignment);
+    if (!type || !method) {
+      issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_TYPE_METHOD_MISSING", "Workflow assignment assignee entries must include export-shaped type and method.", { ...context, type: type || null, method: method || null });
+    }
+    if (!ref) {
+      issue(report, generatorFinalSeverity(report), "TASK_ASSIGNEE_EMPTY", "Workflow assignment assignee entry must include a non-empty value or position reference.", { ...context, type: type || null, method: method || null });
+    } else if (!(type === "user" && method === "expression")) {
+      validateAssignmentReferenceNotInvented(assignment, report, context, ref, type === "position" ? "job-position" : type || "assignee");
+    }
+    if (type === "user" && method === "direct" && assignment.explicitlyRequested !== true && assignment.userAssignmentExplicitlyRequested !== true) {
+      issue(report, generatorFinalSeverity(report), "TASK_DIRECT_USER_REQUIRES_EXPLICIT_REQUEST", "Hardcoded user assignees are tenant-sensitive and require an explicit app-plan/user request.", context);
+    }
+    if (type === "user" && method === "expression") {
+      const managerType = classifyManagerAssignment(assignment);
+      const expression = assignmentExpressionData(assignment.value);
+      if (managerType) {
+        if (!MANAGER_ASSIGNMENT_TYPES.has(managerType)) {
+          issue(report, generatorFinalSeverity(report), "TASK_MANAGER_EXPRESSION_UNSUPPORTED", "Manager-based assignment must use a supported expression-editor manager pattern.", { ...context, managerType });
+        }
+      } else if (!expression && !/{{[^}]+}}/.test(safeString(assignment.value))) {
+        issue(report, generatorFinalSeverity(report), "TASK_MANAGER_EXPRESSION_MALFORMED", "Expression-editor user assignee must preserve a supported expression-button value or a validated expression token.", context);
+      }
+    }
+    if (type === "position" || JOB_POSITION_METHODS.has(method)) validateJobPositionProof(assignment, report, context);
+  });
 }
 
 function zeroPadding(padding) {
@@ -411,6 +624,11 @@ function controlContains(parent, child) {
 
 function uiStandardWarning(report, code, message, details) {
   issue(report, "warning", code, message, details);
+}
+
+function uiStandardContainerIssue(report, context, code, message, details = {}) {
+  const hard = context && context.surface === "approval form page" && isGeneratedFinal(report);
+  issue(report, hard ? "error" : "warning", code, message, { ...context, ...details });
 }
 
 function issue(report, level, code, message, details = {}) {
@@ -716,6 +934,10 @@ function validateYapWrapperSchema(wrapper, report) {
     if (!Object.prototype.hasOwnProperty.call(wrapper || {}, key)) {
       issue(report, "error", "YAP_WRAPPER_REQUIRED_PROPERTY_MISSING", "YAP wrapper is missing a product-schema-required property.", { path: `$.${key}`, key });
     }
+  }
+  const iconSeverity = report.mode === "generator" && report.stage === "final" ? "error" : "warning";
+  for (const finding of validatePackageWrapperIcon(wrapper).findings) {
+    issue(report, iconSeverity, finding.code, finding.message, finding);
   }
   if (typeof wrapper.Resource !== "string") {
     issue(report, "error", "YAP_RESOURCE_NOT_STRING", "YAP wrapper Resource must be a string.");
@@ -1204,6 +1426,16 @@ function validateGeneratedApprovalDesignerControls(formdef, report, context) {
   for (const { control, pointer } of controls) {
     const type = safeString(control && control.type).toLowerCase();
     const id = generatedControlId(control);
+    if (Object.prototype.hasOwnProperty.call(control || {}, "binding") && control.binding !== undefined && control.binding !== null && typeof control.binding !== "string") {
+      issue(report, generatorFinalSeverity(report), "YAP_FORM_CONTROL_BINDING_NOT_STRING", "Generated approval form controls must store binding as a string variable or field id; object binding values can leave the designer loading.", { ...context, path: `${pointer}.binding`, controlType: control && control.type || null, bindingType: Array.isArray(control && control.binding) ? "array" : typeof (control && control.binding) });
+    }
+    if (type === "date") {
+      issue(report, generatorFinalSeverity(report), "YAP_FORM_DATE_CONTROL_LEGACY", "Generated approval forms must use the export-backed datepicker control type; legacy date controls can fail designer hydration.", { ...context, path: `${pointer}.type`, controlType: control && control.type || null });
+    }
+    const width = control && control.attrs && control.attrs.common && control.attrs.common.positioning && control.attrs.common.positioning.width;
+    if (isNumericStringConfig(width)) {
+      issue(report, generatorFinalSeverity(report), "YAP_FORM_CONTROL_WIDTH_STRING_INVALID", "Generated approval form control widths must use Yeeflow config pair values, for example width: [null, 960] and widthu: [null, \"px\"], not numeric strings.", { ...context, path: `${pointer}.attrs.common.positioning.width`, controlType: control && control.type || null, width });
+    }
     if (!id) {
       issue(report, "error", "YAP_FORM_CONTROL_ID_MISSING", "Generated approval form controls must include unique designer-level id values for designer hydration and single-control selection.", { ...context, path: pointer, controlType: control && control.type || null, label: safeString(control && (control.label || control.name || control.title)) || null });
       issue(report, "error", "YAP_FORM_DESIGNER_SELECTION_RISK", "Missing designer IDs can cause selecting one generated approval form control to select many or all controls.", { ...context, path: pointer, controlType: control && control.type || null });
@@ -1420,9 +1652,6 @@ function validateRootAppShell(data, wrapper, replaceIds, listsById, fieldsByList
   if (!root) return;
   if (wrapper && (!safeString(wrapper.Title) || wrapper.Description === undefined)) {
     issue(report, report.mode === "generator" && report.stage === "final" ? "error" : "warning", "WRAPPER_TITLE_DESCRIPTION_INCOMPLETE", "Generated .yap wrapper should include import dialog Title and Description fields.", { titlePresent: Boolean(safeString(wrapper.Title)), descriptionPresent: wrapper.Description !== undefined });
-  }
-  if (wrapper && !safeString(wrapper.IconUrl)) {
-    issue(report, report.mode === "generator" && report.stage === "final" ? "error" : "warning", "WRAPPER_ICONURL_MISSING", "Generated .yap wrapper should include a non-empty IconUrl; real app exports do not use null here.");
   }
   if (safeString(root.CustomType)) {
     issue(report, report.mode === "generator" && report.stage === "final" ? "error" : "warning", "ROOT_CUSTOMTYPE_NOT_EMPTY", "Root app/ListSet CustomType should be empty; child lists use ListSite_<ListSetID>.", { customType: root.CustomType });
@@ -1696,8 +1925,9 @@ function validateDashboardPageResource(page, layout, resource, listsById, fields
   if (page.attrs && page.attrs.hideHeaderAll !== true) {
     uiStandardWarning(report, "UI_STANDARD_DASHBOARD_HEADER_NOT_HIDDEN", "UI/UX standard dashboards should set attrs.hideHeaderAll to true.", { title, layoutId });
   }
-  if (!dashboardRootContentPaddingShape(page.attrs && page.attrs.container)) {
-    issue(report, severity, "DASHBOARD_ROOT_CONTENT_PADDING_INVALID", "Dashboard page root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", { title, layoutId });
+  const dashboardRootPadding = page.attrs && page.attrs.container && page.attrs.container.padding;
+  if (!zeroPadding(dashboardRootPadding) && !hasSafeHorizontalPaddingValue(dashboardRootPadding)) {
+    uiStandardWarning(report, "UI_STANDARD_DASHBOARD_PADDING_UNUSUAL", "Dashboard page root padding should be either zero with padded inner sections or safe horizontal page padding.", { title, layoutId });
   }
   if (!hasSafeHorizontalPaddingNearRoot(page)) {
     uiStandardWarning(report, "UI_QUALITY_DASHBOARD_SAFE_PADDING_MISSING", "Generated dashboards should include safe left/right padding on an outer page section or container so controls do not touch window edges.", { title, layoutId });
@@ -1816,18 +2046,6 @@ function validateDashboardPageResource(page, layout, resource, listsById, fields
   validateDashboardPivotTableControls(title, layoutId, pivotTableControls, pivotExtByControlId, listsById, fieldsByList, filterVars, report);
   validateDashboardCollectionControls(page, title, layoutId, listsById, fieldsByList, filterVars, report);
   validateDashboardFunctionalQuality(page, title, layoutId, report);
-}
-
-function dashboardRootContentPaddingShape(container) {
-  if (!container || typeof container !== "object" || container.cw !== "2") return false;
-  const padding = container.padding;
-  if (!Array.isArray(padding) || padding.length !== 2 || padding[0] !== null || !padding[1] || typeof padding[1] !== "object") return false;
-  const keys = Object.keys(padding[1]).sort().join(",");
-  return keys === "bottom,left,right,top"
-    && padding[1].top === "--sp--s0"
-    && padding[1].right === "--sp--s0"
-    && padding[1].bottom === "--sp--s0"
-    && padding[1].left === "--sp--s0";
 }
 
 function validateAdvancedControl(control, report, context) {
@@ -3425,9 +3643,6 @@ function validateCustomFormLayout(layout, fieldsByName, pathPrefix, report, layo
     issue(report, "error", "CUSTOM_FORM_RESOURCE_JSON_INVALID", "Custom form Resource is not valid JSON.", { title: layout.Title });
     return;
   }
-  if (!dashboardRootContentPaddingShape(form.attrs && form.attrs.container)) {
-    issue(report, generatorFinalSeverity(report), "DATA_LIST_CUSTOM_FORM_ROOT_CONTENT_PADDING_INVALID", "Data-list custom form root content-area padding must use attrs.container.cw = \"2\" and attrs.container.padding = [null, { top/right/bottom/left: \"--sp--s0\" }]. Scalar, object, numeric, attrs.common, and attrs.style padding shapes do not satisfy this gate.", { title: layout.Title, path: `${pathPrefix}.LayoutInResources[0].Resource.attrs.container` });
-  }
   for (const key of ["children", "attrs", "title", "filterVars", "ver", "tempVars"]) {
     if (form[key] === undefined) issue(report, report.mode === "generator" ? "error" : "warning", "CUSTOM_FORM_REQUIRED_KEY_MISSING", `Custom form Resource missing ${key}.`, { title: layout.Title, key });
   }
@@ -3745,6 +3960,33 @@ function validateEmbeddedControlSchema(control, report, context) {
       ...(schemaIssue.detail || {}),
     });
   });
+  if (context.surface === "approval form page" && Object.prototype.hasOwnProperty.call(control || {}, "binding") && control.binding !== undefined && control.binding !== null && typeof control.binding !== "string") {
+    issue(report, generatorFinalSeverity(report), "YAP_FORM_CONTROL_BINDING_NOT_STRING", "Generated approval form controls must store binding as a string variable or field id; object binding values can leave the designer loading.", {
+      surface: context.surface,
+      title: context.title,
+      path: `${context.path}.binding`,
+      controlType: control && control.type || null,
+      bindingType: Array.isArray(control && control.binding) ? "array" : typeof (control && control.binding),
+    });
+  }
+  if (context.surface === "approval form page" && safeString(control && control.type).toLowerCase() === "date") {
+    issue(report, generatorFinalSeverity(report), "YAP_FORM_DATE_CONTROL_LEGACY", "Generated approval forms must use the export-backed datepicker control type; legacy date controls can fail designer hydration.", {
+      surface: context.surface,
+      title: context.title,
+      path: `${context.path}.type`,
+      controlType: control && control.type || null,
+    });
+  }
+  const width = control && control.attrs && control.attrs.common && control.attrs.common.positioning && control.attrs.common.positioning.width;
+  if (context.surface === "approval form page" && isNumericStringConfig(width)) {
+    issue(report, generatorFinalSeverity(report), "YAP_FORM_CONTROL_WIDTH_STRING_INVALID", "Generated approval form control widths must use Yeeflow config pair values, for example width: [null, 960] and widthu: [null, \"px\"], not numeric strings.", {
+      surface: context.surface,
+      title: context.title,
+      path: `${context.path}.attrs.common.positioning.width`,
+      controlType: control && control.type || null,
+      width,
+    });
+  }
   if (
     report.mode === "generator" &&
     report.stage === "final" &&
@@ -3895,6 +4137,12 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
   if (!isObject(def.graphposition)) issue(report, severity, "WORKFLOW_DEF_GRAPHPOSITION_MISSING", "Workflow designer expects DefResource.graphposition metadata.", { form: formName, key });
   if (def.graphzoom === undefined) issue(report, severity, "WORKFLOW_DEF_GRAPHZOOM_MISSING", "Workflow designer expects DefResource.graphzoom metadata.", { form: formName, key });
   if (def.graphver === undefined) issue(report, severity, "WORKFLOW_DEF_GRAPHVER_MISSING", "Workflow designer expects DefResource.graphver metadata.", { form: formName, key });
+  if (def.lineType !== "rounded") {
+    issue(report, severity, "WORKFLOW_DEF_LINETYPE_NOT_ROUNDED", "New workflow designer exports require DefResource.lineType = rounded.", { form: formName, key, actual: def.lineType ?? null, expected: "rounded" });
+  }
+  if (Number(def.graphver) !== 2) {
+    issue(report, severity, "WORKFLOW_DEF_GRAPHVER_NOT_V2", "New workflow designer exports require DefResource.graphver = 2.", { form: formName, key, actual: def.graphver ?? null, expected: 2 });
+  }
 
   const shapes = collectShapes(def);
   const workflowVariables = collectWorkflowVariables(def);
@@ -3912,13 +4160,108 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
       if (!shape.target || !safeString(shape.target.id) || !safeString(shape.target.resourceid)) {
         issue(report, severity, "WORKFLOW_SEQUENCE_TARGET_INVALID", "SequenceFlow target should include id and resourceid.", { form: formName, key, index });
       }
+      if (shape.properties?.linetype !== "rounded") {
+        issue(report, severity, "WORKFLOW_SEQUENCE_LINETYPE_NOT_ROUNDED", "New workflow designer SequenceFlow must set properties.linetype = rounded.", { form: formName, key, index, actual: shape.properties?.linetype ?? null, expected: "rounded" });
+      }
+      if (!Object.prototype.hasOwnProperty.call(shape.properties || {}, "documentation")) {
+        issue(report, severity, "WORKFLOW_SEQUENCE_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow must include properties.documentation as a concise business Description.", { form: formName, key, index });
+      } else {
+        const description = safeString(shape.properties && shape.properties.documentation).trim();
+        if (!description) {
+          issue(report, severity, "WORKFLOW_SEQUENCE_DESCRIPTION_MISSING", "SequenceFlow Description must be a short business label such as Approved, Rejected, Completed, or Amount >= 100.", { form: formName, key, index });
+        } else if (isDefaultWorkflowConnectorDescription(description)) {
+          issue(report, severity, "WORKFLOW_SEQUENCE_DESCRIPTION_DEFAULT", "SequenceFlow Description must not keep default Designer text such as Sequence flow.", { form: formName, key, index, description });
+        } else if (description.length > 42) {
+          issue(report, severity, "WORKFLOW_SEQUENCE_DESCRIPTION_TOO_LONG", "SequenceFlow Description should be concise so connector labels remain readable.", { form: formName, key, index, description, length: description.length, maximum: 42 });
+        }
+      }
+      if (!Array.isArray(shape.dockers) || shape.dockers.length !== 0) {
+        issue(report, severity, "WORKFLOW_SEQUENCE_DOCKERS_NOT_EMPTY", "New workflow designer rounded routing expects SequenceFlow.dockers to be an empty array by default.", { form: formName, key, index, actualLength: Array.isArray(shape.dockers) ? shape.dockers.length : null });
+      }
+      validateWorkflowOutcomeConditionShape(shape, report, { form: formName, key, index });
       validateSequenceFlowConditionVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.conditioninfo` });
+    } else if (["MultiAssignmentTask", "CandidateTask", "ContentList", "InclusiveGateway"].includes(type)) {
+      const actionName = safeString(shape.properties && (shape.properties.name || shape.properties.title || shape.properties.label)).trim();
+      if (!actionName) {
+        issue(report, severity, "WORKFLOW_ACTION_NAME_MISSING", "Workflow action nodes must have a concise business-specific Action name.", { form: formName, key, index, type });
+      } else if (isDefaultWorkflowActionName(actionName)) {
+        issue(report, severity, "WORKFLOW_ACTION_NAME_DEFAULT", "Workflow action nodes must not keep default Designer names such as Assignment Task.", { form: formName, key, index, type, actionName });
+      } else if (actionName.length > 48) {
+        issue(report, severity, "WORKFLOW_ACTION_NAME_TOO_LONG", "Workflow action names should be concise enough to render on the node card.", { form: formName, key, index, type, actionName, length: actionName.length, maximum: 48 });
+      }
+      if (type === "MultiAssignmentTask" || type === "CandidateTask") {
+        validateTaskAssignmentVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.usertaskassignment` });
+      }
     } else if (type === "SetVariableTask") {
       validateSetVariableTaskTargets(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.variablesetting` });
-    } else if (type === "MultiAssignmentTask" || type === "CandidateTask") {
-      validateTaskAssignmentVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.usertaskassignment` });
     } else if (!isObject(shape.position)) {
       issue(report, severity, "WORKFLOW_NODE_POSITION_MISSING", "Workflow designer expects non-sequence workflow nodes to include position metadata.", { form: formName, key, index, type });
+    }
+  });
+}
+
+function validateWorkflowOutcomeConditionShape(shape, report, context) {
+  const severity = generatorFinalSeverity(report);
+  const conditions = asArray(shape && shape.properties && shape.properties.conditioninfo);
+  const sourceId = safeString(shape && shape.source && (shape.source.id || shape.source.resourceid));
+  function expectedTaskOutcome(text) {
+    const value = safeString(text);
+    if (/\bapproved\b/i.test(value) || /已同意/.test(value)) return "Approved";
+    if (/\brejected\b/i.test(value) || /已拒绝/.test(value)) return "Rejected";
+    if (/\bcompleted\b/i.test(value) || /已完成/.test(value)) return "Completed";
+    return "";
+  }
+  conditions.forEach((condition, conditionIndex) => {
+    const text = JSON.stringify(condition || {});
+    const flowLabel = safeString(shape && shape.properties && (shape.properties.name || shape.properties.label || shape.properties.documentation));
+    const labelLooksLikeOutcome = /\b(approved|rejected|completed|approve|reject|complete)\b/i.test(flowLabel) || /\b(approved|rejected|completed|approve|reject|complete)\b/i.test(text);
+    if (!labelLooksLikeOutcome) return;
+    if (!isObject(condition) || condition.left === undefined || condition.right === undefined || !condition.op) {
+      issue(report, severity, "WORKFLOW_OUTCOME_CONDITION_SHAPE_INCOMPLETE", "Approval and complete task outcome transitions must include conditioninfo rows with left, op, and right; label-only condition metadata is not publish-ready.", {
+        ...context,
+        conditionIndex,
+        flowLabel,
+      });
+      return;
+    }
+    const isTaskOutcome = text.includes("&quot;type&quot;:&quot;task&quot;") || text.includes(":Outcome") || text.includes(":结果");
+    if (!isTaskOutcome) return;
+    const expectedOutcome = expectedTaskOutcome(flowLabel) || expectedTaskOutcome(text);
+    const leftText = typeof condition.left === "string" ? condition.left : JSON.stringify(condition.left || {});
+    const rightText = typeof condition.right === "string" ? condition.right : JSON.stringify(condition.right || {});
+    if (condition.op !== "s.=") {
+      issue(report, severity, "WORKFLOW_OUTCOME_CONDITION_BAD_OP", "Approval task outcome condition should use op: s.=.", {
+        ...context,
+        conditionIndex,
+        flowLabel,
+      });
+    }
+    if (
+      typeof condition.left !== "string" ||
+      !leftText.includes("<input") ||
+      !leftText.includes("&quot;type&quot;:&quot;task&quot;") ||
+      !leftText.includes("&quot;prop&quot;:&quot;Outcome&quot;") ||
+      (sourceId && !leftText.includes(sourceId))
+    ) {
+      issue(report, severity, "WORKFLOW_OUTCOME_CONDITION_LEFT_TASK_REF_INVALID", "Approval task outcome condition left operand must be an export-style task Outcome expression-button for the source Assignment task, not a generic Outcome variable token.", {
+        ...context,
+        conditionIndex,
+        flowLabel,
+        sourceId,
+      });
+    }
+    if (
+      typeof condition.right !== "string" ||
+      !rightText.includes("<input") ||
+      !rightText.includes("Task outcome:") ||
+      (expectedOutcome && !rightText.includes(`Task outcome:${expectedOutcome}`))
+    ) {
+      issue(report, severity, "WORKFLOW_OUTCOME_CONDITION_RIGHT_RESULT_INVALID", "Approval task outcome condition right operand must be an export-style Task outcome expression-button matching the outgoing branch.", {
+        ...context,
+        conditionIndex,
+        flowLabel,
+        expectedOutcome,
+      });
     }
   });
 }
@@ -3935,7 +4278,7 @@ function collectWorkflowVariables(def) {
     if (id) {
       ids.add(id);
       keys.add(id);
-      byId.set(id, { id, idx, name });
+      byId.set(id, { id, idx, name, type: safeString(variable.type), valueType: safeString(variable.valueType) });
     }
     if (idx) keys.add(idx);
     if (name) keys.add(name);
@@ -3954,6 +4297,19 @@ function collectWorkflowVariables(def) {
 
 function validateSequenceFlowConditionVariables(shape, workflowVariables, report, context) {
   const conditions = asArray(shape && shape.properties && shape.properties.conditioninfo);
+  for (const finding of validateWorkflowConditionEditorRows({
+    conditions,
+    variablesById: workflowVariables.byId,
+    path: context.path,
+    node: safeString(shape && shape.properties && shape.properties.name) || shapeId(shape),
+  })) {
+    issue(report, generatorFinalSeverity(report), finding.code, finding.message, {
+      ...context,
+      path: finding.path,
+      node: safeString(shape && shape.properties && shape.properties.name) || shapeId(shape),
+      ...(finding.detail || {}),
+    });
+  }
   conditions.forEach((condition, conditionIndex) => {
     for (const side of ["left", "right"]) {
       const operand = condition && condition[side];
@@ -4477,9 +4833,7 @@ function validateApprovalTaskPageReferences(def, form, report, pageById, taskPag
     if (!APPROVAL_APPROVEWAYS.has(approveway)) {
       issue(report, severity, "TASK_APPROVEWAY_INVALID", `${nodeLabel} nodes must include an export-shaped valid approveway value.`, { form: form.Name, node, approveway: approveway || null });
     }
-    if (!asArray(props.usertaskassignment).length) {
-      issue(report, severity, "TASK_USERTASKASSIGNMENT_EMPTY", `${nodeLabel} nodes must include non-empty export-shaped usertaskassignment metadata.`, { form: form.Name, node });
-    }
+    validateWorkflowTaskAssignees(shape, form, report, index, nodeLabel);
   });
   if (!taskNodeCount) {
     issue(report, severity, "APPROVAL_ASSIGNMENT_TASK_MISSING", "Generated approval workflows must include a real task node such as MultiAssignmentTask; StartNoneEvent -> EndNoneEvent alone is not a valid approval workflow.", { form: form.Name, key: form.Key });
@@ -4560,14 +4914,14 @@ function validateUiStandardContainers(root, report, context = {}) {
   if (!context.requireFormBody && !actionPanel.length && !flowHistory.length) return;
   const formBody = findControlByLabel(root, "Form body");
   const formBottom = findControlByLabel(root, "Form bottom");
-  if (!formBody) uiStandardWarning(report, "UI_STANDARD_FORM_BODY_MISSING", "Approval form pages should put main fields inside a container with nv_label \"Form body\".", context);
-  if (!formBottom) uiStandardWarning(report, "UI_STANDARD_FORM_BOTTOM_MISSING", "Approval form pages should put Action Panel and Flow History inside a container with nv_label \"Form bottom\".", context);
+  if (!formBody) uiStandardContainerIssue(report, context, "UI_STANDARD_FORM_BODY_MISSING", "Approval form pages should put main fields inside a container with nv_label \"Form body\".");
+  if (!formBottom) uiStandardContainerIssue(report, context, "UI_STANDARD_FORM_BOTTOM_MISSING", "Approval form pages should put Action Panel and Flow History inside a container with nv_label \"Form bottom\".");
   if (formBottom) {
     for (const control of actionPanel) {
-      if (!controlContains(formBottom, control)) uiStandardWarning(report, "UI_STANDARD_ACTION_PANEL_NOT_IN_FORM_BOTTOM", "workflowControlPanel should be placed inside Form bottom.", context);
+      if (!controlContains(formBottom, control)) uiStandardContainerIssue(report, context, "UI_STANDARD_ACTION_PANEL_NOT_IN_FORM_BOTTOM", "workflowControlPanel should be placed inside Form bottom.");
     }
     for (const control of flowHistory) {
-      if (!controlContains(formBottom, control)) uiStandardWarning(report, "UI_STANDARD_FLOW_HISTORY_NOT_IN_FORM_BOTTOM", "workflowHistory should be placed inside Form bottom.", context);
+      if (!controlContains(formBottom, control)) uiStandardContainerIssue(report, context, "UI_STANDARD_FLOW_HISTORY_NOT_IN_FORM_BOTTOM", "workflowHistory should be placed inside Form bottom.");
     }
   }
 }
@@ -4589,6 +4943,20 @@ function validateWorkflowGraph(def, form, report) {
       if (id && !ids.has(id)) issue(report, "warning", "WORKFLOW_INCOMING_SOURCE_NOT_FOUND", "Workflow incoming reference does not resolve.", { form: form.Name, node: shapeId(shape), incoming: id });
     }
   });
+  const workflowVariables = collectWorkflowVariables(def);
+  for (const finding of validateWorkflowBranchConditionCoverage({
+    shapes,
+    variablesById: workflowVariables.byId,
+    path: "Data.Forms[].DefResource.childshapes",
+    workflow: safeString(form && (form.Name || form.Title || form.Key)),
+  })) {
+    issue(report, generatorFinalSeverity(report), finding.code, finding.message, {
+      form: form.Name,
+      key: form.Key,
+      path: finding.path,
+      ...(finding.detail || {}),
+    });
+  }
   const flowsById = new Map(shapes.filter((shape) => shapeType(shape) === "SequenceFlow").map((shape) => [shapeId(shape), shape]));
   shapes.forEach((shape) => {
     if (shapeType(shape) !== "MultiAssignmentTask") return;

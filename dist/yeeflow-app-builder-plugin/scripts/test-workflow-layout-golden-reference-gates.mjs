@@ -20,6 +20,24 @@ try {
   expectPass("readable workflow resource passes layout gate", ["--resource", writeResource("good-workflow.json", readableWorkflow())]);
   cases.push({ case: "pass: readable lane-based workflow resource", status: "pass" });
 
+  expectCode("default workflow action name fails", mutateReadable("default-action-name.json", (def) => {
+    const review = def.childshapes.find((shape) => shape.id === "review");
+    review.properties.name = "Assignment Task";
+  }), "WORKFLOW_LAYOUT_ACTION_NAME_DEFAULT");
+  cases.push({ case: "fail: default Assignment Task action name", status: "pass" });
+
+  expectCode("empty connector description fails", mutateReadable("empty-connector-description.json", (def) => {
+    const submit = def.childshapes.find((shape) => shape.id === "flow-submit");
+    submit.properties.documentation = "";
+  }), "WORKFLOW_LAYOUT_FLOW_DESCRIPTION_MISSING");
+  cases.push({ case: "fail: empty workflow connector description", status: "pass" });
+
+  expectCode("default connector description fails", mutateReadable("default-connector-description.json", (def) => {
+    const submit = def.childshapes.find((shape) => shape.id === "flow-submit");
+    submit.properties.documentation = "Sequence flow_1";
+  }), "WORKFLOW_LAYOUT_FLOW_DESCRIPTION_DEFAULT");
+  cases.push({ case: "fail: default workflow connector description", status: "pass" });
+
   expectCode("duplicate node coordinates fail", mutateReadable("duplicate-position.json", (def) => {
     const nodes = def.childshapes.filter((shape) => shape.stencil.id !== "SequenceFlow");
     nodes[2].position = { ...nodes[1].position };
@@ -514,7 +532,7 @@ function flow(id, source, target, name, vertices = []) {
     stencil: { id: "SequenceFlow" },
     source: { id: source.id, resourceid: source.id },
     target: { id: target.id, resourceid: target.id },
-    properties: { name, linetype: "rounded", documentation: "" },
+    properties: { name, linetype: "rounded", documentation: name === "Complete" ? "Completed" : name },
     incoming: [{ id: source.id, resourceid: source.id }],
     outgoing: [{ id: target.id, resourceid: target.id }],
     dockers: [],

@@ -340,6 +340,18 @@ function taskNodeLabel(type) {
   return type === "CandidateTask" ? "Claim Task" : "Assignment Task";
 }
 
+function isDefaultWorkflowActionName(value) {
+  const text = safeString(value).trim();
+  if (!text) return true;
+  return /^(assignment\s*task|candidate\s*task|claim\s*task|content\s*list|inclusive\s*gateway|gateway|task|workflow\s*task(?:\s*\d+)?|sequence\s*flow(?:[_\s-]*\d+)?)$/i.test(text);
+}
+
+function isDefaultWorkflowConnectorDescription(value) {
+  const text = safeString(value).trim();
+  if (!text) return true;
+  return /^(sequence\s*flow(?:[_\s-]*\d+)?|connector|transition|line)$/i.test(text);
+}
+
 function nodeDisplayName(shape) {
   return safeString(shape && shape.properties && shape.properties.name) || safeString(shapeId(shape));
 }
@@ -4152,17 +4164,36 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
         issue(report, severity, "WORKFLOW_SEQUENCE_LINETYPE_NOT_ROUNDED", "New workflow designer SequenceFlow must set properties.linetype = rounded.", { form: formName, key, index, actual: shape.properties?.linetype ?? null, expected: "rounded" });
       }
       if (!Object.prototype.hasOwnProperty.call(shape.properties || {}, "documentation")) {
-        issue(report, severity, "WORKFLOW_SEQUENCE_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow should include properties.documentation, usually an empty string.", { form: formName, key, index });
+        issue(report, severity, "WORKFLOW_SEQUENCE_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow must include properties.documentation as a concise business Description.", { form: formName, key, index });
+      } else {
+        const description = safeString(shape.properties && shape.properties.documentation).trim();
+        if (!description) {
+          issue(report, severity, "WORKFLOW_SEQUENCE_DESCRIPTION_MISSING", "SequenceFlow Description must be a short business label such as Approved, Rejected, Completed, or Amount >= 100.", { form: formName, key, index });
+        } else if (isDefaultWorkflowConnectorDescription(description)) {
+          issue(report, severity, "WORKFLOW_SEQUENCE_DESCRIPTION_DEFAULT", "SequenceFlow Description must not keep default Designer text such as Sequence flow.", { form: formName, key, index, description });
+        } else if (description.length > 42) {
+          issue(report, severity, "WORKFLOW_SEQUENCE_DESCRIPTION_TOO_LONG", "SequenceFlow Description should be concise so connector labels remain readable.", { form: formName, key, index, description, length: description.length, maximum: 42 });
+        }
       }
       if (!Array.isArray(shape.dockers) || shape.dockers.length !== 0) {
         issue(report, severity, "WORKFLOW_SEQUENCE_DOCKERS_NOT_EMPTY", "New workflow designer rounded routing expects SequenceFlow.dockers to be an empty array by default.", { form: formName, key, index, actualLength: Array.isArray(shape.dockers) ? shape.dockers.length : null });
       }
       validateWorkflowOutcomeConditionShape(shape, report, { form: formName, key, index });
       validateSequenceFlowConditionVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.conditioninfo` });
+    } else if (["MultiAssignmentTask", "CandidateTask", "ContentList", "InclusiveGateway"].includes(type)) {
+      const actionName = safeString(shape.properties && (shape.properties.name || shape.properties.title || shape.properties.label)).trim();
+      if (!actionName) {
+        issue(report, severity, "WORKFLOW_ACTION_NAME_MISSING", "Workflow action nodes must have a concise business-specific Action name.", { form: formName, key, index, type });
+      } else if (isDefaultWorkflowActionName(actionName)) {
+        issue(report, severity, "WORKFLOW_ACTION_NAME_DEFAULT", "Workflow action nodes must not keep default Designer names such as Assignment Task.", { form: formName, key, index, type, actionName });
+      } else if (actionName.length > 48) {
+        issue(report, severity, "WORKFLOW_ACTION_NAME_TOO_LONG", "Workflow action names should be concise enough to render on the node card.", { form: formName, key, index, type, actionName, length: actionName.length, maximum: 48 });
+      }
+      if (type === "MultiAssignmentTask" || type === "CandidateTask") {
+        validateTaskAssignmentVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.usertaskassignment` });
+      }
     } else if (type === "SetVariableTask") {
       validateSetVariableTaskTargets(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.variablesetting` });
-    } else if (type === "MultiAssignmentTask" || type === "CandidateTask") {
-      validateTaskAssignmentVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.usertaskassignment` });
     } else if (!isObject(shape.position)) {
       issue(report, severity, "WORKFLOW_NODE_POSITION_MISSING", "Workflow designer expects non-sequence workflow nodes to include position metadata.", { form: formName, key, index, type });
     }

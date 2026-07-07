@@ -9,7 +9,10 @@ const {
   validateControlAgainstSchema,
 } = require("./yeeflow-control-field-schema-utils");
 const { validateExpressionTokens } = require("./yeeflow-expression-utils");
-const { validateWorkflowConditionEditorRows } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
+const {
+  validateWorkflowBranchConditionCoverage,
+  validateWorkflowConditionEditorRows,
+} = require("./scripts/lib/workflow-condition-editor-utils.cjs");
 
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
 const NUMERIC_OPS = new Set(["n.>", "n.>=", "n.<", "n.<=", "n.=", "n.!=", ">", ">=", "<", "<="]);
@@ -128,6 +131,18 @@ function isNumericStringConfig(value) {
 
 function isSequenceFlow(shape) {
   return shape && shape.stencil && shape.stencil.id === "SequenceFlow";
+}
+
+function isDefaultWorkflowActionName(value) {
+  const text = String(value || "").trim();
+  if (!text) return true;
+  return /^(assignment\s*task|candidate\s*task|claim\s*task|content\s*list|inclusive\s*gateway|gateway|task|workflow\s*task(?:\s*\d+)?|sequence\s*flow(?:[_\s-]*\d+)?)$/i.test(text);
+}
+
+function isDefaultWorkflowConnectorDescription(value) {
+  const text = String(value || "").trim();
+  if (!text) return true;
+  return /^(sequence\s*flow(?:[_\s-]*\d+)?|connector|transition|line)$/i.test(text);
 }
 
 function shapeId(shape) {
@@ -1534,6 +1549,17 @@ function validateDecodedDef(def, options = {}) {
       if (!shape || isSequenceFlow(shape)) return;
       const p = `$.childshapes[${index}]`;
       const id = shapeId(shape);
+      const stencil = shape.stencil && shape.stencil.id;
+      const actionName = String(shape.properties && (shape.properties.name || shape.properties.title || shape.properties.label) || "").trim();
+      if (["MultiAssignmentTask", "CandidateTask", "ContentList", "InclusiveGateway"].includes(stencil)) {
+        if (!actionName) {
+          addIssue(errors, "WORKFLOW_ACTION_NAME_MISSING", "Workflow action nodes must have a concise business-specific Action name.", `${p}.properties.name`, { nodeId: id, stencil });
+        } else if (isDefaultWorkflowActionName(actionName)) {
+          addIssue(errors, "WORKFLOW_ACTION_NAME_DEFAULT", "Workflow action nodes must not keep default Designer names such as Assignment Task.", `${p}.properties.name`, { nodeId: id, stencil, actionName });
+        } else if (actionName.length > 48) {
+          addIssue(errors, "WORKFLOW_ACTION_NAME_TOO_LONG", "Workflow action names should be concise enough to render on the node card.", `${p}.properties.name`, { nodeId: id, stencil, actionName, length: actionName.length, maximum: 48 });
+        }
+      }
       if (!shape.id || shape.id !== shape.resourceid) {
         addIssue(errors, "GRAPH_NODE_ID_MISSING_OR_MISMATCHED", "Workflow node must include id matching resourceid for designer layout", `${p}.id`, {
           id: shape.id,
@@ -1651,7 +1677,16 @@ function validateDecodedDef(def, options = {}) {
         });
       }
       if (!Object.prototype.hasOwnProperty.call(shape.properties || {}, "documentation")) {
-        addIssue(issues, "WORKFLOW_SEQUENCE_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow should include properties.documentation, usually an empty string.", `${p}.properties.documentation`);
+        addIssue(issues, "WORKFLOW_SEQUENCE_DOCUMENTATION_MISSING", "New workflow designer SequenceFlow must include properties.documentation as a concise business Description.", `${p}.properties.documentation`);
+      } else {
+        const description = String(shape.properties && shape.properties.documentation || "").trim();
+        if (!description) {
+          addIssue(issues, "WORKFLOW_SEQUENCE_DESCRIPTION_MISSING", "SequenceFlow Description must be a short business label such as Approved, Rejected, Completed, or Amount >= 100.", `${p}.properties.documentation`);
+        } else if (isDefaultWorkflowConnectorDescription(description)) {
+          addIssue(issues, "WORKFLOW_SEQUENCE_DESCRIPTION_DEFAULT", "SequenceFlow Description must not keep default Designer text such as Sequence flow.", `${p}.properties.documentation`, { description });
+        } else if (description.length > 42) {
+          addIssue(issues, "WORKFLOW_SEQUENCE_DESCRIPTION_TOO_LONG", "SequenceFlow Description should be concise so connector labels remain readable.", `${p}.properties.documentation`, { description, length: description.length, maximum: 42 });
+        }
       }
       if (!Array.isArray(shape.dockers) || shape.dockers.length !== 0) {
         addIssue(issues, "WORKFLOW_SEQUENCE_DOCKERS_NOT_EMPTY", "New workflow designer rounded routing expects SequenceFlow.dockers to be an empty array by default.", `${p}.dockers`, {
@@ -1822,6 +1857,14 @@ function validateDecodedDef(def, options = {}) {
         }
       });
     });
+    for (const finding of validateWorkflowBranchConditionCoverage({
+      shapes: childshapes,
+      variablesById: variableById,
+      path: "$.childshapes",
+      workflow: String(def && (def.name || def.title || def.id) || ""),
+    })) {
+      addIssue(errors, finding.code, finding.message, finding.path, finding.detail);
+    }
   }
 
   function validateContentLists() {

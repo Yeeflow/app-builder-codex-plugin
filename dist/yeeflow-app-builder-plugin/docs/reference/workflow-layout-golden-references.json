@@ -56,6 +56,8 @@
     ],
     "required": [
       "Every non-SequenceFlow node must carry a top-level position object with numeric x/y coordinates.",
+      "Every generated workflow action node must use a concise business-specific Action name. Defaults such as Assignment Task, Content List, Inclusive Gateway, Gateway, Task, or Sequence flow are invalid. Use names such as Line manager approval, Department head approval, Finance manager approval, Cashier confirm, IT security check, or Request clarification.",
+      "Every generated SequenceFlow must use a concise business Description in properties.documentation. Empty descriptions and defaults such as Sequence flow are invalid. Use labels such as Submitted, Approved, Rejected, Completed, Amount >= 5000, Amount < 5000, or Sensitive data.",
       "Generated nodes must not share identical or near-identical coordinates.",
       "Complex workflows must reserve enough canvas width and height for the number of planned nodes.",
       "Approval Assignment Task nodes must include Approved and Rejected outcome SequenceFlows unless the workflow action is explicitly not an approval task.",
@@ -143,7 +145,9 @@
     "gatewayBranchLocalMaxDeltaX": 650,
     "endMergeMaxDeltaX": 650,
     "endMergeVerticalToleranceY": 130,
-    "connectorLabelMaxChars": 42,
+      "connectorLabelMaxChars": 42,
+      "workflowActionNameMaxChars": 48,
+      "workflowFlowDescriptionMaxChars": 42,
       "localRejectVertexMaxDeltaX": 760,
       "localRejectVertexMaxDeltaY": 260,
       "localForwardAutoRouteMaxDeltaX": 1250,
@@ -155,6 +159,7 @@
       "requiredGraphver": 2,
       "requireEmptyDockers": true,
       "requireDocumentation": true,
+      "requireNonEmptyDocumentation": true,
       "rejectedPath": "rounded; vertices required only for backward/return, overlap, node crossing, or long reroute",
       "crossLanePath": "rounded; vertices required only when spacing cannot prevent overlap"
     },

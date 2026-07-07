@@ -1666,8 +1666,8 @@ function uniqueApprovalFieldSpecs(fields) {
 function uniqueApprovalWorkflowNodes(nodes) {
   const normalized = [];
   const seen = new Set();
-  for (const node of nodes || []) {
-    const nodeName = cleanResourceName(node?.nodeName);
+  for (const [index, node] of (nodes || []).entries()) {
+    const nodeName = workflowBusinessActionName(node, index);
     const nodeType = normalizeApprovalWorkflowNodeType(node?.nodeType);
     if (!nodeName || !nodeType || isNonResourceName(nodeName)) continue;
     const key = `${normKey(nodeName)}::${nodeType.toLowerCase()}`;
@@ -1676,6 +1676,7 @@ function uniqueApprovalWorkflowNodes(nodes) {
     normalized.push({
       ...node,
       nodeName,
+      originalNodeName: cleanResourceName(node?.nodeName),
       nodeType,
       description: cleanResourceName(node?.description),
       assigneeRole: cleanResourceName(node?.assigneeRole),
@@ -1700,6 +1701,60 @@ function uniqueApprovalWorkflowNodes(nodes) {
     });
   }
   return normalized;
+}
+
+function isDefaultWorkflowActionName(value) {
+  const text = cleanResourceName(value);
+  if (!text) return true;
+  return /^(assignment\s*task|candidate\s*task|claim\s*task|content\s*list|inclusive\s*gateway|gateway|task|workflow\s*task|sequence\s*flow(?:[_\s-]*\d+)?)$/i.test(text);
+}
+
+function truncateWorkflowActionName(value, maxLength = 48) {
+  const text = cleanResourceName(value).replace(/\s+/g, " ");
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength).replace(/\s+\S*$/, "").trim() || text.slice(0, maxLength).trim();
+}
+
+function workflowBusinessActionName(node, index = 0) {
+  const raw = cleanResourceName(node?.nodeName || node?.name || node?.title);
+  if (raw && !isDefaultWorkflowActionName(raw)) return truncateWorkflowActionName(raw);
+  const nodeType = normalizeApprovalWorkflowNodeType(node?.nodeType);
+  const text = [
+    node?.requiredJobPositionName,
+    node?.assigneeRole,
+    node?.assignmentStrategy,
+    node?.description,
+    node?.conditionBranch,
+    node?.dataReadWrite,
+  ].map(cleanResourceName).join(" ");
+  const normalized = normKey(text);
+  if (/\bcash(?:i|e)er\b/.test(normalized)) return "Cashier confirm";
+  if (/\bfinance\b/.test(normalized) && /\bmanager\b/.test(normalized)) return "Finance manager approval";
+  if (/\bgeneral\b/.test(normalized) && /\bmanager\b/.test(normalized)) return "General manager approval";
+  if (/\bdepartment\b/.test(normalized) && /\b(head|manager)\b/.test(normalized)) return "Department head approval";
+  if (/\bline\b/.test(normalized) && /\bmanager\b/.test(normalized)) return "Line manager approval";
+  if (/\bowner\b/.test(normalized) && /\bmanager\b/.test(normalized)) return "Owner's manager approval";
+  if (/\bowner\b/.test(normalized)) return "Owner approval";
+  if (/\bit\b/.test(normalized) && /\bsecurity\b/.test(normalized)) return "IT security check";
+  if (/\bsoftware\b/.test(normalized) && /\blicen[sc]e\b/.test(normalized)) return "Software license check";
+  if (/\bprocurement\b/.test(normalized) && /\bavailability\b/.test(normalized)) return "Procurement availability";
+  if (/\bvendor\b/.test(normalized) && /\bquotation\b/.test(normalized)) return "Vendor quotation";
+  if (/\basset\b/.test(normalized) && /\bregistration\b/.test(normalized)) return "Asset registration";
+  if (/\bpickup\b/.test(normalized)) return "Employee pickup";
+  if (/\bclarification\b/.test(normalized)) return "Request clarification";
+  if (nodeType === "InclusiveGateway") {
+    if (/\bamount\b|\bbudget\b|\bcost\b|\bprice\b/.test(normalized)) return "Amount check";
+    if (/\bequipment\b/.test(normalized)) return "Equipment type check";
+    if (/\bavailability\b/.test(normalized)) return "Availability check";
+    return `Business condition ${index + 1}`;
+  }
+  if (nodeType === "ContentList") {
+    if (/\bcreate\b|\badd\b/.test(normalized)) return "Create record";
+    if (/\bupdate\b|\bset\b|\bsave\b/.test(normalized)) return "Update record";
+    return `Save request data ${index + 1}`;
+  }
+  if (nodeType === "CandidateTask") return `Claim task ${index + 1}`;
+  return `Review request ${index + 1}`;
 }
 
 function normalizeApprovalWorkflowNodeType(value) {
@@ -6679,6 +6734,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
   const flowShapes = [];
   const endIncoming = [];
   const addFlow = ({ id, sourceId, targetId, name, conditioninfo = null, vertices = [] }) => {
+    const description = workflowConnectorDescription(name, conditioninfo);
     const flow = {
       id,
       resourceid: id,
@@ -6688,8 +6744,8 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       incoming: [flowRef(sourceId)],
       outgoing: [flowRef(targetId)],
       properties: conditioninfo
-        ? { name, linetype: "rounded", documentation: "", conditionsequenceflow: "", conditioninfo }
-        : { name, linetype: "rounded", documentation: "", conditioninfo: [] },
+        ? { name: description, linetype: "rounded", documentation: description, conditionsequenceflow: "", conditioninfo }
+        : { name: description, linetype: "rounded", documentation: description, conditioninfo: [] },
       dockers: [],
     };
     if (vertices.length) flow.vertices = vertices;
@@ -6738,7 +6794,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
         id: completeFlowId,
         sourceId: node.id,
         targetId,
-        name: "Complete",
+        name: "Completed",
         vertices: workflowVerticesBetween(node.position, targetPosition, { routeNodes: layout.routeNodes }),
       });
       node.outgoing = [completeRef];
@@ -6775,6 +6831,31 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
   ];
 }
 
+function workflowConnectorDescription(name, conditioninfo = null) {
+  const label = cleanResourceName(name).replace(/\s+/g, " ");
+  if (/^complete$/i.test(label)) return "Completed";
+  if (label && !/^sequence\s*flow(?:[_\s-]*\d+)?$/i.test(label)) return truncateWorkflowActionName(label, 42);
+  const conditionText = summarizeWorkflowCondition(conditioninfo);
+  return conditionText || "Next";
+}
+
+function summarizeWorkflowCondition(conditioninfo) {
+  const rows = Array.isArray(conditioninfo) ? conditioninfo : [];
+  for (const row of rows) {
+    const op = cleanResourceName(row?.op);
+    const left = cleanResourceName(row?.left?.value?.name || row?.left?.value?.id);
+    const right = row?.right?.type === 0
+      ? cleanResourceName(row.right.value)
+      : cleanResourceName(row?.right?.value?.name || row?.right?.value?.id);
+    if (!left || !op) continue;
+    if (op === "isNull") return `${left} is empty`;
+    if (op === "isNotNull") return `${left} is not empty`;
+    const symbol = op.replace(/^[a-z]+\./i, "").replace("!=", "!=").replace("=", "=");
+    if (right) return truncateWorkflowActionName(`${left} ${symbol} ${right}`, 42);
+  }
+  return "";
+}
+
 function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas = [], position = null }) {
   const stencil = step.nodeType === "CandidateTask"
     ? "CandidateTask"
@@ -6792,7 +6873,10 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     outgoing: [],
     properties: {
       name: step.nodeName,
+      title: step.nodeName,
+      label: step.nodeName,
       plannedWorkflowNodeName: step.nodeName,
+      plannedOriginalWorkflowNodeName: step.originalNodeName || "",
       plannedWorkflowNodeType: step.nodeType,
       plannedAssigneeRole: step.assigneeRole || "",
       plannedAssignmentStrategy: step.assignmentStrategy || "",

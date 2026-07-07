@@ -28,9 +28,13 @@ It does not prove business behavior, assignment correctness, workflow execution,
 ## Generation Rules
 
 1. Every non-`SequenceFlow` workflow node must have a top-level `position` object with numeric `x` and `y`.
-2. Nodes must not share identical coordinates.
-3. Nodes must not use near-identical coordinates where both `x` and `y` deltas are below the golden-reference near-collision threshold.
-4. Complex workflows must not be compressed into a single small cluster. Main-path steps should use a horizontal column gap of about `335px`, with a minimum of `305px` for adjacent task columns.
+2. Every generated workflow action node must have a concise business-specific Action name. Defaults such as `Assignment Task`, `Content List`, `Inclusive Gateway`, `Gateway`, `Task`, or `Sequence flow` are invalid. Use names like `Line manager approval`, `Department head approval`, `Finance manager approval`, `Cashier confirm`, `IT security check`, or `Request clarification`.
+3. Action names should stay short enough to fit the node card, normally no more than 48 characters.
+4. Every generated `SequenceFlow` must include a non-empty business Description in `properties.documentation`. Use concise labels such as `Submitted`, `Approved`, `Rejected`, `Completed`, `Amount >= 5000`, `Amount < 5000`, or `Sensitive data`. Empty strings and defaults such as `Sequence flow_1` are invalid.
+5. SequenceFlow descriptions should stay short enough to avoid label collisions, normally no more than 42 characters. Keep full logic in `conditioninfo`.
+6. Nodes must not share identical coordinates.
+7. Nodes must not use near-identical coordinates where both `x` and `y` deltas are below the golden-reference near-collision threshold.
+8. Complex workflows must not be compressed into a single small cluster. Main-path steps should use a horizontal column gap of about `335px`, with a minimum of `305px` for adjacent task columns.
 5. Approval Assignment Tasks must have at least `Approved` and `Rejected` outcome SequenceFlows.
 6. Complete Assignment Tasks must have a `Completed` outcome SequenceFlow; `Completed` is the canonical spelling.
 7. Business-field branches such as `Amount >= 5000` / `Amount < 5000` must be modeled through an `InclusiveGateway`, not as direct condition fan-out from an Assignment Task.
@@ -50,7 +54,7 @@ It does not prove business behavior, assignment correctness, workflow execution,
 21. Long vertical route segments must not stack into one visual wall. If more than two long vertical segments need the same column gap, offset lanes or split the branch into local routes.
 22. Generated SequenceFlow line style should be `rounded` by default for complex graphs.
 23. Generated workflow roots must use the current Workflow Designer v2 graph attributes: `lineType = "rounded"` and `graphver = 2`. Preserve/default `graphzoom`; zoom differences are not layout defects.
-24. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
+24. Every generated `SequenceFlow` must include `properties.linetype = "rounded"`, a non-empty string `properties.documentation` field, and `dockers = []` so the designer can auto-route rounded lines.
 25. Do not add vertices merely because a line is rejected or cross-lane. Add `vertices[]` for return/backward lines, overlapping lines, lines that cross other nodes, and long reroutes that cannot be made readable by standard spacing.
 26. Direct same-row connectors must rely on rounded auto-routing. In particular, `StartNoneEvent -> first task` connectors labeled `Submitted` / `Submit` must have empty or absent `vertices[]`.
 27. When a connector needs a horizontal segment between two adjacent rows, route that segment at the midpoint of the net row gap: `routeY = (upperRowY + workflowNodeHeight + lowerRowY) / 2`.
@@ -174,7 +178,7 @@ The current Yeeflow Workflow Designer expects generated workflow graphs to use r
 - root `lineType: "rounded"`
 - root `graphver: 2`
 - each `SequenceFlow.properties.linetype: "rounded"`
-- each `SequenceFlow.properties.documentation` present as a string, with `""` allowed
+- each `SequenceFlow.properties.documentation` present as a non-empty concise business Description string
 - each `SequenceFlow.dockers: []`
 
 Do not generate legacy orthogonal/full-docker routes. Keep `vertices[]` only where explicit routing improves readability, such as return/backward paths, overlap avoidance, node crossing, or long reroutes.

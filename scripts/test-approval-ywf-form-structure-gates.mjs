@@ -244,7 +244,7 @@ function sequence(id, source, target, name, conditioninfo) {
     incoming: [{ id: source.id, resourceid: source.id }],
     outgoing: [{ id: target.id, resourceid: target.id }],
     dockers: [],
-    properties: { name, linetype: "rounded", documentation: "", conditioninfo },
+    properties: { name, linetype: "rounded", documentation: name === "Complete" ? "Completed" : name, conditioninfo },
   };
   source.outgoing.push({ id, resourceid: id });
   target.incoming.push({ id, resourceid: id });

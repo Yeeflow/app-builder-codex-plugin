@@ -2,7 +2,7 @@
 
 ## Objective
 
-Train the plugin to generate readable workflow diagrams for Approval form workflows, Data list workflows, and Scheduled workflows. The training focuses on node placement and SequenceFlow routing only. It intentionally ignores the specific business semantics of the provided examples.
+Train the plugin to generate readable workflow diagrams for Approval form workflows, Data list workflows, and Scheduled workflows. The training focuses on node placement, SequenceFlow routing, concise action naming, and connector descriptions. It does not prove runtime task routing or assignee execution.
 
 ## References Studied
 
@@ -22,6 +22,8 @@ The source files were inspected read-only. Raw exports are not bundled into the 
 - Large workflows reserve enough graph area rather than placing all nodes in one small cluster.
 - Approval Assignment Task nodes require at least `Approved` and `Rejected` outgoing SequenceFlows.
 - Complete Assignment Task nodes require canonical `Completed` outcome spelling.
+- Workflow action nodes must not keep Designer defaults such as `Assignment Task`, `Content List`, `Inclusive Gateway`, or `Gateway`. They must use short business-specific Action names such as `Line manager approval`, `Department head approval`, `Finance manager approval`, `Cashier confirm`, `IT security check`, or `Request clarification`.
+- SequenceFlow `properties.documentation` must be a non-empty, short business Description. Use `Submitted`, `Approved`, `Rejected`, `Completed`, or concise branch labels such as `Amount >= 5000`; do not keep empty strings or defaults such as `Sequence flow_1`.
 - Business-field branch fan-out, such as amount thresholds, must use an `InclusiveGateway` before branching.
 - Branch targets from the same Inclusive Gateway should align on one vertical column when they represent sibling choices.
 - A shared `EndRejectEvent` should collect no more than three adjacent Approval Assignment Task rejection paths.
@@ -111,13 +113,16 @@ The plugin validator now checks the semantic layout contract, not just visual co
 - Updated the workflow layout gate so standard-spaced rejected/cross-lane lines are allowed without vertices, while explicit return/backward lines still require vertices.
 - Updated the workflow layout gate and materializer so multi-row return/backward connectors choose a safe adjacent row-gap midpoint; a route such as `y = 363` is now rejected when it passes through an intermediate row occupying `y = 320..406`.
 - Updated the workflow layout gate and materializer so long connector vertical segments choose a safe adjacent column-gap midpoint; vertical route segments are now rejected when they pass through an intermediate node's column bounds.
+- Updated the materializer so workflow action nodes derive concise business-specific Action names from planned node names, assignee roles, job positions, and branch/action hints. A Finance Manager task should generate `Finance manager approval`, not `Assignment Task`.
+- Updated the workflow layout gate, standalone `.ywf` validator, and package validator so default workflow action names, empty SequenceFlow descriptions, default `Sequence flow_*` descriptions, and overlong action/connector labels fail generated-final validation.
+- Updated the materializer so every generated SequenceFlow writes a non-empty `properties.documentation` aligned with the visible label, such as `Submitted`, `Approved`, `Rejected`, `Completed`, or a concise business condition.
 - Updated the medium-width workflow gate so `2600px` is no longer an isolated hard blocker. Medium workflows may exceed the advisory width when they are folded into readable rows, row density is acceptable, and no label/lane readability gate fails.
 - Added connector readability gates for long label collisions and over-dense shared vertical route lanes. These gates prevent the 0.9.22-style regression where a graph passed geometry checks but became visually worse because labels and vertical lanes were crowded.
 - Added vertex economy and detour economy gates. Generated workflows now fail when too many non-return/non-rejection connectors carry vertices or when a connector path detours far beyond the direct source-target distance. These gates force the generator to fix node placement instead of hiding layout problems behind increasingly complex `vertices[]`.
 - Added workflow motif gates for local Inclusive Gateway fan-out, local normal End merge placement, local rejected connector vertex economy, and concise connector labels. These gates make the validator compare generated layouts against the readable motifs in `Workflow actions layout.json`, not just individual line geometry.
 - Updated the workflow layout gate so shared `EndRejectEvent` nodes can only collect rejected paths from Approval Assignment Tasks on the same horizontal lane.
 - Updated the workflow layout gate so generated diagrams fail when they exceed five vertical rows or when large workflows are collapsed into a single over-wide horizontal row instead of using the 16:9 canvas area.
-- Updated the workflow designer style gate so generated Approval, Data list, and Scheduled workflow graphs use Workflow Designer v2 attributes: root `lineType = "rounded"`, root `graphver = 2`, each `SequenceFlow.properties.linetype = "rounded"`, each `SequenceFlow.properties.documentation` present as a string, and each `SequenceFlow.dockers = []`. `graphzoom` is intentionally excluded as a hard gate.
+- Updated the workflow designer style gate so generated Approval, Data list, and Scheduled workflow graphs use Workflow Designer v2 attributes: root `lineType = "rounded"`, root `graphver = 2`, each `SequenceFlow.properties.linetype = "rounded"`, each `SequenceFlow.properties.documentation` present as a non-empty business Description string, and each `SequenceFlow.dockers = []`. `graphzoom` is intentionally excluded as a hard gate.
 - Updated cache artifact expectations and package-validator guidance.
 
 ## Proof Boundary
