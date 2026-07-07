@@ -8,6 +8,7 @@
 - Generated Dashboard grid-table Collections now synchronize `flex_grid.attrs.columns["1"].list` after schema-driven header/item cell pruning, so cloned six-column golden templates cannot leave blank trailing columns when only three business columns remain visible.
 - Add dataset presentation hard gates for stale `grid_table_col_header` and `grid_col_item` column definitions whose desktop track count no longer matches actual cell `children.length`.
 - Add source/dist regression coverage using the Doctor Operations Dashboard failure shape: header/item children pruned to 3 while grid tracks incorrectly remain at 6.
+- RC cache smoke passed from `yeeflow-app-builder-plugin-v0.9.30-rc1` content installed through the local marketplace checkout: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.30`, and installed-cache dashboard dataset presentation and repo hygiene gates passed.
 
 ## 0.9.29
 
