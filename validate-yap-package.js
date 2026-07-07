@@ -12,7 +12,10 @@ const {
   validateFieldAgainstSchema,
 } = require("./yeeflow-control-field-schema-utils");
 const { validateExpressionTokens } = require("./yeeflow-expression-utils");
-const { validateWorkflowConditionEditorRows } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
+const {
+  validateWorkflowBranchConditionCoverage,
+  validateWorkflowConditionEditorRows,
+} = require("./scripts/lib/workflow-condition-editor-utils.cjs");
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -4909,6 +4912,20 @@ function validateWorkflowGraph(def, form, report) {
       if (id && !ids.has(id)) issue(report, "warning", "WORKFLOW_INCOMING_SOURCE_NOT_FOUND", "Workflow incoming reference does not resolve.", { form: form.Name, node: shapeId(shape), incoming: id });
     }
   });
+  const workflowVariables = collectWorkflowVariables(def);
+  for (const finding of validateWorkflowBranchConditionCoverage({
+    shapes,
+    variablesById: workflowVariables.byId,
+    path: "Data.Forms[].DefResource.childshapes",
+    workflow: safeString(form && (form.Name || form.Title || form.Key)),
+  })) {
+    issue(report, generatorFinalSeverity(report), finding.code, finding.message, {
+      form: form.Name,
+      key: form.Key,
+      path: finding.path,
+      ...(finding.detail || {}),
+    });
+  }
   const flowsById = new Map(shapes.filter((shape) => shapeType(shape) === "SequenceFlow").map((shape) => [shapeId(shape), shape]));
   shapes.forEach((shape) => {
     if (shapeType(shape) !== "MultiAssignmentTask") return;

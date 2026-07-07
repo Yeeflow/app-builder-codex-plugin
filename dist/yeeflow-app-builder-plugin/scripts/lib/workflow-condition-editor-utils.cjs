@@ -130,6 +130,212 @@ function isTaskOutcomeSelector(token) {
   );
 }
 
+function shapeId(shape) {
+  return String(shape && (shape.resourceid || shape.id) || "");
+}
+
+function refId(ref) {
+  return String(ref && (ref.resourceid || ref.id) || "");
+}
+
+function shapeType(shape) {
+  return String(shape && shape.stencil && shape.stencil.id || "");
+}
+
+function literalKey(value) {
+  if (Array.isArray(value)) return value.map(literalKey).join("|");
+  if (typeof value === "boolean") return value ? "true" : "false";
+  return String(value ?? "").trim();
+}
+
+function literalDisplay(value) {
+  const key = literalKey(value);
+  return key || String(value ?? "");
+}
+
+function extractDirectRightLiteral(condition) {
+  const right = condition && condition.right;
+  if (!isObject(right) || right.type !== 0 || !Object.prototype.hasOwnProperty.call(right, "value")) return null;
+  return right.value;
+}
+
+function flattenConditionRows(rows, depth = 0) {
+  const result = [];
+  for (const condition of asArray(rows)) {
+    if (!isObject(condition)) continue;
+    if (Array.isArray(condition.conditions)) {
+      for (const child of flattenConditionRows(condition.conditions, depth + 1)) {
+        result.push({ ...child, parentPre: condition.pre, parentDepth: depth });
+      }
+    } else {
+      result.push({ row: condition, depth });
+    }
+  }
+  return result;
+}
+
+function conditionLeftWorkflowVariable(condition) {
+  const left = condition && condition.left;
+  if (!isObject(left) || left.type !== 1) return null;
+  const value = left.value;
+  if (!isObject(value) || value.exprType !== "variable" || !value.id) return null;
+  if (isTaskOutcomeSelector(value)) return null;
+  return value;
+}
+
+function extractVariableChoices(variable) {
+  if (!isObject(variable)) return [];
+  const candidates = [
+    variable.choices,
+    variable.options,
+    variable.values,
+    variable.items,
+    variable.choiceValues,
+    variable.Rules && variable.Rules.choices,
+    variable.rules && variable.rules.choices,
+  ];
+  const values = [];
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      for (const item of candidate) {
+        if (isObject(item)) {
+          const value = item.value ?? item.Value ?? item.key ?? item.Key ?? item.label ?? item.Label ?? item.name ?? item.Name;
+          if (value !== undefined && value !== null && String(value).trim()) values.push(String(value).trim());
+        } else if (item !== undefined && item !== null && String(item).trim()) {
+          values.push(String(item).trim());
+        }
+      }
+    } else if (typeof candidate === "string" && candidate.trim()) {
+      for (const value of candidate.split(/[,;|]/).map((entry) => entry.trim()).filter(Boolean)) values.push(value);
+    }
+  }
+  const type = normalizeType(variable.type || variable.valueType);
+  if (["boolean", "bit", "switch"].includes(type)) values.push("true", "false");
+  return Array.from(new Set(values.map(literalKey).filter(Boolean)));
+}
+
+function analyzeFlowBranchConditions(flow) {
+  const conditions = asArray(flow && flow.properties && flow.properties.conditioninfo);
+  const text = JSON.stringify(conditions);
+  const hasTaskOutcome = /Task outcome|任务结果|&quot;type&quot;:&quot;task&quot;|:Outcome\b|Instance:Outcome/.test(text);
+  const equalsByVariable = new Map();
+  const notEqualsByVariable = new Map();
+  const rows = flattenConditionRows(conditions);
+
+  for (const { row } of rows) {
+    const token = conditionLeftWorkflowVariable(row);
+    if (!token) continue;
+    const op = row.op;
+    if (!["s.=", "s.!=", "b.=", "b.!="].includes(op)) continue;
+    const literal = extractDirectRightLiteral(row);
+    if (literal === null) continue;
+    const id = token.id;
+    const target = op.endsWith("!=") ? notEqualsByVariable : equalsByVariable;
+    if (!target.has(id)) target.set(id, new Set());
+    target.get(id).add(literalKey(literal));
+  }
+
+  return {
+    flowId: shapeId(flow),
+    sourceId: refId(flow && flow.source),
+    targetId: refId(flow && flow.target),
+    hasTaskOutcome,
+    hasConditions: conditions.length > 0,
+    equalsByVariable,
+    notEqualsByVariable,
+  };
+}
+
+function validateWorkflowBranchConditionCoverage({
+  shapes,
+  variablesById,
+  path = "$.childshapes",
+  workflow = "",
+} = {}) {
+  const findings = [];
+  const sequenceFlows = asArray(shapes).filter((shape) => shapeType(shape) === "SequenceFlow");
+  const flowsBySource = new Map();
+  sequenceFlows.forEach((flow, index) => {
+    const sourceId = refId(flow && flow.source);
+    if (!sourceId) return;
+    if (!flowsBySource.has(sourceId)) flowsBySource.set(sourceId, []);
+    flowsBySource.get(sourceId).push({ flow, index, analysis: analyzeFlowBranchConditions(flow) });
+  });
+
+  function add(code, message, flowIndex, detail = {}) {
+    findings.push({
+      code,
+      message,
+      path: `${path}[${flowIndex}].properties.conditioninfo`,
+      detail: { workflow, ...detail },
+    });
+  }
+
+  for (const [sourceId, entries] of flowsBySource.entries()) {
+    if (entries.length < 2) continue;
+    if (entries.some((entry) => entry.analysis.hasTaskOutcome)) continue;
+
+    const equalityValuesByVariable = new Map();
+    for (const entry of entries) {
+      for (const [variableId, values] of entry.analysis.equalsByVariable.entries()) {
+        if (!equalityValuesByVariable.has(variableId)) equalityValuesByVariable.set(variableId, new Set());
+        for (const value of values) equalityValuesByVariable.get(variableId).add(value);
+      }
+    }
+
+    for (const [variableId, coveredValues] of equalityValuesByVariable.entries()) {
+      if (!coveredValues.size) continue;
+      const variable = variablesById instanceof Map ? variablesById.get(variableId) : null;
+      const choices = extractVariableChoices(variable);
+      const choicesSet = new Set(choices);
+      const allKnownChoicesCovered = choices.length > 0 && choices.every((choice) => coveredValues.has(choice));
+      const complementEntry = entries.find((entry) => {
+        const notEquals = entry.analysis.notEqualsByVariable.get(variableId) || new Set();
+        const equals = entry.analysis.equalsByVariable.get(variableId) || new Set();
+        return equals.size === 0 && Array.from(coveredValues).every((value) => notEquals.has(value));
+      });
+
+      const hasUnconditionedFlow = entries.find((entry) => !entry.analysis.hasConditions);
+      if (hasUnconditionedFlow) {
+        add(
+          "WORKFLOW_BRANCH_UNCONDITIONAL_DEFAULT_NOT_SUPPORTED",
+          "Yeeflow workflow has no implicit else/default branch; every fan-out SequenceFlow must carry explicit conditioninfo coverage.",
+          hasUnconditionedFlow.index,
+          {
+            sourceId,
+            variableId,
+            coveredValues: Array.from(coveredValues).map(literalDisplay),
+            unconditionedFlowId: entryFlowId(hasUnconditionedFlow),
+          },
+        );
+      }
+
+      if (allKnownChoicesCovered || complementEntry) continue;
+
+      add(
+        "WORKFLOW_BRANCH_CONDITION_COVERAGE_INCOMPLETE",
+        "Workflow fan-out branches must explicitly cover remaining cases; add a branch with AND not-equals conditions for every already covered equality value.",
+        entries[0].index,
+        {
+          sourceId,
+          variableId,
+          variableType: variable && (variable.type || variable.valueType) || null,
+          coveredValues: Array.from(coveredValues).map(literalDisplay),
+          knownChoices: choices,
+          missingKnownChoices: choices.length ? choices.filter((choice) => !coveredValues.has(choice)) : [],
+          requiredFallbackConditions: Array.from(coveredValues).map((value) => `${variableId} != ${literalDisplay(value)}`),
+        },
+      );
+    }
+  }
+
+  return findings;
+}
+
+function entryFlowId(entry) {
+  return entry && entry.analysis && entry.analysis.flowId || "";
+}
+
 function validateWorkflowConditionEditorRows({
   conditions,
   variablesById,
@@ -269,4 +475,5 @@ module.exports = {
   workflowConditionEditorGroupForType,
   looksLikeConditionExpressionArray,
   validateWorkflowConditionEditorRows,
+  validateWorkflowBranchConditionCoverage,
 };

@@ -53,12 +53,14 @@ When a business decision says quota, entitlement, budget, or benefit usage is oc
 
 For review nodes with multiple outgoing `SequenceFlow` branches:
 
-- branch variables must be required, auto-derived, or protected by a fallback route
+- branch variables must be required, auto-derived, or protected by an explicit conditioned fallback route
 - cover approve/reject plus yes/no/empty/unexpected values for policy-routing flags
 - route unknown or empty exception flags to a specialist review/fallback path rather than allowing a dead end
 - validate that every outgoing condition family eventually reaches an end or persistence node
 
 Example: if `HasCustomPackageProduct` drives Finance/Benefits Review, the standard branch can use `Approved + HasCustomPackageProduct = No`, while the Finance/fallback branch can use `Approved + HasCustomPackageProduct != No` to cover `Yes`, empty, and unexpected values.
+
+Yeeflow does not have an implicit `else` or `default` SequenceFlow. The fallback route above must still be a normal conditioned branch. For option variables such as `TravelType`, if only `TravelType == type1` and `TravelType == type2` are routed, add a third branch with `TravelType != type1 AND TravelType != type2`. Do not leave an outgoing SequenceFlow unconditioned and treat it as default.
 
 ## SequenceFlow Condition Operand Pattern
 
