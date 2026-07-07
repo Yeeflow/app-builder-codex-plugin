@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.22`
+- Version: `0.9.25`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.22` consolidates standalone export, Job Position assignee, and Workflow Designer vertical-route hardening. Standalone `.ydl` and `.ydp` export generation now shares the same Data List and Dashboard builders, golden reference templates, field/control mapping, filter/action naming, and validator gates used by full `.yapk` materialization; Job Position assignees require OAuth refresh/lookup/create proof before assignment; and vertical workflow connector lanes now use safe column-gap midpoint routing.
+Current release `0.9.25` hardens Workflow Condition editor generation and validation. Generated approval/list/scheduled workflow connector conditions now support direct values, Expression editor right operands, two-layer condition groups, and export-shaped Assignment Task outcome comparisons before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.22
+Version: 0.9.25
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.22
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.25
 ```
 
 ## What Is Included

@@ -44,6 +44,39 @@ Use expression left + static/option/date right when the left side must be calcul
 
 Use expression left + expression right when both sides are dynamic, such as `TotalApplicationAmount > RemainingQuota` or `year(RequestDate) >= year(BoardingDate)`.
 
+## Direct Workflow Variable Conditions
+
+For direct-value conditions where the left side is a Workflow variable selector and the right side is a fixed value, use the current Condition editor wrapper shape:
+
+- `left.type = 1`
+- `left.value.exprType = "variable"`
+- `left.value.type = "expr"`
+- `left.value.id` resolves to `DefResource.variables`
+- `right.type = 0`
+- `group` matches the Condition editor group for the selected variable type
+
+Condition editor group mapping:
+
+| Workflow variable type | Condition editor group | Operator prefix |
+|---|---|---|
+| `file`, `img`, `image`, `signature`, `signer` | `general` | null checks only |
+| `text`, `list`, `richtext`, `metadata`, `mutiple-metadata`, `dict`, `lookup`, `user`, `groupselect`, `department`, `organization`, `location`, `costcenter` | `string` | `s.` |
+| `number`, `decimal`, `currency`, `percent`, `rate` | `number` | `n.` |
+| `boolean`, `bit`, `switch` | `boolean` | `b.` |
+| `date`, `datetime`, `datepicker`, `time` | `datetime` | `dt.`, plus `isNull` / `isNotNull` |
+
+Object-like workflow variables such as User, Department, Location, Cost Center, Lookup, Metadata, and Dictionary values compare as String because the Condition editor stores their selected IDs as string values. File, Image, and Signature variables should use General `isNull` / `isNotNull` checks in this variable-condition pattern.
+
+Date Time workflow variables such as `EffectiveDate` support `dt.=`, `dt.!=`, `dt.>=`, `dt.<=`, `dt.>`, `dt.<`, `isNull`, and `isNotNull`. Direct date/time right operands use `right.type = 0` with a date/time string, preferably the export-observed `YYYY-MM-DD HH:mm:ss` shape when time is present; null checks use `right: null`.
+
+Use `right.type = 0` for fixed known values. Use `right.type = 2` only when the comparison value needs the Expression editor: concatenated strings, numeric calculations, Boolean functions such as `iif`, current-user/applicant-derived values such as `getUserAttr(Instance:Applicant, DepartmentID, [])`, cross-variable comparisons, or date functions such as `dateAdd(now(), "month", 1)`. A `right.type = 2` value must be a non-empty expression-token array, not a raw string or primitive.
+
+When a connector needs grouped logic, use the current Condition editor's two-layer condition shape. Top-level `conditioninfo[]` rows may include a group wrapper row with `left: null`, `op: "isNull"`, `right: null`, and a non-empty child `conditions[]` array. The wrapper row's `pre` joins the group to previous top-level rows; every child condition row carries its own `pre` (`and` or `or`). Use child `and` rows for ranges and all-required clauses; use child `or` rows for alternatives. Do not generate nested child groups beyond this one child layer.
+
+Assignment task output branches are not normal workflow-variable comparisons. For `Approved`, `Rejected`, and `Completed` outgoing lines, generate an export-style task Outcome expression-button on the left side with `data.type = "task"`, `param.defid = <source task id>`, and `prop = "Outcome"`, `op = "s.="`, and an export-style right expression-button with `Task outcome:Approved`, `Task outcome:Rejected`, or `Task outcome:Completed`. Do not generate simplified `left.value.id = "Outcome"` variable tokens for task outcome branches.
+
+See `docs/studies/workflow-condition-editor-direct-value.md` for the export-backed reference and validation rules.
+
 ## Branch Coverage
 
 For every multi-branch node:

@@ -44,6 +44,10 @@ expectCode("label-only task outcome condition fails", (def) => {
   const flow = def.childshapes.find((shape) => shape.id === IDS.approved);
   flow.properties.conditioninfo = [{ label: "Approved" }];
 }, "APPROVAL_CONDITION_SHAPE_INCOMPLETE");
+expectCode("simple Outcome token task outcome condition fails", (def) => {
+  const flow = def.childshapes.find((shape) => shape.id === IDS.approved);
+  flow.properties.conditioninfo = simpleOutcomeCondition("Approved");
+}, "APPROVAL_CONDITION_LEFT_TASK_REF_INVALID");
 
 console.log(JSON.stringify({
   status: "pass",
@@ -128,8 +132,8 @@ function validDef() {
   });
   const end = node(IDS.end, "EndNoneEvent", "End", 760, 160);
   const endReject = node(IDS.endReject, "EndRejectEvent", "End with rejection", 760, 320);
-  const approved = sequence(IDS.approved, task, end, "Approved", outcomeCondition("Approved"));
-  const rejected = sequence(IDS.rejected, task, endReject, "Rejected", outcomeCondition("Rejected"));
+  const approved = sequence(IDS.approved, task, end, "Approved", outcomeCondition(task, "Approved"));
+  const rejected = sequence(IDS.rejected, task, endReject, "Rejected", outcomeCondition(task, "Rejected"));
   const submit = sequence("99999999-9999-4999-8999-999999999999", start, task, "Submit", []);
 
   return {
@@ -247,9 +251,23 @@ function sequence(id, source, target, name, conditioninfo) {
   return flow;
 }
 
-function outcomeCondition(outcome) {
+function outcomeCondition(task, outcome) {
   return [{
     key: uuidFromLabel(`condition ${outcome}`),
+    pre: "and",
+    left: expressionButton({
+      type: "task",
+      param: { defid: task.id },
+      prop: "Outcome",
+    }, `${task.properties.name}:Outcome`),
+    op: "s.=",
+    right: `<input type="button" data="${outcome}" expr="__" tabindex="-1" value="Task outcome:${outcome}">`,
+  }];
+}
+
+function simpleOutcomeCondition(outcome) {
+  return [{
+    key: uuidFromLabel(`simple condition ${outcome}`),
     pre: "and",
     left: {
       type: 1,

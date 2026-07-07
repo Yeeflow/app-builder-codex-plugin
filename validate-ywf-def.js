@@ -9,6 +9,7 @@ const {
   validateControlAgainstSchema,
 } = require("./yeeflow-control-field-schema-utils");
 const { validateExpressionTokens } = require("./yeeflow-expression-utils");
+const { validateWorkflowConditionEditorRows } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
 
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
 const NUMERIC_OPS = new Set(["n.>", "n.>=", "n.<", "n.<=", "n.=", "n.!=", ">", ">=", "<", "<="]);
@@ -1732,9 +1733,57 @@ function validateDecodedDef(def, options = {}) {
         addIssue(warnings, "SEQUENCE_CONDITION_DIRECT_SELECTOR_BAD_VALUE", "Direct-selector workflow transition condition operands should store the selected variable/field token object in value", `${p}.value`, { side });
       }
     }
+    function expectedTaskOutcome(text) {
+      const value = String(text || "");
+      if (/\bapproved\b/i.test(value) || /已同意/.test(value)) return "Approved";
+      if (/\brejected\b/i.test(value) || /已拒绝/.test(value)) return "Rejected";
+      if (/\bcompleted\b/i.test(value) || /已完成/.test(value)) return "Completed";
+      return "";
+    }
+    function validateTaskOutcomeCondition(shape, condition, flowLabel, conditionIndex, p) {
+      const text = JSON.stringify(condition || {});
+      const expectedOutcome = expectedTaskOutcome(flowLabel) || expectedTaskOutcome(text);
+      const leftText = typeof condition.left === "string" ? condition.left : JSON.stringify(condition.left || {});
+      const rightText = typeof condition.right === "string" ? condition.right : JSON.stringify(condition.right || {});
+      const sourceId = String(shape && shape.source && (shape.source.id || shape.source.resourceid) || "");
+      if (condition.op !== "s.=") addIssue(errors, "APPROVAL_CONDITION_BAD_OP", "Approval outcome condition should use op: s.=", `${p}.op`);
+      if (
+        typeof condition.left !== "string" ||
+        !leftText.includes("<input") ||
+        !leftText.includes("&quot;type&quot;:&quot;task&quot;") ||
+        !leftText.includes("&quot;prop&quot;:&quot;Outcome&quot;") ||
+        (sourceId && !leftText.includes(sourceId))
+      ) {
+        addIssue(errors, "APPROVAL_CONDITION_LEFT_TASK_REF_INVALID", "Approval task outcome condition left operand must be an export-style task Outcome expression-button for the source Assignment task, not a generic Outcome variable token.", `${p}.left`, {
+          conditionIndex,
+          flowLabel,
+          sourceId,
+        });
+      }
+      if (
+        typeof condition.right !== "string" ||
+        !rightText.includes("<input") ||
+        !rightText.includes("Task outcome:") ||
+        (expectedOutcome && !rightText.includes(`Task outcome:${expectedOutcome}`))
+      ) {
+        addIssue(errors, "APPROVAL_CONDITION_RIGHT_RESULT_INVALID", "Approval task outcome condition right operand must be an export-style Task outcome expression-button matching the outgoing branch.", `${p}.right`, {
+          conditionIndex,
+          flowLabel,
+          expectedOutcome,
+        });
+      }
+    }
     childshapes.forEach((shape, index) => {
       if (!isSequenceFlow(shape)) return;
       const conditions = asArray(shape.properties && shape.properties.conditioninfo);
+      for (const finding of validateWorkflowConditionEditorRows({
+        conditions,
+        variablesById: variableById,
+        path: `$.childshapes[${index}].properties.conditioninfo`,
+        node: String(shape.properties && (shape.properties.name || shape.properties.label || shape.properties.documentation) || shapeId(shape) || ""),
+      })) {
+        addIssue(errors, finding.code, finding.message, finding.path, finding.detail);
+      }
       conditions.forEach((condition, conditionIndex) => {
         const p = `$.childshapes[${index}].properties.conditioninfo[${conditionIndex}]`;
         const text = JSON.stringify(condition);
@@ -1750,7 +1799,7 @@ function validateDecodedDef(def, options = {}) {
         validateOperandWrapper(condition.right, "right", `${p}.right`);
         const isApprovalOutcome = text.includes("&quot;type&quot;:&quot;task&quot;") || text.includes(":Outcome") || text.includes(":结果");
         if (isApprovalOutcome) {
-          if (condition.op !== "s.=") addIssue(errors, "APPROVAL_CONDITION_BAD_OP", "Approval outcome condition should use op: s.=", `${p}.op`);
+          validateTaskOutcomeCondition(shape, condition, flowLabel, conditionIndex, p);
           if (!text.includes("Outcome") && !text.includes("结果")) addIssue(errors, "APPROVAL_CONDITION_MISSING_OUTCOME", "Approval outcome condition should include task Outcome reference", p);
           if (!text.includes("Task outcome:Approved") && !text.includes("Task outcome:Rejected") && !text.includes("Task outcome:Completed") && !text.includes("任务结果:已同意")) {
             addIssue(errors, "APPROVAL_CONDITION_MISSING_RESULT", "Approval outcome condition should include Task outcome:Approved, Task outcome:Rejected, or Task outcome:Completed", p);
