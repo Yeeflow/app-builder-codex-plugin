@@ -6392,6 +6392,7 @@ function workflowVerticesBetween(sourcePosition, targetPosition, options = {}) {
   const signedDx = Number(targetPosition.x) - Number(sourcePosition.x);
   if (!options.force && dy < 80 && dx < 520) return [];
   if (!options.force && signedDx >= 0 && dx < Number(options.forwardAutoRouteDeltaX || 900)) return [];
+  if (!options.force && signedDx > 0 && dx <= Number(options.localForwardAutoRouteDeltaX || 1250) && dy <= Number(options.localForwardAutoRouteDeltaY || 360)) return [];
   const routeY = workflowSafeRouteYBetweenRows(sourcePosition, targetPosition, options.routeNodes || []);
   if (Number.isFinite(routeY)) {
     const nodeWidth = Number(options.nodeWidth || 190);

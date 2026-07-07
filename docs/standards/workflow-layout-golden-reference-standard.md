@@ -63,7 +63,8 @@ It does not prove business behavior, assignment correctness, workflow execution,
 34. Inclusive Gateway branches must be local fan-out motifs. Branch targets should sit in a nearby branch column, normally about `195px` from the gateway and never as a far-right target that requires long labels or detour connectors.
 35. Normal End nodes with multiple incoming branches must be local merge points beside the incoming source group. Do not place a final End far from the source group and then wrap long completion connectors into it.
 36. Local rejected connectors to a nearby `EndRejectEvent` should not carry explicit vertices. If the rejection endpoint is correctly placed above/below the source group, rounded auto-routing is sufficient.
-37. Connector display labels must stay concise. Use short visible labels such as `Amount >= 5000`, `Sensitive data`, or `Approved`, and keep the full expression in `conditioninfo`; do not put long business sentences on connector labels.
+37. Local forward or merge connectors between nearby upper/lower lanes should also use rounded auto-routing with empty `vertices[]`. Do not add explicit vertices to nearby Completed/Approved merge lines merely because the source and target are on different y lanes. If a short local merge needs several bends to look readable, move the branch/merge nodes into a clearer golden-reference motif instead.
+38. Connector display labels must stay concise. Use short visible labels such as `Amount >= 5000`, `Sensitive data`, or `Approved`, and keep the full expression in `conditioninfo`; do not put long business sentences on connector labels.
 
 ## Standard Spacing
 
@@ -101,6 +102,7 @@ The `workflow_actions_layout` reference establishes the following default spacin
 | `END_MERGE_VERTICAL_TOLERANCE` | `130` | fixed | Allowed y padding around incoming source centers for local End merge placement. |
 | `CONNECTOR_LABEL_MAX` | `42 chars` | fixed | Maximum suggested visible business-condition connector label length. |
 | `LOCAL_REJECT_VERTEX_DELTA` | `760 x 260` | fixed | Local rejected connectors within this x/y distance should not use explicit vertices. |
+| `LOCAL_FORWARD_AUTO_ROUTE_DELTA` | `1250 x 360` | fixed | Local forward or merge connectors within this x/y distance should not use explicit vertices. |
 | `CANVAS_RATIO` | `16:9` | advisory | Preferred visible Designer canvas usage. |
 
 ## Assignment Task Outcome Rules
@@ -222,6 +224,8 @@ vertices = []
 
 This is mandatory for `Start -> first task` / `Submitted` or `Submit` connectors when the source and target are adjacent and unobstructed.
 
+Local forward/merge connectors should also stay vertex-free when the source and target are nearby. For example, a `Completed` line from an upper branch task to the next local merge task, or an `Approved` line from a nearby lower branch task back into a local process step, should rely on Designer rounded auto-routing. Do not add diagonal or multi-bend `vertices[]` just because the nodes are on different y lanes.
+
 For return lines that can travel in the open space between adjacent rows, route the horizontal segment through the midpoint of the net row gap:
 
 ```text
@@ -257,6 +261,7 @@ When materializing App Plan workflow nodes:
 - Keep End on the right of the last main/action step.
 - Route return/rework transitions down or up and across with two or more vertices.
 - Use vertices for cross-lane approved/complete transitions only when standard spacing would make a diagonal line overlap other lines or cross nodes.
+- Do not use vertices for local Completed/Approved merge transitions when the source and target are nearby branch/action lanes. Rounded auto-routing is cleaner; explicit bends in this case usually signal that node placement should be adjusted.
 - When generating vertices for a long connector, choose both a safe horizontal `routeY` from row-gap midpoint rules and a safe vertical `routeX` from column-gap midpoint rules. Do not leave the vertical segment on a task/gateway center line when that would run through another node's bounds.
 - Before adding vertices, try moving branch/action nodes into the reference motif lanes. If multiple forward or branch connectors need explicit vertices, the layout engine should move nodes, not add bends.
 

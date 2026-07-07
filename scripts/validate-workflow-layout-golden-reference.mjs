@@ -136,6 +136,8 @@ function readReference(referencePath, findings) {
       "connectorLabelMaxChars",
       "localRejectVertexMaxDeltaX",
       "localRejectVertexMaxDeltaY",
+      "localForwardAutoRouteMaxDeltaX",
+      "localForwardAutoRouteMaxDeltaY",
     ]) {
       if (!Number.isFinite(Number(spacing[key]))) {
         findings.push(issue("WORKFLOW_LAYOUT_REFERENCE_RULE_MISSING", "Workflow layout reference is missing a required numeric spacing rule.", { reference: referencePath, key }));
@@ -208,6 +210,8 @@ function defaultRules() {
         connectorLabelMaxChars: 42,
         localRejectVertexMaxDeltaX: 760,
         localRejectVertexMaxDeltaY: 260,
+        localForwardAutoRouteMaxDeltaX: 1250,
+        localForwardAutoRouteMaxDeltaY: 360,
       },
       lineStyle: {
         default: "rounded",
@@ -381,7 +385,7 @@ function validateOneWorkflow(resource, reference, findings) {
       spacing,
       findings,
     });
-    if (sourceNode?.position && targetNode?.position && signedDx > 0 && nodes.length >= 5 && targetStencil !== "EndRejectEvent" && dx < Number(spacing.minimumForwardFlowDeltaX)) {
+    if (sourceNode?.position && targetNode?.position && signedDx > 0 && sameRow && nodes.length >= 5 && targetStencil !== "EndRejectEvent" && dx < Number(spacing.minimumForwardFlowDeltaX)) {
       findings.push(issue("WORKFLOW_LAYOUT_FORWARD_FLOW_TOO_CLOSE", "Forward SequenceFlow edges should reserve enough horizontal space between workflow action nodes.", {
         source: resource.source,
         workflowName: resource.workflowName,
@@ -403,7 +407,20 @@ function validateOneWorkflow(resource, reference, findings) {
         targetId,
       }));
     }
-    if (nodes.length >= 8 && dx >= Number(spacing.longFlowVertexRequiredDeltaX) && dy >= 60 && !vertices.length) {
+    const localForwardAutoRoute = isLocalForwardAutoRouteCandidate({ flow: flow.shape, sourceNode, targetNode, spacing });
+    if (vertices.length && localForwardAutoRoute) {
+      findings.push(issue("WORKFLOW_LAYOUT_LOCAL_FORWARD_VERTICES_UNNECESSARY", "Local forward or merge SequenceFlow edges should use clean rounded auto-routing; if explicit vertices are needed for this short local link, move the nodes instead of drawing a bent connector.", {
+        source: resource.source,
+        workflowName: resource.workflowName,
+        path: `${flowPath}.vertices`,
+        flowId: flow.id,
+        sourceId,
+        targetId,
+        delta: { x: dx, y: dy },
+        vertexCount: vertices.length,
+      }));
+    }
+    if (nodes.length >= 8 && dx >= Number(spacing.longFlowVertexRequiredDeltaX) && dy >= 60 && !vertices.length && !localForwardAutoRoute) {
       findings.push(issue("WORKFLOW_LAYOUT_LONG_FLOW_VERTICES_MISSING", "Long SequenceFlow edges that cross multiple columns must include vertices for readable routing.", {
         source: resource.source,
         workflowName: resource.workflowName,
@@ -417,6 +434,19 @@ function validateOneWorkflow(resource, reference, findings) {
   }
 
   validateConnectorReadability(resource, nodes, flows, spacing, findings);
+}
+
+function isLocalForwardAutoRouteCandidate({ flow, sourceNode, targetNode, spacing }) {
+  if (!flow || !sourceNode?.position || !targetNode?.position) return false;
+  const sourceStencil = stencilId(sourceNode.shape);
+  const targetStencil = stencilId(targetNode.shape);
+  if (sourceStencil === "StartNoneEvent" || sourceStencil === "EndRejectEvent" || targetStencil === "EndRejectEvent") return false;
+  if (isRejectedFlow(flow) || isReturnFlow(flow)) return false;
+  const signedDx = Number(targetNode.position.x) - Number(sourceNode.position.x);
+  if (signedDx <= 0) return false;
+  const dx = Math.abs(signedDx);
+  const dy = Math.abs(Number(targetNode.position.y) - Number(sourceNode.position.y));
+  return dx <= Number(spacing.localForwardAutoRouteMaxDeltaX || 1250) && dy <= Number(spacing.localForwardAutoRouteMaxDeltaY || 360);
 }
 
 function validateWorkflowDesignerV2Style(resource, flows, allowedLineTypes, lineStyleRules, findings) {

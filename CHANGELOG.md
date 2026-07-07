@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.27
+
+- Release Workflow Designer local forward merge vertex-economy hardening.
+- Generated Approval form, Data list workflow, and Scheduled workflow diagrams now keep nearby upper/lower-lane Completed or Approved merge connectors on rounded auto-routing with empty `vertices[]` instead of adding visual-noise bends.
+- Preserve explicit `vertices[]` for true same-column vertical branch routes and long return/backward routes, matching the provided good workflow design reference instead of removing every vertex indiscriminately.
+- Add `WORKFLOW_LAYOUT_LOCAL_FORWARD_VERTICES_UNNECESSARY` validation and source/dist regression coverage so the provided bad design fails exactly on the two unnecessary local merge connectors while the wrapped good design passes.
+
 ## 0.9.26
 
 - Release explicit Workflow branch condition coverage hardening.
