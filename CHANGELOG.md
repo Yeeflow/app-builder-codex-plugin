@@ -8,6 +8,7 @@
 - Generated Approval form, Data list workflow, and Scheduled workflow diagrams now keep nearby upper/lower-lane Completed or Approved merge connectors on rounded auto-routing with empty `vertices[]` instead of adding visual-noise bends.
 - Preserve explicit `vertices[]` for true same-column vertical branch routes and long return/backward routes, matching the provided good workflow design reference instead of removing every vertex indiscriminately.
 - Add `WORKFLOW_LAYOUT_LOCAL_FORWARD_VERTICES_UNNECESSARY` validation and source/dist regression coverage so the provided bad design fails exactly on the two unnecessary local merge connectors while the wrapped good design passes.
+- RC install smoke passed from `yeeflow-app-builder-plugin-v0.9.27-rc1`: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.27`, and installed-cache plus marketplace-payload workflow layout, workflow condition, approval YWF structure, and standalone export gates passed.
 
 ## 0.9.26
 
