@@ -8,6 +8,7 @@
 - Generated Approval form, Data list workflow, and Scheduled workflow fan-out branches now fail generated-final validation when business-variable equality branches do not cover all known choices and no explicit complement branch exists.
 - Treat blank/unconditioned outgoing SequenceFlow branches as invalid fallbacks because Yeeflow workflow has no implicit `else` / `default` branch semantics.
 - Add `WORKFLOW_BRANCH_CONDITION_COVERAGE_INCOMPLETE` and `WORKFLOW_BRANCH_UNCONDITIONAL_DEFAULT_NOT_SUPPORTED` regression coverage for option-variable fan-out cases such as `TravelType == type1`, `TravelType == type2`, and explicit `TravelType != type1 AND TravelType != type2` complements.
+- RC install smoke passed from `yeeflow-app-builder-plugin-v0.9.26-rc1`: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.26`, marketplace metadata resolved from the stable snapshot, and installed-cache workflow condition, approval YWF structure, workflow layout, and standalone export gates passed.
 
 ## 0.9.25
 
