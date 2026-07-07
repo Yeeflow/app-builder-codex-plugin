@@ -41,6 +41,16 @@ Standalone `.ydl` output must pass the same list and custom-form gates that full
 
 Generating a `.ydl` by directly assembling fields and a minimal `Main > Content` form shell is a drift defect if the corresponding full-app path would use the approved template builders.
 
+Generator-final standalone `.ydl` validation must hard-fail simplified custom form output. A generated business Data List must not:
+
+- reuse one generic Type `1` custom form for `ListModel.LayoutView.add`, `edit`, and `view`;
+- omit a concrete New/Edit form titled `Edit Item`;
+- omit a concrete View form titled `View Item`;
+- place current-record field controls directly in a generic container or `flex_grid` instead of `form_grid_fields_wrapper`;
+- omit the Data List Form Layouts v1.1 root contract, including `Main`, `Content`, full-width content area, zero page padding, approved content card wrappers, and approved business slots.
+
+If any of these conditions are found, report `STANDALONE_YDL_SHARED_GENERATION_BYPASSED` and stop before handoff.
+
 ## Dashboard `.ydp`
 
 Standalone `.ydp` generation and full-application `.yapk` Dashboard materialization must share the same Dashboard page-layout and component-template generation path.
