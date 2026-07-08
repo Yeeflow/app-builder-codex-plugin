@@ -18,17 +18,19 @@ try {
   expectCode("Registry missing App Plan selection guidance fails", ["--registry", writeJson("registry-missing-guidance.json", registryMissingGuidance())], "DATA_ANALYTICS_REFERENCE_GUIDANCE_INCOMPLETE");
   expectPass("Dashboard v1.1 analytics inside approved content card and multi-column sections pass", ["--resource", writeJson("valid-dashboard.json", dashboardResource()), "--surface", "dashboard"]);
   expectPass("Dashboard v1.1 analytics inside 60/40 section pass", ["--resource", writeJson("valid-dashboard-6040.json", dashboardResource({ only6040: true })), "--surface", "dashboard"]);
-  expectPass("Workbench dashboard analytics inside chart_cards_section pass", ["--resource", writeJson("valid-workbench-dashboard.json", workbenchDashboardResource()), "--surface", "dashboard"]);
+  expectPass("Workbench dashboard charts inside chart_cards_section and pivot inside content card pass", ["--resource", writeJson("valid-workbench-dashboard.json", workbenchDashboardResource()), "--surface", "dashboard"]);
   expectPass("Data List View Item form analytics inside approved content card and multi-column sections pass", ["--resource", writeJson("valid-data-list-form.json", dataListFormResource()), "--surface", "data-list-form"]);
   expectPass("Data List View Item form analytics inside 60/40 section pass", ["--resource", writeJson("valid-data-list-form-6040.json", dataListFormResource({ only6040: true })), "--surface", "data-list-form"]);
-  expectPass("Workbench Data List View Item form analytics inside chart_cards_section pass", ["--resource", writeJson("valid-workbench-data-list-form.json", dataListFormWorkbenchResource()), "--surface", "data-list-form"]);
+  expectPass("Workbench Data List View Item form charts inside chart_cards_section and pivot inside content card pass", ["--resource", writeJson("valid-workbench-data-list-form.json", dataListFormWorkbenchResource()), "--surface", "data-list-form"]);
 
   expectCode("Approval form analytics usage is forbidden", ["--resource", writeJson("approval-form.json", approvalFormResource()), "--surface", "approval-form"], "DATA_ANALYTICS_APPROVAL_FORM_FORBIDDEN");
   expectCode("Data List New/Edit form analytics usage is forbidden", ["--resource", writeJson("new-edit-data-list-form.json", dataListFormResource({ newEdit: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_NEW_EDIT_FORBIDDEN");
   expectCode("Dashboard v1.1 analytics outside approved content card or multi-column sections fail", ["--resource", writeJson("outside-section.json", dashboardResource({ outsideSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID");
   expectCode("Workbench dashboard analytics outside chart_cards_section fail", ["--resource", writeJson("outside-workbench-chart-section.json", workbenchDashboardResource({ outsideChartSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_DASHBOARD_CHART_SECTION_PLACEMENT_INVALID");
+  expectCode("Workbench dashboard pivot inside chart_cards_section fails", ["--resource", writeJson("workbench-pivot-in-chart-section.json", workbenchDashboardResource({ pivotInChartSection: true })), "--surface", "dashboard"], "DATA_ANALYTICS_PIVOT_CHART_SECTION_FORBIDDEN");
   expectCode("Data List View Item form analytics outside approved content card or multi-column sections fail", ["--resource", writeJson("outside-data-list-form-section.json", dataListFormResource({ outsideSection: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_VIEW_V11_SECTION_PLACEMENT_INVALID");
   expectCode("Workbench Data List View Item form analytics outside chart_cards_section fail", ["--resource", writeJson("outside-workbench-data-list-form-section.json", dataListFormWorkbenchResource({ outsideChartSection: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_DATA_LIST_FORM_WORKBENCH_CHART_SECTION_PLACEMENT_INVALID");
+  expectCode("Workbench Data List View Item form pivot inside chart_cards_section fails", ["--resource", writeJson("workbench-data-list-pivot-in-chart-section.json", dataListFormWorkbenchResource({ pivotInChartSection: true })), "--surface", "data-list-form"], "DATA_ANALYTICS_PIVOT_CHART_SECTION_FORBIDDEN");
   expectCode("Simplified chart without approved wrapper fails", ["--resource", writeJson("missing-wrapper.json", dashboardResource({ missingWrapper: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_WRAPPER_MISSING");
   expectCode("Unknown analytics template ID fails", ["--resource", writeJson("unknown-template.json", dashboardResource({ unknownTemplate: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_UNKNOWN");
   expectCode("Chart-with-title template requires title control", ["--resource", writeJson("missing-title.json", dashboardResource({ missingTitle: true })), "--surface", "dashboard"], "DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING");
@@ -77,14 +79,14 @@ function run(args) {
 }
 
 function dashboardResource(options = {}) {
-  const analytics = [
+  const charts = [
     chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
     chartModule("data_analytics_column_chart_with_title", "column_chart_with_title_wrapper", "column_chart_title", "column_chart_control", "bar-chart"),
     chartModule("data_analytics_bar_chart_with_title", "bar_chart_with_title_wrapper", "bar_chart_title", "bar_chart_control", "bar-chart"),
     chartModule("data_analytics_line_chart_with_title", "line_chart_with_title_wrapper", "line_chart_title", "line_chart_control", "line-chart"),
     chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
-    pivotModule(),
   ];
+  const analytics = [...charts, pivotModule()];
   if (options.unknownTemplate) analytics[0].attrs.dataAnalyticsTemplateId = "data_analytics_unknown_chart";
   if (options.missingWrapper) analytics[0] = { type: "pie-chart", nv_label: "pie_chart_control", attrs: { dataAnalyticsTemplateId: "data_analytics_pie_chart_with_title" } };
   if (options.missingTitle) analytics[0].children = analytics[0].children.filter((child) => child.nv_label !== "pie_chart_title");
@@ -123,12 +125,12 @@ function dashboardResource(options = {}) {
             children: options.outsideSection
               ? analytics
               : options.only6040
-                ? [section("2_columns_60/40_section", analytics)]
+                ? [section("2_columns_60/40_section", [...charts, contentCard([pivotModule()])])]
               : [
                   contentCard(analytics.slice(0, 1)),
                   section("2_columns_section", analytics.slice(1, 3)),
                   section("3_columns_section", analytics.slice(3, 5)),
-                  section("2_columns_60/40_section", analytics.slice(5)),
+                  section("2_columns_60/40_section", [contentCard(analytics.slice(5))]),
                 ],
           },
         ],
@@ -150,10 +152,11 @@ function dashboardResource(options = {}) {
 }
 
 function workbenchDashboardResource(options = {}) {
-  const analytics = [
+  const charts = [
     chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
     chartModule("data_analytics_column_chart_with_title", "column_chart_with_title_wrapper", "column_chart_title", "column_chart_control", "bar-chart"),
   ];
+  const analytics = options.pivotInChartSection ? [...charts, pivotModule()] : charts;
   const analyticsHost = options.outsideChartSection
     ? analytics
     : [
@@ -162,6 +165,7 @@ function workbenchDashboardResource(options = {}) {
           nv_label: "chart_cards_section",
           children: analytics,
         },
+        ...(options.pivotInChartSection ? [] : [section("1_columns_section", [contentCard([pivotModule()])])]),
       ];
   const resource = {
     type: "page",
@@ -259,20 +263,20 @@ function writeYapk(name, dashboard) {
 }
 
 function dataListFormResource(options = {}) {
-  const analytics = [
+  const charts = [
     chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
     chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
-    pivotModule(),
   ];
+  const analytics = [...charts, pivotModule()];
   const resource = {
     type: "form",
     nv_label: options.newEdit ? "data_list_form_layout_new_edit_v1_1" : "data_list_form_layout_view_item_v1_1",
     templateId: options.newEdit ? "data_list_form_layout_new_edit_v1_1" : "data_list_form_layout_view_item_v1_1",
     children: [
-      ...(options.outsideSection ? analytics : options.only6040 ? [section("2_columns_60/40_section", analytics)] : [
+      ...(options.outsideSection ? analytics : options.only6040 ? [section("2_columns_60/40_section", [...charts, contentCard([pivotModule()])])] : [
         contentCard(analytics.slice(0, 1)),
         section("2_columns_section", analytics.slice(1, 2)),
-        section("3_columns_section", analytics.slice(2)),
+        section("3_columns_section", [contentCard(analytics.slice(2))]),
       ]),
     ],
   };
@@ -281,10 +285,11 @@ function dataListFormResource(options = {}) {
 }
 
 function dataListFormWorkbenchResource(options = {}) {
-  const analytics = [
+  const charts = [
     chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
     chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
   ];
+  const analytics = options.pivotInChartSection ? [...charts, pivotModule()] : charts;
   const resource = {
     type: "form",
     nv_label: "data_list_form_layout_workbench",
@@ -299,6 +304,7 @@ function dataListFormWorkbenchResource(options = {}) {
             nv_label: "chart_cards_section",
             children: analytics,
           },
+          ...(options.pivotInChartSection ? [] : [section("1_columns_section", [contentCard([pivotModule()])])]),
         ],
       },
     ],

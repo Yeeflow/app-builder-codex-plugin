@@ -94,7 +94,7 @@ Generated pages using these templates must remove unused copied modules:
 - Title-only copied sections.
 - Empty optional panels.
 
-KPI card count must match planned KPI metrics. Data Analytics templates in `chart_cards_section` should not exceed three per section.
+KPI card count must match planned KPI metrics. Chart-like Data Analytics templates in `chart_cards_section` should not exceed three per section. Pivot table templates must use `content_card_wrapper > section_content_area`, not `chart_cards_section`.
 
 ## Validator Updates
 
@@ -110,7 +110,7 @@ KPI card count must match planned KPI metrics. Data Analytics templates in `char
 - Allows the `content_panel_empty` empty-selection state as editable business content.
 - Enforces chart section cleanup and chart count rules for the new templates.
 
-`scripts/validate-data-analytics-golden-references.mjs` now treats the two master-detail workspace templates like Workbench layouts for grouped Data Analytics placement: grouped analytics belong inside `chart_cards_section`.
+`scripts/validate-data-analytics-golden-references.mjs` now treats the two master-detail workspace templates like Workbench layouts for grouped chart-like Data Analytics placement: charts belong inside `chart_cards_section`, while Pivot tables belong inside `content_card_wrapper > section_content_area`.
 
 ## Regression Coverage
 

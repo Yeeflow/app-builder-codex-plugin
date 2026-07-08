@@ -173,7 +173,7 @@ Dynamic controls must match field type:
 
 `primary_working_area` is used for related data and actions tied to the selected record. It may contain KPI metrics, content cards, Data tables, approved Collection templates, approved Data Analytics templates, timelines, or other approved business controls.
 
-`chart_cards_section` is used for grouped Data Analytics templates. Each `chart_cards_section` should contain no more than three Data Analytics templates. If more charts are required, duplicate another `chart_cards_section`. Remove `chart_cards_section` when no Data Analytics templates are planned.
+`chart_cards_section` is used for grouped chart-like Data Analytics templates. Each `chart_cards_section` should contain no more than three chart-like Data Analytics templates. If more charts are required, duplicate another `chart_cards_section`. Remove `chart_cards_section` when no chart-like Data Analytics templates are planned. Pivot table templates are table-like and must be placed in `content_card_wrapper > section_content_area`, not in `chart_cards_section`.
 
 `content_card_wrapper`, `2_columns_section`, `3_columns_section`, `2_columns_60/40_section`, and `kpi_metrics_wrapper` may be reordered to match business priority. Remove any copied section module that contains no meaningful business content.
 

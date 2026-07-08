@@ -85,18 +85,37 @@ New layout must come from copying an approved repeatable module. Invented layout
 
 ## Chart Cards Section
 
-`chart_cards_section` is the preferred host for multiple Data Analytics templates in Workbench dashboards.
+`chart_cards_section` is the preferred host for multiple chart-like Data Analytics templates in Workbench dashboards.
 
 Rules added:
 
 - Place `chart_cards_section` only under `primary_working_area` or `right_side_panel`.
-- Remove `chart_cards_section` when no Data Analytics template is materialized.
-- Put no more than three Data Analytics templates in one `chart_cards_section`.
-- Add another `chart_cards_section` if more than three analytics templates are required.
+- Remove `chart_cards_section` when no chart-like Data Analytics template is materialized.
+- Put no more than three chart-like Data Analytics templates in one `chart_cards_section`.
+- Add another `chart_cards_section` if more than three chart-like analytics templates are required.
+- Do not place Pivot table templates in `chart_cards_section`; use `content_card_wrapper > section_content_area`.
 
 ## Right Side Panel
 
 `right_side_panel` is optional and must be removed when it has no real business content.
+
+When `right_side_panel` is removed or empty, `main_work_queue_wrapper` must also be normalized to a single `1fr` column for desktop/laptop, tablet, and mobile. Keeping the template's second desktop column without right-side content creates a blank right-side area and is now a generated-final failure.
+
+## Standard Filter Group Grid
+
+Workbench global/page-level filters must use the standard `dashboard_standard_filter_group` Grid from `docs/reference/data-filter-standard-filter-group.template.json`.
+
+The required Grid shape is:
+
+- `type: flex_grid`
+- `displayLabel: [null, false]`
+- PC/laptop: 4 `1fr` columns
+- tablet: 2 `1fr` columns
+- mobile: 1 `1fr` column
+- one auto row
+- 16px column and row gaps
+
+The generated Grid must not use simplified properties such as `attrs.columns.count`, `attrs.columns.type`, or `attrs.columns.minmax`; those properties caused Designer settings errors in the Workbench Dashboard global filter area.
 
 ## Validator Updates
 
@@ -107,9 +126,11 @@ Rules added:
 - selects `dashboard-page-layouts-workbench` when a generated page declares that template marker
 - applies template-specific allowed business slots
 - applies template-specific repeatable/removable modules
-- validates Workbench `chart_cards_section` parent and analytics count rules
+- validates Workbench `chart_cards_section` parent and chart-like analytics count rules
 - rejects empty Workbench `chart_cards_section`
 - rejects empty Workbench `right_side_panel`
+- rejects non-standard Workbench `dashboard_standard_filter_group` Grid shapes
+- rejects Workbench `main_work_queue_wrapper` with a retained empty second column when there is no right-side business content
 - preserves the default v1.1 validator behavior for existing dashboards
 
 ## Regression Coverage

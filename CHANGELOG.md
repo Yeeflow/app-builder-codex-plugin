@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.9.33
+
+- Release Dashboard Pivot table placement and Workbench filter-grid hardening.
+- Generated Dashboard and Data List form Pivot tables now materialize as table-like analytics inside `content_card_wrapper > section_content_area`, preferably in `1_columns_section`, instead of being placed in `chart_cards_section`.
+- Keep chart-like analytics in `chart_cards_section` with the existing no-more-than-three-per-section guidance, while blocking Pivot tables with `DATA_ANALYTICS_PIVOT_CHART_SECTION_FORBIDDEN` and `DATA_ANALYTICS_PIVOT_SECTION_PLACEMENT_INVALID`.
+- Strengthen Workbench global filter placement so generated filters use the official `dashboard_standard_filter_group` `flex_grid` shape with 4 desktop columns, 2 tablet columns, 1 mobile column, 16px gaps, and hidden labels.
+- Normalize empty Workbench `main_work_queue_wrapper` right-side columns to a single-column grid when no right panel content is materialized.
+- Add source/dist regression coverage for Pivot placement, Workbench filter group shape, and affected Dashboard/Data List form layout gates.
+
 ## 0.9.32
 
 - Release standalone YDL import-readiness hardening.

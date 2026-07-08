@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.25`
+- Version: `0.9.33`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.25` hardens Workflow Condition editor generation and validation. Generated approval/list/scheduled workflow connector conditions now support direct values, Expression editor right operands, two-layer condition groups, and export-shaped Assignment Task outcome comparisons before signing readiness.
+Current release `0.9.33` hardens Dashboard Pivot table placement and Workbench filter-grid generation. Generated Dashboard and Data List form Pivot tables now use `content_card_wrapper > section_content_area` instead of `chart_cards_section`, while Workbench global filters use the official responsive `dashboard_standard_filter_group` flex grid before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.25
+Version: 0.9.33
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.25
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.33
 ```
 
 ## What Is Included

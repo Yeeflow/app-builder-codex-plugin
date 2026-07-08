@@ -112,6 +112,8 @@ Standalone `.ydl` output must pass the same list and custom-form gates that full
 - `validate-data-list-form-fields-template.mjs` when current-record fields are materialized
 - `inspect-app-creation-rules.mjs` or equivalent field creation/schema gates when package context is available
 
+The packaged helper entrypoints are part of this contract. `scripts/validate-ydl-list.js` copies in the plugin and installed skills must delegate to the shared root validator, and `scripts/build-ydl-wrapper.js` must run the same strict import-ready validation before writing and after round-trip decode. A wrapper builder that can write a `.ydl` which `--strict-import-ready` would reject is considered a release-blocking entrypoint drift.
+
 Generating a `.ydl` by directly assembling fields and a minimal `Main > Content` form shell is a drift defect if the corresponding full-app path would use the approved template builders.
 
 Standalone `.ydl` import-safe output has a stricter wrapper contract than internal full-app resource materialization:

@@ -119,7 +119,9 @@ Reverse-related Collection read behavior must filter the child list by the child
 
 Reverse-related View Item and Workbench View Item Collections must not inherit row-level operation/dropbar controls from a generic Collection template. Do not clone `dropbar`, `grid_table_col_item_op_menu`, `grid_table_col_item_operations`, `card_col_item_operations`, or copied edit/delete/bulk/selected row operation controls into a reverse-related Collection row by default. Toolbar Search and Add controls are allowed when they follow the official export shape and the contracts above. Row operations require a separate export-proven row action structure and an explicit App Plan requirement; otherwise prune them before generated-final validation.
 
-On `data_list_form_layout_workbench`, Data Analytics golden reference templates should be placed inside `chart_cards_section` under `primary_working_area` or `right_side_panel`. A single `chart_cards_section` should contain no more than three Data Analytics templates. If more analytics modules are needed, copy another `chart_cards_section` from the Workbench template. If no Data Analytics or business content is planned for a `chart_cards_section`, remove that section. If the entire `right_side_panel` has no real business content, remove `right_side_panel`.
+On `data_list_form_layout_workbench`, chart-like Data Analytics golden reference templates should be placed inside `chart_cards_section` under `primary_working_area` or `right_side_panel`. A single `chart_cards_section` should contain no more than three chart-like analytics templates. If more chart modules are needed, copy another `chart_cards_section` from the Workbench template. If no chart-like Data Analytics or business content is planned for a `chart_cards_section`, remove that section. If the entire `right_side_panel` has no real business content, remove `right_side_panel`.
+
+Pivot table controls are table-like regions, not chart cards. On Data List View Item and Workbench View Item forms, place `data_analytics_pivot_table_standard` / `pivot_table_standard` inside `content_card_wrapper > section_content_area`, preferably in a one-column section. If the pivot has few columns, the content card may be hosted in a two-column, 60/40, or three-column section. Do not place Pivot tables inside `chart_cards_section`.
 
 Current-record Data List fields must be placed inside the approved `data_list_form_fields_grid_v1_1` field-layout template. Do not place field controls directly in `section_content_area`. If the form has many fields, create multiple approved content-card sections and put one `form_grid_fields_wrapper` inside each section's `section_content_area`. The approved host wrappers are `content_card_wrapper`, `content_card_60_wrapper`, and `content_card_40_wrapper`. Field controls inside the wrapper must receive business-specific `nv_label`/`nav_label` values. Sub list fields must use the control-level `data_list_form_control_sublist_v1_1` template and preserve its locked style/table/header/card settings.
 
@@ -232,14 +234,15 @@ They may contain:
 - current item display fields
 - related business data
 - approved Dashboard Collection templates
-- approved Data Analytics templates inside `chart_cards_section`
+- approved chart-like Data Analytics templates inside `chart_cards_section`
+- approved Pivot table templates inside `content_card_wrapper > section_content_area`
 - Summary-backed KPI cards
 - filters grouped in approved filter regions
 - configured record action controls such as edit/delete buttons
 
 They must preserve `attrs.hideop = true` so the generated full-page item details view hides default operation buttons. Any visible operation controls must be generated explicitly and must carry real Yeeflow actions. `ListModel.LayoutView.view` must point to the Workbench Type `1` layout, and `ListModel.LayoutView.opentype.view` must open it as Full page.
 
-Workbench `right_side_panel` is optional. Keep it only when it contains real business content. Workbench `chart_cards_section` is optional. Keep it only when it contains Data Analytics templates or other planned business content, and prefer creating another `chart_cards_section` when more than three analytics modules are required.
+Workbench `right_side_panel` is optional. Keep it only when it contains real business content. Workbench `chart_cards_section` is optional. Keep it only when it contains chart-like Data Analytics templates or other planned business content, and prefer creating another `chart_cards_section` when more than three chart modules are required. Pivot table modules belong in normal content-card sections, not `chart_cards_section`.
 
 ## App Plan Requirements
 

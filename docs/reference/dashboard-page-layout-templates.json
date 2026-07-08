@@ -8893,7 +8893,6 @@
       },
       "requiredFullWidthContainerIds": [
         "content",
-        "dashboard_standard_filter_group",
         "kpi_card_wrapper",
         "primary_working_area",
         "right_side_panel",
@@ -9638,37 +9637,97 @@
                       },
                       "children": [
                         {
-                          "id": "c4da15e6-4a3d-4813-b56f-a68e632b057e",
-                          "type": "container",
-                          "label": "Container",
+                          "id": "5cb500a5-9f8d-46c0-9ac2-baa93acc834b",
+                          "type": "flex_grid",
+                          "label": "Standard filter group",
                           "attrs": {
-                            "style": {
-                              "widthtype": [
-                                null,
-                                "1"
-                              ],
-                              "direction": [
-                                null,
-                                "row",
-                                "column"
-                              ],
-                              "gap": [
-                                null,
-                                "--sp--s100"
-                              ],
-                              "align_items": [
-                                null,
-                                "center"
-                              ],
-                              "justify_content": [
-                                null,
-                                "flex-start"
-                              ]
+                            "ver": 1,
+                            "columns": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "2": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  },
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              },
+                              "3": {
+                                "list": [
+                                  {
+                                    "value": 1,
+                                    "unit": "fr"
+                                  }
+                                ],
+                                "last": {
+                                  "value": 1,
+                                  "unit": "fr"
+                                }
+                              }
                             },
-                            "goldenReferenceId": "event_portfolio_filter_group",
-                            "derivedFromGoldenReference": "event_portfolio_filter_group"
+                            "rows": {
+                              "1": {
+                                "list": [
+                                  {
+                                    "unit": "auto"
+                                  }
+                                ],
+                                "last": {
+                                  "unit": "auto"
+                                }
+                              }
+                            },
+                            "cgap": {
+                              "1": 16
+                            },
+                            "cgapU": {
+                              "1": "px"
+                            },
+                            "rgap": [
+                              null,
+                              16
+                            ],
+                            "rgapU": [
+                              null,
+                              "px"
+                            ]
                           },
                           "children": [],
+                          "displayLabel": [
+                            null,
+                            false
+                          ],
                           "nv_label": "dashboard_standard_filter_group"
                         }
                       ],
@@ -26764,7 +26823,6 @@
         "masterDetailTempVariable": "vCurrentItemID"
       },
       "requiredFullWidthContainerIds": [
-        "dashboard_standard_filter_group",
         "primary_working_area",
         "content_card_wrapper",
         "kpi_metrics_wrapper"
@@ -31391,37 +31449,97 @@
                                               },
                                               "children": [
                                                 {
-                                                  "id": "9a3d4e20-c142-446a-a13d-cb638be4e131",
-                                                  "type": "container",
-                                                  "label": "Container",
+                                                  "id": "5cb500a5-9f8d-46c0-9ac2-baa93acc834b",
+                                                  "type": "flex_grid",
+                                                  "label": "Standard filter group",
                                                   "attrs": {
-                                                    "style": {
-                                                      "widthtype": [
-                                                        null,
-                                                        "1"
-                                                      ],
-                                                      "direction": [
-                                                        null,
-                                                        "row",
-                                                        "column"
-                                                      ],
-                                                      "gap": [
-                                                        null,
-                                                        "--sp--s100"
-                                                      ],
-                                                      "align_items": [
-                                                        null,
-                                                        "center"
-                                                      ],
-                                                      "justify_content": [
-                                                        null,
-                                                        "flex-start"
-                                                      ]
+                                                    "ver": 1,
+                                                    "columns": {
+                                                      "1": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      },
+                                                      "2": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      },
+                                                      "3": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      }
                                                     },
-                                                    "goldenReferenceId": "event_portfolio_filter_group",
-                                                    "derivedFromGoldenReference": "event_portfolio_filter_group"
+                                                    "rows": {
+                                                      "1": {
+                                                        "list": [
+                                                          {
+                                                            "unit": "auto"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "unit": "auto"
+                                                        }
+                                                      }
+                                                    },
+                                                    "cgap": {
+                                                      "1": 16
+                                                    },
+                                                    "cgapU": {
+                                                      "1": "px"
+                                                    },
+                                                    "rgap": [
+                                                      null,
+                                                      16
+                                                    ],
+                                                    "rgapU": [
+                                                      null,
+                                                      "px"
+                                                    ]
                                                   },
                                                   "children": [],
+                                                  "displayLabel": [
+                                                    null,
+                                                    false
+                                                  ],
                                                   "nv_label": "dashboard_standard_filter_group"
                                                 },
                                                 {
@@ -40103,7 +40221,6 @@
         "masterDetailTempVariable": "vCurrentItemID"
       },
       "requiredFullWidthContainerIds": [
-        "dashboard_standard_filter_group",
         "primary_working_area",
         "content_card_wrapper",
         "kpi_metrics_wrapper"
@@ -44928,37 +45045,97 @@
                                               },
                                               "children": [
                                                 {
-                                                  "id": "9a3d4e20-c142-446a-a13d-cb638be4e131",
-                                                  "type": "container",
-                                                  "label": "Container",
+                                                  "id": "5cb500a5-9f8d-46c0-9ac2-baa93acc834b",
+                                                  "type": "flex_grid",
+                                                  "label": "Standard filter group",
                                                   "attrs": {
-                                                    "style": {
-                                                      "widthtype": [
-                                                        null,
-                                                        "1"
-                                                      ],
-                                                      "direction": [
-                                                        null,
-                                                        "row",
-                                                        "column"
-                                                      ],
-                                                      "gap": [
-                                                        null,
-                                                        "--sp--s100"
-                                                      ],
-                                                      "align_items": [
-                                                        null,
-                                                        "center"
-                                                      ],
-                                                      "justify_content": [
-                                                        null,
-                                                        "flex-start"
-                                                      ]
+                                                    "ver": 1,
+                                                    "columns": {
+                                                      "1": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      },
+                                                      "2": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      },
+                                                      "3": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      }
                                                     },
-                                                    "goldenReferenceId": "event_portfolio_filter_group",
-                                                    "derivedFromGoldenReference": "event_portfolio_filter_group"
+                                                    "rows": {
+                                                      "1": {
+                                                        "list": [
+                                                          {
+                                                            "unit": "auto"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "unit": "auto"
+                                                        }
+                                                      }
+                                                    },
+                                                    "cgap": {
+                                                      "1": 16
+                                                    },
+                                                    "cgapU": {
+                                                      "1": "px"
+                                                    },
+                                                    "rgap": [
+                                                      null,
+                                                      16
+                                                    ],
+                                                    "rgapU": [
+                                                      null,
+                                                      "px"
+                                                    ]
                                                   },
                                                   "children": [],
+                                                  "displayLabel": [
+                                                    null,
+                                                    false
+                                                  ],
                                                   "nv_label": "dashboard_standard_filter_group"
                                                 },
                                                 {
@@ -53963,37 +54140,97 @@
                                               },
                                               "children": [
                                                 {
-                                                  "id": "689765cf-d276-4d4e-bb9f-5599f3272fa4",
-                                                  "type": "container",
-                                                  "label": "Container",
+                                                  "id": "5cb500a5-9f8d-46c0-9ac2-baa93acc834b",
+                                                  "type": "flex_grid",
+                                                  "label": "Standard filter group",
                                                   "attrs": {
-                                                    "style": {
-                                                      "widthtype": [
-                                                        null,
-                                                        "1"
-                                                      ],
-                                                      "direction": [
-                                                        null,
-                                                        "column",
-                                                        "column"
-                                                      ],
-                                                      "gap": [
-                                                        null,
-                                                        "--sp--s100"
-                                                      ],
-                                                      "align_items": [
-                                                        null,
-                                                        "flex-start"
-                                                      ],
-                                                      "justify_content": [
-                                                        null,
-                                                        "flex-start"
-                                                      ]
+                                                    "ver": 1,
+                                                    "columns": {
+                                                      "1": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      },
+                                                      "2": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          },
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      },
+                                                      "3": {
+                                                        "list": [
+                                                          {
+                                                            "value": 1,
+                                                            "unit": "fr"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "value": 1,
+                                                          "unit": "fr"
+                                                        }
+                                                      }
                                                     },
-                                                    "goldenReferenceId": "event_portfolio_filter_group",
-                                                    "derivedFromGoldenReference": "event_portfolio_filter_group"
+                                                    "rows": {
+                                                      "1": {
+                                                        "list": [
+                                                          {
+                                                            "unit": "auto"
+                                                          }
+                                                        ],
+                                                        "last": {
+                                                          "unit": "auto"
+                                                        }
+                                                      }
+                                                    },
+                                                    "cgap": {
+                                                      "1": 16
+                                                    },
+                                                    "cgapU": {
+                                                      "1": "px"
+                                                    },
+                                                    "rgap": [
+                                                      null,
+                                                      16
+                                                    ],
+                                                    "rgapU": [
+                                                      null,
+                                                      "px"
+                                                    ]
                                                   },
                                                   "children": [],
+                                                  "displayLabel": [
+                                                    null,
+                                                    false
+                                                  ],
                                                   "nv_label": "dashboard_standard_filter_group"
                                                 },
                                                 {

@@ -4151,9 +4151,12 @@ function buildDashboardSelectFilter({ filter, listName, listId, id, datasetRegio
 function materializeDashboardAnalytics(resource, { analyticsRecords, fallbackListMeta, listMetaByName, dashboardName, rootListSetId }) {
   const records = analyticsRecords || [];
   if (!records.length) return [];
-  const slots = findDashboardAnalyticsSlots(resource);
-  if (!slots.length) return [];
+  const chartSlots = findDashboardChartAnalyticsSlots(resource);
+  const pivotSlots = findDashboardPivotAnalyticsSlots(resource);
+  if (!chartSlots.length && !pivotSlots.length) return [];
   const runtimeContracts = [];
+  let chartIndex = 0;
+  let pivotIndex = 0;
   records.forEach((record, index) => {
     const sourceMeta = listMetaByName?.get(normKey(record.sourceResource)) || fallbackListMeta;
     const { root: module, runtimeContract } = buildDataAnalyticsTemplateInstance({
@@ -4163,7 +4166,12 @@ function materializeDashboardAnalytics(resource, { analyticsRecords, fallbackLis
       instanceIndex: index,
       rootListSetId,
     });
-    const slot = slots[index % slots.length];
+    const usePivotSlot = isPivotAnalyticsRecord(record);
+    const slots = usePivotSlot ? pivotSlots : chartSlots;
+    const slot = usePivotSlot
+      ? slots[pivotIndex++ % slots.length]
+      : slots[chartIndex++ % slots.length];
+    if (!slot) return;
     slot.children = Array.isArray(slot.children) ? slot.children : [];
     slot.children.push(module);
     if (runtimeContract) runtimeContracts.push(runtimeContract);
@@ -4171,7 +4179,7 @@ function materializeDashboardAnalytics(resource, { analyticsRecords, fallbackLis
   return runtimeContracts;
 }
 
-function findDashboardAnalyticsSlots(resource) {
+function findDashboardChartAnalyticsSlots(resource) {
   const allowedSectionIds = new Set(["content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
   const slots = [];
   for (const chartCards of findDescendants(resource, (node) => hasIdentity(node, "chart_cards_section"))) {
@@ -4182,6 +4190,19 @@ function findDashboardAnalyticsSlots(resource) {
     if (slot) slots.push(slot);
   }
   return slots;
+}
+
+function findDashboardPivotAnalyticsSlots(resource) {
+  const slots = [];
+  for (const section of findDescendants(resource, (node) => hasIdentity(node, "content_card_wrapper"))) {
+    const slot = findFirstByIdentity(section, "section_content_area");
+    if (slot) slots.push(slot);
+  }
+  return slots;
+}
+
+function isPivotAnalyticsRecord(record) {
+  return String(record?.selectedTemplateId || "") === "data_analytics_pivot_table_standard";
 }
 
 function materializeDashboardDataTables(resource, { dataTableRecords, fallbackListMeta, listMetaByName, dashboardName, rootListSetId }) {

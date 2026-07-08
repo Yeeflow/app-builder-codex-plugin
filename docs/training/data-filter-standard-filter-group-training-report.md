@@ -4,7 +4,7 @@
 
 This training adds `dashboard_standard_filter_group` as the golden reference wrapper for pages and forms that contain multiple page-level Data Filter controls.
 
-The template was provided as an export-shaped JSON reference with a `dashboard_standard_filter_group` root container and child `radio-filter` / `relative-period` controls. The source template keeps its Event Portfolio provenance while being registered as a reusable cross-surface Data Filter group template.
+The template was updated to the current export-shaped `flex_grid` reference for `dashboard_standard_filter_group`. The standard wrapper is intentionally an empty Grid shell; generators place mapped Data Filter controls into the Grid cells during page/form materialization.
 
 ## Requirement Covered
 
@@ -33,6 +33,7 @@ Collection-local search boxes are excluded from this grouping requirement becaus
 - Updated App Plan, Dashboard, Data List Form, Approval Form, and full-app generation standards.
 - Updated application-builder, application-generator, and package-validator skill guidance.
 - Mirrored all source artifacts into `dist/yeeflow-app-builder-plugin`.
+- Updated the reference from the older Event Portfolio row container to the export-proven Grid shape: 4 desktop/laptop columns, 2 tablet columns, 1 mobile column, 16px column/row gaps, and hidden Grid label.
 
 ## Hard Gates
 
@@ -41,6 +42,8 @@ The new validator rejects:
 - multiple page-level filters outside `dashboard_standard_filter_group`
 - ad hoc or invented multi-filter wrappers
 - mutated group layout settings
+- non-Grid wrapper controls
+- simplified Grid definitions such as `attrs.columns.count/type/minmax`
 - child filter label typography drift
 - scalar label layout drift
 - missing placeholder color

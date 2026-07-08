@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+## 0.9.33
+
+- Release Dashboard Pivot table placement and Workbench filter-grid hardening.
+- Generated Dashboard and Data List form Pivot tables now materialize as table-like analytics inside `content_card_wrapper > section_content_area`, preferably in `1_columns_section`, instead of being placed in `chart_cards_section`.
+- Keep chart-like analytics in `chart_cards_section` with the existing no-more-than-three-per-section guidance, while blocking Pivot tables with `DATA_ANALYTICS_PIVOT_CHART_SECTION_FORBIDDEN` and `DATA_ANALYTICS_PIVOT_SECTION_PLACEMENT_INVALID`.
+- Strengthen Workbench global filter placement so generated filters use the official `dashboard_standard_filter_group` `flex_grid` shape with 4 desktop columns, 2 tablet columns, 1 mobile column, 16px gaps, and hidden labels.
+- Normalize empty Workbench `main_work_queue_wrapper` right-side columns to a single-column grid when no right panel content is materialized.
+- Add source/dist regression coverage for Pivot placement, Workbench filter group shape, and affected Dashboard/Data List form layout gates.
+
+## 0.9.32
+
+- Release standalone YDL import-readiness hardening.
+- Standalone Data List exports now fail strict import-ready validation when `Defs[].Rules` is emitted as object-shaped JSON instead of stringified JSON.
+- Block demo `ListDatas` from writing system audit fields such as `Created`, `Modified`, `CreatedBy`, or `ModifiedBy`.
+- Require standalone custom forms to use import-safe `LayoutView: null` with concrete `LayoutInResources[0].Resource`, and keep the default view URL as export-safe `default`.
+- Keep standalone `.ywf`, `.ydl`, and `.ydp` generation on the shared Standalone Artifact Plan -> Trace JSON -> Shared Builder -> Standalone Export -> Plan-vs-Actual Validator path.
+- RC cache smoke passed from `yeeflow-app-builder-plugin-v0.9.32-rc1`: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.32`, and installed-cache YDL strict import-ready, standalone export shared-generation, and Data View fixed-filter gates passed.
+
+## 0.9.31
+
+- Release Data List view fixed-filter hardening.
+- Generated Data List views now materialize App Plan fixed filters into `LayoutView.filter[]` instead of leaving view filters empty.
+- Add export-shaped fixed-filter support for `and`/`or` combinations, two-level condition groups, non-empty checks, and Schedule-style `Date >= now` expressions.
+- Block unsupported `Today` function/token usage in Data View filters; generated plans should convert business `Today` intent to Yeeflow's export-proven `now` function.
+- Add source/dist regression coverage using the Event Planning Data View filter scenario: `All Events`, `Schedule Overview`, `RSVP Tracker`, and `Budget and Vendors`.
+- RC cache smoke passed from `yeeflow-app-builder-plugin-v0.9.31-rc1`: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.31`, and installed-cache Data View fixed-filter plus standalone export shared-generation gates passed.
+
+## 0.9.30
+
+- Release Dashboard grid-table column track pruning hardening.
+- Generated Dashboard grid-table Collections now synchronize `flex_grid.attrs.columns["1"].list` after schema-driven header/item cell pruning, so cloned six-column golden templates cannot leave blank trailing columns when only three business columns remain visible.
+- Add dataset presentation hard gates for stale `grid_table_col_header` and `grid_col_item` column definitions whose desktop track count no longer matches actual cell `children.length`.
+- Add source/dist regression coverage using the Doctor Operations Dashboard failure shape: header/item children pruned to 3 while grid tracks incorrectly remain at 6.
+- RC cache smoke passed from `yeeflow-app-builder-plugin-v0.9.30-rc1` content installed through the local marketplace checkout: Codex installed `yeeflow-app-builder@yeeflow` version `0.9.30`, and installed-cache dashboard dataset presentation and repo hygiene gates passed.
+
 ## 0.9.29
 
 - Release standalone YDL shared form hard gates.

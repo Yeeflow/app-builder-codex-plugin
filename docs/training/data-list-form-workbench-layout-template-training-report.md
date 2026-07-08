@@ -21,9 +21,10 @@ Generated forms must preserve the exported root shell, page background, full-wid
 - `ListModel.LayoutView.view` must point to the Workbench Type `1` layout.
 - `ListModel.LayoutView.opentype.view` must open the Workbench View as Full page.
 - `right_side_panel` is optional and must be removed when it contains no real business content.
-- `chart_cards_section` is optional and must be removed when it contains no Data Analytics or other business content.
-- Each `chart_cards_section` should contain no more than three Data Analytics templates; create another `chart_cards_section` when more are required.
-- Data Analytics templates on Workbench View forms must be placed inside `chart_cards_section`.
+- `chart_cards_section` is optional and must be removed when it contains no chart-like Data Analytics or other business content.
+- Each `chart_cards_section` should contain no more than three chart-like Data Analytics templates; create another `chart_cards_section` when more chart cards are required.
+- Chart-like Data Analytics templates on Workbench View forms must be placed inside `chart_cards_section`.
+- Pivot table templates must be placed inside `content_card_wrapper > section_content_area`, not inside `chart_cards_section`.
 
 ## App Plan Changes
 
@@ -48,7 +49,7 @@ The Data List Form Layouts v1.1 validator now checks:
 - overfilled `chart_cards_section` analytics rejection
 - App Plan Workbench full-page declaration
 
-The Data Analytics golden reference validator now treats Workbench Data List View forms like Workbench dashboards for analytics placement: analytics controls must be inside `chart_cards_section`.
+The Data Analytics golden reference validator now treats Workbench Data List View forms like Workbench dashboards for chart-like analytics placement: charts must be inside `chart_cards_section`, while Pivot tables must use `content_card_wrapper > section_content_area`.
 
 ## Regression Tests
 
