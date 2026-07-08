@@ -177,7 +177,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
   }
 
   const decoded = planDemand.hasMaterialResources
-    ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl, appPlanText: planText })
+    ? buildResourceGraphPackage({ appTitle, rootListId: numberId(ids["decoded.ListSet.ListID"]), planDemand, ids, iconUrl: appIconUrl, appPlanText: planText, findings })
     : buildDecodedPackage({
       appTitle,
       rootListId: numberId(ids["decoded.ListSet.ListID"]),
@@ -187,6 +187,7 @@ export function materializeFullAppGeneratedFinal(options = {}) {
       iconUrl: appIconUrl,
       appPlanText: planText,
     });
+  if (findings.length) return buildFailure(findings, { outDir, specPath, planPath });
   const resource = encodeYapkResourceOfficial(decoded);
   const wrapper = {
     PackageId: stringId(ids["wrapper.PackageId"]),
@@ -1506,7 +1507,7 @@ function collectDataListViewRecords(planText) {
     const viewColumn = findHeaderIndex(headers, ["view name", "view"]);
     const listColumn = findHeaderIndex(headers, ["data list", "list/library", "list", "library", "data list or library"]);
     const urlColumn = findHeaderIndex(headers, ["url / route key", "route key", "url"]);
-    const filterColumn = findHeaderIndex(headers, ["filter conditions", "fixed filter conditions", "fixed filters", "filter", "data filter", "data filters"]);
+    const filterColumn = findHeaderIndex(headers, ["filter conditions", "fixed filter conditions", "fixed filters", "filter", "filters", "data filter", "data filters"]);
     const displayColumn = findHeaderIndex(headers, ["display fields", "visible fields", "layout fields", "columns"]);
     const queryColumn = findHeaderIndex(headers, ["query/search fields", "query fields", "search fields", "user filter fields", "user query fields"]);
     const defaultColumn = findHeaderIndex(headers, ["default", "is default", "default view"]);
@@ -1536,6 +1537,19 @@ function collectDataListViewRecords(planText) {
 
 function dataListViewRecordsForList(planDemand, listName) {
   return (planDemand.dataListViewRecords || []).filter((record) => normKey(record.listName) === normKey(listName));
+}
+
+function hasParsedFieldSpecsForList(planDemand, listName) {
+  return Boolean(planDemand.dataListFieldSpecs?.[normKey(listName)]?.length);
+}
+
+function dataListViewRequiresParsedBusinessFields(viewRecord) {
+  if (!viewRecord) return false;
+  const requestedFields = [
+    ...splitPlannedFieldList(viewRecord.displayFields),
+    ...splitPlannedFieldList(viewRecord.queryFields),
+  ].filter((fieldName) => normKey(fieldName) !== "title");
+  return requestedFields.length > 0 || !isNoFixedDataViewFilterText(viewRecord.filterConditions);
 }
 
 function selectDefaultDataListViewRecord(records) {
@@ -1982,6 +1996,23 @@ function buildDataListViewLayoutView({ fields, viewRecord = null }) {
   };
 }
 
+function buildDataListViewLayoutViewChecked({ fields, viewRecord = null, listName = "", findings = null }) {
+  const layoutView = buildDataListViewLayoutView({ fields, viewRecord });
+  const plannedFilterText = viewRecord?.filterConditions || "";
+  if (viewRecord && !isNoFixedDataViewFilterText(plannedFilterText) && layoutView.filter.length === 0) {
+    findings?.push(error(
+      "DATA_VIEW_FILTER_PLANNED_BUT_NOT_MATERIALIZED",
+      "Planned Data List View fixed filter text did not materialize into LayoutView.filter[]. Use concrete field-level filters such as `Meeting Date is not empty` or `Status = Active`; vague business phrases are not signing-ready.",
+      {
+        listName,
+        viewName: viewRecord.viewName,
+        filterConditions: plannedFilterText,
+      },
+    ));
+  }
+  return layoutView;
+}
+
 function buildDataViewLayoutColumn(field, fieldIndex) {
   return {
     FieldID: field.FieldID,
@@ -2043,7 +2074,7 @@ function resolveDataViewField(fields, requestedName) {
 
 function parseDataViewFixedFilterConditions(value, fields) {
   const text = cleanResourceName(value);
-  if (!text || isNonResourceName(text) || /(?:no fixed|no filter|not filtered|all records|all items|无固定|不过滤|全集)/i.test(text)) return [];
+  if (isNoFixedDataViewFilterText(text)) return [];
   const normalized = text
     .replace(/\bDate\s*>=\s*Today\b/gi, "Date >= now")
     .replace(/\bcurrent date\b/gi, "now")
@@ -2061,6 +2092,11 @@ function parseDataViewFixedFilterConditions(value, fields) {
     if (condition) conditions.push(condition);
   }
   return conditions;
+}
+
+function isNoFixedDataViewFilterText(value) {
+  const text = cleanResourceName(value);
+  return !text || isNonResourceName(text) || /(?:no fixed|no filter|not filtered|all records|all items|无固定|不过滤|全集)/i.test(text);
 }
 
 function parseDataViewFixedFilterConditionPart(part, fields, joiner, index) {
@@ -2988,7 +3024,7 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
   };
 }
 
-function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON, appPlanText = "" }) {
+function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON, appPlanText = "", findings = [] }) {
   const dataListNames = planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`];
   const dataListByName = new Map();
   const listMetaByName = new Map();
@@ -2999,6 +3035,19 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
   const fieldRecordsByName = new Map();
   dataListNames.forEach((name, index) => {
     const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
+    const plannedViewsForList = dataListViewRecordsForList(planDemand, name);
+    if (!hasParsedFieldSpecsForList(planDemand, name) && plannedViewsForList.some(dataListViewRequiresParsedBusinessFields)) {
+      findings.push(error(
+        "DATA_LIST_FIELD_TABLE_REQUIRED_FOR_PLANNED_VIEW",
+        "Planned Data List views reference business columns or fixed filters, but the Data List has no parseable field table. Do not downgrade the list to native Title-only output; add a standard field table with field labels, internal field names, and field types.",
+        {
+          listName: name,
+          viewNames: plannedViewsForList
+            .filter(dataListViewRequiresParsedBusinessFields)
+            .map((record) => record.viewName),
+        },
+      ));
+    }
     const fieldSpecs = fieldSpecsForList(planDemand, name);
     const fields = fieldSpecs.map((field, fieldIndex) => buildFieldRecord({
       field,
@@ -3023,7 +3072,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         LayoutID: stringId(ids[`decoded.Childs[${index}].Layouts[0].LayoutID`]),
         Title: defaultPlannedView?.viewName || "Default View",
         Type: 0,
-        LayoutView: JSON.stringify(buildDataListViewLayoutView({ fields, viewRecord: defaultPlannedView })),
+        LayoutView: JSON.stringify(buildDataListViewLayoutViewChecked({ fields, viewRecord: defaultPlannedView, listName: name, findings })),
         Ext1: JSON.stringify({ Url: defaultPlannedView?.routeKey || "default" }),
         IsDefault: true,
         IsItemPerm: false,
@@ -3044,7 +3093,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         LayoutID: stringId(ids[`decoded.Childs[${index}].Layouts[${layoutIndex}].LayoutID`]),
         Title: viewRecord.viewName,
         Type: 0,
-        LayoutView: JSON.stringify(buildDataListViewLayoutView({ fields, viewRecord })),
+        LayoutView: JSON.stringify(buildDataListViewLayoutViewChecked({ fields, viewRecord, listName: name, findings })),
         Ext1: JSON.stringify({ Url: viewRecord.routeKey || slugify(viewRecord.viewName) }),
         IsDefault: false,
         IsItemPerm: false,

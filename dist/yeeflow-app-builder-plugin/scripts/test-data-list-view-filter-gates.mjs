@@ -68,6 +68,9 @@ assert.equal(filterExpressionUsesToday([{ type: "func", func: "now", params: [] 
 assert.equal(filterExpressionUsesToday([{ type: "func", func: "Today", params: [] }]), true);
 
 expectEventPlanningMaterialization();
+expectCorporateSecretarialExplicitFilterMaterialization();
+expectVagueBusinessFilterMaterializationFailure();
+expectPlannedViewRequiresFieldTableFailure();
 
 console.log(JSON.stringify({
   status: "pass",
@@ -132,7 +135,7 @@ Event Planning app.
 | Vendors | Text7 | Text | input | Vendors |
 
 ## 13. Data List Views Plan
-| View Name | Data List | URL / Route Key | Display Fields | Query/Search Fields | Filter Conditions | Default |
+| View Name | Data List | URL / Route Key | Display Fields | Query/Search Fields | Filters | Default |
 | --- | --- | --- | --- | --- | --- | --- |
 | All Events | Event Planning | all-events | Name, Date, RSVP Status | Name, Date, RSVP Status | No fixed filter | Yes |
 | Schedule Overview | Event Planning | schedule-overview | Name, Date | Name, Date | Date is not empty AND Date >= Today | No |
@@ -172,4 +175,153 @@ Event Planning app.
     { pre: "or", left: "Text7", op: "7", right: null },
   ]);
   results.push({ name: "Event Planning App Plan data views materialize fixed filters", status: "pass" });
+}
+
+function expectVagueBusinessFilterMaterializationFailure() {
+  const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-dataview-filter-vague-"));
+  const specPath = path.join(tmpdir, "functional-specification.md");
+  const planPath = path.join(tmpdir, "yeeflow-app-plan.md");
+  const outDir = path.join(tmpdir, "dist");
+  fs.writeFileSync(specPath, "# Functional Specification\n\nBuild a corporate secretarial application.\n", "utf8");
+  fs.writeFileSync(planPath, `# Corporate Secretarial Information System - Yeeflow App Plan
+
+## 1. Application Overview
+Corporate secretarial application.
+
+## 4. Data Lists and Document Libraries Plan
+| List Name | Purpose |
+| --- | --- |
+| Board Committee Meetings | Store board and committee meeting records. |
+
+### 4.1 Board Committee Meetings
+| Field label | Field name | Field type | Control type | Purpose |
+| --- | --- | --- | --- | --- |
+| Meeting Title | Title | Text | input | Meeting title |
+| Meeting Date | Datetime1 | Datetime | datepicker | Meeting date |
+| Meeting Status | Text1 | Text | radio | choices: Active, Closed |
+
+## 13. Data List Views Plan
+| Data List | View Name | Purpose | Filters | Columns | Sort |
+| --- | --- | --- | --- | --- | --- |
+| Board Committee Meetings | Meeting Tracker | Meeting lifecycle | All active meetings | Meeting Title, Meeting Date, Meeting Status | Meeting Date desc |
+`, "utf8");
+
+  let failed = false;
+  let parsed = null;
+  try {
+    execFileSync(process.execPath, [
+      path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs"),
+      "--functional-spec", specPath,
+      "--app-plan", planPath,
+      "--out-dir", outDir,
+      "--allow-fixture-api-ids-for-tests",
+      "--json",
+    ], { cwd: ROOT, encoding: "utf8" });
+  } catch (error) {
+    failed = true;
+    parsed = JSON.parse(error.stdout || "{}");
+  }
+  assert.equal(failed, true, "vague fixed filter text should block generated-final materialization");
+  assert.ok(parsed?.findings?.some((finding) => finding.code === "DATA_VIEW_FILTER_PLANNED_BUT_NOT_MATERIALIZED"), JSON.stringify(parsed, null, 2));
+  results.push({ name: "Vague business fixed filters fail instead of materializing empty LayoutView.filter[]", status: "pass" });
+}
+
+function expectCorporateSecretarialExplicitFilterMaterialization() {
+  const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-dataview-filter-corpsec-"));
+  const specPath = path.join(tmpdir, "functional-specification.md");
+  const planPath = path.join(tmpdir, "yeeflow-app-plan.md");
+  const outDir = path.join(tmpdir, "dist");
+  fs.writeFileSync(specPath, "# Functional Specification\n\nBuild a corporate secretarial information system.\n", "utf8");
+  fs.writeFileSync(planPath, `# Corporate Secretarial Information System - Yeeflow App Plan
+
+## 1. Application Overview
+Corporate secretarial application.
+
+## 4. Data Lists and Document Libraries Plan
+| List Name | Purpose |
+| --- | --- |
+| Board Committee Meetings | Store board and committee meeting records. |
+
+### 4.1 Board Committee Meetings
+| Field label | Field name | Field type | Control type | Purpose |
+| --- | --- | --- | --- | --- |
+| Meeting Title | Title | Text | input | Meeting title |
+| Entity | Text1 | Text | lookup | Entity |
+| Committee | Text2 | Text | radio | Committee |
+| Meeting Date | Datetime1 | Datetime | datepicker | Meeting date |
+| Agenda Status | Text3 | Text | radio | Agenda status |
+| Pack Status | Text4 | Text | radio | Pack status |
+| Minutes Status | Text5 | Text | radio | choices: Draft, Approved, Closed |
+
+## 13. Data List Views Plan
+| Data List | View Name | Purpose | Filters | Columns | Sort |
+| --- | --- | --- | --- | --- | --- |
+| Board Committee Meetings | Meeting Tracker | Meeting lifecycle | Meeting Date is not empty AND Minutes Status != Closed | Meeting Title, Entity, Committee, Meeting Date, Agenda Status, Pack Status, Minutes Status | Meeting Date desc |
+`, "utf8");
+
+  execFileSync(process.execPath, [
+    path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs"),
+    "--functional-spec", specPath,
+    "--app-plan", planPath,
+    "--out-dir", outDir,
+    "--allow-fixture-api-ids-for-tests",
+    "--json",
+  ], { cwd: ROOT, stdio: "ignore" });
+
+  const packageName = fs.readdirSync(outDir).find((name) => name.endsWith(".yapk"));
+  assert.ok(packageName, "materializer should produce a corporate-secretarial fixture package");
+  const decoded = decodeYapkResource(JSON.parse(fs.readFileSync(path.join(outDir, packageName), "utf8")));
+  const child = decoded.Childs?.find((item) => item.List?.Title === "Board Committee Meetings");
+  assert.ok(child, "Board Committee Meetings data list should materialize");
+  const tracker = child.Layouts.find((layout) => layout.Title === "Meeting Tracker");
+  assert.ok(tracker, "Meeting Tracker view should materialize");
+  const layoutView = JSON.parse(tracker.LayoutView);
+  assert.deepEqual(layoutView.layout.map((field) => field.FieldName), ["Title", "Text1", "Text2", "Datetime1", "Text3", "Text4", "Text5"]);
+  assert.deepEqual(layoutView.filter.map((condition) => ({ pre: condition.pre, left: condition.left, op: condition.op, right: condition.right })), [
+    { pre: "and", left: "Datetime1", op: "7", right: null },
+    { pre: "and", left: "Text5", op: "1", right: "Closed" },
+  ]);
+  results.push({ name: "Corporate Secretarial Meeting Tracker materializes explicit fixed filters", status: "pass" });
+}
+
+function expectPlannedViewRequiresFieldTableFailure() {
+  const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-dataview-filter-titleonly-"));
+  const specPath = path.join(tmpdir, "functional-specification.md");
+  const planPath = path.join(tmpdir, "yeeflow-app-plan.md");
+  const outDir = path.join(tmpdir, "dist");
+  fs.writeFileSync(specPath, "# Functional Specification\n\nBuild a corporate secretarial information system.\n", "utf8");
+  fs.writeFileSync(planPath, `# Corporate Secretarial Information System - Yeeflow App Plan
+
+## 1. Application Overview
+Corporate secretarial application.
+
+## 4. Data Lists and Document Libraries Plan
+| List Name | Purpose |
+| --- | --- |
+| Board Committee Meetings | Store board and committee meeting records. |
+
+## 13. Data List Views Plan
+| Data List | View Name | Purpose | Filters | Columns | Sort |
+| --- | --- | --- | --- | --- | --- |
+| Board Committee Meetings | Meeting Tracker | Meeting lifecycle | Meeting Date is not empty | Meeting Title, Entity, Committee, Meeting Date | Meeting Date desc |
+`, "utf8");
+
+  let failed = false;
+  let parsed = null;
+  try {
+    execFileSync(process.execPath, [
+      path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs"),
+      "--functional-spec", specPath,
+      "--app-plan", planPath,
+      "--out-dir", outDir,
+      "--allow-fixture-api-ids-for-tests",
+      "--json",
+    ], { cwd: ROOT, encoding: "utf8" });
+  } catch (error) {
+    failed = true;
+    parsed = JSON.parse(error.stdout || "{}");
+  }
+  assert.equal(failed, true, "planned business view without a field table should block Title-only fallback");
+  assert.ok(parsed?.findings?.some((finding) => finding.code === "DATA_LIST_FIELD_TABLE_REQUIRED_FOR_PLANNED_VIEW"), JSON.stringify(parsed, null, 2));
+  results.push({ name: "Planned business data views require parseable field tables instead of Title-only fallback", status: "pass" });
 }

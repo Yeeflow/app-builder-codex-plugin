@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.36
+
+- Release Data List View field-table and fixed-filter hardening.
+- Generated Data List views now fail generated-final materialization with `DATA_LIST_FIELD_TABLE_REQUIRED_FOR_PLANNED_VIEW` when business views reference non-Title columns, query/search fields, or fixed filters but the host Data List has no parseable field table.
+- Prevent Title-only downgrade regressions for plans that describe business views but omit standard field tables.
+- Treat App Plan Section 13 `Filters` as a fixed-filter alias for `LayoutView.filter[]`; vague phrases such as `All active meetings` must be converted to executable field-level filters or fail with `DATA_VIEW_FILTER_PLANNED_BUT_NOT_MATERIALIZED`.
+- Add Corporate Secretarial `Board Committee Meetings / Meeting Tracker` positive regression coverage for explicit `Meeting Date is not empty AND Minutes Status != Closed` filters.
+
 ## 0.9.33
 
 - Release Dashboard Pivot table placement and Workbench filter-grid hardening.
