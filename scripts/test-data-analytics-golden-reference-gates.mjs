@@ -37,7 +37,14 @@ try {
   expectCode("Visual analytics template without runtime exts fails", ["--resource", writeJson("missing-runtime.json", dashboardResource({ omitRuntimeBindings: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_EXT_MISSING");
   expectCode("Runtime ext without ReportIds registration fails", ["--resource", writeJson("missing-reportids.json", dashboardResource({ omitReportIds: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_REPORT_ID_MISSING");
   expectCode("Runtime chart type semantic strings fail", ["--resource", writeJson("semantic-chart-type-string.json", dashboardResource({ semanticChartTypeString: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_CHART_TYPE_CODE_INVALID");
-  expectCode("Line/area date trend rows without DATE func fail", ["--resource", writeJson("missing-date-trend-func.json", dashboardResource({ omitDateTrendRowFunc: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING");
+  expectCode("Line/area date trend rows without a supported date grouping func fail", ["--resource", writeJson("missing-date-trend-func.json", dashboardResource({ omitDateTrendRowFunc: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING");
+  expectPass("Line chart Events by Day with DATE date trend func passes", ["--resource", writeJson("daily-line-chart.json", dashboardResource({ lineChartTitle: "Events by Day", dateTrendFunc: "DATE" })), "--surface", "dashboard"]);
+  expectPass("Line chart Events by Month with MONTH date trend func passes", ["--resource", writeJson("monthly-line-chart.json", dashboardResource({ lineChartTitle: "Events by Month", dateTrendFunc: "MONTH" })), "--surface", "dashboard"]);
+  expectPass("Line chart Events by Quarter with QUARTER date trend func passes", ["--resource", writeJson("quarterly-line-chart.json", dashboardResource({ lineChartTitle: "Events by Quarter", dateTrendFunc: "QUARTER" })), "--surface", "dashboard"]);
+  expectPass("Line chart Events by Year with YEAR date trend func passes", ["--resource", writeJson("yearly-line-chart.json", dashboardResource({ lineChartTitle: "Events by Year", dateTrendFunc: "YEAR" })), "--surface", "dashboard"]);
+  expectCode("Line chart Events by Month with DATE func fails business granularity", ["--resource", writeJson("monthly-line-chart-wrong-date-func.json", dashboardResource({ lineChartTitle: "Events by Month", dateTrendFunc: "DATE" })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DATE_TREND_GRANULARITY_MISMATCH");
+  expectCode("Line chart with unsupported DAY func fails", ["--resource", writeJson("unsupported-day-func.json", dashboardResource({ lineChartTitle: "Events by Day", dateTrendFunc: "DAY" })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING");
+  expectCode("Line chart with unsupported WEEK func fails", ["--resource", writeJson("unsupported-week-func.json", dashboardResource({ lineChartTitle: "Events by Week", dateTrendFunc: "WEEK" })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING");
   expectCode("Runtime row field metadata must be export-shaped", ["--resource", writeJson("thin-runtime-row.json", dashboardResource({ thinRuntimeRow: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_ROW_EXPORT_SHAPE_INCOMPLETE");
   expectCode("Runtime value field metadata must be export-shaped", ["--resource", writeJson("thin-runtime-value.json", dashboardResource({ thinRuntimeValue: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_VALUE_EXPORT_SHAPE_INCOMPLETE");
   expectCode("Runtime settings must preserve export-shaped conditions keys", ["--resource", writeJson("missing-runtime-conditions.json", dashboardResource({ omitRuntimeConditions: true })), "--surface", "dashboard"], "DATA_ANALYTICS_RUNTIME_CONDITIONS_SHAPE_MISSING");
@@ -83,7 +90,7 @@ function dashboardResource(options = {}) {
     chartModule("data_analytics_pie_chart_with_title", "pie_chart_with_title_wrapper", "pie_chart_title", "pie_chart_control", "pie-chart"),
     chartModule("data_analytics_column_chart_with_title", "column_chart_with_title_wrapper", "column_chart_title", "column_chart_control", "bar-chart"),
     chartModule("data_analytics_bar_chart_with_title", "bar_chart_with_title_wrapper", "bar_chart_title", "bar_chart_control", "bar-chart"),
-    chartModule("data_analytics_line_chart_with_title", "line_chart_with_title_wrapper", "line_chart_title", "line_chart_control", "line-chart"),
+    chartModule("data_analytics_line_chart_with_title", "line_chart_with_title_wrapper", "line_chart_title", "line_chart_control", "line-chart", { title: options.lineChartTitle }),
     chartModule("data_analytics_area_chart_with_title", "area_chart_with_title_wrapper", "area_chart_title", "area_chart_control", "line-chart"),
   ];
   const analytics = [...charts, pivotModule()];
@@ -144,6 +151,7 @@ function dashboardResource(options = {}) {
     emptyPivotValueObject: options.emptyPivotValueObject,
     semanticChartTypeString: options.semanticChartTypeString,
     omitDateTrendRowFunc: options.omitDateTrendRowFunc,
+    dateTrendFunc: options.dateTrendFunc,
     thinRuntimeRow: options.thinRuntimeRow,
     thinRuntimeValue: options.thinRuntimeValue,
     omitRuntimeConditions: options.omitRuntimeConditions,
@@ -203,7 +211,7 @@ function workbenchDashboardResource(options = {}) {
       },
     ],
   };
-  addAnalyticsRuntimeBindings(resource);
+  addAnalyticsRuntimeBindings(resource, options);
   return resource;
 }
 
@@ -358,7 +366,8 @@ function contentCard(children) {
   };
 }
 
-function chartModule(templateId, wrapperId, titleId, controlId, controlType) {
+function chartModule(templateId, wrapperId, titleId, controlId, controlType, options = {}) {
+  const title = options.title || "Business-specific title";
   return {
     type: "container",
     nv_label: wrapperId,
@@ -366,7 +375,7 @@ function chartModule(templateId, wrapperId, titleId, controlId, controlType) {
     templateId,
     attrs: { dataAnalyticsTemplateId: templateId, templateId },
     children: [
-      { type: "text", nv_label: titleId, attrs: { headc: { title: { value: "Business-specific title" } } } },
+      { type: "text", nv_label: titleId, attrs: { headc: { title: { value: title } } } },
       { type: "container", nv_label: wrapperId.replace("_with_title_wrapper", "_container"), children: [
         {
           type: controlType,
@@ -381,7 +390,7 @@ function chartModule(templateId, wrapperId, titleId, controlId, controlType) {
             runtimeModelProven: true,
             data: { list: { AppID: 41, ListID: "list_assets", ListSetID: "app_1" }, groupBy: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", axisField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID" },
             model: { source: { AppID: 41, ListID: "list_assets", ListSetID: "app_1" }, categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID", aggregate: "COUNT", runtimeModelProven: true },
-            series: [{ name: "Business-specific title", categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID", aggregate: "COUNT" }],
+            series: [{ name: title, categoryField: controlId.includes("line") || controlId.includes("area") ? "Created" : "Status", valueField: "ListDataID", aggregate: "COUNT" }],
             values: [{ field: "ListDataID", fieldName: "ListDataID", FieldName: "ListDataID", id: "ListDataID", aggregate: "COUNT" }],
           },
         },
@@ -448,7 +457,7 @@ function addAnalyticsRuntimeBindings(resource, options = {}) {
       delete row.fieldType;
       delete row.attr;
     }
-    if ((id.includes("line") || id.includes("area")) && !options.omitDateTrendRowFunc) row.func = "DATE";
+    if ((id.includes("line") || id.includes("area")) && !options.omitDateTrendRowFunc) row.func = String(options.dateTrendFunc || "DATE").toUpperCase();
     const valueEntry = options.emptyPivotValueObject && control.type === "pivot-table"
       ? {}
       : options.countValueUsesTitle

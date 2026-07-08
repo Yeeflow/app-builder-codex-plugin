@@ -48,7 +48,7 @@ Generated Data Analytics runtime models must preserve export-shaped metadata:
 - `settings.Conditions` must exist and must be an array, even when empty.
 - Every `settings.rows[]` entry must include `id`, `fieldName`, `fieldType`, `type`, and an `attr` object.
 - Every `settings.values[]` entry must include `id`, `field`, `fieldName`, `FieldName`, `fieldType`, `type`, and an `attr` object.
-- Line and area date trend rows still require `func: "DATE"`.
+- Line and area date trend rows still require an export-supported date grouping `func`, but it must match business granularity rather than always being `DATE`: use `DATE` for daily/by-day, `MONTH` for monthly/by-month, `QUARTER` for quarterly, and `YEAR` for yearly/annual trends.
 - COUNT values must still use `ListDataID` for `field`, `fieldName`, `FieldName`, and `id`, plus aggregate metadata.
 
 Example accepted value entry:

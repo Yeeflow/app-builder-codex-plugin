@@ -31,11 +31,13 @@ The Yeeflow runtime-proven export shape requires chart type codes in `Resource.e
 - Column chart: `2`
 - Pivot table: empty / no chart type, with `key: "PivotTable"`
 
-Date-based line and area charts also require date aggregation on the row definition:
+Date-based line and area charts also require an export-supported date grouping function on the row definition. The function must match the business question:
 
 ```json
 { "field": "Created", "fieldName": "Created", "FieldName": "Created", "func": "DATE" }
 ```
+
+Use `DATE` for daily/by-day trends, `MONTH` for monthly/by-month trends, `QUARTER` for quarterly trends, and `YEAR` for annual/by-year trends. For example, `Events by Month` must use `func: "MONTH"`; using `func: "DATE"` makes Yeeflow render the trend at day granularity.
 
 Without this shape, the chart can render an empty shell or fail to materialize even when the wrapper, title, source list, `ReportIds`, and `exts` are structurally present.
 
@@ -45,7 +47,7 @@ Full-app materialization must:
 
 - Map approved Data Analytics templates to Yeeflow runtime chart codes before writing `Resource.exts[].attr.chartType`.
 - Never emit semantic chart type strings in generated-final runtime extensions.
-- Add `func: "DATE"` to line/area runtime row fields when grouping by date-like fields such as Created, Modified, Start Date, End Date, Due Date, or Datetime fields.
+- Add a valid date grouping `func` to line/area runtime row fields when grouping by date-like fields such as Created, Modified, Start Date, End Date, Due Date, or Datetime fields, and select `DATE`, `MONTH`, `QUARTER`, or `YEAR` from the App Plan/chart title/business granularity.
 - Keep pivot table runtime entries on `key: "PivotTable"` and omit chart type unless an export-proven pivot shape requires an empty string.
 - Preserve the existing runtime requirements for `ReportIds[]`, `category: "___Pivot___"`, `i`, source metadata, rows, values, and visible/runtime model alignment.
 
@@ -55,7 +57,7 @@ Generated-final validation must fail when:
 
 - A chart control has no runtime `chartType`.
 - A chart runtime `chartType` is a semantic string such as `pie-chart`, `bar-chart`, `column-chart`, `line-chart`, or `area-chart`.
-- A line or area chart runtime row lacks `func: "DATE"`.
+- A line or area chart runtime row lacks an export-supported date grouping `func`, or the `func` conflicts with the declared business granularity.
 
 Validator errors added in this pass:
 
@@ -67,6 +69,6 @@ Validator errors added in this pass:
 `scripts/test-data-analytics-golden-reference-gates.mjs` now includes focused negative fixtures for:
 
 - semantic runtime chart type strings;
-- missing `func: "DATE"` on line/area trend rows.
+- missing or business-mismatched date grouping `func` on line/area trend rows.
 
-The normal positive fixture now uses runtime chart codes and date row functions, so the accepted test shape mirrors the runtime-proven v1.0.13 contract.
+The normal positive fixture now uses runtime chart codes and date row functions, so the accepted test shape mirrors the runtime-proven v1.0.13 contract while also allowing business-correct monthly/quarterly/yearly trend groupings.

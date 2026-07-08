@@ -79,6 +79,7 @@ Visible Data Analytics controls are not runtime-ready unless the containing layo
 - every `attr.settings.rows[]` entry must preserve export-shaped field metadata, including `id`, `fieldName`, `fieldType`, `type`, and an `attr` object; a thin `{ field, fieldName, id }` tuple is not runtime-ready;
 - every `attr.settings.values[]` entry must preserve export-shaped field metadata, including `id`, `field`, `fieldName`, `FieldName`, `fieldType`, `type`, and an `attr` object;
 - every row, column, and value field reference must resolve to a real field on the selected source list/report;
+- line/area trend charts over date/time fields must set a runtime row `func` that matches the business granularity: `DATE` for daily/by-day trends, `MONTH` for monthly/by-month trends such as `Events by Month`, `QUARTER` for quarterly trends, and `YEAR` for annual/by-year trends; these four values are the only supported date grouping functions for Data Analytics date rows, and the Designer UI label `Day` must serialize as `DATE`, not `DAY`;
 - the visible control's `attrs.data.list` and `attrs.model.source` must both include `AppID`, `ListID`, and `ListSetID`, and those values must match the same source metadata in `Resource.exts[]`;
 - the visible control's `attrs.data.groupBy`, `attrs.data.axisField`, `attrs.data.categoryField`, `attrs.model.categoryField`, and `attrs.series[].categoryField` must match `Resource.exts[].attr.settings.rows[]`;
 - the visible control's `attrs.data.valueField`, `attrs.model.valueField`, `attrs.series[].valueField`, and `attrs.values[].field` must match `Resource.exts[].attr.settings.values[]`;
@@ -97,4 +98,5 @@ Generated-final validation must fail when:
 - A generator emits an ad hoc chart/pivot control instead of cloning the approved template.
 - A visible chart or pivot control is missing its `Resource.ReportIds[]` registration, matching `Resource.exts[]` runtime entry, source metadata, chart type, runtime settings, or resolvable source fields.
 - A runtime chart/pivot model has rows or values that identify fields but omit export-shaped metadata such as `type`, `fieldType`, `attr`, or `Conditions`/`preConditions`.
+- A line/area date trend omits an export-supported date grouping `func`, uses an unsupported value, or uses a granularity that conflicts with business text such as `By Month`.
 - A visible chart or pivot control has template marker drift, missing `runtimeModelProven`, missing or mismatched `attrs.data.list` / `attrs.model.source` source metadata, stale `attrs.model`/`attrs.series`/`attrs.values` field references, empty row/value model entries, or derived aggregate field IDs instead of real source fields plus aggregate metadata.
