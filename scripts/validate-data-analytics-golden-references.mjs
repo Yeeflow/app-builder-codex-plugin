@@ -20,8 +20,12 @@ const DATA_LIST_FORM_NEW_EDIT_TEMPLATE_ID = "data_list_form_layout_new_edit_v1_1
 const DATA_LIST_FORM_VIEW_TEMPLATE_ID = "data_list_form_layout_view_item_v1_1";
 const DATA_LIST_FORM_WORKBENCH_TEMPLATE_ID = "data_list_form_layout_workbench";
 const ANALYTICS_TYPES = new Set(["pie-chart", "bar-chart", "line-chart", "pivot-table"]);
+const PIVOT_ANALYTICS_TYPES = new Set(["pivot-table"]);
 const APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS = new Set(["content_card_wrapper", "2_columns_section", "3_columns_section", "2_columns_60/40_section"]);
 const APPROVED_WORKBENCH_ANALYTICS_HOST_IDS = new Set(["chart_cards_section"]);
+const APPROVED_PIVOT_CARD_HOST_IDS = new Set(["content_card_wrapper"]);
+const APPROVED_PIVOT_CONTENT_HOST_IDS = new Set(["section_content_area"]);
+const FORBIDDEN_PIVOT_HOST_IDS = new Set(["chart_cards_section"]);
 const RUNTIME_CATEGORY = "___Pivot___";
 const CONTROL_KEY_BY_TYPE = {
   "pie-chart": "pie-chart",
@@ -339,22 +343,47 @@ function validateResource(resource, context) {
       context.findings.push(error("DATA_ANALYTICS_TEMPLATE_TITLE_CONTROL_MISSING", "Chart-with-title templates must include the approved title Text control.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, titleControlId: reference.titleControlId }));
     }
     validateGeneratedTemplateContract(entry, reference, context);
+    const isPivotAnalytics = isPivotAnalyticsControl(entry, reference);
+    if (isPivotAnalytics) validatePivotTablePlacement(entry, reference, context);
     if (isDataListFormNewEdit) {
       context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_NEW_EDIT_FORBIDDEN", "Data Analytics templates must not be used on Data List Form Layouts v1.1 New/Edit forms.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId }));
     }
-    if (isDashboardV11 && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
+    if (!isPivotAnalytics && isDashboardV11 && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
       context.findings.push(error("DATA_ANALYTICS_DASHBOARD_V11_SECTION_PLACEMENT_INVALID", "Dashboard Page Layouts v1.1 Data Analytics templates must be placed inside content_card_wrapper, 2_columns_section, 3_columns_section, or 2_columns_60/40_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS] }));
     }
-    if (isDashboardChartSectionLayout && !hasAncestorInSet(entry, APPROVED_WORKBENCH_ANALYTICS_HOST_IDS)) {
-      context.findings.push(error("DATA_ANALYTICS_DASHBOARD_CHART_SECTION_PLACEMENT_INVALID", "Workbench and workspace Dashboard Data Analytics templates must be placed inside chart_cards_section under an approved working-area panel.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_WORKBENCH_ANALYTICS_HOST_IDS] }));
+    if (!isPivotAnalytics && isDashboardChartSectionLayout && !hasAncestorInSet(entry, APPROVED_WORKBENCH_ANALYTICS_HOST_IDS)) {
+      context.findings.push(error("DATA_ANALYTICS_DASHBOARD_CHART_SECTION_PLACEMENT_INVALID", "Workbench and workspace Dashboard chart-like Data Analytics templates must be placed inside chart_cards_section under an approved working-area panel. Pivot tables are table-like and must use content_card_wrapper > section_content_area instead.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_WORKBENCH_ANALYTICS_HOST_IDS] }));
     }
-    if (isDataListFormView && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
+    if (!isPivotAnalytics && isDataListFormView && !hasAncestorInSet(entry, APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS)) {
       context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_VIEW_V11_SECTION_PLACEMENT_INVALID", "Data List Form Layouts v1.1 View Item Data Analytics templates must be placed inside content_card_wrapper, 2_columns_section, 3_columns_section, or 2_columns_60/40_section.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_LAYOUT_V11_ANALYTICS_HOST_IDS] }));
     }
-    if (isDataListFormWorkbench && !hasAncestorInSet(entry, APPROVED_WORKBENCH_ANALYTICS_HOST_IDS)) {
-      context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_WORKBENCH_CHART_SECTION_PLACEMENT_INVALID", "Workbench Data List View Item Data Analytics templates must be placed inside chart_cards_section under primary_working_area or right_side_panel.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_WORKBENCH_ANALYTICS_HOST_IDS] }));
+    if (!isPivotAnalytics && isDataListFormWorkbench && !hasAncestorInSet(entry, APPROVED_WORKBENCH_ANALYTICS_HOST_IDS)) {
+      context.findings.push(error("DATA_ANALYTICS_DATA_LIST_FORM_WORKBENCH_CHART_SECTION_PLACEMENT_INVALID", "Workbench Data List View Item chart-like Data Analytics templates must be placed inside chart_cards_section under primary_working_area or right_side_panel. Pivot tables are table-like and must use content_card_wrapper > section_content_area instead.", { page: context.pageTitle, path: entry.pointer, templateId: reference.templateId, approvedSectionContainers: [...APPROVED_WORKBENCH_ANALYTICS_HOST_IDS] }));
     }
     validateRuntimeBinding(resource, entry, reference, context);
+  }
+}
+
+function isPivotAnalyticsControl(entry, reference) {
+  return PIVOT_ANALYTICS_TYPES.has(String(entry?.node?.type || "")) || String(reference?.templateId || "") === "data_analytics_pivot_table_standard";
+}
+
+function validatePivotTablePlacement(entry, reference, context) {
+  if (hasAncestorInSet(entry, FORBIDDEN_PIVOT_HOST_IDS)) {
+    context.findings.push(error("DATA_ANALYTICS_PIVOT_CHART_SECTION_FORBIDDEN", "Pivot table Data Analytics templates are table-like regions and must not be placed inside chart_cards_section.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      forbiddenSectionContainers: [...FORBIDDEN_PIVOT_HOST_IDS],
+    }));
+  }
+  if (!hasAncestorInSet(entry, APPROVED_PIVOT_CARD_HOST_IDS) || !hasAncestorInSet(entry, APPROVED_PIVOT_CONTENT_HOST_IDS)) {
+    context.findings.push(error("DATA_ANALYTICS_PIVOT_SECTION_PLACEMENT_INVALID", "Pivot table Data Analytics templates must be placed inside content_card_wrapper > section_content_area, preferably in a 1_columns_section and only in multi-column sections when the pivot has few columns.", {
+      page: context.pageTitle,
+      path: entry.pointer,
+      templateId: reference.templateId,
+      approvedSectionContainers: ["content_card_wrapper", "section_content_area"],
+    }));
   }
 }
 

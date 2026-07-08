@@ -80,6 +80,38 @@ const LOAN_ASSET_DOMAIN_TERMS = new Set([
   "checkout status",
   "Office Asset records",
 ]);
+const STANDARD_DASHBOARD_FILTER_GROUP_COLUMNS = {
+  "1": {
+    list: [
+      { value: 1, unit: "fr" },
+      { value: 1, unit: "fr" },
+      { value: 1, unit: "fr" },
+      { value: 1, unit: "fr" },
+    ],
+    last: { value: 1, unit: "fr" },
+  },
+  "2": {
+    list: [
+      { value: 1, unit: "fr" },
+      { value: 1, unit: "fr" },
+    ],
+    last: { value: 1, unit: "fr" },
+  },
+  "3": {
+    list: [
+      { value: 1, unit: "fr" },
+    ],
+    last: { value: 1, unit: "fr" },
+  },
+};
+const STANDARD_DASHBOARD_FILTER_GROUP_ROWS = {
+  "1": {
+    list: [
+      { unit: "auto" },
+    ],
+    last: { unit: "auto" },
+  },
+};
 const USER_FIELD_HINT = /\b(user|owner|assignee|requester|borrower|manager|approver|person|people|accountid|account id)\b/i;
 const USER_FIELD_EXCLUSION_HINT = /\b(employee\s*(?:number|no|id|code)|department\s*code|staffing\s*target)\b/i;
 
@@ -400,7 +432,59 @@ function validatePageShell(resource, findings, context) {
   }
   if (!context.allowTemplateOperations) validateOperations(resource, findings, context.page);
   if (!context.allowTemplateOperations) validateGeneratedSectionCleanup(resource, findings, context.page, context);
+  validateWorkbenchSpecificContracts(resource, findings, context, rules);
   validateControlledSlotsAndRepeatableModules(resource, findings, context);
+}
+
+function validateWorkbenchSpecificContracts(resource, findings, context, rules) {
+  if (rules.id !== WORKBENCH_TEMPLATE_ID) return;
+  for (const entry of findAllByIdentityWithPointers(resource, "dashboard_standard_filter_group")) {
+    validateWorkbenchStandardFilterGroup(entry, findings, context);
+  }
+  if (!context.allowTemplateOperations) validateWorkbenchEmptyRightColumnPruned(resource, findings, context);
+}
+
+function validateWorkbenchStandardFilterGroup(entry, findings, context) {
+  const control = entry.control;
+  const attrs = control?.attrs || {};
+  const invalid = [];
+  if (String(control?.type || "") !== "flex_grid") invalid.push({ slot: "type", actual: control?.type || null });
+  if (String(control?.label || "") !== "Standard filter group") invalid.push({ slot: "label", actual: control?.label || null });
+  if (stableJson(control?.displayLabel ?? null) !== stableJson([null, false])) invalid.push({ slot: "displayLabel", actual: control?.displayLabel ?? null });
+  if (attrs.ver !== 1) invalid.push({ slot: "attrs.ver", actual: attrs.ver ?? null });
+  if (stableJson(attrs.columns ?? null) !== stableJson(STANDARD_DASHBOARD_FILTER_GROUP_COLUMNS)) invalid.push({ slot: "attrs.columns", actual: attrs.columns ?? null });
+  if (stableJson(attrs.rows ?? null) !== stableJson(STANDARD_DASHBOARD_FILTER_GROUP_ROWS)) invalid.push({ slot: "attrs.rows", actual: attrs.rows ?? null });
+  if (stableJson(attrs.cgap ?? null) !== stableJson({ "1": 16 }) || stableJson(attrs.cgapU ?? null) !== stableJson({ "1": "px" })) {
+    invalid.push({ slot: "column-gap", actual: { cgap: attrs.cgap ?? null, cgapU: attrs.cgapU ?? null } });
+  }
+  if (stableJson(attrs.rgap ?? null) !== stableJson([null, 16]) || stableJson(attrs.rgapU ?? null) !== stableJson([null, "px"])) {
+    invalid.push({ slot: "row-gap", actual: { rgap: attrs.rgap ?? null, rgapU: attrs.rgapU ?? null } });
+  }
+  if (invalid.length) {
+    findings.push(error("DASH_WORKBENCH_FILTER_GROUP_GRID_CONTRACT_INVALID", "Workbench dashboard_standard_filter_group must use the export-proven flex_grid standard filter group with 4/2/1 responsive columns; simplified count/minmax Grid settings are invalid.", {
+      page: context.page,
+      pointer: entry.pointer,
+      invalid,
+    }));
+  }
+}
+
+function validateWorkbenchEmptyRightColumnPruned(resource, findings, context) {
+  const entry = findAllByIdentityWithPointers(resource, "main_work_queue_wrapper")[0];
+  if (!entry) return;
+  const queue = entry.control;
+  const children = asArray(queue?.children).filter(isObject);
+  const rightPanel = children.find((child) => hasIdentity(child, "right_side_panel"));
+  if (rightPanel && hasMeaningfulDashboardContent(rightPanel)) return;
+  const desktopColumns = queue?.attrs?.columns?.["1"]?.list;
+  if (Array.isArray(desktopColumns) && desktopColumns.length > 1) {
+    findings.push(error("DASH_WORKBENCH_EMPTY_RIGHT_COLUMN_NOT_PRUNED", "Workbench main_work_queue_wrapper must remove the second Grid column when no right_side_panel business content is generated.", {
+      page: context.page,
+      pointer: entry.pointer,
+      columnCount: desktopColumns.length,
+      columns: queue?.attrs?.columns || null,
+    }));
+  }
 }
 
 function validateSectionContentAreaGap(resource, findings, context) {
@@ -1282,6 +1366,17 @@ function findAllByIdentity(root, expected) {
     if (!isObject(node)) return;
     if (hasIdentity(node, expected)) matches.push(node);
     for (const child of asArray(node.children)) visit(child);
+  };
+  visit(root);
+  return matches;
+}
+
+function findAllByIdentityWithPointers(root, expected) {
+  const matches = [];
+  const visit = (node, pointer = "$") => {
+    if (!isObject(node)) return;
+    if (hasIdentity(node, expected)) matches.push({ control: node, pointer });
+    asArray(node.children).forEach((child, index) => visit(child, `${pointer}.children[${index}]`));
   };
   visit(root);
   return matches;

@@ -24,7 +24,7 @@ try {
 
   expectCode("multiple loose filters fail", ["--resource", writeJson("loose-filters.json", pageResource({ loose: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_REQUIRED_FOR_MULTIPLE_FILTERS");
   expectCode("one filter outside group fails when multiple filters exist", ["--resource", writeJson("mixed-filters.json", pageResource({ mixed: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_FILTER_OUTSIDE_GROUP");
-  expectCode("mutated group gap fails", ["--resource", writeJson("mutated-gap.json", pageResource({ mutateGap: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_GAP_INVALID");
+  expectCode("mutated group columns fail", ["--resource", writeJson("mutated-columns.json", pageResource({ mutateColumns: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_GRID_COLUMNS_INVALID");
   expectCode("left panel filter group with more than two filters fails", ["--resource", writeJson("left-panel-too-many-filters.json", masterDetailWorkspaceResource({ tooManyFilters: true })), "--surface", "dashboard"], "DATA_FILTER_LEFT_PANEL_GROUP_TOO_MANY_FILTERS");
   expectCode("child scalar label layout fails", ["--resource", writeJson("bad-lablay.json", pageResource({ badLablay: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_CHILD_LABEL_LAYOUT_INVALID");
   expectCode("child missing fixed width fails", ["--resource", writeJson("bad-width.json", pageResource({ badWidth: true })), "--surface", "dashboard"], "DATA_FILTER_GROUP_CHILD_FIXED_WIDTH_MISSING");
@@ -130,20 +130,54 @@ function pageResource(options = {}) {
 
 function filterGroup(options = {}) {
   const group = {
-    type: "container",
+    type: "flex_grid",
     id: "dashboard_standard_filter_group",
-    name: "Dashboard Standard Filter Group",
+    name: "Standard filter group",
+    label: "Standard filter group",
     nv_label: "dashboard_standard_filter_group",
+    displayLabel: [null, false],
     attrs: {
-      goldenReferenceId: "dashboard_standard_filter_group",
-      derivedFromGoldenReference: "event_portfolio_filter_group",
-      style: {
-        widthtype: [null, "1"],
-        direction: [null, "row", "column"],
-        gap: [null, "--sp--s100"],
-        align_items: [null, "center"],
-        justify_content: [null, "flex-start"],
+      ver: 1,
+      columns: {
+        "1": {
+          list: [
+            { value: 1, unit: "fr" },
+            { value: 1, unit: "fr" },
+            { value: 1, unit: "fr" },
+            { value: 1, unit: "fr" },
+          ],
+          last: { value: 1, unit: "fr" },
+        },
+        "2": {
+          list: [
+            { value: 1, unit: "fr" },
+            { value: 1, unit: "fr" },
+          ],
+          last: { value: 1, unit: "fr" },
+        },
+        "3": {
+          list: [
+            { value: 1, unit: "fr" },
+          ],
+          last: { value: 1, unit: "fr" },
+        },
       },
+      rows: {
+        "1": {
+          list: [
+            { unit: "auto" },
+          ],
+          last: { unit: "auto" },
+        },
+      },
+      cgap: {
+        "1": 16,
+      },
+      cgapU: {
+        "1": "px",
+      },
+      rgap: [null, 16],
+      rgapU: [null, "px"],
     },
     children: [
       dataFilter("department_filter", "radio-filter"),
@@ -151,7 +185,7 @@ function filterGroup(options = {}) {
       dataFilter("status_filter", "radio-filter"),
     ],
   };
-  if (options.mutateGap) group.attrs.style.gap = [null, "--sp--s050"];
+  if (options.mutateColumns) group.attrs.columns = { count: 6, type: "repeat", minmax: ["160px", "1fr"] };
   if (options.badLablay) group.children[0].attrs.lablay = "top";
   if (options.badWidth) group.children[0].attrs.common.positioning.width = [null, 160];
   return group;

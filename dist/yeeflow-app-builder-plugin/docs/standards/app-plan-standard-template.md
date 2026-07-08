@@ -559,7 +559,8 @@ Rules:
 - App Plan selection is a business decision only. It must not include generated `ListID`, `LayoutID`, `PageID`, action type codes, JSON property paths, placeholder IDs, or runtime payload fields in this table.
 - Data Analytics templates are allowed only on Dashboard pages and Data List forms. They must not be planned for Approval forms.
 - On Dashboard Page Layouts v1.1 pages, generated resources may place Data Analytics templates inside `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`.
-- On Workbench Dashboard pages, grouped analytics should use `chart_cards_section` under `primary_working_area` or `right_side_panel`; one `chart_cards_section` should contain no more than three Data Analytics templates.
+- On Workbench Dashboard pages and Workbench Data List View Item forms, chart-like analytics should use `chart_cards_section` under `primary_working_area` or `right_side_panel`; one `chart_cards_section` should contain no more than three chart-like Data Analytics templates.
+- Pivot table analytics are table-like regions. Plan `data_analytics_pivot_table_standard` inside `content_card_wrapper > section_content_area`, preferably under `1_columns_section`; use `2_columns_section`, `2_columns_60/40_section`, or `3_columns_section` only for narrow/few-column pivots. Do not plan Pivot tables inside `chart_cards_section`.
 - The App Plan may state the selected placement family, but must not prescribe low-level container properties.
 
 #### Data Table Template Selection

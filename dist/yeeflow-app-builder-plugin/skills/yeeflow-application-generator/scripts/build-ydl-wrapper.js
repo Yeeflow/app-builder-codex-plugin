@@ -17,6 +17,8 @@ function usage(exitCode = 1) {
     "",
     "Example:",
     "  node build-ydl-wrapper.js ./asset-inventory-def.test-generated-ids.json ./asset-inventory.test-generated-ids.ydl --title \"Asset Inventory\" --description \"Sandbox generated Asset Inventory data list\"",
+    "",
+    "Import-ready validation is mandatory: the wrapper runs validate-ydl-list.js --mode generator --stage final --strict-import-ready before writing and after round-trip decode.",
   ].join("\n");
   (exitCode === 0 ? console.log : console.error)(text);
   process.exit(exitCode);
@@ -155,7 +157,7 @@ function listModelOf(data) {
 
 function runFinalValidation(inputPath, report, target = "preWrite", dependencyMap = null) {
   const validator = path.join(__dirname, "validate-ydl-list.js");
-  const validationArgs = [validator, inputPath, "--mode", "generator", "--stage", "final"];
+  const validationArgs = [validator, inputPath, "--mode", "generator", "--stage", "final", "--strict-import-ready"];
   if (dependencyMap) validationArgs.push("--dependency-map", dependencyMap);
   const result = spawnSync(process.execPath, validationArgs, {
     encoding: "utf8",
@@ -293,6 +295,7 @@ function main() {
     inputData: path.resolve(args.inputData),
     outputWrapper: path.resolve(args.outputWrapper),
     title: args.title,
+    strictImportReady: true,
     dependencyMap: args.dependencyMap ? path.resolve(args.dependencyMap) : null,
     errors: [],
     warnings: [],

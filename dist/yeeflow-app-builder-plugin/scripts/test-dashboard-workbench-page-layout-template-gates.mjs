@@ -47,6 +47,7 @@ function addTopFilter(resource) {
 function keepOnlyPrimaryWorkingArea(resource) {
   const queue = find(resource, "main_work_queue_wrapper");
   queue.children = queue.children.filter((child) => ids(child).includes("primary_working_area"));
+  normalizeMainWorkQueueWrapperToSingleColumn(queue);
   const primary = find(resource, "primary_working_area");
   primary.children = primary.children.filter((child) => {
     const childIds = ids(child);
@@ -178,6 +179,14 @@ try {
   addRightSidePanel(withRightPanel, true);
   expectPass("generated Workbench dashboard may keep right side panel when it has business content", ["--package", writePackage(tempDir, "valid-right-panel", decoded(withRightPanel))]);
 
+  const badFilterGrid = workbenchTemplate();
+  find(badFilterGrid, "dashboard_standard_filter_group").attrs.columns = { count: 6, type: "repeat", minmax: ["160px", "1fr"] };
+  expectCode("Workbench standard filter group with simplified Grid columns fails", ["--package", writePackage(tempDir, "bad-filter-grid", decoded(badFilterGrid))], "DASH_WORKBENCH_FILTER_GROUP_GRID_CONTRACT_INVALID");
+
+  const emptyRightColumn = workbenchTemplate();
+  find(emptyRightColumn, "main_work_queue_wrapper").attrs.columns["1"].list = [{ value: 2.5, unit: "fr" }, { value: 1, unit: "fr" }];
+  expectCode("Workbench main grid with no right content but two desktop columns fails", ["--package", writePackage(tempDir, "empty-right-column", decoded(emptyRightColumn))], "DASH_WORKBENCH_EMPTY_RIGHT_COLUMN_NOT_PRUNED");
+
   const emptyChartSection = workbenchTemplate();
   find(find(emptyChartSection, "primary_working_area"), "chart_cards_section").children = [];
   expectCode("empty chart_cards_section fails", ["--package", writePackage(tempDir, "empty-chart-section", decoded(emptyChartSection))], "DASH_LAYOUT_EMPTY_CHART_CARDS_SECTION");
@@ -195,7 +204,31 @@ try {
   addRightSidePanel(emptyRightPanel, false);
   expectCode("empty right_side_panel fails", ["--package", writePackage(tempDir, "empty-right-panel", decoded(emptyRightPanel))], "DASH_LAYOUT_EMPTY_RIGHT_SIDE_PANEL");
 
-  console.log(JSON.stringify({ status: "pass", cases: 7 }, null, 2));
+  console.log(JSON.stringify({ status: "pass", cases: 9 }, null, 2));
 } finally {
   fs.rmSync(tempDir, { recursive: true, force: true });
+}
+
+function normalizeMainWorkQueueWrapperToSingleColumn(queue) {
+  queue.attrs = queue.attrs || {};
+  queue.attrs.columns = {
+    "1": {
+      list: [
+        { value: 1, unit: "fr" },
+      ],
+      last: { value: 1, unit: "fr" },
+    },
+    "2": {
+      list: [
+        { value: 1, unit: "fr" },
+      ],
+      last: { value: 1, unit: "fr" },
+    },
+    "3": {
+      list: [
+        { value: 1, unit: "fr" },
+      ],
+      last: { value: 1, unit: "fr" },
+    },
+  };
 }

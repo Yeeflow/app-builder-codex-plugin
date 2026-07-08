@@ -92,6 +92,8 @@ The regression fixture should fail a standalone `.ydl` shape that hand-builds a 
 
 Focused follow-up from `event-planning-datalist-e2e-20260707-234854-plugin-0.9.31-50rows`: a standalone `.ydl` can pass broad structural checks yet fail Yeeflow import with `create failed` when the generated wrapper does not match current export/import expectations. Import-ready standalone `.ydl` output must preserve `Defs[].Rules` as stringified JSON, must not seed audit/system fields in demo `ListDatas`, must keep Type `1` custom form `LayoutView: null` with the form JSON in `LayoutInResources[0].Resource`, and must keep the default view URL as `default`. These are now covered by `--strict-import-ready` and should be enforced before handoff, not deferred to manual import testing.
 
+Focused follow-up from the `0.9.32` verification: root `validate-ydl-list.js` enforcing `--strict-import-ready` is not sufficient if packaged helper entrypoints drift. Every bundled `scripts/validate-ydl-list.js` under the plugin and installed skills must route to the shared root validator, and every bundled `scripts/build-ydl-wrapper.js` must run `--strict-import-ready` before writing the `.ydl` and again after wrapper round-trip decode. A `.ydl` wrapper build must fail closed when strict import-ready errors are present; `build-ydl-wrapper.js` must not be a bypass around the validator.
+
 For `.ydp`:
 
 - `validate-standalone-artifact-plan-trace.mjs`

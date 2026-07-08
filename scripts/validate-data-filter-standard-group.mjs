@@ -9,6 +9,38 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/data-filter-golden-references.json");
 const TEMPLATE_ID = "dashboard_standard_filter_group";
 const TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-filter-standard-filter-group.template.json");
+const STANDARD_FILTER_GRID_COLUMNS = {
+  "1": {
+    list: [
+      { value: 1, unit: "fr" },
+      { value: 1, unit: "fr" },
+      { value: 1, unit: "fr" },
+      { value: 1, unit: "fr" },
+    ],
+    last: { value: 1, unit: "fr" },
+  },
+  "2": {
+    list: [
+      { value: 1, unit: "fr" },
+      { value: 1, unit: "fr" },
+    ],
+    last: { value: 1, unit: "fr" },
+  },
+  "3": {
+    list: [
+      { value: 1, unit: "fr" },
+    ],
+    last: { value: 1, unit: "fr" },
+  },
+};
+const STANDARD_FILTER_GRID_ROWS = {
+  "1": {
+    list: [
+      { unit: "auto" },
+    ],
+    last: { unit: "auto" },
+  },
+};
 const DATA_FILTER_TYPES = new Set([
   "select-filter",
   "radio-filter",
@@ -85,10 +117,6 @@ function validateRegistry(registry, templateRoot, findings) {
     return;
   }
   validateGroupContract({ node: templateRoot, pointer: "$", ancestors: [] }, { title: "source template", surface: "registry", findings });
-  const filters = flattenControls(templateRoot).filter((entry) => DATA_FILTER_TYPES.has(String(entry.node?.type || "")));
-  if (filters.length < 2) {
-    findings.push(error("DATA_FILTER_GROUP_TEMPLATE_CHILD_FILTERS_MISSING", "dashboard_standard_filter_group template must include at least two page-level Data Filter child controls."));
-  }
 }
 
 function validatePackage(packagePath, findings) {
@@ -171,21 +199,30 @@ function validateLeftPanelFilterGroups(entries, context) {
 
 function validateGroupContract(group, context) {
   const node = group.node || group;
-  const style = node?.attrs?.style || {};
-  if (!sameJson(style.widthtype, [null, "1"])) {
-    context.findings.push(error("DATA_FILTER_GROUP_WIDTHTYPE_INVALID", "dashboard_standard_filter_group must preserve Full width style widthtype [null,\"1\"].", detail(context, group.pointer, style.widthtype)));
+  const attrs = node?.attrs || {};
+  if (String(node?.type || "") !== "flex_grid") {
+    context.findings.push(error("DATA_FILTER_GROUP_GRID_TYPE_INVALID", "dashboard_standard_filter_group must use the export-proven flex_grid standard filter group control.", detail(context, group.pointer, node?.type || null)));
   }
-  if (!sameJson(style.direction, [null, "row", "column"])) {
-    context.findings.push(error("DATA_FILTER_GROUP_DIRECTION_INVALID", "dashboard_standard_filter_group must preserve responsive row/column direction.", detail(context, group.pointer, style.direction)));
+  if (String(node?.label || "") !== "Standard filter group") {
+    context.findings.push(error("DATA_FILTER_GROUP_LABEL_INVALID", "dashboard_standard_filter_group must preserve label \"Standard filter group\".", detail(context, group.pointer, node?.label || null)));
   }
-  if (!sameJson(style.gap, [null, "--sp--s100"])) {
-    context.findings.push(error("DATA_FILTER_GROUP_GAP_INVALID", "dashboard_standard_filter_group must preserve the template gap token.", detail(context, group.pointer, style.gap)));
+  if (!sameJson(node?.displayLabel, [null, false])) {
+    context.findings.push(error("DATA_FILTER_GROUP_DISPLAY_LABEL_INVALID", "dashboard_standard_filter_group must hide its own Grid label with displayLabel [null,false].", detail(context, group.pointer, node?.displayLabel ?? null)));
   }
-  if (!sameJson(style.align_items, [null, "center"])) {
-    context.findings.push(error("DATA_FILTER_GROUP_ALIGN_ITEMS_INVALID", "dashboard_standard_filter_group must preserve center alignment.", detail(context, group.pointer, style.align_items)));
+  if (attrs.ver !== 1) {
+    context.findings.push(error("DATA_FILTER_GROUP_GRID_VERSION_INVALID", "dashboard_standard_filter_group flex_grid must preserve attrs.ver = 1.", detail(context, group.pointer, attrs.ver ?? null)));
   }
-  if (!sameJson(style.justify_content, [null, "flex-start"])) {
-    context.findings.push(error("DATA_FILTER_GROUP_JUSTIFY_CONTENT_INVALID", "dashboard_standard_filter_group must preserve flex-start justification.", detail(context, group.pointer, style.justify_content)));
+  if (!sameJson(attrs.columns, STANDARD_FILTER_GRID_COLUMNS)) {
+    context.findings.push(error("DATA_FILTER_GROUP_GRID_COLUMNS_INVALID", "dashboard_standard_filter_group must preserve the responsive 4/2/1 column flex_grid definition; simplified count/minmax columns are invalid.", detail(context, group.pointer, attrs.columns ?? null)));
+  }
+  if (!sameJson(attrs.rows, STANDARD_FILTER_GRID_ROWS)) {
+    context.findings.push(error("DATA_FILTER_GROUP_GRID_ROWS_INVALID", "dashboard_standard_filter_group must preserve the export-proven auto row definition.", detail(context, group.pointer, attrs.rows ?? null)));
+  }
+  if (!sameJson(attrs.cgap, { "1": 16 }) || !sameJson(attrs.cgapU, { "1": "px" })) {
+    context.findings.push(error("DATA_FILTER_GROUP_GRID_COLUMN_GAP_INVALID", "dashboard_standard_filter_group must preserve 16px column gap settings.", detail(context, group.pointer, { cgap: attrs.cgap ?? null, cgapU: attrs.cgapU ?? null })));
+  }
+  if (!sameJson(attrs.rgap, [null, 16]) || !sameJson(attrs.rgapU, [null, "px"])) {
+    context.findings.push(error("DATA_FILTER_GROUP_GRID_ROW_GAP_INVALID", "dashboard_standard_filter_group must preserve 16px row gap settings.", detail(context, group.pointer, { rgap: attrs.rgap ?? null, rgapU: attrs.rgapU ?? null })));
   }
   const childFilters = flattenControls(node)
     .filter((entry) => entry.node !== node && DATA_FILTER_TYPES.has(String(entry.node?.type || "")));

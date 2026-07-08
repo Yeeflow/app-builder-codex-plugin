@@ -1,1 +1,99 @@
-{"_ak_c":{"id":"e2e4f6db-eaef-4eca-bc62-df8523db3ba3","type":"container","label":"Dashboard Standard Filter Group","attrs":{"style":{"widthtype":[null,"1"],"direction":[null,"row","column"],"gap":[null,"--sp--s100"],"align_items":[null,"center"],"justify_content":[null,"flex-start"]},"goldenReferenceId":"event_portfolio_filter_group","derivedFromGoldenReference":"event_portfolio_filter_group"},"children":[{"id":"event_portfolio_region_filter","type":"radio-filter","label":"Borrower Department","name":"Select borrower department...","displayLabel":[null,true],"binding":"__filter_filter_event_portfolio_region","width":"full","attrs":{"lab":{"value":"Borrower Department","ty":[null,"xs-light"]},"lablay":[null,"top"],"layout":"dropdown","displayStyle":"dropdown","dropdown-enable":true,"search-enable":false,"more-enable":false,"more-text":"","less-text":"","placeholder":"Select borrower department...","displayTitle":false,"visualIntent":"native-data-filter-dropdown-visual-fidelity-180px-extension","style":{"gap":[null,0],"direction":[null,"column"],"widthtype":[null,"1"],"width":[null,180],"widthu":[null,"px"],"align_items":[null,"stretch"],"justify_content":[null,"center"],"wrap":[null,"nowrap"]},"common":{"positioning":{"widthtype":[null,"3","1","1"],"width":[null,200],"widthu":[null,"px"]},"sizing":{"width":[null,180],"minWidth":[null,180],"maxWidth":[null,180],"height":[null,48],"minHeight":[null,48],"maxHeight":[null,48]},"margin":[null,{"top":0,"right":0,"bottom":0,"left":0}],"padding":[null,{"top":0,"right":0,"bottom":0,"left":0}],"border":{"normal":{"type":"0","width":[null,{"top":0,"right":0,"bottom":0,"left":0}],"color":"transparent"}}},"edit":{"placeholder":{"color":"#5f6b7a"},"normal":{"color":"#263241","border":{"type":"1","width":[null,{"top":1,"right":1,"bottom":1,"left":1}],"color":"var(--c--neutral-light-active)","radius":[null,{"top":8,"right":8,"bottom":8,"left":8}]}},"pcolor":"var(--c--neutral-dark-hover)","pd":[null,{"top":8,"right":8,"bottom":8,"left":8}]},"data":{"list":{"AppID":41,"ListID":"2068704921732997133","Type":1,"Title":"Loan Transactions","ListSetID":"2068704921732997123"},"field":"Text3","filter":[]},"display_f":"Text3","value_f":"Text3","ps":20,"content":{"htmltag":"div"},"dropdown":{"body":{"border":{"boxShadow":{"color":"rgba(74, 74, 74, 0.15)","x":0,"y":0,"blur":20,"spread":0,"position":"outline"},"radius":[null,{"top":8,"right":8,"bottom":8,"left":8}]}}},"apply_t":"1"},"children":[],"nv_label":"event_portfolio_region_filter"},{"id":"event_portfolio_period_filter","type":"relative-period","label":"Due Date","name":"Select due date...","displayLabel":[null,true],"binding":"__filter_filter_event_portfolio_period","width":"full","attrs":{"lab":{"value":"Due Date","ty":[null,"xs-light"]},"lablay":[null,"top"],"layout":"dropdown","displayStyle":"dropdown","dropdown-enable":true,"search-enable":false,"more-enable":false,"more-text":"","less-text":"","placeholder":"Select due date...","displayTitle":false,"visualIntent":"native-data-filter-dropdown-visual-fidelity-180px-extension","style":{"gap":[null,0],"direction":[null,"column"],"widthtype":[null,"1"],"width":[null,180],"widthu":[null,"px"],"align_items":[null,"stretch"],"justify_content":[null,"center"],"wrap":[null,"nowrap"]},"common":{"positioning":{"widthtype":[null,"3","1","1"],"width":[null,200],"widthu":[null,"px"]},"sizing":{"width":[null,180],"minWidth":[null,180],"maxWidth":[null,180],"height":[null,48],"minHeight":[null,48],"maxHeight":[null,48]},"margin":[null,{"top":0,"right":0,"bottom":0,"left":0}],"padding":[null,{"top":0,"right":0,"bottom":0,"left":0}],"border":{"normal":{"type":"0","width":[null,{"top":0,"right":0,"bottom":0,"left":0}],"color":"transparent"}}},"edit":{"placeholder":{"color":"#5f6b7a"},"normal":{"color":"#263241","border":{"type":"1","width":[null,{"top":1,"right":1,"bottom":1,"left":1}],"color":"var(--c--neutral-light-active)","radius":[null,{"top":8,"right":8,"bottom":8,"left":8}]}},"pcolor":"var(--c--neutral-dark-hover)","pd":[null,{"top":8,"right":8,"bottom":8,"left":8}]},"field":"Datetime2","choice-options":["q_n_1","q_l_1","y_t_1","y_l_1"],"content":{"htmltag":"div"},"dropdown":{"body":{"border":{"boxShadow":{"color":"rgba(74, 74, 74, 0.15)","x":0,"y":0,"blur":20,"spread":0,"position":"outline"},"radius":[null,{"top":8,"right":8,"bottom":8,"left":8}]}}},"apply_t":"1"},"children":[],"nv_label":"event_portfolio_period_filter"},{"id":"event_portfolio_status_filter","type":"radio-filter","label":"Loan Status","name":"Select loan status...","displayLabel":[null,true],"binding":"__filter_filter_event_portfolio_status","width":"full","attrs":{"lab":{"value":"Loan Status","ty":[null,"xs-light"]},"lablay":[null,"top"],"layout":"dropdown","displayStyle":"dropdown","dropdown-enable":true,"search-enable":false,"more-enable":false,"more-text":"","less-text":"","placeholder":"Select loan status...","displayTitle":false,"visualIntent":"native-data-filter-dropdown-visual-fidelity-180px-extension","style":{"gap":[null,0],"direction":[null,"column"],"widthtype":[null,"1"],"width":[null,180],"widthu":[null,"px"],"align_items":[null,"stretch"],"justify_content":[null,"center"],"wrap":[null,"nowrap"]},"common":{"positioning":{"widthtype":[null,"3","1","1"],"width":[null,200],"widthu":[null,"px"]},"sizing":{"width":[null,180],"minWidth":[null,180],"maxWidth":[null,180],"height":[null,48],"minHeight":[null,48],"maxHeight":[null,48]},"margin":[null,{"top":0,"right":0,"bottom":0,"left":0}],"padding":[null,{"top":0,"right":0,"bottom":0,"left":0}],"border":{"normal":{"type":"0","width":[null,{"top":0,"right":0,"bottom":0,"left":0}],"color":"transparent"}}},"edit":{"placeholder":{"color":"#5f6b7a"},"normal":{"color":"#263241","border":{"type":"1","width":[null,{"top":1,"right":1,"bottom":1,"left":1}],"color":"var(--c--neutral-light-active)","radius":[null,{"top":8,"right":8,"bottom":8,"left":8}]}},"pcolor":"var(--c--neutral-dark-hover)","pd":[null,{"top":8,"right":8,"bottom":8,"left":8}]},"data":{"list":{"AppID":41,"ListID":"2068704921732997133","Type":1,"Title":"Loan Transactions","ListSetID":"2068704921732997123"},"field":"Text4","filter":[]},"display_f":"Text4","value_f":"Text4","ps":20,"content":{"htmltag":"div"},"dropdown":{"body":{"border":{"boxShadow":{"color":"rgba(74, 74, 74, 0.15)","x":0,"y":0,"blur":20,"spread":0,"position":"outline"},"radius":[null,{"top":8,"right":8,"bottom":8,"left":8}]}}},"apply_t":"1"},"children":[],"nv_label":"event_portfolio_status_filter"},{"id":"event_portfolio_event_type_filter","type":"radio-filter","label":"Assigned Asset","name":"Select assigned asset...","displayLabel":[null,true],"binding":"__filter_filter_event_portfolio_event_type","width":"full","attrs":{"lab":{"value":"Assigned Asset","ty":[null,"xs-light"]},"lablay":[null,"top"],"layout":"dropdown","displayStyle":"dropdown","dropdown-enable":true,"search-enable":false,"more-enable":false,"more-text":"","less-text":"","placeholder":"Select assigned asset...","displayTitle":false,"visualIntent":"native-data-filter-dropdown-visual-fidelity-180px-extension","style":{"gap":[null,0],"direction":[null,"column"],"widthtype":[null,"1"],"width":[null,180],"widthu":[null,"px"],"align_items":[null,"stretch"],"justify_content":[null,"center"],"wrap":[null,"nowrap"]},"common":{"positioning":{"widthtype":[null,"3","1","1"],"width":[null,200],"widthu":[null,"px"]},"sizing":{"width":[null,180],"minWidth":[null,180],"maxWidth":[null,180],"height":[null,48],"minHeight":[null,48],"maxHeight":[null,48]},"margin":[null,{"top":0,"right":0,"bottom":0,"left":0}],"padding":[null,{"top":0,"right":0,"bottom":0,"left":0}],"border":{"normal":{"type":"0","width":[null,{"top":0,"right":0,"bottom":0,"left":0}],"color":"transparent"}}},"edit":{"placeholder":{"color":"#5f6b7a"},"normal":{"color":"#263241","border":{"type":"1","width":[null,{"top":1,"right":1,"bottom":1,"left":1}],"color":"var(--c--neutral-light-active)","radius":[null,{"top":8,"right":8,"bottom":8,"left":8}]}},"pcolor":"var(--c--neutral-dark-hover)","pd":[null,{"top":8,"right":8,"bottom":8,"left":8}]},"data":{"list":{"AppID":41,"ListID":"2068704921732997133","Type":1,"Title":"Loan Transactions","ListSetID":"2068704921732997123"},"field":"Text1","filter":[]},"display_f":"Text1","value_f":"Text1","ps":20,"content":{"htmltag":"div"},"dropdown":{"body":{"border":{"boxShadow":{"color":"rgba(74, 74, 74, 0.15)","x":0,"y":0,"blur":20,"spread":0,"position":"outline"},"radius":[null,{"top":8,"right":8,"bottom":8,"left":8}]}}},"apply_t":"1"},"children":[],"nv_label":"event_portfolio_event_type_filter","readonly":false}],"nv_label":"dashboard_standard_filter_group","name":"Dashboard Standard Filter Group","goldenReferenceId":"event_portfolio_filter_group"},"_ak_c_opt":{"exts":[]}}
+{
+  "_ak_c": {
+    "id": "5cb500a5-9f8d-46c0-9ac2-baa93acc834b",
+    "type": "flex_grid",
+    "label": "Standard filter group",
+    "attrs": {
+      "ver": 1,
+      "columns": {
+        "1": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "2": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            },
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        },
+        "3": {
+          "list": [
+            {
+              "value": 1,
+              "unit": "fr"
+            }
+          ],
+          "last": {
+            "value": 1,
+            "unit": "fr"
+          }
+        }
+      },
+      "rows": {
+        "1": {
+          "list": [
+            {
+              "unit": "auto"
+            }
+          ],
+          "last": {
+            "unit": "auto"
+          }
+        }
+      },
+      "cgap": {
+        "1": 16
+      },
+      "cgapU": {
+        "1": "px"
+      },
+      "rgap": [
+        null,
+        16
+      ],
+      "rgapU": [
+        null,
+        "px"
+      ]
+    },
+    "children": [],
+    "displayLabel": [
+      null,
+      false
+    ],
+    "nv_label": "dashboard_standard_filter_group"
+  },
+  "_ak_c_opt": {
+    "exts": []
+  }
+}

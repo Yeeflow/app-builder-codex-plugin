@@ -48,7 +48,9 @@ Data Analytics templates must not be used on Approval forms because Approval for
 
 When a Dashboard page uses `dashboard-page-layouts-v1.1`, Data Analytics templates must be placed inside one of the approved business section containers: `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`. They must not be placed directly under root `Content`, page title regions, `Operations`, KPI wrappers, Collection-only regions, or copied source-app shells.
 
-When a Dashboard page uses `dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, or `dashboard-page-layouts-three-panel-workspace`, grouped Data Analytics templates must be placed inside `chart_cards_section` under the approved working-area containers for that layout. Each `chart_cards_section` should contain no more than three Data Analytics templates. Remove `chart_cards_section` when no Data Analytics templates are planned.
+When a Dashboard page uses `dashboard-page-layouts-workbench`, `dashboard-page-layouts-two-panel-workspace`, or `dashboard-page-layouts-three-panel-workspace`, chart-like Data Analytics templates must be placed inside `chart_cards_section` under the approved working-area containers for that layout. Each `chart_cards_section` should contain no more than three chart-like analytics templates. Remove `chart_cards_section` when no chart-like Data Analytics templates are planned.
+
+`data_analytics_pivot_table_standard` is table-like, not card-like. On Dashboard pages and Data List forms, place Pivot table controls inside `content_card_wrapper > section_content_area`, preferably in a `1_columns_section`. If the pivot has few columns, the `content_card_wrapper` may be placed in `2_columns_section`, `2_columns_60/40_section`, or `3_columns_section`. Do not place Pivot tables inside `chart_cards_section`.
 
 ## Fidelity Rules
 
@@ -91,6 +93,7 @@ Generated-final validation must fail when:
 - A pivot table does not preserve the approved template identity.
 - A template appears on an Approval form.
 - A Dashboard v1.1 page places an analytics template outside `content_card_wrapper`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`.
+- A Pivot table is placed in `chart_cards_section` or outside `content_card_wrapper > section_content_area`.
 - A generator emits an ad hoc chart/pivot control instead of cloning the approved template.
 - A visible chart or pivot control is missing its `Resource.ReportIds[]` registration, matching `Resource.exts[]` runtime entry, source metadata, chart type, runtime settings, or resolvable source fields.
 - A runtime chart/pivot model has rows or values that identify fields but omit export-shaped metadata such as `type`, `fieldType`, `attr`, or `Conditions`/`preConditions`.

@@ -8,6 +8,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const DIST_ROOT = fs.existsSync(path.join(ROOT, "dist/yeeflow-app-builder-plugin"))
+  ? path.join(ROOT, "dist/yeeflow-app-builder-plugin")
+  : ROOT;
+const SOURCE_INSTALLED_SKILLS_ROOT = path.join(ROOT, "skills/installed");
 const checks = [];
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ydl-strict-import-ready-"));
@@ -24,6 +28,29 @@ expectCode(badReport, "YDL_IMPORT_FIELD_RULES_NOT_STRINGIFIED");
 expectCode(badReport, "YDL_IMPORT_SAMPLE_AUDIT_FIELD_PRESENT");
 expectCode(badReport, "YDL_IMPORT_CUSTOM_FORM_LAYOUTVIEW_NOT_NULL");
 expectCode(badReport, "YDL_IMPORT_DEFAULT_VIEW_URL_NOT_DEFAULT");
+
+for (const validatorPath of packagedValidatorEntrypoints()) {
+  const report = runValidator(badFixture, validatorPath);
+  assert.ok(report.errors.some((error) => error.code === "YDL_IMPORT_SAMPLE_AUDIT_FIELD_PRESENT"), `${validatorPath} should enforce strict import-ready audit-field checks`);
+  checks.push({ case: `packaged validator strict import-ready: ${path.relative(ROOT, validatorPath)}`, status: "pass" });
+}
+
+for (const wrapperPath of packagedBuildWrapperEntrypoints()) {
+  const outputPath = path.join(tmpDir, `${path.relative(ROOT, wrapperPath).replace(/[^a-z0-9]+/gi, "-")}.ydl`);
+  const result = spawnSync(process.execPath, [
+    wrapperPath,
+    badFixture,
+    outputPath,
+    "--title",
+    "Bad Event Planning",
+  ], { cwd: ROOT, encoding: "utf8" });
+  assert.notEqual(result.status, 0, `${wrapperPath} should reject strict import-unsafe data before writing: ${result.stdout || result.stderr}`);
+  const report = JSON.parse(result.stdout || "{}");
+  const nestedErrors = report.errors.flatMap((error) => Array.isArray(error.detail?.errors) ? error.detail.errors : []);
+  assert.ok(nestedErrors.some((error) => error.code === "YDL_IMPORT_FIELD_RULES_NOT_STRINGIFIED"), `${wrapperPath} should surface strict validator errors`);
+  assert.equal(fs.existsSync(outputPath), false, `${wrapperPath} should not write output when strict import-ready validation fails`);
+  checks.push({ case: `build wrapper blocks import-unsafe fixture: ${path.relative(ROOT, wrapperPath)}`, status: "pass" });
+}
 
 const goodFixture = path.join(tmpDir, "good-standalone.ydl.json");
 fs.writeFileSync(goodFixture, JSON.stringify(makeFixture({
@@ -50,9 +77,9 @@ console.log(JSON.stringify({
   checks,
 }, null, 2));
 
-function runValidator(inputPath) {
+function runValidator(inputPath, validatorPath = path.join(ROOT, "validate-ydl-list.js")) {
   const result = spawnSync(process.execPath, [
-    path.join(ROOT, "validate-ydl-list.js"),
+    validatorPath,
     inputPath,
     "--mode",
     "generator",
@@ -62,6 +89,35 @@ function runValidator(inputPath) {
   ], { cwd: ROOT, encoding: "utf8" });
   assert.ok(result.stdout.trim(), `validator should write JSON report for ${inputPath}: ${result.stderr}`);
   return JSON.parse(result.stdout);
+}
+
+function packagedValidatorEntrypoints() {
+  return includeSourceInstalledEntrypoints([
+    path.join(DIST_ROOT, "scripts/validate-ydl-list.js"),
+    path.join(DIST_ROOT, "skills/yeeflow-application-generator/scripts/validate-ydl-list.js"),
+    path.join(DIST_ROOT, "skills/yeeflow-data-list-generator/scripts/validate-ydl-list.js"),
+  ], "validate-ydl-list.js");
+}
+
+function packagedBuildWrapperEntrypoints() {
+  return includeSourceInstalledEntrypoints([
+    path.join(DIST_ROOT, "scripts/build-ydl-wrapper.js"),
+    path.join(DIST_ROOT, "skills/yeeflow-application-generator/scripts/build-ydl-wrapper.js"),
+    path.join(DIST_ROOT, "skills/yeeflow-data-list-generator/scripts/build-ydl-wrapper.js"),
+  ], "build-ydl-wrapper.js");
+}
+
+function includeSourceInstalledEntrypoints(distEntrypoints, scriptName) {
+  const entrypoints = [...distEntrypoints];
+  if (fs.existsSync(SOURCE_INSTALLED_SKILLS_ROOT)) {
+    for (const skillName of ["yeeflow-application-generator", "yeeflow-data-list-generator"]) {
+      const entrypoint = path.join(SOURCE_INSTALLED_SKILLS_ROOT, `${skillName}/scripts/${scriptName}`);
+      if (fs.existsSync(entrypoint)) {
+        entrypoints.push(entrypoint);
+      }
+    }
+  }
+  return entrypoints;
 }
 
 function expectCode(report, code) {
