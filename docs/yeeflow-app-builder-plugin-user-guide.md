@@ -20,9 +20,9 @@ Horizontal navigation active-state styling is a runtime-computed style claim. De
 
 ## Expected Version
 
-`0.9.34`
+`0.9.35`
 
-Version `0.9.34` releases Data Analytics date granularity hardening. Generated line and area charts over date/time fields now choose Yeeflow runtime date grouping funcs from explicit business granularity: `DATE` for Designer Day/daily trends, `MONTH` for monthly trends such as Events by Month, `QUARTER` for quarterly trends, and `YEAR` for annual trends. Data Analytics validation rejects unsupported funcs such as `DAY` or `WEEK` and blocks business-granularity mismatches before signing readiness.
+Version `0.9.35` releases Data List Workbench empty-right-column hardening. Generated Data List Workbench View Item forms now remove empty `right_side_panel` content and normalize `main_work_queue_wrapper` to a single `1fr` Grid column across desktop/laptop, tablet, and mobile when no right-side business content is present. Data List form layout validation blocks Workbench forms that retain a blank second `main_work_queue_wrapper` column before signing readiness.
 
 Version `0.8.107` releases refreshed Dashboard master-detail workspace YDP templates. Two-Panel and Three-Panel Workspace Dashboard layouts preserve the latest exported YDP structure, including the 520px left panel, relocated `left_panel_sidebar`, editable `left_panel_caption_icon_wrapper` / `left_panel_caption_icon`, explicit current-item edit/delete operation buttons, repeatable generic operation buttons, and no-action operation-container pruning before signing readiness.
 

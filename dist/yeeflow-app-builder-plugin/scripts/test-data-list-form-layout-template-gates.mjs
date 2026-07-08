@@ -68,6 +68,9 @@ try {
   const emptyWorkbenchRightPanel = workbenchResource({ emptyRightPanel: true });
   expectCode("Workbench empty right side panel fails", ["--resource", writeJson("workbench-empty-right-panel.json", emptyWorkbenchRightPanel), "--template", WORKBENCH_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_RIGHT_SIDE_PANEL");
 
+  const emptyWorkbenchRightColumn = workbenchResource({ omitRightPanel: true, retainTwoColumnQueue: true });
+  expectCode("Workbench main queue with empty second column fails", ["--resource", writeJson("workbench-empty-right-column.json", emptyWorkbenchRightColumn), "--template", WORKBENCH_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_RIGHT_COLUMN_NOT_PRUNED");
+
   const directRootBusinessControl = viewResource();
   content(directRootBusinessControl).children.push({ type: "collection", nv_label: "loose_collection", attrs: { data: { list: { ListID: "list-1" } } } });
   expectCode("business control directly under Content fails", ["--resource", writeJson("view-root-business.json", directRootBusinessControl), "--template", VIEW_TEMPLATE_ID, "--form-usage", "view"], "DATA_LIST_FORM_LAYOUT_INVENTED_ROOT_MODULE");
@@ -214,16 +217,26 @@ function workbenchResource(options = {}) {
   }
   const queueWrapper = find(resource, "main_work_queue_wrapper");
   if (queueWrapper) {
-    queueWrapper.children = [...(queueWrapper.children || []), {
-      type: "container",
-      id: "right_side_panel",
-      nv_label: "right_side_panel",
-      children: options.emptyRightPanel ? [] : [
-        { type: "container", id: "chart_cards_section", nv_label: "chart_cards_section", children: [
-          { type: "bar-chart", id: "asset_workbench_bar", nv_label: "asset_workbench_bar", dataAnalyticsTemplateId: "data_analytics_bar_chart_with_title", templateId: "data_analytics_bar_chart_with_title", runtimeModelProven: true },
-        ] },
-      ],
-    }];
+    if (options.retainTwoColumnQueue) {
+      queueWrapper.attrs = queueWrapper.attrs || {};
+      queueWrapper.attrs.columns = {
+        "1": { list: [{ value: 2.5, unit: "fr" }, { value: 1, unit: "fr" }], last: { value: 1, unit: "fr" } },
+        "2": { list: [{ value: 1, unit: "fr" }], last: { value: 1, unit: "fr" } },
+        "3": { list: [{ value: 1, unit: "fr" }], last: { value: 1, unit: "fr" } },
+      };
+    }
+    if (!options.omitRightPanel) {
+      queueWrapper.children = [...(queueWrapper.children || []), {
+        type: "container",
+        id: "right_side_panel",
+        nv_label: "right_side_panel",
+        children: options.emptyRightPanel ? [] : [
+          { type: "container", id: "chart_cards_section", nv_label: "chart_cards_section", children: [
+            { type: "bar-chart", id: "asset_workbench_bar", nv_label: "asset_workbench_bar", dataAnalyticsTemplateId: "data_analytics_bar_chart_with_title", templateId: "data_analytics_bar_chart_with_title", runtimeModelProven: true },
+          ] },
+        ],
+      }];
+    }
   }
   return resource;
 }
