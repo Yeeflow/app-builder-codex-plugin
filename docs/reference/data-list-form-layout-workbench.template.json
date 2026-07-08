@@ -71,7 +71,7 @@
     "kpi_cards_kpi_row"
   ],
   "lockedRule": "All containers and controls outside the allowed business-content containers must preserve the exported template structure, style, layout, typography, width, padding, background, gap, direction, and control types. New layout modules may only be added by copying an allowed repeatable/removable module from this template.",
-  "editableRule": "Business-specific fields, Dynamic controls, related-data regions, analytics, Collection templates, labels, descriptions, and configured actions may be inserted only inside the allowed business-content containers. The right_side_panel and chart_cards_section are optional and must be removed when they have no real business content.",
+  "editableRule": "Business-specific fields, Dynamic controls, related-data regions, analytics, Collection templates, labels, descriptions, and configured actions may be inserted only inside the allowed business-content containers. The right_side_panel and chart_cards_section are optional and must be removed when they have no real business content. When right_side_panel is removed or empty, main_work_queue_wrapper must be normalized to a single 1fr Grid column.",
   "usageRule": "Use only for Data List or Document Library View Item custom forms opened as a full page. Do not use for New Item or Edit Item forms. Hide default operation buttons must remain enabled; add explicit operation buttons only when actions are configured.",
   "templateResource": {
     "children": [

@@ -422,6 +422,28 @@ function validateWorkbenchBusinessRules(resource, context) {
       context.findings.push(error("DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_RIGHT_SIDE_PANEL", "Workbench right_side_panel is optional and must be removed when it has no real business content.", { source: context.source, path: pointerForNode(resource, panel) }));
     }
   }
+  validateWorkbenchEmptyRightColumnPruned(resource, context);
+}
+
+function validateWorkbenchEmptyRightColumnPruned(resource, context) {
+  const queueWrapper = findFirstByIdentity(resource, "main_work_queue_wrapper");
+  if (!queueWrapper) return;
+  const children = asArray(queueWrapper.children).filter(isObject);
+  const rightPanel = children.find((child) => hasIdentity(child, "right_side_panel"));
+  if (rightPanel && hasMeaningfulBusinessContent(rightPanel)) return;
+  const desktopColumns = queueWrapper?.attrs?.columns?.["1"]?.list;
+  if (Array.isArray(desktopColumns) && desktopColumns.length > 1) {
+    context.findings.push(error(
+      "DATA_LIST_FORM_LAYOUT_WORKBENCH_EMPTY_RIGHT_COLUMN_NOT_PRUNED",
+      "Workbench main_work_queue_wrapper must remove the second Grid column when no right_side_panel business content is generated.",
+      {
+        source: context.source,
+        path: pointerForNode(resource, queueWrapper),
+        columnCount: desktopColumns.length,
+        columns: queueWrapper?.attrs?.columns || null,
+      },
+    ));
+  }
 }
 
 function validateReverseRelatedCollectionSections(resource, context) {

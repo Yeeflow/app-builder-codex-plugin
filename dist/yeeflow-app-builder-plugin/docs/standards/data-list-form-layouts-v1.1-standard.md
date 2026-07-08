@@ -242,7 +242,7 @@ They may contain:
 
 They must preserve `attrs.hideop = true` so the generated full-page item details view hides default operation buttons. Any visible operation controls must be generated explicitly and must carry real Yeeflow actions. `ListModel.LayoutView.view` must point to the Workbench Type `1` layout, and `ListModel.LayoutView.opentype.view` must open it as Full page.
 
-Workbench `right_side_panel` is optional. Keep it only when it contains real business content. Workbench `chart_cards_section` is optional. Keep it only when it contains chart-like Data Analytics templates or other planned business content, and prefer creating another `chart_cards_section` when more than three chart modules are required. Pivot table modules belong in normal content-card sections, not `chart_cards_section`.
+Workbench `right_side_panel` is optional. Keep it only when it contains real business content. If `right_side_panel` is removed or has no real business content, the generated `main_work_queue_wrapper` Grid must be normalized to one `1fr` column for desktop/laptop, tablet, and mobile. Do not leave the Workbench template's empty second desktop column after pruning the right panel. Workbench `chart_cards_section` is optional. Keep it only when it contains chart-like Data Analytics templates or other planned business content, and prefer creating another `chart_cards_section` when more than three chart modules are required. Pivot table modules belong in normal content-card sections, not `chart_cards_section`.
 
 ## App Plan Requirements
 

@@ -2222,6 +2222,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
+  if (templateKind === "workbench") normalizeDataListWorkbenchMainQueueColumns(resource);
   return resource;
 }
 
@@ -5720,6 +5721,21 @@ function removeEmptyBusinessSections(root) {
     });
   };
   visit(root);
+}
+
+function normalizeDataListWorkbenchMainQueueColumns(root) {
+  const queueWrapper = findFirstByIdentity(root, "main_work_queue_wrapper");
+  if (!queueWrapper) return;
+  const children = Array.isArray(queueWrapper.children) ? queueWrapper.children.filter(isObject) : [];
+  const rightPanel = children.find((child) => hasIdentity(child, "right_side_panel"));
+  if (rightPanel && hasMeaningfulBusinessContent(rightPanel)) return;
+  queueWrapper.children = children.filter((child) => !hasIdentity(child, "right_side_panel"));
+  queueWrapper.attrs = queueWrapper.attrs || {};
+  queueWrapper.attrs.columns = {
+    "1": { list: [{ value: 1, unit: "fr" }], last: { value: 1, unit: "fr" } },
+    "2": { list: [{ value: 1, unit: "fr" }], last: { value: 1, unit: "fr" } },
+    "3": { list: [{ value: 1, unit: "fr" }], last: { value: 1, unit: "fr" } },
+  };
 }
 
 function removeEmptyDashboardBusinessSections(root) {
