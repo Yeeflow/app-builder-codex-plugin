@@ -456,7 +456,10 @@ Rules:
 - Each generated list should have meaningful default display columns.
 - Query/search fields must use fields that exist in the list.
 - `Filter Conditions` are fixed `LayoutView.filter[]` constraints and must be planned separately from interactive `Query/Search Fields` in `LayoutView.query[]`.
+- The fixed-filter column may be labeled `Filter Conditions` or `Filters`, but its contents must still be executable field-level conditions.
 - If a view's business purpose narrows the dataset, write concrete field-level filters such as `Datetime1 is not empty`, `Text3 is not empty AND Text4 is not empty`, or `Decimal1 is not empty OR Text7 is not empty`; do not leave the fixed filter blank unless the view intentionally shows all records.
+- Do not use vague fixed-filter phrases such as `All active meetings`, `lifecycle tracking`, or `active items` without naming the actual field and comparison. Convert them to concrete filters like `Meeting Status = Active` or `Meeting Date is not empty`.
+- Any view that references business columns, query/search fields, or fixed filters requires a parseable field table for that Data List. Do not rely on prose such as `Fields: ...`; without a standard field table, generation must fail instead of downgrading the list to a native `Title`-only view.
 - When business wording says `Today`, use the export-proven `now` expression in generated Data View filters; do not generate an unsupported `Today` function/token.
 - View order must be explicit.
 

@@ -14,6 +14,12 @@ Each generated App Plan data view must decide both:
 Do not satisfy a fixed filter requirement by adding only `query[]` fields.
 Do not treat App Plan Section 13 as navigation metadata only. Every planned Data View must materialize as a real `Layouts[]` record with `Type: 0`, `Title`, `Ext1.Url`, and a complete `LayoutView` object.
 
+The App Plan table may use `Filter Conditions`, `Fixed Filters`, `Filter`, `Filters`, `Data Filter`, or `Data Filters` as the fixed-filter column header. The generator must treat all of these as fixed `LayoutView.filter[]` input, not as display copy.
+
+Fixed filters must be concrete field-level conditions. Phrases such as `All active meetings`, `Meeting lifecycle`, `active records`, or `pending work` are not executable by themselves. If a business view narrows records, the plan must write explicit filters such as `Meeting Status = Active`, `Meeting Date is not empty`, or `Pack Status != Completed`. If a non-empty fixed-filter cell does not materialize at least one `LayoutView.filter[]` condition, generated-final materialization must fail instead of silently emitting `filter: []`.
+
+If a planned Data View references business columns, query/search fields, or fixed filters, the host Data List must have a parseable field table. A generated business view must not downgrade to the native `Title` field only because the field table was missing or written with unsupported headings. In that case generated-final materialization must fail with `DATA_LIST_FIELD_TABLE_REQUIRED_FOR_PLANNED_VIEW`.
+
 ## Export-Proven Basic Shape
 
 ```json
@@ -79,11 +85,13 @@ Never emit `Today`, `today()`, or `{ "func": "Today" }` in generated Data View f
 Generated-final validation must fail when:
 
 - `LayoutView.filter` is not an array.
+- a non-empty planned fixed-filter cell is present but the generated `LayoutView.filter[]` is empty.
 - A filter field does not resolve to the host list fields or a known system field.
 - A leaf condition omits `left` or `op`.
 - `pre` is not `and` or `or`.
 - `op: "7"` does not use `right: null`.
 - a filter uses an unsupported `Today` token/function instead of `now`.
+- a planned business view references non-Title columns or fixed filters while the host list has no parseable field table.
 
 Validation must not confuse `LayoutView.query[]` user filters with `LayoutView.filter[]` fixed filters.
 The regression gate must also materialize an Event Planning fixture from App Plan to generated-final `.yapk` and assert that the four planned data views appear as decoded `Type: 0` layouts with the expected filters.
