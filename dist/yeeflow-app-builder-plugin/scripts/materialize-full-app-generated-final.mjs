@@ -4505,7 +4505,7 @@ function buildDataAnalyticsRuntimeContract({ controlId, reference, listMeta, roo
   const extKey = controlType === "pivot-table" ? "PivotTable" : controlType;
   const chartType = runtimeChartTypeCode(reference);
   const rowField = runtimeFieldRef(groupingField, "row");
-  if (requiresDateTrendRow(reference, groupingField)) rowField.func = "DATE";
+  if (requiresDateTrendRow(reference, groupingField)) rowField.func = selectDateTrendRuntimeFunc({ reference, groupingField, title });
   const valueRef = {
     ...runtimeFieldRef(valueField, "value"),
     func: "COUNT",
@@ -4549,6 +4549,25 @@ function requiresDateTrendRow(reference, field) {
   const chartKind = String(reference?.semanticChartKind || reference?.controlType || "").toLowerCase();
   if (chartKind !== "line-chart" && chartKind !== "area-chart") return false;
   return isDateLikeAnalyticsField(field);
+}
+
+function selectDateTrendRuntimeFunc({ groupingField, title }) {
+  const explicit = String(
+    groupingField?.dateGrouping ||
+    groupingField?.dateGranularity ||
+    groupingField?.timeGranularity ||
+    groupingField?.grouping ||
+    groupingField?.groupBy ||
+    groupingField?.func ||
+    groupingField?.function ||
+    "",
+  ).trim().toUpperCase();
+  if (["DATE", "MONTH", "QUARTER", "YEAR"].includes(explicit)) return explicit;
+  const text = `${title || ""} ${groupingField?.displayName || groupingField?.DisplayName || ""} ${groupingField?.fieldName || groupingField?.FieldName || ""}`.toLowerCase();
+  if (/\b(monthly|month|months)\b/.test(text) || /by\s+month|per\s+month/.test(text)) return "MONTH";
+  if (/\b(quarterly|quarter|quarters)\b/.test(text) || /by\s+quarter|per\s+quarter/.test(text)) return "QUARTER";
+  if (/\b(yearly|annual|year|years)\b/.test(text) || /by\s+year|per\s+year/.test(text)) return "YEAR";
+  return "DATE";
 }
 
 function isDateLikeAnalyticsField(field) {

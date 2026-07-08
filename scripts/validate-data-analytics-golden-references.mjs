@@ -40,6 +40,7 @@ const RUNTIME_CHART_TYPE_CODE_BY_KIND = {
   "bar-chart": "2",
   "column-chart": "2",
 };
+const DATE_TREND_RUNTIME_FUNCS = new Set(["DATE", "MONTH", "QUARTER", "YEAR"]);
 const REQUIRED_GUIDANCE_KEYS = [
   "summary",
   "suitableSourceResourceTypes",
@@ -530,14 +531,30 @@ function validateRuntimeRowsAndValuesShape({ entry, reference, context, controlI
         controlId,
       }));
     }
-    if (requiresDateTrendRuntimeRow(reference) && String(row?.func || row?.function || "").toUpperCase() !== "DATE") {
-      context.findings.push(error("DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING", "Line/area trend charts must mark date grouping rows with func: DATE so Yeeflow can materialize the chart runtime model.", {
+    if (requiresDateTrendRuntimeRow(reference)) {
+      const actualFunc = String(row?.func || row?.function || "").toUpperCase();
+      if (!DATE_TREND_RUNTIME_FUNCS.has(actualFunc)) {
+        context.findings.push(error("DATA_ANALYTICS_RUNTIME_DATE_TREND_ROW_FUNC_MISSING", "Line/area trend charts over date/time fields must mark runtime rows with an export-supported date grouping func such as DATE, MONTH, QUARTER, or YEAR.", {
+          page: context.pageTitle,
+          path: `${entry.pointer}.exts.rows[${index}]`,
+          templateId: reference.templateId,
+          controlId,
+          actualFunc: row?.func || row?.function || null,
+          allowed: [...DATE_TREND_RUNTIME_FUNCS],
+        }));
+      }
+      const expectedFunc = expectedDateTrendRuntimeFunc(entry, row);
+      if (expectedFunc && DATE_TREND_RUNTIME_FUNCS.has(actualFunc) && actualFunc !== expectedFunc) {
+        context.findings.push(error("DATA_ANALYTICS_RUNTIME_DATE_TREND_GRANULARITY_MISMATCH", "Line/area trend chart date grouping func must match the declared business granularity, for example Events by Month must use func: MONTH rather than DATE.", {
         page: context.pageTitle,
         path: `${entry.pointer}.exts.rows[${index}]`,
         templateId: reference.templateId,
         controlId,
-        actualFunc: row?.func || row?.function || null,
-      }));
+          expectedFunc,
+          actualFunc,
+          businessText: dateTrendBusinessText(entry, row),
+        }));
+      }
     }
     const missingExportKeys = missingRuntimeExportKeys(row, ["id", "fieldName", "fieldType", "type", "attr"]);
     if (missingExportKeys.length) {
@@ -621,6 +638,64 @@ function expectedRuntimeChartTypeCode(reference) {
 function requiresDateTrendRuntimeRow(reference) {
   const chartKind = String(reference?.semanticChartKind || reference?.controlType || "").toLowerCase();
   return chartKind === "line-chart" || chartKind === "area-chart";
+}
+
+function expectedDateTrendRuntimeFunc(entry, row) {
+  const text = dateTrendBusinessText(entry, row).toLowerCase();
+  if (/\b(monthly|month|months)\b/.test(text) || /by\s+month|per\s+month/.test(text)) return "MONTH";
+  if (/\b(quarterly|quarter|quarters)\b/.test(text) || /by\s+quarter|per\s+quarter/.test(text)) return "QUARTER";
+  if (/\b(yearly|annual|year|years)\b/.test(text) || /by\s+year|per\s+year/.test(text)) return "YEAR";
+  if (/\b(daily|day|days)\b/.test(text) || /by\s+day|per\s+day/.test(text)) return "DATE";
+  return "";
+}
+
+function dateTrendBusinessText(entry, row) {
+  const texts = [
+    contextTextFromNode(entry?.node),
+    contextTextFromNode(row),
+  ];
+  let current = entry?.index?.entryByPointer?.get(entry?.index?.parentByPointer?.get(entry.pointer));
+  let depth = 0;
+  while (current && depth < 4) {
+    texts.push(contextTextFromNode(current.node));
+    current = current.index?.entryByPointer?.get(current.index?.parentByPointer?.get(current.pointer));
+    depth += 1;
+  }
+  return texts.filter(Boolean).join(" ");
+}
+
+function contextTextFromNode(value) {
+  if (!isObject(value)) return "";
+  const attrs = isObject(value.attrs) ? value.attrs : {};
+  const headc = isObject(attrs.headc) ? attrs.headc : {};
+  const title = isObject(headc.title) ? headc.title : {};
+  const seriesText = Array.isArray(attrs.series)
+    ? attrs.series.map((series) => [series?.name, series?.title, series?.label].filter(Boolean).join(" ")).join(" ")
+    : "";
+  const valuesText = Array.isArray(attrs.values)
+    ? attrs.values.map((item) => [item?.name, item?.title, item?.label, item?.DisplayName, item?.displayName].filter(Boolean).join(" ")).join(" ")
+    : "";
+  return [
+    value.title,
+    value.name,
+    value.label,
+    value.DisplayName,
+    value.displayName,
+    value.fieldName,
+    value.FieldName,
+    attrs.title,
+    attrs.name,
+    attrs.label,
+    attrs.placeholder,
+    attrs?.data?.title,
+    attrs?.data?.name,
+    attrs?.data?.label,
+    attrs?.model?.title,
+    attrs?.model?.name,
+    seriesText,
+    valuesText,
+    title.value,
+  ].filter((item) => item !== undefined && item !== null && typeof item !== "object").map(String).join(" ");
 }
 
 function isCountAggregate(value) {
