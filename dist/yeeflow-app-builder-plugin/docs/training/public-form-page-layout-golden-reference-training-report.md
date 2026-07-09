@@ -12,6 +12,10 @@
 
 `docs/reference/public-form-page-layout-standard.template.json`
 
+The survey-style one-column Public Form field layout template is stored at:
+
+`docs/reference/public-form-fields-1col.template.json`
+
 The exported public form `Resource` is a JSON string under `Data.Item.PublicForms[]`. The parsed resource uses `pagetype: 3`, `ver: 2`, root page attributes, `children[]`, and `tempVars`.
 
 ## Generation Contract
@@ -92,6 +96,24 @@ CTA action buttons in the title region must be inside `public_form_title_cta_are
 
 ## Shared Field Grid Templates
 
+Public Forms may use the Public Form-specific field-layout template for survey and questionnaire-style fields:
+
+- `public_form_fields_1col_v1_1`
+
+The template root is the `flex_grid` control `form_grid_fields_1col_wrapper`. It has one column on PC/laptop, tablet, and mobile, and is recommended for Public Forms with a small number of fields, long question prompts, survey questions, or questionnaire fields where readability is more important than dense two-column scanning.
+
+Hard requirements for `public_form_fields_1col_v1_1`:
+
+- place the root `form_grid_fields_1col_wrapper` only inside an approved content card's `section_content_area`;
+- preserve the root Grid attributes exactly, including `canFold`, `ver`, `columns`, `rows`, `cgap/cgapU`, and `rgap/rgapU`;
+- place every public-form list field for that section inside the root Grid;
+- each Grid cell must be a `form_grid_field_container` container;
+- each field container must contain a `form_grid_field_title` heading and a `form_grid_field_control` list-bound control;
+- every field control must set native Display title off with `displayLabel: [null, false]`;
+- every field control must set `attrs.common.margin` to `--sp--s0` on all sides.
+
+Dynamic display, custom validation, and action settings are allowed on generated Public Form controls. When multiple controls share the same dynamic display rule, group them in a container or nested grid and place the shared rule on the group instead of duplicating it on every field control.
+
 Public Forms may reuse the Data List Form field-layout templates for anonymous field-entry regions:
 
 - `data_list_form_fields_grid_v1_1`
@@ -136,7 +158,11 @@ Hard-gate examples:
 - `PUBLIC_FORM_TEMPLATE_SUBMIT_BUTTON_COUNT_INVALID`
 - `PUBLIC_FORM_TEMPLATE_SUBMIT_BUTTON_LOCATION_INVALID`
 - `PUBLIC_FORM_TEMPLATE_FIELD_CONTROL_OUTSIDE_ALLOWED_SLOT`
+- `PUBLIC_FORM_TEMPLATE_FIELD_CONTROL_OUTSIDE_FIELD_TEMPLATE`
 - `PUBLIC_FORM_TEMPLATE_CONTENT_SECTION_CHILD_INVALID`
+- `PUBLIC_FORM_FIELDS_1COL_GRID_ATTRS_MISMATCH`
+- `PUBLIC_FORM_FIELDS_1COL_CONTROL_DISPLAY_LABEL_MISMATCH`
+- `PUBLIC_FORM_FIELDS_1COL_CONTROL_MARGIN_MISMATCH`
 
 Regression coverage:
 

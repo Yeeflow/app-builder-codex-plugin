@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.9.39",
-  "description": "v0.9.39 adds Public Form golden-reference generation support. Public forms now preserve the Public Form page layout standard, validate editable slots, allow approved reuse of data_list_form_fields_grid_v1_1 and data_list_form_control_sublist_v1_1 inside public form content cards, and enforce public-form-compatible field placement across standalone YDL and full-application validation paths.",
+  "version": "0.9.40",
+  "description": "v0.9.40 adds the Public Form fields 1-column golden reference template. Survey-style public forms can now use public_form_fields_1col_v1_1 with locked one-column Grid attributes, section-content placement, hidden native field titles, zero field margins, field title/control cell structure, and source/dist public-form validation coverage.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
@@ -127,7 +127,11 @@
     "reverse-related-view-intent",
     "workbench-main-queue-columns",
     "tabulated-tracker-grid-table",
-    "stage-field-regression"
+    "stage-field-regression",
+    "public-form-fields-1col",
+    "survey-public-form",
+    "field-control-zero-margin",
+    "public-form-field-layouts"
   ],
   "skills": "./skills/",
   "interface": {

@@ -1,0 +1,685 @@
+{
+    "_ak_c": {
+        "id": "adc13611-c779-4540-979e-0c6ba375ddb8",
+        "type": "flex_grid",
+        "label": "Public form fields",
+        "attrs": {
+            "canFold": true,
+            "cgap": {
+                "1": 24
+            },
+            "cgapU": {
+                "1": "px"
+            },
+            "rgap": [
+                null,
+                24
+            ],
+            "rgapU": [
+                null,
+                "px"
+            ],
+            "ver": 1,
+            "columns": {
+                "1": {
+                    "list": [
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        }
+                    ],
+                    "last": {
+                        "value": 1,
+                        "unit": "fr"
+                    }
+                },
+                "2": {
+                    "list": [
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        }
+                    ],
+                    "last": {
+                        "value": 1,
+                        "unit": "fr"
+                    }
+                },
+                "3": {
+                    "list": [
+                        {
+                            "value": 1,
+                            "unit": "fr"
+                        }
+                    ],
+                    "last": {
+                        "value": 1,
+                        "unit": "fr"
+                    }
+                }
+            },
+            "rows": {
+                "1": {
+                    "list": [
+                        {
+                            "unit": "auto"
+                        }
+                    ],
+                    "last": {
+                        "unit": "auto"
+                    }
+                }
+            }
+        },
+        "children": [
+            {
+                "id": "5041ec13-1383-45f5-832b-a0071f85fe41",
+                "type": "container",
+                "label": "Container",
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            "--sp--s100"
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "24f2fd46-fb00-460a-9c70-38d53c4c8946",
+                        "type": "heading",
+                        "label": "Title",
+                        "displayLabel": true,
+                        "attrs": {
+                            "headc": {
+                                "title": {
+                                    "value": "1. Overall, how satisfied or dissatisfied are you with our company?",
+                                    "variable": null
+                                }
+                            },
+                            "heads": {
+                                "ty": [
+                                    null,
+                                    "base-light"
+                                ],
+                                "color": "var(--c--neutral-darker)"
+                            },
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            }
+                        },
+                        "nv_label": "form_grid_field_title"
+                    },
+                    {
+                        "id": "bdf88c55-63d6-4561-be06-7e2198b49bb6",
+                        "binding": "Text1",
+                        "type": "radio",
+                        "label": "Overall satisfaction",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "choices": [
+                                "Very satisfied",
+                                "Somewhat satisfied",
+                                "Somewhat dissatisfied",
+                                " Very dissatisfied",
+                                "Neither satisfied nor dissatisfied"
+                            ],
+                            "color_choices": [
+                                {
+                                    "value": "Very satisfied",
+                                    "key": "8806acfa-0a00-4ac3-b6d7-c8e7fe8d0b76",
+                                    "color": {
+                                        "background": "#20c933",
+                                        "color": "#ffffff"
+                                    }
+                                },
+                                {
+                                    "value": "Somewhat satisfied",
+                                    "key": "3e8c56e1-3a16-45c0-92cb-6426a2514229",
+                                    "color": {
+                                        "background": "#d1f7c4",
+                                        "color": "#3b2501"
+                                    }
+                                },
+                                {
+                                    "value": "Somewhat dissatisfied",
+                                    "key": "42c833e8-7602-4898-93e3-750332cac787",
+                                    "color": {
+                                        "background": "#ffdce5",
+                                        "color": "#3b2501"
+                                    }
+                                },
+                                {
+                                    "value": " Very dissatisfied",
+                                    "key": "d0f1188b-c502-4795-9ee9-1332543edc20",
+                                    "color": {
+                                        "background": "#f82b60",
+                                        "color": "#ffffff"
+                                    }
+                                },
+                                {
+                                    "value": "Neither satisfied nor dissatisfied",
+                                    "key": "c10e6da8-535e-4fe9-b51f-6d64c31ec23d",
+                                    "color": {
+                                        "background": "#fcb400",
+                                        "color": "#ffffff"
+                                    }
+                                }
+                            ],
+                            "ver": 1,
+                            "show_color": true,
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            }
+                        },
+                        "fieldID": "1792000971484569606",
+                        "isFilter": false,
+                        "isSort": false,
+                        "isUnique": false,
+                        "isSystem": false,
+                        "status": 1,
+                        "value": "",
+                        "nv_label": "form_grid_field_control"
+                    }
+                ],
+                "nv_label": "form_grid_field_container"
+            },
+            {
+                "id": "7f5d6144-b65f-4bd7-806b-9a0997e4245b",
+                "type": "container",
+                "label": "Container",
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            "--sp--s075"
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "470ab0d3-c2a0-4d84-87a0-49daddd7469a",
+                        "type": "heading",
+                        "label": "Title",
+                        "displayLabel": true,
+                        "attrs": {
+                            "heads": {
+                                "ty": [
+                                    null,
+                                    "base-light"
+                                ],
+                                "color": "var(--c--neutral-darker)"
+                            },
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "2. Which of the following words would you use to describe our products? Select all that apply.",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "nv_label": "form_grid_field_title"
+                    },
+                    {
+                        "id": "e66f3350-6591-47ea-aab8-be2368e81b3e",
+                        "binding": "Text2",
+                        "type": "checkbox",
+                        "label": "Describe our products",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "choices": [
+                                "Reliable",
+                                "High quality",
+                                "Useful",
+                                "Unique",
+                                "Good value for money",
+                                "Overpriced",
+                                "Impractical",
+                                "Ineffective",
+                                "Poor quality",
+                                " Unreliable"
+                            ],
+                            "color_choices": [
+                                {
+                                    "value": "Reliable",
+                                    "key": "07eabe69-f138-4055-9b7a-66b2de2071ae"
+                                },
+                                {
+                                    "value": "High quality",
+                                    "key": "773224b3-ef00-4b1e-bc6c-d9da753f7e3f"
+                                },
+                                {
+                                    "value": "Useful",
+                                    "key": "021afb5f-6b2f-48b1-8d01-50f5f6467bf5"
+                                },
+                                {
+                                    "value": "Unique",
+                                    "key": "986661b2-dfdd-4950-9818-e51f39a94a4b"
+                                },
+                                {
+                                    "value": "Good value for money",
+                                    "key": "2afd4f8c-d31c-4d8b-9444-f4e63f495703"
+                                },
+                                {
+                                    "value": "Overpriced",
+                                    "key": "65c5f3a6-d9a0-4cec-a5d7-2b48c378a134"
+                                },
+                                {
+                                    "value": "Impractical",
+                                    "key": "ebae6f53-6c4c-4fd6-9519-ec5ec791f454"
+                                },
+                                {
+                                    "value": "Ineffective",
+                                    "key": "5d900862-ef08-49b1-8095-d033915e51d1"
+                                },
+                                {
+                                    "value": "Poor quality",
+                                    "key": "ed8214c5-5c63-4e52-b388-f6ba191aae84"
+                                },
+                                {
+                                    "value": " Unreliable",
+                                    "key": "d50de434-0006-4e4a-9de9-e458a6fc12c8"
+                                }
+                            ],
+                            "ver": 1,
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            }
+                        },
+                        "fieldID": "1792000971484569607",
+                        "isFilter": false,
+                        "isSort": false,
+                        "isUnique": false,
+                        "isSystem": false,
+                        "status": 1,
+                        "nv_label": "form_grid_field_control"
+                    }
+                ],
+                "nv_label": "form_grid_field_container"
+            },
+            {
+                "id": "02fac515-edce-4212-a264-c5abdff9246a",
+                "type": "container",
+                "label": "Container",
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            "--sp--s075"
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "9ffe7c4b-3f2f-4f31-9e30-5d43a8055d2a",
+                        "type": "heading",
+                        "label": "Title",
+                        "displayLabel": true,
+                        "attrs": {
+                            "heads": {
+                                "ty": [
+                                    null,
+                                    "base-light"
+                                ],
+                                "color": "var(--c--neutral-darker)"
+                            },
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "3. How well do our products meet your needs?",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "nv_label": "form_grid_field_title"
+                    },
+                    {
+                        "id": "c79e1ab2-8f5a-439f-8cf4-25a3af21a353",
+                        "binding": "Text3",
+                        "type": "radio",
+                        "label": "products meet your needs",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "choices": [
+                                "Extremely well",
+                                "Very well",
+                                " Somewhat well",
+                                "Not so well",
+                                "Not at all well"
+                            ],
+                            "color_choices": [
+                                {
+                                    "value": "Extremely well",
+                                    "key": "50f8b40e-d5b4-4e50-bfc4-5ac7184c8a6f",
+                                    "color": {
+                                        "background": "#06a09b",
+                                        "color": "#ffffff"
+                                    }
+                                },
+                                {
+                                    "value": "Very well",
+                                    "key": "b64dde91-e90e-42b3-841b-07d6415efa0c",
+                                    "color": {
+                                        "background": "#20d9d2",
+                                        "color": "#ffffff"
+                                    }
+                                },
+                                {
+                                    "value": " Somewhat well",
+                                    "key": "c5be6d16-8fae-4eb9-b38a-005086281159",
+                                    "color": {
+                                        "background": "#ffd66e",
+                                        "color": "#3b2501"
+                                    }
+                                },
+                                {
+                                    "value": "Not so well",
+                                    "key": "56bd96c3-a6ab-47a1-ab9f-5562ee6f3b46",
+                                    "color": {
+                                        "background": "#ffa981",
+                                        "color": "#3b2501"
+                                    }
+                                },
+                                {
+                                    "value": "Not at all well",
+                                    "key": "1885f0fb-1b28-477e-9415-958e2385eaf2",
+                                    "color": {
+                                        "background": "#ff9eb7",
+                                        "color": "#3b2501"
+                                    }
+                                }
+                            ],
+                            "ver": 1,
+                            "show_color": true,
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            }
+                        },
+                        "fieldID": "1792000971484569608",
+                        "isFilter": false,
+                        "isSort": false,
+                        "isUnique": false,
+                        "isSystem": false,
+                        "status": 1,
+                        "value": "",
+                        "nv_label": "form_grid_field_control"
+                    }
+                ],
+                "nv_label": "form_grid_field_container"
+            },
+            {
+                "id": "fd316f2c-dab9-4bb3-9fa0-74b3063bd40c",
+                "type": "container",
+                "label": "Container",
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            "--sp--s075"
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "7dcc4130-47c1-43a3-ae40-24ed75bb36ad",
+                        "type": "heading",
+                        "label": "Title",
+                        "displayLabel": true,
+                        "attrs": {
+                            "heads": {
+                                "ty": [
+                                    null,
+                                    "base-light"
+                                ],
+                                "color": "var(--c--neutral-darker)"
+                            },
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "4. How would you rate the quality of the product?",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "nv_label": "form_grid_field_title"
+                    },
+                    {
+                        "id": "33e88805-6883-45ce-bdf1-150dd7af7195",
+                        "binding": "Text4",
+                        "type": "radio",
+                        "label": "Rate the quality",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "choices": [
+                                "Very high quality",
+                                "High quality",
+                                "Low quality",
+                                "Very low quality",
+                                "Neither high nor low quality"
+                            ],
+                            "color_choices": [
+                                {
+                                    "value": "Very high quality",
+                                    "key": "fa79fe1e-5d55-4194-974c-2b9dd53f2473"
+                                },
+                                {
+                                    "value": "High quality",
+                                    "key": "4b5469f3-80bd-4f47-b267-d7a6a4fd3a54"
+                                },
+                                {
+                                    "value": "Low quality",
+                                    "key": "8696f65a-e9b5-4a8f-81c1-3ab9f103087c"
+                                },
+                                {
+                                    "value": "Very low quality",
+                                    "key": "1fa911cb-f2fc-425a-9add-f1820bb3e00c"
+                                },
+                                {
+                                    "value": "Neither high nor low quality",
+                                    "key": "2b3bdda1-4e96-495a-9a52-f1c3eb650d8e"
+                                }
+                            ],
+                            "ver": 1
+                        },
+                        "fieldID": "1792000971484569609",
+                        "isFilter": false,
+                        "isSort": false,
+                        "isUnique": false,
+                        "isSystem": false,
+                        "status": 1,
+                        "value": "",
+                        "nv_label": "form_grid_field_control"
+                    }
+                ],
+                "nv_label": "form_grid_field_container"
+            },
+            {
+                "id": "bd3a6bb8-6375-4259-80b4-399f4935df15",
+                "type": "container",
+                "label": "Container",
+                "attrs": {
+                    "style": {
+                        "gap": [
+                            null,
+                            "--sp--s075"
+                        ]
+                    }
+                },
+                "children": [
+                    {
+                        "id": "de0f8e93-0ae8-4235-8cc3-9f8dce8a2d3f",
+                        "type": "heading",
+                        "label": "Title",
+                        "displayLabel": true,
+                        "attrs": {
+                            "heads": {
+                                "ty": [
+                                    null,
+                                    "base-light"
+                                ],
+                                "color": "var(--c--neutral-darker)"
+                            },
+                            "common": {
+                                "positioning": {
+                                    "widthtype": [
+                                        null,
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "headc": {
+                                "title": {
+                                    "value": "5. How would you rate the value for money of the product?",
+                                    "variable": null
+                                }
+                            }
+                        },
+                        "nv_label": "form_grid_field_title"
+                    },
+                    {
+                        "id": "3eaaf0da-b14f-45c4-a410-988cfabf2fa6",
+                        "binding": "Text5",
+                        "type": "radio",
+                        "label": "Value for money",
+                        "displayLabel": [
+                            null,
+                            false
+                        ],
+                        "attrs": {
+                            "common": {
+                                "margin": [
+                                    null,
+                                    {
+                                        "top": "--sp--s0",
+                                        "right": "--sp--s0",
+                                        "bottom": "--sp--s0",
+                                        "left": "--sp--s0"
+                                    }
+                                ]
+                            },
+                            "choices": [
+                                "Excellent",
+                                "Above average",
+                                "Average",
+                                "Below average",
+                                "Poor"
+                            ],
+                            "color_choices": [
+                                {
+                                    "value": "Excellent",
+                                    "key": "a37660bc-09a6-4594-8446-a2bd6a43f762"
+                                },
+                                {
+                                    "value": "Above average",
+                                    "key": "eb1d3530-17b4-4480-b74e-6b18d570cd94"
+                                },
+                                {
+                                    "value": "Average",
+                                    "key": "573f6753-c016-4b2f-9818-a0bef6ada3ca"
+                                },
+                                {
+                                    "value": "Below average",
+                                    "key": "0e57c6f2-bbcb-4dd7-b01f-5eabe4fd7d7f"
+                                },
+                                {
+                                    "value": "Poor",
+                                    "key": "b3512445-12ec-4f40-b0ab-6176554e5485"
+                                }
+                            ],
+                            "ver": 1
+                        },
+                        "fieldID": "1792000971484569610",
+                        "isFilter": false,
+                        "isSort": false,
+                        "isUnique": false,
+                        "isSystem": false,
+                        "status": 1,
+                        "value": "",
+                        "nv_label": "form_grid_field_control"
+                    }
+                ],
+                "nv_label": "form_grid_field_container"
+            }
+        ],
+        "displayLabel": [
+            null,
+            false,
+            false
+        ],
+        "nv_label": "form_grid_fields_1col_wrapper"
+    },
+    "_ak_c_opt": {}
+}

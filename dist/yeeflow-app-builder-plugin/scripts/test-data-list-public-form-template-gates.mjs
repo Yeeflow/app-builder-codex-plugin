@@ -19,6 +19,7 @@ const {
 const templatePath = path.join(ROOT, "docs/reference/public-form-page-layout-standard.template.json");
 const template = JSON.parse(fs.readFileSync(templatePath, "utf8"));
 const baseResource = template.resource;
+const publicFormFields1ColTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/public-form-fields-1col.template.json"), "utf8"));
 const dataListFieldGridTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/data-list-form-fields-grid.template.json"), "utf8"));
 const dataListSubListTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/data-list-form-control-sublist.template.json"), "utf8"));
 const checks = [];
@@ -60,20 +61,56 @@ expectPass("public form content card may host data_list_form_fields_grid_v1_1", 
   const sectionContent = findByLabel(resource, "section_content_area");
   sectionContent.node.children = [clone(core(dataListFieldGridTemplate))];
 }));
+expectPass("survey public form may host public_form_fields_1col_v1_1", mutate(clone(baseResource), (resource) => {
+  const sectionContent = findByLabel(resource, "section_content_area");
+  sectionContent.node.children = [clone(core(publicFormFields1ColTemplate))];
+}));
 expectPass("public form field grid may host data_list_form_control_sublist_v1_1", mutate(clone(baseResource), (resource) => {
   const sectionContent = findByLabel(resource, "section_content_area");
   const fieldGrid = clone(core(dataListFieldGridTemplate));
   fieldGrid.children = [clone(core(dataListSubListTemplate))];
   sectionContent.node.children = [fieldGrid];
 }));
+expectCode("public form direct field control outside approved field template fails", mutate(clone(baseResource), (resource) => {
+  const sectionContent = findByLabel(resource, "section_content_area");
+  sectionContent.node.children = [{
+    id: "bad-direct-public-field",
+    type: "input",
+    label: "Bad direct public field",
+    binding: "Text1",
+    attrs: {},
+  }];
+}), "PUBLIC_FORM_TEMPLATE_FIELD_CONTROL_OUTSIDE_FIELD_TEMPLATE");
 expectCode("data_list_form_fields_grid_v1_1 outside section_content_area fails", mutate(clone(baseResource), (resource) => {
   const titleHeader = findByLabel(resource, "public_form_title_header");
   titleHeader.node.children.push(clone(core(dataListFieldGridTemplate)));
 }), "PUBLIC_FORM_TEMPLATE_FIELD_CONTROL_OUTSIDE_ALLOWED_SLOT");
+expectCode("public_form_fields_1col_v1_1 root Grid attrs are locked", mutate(clone(baseResource), (resource) => {
+  const sectionContent = findByLabel(resource, "section_content_area");
+  const fieldGrid = clone(core(publicFormFields1ColTemplate));
+  fieldGrid.attrs.columns["1"].list.push({ value: 1, unit: "fr" });
+  sectionContent.node.children = [fieldGrid];
+}), "PUBLIC_FORM_FIELDS_1COL_GRID_ATTRS_MISMATCH");
+expectCode("public_form_fields_1col_v1_1 field controls must hide native title", mutate(clone(baseResource), (resource) => {
+  const sectionContent = findByLabel(resource, "section_content_area");
+  const fieldGrid = clone(core(publicFormFields1ColTemplate));
+  const control = findByLabel({ children: [fieldGrid] }, "form_grid_field_control");
+  control.node.displayLabel = [null, true];
+  sectionContent.node.children = [fieldGrid];
+}), "PUBLIC_FORM_FIELDS_1COL_CONTROL_DISPLAY_LABEL_MISMATCH");
+expectCode("public_form_fields_1col_v1_1 field controls must use zero margin", mutate(clone(baseResource), (resource) => {
+  const sectionContent = findByLabel(resource, "section_content_area");
+  const fieldGrid = clone(core(publicFormFields1ColTemplate));
+  const control = findByLabel({ children: [fieldGrid] }, "form_grid_field_control");
+  control.node.attrs.common.margin[1].top = "--sp--s100";
+  sectionContent.node.children = [fieldGrid];
+}), "PUBLIC_FORM_FIELDS_1COL_CONTROL_MARGIN_MISMATCH");
 
 expectMirror("scripts/lib/public-form-template-utils.cjs");
 expectMirror("scripts/test-data-list-public-form-template-gates.mjs");
 expectMirror("docs/reference/public-form-page-layout-standard.template.json");
+expectMirror("docs/reference/public-form-fields-1col.template.json");
+expectMirror("docs/reference/public-form-field-layout-templates.json");
 expectMirror("docs/training/public-form-page-layout-golden-reference-training-report.md");
 expectMirror("docs/studies/data-list-public-forms.md");
 expectMirror("validate-ydl-list.js");
