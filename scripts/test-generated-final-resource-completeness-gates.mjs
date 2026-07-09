@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const VALIDATOR = path.join(ROOT, "scripts", "validate-generated-final-resource-completeness.mjs");
 
-function plan({ deferred = false, dataReports = false } = {}) {
+function plan({ deferred = false, dataReports = false, missingReferencedDataList = false } = {}) {
   return `# Office Asset Loan Management - Yeeflow App Plan
 
 ## 1. Plan Status
@@ -20,6 +20,11 @@ function plan({ deferred = false, dataReports = false } = {}) {
 - Selected Yeeflow resource type: Data list
 ### 4.2 Asset Loan Records
 - Selected Yeeflow resource type: Data list
+
+| Field label | Field name | Field type | Control type | Lookup Target | Purpose |
+| --- | --- | --- | --- | --- | --- |
+| Title | Title | Text | input | | System title |
+${missingReferencedDataList ? "| Risk category | Text2 | Text | lookup | Risk Categories | Classify the loan risk category |\n" : ""}
 
 ## 5. Approval Forms Plan
 ### 5.1 Asset Loan Request
@@ -87,6 +92,7 @@ function plan({ deferred = false, dataReports = false } = {}) {
 | 1 | Requests | Asset Loan Request | Approval form | Asset Loan Request | Yes | fa-regular fa-calendar-check | Required |
 | 2 | Monitoring | Loan Operations Dashboard | Dashboard | Loan Operations Dashboard | Yes | fa-solid fa-chart-line | Required |
 | 3 | Administration | Asset Registry | Data list | Asset Registry | Yes | fa-solid fa-boxes-stacked | Required |
+${missingReferencedDataList ? "| 4 | Administration | Risk Categories | Data list | Risk Categories | Yes | fa-solid fa-triangle-exclamation | Required |\n" : ""}
 
 ## 18. Generation Contract and Hard Gates
 - Forms: [] is forbidden when approval forms are planned.
@@ -235,6 +241,12 @@ try {
   output = run(basePlan, writeFile(tempDir, "generic-nav.json", decoded({ genericNavigation: true })));
   expectFail("navigation groups planned but generic only", output.report, "GENERATED_FINAL_NAVIGATION_GENERIC_ONLY");
   results.push({ case: "fail: planned navigation groups missing", status: "pass" });
+
+  const missingReferencePlan = writeFile(tempDir, "missing-reference-plan.md", plan({ missingReferencedDataList: true }));
+  output = run(missingReferencePlan, writeFile(tempDir, "missing-reference-package.json", decoded()));
+  expectFail("navigation data-list target must be planned", output.report, "APP_PLAN_NAVIGATION_DATA_LIST_TARGET_NOT_PLANNED");
+  expectFail("lookup target must be planned", output.report, "APP_PLAN_LOOKUP_TARGET_DATA_LIST_NOT_PLANNED");
+  results.push({ case: "fail: App Plan references an unplanned lookup/navigation Data List target", status: "pass" });
 
   const reportsPlan = writeFile(tempDir, "reports-plan.md", plan({ dataReports: true }));
   output = run(reportsPlan, writeFile(tempDir, "missing-reports.json", decoded({ reports: false, dataReports: false, partialDescription: "generated-final package complete" })));

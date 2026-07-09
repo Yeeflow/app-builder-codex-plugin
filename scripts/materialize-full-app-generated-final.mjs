@@ -3032,6 +3032,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
   dataListNames.forEach((name, index) => {
     dataListByName.set(normKey(name), stringId(ids[`decoded.Childs[${index}].List.ListID`]));
   });
+  validatePlannedLookupTargetsMaterialized({ planDemand, dataListNames, dataListByName, findings });
   const fieldRecordsByName = new Map();
   dataListNames.forEach((name, index) => {
     const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
@@ -3242,6 +3243,29 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     Components: [],
     Childs: childs,
   };
+}
+
+function validatePlannedLookupTargetsMaterialized({ planDemand, dataListNames, dataListByName, findings }) {
+  const plannedListNames = new Set(dataListNames.map((name) => normKey(name)));
+  for (const listName of dataListNames) {
+    for (const field of fieldSpecsForList(planDemand, listName)) {
+      const lookupTarget = cleanResourceName(field.lookupTarget);
+      if (!lookupTarget || isNonResourceName(lookupTarget)) continue;
+      const targetKey = normKey(lookupTarget);
+      if (plannedListNames.has(targetKey) && dataListByName.has(targetKey)) continue;
+      findings.push(error(
+        "FULL_APP_MATERIALIZATION_LOOKUP_TARGET_DATA_LIST_NOT_PLANNED",
+        "A planned lookup field references a Data List that is not included in the generated Data Lists plan. Refusing to emit an empty lookup Rules payload.",
+        {
+          sourceDataList: listName,
+          fieldDisplayName: field.displayName,
+          fieldName: field.fieldName,
+          lookupTarget,
+          expectedPlanSection: "## 4. Data Lists and Document Libraries Plan",
+        },
+      ));
+    }
+  }
 }
 
 function selectDashboardPageLayoutTemplateForPage({ planDemand, pageName }) {

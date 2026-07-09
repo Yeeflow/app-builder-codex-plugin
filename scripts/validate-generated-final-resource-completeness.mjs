@@ -114,6 +114,7 @@ function parseAppPlan(file) {
     customForms: parseCustomForms(text),
     dataListWorkflows: parseTableItems(text, /^##\s+11\.\s+Data List Workflows Plan/i, "Workflow Name", "DataListWorkflows"),
     notifications: parseTableItems(text, /^##\s+12\.\s+Notifications Plan/i, "Notification Name", "Notifications"),
+    dataListFieldSpecs: parseDataListFieldSpecs(text),
     dataListViews: parseDataListViews(text),
     dashboards: parseDashboards(text),
     navigation: parseNavigation(text),
@@ -141,6 +142,53 @@ function parseDataListViews(text) {
     .flatMap((table) => table.rows.map((row) => plannedItem(row["View Name"], section, row.__index, "dataListViews", {
       host: row["Data List"] || row["List/Library"] || row.List || "",
     })));
+}
+
+function parseDataListFieldSpecs(text) {
+  const section = extractSection(text, /^##\s+4\.\s+Data Lists and Document Libraries Plan/i);
+  const byList = new Map();
+  if (!section) return [];
+  const lines = section.split(/\r?\n/);
+  let currentList = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+4\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) {
+      currentList = cleanName(heading[1]);
+      continue;
+    }
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => norm(header));
+    const listColumn = findHeaderIndex(normalizedHeaders, ["list", "data list", "data list name", "list name", "document library", "source list"]);
+    const displayColumn = findHeaderIndex(normalizedHeaders, ["field label", "display name", "field display name", "business field", "business label", "label", "name"]);
+    const typeColumn = findHeaderIndex(normalizedHeaders, ["field type", "business type", "type", "yeeflow field type", "exact yeeflow field type"]);
+    const lookupTargetColumn = findHeaderIndex(normalizedHeaders, ["lookup target", "target list", "lookup data list", "lookup list", "related list"]);
+    if (displayColumn === -1 || lookupTargetColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const listName = cleanName(cells[listColumn] || currentList);
+      const displayName = cleanName(cells[displayColumn]);
+      const fieldType = typeColumn === -1 ? "" : cleanName(cells[typeColumn]);
+      const lookupTarget = cleanName(cells[lookupTargetColumn]);
+      if (!listName || isPlaceholder(listName) || !displayName || isPlaceholder(displayName) || !lookupTarget || isPlaceholder(lookupTarget)) {
+        rowIndex += 1;
+        continue;
+      }
+      const key = norm(listName);
+      if (!byList.has(key)) byList.set(key, []);
+      byList.get(key).push({
+        listName,
+        displayName,
+        fieldType,
+        lookupTarget,
+        line: lineNumberFor(text, lines[rowIndex].trim()) || null,
+      });
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return [...byList.values()].flat();
 }
 
 function parseDataListHeadings(text) {
@@ -392,6 +440,7 @@ function collectControls(node, controls, contentNodes, pointer) {
 }
 
 function validateResourceCompleteness(plan, inventory, findings) {
+  validateAppPlanReferencedResourceCompleteness(plan, inventory, findings);
   comparePlanned(plan.dataLists, inventory.dataLists, findings, {
     code: "GENERATED_FINAL_DATA_LIST_MISSING",
     message: "App Plan declares a data list/document library that is missing from the decoded package.",
@@ -407,6 +456,61 @@ function validateResourceCompleteness(plan, inventory, findings) {
     message: "App Plan declares a form report that is missing from decoded $.FormNewReports[].",
     decodedPath: "$.FormNewReports[]",
   });
+}
+
+function validateAppPlanReferencedResourceCompleteness(plan, inventory, findings) {
+  const plannedDataLists = plan.dataLists.filter((item) => !item.deferred);
+  const generatedDataLists = inventory.dataLists;
+  const plannedDataListViews = plan.dataListViews.filter((item) => !item.deferred);
+
+  for (const group of plan.navigation.groups.filter((item) => !item.deferred)) {
+    for (const item of group.items.filter((candidate) => !candidate.deferred)) {
+      if (!isDataListNavigationItem(item)) continue;
+      const target = item.name || item.item;
+      if (isPlaceholder(target)) continue;
+      const plannedList = findByName(plannedDataLists, target);
+      const generatedList = findByName(generatedDataLists, target);
+      const plannedView = plannedDataListViews.find((view) => norm(view.name) === norm(target) || norm(view.name) === norm(item.item));
+      const plannedViewHost = plannedView ? findByName(plannedDataLists, plannedView.host) : null;
+      if (!plannedList && !generatedList && !plannedViewHost) {
+        findings.push(error("APP_PLAN_NAVIGATION_DATA_LIST_TARGET_NOT_PLANNED", "Navigation declares a data-list target that is not planned as a Data List and cannot be resolved through a planned Data List View host.", {
+          appPlanReference: ref(item),
+          plannedGroup: group.name,
+          plannedNavigationItem: item.item || item.name,
+          plannedTarget: target,
+          expectedPlanSection: "## 4. Data Lists and Document Libraries Plan",
+        }));
+      }
+    }
+  }
+
+  for (const field of plan.dataListFieldSpecs || []) {
+    const hostPlanned = findByName(plannedDataLists, field.listName);
+    if (!hostPlanned) continue;
+    if (isPlaceholder(field.lookupTarget)) continue;
+    const targetPlanned = findByName(plannedDataLists, field.lookupTarget);
+    const targetGenerated = findByName(generatedDataLists, field.lookupTarget);
+    if (!targetPlanned && !targetGenerated) {
+      findings.push(error("APP_PLAN_LOOKUP_TARGET_DATA_LIST_NOT_PLANNED", "A Data List field declares a lookup target that is not planned or generated as a Data List. Lookup targets must be first-class generated resources, not implicit placeholder names.", {
+        appPlanReference: {
+          item: `${field.listName}.${field.displayName}`,
+          category: "dataListFieldLookup",
+          line: field.line || null,
+        },
+        sourceDataList: field.listName,
+        fieldDisplayName: field.displayName,
+        lookupTarget: field.lookupTarget,
+        expectedPlanSection: "## 4. Data Lists and Document Libraries Plan",
+      }));
+    }
+  }
+}
+
+function isDataListNavigationItem(item) {
+  const type = String(item?.type || "").toLowerCase();
+  if (/external|approval|dashboard|form report|data report|agent|copilot/.test(type)) return false;
+  if (/\b(data\s*list|document\s*library)\b/.test(type)) return true;
+  return /^(list|library)$/i.test(type.trim());
 }
 
 function validateFormsCompleteness(plan, inventory, findings) {
@@ -691,6 +795,11 @@ function isTableLine(line) {
 
 function splitTableLine(line) {
   return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cleanName(cell));
+}
+
+function findHeaderIndex(normalizedHeaders, candidates) {
+  const normalizedCandidates = candidates.map((candidate) => norm(candidate));
+  return normalizedHeaders.findIndex((header) => normalizedCandidates.includes(header));
 }
 
 function uniqueByNorm(values) {
