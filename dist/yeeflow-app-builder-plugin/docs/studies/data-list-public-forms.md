@@ -4,7 +4,7 @@
 
 Source export:
 
-`<downloads>/Data Lists (4).yap`
+`/Users/Renger/Downloads/Data Lists (4).yap`
 
 Target data lists:
 
@@ -27,6 +27,65 @@ Proof boundary:
 Data List Public Forms are separate from Custom List Forms. Custom List Forms configure authenticated New/Edit/View item experiences inside the data list UI. Public Forms are anonymous/no-login collection forms intended to be shared publicly, similar in purpose to Google Forms or Microsoft Forms.
 
 Because Public Forms can be submitted without login, they use a restricted field/control palette. Generators must not reuse Custom List Form or Approval Form assumptions blindly.
+
+## Public Form Page Layout Golden Reference
+
+`Customer Satisfaction.ydl` adds the export-proven `Public form page layout standard` public form. This is the default golden reference page layout template for generated Public Forms.
+
+Template resource:
+
+`docs/reference/public-form-page-layout-standard.template.json`
+
+Generation rule:
+
+Every generated Public Form must be plan-first and must declare a page layout template selection. Use `public-form-page-layout-standard` unless the user explicitly provides and approves another Public Form page layout template. Do not hand-build a simplified public form body.
+
+Locked template contract:
+
+- `Resource.pagetype = 3`
+- `Resource.ver = 2`
+- root Content area uses full width (`attrs.container.cw = "2"`)
+- root Content padding remains zero on all sides
+- root page background remains the template background
+- `public_form_title_wrapper`, `public_form_content_section`, and `pubic_form_bottom_section` keep synchronized custom widths, defaulting to `1280px`
+- `pubic_form_submit_button` remains required and stays inside `pubic_form_bottom_section > section_content_center_area`
+
+Editable public-form regions:
+
+- `public_form_title_section`
+- `public_form_title_header`
+- `public_form_title_text`
+- `public_form_description`
+- `public_form_title_cta_area`
+- `public_form_title_cta_button_primary`
+- `public_form_title_cta_button_secondary`
+- `public_form_content_section`
+- `1_columns_section`
+- `2_columns_section`
+- `3_columns_section`
+- `2_columns_60/40_section`
+- `content_card_wrapper`
+- `content_card_60_wrapper`
+- `content_card_40_wrapper`
+- `section_title_header`
+- `section_title_text`
+- `section_title_description`
+- `Operations`
+- `section_content_area`
+- `pubic_form_bottom_section`
+- `section_content_center_area`
+- `pubic_form_submit_button`
+
+All business field controls must be placed inside `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`, specifically inside `section_content_area`. The top-level `public_form_content_section` may only contain approved section layout containers: `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`.
+
+Public Form field groups may reuse the Data List Form field-layout templates when the fields are public-form-compatible:
+
+- `data_list_form_fields_grid_v1_1`, rooted at `form_grid_fields_wrapper`
+- `data_list_form_control_sublist_v1_1`, rooted at the approved Sub List `list` control
+
+When reused in a Public Form, these templates must still be hosted inside an approved Public Form content card's `section_content_area`. Generation may remap labels, bindings, field IDs, option rules, and public-form-compatible field controls, but must keep the template grid/sub-list structure, spacing, zero-margin discipline, responsive columns, and designer labels. Do not use Data List Form grids to sneak login-dependent or public-form-unsupported fields into anonymous Public Forms.
+
+Shared validators now enforce the page layout contract for standalone `.ydl` and full `.yap/.yapk` output through `scripts/lib/public-form-template-utils.cjs`.
 
 ## Export Storage
 

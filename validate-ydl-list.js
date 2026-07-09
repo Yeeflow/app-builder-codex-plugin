@@ -9,6 +9,7 @@ const {
   validateFieldAgainstSchema,
 } = require("./yeeflow-control-field-schema-utils");
 const { validateDataViewFixedFilters } = require("./scripts/lib/data-list-view-filter-utils.cjs");
+const { validatePublicFormPageLayout } = require("./scripts/lib/public-form-template-utils.cjs");
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -1218,6 +1219,13 @@ function validatePublicForms(item, fieldByName, report) {
     }
     if (resource.tempVars !== undefined && !Array.isArray(resource.tempVars)) {
       issue(report, "warning", "PUBLIC_FORM_TEMPVARS_NOT_ARRAY", "Data List Public Form Resource.tempVars should be an array when present.", { ...context, location: `${context.location}.Resource.tempVars` });
+    }
+    for (const templateIssue of validatePublicFormPageLayout(resource, {
+      pathPrefix: `${context.location}.Resource`,
+      publicFormName: context.publicForm,
+      severity: generatorFinalSeverity(report),
+    })) {
+      issue(report, templateIssue.severity, templateIssue.code, templateIssue.message, templateIssue.details);
     }
     const seenControlIds = new Set();
     let submitControls = 0;
