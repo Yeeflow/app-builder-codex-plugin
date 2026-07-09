@@ -84,6 +84,7 @@ try {
 | Operations | Bulk reminders | Loan Requests Data List | Batch send reminders | collection_control_grid_table_with_multiselect | Multi-row selection and batch reminder |
 | Operations | Bulk card close | Loan Requests Data List | Batch close selected card records | collection_control_card_with_multiselect_toolbar | Multi-select cards with selected count and batch operation |
 | Operations | Primary work queue | Loan Requests Data List | Primary operational pipeline | Event Pipeline Grid-Table | High-fidelity work queue |
+| Operations | Document register | Audit Document Register | Dense audit document tracker | collection_control_grid_table | Customer needs tabulated tracker |
 `);
   expectPass("App Plan with approved dataset presentation references passes", ["--app-plan", validPlan]);
 

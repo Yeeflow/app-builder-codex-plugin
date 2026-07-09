@@ -48,7 +48,12 @@ function dynamicField(name, type, fieldName) {
       "obj-f": fieldName,
       field: fieldName,
       data: { field: fieldName, fieldName },
-      ...(type === "dynamic-user" ? { user: { field: fieldName, fieldName } } : {}),
+      ...(type === "dynamic-user" ? {
+        user: { field: fieldName, fieldName },
+        item_style: {
+          pd: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
+        },
+      } : {}),
     },
   };
 }

@@ -4183,7 +4183,7 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
       }
       validateWorkflowOutcomeConditionShape(shape, report, { form: formName, key, index });
       validateSequenceFlowConditionVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.conditioninfo` });
-    } else if (["MultiAssignmentTask", "CandidateTask", "ContentList", "InclusiveGateway"].includes(type)) {
+    } else if (["MultiAssignmentTask", "CandidateTask", "ContentList", "ExclusiveGateway", "InclusiveGateway", "QueryData"].includes(type)) {
       const actionName = safeString(shape.properties && (shape.properties.name || shape.properties.title || shape.properties.label)).trim();
       if (!actionName) {
         issue(report, severity, "WORKFLOW_ACTION_NAME_MISSING", "Workflow action nodes must have a concise business-specific Action name.", { form: formName, key, index, type });

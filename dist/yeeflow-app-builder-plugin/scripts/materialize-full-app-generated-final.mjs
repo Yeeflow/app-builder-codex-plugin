@@ -749,16 +749,14 @@ function collectDashboardAnalyticsRecords(planText) {
     const questionColumn = findHeaderIndex(normalizedHeaders, ["business question", "question", "title", "analytics title"]);
     const groupColumn = findHeaderIndex(normalizedHeaders, ["grouping field", "grouping/axis fields", "axis field", "category field", "row fields"]);
     const valueColumn = findHeaderIndex(normalizedHeaders, ["value field", "value/aggregate fields", "aggregate field", "measure field", "values"]);
-    if (pageColumn === -1 && !currentDashboardPage) continue;
+    const hasExplicitPageColumn = pageColumn !== -1;
+    const isGlobalSurfaceSelectionTable = !hasExplicitPageColumn && surfaceColumn !== -1 && sectionColumn !== -1;
+    if (!hasExplicitPageColumn && !currentDashboardPage && !isGlobalSurfaceSelectionTable) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
       const selectedTemplateId = extractApprovedDataAnalyticsTemplateId(lines[rowIndex]);
-      const dashboardPage = pageColumn === -1 ? currentDashboardPage : (cleanResourceName(cells[pageColumn]) || currentDashboardPage);
-      if (!dashboardPage) {
-        rowIndex += 1;
-        continue;
-      }
+      const dashboardPage = hasExplicitPageColumn ? (cleanResourceName(cells[pageColumn]) || currentDashboardPage) : (isGlobalSurfaceSelectionTable ? "" : currentDashboardPage);
       if (selectedTemplateId) {
         records.push({
           dashboardPage,
@@ -1816,6 +1814,10 @@ function normalizeApprovalWorkflowNodeType(value) {
   if (/end\s*reject|reject\s*end/.test(key)) return "EndRejectEvent";
   if (/^end/.test(key)) return "EndNoneEvent";
   if (/sequence|flow|transition/.test(key)) return "SequenceFlow";
+  if (/exclusive\s*gateway|exclusivegateway/.test(key)) return "ExclusiveGateway";
+  if (/inclusive\s*gateway|inclusivegateway/.test(key)) return "InclusiveGateway";
+  if (/query\s*data|querydata/.test(key)) return "QueryData";
+  if (/set\s*variable|setvariable|setvariabletask/.test(key)) return "SetVariableTask";
   if (/gateway|condition|branch|decision/.test(key)) return "InclusiveGateway";
   if (/content\s*list|service\s*action|serviceaction|action\s*node|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
   if (/candidate/.test(key)) return "CandidateTask";
@@ -1977,9 +1979,12 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
 }
 
 function buildDataListViewLayoutView({ fields, viewRecord = null }) {
-  const layoutFields = resolveDataViewFields(fields, viewRecord?.displayFields).slice(0, 12);
+  const layoutFields = ensureTitleFirstFields(resolveDataViewFields(fields, viewRecord?.displayFields), fields).slice(0, 12);
   const queryFields = resolveDataViewFields(fields, viewRecord?.queryFields);
-  const effectiveQueryFields = queryFields.length ? queryFields : fields;
+  const effectiveQueryFields = uniqueFieldsByName([
+    ...layoutFields,
+    ...(queryFields.length ? queryFields : fields),
+  ]);
   return {
     layout: layoutFields.map((field, fieldIndex) => buildDataViewLayoutColumn(field, fieldIndex)),
     filter: parseDataViewFixedFilterConditions(viewRecord?.filterConditions || "", fields),
@@ -1994,6 +1999,26 @@ function buildDataListViewLayoutView({ fields, viewRecord = null }) {
     sort: [],
     rowColor: [],
   };
+}
+
+function ensureTitleFirstFields(fields, allFields = fields) {
+  const titleField = fields.find((field) => field.FieldName === "Title") || allFields.find((field) => field.FieldName === "Title");
+  if (titleField) {
+    return [titleField, ...fields.filter((field) => field.FieldName !== "Title")];
+  }
+  return fields;
+}
+
+function uniqueFieldsByName(fields) {
+  const out = [];
+  const seen = new Set();
+  for (const field of fields) {
+    const fieldName = field?.FieldName;
+    if (!fieldName || seen.has(fieldName)) continue;
+    seen.add(fieldName);
+    out.push(field);
+  }
+  return out;
 }
 
 function buildDataListViewLayoutViewChecked({ fields, viewRecord = null, listName = "", findings = null }) {
@@ -2258,15 +2283,14 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   removeResidualTemplateSectionHeaders(resource);
   removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
-  if (templateKind === "workbench") normalizeDataListWorkbenchMainQueueColumns(resource);
+  if (templateKind === "workbench") normalizeWorkbenchMainQueueColumns(resource);
   return resource;
 }
 
 function appendReverseRelatedCollectionSections(resource, { planDemand, listMetaByName, hostListName, formName, rootListSetId, layoutId }) {
   const records = (planDemand.reverseRelatedRecords || []).filter((record) => {
     if (normKey(record.hostList) !== normKey(hostListName)) return false;
-    if (!record.viewItemForm) return true;
-    return normKey(record.viewItemForm) === normKey(formName);
+    return reverseRelatedRecordMatchesForm(record, { hostListName, formName });
   });
   if (!records.length) return;
   const contentRoot = findFirstByIdentity(resource, "content") || findFirstByIdentity(resource, "Content");
@@ -2289,6 +2313,30 @@ function appendReverseRelatedCollectionSections(resource, { planDemand, listMeta
       addDataListFormFilterVar(resource, section?.attrs?.reverseRelated?.searchFilterVar);
     }
   }
+}
+
+function reverseRelatedRecordMatchesForm(record, { hostListName, formName }) {
+  const planned = cleanResourceName(record?.viewItemForm);
+  if (!planned) return true;
+  if (normKey(planned) === normKey(formName)) return true;
+  const plannedText = normalizeForLooseFormMatch(planned);
+  const actualText = normalizeForLooseFormMatch(formName);
+  const hostText = normalizeForLooseFormMatch(hostListName);
+  const hostSingular = hostText.replace(/s\b/g, "");
+  const plannedMentionsHost = plannedText.includes(hostText) || (hostSingular && plannedText.includes(hostSingular));
+  const actualMentionsHost = actualText.includes(hostText) || (hostSingular && actualText.includes(hostSingular));
+  const hostTokens = hostText.split(/\s+/).filter((token) => token.length > 3);
+  const hostLastToken = hostTokens[hostTokens.length - 1] || "";
+  const hostLastSingular = hostLastToken.replace(/s$/, "");
+  const plannedMentionsHostConcept = plannedMentionsHost || (hostLastSingular && plannedText.includes(hostLastSingular));
+  const actualMentionsHostConcept = actualMentionsHost || (hostLastSingular && actualText.includes(hostLastSingular));
+  const plannedViewIntent = /\bview\b|\bworkbench\b|\bworkspace\b|\bdetails?\b/.test(plannedText);
+  const actualViewIntent = /\bview\b|\bitem\b|\bworkbench\b|\bworkspace\b|\bdetails?\b/.test(actualText);
+  return plannedMentionsHostConcept && actualMentionsHostConcept && plannedViewIntent && actualViewIntent;
+}
+
+function normalizeForLooseFormMatch(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function buildReverseRelatedCollectionSection({ record, childMeta, hostListName, formName, rootListSetId, detailLayoutId, index }) {
@@ -3074,7 +3122,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         Title: defaultPlannedView?.viewName || "Default View",
         Type: 0,
         LayoutView: JSON.stringify(buildDataListViewLayoutViewChecked({ fields, viewRecord: defaultPlannedView, listName: name, findings })),
-        Ext1: JSON.stringify({ Url: defaultPlannedView?.routeKey || "default" }),
+        Ext1: JSON.stringify({ Url: "default" }),
         IsDefault: true,
         IsItemPerm: false,
         Perms: [],
@@ -3324,6 +3372,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   const resource = buildDashboardPageLayoutShell({ name, layoutId, templateId: pageLayoutTemplateId });
   const pageLayoutDependencies = resource.__pageLayoutDependencies || {};
   const isMasterDetailWorkspace = MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS.has(pageLayoutTemplateId);
+  const isWorkbenchDashboard = pageLayoutTemplateId === "dashboard-page-layouts-workbench";
   const primaryDatasetRecord = (datasetRecords || [])[0] || null;
   const sourceResource = primaryDatasetRecord?.sourceResource || listName;
   const selectedTemplateId = primaryDatasetRecord?.selectedTemplateId || "collection_control_grid_table";
@@ -3493,6 +3542,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   resource.actions = normalizeDependencyArray(templateDependencies.actions);
   resource.formAction = normalizeDependencyArray(templateDependencies.formAction);
   removeUnresolvedPageActionControls(resource);
+  if (isMasterDetailWorkspace || isWorkbenchDashboard) normalizeWorkbenchMainQueueColumns(resource);
   resource.LayoutID = layoutId;
   resource.plannedControls = { kpis: kpiContracts.length > 0, kpiCount: kpiContracts.length, gridTable: true };
   resource.generatedFinalDashboardMaterialization = {
@@ -5796,10 +5846,10 @@ function removeEmptyBusinessSections(root) {
   visit(root);
 }
 
-function normalizeDataListWorkbenchMainQueueColumns(root) {
+function normalizeWorkbenchMainQueueColumns(root) {
   const queueWrapper = findFirstByIdentity(root, "main_work_queue_wrapper");
   if (!queueWrapper) return;
-  const children = Array.isArray(queueWrapper.children) ? queueWrapper.children.filter(isObject) : [];
+  const children = Array.isArray(queueWrapper.children) ? queueWrapper.children.filter((child) => child && typeof child === "object") : [];
   const rightPanel = children.find((child) => hasIdentity(child, "right_side_panel"));
   if (rightPanel && hasMeaningfulBusinessContent(rightPanel)) return;
   queueWrapper.children = children.filter((child) => !hasIdentity(child, "right_side_panel"));
@@ -6716,7 +6766,7 @@ function workflowLayoutForSteps(workflowSteps) {
   const columnGap = 335;
   const rowGap = 155;
   const stepPositions = workflowSteps.map((step, index) => {
-    const isAction = ["ContentList", "CandidateTask"].includes(step.nodeType);
+    const isAction = ["ContentList", "QueryData", "SetVariableTask"].includes(step.nodeType);
     return {
       x: firstStepX + index * columnGap,
       y: isAction ? actionLaneY : mainLaneY,
@@ -6727,7 +6777,7 @@ function workflowLayoutForSteps(workflowSteps) {
   const endY = mainLaneY;
   const approvalEntries = stepPositions.map((position, index) => {
     const nodeType = workflowSteps[index]?.nodeType || "";
-    const isApproval = nodeType !== "ContentList" && nodeType !== "StartNoneEvent" && nodeType !== "EndNoneEvent" && nodeType !== "EndRejectEvent" && nodeType !== "SequenceFlow";
+    const isApproval = ["MultiAssignmentTask", "CandidateTask"].includes(nodeType);
     return isApproval ? { index, position } : null;
   }).filter(Boolean);
   const approvalRows = workflowLayoutRows(approvalEntries, workflowRowToleranceY);
@@ -7203,13 +7253,16 @@ function summarizeWorkflowCondition(conditioninfo) {
 }
 
 function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSetId, dataListMetas = [], position = null }) {
-  const stencil = step.nodeType === "CandidateTask"
-    ? "CandidateTask"
-    : step.nodeType === "ContentList"
-      ? "ContentList"
-      : step.nodeType === "InclusiveGateway"
-        ? "InclusiveGateway"
-        : "MultiAssignmentTask";
+  const stencil = [
+    "CandidateTask",
+    "ContentList",
+    "ExclusiveGateway",
+    "InclusiveGateway",
+    "QueryData",
+    "SetVariableTask",
+  ].includes(step.nodeType)
+    ? step.nodeType
+    : "MultiAssignmentTask";
   const base = {
     id,
     resourceid: id,
@@ -7233,7 +7286,50 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
       plannedProofBoundary: step.proofBoundary || "",
     },
   };
-  if (stencil === "InclusiveGateway") {
+  if (stencil === "InclusiveGateway" || stencil === "ExclusiveGateway") {
+    return base;
+  }
+  if (stencil === "QueryData") {
+    const targetList = resolveContentListTargetList({ step, dataListMetas });
+    const fields = Array.isArray(targetList?.fields) ? targetList.fields.slice(0, 12) : [];
+    base.properties = {
+      ...base.properties,
+      appid: 41,
+      listsetid: stringId(rootListSetId),
+      listid: stringId(targetList?.listId || rootListSetId),
+      listtype: 1,
+      filters: [],
+      sorts: [],
+      result: {
+        type: "multiple",
+        pageIndex: 1,
+        pageSize: 1000,
+        listName: workflowVariableIdFromName(step.nodeName || `Query result ${index + 1}`),
+        listParent: "__variables_",
+        vartype: "text",
+        fields: fields.map((field) => buildWorkflowQueryDataResultField(field)),
+        totalCount: workflowVariableIdFromName(`${step.nodeName || `Query result ${index + 1}`} Count`),
+        querycount_prefix: "__variables_",
+      },
+      plannedTargetListName: targetList?.listName || "",
+    };
+    return base;
+  }
+  if (stencil === "SetVariableTask") {
+    base.properties = {
+      ...base.properties,
+      formtype: "current",
+      variablesetting: [
+        {
+          idx: workflowVariableIdFromName(`${step.nodeName || `Workflow variable ${index + 1}`} Result`),
+          id: workflowVariableIdFromName(`${step.nodeName || `Workflow variable ${index + 1}`} Result`),
+          name: `${step.nodeName || `Workflow variable ${index + 1}`} Result`,
+          type: "text",
+          editable: true,
+          value: [{ type: "str", value: "" }],
+        },
+      ],
+    };
     return base;
   }
   if (stencil === "ContentList") {
@@ -7261,6 +7357,20 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     usertaskassignment: workflowTaskAssigneesForStep(step),
   };
   return base;
+}
+
+function workflowVariableIdFromName(value) {
+  const slug = slugify(cleanResourceName(value) || "workflow-variable").replace(/-/g, "_");
+  return slug || "workflow_variable";
+}
+
+function buildWorkflowQueryDataResultField(field) {
+  return {
+    FieldID: stringId(field?.FieldID || field?.fieldId || field?.id || field?.fieldName || field?.FieldName),
+    FieldName: cleanResourceName(field?.FieldName || field?.fieldName || field?.field || "Title"),
+    DisplayName: cleanResourceName(field?.DisplayName || field?.displayName || field?.name || field?.FieldName || "Title"),
+    Type: cleanResourceName(field?.Type || field?.type || field?.FieldType || field?.fieldType || "Text"),
+  };
 }
 
 function resolveContentListTargetList({ step, dataListMetas = [] }) {

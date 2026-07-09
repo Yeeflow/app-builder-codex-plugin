@@ -248,14 +248,16 @@ function collectPlannedDataAnalyticsTemplates(planText, references) {
       sectionColumn = surfaceColumn;
     }
     const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource", "data source", "source data", "source"]);
+    const hasExplicitPageColumn = pageColumn !== -1;
+    const isGlobalSurfaceSelectionTable = !hasExplicitPageColumn && surfaceColumn !== -1 && bareSectionColumn !== -1;
     let rowIndex = index + 2;
-    if (pageColumn === -1 && !currentDashboardPage) continue;
+    if (!hasExplicitPageColumn && !currentDashboardPage && !isGlobalSurfaceSelectionTable) continue;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
       const raw = lines[rowIndex];
       const templateId = extractApprovedDataAnalyticsTemplateId(raw, references);
-      const dashboardPage = pageColumn === -1 ? currentDashboardPage : (cleanMarkdownCell(cells[pageColumn]) || currentDashboardPage);
-      if (!dashboardPage) {
+      const dashboardPage = hasExplicitPageColumn ? (cleanMarkdownCell(cells[pageColumn]) || currentDashboardPage) : (isGlobalSurfaceSelectionTable ? "" : currentDashboardPage);
+      if (!dashboardPage && !isGlobalSurfaceSelectionTable) {
         rowIndex += 1;
         continue;
       }

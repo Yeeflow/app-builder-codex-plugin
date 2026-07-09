@@ -704,7 +704,7 @@ function emptyMapping(value) {
 }
 
 function rejectCopiedMarketingTerms(value, findings, code, extra = {}) {
-  const terms = new Set(["Event", "Stage", "Region", "Registration", "Budget"]);
+  const terms = new Set(["Event", "Region", "Registration", "Budget"]);
   const hits = new Set();
   const visit = (node) => {
     if (Array.isArray(node)) return node.forEach(visit);

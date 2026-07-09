@@ -440,7 +440,7 @@ function validateOneWorkflow(resource, reference, findings) {
 
 function validateWorkflowActionNames(resource, nodes, spacing, findings) {
   const maxChars = Number(spacing.workflowActionNameMaxChars || 48);
-  const actionStencils = new Set(["MultiAssignmentTask", "CandidateTask", "ContentList", "InclusiveGateway"]);
+  const actionStencils = new Set(["MultiAssignmentTask", "CandidateTask", "ContentList", "ExclusiveGateway", "InclusiveGateway", "QueryData", "SetVariableTask"]);
   for (const node of nodes) {
     if (!actionStencils.has(node.stencil)) continue;
     const nodePath = `$.childshapes[${node.index}]`;

@@ -13,7 +13,7 @@ Use this with `workflow-action-configurations.normalized.json` when generating o
 
 ## Action Families
 
-- Supported for structural generation/validation: `StartNoneEvent`, `EndNoneEvent`, `EndRejectEvent`, `SequenceFlow`, `InclusiveGateway`, `MultiAssignmentTask`, `CandidateTask`, `MailTask`, `SetVariableTask`, `ContentList`, `QueryData`, `SignalEvent`, `ResponseTo`, `Delay`, `Loop`, `LoopBreak`, `StartWorkflowTask`.
+- Supported for structural generation/validation: `StartNoneEvent`, `EndNoneEvent`, `EndRejectEvent`, `SequenceFlow`, `ExclusiveGateway`, `InclusiveGateway`, `MultiAssignmentTask`, `CandidateTask`, `MailTask`, `SetVariableTask`, `ContentList`, `QueryData`, `SignalEvent`, `ResponseTo`, `Delay`, `Loop`, `LoopBreak`, `StartWorkflowTask`.
 - Partially supported because document/template dependencies must be resolved from real metadata: `GenerateDocument`, `ConvertToPdf`, `AddWatermark`, `DocumentRecognition`.
 - Partially supported and blocked for generated packages unless the user provides safe dependency metadata without sensitive values: `AI`, `AzureOpenAI`, `Connector`, `HttpRequest`, `AcrobatSign`, `DocuSign`, `PandaDoc`.
 
