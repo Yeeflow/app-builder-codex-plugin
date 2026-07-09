@@ -80,10 +80,15 @@ All business field controls must be placed inside `content_card_wrapper`, `conte
 
 Public Form field groups may reuse the Data List Form field-layout templates when the fields are public-form-compatible:
 
+- `public_form_fields_1col_v1_1`, rooted at `form_grid_fields_1col_wrapper`
 - `data_list_form_fields_grid_v1_1`, rooted at `form_grid_fields_wrapper`
 - `data_list_form_control_sublist_v1_1`, rooted at the approved Sub List `list` control
 
-When reused in a Public Form, these templates must still be hosted inside an approved Public Form content card's `section_content_area`. Generation may remap labels, bindings, field IDs, option rules, and public-form-compatible field controls, but must keep the template grid/sub-list structure, spacing, zero-margin discipline, responsive columns, and designer labels. Do not use Data List Form grids to sneak login-dependent or public-form-unsupported fields into anonymous Public Forms.
+`public_form_fields_1col_v1_1` is the preferred field layout for survey/questionnaire Public Forms, forms with a small number of fields, and forms with long question-style labels. It is a Public Form-specific golden reference learned from `Customer Satisfaction (1).ydl` and `form_grid_fields_1col_wrapper.json`. The root Grid has one column at every responsive breakpoint and its Grid attributes are locked.
+
+When field-layout templates are used in a Public Form, they must be hosted inside an approved Public Form content card's `section_content_area`. Generation may remap labels, bindings, field IDs, option rules, and public-form-compatible field controls, but must keep the template grid/sub-list structure, spacing, zero-margin discipline, responsive columns, and designer labels. Do not use Data List Form grids to sneak login-dependent or public-form-unsupported fields into anonymous Public Forms.
+
+For `public_form_fields_1col_v1_1`, every field cell must be a `form_grid_field_container` containing `form_grid_field_title` and `form_grid_field_control`. The field control's native Display title must be off (`displayLabel: [null, false]`) because the separate title heading carries the prompt/description, and the field control margin must be set to `--sp--s0` on all sides to remove the default Public Form field margin. Dynamic display, custom validation, and control actions may be used; if multiple fields share the same display rule, place them in a shared container or nested grid and put the dynamic display rule on that group.
 
 Shared validators now enforce the page layout contract for standalone `.ydl` and full `.yap/.yapk` output through `scripts/lib/public-form-template-utils.cjs`.
 

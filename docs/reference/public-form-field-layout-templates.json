@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "templates": [
+    {
+      "templateId": "public_form_fields_1col_v1_1",
+      "templateName": "Public Form Fields 1 Column",
+      "rootNvLabel": "form_grid_fields_1col_wrapper",
+      "rootType": "flex_grid",
+      "source": "docs/reference/public-form-fields-1col.template.json",
+      "recommendedUse": [
+        "survey public forms",
+        "questionnaire public forms",
+        "forms with a small number of fields",
+        "forms with long field prompts"
+      ],
+      "allowedHost": "public-form-page-layout-standard > content_card_wrapper/content_card_60_wrapper/content_card_40_wrapper > section_content_area",
+      "lockedRules": [
+        "root Grid attributes must match the template exactly",
+        "all generated list fields for the section must be inside the root Grid",
+        "each cell must be form_grid_field_container",
+        "each field cell must contain form_grid_field_title and form_grid_field_control",
+        "field controls must hide native Display title",
+        "field controls must use zero margin on all sides"
+      ]
+    },
+    {
+      "templateId": "data_list_form_fields_grid_v1_1",
+      "templateName": "Data List Form Fields Grid v1.1",
+      "rootNvLabel": "form_grid_fields_wrapper",
+      "rootType": "flex_grid",
+      "source": "docs/reference/data-list-form-fields-grid.template.json",
+      "recommendedUse": [
+        "dense public forms with shorter labels",
+        "business intake forms where multi-column scanning is preferable"
+      ],
+      "allowedHost": "public-form-page-layout-standard > content_card_wrapper/content_card_60_wrapper/content_card_40_wrapper > section_content_area"
+    },
+    {
+      "templateId": "data_list_form_control_sublist_v1_1",
+      "templateName": "Data List Form Control Sub List v1.1",
+      "rootNvLabel": "form_grid_field_control",
+      "rootType": "list",
+      "source": "docs/reference/data-list-form-control-sublist.template.json",
+      "recommendedUse": [
+        "public form sub-list fields when the field type is public-form-compatible and explicitly planned"
+      ],
+      "allowedHost": "inside an approved field grid template under public-form-page-layout-standard"
+    }
+  ]
+}

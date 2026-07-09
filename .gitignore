@@ -102,6 +102,8 @@ yeeflow-data-list-generator/
 !doc-library-control-reference.normalized.json
 !yeeflow-expression-functions.normalized.json
 !yeeflow-expression-function-knowledge-base.normalized.json
+!docs/reference/public-form-field-layout-templates.json
+!docs/reference/public-form-fields-1col.template.json
 !docs/reference/service-portal-yapk-example.normalized.json
 !yeeflow-expression-operators.normalized.json
 !dashboard-dataset-presentation-golden-references.json
