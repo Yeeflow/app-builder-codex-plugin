@@ -657,8 +657,14 @@ function normalizeWorkflowNodeType(value) {
   if (/end\s*reject|reject\s*end/.test(key)) return "EndRejectEvent";
   if (/^end/.test(key)) return "EndNoneEvent";
   if (/sequence|flow|transition/.test(key)) return "SequenceFlow";
+  if (/exclusive\s*gateway|exclusivegateway/.test(key)) return "ExclusiveGateway";
+  if (/inclusive\s*gateway|inclusivegateway/.test(key)) return "InclusiveGateway";
+  if (/query\s*data|querydata/.test(key)) return "QueryData";
+  if (/set\s*variable|setvariable|setvariabletask/.test(key)) return "SetVariableTask";
+  if (/query\s*data.*set\s*variable|set\s*variable.*query\s*data/.test(key)) return "QueryData";
   if (/content\s*list|service\s*action|serviceaction|action\s*node|create|update|archive|persist|master/.test(key) || text === "ContentList") return "ContentList";
   if (/candidate/.test(key)) return "CandidateTask";
+  if (/gateway|condition|branch|decision/.test(key)) return "InclusiveGateway";
   if (/assignment|approval|review|task|multi/.test(key) || text === "MultiAssignmentTask" || text === "AssignmentTask") return "MultiAssignmentTask";
   return text.replace(/[^A-Za-z0-9_]/g, "") || "MultiAssignmentTask";
 }

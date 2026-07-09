@@ -729,7 +729,7 @@ function lineMatchesReferenceGuidance(line, templateId, reference) {
   const fallbackSignals = {
     collection_control_responsive_card_grid: ["card", "browse", "overview", "portfolio", "asset cards", "ticket cards", "request cards", "visual", "display first"],
     collection_control_card_with_multiselect_toolbar: ["card", "multi-select", "multiselect", "bulk", "batch", "selected"],
-    collection_control_grid_table: ["dense", "row", "column", "work queue", "task list", "record list", "operational table", "scan"],
+    collection_control_grid_table: ["dense", "row", "column", "work queue", "task list", "record list", "operational table", "scan", "tabulated", "tabular", "table tracker", "tabulated tracker", "tracker table", "spreadsheet-like"],
     collection_control_grid_table_with_multiselect: ["multi-row", "multi row", "checkbox", "bulk", "batch", "selected count", "selection"],
     "Event Pipeline Grid-Table": ["primary", "high-fidelity", "pipeline", "portfolio", "work queue", "health", "status", "progress"],
   };

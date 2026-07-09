@@ -1,11 +1,11 @@
 {
   "schema_version": "2026-05-13.workflow-action-configurations.v1",
   "source": {
-    "path": "<downloads>/node-configurations.json",
+    "path": "/Users/Renger/Downloads/node-configurations.json",
     "note": "Read-only source supplied by user; normalized locally for generator validation."
   },
   "generated_at": "2026-05-13T12:37:24.280Z",
-  "action_count": 28,
+  "action_count": 29,
   "action_types": [
     "AI",
     "AcrobatSign",
@@ -20,6 +20,7 @@
     "DocumentRecognition",
     "EndNoneEvent",
     "EndRejectEvent",
+    "ExclusiveGateway",
     "GenerateDocument",
     "HttpRequest",
     "InclusiveGateway",
@@ -2957,6 +2958,47 @@
       "id": "config_InclusiveGateway",
       "control_types": [
         "InclusiveGateway"
+      ],
+      "createdAt": 1766491500,
+      "required_properties": [
+        "properties.name"
+      ],
+      "optional_properties": [
+        "properties.documentation"
+      ],
+      "enum_properties": [],
+      "conditional_properties": [],
+      "nested_schema_properties": [],
+      "risk": "standard",
+      "properties": [
+        {
+          "index": 0,
+          "path": "properties.name",
+          "allowDevice": null,
+          "valueType": "string",
+          "required": true,
+          "enumValues": [],
+          "description": "Node Name",
+          "nestedSchema": null,
+          "appliesWhen": []
+        },
+        {
+          "index": 1,
+          "path": "properties.documentation",
+          "allowDevice": null,
+          "valueType": "string",
+          "required": false,
+          "enumValues": [],
+          "description": "Node description",
+          "nestedSchema": null,
+          "appliesWhen": []
+        }
+      ]
+    },
+    "ExclusiveGateway": {
+      "id": "config_ExclusiveGateway",
+      "control_types": [
+        "ExclusiveGateway"
       ],
       "createdAt": 1766491500,
       "required_properties": [

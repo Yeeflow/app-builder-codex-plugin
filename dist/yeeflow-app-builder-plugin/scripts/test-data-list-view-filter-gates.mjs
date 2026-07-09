@@ -69,6 +69,7 @@ assert.equal(filterExpressionUsesToday([{ type: "func", func: "Today", params: [
 
 expectEventPlanningMaterialization();
 expectCorporateSecretarialExplicitFilterMaterialization();
+expectDefaultViewPrependsNativeTitle();
 expectVagueBusinessFilterMaterializationFailure();
 expectPlannedViewRequiresFieldTableFailure();
 
@@ -158,10 +159,14 @@ Event Planning app.
   const decoded = decodeYapkResource(wrapper);
   const child = decoded.Childs?.[0];
   assert.ok(child, "materialized Event Planning package should include the Event Planning data list");
+  const defaultLayout = child.Layouts.find((layout) => layout.Type === 0 && layout.IsDefault === true);
+  assert.ok(defaultLayout, "App Plan data views should include one default Type 0 layout");
+  assert.deepEqual(JSON.parse(defaultLayout.Ext1), { Url: "default" }, "Default data-list view must keep export-safe Ext1.Url=default");
   const views = new Map(child.Layouts.filter((layout) => layout.Type === 0).map((layout) => [layout.Title, JSON.parse(layout.LayoutView)]));
   assert.equal(views.size, 4, "App Plan data views should materialize as four Type 0 layouts");
   assert.deepEqual(views.get("All Events").filter, [], "All Events should remain unfiltered");
   assert.deepEqual(views.get("All Events").layout.map((field) => field.FieldName), ["Title", "Datetime1", "Text4"]);
+  assertVisibleFieldsInQuery("All Events", views.get("All Events"));
   assert.deepEqual(views.get("Schedule Overview").filter.map((condition) => ({ left: condition.left, op: condition.op, right: condition.right })), [
     { left: "Datetime1", op: "7", right: null },
     { left: "Datetime1", op: "3", right: [{ type: "func", func: "now", params: [] }] },
@@ -273,15 +278,77 @@ Corporate secretarial application.
   const decoded = decodeYapkResource(JSON.parse(fs.readFileSync(path.join(outDir, packageName), "utf8")));
   const child = decoded.Childs?.find((item) => item.List?.Title === "Board Committee Meetings");
   assert.ok(child, "Board Committee Meetings data list should materialize");
+  const defaultLayout = child.Layouts.find((layout) => layout.Type === 0 && layout.IsDefault === true);
+  assert.ok(defaultLayout, "Board Committee Meetings should include a default Type 0 layout");
+  assert.deepEqual(JSON.parse(defaultLayout.Ext1), { Url: "default" }, "Default data-list view must keep Ext1.Url=default");
   const tracker = child.Layouts.find((layout) => layout.Title === "Meeting Tracker");
   assert.ok(tracker, "Meeting Tracker view should materialize");
   const layoutView = JSON.parse(tracker.LayoutView);
   assert.deepEqual(layoutView.layout.map((field) => field.FieldName), ["Title", "Text1", "Text2", "Datetime1", "Text3", "Text4", "Text5"]);
+  assertVisibleFieldsInQuery("Meeting Tracker", layoutView);
   assert.deepEqual(layoutView.filter.map((condition) => ({ pre: condition.pre, left: condition.left, op: condition.op, right: condition.right })), [
     { pre: "and", left: "Datetime1", op: "7", right: null },
     { pre: "and", left: "Text5", op: "1", right: "Closed" },
   ]);
   results.push({ name: "Corporate Secretarial Meeting Tracker materializes explicit fixed filters", status: "pass" });
+}
+
+function assertVisibleFieldsInQuery(viewName, layoutView) {
+  const queryFields = new Set((layoutView.query || []).map((field) => field.field || field.Field || field.FieldName));
+  for (const field of layoutView.layout || []) {
+    assert.ok(queryFields.has(field.FieldName), `${viewName} query must include visible field ${field.FieldName}`);
+  }
+  for (const systemField of ["Title", "ListDataID", "CreatedBy", "ModifiedBy", "Created", "Modified"]) {
+    assert.ok(queryFields.has(systemField), `${viewName} query must include system field ${systemField}`);
+  }
+}
+
+function expectDefaultViewPrependsNativeTitle() {
+  const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), "yeeflow-dataview-default-title-"));
+  const specPath = path.join(tmpdir, "functional-specification.md");
+  const planPath = path.join(tmpdir, "yeeflow-app-plan.md");
+  const outDir = path.join(tmpdir, "dist");
+  fs.writeFileSync(specPath, "# Functional Specification\n\nBuild an audit register application.\n", "utf8");
+  fs.writeFileSync(planPath, `# Audit Register - Yeeflow App Plan
+
+## 4. Data Lists and Document Libraries Plan
+| List Name | Purpose |
+| --- | --- |
+| Audit Register | Store audit records. |
+
+### 4.1 Audit Register
+| Field label | Field name | Field type | Control type | Purpose |
+| --- | --- | --- | --- | --- |
+| Audit Title | Title | Text | input | Native title |
+| Audit Stage | Text1 | Text | select | choices: Planning, Fieldwork, Report |
+| Owner | Text2 | Text | identity-picker | Owner |
+
+## 13. Data List Views Plan
+| View Name | Data List | URL / Route Key | Display Fields | Query/Search Fields | Filters | Default |
+| --- | --- | --- | --- | --- | --- | --- |
+| Stage Tracker | Audit Register | stage-tracker | Audit Stage, Owner | Audit Stage | No fixed filter | Yes |
+`, "utf8");
+
+  execFileSync(process.execPath, [
+    path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs"),
+    "--functional-spec", specPath,
+    "--app-plan", planPath,
+    "--out-dir", outDir,
+    "--allow-fixture-api-ids-for-tests",
+    "--json",
+  ], { cwd: ROOT, stdio: "ignore" });
+
+  const packageName = fs.readdirSync(outDir).find((name) => name.endsWith(".yapk"));
+  assert.ok(packageName, "materializer should produce an audit register fixture package");
+  const decoded = decodeYapkResource(JSON.parse(fs.readFileSync(path.join(outDir, packageName), "utf8")));
+  const child = decoded.Childs?.find((item) => item.List?.Title === "Audit Register");
+  const defaultLayout = child?.Layouts?.find((layout) => layout.Type === 0 && layout.IsDefault === true);
+  assert.ok(defaultLayout, "Audit Register should include a default Type 0 layout");
+  assert.deepEqual(JSON.parse(defaultLayout.Ext1), { Url: "default" });
+  const layoutView = JSON.parse(defaultLayout.LayoutView);
+  assert.equal(layoutView.layout[0]?.FieldName, "Title", "Default view must prepend native Title even when the plan omits it from display fields");
+  assertVisibleFieldsInQuery("Stage Tracker", layoutView);
+  results.push({ name: "Default data-list view prepends native Title and query coverage", status: "pass" });
 }
 
 function expectPlannedViewRequiresFieldTableFailure() {
