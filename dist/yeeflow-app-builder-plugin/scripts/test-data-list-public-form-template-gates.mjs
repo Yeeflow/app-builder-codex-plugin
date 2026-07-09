@@ -23,6 +23,22 @@ const publicFormFields1ColTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, 
 const dataListFieldGridTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/data-list-form-fields-grid.template.json"), "utf8"));
 const dataListSubListTemplate = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/data-list-form-control-sublist.template.json"), "utf8"));
 const checks = [];
+const publicFormDisallowedControlTypes = new Set([
+  "identity-picker",
+  "organization-picker",
+  "department",
+  "metadata",
+  "mutiple-metadata",
+  "multiple-metadata",
+  "tag",
+  "location-picker",
+  "cost-center-picker",
+  "lookup",
+  "user",
+  "groupselect",
+  "location",
+  "costcenter",
+]);
 
 expectPass("exported public form page layout standard passes", clone(baseResource));
 expectCode("missing public submit button fails", mutate(clone(baseResource), (resource) => {
@@ -57,18 +73,18 @@ expectCode("public form content section cannot receive arbitrary direct children
     children: [],
   });
 }), "PUBLIC_FORM_TEMPLATE_CONTENT_SECTION_CHILD_INVALID");
-expectPass("public form content card may host data_list_form_fields_grid_v1_1", mutate(clone(baseResource), (resource) => {
+expectPass("public form content card may host public-compatible data_list_form_fields_grid_v1_1", mutate(clone(baseResource), (resource) => {
   const sectionContent = findByLabel(resource, "section_content_area");
-  sectionContent.node.children = [clone(core(dataListFieldGridTemplate))];
+  sectionContent.node.children = [makePublicSafeFieldGrid()];
 }));
 expectPass("survey public form may host public_form_fields_1col_v1_1", mutate(clone(baseResource), (resource) => {
   const sectionContent = findByLabel(resource, "section_content_area");
   sectionContent.node.children = [clone(core(publicFormFields1ColTemplate))];
 }));
-expectPass("public form field grid may host data_list_form_control_sublist_v1_1", mutate(clone(baseResource), (resource) => {
+expectPass("public form field grid may host public-compatible data_list_form_control_sublist_v1_1", mutate(clone(baseResource), (resource) => {
   const sectionContent = findByLabel(resource, "section_content_area");
-  const fieldGrid = clone(core(dataListFieldGridTemplate));
-  fieldGrid.children = [clone(core(dataListSubListTemplate))];
+  const fieldGrid = makePublicSafeFieldGrid();
+  fieldGrid.children = [makePublicSafeSubList()];
   sectionContent.node.children = [fieldGrid];
 }));
 expectCode("public form direct field control outside approved field template fails", mutate(clone(baseResource), (resource) => {
@@ -105,6 +121,33 @@ expectCode("public_form_fields_1col_v1_1 field controls must use zero margin", m
   control.node.attrs.common.margin[1].top = "--sp--s100";
   sectionContent.node.children = [fieldGrid];
 }), "PUBLIC_FORM_FIELDS_1COL_CONTROL_MARGIN_MISMATCH");
+expectCode("public form cannot include lookup field controls", mutate(clone(baseResource), (resource) => {
+  const sectionContent = findByLabel(resource, "section_content_area");
+  const fieldGrid = clone(core(publicFormFields1ColTemplate));
+  const control = findByLabel({ children: [fieldGrid] }, "form_grid_field_control");
+  control.node.type = "lookup";
+  control.node.binding = "Text7";
+  sectionContent.node.children = [fieldGrid];
+}), "PUBLIC_FORM_FIELD_CONTROL_TYPE_NOT_ALLOWED");
+expectCode("public form cannot include data filter controls", mutate(clone(baseResource), (resource) => {
+  const sectionContent = findByLabel(resource, "section_content_area");
+  sectionContent.node.children = [{
+    id: "bad-public-filter",
+    type: "search-filter",
+    label: "Search filter",
+    attrs: {},
+  }];
+}), "PUBLIC_FORM_CONTROL_TYPE_NOT_ALLOWED");
+expectCode("public form cannot include collection controls", mutate(clone(baseResource), (resource) => {
+  const sectionContent = findByLabel(resource, "section_content_area");
+  sectionContent.node.children = [{
+    id: "bad-public-collection",
+    type: "collection",
+    label: "Collection",
+    attrs: {},
+    children: [],
+  }];
+}), "PUBLIC_FORM_CONTROL_TYPE_NOT_ALLOWED");
 
 expectMirror("scripts/lib/public-form-template-utils.cjs");
 expectMirror("scripts/test-data-list-public-form-template-gates.mjs");
@@ -153,6 +196,30 @@ function expectCode(label, resource, code) {
 
 function core(node) {
   return node && node._ak_c ? node._ak_c : node;
+}
+
+function makePublicSafeFieldGrid() {
+  const fieldGrid = clone(core(dataListFieldGridTemplate));
+  sanitizePublicSafeControls(fieldGrid);
+  return fieldGrid;
+}
+
+function makePublicSafeSubList() {
+  const subList = clone(core(dataListSubListTemplate));
+  sanitizePublicSafeControls(subList);
+  return subList;
+}
+
+function sanitizePublicSafeControls(node) {
+  const c = core(node);
+  if (!c || typeof c !== "object") return;
+  if (publicFormDisallowedControlTypes.has(c.type)) {
+    c.type = "input";
+    c.binding = c.binding || "Text1";
+    c.fieldID = c.fieldID || "public_safe_text_field";
+    c.label = `${c.label || "Field"} public safe text`;
+  }
+  for (const child of childrenOf(c)) sanitizePublicSafeControls(child);
 }
 
 function labelOf(node) {

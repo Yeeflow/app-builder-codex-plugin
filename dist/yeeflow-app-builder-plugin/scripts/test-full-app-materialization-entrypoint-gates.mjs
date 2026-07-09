@@ -400,6 +400,7 @@ try {
   assert.equal(resourceGenerationReport.outputs.seedData.path.endsWith(".generated-final.seed-data.json"), true, "generation report exposes seed-data companion artifact");
   assert.deepEqual(resourceGenerationReport.plannedResourceDemand.counts, {
     dataLists: 4,
+    documentLibraries: 0,
     approvalForms: 2,
     formReports: 1,
     customForms: 8,

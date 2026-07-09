@@ -94,6 +94,30 @@ The submit button is required for anonymous collection and must remain:
 
 CTA action buttons in the title region must be inside `public_form_title_cta_area`.
 
+## Anonymous Public Form Control Restrictions
+
+Public Forms are anonymous submission forms. They must not include fields or controls that require a signed-in Yeeflow user, tenant/org context, related-record selection, authenticated data browsing, or dashboard-style filtering.
+
+Disallowed Data List field families on Public Forms:
+
+- User (`identity-picker`, `user`)
+- Department (`organization-picker`, `groupselect`, `department`)
+- Metadata (`metadata`)
+- Tag (`tag`)
+- Multi Meta (`mutiple-metadata`, `multiple-metadata`)
+- Location (`location-picker`, `location`)
+- Cost center (`cost-center-picker`, `costcenter`)
+- Lookup (`lookup`)
+
+Disallowed Public Form controls:
+
+- Data filter controls, including `search-filter`, `select-filter`, `date-filter`, `number-filter`, `user-filter`, and `data-filter`
+- Collection/Data table/Data list controls
+- Pivot Table, Chart/Data Analytics, and Summary/KPI controls
+- Dynamic record display controls such as `dynamic-field`, `dynamic-user`, `dynamic-image`, and `dynamic-file`
+
+Planning rule: if the source Data List contains any unsupported field family, the App Plan or standalone Data List artifact plan must explicitly omit it from the Public Form and explain that the field remains available only on authenticated Data List custom forms or internal views.
+
 ## Shared Field Grid Templates
 
 Public Forms may use the Public Form-specific field-layout template for survey and questionnaire-style fields:
@@ -163,6 +187,8 @@ Hard-gate examples:
 - `PUBLIC_FORM_FIELDS_1COL_GRID_ATTRS_MISMATCH`
 - `PUBLIC_FORM_FIELDS_1COL_CONTROL_DISPLAY_LABEL_MISMATCH`
 - `PUBLIC_FORM_FIELDS_1COL_CONTROL_MARGIN_MISMATCH`
+- `PUBLIC_FORM_FIELD_CONTROL_TYPE_NOT_ALLOWED`
+- `PUBLIC_FORM_CONTROL_TYPE_NOT_ALLOWED`
 
 Regression coverage:
 

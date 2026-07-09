@@ -12,6 +12,8 @@ Dashboard control study update: `Enterprise Document Center Folders Runtime.yap`
 
 - Treat Document Library as a first-class app child resource.
 - Generate it with `ListModel.Type = 16`.
+- Full-app materialization must preserve the App Plan resource type. A row, heading, or navigation item planned as `Document Library` must create a Type `16` child resource; it must not be downgraded to a Type `1` Data List with `file-upload` fields.
+- If the business needs both a document index/register and real file storage, generate two resources: a Type `1` Data List for the register/workflow metadata and a Type `16` Document Library for the native documents.
 - Keep the same child-resource envelope used by data lists: `ListModel`, `Defs`, `Layouts`, `ListDatas`, `FlowMappings`, `PublicForms`, and `RemindRules`.
 - Link it into root app navigation with `Type = 16` for mixed/richer apps. For document-library-only packages that intentionally mirror `Document Library Sample.yap`, root `LayoutView = {"sortVer":1}` and `Item.Layouts = []` are export-proven and should validate with warnings.
 - Use `CustomType = "ListSite_<root app list id>"` for app-owned libraries.
@@ -67,6 +69,8 @@ The runtime-proven minimal `New Document Library` baseline has one `New file` up
 ## Validator Rules
 
 - Recognize `ListModel.Type = 16` as document library.
+- Plan-to-package conformance must fail if any App Plan `Document Library` resource is missing from `Childs[]` as Type `16`, or if its navigation item is generated as Type `1`.
+- Plan-to-package conformance must fail if the only generated representation of a planned Document Library is a Type `1` Data List with upload fields.
 - Warn on missing or unusual document-library default fields.
 - Warn when `Text4` is not a `file-upload` field with library upload rules.
 - Warn when `Bigint1` / ParentID is missing.

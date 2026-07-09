@@ -518,6 +518,7 @@ For app-contained AI Agent/Copilot Access application resources tools, generate 
 Use these only after the document-library study docs and validators are present in the active workspace. `Projects Center.yap` proved that Yeeflow Document Library is a first-class app child resource, similar to a data list but not identical.
 
 - Generate document libraries with `ListModel.Type = 16`.
+- Preserve the App Plan resource type through full-app materialization. A planned `Document Library` row or navigation target must generate a Type `16` child resource and Type `16` navigation item; never downgrade it to a Type `1` Data List with file-upload fields. If the business needs both metadata tracking and native document storage, generate a Type `1` register Data List plus a separate Type `16` Document Library.
 - Keep the normal child-resource envelope: `ListModel`, `Defs`, `Layouts`, `ListDatas`, `FlowMappings`, `PublicForms`, and `RemindRules`.
 - Link the library from root app navigation with `Type = 16` for mixed/richer apps. The focused `Document Library Sample.yap` proves document-library-only apps may omit root pages and navigation, using root `LayoutView = {"sortVer":1}`.
 - Set top-level wrapper `Resource.SimplePortal = null` for generated document-library `.yap` packages. Both known-good document-library exports use `null`; generated `[]` wrappers failed at Yeeflow create.
