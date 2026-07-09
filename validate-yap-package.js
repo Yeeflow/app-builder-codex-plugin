@@ -17,7 +17,13 @@ const {
   validateWorkflowConditionEditorRows,
 } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
 const { validateDataViewFixedFilters } = require("./scripts/lib/data-list-view-filter-utils.cjs");
-const { validatePublicFormPageLayout } = require("./scripts/lib/public-form-template-utils.cjs");
+const {
+  PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES,
+  PUBLIC_FORM_ALLOWED_VISUAL_CONTROL_TYPES,
+  PUBLIC_FORM_DISALLOWED_CONTROL_TYPES,
+  PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES,
+  validatePublicFormPageLayout,
+} = require("./scripts/lib/public-form-template-utils.cjs");
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -148,35 +154,10 @@ const CUSTOM_FORM_OPEN_MODE_LABELS = {
   fullPage: "Full page",
 };
 const CUSTOM_FORM_SIZE_LABELS = new Map([[0, "Medium"], [1, "Small"], [2, "Large"], [3, "Full screen"]]);
-const PUBLIC_FORM_ALLOWED_FIELD_TYPES = new Set([
-  "input",
-  "textarea",
-  "richtext",
-  "input_number",
-  "percent",
-  "currency",
-  "switch",
-  "radio",
-  "checkbox",
-  "datepicker",
-  "time",
-  "file-upload",
-  "icon-upload",
-  "rate",
-  "hyperlink",
-  "signer",
-  "list",
-]);
+const PUBLIC_FORM_ALLOWED_FIELD_TYPES = PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES;
 const PUBLIC_FORM_DISALLOWED_FIELD_TYPES = new Set([
-  "identity-picker",
-  "organization-picker",
-  "location-picker",
-  "lookup",
+  ...PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES,
   "calculated-column",
-  "metadata",
-  "mutiple-metadata",
-  "cost-center-picker",
-  "tag",
   "autonumber",
 ]);
 const PUBLIC_FORM_DISALLOWED_SYSTEM_FIELDS = new Set([
@@ -190,27 +171,7 @@ const PUBLIC_FORM_DISALLOWED_SYSTEM_FIELDS = new Set([
   "ModifiedBy",
   "ModifiedByName",
 ]);
-const PUBLIC_FORM_KNOWN_CONTROL_TYPES = new Set([
-  "container",
-  "list",
-  "flex_grid",
-  "action_button",
-  "submit-button",
-  ...PUBLIC_FORM_ALLOWED_FIELD_TYPES,
-  "text",
-  "number",
-  "boolean",
-  "date",
-  "file",
-  "metadata",
-  "user",
-  "costcenter",
-  "groupselect",
-  "location",
-  "lookup",
-  "img",
-  "total",
-]);
+const PUBLIC_FORM_KNOWN_CONTROL_TYPES = PUBLIC_FORM_ALLOWED_VISUAL_CONTROL_TYPES;
 const ADVANCED_CONTROL_TYPES = new Set(["aktabs", "toggle", "timer", "icon_list", "line", "alert", "progress", "gap", "progress-circle", "steps-bar", "list-qrcode", "qrcode", "barcode", "embed", "document-embed"]);
 const ADVANCED_CONTAINER_CHILD_TYPES = new Map([["aktabs", "ak-tabs-tab"], ["toggle", "toggle-panel"]]);
 const ADVANCED_NUMERIC_FIELD_TYPES = new Set(["input_number", "currency", "percent", "rate", "calculated-column", "Decimal", "Int", "Bigint", "Number"]);
@@ -3736,7 +3697,9 @@ function validatePublicForms(item, fieldsByName, pathPrefix, report) {
       if (type === "pivot-table") {
         issue(report, generatorFinalSeverity(report), "PIVOT_TABLE_PUBLIC_FORM_UNSUPPORTED", "Pivot Table is a Data Analytics control and should not be generated on Data List Public Forms.", { ...context, path: controlPath });
       }
-      if (!PUBLIC_FORM_KNOWN_CONTROL_TYPES.has(type)) {
+      if (PUBLIC_FORM_DISALLOWED_CONTROL_TYPES.has(type)) {
+        issue(report, generatorFinalSeverity(report), "PUBLIC_FORM_CONTROL_TYPE_NOT_ALLOWED", "This control type is not allowed on anonymous Data List Public Forms.", { ...context, path: controlPath, type });
+      } else if (!PUBLIC_FORM_KNOWN_CONTROL_TYPES.has(type)) {
         issue(report, "warning", "PUBLIC_FORM_CONTROL_TYPE_UNKNOWN", "Public form uses a control type that is not yet export-proven for public forms.", { ...context, path: controlPath, type });
       }
       const controlId = safeString(control.id);

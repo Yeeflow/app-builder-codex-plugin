@@ -66,7 +66,7 @@ const EDITABLE_LABELS = new Set([
   ...FIELD_TEMPLATE_LABELS,
 ]);
 
-const FIELD_CONTROL_TYPES = new Set([
+const PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES = new Set([
   "input",
   "textarea",
   "richtext",
@@ -84,6 +84,89 @@ const FIELD_CONTROL_TYPES = new Set([
   "hyperlink",
   "signer",
   "list",
+]);
+
+const PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES = new Set([
+  "identity-picker",
+  "organization-picker",
+  "department",
+  "metadata",
+  "mutiple-metadata",
+  "multiple-metadata",
+  "tag",
+  "location-picker",
+  "cost-center-picker",
+  "lookup",
+  "user",
+  "groupselect",
+  "location",
+  "costcenter",
+]);
+
+const PUBLIC_FORM_ALLOWED_VISUAL_CONTROL_TYPES = new Set([
+  "section",
+  "container",
+  "flex_grid",
+  "grid",
+  "heading",
+  "text",
+  "paragraph",
+  "richtext",
+  "picture",
+  "image",
+  "line",
+  "divider",
+  "gap",
+  "spacer",
+  "action_button",
+  "button",
+  "aktabs",
+  "ak-tabs-tab",
+  "table",
+  "toggle",
+  "toggle-panel",
+  "icon_list",
+  "icon",
+  "timer",
+  "dropbar",
+  "alert",
+  "progress",
+  "progress-circle",
+  "steps-bar",
+  "list-qrcode",
+  "qrcode",
+  "barcode",
+  "custom-code",
+  "embed",
+  "document-embed",
+  "submit-button",
+  ...PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES,
+]);
+
+const PUBLIC_FORM_DISALLOWED_CONTROL_TYPES = new Set([
+  ...PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES,
+  "collection",
+  "collection-control",
+  "data-table",
+  "data-list",
+  "pivot-table",
+  "chart",
+  "summary",
+  "search-filter",
+  "select-filter",
+  "date-filter",
+  "number-filter",
+  "user-filter",
+  "data-filter",
+  "dynamic-field",
+  "dynamic-user",
+  "dynamic-image",
+  "dynamic-file",
+]);
+
+const FIELD_CONTROL_TYPES = new Set([
+  ...PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES,
+  ...PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES,
   "text",
   "number",
   "boolean",
@@ -237,6 +320,25 @@ function isFieldLikeControl(entry) {
   return FIELD_CONTROL_TYPES.has(entry.type) && (core.binding || core.fieldID || valueAtPath(core, ["attrs", "list_field"]) === true);
 }
 
+function validatePublicFormAllowedControl(entry, add) {
+  if (!entry.type) return;
+  if (PUBLIC_FORM_DISALLOWED_CONTROL_TYPES.has(entry.type)) {
+    add("PUBLIC_FORM_CONTROL_TYPE_NOT_ALLOWED", "This control type is not allowed on anonymous Data List Public Forms.", {
+      path: entry.path,
+      type: entry.type,
+      label: entry.label,
+    });
+    return;
+  }
+  if (!PUBLIC_FORM_ALLOWED_VISUAL_CONTROL_TYPES.has(entry.type)) {
+    add("PUBLIC_FORM_CONTROL_TYPE_UNAPPROVED", "Public Form contains a control type outside the approved Public Form control palette.", {
+      path: entry.path,
+      type: entry.type,
+      label: entry.label,
+    });
+  }
+}
+
 function validatePublicFormFields1ColWrapper(entry, add) {
   const core = entry.core || {};
   if (entry.type !== "flex_grid") {
@@ -387,8 +489,16 @@ function validatePublicFormPageLayout(resource, options = {}) {
   }
 
   walkPublicFormControls(resource, (entry) => {
+    validatePublicFormAllowedControl(entry, add);
     if (entry.label === "form_grid_fields_1col_wrapper") {
       validatePublicFormFields1ColWrapper(entry, add);
+    }
+    if (PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES.has(entry.type)) {
+      add("PUBLIC_FORM_FIELD_CONTROL_TYPE_NOT_ALLOWED", "This Data List field control type is not supported on anonymous Public Forms.", {
+        path: entry.path,
+        type: entry.type,
+        label: entry.label,
+      });
     }
     if (isFieldLikeControl(entry)) {
       if (!hasAncestor(entry, "section_content_area") || !hasAnyAncestor(entry, CONTENT_CARD_LABELS)) {
@@ -417,5 +527,9 @@ module.exports = {
   PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID,
   PUBLIC_FORM_FIELDS_1COL_TEMPLATE_NAME,
   PUBLIC_FORM_SUPPORTED_FIELD_TEMPLATE_IDS,
+  PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES,
+  PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES,
+  PUBLIC_FORM_ALLOWED_VISUAL_CONTROL_TYPES,
+  PUBLIC_FORM_DISALLOWED_CONTROL_TYPES,
   validatePublicFormPageLayout,
 };

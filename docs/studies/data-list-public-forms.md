@@ -174,19 +174,22 @@ The native primary `Title` field appears in both public forms as an export-prove
 
 ## Disallowed Or Unavailable Fields
 
-The screenshots show unavailable Public Form palette entries for several field families and default list fields. The export also defines fields that are not used in the public form controls.
+Public Forms are anonymous submission forms, so they cannot depend on signed-in user, organization, tenant metadata, app data browsing, or related-record context. The product UI screenshots show that these field families are unavailable for Public Forms, and generated Public Forms must reject them during App Plan review, materialization, and final validation.
 
-UI-reference-backed unavailable or not-public-safe custom field types:
+User-confirmed unsupported Data List field families:
 
-- `identity-picker`
-- `organization-picker`
-- `location-picker`
-- `lookup`
+- User, represented in exports as `identity-picker` / `user`
+- Department, represented in exports as `organization-picker`, `groupselect`, or `department`
+- Metadata, represented in exports as `metadata`
+- Tag, represented in exports as `tag`
+- Multi Meta, represented in exports as `mutiple-metadata` or `multiple-metadata`
+- Location, represented in exports as `location-picker` / `location`
+- Cost center, represented in exports as `cost-center-picker` / `costcenter`
+- Lookup, represented in exports as `lookup`
+
+Additional UI-reference-backed unavailable or not-public-safe custom field types:
+
 - `calculated-column`
-- `metadata`
-- `mutiple-metadata`
-- `cost-center-picker`
-- `tag`
 - `autonumber`
 
 UI-reference-backed default/system fields that should not be generated into Public Forms:
@@ -199,7 +202,7 @@ UI-reference-backed default/system fields that should not be generated into Publ
 
 Generation rule:
 
-Do not generate login-dependent fields, default/system fields, lookup/calculated fields, tenant-specific picker fields, or unknown field types into Data List Public Forms unless a future export or product rule proves support. If a generated public form includes a known-disallowed field type, validators should report a hard error. Unknown or ambiguous field types should warn first.
+Do not generate login-dependent fields, default/system fields, lookup/calculated fields, tenant-specific picker fields, metadata/tag/location/cost-center fields, or unknown field types into Data List Public Forms unless a future export or product rule proves support. If the source Data List contains such fields, omit them from the Public Form and explain the omission in the App Plan / artifact plan. If a generated public form includes a known-disallowed field type, validators must report a hard error. Unknown or ambiguous field types should warn first.
 
 ## Field Family Notes
 
@@ -283,6 +286,8 @@ Generation rule:
 
 Public Form generators must only use export-proven or UI-reference-backed Public Form controls. They must not add other general, advanced, dashboard, custom-list-form-only, approval-form-only, or workflow controls to a Public Form.
 
+Public Forms must not include data-browsing or filter controls. This specifically forbids Collection/Data table/Data list controls, Pivot Table, Chart/Data Analytics, Summary/KPI, Data filter controls, Search filter, Select filter, Date/Number/User filters, and Dynamic record display controls such as Dynamic field, Dynamic user, Dynamic image, or Dynamic file. Public Forms are for anonymous submission, not authenticated record browsing or dashboard-style filtering.
+
 ## Submit Behavior
 
 Both target public forms include one `submit-button` control. This proves the structural submit control exists in Public Form resources.
@@ -308,6 +313,7 @@ Hard errors for generated Public Forms:
 - List-bound control `binding`/`fieldID` cannot resolve to a field in the same list.
 - Known-disallowed default/system fields are used, except the export-proven primary `Title` special case.
 - Known-disallowed public form field types are used.
+- Known-disallowed Public Form control types are used, including Data filter/Search filter/Collection/Data table controls.
 - Duplicate control IDs occur within a public form.
 
 Warnings:

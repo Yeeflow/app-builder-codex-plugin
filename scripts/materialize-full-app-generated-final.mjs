@@ -89,6 +89,15 @@ const MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
 ]);
 const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const DOCUMENT_LIBRARY_DEFAULT_FIELDS = Object.freeze([
+  { FieldName: "Title", FieldType: "Text", FieldIndex: 0, DisplayName: "Name", Type: "input", Status: 1, IsSystem: true, IsIndex: true, Rules: { isLibrary: true } },
+  { FieldName: "Bigint1", FieldType: "Bigint", FieldIndex: 1, DisplayName: "ParentID", Type: "input_number", Status: 1, IsSystem: true, Rules: { isNotInListFiles: true } },
+  { FieldName: "Text1", FieldType: "Text", FieldIndex: 1, DisplayName: "Type", Type: "input", Status: 1, IsSystem: true, Rules: "" },
+  { FieldName: "Bigint2", FieldType: "Bigint", FieldIndex: 2, DisplayName: "FileSize", Type: "input_number", Status: 1, IsSystem: true, Rules: { readonly: true } },
+  { FieldName: "Text2", FieldType: "Text", FieldIndex: 2, DisplayName: "Extension", Type: "input", Status: 1, IsSystem: true, Rules: { readonly: true } },
+  { FieldName: "Text3", FieldType: "Text", FieldIndex: 3, DisplayName: "UniqueName", Type: "input", Status: 1, IsSystem: true, Rules: { isNotInListFiles: true } },
+  { FieldName: "Text4", FieldType: "Text", FieldIndex: 4, DisplayName: "Upload File", Type: "file-upload", Status: 1, IsSystem: true, Rules: { required: true, isLabrary: true, isLibrary: true } },
+]);
 const DEFAULT_APPLICATION_COLOR_PATTERN = {
   primary: { value: "#0065FF", lightmodel: "Luminance" },
   secondary: { value: "#00D1FF", lightmodel: "Luminance" },
@@ -541,6 +550,67 @@ function normalizeHexColor(value) {
   return match ? match[0].toUpperCase() : "";
 }
 
+function inferPlannedChildResourceType(value, fallback = "data-list") {
+  const text = normKey(value);
+  if (/\b(document library|doc library|document libraries|type 16|native document)\b/.test(text)) return "document-library";
+  if (/\b(data list|list|type 1)\b/.test(text)) return "data-list";
+  return fallback;
+}
+
+function collectPlannedChildResourceRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+4\.\s+Data Lists and Document Libraries Plan/im);
+  if (!section.trim()) return [];
+  const recordsByName = new Map();
+  const upsert = (name, resourceType, evidence = "") => {
+    const cleanName = cleanResourceName(name);
+    if (!cleanName || isNonResourceName(cleanName)) return;
+    const key = normKey(cleanName);
+    const existing = recordsByName.get(key);
+    const type = resourceType || existing?.resourceType || "data-list";
+    recordsByName.set(key, {
+      name: cleanName,
+      resourceType: existing?.resourceType === "document-library" ? "document-library" : type,
+      evidence: existing?.evidence || evidence,
+    });
+  };
+
+  const lines = section.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+(?:\.[x0-9]+)?\s+(.+?)\s*$/i);
+    if (heading) {
+      const name = cleanResourceName(heading[1]);
+      const blockLines = [];
+      for (let scan = index + 1; scan < lines.length && !/^###\s+\d+(?:\.[x0-9]+)?\s+/i.test(lines[scan]); scan += 1) blockLines.push(lines[scan]);
+      const blockText = blockLines.join("\n");
+      upsert(name, inferPlannedChildResourceType(`${name}\n${blockText}`), "section-heading");
+    }
+
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const nameColumn = findHeaderIndex(normalizedHeaders, ["document library name", "data list name", "list name", "resource name", "resource", "name", "item"]);
+    const resourceTypeColumn = findHeaderIndex(normalizedHeaders, ["resource type", "yeeflow resource type", "type", "kind"]);
+    const documentLibraryNameColumn = findHeaderIndex(normalizedHeaders, ["document library name"]);
+    const dataListNameColumn = findHeaderIndex(normalizedHeaders, ["data list name", "list name"]);
+    if (nameColumn === -1 && documentLibraryNameColumn === -1 && dataListNameColumn === -1) continue;
+    if (resourceTypeColumn === -1 && documentLibraryNameColumn === -1 && dataListNameColumn === -1) continue;
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const name = cleanResourceName(cells[nameColumn !== -1 ? nameColumn : documentLibraryNameColumn !== -1 ? documentLibraryNameColumn : dataListNameColumn]);
+      const headerHint = documentLibraryNameColumn !== -1 && (nameColumn === -1 || nameColumn === documentLibraryNameColumn)
+        ? "Document Library"
+        : dataListNameColumn !== -1 && (nameColumn === -1 || nameColumn === dataListNameColumn)
+          ? "Data List"
+          : "";
+      const typeText = resourceTypeColumn === -1 ? headerHint : cleanResourceName(cells[resourceTypeColumn]) || headerHint;
+      upsert(name, inferPlannedChildResourceType(typeText, headerHint === "Document Library" ? "document-library" : "data-list"), "section-table");
+      rowIndex += 1;
+    }
+  }
+  return [...recordsByName.values()];
+}
+
 function escapeRegExp(value) {
   return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -565,7 +635,34 @@ function analyzeAppPlanResourceDemand(planText) {
     const count = names.length;
     counts[key] = count;
     resources[key] = names;
-    if (count > 0) evidence.push({ section: key, outputSurface, plannedItems: count, names });
+      if (count > 0) evidence.push({ section: key, outputSurface, plannedItems: count, names });
+  }
+  const navigationResourceTypesByName = new Map();
+  for (const items of Object.values(navigationItemsByGroup)) {
+    for (const item of items || []) {
+      const resourceType = inferPlannedChildResourceType(item.type, "");
+      if (!resourceType) continue;
+      navigationResourceTypesByName.set(normKey(item.target || item.title), resourceType);
+      navigationResourceTypesByName.set(normKey(item.title), resourceType);
+    }
+  }
+  const childResourceRecords = collectPlannedChildResourceRecords(planText).map((record) => {
+    const navType = navigationResourceTypesByName.get(normKey(record.name));
+    return navType && navType !== record.resourceType ? { ...record, resourceType: navType, evidence: `${record.evidence}+navigation-type` } : record;
+  });
+  if (childResourceRecords.length) {
+    resources.dataLists = childResourceRecords.filter((record) => record.resourceType !== "document-library").map((record) => record.name);
+    resources.documentLibraries = childResourceRecords.filter((record) => record.resourceType === "document-library").map((record) => record.name);
+    counts.dataLists = resources.dataLists.length;
+    counts.documentLibraries = resources.documentLibraries.length;
+    for (let index = evidence.length - 1; index >= 0; index -= 1) {
+      if (evidence[index].section === "dataLists") evidence.splice(index, 1);
+    }
+    if (resources.dataLists.length) evidence.push({ section: "dataLists", outputSurface: "$.Childs[] Type 1 data list resources", plannedItems: resources.dataLists.length, names: resources.dataLists });
+    if (resources.documentLibraries.length) evidence.push({ section: "documentLibraries", outputSurface: "$.Childs[] Type 16 document library resources", plannedItems: resources.documentLibraries.length, names: resources.documentLibraries });
+  } else {
+    resources.documentLibraries = [];
+    counts.documentLibraries = 0;
   }
   const dashboardFilterRecords = collectDashboardFilterRecords(planText);
   const dashboardSummaryMetricRecords = collectDashboardSummaryMetricRecords(planText);
@@ -602,6 +699,7 @@ function analyzeAppPlanResourceDemand(planText) {
   return {
     counts,
     resources,
+    childResourceRecords,
     navigationItemsByGroup,
     dataListFieldSpecs: collectDataListFieldSpecs(planText),
     dataListViewRecords: collectDataListViewRecords(planText),
@@ -1272,7 +1370,18 @@ function uniqueDashboardLayoutTemplateRecords(records) {
 function uniqueDashboardAnalyticsRecords(records) {
   const out = [];
   const indexByKey = new Map();
+  const scopedSignatures = new Set((records || [])
+    .filter((record) => normKey(record.dashboardPage))
+    .map((record) => [
+      normKey(record.selectedTemplateId),
+      normKey(record.sourceResource),
+    ].join("::")));
   for (const record of records || []) {
+    const signature = [
+      normKey(record.selectedTemplateId),
+      normKey(record.sourceResource),
+    ].join("::");
+    if (!normKey(record.dashboardPage) && scopedSignatures.has(signature)) continue;
     const key = [
       normKey(record.dashboardPage),
       normKey(record.selectedTemplateId),
@@ -1345,7 +1454,8 @@ function extractDashboardPageLayoutTemplateId(text) {
 
 function buildMissingResourceGraph(planDemand) {
   const surfaceByKey = {
-    dataLists: "$.Childs[] data list/document library resources",
+    dataLists: "$.Childs[] Type 1 data list resources",
+    documentLibraries: "$.Childs[] Type 16 document library resources",
     approvalForms: "$.Forms[] approval form definitions",
     formReports: "$.FormNewReports[] approval report registrations",
     customForms: "$.Childs[].Layouts[] custom data list form layouts",
@@ -1377,25 +1487,28 @@ function buildIdPaths(planDemand) {
     "wrapper.PackageId",
     "decoded.ListSet.ListID",
   ];
-  planDemand.resources.dataLists.forEach((name, index) => {
-    const fieldSpecs = fieldSpecsForList(planDemand, name);
+  const childResources = plannedChildResources(planDemand);
+  childResources.forEach((record, index) => {
+    const name = record.name;
+    const fieldSpecs = record.resourceType === "document-library" ? DOCUMENT_LIBRARY_DEFAULT_FIELDS : fieldSpecsForList(planDemand, name);
     paths.push(`decoded.Childs[${index}].List.ListID`);
     fieldSpecs.forEach((field, fieldIndex) => {
       paths.push(`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`);
     });
     paths.push(`decoded.Childs[${index}].Layouts[0].LayoutID`);
   });
-  for (const assignment of assignAllCustomFormLayoutPositions(planDemand, planDemand.resources.dataLists)) {
+  for (const assignment of assignAllCustomFormLayoutPositions(planDemand, childResources.map((record) => record.name))) {
     paths.push(`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`);
   }
   const customLayoutCountByListIndex = new Map();
-  for (const assignment of assignAllCustomFormLayoutPositions(planDemand, planDemand.resources.dataLists)) {
+  for (const assignment of assignAllCustomFormLayoutPositions(planDemand, childResources.map((record) => record.name))) {
     customLayoutCountByListIndex.set(
       assignment.listIndex,
       Math.max(customLayoutCountByListIndex.get(assignment.listIndex) || 0, assignment.layoutIndex),
     );
   }
-  planDemand.resources.dataLists.forEach((name, index) => {
+  childResources.forEach((record, index) => {
+    const name = record.name;
     const plannedViews = dataListViewRecordsForList(planDemand, name);
     const defaultViewRecord = selectDefaultDataListViewRecord(plannedViews);
     const extraViews = plannedViews.filter((record) => record !== defaultViewRecord);
@@ -1418,6 +1531,19 @@ function buildIdPaths(planDemand) {
     paths.push(`decoded.ListSet.LayoutView.sort[${index}].ID`);
   });
   return paths;
+}
+
+function plannedChildResources(planDemand, fallbackNames = []) {
+  const records = Array.isArray(planDemand?.childResourceRecords) ? planDemand.childResourceRecords : [];
+  if (records.length) return records.map((record) => ({
+    name: record.name,
+    resourceType: record.resourceType === "document-library" ? "document-library" : "data-list",
+  }));
+  const dataLists = (planDemand?.resources?.dataLists || []).map((name) => ({ name, resourceType: "data-list" }));
+  const documentLibraries = (planDemand?.resources?.documentLibraries || []).map((name) => ({ name, resourceType: "document-library" }));
+  const combined = dataLists.concat(documentLibraries);
+  if (combined.length) return combined;
+  return fallbackNames.map((name) => ({ name, resourceType: "data-list" }));
 }
 
 function extractNumberedSection(text, marker) {
@@ -1976,6 +2102,33 @@ function buildFieldRecord({ field, fieldIndex, listId, fieldId, lookupTargetList
     Ext2: "",
     Ext3: "",
   };
+}
+
+function buildDocumentLibraryFieldRecords({ listId, ids, childIndex }) {
+  return DOCUMENT_LIBRARY_DEFAULT_FIELDS.map((field, fieldIndex) => {
+    const rules = field.Rules && typeof field.Rules === "object" ? JSON.stringify(field.Rules) : field.Rules || "";
+    return {
+      FieldID: stringId(ids[`decoded.Childs[${childIndex}].Fields[${fieldIndex}].FieldID`]),
+      ListID: listId,
+      FieldName: field.FieldName,
+      FieldType: field.FieldType,
+      FieldIndex: field.FieldIndex,
+      DisplayName: field.DisplayName,
+      InternalName: field.FieldName,
+      Type: field.Type,
+      Status: field.Status,
+      Category: 0,
+      DefaultValue: "",
+      Rules: rules,
+      IsSort: false,
+      IsSystem: Boolean(field.IsSystem),
+      IsUnique: false,
+      IsIndex: Boolean(field.IsIndex),
+      Ext1: "",
+      Ext2: "",
+      Ext3: "",
+    };
+  });
 }
 
 function buildDataListViewLayoutView({ fields, viewRecord = null }) {
@@ -3073,8 +3226,10 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
 }
 
 function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON, appPlanText = "", findings = [] }) {
-  const dataListNames = planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`];
+  const childResourceRecords = plannedChildResources(planDemand, planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`]);
+  const dataListNames = childResourceRecords.map((record) => record.name);
   const dataListByName = new Map();
+  const childResourceTypeByName = new Map(childResourceRecords.map((record) => [normKey(record.name), record.resourceType]));
   const listMetaByName = new Map();
   const allCustomFormAssignments = assignAllCustomFormLayoutPositions(planDemand, dataListNames);
   dataListNames.forEach((name, index) => {
@@ -3097,18 +3252,23 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         },
       ));
     }
-    const fieldSpecs = fieldSpecsForList(planDemand, name);
-    const fields = fieldSpecs.map((field, fieldIndex) => buildFieldRecord({
-      field,
-      fieldIndex,
-      listId,
-      fieldId: stringId(ids[`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`]),
-      lookupTargetListId: resolveLookupTargetListId(field, dataListByName),
-    }));
+    const resourceType = childResourceTypeByName.get(normKey(name)) || "data-list";
+    const fields = resourceType === "document-library"
+      ? buildDocumentLibraryFieldRecords({ listId, ids, childIndex: index })
+      : fieldSpecsForList(planDemand, name).map((field, fieldIndex) => buildFieldRecord({
+        field,
+        fieldIndex,
+        listId,
+        fieldId: stringId(ids[`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`]),
+        lookupTargetListId: resolveLookupTargetListId(field, dataListByName),
+      }));
     fieldRecordsByName.set(normKey(name), fields);
-    listMetaByName.set(normKey(name), { listName: name, listId, fields, detailLayoutId: "" });
+    listMetaByName.set(normKey(name), { listName: name, listId, fields, detailLayoutId: "", resourceType });
   });
-  const childs = dataListNames.map((name, index) => {
+  const childs = childResourceRecords.map((record, index) => {
+    const name = record.name;
+    const resourceType = record.resourceType || "data-list";
+    const listType = resourceType === "document-library" ? 16 : 1;
     const listId = stringId(ids[`decoded.Childs[${index}].List.ListID`]);
     dataListByName.set(normKey(name), listId);
     const fields = fieldRecordsByName.get(normKey(name)) || [];
@@ -3152,11 +3312,17 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     }
     const displayLayoutView = buildDataListFormDisplaySettings({ customLayoutsForList, ids });
     const detailLayoutId = displayLayoutView.view || displayLayoutView.edit || displayLayoutView.add || "";
-    const currentMeta = listMetaByName.get(normKey(name)) || { listName: name, listId, fields };
+    const currentMeta = listMetaByName.get(normKey(name)) || { listName: name, listId, fields, resourceType };
     currentMeta.detailLayoutId = detailLayoutId;
     listMetaByName.set(normKey(name), currentMeta);
     return {
-      List: listInfo({ listId, title: name, type: 1, ext2: "{\"generatedFinal\":true}", layoutView: JSON.stringify(displayLayoutView) }),
+      List: listInfo({
+        listId,
+        title: name,
+        type: listType,
+        ext2: "{\"generatedFinal\":true}",
+        layoutView: customLayoutsForList.length ? JSON.stringify(displayLayoutView) : (listType === 1 ? JSON.stringify(displayLayoutView) : ""),
+      }),
       Fields: fields,
       Layouts: layouts,
       RemindRules: [],
@@ -6358,10 +6524,19 @@ function buildNavigationLayoutView({ planDemand, rootListId, ids, dataListByName
   const groups = navigationGroupNames(planDemand);
   const dashboardItems = pages.map((page) => ({ Title: page.Title, Type: 103, Target: page.Title, ListID: page.LayoutID, LayoutID: page.LayoutID, Icon: inferNavigationIcon({ title: page.Title, type: 103 }) }));
   const formItems = forms.map((form) => ({ Title: form.Name, Type: 105, Target: form.Name, ListID: form.Key, Icon: inferNavigationIcon({ title: form.Name, type: 105 }) }));
-  const listItems = planDemand.resources.dataLists.map((name) => ({ Title: name, Type: 1, Target: name, ListID: dataListByName.get(normKey(name)), Icon: inferNavigationIcon({ title: name, type: 1 }) }));
+  const listItems = plannedChildResources(planDemand).map((record) => {
+    const type = record.resourceType === "document-library" ? 16 : 1;
+    return {
+      Title: record.name,
+      Type: type,
+      Target: record.name,
+      ListID: dataListByName.get(normKey(record.name)),
+      Icon: inferNavigationIcon({ title: record.name, type }),
+    };
+  });
   const dataListViewItems = (planDemand.dataListViewRecords || []).map((record) => ({
     Title: record.viewName,
-    Type: 1,
+    Type: (plannedChildResources(planDemand).find((child) => normKey(child.name) === normKey(record.listName))?.resourceType === "document-library") ? 16 : 1,
     Target: record.viewName,
     ListID: dataListByName.get(normKey(record.listName)),
     SourceListName: record.listName,
@@ -6397,7 +6572,7 @@ function isRuntimeNavigationItemObject(item) {
 }
 
 function toRuntimeNavigationItem(item, rootListId) {
-  if (!["1", "103", "105"].includes(String(item.Type))) return null;
+  if (!["1", "16", "103", "105"].includes(String(item.Type))) return null;
   if (!item.ListID) return null;
   const out = {
     AppID: 41,
@@ -6496,6 +6671,7 @@ function inferNavigationIcon({ title = "", type = "" } = {}) {
 function inferNavigationType(value) {
   if (/approval/i.test(value)) return 105;
   if (/dashboard/i.test(value)) return 103;
+  if (/document\s+library|doc\s+library/i.test(value)) return 16;
   if (/report/i.test(value)) return 106;
   return 1;
 }
@@ -7627,7 +7803,7 @@ function listInfo({ listId, title, type, ext2 = "", iconUrl = "", layoutView = n
     Ext3: "",
     Type: type,
     Flags: 1,
-    LayoutView: type === 1 ? layoutView : "",
+    LayoutView: (type === 1 || type === 16) ? (layoutView || "") : "",
     Perms: [],
     AdvancePerms: [],
     IndexCode: "flowcraft",
