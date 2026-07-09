@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.37
+
+- Release App Plan referenced-resource completeness hardening.
+- Generated-final validation now parses App Plan Data List field tables to discover lookup target lists and fails when referenced lookup targets are not planned/materialized.
+- Generated-final validation now checks Data List navigation targets from App Plan navigation sections and fails when a navigation item points to an unplanned Data List.
+- Full-app materialization now fails closed with `FULL_APP_MATERIALIZATION_LOOKUP_TARGET_DATA_LIST_NOT_PLANNED` instead of emitting empty lookup `Rules` for missing target lists.
+- Add source/dist regression coverage for missing lookup target lists, missing navigation target lists, and the Internal Audit `Risk Categories` failure shape.
+
 ## 0.9.36
 
 - Release Data List View field-table and fixed-filter hardening.

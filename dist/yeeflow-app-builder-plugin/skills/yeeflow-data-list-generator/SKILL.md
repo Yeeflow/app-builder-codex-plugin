@@ -171,6 +171,7 @@ Do not build a final `.ydl` when:
 - a generated standalone `.ydl` reuses one generic custom form for New, Edit, and View instead of concrete New/Edit and View Item layouts
 - current-record custom form fields are placed outside `form_grid_fields_wrapper`
 - lookup targets or target display fields are unresolved
+- full-app App Plans reference lookup target lists that are not planned/generated as Data Lists; do not silently emit lookup `Rules: ""` for missing targets
 - sample lookup values are unknown or unsafe
 - sample lookup values do not map to valid referenced target rows
 - external resolved lookup IDs would be included in `Resource.ReplaceIds`
