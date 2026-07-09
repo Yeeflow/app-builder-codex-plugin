@@ -1,7 +1,7 @@
 {
   "name": "yeeflow-app-builder",
-  "version": "0.9.38",
-  "description": "v0.9.38 releases Internal Audit generated-final hard gate closure. Full-app materialization now parses global Data Analytics selection tables, materializes unscoped planned analytics across Dashboard pages, matches reverse-related View Item targets through host-concept view/detail intent, prunes empty Workbench main queue columns, accepts tabulated tracker grid-table rationale, and avoids false marketing residue failures for legitimate Stage fields while keeping fixture-ID provenance as a signing boundary.",
+  "version": "0.9.39",
+  "description": "v0.9.39 adds Public Form golden-reference generation support. Public forms now preserve the Public Form page layout standard, validate editable slots, allow approved reuse of data_list_form_fields_grid_v1_1 and data_list_form_control_sublist_v1_1 inside public form content cards, and enforce public-form-compatible field placement across standalone YDL and full-application validation paths.",
   "visibility": "private/internal",
   "category": "developer/productivity/internal tools",
   "keywords": [
