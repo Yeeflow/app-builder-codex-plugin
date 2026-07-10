@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.43`
+- Version: `0.9.44`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.43` makes Public Forms additive to the complete Type 1 Data List lifecycle. Every generated Data List now keeps standard New/Edit/View custom forms and resolved `List.LayoutView.add/edit/view` routing whether or not Public Forms are planned, while Public Form-only generation paths fail App Plan, package, layout, and preflight gates.
+Current release `0.9.44` hardens native Type 16 Document Library runtime metadata. Generated libraries now preserve export-backed status bits, rules, system/index flags, and upload limits for all seven native fields, while root and skill-local preflight block the former Data List-style metadata before signing.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.43
+Version: 0.9.44
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.43
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.44
 ```
 
 ## What Is Included

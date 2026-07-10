@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.44
+
+- Release runtime-proven Type 16 Document Library native field metadata for `Title`, `ParentID`, `Type`, `FileSize`, `Extension`, `UniqueName`, and `Upload File`.
+- Preserve export-backed field-specific status bits, Rules, system/index flags, and the `2147483648` upload size contract while keeping `Title.FieldIndex = 0` for canonical generated-package schema compatibility.
+- Add `validate-document-library-native-field-runtime-metadata.mjs` as a root and skill-local first-generation preflight hard gate.
+- Add a redacted normalized reference, runtime checklist, tolerant-Brotli skill entrypoint alignment, and source/dist positive/negative regression coverage.
+- Confirm the user-verified repaired Internal Audit package passes while the prior runtime-failing metadata shape is blocked before signing.
+
 ## 0.9.43
 
 - Release complete Type 1 Data List generation hardening for applications with and without Public Forms.

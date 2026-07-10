@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## 0.9.44
+
+- Release runtime-proven Type 16 Document Library native field metadata for `Title`, `ParentID`, `Type`, `FileSize`, `Extension`, `UniqueName`, and `Upload File`.
+- Preserve export-backed field-specific status bits, Rules, system/index flags, and the `2147483648` upload size contract while keeping `Title.FieldIndex = 0` for canonical generated-package schema compatibility.
+- Add `validate-document-library-native-field-runtime-metadata.mjs` as a root and skill-local first-generation preflight hard gate.
+- Add a redacted normalized reference, runtime checklist, tolerant-Brotli skill entrypoint alignment, and source/dist positive/negative regression coverage.
+- Confirm the user-verified repaired Internal Audit package passes while the prior runtime-failing metadata shape is blocked before signing.
+
+## 0.9.43
+
+- Release complete Type 1 Data List generation hardening for applications with and without Public Forms.
+- Materialize planned Public Forms through the shared full-app Data List builder only after standard New/Edit/View custom forms, field grids, views, navigation, and package contracts are complete.
+- Require every generated Type 1 Data List to resolve `List.LayoutView.add/edit/view` to Type 1 custom forms; Public Forms and system/support purposes do not replace this requirement.
+- Add App Plan, package, Data List Form Layouts v1.1, source/dist, and first-generation preflight regressions for Public Form-only failure shapes.
+- Preserve the Type 16 Document Library boundary while enforcing the complete lifecycle on all Type 1 Data Lists.
+
+## 0.9.42
+
+- Release native Document Library YAPK contract and root-folder materialization hardening.
+- Preserve Type 16 export-compatible native fields and navigation instead of coercing Document Libraries through normal Data List rules.
+- Materialize planned root folders as API-issued-ID-backed `Childs[].List.Items` folder rows with `Text1 = "folder"`, `Bigint1 = "0"`, deterministic `Text3` path keys, and no `Text4` file payload.
+- Enforce folder row shape, ID provenance, and App Plan-to-generated-final completeness across source and dist validators.
+- Keep nested folder creation deferred until focused runtime proof establishes its current-product contract.
+
 ## 0.9.37
 
 - Release App Plan referenced-resource completeness hardening.
@@ -9,14 +33,6 @@
 - Generated-final validation now checks Data List navigation targets from App Plan navigation sections and fails when a navigation item points to an unplanned Data List.
 - Full-app materialization now fails closed with `FULL_APP_MATERIALIZATION_LOOKUP_TARGET_DATA_LIST_NOT_PLANNED` instead of emitting empty lookup `Rules` for missing target lists.
 - Add source/dist regression coverage for missing lookup target lists, missing navigation target lists, and the Internal Audit `Risk Categories` failure shape.
-
-## 0.9.36
-
-- Release Data List View field-table and fixed-filter hardening.
-- Generated Data List views now fail generated-final materialization with `DATA_LIST_FIELD_TABLE_REQUIRED_FOR_PLANNED_VIEW` when business views reference non-Title columns, query/search fields, or fixed filters but the host Data List has no parseable field table.
-- Prevent Title-only downgrade regressions for plans that describe business views but omit standard field tables.
-- Treat App Plan Section 13 `Filters` as a fixed-filter alias for `LayoutView.filter[]`; vague phrases such as `All active meetings` must be converted to executable field-level filters or fail with `DATA_VIEW_FILTER_PLANNED_BUT_NOT_MATERIALIZED`.
-- Add Corporate Secretarial `Board Committee Meetings / Meeting Tracker` positive regression coverage for explicit `Meeting Date is not empty AND Minutes Status != Closed` filters.
 
 ## 0.9.33
 
