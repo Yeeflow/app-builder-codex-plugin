@@ -611,6 +611,61 @@ function collectPlannedChildResourceRecords(planText) {
   return [...recordsByName.values()];
 }
 
+function collectDocumentLibraryFolderRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+4\.\s+Data Lists and Document Libraries Plan/im);
+  if (!section.trim()) return [];
+  const documentLibraryNames = new Set(
+    collectPlannedChildResourceRecords(planText)
+      .filter((record) => record.resourceType === "document-library")
+      .map((record) => normKey(record.name)),
+  );
+  const records = [];
+  const lines = section.split(/\r?\n/);
+  let currentResource = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+(?:\.[x0-9]+)?\s+(.+?)\s*$/i);
+    if (heading) currentResource = cleanResourceName(heading[1]);
+    if (!currentResource || !documentLibraryNames.has(normKey(currentResource))) continue;
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const levelColumn = findHeaderIndex(normalizedHeaders, ["folder level", "level"]);
+    const nameColumn = findHeaderIndex(normalizedHeaders, ["folder name pattern", "folder name", "folder", "name"]);
+    if (levelColumn === -1 || nameColumn === -1) continue;
+    const generationColumn = findHeaderIndex(normalizedHeaders, ["generation plan", "generation", "plan"]);
+    const proofColumn = findHeaderIndex(normalizedHeaders, ["proof boundary", "proof"]);
+    const notesColumn = findHeaderIndex(normalizedHeaders, ["notes", "description"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const folderLevel = cleanResourceName(cells[levelColumn]);
+      const folderName = cleanResourceName(cells[nameColumn]);
+      const generationPlan = generationColumn === -1 ? "" : cleanResourceName(cells[generationColumn]);
+      const isRoot = /^root(?:\s|$)/i.test(folderLevel);
+      const isDeferred = /post[-\s]*import|defer|runtime[-\s]*proof[-\s]*required|do not generate|not generated/i.test(generationPlan);
+      if (isRoot && folderName && !isNonResourceName(folderName) && !isDeferred) {
+        records.push({
+          libraryName: currentResource,
+          folderName,
+          folderLevel: "Root",
+          generationPlan,
+          proofBoundary: proofColumn === -1 ? "" : cleanResourceName(cells[proofColumn]),
+          notes: notesColumn === -1 ? "" : cleanResourceName(cells[notesColumn]),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex - 1;
+  }
+  const seen = new Set();
+  return records.filter((record) => {
+    const key = `${normKey(record.libraryName)}:${normKey(record.folderName)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function escapeRegExp(value) {
   return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -700,6 +755,7 @@ function analyzeAppPlanResourceDemand(planText) {
     counts,
     resources,
     childResourceRecords,
+    documentLibraryFolderRecords: collectDocumentLibraryFolderRecords(planText),
     navigationItemsByGroup,
     dataListFieldSpecs: collectDataListFieldSpecs(planText),
     dataListViewRecords: collectDataListViewRecords(planText),
@@ -1496,6 +1552,11 @@ function buildIdPaths(planDemand) {
       paths.push(`decoded.Childs[${index}].Fields[${fieldIndex}].FieldID`);
     });
     paths.push(`decoded.Childs[${index}].Layouts[0].LayoutID`);
+    if (record.resourceType === "document-library") {
+      documentLibraryFoldersForList(planDemand, record.name).forEach((folder, folderIndex) => {
+        paths.push(documentLibraryFolderIdPath(index, folderIndex));
+      });
+    }
   });
   for (const assignment of assignAllCustomFormLayoutPositions(planDemand, childResources.map((record) => record.name))) {
     paths.push(`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`);
@@ -1531,6 +1592,33 @@ function buildIdPaths(planDemand) {
     paths.push(`decoded.ListSet.LayoutView.sort[${index}].ID`);
   });
   return paths;
+}
+
+function documentLibraryFoldersForList(planDemand, listName) {
+  return (planDemand?.documentLibraryFolderRecords || [])
+    .filter((record) => normKey(record.libraryName) === normKey(listName));
+}
+
+function documentLibraryFolderIdPath(childIndex, folderIndex) {
+  return `decoded.Childs[${childIndex}].List.Items[${folderIndex}].$key`;
+}
+
+function documentLibraryFolderUniqueName(folderName) {
+  return `0_${String(folderName || "").trim().toLowerCase()}`;
+}
+
+function buildDocumentLibraryFolderItems({ planDemand, listName, childIndex, ids }) {
+  return Object.fromEntries(documentLibraryFoldersForList(planDemand, listName).map((folder, folderIndex) => {
+    const folderId = stringId(ids[documentLibraryFolderIdPath(childIndex, folderIndex)]);
+    return [folderId, {
+      Title: folder.folderName,
+      Bigint1: "0",
+      Text1: "folder",
+      Bigint2: "",
+      Text2: "",
+      Text3: documentLibraryFolderUniqueName(folder.folderName),
+    }];
+  }));
 }
 
 function plannedChildResources(planDemand, fallbackNames = []) {
@@ -3315,14 +3403,19 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     const currentMeta = listMetaByName.get(normKey(name)) || { listName: name, listId, fields, resourceType };
     currentMeta.detailLayoutId = detailLayoutId;
     listMetaByName.set(normKey(name), currentMeta);
-    return {
-      List: listInfo({
+    const list = listInfo({
         listId,
         title: name,
         type: listType,
         ext2: "{\"generatedFinal\":true}",
         layoutView: customLayoutsForList.length ? JSON.stringify(displayLayoutView) : (listType === 1 ? JSON.stringify(displayLayoutView) : ""),
-      }),
+      });
+    if (listType === 16) {
+      const folderItems = buildDocumentLibraryFolderItems({ planDemand, listName: name, childIndex: index, ids });
+      if (Object.keys(folderItems).length) list.Items = folderItems;
+    }
+    return {
+      List: list,
       Fields: fields,
       Layouts: layouts,
       RemindRules: [],

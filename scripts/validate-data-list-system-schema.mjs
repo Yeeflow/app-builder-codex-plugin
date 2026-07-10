@@ -528,6 +528,7 @@ function validateChild(child, issues, context, args) {
   }
 
   const titleField = child.fields.find((field) => field.FieldName === "Title" || field.InternalName === "Title");
+  const isDocumentLibrary = Number(child.list?.Type) === 16;
   if (!titleField) {
     addIssue(issues, "error", "NATIVE_TITLE_FIELD_MISSING", child.title, "List is missing native system Title field.");
   } else {
@@ -537,8 +538,11 @@ function validateChild(child, issues, context, args) {
     if (titleField.IsSystem !== true) {
       addIssue(issues, "error", "NATIVE_TITLE_NOT_SYSTEM", child.title, "Native Title field must be marked IsSystem true.");
     }
-    if (Number(titleField.Status) !== 0) {
+    if (!isDocumentLibrary && Number(titleField.Status) !== 0) {
       addIssue(issues, "error", "NATIVE_TITLE_STATUS_INVALID", child.title, "Native Title field must preserve export-aligned Status: 0 metadata.");
+    }
+    if (isDocumentLibrary && Number(titleField.Status) !== 1) {
+      addIssue(issues, "error", "DOCUMENT_LIBRARY_NATIVE_TITLE_STATUS_INVALID", child.title, "Native Document Library Title must preserve export-aligned Status: 1 metadata.");
     }
     if (titleField.IsIndex !== true) {
       addIssue(issues, "error", "NATIVE_TITLE_ISINDEX_MISSING", child.title, "Native Title field must preserve export-aligned IsIndex:true metadata.");

@@ -42,6 +42,7 @@ export function validateGeneratedFinalResourceCompleteness(options = {}) {
     const inventory = collectInventory(decoded);
     validatePlanParserDidNotFailOpen(plan, findings);
     validateResourceCompleteness(plan, inventory, findings);
+    validateDocumentLibraryFolderCompleteness(plan, inventory, findings);
     validateFormsCompleteness(plan, inventory, findings);
     validateDashboardMaterialization(plan, inventory, findings);
     validateNavigationCompleteness(plan, inventory, findings);
@@ -115,6 +116,7 @@ function parseAppPlan(file) {
     dataListWorkflows: parseTableItems(text, /^##\s+11\.\s+Data List Workflows Plan/i, "Workflow Name", "DataListWorkflows"),
     notifications: parseTableItems(text, /^##\s+12\.\s+Notifications Plan/i, "Notification Name", "Notifications"),
     dataListFieldSpecs: parseDataListFieldSpecs(text),
+    documentLibraryFolders: parseDocumentLibraryFolders(text),
     dataListViews: parseDataListViews(text),
     dashboards: parseDashboards(text),
     navigation: parseNavigation(text),
@@ -133,6 +135,46 @@ function parseAppPlan(file) {
     items: group.items.filter((item) => !isPlaceholder(item.name)).map((item) => ({ ...item, deferred: isDeferred(plan.deferred, item.name, "navigation") })),
   }));
   return plan;
+}
+
+function parseDocumentLibraryFolders(text) {
+  const section = extractSection(text, /^##\s+4\.\s+Data Lists and Document Libraries Plan/i);
+  if (!section) return [];
+  const records = [];
+  const lines = section.split(/\r?\n/);
+  let currentResource = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+4\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) currentResource = cleanName(heading[1]);
+    if (!currentResource || !isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => norm(header));
+    const levelColumn = findHeaderIndex(normalizedHeaders, ["folder level", "level"]);
+    const nameColumn = findHeaderIndex(normalizedHeaders, ["folder name pattern", "folder name", "folder", "name"]);
+    if (levelColumn === -1 || nameColumn === -1) continue;
+    const generationColumn = findHeaderIndex(normalizedHeaders, ["generation plan", "generation", "plan"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const folderLevel = cleanName(cells[levelColumn]);
+      const folderName = cleanName(cells[nameColumn]);
+      const generationPlan = generationColumn === -1 ? "" : cleanName(cells[generationColumn]);
+      const deferred = !/^root(?:\s|$)/i.test(folderLevel) || /post[-\s]*import|defer|runtime[-\s]*proof[-\s]*required|do not generate|not generated/i.test(generationPlan);
+      if (folderName && !isPlaceholder(folderName)) {
+        records.push({
+          libraryName: currentResource,
+          folderName,
+          folderLevel,
+          generationPlan,
+          deferred,
+          line: lineNumberFor(text, lines[rowIndex].trim()) || null,
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex - 1;
+  }
+  return records;
 }
 
 function parseDataListViews(text) {
@@ -384,6 +426,33 @@ function collectInventory(decoded) {
     pages: collectPages(data.pages),
     navigation: collectNavigation(data.root),
   };
+}
+
+function validateDocumentLibraryFolderCompleteness(plan, inventory, findings) {
+  const requiredFolders = (plan.documentLibraryFolders || []).filter((folder) => !folder.deferred);
+  for (const folder of requiredFolders) {
+    const library = findByName(inventory.dataLists, folder.libraryName);
+    if (!library) continue;
+    const list = library.raw?.list || library.raw?.List || library.raw?.ListModel;
+    if (Number(list?.Type) !== 16) {
+      findings.push(error("GENERATED_FINAL_DOCUMENT_LIBRARY_FOLDER_HOST_TYPE_INVALID", "App Plan root folders must be hosted by a native Type 16 Document Library.", {
+        appPlanReference: { item: `${folder.libraryName} / ${folder.folderName}`, line: folder.line, category: "documentLibraryFolder" },
+        decodedPath: library.path,
+      }));
+      continue;
+    }
+    const items = list?.Items;
+    const entries = isObject(items) && !Array.isArray(items) ? Object.entries(items) : [];
+    const match = entries.find(([, row]) => norm(row?.Title) === norm(folder.folderName));
+    if (!match) {
+      findings.push(error("GENERATED_FINAL_DOCUMENT_LIBRARY_FOLDER_MISSING", "App Plan declares a root Document Library folder that is missing from generated List.Items.", {
+        appPlanReference: { item: `${folder.libraryName} / ${folder.folderName}`, line: folder.line, category: "documentLibraryFolder" },
+        decodedPath: `${library.path}.Items`,
+        plannedLibrary: folder.libraryName,
+        plannedFolder: folder.folderName,
+      }));
+    }
+  }
 }
 
 function appData(decoded) {
