@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.45`
+- Version: `0.9.46`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.45` prunes unused Public Form golden-template regions after business mapping. Generated forms now remove unconfigured CTA areas, empty copied column sections, placeholder section headers, and Operations without real actions, with the same generated-output gates for standalone `.ydl` and full application materialization.
+Current release `0.9.46` preserves the export-proven grid-table multiselect leading-column contract after business-field pruning: a dedicated `46px` checkbox column, followed by the `2fr` primary title column and `1fr` business columns. Generated and source-template validators now reject checkbox-only first columns widened to `2fr`.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.45
+Version: 0.9.46
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.45
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.46
 ```
 
 ## What Is Included

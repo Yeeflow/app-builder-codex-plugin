@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.46
+
+- Preserve the `collection_control_grid_table_with_multiselect` Golden Reference leading-column geometry after schema-driven field pruning.
+- Keep the dedicated selection-only header/item cells fixed at `46px`, the following primary title cells at `2fr`, and remaining business columns at `1fr`.
+- Add `DASH_DATASET_GRID_MULTISELECT_SELECTION_COLUMN_CONTRACT_INVALID` and source-template parity validation so matching-but-wrong `2fr` checkbox columns fail before signing readiness.
+- Add source/dist full-app materialization regression coverage based on the Legal Intake Workbench Triage Queue shape.
+
 ## 0.9.45
 
 - Prune unconfigured Public Form CTA areas, empty copied 2/3/60-40 column sections, and placeholder Operations after golden-template business mapping.
