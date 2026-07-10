@@ -61,6 +61,11 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("application-layout-template", ["scripts/validate-application-layout-template.mjs", "--package", resolvedPackage]));
   gates.push(runGate("decoded-app-package-runtime", ["validate-yapk-package.js", resolvedPackage]));
   gates.push(runGate("data-list-system-schema", ["scripts/validate-data-list-system-schema.mjs", resolvedPackage, "--strict-generated-list", "--json"]));
+  gates.push(runGate("document-library-native-field-runtime-metadata", [
+    "scripts/validate-document-library-native-field-runtime-metadata.mjs",
+    "--package",
+    resolvedPackage,
+  ]));
   gates.push(runGate("data-list-bit-field-controls", ["scripts/validate-yapk-bit-field-controls.mjs", "--package", resolvedPackage]));
   gates.push(runGate("api-issued-content-id-provenance", ["scripts/validate-yapk-id-provenance.mjs", "--package", resolvedPackage, "--manifest", idProvenance]));
   gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));

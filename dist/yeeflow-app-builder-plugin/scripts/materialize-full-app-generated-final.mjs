@@ -113,13 +113,13 @@ const MASTER_DETAIL_DASHBOARD_PAGE_LAYOUT_TEMPLATE_IDS = new Set([
 const DASHBOARD_GOLDEN_REFERENCE_ID = "event_portfolio_dashboard_golden_reference";
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DOCUMENT_LIBRARY_DEFAULT_FIELDS = Object.freeze([
-  { FieldName: "Title", FieldType: "Text", FieldIndex: 0, DisplayName: "Name", Type: "input", Status: 1, IsSystem: true, IsIndex: true, Rules: { isLibrary: true } },
-  { FieldName: "Bigint1", FieldType: "Bigint", FieldIndex: 1, DisplayName: "ParentID", Type: "input_number", Status: 1, IsSystem: true, Rules: { isNotInListFiles: true } },
-  { FieldName: "Text1", FieldType: "Text", FieldIndex: 1, DisplayName: "Type", Type: "input", Status: 1, IsSystem: true, Rules: "" },
-  { FieldName: "Bigint2", FieldType: "Bigint", FieldIndex: 2, DisplayName: "FileSize", Type: "input_number", Status: 1, IsSystem: true, Rules: { readonly: true } },
-  { FieldName: "Text2", FieldType: "Text", FieldIndex: 2, DisplayName: "Extension", Type: "input", Status: 1, IsSystem: true, Rules: { readonly: true } },
-  { FieldName: "Text3", FieldType: "Text", FieldIndex: 3, DisplayName: "UniqueName", Type: "input", Status: 1, IsSystem: true, Rules: { isNotInListFiles: true } },
-  { FieldName: "Text4", FieldType: "Text", FieldIndex: 4, DisplayName: "Upload File", Type: "file-upload", Status: 1, IsSystem: true, Rules: { required: true, isLabrary: true, isLibrary: true } },
+  { FieldName: "Title", FieldType: "Text", FieldIndex: 0, DisplayName: "Name", Type: "input", Status: 1, IsSystem: true, IsIndex: true, Rules: { displayLabel: true, isLibrary: true } },
+  { FieldName: "Bigint1", FieldType: "Bigint", FieldIndex: 1, DisplayName: "ParentID", Type: "input_number", Status: 127, IsSystem: false, Rules: { displayLabel: true, isNotInListFiles: true } },
+  { FieldName: "Text1", FieldType: "Text", FieldIndex: 1, DisplayName: "Type", Type: "input", Status: 119, IsSystem: false, Rules: { displayLabel: true } },
+  { FieldName: "Bigint2", FieldType: "Bigint", FieldIndex: 2, DisplayName: "FileSize", Type: "input_number", Status: 99, IsSystem: false, Rules: { displayLabel: true, readonly: true } },
+  { FieldName: "Text2", FieldType: "Text", FieldIndex: 2, DisplayName: "Extension", Type: "input", Status: 99, IsSystem: false, Rules: { displayLabel: true, readonly: true } },
+  { FieldName: "Text3", FieldType: "Text", FieldIndex: 3, DisplayName: "UniqueName", Type: "input", Status: 319, IsSystem: false, Rules: { displayLabel: true, isNotInListFiles: true } },
+  { FieldName: "Text4", FieldType: "Text", FieldIndex: 4, DisplayName: "Upload File", Type: "file-upload", Status: 57, IsSystem: false, Rules: { displayLabel: true, required: true, isLabrary: true, PROP_MAXSIZE: 2147483648 } },
 ]);
 const DEFAULT_APPLICATION_COLOR_PATTERN = {
   primary: { value: "#0065FF", lightmodel: "Luminance" },

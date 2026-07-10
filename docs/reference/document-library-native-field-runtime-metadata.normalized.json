@@ -1,0 +1,111 @@
+{
+  "referenceId": "document_library_native_field_runtime_metadata_v1",
+  "resourceType": 16,
+  "proof": {
+    "shape": "export-proven",
+    "runtime": "user-confirmed browser open without the prior server request error",
+    "schemaCompatibility": "Title.FieldIndex remains 0 for the current canonical generated-package schema"
+  },
+  "fields": [
+    {
+      "FieldName": "Title",
+      "FieldType": "Text",
+      "FieldIndex": 0,
+      "DisplayName": "Name",
+      "Type": "input",
+      "Status": 1,
+      "IsSystem": true,
+      "IsIndex": true,
+      "Rules": {
+        "displayLabel": true,
+        "isLibrary": true
+      }
+    },
+    {
+      "FieldName": "Bigint1",
+      "FieldType": "Bigint",
+      "FieldIndex": 1,
+      "DisplayName": "ParentID",
+      "Type": "input_number",
+      "Status": 127,
+      "IsSystem": false,
+      "IsIndex": false,
+      "Rules": {
+        "displayLabel": true,
+        "isNotInListFiles": true
+      }
+    },
+    {
+      "FieldName": "Text1",
+      "FieldType": "Text",
+      "FieldIndex": 1,
+      "DisplayName": "Type",
+      "Type": "input",
+      "Status": 119,
+      "IsSystem": false,
+      "IsIndex": false,
+      "Rules": {
+        "displayLabel": true
+      }
+    },
+    {
+      "FieldName": "Bigint2",
+      "FieldType": "Bigint",
+      "FieldIndex": 2,
+      "DisplayName": "FileSize",
+      "Type": "input_number",
+      "Status": 99,
+      "IsSystem": false,
+      "IsIndex": false,
+      "Rules": {
+        "displayLabel": true,
+        "readonly": true
+      }
+    },
+    {
+      "FieldName": "Text2",
+      "FieldType": "Text",
+      "FieldIndex": 2,
+      "DisplayName": "Extension",
+      "Type": "input",
+      "Status": 99,
+      "IsSystem": false,
+      "IsIndex": false,
+      "Rules": {
+        "displayLabel": true,
+        "readonly": true
+      }
+    },
+    {
+      "FieldName": "Text3",
+      "FieldType": "Text",
+      "FieldIndex": 3,
+      "DisplayName": "UniqueName",
+      "Type": "input",
+      "Status": 319,
+      "IsSystem": false,
+      "IsIndex": false,
+      "Rules": {
+        "displayLabel": true,
+        "isNotInListFiles": true
+      }
+    },
+    {
+      "FieldName": "Text4",
+      "FieldType": "Text",
+      "FieldIndex": 4,
+      "DisplayName": "Upload File",
+      "Type": "file-upload",
+      "Status": 57,
+      "IsSystem": false,
+      "IsIndex": false,
+      "Rules": {
+        "displayLabel": true,
+        "required": true,
+        "isLabrary": true,
+        "PROP_MAXSIZE": 2147483648
+      }
+    }
+  ],
+  "redaction": "No tenant, application, list, package, record, user, URL, signature, or file payload identifiers are retained."
+}

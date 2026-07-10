@@ -44,8 +44,9 @@ The test asserts:
 
 - planned Document Library is not downgraded to Type `1`;
 - Type `16` child includes the native upload field;
+- all seven Type `16` native fields preserve the runtime-proven status bits, rules, system/index flags, field identities, and controls;
 - root navigation includes the Document Library as Type `16`.
 
 ## Validation Boundary
 
-This training verifies generated-final package structure and navigation conformance. It does not claim upload runtime behavior, folder runtime behavior, or document binary persistence without a focused install/runtime proof.
+Structure and navigation alone are insufficient. Run `scripts/validate-document-library-native-field-runtime-metadata.mjs --package <generated-final.yapk>` and stop before signing if the native field runtime contract fails. The repaired Internal Audit package was user-confirmed to open without the prior server request error. Upload execution, binary persistence, permissions, version history, and nested-folder behavior still require separate focused runtime proof.
