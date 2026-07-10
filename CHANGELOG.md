@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.45
+
+- Prune unconfigured Public Form CTA areas, empty copied 2/3/60-40 column sections, and placeholder Operations after golden-template business mapping.
+- Require retained `section_title_header` text to be business-specific and remove `section_title_area` when neither a meaningful header nor configured Operations is needed.
+- Add generated-output hard gates for all five optional-region residue shapes while preserving the complete unpruned golden reference for template-authoring validation.
+- Enforce the same cleanup and validator contract for standalone `.ydl` and full `.yap`/`.yapk` generation.
+- Add source/dist regressions based on the BPE survey residue shape and verify the previous output is rejected before handoff.
+
 ## 0.9.44
 
 - Release runtime-proven Type 16 Document Library native field metadata for `Title`, `ParentID`, `Type`, `FileSize`, `Extension`, `UniqueName`, and `Upload File`.
