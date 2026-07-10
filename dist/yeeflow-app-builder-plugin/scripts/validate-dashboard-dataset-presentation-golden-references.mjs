@@ -349,7 +349,7 @@ function validateGridMultiselectTemplateArtifact(registry, findings, options = {
       actual: template.templateResource?.rootContainer?.nv_label || null,
     }));
   }
-  for (const label of ["grid_table_col_title_wrapper", "op_normal", "op_multipleselected", "grid_table_col_header", "grid_col_item", "grid_table_col_item_select", "btn_set_items"]) {
+  for (const label of ["grid_table_col_title_wrapper", "op_normal", "op_multipleselected", "grid_table_col_header", "grid_table_col_header_select", "grid_col_item", "grid_table_col_item_select", "btn_set_items"]) {
     if (!template.extractionIndex?.slotPointers?.[label]) {
       findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_SLOT_MISSING", "Grid-table multiselect template artifact is missing a required slot pointer.", { slot: label }));
     }
@@ -370,6 +370,16 @@ function validateGridMultiselectTemplateArtifact(registry, findings, options = {
     }));
   }
   const root = template.templateResource?.rootContainer;
+  validateGridMultiselectLeadingColumnContract(
+    findDescendantByIdentity(root, "grid_table_col_header"),
+    findDescendantByIdentity(root, "grid_col_item"),
+    {
+      findings,
+      code: "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_SELECTION_COLUMN_CONTRACT_INVALID",
+      message: "Grid-table multiselect template must preserve a dedicated leading 46px selection column followed by the 2fr primary title column in both header and item grids.",
+      details: { templateId: "collection_control_grid_table_with_multiselect" },
+    },
+  );
   if (root?.attrs?.container?.gap !== 0) {
     findings.push(error("DASH_DATASET_GRID_MULTISELECT_TEMPLATE_WRAPPER_CONTAINER_GAP_MISSING", "Grid-table multiselect template root must preserve attrs.container.gap = 0 for generated grid-table wrapper parity.", {
       templateId: "collection_control_grid_table_with_multiselect",
@@ -1760,6 +1770,7 @@ function validateGridMultiselect(entry, page, findings) {
     "op_normal",
     "op_multipleselected",
     "grid_table_col_header",
+    "grid_table_col_header_select",
     "grid_col_item",
     "grid_table_col_item_select",
   ];
@@ -1798,6 +1809,12 @@ function validateGridMultiselect(entry, page, findings) {
       itemColumns,
     }));
   }
+  validateGridMultiselectLeadingColumnContract(header, itemGrid, {
+    findings,
+    code: "DASH_DATASET_GRID_MULTISELECT_SELECTION_COLUMN_CONTRACT_INVALID",
+    message: "Generated grid-table multiselect modules must keep a dedicated leading 46px selection column followed by the 2fr primary title column; checkbox-only cells must never receive the primary 2fr track.",
+    details: { page: page.title, path: entry.pointer },
+  });
   validateGridColumnTrackCount(header, {
     page,
     path: entry.pointer,
@@ -2335,6 +2352,11 @@ function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase().replace(/[\s_/-]+/g, "_");
 }
 
+function controlHasIdentity(node, identity) {
+  const expected = normalizeIdentity(identity);
+  return identityCandidates(node).map(normalizeIdentity).includes(expected);
+}
+
 function gridColumnWidths(grid, deviceKey) {
   const list = grid?.attrs?.columns?.[deviceKey]?.list;
   return asArray(list).map((item) => {
@@ -2342,6 +2364,36 @@ function gridColumnWidths(grid, deviceKey) {
     if (isObject(item)) return `${item.value || item.w || item.width || ""}${item.unit || item.u || ""}`;
     return String(item || "");
   }).filter(Boolean);
+}
+
+function validateGridMultiselectLeadingColumnContract(header, itemGrid, { findings, code, message, details = {} }) {
+  if (!header || !itemGrid) return;
+  const headerChildren = asArray(header.children);
+  const itemChildren = asArray(itemGrid.children);
+  const headerColumns = gridColumnWidths(header, "1");
+  const itemColumns = gridColumnWidths(itemGrid, "1");
+  const selectionSlotsValid =
+    controlHasIdentity(headerChildren[0], "grid_table_col_header_select")
+    && controlHasIdentity(itemChildren[0], "grid_table_col_item_select");
+  const primarySlotsValid =
+    controlHasIdentity(headerChildren[1], "grid_table_col_header_title_column")
+    && controlHasIdentity(itemChildren[1], "grid_table_col_item_title_column");
+  const widthsValid =
+    headerColumns[0] === "46px"
+    && itemColumns[0] === "46px"
+    && headerColumns[1] === "2fr"
+    && itemColumns[1] === "2fr";
+  if (selectionSlotsValid && primarySlotsValid && widthsValid) return;
+  findings.push(error(code, message, {
+    ...details,
+    expectedLeadingTracks: ["46px", "2fr"],
+    headerLeadingTracks: headerColumns.slice(0, 2),
+    itemLeadingTracks: itemColumns.slice(0, 2),
+    headerFirstIdentity: identityCandidates(headerChildren[0])[0] || null,
+    itemFirstIdentity: identityCandidates(itemChildren[0])[0] || null,
+    headerSecondIdentity: identityCandidates(headerChildren[1])[0] || null,
+    itemSecondIdentity: identityCandidates(itemChildren[1])[0] || null,
+  }));
 }
 
 function validateGridColumnTrackCount(grid, { page, path, code, role, findings }) {

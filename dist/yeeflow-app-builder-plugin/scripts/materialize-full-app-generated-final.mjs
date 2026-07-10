@@ -3104,12 +3104,19 @@ function buildReverseRelatedDynamicField(field, index) {
   };
 }
 
-function normalizeGridColumnDefinition(grid, columnCount) {
-  const count = Math.max(1, Math.min(6, columnCount || 1));
+function normalizeGridColumnDefinition(grid, columnCount, { leadingSelectionColumn = false } = {}) {
+  const maxColumns = leadingSelectionColumn ? 7 : 6;
+  const count = Math.max(1, Math.min(maxColumns, columnCount || 1));
   grid.attrs = grid.attrs || {};
-  const first = { value: count > 1 ? 2 : 1, unit: "fr" };
-  const rest = Array.from({ length: Math.max(0, count - 1) }, () => ({ value: 1, unit: "fr" }));
-  const columns = [first, ...rest];
+  const columns = leadingSelectionColumn
+    ? [
+        { value: 46, unit: "px" },
+        ...Array.from({ length: Math.max(0, count - 1) }, (_, index) => ({ value: index === 0 ? 2 : 1, unit: "fr" })),
+      ]
+    : [
+        { value: count > 1 ? 2 : 1, unit: "fr" },
+        ...Array.from({ length: Math.max(0, count - 1) }, () => ({ value: 1, unit: "fr" })),
+      ];
   if (grid.attrs.columns && !Array.isArray(grid.attrs.columns)) {
     grid.attrs.columns = {
       ...grid.attrs.columns,
@@ -5634,10 +5641,15 @@ function pruneGridTableColumnsBySchema(root, { fieldMap, allowedFields }) {
     }
     if (keepIndexes.length && keepIndexes.length < headerRow.children.length) {
       headerRow.children = keepIndexes.map((index) => headerRow.children[index]).filter(Boolean);
-      normalizeGridColumnDefinition(headerRow, headerRow.children.length);
       if (nearestItemRow && Array.isArray(nearestItemRow.children)) {
         nearestItemRow.children = keepIndexes.map((index) => nearestItemRow.children[index]).filter(Boolean);
-        normalizeGridColumnDefinition(nearestItemRow, nearestItemRow.children.length);
+      }
+      const leadingSelectionColumn =
+        hasIdentity(headerRow.children?.[0], "grid_table_col_header_select")
+        && hasIdentity(nearestItemRow?.children?.[0], "grid_table_col_item_select");
+      normalizeGridColumnDefinition(headerRow, headerRow.children.length, { leadingSelectionColumn });
+      if (nearestItemRow && Array.isArray(nearestItemRow.children)) {
+        normalizeGridColumnDefinition(nearestItemRow, nearestItemRow.children.length, { leadingSelectionColumn });
       }
     }
   }
