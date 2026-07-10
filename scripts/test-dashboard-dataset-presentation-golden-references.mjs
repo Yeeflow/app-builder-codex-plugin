@@ -73,6 +73,13 @@ try {
   findByIdentity(badGridMultiselectTitleTypographyTemplate.templateResource.rootContainer, "grid_table_col_title").attrs.heads.ty = [null, "h5-medium"];
   expectCode("grid-table multiselect source caption title typography is enforced", ["--registry", REGISTRY, "--grid-template", writeJson("bad-grid-multiselect-title-typography-template.json", badGridMultiselectTitleTypographyTemplate)], "DASH_DATASET_TEMPLATE_GRID_TABLE_TITLE_TYPOGRAPHY_INVALID");
 
+  const badGridMultiselectSelectionWidthTemplate = structuredClone(gridTemplate);
+  const badTemplateHeader = findByIdentity(badGridMultiselectSelectionWidthTemplate.templateResource.rootContainer, "grid_table_col_header");
+  const badTemplateItem = findByIdentity(badGridMultiselectSelectionWidthTemplate.templateResource.rootContainer, "grid_col_item");
+  badTemplateHeader.attrs.columns["1"].list[0] = { value: 2, unit: "fr" };
+  badTemplateItem.attrs.columns["1"].list[0] = { value: 2, unit: "fr" };
+  expectCode("grid-table multiselect source keeps a fixed selection column", ["--registry", REGISTRY, "--grid-template", writeJson("bad-grid-multiselect-selection-width-template.json", badGridMultiselectSelectionWidthTemplate)], "DASH_DATASET_GRID_MULTISELECT_TEMPLATE_SELECTION_COLUMN_CONTRACT_INVALID");
+
   const validPlan = write("valid-plan.md", `# Yeeflow App Plan
 
 ## Dashboard Pages Plan
@@ -449,6 +456,14 @@ Dashboard validator commands used during validation:
   staleMultiselectHeader.children = staleMultiselectHeader.children.slice(0, 3);
   staleMultiselectItem.children = staleMultiselectItem.children.slice(0, 3);
   expectCode("grid-table multiselect stale tracks after column pruning fail", ["--package", writePackage("bad-grid-multiselect-stale-tracks", staleGridMultiselectTracksPages)], "DASH_DATASET_GRID_MULTISELECT_COLUMN_TRACK_COUNT_MISMATCH");
+
+  const wideSelectionColumnPages = validPages();
+  const wideSelectionHeader = findControl(wideSelectionColumnPages[2], "grid_table_col_header");
+  const wideSelectionItem = findControl(wideSelectionColumnPages[2], "grid_col_item");
+  const wideSelectionTracks = [[2, "fr"], [1, "fr"], [1, "fr"], [1, "fr"], [1, "fr"]];
+  wideSelectionHeader.attrs.columns["1"].list = structuredClone(wideSelectionTracks);
+  wideSelectionItem.attrs.columns["1"].list = structuredClone(wideSelectionTracks);
+  expectCode("grid-table multiselect checkbox-only first column cannot use primary 2fr width", ["--package", writePackage("bad-grid-multiselect-wide-selection-column", wideSelectionColumnPages)], "DASH_DATASET_GRID_MULTISELECT_SELECTION_COLUMN_CONTRACT_INVALID");
 
   const badGridFullWidthPages = validPages();
   delete findControl(badGridFullWidthPages[2], "grid_table_col_caption").attrs.style.widthtype;
@@ -886,7 +901,7 @@ function gridMultiselectSection(prefix) {
       ]),
     ]),
     container("grid_table_col_content", [
-      gridHeader("grid_table_col_header", columns),
+      gridHeader("grid_table_col_header", columns, { multiselect: true }),
       collection(`${prefix}_collection`, "collection_control_grid_table_with_multiselect", {
         nv_label: "grid_table_col_body",
         children: [gridItem("grid_col_item", columns, [
@@ -894,7 +909,7 @@ function gridMultiselectSection(prefix) {
             { id: "grid_item_unchecked", type: "icon", attrs: { icon: "fa-regular fa-square" } },
             { id: "grid_item_checked", type: "icon", attrs: { icon: "fa-regular fa-square-check" } },
           ], { attrs: { control_action: `${prefix}_select_items` } }),
-          dynamic(`${prefix}_title`, "dynamic-field", "Title"),
+          container("grid_table_col_item_title_column", [dynamic(`${prefix}_title`, "dynamic-field", "Title")]),
           dynamic(`${prefix}_owner`, "dynamic-user", "User1"),
           dynamic(`${prefix}_status`, "dynamic-field", "Text1"),
           { id: `${prefix}_progress`, type: "progress", attrs: { bar: { per: { variable: [{ exprType: "variable_ctx", id: "Decimal2", ctx: "__ctx_coll" }] } } } },
@@ -1117,13 +1132,17 @@ function collection(id, templateId, overrides = {}) {
   };
 }
 
-function gridHeader(id, columns) {
+function gridHeader(id, columns, { multiselect = false } = {}) {
   return {
     id,
     type: "flex_grid",
     displayLabel: [null, false],
     attrs: { columns: { "1": { list: columns }, "3": { list: [[1, "fr"]] } }, rows: { "1": { list: [[1, "fr"]] } }, common: { hide: [null, false, false, true] } },
-    children: columns.map((_, index) => heading(`${id}_h_${index}`, `Column ${index + 1}`)),
+    children: columns.map((_, index) => {
+      if (multiselect && index === 0) return container("grid_table_col_header_select", []);
+      if (multiselect && index === 1) return container("grid_table_col_header_title_column", [heading(`${id}_h_${index}`, "Title")]);
+      return heading(`${id}_h_${index}`, `Column ${index + 1}`);
+    }),
   };
 }
 

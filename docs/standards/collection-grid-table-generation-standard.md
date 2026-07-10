@@ -73,6 +73,8 @@ Export-proven widths:
 - normal task table: `[2fr, 1fr, 1fr, 1fr, 1fr, 1fr]`
 - multiselect task table: `[46px, 2fr, 1fr, 1fr, 1fr, 1fr, 1fr]`
 
+For `collection_control_grid_table_with_multiselect`, the first track is a dedicated selection-only column and must remain exactly `46px` on desktop after business-field mapping or schema pruning. The primary title/business column is the second track and may use `2fr`; all following business columns default to `1fr`. Never apply the normal grid-table `2fr` first-track rule to `grid_table_col_header_select` or `grid_table_col_item_select`. Header and item grids must preserve the same ordered slot contract: selection cell first, primary title cell second, then mapped business cells.
+
 Generated-final validation must fail:
 
 - `COLLECTION_GRID_TABLE_HEADER_GRID_MISSING`
@@ -81,6 +83,7 @@ Generated-final validation must fail:
 - `COLLECTION_GRID_TABLE_COLUMN_WIDTH_MISMATCH`
 - `COLLECTION_GRID_TABLE_HEADER_CAPTION_VISIBLE`
 - `COLLECTION_GRID_TABLE_ITEM_CAPTION_VISIBLE`
+- `DASH_DATASET_GRID_MULTISELECT_SELECTION_COLUMN_CONTRACT_INVALID`
 
 ## Collection Body
 
