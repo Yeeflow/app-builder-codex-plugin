@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.47`
+- Version: `0.9.48`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.47` fixes workflow assignee Expression Button serialization. Generated Approval, Data List, and Scheduled workflows now use export-compatible outer `${ key:value... }` variable JSON with nested `${...}` Applicant or workflow-variable manager references, and recursive validators reject malformed expressions before publish readiness.
+Current release `0.9.48` hardens Approval Workflow Designer editability and publish readiness. Standalone `.ywf` and full `.yapk` generation now share positive-area node bounds and bounds-derived graph extents, declare QueryData output variables, and reject incomplete or semantically incorrect ContentList mutations before signing.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.47
+Version: 0.9.48
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.47
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.48
 ```
 
 ## What Is Included
