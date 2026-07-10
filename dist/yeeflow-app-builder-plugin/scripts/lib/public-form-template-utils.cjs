@@ -320,6 +320,79 @@ function isFieldLikeControl(entry) {
   return FIELD_CONTROL_TYPES.has(entry.type) && (core.binding || core.fieldID || valueAtPath(core, ["attrs", "list_field"]) === true);
 }
 
+function hasConfiguredAction(node) {
+  const core = nodeCore(node) || {};
+  const attrs = attrsOf(node);
+  if (String(attrs.control_action || attrs.action || attrs["action-type"] || attrs.actionType || core.control_action || core.action || core["action-type"] || core.actionType || "").trim()) return true;
+  if (Array.isArray(attrs.actions) && attrs.actions.length > 0) return true;
+  if (Array.isArray(core.actions) && core.actions.length > 0) return true;
+  return childrenOf(node).some((child) => hasConfiguredAction(child));
+}
+
+function visibleText(node) {
+  const core = nodeCore(node) || {};
+  const attrs = attrsOf(node);
+  return [
+    valueAtPath(attrs, ["headc", "title", "value"]),
+    valueAtPath(attrs, ["title", "value"]),
+    core.value,
+    core.text,
+  ].find((value) => typeof value === "string" && value.trim()) || "";
+}
+
+function isTemplatePlaceholderText(value) {
+  return /^(section title|section title here|section short description|collection title here)$/i.test(String(value || "").trim());
+}
+
+function containsGeneratedBusinessContent(node) {
+  const core = nodeCore(node) || {};
+  const type = typeOf(node);
+  if (FIELD_CONTROL_TYPES.has(type) && (core.binding || core.fieldID || valueAtPath(core, ["attrs", "list_field"]) === true)) return true;
+  if (["action_button", "button"].includes(type) && hasConfiguredAction(node)) return true;
+  if (["paragraph", "richtext", "picture", "image", "table", "toggle", "alert", "progress", "progress-circle", "steps-bar", "list-qrcode", "qrcode", "barcode", "custom-code", "embed", "document-embed"].includes(type)) return true;
+  return childrenOf(node).some((child) => containsGeneratedBusinessContent(child));
+}
+
+function validateGeneratedOptionalRegions(resource, labels, add) {
+  for (const entry of labels.get("public_form_title_cta_area") || []) {
+    if (!hasConfiguredAction(entry.node)) {
+      add("PUBLIC_FORM_TEMPLATE_UNUSED_CTA_AREA", "Generated Public Forms must remove public_form_title_cta_area when no configured CTA action is required.", { path: entry.path });
+    }
+  }
+
+  for (const entry of labels.get("public_form_content_section") || []) {
+    for (const child of childrenOf(entry.node)) {
+      if (!ALLOWED_CONTENT_SECTION_LABELS.has(labelOf(child))) continue;
+      if (!containsGeneratedBusinessContent(child)) {
+        add("PUBLIC_FORM_TEMPLATE_UNUSED_LAYOUT_SECTION", "Generated Public Forms must remove copied 1/2/3/60-40 column sections that contain no mapped business content.", { path: entry.path, section: labelOf(child) });
+      }
+    }
+  }
+
+  for (const entry of labels.get("section_title_area") || []) {
+    const header = childrenOf(entry.node).find((child) => labelOf(child) === "section_title_header");
+    const operations = childrenOf(entry.node).find((child) => labelOf(child) === "Operations");
+    const headerTexts = [];
+    if (header) {
+      walkPublicFormControls({ children: [header] }, (childEntry) => {
+        const value = visibleText(childEntry.node);
+        if (value) headerTexts.push(value);
+      });
+    }
+    const meaningfulHeader = headerTexts.some((value) => !isTemplatePlaceholderText(value));
+    const configuredOperations = operations && hasConfiguredAction(operations);
+    if (header && !meaningfulHeader) {
+      add("PUBLIC_FORM_TEMPLATE_SECTION_TITLE_HEADER_NOT_BUSINESS_MAPPED", "A retained Public Form section_title_header must use business-specific title/description text, not golden-template placeholder copy.", { path: entry.path, values: headerTexts });
+    }
+    if (operations && !configuredOperations) {
+      add("PUBLIC_FORM_TEMPLATE_OPERATIONS_EMPTY_OR_PLACEHOLDER", "A retained Public Form Operations region must contain real configured actions; otherwise remove it.", { path: entry.path });
+    }
+    if (!meaningfulHeader && !configuredOperations) {
+      add("PUBLIC_FORM_TEMPLATE_EMPTY_SECTION_TITLE_AREA", "Remove section_title_area when neither a business-specific section title nor configured Operations are required.", { path: entry.path });
+    }
+  }
+}
+
 function validatePublicFormAllowedControl(entry, add) {
   if (!entry.type) return;
   if (PUBLIC_FORM_DISALLOWED_CONTROL_TYPES.has(entry.type)) {
@@ -407,6 +480,7 @@ function validatePublicFormPageLayout(resource, options = {}) {
     pathPrefix = "PublicForms[].Resource",
     publicFormName = null,
     severity = "error",
+    generatedOutput = false,
   } = options;
   const issues = [];
   const add = (code, message, details = {}) => {
@@ -487,6 +561,8 @@ function validatePublicFormPageLayout(resource, options = {}) {
       }
     }
   }
+
+  if (generatedOutput) validateGeneratedOptionalRegions(resource, labels, add);
 
   walkPublicFormControls(resource, (entry) => {
     validatePublicFormAllowedControl(entry, add);

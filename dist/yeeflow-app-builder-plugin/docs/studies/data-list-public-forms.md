@@ -78,6 +78,8 @@ Editable public-form regions:
 
 All business field controls must be placed inside `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper`, specifically inside `section_content_area`. The top-level `public_form_content_section` may only contain approved section layout containers: `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section`.
 
+Generated output must treat those regions as optional choices, not retain the complete example set. Remove `public_form_title_cta_area` when no real CTA is configured; remove copied column sections with no mapped business content; replace retained section placeholder copy with business-specific text; and remove `Operations` when it contains no configured actions. If neither a business-specific `section_title_header` nor configured `Operations` remains, remove the entire `section_title_area`. Standalone `.ydl` and full-application generation use the same cleanup contract.
+
 Public Form field groups may reuse the Data List Form field-layout templates when the fields are public-form-compatible:
 
 - `public_form_fields_1col_v1_1`, rooted at `form_grid_fields_1col_wrapper`

@@ -341,9 +341,9 @@ Rules:
 
 Optional and additive. Add rows only for Data Lists that require anonymous submission. Every host Data List must still include the New/Edit/View custom forms planned above.
 
-| Host Data List | Public Form Name | Form Title | Description / Purpose | Included Fields | Public Form Page Layout Template | Public Form Fields Layout Template | Proof Boundary |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| <Data List> | <Public Form> | <Visible title> | <Anonymous submission purpose> | <Field labels or field names> | public-form-page-layout-standard | public_form_fields_1col_v1_1 | Generated-final validation; anonymous runtime submit proof separate |
+| Host Data List | Public Form Name | Form Title | Description / Purpose | Included Fields | Public Form Page Layout Template | Public Form Fields Layout Template | Business Sections Needed | CTA Actions | Section Title / Operations | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Data List> | <Public Form> | <Visible title> | <Anonymous submission purpose> | <Field labels or field names> | public-form-page-layout-standard | public_form_fields_1col_v1_1 | 1 column survey fields | None | Business-mapped title; no Operations | Generated-final validation; anonymous runtime submit proof separate |
 
 Rules:
 

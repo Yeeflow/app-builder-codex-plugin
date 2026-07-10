@@ -88,7 +88,8 @@ try {
     .sort();
   const actualPublicFieldNames = collectFieldBindings(publicResource).filter((fieldName) => expectedPublicFieldNames.includes(fieldName)).sort();
   assert.deepEqual(actualPublicFieldNames, expectedPublicFieldNames, "planned Public Form fields must materialize inside the golden-reference field grid");
-  assert.deepEqual(validatePublicFormPageLayout(publicResource, { pathPrefix: "Survey Responses.PublicForms[0].Resource", severity: "error" }), []);
+  assert.deepEqual(validatePublicFormPageLayout(publicResource, { pathPrefix: "Survey Responses.PublicForms[0].Resource", severity: "error", generatedOutput: true }), []);
+  assertGeneratedPublicFormOptionalRegionsPruned(publicResource);
   cases.push("full-app materializer keeps Public Form additive to standard New/Edit/View custom forms");
 
   const noPublicPlanPath = path.join(tempDir, "yeeflow-app-plan-no-public-form.md");
@@ -182,4 +183,25 @@ function collectFieldBindings(value, bindings = []) {
   if (typeof value.binding === "string" && value.binding.trim()) bindings.push(value.binding.trim());
   for (const item of Object.values(value)) collectFieldBindings(item, bindings);
   return bindings;
+}
+
+function assertGeneratedPublicFormOptionalRegionsPruned(resource) {
+  const labels = collectLabels(resource);
+  assert.equal(labels.has("public_form_title_cta_area"), false, "unplanned CTA area must be removed");
+  assert.equal(labels.has("2_columns_section"), false, "unused 2-column section must be removed");
+  assert.equal(labels.has("3_columns_section"), false, "unused 3-column section must be removed");
+  assert.equal(labels.has("2_columns_60/40_section"), false, "unused 60/40 section must be removed");
+  assert.equal(labels.has("Operations"), false, "placeholder Operations regions must be removed");
+}
+
+function collectLabels(value, labels = new Set()) {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectLabels(item, labels));
+    return labels;
+  }
+  if (!value || typeof value !== "object") return labels;
+  const label = value.nv_label || value.nav_label || value.name || value.title || value.label || value.id;
+  if (label) labels.add(label);
+  Object.values(value).forEach((item) => collectLabels(item, labels));
+  return labels;
 }

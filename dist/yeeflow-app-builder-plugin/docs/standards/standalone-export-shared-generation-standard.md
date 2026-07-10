@@ -103,6 +103,7 @@ Required shared contracts:
 - Reverse-related Collection sections from the official designer-open `.ydl` shape.
 - Data table, Data Analytics, Dynamic control, and Sub list template rules where those controls are generated on list forms.
 - Data-list workflow and task-form generation rules where list workflows are included.
+- Public Forms from `public-form-page-layout-standard`, including generated optional-region cleanup: no unconfigured CTA area, no empty copied column sections, no placeholder section title copy, and no Operations without real actions.
 
 Standalone `.ydl` output must pass the same list and custom-form gates that full-app generation relies on:
 
@@ -111,6 +112,7 @@ Standalone `.ydl` output must pass the same list and custom-form gates that full
 - `validate-data-list-form-layout-template.mjs` when custom forms are present
 - `validate-data-list-form-fields-template.mjs` when current-record fields are materialized
 - `inspect-app-creation-rules.mjs` or equivalent field creation/schema gates when package context is available
+- shared Public Form generated-output validation when `PublicForms[]` is present
 
 The packaged helper entrypoints are part of this contract. `scripts/validate-ydl-list.js` copies in the plugin and installed skills must delegate to the shared root validator, and `scripts/build-ydl-wrapper.js` must run the same strict import-ready validation before writing and after round-trip decode. A wrapper builder that can write a `.ydl` which `--strict-import-ready` would reject is considered a release-blocking entrypoint drift.
 

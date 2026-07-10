@@ -149,6 +149,13 @@ expectCode("public form cannot include collection controls", mutate(clone(baseRe
   }];
 }), "PUBLIC_FORM_CONTROL_TYPE_NOT_ALLOWED");
 
+expectGeneratedPass("generated survey form prunes unused optional template modules", makeGeneratedSurveyResource());
+expectGeneratedCode("generated Public Form removes unused CTA area", clone(baseResource), "PUBLIC_FORM_TEMPLATE_UNUSED_CTA_AREA");
+expectGeneratedCode("generated Public Form removes unused layout sections", clone(baseResource), "PUBLIC_FORM_TEMPLATE_UNUSED_LAYOUT_SECTION");
+expectGeneratedCode("generated Public Form maps retained section title copy", clone(baseResource), "PUBLIC_FORM_TEMPLATE_SECTION_TITLE_HEADER_NOT_BUSINESS_MAPPED");
+expectGeneratedCode("generated Public Form removes placeholder Operations", clone(baseResource), "PUBLIC_FORM_TEMPLATE_OPERATIONS_EMPTY_OR_PLACEHOLDER");
+expectGeneratedCode("generated Public Form removes empty section title area", clone(baseResource), "PUBLIC_FORM_TEMPLATE_EMPTY_SECTION_TITLE_AREA");
+
 expectMirror("scripts/lib/public-form-template-utils.cjs");
 expectMirror("scripts/test-data-list-public-form-template-gates.mjs");
 expectMirror("docs/reference/public-form-page-layout-standard.template.json");
@@ -182,6 +189,15 @@ function collectIssues(resource) {
   });
 }
 
+function collectGeneratedIssues(resource) {
+  return validatePublicFormPageLayout(resource, {
+    pathPrefix: "fixture.PublicForms[0].Resource",
+    publicFormName: "Fixture Public Form",
+    severity: "error",
+    generatedOutput: true,
+  });
+}
+
 function expectPass(label, resource) {
   const issues = collectIssues(resource);
   checks.push({ case: label, status: issues.length ? "fail" : "pass", issues });
@@ -192,6 +208,41 @@ function expectCode(label, resource, code) {
   const issues = collectIssues(resource);
   checks.push({ case: label, status: issues.some((issue) => issue.code === code) ? "pass" : "fail", expectedCode: code, issues });
   assert.ok(issues.some((issue) => issue.code === code), `${label} should include ${code}: ${JSON.stringify(issues, null, 2)}`);
+}
+
+function expectGeneratedPass(label, resource) {
+  const issues = collectGeneratedIssues(resource);
+  checks.push({ case: label, status: issues.length ? "fail" : "pass", issues });
+  assert.deepEqual(issues, [], label);
+}
+
+function expectGeneratedCode(label, resource, code) {
+  const issues = collectGeneratedIssues(resource);
+  checks.push({ case: label, status: issues.some((issue) => issue.code === code) ? "pass" : "fail", expectedCode: code, issues });
+  assert.ok(issues.some((issue) => issue.code === code), `${label} should include ${code}: ${JSON.stringify(issues, null, 2)}`);
+}
+
+function makeGeneratedSurveyResource() {
+  const resource = clone(baseResource);
+  removeByLabel(resource, "public_form_title_cta_area");
+  const content = findByLabel(resource, "public_form_content_section").node;
+  content.children = [content.children.find((child) => labelOf(child) === "1_columns_section")];
+  const sectionContent = findByLabel(resource, "section_content_area").node;
+  sectionContent.children = [clone(core(publicFormFields1ColTemplate))];
+  findByLabel(resource, "section_title_text").node.attrs.headc.title.value = "Board evaluation questions";
+  findByLabel(resource, "section_title_description").node.attrs.headc.title.value = "Complete each required evaluation item.";
+  removeByLabel(resource, "Operations");
+  return resource;
+}
+
+function removeByLabel(resource, label) {
+  const walk = (node) => {
+    const c = core(node);
+    if (!c || !Array.isArray(c.children)) return;
+    c.children = c.children.filter((child) => labelOf(child) !== label);
+    c.children.forEach(walk);
+  };
+  walk(resource);
 }
 
 function core(node) {
