@@ -117,6 +117,23 @@ Business defaults approval status: user-default-approved-for-generation.
   assert.equal(Number(register.List?.Type), 1, "document register must remain a Type 1 data list");
   assert.equal(Number(library.List?.Type), 16, "document library must materialize as native Type 16");
   assert.ok((library.Fields || []).some((field) => field.FieldName === "Text4" && field.Type === "file-upload"), "document library must include native Upload File field");
+  const nativeFieldContract = {
+    Title: { Status: 1, IsSystem: true, IsIndex: true, Rules: { displayLabel: true, isLibrary: true } },
+    Bigint1: { Status: 127, IsSystem: false, IsIndex: false, Rules: { displayLabel: true, isNotInListFiles: true } },
+    Text1: { Status: 119, IsSystem: false, IsIndex: false, Rules: { displayLabel: true } },
+    Bigint2: { Status: 99, IsSystem: false, IsIndex: false, Rules: { displayLabel: true, readonly: true } },
+    Text2: { Status: 99, IsSystem: false, IsIndex: false, Rules: { displayLabel: true, readonly: true } },
+    Text3: { Status: 319, IsSystem: false, IsIndex: false, Rules: { displayLabel: true, isNotInListFiles: true } },
+    Text4: { Status: 57, IsSystem: false, IsIndex: false, Rules: { displayLabel: true, required: true, isLabrary: true, PROP_MAXSIZE: 2147483648 } },
+  };
+  for (const [fieldName, expected] of Object.entries(nativeFieldContract)) {
+    const field = library.Fields.find((candidate) => candidate.FieldName === fieldName);
+    assert.ok(field, `Document Library native field ${fieldName} must exist`);
+    assert.equal(field.Status, expected.Status, `${fieldName} must preserve runtime Status`);
+    assert.equal(field.IsSystem, expected.IsSystem, `${fieldName} must preserve IsSystem`);
+    assert.equal(field.IsIndex, expected.IsIndex, `${fieldName} must preserve IsIndex`);
+    assert.deepEqual(JSON.parse(field.Rules), expected.Rules, `${fieldName} must preserve runtime Rules`);
+  }
   assert.equal(Object.keys(library.List?.Items || {}).length, 2, "planned root folders must materialize under Type 16 List.Items");
   const folderEntries = Object.entries(library.List.Items);
   assert.ok(folderEntries.every(([folderId]) => /^\d{16,}$/.test(folderId)), "folder object keys must use allocated API-style IDs");
@@ -172,6 +189,12 @@ Business defaults approval status: user-default-approved-for-generation.
     "--package", report.outputs.package,
   ]);
   assert.equal(exportShapeValidation.status, "pass", "generated YAPK export shape must preserve Document Library native Title metadata");
+  const runtimeMetadataValidation = runJson(process.execPath, [
+    path.join(SCRIPT_DIR, "validate-document-library-native-field-runtime-metadata.mjs"),
+    "--package", report.outputs.package,
+  ]);
+  assert.equal(runtimeMetadataValidation.status, "pass", "generated Type 16 fields must satisfy the runtime metadata contract");
+  assert.equal(runtimeMetadataValidation.documentLibraryCount, 1, "runtime metadata validation must inspect the Type 16 library and ignore the Type 1 register");
   const completenessValidation = runJson(process.execPath, [
     path.join(SCRIPT_DIR, "validate-generated-final-resource-completeness.mjs"),
     "--plan", planPath,
@@ -246,6 +269,48 @@ Business defaults approval status: user-default-approved-for-generation.
     "--package", invalidDocumentLibraryTitlePackage,
   ], "DOCUMENT_LIBRARY_NATIVE_TITLE_STATUS_INVALID");
 
+  const simplifiedDocumentLibraryMetadata = structuredClone(decoded);
+  const simplifiedLibrary = simplifiedDocumentLibraryMetadata.Childs.find((child) => child.List?.Title === "Audit Evidence Library");
+  for (const field of simplifiedLibrary.Fields) {
+    if (field.FieldName === "Title") {
+      field.Rules = JSON.stringify({ isLibrary: true });
+      continue;
+    }
+    field.Status = 1;
+    field.IsSystem = true;
+    if (field.FieldName === "Bigint1" || field.FieldName === "Text3") field.Rules = JSON.stringify({ isNotInListFiles: true });
+    else if (field.FieldName === "Bigint2" || field.FieldName === "Text2") field.Rules = JSON.stringify({ readonly: true });
+    else if (field.FieldName === "Text4") field.Rules = JSON.stringify({ required: true, isLabrary: true, isLibrary: true });
+    else field.Rules = "";
+  }
+  const simplifiedMetadataPackage = writeVariant(report.outputs.package, simplifiedDocumentLibraryMetadata, "simplified-document-library-runtime-metadata.yapk");
+  const simplifiedMetadataFailure = runJsonExpectFailure(process.execPath, [
+    path.join(SCRIPT_DIR, "validate-document-library-native-field-runtime-metadata.mjs"),
+    "--package", simplifiedMetadataPackage,
+  ], "DOCUMENT_LIBRARY_NATIVE_FIELD_STATUS_INVALID");
+  const simplifiedCodes = new Set((simplifiedMetadataFailure.findings || []).map((finding) => finding.code));
+  assert.ok(simplifiedCodes.has("DOCUMENT_LIBRARY_NATIVE_FIELD_SYSTEM_FLAG_INVALID"), "simplified IsSystem metadata must fail");
+  assert.ok(simplifiedCodes.has("DOCUMENT_LIBRARY_NATIVE_FIELD_RULE_INVALID"), "missing displayLabel and upload runtime rules must fail");
+  assert.ok(simplifiedCodes.has("DOCUMENT_LIBRARY_NATIVE_FIELD_RULE_UNSUPPORTED"), "legacy Text4 Rules.isLibrary must fail");
+
+  const invalidDocumentLibraryTitleIndex = structuredClone(decoded);
+  invalidDocumentLibraryTitleIndex.Childs
+    .find((child) => child.List?.Title === "Audit Evidence Library")
+    .Fields.find((field) => field.FieldName === "Title").FieldIndex = 1;
+  runJsonExpectFailure(process.execPath, [
+    path.join(SCRIPT_DIR, "validate-document-library-native-field-runtime-metadata.mjs"),
+    "--package", writeVariant(report.outputs.package, invalidDocumentLibraryTitleIndex, "invalid-document-library-title-index.yapk"),
+  ], "DOCUMENT_LIBRARY_NATIVE_FIELD_INDEX_INVALID");
+
+  const preflightFailure = runJsonExpectFailure(process.execPath, [
+    path.join(SCRIPT_DIR, "yapk-first-generation-preflight.mjs"),
+    "--package", simplifiedMetadataPackage,
+    "--plan", planPath,
+    "--id-provenance", provenanceValidationPath,
+    "--json",
+  ], "DOCUMENT_LIBRARY_NATIVE_FIELD_STATUS_INVALID");
+  assert.equal(preflightFailure.failedGate, "document-library-native-field-runtime-metadata", "first-generation preflight must stop at the dedicated Document Library runtime metadata gate");
+
   console.log(JSON.stringify({
     status: "pass",
     cases: [
@@ -253,6 +318,11 @@ Business defaults approval status: user-default-approved-for-generation.
       "Document Libraries are not downgraded to Data Lists with file-upload fields",
       "Document Library navigation uses Type 16",
       "Document Library default upload field is present",
+      "All seven native Document Library fields preserve runtime-proven Status, Rules, IsSystem, and IsIndex metadata",
+      "The dedicated runtime metadata validator inspects Type 16 resources and ignores Type 1 Data Lists",
+      "Simplified Data List-style Document Library field metadata fails before signing",
+      "Title FieldIndex remains 0 for current canonical schema compatibility",
+      "First-generation preflight exposes the Document Library runtime metadata hard gate",
       "Native Bigint Document Library fields pass package validation without Data List coercion",
       "Type 16 fields pass the canonical schema compatibility projection",
       "Type 16 navigation targets resolve through the runtime metadata gate",
