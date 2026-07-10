@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.47
+
+- Generate workflow assignee Expression Buttons with canonical Yeeflow `${ key:value... }` variable JSON instead of invalid `${{...}}` ordinary-JSON wrapping.
+- Preserve nested `${...}` Applicant, Department Manager, and workflow user-variable manager references in `usertaskassignment[]` across standalone YWF and full YAPK materialization.
+- Add recursive assignee-expression parsing and hard gates for invalid outer shape, unparseable buttons, missing/invalid nested expressions, title/value drift, and unresolved workflow variables.
+- Add real-export canonical golden reference text plus source/dist Assignment Task, Approval YWF, and publish-readiness regressions for the Legal Triage failure class.
+
 ## 0.9.46
 
 - Preserve the `collection_control_grid_table_with_multiselect` Golden Reference leading-column geometry after schema-driven field pruning.
