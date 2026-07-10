@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.43
+
+- Release complete Type 1 Data List generation hardening for applications with and without Public Forms.
+- Materialize planned Public Forms through the shared full-app Data List builder only after standard New/Edit/View custom forms, field grids, views, navigation, and package contracts are complete.
+- Require every generated Type 1 Data List to resolve `List.LayoutView.add/edit/view` to Type 1 custom forms; Public Forms and system/support purposes do not replace this requirement.
+- Add App Plan, package, Data List Form Layouts v1.1, source/dist, and first-generation preflight regressions for Public Form-only failure shapes.
+- Preserve the Type 16 Document Library boundary while enforcing the complete lifecycle on all Type 1 Data Lists.
+
 ## 0.9.42
 
 - Release native Document Library YAPK contract and root-folder materialization hardening.
