@@ -12,10 +12,11 @@
           "type": "user",
           "method": "expression",
           "titleShape": "User: <expression-button value=\"Applicant:Line Manager\">",
+          "canonicalValue": "<input type=\"button\" data=\"${ &quot;type&quot;:&quot;user&quot;, &quot;param&quot;:{&quot;id&quot;:&quot;${\\&quot;type\\&quot;:\\&quot;application\\&quot;,\\&quot;prop\\&quot;:\\&quot;ApplicantUserID\\&quot;}&quot;},&quot;prop&quot;:&quot;LineManager&quot;}\" expr=\"__\" tabindex=\"-1\" value=\"Applicant:Line Manager\">",
           "valueShape": {
             "type": "user",
             "param": {
-              "id": "{\"type\":\"application\",\"prop\":\"ApplicantUserID\"}"
+              "id": "${\"type\":\"application\",\"prop\":\"ApplicantUserID\"}"
             },
             "prop": "LineManager"
           }
@@ -34,7 +35,7 @@
           "valueShape": {
             "type": "org",
             "param": {
-              "id": "{\"type\":\"user\",\"param\":{\"id\":\"{\\\"type\\\":\\\"application\\\",\\\"prop\\\":\\\"ApplicantUserID\\\"}\"},\"prop\":\"OrganizationID\"}"
+              "id": "${\"type\":\"user\",\"param\":{\"id\":\"${\\\"type\\\":\\\"application\\\",\\\"prop\\\":\\\"ApplicantUserID\\\"}\"},\"prop\":\"OrganizationID\"}"
             },
             "prop": "Manager"
           }
@@ -105,7 +106,7 @@
           "valueShape": {
             "type": "user",
             "param": {
-              "id": "{\"type\":\"variable\",\"param\":{\"id\":\"Owner\"}}"
+              "id": "${\"type\":\"variable\",\"param\":{\"id\":\"Owner\"}}"
             },
             "prop": "LineManager"
           }

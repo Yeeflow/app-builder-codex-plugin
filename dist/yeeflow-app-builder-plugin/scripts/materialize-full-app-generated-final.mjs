@@ -10,6 +10,12 @@ import {
   buildApprovalFormLayoutDef,
 } from "./lib/approval-form-layout-builder.mjs";
 import { encodeYapkResourceOfficial } from "./lib/yapk-decode-utils.mjs";
+import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
+
+const {
+  buildWorkflowExpressionButton,
+  serializeWorkflowVariableJson,
+} = workflowAssigneeExpressionUtils;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
@@ -7010,16 +7016,15 @@ function exportResource(resource) {
 }
 
 function workflowExpressionButton(data, label) {
-  const escapedData = JSON.stringify(data).replace(/"/g, "&quot;");
-  return `<input type="button" data="\${${escapedData}}" expr="__" tabindex="-1" value="${label}">`;
+  return buildWorkflowExpressionButton(data, label);
 }
 
 function workflowApplicantUserExpression() {
-  return JSON.stringify({ type: "application", prop: "ApplicantUserID" });
+  return serializeWorkflowVariableJson({ type: "application", prop: "ApplicantUserID" });
 }
 
 function workflowVariableUserReferenceExpression(variableId) {
-  return JSON.stringify({ type: "variable", param: { id: variableId } });
+  return serializeWorkflowVariableJson({ type: "variable", param: { id: variableId } });
 }
 
 function workflowApplicantLineManagerExpression() {
@@ -7034,7 +7039,7 @@ function workflowApplicantDepartmentManagerExpression() {
   return workflowExpressionButton({
     type: "org",
     param: {
-      id: JSON.stringify({
+      id: serializeWorkflowVariableJson({
         type: "user",
         param: { id: workflowApplicantUserExpression() },
         prop: "OrganizationID",

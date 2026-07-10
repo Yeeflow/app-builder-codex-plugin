@@ -68,6 +68,7 @@ Use these rules for generated packages:
 
 - Every generated approval workflow Assignment Task must have an explicit assignee plan before package generation. The plan must list task name, assignment type, required job position name when applicable, source, proof status, fallback, and blocker.
 - Use `docs/reference/workflow-assignment-task-assignee-golden-references.json` as the focused golden reference for common business assignee patterns.
+- Apply `docs/standards/workflow-assignee-expression-serialization-standard.md` to every expression-based assignee. The outer Expression Button uses Yeeflow `${ key:value... }` variable JSON rather than `${{...}}`, and manager/organization `param.id` references use nested `${...}` expressions rather than plain JSON strings. Use the shared serializer; do not interpolate generic `JSON.stringify()` output directly.
 - “Line manager approval” must use the applicant application context shape: expression data `type=user`, `param.id={type:application, prop:ApplicantUserID}`, `prop=LineManager`.
 - “Department manager”, “Department head”, and “Department approval” must use the applicant department manager shape: expression data `type=org`, `param.id={type:user, param.id={type:application, prop:ApplicantUserID}, prop:OrganizationID}`, `prop=Manager`.
 - Workflow user-variable assignees must use expression data `type=variable`, `param.id=<workflow user variable id>`.

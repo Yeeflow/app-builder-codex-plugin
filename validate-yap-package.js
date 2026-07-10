@@ -16,6 +16,10 @@ const {
   validateWorkflowBranchConditionCoverage,
   validateWorkflowConditionEditorRows,
 } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
+const {
+  parseWorkflowExpressionButton,
+  validateWorkflowAssigneeExpression,
+} = require("./scripts/lib/workflow-assignee-expression-utils.cjs");
 const { validateDataViewFixedFilters } = require("./scripts/lib/data-list-view-filter-utils.cjs");
 const {
   PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES,
@@ -334,48 +338,9 @@ function primaryTaskUrl(props = {}) {
   return "";
 }
 
-function decodeHtmlEntities(value) {
-  return safeString(value)
-    .replace(/&quot;/g, "\"")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
-}
-
 function assignmentExpressionData(value) {
-  const decoded = decodeHtmlEntities(value);
-  const marker = 'data="${';
-  const markerIndex = decoded.indexOf(marker);
-  if (markerIndex === -1) return null;
-  const start = markerIndex + 'data="$'.length;
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < decoded.length; i += 1) {
-    const ch = decoded[i];
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (ch === "\\") escaped = true;
-      else if (ch === "\"") inString = false;
-      continue;
-    }
-    if (ch === "\"") {
-      inString = true;
-      continue;
-    }
-    if (ch === "{") depth += 1;
-    else if (ch === "}") {
-      depth -= 1;
-      if (depth === 0) {
-        try {
-          return JSON.parse(decoded.slice(start, i + 1));
-        } catch {
-          return null;
-        }
-      }
-    }
-  }
-  return null;
+  const parsed = parseWorkflowExpressionButton(value);
+  return parsed.ok ? parsed.data : null;
 }
 
 function assignmentBlob(assignment) {
@@ -500,11 +465,20 @@ function validateWorkflowTaskAssignees(shape, form, report, index, nodeLabel) {
     if (type === "user" && method === "expression") {
       const managerType = classifyManagerAssignment(assignment);
       const expression = assignmentExpressionData(assignment.value);
+      const expressionValidation = validateWorkflowAssigneeExpression(assignment);
+      for (const finding of expressionValidation.findings) {
+        issue(report, generatorFinalSeverity(report), finding.code, finding.message, {
+          ...context,
+          path: `${context.path}.${finding.path}`,
+          actual: finding.actual ?? null,
+        });
+      }
       if (managerType) {
         if (!MANAGER_ASSIGNMENT_TYPES.has(managerType)) {
           issue(report, generatorFinalSeverity(report), "TASK_MANAGER_EXPRESSION_UNSUPPORTED", "Manager-based assignment must use a supported expression-editor manager pattern.", { ...context, managerType });
         }
-      } else if (!expression && !/{{[^}]+}}/.test(safeString(assignment.value))) {
+      }
+      if (!expression && expressionValidation.findings.length === 0 && !/{{[^}]+}}/.test(safeString(assignment.value))) {
         issue(report, generatorFinalSeverity(report), "TASK_MANAGER_EXPRESSION_MALFORMED", "Expression-editor user assignee must preserve a supported expression-button value or a validated expression token.", context);
       }
     }
@@ -4333,10 +4307,8 @@ function validateSetVariableTaskTargets(shape, workflowVariables, report, contex
 
 function validateTaskAssignmentVariables(shape, workflowVariables, report, context) {
   asArray(shape && shape.properties && shape.properties.usertaskassignment).forEach((assignment, assignmentIndex) => {
-    const text = JSON.stringify(assignment || {});
-    const variableIds = [...text.matchAll(/\\"id\\":\\"([^"\\]+)\\"|"id":"([^"]+)"/g)]
-      .map((match) => safeString(match[1] || match[2]))
-      .filter((id) => id && !["FlowNo"].includes(id));
+    const expressionValidation = validateWorkflowAssigneeExpression(assignment);
+    const variableIds = expressionValidation.variableIds.filter((id) => id && !["FlowNo"].includes(id));
     for (const id of variableIds) {
       if (workflowVariables.keys.has(id)) continue;
       issue(report, generatorFinalSeverity(report), "ASSIGNMENT_TASK_VARIABLE_UNRESOLVED", "Task assignment references a workflow variable that is not present in DefResource.variables.", {

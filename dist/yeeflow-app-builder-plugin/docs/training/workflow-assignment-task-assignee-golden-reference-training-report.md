@@ -26,6 +26,7 @@ Covered patterns:
 ## Generation Rules
 
 - Applicant line manager uses application applicant context, not a workflow variable named `ApplicantUserID`.
+- Applicant line-manager Expression Button serialization follows `docs/standards/workflow-assignee-expression-serialization-standard.md`: outer `${ key:value... }`, nested `${...}` application context, and matching title/value data. `${{...}}` and plain JSON `param.id` are invalid even when the visible label is correct.
 - Department manager / Department head uses applicant department manager expression.
 - Workflow user variable assignment uses `type=variable` expression-button data.
 - Workflow user variable manager assignment uses `type=user` with nested variable reference and `prop=LineManager`.
