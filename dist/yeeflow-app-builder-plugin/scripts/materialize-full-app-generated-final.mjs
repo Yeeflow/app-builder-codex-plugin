@@ -31,6 +31,29 @@ const APPROVAL_FORM_TEMPLATE_IDS = {
 };
 const DATA_LIST_FORM_FIELDS_GRID_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-fields-grid.template.json");
 const DATA_LIST_FORM_SUBLIST_TEMPLATE_PATH = path.join(ROOT, "docs/reference/data-list-form-control-sublist.template.json");
+const PUBLIC_FORM_PAGE_TEMPLATE_PATH = path.join(ROOT, "docs/reference/public-form-page-layout-standard.template.json");
+const PUBLIC_FORM_FIELDS_1COL_TEMPLATE_PATH = path.join(ROOT, "docs/reference/public-form-fields-1col.template.json");
+const PUBLIC_FORM_PAGE_TEMPLATE_ID = "public-form-page-layout-standard";
+const PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID = "public_form_fields_1col_v1_1";
+const PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES = new Set([
+  "input",
+  "textarea",
+  "richtext",
+  "input_number",
+  "percent",
+  "currency",
+  "switch",
+  "radio",
+  "checkbox",
+  "datepicker",
+  "time",
+  "file-upload",
+  "icon-upload",
+  "rate",
+  "hyperlink",
+  "signer",
+  "list",
+]);
 const DATA_ANALYTICS_REGISTRY_PATH = path.join(ROOT, "docs/reference/data-analytics-golden-references.json");
 const DATA_ANALYTICS_TEMPLATE_PATHS = {
   data_analytics_pie_chart_with_title: path.join(ROOT, "docs/reference/data-analytics-pie-chart-with-title.template.json"),
@@ -760,6 +783,7 @@ function analyzeAppPlanResourceDemand(planText) {
     dataListFieldSpecs: collectDataListFieldSpecs(planText),
     dataListViewRecords: collectDataListViewRecords(planText),
     customFormRecords: collectCustomFormRecords(planText),
+    publicFormRecords: collectPublicFormRecords(planText),
     reverseRelatedRecords,
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
@@ -1151,6 +1175,54 @@ function collectCustomFormRecords(planText) {
       } else if (selectedTemplate || openIn || reason) {
         const existing = records.find((item) => `${normKey(item.listName)}::${normKey(item.formName)}` === key);
         if (existing) Object.assign(existing, Object.fromEntries(Object.entries(record).filter(([, value]) => value)));
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex;
+  }
+  return records;
+}
+
+function collectPublicFormRecords(planText) {
+  const section = extractNumberedSection(planText, /^##\s+10\.\s+Custom Data List Forms Plan/im);
+  if (!section.trim()) return [];
+  const lines = section.split(/\r?\n/);
+  const records = [];
+  const seen = new Set();
+  let currentList = "";
+  for (let index = 0; index < lines.length; index += 1) {
+    const heading = lines[index].match(/^###\s+\d+\.[x0-9]+\s+(.+?)\s*$/i);
+    if (heading) currentList = cleanResourceName(heading[1]);
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1] || "") || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const formColumn = findHeaderIndex(normalizedHeaders, ["public form", "public form name"]);
+    if (formColumn === -1) continue;
+    const listColumn = findHeaderIndex(normalizedHeaders, ["host data list", "data list", "host list", "list name"]);
+    const titleColumn = findHeaderIndex(normalizedHeaders, ["form title", "public title", "title"]);
+    const descriptionColumn = findHeaderIndex(normalizedHeaders, ["description", "form description", "purpose"]);
+    const fieldsColumn = findHeaderIndex(normalizedHeaders, ["fields", "included fields", "field source"]);
+    const pageTemplateColumn = findHeaderIndex(normalizedHeaders, ["page layout template", "public form page layout template", "selected public form page layout template"]);
+    const fieldTemplateColumn = findHeaderIndex(normalizedHeaders, ["fields layout template", "public form fields layout template", "selected public form fields layout template"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const formName = cleanResourceName(cells[formColumn]);
+      const listName = cleanResourceName(cells[listColumn]) || currentList;
+      if (formName && listName && !isNonResourceName(formName) && !isNonResourceName(listName)) {
+        const key = `${normKey(listName)}::${normKey(formName)}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          records.push({
+            listName,
+            formName,
+            title: titleColumn === -1 ? formName : cleanResourceName(cells[titleColumn]) || formName,
+            description: descriptionColumn === -1 ? "" : cleanResourceName(cells[descriptionColumn]),
+            fields: fieldsColumn === -1 ? "" : cleanResourceName(cells[fieldsColumn]),
+            pageTemplateId: pageTemplateColumn === -1 ? PUBLIC_FORM_PAGE_TEMPLATE_ID : cleanResourceName(cells[pageTemplateColumn]) || PUBLIC_FORM_PAGE_TEMPLATE_ID,
+            fieldTemplateId: fieldTemplateColumn === -1 ? PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID : cleanResourceName(cells[fieldTemplateColumn]) || PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID,
+          });
+        }
       }
       rowIndex += 1;
     }
@@ -1560,6 +1632,9 @@ function buildIdPaths(planDemand) {
   });
   for (const assignment of assignAllCustomFormLayoutPositions(planDemand, childResources.map((record) => record.name))) {
     paths.push(`decoded.Childs[${assignment.listIndex}].Layouts[${assignment.layoutIndex}].LayoutID`);
+  }
+  for (const assignment of assignPublicFormPositions(planDemand, childResources)) {
+    if (assignment.listIndex >= 0) paths.push(`decoded.Childs[${assignment.listIndex}].PublicForms[${assignment.publicFormIndex}].ID`);
   }
   const customLayoutCountByListIndex = new Map();
   for (const assignment of assignAllCustomFormLayoutPositions(planDemand, childResources.map((record) => record.name))) {
@@ -2091,6 +2166,17 @@ function assignAllCustomFormLayoutPositions(planDemand, dataListNames) {
   return assignments.concat(fallbackAssignments);
 }
 
+function assignPublicFormPositions(planDemand, childResourceRecords) {
+  const listIndexByName = new Map(childResourceRecords.map((record, index) => [normKey(record.name), index]));
+  const countsByList = new Map();
+  return (planDemand.publicFormRecords || []).map((record) => {
+    const listIndex = listIndexByName.has(normKey(record.listName)) ? listIndexByName.get(normKey(record.listName)) : -1;
+    const publicFormIndex = countsByList.get(listIndex) || 0;
+    countsByList.set(listIndex, publicFormIndex + 1);
+    return { ...record, listIndex, publicFormIndex };
+  });
+}
+
 function inferCustomFormHostListName(formName, dataListNames) {
   const formKey = normKey(formName);
   const exact = dataListNames.find((name) => formKey.includes(normKey(name)) || normKey(name).includes(formKey.replace(/\b(new|edit|view|item|form|details?)\b/g, "").trim()));
@@ -2526,6 +2612,112 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   removeEmptyBusinessSections(resource);
   if (templateKind === "workbench") normalizeWorkbenchMainQueueColumns(resource);
   return resource;
+}
+
+function buildPublicFormEntry({ record, publicFormId, listId, listName, fields, findings }) {
+  const selectedFields = resolvePublicFormFields(record, fields);
+  for (const field of selectedFields) {
+    const controlType = publicFormControlType(field);
+    if (!PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES.has(controlType)) {
+      findings.push(error(
+        "PUBLIC_FORM_FIELD_CONTROL_TYPE_NOT_ALLOWED",
+        "Public Form fields must use anonymous-submission-compatible controls; unsupported Data List field types cannot be materialized on Public Forms.",
+        { listName, publicForm: record.formName, field: field.DisplayName, fieldName: field.FieldName, controlType },
+      ));
+    }
+  }
+  const resource = materializePublicFormResource({ record, listName, fields: selectedFields.filter((field) => PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES.has(publicFormControlType(field))) });
+  return {
+    ListID: listId,
+    ID: publicFormId,
+    Type: 0,
+    Name: record.formName,
+    Desc: record.description || `${record.formName} anonymous submission form.`,
+    Ext: null,
+    ExpiredTip: null,
+    RefId: listId,
+    Resource: JSON.stringify(resource),
+  };
+}
+
+function resolvePublicFormFields(record, fields) {
+  const requested = splitPlannedFieldList(record.fields);
+  if (!requested.length) return fields;
+  const selected = [];
+  const seen = new Set();
+  for (const name of requested) {
+    const field = resolveDataViewField(fields, name);
+    if (!field || seen.has(field.FieldName)) continue;
+    seen.add(field.FieldName);
+    selected.push(field);
+  }
+  return selected;
+}
+
+function publicFormControlType(field) {
+  const type = String(field?.Type || "input");
+  if (type === "select") return "radio";
+  return type;
+}
+
+function materializePublicFormResource({ record, listName, fields }) {
+  const pageTemplate = JSON.parse(fs.readFileSync(PUBLIC_FORM_PAGE_TEMPLATE_PATH, "utf8"));
+  const resource = clone(pageTemplate.resource);
+  resource.publicFormPageLayoutTemplateId = PUBLIC_FORM_PAGE_TEMPLATE_ID;
+  resource.publicFormFieldsLayoutTemplateId = PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID;
+  resource.title = record.formName;
+  setTemplateText(resource, "public_form_title_text", record.title || record.formName);
+  setTemplateText(resource, "public_form_description", record.description || `Submit ${listName} information.`);
+  setTemplateText(resource, "section_title_text", record.title || record.formName);
+  setTemplateText(resource, "section_title_description", record.description || `Complete the ${listName} fields below.`);
+  removeAllByIdentity(resource, "public_form_title_cta_area");
+  const slot = findBusinessSectionContentArea(resource);
+  if (slot) slot.children = [buildPublicFormFieldsGrid({ fields, listName, formName: record.formName })];
+  reinstantiateTemplateUuidValues(resource);
+  return resource;
+}
+
+function buildPublicFormFieldsGrid({ fields, listName, formName }) {
+  const template = JSON.parse(fs.readFileSync(PUBLIC_FORM_FIELDS_1COL_TEMPLATE_PATH, "utf8"));
+  const wrapper = clone(template._ak_c || template);
+  const templateCell = clone((wrapper.children || [])[0]);
+  wrapper.children = fields.map((field, index) => {
+    const cell = clone(templateCell);
+    const title = findFirstByIdentity(cell, "form_grid_field_title");
+    const control = findFirstByIdentity(cell, "form_grid_field_control");
+    if (title) setTemplateText(cell, "form_grid_field_title", field.DisplayName);
+    if (control) {
+      const rules = parseJsonObject(field.Rules);
+      control.id = crypto.randomUUID();
+      control.type = publicFormControlType(field);
+      control.binding = field.FieldName;
+      control.fieldID = field.FieldID;
+      control.name = `${formName} ${field.DisplayName}`;
+      control.title = field.DisplayName;
+      control.displayLabel = [null, false];
+      control.attrs = control.attrs || {};
+      control.attrs.required = rules.required === true;
+      if (rules.placeholder) control.attrs.placeholder = rules.placeholder;
+      if (Array.isArray(rules.choices)) control.attrs.options = rules.choices;
+      control.attrs.common = control.attrs.common || {};
+      control.attrs.common.margin = [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }];
+    }
+    cell.id = crypto.randomUUID();
+    cell.name = `${listName} ${field.DisplayName} field`;
+    return cell;
+  });
+  wrapper.id = crypto.randomUUID();
+  return wrapper;
+}
+
+function parseJsonObject(value) {
+  if (value && typeof value === "object" && !Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(String(value || "{}"));
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
 }
 
 function appendReverseRelatedCollectionSections(resource, { planDemand, listMetaByName, hostListName, formName, rootListSetId, layoutId }) {
@@ -3320,6 +3512,23 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
   const childResourceTypeByName = new Map(childResourceRecords.map((record) => [normKey(record.name), record.resourceType]));
   const listMetaByName = new Map();
   const allCustomFormAssignments = assignAllCustomFormLayoutPositions(planDemand, dataListNames);
+  const allPublicFormAssignments = assignPublicFormPositions(planDemand, childResourceRecords);
+  for (const assignment of allPublicFormAssignments) {
+    if (assignment.listIndex < 0) {
+      findings.push(error("PUBLIC_FORM_HOST_DATA_LIST_NOT_FOUND", "Every planned Public Form must resolve to a planned Type 1 Data List host.", { publicForm: assignment.formName, listName: assignment.listName }));
+      continue;
+    }
+    const host = childResourceRecords[assignment.listIndex];
+    if (host?.resourceType === "document-library") {
+      findings.push(error("PUBLIC_FORM_HOST_TYPE_INVALID", "Public Forms are supported only on Type 1 Data Lists, not Document Libraries.", { publicForm: assignment.formName, listName: assignment.listName }));
+    }
+    if (assignment.pageTemplateId !== PUBLIC_FORM_PAGE_TEMPLATE_ID) {
+      findings.push(error("PUBLIC_FORM_PAGE_LAYOUT_TEMPLATE_INVALID", "Generated Public Forms must select public-form-page-layout-standard.", { publicForm: assignment.formName, selectedTemplate: assignment.pageTemplateId }));
+    }
+    if (assignment.fieldTemplateId !== PUBLIC_FORM_FIELDS_1COL_TEMPLATE_ID) {
+      findings.push(error("PUBLIC_FORM_FIELDS_LAYOUT_TEMPLATE_INVALID", "This Public Form generation path must select public_form_fields_1col_v1_1.", { publicForm: assignment.formName, selectedTemplate: assignment.fieldTemplateId }));
+    }
+  }
   dataListNames.forEach((name, index) => {
     dataListByName.set(normKey(name), stringId(ids[`decoded.Childs[${index}].List.ListID`]));
   });
@@ -3361,6 +3570,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
     dataListByName.set(normKey(name), listId);
     const fields = fieldRecordsByName.get(normKey(name)) || [];
     const customLayoutsForList = allCustomFormAssignments.filter((assignment) => assignment.listIndex === index);
+    const publicFormsForList = allPublicFormAssignments.filter((assignment) => assignment.listIndex === index);
     const plannedViewsForList = dataListViewRecordsForList(planDemand, name);
     const defaultPlannedView = selectDefaultDataListViewRecord(plannedViewsForList);
     const layouts = [
@@ -3414,12 +3624,20 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       const folderItems = buildDocumentLibraryFolderItems({ planDemand, listName: name, childIndex: index, ids });
       if (Object.keys(folderItems).length) list.Items = folderItems;
     }
+    const publicForms = listType === 1 ? publicFormsForList.map((record) => buildPublicFormEntry({
+      record,
+      publicFormId: stringId(ids[`decoded.Childs[${index}].PublicForms[${record.publicFormIndex}].ID`]),
+      listId,
+      listName: name,
+      fields,
+      findings,
+    })) : [];
     return {
       List: list,
       Fields: fields,
       Layouts: layouts,
       RemindRules: [],
-      PublicForms: [],
+      PublicForms: publicForms,
       FlowMappings: [],
     };
   });

@@ -12,7 +12,7 @@ Generated package:
 
 Downloads copy:
 
-`<downloads>/data-list-public-form-runtime-proof.v1.yap`
+`/Users/Renger/Downloads/data-list-public-form-runtime-proof.v1.yap`
 
 Package strategy:
 
@@ -71,7 +71,7 @@ Results:
 - Package validator: pass with warnings only, 0 errors
 - Graph validator: pass with warnings only, 0 errors
 
-Known validator warnings were unrelated to public-form import/open proof: runtime-sensitive field semantics for percent/time/hyperlink, missing standard custom edit/view forms because this package focuses on Public Forms, dashboard UI-standard warnings, and token-color warnings.
+Historical proof note: this focused runtime package omitted standard custom New/Edit/View forms because it isolated Public Form import/open behavior. That omission is no longer acceptable for newly generated full applications or standalone Data Lists. Current generation must preserve the Public Form proof while also producing Data List Form Layouts v1.1 New/Edit/View forms and resolved `List.LayoutView.add/edit/view` routing.
 
 ## User-Proven Runtime Result
 

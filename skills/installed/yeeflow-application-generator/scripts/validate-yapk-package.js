@@ -330,6 +330,9 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
     if (pkg.List.LayoutView !== null && pkg.List.LayoutView !== undefined && !hasExportResolvedCustomFormRouting(pkg)) {
       add(errors, "LIST_LAYOUTVIEW_SHOULD_BE_NULL", "Generated child List.LayoutView must be null unless custom form routing is fully export-resolved.", { path: `${path}.List.LayoutView` });
     }
+    if (Number(pkg.List.Type) === 1 && asArray(pkg.PublicForms).length > 0 && !hasExportResolvedCustomFormRouting(pkg)) {
+      add(errors, "YAPK_PUBLIC_FORM_CANNOT_REPLACE_CUSTOM_FORMS", "PublicForms[] is additive functionality. A generated Type 1 Data List with a Public Form must still include export-resolved New/Edit/View custom forms through List.LayoutView.add/edit/view.", { path, list: pkg.List.Title || null, publicFormCount: asArray(pkg.PublicForms).length });
+    }
   }
   counts.fields += asArray(pkg.Fields).length;
   counts.layouts += asArray(pkg.Layouts).length;
