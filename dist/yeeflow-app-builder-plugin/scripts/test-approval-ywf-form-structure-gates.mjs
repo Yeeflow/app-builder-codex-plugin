@@ -8,9 +8,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildApprovalFormLayoutDef } from "./lib/approval-form-layout-builder.mjs";
 import { validateApprovalFormLayoutTemplate } from "./validate-approval-form-layout-template.mjs";
+import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
 
 const require = createRequire(import.meta.url);
 const { validateDecodedDef } = require("../validate-ywf-def.js");
+const {
+  buildWorkflowExpressionButton,
+  serializeWorkflowVariableJson,
+} = workflowAssigneeExpressionUtils;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const IDS = {
@@ -48,6 +53,14 @@ expectCode("simple Outcome token task outcome condition fails", (def) => {
   const flow = def.childshapes.find((shape) => shape.id === IDS.approved);
   flow.properties.conditioninfo = simpleOutcomeCondition("Approved");
 }, "APPROVAL_CONDITION_LEFT_TASK_REF_INVALID");
+expectCode("JSON-wrapped assignee expression fails", (def) => {
+  const task = def.childshapes.find((shape) => shape.id === IDS.task);
+  task.properties.usertaskassignment = [legacyJsonWrappedApplicantLineManager()];
+}, "WORKFLOW_ASSIGNEE_EXPRESSION_OUTER_SHAPE_INVALID");
+expectCode("plain JSON nested applicant expression fails", (def) => {
+  const task = def.childshapes.find((shape) => shape.id === IDS.task);
+  task.properties.usertaskassignment = [applicantLineManagerWithPlainJsonParam()];
+}, "WORKFLOW_ASSIGNEE_NESTED_EXPRESSION_MISSING");
 
 console.log(JSON.stringify({
   status: "pass",
@@ -291,18 +304,41 @@ function applicantLineManager() {
   return {
     type: "user",
     method: "expression",
-    title: "User: Applicant:Line Manager",
+    title: `User: ${expressionButton({
+      type: "user",
+      param: { id: serializeWorkflowVariableJson({ type: "application", prop: "ApplicantUserID" }) },
+      prop: "LineManager",
+    }, "Applicant:Line Manager")}`,
     value: expressionButton({
       type: "user",
-      param: { id: JSON.stringify({ type: "application", prop: "ApplicantUserID" }) },
+      param: { id: serializeWorkflowVariableJson({ type: "application", prop: "ApplicantUserID" }) },
       prop: "LineManager",
     }, "Applicant:Line Manager"),
   };
 }
 
 function expressionButton(data, label) {
+  return buildWorkflowExpressionButton(data, label);
+}
+
+function legacyJsonWrappedApplicantLineManager() {
+  const data = {
+    type: "user",
+    param: { id: JSON.stringify({ type: "application", prop: "ApplicantUserID" }) },
+    prop: "LineManager",
+  };
   const escapedData = JSON.stringify(data).replace(/"/g, "&quot;");
-  return `<input type="button" data="\${${escapedData}}" expr="__" tabindex="-1" value="${label}">`;
+  const value = `<input type="button" data="\${${escapedData}}" expr="__" tabindex="-1" value="Applicant:Line Manager">`;
+  return { type: "user", method: "expression", title: `User: ${value}`, value };
+}
+
+function applicantLineManagerWithPlainJsonParam() {
+  const value = expressionButton({
+    type: "user",
+    param: { id: JSON.stringify({ type: "application", prop: "ApplicantUserID" }) },
+    prop: "LineManager",
+  }, "Applicant:Line Manager");
+  return { type: "user", method: "expression", title: `User: ${value}`, value };
 }
 
 function firstValueControl(def) {

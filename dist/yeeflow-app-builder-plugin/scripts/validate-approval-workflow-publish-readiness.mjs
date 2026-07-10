@@ -10,6 +10,7 @@ import { asArray, isObject, readDecodedYapk } from "./lib/yapk-decode-utils.mjs"
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
 const { validateDecodedDef } = require(path.join(ROOT, "validate-ywf-def.js"));
+const { validateWorkflowAssigneeExpression } = require(path.join(ROOT, "scripts/lib/workflow-assignee-expression-utils.cjs"));
 const BROTLI_PREFIX = Buffer.from("::brotli::", "utf8");
 
 if (isMainModule()) {
@@ -232,6 +233,18 @@ function validateAssignmentShape(def, context) {
         source: context.source,
         path: `$.childshapes[${shapeIndex}].properties.usertaskassignment`,
       }));
+    } else {
+      for (const [assignmentIndex, assignment] of props.usertaskassignment.entries()) {
+        if (assignment?.method !== "expression") continue;
+        const validation = validateWorkflowAssigneeExpression(assignment);
+        for (const finding of validation.findings) {
+          context.findings.push(issue(finding.code, finding.message, {
+            source: context.source,
+            path: `$.childshapes[${shapeIndex}].properties.usertaskassignment[${assignmentIndex}].${finding.path}`,
+            actual: finding.actual ?? null,
+          }));
+        }
+      }
     }
     if (!props.approveway) {
       context.findings.push(issue("APPROVAL_WORKFLOW_APPROVEWAY_MISSING", "MultiAssignmentTask must include approveway metadata.", {

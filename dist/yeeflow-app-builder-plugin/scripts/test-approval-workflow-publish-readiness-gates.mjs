@@ -70,6 +70,13 @@ try {
   }), "APPROVAL_WORKFLOW_ASSIGNMENT_SHAPE_INVALID");
   cases.push({ case: "fail: assignment object instead of array", status: "pass" });
 
+  expectCode("JSON-wrapped assignee expression fails", mutateResource(validDef, (def) => {
+    const task = def.childshapes.find((shape) => shape?.stencil?.id === "MultiAssignmentTask");
+    const badValue = '<input type="button" data="${{&quot;type&quot;:&quot;user&quot;,&quot;param&quot;:{&quot;id&quot;:&quot;{\\&quot;type\\&quot;:\\&quot;application\\&quot;,\\&quot;prop\\&quot;:\\&quot;ApplicantUserID\\&quot;}&quot;},&quot;prop&quot;:&quot;LineManager&quot;}}" expr="__" tabindex="-1" value="Applicant:Line Manager">';
+    task.properties.usertaskassignment = [{ type: "user", method: "expression", title: `User: ${badValue}`, value: badValue }];
+  }), "WORKFLOW_ASSIGNEE_EXPRESSION_OUTER_SHAPE_INVALID");
+  cases.push({ case: "fail: JSON-wrapped assignee Expression Button", status: "pass" });
+
   expectCode("legacy outcome condition shape fails", mutateResource(validDef, (def) => {
     const approvedFlow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow" && /Approved/i.test(JSON.stringify(shape?.properties || {})));
     approvedFlow.properties.conditioninfo = [{ label: "Task outcome:Approved", value: "Approved" }];

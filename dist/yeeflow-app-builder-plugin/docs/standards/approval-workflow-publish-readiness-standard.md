@@ -47,7 +47,7 @@ Required Assignment Task node:
 - `properties.taskurl`, `properties.taskUrl`, and `properties.TaskUrl` must all reference the task page ID.
 - `properties.usertaskassignment` must be a non-empty array.
 - `properties.approveway` and `properties.approvepercentage` must be present.
-- Applicant line-manager assignment must use the export-proven `ApplicantUserID` + `LineManager` expression button shape, not a legacy `Applicant` shortcut or a free-text placeholder.
+- Applicant line-manager assignment must use the export-proven `ApplicantUserID` + `LineManager` expression button shape, not a legacy `Applicant` shortcut or a free-text placeholder. The outer expression must use `${ key:value... }`, never `${{...}}`; its `param.id` must contain nested `${...}` application variable JSON. A manager label is not sufficient when the Expression Button cannot be recursively parsed.
 - Approved and Rejected outgoing conditions must be explicit and Designer-readable:
   - `conditioninfo[]` rows must use `left`, `op`, and `right`.
   - `left` must be a task Outcome expression that references the current `MultiAssignmentTask` id.

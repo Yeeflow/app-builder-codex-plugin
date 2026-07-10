@@ -5,10 +5,18 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
+
+const {
+  buildWorkflowExpressionButton,
+  serializeWorkflowVariableJson,
+} = workflowAssigneeExpressionUtils;
 
 const ROOT = process.cwd();
 const REQUEST_PAGE_ID = "11111111-1111-4111-8111-111111111111";
 const TASK_PAGE_ID = "22222222-2222-4222-8222-222222222222";
+const ASSIGNEE_GOLDEN = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/workflow-assignment-task-assignee-golden-references.json"), "utf8"));
+const APPLICANT_LINE_MANAGER_GOLDEN = ASSIGNEE_GOLDEN.patterns.find((pattern) => pattern.id === "assignment_assignee_applicant_line_manager").usertaskassignment[0].canonicalValue;
 
 function page(id, key, type, formdefPagetype) {
   return {
@@ -157,16 +165,15 @@ function managerExpression(label, value) {
 }
 
 function expressionButton(data, label) {
-  const escapedData = JSON.stringify(data).replace(/"/g, "&quot;");
-  return `<input type="button" data="\${${escapedData}}" expr="__" tabindex="-1" value="${label}">`;
+  return buildWorkflowExpressionButton(data, label);
 }
 
 function applicantUserExpr() {
-  return JSON.stringify({ type: "application", prop: "ApplicantUserID" });
+  return serializeWorkflowVariableJson({ type: "application", prop: "ApplicantUserID" });
 }
 
 function variableUserRef(variableId) {
-  return JSON.stringify({ type: "variable", param: { id: variableId } });
+  return serializeWorkflowVariableJson({ type: "variable", param: { id: variableId } });
 }
 
 function applicantLineManager() {
@@ -217,6 +224,27 @@ function directUser(overrides = {}) {
   };
 }
 
+function legacyJsonWrappedExpressionButton(data, label) {
+  const escapedData = JSON.stringify(data).replace(/"/g, "&quot;");
+  return `<input type="button" data="\${${escapedData}}" expr="__" tabindex="-1" value="${label}">`;
+}
+
+function malformedApplicantLineManagerOuter() {
+  return managerExpression("User: Applicant:Line Manager", legacyJsonWrappedExpressionButton({
+    type: "user",
+    param: { id: JSON.stringify({ type: "application", prop: "ApplicantUserID" }) },
+    prop: "LineManager",
+  }, "Applicant:Line Manager"));
+}
+
+function applicantLineManagerWithPlainJsonParam() {
+  return managerExpression("User: Applicant:Line Manager", expressionButton({
+    type: "user",
+    param: { id: JSON.stringify({ type: "application", prop: "ApplicantUserID" }) },
+    prop: "LineManager",
+  }, "Applicant:Line Manager"));
+}
+
 function writeFixture(dir, name, assignment) {
   const file = path.join(dir, `${name}.json`);
   fs.writeFileSync(file, `${JSON.stringify(app(assignment), null, 2)}\n`, "utf8");
@@ -256,6 +284,7 @@ function expectCode(name, assignment, code) {
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "workflow-assignee-guardrails-"));
 
 try {
+  assert.equal(applicantLineManager().value, APPLICANT_LINE_MANAGER_GOLDEN, "Applicant line-manager Expression Button must match the real export canonical value");
   expectPass("job-position-discovered", jobPosition());
   expectPass("job-position-admin-created", adminCreatedJobPosition());
   expectPass("job-position-user-selected", userSelectedJobPosition());
@@ -281,8 +310,16 @@ try {
   expectCode("admin-create-duplicate-scan-missing", adminCreatedJobPosition({ duplicateNameScanRecorded: false }), "TASK_JOB_POSITION_DUPLICATE_SCAN_MISSING");
   expectCode("hardcoded-user-without-request", directUser({ explicitlyRequested: false, userAssignmentExplicitlyRequested: false }), "TASK_DIRECT_USER_REQUIRES_EXPLICIT_REQUEST");
   expectCode("malformed-manager-expression", managerExpression("Reviewer expression", "not an expression"), "TASK_MANAGER_EXPRESSION_MALFORMED");
+  expectCode("json-wrapped-expression-button", malformedApplicantLineManagerOuter(), "WORKFLOW_ASSIGNEE_EXPRESSION_OUTER_SHAPE_INVALID");
+  expectCode("plain-json-nested-applicant", applicantLineManagerWithPlainJsonParam(), "WORKFLOW_ASSIGNEE_NESTED_EXPRESSION_MISSING");
+  expectCode("invalid-nested-applicant", managerExpression("User: Applicant:Line Manager", expressionButton({ type: "user", param: { id: '${"type":}' }, prop: "LineManager" }, "Applicant:Line Manager")), "WORKFLOW_ASSIGNEE_NESTED_EXPRESSION_INVALID");
+  expectCode("unparseable-expression-button", managerExpression("User: Applicant:Line Manager", '<input type="button" data="${ &quot;type&quot;:" expr="__" value="Applicant:Line Manager">'), "WORKFLOW_ASSIGNEE_EXPRESSION_PARSE_FAILED");
+  expectCode("title-value-expression-mismatch", {
+    ...applicantLineManager(),
+    title: `User: ${expressionButton({ type: "variable", param: { id: "Owner" } }, "Workflow Variables:Owner")}`,
+  }, "WORKFLOW_ASSIGNEE_EXPRESSION_TITLE_VALUE_MISMATCH");
 
-  console.log(JSON.stringify({ status: "pass", cases: 25 }, null, 2));
+  console.log(JSON.stringify({ status: "pass", cases: 30 }, null, 2));
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });
 }
