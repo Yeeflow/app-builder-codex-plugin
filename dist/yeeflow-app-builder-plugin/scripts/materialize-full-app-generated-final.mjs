@@ -2673,6 +2673,10 @@ function materializePublicFormResource({ record, listName, fields }) {
   removeAllByIdentity(resource, "public_form_title_cta_area");
   const slot = findBusinessSectionContentArea(resource);
   if (slot) slot.children = [buildPublicFormFieldsGrid({ fields, listName, formName: record.formName })];
+  removeAllByIdentity(resource, "Operations");
+  removeResidualTemplateSectionHeaders(resource);
+  removeEmptySectionTitleAreas(resource);
+  removeEmptyBusinessSections(resource);
   reinstantiateTemplateUuidValues(resource);
   return resource;
 }

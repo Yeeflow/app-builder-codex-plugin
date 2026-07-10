@@ -94,6 +94,18 @@ The submit button is required for anonymous collection and must remain:
 
 CTA action buttons in the title region must be inside `public_form_title_cta_area`.
 
+## Generated Optional-Region Cleanup
+
+The golden reference is a complete library of supported layout modules, not a requirement to retain every example module in each generated Public Form. After business content is mapped, generated output must prune every unselected optional region:
+
+- Remove `public_form_title_cta_area` when the App Plan does not define a real configured CTA action.
+- Keep only selected `1_columns_section`, `2_columns_section`, `3_columns_section`, or `2_columns_60/40_section` instances that contain mapped business content. Remove copied sections whose content cards remain empty.
+- `section_title_header` is optional. If retained, rewrite `section_title_text` and `section_title_description` for the current business section; source placeholders are forbidden.
+- `Operations` is optional. If retained, it must contain real configured actions. Remove placeholder or visual-only buttons.
+- If neither a business-specific `section_title_header` nor configured `Operations` is required, remove the entire `section_title_area`.
+
+This cleanup applies equally to standalone `.ydl` generation and Data Lists materialized inside `.yap`/`.yapk` applications. Generated-output hard gates are `PUBLIC_FORM_TEMPLATE_UNUSED_CTA_AREA`, `PUBLIC_FORM_TEMPLATE_UNUSED_LAYOUT_SECTION`, `PUBLIC_FORM_TEMPLATE_SECTION_TITLE_HEADER_NOT_BUSINESS_MAPPED`, `PUBLIC_FORM_TEMPLATE_OPERATIONS_EMPTY_OR_PLACEHOLDER`, and `PUBLIC_FORM_TEMPLATE_EMPTY_SECTION_TITLE_AREA`.
+
 ## Anonymous Public Form Control Restrictions
 
 Public Forms are anonymous submission forms. They must not include fields or controls that require a signed-in Yeeflow user, tenant/org context, related-record selection, authenticated data browsing, or dashboard-style filtering.

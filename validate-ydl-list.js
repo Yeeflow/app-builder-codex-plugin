@@ -1186,6 +1186,7 @@ function validatePublicForms(item, fieldByName, report) {
       pathPrefix: `${context.location}.Resource`,
       publicFormName: context.publicForm,
       severity: generatorFinalSeverity(report),
+      generatedOutput: true,
     })) {
       issue(report, templateIssue.severity, templateIssue.code, templateIssue.message, templateIssue.details);
     }
