@@ -309,7 +309,7 @@ Rules:
 
 Return to the Data lists and Document libraries from Section 4 and plan their custom forms.
 
-Every business Data List or Document Library from Section 4 must plan custom forms for New Item, Edit Item, and View Item. Do not plan Yeeflow's built-in default layout for generated business lists. If a generated list is a hidden system/support list and custom forms are intentionally not needed, add an explicit system/support-list form-layout exemption with reason, user impact, fallback, and proof boundary.
+Every Type `1` Data List from Section 4 must plan custom forms for New Item, Edit Item, and View Item. Do not plan Yeeflow's built-in default layout for generated Data Lists. Public Forms are additive anonymous-submission surfaces and never replace internal New/Edit/View custom forms. Generated Type `1` Data Lists do not receive a system/support-list exemption from this requirement. Document Library custom forms remain subject to an export-proven Type `16` contract and are not implied by this Data List rule.
 
 ### 10.x <Data List or Document Library Name>
 
@@ -332,10 +332,26 @@ Rules:
 - Standard View Item custom forms must select `data_list_form_layout_view_item_v1_1`.
 - Full-page Workbench View Item custom forms must select `data_list_form_layout_workbench` and explicitly state `Open in: Full page` in the row's business sections, selection reason, or proof boundary.
 - Default New/Edit/View layouts are forbidden for generated business Data Lists and Document Libraries.
-- System/support-list exemptions must be explicit; silent omission of custom forms is not generation-ready.
+- Public Forms, hidden/support purposes, or a narrow generation request do not exempt a Type `1` Data List from New/Edit/View custom forms.
 - New/Edit forms focus on the current list item and must not plan related Collection/Data Analytics/KPI regions.
 - View Item forms may plan current-record display plus related business data, approved Collection templates, approved Data Analytics templates, and KPI regions inside the v1.1 allowed slots. Field-grid and Collection templates may use the `section_content_area` of `content_card_wrapper`, `content_card_60_wrapper`, or `content_card_40_wrapper` depending on the required section width. Workbench View Item forms may use `primary_working_area`, optional `right_side_panel`, and `chart_cards_section`; empty Workbench right panels or chart sections must be pruned.
 - App Plan selection is a business/layout decision only. It must not include generated `ListID`, `LayoutID`, action type codes, JSON property paths, placeholder IDs, copied control JSON, or runtime payload fields.
+
+#### Public Forms Plan
+
+Optional and additive. Add rows only for Data Lists that require anonymous submission. Every host Data List must still include the New/Edit/View custom forms planned above.
+
+| Host Data List | Public Form Name | Form Title | Description / Purpose | Included Fields | Public Form Page Layout Template | Public Form Fields Layout Template | Proof Boundary |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <Data List> | <Public Form> | <Visible title> | <Anonymous submission purpose> | <Field labels or field names> | public-form-page-layout-standard | public_form_fields_1col_v1_1 | Generated-final validation; anonymous runtime submit proof separate |
+
+Rules:
+
+- Public Forms are stored under the host Type `1` Data List `PublicForms[]`; they are not custom Data List forms and must not replace `List.LayoutView.add/edit/view`.
+- The host Data List must complete normal field, view, custom New/Edit/View form, workflow, navigation, permission, package, and preflight generation before the Public Form is added.
+- Use `public-form-page-layout-standard` and an approved Public Form field-layout template. Survey/questionnaire forms should prefer `public_form_fields_1col_v1_1`.
+- Included Fields must resolve to fields on the host Data List and must use Public Form-compatible anonymous controls. User, Department, Metadata, Tag, Multi Meta, Location, Cost center, and Lookup fields are forbidden.
+- Public Form generation does not create a reduced Public Form-only Data List package. Full application and standalone Data List generation must remain on the shared builder and validator path.
 
 #### Reverse-Related Collection Selection
 

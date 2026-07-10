@@ -229,7 +229,7 @@ function validateAppPlanListCoverage(text, findings, context = {}) {
   const section = extractSection(text, /^##\s+10\.\s+Custom Data List Forms Plan/im);
   if (!section.trim()) {
     for (const list of plannedLists) {
-      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_LIST_FORMS_MISSING", "Every planned Data List or Document Library must plan custom New/Edit and View forms, or explicitly declare a system/support-list exemption.", { list }));
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_LIST_FORMS_MISSING", "Every planned Type 1 Data List must plan custom New/Edit and View forms. Public Forms and system/support purposes do not replace this requirement.", { list }));
     }
     return;
   }
@@ -237,13 +237,12 @@ function validateAppPlanListCoverage(text, findings, context = {}) {
     const listRows = tableRows(section).map((row) => row.raw).filter((line) => lineMentionsList(line, list));
     const sectionBody = subsectionForList(section, list);
     const evidence = [...listRows, sectionBody].join("\n");
-    if (hasExplicitFormExemption(evidence)) continue;
     const packageCoverage = context.packageCoverage?.get(norm(list));
     if (!hasNewEditPlan(evidence) && packageCoverage?.newEdit !== true) {
-      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_FORM_REQUIRED", "Every planned Data List or Document Library must plan a New/Edit custom form using data_list_form_layout_new_edit_v1_1. Default New/Edit layouts are not generation-ready.", { list }));
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_NEW_EDIT_FORM_REQUIRED", "Every planned Type 1 Data List must plan a New/Edit custom form using data_list_form_layout_new_edit_v1_1. Default New/Edit layouts are not generation-ready.", { list }));
     }
     if (!hasViewPlan(evidence) && packageCoverage?.view !== true) {
-      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_FORM_REQUIRED", "Every planned Data List or Document Library must plan a View custom form using data_list_form_layout_view_item_v1_1 or data_list_form_layout_workbench. Default View layouts are not generation-ready.", { list }));
+      findings.push(error("DATA_LIST_FORM_LAYOUT_APP_PLAN_VIEW_FORM_REQUIRED", "Every planned Type 1 Data List must plan a View custom form using data_list_form_layout_view_item_v1_1 or data_list_form_layout_workbench. Default View layouts are not generation-ready.", { list }));
     }
   }
 }
@@ -1013,11 +1012,15 @@ function stableJson(value) {
 
 function validateListDisplayAssignments(decoded, context) {
   for (const [childIndex, child] of asArray(decoded?.Childs || decoded?.Data?.Childs).entries()) {
-    if (isExplicitListExempt(child)) continue;
+    const explicitListType = Number(child?.List?.Type ?? child?.ListModel?.Type ?? child?.Type);
+    if (Number.isFinite(explicitListType) && explicitListType !== 1) continue;
     const listTitle = child?.List?.Title || child?.ListModel?.Title || child?.Title || child?.Name || `Childs[${childIndex}]`;
     const layoutViewValue = child?.List?.LayoutView || child?.ListModel?.LayoutView || child?.LayoutView;
     const layoutView = parseJsonMaybe(layoutViewValue);
     if (!isObject(layoutView)) {
+      if (asArray(child?.PublicForms).length > 0) {
+        context.findings.push(error("DATA_LIST_PUBLIC_FORM_CUSTOM_FORMS_REQUIRED", "Public Forms are additive. A Data List with PublicForms[] must still generate and assign New/Edit/View custom Data List forms.", { list: listTitle, childIndex, publicFormCount: asArray(child?.PublicForms).length }));
+      }
       context.findings.push(error("DATA_LIST_FORM_LAYOUT_DISPLAY_SETTINGS_MISSING", "Every generated business Data List must assign New/Edit/View to custom Data List forms through LayoutView.add/edit/view. Default layouts are not allowed.", { list: listTitle, childIndex }));
       continue;
     }
@@ -1360,11 +1363,15 @@ function parsePlannedDataLists(text) {
     const headers = splitTableLine(lines[index]).map((header) => norm(header));
     const listColumn = headers.findIndex((header) => ["list", "data list", "list name", "data list name", "document library name"].includes(header));
     if (listColumn === -1) continue;
+    const typeColumn = headers.findIndex((header) => ["type", "resource type", "selected yeeflow resource type"].includes(header));
+    const documentLibraryOnlyTable = headers[listColumn] === "document library name";
     let rowIndex = index + 2;
     while (rowIndex < lines.length && /^\s*\|.+\|\s*$/.test(lines[rowIndex] || "")) {
       const cells = splitTableLine(lines[rowIndex]);
       const name = cleanName(cells[listColumn]);
-      if (name && !isPlaceholderName(name)) names.push(name);
+      const resourceType = typeColumn === -1 ? "" : norm(cells[typeColumn]);
+      const isDocumentLibrary = documentLibraryOnlyTable || (/document library/.test(resourceType) && !/data list/.test(resourceType));
+      if (name && !isPlaceholderName(name) && !isDocumentLibrary) names.push(name);
       rowIndex += 1;
     }
     index = rowIndex;
@@ -1374,6 +1381,8 @@ function parsePlannedDataLists(text) {
     const name = cleanName(match[1]);
     if (!name || isPlaceholderName(name)) continue;
     if (/\b(?:schema|field|fields|table|selection|template|view|views)\b/i.test(name)) continue;
+    const subsection = extractSubsection(section.slice(match.index), /^###\s+4\.[x0-9]+\s+.+?\s*$/im);
+    if (/selected\s+yeeflow\s+resource\s+type\s*:\s*document\s+library/i.test(subsection)) continue;
     names.push(name);
   }
   return unique(names);

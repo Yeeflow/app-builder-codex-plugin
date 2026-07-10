@@ -331,7 +331,9 @@ When generating Data List Public Forms:
 
 - Store public forms under `Data.Childs[].PublicForms[]`.
 - Use `Resource` as JSON string with `pagetype: 3`, `ver: 2`, `attrs`, `children`, and `tempVars`.
-- Keep Public Forms separate from Custom List Forms and Approval Forms.
+- Keep Public Forms separate from Custom List Forms and Approval Forms. Public Forms are additive and never replace the host Data List's standard New/Edit/View custom forms.
+- Complete normal Type `1` Data List generation first: fields, default and business views, Data List Form Layouts v1.1 New/Edit/View forms, `List.LayoutView.add/edit/view`, workflows, navigation, permissions, package validation, and full generated-final preflight. Then attach planned Public Forms under `PublicForms[]`.
+- Do not create a reduced Public Form-only Data List package or a dedicated hand-built generator path. Full-app and standalone Data List generation must use the shared Data List builder and validators whether `PublicForms[]` is empty or populated.
 - Use safe layout controls such as `container` and `flex_grid`.
 - Include only public-safe, export-proven field types unless product evidence expands the allowlist.
 - Do not include default/system fields except the export-proven primary `Title` field when needed.
@@ -340,6 +342,7 @@ When generating Data List Public Forms:
 - Validate every list-bound field reference before packaging.
 - Redact public URLs/share codes in docs, logs, normalized refs, and generated reports.
 - Preserve existing app-creation gates: valid `Defs`/`Layouts` arrays, `ListModel.Flags = 1`, valid `FieldIndex`/`FieldName`, unique identifiers, and valid internal names.
+- Treat `YAPK_PUBLIC_FORM_CANNOT_REPLACE_CUSTOM_FORMS` and `DATA_LIST_PUBLIC_FORM_CUSTOM_FORMS_REQUIRED` as generated-final blockers.
 
 ## Normalized References
 
