@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.48
+
+- Generate positive-area Workflow Designer `bounds` for every non-SequenceFlow Approval workflow node and derive `graphposition` from complete node rectangles, so rendered workflows remain selectable, editable, extensible, and publish-ready.
+- Share the Designer-shape builder across standalone `.ywf` and full `.yapk` materialization, and centralize validator entrypoints on the canonical YWF validator.
+- Declare QueryData result/count workflow variables with compatible types and reject missing result fields before signing readiness.
+- Require ContentList add/edit mappings, edit/remove target-record criteria, and operation semantics that match business action names such as Update/Edit.
+- Add source/dist incident regressions for missing bounds, bounds-position drift, incomplete graph extents, malformed assignees, undeclared query outputs, and empty/mismatched ContentList actions.
+
 ## 0.9.47
 
 - Generate workflow assignee Expression Buttons with canonical Yeeflow `${ key:value... }` variable JSON instead of invalid `${{...}}` ordinary-JSON wrapping.
