@@ -9,6 +9,10 @@ import {
   approvalVariableTypeForField,
   buildApprovalFormLayoutDef,
 } from "./lib/approval-form-layout-builder.mjs";
+import {
+  approvalWorkflowGraphPosition,
+  withApprovalWorkflowDesignerBounds,
+} from "./lib/approval-workflow-designer-shape-utils.mjs";
 import { encodeYapkResourceOfficial } from "./lib/yapk-decode-utils.mjs";
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
 
@@ -7500,25 +7504,6 @@ function workflowRejectedVertices(sourcePosition, rejectPosition) {
   ];
 }
 
-function workflowGraphPosition(childshapes) {
-  const positions = childshapes
-    .filter((shape) => shape?.stencil?.id !== "SequenceFlow")
-    .map((shape) => shape?.position)
-    .filter((position) => Number.isFinite(position?.x) && Number.isFinite(position?.y));
-  if (!positions.length) return { x: 0, y: 0, width: 960, height: 420 };
-  const minX = Math.min(...positions.map((position) => position.x));
-  const maxX = Math.max(...positions.map((position) => position.x));
-  const minY = Math.min(...positions.map((position) => position.y));
-  const maxY = Math.max(...positions.map((position) => position.y));
-  const margin = 160;
-  return {
-    x: Math.min(0, minX - margin),
-    y: Math.min(0, minY - margin),
-    width: Math.max(960, maxX - minX + margin * 2),
-    height: Math.max(620, maxY - minY + margin * 2),
-  };
-}
-
 function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [] }) {
   const {
     submissionPageId,
@@ -7548,6 +7533,8 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     workflowSteps,
     dataListMetas,
   });
+  const variables = buildApprovalVariables(approvalFieldSpecs);
+  addApprovalWorkflowActionVariables(variables, childshapes);
   return {
     id: defId,
     key: formKey,
@@ -7563,8 +7550,8 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     lineType: "rounded",
     iconURL: "",
     flowPage: [],
-    variables: buildApprovalVariables(approvalFieldSpecs),
-    graphposition: workflowGraphPosition(childshapes),
+    variables,
+    graphposition: approvalWorkflowGraphPosition(childshapes),
     graphzoom: 1,
     graphver: 2,
     pageurls: [
@@ -7633,7 +7620,16 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
     position: layout.start,
     incoming: [],
     outgoing: [flowRef(startToFirstFlowId)],
-    properties: { name: "Start", taskurl: submissionPageId, taskUrl: submissionPageId, TaskUrl: submissionPageId },
+    properties: {
+      name: "Start",
+      taskurl: submissionPageId,
+      taskUrl: submissionPageId,
+      TaskUrl: submissionPageId,
+      isenabledemail: false,
+      subject: "",
+      to: "",
+      html: "",
+    },
   };
   const flowShapes = [];
   const endIncoming = [];
@@ -7721,7 +7717,7 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       position: layout.end,
       incoming: endIncoming,
       outgoing: [],
-      properties: { name: "End" },
+      properties: { name: "End", isenabledemail: false, subject: "", to: "", html: "" },
     },
     ...rejectGroups.map((group, index) => ({
       id: group.id,
@@ -7730,9 +7726,15 @@ function buildApprovalWorkflowShapes({ defId, formKey, rootListSetId, submission
       position: group.position,
       incoming: group.incoming,
       outgoing: [],
-      properties: { name: index === 0 ? "Rejected" : `Rejected ${index + 1}` },
+      properties: {
+        name: index === 0 ? "Rejected" : `Rejected ${index + 1}`,
+        isenabledemail: false,
+        subject: "",
+        to: "",
+        html: "",
+      },
     })),
-  ];
+  ].map(withApprovalWorkflowDesignerBounds);
 }
 
 function workflowConnectorDescription(name, conditioninfo = null) {
@@ -7842,18 +7844,21 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
   }
   if (stencil === "ContentList") {
     const targetList = resolveContentListTargetList({ step, dataListMetas });
+    const operation = workflowContentListOperation(step);
     base.properties = {
       ...base.properties,
-      type: "add",
+      type: operation,
       appid: 41,
       listsetid: stringId(rootListSetId),
       listid: stringId(targetList?.listId || rootListSetId),
       listtype: targetList?.listId ? "select" : "current",
       plannedTargetListName: targetList?.listName || "",
-      listdatas: [],
+      listdatas: operation === "remove" ? [] : workflowContentListDefaultMappings(targetList),
     };
+    if (operation === "edit" || operation === "remove") base.properties.wheres = [];
     return base;
   }
+  const tasktype = workflowAssignmentTaskType(step);
   base.properties = {
     ...base.properties,
     pagetype: 1,
@@ -7862,9 +7867,47 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     TaskUrl: taskPageId,
     approveway: "anyapprove",
     approvepercentage: 100,
+    ...(tasktype ? { tasktype } : {}),
+    duedatedefinition: 120,
+    isenabledemail: false,
+    isallowreassign: false,
+    isallowsign: false,
+    allowskip: true,
     usertaskassignment: workflowTaskAssigneesForStep(step),
   };
   return base;
+}
+
+function workflowAssignmentTaskType(step) {
+  const outcomes = cleanResourceName(step?.outcomes);
+  if (/\bcompleted?\b/i.test(outcomes) && !/\bapproved?|rejected?\b/i.test(outcomes)) return "complete";
+  return null;
+}
+
+function workflowContentListOperation(step) {
+  const text = [step?.nodeName, step?.description, step?.dataReadWrite]
+    .map(cleanResourceName)
+    .join(" ");
+  if (/\b(remove|delete)\b/i.test(text)) return "remove";
+  if (/\b(update|edit)\b/i.test(text)) return "edit";
+  return "add";
+}
+
+function workflowContentListDefaultMappings(targetList) {
+  const fields = Array.isArray(targetList?.fields) ? targetList.fields : [];
+  const titleField = fields.find((field) => String(field?.FieldName || field?.fieldName || "") === "Title") || fields[0];
+  const column = cleanResourceName(titleField?.FieldName || titleField?.fieldName || "Title") || "Title";
+  return [{
+    Columns: column,
+    Per: "0",
+    Data: [{
+      exprType: "variable",
+      valueType: "text",
+      id: "requestTitle",
+      type: "expr",
+      name: "Workflow Variables:Request Title",
+    }],
+  }];
 }
 
 function workflowVariableIdFromName(value) {
@@ -7952,6 +7995,55 @@ function buildApprovalVariables(approvalFieldSpecs = {}) {
     });
   }
   return { basic: uniqueVariablesById(basic), listref: [], filter: [], tempVars: [] };
+}
+
+function addApprovalWorkflowActionVariables(variables, childshapes) {
+  if (!variables || !Array.isArray(variables.basic)) return;
+  const additions = [];
+  for (const shape of childshapes || []) {
+    const stencil = String(shape?.stencil?.id || "");
+    const props = shape?.properties || {};
+    if (stencil === "QueryData") {
+      const result = props.result || {};
+      const listName = cleanResourceName(result.listName);
+      const totalCount = cleanResourceName(result.totalCount);
+      if (listName) {
+        additions.push({
+          id: listName,
+          idx: listName,
+          name: listName,
+          title: `${cleanResourceName(props.name) || "Query Data"} Result`,
+          type: cleanResourceName(result.vartype) || "text",
+          source: "workflow-query-result",
+        });
+      }
+      if (totalCount) {
+        additions.push({
+          id: totalCount,
+          idx: totalCount,
+          name: totalCount,
+          title: `${cleanResourceName(props.name) || "Query Data"} Count`,
+          type: "number",
+          source: "workflow-query-count",
+        });
+      }
+    }
+    if (stencil === "SetVariableTask") {
+      for (const setting of Array.isArray(props.variablesetting) ? props.variablesetting : []) {
+        const id = cleanResourceName(setting?.id || setting?.idx);
+        if (!id) continue;
+        additions.push({
+          id,
+          idx: cleanResourceName(setting?.idx) || id,
+          name: cleanResourceName(setting?.name) || id,
+          title: cleanResourceName(setting?.name) || id,
+          type: cleanResourceName(setting?.type) || "text",
+          source: "workflow-set-variable",
+        });
+      }
+    }
+  }
+  variables.basic = uniqueVariablesById([...variables.basic, ...additions]);
 }
 
 function uniqueVariablesById(variables) {

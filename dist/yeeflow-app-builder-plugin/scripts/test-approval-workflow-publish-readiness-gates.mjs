@@ -29,7 +29,12 @@ try {
   const rootListSetId = String(packageDecoded.ListSet.ListID);
   const travelRecordsListId = String(packageDecoded.Childs.find((child) => child?.List?.Title === "Travel Records")?.List?.ListID || "");
   const contentListNode = materializedDef.childshapes.find((shape) => shape?.stencil?.id === "ContentList" && shape?.properties?.name === "Create Travel Record");
+  const queryNode = materializedDef.childshapes.find((shape) => shape?.stencil?.id === "QueryData" && shape?.properties?.name === "Query Travel Records");
   assert.ok(contentListNode, "materializer must preserve planned action nodes");
+  assert.ok(queryNode, "materializer must preserve planned QueryData nodes");
+  const variableIds = new Set(materializedDef.variables.basic.map((variable) => variable.id));
+  assert.equal(variableIds.has(queryNode.properties.result.listName), true, "QueryData result variable is declared in DefResource.variables.basic");
+  assert.equal(variableIds.has(queryNode.properties.result.totalCount), true, "QueryData count variable is declared in DefResource.variables.basic");
   assert.equal(String(contentListNode.properties.listid), travelRecordsListId, "ContentList target listid resolves to the planned child data list");
   assert.notEqual(String(contentListNode.properties.listid), rootListSetId, "ContentList target listid must not use the root application ListSet");
   assert.equal(contentListNode.properties.listtype, "select", "ContentList uses select application mode instead of current/Uncategorized");
@@ -99,8 +104,74 @@ try {
   expectCode("stacked workflow node positions fail", mutateResource(validDef, (def) => {
     const nodes = def.childshapes.filter((shape) => shape?.stencil?.id !== "SequenceFlow");
     nodes[1].position = { ...nodes[0].position };
+    nodes[1].bounds = structuredClone(nodes[0].bounds);
   }), "APPROVAL_WORKFLOW_NODE_POSITION_COLLISION");
   cases.push({ case: "fail: stacked workflow node coordinates", status: "pass" });
+
+  expectCode("workflow node missing Designer bounds fails", mutateResource(validDef, (def) => {
+    const task = def.childshapes.find((shape) => shape?.stencil?.id === "MultiAssignmentTask");
+    delete task.bounds;
+  }), "APPROVAL_WORKFLOW_NODE_BOUNDS_MISSING");
+  cases.push({ case: "fail: workflow node lacks Designer bounds hitbox", status: "pass" });
+
+  expectCode("workflow node bounds and position mismatch fails", mutateResource(validDef, (def) => {
+    const task = def.childshapes.find((shape) => shape?.stencil?.id === "MultiAssignmentTask");
+    task.bounds.upperLeft.x += 12;
+  }), "APPROVAL_WORKFLOW_NODE_BOUNDS_POSITION_MISMATCH");
+  cases.push({ case: "fail: workflow node bounds do not match position", status: "pass" });
+
+  expectCode("graphposition that excludes node bounds fails", mutateResource(validDef, (def) => {
+    def.graphposition.width = 100;
+    def.graphposition.height = 100;
+  }), "APPROVAL_WORKFLOW_GRAPHPOSITION_BOUNDS_INCOMPLETE");
+  cases.push({ case: "fail: graphposition does not contain workflow node bounds", status: "pass" });
+
+  expectCode("QueryData undeclared result variable fails", mutateResource(validDef, (def) => {
+    const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");
+    action.stencil.id = "QueryData";
+    action.properties = {
+      ...action.properties,
+      appid: 41,
+      listsetid: "940000000000000001",
+      listid: "940000000000000002",
+      listtype: 1,
+      filters: [],
+      sorts: [],
+      result: {
+        type: "multiple",
+        pageIndex: 1,
+        pageSize: 1000,
+        listName: "undeclared_query_result",
+        listParent: "__variables_",
+        vartype: "text",
+        fields: [{ fieldName: "Title", name: "Title", type: "text" }],
+        totalCount: "undeclared_query_count",
+        querycount_prefix: "__variables_",
+      },
+    };
+  }), "QUERYDATA_RESULT_VARIABLE_NOT_FOUND");
+  cases.push({ case: "fail: QueryData result/count variables are undeclared", status: "pass" });
+
+  expectCode("ContentList add with empty field mappings fails", mutateResource(validDef, (def) => {
+    const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");
+    action.properties.listdatas = [];
+  }), "CONTENTLIST_EMPTY_LISTDATAS");
+  cases.push({ case: "fail: ContentList add has no target field mappings", status: "pass" });
+
+  expectCode("ContentList edit without record criteria fails", mutateResource(validDef, (def) => {
+    const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");
+    action.properties.name = "Update Travel Record";
+    action.properties.type = "edit";
+    action.properties.wheres = [];
+  }), "CONTENTLIST_EMPTY_WHERES");
+  cases.push({ case: "fail: ContentList edit has no target record criteria", status: "pass" });
+
+  expectCode("ContentList Update action using add semantics fails", mutateResource(validDef, (def) => {
+    const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");
+    action.properties.name = "Update Travel Record";
+    action.properties.type = "add";
+  }), "CONTENTLIST_OPERATION_SEMANTICS_MISMATCH");
+  cases.push({ case: "fail: Update ContentList action materializes as add", status: "pass" });
 
   expectPackageCode("ContentList root ListSet target fails package validation", mutatePackage(packagePath, (decoded) => {
     const def = decodeDefResource(decoded.Forms[0].DefResource);
@@ -220,10 +291,11 @@ function approvalPlanMarkdown() {
     "| Step | Node Name | Node Type | Description | Assignee/Role | Assignment Strategy | Outcomes | Condition/Branch | Data Read/Write | Proof Boundary |",
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     "| 1 | Start | StartNoneEvent | Request submission starts the process. | Requester | Submission | Submitted | Always | Read submission fields | Generated-final validation |",
-    "| 2 | Department Manager Review | MultiAssignmentTask | Manager reviews business purpose. | Department Manager | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
-    "| 3 | Finance Review | MultiAssignmentTask | Finance reviews estimated cost. | Finance | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
-    "| 4 | Create Travel Record | ContentList | Persist accepted travel request. | System | System action | Complete | Approved path only | Travel Records create | Generated-final validation |",
-    "| 5 | End | EndNoneEvent | Approved process ends. | System | End | Complete | Approved path | No data write | Generated-final validation |",
+    "| 2 | Query Travel Records | QueryData | Read related travel records. | System | System action | Completed | Always | Travel Records read | Generated-final validation |",
+    "| 3 | Department Manager Review | MultiAssignmentTask | Manager reviews business purpose. | Department Manager | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
+    "| 4 | Finance Review | MultiAssignmentTask | Finance reviews estimated cost. | Finance | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
+    "| 5 | Create Travel Record | ContentList | Persist accepted travel request. | System | System action | Complete | Approved path only | Travel Records create | Generated-final validation |",
+    "| 6 | End | EndNoneEvent | Approved process ends. | System | End | Complete | Approved path | No data write | Generated-final validation |",
     "",
     "## 6. Form Reports Plan",
     "",

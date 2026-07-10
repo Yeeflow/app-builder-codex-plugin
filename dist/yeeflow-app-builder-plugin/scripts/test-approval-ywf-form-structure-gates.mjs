@@ -7,6 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildApprovalFormLayoutDef } from "./lib/approval-form-layout-builder.mjs";
+import { approvalWorkflowNodeSize } from "./lib/approval-workflow-designer-shape-utils.mjs";
 import { validateApprovalFormLayoutTemplate } from "./validate-approval-form-layout-template.mjs";
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
 
@@ -236,11 +237,16 @@ function container(label, children) {
 }
 
 function node(id, stencil, name, x, y, properties = {}) {
+  const size = approvalWorkflowNodeSize(stencil);
   return {
     id,
     resourceid: id,
     stencil: { id: stencil },
     position: { x, y },
+    bounds: {
+      upperLeft: { x, y },
+      lowerRight: { x: x + size.width, y: y + size.height },
+    },
     incoming: [],
     outgoing: [],
     properties: { name, ...properties },

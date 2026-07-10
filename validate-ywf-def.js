@@ -259,6 +259,7 @@ function validateDecodedDef(def, options = {}) {
   validateWorkflowDesignerV2Style();
   validateApprovalTasks();
   validateSequenceFlowConditions();
+  validateQueryDataNodes();
   validateContentLists();
   validateSetVariableTasks();
   validateWorkflowActionConfigurations();
@@ -1572,6 +1573,19 @@ function validateDecodedDef(def, options = {}) {
       if (!isObject(shape.position) || typeof shape.position.x !== "number" || typeof shape.position.y !== "number") {
         addIssue(errors, "GRAPH_NODE_POSITION_MISSING", "Workflow node must include top-level position {x, y} for designer layout", `${p}.position`, { nodeId: id });
       }
+      const designerBounds = workflowNodeDesignerBounds(shape);
+      const boundsIssues = mode === "final" ? errors : warnings;
+      if (!designerBounds) {
+        addIssue(boundsIssues, "APPROVAL_WORKFLOW_NODE_BOUNDS_MISSING", "Workflow node must include valid bounds.upperLeft/lowerRight coordinates so Workflow Designer can select and edit the node.", `${p}.bounds`, { nodeId: id, stencil });
+      } else if (isObject(shape.position) && typeof shape.position.x === "number" && typeof shape.position.y === "number") {
+        if (Number(shape.position.x) !== designerBounds.upperLeft.x || Number(shape.position.y) !== designerBounds.upperLeft.y) {
+          addIssue(boundsIssues, "APPROVAL_WORKFLOW_NODE_BOUNDS_POSITION_MISMATCH", "Workflow node position must match bounds.upperLeft so Designer layout and hit testing use the same coordinates.", `${p}.bounds.upperLeft`, {
+            nodeId: id,
+            position: shape.position,
+            upperLeft: designerBounds.upperLeft,
+          });
+        }
+      }
       for (const outgoing of asArray(shape.outgoing)) {
         const id = refId(outgoing);
         if (!seqById.has(id)) addIssue(errors, "OUTGOING_SEQUENCE_MISSING", `Outgoing SequenceFlow ${id} does not exist`, `$.childshapes[${index}].outgoing`);
@@ -1652,6 +1666,19 @@ function validateDecodedDef(def, options = {}) {
     }
   }
 
+  function workflowNodeDesignerBounds(shape) {
+    const upperLeft = shape && shape.bounds && shape.bounds.upperLeft;
+    const lowerRight = shape && shape.bounds && shape.bounds.lowerRight;
+    const values = [upperLeft && upperLeft.x, upperLeft && upperLeft.y, lowerRight && lowerRight.x, lowerRight && lowerRight.y]
+      .map(Number);
+    if (!values.every(Number.isFinite)) return null;
+    if (values[2] <= values[0] || values[3] <= values[1]) return null;
+    return {
+      upperLeft: { x: values[0], y: values[1] },
+      lowerRight: { x: values[2], y: values[3] },
+    };
+  }
+
   function workflowDesignerStyleIssues() {
     return mode === "final" ? errors : warnings;
   }
@@ -1697,6 +1724,29 @@ function validateDecodedDef(def, options = {}) {
         });
       }
     });
+
+    const graph = def.graphposition || {};
+    if ([graph.x, graph.y, graph.width, graph.height].every((value) => Number.isFinite(Number(value)))) {
+      const graphRight = Number(graph.x) + Number(graph.width);
+      const graphBottom = Number(graph.y) + Number(graph.height);
+      childshapes.forEach((shape, index) => {
+        if (!shape || isSequenceFlow(shape)) return;
+        const bounds = workflowNodeDesignerBounds(shape);
+        if (!bounds) return;
+        if (
+          bounds.upperLeft.x < Number(graph.x)
+          || bounds.upperLeft.y < Number(graph.y)
+          || bounds.lowerRight.x > graphRight
+          || bounds.lowerRight.y > graphBottom
+        ) {
+          addIssue(errors, "APPROVAL_WORKFLOW_GRAPHPOSITION_BOUNDS_INCOMPLETE", "Workflow graphposition must contain every workflow node bounds rectangle.", `$.childshapes[${index}].bounds`, {
+            nodeId: shapeId(shape),
+            bounds,
+            graphposition: graph,
+          });
+        }
+      });
+    }
   }
 
   function validateApprovalTasks() {
@@ -1879,6 +1929,55 @@ function validateDecodedDef(def, options = {}) {
     }
   }
 
+  function validateQueryDataNodes() {
+    childshapes.forEach((shape, index) => {
+      if (!shape || !shape.stencil || shape.stencil.id !== "QueryData") return;
+      const p = `$.childshapes[${index}]`;
+      const props = shape.properties || {};
+      for (const key of ["appid", "listsetid", "listid", "listtype"]) {
+        if (props[key] === undefined || props[key] === null || props[key] === "") {
+          addIssue(errors, "QUERYDATA_TARGET_METADATA_MISSING", `QueryData must have properties.${key}`, `${p}.properties.${key}`);
+        }
+      }
+      if (!isObject(props.result)) {
+        addIssue(errors, "QUERYDATA_RESULT_TARGET_MISSING", "QueryData must define an export-shaped properties.result target.", `${p}.properties.result`);
+        return;
+      }
+      const result = props.result;
+      if (result.type === "multiple") {
+        if (!result.listName || !result.listParent) {
+          addIssue(errors, "QUERYDATA_RESULT_TARGET_MISSING", "Multiple-result QueryData must define result.listName and result.listParent.", `${p}.properties.result`);
+        } else if (result.listParent === "__variables_") {
+          const target = variableById.get(result.listName);
+          if (!target) {
+            addIssue(errors, "QUERYDATA_RESULT_VARIABLE_NOT_FOUND", `QueryData result variable ${result.listName} is not declared in DefResource.variables.basic.`, `${p}.properties.result.listName`);
+          } else if (result.vartype && String(target.type || "") !== String(result.vartype)) {
+            addIssue(errors, "QUERYDATA_RESULT_VARIABLE_TYPE_MISMATCH", `QueryData result variable ${result.listName} must use type ${result.vartype}.`, `${p}.properties.result.vartype`, {
+              variableType: target.type || null,
+              resultType: result.vartype,
+            });
+          }
+        }
+        if (!Array.isArray(result.fields) || result.fields.length === 0) {
+          addIssue(errors, "QUERYDATA_RESULT_FIELDS_EMPTY", "Multiple-result QueryData must select at least one result field.", `${p}.properties.result.fields`);
+        }
+      }
+      if (result.totalCount) {
+        const countVariable = variableById.get(result.totalCount);
+        if (result.querycount_prefix !== "__variables_") {
+          addIssue(errors, "QUERYDATA_COUNT_PARENT_INVALID", "QueryData totalCount written to workflow variables must use result.querycount_prefix = __variables_.", `${p}.properties.result.querycount_prefix`);
+        }
+        if (!countVariable) {
+          addIssue(errors, "QUERYDATA_COUNT_VARIABLE_NOT_FOUND", `QueryData count variable ${result.totalCount} is not declared in DefResource.variables.basic.`, `${p}.properties.result.totalCount`);
+        } else if (String(countVariable.type || "") !== "number") {
+          addIssue(errors, "QUERYDATA_COUNT_VARIABLE_TYPE_MISMATCH", `QueryData count variable ${result.totalCount} must use type number.`, `${p}.properties.result.totalCount`, {
+            variableType: countVariable.type || null,
+          });
+        }
+      }
+    });
+  }
+
   function validateContentLists() {
     childshapes.forEach((shape, index) => {
       if (!shape || !shape.stencil || shape.stencil.id !== "ContentList") return;
@@ -1891,11 +1990,29 @@ function validateDecodedDef(def, options = {}) {
       }
       if (["add", "edit"].includes(props.type) && !Array.isArray(props.listdatas)) {
         addIssue(errors, "CONTENTLIST_MISSING_LISTDATAS", "ContentList add/edit operations must have listdatas", `${p}.properties.listdatas`);
+      } else if (["add", "edit"].includes(props.type) && props.listdatas.length === 0) {
+        addIssue(errors, "CONTENTLIST_EMPTY_LISTDATAS", "ContentList add/edit operations must map at least one target field.", `${p}.properties.listdatas`);
       }
       if (["edit", "remove"].includes(props.type) && !Array.isArray(props.wheres)) {
         addIssue(errors, "CONTENTLIST_MISSING_WHERES", "ContentList edit/remove operations must have wheres", `${p}.properties.wheres`);
+      } else if (["edit", "remove"].includes(props.type) && props.wheres.length === 0) {
+        addIssue(errors, "CONTENTLIST_EMPTY_WHERES", "ContentList edit/remove operations must identify the target record with at least one where condition.", `${p}.properties.wheres`);
+      }
+      const actionName = String(props.name || props.title || props.label || "").trim();
+      if (/\b(update|edit)\b/i.test(actionName) && props.type === "add") {
+        addIssue(errors, "CONTENTLIST_OPERATION_SEMANTICS_MISMATCH", "A ContentList action named Update/Edit must use edit semantics instead of add.", `${p}.properties.type`, { actionName, operation: props.type });
       }
       asArray(props.listdatas).forEach((entry, entryIndex) => {
+        const entryPath = `${p}.properties.listdatas[${entryIndex}]`;
+        if (!entry || !String(entry.Columns || "").trim()) {
+          addIssue(errors, "CONTENTLIST_MAPPING_COLUMN_MISSING", "ContentList field mappings must include Columns.", `${entryPath}.Columns`);
+        }
+        if (!entry || String(entry.Per ?? "") !== "0") {
+          addIssue(errors, "CONTENTLIST_MAPPING_MODE_INVALID", "ContentList field mappings must preserve export-shaped Per = \"0\".", `${entryPath}.Per`);
+        }
+        if (!entry || entry.Data === undefined || entry.Data === null || (Array.isArray(entry.Data) && entry.Data.length === 0)) {
+          addIssue(errors, "CONTENTLIST_MAPPING_DATA_MISSING", "ContentList field mappings must include a non-empty Data value or expression.", `${entryPath}.Data`);
+        }
         validateDataExpression(entry && entry.Data, `${p}.properties.listdatas[${entryIndex}].Data`);
       });
       asArray(props.wheres).forEach((where, whereIndex) => {
@@ -2071,4 +2188,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { validateDecodedDef };
+module.exports = { main, validateDecodedDef };
