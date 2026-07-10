@@ -395,14 +395,31 @@ function validateNodePositions(def, context) {
   const occupied = new Map();
   for (const [shapeIndex, shape] of asArray(def.childshapes).entries()) {
     if (stencilId(shape) === "SequenceFlow") continue;
+    const bounds = nodeDesignerBounds(shape);
+    if (!bounds) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_NODE_BOUNDS_MISSING", "Workflow node must include positive-area bounds.upperLeft/lowerRight coordinates so Designer can select, edit, and add adjacent nodes.", {
+        source: context.source,
+        path: `$.childshapes[${shapeIndex}].bounds`,
+        nodeId: shapeId(shape),
+      }));
+    }
     const position = nodePosition(shape);
     if (!position) {
-      context.findings.push(issue("APPROVAL_WORKFLOW_NODE_POSITION_MISSING", "Workflow node must include top-level position or bounds coordinates.", {
+      context.findings.push(issue("APPROVAL_WORKFLOW_NODE_POSITION_MISSING", "Workflow node must include top-level position coordinates.", {
         source: context.source,
         path: `$.childshapes[${shapeIndex}].position`,
         nodeId: shapeId(shape),
       }));
       continue;
+    }
+    if (bounds && (position.x !== bounds.upperLeft.x || position.y !== bounds.upperLeft.y)) {
+      context.findings.push(issue("APPROVAL_WORKFLOW_NODE_BOUNDS_POSITION_MISMATCH", "Workflow node position must match bounds.upperLeft for consistent Designer layout and hit testing.", {
+        source: context.source,
+        path: `$.childshapes[${shapeIndex}].bounds.upperLeft`,
+        nodeId: shapeId(shape),
+        position,
+        upperLeft: bounds.upperLeft,
+      }));
     }
     const key = `${position.x},${position.y}`;
     if (occupied.has(key)) {
@@ -703,12 +720,19 @@ function nodePosition(shape) {
   if (isObject(shape?.position) && typeof shape.position.x === "number" && typeof shape.position.y === "number") {
     return { x: shape.position.x, y: shape.position.y };
   }
-  if (isObject(shape?.bounds) && isObject(shape.bounds.upperLeft)) {
-    const x = Number(shape.bounds.upperLeft.x);
-    const y = Number(shape.bounds.upperLeft.y);
-    if (Number.isFinite(x) && Number.isFinite(y)) return { x, y };
-  }
   return null;
+}
+
+function nodeDesignerBounds(shape) {
+  const upperLeft = shape?.bounds?.upperLeft;
+  const lowerRight = shape?.bounds?.lowerRight;
+  const values = [upperLeft?.x, upperLeft?.y, lowerRight?.x, lowerRight?.y].map(Number);
+  if (!values.every(Number.isFinite)) return null;
+  if (values[2] <= values[0] || values[3] <= values[1]) return null;
+  return {
+    upperLeft: { x: values[0], y: values[1] },
+    lowerRight: { x: values[2], y: values[3] },
+  };
 }
 
 function issue(code, message, detail = {}, level = "error") {
