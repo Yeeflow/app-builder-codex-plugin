@@ -45,6 +45,7 @@ const STORAGE_FIELD_TYPES = new Map([
   ["Datetime", "Datetime"],
   ["Bigint", "Bigint"],
   ["Bit", "Bit"],
+  ["User", "User"],
 ]);
 
 function parseArgs(argv) {
@@ -205,6 +206,19 @@ function getChildren(decoded) {
 
 function addIssue(issues, level, code, listTitle, message, detail = {}) {
   issues.push({ level, code, listTitle, message, ...detail });
+}
+
+function hasExportProvenCustomFormRouting(child) {
+  const layoutView = parseMaybeJson(child.list.LayoutView, null);
+  if (!layoutView || typeof layoutView !== "object" || Array.isArray(layoutView)) return false;
+  const layouts = new Map((Array.isArray(child.layouts) ? child.layouts : []).map((layout) => [String(layout?.LayoutID || ""), layout]));
+  for (const usage of ["add", "edit", "view"]) {
+    const layoutId = String(layoutView?.[usage] || "").trim();
+    if (!layoutId || layoutId.toLowerCase() === "default") return false;
+    const layout = layouts.get(layoutId);
+    if (!layout || Number(layout.Type) !== 1) return false;
+  }
+  return true;
 }
 
 function fieldLabel(field) {
@@ -514,6 +528,7 @@ function validateChild(child, issues, context, args) {
   }
 
   const titleField = child.fields.find((field) => field.FieldName === "Title" || field.InternalName === "Title");
+  const isDocumentLibrary = Number(child.list?.Type) === 16;
   if (!titleField) {
     addIssue(issues, "error", "NATIVE_TITLE_FIELD_MISSING", child.title, "List is missing native system Title field.");
   } else {
@@ -522,6 +537,15 @@ function validateChild(child, issues, context, args) {
     }
     if (titleField.IsSystem !== true) {
       addIssue(issues, "error", "NATIVE_TITLE_NOT_SYSTEM", child.title, "Native Title field must be marked IsSystem true.");
+    }
+    if (!isDocumentLibrary && Number(titleField.Status) !== 0) {
+      addIssue(issues, "error", "NATIVE_TITLE_STATUS_INVALID", child.title, "Native Title field must preserve export-aligned Status: 0 metadata.");
+    }
+    if (isDocumentLibrary && Number(titleField.Status) !== 1) {
+      addIssue(issues, "error", "DOCUMENT_LIBRARY_NATIVE_TITLE_STATUS_INVALID", child.title, "Native Document Library Title must preserve export-aligned Status: 1 metadata.");
+    }
+    if (titleField.IsIndex !== true) {
+      addIssue(issues, "error", "NATIVE_TITLE_ISINDEX_MISSING", child.title, "Native Title field must preserve export-aligned IsIndex:true metadata.");
     }
     if (titleField.Type !== "input" || titleField.FieldType !== "Text") {
       addIssue(issues, "error", "NATIVE_TITLE_TYPE_INVALID", child.title, "Native Title field must use Type input and FieldType Text.");
@@ -532,7 +556,7 @@ function validateChild(child, issues, context, args) {
     addIssue(issues, "error", "TEXT0_PRIMARY_FIELD_INVALID_WHEN_TITLE_USED", child.title, "Generated list still contains Text0; use native Title instead of Text0 as primary display field.");
   }
 
-  if (args.strictGeneratedList && child.list.LayoutView != null) {
+  if (args.strictGeneratedList && child.list.LayoutView != null && !hasExportProvenCustomFormRouting(child)) {
     addIssue(issues, "error", "LIST_LAYOUTVIEW_SHOULD_BE_NULL", child.title, "Generated default data-list routing should keep List.LayoutView null unless export-proven custom form routing is configured.");
   }
 

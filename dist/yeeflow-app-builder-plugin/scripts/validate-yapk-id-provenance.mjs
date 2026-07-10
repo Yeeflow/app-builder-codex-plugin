@@ -151,6 +151,15 @@ export function collectNumericContentIds({ wrapper, decoded }) {
   };
   visit("wrapper", wrapper);
   visit("decoded", decoded);
+  for (const [childIndex, child] of (Array.isArray(decoded?.Childs) ? decoded.Childs : []).entries()) {
+    const items = child?.List?.Items;
+    if (!isObject(items)) continue;
+    Object.keys(items).forEach((itemId, itemIndex) => {
+      if (NUMERIC_RE.test(itemId) && itemId.length >= 7) {
+        ids.push({ id: itemId, path: `decoded.Childs[${childIndex}].List.Items[${itemIndex}].$key` });
+      }
+    });
+  }
   return dedupeByPathAndId(ids);
 }
 
@@ -198,6 +207,13 @@ function normalizeAllocations(manifest) {
 function valueAtPathMatches(roots, declaredPath, expected) {
   if (TENANT_METADATA_PATHS.has(declaredPath)) return true;
   const normalized = declaredPath.replace(/^\$/, "decoded");
+  const itemKeyMatch = normalized.match(/^(decoded\.Childs\[(\d+)\]\.List\.Items)\[(\d+)\]\.\$key$/);
+  if (itemKeyMatch) {
+    const childIndex = Number(itemKeyMatch[2]);
+    const itemIndex = Number(itemKeyMatch[3]);
+    const items = roots.decoded?.Childs?.[childIndex]?.List?.Items;
+    return isObject(items) && String(Object.keys(items)[itemIndex] || "") === String(expected);
+  }
   const rootName = normalized.startsWith("wrapper") ? "wrapper" : normalized.startsWith("decoded") ? "decoded" : null;
   if (!rootName) return true;
   const pathParts = normalized.slice(rootName.length).match(/(?:\.([A-Za-z_$][A-Za-z0-9_$]*))|(?:\[(\d+)\])/g) || [];

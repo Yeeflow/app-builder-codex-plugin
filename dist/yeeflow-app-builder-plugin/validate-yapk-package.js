@@ -85,6 +85,7 @@ const STORAGE_FAMILY_BY_PREFIX = new Map([
   ["Bit", "Bit"],
   ["User", "User"],
 ]);
+const DOCUMENT_LIBRARY_BIGINT_FIELDS = new Set(["Bigint1", "Bigint2"]);
 
 function resolveLocalModule(candidates) {
   for (const candidate of candidates) {
@@ -262,7 +263,7 @@ function tolerantBrotliDecodeSync(bytes) {
   return { text: Buffer.from(result.stdout, "base64").toString("utf8") };
 }
 
-function validateField(field, path, errors, warnings) {
+function validateField(field, path, errors, warnings, context = {}) {
   if (!isObject(field)) {
     add(errors, "YAPK_FIELD_NOT_OBJECT", "List field entry must be an object.", { path });
     return;
@@ -284,7 +285,16 @@ function validateField(field, path, errors, warnings) {
     add(errors, "YAPK_FIELD_NAME_STORAGE_FAMILY_MISMATCH", "Generated field storage family must match its FieldName prefix.", { path: `${path}.FieldName`, fieldName, fieldType: field.FieldType, expectedFamily: family });
   }
   if (typeof field.InternalName !== "string" || !INTERNAL_NAME_RE.test(field.InternalName)) add(errors, "YAPK_FIELD_INTERNAL_NAME_INVALID", "InternalName must match ^[a-zA-Z0-9_]+$.", { path: `${path}.InternalName` });
-  if (field.FieldType !== undefined && !FIELD_TYPE_ENUM.has(field.FieldType)) add(errors, "YAPK_FIELD_TYPE_INVALID", "FieldType is outside product schema enum.", { path: `${path}.FieldType` });
+  const documentLibraryBigint = Number(context.listType) === 16
+    && field.FieldType === "Bigint"
+    && DOCUMENT_LIBRARY_BIGINT_FIELDS.has(fieldName);
+  if (field.FieldType !== undefined && !FIELD_TYPE_ENUM.has(field.FieldType) && !documentLibraryBigint) {
+    add(errors, "YAPK_FIELD_TYPE_INVALID", "FieldType is outside the generated Data List enum and is not an export-proven native Document Library support field.", {
+      path: `${path}.FieldType`,
+      listType: context.listType ?? null,
+      fieldName,
+    });
+  }
   if (field.Type !== undefined && !FIELD_CONTROL_TYPES.has(field.Type)) add(warnings, "YAPK_FIELD_CONTROL_TYPE_UNKNOWN", "Field Type is not in product schema known control-type list.", { path: `${path}.Type` });
   if (CHOICE_FIELD_TYPES.has(field.Type)) {
     const choices = collectChoiceValues(field);
@@ -324,7 +334,9 @@ function validateListPackage(pkg, path, errors, warnings, counts, appId) {
   counts.fields += asArray(pkg.Fields).length;
   counts.layouts += asArray(pkg.Layouts).length;
   validateNoEmbeddedListDatas(pkg, path, errors);
-  for (const [index, field] of asArray(pkg.Fields).entries()) validateField(field, `${path}.Fields[${index}]`, errors, warnings);
+  for (const [index, field] of asArray(pkg.Fields).entries()) {
+    validateField(field, `${path}.Fields[${index}]`, errors, warnings, { listType: pkg.List?.Type });
+  }
   validateNativeTitle(pkg.Fields, path, errors);
   validateDefaultViews(pkg, path, errors);
   validateChoiceSampleRows(pkg, path, errors);
@@ -361,10 +373,40 @@ function validateNoEmbeddedListDatas(pkg, path, errors) {
     const value = pkg.List.Items;
     const rowCount = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : null;
     if (rowCount === null || rowCount > 0) {
-      add(errors, "YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN", "Generated-final YAPK AppPackageInfo must not embed seed/sample rows in Childs[].List.Items. Emit a companion seed artifact and run explicit post-install seeding instead.", {
-        path: `${path}.List.Items`,
-        rowCount,
-      });
+      if (Number(pkg.List.Type) === 16) validateDocumentLibraryFolderItems(pkg, path, errors);
+      else add(errors, "YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN", "Generated-final YAPK AppPackageInfo must not embed seed/sample rows in Childs[].List.Items. Only export-shaped structural folder rows are allowed for Type 16 Document Libraries.", { path: `${path}.List.Items`, rowCount });
+    }
+  }
+}
+
+function validateDocumentLibraryFolderItems(pkg, path, errors) {
+  const items = pkg?.List?.Items;
+  if (!isObject(items) || Array.isArray(items)) {
+    add(errors, "DOCUMENT_LIBRARY_FOLDER_ITEMS_OBJECT_REQUIRED", "Type 16 Document Library folder rows must use a record-ID-keyed List.Items object.", { path: `${path}.List.Items` });
+    return;
+  }
+  const fieldNames = new Set(asArray(pkg.Fields).map((field) => String(field?.FieldName || "")));
+  for (const [folderId, row] of Object.entries(items)) {
+    const rowPath = `${path}.List.Items[${folderId}]`;
+    if (!/^\d{16,}$/.test(folderId)) add(errors, "DOCUMENT_LIBRARY_FOLDER_ROW_ID_INVALID", "Document Library folder object keys must be API-style numeric IDs.", { path: rowPath });
+    if (!isObject(row) || Array.isArray(row)) {
+      add(errors, "DOCUMENT_LIBRARY_FOLDER_ROW_INVALID", "Document Library List.Items entries must be folder row objects.", { path: rowPath });
+      continue;
+    }
+    const title = String(row.Title || "").trim();
+    if (!title) add(errors, "DOCUMENT_LIBRARY_FOLDER_TITLE_REQUIRED", "Document Library folder rows require a non-empty Title.", { path: `${rowPath}.Title` });
+    if (String(row.Bigint1 ?? "") !== "0") add(errors, "DOCUMENT_LIBRARY_FOLDER_PARENT_INVALID", "Generated-final Document Library folders are currently limited to root folders with Bigint1 = \"0\".", { path: `${rowPath}.Bigint1` });
+    if (String(row.Text1 ?? "") !== "folder") add(errors, "DOCUMENT_LIBRARY_FOLDER_TYPE_INVALID", "Document Library folder rows require Text1 = \"folder\".", { path: `${rowPath}.Text1` });
+    if (String(row.Bigint2 ?? "") !== "" || String(row.Text2 ?? "") !== "") add(errors, "DOCUMENT_LIBRARY_FOLDER_FILE_METADATA_INVALID", "Structural folder rows require blank Bigint2 and Text2 file metadata.", { path: rowPath });
+    if (title && String(row.Text3 ?? "") !== `0_${title.toLowerCase()}`) add(errors, "DOCUMENT_LIBRARY_FOLDER_UNIQUE_NAME_INVALID", "Root folder Text3 must equal 0_<lowercase folder title>.", { path: `${rowPath}.Text3` });
+    if (Object.prototype.hasOwnProperty.call(row, "Text4")) add(errors, "DOCUMENT_LIBRARY_FOLDER_UPLOAD_FORBIDDEN", "Structural folder rows must omit Text4 upload/file payload data.", { path: `${rowPath}.Text4` });
+    if (Object.prototype.hasOwnProperty.call(row, "ListDataID")) add(errors, "DOCUMENT_LIBRARY_FOLDER_LISTDATAID_FIELD_FORBIDDEN", "The folder ID belongs in the List.Items object key, not a ListDataID row property.", { path: `${rowPath}.ListDataID` });
+    for (const [fieldName, fieldValue] of Object.entries(row)) {
+      if (!fieldNames.has(fieldName)) add(errors, "DOCUMENT_LIBRARY_FOLDER_FIELD_UNKNOWN", "Folder rows may only use fields declared by the target Document Library.", { path: `${rowPath}.${fieldName}`, fieldName });
+      if (typeof fieldValue !== "string") add(errors, "DOCUMENT_LIBRARY_FOLDER_VALUE_NOT_STRING", "Document Library folder field values must serialize as strings.", { path: `${rowPath}.${fieldName}` });
+      if (!new Set(["Title", "Bigint1", "Text1", "Bigint2", "Text2", "Text3"]).has(fieldName) && String(fieldValue) !== "") {
+        add(errors, "DOCUMENT_LIBRARY_FOLDER_CUSTOM_VALUE_NOT_BLANK", "Structural folder rows may include custom fields only as blank export-shaped values.", { path: `${rowPath}.${fieldName}` });
+      }
     }
   }
 }
@@ -747,7 +789,14 @@ function validateRootNavigation(decoded, errors) {
   if (!isObject(layoutView)) return;
   const pagesByLayoutId = new Set(asArray(decoded.Pages).map((page) => safeString(page?.LayoutID)).filter(Boolean));
   const formsByKey = new Set(asArray(decoded.Forms).map((form) => safeString(form?.Key || form?.FlowKey || form?.ProcKey)).filter(Boolean));
-  const childListsById = new Set(asArray(decoded.Childs).map((child) => safeString(child?.List?.ListID || child?.ListModel?.ListID)).filter(Boolean));
+  const childListsByType = new Map();
+  for (const child of asArray(decoded.Childs)) {
+    const listId = safeString(child?.List?.ListID || child?.ListModel?.ListID);
+    const listType = Number(child?.List?.Type ?? child?.ListModel?.Type);
+    if (!listId || !Number.isFinite(listType)) continue;
+    if (!childListsByType.has(listType)) childListsByType.set(listType, new Set());
+    childListsByType.get(listType).add(listId);
+  }
   function visit(items, path, inGroup = false) {
     for (const [index, item] of asArray(items).entries()) {
       const itemPath = `${path}[${index}]`;
@@ -779,7 +828,10 @@ function validateRootNavigation(decoded, errors) {
         if (!target || !formsByKey.has(target)) add(errors, "NAVIGATION_APPROVAL_FORM_TARGET_INVALID", "Approval form navigation must use Type:105 and ListID equal to an included Forms[].Key.", { path: itemPath, title, target });
       } else if (Number(type) === 1) {
         const target = safeString(item.ListID);
-        if (!target || !childListsById.has(target)) add(errors, "NAVIGATION_DATA_LIST_TARGET_INVALID", "Data list navigation must use Type:1 and ListID equal to an included child list ID.", { path: itemPath, title, target });
+        if (!target || !childListsByType.get(1)?.has(target)) add(errors, "NAVIGATION_DATA_LIST_TARGET_INVALID", "Data list navigation must use Type:1 and ListID equal to an included Type 1 child list ID.", { path: itemPath, title, target });
+      } else if (Number(type) === 16) {
+        const target = safeString(item.ListID);
+        if (!target || !childListsByType.get(16)?.has(target)) add(errors, "NAVIGATION_DOCUMENT_LIBRARY_TARGET_INVALID", "Document Library navigation must use Type:16 and ListID equal to an included Type 16 child resource ID.", { path: itemPath, title, target });
       }
     }
   }

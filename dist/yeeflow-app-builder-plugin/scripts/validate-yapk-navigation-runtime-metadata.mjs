@@ -122,17 +122,21 @@ function validateChild(child, pointer, context) {
   } else if (String(child.Type) === "105") {
     if (!targets.forms.has(listId)) findings.push(error("NAVIGATION_APPROVAL_FORM_TARGET_INVALID", "Approval form navigation must use Type 105 and ListID equal to Forms[].Key.", { path: pointer, listId }));
   } else if (String(child.Type) === "1") {
-    if (!targets.lists.has(listId)) findings.push(error("NAVIGATION_DATA_LIST_TARGET_INVALID", "Data-list navigation must use Type 1 and ListID equal to Childs[].List.ListID.", { path: pointer, listId }));
+    if (!targets.dataLists.has(listId)) findings.push(error("NAVIGATION_DATA_LIST_TARGET_INVALID", "Data-list navigation must use Type 1 and ListID equal to an included Type 1 Childs[].List.ListID.", { path: pointer, listId }));
+  } else if (String(child.Type) === "16") {
+    if (!targets.documentLibraries.has(listId)) findings.push(error("NAVIGATION_DOCUMENT_LIBRARY_TARGET_INVALID", "Document Library navigation must use Type 16 and ListID equal to an included Type 16 Childs[].List.ListID.", { path: pointer, listId }));
   } else {
-    findings.push(error("NAVIGATION_CHILD_TYPE_UNSUPPORTED", "Navigation child Type must resolve as dashboard/page 103, approval form 105, or data-list 1.", { path: `${pointer}.Type`, type: child.Type }));
+    findings.push(error("NAVIGATION_CHILD_TYPE_UNSUPPORTED", "Navigation child Type must resolve as dashboard/page 103, approval form 105, data-list 1, or Document Library 16.", { path: `${pointer}.Type`, type: child.Type }));
   }
 }
 
 function buildTargetIndex(decoded) {
+  const childResources = asArray(decoded?.Childs);
   return {
     pages: new Set(asArray(decoded?.Pages).map((page) => String(page.LayoutID)).filter(Boolean)),
     forms: new Set(asArray(decoded?.Forms).map((form) => String(form.Key)).filter(Boolean)),
-    lists: new Set(asArray(decoded?.Childs).map((child) => String(child?.List?.ListID)).filter(Boolean)),
+    dataLists: new Set(childResources.filter((child) => Number(child?.List?.Type) === 1).map((child) => String(child?.List?.ListID)).filter(Boolean)),
+    documentLibraries: new Set(childResources.filter((child) => Number(child?.List?.Type) === 16).map((child) => String(child?.List?.ListID)).filter(Boolean)),
   };
 }
 

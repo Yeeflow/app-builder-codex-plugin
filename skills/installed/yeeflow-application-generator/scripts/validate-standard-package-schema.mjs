@@ -649,6 +649,23 @@ function normalizeYapkDecodedForSchema(decoded) {
   }
   for (const child of asArray(normalized.Childs)) {
     if (child?.List?.LayoutView === null) child.List.LayoutView = "";
+    if (Number(child?.List?.Type) !== 16) continue;
+
+    // The canonical ListFieldInfo schema models normal Data List fields. Native
+    // Document Library support fields are system-managed and include Bigint
+    // storage. Project only the Type 16 fields into the closest schema family
+    // for this generic schema gate; dedicated package validation still checks
+    // the original export-shaped Document Library fields without mutation.
+    for (const field of asArray(child.Fields)) {
+      if (!isObject(field) || field.FieldName === "Title") continue;
+      field.IsSystem = false;
+      const bigintMatch = String(field.FieldName || "").match(/^Bigint(\d+)$/);
+      if (field.FieldType === "Bigint" && bigintMatch) {
+        field.FieldType = "Decimal";
+        field.FieldName = `Decimal${bigintMatch[1]}`;
+        if (String(field.InternalName || "").match(/^Bigint\d+$/)) field.InternalName = field.FieldName;
+      }
+    }
   }
   return normalized;
 }
@@ -738,6 +755,22 @@ function nonZeroApiId(value) {
 function inspectYapkStandardAdditions(decoded) {
   const errors = [];
   if (!isObject(decoded)) return errors;
+  for (const [childIndex, child] of asArray(decoded.Childs).entries()) {
+    if (isObject(child) && Object.prototype.hasOwnProperty.call(child, "ListDatas")) {
+      errors.push({ scope: "decodedResource", path: `$.Childs[${childIndex}].ListDatas`, code: "YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", message: "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].ListDatas; create a companion seed artifact and seed only after explicit live-write approval." });
+    }
+    if (isObject(child?.List) && Object.prototype.hasOwnProperty.call(child.List, "ListDatas")) {
+      errors.push({ scope: "decodedResource", path: `$.Childs[${childIndex}].List.ListDatas`, code: "YAPK_EMBEDDED_LISTDATAS_FORBIDDEN", message: "Generated YAPK AppPackageInfo must not embed sample rows in Childs[].List.ListDatas." });
+    }
+    if (isObject(child?.List) && Object.prototype.hasOwnProperty.call(child.List, "Items")) {
+      const value = child.List.Items;
+      const rowCount = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : null;
+      if (rowCount === null || rowCount > 0) {
+        if (Number(child.List.Type) === 16) errors.push(...inspectDocumentLibraryFolderItems(child, childIndex));
+        else errors.push({ scope: "decodedResource", path: `$.Childs[${childIndex}].List.Items`, code: "YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN", message: "Generated-final YAPK AppPackageInfo must not embed seed/sample rows in Childs[].List.Items. Only export-shaped structural folder rows are allowed for Type 16 Document Libraries." });
+      }
+    }
+  }
   if (decoded.FormReports !== undefined && !Array.isArray(decoded.FormReports)) {
     errors.push({ scope: "decodedResource", path: "$.FormReports", code: "FORMREPORTS_LEGACY_INVALID", message: "Legacy AppPackageInfo.FormReports may be present for old packages, but it must be an array when present and is not required for generated YAPK apps." });
   }
@@ -789,6 +822,41 @@ function inspectYapkStandardAdditions(decoded) {
       if (taskurl && !pageIds.has(String(taskurl))) {
         errors.push({ scope: "decodedResource", path: `${formPath}.DefResource.childshapes[${shapeIndex}].properties.taskurl`, code: "APPROVAL_WORKFLOW_TASKURL_PAGE_NOT_FOUND", message: "Workflow task URL references must resolve to decoded pageurls[].id." });
       }
+    }
+  }
+  return errors;
+}
+
+function inspectDocumentLibraryFolderItems(child, childIndex) {
+  const errors = [];
+  const items = child?.List?.Items;
+  const basePath = `$.Childs[${childIndex}].List.Items`;
+  const push = (code, message, path, detail = {}) => errors.push({ scope: "decodedResource", path, code, message, ...detail });
+  if (!isObject(items) || Array.isArray(items)) {
+    push("DOCUMENT_LIBRARY_FOLDER_ITEMS_OBJECT_REQUIRED", "Type 16 Document Library folder rows must use a record-ID-keyed List.Items object.", basePath);
+    return errors;
+  }
+  const fieldNames = new Set(asArray(child.Fields).map((field) => String(field?.FieldName || "")));
+  const coreFields = new Set(["Title", "Bigint1", "Text1", "Bigint2", "Text2", "Text3"]);
+  for (const [folderId, row] of Object.entries(items)) {
+    const rowPath = `${basePath}[${folderId}]`;
+    if (!/^\d{16,}$/.test(folderId)) push("DOCUMENT_LIBRARY_FOLDER_ROW_ID_INVALID", "Document Library folder object keys must be API-style numeric IDs.", rowPath);
+    if (!isObject(row) || Array.isArray(row)) {
+      push("DOCUMENT_LIBRARY_FOLDER_ROW_INVALID", "Document Library List.Items entries must be folder row objects.", rowPath);
+      continue;
+    }
+    const title = String(row.Title || "").trim();
+    if (!title) push("DOCUMENT_LIBRARY_FOLDER_TITLE_REQUIRED", "Document Library folder rows require a non-empty Title.", `${rowPath}.Title`);
+    if (String(row.Bigint1 ?? "") !== "0") push("DOCUMENT_LIBRARY_FOLDER_PARENT_INVALID", "Generated-final Document Library folders are currently limited to root folders with Bigint1 = \"0\".", `${rowPath}.Bigint1`);
+    if (String(row.Text1 ?? "") !== "folder") push("DOCUMENT_LIBRARY_FOLDER_TYPE_INVALID", "Document Library folder rows require Text1 = \"folder\".", `${rowPath}.Text1`);
+    if (String(row.Bigint2 ?? "") !== "" || String(row.Text2 ?? "") !== "") push("DOCUMENT_LIBRARY_FOLDER_FILE_METADATA_INVALID", "Structural folder rows require blank Bigint2 and Text2 file metadata.", rowPath);
+    if (title && String(row.Text3 ?? "") !== `0_${title.toLowerCase()}`) push("DOCUMENT_LIBRARY_FOLDER_UNIQUE_NAME_INVALID", "Root folder Text3 must equal 0_<lowercase folder title>.", `${rowPath}.Text3`);
+    if (Object.prototype.hasOwnProperty.call(row, "Text4")) push("DOCUMENT_LIBRARY_FOLDER_UPLOAD_FORBIDDEN", "Structural folder rows must omit Text4 upload/file payload data.", `${rowPath}.Text4`);
+    if (Object.prototype.hasOwnProperty.call(row, "ListDataID")) push("DOCUMENT_LIBRARY_FOLDER_LISTDATAID_FIELD_FORBIDDEN", "The folder ID belongs in the List.Items object key, not a ListDataID row property.", `${rowPath}.ListDataID`);
+    for (const [fieldName, fieldValue] of Object.entries(row)) {
+      if (!fieldNames.has(fieldName)) push("DOCUMENT_LIBRARY_FOLDER_FIELD_UNKNOWN", "Folder rows may only use fields declared by the target Document Library.", `${rowPath}.${fieldName}`, { fieldName });
+      if (typeof fieldValue !== "string") push("DOCUMENT_LIBRARY_FOLDER_VALUE_NOT_STRING", "Document Library folder field values must serialize as strings.", `${rowPath}.${fieldName}`);
+      if (!coreFields.has(fieldName) && String(fieldValue) !== "") push("DOCUMENT_LIBRARY_FOLDER_CUSTOM_VALUE_NOT_BLANK", "Structural folder rows may include custom fields only as blank export-shaped values.", `${rowPath}.${fieldName}`);
     }
   }
   return errors;

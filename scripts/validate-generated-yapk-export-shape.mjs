@@ -285,11 +285,41 @@ function validateNoEmbeddedListDatas(decoded, findings) {
       const value = child.List.Items;
       const rowCount = Array.isArray(value) ? value.length : isObject(value) ? Object.keys(value).length : null;
       if (rowCount === null || rowCount > 0) {
-        findings.push(error("YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN", "Generated-final YAPK AppPackageInfo must not embed seed/sample rows in Childs[].List.Items; emit a companion seed artifact and run explicit post-install seeding.", {
-          path: `$.Childs[${childIndex}].List.Items`,
-          rowCount,
-        }));
+        if (Number(child.List.Type) === 16) validateDocumentLibraryFolderItems(child, childIndex, findings);
+        else findings.push(error("YAPK_EMBEDDED_LIST_ITEMS_FORBIDDEN", "Generated-final YAPK AppPackageInfo must not embed seed/sample rows in Childs[].List.Items. Only export-shaped structural folder rows are allowed for Type 16 Document Libraries.", { path: `$.Childs[${childIndex}].List.Items`, rowCount }));
       }
+    }
+  }
+}
+
+function validateDocumentLibraryFolderItems(child, childIndex, findings) {
+  const items = child?.List?.Items;
+  const basePath = `$.Childs[${childIndex}].List.Items`;
+  if (!isObject(items) || Array.isArray(items)) {
+    findings.push(error("DOCUMENT_LIBRARY_FOLDER_ITEMS_OBJECT_REQUIRED", "Type 16 Document Library folder rows must use a record-ID-keyed List.Items object.", { path: basePath }));
+    return;
+  }
+  const fieldNames = new Set(asArray(child.Fields).map((field) => String(field?.FieldName || "")));
+  const coreFields = new Set(["Title", "Bigint1", "Text1", "Bigint2", "Text2", "Text3"]);
+  for (const [folderId, row] of Object.entries(items)) {
+    const rowPath = `${basePath}[${folderId}]`;
+    if (!/^\d{16,}$/.test(folderId)) findings.push(error("DOCUMENT_LIBRARY_FOLDER_ROW_ID_INVALID", "Document Library folder object keys must be API-style numeric IDs.", { path: rowPath }));
+    if (!isObject(row) || Array.isArray(row)) {
+      findings.push(error("DOCUMENT_LIBRARY_FOLDER_ROW_INVALID", "Document Library List.Items entries must be folder row objects.", { path: rowPath }));
+      continue;
+    }
+    const title = String(row.Title || "").trim();
+    if (!title) findings.push(error("DOCUMENT_LIBRARY_FOLDER_TITLE_REQUIRED", "Document Library folder rows require a non-empty Title.", { path: `${rowPath}.Title` }));
+    if (String(row.Bigint1 ?? "") !== "0") findings.push(error("DOCUMENT_LIBRARY_FOLDER_PARENT_INVALID", "Generated-final Document Library folders are currently limited to root folders with Bigint1 = \"0\".", { path: `${rowPath}.Bigint1` }));
+    if (String(row.Text1 ?? "") !== "folder") findings.push(error("DOCUMENT_LIBRARY_FOLDER_TYPE_INVALID", "Document Library folder rows require Text1 = \"folder\".", { path: `${rowPath}.Text1` }));
+    if (String(row.Bigint2 ?? "") !== "" || String(row.Text2 ?? "") !== "") findings.push(error("DOCUMENT_LIBRARY_FOLDER_FILE_METADATA_INVALID", "Structural folder rows require blank Bigint2 and Text2 file metadata.", { path: rowPath }));
+    if (title && String(row.Text3 ?? "") !== `0_${title.toLowerCase()}`) findings.push(error("DOCUMENT_LIBRARY_FOLDER_UNIQUE_NAME_INVALID", "Root folder Text3 must equal 0_<lowercase folder title>.", { path: `${rowPath}.Text3` }));
+    if (Object.prototype.hasOwnProperty.call(row, "Text4")) findings.push(error("DOCUMENT_LIBRARY_FOLDER_UPLOAD_FORBIDDEN", "Structural folder rows must omit Text4 upload/file payload data.", { path: `${rowPath}.Text4` }));
+    if (Object.prototype.hasOwnProperty.call(row, "ListDataID")) findings.push(error("DOCUMENT_LIBRARY_FOLDER_LISTDATAID_FIELD_FORBIDDEN", "The folder ID belongs in the List.Items object key, not a ListDataID row property.", { path: `${rowPath}.ListDataID` }));
+    for (const [fieldName, fieldValue] of Object.entries(row)) {
+      if (!fieldNames.has(fieldName)) findings.push(error("DOCUMENT_LIBRARY_FOLDER_FIELD_UNKNOWN", "Folder rows may only use fields declared by the target Document Library.", { path: `${rowPath}.${fieldName}`, fieldName }));
+      if (typeof fieldValue !== "string") findings.push(error("DOCUMENT_LIBRARY_FOLDER_VALUE_NOT_STRING", "Document Library folder field values must serialize as strings.", { path: `${rowPath}.${fieldName}` }));
+      if (!coreFields.has(fieldName) && String(fieldValue) !== "") findings.push(error("DOCUMENT_LIBRARY_FOLDER_CUSTOM_VALUE_NOT_BLANK", "Structural folder rows may include custom fields only as blank export-shaped values.", { path: `${rowPath}.${fieldName}` }));
     }
   }
 }
@@ -399,8 +429,10 @@ function validateNativeTitleMetadata(decoded, findings) {
   for (const [childIndex, child] of asArray(decoded?.Childs).entries()) {
     const title = asArray(child?.Fields).find((field) => field?.FieldName === "Title" || field?.InternalName === "Title");
     if (!title) continue;
+    const isDocumentLibrary = Number(child?.List?.Type) === 16;
     if (title.IsSystem !== true) findings.push(error("NATIVE_TITLE_NOT_SYSTEM", "Native Title field must preserve IsSystem:true.", { path: `$.Childs[${childIndex}].Fields.Title.IsSystem` }));
-    if (Number(title.Status) !== 0) findings.push(error("NATIVE_TITLE_STATUS_INVALID", "Native Title field must preserve Status:0.", { path: `$.Childs[${childIndex}].Fields.Title.Status` }));
+    if (!isDocumentLibrary && Number(title.Status) !== 0) findings.push(error("NATIVE_TITLE_STATUS_INVALID", "Native Data List Title field must preserve Status:0.", { path: `$.Childs[${childIndex}].Fields.Title.Status` }));
+    if (isDocumentLibrary && Number(title.Status) !== 1) findings.push(error("DOCUMENT_LIBRARY_NATIVE_TITLE_STATUS_INVALID", "Native Document Library Title field must preserve Status:1.", { path: `$.Childs[${childIndex}].Fields.Title.Status` }));
     if (title.IsIndex !== true) findings.push(error("NATIVE_TITLE_ISINDEX_MISSING", "Native Title field must preserve IsIndex:true.", { path: `$.Childs[${childIndex}].Fields.Title.IsIndex` }));
   }
 }
