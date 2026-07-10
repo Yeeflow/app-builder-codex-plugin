@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.42
+
+- Release native Document Library YAPK contract and root-folder materialization hardening.
+- Preserve Type 16 export-compatible native fields and navigation instead of coercing Document Libraries through normal Data List rules.
+- Materialize planned root folders as API-issued-ID-backed `Childs[].List.Items` folder rows with `Text1 = "folder"`, `Bigint1 = "0"`, deterministic `Text3` path keys, and no `Text4` file payload.
+- Enforce folder row shape, ID provenance, and App Plan-to-generated-final completeness across source and dist validators.
+- Keep nested folder creation deferred until focused runtime proof establishes its current-product contract.
+
 ## 0.9.37
 
 - Release App Plan referenced-resource completeness hardening.
