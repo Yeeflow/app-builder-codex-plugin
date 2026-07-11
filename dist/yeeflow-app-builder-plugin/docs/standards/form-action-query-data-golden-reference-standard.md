@@ -24,6 +24,20 @@ Every planned Form Action Query Data step must select one explicit mode.
 
 The previously proven `multiple_to_temp_collection` mode remains supported for transient aggregates/display, with explicit `querydata_fields[]`; it is not one of the four new v1.1 focused templates.
 
+## Business Capability Selection Before Query Mode
+
+Do not start by selecting a Query Data serialization mode. First choose the smallest native capability that satisfies the business requirement:
+
+- read-only multi-row browsing, recent records, and reverse-related rows: bind an approved Collection or Data Table directly to the Data List source;
+- one related record needed for page-only context: `single_to_temp_variables`;
+- one related record whose values must persist with an Approval instance: `single_to_variables`;
+- dependent Data List New/Edit enrichment: `single_to_list_fields` or `single_to_list_fields_and_temp_variables`;
+- queried rows that become a persisted editable working copy: `multiple_to_list_sublist`;
+- count/KPI/visibility logic without row consumption: `multiple_count_only`;
+- client-side aggregate, JSON text, or explicitly justified custom transformation: `multiple_to_temp_collection`.
+
+Do not generate `Query Data -> temp JSON/temp collection -> Collection/Data Table`. Dataset controls already own a normal Data List source contract and cannot consume Query Data temp JSON. If the required result genuinely needs custom transformation, name the Custom Code consumer and runtime-proof boundary in the App Plan.
+
 ## Required Source Contract
 
 `attrs.querydata_list` must contain confirmed source metadata:
@@ -157,8 +171,13 @@ Every Query Data row must state:
 - persistence/page-lifetime intent;
 - proof boundary.
 - Page Size and Page Number, including whether each uses its shared default.
+- exact result consumer/use, especially for temp collections and JSON values.
 
 Planning labels are resolved to current source fields and declared workflow/temp/listref variables during generation. App Plans must not contain copied runtime IDs.
+
+Generation-ready planning must not retain alternative implementation wording such as `temp collection / import buffer`, `Query Data or lookup-bound display`, or `preferably`. Select one exact mode and target; put unselected alternatives in an explicitly deferred row.
+
+Lookup filters and chained-query mappings must distinguish the display value from the stored target identity. Use the target record `ListDataID`/stored target identifier; never pass a display title as the next query's record ID.
 
 Run `node scripts/validate-form-action-query-data-plan.mjs --plan <app-plan.md>` before materialization whenever the Form Actions table includes Query Data.
 
@@ -188,5 +207,11 @@ Final generation fails when:
 - a chained Dashboard query omits its not-empty guard.
 - Collection/Data Table directly binds a Query Data temp JSON value.
 - Query Data is hosted directly by a Form Report or Data Report.
+- a temp collection/JSON result omits its supported consumer or is planned as a Collection/Data Table source;
+- an exact result target remains ambiguous or uses an import-buffer alternative;
+- a Lookup display value or ambiguous Lookup value is used where a target record identifier is required;
+- Generation Readiness detects Form Action Query Data intent but no standard planning table exists.
+
+`validate-generation-readiness-review.mjs` must invoke the Query Data plan validator automatically whenever Form Action Query Data intent exists. Passing only resource-order validation is not sufficient to call an App Plan generation-ready.
 
 Schema/package validation does not prove live query execution, returned values, count accuracy, or host-page trigger execution. Keep runtime proof separate.

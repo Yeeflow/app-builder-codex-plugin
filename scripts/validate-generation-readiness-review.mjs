@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { validateFormActionQueryDataPlan } from "./validate-form-action-query-data-plan.mjs";
 
 const AREAS = [
   { key: "dataLists", title: "Data Lists and Document Libraries Plan", code: "GENERATION_READINESS_AREA_EMPTY", required: /data list|document library|not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required/i, extra: validateDataLists },
@@ -475,14 +476,43 @@ function validate(file) {
   for (const finding of validateControlActionPropertyGates(text, sections)) findings.push(finding);
   for (const finding of validateAmbiguousImplementationWording(text, sections)) findings.push(finding);
 
-  const errors = findings.length;
+  const queryDataPlan = validateFormActionQueryDataPlan(text);
+  const hasFormActionQueryDataIntent = queryDataPlan.queryDataRows > 0 || text.split(/\r?\n/).some((line) =>
+    /\bQuery\s*Data\b/i.test(line)
+    && /\b(Form Action|Form Actions and Temp Variables|Dashboard|Custom Data List Form|Approval Submission|Approval Task)\b/i.test(line)
+    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
+  );
+  if (hasFormActionQueryDataIntent && queryDataPlan.queryDataRows === 0) {
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_QUERYDATA_PLAN_TABLE_MISSING",
+      area: "Form Actions and Temp Variables",
+      message: "Form Action Query Data intent requires a standard Form Actions and Temp Variables planning table before generation readiness can pass.",
+    });
+  }
+  for (const finding of queryDataPlan.findings) {
+    findings.push({
+      level: finding.severity === "warning" ? "warning" : "error",
+      area: "Form Actions and Temp Variables",
+      ...finding,
+    });
+  }
+
+  const errors = findings.filter((finding) => finding.level !== "warning").length;
+  const warnings = findings.filter((finding) => finding.level === "warning").length;
   return {
     status: errors ? "fail" : "pass",
     file: path.resolve(file),
     errors,
-    warnings: 0,
+    warnings,
     areas: areaStatus,
     findings,
+    queryDataPlan: {
+      validatorRan: true,
+      detectedIntent: hasFormActionQueryDataIntent,
+      queryDataRows: queryDataPlan.queryDataRows,
+      status: queryDataPlan.status,
+    },
     proofBoundary: "Generation readiness review checks planning completeness only; it does not prove package generation, schema validity, signing, API acceptance, or runtime behavior.",
   };
 }

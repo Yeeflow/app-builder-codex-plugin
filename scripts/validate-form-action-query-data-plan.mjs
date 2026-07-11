@@ -25,7 +25,7 @@ if (isMainModule()) {
 export function validateFormActionQueryDataPlan(markdown) {
   const findings = [];
   const rows = queryDataRows(markdown);
-  for (const [index, row] of rows.entries()) validateRow(row, index, findings);
+  for (const [index, row] of rows.entries()) validateRow(row, index, findings, markdown);
   return {
     status: findings.some((item) => item.severity === "error") ? "fail" : findings.some((item) => item.severity === "warning") ? "pass_with_warnings" : "pass",
     queryDataRows: rows.length,
@@ -37,7 +37,7 @@ export function extractFormActionQueryDataPlanRows(markdown) {
   return queryDataRows(markdown);
 }
 
-function validateRow(row, index, findings) {
+function validateRow(row, index, findings, markdown) {
   const path = `Form Actions and Temp Variables row ${index + 1}`;
   const mode = value(row, "Query Mode");
   const host = value(row, "Host Surface / Page", "Host Form");
@@ -52,11 +52,17 @@ function validateRow(row, index, findings) {
   const count = value(row, "Count Target");
   const pageSize = value(row, "Page Size");
   const pageNumber = value(row, "Page Number");
+  const filters = value(row, "Filters");
+  const boundControl = value(row, "Bound Control");
+  const resultConsumer = value(row, "Result Consumer / Use", "Result Consumer", "Consumer / Use");
   const notes = value(row, "Notes", "Business Rationale");
   for (const [label, current] of [["Action Name", value(row, "Action Name")], ["Step Name", value(row, "Step Name")], ["Host Surface / Page", host], ["Trigger", value(row, "Trigger")], ["Query Mode", mode], ["Source Resource Type", sourceType], ["Source Resource", source]]) {
     if (isEmpty(current)) add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_REQUIRED_VALUE_MISSING", `${label} is required for a Query Data step`, path, { column: label });
   }
   if (!MODES.has(mode)) add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_MODE_INVALID", "Query Mode must use a supported golden-reference mode", path, { mode });
+  if (isAmbiguousResultContract(resultType) || isAmbiguousResultContract(result)) {
+    add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_AMBIGUOUS_IMPLEMENTATION", "Result target type and result target must select one exact implementation; alternatives such as temp collection / import buffer or Query Data or lookup-bound display are not generation-ready", path, { resultType, result });
+  }
   if (/public\s*form/i.test(host)) add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_PUBLIC_FORM_FORBIDDEN", "Public Forms cannot host Form Action Query Data", path);
   if (/data\s*list|document\s*library/i.test(host)) {
     if (isNone(hostResource)) add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_HOST_RESOURCE_MISSING", "Data List/Document Library Form Query Data requires Host Resource", path);
@@ -86,6 +92,13 @@ function validateRow(row, index, findings) {
     }
   } else if (mode === "multiple_to_temp_collection") {
     requireTarget(resultType, result, mapping, /temp.*collection|collection/i, findings, path);
+    const consumerText = `${resultConsumer} ${boundControl} ${notes}`.trim();
+    const datasetConsumer = /\b(Collection|Data Table)\b/i.test(consumerText) || hasRelatedDatasetControlConsumer(markdown, row);
+    if (datasetConsumer && !/\bCustom Code\b/i.test(consumerText)) {
+      add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_TEMP_JSON_DATASET_CONTROL_FORBIDDEN", "Collection and Data Table cannot consume Query Data temp JSON/temp collection results; bind the dataset control directly to its Data List source or use a specifically justified Custom Code renderer", path, { boundControl });
+    } else if (!/JSONStringfy|Custom Code|arraySum|aggregate|calculation|calculate|text|JSON|client-side/i.test(consumerText)) {
+      add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_RESULT_CONSUMER_UNPROVEN", "A temp collection/JSON Query Data result must name its supported consumer or calculation purpose", path, { resultConsumer, boundControl, notes });
+    }
   } else if (mode === "multiple_count_only") {
     if (!isNone(resultType) || !isNone(result) || !isNone(mapping)) {
       add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_COUNT_ONLY_RESULT_PRESENT", "Count-only mode must set result target and field mapping to None", path, { resultType, result, mapping });
@@ -117,9 +130,47 @@ function validateRow(row, index, findings) {
       add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_PAGE_NUMBER_INVALID", "Page Number must be a positive integer; omitted means the shared default 1", path, { pageNumber });
     }
   }
+  if (usesUnresolvedLookupDisplayValue(filters) || usesUnresolvedLookupDisplayValue(mapping)) {
+    add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_LOOKUP_DISPLAY_VALUE_USED", "Lookup-backed query filters and ID mappings must explicitly use the target record ListDataID/stored target identifier, not a display title or ambiguous lookup value", path, { filters, mapping });
+  }
   if (!/^data\s*list$/i.test(sourceType) && !isEmpty(sourceType)) {
     add(findings, "warning", "FORM_ACTION_QUERYDATA_PLAN_SOURCE_EXPORT_PROOF_REQUIRED", "This focused baseline proves Data List source metadata; other source types require a focused export before final generation", path, { sourceType });
   }
+}
+
+function isAmbiguousResultContract(input) {
+  const text = String(input || "").trim();
+  if (!text) return false;
+  return /\b(?:preferably|equivalent|either)\b|\bquery\s*data\s+or\b|\btemp(?:orary)?\s+collection\s*\/\s*import\s+buffer\b|\bimport\s+buffer\b/i.test(text);
+}
+
+function usesUnresolvedLookupDisplayValue(input) {
+  const text = String(input || "");
+  if (!text) return false;
+  const identityProven = /ListDataID|target\s+record\s+(?:id|identifier)|stored\s+target\s+(?:id|identifier)|lookup\s+(?:target\s+)?(?:id|identifier)/i.test(text);
+  if (identityProven) return false;
+  if (/lookup\s+(?:display\s+)?(?:title|text|value)/i.test(text)) return true;
+  return /\b[A-Za-z][A-Za-z0-9 _-]*\s*->\s*`?v[A-Za-z0-9_]*Id`?\b/.test(text) && !/\brecord\s+ID\s*->/i.test(text);
+}
+
+function hasRelatedDatasetControlConsumer(markdown, row) {
+  const candidates = [value(row, "Bound Control"), value(row, "Step Name"), value(row, "Action Name")]
+    .map(meaningfulTokens)
+    .filter((tokens) => tokens.length >= 2);
+  if (!candidates.length) return false;
+  for (const line of String(markdown || "").split(/\r?\n/)) {
+    if (!/^\s*\|.*\|\s*$/.test(line)) continue;
+    const cells = line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+    if (!cells.some((cell) => /^(Collection|Data Table)$/i.test(cell))) continue;
+    const lineTokens = new Set(meaningfulTokens(line));
+    if (candidates.some((tokens) => tokens.filter((token) => lineTokens.has(token)).length >= 2)) return true;
+  }
+  return false;
+}
+
+function meaningfulTokens(input) {
+  const ignored = new Set(["action", "all", "data", "load", "my", "query", "result", "results", "section", "service", "step", "the", "to"]);
+  return String(input || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").split(/\s+/).filter((token) => token.length > 2 && !ignored.has(token) && !/^\d+$/.test(token));
 }
 
 function requireDataListHost(host, findings, path, mode) {
