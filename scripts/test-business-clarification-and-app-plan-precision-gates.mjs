@@ -228,6 +228,29 @@ try {
   }));
   expectPass("ambiguous wording marked export-learning-required passes", ["scripts/validate-generation-readiness-review.mjs", "--plan", ambiguousDeferred, "--json"], results);
 
+  const validQueryDataPlan = writeFixture(tempDir, "valid-query-data-plan.md", readinessPlan({
+    customForms: `${readinessAreas.customForms}\n\n#### Form Actions and Temp Variables\n\n| Action Name | Step Name | Host Resource | Host Form | Host Surface / Page | Trigger | Exact Step Type | Query Mode | Source Resource Type | Source Resource | Filters | Sorts | Result Target Type | Result Target | Field Mapping | Count Target Type | Count Target | Page Size | Page Number | Persistence / Lifetime | Bound Control | Proof Boundary | Notes |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Load owner | Query contract owner | Contracts | Contract Detail | Data List View Item | Page Load | Query Data | single_to_temp_variables | Data List | Contract Owners | Contract ID = current record | None | Temp variables | ContractOwner | Owner -> ContractOwner | None | None | 1 | 1 | Current page session | Owner text | export-proven | Read-only context |`,
+  }));
+  const validQueryReadiness = expectPass("generation readiness automatically runs valid Query Data plan gate", ["scripts/validate-generation-readiness-review.mjs", "--plan", validQueryDataPlan, "--json"], results);
+  assert.equal(validQueryReadiness.queryDataPlan?.validatorRan, true);
+  assert.equal(validQueryReadiness.queryDataPlan?.queryDataRows, 1);
+
+  const invalidQueryDataPlan = writeFixture(tempDir, "invalid-query-data-plan.md", readinessPlan({
+    customForms: `${readinessAreas.customForms}\n\n#### Form Actions and Temp Variables\n\n| Action Name | Step Name | Host Resource | Host Form | Host Surface / Page | Trigger | Exact Step Type | Query Mode | Source Resource Type | Source Resource | Filters | Sorts | Result Target Type | Result Target | Field Mapping | Count Target Type | Count Target | Page Size | Page Number | Persistence / Lifetime | Bound Control | Proof Boundary | Notes |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Count contracts | Count contracts | Contracts | Contract Detail | Data List View Item | Page Load | Query Data | multiple_count_only | Data List | Contracts | Status = Active | None | None | None | None | Temp variable | ContractCount | Count only | 1 | Current page session | Count text | export-proven | Count only |`,
+  }));
+  expectFail("generation readiness blocks invalid Query Data pagination", ["scripts/validate-generation-readiness-review.mjs", "--plan", invalidQueryDataPlan, "--json"], "FORM_ACTION_QUERYDATA_PLAN_PAGE_SIZE_INVALID", results);
+
+  const missingQueryDataTable = writeFixture(tempDir, "missing-query-data-table.md", readinessPlan({
+    dashboards: `${readinessAreas.dashboards}\n\nThe Dashboard Form Action uses Query Data on page load to populate temp variables, but the Form Actions and Temp Variables planning table is omitted.`,
+  }));
+  expectFail("generation readiness requires Query Data planning table", ["scripts/validate-generation-readiness-review.mjs", "--plan", missingQueryDataTable, "--json"], "GENERATION_READINESS_QUERYDATA_PLAN_TABLE_MISSING", results);
+
+  const noQueryDataRequired = writeFixture(tempDir, "no-query-data-required.md", readinessPlan({
+    customForms: `${readinessAreas.customForms}\n\nNo Form Action Query Data is required or planned for these forms.`,
+  }));
+  const noQueryDataReadiness = expectPass("negative no-Query-Data decision does not require planning table", ["scripts/validate-generation-readiness-review.mjs", "--plan", noQueryDataRequired, "--json"], results);
+  assert.equal(noQueryDataReadiness.queryDataPlan?.detectedIntent, false);
+
   const reportText = [
     "Functional Specification structure: pass",
     "App Plan resource order: pass",
