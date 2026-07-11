@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.50`
+- Version: `0.9.51`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.50` hardens Query Data planning decisions. App Plans now choose native dataset controls before Query Data modes, declare temp-result consumers and Lookup target identity, and automatically run Query Data validation inside Generation Readiness.
+Current release `0.9.51` adds export-proven Workflow Query Data and Loop contracts across Approval, Data List, and Scheduled workflows. Data List, Document Library, and Form Report sources now share pagination, two-sort, List/Complex Type, planning, and generated-final validation rules.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.50
+Version: 0.9.51
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.50
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.51
 ```
 
 ## What Is Included
