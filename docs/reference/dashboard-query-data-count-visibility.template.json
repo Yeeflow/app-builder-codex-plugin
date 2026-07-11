@@ -1,0 +1,49 @@
+{
+  "attrs": {
+    "control_display": {
+      "formula": [
+        {
+          "type": "func",
+          "func": "isNullOrEmpty",
+          "params": [
+            [
+              {
+                "exprType": "variable",
+                "valueType": "number",
+                "id": "__temp_<declared-count-temp-id>",
+                "type": "expr"
+              }
+            ]
+          ]
+        },
+        {
+          "type": "op",
+          "op": "=="
+        },
+        {
+          "type": "bool",
+          "value": false
+        },
+        {
+          "type": "op",
+          "op": "and"
+        },
+        {
+          "exprType": "variable",
+          "valueType": "number",
+          "id": "__temp_<declared-count-temp-id>",
+          "type": "expr"
+        },
+        {
+          "type": "op",
+          "op": ">"
+        },
+        {
+          "type": "number",
+          "value": 0
+        }
+      ],
+      "action": "show"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "type": "querydata",
+  "name": "Query single data and save to temp variables",
+  "attrs": {
+    "querydata_list": {
+      "AppID": "{{APP_ID}}",
+      "ListSetID": "{{LIST_SET_ID}}",
+      "ListID": "{{SOURCE_LIST_ID}}",
+      "ListType": 1
+    },
+    "querydata_filters": [
+      {
+        "key": "{{FILTER_UUID}}",
+        "pre": "and",
+        "left": "{{SOURCE_FILTER_FIELD}}",
+        "op": "0",
+        "right": "{{LITERAL_VALUE}}",
+        "showCus": true
+      }
+    ],
+    "querydata_sorts": [
+      {
+        "SortName": "{{SOURCE_SORT_FIELD}}",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_fieldmap": {
+      "{{SOURCE_FIELD_NAME}}": "__temp_{{TEMP_VARIABLE_ID}}"
+    },
+    "querydata_fields": null
+  }
+}

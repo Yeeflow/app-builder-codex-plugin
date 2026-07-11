@@ -1,0 +1,22 @@
+{
+  "title": "<task-form-title>",
+  "type": 2,
+  "formdef": {
+    "formAction": {
+      "onLoad": "<query-action-id>"
+    },
+    "actions": [
+      {
+        "id": "<query-action-id>",
+        "name": "<business-query-action-name>",
+        "steps": [
+          {
+            "type": "querydata",
+            "name": "<business-query-step-name>",
+            "attrs": "<use-a-host-compatible-query-data-golden-template>"
+          }
+        ]
+      }
+    ]
+  }
+}

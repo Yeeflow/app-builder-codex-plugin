@@ -1,0 +1,47 @@
+{
+  "type": "querydata",
+  "name": "Load related records into current Sub list",
+  "attrs": {
+    "querydata_list": {
+      "AppID": "{{APP_ID}}",
+      "ListSetID": "{{LIST_SET_ID}}",
+      "ListID": "{{SOURCE_LIST_ID}}",
+      "ListType": 1
+    },
+    "querydata_filters": [
+      {
+        "key": "{{FILTER_UUID}}",
+        "pre": "and",
+        "left": "{{SOURCE_LOOKUP_FIELD}}",
+        "op": "0",
+        "right": [
+          {
+            "exprType": "list_field",
+            "valueType": "input",
+            "prop": "ListDataID",
+            "id": "ListDataID",
+            "type": "expr",
+            "name": "List Fields:Id"
+          }
+        ],
+        "showCus": false
+      }
+    ],
+    "querydata_sorts": [
+      {
+        "SortName": "Created",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_type": "multiple",
+    "querydata_fieldmap": {
+      "{{SOURCE_FIELD_NAME}}": "{{SUBLIST_FIELD_ID}}"
+    },
+    "querydata_listname": "{{HOST_SUBLIST_FIELD_NAME}}",
+    "querydata_vartype": "list",
+    "querydata_listname_parent": "__list_",
+    "querydata_fields": null,
+    "querydata_totalcount": "{{TEMP_COUNT_VARIABLE_ID}}",
+    "querydata_totalparent": "__temp_"
+  }
+}

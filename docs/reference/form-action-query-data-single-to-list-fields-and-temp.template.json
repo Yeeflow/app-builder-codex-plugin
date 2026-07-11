@@ -1,0 +1,42 @@
+{
+  "type": "querydata",
+  "name": "Query one record into current fields and temporary values",
+  "attrs": {
+    "querydata_list": {
+      "AppID": "{{APP_ID}}",
+      "ListSetID": "{{LIST_SET_ID}}",
+      "ListID": "{{SOURCE_LIST_ID}}",
+      "ListType": 1
+    },
+    "querydata_filters": [
+      {
+        "key": "{{FILTER_UUID}}",
+        "pre": "and",
+        "left": "ListDataID",
+        "op": "0",
+        "right": [
+          {
+            "exprType": "list_field",
+            "valueType": "lookup",
+            "prop": "{{HOST_LOOKUP_FIELD}}",
+            "id": "{{HOST_LOOKUP_LABEL}}",
+            "type": "expr",
+            "name": "List Fields:{{HOST_LOOKUP_LABEL}}"
+          }
+        ],
+        "showCus": false
+      }
+    ],
+    "querydata_sorts": [
+      {
+        "SortName": "Created",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_fieldmap": {
+      "{{SOURCE_FIELD_TO_HOST}}": "____customListFields_{{HOST_FIELD_NAME}}",
+      "{{SOURCE_FIELD_TO_TEMP}}": "__temp_{{TEMP_VARIABLE_ID}}"
+    },
+    "querydata_fields": null
+  }
+}

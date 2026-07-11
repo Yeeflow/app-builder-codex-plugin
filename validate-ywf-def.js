@@ -16,6 +16,11 @@ const {
 const {
   validateWorkflowAssigneeExpression,
 } = require("./scripts/lib/workflow-assignee-expression-utils.cjs");
+const {
+  classifyFormActionQueryDataStep,
+  effectiveQueryDataType,
+  isCountOnlyIntent,
+} = require("./scripts/lib/form-action-query-data-utils.cjs");
 
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
 const NUMERIC_OPS = new Set(["n.>", "n.>=", "n.<", "n.<=", "n.=", "n.!=", ">", ">=", "<", "<="]);
@@ -535,91 +540,127 @@ function validateDecodedDef(def, options = {}) {
 
   function validateQueryDataStep(step, stepPath) {
     const attrs = step.attrs || {};
+    const queryIssues = mode === "final" ? errors : warnings;
+    const queryType = effectiveQueryDataType(attrs);
+    const queryMode = classifyFormActionQueryDataStep(step);
+    const hasResultTarget = Boolean(attrs.querydata_listname);
+    const hasCountTarget = Boolean(attrs.querydata_totalcount);
     if (!isObject(attrs.querydata_list)) {
-      addIssue(warnings, "FORM_ACTION_QUERYDATA_SOURCE_MISSING", "Query data step should include attrs.querydata_list source metadata", `${stepPath}.attrs.querydata_list`);
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SOURCE_MISSING", "Query data step must include attrs.querydata_list source metadata", `${stepPath}.attrs.querydata_list`);
     } else {
       for (const key of ["AppID", "ListSetID", "ListID", "ListType"]) {
         if (attrs.querydata_list[key] === undefined || attrs.querydata_list[key] === null || attrs.querydata_list[key] === "") {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_SOURCE_INCOMPLETE", `Query data source is missing ${key}`, `${stepPath}.attrs.querydata_list.${key}`);
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SOURCE_INCOMPLETE", `Query data source is missing ${key}`, `${stepPath}.attrs.querydata_list.${key}`);
         }
       }
     }
 
-    if (!["multiple", "single"].includes(attrs.querydata_type)) {
-      addIssue(warnings, "FORM_ACTION_QUERYDATA_TYPE_UNKNOWN", "Query data step should use querydata_type single or multiple", `${stepPath}.attrs.querydata_type`, {
+    if (attrs.querydata_type !== undefined && !["multiple", "single"].includes(attrs.querydata_type)) {
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_TYPE_UNKNOWN", "Query data step must use querydata_type single or multiple; omitted querydata_type is the v1.1 export shape for single-record queries", `${stepPath}.attrs.querydata_type`, {
         querydata_type: attrs.querydata_type,
       });
     }
+    const pageSize = attrs.querydata_pagesize ?? 100;
+    if (!Number.isInteger(Number(pageSize)) || Number(pageSize) < 1 || Number(pageSize) > 1000) {
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_PAGE_SIZE_INVALID", "Query Data Page Size must be an integer from 1 to 1000; omitted means 100", `${stepPath}.attrs.querydata_pagesize`, { pageSize });
+    }
+    const pageNumber = attrs.querydata_pageindex ?? 1;
+    if (!Number.isInteger(Number(pageNumber)) || Number(pageNumber) < 1) {
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_PAGE_NUMBER_INVALID", "Query Data Page Number uses querydata_pageindex and must be a positive integer; omitted means 1", `${stepPath}.attrs.querydata_pageindex`, { pageNumber });
+    }
+    if (attrs.querydata_pagenumber !== undefined || attrs.querydata_page !== undefined) {
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_PAGE_NUMBER_PROPERTY_INVALID", "Use export-proven querydata_pageindex for Query Data Page Number", `${stepPath}.attrs`);
+    }
 
-    if (attrs.querydata_totalcount && !variableNamespaceHasTarget(attrs.querydata_totalparent, attrs.querydata_totalcount)) {
-      addIssue(warnings, "FORM_ACTION_QUERYDATA_COUNT_TARGET_MISSING", `Query data total count target ${attrs.querydata_totalparent || ""}${attrs.querydata_totalcount} is not declared`, `${stepPath}.attrs.querydata_totalcount`);
+    if (hasCountTarget && !variableNamespaceHasTarget(attrs.querydata_totalparent, attrs.querydata_totalcount)) {
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_COUNT_TARGET_MISSING", `Query data total count target ${attrs.querydata_totalparent || ""}${attrs.querydata_totalcount} is not declared`, `${stepPath}.attrs.querydata_totalcount`);
+    }
+    if (hasCountTarget && attrs.querydata_totalparent === "__variables_") {
+      const countVariable = variableById.get(attrs.querydata_totalcount);
+      if (countVariable && countVariable.type !== "number") {
+        addIssue(queryIssues, "FORM_ACTION_QUERYDATA_COUNT_TARGET_NOT_NUMBER", "Query Data result count stored in a workflow variable must target a number variable", `${stepPath}.attrs.querydata_totalcount`, {
+          target: attrs.querydata_totalcount,
+          type: countVariable.type,
+        });
+      }
     }
 
     if (Array.isArray(attrs.querydata_filter) && !Array.isArray(attrs.querydata_filters)) {
-      addIssue(warnings, "FORM_ACTION_QUERYDATA_FILTER_SINGULAR_IGNORED", "Query data filters should use attrs.querydata_filters; attrs.querydata_filter is ignored by runtime", `${stepPath}.attrs.querydata_filter`);
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_SINGULAR_IGNORED", "Query data filters must use attrs.querydata_filters; attrs.querydata_filter is ignored by runtime", `${stepPath}.attrs.querydata_filter`);
     }
 
     if (Array.isArray(attrs.querydata_filters)) {
       attrs.querydata_filters.forEach((filter, index) => {
         const filterPath = `${stepPath}.attrs.querydata_filters.${index}`;
         if (!isObject(filter)) {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_FILTER_BAD_ENTRY", "Query data filter entries should be objects", filterPath);
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_BAD_ENTRY", "Query data filter entries must be objects", filterPath);
           return;
         }
-        if (!filter.left || filter.op === undefined || filter.op === null || filter.right === undefined || filter.right === null) {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_FILTER_INCOMPLETE", "Query data filter entries should include left, op, and right", filterPath);
+        if (!filter.left || filter.op === undefined || filter.op === null || filter.right === undefined || (filter.right === null && String(filter.op) !== "11")) {
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_INCOMPLETE", "Query data filters require left/op/right; export-proven op 11 may use right=null for current-user membership", filterPath);
         }
         if (filter.right === "ON" || filter.right === "OFF") {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_FILTER_BOOLEAN_LABEL", "Boolean Query data filters should use true/false string values, not ON/OFF labels", `${filterPath}.right`, { right: filter.right });
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_BOOLEAN_LABEL", "Boolean Query data filters must use true/false string values, not ON/OFF labels", `${filterPath}.right`, { right: filter.right });
         }
         if (typeof filter.right === "string" && (filter.right.includes("<input") || filter.right.includes("&quot;") || filter.right.includes("Workflow Variables:"))) {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_FILTER_HTML_VALUE_OPERAND", "Query data filter variable/calculated operands must use expression-editor token arrays with showCus false; HTML expression-button strings in direct-value mode are treated as literal strings at runtime", `${filterPath}.right`, { right: filter.right, showCus: filter.showCus });
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_HTML_VALUE_OPERAND", "Query data filter variable/calculated operands must use expression-editor token arrays with showCus false; HTML expression-button strings in direct-value mode are treated as literal strings at runtime", `${filterPath}.right`, { right: filter.right, showCus: filter.showCus });
         }
         if (Array.isArray(filter.right) && filter.showCus !== false) {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_FILTER_EXPR_MODE_MISMATCH", "Query data filter expression-token operands should set showCus false so the right operand is in expression-editor mode", `${filterPath}.showCus`, { showCus: filter.showCus });
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_EXPR_MODE_MISMATCH", "Query data filter expression-token operands must set showCus false so the right operand is in expression-editor mode", `${filterPath}.showCus`, { showCus: filter.showCus });
         }
       });
     }
 
-    if (attrs.querydata_type === "multiple") {
+    if (queryType === "multiple") {
       const parent = attrs.querydata_listname_parent;
       const target = attrs.querydata_listname;
-      if (!target) {
-        addIssue(warnings, "FORM_ACTION_QUERYDATA_RESULT_TARGET_MISSING", "Multiple query data step should include querydata_listname when results are needed", `${stepPath}.attrs.querydata_listname`);
+      if (!hasResultTarget && !hasCountTarget) {
+        addIssue(queryIssues, "FORM_ACTION_QUERYDATA_OUTPUT_MISSING", "Multiple Query Data must save records to a result target, save the number of results, or do both", `${stepPath}.attrs`);
       } else if (!variableNamespaceHasTarget(parent, target)) {
-        addIssue(warnings, "FORM_ACTION_QUERYDATA_RESULT_TARGET_UNKNOWN", `Multiple query data target ${parent || ""}${target} is not a known workflow or temp variable`, `${stepPath}.attrs.querydata_listname`);
+        if (hasResultTarget) addIssue(queryIssues, "FORM_ACTION_QUERYDATA_RESULT_TARGET_UNKNOWN", `Multiple query data target ${parent || ""}${target} is not a known workflow or temp variable`, `${stepPath}.attrs.querydata_listname`);
       }
       if (parent === "__variables_" && target && variableById.has(target)) {
         const variable = variableById.get(target);
         if (variable.type !== "list") {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_RESULT_TARGET_NOT_LIST", "Multiple query data mapped to workflow variables should target a list variable", `${stepPath}.attrs.querydata_listname`, { target });
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_RESULT_TARGET_NOT_LIST", "Multiple query data mapped to workflow variables must target a list variable", `${stepPath}.attrs.querydata_listname`, { target });
         }
+      }
+      const countOnlyByShape = !hasResultTarget && hasCountTarget;
+      const countOnlyByName = isCountOnlyIntent(step);
+      const hasStaleResultMapping = (isObject(attrs.querydata_fieldmap) && Object.keys(attrs.querydata_fieldmap).length > 0)
+        || (Array.isArray(attrs.querydata_fields) && attrs.querydata_fields.length > 0)
+        || Boolean(attrs.querydata_listname || attrs.querydata_vartype || attrs.querydata_listname_parent);
+      if ((countOnlyByShape || countOnlyByName) && hasStaleResultMapping) {
+        addIssue(queryIssues, "FORM_ACTION_QUERYDATA_COUNT_ONLY_STALE_RESULT_MAPPING", "Count-only Query Data must not retain a Sub list/temp collection target, field map, selected fields, or result namespace", `${stepPath}.attrs`, { queryMode });
       }
     }
 
     if (isObject(attrs.querydata_fieldmap)) {
       for (const [sourceField, targetField] of Object.entries(attrs.querydata_fieldmap)) {
         if (!sourceField || !targetField) {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_FIELDMAP_BAD_ENTRY", "Query data field map entries should map source fields to target variables/row fields", `${stepPath}.attrs.querydata_fieldmap`);
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FIELDMAP_BAD_ENTRY", "Query data field map entries must map source fields to target variables/row fields", `${stepPath}.attrs.querydata_fieldmap`);
           continue;
         }
-        if (attrs.querydata_type === "multiple" && attrs.querydata_listname_parent === "__variables_" && rowFieldsByListVar.has(attrs.querydata_listname)) {
+        if (queryType === "multiple" && attrs.querydata_listname_parent === "__variables_" && rowFieldsByListVar.has(attrs.querydata_listname)) {
           const rowFields = rowFieldsByListVar.get(attrs.querydata_listname);
           if (!rowFields.has(targetField)) {
-            addIssue(warnings, "FORM_ACTION_QUERYDATA_ROW_FIELD_MISSING", `Query data maps ${sourceField} to missing list row field ${targetField}`, `${stepPath}.attrs.querydata_fieldmap.${sourceField}`);
+            addIssue(queryIssues, "FORM_ACTION_QUERYDATA_ROW_FIELD_MISSING", `Query data maps ${sourceField} to missing list row field ${targetField}`, `${stepPath}.attrs.querydata_fieldmap.${sourceField}`);
           }
-        } else if (attrs.querydata_type === "single" && !variableById.has(targetField) && !tempVarIds.has(targetField)) {
-          addIssue(warnings, "FORM_ACTION_QUERYDATA_VARIABLE_TARGET_MISSING", `Query data maps ${sourceField} to missing variable ${targetField}`, `${stepPath}.attrs.querydata_fieldmap.${sourceField}`);
+        } else if (queryType === "single") {
+          const normalizedTempTarget = String(targetField).startsWith("__temp_") ? String(targetField).slice("__temp_".length) : String(targetField);
+          if (!variableById.has(targetField) && !tempVarIds.has(targetField) && !tempVarIds.has(normalizedTempTarget)) {
+            addIssue(queryIssues, "FORM_ACTION_QUERYDATA_VARIABLE_TARGET_MISSING", `Query data maps ${sourceField} to missing workflow/temp variable ${targetField}`, `${stepPath}.attrs.querydata_fieldmap.${sourceField}`);
+          }
         }
       }
-    } else if (attrs.querydata_type === "single") {
-      addIssue(warnings, "FORM_ACTION_QUERYDATA_SINGLE_FIELDMAP_MISSING", "Single query data steps should map selected fields into variables", `${stepPath}.attrs.querydata_fieldmap`);
+    } else if (queryType === "single") {
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SINGLE_FIELDMAP_MISSING", "Single query data steps must map selected fields into workflow or temp variables", `${stepPath}.attrs.querydata_fieldmap`);
     }
 
-    if (attrs.querydata_listname_parent === "__temp_" && attrs.querydata_type === "multiple") {
+    if (attrs.querydata_listname_parent === "__temp_" && queryType === "multiple") {
       const fields = attrs.querydata_fields;
       if (!Array.isArray(fields) || fields.length === 0) {
-        addIssue(warnings, "FORM_ACTION_QUERYDATA_SELECTED_FIELDS_MISSING", "Temp collection query results should include explicit querydata_fields[]", `${stepPath}.attrs.querydata_fields`);
+        addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SELECTED_FIELDS_MISSING", "Temp collection query results must include explicit querydata_fields[]", `${stepPath}.attrs.querydata_fields`);
       }
     }
   }

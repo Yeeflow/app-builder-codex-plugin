@@ -1,0 +1,31 @@
+{
+  "type": "querydata",
+  "name": "Count current user records",
+  "attrs": {
+    "querydata_list": {
+      "AppID": 41,
+      "ListSetID": "<current-list-set-id>",
+      "ListID": "<current-source-list-id>",
+      "ListType": 1
+    },
+    "querydata_filters": [
+      {
+        "key": "<uuid>",
+        "pre": "and",
+        "left": "<identity-field>",
+        "op": "11",
+        "right": null
+      }
+    ],
+    "querydata_sorts": [
+      {
+        "SortName": "<date-field>",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_type": "multiple",
+    "querydata_totalcount": "<declared-count-temp-id>",
+    "querydata_totalparent": "__temp_",
+    "querydata_pagesize": 1000
+  }
+}

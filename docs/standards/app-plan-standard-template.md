@@ -226,9 +226,32 @@ Approval form field-layout rules:
 
 #### Form Actions and Temp Variables
 
-| Action Name | Host Form | Trigger Location | Trigger Type | Temp Variables | Steps | Data Read | Data Write | Bound Controls | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <Action> | Submission / Task / Other | Page Load / Field Change / Submission / Button | <Type> | <Variables> | <Steps> | <Data> | <Data> | <Controls> | <Notes> |
+| Action Name | Step Name | Host Resource | Host Form | Host Surface / Page | Trigger | Exact Step Type | Query Mode | Source Resource Type | Source Resource | Filters | Sorts | Result Target Type | Result Target | Field Mapping | Count Target Type | Count Target | Page Size | Page Number | Persistence / Lifetime | Bound Control | Proof Boundary | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Action> | <Step> | <Approval form / Data List / Dashboard name> | <Submission / Task / Print / Custom form / Dashboard page> | Approval Submission / Task / Print / Data List New / Edit / View / Dashboard | Page Load / Field Change / Submission / Button | Query Data / Set variable / Confirm / Submit / other proven type | single_to_variables / single_to_temp_variables / single_to_list_fields / single_to_list_fields_and_temp_variables / multiple_to_sublist / multiple_to_list_sublist / multiple_to_temp_collection / multiple_count_only / N/A | Data List / Document Library / Form Report / Data Report / N/A | <Resource> | <Field/operator/value or None> | <Field asc/desc or None> | Workflow variables / Temp variables / Current Data List fields / Current fields + Temp variables / Approval Sub list / Current record Sub list / Temp collection / None | <Target id/name or None> | <Source field -> target id; ... or None> | Workflow number / Temp variable / None | <Target id/name or None> | 100 default / 1..1000 | 1 default / positive integer | Persisted instance / Current page session / N/A | <Control or trigger> | export-proven / runtime-proven / focused-proof-required | <Notes and business rationale> |
+
+Query Data planning rules:
+
+- One table row represents one Form Action step. Repeat `Action Name` for multi-step actions and preserve row order.
+- Data List Form rows must identify both `Host Resource` and `Host Form`; these values are part of Plan-vs-Actual validation.
+- Query Data steps must select an exact mode from `docs/standards/form-action-query-data-golden-reference-standard.md`.
+- `single_to_variables` maps source fields to declared Approval workflow variables.
+- `single_to_temp_variables` maps source fields to declared page temp variables and is not persisted.
+- `single_to_list_fields` is Data List New/Edit only and maps source fields to current-record fields using the canonical current-field target encoding.
+- `single_to_list_fields_and_temp_variables` is Data List New/Edit only and may populate persisted current fields plus page-session display values in one query step.
+- `multiple_to_sublist` requires a declared list variable/listref row schema and explicit source-to-row-field mappings.
+- `multiple_to_list_sublist` writes queried rows into the current Data List record's Sub list and must use `__list_`; its count target uses a declared temp variable.
+- Prefer Collection or Data Table for read-only reverse-related display. Use Query Data into a current-record Sub list only when rows become an editable working copy, such as quote lines loaded by product type before quantity or description changes.
+- Prefer New/Edit Item forms for `multiple_to_list_sublist`. A View Item host is export-proven by the focused sample but requires an explicit save/edit workflow and business rationale.
+- Data List Form field-change actions bind through the source control's `control_event_rule`; page-load actions bind through `formAction.onLoad`.
+- `multiple_count_only` uses no record-result target and no field mapping; it only declares a workflow/temp count target.
+- Public Forms must not plan or materialize Query Data Form Action steps.
+- Pagination is shared across Approval Form, Custom Data List Form, and Dashboard Query Data. Omitted `Page Size` means `100`; an explicit Page Size must be `1..1000`. Omitted `Page Number` means `1`.
+- Serialize a non-default Page Number with export-proven `querydata_pageindex`; omit it for default Page Number 1.
+- Dashboard Query Data may write only declared temp variables/temp collections. Dashboard counts also use temp variables; workflow/current-record targets are forbidden.
+- Dashboard temp collections are JSON payloads, not Collection/Data Table data sources. Plan `JSONStringfy` for text output or an explicitly justified Custom Code renderer for custom tabular presentation.
+- Native Document Library custom forms use the same Query Data planning and target rules as Custom Data List forms. Form Report and Data Report cannot be independent Form Action hosts.
+- This focused golden reference proves Approval Submission, Custom Data List Form, and Dashboard hosts with Data List sources. Other source combinations remain focused-proof-required until their exports are studied.
 
 #### Sub List List Actions
 

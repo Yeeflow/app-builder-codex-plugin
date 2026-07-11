@@ -636,6 +636,8 @@ Use the current Yeeflow generation foundation by default:
 - latest workflow transition condition operand wrappers for direct selectors, direct values, and expression-editor operands
 - form actions Phase 1 and Phase 2
 - correct `attrs.querydata_filters`
+- explicit Form Action Query Data mode, source, filters/sorts, result target, field mapping, count target, and persistence/page-lifetime contract from `docs/standards/form-action-query-data-golden-reference-standard.md`
+- for Custom Data List Form Query Data, exact trigger binding plus current-field (`____customListFields_`), current Sub list (`__list_`), temp declaration, and editable-working-copy rationale; read-only reverse relations use Collection/Data Table
 - expression-editor token arrays with `showCus: false` for Query data filter values that reference workflow variables or calculations
 - `arraySum`
 - `JSONStringfy`
@@ -808,3 +810,5 @@ Validation and proof boundaries:
 <!-- advanced-controls-runtime-proof:end -->
 
 For `collection_control_grid_table`, use `docs/reference/collection-control-grid-table.template.json` as the export-shaped source of truth. Copy `grid_table_col_wrapper` and all descendants, not a simplified header-plus-Collection lookalike. Business mapping may edit only `grid_table_col_title_wrapper`, `op_normal`, `grid_table_col_header`, `grid_col_item`, and optional `grid_table_col_item_operations`. Preserve style/layout/typography outside those regions, keep `grid_table_col_header` and `grid_col_item` column count/width/property parity, map field types to Dynamic user/image/file/field controls, and omit item operation menus for Form Report/Data Report display-only sources. If item operations are present, every button must bind to a valid action; edit/delete require matching Collection actions, and delete requires the confirmation temp variable/conditional delete flow.
+
+Plan and materialize Dashboard Query Data with v1.3/v1.4 temp-only outputs, exact page/action binding, ordered chained queries, not-empty guards, count-driven display, and selected-field temp JSON where required. Query Data pagination is shared on Approval, Data List, Document Library, and Dashboard hosts: Page Size defaults to 100 and is capped at 1000; Page Number defaults to 1 and non-default values serialize as `querydata_pageindex`. Temp JSON cannot directly feed Collection/Data Table. Form Report/Data Report cannot host independent Form Actions.

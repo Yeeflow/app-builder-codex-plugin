@@ -10,6 +10,7 @@ import { buildApprovalFormLayoutDef } from "./lib/approval-form-layout-builder.m
 import { approvalWorkflowNodeSize } from "./lib/approval-workflow-designer-shape-utils.mjs";
 import { validateApprovalFormLayoutTemplate } from "./validate-approval-form-layout-template.mjs";
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
+import formActionQueryDataUtils from "./lib/form-action-query-data-utils.cjs";
 
 const require = createRequire(import.meta.url);
 const { validateDecodedDef } = require("../validate-ywf-def.js");
@@ -17,6 +18,10 @@ const {
   buildWorkflowExpressionButton,
   serializeWorkflowVariableJson,
 } = workflowAssigneeExpressionUtils;
+const {
+  QUERY_DATA_MODES,
+  buildFormActionQueryDataStep,
+} = formActionQueryDataUtils;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const IDS = {
@@ -62,6 +67,46 @@ expectCode("plain JSON nested applicant expression fails", (def) => {
   const task = def.childshapes.find((shape) => shape.id === IDS.task);
   task.properties.usertaskassignment = [applicantLineManagerWithPlainJsonParam()];
 }, "WORKFLOW_ASSIGNEE_NESTED_EXPRESSION_MISSING");
+expectQueryDataGoldenModesPass();
+expectTaskFormQueryDataWrapperPass();
+expectCode("Query Data multiple query missing all outputs fails", (def) => {
+  addQueryDataFixture(def, [{
+    type: "querydata",
+    name: "Query multiple without output",
+    attrs: { querydata_list: querySource(), querydata_type: "multiple" },
+  }]);
+}, "FORM_ACTION_QUERYDATA_OUTPUT_MISSING");
+expectCode("Query Data count-only stale Sub list mapping fails", (def) => {
+  const step = querySteps()[3];
+  step.attrs.querydata_fieldmap = { Title: "row_title" };
+  step.attrs.querydata_listname = "QueryRows";
+  step.attrs.querydata_vartype = "list";
+  step.attrs.querydata_listname_parent = "__variables_";
+  addQueryDataFixture(def, [step]);
+}, "FORM_ACTION_QUERYDATA_COUNT_ONLY_STALE_RESULT_MAPPING");
+expectCode("Query Data single mapping to undeclared temp variable fails", (def) => {
+  const step = buildFormActionQueryDataStep({
+    mode: QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES,
+    name: "Query single to missing temp",
+    source: querySource(),
+    fieldMap: { Title: "MissingTemp" },
+  });
+  addQueryDataFixture(def, [step]);
+}, "FORM_ACTION_QUERYDATA_VARIABLE_TARGET_MISSING");
+expectCode("Query Data workflow count target must be numeric", (def) => {
+  const step = buildFormActionQueryDataStep({
+    mode: QUERY_DATA_MODES.MULTIPLE_COUNT_ONLY,
+    name: "Query count only",
+    source: querySource(),
+    countTarget: { id: "RequestTitle", parent: "__variables_" },
+  });
+  addQueryDataFixture(def, [step]);
+}, "FORM_ACTION_QUERYDATA_COUNT_TARGET_NOT_NUMBER");
+expectCode("Query Data page size above 1000 fails", (def) => {
+  const step = querySteps()[0];
+  step.attrs.querydata_pagesize = 1001;
+  addQueryDataFixture(def, [step]);
+}, "FORM_ACTION_QUERYDATA_PAGE_SIZE_INVALID");
 
 console.log(JSON.stringify({
   status: "pass",
@@ -127,6 +172,99 @@ function expectCode(label, mutate, expectedCode) {
   assert.equal(report.status, "fail", `${label} should fail\n${JSON.stringify(report, null, 2)}`);
   assert.ok(report.errors.some((error) => error.code === expectedCode), `${label} expected ${expectedCode}\n${JSON.stringify(report, null, 2)}`);
   cases.push({ case: `fail: ${label}`, status: "pass", code: expectedCode });
+}
+
+function expectQueryDataGoldenModesPass() {
+  const def = validDef();
+  addQueryDataFixture(def, querySteps());
+  const report = validateDecodedDef(def, { mode: "final" });
+  assert.equal(report.status, "pass", `four Query Data golden modes should pass\n${JSON.stringify(report, null, 2)}`);
+  cases.push({ case: "pass: four Form Action Query Data golden modes", status: "pass" });
+}
+
+function expectTaskFormQueryDataWrapperPass() {
+  const def = validDef();
+  addQueryDataFixture(def, querySteps());
+  const taskPage = def.pageurls[1];
+  taskPage.formdef.actions = structuredClone(def.pageurls[0].formdef.actions);
+  taskPage.formdef.formAction.onLoad = def.pageurls[0].formdef.formAction.onLoad;
+  const report = validateDecodedDef(def, { mode: "final" });
+  assert.equal(report.status, "pass", `Approval Task Form Query Data wrapper should match Submission Form\n${JSON.stringify(report, null, 2)}`);
+  cases.push({ case: "pass: Approval Task Form uses Submission-style Query Data wrapper", status: "pass" });
+}
+
+function addQueryDataFixture(def, steps) {
+  def.variables.basic.push(
+    { id: "QueryRows", idx: "QueryRows", name: "Query Rows", type: "list", value: "QueryRowsRef" },
+    { id: "QueryCount", idx: "QueryCount", name: "Query Count", type: "number" },
+  );
+  def.variables.listref.push({
+    id: "QueryRowsRef",
+    idx: "QueryRowsRef",
+    name: "Query Rows",
+    fields: [{ id: "row_title", idx: "row_title", name: "Title", type: "text" }],
+  });
+  def.variables.tempVars = [
+    { id: "QueryName", idx: "QueryName" },
+    { id: "TempCount", idx: "TempCount" },
+  ];
+  def.pageurls[0].formdef.actions = [{
+    id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    name: "Query data sample",
+    steps,
+  }];
+  def.pageurls[0].formdef.formAction.onLoad = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+}
+
+function querySteps() {
+  return [
+    buildFormActionQueryDataStep({
+      mode: QUERY_DATA_MODES.SINGLE_TO_VARIABLES,
+      name: "Query single data and save to variables",
+      source: querySource(),
+      filters: queryFilters(),
+      sorts: querySorts(),
+      fieldMap: { Title: "RequestTitle" },
+    }),
+    buildFormActionQueryDataStep({
+      mode: QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES,
+      name: "Query single data and save to temp variables",
+      source: querySource(),
+      filters: queryFilters(),
+      sorts: querySorts(),
+      fieldMap: { Title: "QueryName" },
+    }),
+    buildFormActionQueryDataStep({
+      mode: QUERY_DATA_MODES.MULTIPLE_TO_SUBLIST,
+      name: "Query multiple data and save to Sub list",
+      source: querySource(),
+      filters: queryFilters(),
+      sorts: querySorts(),
+      fieldMap: { Title: "row_title" },
+      resultTarget: "QueryRows",
+      countTarget: { id: "QueryCount", parent: "__variables_" },
+    }),
+    buildFormActionQueryDataStep({
+      mode: QUERY_DATA_MODES.MULTIPLE_COUNT_ONLY,
+      name: "Query multiple data and save result count only",
+      source: querySource(),
+      filters: queryFilters(),
+      sorts: querySorts(),
+      countTarget: { id: "TempCount", parent: "__temp_" },
+    }),
+  ];
+}
+
+function querySource() {
+  return { AppID: 41, ListSetID: "9000000000000000001", ListID: "9000000000000000002", ListType: 1 };
+}
+
+function queryFilters() {
+  return [{ left: "Text4", op: "0", right: "Confirmed", showCus: true }];
+}
+
+function querySorts() {
+  return [{ SortName: "Datetime1", SortByDesc: true }];
 }
 
 function validDef() {

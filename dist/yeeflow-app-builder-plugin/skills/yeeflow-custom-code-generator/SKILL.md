@@ -481,3 +481,5 @@ Do:
 - Dashboard temp variables can evaluate to their current value while the writable key must be recovered from configuration or `requiredFields`.
 - Value save behavior must be tested separately from UI behavior.
 - Search/list behavior must handle multiple `queryItems` signatures, empty filtered results, broad fallback queries, nested row shapes, and field-key casing differences.
+
+For the v1.4 Dashboard Query Data temp-JSON pattern, prefer standard controls and `JSONStringfy` when plain text is enough. Collection and Data Table cannot directly consume the Query Data temp JSON payload. Only when a real business requirement needs custom tabular transformation/display, generate a `codein` control that reads the declared temp value with `context.getTempVar('<temp-id>')`, accepts either a JSON string or already-parsed array, validates the array shape, and renders explicit empty/error states. Keep React 15.6, Ant Design 2.13, and TypeScript compatibility. Treat Custom Code rendering as separate runtime proof from Query Data structural validation.

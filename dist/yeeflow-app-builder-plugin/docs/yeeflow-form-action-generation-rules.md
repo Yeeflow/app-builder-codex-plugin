@@ -6,6 +6,8 @@ Phase 1 source: `Expression Sublist Summary Workflow Test v1.yap`.
 
 Phase 2 source: `Form Actions Phase 1 Test v1 Runtime.yap`.
 
+Focused v1.1 source: `Approval form workflow sample-v1.1.yapk`, Approval Submission form action `Query data sample`.
+
 ## Scope
 
 Phase 1 covers:
@@ -217,7 +219,7 @@ For Employee Family Implant v1, `Warn when family quota is exceeded` must use `c
 
 ## Query Data Step
 
-Use the detailed rules in `docs/yeeflow-form-action-query-data-step-rules.md`.
+Use the detailed rules in `docs/yeeflow-form-action-query-data-step-rules.md` and the normalized modes/templates in `docs/standards/form-action-query-data-golden-reference-standard.md`.
 
 Export-backed `querydata` step shape:
 
@@ -242,11 +244,18 @@ Export-backed `querydata` step shape:
 Rules:
 
 - Use `querydata_type = "multiple"` when mapping rows into a form list/sub list or temp collection.
-- Use `querydata_type = "single"` when mapping the first matching item into workflow/temp variables.
+- The v1.1 export omits `querydata_type` for the default single-record mode. Explicit `querydata_type = "single"` from older proven exports remains accepted.
 - Use explicit `querydata_fieldmap` and verify every mapped target variable or list row field exists.
 - Store display-only counts in temp variables via `querydata_totalcount` and `querydata_totalparent = "__temp_"`.
 - Store transient query collections in temp variables only when they are used for display or client-side expressions.
 - Copy business-relevant values into workflow variables before submit when persistence or workflow routing is required.
+- Single-record temp mappings use `__temp_<id>` targets while declarations use unprefixed ids under `variables.tempVars[]`.
+- A multiple-record count-only query omits record result mappings/targets completely and retains only the count target.
+- Never place Form Action Query Data on a Public Form.
+- On Custom Data List Forms, bind page-load actions through `formAction.onLoad` and field-change actions through the source control's `control_event_rule`.
+- Encode current-record field targets as `____customListFields_<FieldName>` and current-record Sub list output with `querydata_listname_parent = "__list_"`.
+- Do not use Approval `__variables_` result targets on Custom Data List Forms.
+- Prefer Collection/Data Table for read-only reverse-related display. Query into a current-record Sub list is for editable working-copy/line-item scenarios and normally belongs on New/Edit forms.
 
 ## Query Result Expressions
 
@@ -381,3 +390,5 @@ Filter correction:
 - A submit validation action should call the reusable check action first, then use conditional warning/confirm behavior and a conditional native `submit` step.
 - Do not rely only on a manual Check button for core policy checks such as quota validation.
 - If quota is occupied on submission, quota checks must include in-progress/occupied usage records as well as approved/confirmed usage records. Use separate safe Query data steps per status if OR/in-list filters are not proven, then aggregate each collection with `arraySum`.
+
+Form Action Query Data must use the shared builder and pagination contract on every supported host. Approval Form, Custom Data List/Document Library Form, and Dashboard default Page Size to 100, cap it at 1000, and default Page Number to 1; non-default Page Number serializes as `querydata_pageindex`. Dashboard outputs are temp-only; chained Dashboard queries preserve step order and guard temp-dependent filters. Temp JSON is not a Collection/Data Table source. Run the host-specific Query Data generated-final gate before signing.

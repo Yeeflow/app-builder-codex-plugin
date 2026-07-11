@@ -4,7 +4,7 @@ Use these rules when generating Yeeflow front-end form actions that read records
 
 ## Scope
 
-Export-backed from `Form Actions Phase 1 Test v1 Runtime.yap`:
+Export-backed from `Form Actions Phase 1 Test v1 Runtime.yap` and the focused v1.1/v1.2 Query Data exports:
 
 - query data from a packaged data list
 - query multiple items
@@ -15,6 +15,12 @@ Export-backed from `Form Actions Phase 1 Test v1 Runtime.yap`:
 - store total query count in a temp variable
 - store selected multiple-query fields in a temp collection variable
 - use `arraySum` against the temp query collection
+- single-record mapping to `__temp_<id>` page temp variables
+- multiple-record Sub list mapping with count output stored directly in a workflow number variable
+- multiple-record count-only output
+- Custom Data List View Item page-load query into temp variables
+- Custom Data List New Item field-change query into current fields plus temp variables
+- multiple query into the current Data List record's Sub list through `__list_`, with count saved to a temp variable
 
 Generated-runtime-proven by `Form Actions Phase 2 Query Submit Test v1`:
 
@@ -27,7 +33,7 @@ Generated-runtime-proven by `Form Actions Phase 2 Query Submit Test v1`:
 - temp query collection aggregation with `arraySum`
 - temp query collection display with `JSONStringfy`
 
-Still deferred:
+Still deferred for exact source metadata or host wrapper generation:
 
 - document library sources
 - form report sources
@@ -35,6 +41,8 @@ Still deferred:
 - paging beyond `querydata_pagesize`
 - empty-result handling
 - `vLookup` function token shape
+
+Product guidance allows Query Data Form Action steps on Approval Submission/task/print pages, custom Data List forms, and Dashboard pages. Public Forms do not support Query Data. The focused exports prove Approval Submission and Custom Data List Form wrappers; Dashboard remains focused-proof-required.
 
 The first generated runtime test attempted an `Active == true` filter by writing `attrs.querydata_filter`. Runtime still returned the inactive `SRC-003` record because that singular helper attribute did not populate the Query data step's actual `Data filter -> Condition` setting. User follow-up and the patched export confirmed the fix: the runtime filter is stored in `attrs.querydata_filters` (plural).
 
@@ -108,7 +116,6 @@ Pattern:
 
 ```json
 {
-  "querydata_type": "single",
   "querydata_fieldmap": {
     "Title": "QueryTitle",
     "Text1": "QueryRequestTitle"
@@ -121,9 +128,26 @@ Pattern:
 
 Rules:
 
+- The v1.1 export omits `querydata_type` for the default single-record mode. Older proven exports may include `querydata_type: "single"`; validators accept both.
 - Map source fields directly to workflow variables when values must be submitted, persisted, or used by workflow.
 - Use temp variables for transient display-only values.
 - Add filters in future generated apps when business logic requires a specific source row.
+
+## Single Query To Temp Variables
+
+The v1.1 export maps each source field directly to a prefixed temp target:
+
+```json
+{
+  "querydata_fieldmap": {
+    "Title": "__temp_var_Name",
+    "Datetime1": "__temp_var_Date"
+  },
+  "querydata_fields": null
+}
+```
+
+Declare `var_Name` and `var_Date` under `variables.tempVars[]`. The `__temp_` prefix appears in the field map/expression reference, not in the declaration id. Temp values last only while the page is open.
 
 ## Multiple Query To Temp Collection
 
@@ -166,6 +190,13 @@ Rules:
 
 - Use temp variables for display-only query counts.
 - Use workflow variables when the count must be submitted, persisted, or used by workflow routing.
+- Workflow count targets must be number variables.
+
+### Count-Only Multiple Query
+
+When only the number of matching records is needed, use `querydata_type: "multiple"`, set `querydata_totalcount`/`querydata_totalparent`, and omit all record-result settings (`querydata_fieldmap`, `querydata_fields`, `querydata_listname`, `querydata_vartype`, and `querydata_listname_parent`).
+
+The source v1.1 export retained hidden Sub list attrs on its count-only UI step. Treat that as designer residue. Generated count-only steps must use the clean normalized template in `docs/reference/form-action-query-data-multiple-count-only.template.json`.
 
 ## Sorts And Page Size
 
@@ -298,3 +329,11 @@ Filter follow-up:
 - The generated `attrs.querydata_filter` singular path was ignored by runtime.
 - The patched export and corrected generated retest confirm the correct path is `attrs.querydata_filters` plural.
 - `vLookup` remains UI-observed only and is not generation-safe.
+
+## Shared Pagination And Dashboard v1.3
+
+Page Size and Page Number use one contract across Approval Form, Custom Data List/Document Library Form, and Dashboard Query Data. Omitted Page Size means `100`; explicit `querydata_pagesize` must be `1..1000`. Omitted Page Number means `1`; v1.4 proves non-default Page Number uses `querydata_pageindex`.
+
+The `My latest event` v1.3 Dashboard proves page-load Query Data with temp-only outputs: count current-user records, load the newest matching record into temp variables, then use a temp related-record ID in a later single query. Keep chained step order and guard the dependent step with `isNullOrEmpty(temp) == false`. Dashboard field/count/result targets must all resolve to declared temp variables. `op: "11"` with `right: null` is the export-proven current-user membership filter and is not an incomplete condition.
+
+The v1.4 Dashboard proves multiple rows can be selected into a temp JSON payload through `querydata_fields[]`, `querydata_vartype: "text"`, and `querydata_listname_parent: "__temp_"`. Use exact function `JSONStringfy` for text. Collection/Data Table cannot consume this temp payload directly; use normal data-source binding or an explicitly justified Custom Code renderer. v1.4 also proves native Type 16 Document Library custom forms share the Data List Form Action wrapper, and Approval Task Form uses the Submission-style `formAction.onLoad + actions[]` wrapper.

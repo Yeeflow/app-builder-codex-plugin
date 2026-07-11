@@ -1,0 +1,15 @@
+{
+  "type": "func",
+  "func": "JSONStringfy",
+  "params": [
+    [
+      {
+        "exprType": "variable",
+        "valueType": "string",
+        "id": "__temp_<declared-temp-json-id>",
+        "type": "expr",
+        "name": "<declared-temp-json-id>"
+      }
+    ]
+  ]
+}
