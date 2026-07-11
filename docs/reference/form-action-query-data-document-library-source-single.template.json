@@ -1,0 +1,36 @@
+{
+  "type": "querydata",
+  "name": "Query related document",
+  "attrs": {
+    "querydata_list": {
+      "AppID": 41,
+      "ListSetID": "<current-list-set-id>",
+      "ListID": "<document-library-list-id>",
+      "ListType": 16
+    },
+    "querydata_filters": [
+      {
+        "key": "<uuid>",
+        "pre": "and",
+        "left": "<document-library-lookup-field>",
+        "op": "0",
+        "right": [
+          {
+            "exprType": "list_field",
+            "valueType": "input",
+            "prop": "ListDataID",
+            "id": "ListDataID",
+            "type": "expr",
+            "name": "List Fields:Id"
+          }
+        ],
+        "showCus": false
+      }
+    ],
+    "querydata_fieldmap": {
+      "Title": "__temp_<declared-document-name-temp-id>",
+      "Text4": "__temp_<declared-document-file-temp-id>"
+    },
+    "querydata_fields": null
+  }
+}

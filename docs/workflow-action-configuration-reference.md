@@ -546,7 +546,7 @@ Nested schema notes:
 - `properties.datasource`: Defines the sorting rules for data. 
 - `properties.result.fields`: Field assignment configuration for query results (When properties.result.type is 'multiple' and the selected field in properties.result.listName is of type text) 
 
-Export-backed scheduled workflow note: `AI Agent and Copilot Local Resource Baseline8.yap` proves `QueryData` can target a local app data list from a Scheduled Workflow and save a multiple-result JSON payload into a text workflow variable by using `result.listParent = "__variables_"`, `result.listName`, `result.vartype = "text"`, and `result.fields[]`. The total count can be saved with `result.totalCount` and `result.querycount_prefix = "__variables_"`.
+Export-backed workflow note: `AI Agent and Copilot Local Resource Baseline8.yap` proves Scheduled Workflow multiple-result JSON text output. `Approval form workflow sample-V1.6.yapk` additionally proves Approval Workflow count-only and single-to-variable modes plus Scheduled Workflow List-variable output. Count-only keeps row-target properties empty/null and writes only `totalCount`. List output uses `result.vartype = "list"`, `result.fieldMap`, a declared List variable linked to `variables.listref`, and `result.fields = null`. The V1.6 sort array is `properties.sorts`.
 
 ## ResponseTo
 

@@ -251,6 +251,40 @@ try {
   const noQueryDataReadiness = expectPass("negative no-Query-Data decision does not require planning table", ["scripts/validate-generation-readiness-review.mjs", "--plan", noQueryDataRequired, "--json"], results);
   assert.equal(noQueryDataReadiness.queryDataPlan?.detectedIntent, false);
 
+  const validWorkflowQueryDataPlan = writeFixture(tempDir, "valid-workflow-query-data-plan.md", readinessPlan({
+    approvalForms: `${readinessAreas.approvalForms}\n\n#### Workflow Query Data Planning\n\n| Workflow | Workflow Host Type | Node Name | Workflow Query Mode | Source Resource Type | Source Resource | Filters | Sorts | Result Variable | Result Variable Type | ListRef / Complex Type | Field Mapping | Count Variable | Page Size | Page Number | Downstream Consumer / Use | Branch Coverage | Proof Boundary | Notes |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Contract Approval | Approval Workflow | Count contracts | multiple_count_only | Data List | Contracts | Status = Active | Created desc | None | None | None | None | ContractCount | 100 | 1 | Branch on count | ContractCount > 0; ContractCount <= 0 | export-proven | Count decision |`,
+  }));
+  const validWorkflowQueryReadiness = expectPass("generation readiness automatically runs valid Workflow Query Data plan gate", ["scripts/validate-generation-readiness-review.mjs", "--plan", validWorkflowQueryDataPlan, "--json"], results);
+  assert.equal(validWorkflowQueryReadiness.workflowQueryDataPlan?.validatorRan, true);
+  assert.equal(validWorkflowQueryReadiness.workflowQueryDataPlan?.queryDataRows, 1);
+
+  const invalidWorkflowQueryDataPlan = writeFixture(tempDir, "invalid-workflow-query-data-plan.md", readinessPlan({
+    approvalForms: `${readinessAreas.approvalForms}\n\n#### Workflow Query Data Planning\n\n| Workflow | Workflow Host Type | Node Name | Workflow Query Mode | Source Resource Type | Source Resource | Filters | Sorts | Result Variable | Result Variable Type | ListRef / Complex Type | Field Mapping | Count Variable | Page Size | Page Number | Downstream Consumer / Use | Branch Coverage | Proof Boundary | Notes |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Event Reminder | Scheduled Workflow | Query events | multiple_to_text_variable | Data List | Events | Date in one month | Date asc | UpcomingEvents | Text workflow variable | None | Title -> EventName | TotalEvents | 1000 | 1 | Loop through list items | N/A | export-proven | Invalid loop target |`,
+  }));
+  expectFail("generation readiness blocks Workflow Query Data text result feeding Loop", ["scripts/validate-generation-readiness-review.mjs", "--plan", invalidWorkflowQueryDataPlan, "--json"], "WORKFLOW_QUERYDATA_PLAN_LOOP_REQUIRES_LIST", results);
+
+  const missingWorkflowQueryDataTable = writeFixture(tempDir, "missing-workflow-query-data-table.md", readinessPlan({
+    scheduleWorkflows: `${readinessAreas.scheduleWorkflows}\n\nThe Scheduled Workflow contains a Query Data workflow node, but the Workflow Query Data Planning table is omitted.`,
+  }));
+  expectFail("generation readiness requires Workflow Query Data planning table", ["scripts/validate-generation-readiness-review.mjs", "--plan", missingWorkflowQueryDataTable, "--json"], "GENERATION_READINESS_WORKFLOW_QUERYDATA_PLAN_TABLE_MISSING", results);
+
+  const validWorkflowLoopPlan = writeFixture(tempDir, "valid-workflow-loop-plan.md", readinessPlan({
+    dataListWorkflows: `${readinessAreas.dataListWorkflows}\n\n#### Workflow Loop Planning\n\n| Workflow | Workflow Host Type | Loop Node Name | Loop Mode | Loop Source Parent | Loop Source | LoopBody Actions | Current Iteration / Current Item Use | Delay or Repeated Side Effects | Proof Boundary | Business Rationale |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Campaign events | Data List Workflow | Loop Event Items | list | __list_ | Event Items Sub List field | Add event record | LoopIndex; LoopItem.field_Name | ContentList add mutation | runtime-proof-required | Create one Event per template row |`,
+  }));
+  const validWorkflowLoopReadiness = expectPass("generation readiness automatically runs valid Workflow Loop plan gate", ["scripts/validate-generation-readiness-review.mjs", "--plan", validWorkflowLoopPlan, "--json"], results);
+  assert.equal(validWorkflowLoopReadiness.workflowLoopPlan?.validatorRan, true);
+  assert.equal(validWorkflowLoopReadiness.workflowLoopPlan?.loopRows, 1);
+
+  const invalidWorkflowLoopPlan = writeFixture(tempDir, "invalid-workflow-loop-plan.md", readinessPlan({
+    dataListWorkflows: `${readinessAreas.dataListWorkflows}\n\n#### Workflow Loop Planning\n\n| Workflow | Workflow Host Type | Loop Node Name | Loop Mode | Loop Source Parent | Loop Source | LoopBody Actions | Current Iteration / Current Item Use | Delay or Repeated Side Effects | Proof Boundary | Business Rationale |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Campaign reminders | Data List Workflow | Loop reminders | number | expression | Fixed number 3 | Send email; Delay | LoopIndex | Repeated email and Delay | export-proven | Repeat reminders |`,
+  }));
+  expectFail("generation readiness requires runtime proof for repeated Loop side effects", ["scripts/validate-generation-readiness-review.mjs", "--plan", invalidWorkflowLoopPlan, "--json"], "WORKFLOW_LOOP_PLAN_SIDE_EFFECT_PROOF_MISSING", results);
+
+  const missingWorkflowLoopTable = writeFixture(tempDir, "missing-workflow-loop-table.md", readinessPlan({
+    dataListWorkflows: `${readinessAreas.dataListWorkflows}\n\nThe Data List Workflow contains a Loop workflow node with a LoopBody, but the Workflow Loop Planning table is omitted.`,
+  }));
+  expectFail("generation readiness requires Workflow Loop planning table", ["scripts/validate-generation-readiness-review.mjs", "--plan", missingWorkflowLoopTable, "--json"], "GENERATION_READINESS_WORKFLOW_LOOP_PLAN_TABLE_MISSING", results);
+
   const reportText = [
     "Functional Specification structure: pass",
     "App Plan resource order: pass",

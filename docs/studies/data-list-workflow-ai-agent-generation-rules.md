@@ -9,7 +9,7 @@ Classification: generation guidance promoted from the `Spark & AI (1).yap` expor
 - Register each host-list workflow in `Data.Childs[].FlowMappings[]`.
 - Keep `FlowMappings[].DefKey` equal to the workflow `Key`.
 - For new-item-triggered flows, use `FlowMappings[].Setting = {"NewTrigger": true}`.
-- For Add Item / new-item triggers, keep `FlowMappings[].FieldName = null`; the trigger is not bound to a flow-status field.
+- For Add Item / new-item triggers, `FlowMappings[].FieldName` may be null, or may resolve to a real host-list `flowstatus` field as V1.7 proves. It must not reference a normal business field.
 - Keep `Data.Forms[].Settings = null` for export-like data-list new-item workflows; the trigger configuration lives in `FlowMappings[].Setting`.
 - When a flow-status field is used in `FlowMappings.FieldName`, ensure the field exists on the host list and is `Type = "flowstatus"`.
 
@@ -55,7 +55,7 @@ Hard errors are appropriate for:
 - missing `ListID` on a data-list workflow
 - classifying `WorkflowType = 1` data-list workflows as approval forms
 - missing or unresolved `FlowMappings.DefKey` registration for generated list workflows
-- non-null `FlowMappings.FieldName` on generated Add Item / new-item triggers
+- non-null `FlowMappings.FieldName` on generated Add Item / new-item triggers unless it resolves to a real host-list `flowstatus` field
 - non-null `Data.Forms[].Settings` on generated data-list new-item workflows
 - missing or unresolved `AI.properties.data.AgentID`
 - unresolved app-resource tool list references in generator final mode
@@ -93,6 +93,10 @@ Data-list workflow definitions need the same designer-facing graph metadata as e
 The first Asia Tech visitor Copilot workflow used a simplified graph shape and the imported designer failed with `Cannot read properties of undefined (reading 'find')`. Regenerate list workflows with the export-like shape before claiming designer-open readiness.
 
 The later user-created runtime comparison workflow `ATX_CONTACT_AI_ANALYSIS_2` showed one more required trigger-registration detail: the working Add Item trigger used `FlowMappings.FieldName = null`, `FlowMappings.Setting = {"NewTrigger": true}`, `Data.Forms[].Settings = null`, and `Data.Forms[].Deployed = true`. The generated workflow had `FieldName` bound to a normal text field, which made the frontend show an empty trigger condition and kept the workflow designer from opening reliably.
+
+V1.7 narrows this rule: both studied Data List Workflows use `Setting.NewTrigger = true` and non-null FieldName values that resolve to dedicated host-list `flowstatus` fields. Therefore the blocker is a non-null ordinary business field, not every non-null FieldName. Null and resolving flowstatus shapes are both export-proven; runtime proof remains host/package-specific.
+
+V1.10 additionally proves Data List Workflow QueryData against an included Document Library (`listtype = 16`) and Form Report (`listtype = 32`). Multiple rows still require a List workflow variable with a matching ListRef/Complex Type field mapping. Page Number/Page Size use `result.pageIndex`/`result.pageSize`; no query may contain more than two `sorts[]` entries. Data Report remains focused-learning-required.
 
 ## Import-Safe ID Range
 

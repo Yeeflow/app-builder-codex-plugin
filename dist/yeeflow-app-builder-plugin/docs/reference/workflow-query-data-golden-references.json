@@ -1,0 +1,366 @@
+{
+  "version": "1.2.0",
+  "source": [
+    "Approval form workflow sample-V1.6.yapk",
+    "Approval form workflow sample-v1.7.yapk",
+    "Approval form workflow sample-v1.10.yapk"
+  ],
+  "proofBoundary": "Export-proven configuration shapes. Runtime execution, email delivery, scheduled triggering, and downstream mutation remain separate proof.",
+  "references": {
+    "workflow_query_multiple_count_only": {
+      "stencil": "QueryData",
+      "hostWorkflowTypes": [1, 2, 3],
+      "properties": {
+        "result": {
+          "type": "multiple",
+          "pageIndex": 1,
+          "pageSize": 100,
+          "fieldMap": null,
+          "listName": "",
+          "vartype": "",
+          "listParent": "",
+          "fields": null,
+          "totalCount": "<number-variable-id>",
+          "querycount_prefix": "__variables_"
+        },
+        "filters": [],
+        "sorts": [
+          {
+            "SortName": "Created",
+            "SortByDesc": true
+          }
+        ]
+      }
+    },
+    "workflow_query_single_to_variables": {
+      "stencil": "QueryData",
+      "hostWorkflowTypes": [1, 2, 3],
+      "properties": {
+        "result": {
+          "type": "single",
+          "pageIndex": 1,
+          "pageSize": 100,
+          "fieldMap": {
+            "<source-field-name>": "<workflow-variable-id>"
+          },
+          "listName": "",
+          "fields": null
+        },
+        "filters": [
+          {
+            "key": "<uuid>",
+            "pre": "and",
+            "left": "ListDataID",
+            "op": "0",
+            "right": [
+              {
+                "exprType": "variable",
+                "valueType": "lookup",
+                "id": "<lookup-variable-id>",
+                "type": "expr",
+                "name": "Workflow Variables:<lookup-label>"
+              }
+            ],
+            "showCus": false
+          }
+        ],
+        "sorts": [
+          {
+            "SortName": "Created",
+            "SortByDesc": true
+          }
+        ]
+      }
+    },
+    "workflow_query_multiple_to_list_variable": {
+      "stencil": "QueryData",
+      "hostWorkflowTypes": [1, 2, 3],
+      "properties": {
+        "result": {
+          "type": "multiple",
+          "pageIndex": 1,
+          "pageSize": 1000,
+          "fieldMap": {
+            "<source-field-name>": "<complex-type-field-id>"
+          },
+          "listName": "<list-variable-id>",
+          "vartype": "list",
+          "listParent": "__variables_",
+          "fields": null,
+          "totalCount": "<number-variable-id>",
+          "querycount_prefix": "__variables_"
+        }
+      },
+      "variableContract": {
+        "basic": {
+          "id": "<list-variable-id>",
+          "type": "list",
+          "value": "<listref-id>"
+        },
+        "listref": {
+          "id": "<listref-id>",
+          "fields": [
+            {
+              "id": "<complex-type-field-id>",
+              "type": "text"
+            }
+          ]
+        }
+      }
+    },
+    "workflow_loop_through_list_items": {
+      "stencil": "Loop",
+      "properties": {
+        "loopType": "list",
+        "loopValue": {
+          "prefix": "__variables_",
+          "value": "<list-variable-id>"
+        }
+      },
+      "bodyRef": "<loop-body-start-node-id>",
+      "loopItemExpression": {
+        "type": "loop_ctx",
+        "param": {
+          "defid": "<loop-node-id>"
+        },
+        "prop": "LoopItem.<complex-type-field-id>"
+      }
+    },
+    "data_list_workflow_query_count_only_current_record": {
+      "stencil": "QueryData",
+      "hostWorkflowTypes": [1],
+      "properties": {
+        "filters": [
+          {
+            "pre": "and",
+            "left": "<target-lookup-field>",
+            "op": "0",
+            "right": [
+              {
+                "exprType": "list_field",
+                "valueType": "input",
+                "prop": "ListDataID",
+                "id": "ListDataID",
+                "type": "expr",
+                "name": "List Fields:Id"
+              }
+            ],
+            "showCus": false
+          }
+        ],
+        "result": {
+          "type": "multiple",
+          "pageIndex": 1,
+          "pageSize": 100,
+          "fieldMap": null,
+          "listName": "",
+          "vartype": "",
+          "listParent": "",
+          "fields": null,
+          "totalCount": "<number-variable-id>",
+          "querycount_prefix": "__variables_"
+        }
+      }
+    },
+    "workflow_query_document_library_to_list": {
+      "stencil": "QueryData",
+      "hostWorkflowTypes": [1, 2, 3],
+      "properties": {
+        "listtype": 16,
+        "result": {
+          "type": "multiple",
+          "pageIndex": 2,
+          "pageSize": 3,
+          "fieldMap": {
+            "Title": "Name",
+            "Text4": "File"
+          },
+          "listName": "<document-list-variable-id>",
+          "vartype": "list",
+          "listParent": "__variables_",
+          "fields": null,
+          "totalCount": "<document-count-variable-id>",
+          "querycount_prefix": "__variables_"
+        },
+        "filters": [
+          {
+            "pre": "and",
+            "left": "<document-event-lookup-field>",
+            "op": "0",
+            "right": [
+              {
+                "exprType": "list_field",
+                "valueType": "input",
+                "prop": "ListDataID",
+                "id": "ListDataID",
+                "type": "expr"
+              }
+            ],
+            "showCus": false
+          }
+        ],
+        "sorts": [
+          { "SortName": "Created", "SortByDesc": true },
+          { "SortName": "Bigint2", "SortByDesc": false }
+        ]
+      }
+    },
+    "workflow_query_form_report_to_list": {
+      "stencil": "QueryData",
+      "hostWorkflowTypes": [1, 2, 3],
+      "properties": {
+        "listtype": 32,
+        "result": {
+          "type": "multiple",
+          "pageIndex": 3,
+          "pageSize": 1000,
+          "fieldMap": {
+            "Bigint1": "FormID",
+            "Text2": "Applicant",
+            "Datetime1": "Submitted"
+          },
+          "listName": "<form-report-list-variable-id>",
+          "vartype": "list",
+          "listParent": "__variables_",
+          "fields": null,
+          "totalCount": "<form-report-count-variable-id>",
+          "querycount_prefix": "__variables_"
+        },
+        "filters": [
+          {
+            "pre": "and",
+            "left": "Bigint1",
+            "op": "7",
+            "right": null
+          }
+        ],
+        "sorts": [
+          { "SortName": "Datetime1", "SortByDesc": true },
+          { "SortName": "Text2", "SortByDesc": false }
+        ]
+      }
+    },
+    "form_action_query_document_library_single": {
+      "type": "querydata",
+      "hostSurfaces": ["approval_submission", "approval_task", "approval_print", "data_list_custom_form", "document_library_custom_form", "dashboard"],
+      "attrs": {
+        "querydata_list": { "ListType": 16 },
+        "querydata_fieldmap": {
+          "Title": "<declared-target>",
+          "Text4": "<declared-target>"
+        },
+        "querydata_fields": null
+      }
+    },
+    "form_action_query_form_report_single": {
+      "type": "querydata",
+      "hostSurfaces": ["approval_submission", "approval_task", "approval_print", "data_list_custom_form", "document_library_custom_form", "dashboard"],
+      "attrs": {
+        "querydata_list": { "ListType": 32 },
+        "querydata_sorts": [
+          { "SortName": "Datetime1", "SortByDesc": true }
+        ],
+        "querydata_fieldmap": {
+          "<form-report-storage-field>": "<declared-target>"
+        },
+        "querydata_fields": null
+      }
+    },
+    "data_list_loop_through_sublist": {
+      "stencil": "Loop",
+      "properties": {
+        "loopType": "list",
+        "loopValue": {
+          "prefix": "__list_",
+          "value": "<sublist-field-id>"
+        }
+      },
+      "bodyRef": "<loop-body-node-id>",
+      "currentIterationExpression": {
+        "exprType": "loop_ctx",
+        "valueType": "string",
+        "id": "<loop-node-id>",
+        "key": "LoopIndex",
+        "type": "expr",
+        "name": "Current Loop:Current iteration"
+      },
+      "currentItemFieldExpression": {
+        "exprType": "loop_ctx",
+        "valueType": "string",
+        "id": "<loop-node-id>",
+        "key": "LoopItem.<sublist-field-id>",
+        "type": "expr"
+      }
+    },
+    "workflow_loop_through_multiple_values": {
+      "stencil": "Loop",
+      "properties": {
+        "loopType": "values",
+        "loopValue": {
+          "type": 2,
+          "value": [
+            {
+              "exprType": "list_field",
+              "valueType": "identity-picker",
+              "prop": "<multi-value-field-name>",
+              "id": "<multi-value-field-id>",
+              "type": "expr"
+            }
+          ]
+        }
+      },
+      "bodyRef": "<loop-body-node-id>"
+    },
+    "workflow_loop_for_fixed_times": {
+      "stencil": "Loop",
+      "properties": {
+        "loopType": "number",
+        "loopValue": {
+          "type": 2,
+          "value": [
+            {
+              "type": "num",
+              "value": "<positive-count>"
+            }
+          ]
+        }
+      },
+      "bodyRef": "<loop-body-node-id>",
+      "bodyExample": [
+        "MailTask",
+        "Delay"
+      ]
+    },
+    "workflow_list_to_html_custom_service": {
+      "stencil": "InvokeCode",
+      "properties": {
+        "params": [
+          {
+            "id": "subListJson",
+            "type": "text",
+            "value": {
+              "type": 1,
+              "value": {
+                "exprType": "variable",
+                "valueType": "list",
+                "id": "<list-variable-id>",
+                "type": "expr"
+              }
+            }
+          }
+        ],
+        "outputs": [
+          {
+            "id": "htmlTable",
+            "type": "text",
+            "value": {
+              "prefix": "__variables_",
+              "value": "<html-output-variable-id>"
+            }
+          }
+        ],
+        "serviceId": "<included-custom-service-id>"
+      }
+    }
+  }
+}

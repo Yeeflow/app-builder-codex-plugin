@@ -126,11 +126,19 @@ function validateStep({ step, action, form, fieldByName, tempIds, subListFields,
       findings.push({ level: "error", code: "FORM_ACTION_QUERYDATA_SOURCE_INCOMPLETE", message: `Query Data source is missing ${key}.`, context });
     }
   }
+  if (attrs.querydata_list?.ListType !== undefined && ![1, 16, 32].includes(Number(attrs.querydata_list.ListType))) {
+    findings.push({ level: "error", code: "FORM_ACTION_QUERYDATA_SOURCE_TYPE_UNPROVEN", message: "Query Data source must be export-proven Data List (1), Document Library (16), or Form Report (32); Data Report remains focused-learning-required.", context });
+  }
   if (attrs.querydata_filter !== undefined || (attrs.querydata_filters !== undefined && !Array.isArray(attrs.querydata_filters))) {
     findings.push({ level: "error", code: "FORM_ACTION_QUERYDATA_FILTER_SHAPE_INVALID", message: "Use plural querydata_filters[] for Query Data criteria.", context });
   }
   if (attrs.querydata_sorts !== undefined && !Array.isArray(attrs.querydata_sorts)) {
     findings.push({ level: "error", code: "FORM_ACTION_QUERYDATA_SORT_SHAPE_INVALID", message: "querydata_sorts must be an array.", context });
+  } else if (Array.isArray(attrs.querydata_sorts)) {
+    if (attrs.querydata_sorts.length > 2) findings.push({ level: "error", code: "FORM_ACTION_QUERYDATA_SORT_COUNT_EXCEEDED", message: "Query Data supports at most two sort fields.", context });
+    for (const sort of attrs.querydata_sorts) {
+      if (!sort || !sort.SortName || typeof sort.SortByDesc !== "boolean") findings.push({ level: "error", code: "FORM_ACTION_QUERYDATA_SORT_SHAPE_INVALID", message: "Each Query Data sort requires SortName and boolean SortByDesc.", context });
+    }
   }
   const pageSize = attrs.querydata_pagesize ?? 100;
   if (!Number.isInteger(Number(pageSize)) || Number(pageSize) < 1 || Number(pageSize) > 1000) {
@@ -194,8 +202,8 @@ function validateStep({ step, action, form, fieldByName, tempIds, subListFields,
 }
 
 function validateFilter(filter, fieldByName, findings, context) {
-  if (!filter || !filter.left || filter.op === undefined || filter.right === undefined || (filter.right === null && String(filter.op) !== "11")) {
-    findings.push({ level: "error", code: "FORM_ACTION_QUERYDATA_FILTER_INCOMPLETE", message: "Each filter requires left/op/right; export-proven op 11 may use right=null for current-user membership.", context });
+  if (!filter || !filter.left || filter.op === undefined || filter.right === undefined || (filter.right === null && !["7", "11"].includes(String(filter.op)))) {
+    findings.push({ level: "error", code: "FORM_ACTION_QUERYDATA_FILTER_INCOMPLETE", message: "Each filter requires left/op/right; export-proven nullary operators 7 (not empty) and 11 (current-user membership) may use right=null.", context });
     return;
   }
   if (Array.isArray(filter.right)) {

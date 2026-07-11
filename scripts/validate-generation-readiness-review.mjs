@@ -3,6 +3,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { validateFormActionQueryDataPlan } from "./validate-form-action-query-data-plan.mjs";
+import { validateWorkflowQueryDataPlan } from "./validate-workflow-query-data-plan.mjs";
+import { validateWorkflowLoopPlan } from "./validate-workflow-loop-plan.mjs";
 
 const AREAS = [
   { key: "dataLists", title: "Data Lists and Document Libraries Plan", code: "GENERATION_READINESS_AREA_EMPTY", required: /data list|document library|not applicable|N\/A|none required|deferred|runtime-proof-required|export-learning-required/i, extra: validateDataLists },
@@ -498,6 +500,50 @@ function validate(file) {
     });
   }
 
+  const workflowQueryDataPlan = validateWorkflowQueryDataPlan(text);
+  const hasWorkflowQueryDataIntent = workflowQueryDataPlan.queryDataRows > 0 || text.split(/\r?\n/).some((line) =>
+    /\bQuery\s*Data\b|\bQueryData\b/i.test(line)
+    && /\b(Approval|Data List|Scheduled)\s+Workflow\b|\bworkflow\s+node\b/i.test(line)
+    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
+  );
+  if (hasWorkflowQueryDataIntent && workflowQueryDataPlan.queryDataRows === 0) {
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_WORKFLOW_QUERYDATA_PLAN_TABLE_MISSING",
+      area: "Workflow Query Data Planning",
+      message: "Workflow Query Data intent requires the standard Workflow Query Data Planning table before generation readiness can pass.",
+    });
+  }
+  for (const finding of workflowQueryDataPlan.findings) {
+    findings.push({
+      level: finding.severity === "warning" ? "warning" : "error",
+      area: "Workflow Query Data Planning",
+      ...finding,
+    });
+  }
+
+  const workflowLoopPlan = validateWorkflowLoopPlan(text);
+  const hasWorkflowLoopIntent = workflowLoopPlan.loopRows > 0 || text.split(/\r?\n/).some((line) =>
+    /\bLoop\b|Loop through list items|Loop through multiple values|Loop for fixed times/i.test(line)
+    && /\b(Approval|Data List|Scheduled)\s+Workflow\b|\bworkflow\s+node\b|\bLoopBody\b/i.test(line)
+    && !/\b(no|none|not required|not planned|do not|must not|forbidden|deferred)\b/i.test(line),
+  );
+  if (hasWorkflowLoopIntent && workflowLoopPlan.loopRows === 0) {
+    findings.push({
+      level: "error",
+      code: "GENERATION_READINESS_WORKFLOW_LOOP_PLAN_TABLE_MISSING",
+      area: "Workflow Loop Planning",
+      message: "Workflow Loop intent requires the standard Workflow Loop Planning table before generation readiness can pass.",
+    });
+  }
+  for (const finding of workflowLoopPlan.findings) {
+    findings.push({
+      level: finding.severity === "warning" ? "warning" : "error",
+      area: "Workflow Loop Planning",
+      ...finding,
+    });
+  }
+
   const errors = findings.filter((finding) => finding.level !== "warning").length;
   const warnings = findings.filter((finding) => finding.level === "warning").length;
   return {
@@ -512,6 +558,18 @@ function validate(file) {
       detectedIntent: hasFormActionQueryDataIntent,
       queryDataRows: queryDataPlan.queryDataRows,
       status: queryDataPlan.status,
+    },
+    workflowQueryDataPlan: {
+      validatorRan: true,
+      detectedIntent: hasWorkflowQueryDataIntent,
+      queryDataRows: workflowQueryDataPlan.queryDataRows,
+      status: workflowQueryDataPlan.status,
+    },
+    workflowLoopPlan: {
+      validatorRan: true,
+      detectedIntent: hasWorkflowLoopIntent,
+      loopRows: workflowLoopPlan.loopRows,
+      status: workflowLoopPlan.status,
     },
     proofBoundary: "Generation readiness review checks planning completeness only; it does not prove package generation, schema validity, signing, API acceptance, or runtime behavior.",
   };

@@ -7,6 +7,8 @@ const SECRET_KEY_RE = /(token|secret|password|credential|clientsecret|api[_-]?ke
 const UNSAFE_ACTION_RE = /^(AI|AzureOpenAI|Connector|HttpRequest|AcrobatSign|DocuSign|PandaDoc)$/i;
 const EMAIL_RE = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
 const REQUIRED_PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
+const QUERYDATA_EXPORT_PROVEN_LIST_TYPES = new Set([1, 16, 32]);
+const QUERYDATA_MAX_SORTS = 2;
 
 let cachedReference = null;
 
@@ -136,7 +138,11 @@ function validateConfiguredProperties(issues, action, shape, type, pointer, opti
       continue;
     }
     if (!found.exists || valueMissing(found.value)) continue;
-    if (!valueMatchesType(found.value, prop.valueType)) {
+    const exportProvenLoopExpressionArray = type === "Loop"
+      && prop.path === "properties.loopValue.value"
+      && ["values", "number"].includes(safeString(shape?.properties?.loopType))
+      && Array.isArray(found.value);
+    if (!valueMatchesType(found.value, prop.valueType) && !exportProvenLoopExpressionArray) {
       issue(issues, severity, "WORKFLOW_ACTION_PROPERTY_TYPE_INVALID", "Workflow node property has an invalid value type for the action configuration reference.", {
         path: propPath,
         nodeType: type,
@@ -1068,6 +1074,21 @@ function validateContentList(issues, shape, pointer, options) {
 function validateQueryData(issues, shape, pointer, options) {
   const props = shape.properties || {};
   const severity = strictLevel(options, "warning");
+  for (const key of ["appid", "listsetid", "listid", "listtype"]) {
+    if (valueMissing(props[key])) {
+      issue(issues, severity, "QUERYDATA_SOURCE_INCOMPLETE", `QueryData source is missing properties.${key}.`, {
+        path: `${pointer}.properties.${key}`,
+        nodeId: shapeId(shape),
+      });
+    }
+  }
+  if (!valueMissing(props.listtype) && !QUERYDATA_EXPORT_PROVEN_LIST_TYPES.has(Number(props.listtype))) {
+    issue(issues, severity, "QUERYDATA_SOURCE_TYPE_UNPROVEN", "Workflow Query Data currently supports export-proven Data List (1), Document Library (16), and Form Report (32) sources. Data Report remains focused-learning-required.", {
+      path: `${pointer}.properties.listtype`,
+      nodeId: shapeId(shape),
+      listtype: props.listtype,
+    });
+  }
   if (!valueMissing(props.filters) && !Array.isArray(props.filters)) {
     issue(issues, severity, "QUERYDATA_FILTERS_NOT_ARRAY", "QueryData properties.filters must be an array when present.", {
       path: `${pointer}.properties.filters`,
@@ -1075,36 +1096,71 @@ function validateQueryData(issues, shape, pointer, options) {
     });
   }
   validateConditionArray(issues, props.filters, `${pointer}.properties.filters`, "QUERYDATA_FILTER_CONDITION_INVALID", severity);
-  if (props.datasource !== undefined) {
-    if (!Array.isArray(props.datasource)) {
-      issue(issues, severity, "QUERYDATA_DATASOURCE_NOT_ARRAY", "QueryData properties.datasource must be an array when present.", {
-        path: `${pointer}.properties.datasource`,
+  const sorts = props.sorts !== undefined ? props.sorts : props.datasource;
+  const sortsProperty = props.sorts !== undefined ? "sorts" : "datasource";
+  if (sorts !== undefined) {
+    if (!Array.isArray(sorts)) {
+      issue(issues, severity, "QUERYDATA_SORTS_NOT_ARRAY", `QueryData properties.${sortsProperty} must be an array when present.`, {
+        path: `${pointer}.properties.${sortsProperty}`,
         nodeId: shapeId(shape),
       });
     } else {
-      props.datasource.forEach((sort, index) => {
+      if (sorts.length > QUERYDATA_MAX_SORTS) {
+        issue(issues, severity, "QUERYDATA_SORT_COUNT_EXCEEDED", `QueryData supports at most ${QUERYDATA_MAX_SORTS} sort fields.`, {
+          path: `${pointer}.properties.${sortsProperty}`,
+          nodeId: shapeId(shape),
+          sortCount: sorts.length,
+        });
+      }
+      sorts.forEach((sort, index) => {
         if (!isObject(sort) || valueMissing(sort.SortName || sort.sortName) || valueMissing(sort.SortByDesc !== undefined ? sort.SortByDesc : sort.sortByDesc)) {
           issue(issues, severity, "QUERYDATA_SORT_SHAPE_INVALID", "QueryData datasource sort entry should include SortName and SortByDesc.", {
-            path: `${pointer}.properties.datasource[${index}]`,
+            path: `${pointer}.properties.${sortsProperty}[${index}]`,
             nodeId: shapeId(shape),
           });
         }
       });
     }
   }
-  const resultType = props.result && props.result.type;
-  if (safeString(resultType) === "multiple") {
-    if (!props.result.listName) issue(issues, severity, "QUERYDATA_MULTIPLE_RESULT_TARGET_MISSING", "QueryData multiple result requires result.listName.", {
-      path: `${pointer}.properties.result.listName`,
-      nodeId: shapeId(shape),
-    });
-    if (props.result.fields !== undefined && !Array.isArray(props.result.fields)) {
+  const result = props.result;
+  if (!isObject(result) || !["single", "multiple"].includes(safeString(result.type))) {
+    issue(issues, severity, "QUERYDATA_RESULT_TYPE_INVALID", "QueryData requires result.type single or multiple.", { path: `${pointer}.properties.result.type`, nodeId: shapeId(shape) });
+    return;
+  }
+  const pageIndex = Number(result.pageIndex);
+  const pageSize = Number(result.pageSize);
+  if (!Number.isInteger(pageIndex) || pageIndex < 1) issue(issues, severity, "QUERYDATA_PAGE_INDEX_INVALID", "QueryData result.pageIndex must be a positive integer.", { path: `${pointer}.properties.result.pageIndex`, nodeId: shapeId(shape) });
+  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 1000) issue(issues, severity, "QUERYDATA_PAGE_SIZE_INVALID", "QueryData result.pageSize must be an integer from 1 to 1000.", { path: `${pointer}.properties.result.pageSize`, nodeId: shapeId(shape) });
+  if (result.type === "single") {
+    if (!isObject(result.fieldMap) || Object.keys(result.fieldMap).length === 0) issue(issues, severity, "QUERYDATA_SINGLE_FIELDMAP_EMPTY", "Single-result QueryData requires a non-empty fieldMap.", { path: `${pointer}.properties.result.fieldMap`, nodeId: shapeId(shape) });
+    return;
+  }
+  const countOnly = !safeString(result.listName).trim() && Boolean(result.totalCount);
+  if (countOnly) {
+    if (result.fieldMap !== null || result.fields !== null || safeString(result.vartype).trim() || safeString(result.listParent).trim()) {
+      issue(issues, severity, "QUERYDATA_COUNT_ONLY_ROW_TARGET_PRESENT", "Count-only QueryData must keep fieldMap/fields null and listName/vartype/listParent empty.", { path: `${pointer}.properties.result`, nodeId: shapeId(shape) });
+    }
+  } else {
+    if (!result.listName || result.listParent !== "__variables_") issue(issues, severity, "QUERYDATA_MULTIPLE_RESULT_TARGET_MISSING", "Multiple-result QueryData requires a workflow result target unless it is count-only.", { path: `${pointer}.properties.result.listName`, nodeId: shapeId(shape) });
+    if (result.vartype === "list") {
+      if (!isObject(result.fieldMap) || Object.keys(result.fieldMap).length === 0) issue(issues, severity, "QUERYDATA_LIST_FIELDMAP_EMPTY", "List-result QueryData requires fieldMap.", { path: `${pointer}.properties.result.fieldMap`, nodeId: shapeId(shape) });
+      if (result.fields !== null && result.fields !== undefined) issue(issues, severity, "QUERYDATA_LIST_RESULT_FIELDS_PRESENT", "List-result QueryData should keep result.fields null.", { path: `${pointer}.properties.result.fields`, nodeId: shapeId(shape) });
+    } else if (result.vartype === "text" && (!Array.isArray(result.fields) || result.fields.length === 0)) {
+      issue(issues, severity, "QUERYDATA_RESULT_FIELDS_INVALID", "Text/JSON multiple-result QueryData requires selected result.fields.", {
+        path: `${pointer}.properties.result.fields`,
+        nodeId: shapeId(shape),
+      });
+    } else if (!["list", "text"].includes(safeString(result.vartype))) {
+      issue(issues, severity, "QUERYDATA_RESULT_VARTYPE_INVALID", "Multiple-result QueryData row target vartype must be list or text.", { path: `${pointer}.properties.result.vartype`, nodeId: shapeId(shape) });
+    }
+    if (result.fields !== undefined && result.fields !== null && !Array.isArray(result.fields)) {
       issue(issues, severity, "QUERYDATA_RESULT_FIELDS_INVALID", "QueryData result.fields must be an array when present.", {
         path: `${pointer}.properties.result.fields`,
         nodeId: shapeId(shape),
       });
     }
   }
+  if (result.totalCount && result.querycount_prefix !== "__variables_") issue(issues, severity, "QUERYDATA_COUNT_PARENT_INVALID", "Workflow QueryData totalCount must use querycount_prefix __variables_.", { path: `${pointer}.properties.result.querycount_prefix`, nodeId: shapeId(shape) });
 }
 
 function validateSequenceFlow(issues, shape, pointer, options) {
@@ -1146,12 +1202,21 @@ function validateLoop(issues, shape, pointer, options) {
   }
   if (!valueMissing(props.loopType)) {
     const loopValue = props.loopValue || {};
-    for (const key of ["prefix", "type", "value"]) {
-      if (valueMissing(loopValue[key])) issue(issues, severity, "LOOP_VALUE_PROPERTY_MISSING", "Loop requires loopValue prefix/type/value when loopType is configured.", {
+    const loopType = safeString(props.loopType);
+    const requiredKeys = loopType === "list" ? ["prefix", "value"] : ["type", "value"];
+    for (const key of requiredKeys) {
+      if (valueMissing(loopValue[key])) issue(issues, severity, "LOOP_VALUE_PROPERTY_MISSING", "Loop requires the export-proven loopValue properties for its selected mode.", {
         path: `${pointer}.properties.loopValue.${key}`,
         nodeId: shapeId(shape),
       });
     }
+    if (loopType === "list") {
+      if (!["__variables_", "__list_"].includes(loopValue.prefix)) issue(issues, severity, "LOOP_LIST_PREFIX_INVALID", "Loop through list items must target a workflow List variable through __variables_ or a Data List Sub List through __list_.", { path: `${pointer}.properties.loopValue.prefix`, nodeId: shapeId(shape) });
+    } else if (["values", "number"].includes(loopType)) {
+      if (loopValue.type !== 2) issue(issues, severity, "LOOP_EXPRESSION_TYPE_INVALID", "Loop through multiple values and fixed times must use loopValue.type = 2.", { path: `${pointer}.properties.loopValue.type`, nodeId: shapeId(shape), value: loopValue.type });
+      if (!Array.isArray(loopValue.value) || loopValue.value.length === 0) issue(issues, severity, "LOOP_EXPRESSION_VALUE_INVALID", "Loop through multiple values and fixed times require a non-empty expression-token array.", { path: `${pointer}.properties.loopValue.value`, nodeId: shapeId(shape) });
+    }
+    if (valueMissing(shape.bodyRef)) issue(issues, severity, "LOOP_BODYREF_MISSING", "Every Loop mode requires bodyRef for the LoopBody node.", { path: `${pointer}.bodyRef`, nodeId: shapeId(shape) });
   }
   validateConditionStringOrArray(issues, props.continueCondition, `${pointer}.properties.continueCondition`, "LOOP_CONTINUE_CONDITION_INVALID", severity);
   validateConditionStringOrArray(issues, props.breakCondition, `${pointer}.properties.breakCondition`, "LOOP_BREAK_CONDITION_INVALID", severity);

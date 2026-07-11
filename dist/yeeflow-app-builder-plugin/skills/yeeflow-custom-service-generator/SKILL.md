@@ -248,7 +248,8 @@ Current Custom Service knowledge is:
 - export-proven for `.ycs` top-level shape and DraftConfig layout;
 - export-proven for Submission form Form Action `invokeservice`, Approval workflow `InvokeCode`, and custom data list form Form Action `invokeservice` invocation shapes;
 - export-proven for Data list workflow `InvokeCode` invocation with `properties.connections[]`, list-field/static params, workflow-variable output, and downstream Set Data List update;
-- product/user-understanding-backed for Task form, Scheduled workflow, and Dashboard invocation surfaces that share the same known form-action/workflow-action shapes;
+- export-proven for Scheduled Workflow `InvokeCode` invocation that passes a List workflow variable into a Custom Service and stores a text output in a workflow variable (`Approval form workflow sample-V1.6.yapk`);
+- product/user-understanding-backed for Task form and Dashboard invocation surfaces that share the same known form-action/workflow-action shapes;
 - validator-backed when focused gates pass.
 
 AI Agent or Copilot invocation is future work and must not be claimed as runtime-proven yet.

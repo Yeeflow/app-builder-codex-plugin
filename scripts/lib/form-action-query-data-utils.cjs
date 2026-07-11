@@ -25,6 +25,12 @@ const QUERY_DATA_PAGINATION = Object.freeze({
   MAX_PAGE_SIZE: 1000,
   DEFAULT_PAGE_NUMBER: 1,
 });
+const QUERY_DATA_SOURCE_TYPES = Object.freeze({
+  DATA_LIST: 1,
+  DOCUMENT_LIBRARY: 16,
+  FORM_REPORT: 32,
+});
+const QUERY_DATA_MAX_SORTS = 2;
 
 function buildFormActionQueryDataStep(options = {}) {
   const mode = String(options.mode || "").trim();
@@ -50,7 +56,10 @@ function buildFormActionQueryDataStep(options = {}) {
     querydata_list: normalizeSource(options.source),
   };
   if (Array.isArray(options.filters)) attrs.querydata_filters = options.filters.map(normalizeFilter);
-  if (Array.isArray(options.sorts)) attrs.querydata_sorts = options.sorts.map(normalizeSort);
+  if (Array.isArray(options.sorts)) {
+    if (options.sorts.length > QUERY_DATA_MAX_SORTS) throw new Error(`Query Data supports at most ${QUERY_DATA_MAX_SORTS} sort fields`);
+    attrs.querydata_sorts = options.sorts.map(normalizeSort);
+  }
 
   if (mode === QUERY_DATA_MODES.SINGLE_TO_VARIABLES || mode === QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES) {
     attrs.querydata_fieldmap = normalizeFieldMap(options.fieldMap, {
@@ -187,6 +196,11 @@ function normalizeSource(value) {
     if (value[key] === undefined || value[key] === null || value[key] === "") throw new Error(`source.${key} is required`);
     out[key] = value[key];
   }
+  const listType = Number(out.ListType);
+  if (!Object.values(QUERY_DATA_SOURCE_TYPES).includes(listType)) {
+    throw new Error(`Unsupported export-proven Query Data source ListType: ${out.ListType}`);
+  }
+  out.ListType = listType;
   return out;
 }
 
@@ -292,6 +306,8 @@ function clone(value) {
 module.exports = {
   ALLOWED_HOST_SURFACES,
   QUERY_DATA_PAGINATION,
+  QUERY_DATA_SOURCE_TYPES,
+  QUERY_DATA_MAX_SORTS,
   QUERY_DATA_MODES,
   buildFormActionQueryDataStep,
   classifyFormActionQueryDataStep,

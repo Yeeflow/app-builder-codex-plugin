@@ -108,6 +108,7 @@ yeeflow-data-list-generator/
 !docs/reference/service-portal-yapk-example.normalized.json
 !docs/reference/form-action-query-data-*.template.json
 !docs/reference/dashboard-query-data-*.template.json
+!docs/reference/workflow-query-data-golden-references.json
 !yeeflow-expression-operators.normalized.json
 !dashboard-dataset-presentation-golden-references.json
 !collection-control-card-with-multiselect-toolbar.template.json
@@ -125,6 +126,8 @@ yeeflow-data-list-generator/
 *.metadata.json
 *inspection*.json
 *source*.json
+!docs/reference/form-action-query-data-document-library-source-single.template.json
+!docs/reference/form-action-query-data-form-report-source-single.template.json
 *exportback*.json
 !docs/studies/normalized/**/*.normalized.json
 

@@ -256,7 +256,51 @@ Query Data planning rules:
 - Lookup-backed filters and chained ID mappings must state that the stored target record `ListDataID`/target identifier is used. A display title or ambiguous `lookup value` is not an ID contract.
 - `validate-generation-readiness-review.mjs` automatically runs `validate-form-action-query-data-plan.mjs` when Form Action Query Data intent is detected. Resource-order validation alone is not planning readiness.
 - Native Document Library custom forms use the same Query Data planning and target rules as Custom Data List forms. Form Report and Data Report cannot be independent Form Action hosts.
-- This focused golden reference proves Approval Submission, Custom Data List Form, and Dashboard hosts with Data List sources. Other source combinations remain focused-proof-required until their exports are studied.
+- Focused exports prove Approval Submission, Custom Data List Form, Document Library custom form, Approval Task Form, and Dashboard hosts. Query Data sources are generation-safe for Data List, Document Library, and Form Report. Form Report is a source but not a Form Action host; Data Report remains focused-proof-required.
+- Form Action `querydata_sorts[]` supports at most two sort fields, in listed priority order.
+
+#### Workflow Query Data Planning
+
+Required for every `QueryData` node in an Approval Form workflow, Data List workflow, or Scheduled Workflow. This table is separate from Form Action Query Data planning.
+
+| Workflow | Workflow Host Type | Node Name | Workflow Query Mode | Source Resource Type | Source Resource | Filters | Sorts | Result Variable | Result Variable Type | ListRef / Complex Type | Field Mapping | Count Variable | Page Size | Page Number | Downstream Consumer / Use | Branch Coverage | Proof Boundary | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Workflow> | Approval / Data List / Scheduled Workflow | <Business action name> | single_to_variables / multiple_to_list_variable / multiple_to_text_variable / multiple_count_only | Data List / Document Library / Form Report | <Resource> | <Field/operator/value; Lookup filters explicitly use ListDataID; or None> | <Field asc/desc; maximum 2; or None> | <Workflow variable or None> | Workflow variables / List workflow variable / Text workflow variable / None | <ListRef/Complex Type name or None> | <Source field -> workflow variable/ListRef field; or None> | <Number workflow variable or None> | 100 default / 1..1000 | 1 default / positive integer | Branch / Assignment assignee / Loop through list items / Invoke Custom Service / Send Email / calculation | <Complete complementary branches or N/A> | export-proven / runtime-proof-required | <Business rationale> |
+
+Workflow Query Data planning rules:
+
+- Use `docs/standards/workflow-query-data-golden-reference-standard.md`; do not serialize a Form Action `querydata` step as a Workflow `QueryData` node.
+- Workflow Query Data writes to declared normal workflow variables. Page temp variables are not available in Approval, Data List, or Scheduled workflow execution.
+- `multiple_count_only` has no row result variable, Complex Type, or field mapping. It requires a number workflow variable and complete branch coverage such as `count > 0` plus `count <= 0`.
+- `single_to_variables` requires explicit source-field to workflow-variable mappings. Query-derived User assignees must map to a declared User workflow variable before Assignment Task use.
+- `multiple_to_list_variable` requires a List workflow variable, a linked ListRef/Complex Type definition, and source-field to ListRef-field mappings. A downstream Loop through list items must use this mode.
+- `multiple_to_text_variable` is reserved for a proven JSON/text consumer. Do not use it as a substitute for a List variable when the workflow iterates rows.
+- Lookup-backed filters must compare source `ListDataID` with the stored Lookup target record identity, never display text.
+- Page Size is `1..1000`; omitted means `100`. Page Number is a positive integer; omitted means `1`.
+- Export-proven source types are Data List, Document Library, and Form Report. Data Report remains `focused-learning-required` until its dedicated training round.
+- A Query Data action supports at most two sort fields. Plan both explicitly when deterministic secondary ordering matters.
+- Approval, Data List, and Scheduled workflows share the QueryData result contract. Host-specific current-record expressions still require host-specific export proof.
+- `validate-generation-readiness-review.mjs` automatically runs `validate-workflow-query-data-plan.mjs` whenever Workflow Query Data intent is detected.
+- Data List Workflow current-record filters must identify the exact source list field and target field. A related-record query commonly compares the target Lookup field to current-record `ListDataID`.
+
+#### Workflow Loop Planning
+
+Required for every Workflow `Loop` node.
+
+| Workflow | Workflow Host Type | Loop Node Name | Loop Mode | Loop Source Parent | Loop Source | LoopBody Actions | Current Iteration / Current Item Use | Delay or Repeated Side Effects | Proof Boundary | Business Rationale |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| <Workflow> | Approval / Data List / Scheduled Workflow | <Business action name> | list / values / number | __variables_ / __list_ / expression | <List variable, Sub List field, multi-value expression, or count expression> | <Ordered actions inside LoopBody> | <LoopIndex / LoopItem fields / None> | <Email, mutation, Delay, or None> | export-proven / runtime-proof-required | <Why iteration is required> |
+
+Workflow Loop planning rules:
+
+- `list + __variables_` requires a declared List workflow variable linked to a ListRef/Complex Type.
+- `list + __list_` is Data List Workflow-only and requires a real Sub List field on the host list.
+- `values` requires a non-empty expression-token array that returns multiple values; V1.7 proves a multiple User field.
+- `number` requires an expression-token array that resolves to a positive loop count; a fixed number uses a numeric token.
+- Every mode requires a resolving `bodyRef` and explicit ordered `LoopBody Actions`.
+- List current iteration is `LoopIndex`; current row fields use `LoopItem.<field>`. Do not invent field IDs.
+- Repeated email, mutation, external calls, and Delay execution are runtime-sensitive even when their serialization is export-proven.
+- `validate-generation-readiness-review.mjs` automatically runs the Workflow Loop planning gate whenever Loop intent is detected.
 
 #### Sub List List Actions
 

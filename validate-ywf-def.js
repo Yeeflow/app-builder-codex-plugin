@@ -109,6 +109,18 @@ function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function collectWorkflowShapeEntries(shapes, basePath = "$.childshapes") {
+  const entries = [];
+  asArray(shapes).forEach((shape, index) => {
+    if (!shape) return;
+    const path = `${basePath}[${index}]`;
+    entries.push({ shape, path });
+    if (Array.isArray(shape.children)) entries.push(...collectWorkflowShapeEntries(shape.children, `${path}.children`));
+    if (Array.isArray(shape.childshapes)) entries.push(...collectWorkflowShapeEntries(shape.childshapes, `${path}.childshapes`));
+  });
+  return entries;
+}
+
 function zeroPadding(padding) {
   const value = Array.isArray(padding) ? padding[1] : padding;
   if (!isObject(value)) return false;
@@ -235,6 +247,8 @@ function validateDecodedDef(def, options = {}) {
   const listrefs = asArray(def.variables && def.variables.listref);
   const pages = asArray(def.pageurls);
   const childshapes = asArray(def.childshapes);
+  const workflowShapeEntries = collectWorkflowShapeEntries(childshapes);
+  const workflowShapes = workflowShapeEntries.map((entry) => entry.shape);
   const variableById = new Map();
   const listrefById = new Map();
   const rowFieldsByListVar = new Map();
@@ -251,10 +265,10 @@ function validateDecodedDef(def, options = {}) {
   summary.variables = basicVars.length;
   summary.listrefs = listrefs.length;
   summary.pages = pages.length;
-  summary.workflowNodes = childshapes.filter((s) => !isSequenceFlow(s)).length;
-  summary.sequenceFlows = childshapes.filter(isSequenceFlow).length;
-  summary.approvalTasks = childshapes.filter((s) => s.stencil && s.stencil.id === "MultiAssignmentTask").length;
-  summary.contentListNodes = childshapes.filter((s) => s.stencil && s.stencil.id === "ContentList").length;
+  summary.workflowNodes = workflowShapes.filter((s) => !isSequenceFlow(s)).length;
+  summary.sequenceFlows = workflowShapes.filter(isSequenceFlow).length;
+  summary.approvalTasks = workflowShapes.filter((s) => s.stencil && s.stencil.id === "MultiAssignmentTask").length;
+  summary.contentListNodes = workflowShapes.filter((s) => s.stencil && s.stencil.id === "ContentList").length;
 
   validateVariables();
   validatePagesAndControls();
@@ -265,6 +279,7 @@ function validateDecodedDef(def, options = {}) {
   validateApprovalTasks();
   validateSequenceFlowConditions();
   validateQueryDataNodes();
+  validateWorkflowLoopNodes();
   validateContentLists();
   validateSetVariableTasks();
   validateWorkflowActionConfigurations();
@@ -553,6 +568,26 @@ function validateDecodedDef(def, options = {}) {
           addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SOURCE_INCOMPLETE", `Query data source is missing ${key}`, `${stepPath}.attrs.querydata_list.${key}`);
         }
       }
+      if (![1, 16, 32].includes(Number(attrs.querydata_list.ListType))) {
+        addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SOURCE_TYPE_UNPROVEN", "Form Action Query Data currently supports export-proven Data List (1), Document Library (16), and Form Report (32) sources. Data Report remains focused-learning-required.", `${stepPath}.attrs.querydata_list.ListType`, {
+          listType: attrs.querydata_list.ListType,
+        });
+      }
+    }
+
+    if (attrs.querydata_sorts !== undefined && !Array.isArray(attrs.querydata_sorts)) {
+      addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SORTS_NOT_ARRAY", "Query Data sorts must use attrs.querydata_sorts[]", `${stepPath}.attrs.querydata_sorts`);
+    } else if (Array.isArray(attrs.querydata_sorts)) {
+      if (attrs.querydata_sorts.length > 2) {
+        addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SORT_COUNT_EXCEEDED", "Query Data supports at most two sort fields", `${stepPath}.attrs.querydata_sorts`, {
+          sortCount: attrs.querydata_sorts.length,
+        });
+      }
+      attrs.querydata_sorts.forEach((sort, index) => {
+        if (!isObject(sort) || !sort.SortName || typeof sort.SortByDesc !== "boolean") {
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_SORT_SHAPE_INVALID", "Each Query Data sort requires SortName and boolean SortByDesc", `${stepPath}.attrs.querydata_sorts.${index}`);
+        }
+      });
     }
 
     if (attrs.querydata_type !== undefined && !["multiple", "single"].includes(attrs.querydata_type)) {
@@ -596,8 +631,8 @@ function validateDecodedDef(def, options = {}) {
           addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_BAD_ENTRY", "Query data filter entries must be objects", filterPath);
           return;
         }
-        if (!filter.left || filter.op === undefined || filter.op === null || filter.right === undefined || (filter.right === null && String(filter.op) !== "11")) {
-          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_INCOMPLETE", "Query data filters require left/op/right; export-proven op 11 may use right=null for current-user membership", filterPath);
+        if (!filter.left || filter.op === undefined || filter.op === null || filter.right === undefined || (filter.right === null && !["7", "11"].includes(String(filter.op)))) {
+          addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_INCOMPLETE", "Query data filters require left/op/right; export-proven nullary operators 7 (not empty) and 11 (current-user membership) may use right=null", filterPath);
         }
         if (filter.right === "ON" || filter.right === "OFF") {
           addIssue(queryIssues, "FORM_ACTION_QUERYDATA_FILTER_BOOLEAN_LABEL", "Boolean Query data filters must use true/false string values, not ON/OFF labels", `${filterPath}.right`, { right: filter.right });
@@ -1971,9 +2006,8 @@ function validateDecodedDef(def, options = {}) {
   }
 
   function validateQueryDataNodes() {
-    childshapes.forEach((shape, index) => {
+    workflowShapeEntries.forEach(({ shape, path: p }) => {
       if (!shape || !shape.stencil || shape.stencil.id !== "QueryData") return;
-      const p = `$.childshapes[${index}]`;
       const props = shape.properties || {};
       for (const key of ["appid", "listsetid", "listid", "listtype"]) {
         if (props[key] === undefined || props[key] === null || props[key] === "") {
@@ -1985,10 +2019,27 @@ function validateDecodedDef(def, options = {}) {
         return;
       }
       const result = props.result;
+      if (!Number.isInteger(Number(result.pageIndex)) || Number(result.pageIndex) < 1) {
+        addIssue(errors, "QUERYDATA_PAGE_INDEX_INVALID", "QueryData result.pageIndex must be a positive integer.", `${p}.properties.result.pageIndex`);
+      }
+      if (!Number.isInteger(Number(result.pageSize)) || Number(result.pageSize) < 1 || Number(result.pageSize) > 1000) {
+        addIssue(errors, "QUERYDATA_PAGE_SIZE_INVALID", "QueryData result.pageSize must be an integer from 1 to 1000.", `${p}.properties.result.pageSize`);
+      }
+      if (result.type === "single") {
+        if (!isObject(result.fieldMap) || Object.keys(result.fieldMap).length === 0) {
+          addIssue(errors, "QUERYDATA_SINGLE_FIELDMAP_EMPTY", "Single-result QueryData must map at least one source field to a declared workflow variable.", `${p}.properties.result.fieldMap`);
+        } else {
+          for (const [sourceField, targetVariableId] of Object.entries(result.fieldMap)) {
+            if (!String(sourceField || "").trim()) addIssue(errors, "QUERYDATA_SINGLE_SOURCE_FIELD_MISSING", "Single-result QueryData fieldMap source field must not be empty.", `${p}.properties.result.fieldMap`);
+            if (!variableById.has(targetVariableId)) addIssue(errors, "QUERYDATA_SINGLE_TARGET_VARIABLE_NOT_FOUND", `QueryData single-result target variable ${targetVariableId} is not declared.`, `${p}.properties.result.fieldMap.${sourceField}`);
+          }
+        }
+      }
       if (result.type === "multiple") {
-        if (!result.listName || !result.listParent) {
-          addIssue(errors, "QUERYDATA_RESULT_TARGET_MISSING", "Multiple-result QueryData must define result.listName and result.listParent.", `${p}.properties.result`);
-        } else if (result.listParent === "__variables_") {
+        const countOnly = !String(result.listName || "").trim() && Boolean(result.totalCount);
+        if (!countOnly && (!result.listName || !result.listParent)) {
+          addIssue(errors, "QUERYDATA_RESULT_TARGET_MISSING", "Multiple-result QueryData must define a row target or a count-only totalCount target.", `${p}.properties.result`);
+        } else if (!countOnly && result.listParent === "__variables_") {
           const target = variableById.get(result.listName);
           if (!target) {
             addIssue(errors, "QUERYDATA_RESULT_VARIABLE_NOT_FOUND", `QueryData result variable ${result.listName} is not declared in DefResource.variables.basic.`, `${p}.properties.result.listName`);
@@ -1999,8 +2050,27 @@ function validateDecodedDef(def, options = {}) {
             });
           }
         }
-        if (!Array.isArray(result.fields) || result.fields.length === 0) {
-          addIssue(errors, "QUERYDATA_RESULT_FIELDS_EMPTY", "Multiple-result QueryData must select at least one result field.", `${p}.properties.result.fields`);
+        if (countOnly) {
+          if (result.fieldMap !== null || result.fields !== null || String(result.vartype || "") || String(result.listParent || "")) {
+            addIssue(errors, "QUERYDATA_COUNT_ONLY_ROW_TARGET_PRESENT", "Count-only QueryData must keep fieldMap/fields null and listName/vartype/listParent empty.", `${p}.properties.result`);
+          }
+        } else if (result.vartype === "list") {
+          const target = variableById.get(result.listName);
+          const listref = target && listrefById.get(target.value);
+          if (!target || target.type !== "list" || !listref) {
+            addIssue(errors, "QUERYDATA_LIST_RESULT_LISTREF_MISSING", "List-result QueryData requires a declared List variable linked to an existing variables.listref definition.", `${p}.properties.result.listName`);
+          }
+          if (!isObject(result.fieldMap) || Object.keys(result.fieldMap).length === 0) {
+            addIssue(errors, "QUERYDATA_LIST_FIELDMAP_EMPTY", "List-result QueryData requires source-field to ListRef-field mappings.", `${p}.properties.result.fieldMap`);
+          } else if (listref) {
+            const rowFields = new Set(asArray(listref.fields).map((field) => field && field.id).filter(Boolean));
+            for (const [sourceField, targetField] of Object.entries(result.fieldMap)) {
+              if (!String(sourceField || "").trim() || !rowFields.has(targetField)) addIssue(errors, "QUERYDATA_LIST_FIELDMAP_TARGET_NOT_FOUND", `QueryData List mapping target ${targetField} is not declared in ListRef ${listref.id}.`, `${p}.properties.result.fieldMap.${sourceField}`);
+            }
+          }
+          if (result.fields !== null && result.fields !== undefined) addIssue(errors, "QUERYDATA_LIST_RESULT_FIELDS_PRESENT", "List-result QueryData uses fieldMap and should keep result.fields null.", `${p}.properties.result.fields`);
+        } else if (!Array.isArray(result.fields) || result.fields.length === 0) {
+          addIssue(errors, "QUERYDATA_RESULT_FIELDS_EMPTY", "Text/JSON multiple-result QueryData must select at least one result field.", `${p}.properties.result.fields`);
         }
       }
       if (result.totalCount) {
@@ -2019,10 +2089,40 @@ function validateDecodedDef(def, options = {}) {
     });
   }
 
+  function validateWorkflowLoopNodes() {
+    const nodeIds = new Set(workflowShapes.map((shape) => shape && (shape.resourceid || shape.id)).filter(Boolean));
+    workflowShapeEntries.forEach(({ shape, path: p }) => {
+      if (!shape || !shape.stencil || shape.stencil.id !== "Loop") return;
+      const props = shape.properties || {};
+      const loopValue = props.loopValue;
+      if (props.loopType === "list") {
+        if (!isObject(loopValue) || !["__variables_", "__list_"].includes(loopValue.prefix) || !loopValue.value) {
+          addIssue(errors, "WORKFLOW_LOOP_LIST_VALUE_INVALID", "Loop through list items must use __variables_ for a workflow List variable or __list_ for a Data List Sub List field.", `${p}.properties.loopValue`);
+        } else if (loopValue.prefix === "__variables_") {
+          const variable = variableById.get(loopValue.value);
+          if (!variable || variable.type !== "list" || !listrefById.has(variable.value)) {
+            addIssue(errors, "WORKFLOW_LOOP_LIST_VARIABLE_INVALID", `Loop target ${loopValue.value} must be a declared List variable linked to an existing ListRef.`, `${p}.properties.loopValue.value`);
+          }
+        } else if (Number(def.workflowType) !== 1) {
+          addIssue(errors, "WORKFLOW_LOOP_SUBLIST_HOST_INVALID", "The __list_ Loop source is valid only in a Data List Workflow (workflowType = 1).", `${p}.properties.loopValue.prefix`);
+        }
+      } else if (["values", "number"].includes(props.loopType)) {
+        if (!isObject(loopValue) || loopValue.type !== 2 || !Array.isArray(loopValue.value) || loopValue.value.length === 0) {
+          addIssue(errors, "WORKFLOW_LOOP_EXPRESSION_VALUE_INVALID", "Loop values/number modes require loopValue.type = 2 and a non-empty expression-token array.", `${p}.properties.loopValue`);
+        }
+      } else {
+        addIssue(errors, "WORKFLOW_LOOP_TYPE_INVALID", "Loop loopType must be list, values, or number.", `${p}.properties.loopType`);
+      }
+      const body = workflowShapes.find((candidate) => (candidate.resourceid || candidate.id) === shape.bodyRef);
+      if (!shape.bodyRef || !nodeIds.has(shape.bodyRef) || body?.stencil?.id !== "LoopBody") {
+        addIssue(errors, "WORKFLOW_LOOP_BODYREF_UNRESOLVED", "Every Loop must have bodyRef resolving to a LoopBody node.", `${p}.bodyRef`);
+      }
+    });
+  }
+
   function validateContentLists() {
-    childshapes.forEach((shape, index) => {
+    workflowShapeEntries.forEach(({ shape, path: p }) => {
       if (!shape || !shape.stencil || shape.stencil.id !== "ContentList") return;
-      const p = `$.childshapes[${index}]`;
       const props = shape.properties || {};
       for (const key of ["type", "appid", "listsetid", "listid", "listtype"]) {
         if (props[key] === undefined || props[key] === null || props[key] === "") {
@@ -2108,27 +2208,28 @@ function validateDecodedDef(def, options = {}) {
   }
 
   function validateSetVariableTasks() {
-    childshapes.forEach((shape, index) => {
+    workflowShapeEntries.forEach(({ shape, path: p }) => {
       if (!shape || !shape.stencil || shape.stencil.id !== "SetVariableTask") return;
       const settings = asArray(shape.properties && shape.properties.variablesetting);
       settings.forEach((setting, settingIndex) => {
-        const p = `$.childshapes[${index}].properties.variablesetting[${settingIndex}]`;
+        const settingPath = `${p}.properties.variablesetting[${settingIndex}]`;
         if (!setting.id || !variableById.has(setting.id)) {
-          addIssue(errors, "SETVARIABLE_UNKNOWN_VARIABLE", `SetVariableTask references unknown variable ${setting && setting.id}`, `${p}.id`);
+          addIssue(errors, "SETVARIABLE_UNKNOWN_VARIABLE", `SetVariableTask references unknown variable ${setting && setting.id}`, `${settingPath}.id`);
         }
         if (typeof setting.value === "string" && setting.value.includes("&quot;prop&quot;:&quot;FlowNo&quot;")) {
           return;
         }
-        validateDataExpression(setting.value, `${p}.value`);
+        validateDataExpression(setting.value, `${settingPath}.value`);
       });
     });
   }
 
   function validateWorkflowActionConfigurations() {
-    const actionReport = validateWorkflowActionShapes(childshapes, {
+    const configurableEntries = workflowShapeEntries.filter(({ shape }) => shape?.stencil?.id !== "LoopBody");
+    const actionReport = validateWorkflowActionShapes(configurableEntries.map((entry) => entry.shape), {
       mode,
       stage: mode,
-      pointerForIndex: (index) => `$.childshapes[${index}]`,
+      pointerForIndex: (index) => configurableEntries[index]?.path || `$.childshapes[${index}]`,
     });
     summary.workflowActionConfig = actionReport.summary;
     actionReport.issues.forEach((entry) => {
