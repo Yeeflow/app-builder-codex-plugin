@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.9.51
+
+- Add export-proven Workflow Query Data modes for Approval, Data List, and Scheduled workflows, including count-only, single-variable, List/Complex Type, and text-result contracts.
+- Add Data List (`1`), Document Library (`16`), and Form Report (`32`) Query Data source contracts for Workflow nodes and supported Form Action hosts while keeping Data Report focused-learning-required.
+- Add export-backed Data List Workflow current-record count/upsert patterns and all three Loop modes: List/Sub List, multiple values, and fixed times.
+- Enforce positive Page Number, Page Size `1..1000`, and a maximum of two sort fields across Workflow and Form Action Query Data planning, builders, and validators.
+- Accept the Form Report not-empty filter export shape `op = "7"` with `right = null`, while retaining current-user membership `op = "11"` compatibility.
+- Add shared App Plan tables and Generation Readiness gates for Workflow Query Data and Loop decisions, including complete count-branch coverage and repeated-side-effect proof boundaries.
+- Fail closed when planned Data List or Scheduled Workflow hosts cannot yet be fully materialized instead of silently omitting WorkflowType `1` or `3` resources.
+
 ## 0.9.50
 
 - Add a business-capability decision layer before Form Action Query Data mode selection, preferring direct Collection/Data Table binding for read-only multi-row regions and reserving Query-to-Sub-list for editable working copies.
