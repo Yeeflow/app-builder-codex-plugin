@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.50
+
+- Add a business-capability decision layer before Form Action Query Data mode selection, preferring direct Collection/Data Table binding for read-only multi-row regions and reserving Query-to-Sub-list for editable working copies.
+- Reject ambiguous result targets, unconsumed temp JSON/temp collections, Query Data temp payloads planned as Collection/Data Table sources, and ambiguous Lookup display values used as target record identifiers.
+- Require every temp collection/JSON plan to name a supported result consumer such as `JSONStringfy`, a calculation, or an explicitly justified Custom Code renderer.
+- Make Generation Readiness automatically run the Query Data plan validator and fail when Form Action Query Data intent lacks the standard planning table.
+- Add `Result Consumer / Use` to the App Plan template and source/dist regressions based on the Campaign/Event and Customer Service Dashboard planning failures.
+
 ## 0.9.49
 
 - Add export-proven Form Action Query Data golden references for Approval submission/task forms, Data List and Document Library custom forms, and Dashboard pages.
