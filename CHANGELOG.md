@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.9.49
+
+- Add export-proven Form Action Query Data golden references for Approval submission/task forms, Data List and Document Library custom forms, and Dashboard pages.
+- Share single/multiple-result mapping, selected-field output, result-count assignment, chained Query Data, and pagination contracts across supported hosts while preserving host-specific variable boundaries.
+- Enforce `querydata_pageindex >= 1` and `1 <= querydata_pagesize <= 1000`, with defaults of page 1 and 100 rows, across planning, generation, standalone/package validation, and first-generation preflight.
+- Support Dashboard temp JSON result variables, `JSONStringfy` display conversion, and Custom Code rendering boundaries while blocking Collection/Data Table controls from directly consuming temp JSON results.
+- Treat Document Library custom forms like Data List custom forms for Form Action Query Data, and reject Public Form, Form Report, and Data Report as independent Form Action hosts.
+- Add source/dist golden-reference, App Plan, host-matrix, generated-final, and cache-root regression coverage for the v1.1-v1.4 exported reference applications.
+
 ## 0.9.48
 
 - Generate positive-area Workflow Designer `bounds` for every non-SequenceFlow Approval workflow node and derive `graphposition` from complete node rectangles, so rendered workflows remain selectable, editable, extensible, and publish-ready.

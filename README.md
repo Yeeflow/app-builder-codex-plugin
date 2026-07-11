@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.48`
+- Version: `0.9.49`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.48` hardens Approval Workflow Designer editability and publish readiness. Standalone `.ywf` and full `.yapk` generation now share positive-area node bounds and bounds-derived graph extents, declare QueryData output variables, and reject incomplete or semantically incorrect ContentList mutations before signing.
+Current release `0.9.49` adds export-proven Form Action Query Data generation across Approval submission/task forms, Data List and Document Library custom forms, and Dashboards. Planning and generated-final gates now share pagination, result mapping, temp JSON, chained-query, and supported-host contracts before signing readiness.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.48
+Version: 0.9.49
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.48
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.49
 ```
 
 ## What Is Included
