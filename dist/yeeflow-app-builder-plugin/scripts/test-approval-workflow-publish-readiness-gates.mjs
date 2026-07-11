@@ -30,11 +30,23 @@ try {
   const travelRecordsListId = String(packageDecoded.Childs.find((child) => child?.List?.Title === "Travel Records")?.List?.ListID || "");
   const contentListNode = materializedDef.childshapes.find((shape) => shape?.stencil?.id === "ContentList" && shape?.properties?.name === "Create Travel Record");
   const queryNode = materializedDef.childshapes.find((shape) => shape?.stencil?.id === "QueryData" && shape?.properties?.name === "Query Travel Records");
+  const countQueryNode = materializedDef.childshapes.find((shape) => shape?.stencil?.id === "QueryData" && shape?.properties?.name === "Count Travel Records");
+  const singleQueryNode = materializedDef.childshapes.find((shape) => shape?.stencil?.id === "QueryData" && shape?.properties?.name === "Get Travel Title");
+  const listQueryNode = materializedDef.childshapes.find((shape) => shape?.stencil?.id === "QueryData" && shape?.properties?.name === "Query Travel Rows");
   assert.ok(contentListNode, "materializer must preserve planned action nodes");
   assert.ok(queryNode, "materializer must preserve planned QueryData nodes");
+  assert.equal(countQueryNode.properties.result.listName, "", "count-only QueryData has no row result target");
+  assert.equal(countQueryNode.properties.result.totalCount, "TravelRecordCount", "count-only QueryData writes the planned count variable");
+  assert.deepEqual(singleQueryNode.properties.result.fieldMap, { Title: "queriedTitle" }, "single QueryData preserves source-to-workflow-variable mapping");
+  assert.equal(listQueryNode.properties.result.vartype, "list", "multiple List QueryData preserves List variable mode");
+  assert.deepEqual(listQueryNode.properties.result.fieldMap, { Title: "rowTitle" }, "multiple List QueryData preserves ListRef field mapping");
   const variableIds = new Set(materializedDef.variables.basic.map((variable) => variable.id));
   assert.equal(variableIds.has(queryNode.properties.result.listName), true, "QueryData result variable is declared in DefResource.variables.basic");
   assert.equal(variableIds.has(queryNode.properties.result.totalCount), true, "QueryData count variable is declared in DefResource.variables.basic");
+  assert.equal(variableIds.has("TravelRecordCount"), true, "count-only QueryData count variable is declared");
+  assert.equal(variableIds.has("queriedTitle"), true, "single QueryData target variable is declared");
+  assert.equal(variableIds.has("travelRows"), true, "List QueryData result variable is declared");
+  assert.equal(materializedDef.variables.listref.some((listref) => listref.id === "TravelRows" && listref.fields.some((field) => field.id === "rowTitle")), true, "List QueryData creates the planned Complex Type/ListRef fields");
   assert.equal(String(contentListNode.properties.listid), travelRecordsListId, "ContentList target listid resolves to the planned child data list");
   assert.notEqual(String(contentListNode.properties.listid), rootListSetId, "ContentList target listid must not use the root application ListSet");
   assert.equal(contentListNode.properties.listtype, "select", "ContentList uses select application mode instead of current/Uncategorized");
@@ -151,6 +163,45 @@ try {
     };
   }), "QUERYDATA_RESULT_VARIABLE_NOT_FOUND");
   cases.push({ case: "fail: QueryData result/count variables are undeclared", status: "pass" });
+
+  expectPass("count-only QueryData does not require a row result target", ["--resource", mutateResource(validDef, (def) => {
+    const query = def.childshapes.find((shape) => shape?.stencil?.id === "QueryData");
+    query.properties.result = {
+      type: "multiple",
+      pageIndex: 1,
+      pageSize: 100,
+      fieldMap: null,
+      listName: "",
+      vartype: "",
+      listParent: "",
+      fields: null,
+      totalCount: query.properties.result.totalCount,
+      querycount_prefix: "__variables_",
+    };
+  })]);
+  cases.push({ case: "pass: count-only QueryData with no row target", status: "pass" });
+
+  expectPass("single QueryData maps source fields to declared workflow variables", ["--resource", mutateResource(validDef, (def) => {
+    const query = def.childshapes.find((shape) => shape?.stencil?.id === "QueryData");
+    query.properties.result = { type: "single", pageIndex: 1, pageSize: 100, fieldMap: { Title: "requestTitle" }, listName: "", fields: null };
+  })]);
+  cases.push({ case: "pass: single QueryData fieldMap to workflow variable", status: "pass" });
+
+  expectPass("multiple QueryData maps rows into a List variable and ListRef", ["--resource", mutateResource(validDef, (def) => {
+    const query = def.childshapes.find((shape) => shape?.stencil?.id === "QueryData");
+    def.variables.basic.push({ id: "queryRows", idx: "queryRows", name: "Query Rows", type: "list", value: "queryRowsRef" });
+    def.variables.listref.push({ id: "queryRowsRef", idx: "queryRowsRef", name: "Query Rows", fields: [{ id: "rowTitle", idx: "rowTitle", name: "Title", type: "text", editable: true }] });
+    query.properties.result = { type: "multiple", pageIndex: 1, pageSize: 1000, fieldMap: { Title: "rowTitle" }, listName: "queryRows", vartype: "list", listParent: "__variables_", fields: null };
+  })]);
+  cases.push({ case: "pass: multiple QueryData into List variable", status: "pass" });
+
+  expectCode("List QueryData mapping target must exist in ListRef", mutateResource(validDef, (def) => {
+    const query = def.childshapes.find((shape) => shape?.stencil?.id === "QueryData");
+    def.variables.basic.push({ id: "queryRows", idx: "queryRows", name: "Query Rows", type: "list", value: "queryRowsRef" });
+    def.variables.listref.push({ id: "queryRowsRef", idx: "queryRowsRef", name: "Query Rows", fields: [{ id: "rowTitle", idx: "rowTitle", name: "Title", type: "text", editable: true }] });
+    query.properties.result = { type: "multiple", pageIndex: 1, pageSize: 1000, fieldMap: { Title: "missingRowField" }, listName: "queryRows", vartype: "list", listParent: "__variables_", fields: null };
+  }), "QUERYDATA_LIST_FIELDMAP_TARGET_NOT_FOUND");
+  cases.push({ case: "fail: List QueryData fieldMap target missing from ListRef", status: "pass" });
 
   expectCode("ContentList add with empty field mappings fails", mutateResource(validDef, (def) => {
     const action = def.childshapes.find((shape) => shape?.stencil?.id === "ContentList");
@@ -292,10 +343,22 @@ function approvalPlanMarkdown() {
     "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     "| 1 | Start | StartNoneEvent | Request submission starts the process. | Requester | Submission | Submitted | Always | Read submission fields | Generated-final validation |",
     "| 2 | Query Travel Records | QueryData | Read related travel records. | System | System action | Completed | Always | Travel Records read | Generated-final validation |",
-    "| 3 | Department Manager Review | MultiAssignmentTask | Manager reviews business purpose. | Department Manager | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
-    "| 4 | Finance Review | MultiAssignmentTask | Finance reviews estimated cost. | Finance | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
-    "| 5 | Create Travel Record | ContentList | Persist accepted travel request. | System | System action | Complete | Approved path only | Travel Records create | Generated-final validation |",
-    "| 6 | End | EndNoneEvent | Approved process ends. | System | End | Complete | Approved path | No data write | Generated-final validation |",
+    "| 3 | Count Travel Records | QueryData | Count related travel records. | System | System action | Completed | Always | Travel Records count | Generated-final validation |",
+    "| 4 | Get Travel Title | QueryData | Read one related travel record. | System | System action | Completed | Always | Travel Records read | Generated-final validation |",
+    "| 5 | Query Travel Rows | QueryData | Read related rows for workflow processing. | System | System action | Completed | Always | Travel Records read | Generated-final validation |",
+    "| 6 | Department Manager Review | MultiAssignmentTask | Manager reviews business purpose. | Department Manager | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
+    "| 7 | Finance Review | MultiAssignmentTask | Finance reviews estimated cost. | Finance | Role based | Approved; Rejected | Always | Read submitted request fields | Generated-final validation |",
+    "| 8 | Create Travel Record | ContentList | Persist accepted travel request. | System | System action | Complete | Approved path only | Travel Records create | Generated-final validation |",
+    "| 9 | End | EndNoneEvent | Approved process ends. | System | End | Complete | Approved path | No data write | Generated-final validation |",
+    "",
+    "#### Workflow Query Data Planning",
+    "",
+    "| Workflow | Workflow Host Type | Node Name | Workflow Query Mode | Source Resource Type | Source Resource | Filters | Sorts | Result Variable | Result Variable Type | ListRef / Complex Type | Field Mapping | Count Variable | Page Size | Page Number | Downstream Consumer / Use | Branch Coverage | Proof Boundary | Notes |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    "| Business Travel Request Approval | Approval Workflow | Query Travel Records | multiple_to_text_variable | Data List | Travel Records | None | Created desc | travel_query_rows | Text workflow variable | None | Title -> Title | travel_query_records_count | 100 | 1 | JSON text calculation | N/A | Generated-final validation | Backward-compatible text result |",
+    "| Business Travel Request Approval | Approval Workflow | Count Travel Records | multiple_count_only | Data List | Travel Records | None | Created desc | None | None | None | None | TravelRecordCount | 100 | 1 | Branch on count | TravelRecordCount > 0; TravelRecordCount <= 0 | Generated-final validation | Count only |",
+    "| Business Travel Request Approval | Approval Workflow | Get Travel Title | single_to_variables | Data List | Travel Records | None | Created desc | queriedTitle | Workflow text variable | None | Title -> queriedTitle | None | 100 | 1 | Workflow variable | N/A | Generated-final validation | Single result |",
+    "| Business Travel Request Approval | Approval Workflow | Query Travel Rows | multiple_to_list_variable | Data List | Travel Records | None | Created desc | travelRows | List workflow variable | TravelRows | Title -> rowTitle | None | 1000 | 1 | Loop through list items | N/A | Generated-final validation | List result |",
     "",
     "## 6. Form Reports Plan",
     "",

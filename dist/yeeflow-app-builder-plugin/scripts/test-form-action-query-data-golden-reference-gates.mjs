@@ -25,6 +25,8 @@ const templates = [
   ["form-action-query-data-dashboard-chained-single.template.json", QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES],
   ["form-action-query-data-dashboard-multiple-to-temp-json.template.json", QUERY_DATA_MODES.MULTIPLE_TO_TEMP_COLLECTION],
   ["form-action-query-data-document-library-single-to-temp.template.json", QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES],
+  ["form-action-query-data-document-library-source-single.template.json", QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES],
+  ["form-action-query-data-form-report-source-single.template.json", QUERY_DATA_MODES.SINGLE_TO_LIST_FIELDS],
 ];
 
 for (const [file] of templates) {
@@ -98,10 +100,34 @@ const documentLibraryStep = buildFormActionQueryDataStep({
   mode: QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES,
   hostSurface: "document_library_custom_form",
   name: "Load related record",
-  source: source(),
+  source: source(16),
   fieldMap: { Title: "RelatedName" },
 });
 assert.equal(documentLibraryStep.attrs.querydata_fieldmap.Title, "__temp_RelatedName");
+assert.equal(documentLibraryStep.attrs.querydata_list.ListType, 16);
+const formReportStep = buildFormActionQueryDataStep({
+  mode: QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES,
+  hostSurface: "data_list_custom_form",
+  name: "Query form report data",
+  source: source(32),
+  fieldMap: { Bigint1: "FormID", Text2: "Applicant" },
+  sorts: [{ SortName: "Datetime1", SortByDesc: true }, { SortName: "Text2", SortByDesc: false }],
+});
+assert.equal(formReportStep.attrs.querydata_list.ListType, 32);
+assert.equal(formReportStep.attrs.querydata_sorts.length, 2);
+assert.throws(() => buildFormActionQueryDataStep({
+  mode: QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES,
+  name: "Too many sorts",
+  source: source(),
+  fieldMap: { Title: "Name" },
+  sorts: [{ SortName: "Created" }, { SortName: "Modified" }, { SortName: "Title" }],
+}), /at most 2 sort fields/);
+assert.throws(() => buildFormActionQueryDataStep({
+  mode: QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES,
+  name: "Unproven Data Report",
+  source: source(999),
+  fieldMap: { Title: "Name" },
+}), /Unsupported export-proven Query Data source ListType/);
 const expressionFilterStep = buildFormActionQueryDataStep({
   mode: QUERY_DATA_MODES.SINGLE_TO_VARIABLES,
   name: "Expression filter",
@@ -110,13 +136,21 @@ const expressionFilterStep = buildFormActionQueryDataStep({
   filters: [{ left: "Text1", op: "0", right: [{ exprType: "variable", valueType: "text", id: "FilterValue", type: "expr" }] }],
 });
 assert.equal(expressionFilterStep.attrs.querydata_filters[0].showCus, false, "expression-token filters must use expression-editor mode");
+const formReportNotEmptyStep = buildFormActionQueryDataStep({
+  mode: QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES,
+  name: "Form ID is not empty",
+  source: source(32),
+  fieldMap: { Bigint1: "FormID" },
+  filters: [{ left: "Bigint1", op: "7", right: null }],
+});
+assert.equal(formReportNotEmptyStep.attrs.querydata_filters[0].right, null);
 
 console.log(JSON.stringify({
   status: "pass",
   test: "test-form-action-query-data-golden-reference-gates.mjs",
   templates: templates.length,
   modes: steps.map(classifyFormActionQueryDataStep),
-  cases: 37,
+  cases: 44,
 }, null, 2));
 
 function buildGoldenSteps() {
@@ -145,6 +179,6 @@ function buildGoldenSteps() {
   ];
 }
 
-function source() {
-  return { AppID: 41, ListSetID: "9000000000000000001", ListID: "9000000000000000002", ListType: 1 };
+function source(listType = 1) {
+  return { AppID: 41, ListSetID: "9000000000000000001", ListID: "9000000000000000002", ListType: listType };
 }

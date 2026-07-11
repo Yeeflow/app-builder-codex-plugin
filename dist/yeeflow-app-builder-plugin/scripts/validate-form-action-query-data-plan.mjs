@@ -53,6 +53,7 @@ function validateRow(row, index, findings, markdown) {
   const pageSize = value(row, "Page Size");
   const pageNumber = value(row, "Page Number");
   const filters = value(row, "Filters");
+  const sorts = value(row, "Sorts");
   const boundControl = value(row, "Bound Control");
   const resultConsumer = value(row, "Result Consumer / Use", "Result Consumer", "Consumer / Use");
   const notes = value(row, "Notes", "Business Rationale");
@@ -133,9 +134,11 @@ function validateRow(row, index, findings, markdown) {
   if (usesUnresolvedLookupDisplayValue(filters) || usesUnresolvedLookupDisplayValue(mapping)) {
     add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_LOOKUP_DISPLAY_VALUE_USED", "Lookup-backed query filters and ID mappings must explicitly use the target record ListDataID/stored target identifier, not a display title or ambiguous lookup value", path, { filters, mapping });
   }
-  if (!/^data\s*list$/i.test(sourceType) && !isEmpty(sourceType)) {
-    add(findings, "warning", "FORM_ACTION_QUERYDATA_PLAN_SOURCE_EXPORT_PROOF_REQUIRED", "This focused baseline proves Data List source metadata; other source types require a focused export before final generation", path, { sourceType });
+  if (!/^(Data List|Document Library|Form Report)$/i.test(sourceType) && !isEmpty(sourceType)) {
+    add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_SOURCE_EXPORT_PROOF_REQUIRED", "Source Resource Type must be export-proven Data List, Document Library, or Form Report. Data Report remains focused-learning-required.", path, { sourceType });
   }
+  const sortCount = String(sorts || "").split(/\s*;\s*/).filter((entry) => entry && !isNone(entry)).length;
+  if (sortCount > 2) add(findings, "error", "FORM_ACTION_QUERYDATA_PLAN_SORT_COUNT_EXCEEDED", "Form Action Query Data supports at most two sort fields", path, { sortCount, sorts });
 }
 
 function isAmbiguousResultContract(input) {

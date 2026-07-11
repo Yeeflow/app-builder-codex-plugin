@@ -171,7 +171,7 @@ Workflow variable inputs use expression-wrapper values such as:
 
 Workflow variable outputs use the `__variables_` prefix.
 
-Data list workflow and Scheduled workflow invocation should use the same `InvokeCode` node shape by platform rule, but this training only had an Approval workflow export.
+The original training export proved Approval workflow `InvokeCode`. A later focused export, `Approval form workflow sample-V1.6.yapk`, proves Scheduled Workflow `InvokeCode` with a List workflow-variable input and a text workflow-variable output. It does not prove scheduled trigger execution or service runtime behavior.
 
 ### Runtime Placement Guidance
 

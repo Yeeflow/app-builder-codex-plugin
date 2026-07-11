@@ -1,0 +1,31 @@
+{
+  "type": "querydata",
+  "name": "Query form report data",
+  "attrs": {
+    "querydata_list": {
+      "AppID": 41,
+      "ListSetID": "<current-list-set-id>",
+      "ListID": "<form-report-list-id>",
+      "ListType": 32
+    },
+    "querydata_filters": [
+      {
+        "key": "<uuid>",
+        "pre": "and",
+        "left": "<form-id-storage-field>",
+        "op": "7",
+        "right": null
+      }
+    ],
+    "querydata_sorts": [
+      {
+        "SortName": "<submission-date-storage-field>",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_fieldmap": {
+      "<form-report-storage-field>": "<declared-host-compatible-target>"
+    },
+    "querydata_fields": null
+  }
+}

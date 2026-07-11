@@ -14,6 +14,12 @@ import {
   withApprovalWorkflowDesignerBounds,
 } from "./lib/approval-workflow-designer-shape-utils.mjs";
 import { encodeYapkResourceOfficial } from "./lib/yapk-decode-utils.mjs";
+import {
+  buildWorkflowQueryDataProperties,
+  normalizeWorkflowQueryDataMode,
+  parseWorkflowFieldMap,
+  parseWorkflowSorts,
+} from "./lib/workflow-query-data-utils.mjs";
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
 
 const {
@@ -708,7 +714,9 @@ function analyzeAppPlanResourceDemand(planText) {
     { key: "dataLists", marker: /^##\s+4\.\s+Data Lists and Document Libraries Plan/im, tableHeaders: ["List Name", "Data List Name", "Document Library Name", "List", "Data List"], outputSurface: "$.Childs[]" },
     { key: "approvalForms", marker: /^##\s+5\.\s+Approval Forms Plan/im, tableHeaders: ["Approval Form Name", "Form Name"], outputSurface: "$.Forms[]" },
     { key: "formReports", marker: /^##\s+6\.\s+Form Reports Plan/im, tableHeaders: ["Form Report Name"], outputSurface: "$.FormNewReports[]" },
+    { key: "scheduleWorkflows", marker: /^##\s+7\.\s+Schedule Workflows Plan/im, tableHeaders: ["Workflow Name", "Scheduled Workflow Name", "Schedule Workflow Name"], outputSurface: "$.Forms[] WorkflowType 3" },
     { key: "customForms", marker: /^##\s+10\.\s+Custom Data List Forms Plan/im, tableHeaders: ["Form Name"], outputSurface: "$.Childs[].Layouts[]" },
+    { key: "dataListWorkflows", marker: /^##\s+11\.\s+Data List Workflows Plan/im, tableHeaders: ["Workflow Name", "Data List Workflow Name"], outputSurface: "$.Forms[] WorkflowType 1 + $.Childs[].FlowMappings[]" },
     { key: "dashboards", marker: /^##\s+14\.\s+Dashboard Pages Plan/im, tableHeaders: ["Dashboard Page Name", "Dashboard Page", "Page Name"], outputSurface: "$.Pages[] Type 103" },
     { key: "navigationGroups", marker: /^##\s+15\.\s+Application Navigation Plan/im, tableHeaders: ["Group"], outputSurface: "$.ListSet.LayoutView.sort[]" },
   ];
@@ -797,6 +805,7 @@ function analyzeAppPlanResourceDemand(planText) {
     reverseRelatedRecords,
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
+    workflowQueryDataConfigs: collectWorkflowQueryDataConfigs(planText),
     dashboardPageLayoutTemplateRecords,
     dashboardFilterRecords,
     dashboardSummaryMetricRecords,
@@ -1334,6 +1343,18 @@ function collectApprovalWorkflowNodeSpecs(planText) {
     const conditionColumn = findHeaderIndex(normalizedHeaders, ["condition/branch", "condition", "branch"]);
     const dataColumn = findHeaderIndex(normalizedHeaders, ["data read/write", "data read write", "data source", "read/write", "read write"]);
     const proofColumn = findHeaderIndex(normalizedHeaders, ["proof boundary", "proof"]);
+    const queryModeColumn = findHeaderIndex(normalizedHeaders, ["workflow query mode", "query mode"]);
+    const querySourceColumn = findHeaderIndex(normalizedHeaders, ["query source resource", "source resource"]);
+    const queryFiltersColumn = findHeaderIndex(normalizedHeaders, ["query filters", "filters"]);
+    const querySortsColumn = findHeaderIndex(normalizedHeaders, ["query sorts", "sorts"]);
+    const queryResultVariableColumn = findHeaderIndex(normalizedHeaders, ["query result variable", "result variable"]);
+    const queryResultVariableTypeColumn = findHeaderIndex(normalizedHeaders, ["query result variable type", "result variable type"]);
+    const queryComplexTypeColumn = findHeaderIndex(normalizedHeaders, ["query listref complex type", "listref complex type", "complex type"]);
+    const queryFieldMappingColumn = findHeaderIndex(normalizedHeaders, ["query field mapping", "field mapping"]);
+    const queryCountVariableColumn = findHeaderIndex(normalizedHeaders, ["query count variable", "count variable"]);
+    const queryPageSizeColumn = findHeaderIndex(normalizedHeaders, ["query page size", "page size"]);
+    const queryPageNumberColumn = findHeaderIndex(normalizedHeaders, ["query page number", "page number"]);
+    const queryConsumerColumn = findHeaderIndex(normalizedHeaders, ["downstream consumer use", "downstream consumer", "result consumer use"]);
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
       const cells = splitTableLine(lines[rowIndex]);
@@ -1366,12 +1387,77 @@ function collectApprovalWorkflowNodeSpecs(planText) {
         conditionBranch: conditionColumn === -1 ? "" : cleanResourceName(cells[conditionColumn]),
         dataReadWrite: dataColumn === -1 ? "" : cleanResourceName(cells[dataColumn]),
         proofBoundary: proofColumn === -1 ? "" : cleanResourceName(cells[proofColumn]),
+        queryMode: queryModeColumn === -1 ? "" : cleanResourceName(cells[queryModeColumn]),
+        querySourceResource: querySourceColumn === -1 ? "" : cleanResourceName(cells[querySourceColumn]),
+        queryFilters: queryFiltersColumn === -1 ? "" : cleanResourceName(cells[queryFiltersColumn]),
+        querySorts: querySortsColumn === -1 ? "" : cleanResourceName(cells[querySortsColumn]),
+        queryResultVariable: queryResultVariableColumn === -1 ? "" : cleanResourceName(cells[queryResultVariableColumn]),
+        queryResultVariableType: queryResultVariableTypeColumn === -1 ? "" : cleanResourceName(cells[queryResultVariableTypeColumn]),
+        queryComplexType: queryComplexTypeColumn === -1 ? "" : cleanResourceName(cells[queryComplexTypeColumn]),
+        queryFieldMapping: queryFieldMappingColumn === -1 ? "" : cleanResourceName(cells[queryFieldMappingColumn]),
+        queryCountVariable: queryCountVariableColumn === -1 ? "" : cleanResourceName(cells[queryCountVariableColumn]),
+        queryPageSize: queryPageSizeColumn === -1 ? "" : cleanResourceName(cells[queryPageSizeColumn]),
+        queryPageNumber: queryPageNumberColumn === -1 ? "" : cleanResourceName(cells[queryPageNumberColumn]),
+        queryDownstreamUse: queryConsumerColumn === -1 ? "" : cleanResourceName(cells[queryConsumerColumn]),
       });
       rowIndex += 1;
     }
     index = rowIndex;
   }
   return Object.fromEntries(Object.entries(byForm).map(([key, nodes]) => [key, uniqueApprovalWorkflowNodes(nodes)]));
+}
+
+function collectWorkflowQueryDataConfigs(planText) {
+  const byWorkflow = {};
+  const lines = String(planText || "").split(/\r?\n/);
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    if (!isTableLine(lines[index]) || !isTableLine(lines[index + 1]) || !/^\s*\|?\s*:?-{3,}/.test(lines[index + 1])) continue;
+    const headers = splitTableLine(lines[index]);
+    const normalizedHeaders = headers.map((header) => normKey(header));
+    const workflowColumn = findHeaderIndex(normalizedHeaders, ["workflow"]);
+    const nodeColumn = findHeaderIndex(normalizedHeaders, ["node name", "workflow node"]);
+    const modeColumn = findHeaderIndex(normalizedHeaders, ["workflow query mode"]);
+    if (workflowColumn === -1 || nodeColumn === -1 || modeColumn === -1) continue;
+    const sourceColumn = findHeaderIndex(normalizedHeaders, ["source resource"]);
+    const filtersColumn = findHeaderIndex(normalizedHeaders, ["filters"]);
+    const sortsColumn = findHeaderIndex(normalizedHeaders, ["sorts"]);
+    const resultColumn = findHeaderIndex(normalizedHeaders, ["result variable"]);
+    const resultTypeColumn = findHeaderIndex(normalizedHeaders, ["result variable type"]);
+    const complexTypeColumn = findHeaderIndex(normalizedHeaders, ["listref / complex type", "listref complex type", "complex type"]);
+    const mappingColumn = findHeaderIndex(normalizedHeaders, ["field mapping"]);
+    const countColumn = findHeaderIndex(normalizedHeaders, ["count variable"]);
+    const pageSizeColumn = findHeaderIndex(normalizedHeaders, ["page size"]);
+    const pageNumberColumn = findHeaderIndex(normalizedHeaders, ["page number"]);
+    const consumerColumn = findHeaderIndex(normalizedHeaders, ["downstream consumer / use", "downstream consumer", "result consumer / use"]);
+    let rowIndex = index + 2;
+    while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
+      const cells = splitTableLine(lines[rowIndex]);
+      const workflow = cleanResourceName(cells[workflowColumn]);
+      const nodeName = cleanResourceName(cells[nodeColumn]);
+      if (workflow && nodeName && !isNonResourceName(workflow) && !isNonResourceName(nodeName)) {
+        const key = normKey(workflow);
+        if (!byWorkflow[key]) byWorkflow[key] = [];
+        byWorkflow[key].push({
+          nodeName,
+          queryMode: cleanResourceName(cells[modeColumn]),
+          querySourceResource: sourceColumn === -1 ? "" : cleanResourceName(cells[sourceColumn]),
+          queryFilters: filtersColumn === -1 ? "" : cleanResourceName(cells[filtersColumn]),
+          querySorts: sortsColumn === -1 ? "" : cleanResourceName(cells[sortsColumn]),
+          queryResultVariable: resultColumn === -1 ? "" : cleanResourceName(cells[resultColumn]),
+          queryResultVariableType: resultTypeColumn === -1 ? "" : cleanResourceName(cells[resultTypeColumn]),
+          queryComplexType: complexTypeColumn === -1 ? "" : cleanResourceName(cells[complexTypeColumn]),
+          queryFieldMapping: mappingColumn === -1 ? "" : cleanResourceName(cells[mappingColumn]),
+          queryCountVariable: countColumn === -1 ? "" : cleanResourceName(cells[countColumn]),
+          queryPageSize: pageSizeColumn === -1 ? "" : cleanResourceName(cells[pageSizeColumn]),
+          queryPageNumber: pageNumberColumn === -1 ? "" : cleanResourceName(cells[pageNumberColumn]),
+          queryDownstreamUse: consumerColumn === -1 ? "" : cleanResourceName(cells[consumerColumn]),
+        });
+      }
+      rowIndex += 1;
+    }
+    index = rowIndex - 1;
+  }
+  return byWorkflow;
 }
 
 function collectDashboardFilterRecords(planText) {
@@ -1595,6 +1681,8 @@ function buildMissingResourceGraph(planDemand) {
     dataLists: "$.Childs[] Type 1 data list resources",
     documentLibraries: "$.Childs[] Type 16 document library resources",
     approvalForms: "$.Forms[] approval form definitions",
+    scheduleWorkflows: "$.Forms[] WorkflowType 3 scheduled workflow definitions",
+    dataListWorkflows: "$.Forms[] WorkflowType 1 definitions plus host-list FlowMappings[]",
     formReports: "$.FormNewReports[] approval report registrations",
     customForms: "$.Childs[].Layouts[] custom data list form layouts",
     dashboards: "$.Pages[] Type 103 dashboard pages with materialized v1.1 content",
@@ -1988,7 +2076,14 @@ function approvalFieldSpecsForForm(planDemand, formName) {
 }
 
 function approvalWorkflowNodeSpecsForForm(planDemand, formName) {
-  return uniqueApprovalWorkflowNodes(planDemand.approvalWorkflowNodeSpecs?.[normKey(formName)] || []);
+  const key = normKey(formName);
+  const configs = planDemand.workflowQueryDataConfigs?.[key] || [];
+  const nodes = (planDemand.approvalWorkflowNodeSpecs?.[key] || []).map((node) => {
+    if (normalizeApprovalWorkflowNodeType(node?.nodeType) !== "QueryData") return node;
+    const config = configs.find((item) => normKey(item.nodeName) === normKey(node.nodeName));
+    return config ? { ...node, ...config } : node;
+  });
+  return uniqueApprovalWorkflowNodes(nodes);
 }
 
 function uniqueApprovalFieldSpecs(fields) {
@@ -2046,6 +2141,18 @@ function uniqueApprovalWorkflowNodes(nodes) {
       conditionBranch: cleanResourceName(node?.conditionBranch),
       dataReadWrite: cleanResourceName(node?.dataReadWrite),
       proofBoundary: cleanResourceName(node?.proofBoundary),
+      queryMode: cleanResourceName(node?.queryMode),
+      querySourceResource: cleanResourceName(node?.querySourceResource),
+      queryFilters: cleanResourceName(node?.queryFilters),
+      querySorts: cleanResourceName(node?.querySorts),
+      queryResultVariable: cleanResourceName(node?.queryResultVariable),
+      queryResultVariableType: cleanResourceName(node?.queryResultVariableType),
+      queryComplexType: cleanResourceName(node?.queryComplexType),
+      queryFieldMapping: cleanResourceName(node?.queryFieldMapping),
+      queryCountVariable: cleanResourceName(node?.queryCountVariable),
+      queryPageSize: cleanResourceName(node?.queryPageSize),
+      queryPageNumber: cleanResourceName(node?.queryPageNumber),
+      queryDownstreamUse: cleanResourceName(node?.queryDownstreamUse),
     });
   }
   return normalized;
@@ -3527,6 +3634,12 @@ function buildDecodedPackage({ appTitle, rootListId, dashboardLayoutId, layoutRe
 }
 
 function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, iconUrl = DEFAULT_ICON, appPlanText = "", findings = [] }) {
+  if (planDemand.resources.scheduleWorkflows?.length) {
+    findings.push(error("FULL_APP_SCHEDULED_WORKFLOW_MATERIALIZER_NOT_IMPLEMENTED", "Scheduled Workflow resources are planned, but the shared full-app materializer does not yet emit the WorkflowType 3 resource envelope. Refusing to silently omit planned workflows.", { plannedWorkflows: planDemand.resources.scheduleWorkflows }));
+  }
+  if (planDemand.resources.dataListWorkflows?.length) {
+    findings.push(error("FULL_APP_DATA_LIST_WORKFLOW_MATERIALIZER_NOT_IMPLEMENTED", "Data List Workflow resources are planned, but the shared full-app materializer does not yet emit WorkflowType 1 Forms and host-list FlowMappings. Refusing to silently omit planned workflows.", { plannedWorkflows: planDemand.resources.dataListWorkflows }));
+  }
   const childResourceRecords = plannedChildResources(planDemand, planDemand.resources.dataLists.length ? planDemand.resources.dataLists : [`${appTitle} Records`]);
   const dataListNames = childResourceRecords.map((record) => record.name);
   const dataListByName = new Map();
@@ -7802,26 +7915,40 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
   if (stencil === "QueryData") {
     const targetList = resolveContentListTargetList({ step, dataListMetas });
     const fields = Array.isArray(targetList?.fields) ? targetList.fields.slice(0, 12) : [];
+    const mode = normalizeWorkflowQueryDataMode(step.queryMode) || "multiple_to_text_variable";
+    const explicitFieldMap = parseWorkflowFieldMap(step.queryFieldMapping);
+    const resultVariable = cleanResourceName(step.queryResultVariable)
+      || (mode === "multiple_count_only" ? "" : workflowVariableIdFromName(step.nodeName || `Query result ${index + 1}`));
+    const countVariable = cleanResourceName(step.queryCountVariable)
+      || (!cleanResourceName(step.queryMode) || mode === "multiple_count_only"
+        ? workflowVariableIdFromName(`${step.nodeName || `Query result ${index + 1}`} Count`)
+        : "");
     base.properties = {
       ...base.properties,
-      appid: 41,
-      listsetid: stringId(rootListSetId),
-      listid: stringId(targetList?.listId || rootListSetId),
-      listtype: 1,
-      filters: [],
-      sorts: [],
-      result: {
-        type: "multiple",
-        pageIndex: 1,
-        pageSize: 1000,
-        listName: workflowVariableIdFromName(step.nodeName || `Query result ${index + 1}`),
-        listParent: "__variables_",
-        vartype: "text",
+      ...buildWorkflowQueryDataProperties({
+        name: step.nodeName,
+        mode,
+        appId: 41,
+        listSetId: stringId(rootListSetId),
+        listId: stringId(targetList?.listId || rootListSetId),
+        listType: 1,
+        filters: buildPlannedWorkflowQueryFilters(step),
+        sorts: parseWorkflowSorts(step.querySorts),
+        resultVariable,
+        countVariable,
+        pageSize: numericPlanValue(step.queryPageSize),
+        pageIndex: numericPlanValue(step.queryPageNumber),
+        fieldMap: explicitFieldMap,
         fields: fields.map((field) => buildWorkflowQueryDataResultField(field)),
-        totalCount: workflowVariableIdFromName(`${step.nodeName || `Query result ${index + 1}`} Count`),
-        querycount_prefix: "__variables_",
-      },
+      }),
       plannedTargetListName: targetList?.listName || "",
+      plannedWorkflowQueryMode: mode,
+      plannedQueryComplexType: step.queryComplexType || "",
+      plannedQueryDownstreamUse: step.queryDownstreamUse || "",
+      plannedQuerySourceFieldTypes: Object.fromEntries(fields.map((field) => [
+        cleanResourceName(field?.FieldName || field?.fieldName || field?.field),
+        workflowVariableTypeFromSourceFieldType(field?.FieldType || field?.fieldType || field?.Type || field?.type),
+      ]).filter(([fieldName]) => fieldName)),
     };
     return base;
   }
@@ -7924,6 +8051,38 @@ function buildWorkflowQueryDataResultField(field) {
   };
 }
 
+function workflowVariableTypeFromSourceFieldType(value) {
+  const key = normKey(value);
+  if (/user|identity/.test(key)) return "user";
+  if (/date|time/.test(key)) return "date";
+  if (/decimal|number|currency|percent|bigint/.test(key)) return "number";
+  if (/bit|boolean/.test(key)) return "boolean";
+  if (/file|image|upload/.test(key)) return "file";
+  return "text";
+}
+
+function buildPlannedWorkflowQueryFilters(step) {
+  const text = cleanResourceName(step?.queryFilters);
+  if (!text || /^(none|n\/a|not applicable)$/i.test(text)) return [];
+  const lookupMatch = text.match(/(?:ListDataID|record\s+id)\s*(?:=|equals?)\s*`?([A-Za-z][A-Za-z0-9_]*)`?/i);
+  if (!lookupMatch || !/ListDataID|stored\s+target|target\s+record\s+id/i.test(text)) return [];
+  const variableId = lookupMatch[1];
+  return [{
+    key: deterministicUuid(`workflow-query-filter:${step?.nodeName || "query"}:${variableId}`),
+    pre: "and",
+    left: "ListDataID",
+    op: "0",
+    right: [{
+      exprType: "variable",
+      valueType: "lookup",
+      id: variableId,
+      type: "expr",
+      name: `Workflow Variables:${variableId}`,
+    }],
+    showCus: false,
+  }];
+}
+
 function resolveContentListTargetList({ step, dataListMetas = [] }) {
   const metas = dataListMetas.filter((meta) => meta?.listId && meta?.listName);
   if (!metas.length) return null;
@@ -7932,6 +8091,7 @@ function resolveContentListTargetList({ step, dataListMetas = [] }) {
     step?.description,
     step?.dataReadWrite,
     step?.conditionBranch,
+    step?.querySourceResource,
   ].map(cleanResourceName).join(" ");
   const normalizedText = normKey(text);
   const textTokens = tokenSet(text);
@@ -8000,6 +8160,7 @@ function buildApprovalVariables(approvalFieldSpecs = {}) {
 function addApprovalWorkflowActionVariables(variables, childshapes) {
   if (!variables || !Array.isArray(variables.basic)) return;
   const additions = [];
+  const listrefAdditions = [];
   for (const shape of childshapes || []) {
     const stencil = String(shape?.stencil?.id || "");
     const props = shape?.properties || {};
@@ -8008,14 +8169,45 @@ function addApprovalWorkflowActionVariables(variables, childshapes) {
       const listName = cleanResourceName(result.listName);
       const totalCount = cleanResourceName(result.totalCount);
       if (listName) {
+        const isListResult = cleanResourceName(result.vartype) === "list";
+        const listRefId = cleanResourceName(props.plannedQueryComplexType) || workflowVariableIdFromName(`${listName} row`);
         additions.push({
           id: listName,
           idx: listName,
           name: listName,
           title: `${cleanResourceName(props.name) || "Query Data"} Result`,
           type: cleanResourceName(result.vartype) || "text",
+          ...(isListResult ? { value: listRefId } : {}),
           source: "workflow-query-result",
         });
+        if (isListResult) {
+          const fieldTypes = props.plannedQuerySourceFieldTypes || {};
+          listrefAdditions.push({
+            id: listRefId,
+            idx: listRefId,
+            name: cleanResourceName(props.plannedQueryComplexType) || `${cleanResourceName(props.name) || "Query Data"} Rows`,
+            fields: Object.entries(result.fieldMap || {}).map(([sourceField, targetField]) => ({
+              id: targetField,
+              idx: targetField,
+              name: targetField,
+              type: cleanResourceName(fieldTypes[sourceField]) || "text",
+              editable: true,
+            })),
+          });
+        }
+      }
+      if (result.type === "single") {
+        const fieldTypes = props.plannedQuerySourceFieldTypes || {};
+        for (const [sourceField, targetVariable] of Object.entries(result.fieldMap || {})) {
+          additions.push({
+            id: targetVariable,
+            idx: targetVariable,
+            name: targetVariable,
+            title: targetVariable,
+            type: cleanResourceName(fieldTypes[sourceField]) || "text",
+            source: "workflow-query-single-result",
+          });
+        }
       }
       if (totalCount) {
         additions.push({
@@ -8044,6 +8236,8 @@ function addApprovalWorkflowActionVariables(variables, childshapes) {
     }
   }
   variables.basic = uniqueVariablesById([...variables.basic, ...additions]);
+  if (!Array.isArray(variables.listref)) variables.listref = [];
+  variables.listref = uniqueVariablesById([...variables.listref, ...listrefAdditions]);
 }
 
 function uniqueVariablesById(variables) {

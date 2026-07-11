@@ -426,6 +426,8 @@ Generators and validators must enforce:
 - workflow Custom Service connection selections use `properties.connections[]` with `id`, `type`, `desc`, and `value.connectionid`.
 - invocation parameter/output binding prefixes match the host surface: `__variables_`, `__list_`, or `__temp_`.
 
+`Approval form workflow sample-V1.6.yapk` additionally export-proves Scheduled Workflow `InvokeCode` with a List workflow variable passed as an expression (`valueType = "list"`) and a text service output stored under the `__variables_` prefix. This proves serialization only; scheduled execution and service runtime remain separate proof boundaries.
+
 ## Proof Boundary
 
 This training is **export-proven** and **validator-backed** for `.ycs` structure and runtime script contract.

@@ -403,7 +403,9 @@ try {
     documentLibraries: 0,
     approvalForms: 2,
     formReports: 1,
+    scheduleWorkflows: 0,
     customForms: 8,
+    dataListWorkflows: 0,
     dashboards: 2,
     navigationGroups: 4,
   });

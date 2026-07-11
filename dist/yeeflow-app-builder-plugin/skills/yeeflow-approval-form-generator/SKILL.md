@@ -465,6 +465,10 @@ Use bundled scripts rather than rewriting validators/builders:
 
 Workflow action validation now covers missing required node properties, invalid enum values, invalid value types, `ContentList` mappings, `QueryData` filters, `SequenceFlow` conditions, `Loop`/`Delay` condition shapes, and unsafe external or credential-related workflow actions. Do not bundle sensitive values.
 
+Approval Workflow Query Data v1.6: `QueryData` count-only multiple results may omit the row target and write only `totalCount`; single results use `fieldMap` to declared workflow variables. A Lookup-backed query compares source `ListDataID` to the stored Lookup target identity through an expression-token array with `showCus: false`. A queried User field may feed a later Assignment Task only after mapping into a declared User workflow variable and using the canonical workflow-variable assignee expression. Validate complete complementary branches because Yeeflow has no implicit default/else path. Use the Workflow Query Data standard, not the Form Action querydata step schema.
+
+V1.10 proves that Approval Form Actions and Approval Workflow Query Data may query included Document Library (`ListType/listtype = 16`) and Form Report (`32`) resources using the same result-mode contracts. Form Report is a source, not a Form Action host. Preserve at most two sorts and the shared pagination constraints. Data Report remains deferred.
+
 ## Output Contract
 
 For new form generation, output:

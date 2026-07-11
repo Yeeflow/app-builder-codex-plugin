@@ -16,6 +16,18 @@ const {
   validateWorkflowBranchConditionCoverage,
   validateWorkflowConditionEditorRows,
 } = require("./scripts/lib/workflow-condition-editor-utils.cjs");
+const {
+  parseWorkflowExpressionButton,
+  validateWorkflowAssigneeExpression,
+} = require("./scripts/lib/workflow-assignee-expression-utils.cjs");
+const { validateDataViewFixedFilters } = require("./scripts/lib/data-list-view-filter-utils.cjs");
+const {
+  PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES,
+  PUBLIC_FORM_ALLOWED_VISUAL_CONTROL_TYPES,
+  PUBLIC_FORM_DISALLOWED_CONTROL_TYPES,
+  PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES,
+  validatePublicFormPageLayout,
+} = require("./scripts/lib/public-form-template-utils.cjs");
 
 const GZIP_PREFIX = "[______gizp______]";
 const LARGE_INTEGER_RE = /^-?\d{16,}$/;
@@ -146,35 +158,10 @@ const CUSTOM_FORM_OPEN_MODE_LABELS = {
   fullPage: "Full page",
 };
 const CUSTOM_FORM_SIZE_LABELS = new Map([[0, "Medium"], [1, "Small"], [2, "Large"], [3, "Full screen"]]);
-const PUBLIC_FORM_ALLOWED_FIELD_TYPES = new Set([
-  "input",
-  "textarea",
-  "richtext",
-  "input_number",
-  "percent",
-  "currency",
-  "switch",
-  "radio",
-  "checkbox",
-  "datepicker",
-  "time",
-  "file-upload",
-  "icon-upload",
-  "rate",
-  "hyperlink",
-  "signer",
-  "list",
-]);
+const PUBLIC_FORM_ALLOWED_FIELD_TYPES = PUBLIC_FORM_ALLOWED_FIELD_CONTROL_TYPES;
 const PUBLIC_FORM_DISALLOWED_FIELD_TYPES = new Set([
-  "identity-picker",
-  "organization-picker",
-  "location-picker",
-  "lookup",
+  ...PUBLIC_FORM_DISALLOWED_FIELD_CONTROL_TYPES,
   "calculated-column",
-  "metadata",
-  "mutiple-metadata",
-  "cost-center-picker",
-  "tag",
   "autonumber",
 ]);
 const PUBLIC_FORM_DISALLOWED_SYSTEM_FIELDS = new Set([
@@ -188,27 +175,7 @@ const PUBLIC_FORM_DISALLOWED_SYSTEM_FIELDS = new Set([
   "ModifiedBy",
   "ModifiedByName",
 ]);
-const PUBLIC_FORM_KNOWN_CONTROL_TYPES = new Set([
-  "container",
-  "list",
-  "flex_grid",
-  "action_button",
-  "submit-button",
-  ...PUBLIC_FORM_ALLOWED_FIELD_TYPES,
-  "text",
-  "number",
-  "boolean",
-  "date",
-  "file",
-  "metadata",
-  "user",
-  "costcenter",
-  "groupselect",
-  "location",
-  "lookup",
-  "img",
-  "total",
-]);
+const PUBLIC_FORM_KNOWN_CONTROL_TYPES = PUBLIC_FORM_ALLOWED_VISUAL_CONTROL_TYPES;
 const ADVANCED_CONTROL_TYPES = new Set(["aktabs", "toggle", "timer", "icon_list", "line", "alert", "progress", "gap", "progress-circle", "steps-bar", "list-qrcode", "qrcode", "barcode", "embed", "document-embed"]);
 const ADVANCED_CONTAINER_CHILD_TYPES = new Map([["aktabs", "ak-tabs-tab"], ["toggle", "toggle-panel"]]);
 const ADVANCED_NUMERIC_FIELD_TYPES = new Set(["input_number", "currency", "percent", "rate", "calculated-column", "Decimal", "Int", "Bigint", "Number"]);
@@ -371,48 +338,9 @@ function primaryTaskUrl(props = {}) {
   return "";
 }
 
-function decodeHtmlEntities(value) {
-  return safeString(value)
-    .replace(/&quot;/g, "\"")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
-}
-
 function assignmentExpressionData(value) {
-  const decoded = decodeHtmlEntities(value);
-  const marker = 'data="${';
-  const markerIndex = decoded.indexOf(marker);
-  if (markerIndex === -1) return null;
-  const start = markerIndex + 'data="$'.length;
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-  for (let i = start; i < decoded.length; i += 1) {
-    const ch = decoded[i];
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (ch === "\\") escaped = true;
-      else if (ch === "\"") inString = false;
-      continue;
-    }
-    if (ch === "\"") {
-      inString = true;
-      continue;
-    }
-    if (ch === "{") depth += 1;
-    else if (ch === "}") {
-      depth -= 1;
-      if (depth === 0) {
-        try {
-          return JSON.parse(decoded.slice(start, i + 1));
-        } catch {
-          return null;
-        }
-      }
-    }
-  }
-  return null;
+  const parsed = parseWorkflowExpressionButton(value);
+  return parsed.ok ? parsed.data : null;
 }
 
 function assignmentBlob(assignment) {
@@ -537,11 +465,20 @@ function validateWorkflowTaskAssignees(shape, form, report, index, nodeLabel) {
     if (type === "user" && method === "expression") {
       const managerType = classifyManagerAssignment(assignment);
       const expression = assignmentExpressionData(assignment.value);
+      const expressionValidation = validateWorkflowAssigneeExpression(assignment);
+      for (const finding of expressionValidation.findings) {
+        issue(report, generatorFinalSeverity(report), finding.code, finding.message, {
+          ...context,
+          path: `${context.path}.${finding.path}`,
+          actual: finding.actual ?? null,
+        });
+      }
       if (managerType) {
         if (!MANAGER_ASSIGNMENT_TYPES.has(managerType)) {
           issue(report, generatorFinalSeverity(report), "TASK_MANAGER_EXPRESSION_UNSUPPORTED", "Manager-based assignment must use a supported expression-editor manager pattern.", { ...context, managerType });
         }
-      } else if (!expression && !/{{[^}]+}}/.test(safeString(assignment.value))) {
+      }
+      if (!expression && expressionValidation.findings.length === 0 && !/{{[^}]+}}/.test(safeString(assignment.value))) {
         issue(report, generatorFinalSeverity(report), "TASK_MANAGER_EXPRESSION_MALFORMED", "Expression-editor user assignee must preserve a supported expression-button value or a validated expression token.", context);
       }
     }
@@ -3587,12 +3524,14 @@ function validateDataListViewLayout(layout, fieldsByName, pathPrefix, report, re
       issue(report, severity, "DATA_VIEW_SORT_DIRECTION_INVALID", "Data view SortByDesc should be boolean when present.", { title: layout.Title, index });
     }
   });
-  asArray(view.filter).forEach((filter, index) => {
-    const fieldName = safeString(filter.left || filter.FieldName || filter.field);
-    if (fieldName && !fieldsByName.has(fieldName) && !KNOWN_SYSTEM_FIELDS.has(fieldName)) {
-      issue(report, severity, "DATA_VIEW_FILTER_FIELD_NOT_FOUND", "Data view fixed filter field does not resolve to a list field or known system field.", { title: layout.Title, index, fieldName });
-    }
-    if (!safeString(filter.op)) issue(report, "warning", "DATA_VIEW_FILTER_OPERATOR_MISSING", "Data view fixed filter condition should include an operator.", { title: layout.Title, index });
+  validateDataViewFixedFilters({
+    filters: view.filter,
+    fieldsByName,
+    knownSystemFields: KNOWN_SYSTEM_FIELDS,
+    severity,
+    viewTitle: layout.Title || null,
+    pathPrefix: `${pathPrefix}.LayoutView.filter`,
+    addIssue: (severity, code, message, details) => issue(report, severity, code, message, details),
   });
   asArray(view.query).forEach((query, index) => {
     const fieldName = safeString(query.FieldName || query.field || query.Name);
@@ -3714,6 +3653,14 @@ function validatePublicForms(item, fieldsByName, pathPrefix, report) {
     if (resource.tempVars !== undefined && !Array.isArray(resource.tempVars)) {
       issue(report, "warning", "PUBLIC_FORM_TEMPVARS_NOT_ARRAY", "Data List Public Form Resource.tempVars should be an array when present.", { ...context, location: `${context.path}.Resource.tempVars` });
     }
+    for (const templateIssue of validatePublicFormPageLayout(resource, {
+      pathPrefix: `${context.path}.Resource`,
+      publicFormName: context.publicForm,
+      severity: generatorFinalSeverity(report),
+      generatedOutput: true,
+    })) {
+      issue(report, templateIssue.severity, templateIssue.code, templateIssue.message, templateIssue.details);
+    }
 
     const seenControlIds = new Set();
     let submitControls = 0;
@@ -3725,7 +3672,9 @@ function validatePublicForms(item, fieldsByName, pathPrefix, report) {
       if (type === "pivot-table") {
         issue(report, generatorFinalSeverity(report), "PIVOT_TABLE_PUBLIC_FORM_UNSUPPORTED", "Pivot Table is a Data Analytics control and should not be generated on Data List Public Forms.", { ...context, path: controlPath });
       }
-      if (!PUBLIC_FORM_KNOWN_CONTROL_TYPES.has(type)) {
+      if (PUBLIC_FORM_DISALLOWED_CONTROL_TYPES.has(type)) {
+        issue(report, generatorFinalSeverity(report), "PUBLIC_FORM_CONTROL_TYPE_NOT_ALLOWED", "This control type is not allowed on anonymous Data List Public Forms.", { ...context, path: controlPath, type });
+      } else if (!PUBLIC_FORM_KNOWN_CONTROL_TYPES.has(type)) {
         issue(report, "warning", "PUBLIC_FORM_CONTROL_TYPE_UNKNOWN", "Public form uses a control type that is not yet export-proven for public forms.", { ...context, path: controlPath, type });
       }
       const controlId = safeString(control.id);
@@ -4180,7 +4129,7 @@ function validateWorkflowDesignerCompatibility(form, def, report) {
       }
       validateWorkflowOutcomeConditionShape(shape, report, { form: formName, key, index });
       validateSequenceFlowConditionVariables(shape, workflowVariables, report, { form: formName, key, index, path: `Data.Forms[].DefResource.childshapes[${index}].properties.conditioninfo` });
-    } else if (["MultiAssignmentTask", "CandidateTask", "ContentList", "InclusiveGateway"].includes(type)) {
+    } else if (["MultiAssignmentTask", "CandidateTask", "ContentList", "ExclusiveGateway", "InclusiveGateway", "QueryData"].includes(type)) {
       const actionName = safeString(shape.properties && (shape.properties.name || shape.properties.title || shape.properties.label)).trim();
       if (!actionName) {
         issue(report, severity, "WORKFLOW_ACTION_NAME_MISSING", "Workflow action nodes must have a concise business-specific Action name.", { form: formName, key, index, type });
@@ -4358,10 +4307,8 @@ function validateSetVariableTaskTargets(shape, workflowVariables, report, contex
 
 function validateTaskAssignmentVariables(shape, workflowVariables, report, context) {
   asArray(shape && shape.properties && shape.properties.usertaskassignment).forEach((assignment, assignmentIndex) => {
-    const text = JSON.stringify(assignment || {});
-    const variableIds = [...text.matchAll(/\\"id\\":\\"([^"\\]+)\\"|"id":"([^"]+)"/g)]
-      .map((match) => safeString(match[1] || match[2]))
-      .filter((id) => id && !["FlowNo"].includes(id));
+    const expressionValidation = validateWorkflowAssigneeExpression(assignment);
+    const variableIds = expressionValidation.variableIds.filter((id) => id && !["FlowNo"].includes(id));
     for (const id of variableIds) {
       if (workflowVariables.keys.has(id)) continue;
       issue(report, generatorFinalSeverity(report), "ASSIGNMENT_TASK_VARIABLE_UNRESOLVED", "Task assignment references a workflow variable that is not present in DefResource.variables.", {
@@ -4406,16 +4353,13 @@ function validateListWorkflowRegistration(form, listsById, fieldsByList, report)
     issue(report, generatorFinalSeverity(report), "LIST_WORKFLOW_FORM_SETTINGS_NOT_NULL", "Export-proven data-list new-item workflows keep Data.Forms[].Settings null; trigger configuration belongs in FlowMappings.Setting.", { form: formName, key, list: list.title });
   }
   const fieldName = safeString(mapping.FieldName);
-  if (isObject(mappingSetting) && mappingSetting.NewTrigger === true && fieldName) {
-    issue(report, generatorFinalSeverity(report), "LIST_WORKFLOW_NEW_TRIGGER_FIELDNAME_NOT_NULL", "Export-proven Add Item new-item triggers keep FlowMappings.FieldName null; non-null FieldName can render an empty trigger condition and break designer open.", { form: formName, key, list: list.title, fieldName });
-  }
   if (fieldName) {
     const fields = fieldsByList.get(listId) || new Map();
     const field = fields.get(fieldName);
     if (!field) {
       issue(report, report.mode === "generator" ? "error" : "warning", "LIST_WORKFLOW_FLOWSTATUS_FIELD_UNRESOLVED", "FlowMappings FieldName does not resolve on the host data list.", { form: formName, key, list: list.title, fieldName });
     } else if (normalizeType(field) !== "flowstatus") {
-      issue(report, "warning", "LIST_WORKFLOW_FLOWSTATUS_FIELD_TYPE_UNEXPECTED", "The mapped FlowMappings field is present but is not export-proven as a flowstatus field.", {
+      issue(report, isObject(mappingSetting) && mappingSetting.NewTrigger === true ? generatorFinalSeverity(report) : "warning", "LIST_WORKFLOW_FLOWSTATUS_FIELD_TYPE_UNEXPECTED", "A non-null FlowMappings FieldName must resolve to an export-proven flowstatus field; normal business fields can render an empty trigger condition.", {
         form: formName,
         key,
         list: list.title,

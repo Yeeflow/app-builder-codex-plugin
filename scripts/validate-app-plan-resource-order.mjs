@@ -731,7 +731,7 @@ function validateApprovalFormLayoutTemplateSelection(text, findings) {
   validateWorkflowTaskLayoutTemplateSelection(text, findings, "Data List Workflows Plan", "data list workflow task");
   const approvalForms = sectionBody(sections, "Approval Forms Plan");
   if (!approvalForms.trim()) return;
-  const dataRows = splitTableRows(approvalForms).filter((row) => !/^\|\s*(Approval Form|Field Order|Step Order|Task Form Name|Action Name|Host Form)\s*\|/i.test(row));
+  const dataRows = splitTableRows(approvalForms).filter((row) => !/^\|\s*(Approval Form|Field Order|Step Order|Task Form Name|Action Name|Host Form|Workflow)\s*\|/i.test(row));
   const hasApprovalRows = dataRows.some((row) => /\b(Submission|Task|Workflow|Review|Approve|Reject|approval_form_layout_)\b/i.test(row));
   if (!hasApprovalRows) return;
   const selectionBlock = subsectionAfterHeading(approvalForms, /####\s+Approval Form Layout Template Selection/i);

@@ -2,7 +2,7 @@
 
 ## Scope
 
-This standard governs `type: "querydata"` steps inside front-end Yeeflow Form Actions. Focused references include Approval Submission v1.1, Custom Data List Form v1.2, Dashboard v1.3, and pagination/temp JSON/Document Library/Approval Task Form v1.4.
+This standard governs `type: "querydata"` steps inside front-end Yeeflow Form Actions. Focused references include Approval Submission v1.1, Custom Data List Form v1.2, Dashboard v1.3, pagination/temp JSON/Document Library/Approval Task Form v1.4, and Document Library/Form Report sources v1.10.
 
 The focused exports prove Approval Submission, Custom Data List Form, and Dashboard placement with Data List sources. Product guidance also allows Form Action Query Data on Approval task/print pages; those unstudied wrappers remain focused-proof-required. Public Forms must never contain Query Data steps.
 
@@ -53,7 +53,7 @@ Do not generate `Query Data -> temp JSON/temp collection -> Collection/Data Tabl
 
 Keep 19-digit IDs as strings. Do not copy source-template IDs into generated applications. Full-app generation must remap the source to the current API-issued resource IDs.
 
-This focused export proves `ListType: 1` Data List queries. Document Library, Form Report, and Data Report are product-supported source categories but require focused exports before their exact `querydata_list` metadata is promoted as generation-safe.
+Focused exports prove `ListType: 1` Data List, `ListType: 16` Document Library, and `ListType: 32` Form Report queries. Data Report remains focused-learning-required until its dedicated training round.
 
 ## Filters And Sorts
 
@@ -61,7 +61,7 @@ This focused export proves `ListType: 1` Data List queries. Document Library, Fo
 - Literal operands use primitive `right` values and `showCus: true`.
 - Dynamic/calculated operands use expression-token arrays and `showCus: false`.
 - Never serialize expression-button HTML into `right`.
-- Use explicit sorts for deterministic single-record selection. Multiple sort rows preserve their listed priority.
+- Use explicit sorts for deterministic single-record selection. Multiple sort rows preserve their listed priority, with a product maximum of two sort fields.
 - A single-record query without filters or deterministic sort is a business-quality warning even when structurally valid.
 - The Dashboard v1.3 export proves current-user membership filtering as `op: "11"` with `right: null`. Validators must not misclassify this exact nullary operator shape as an incomplete filter.
 
@@ -138,7 +138,7 @@ The v1.1 source export's fourth step retained Sub list settings while its UI/bus
 - A native `Type: 16` Document Library custom form uses the same Form Action wrapper and Query Data step contracts as a Data List custom form.
 - Current-field, current-Sub-list, temp, trigger, pagination, and target validation rules are shared.
 - A Document Library lookup may be used as a `list_field` expression operand with `showCus: false` to query its related Data List record.
-- This proves Document Library as a host. Querying Document Library records as a source still requires source-specific export proof.
+- V1.10 proves Document Library as both a host and a Query Data source. It also proves Form Report as a source.
 - Form Report and Data Report do not host independent Form Actions. Form Report details use the Approval Submission form; Data Report has no custom form surface.
 
 ### Approval Task Forms
