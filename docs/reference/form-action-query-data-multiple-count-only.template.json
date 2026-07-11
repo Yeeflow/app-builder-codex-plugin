@@ -1,0 +1,31 @@
+{
+  "type": "querydata",
+  "name": "Query multiple data and save result count only",
+  "attrs": {
+    "querydata_list": {
+      "AppID": "{{APP_ID}}",
+      "ListSetID": "{{LIST_SET_ID}}",
+      "ListID": "{{SOURCE_LIST_ID}}",
+      "ListType": 1
+    },
+    "querydata_filters": [
+      {
+        "key": "{{FILTER_UUID}}",
+        "pre": "and",
+        "left": "{{SOURCE_FILTER_FIELD}}",
+        "op": "0",
+        "right": "{{LITERAL_VALUE}}",
+        "showCus": true
+      }
+    ],
+    "querydata_sorts": [
+      {
+        "SortName": "{{SOURCE_SORT_FIELD}}",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_type": "multiple",
+    "querydata_totalcount": "{{COUNT_VARIABLE_ID}}",
+    "querydata_totalparent": "__temp_"
+  }
+}

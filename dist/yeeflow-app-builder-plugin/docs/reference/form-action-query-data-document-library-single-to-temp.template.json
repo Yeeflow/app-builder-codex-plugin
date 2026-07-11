@@ -1,0 +1,35 @@
+{
+  "type": "querydata",
+  "name": "Load related record for document",
+  "attrs": {
+    "querydata_list": {
+      "AppID": 41,
+      "ListSetID": "<current-list-set-id>",
+      "ListID": "<current-source-list-id>",
+      "ListType": 1
+    },
+    "querydata_filters": [
+      {
+        "key": "<uuid>",
+        "pre": "and",
+        "left": "ListDataID",
+        "op": "0",
+        "right": [
+          {
+            "exprType": "list_field",
+            "valueType": "lookup",
+            "prop": "<document-library-lookup-field>",
+            "id": "<document-library-lookup-label>",
+            "type": "expr",
+            "name": "List Fields:<lookup-label>"
+          }
+        ],
+        "showCus": false
+      }
+    ],
+    "querydata_fieldmap": {
+      "Title": "__temp_<declared-related-title-temp-id>"
+    },
+    "querydata_fields": null
+  }
+}

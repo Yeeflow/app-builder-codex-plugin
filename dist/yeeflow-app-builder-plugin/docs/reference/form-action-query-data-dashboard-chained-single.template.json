@@ -1,0 +1,65 @@
+{
+  "type": "querydata",
+  "name": "Load related record details",
+  "attrs": {
+    "querydata_list": {
+      "AppID": 41,
+      "ListSetID": "<current-list-set-id>",
+      "ListID": "<current-source-list-id>",
+      "ListType": 1
+    },
+    "querydata_filters": [
+      {
+        "key": "<uuid>",
+        "pre": "and",
+        "left": "ListDataID",
+        "op": "0",
+        "right": [
+          {
+            "exprType": "variable",
+            "valueType": "string",
+            "id": "__temp_<prior-step-temp-id>",
+            "type": "expr",
+            "name": "<prior-step-temp-id>"
+          }
+        ],
+        "showCus": false
+      }
+    ],
+    "querydata_sorts": [
+      {
+        "SortName": "Created",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_fieldmap": {
+      "Title": "__temp_<declared-related-title-temp-id>"
+    },
+    "querydata_fields": null
+  },
+  "condition": [
+    {
+      "type": "func",
+      "func": "isNullOrEmpty",
+      "params": [
+        [
+          {
+            "exprType": "variable",
+            "valueType": "string",
+            "id": "__temp_<prior-step-temp-id>",
+            "type": "expr",
+            "name": "<prior-step-temp-id>"
+          }
+        ]
+      ]
+    },
+    {
+      "type": "op",
+      "op": "=="
+    },
+    {
+      "type": "bool",
+      "value": false
+    }
+  ]
+}

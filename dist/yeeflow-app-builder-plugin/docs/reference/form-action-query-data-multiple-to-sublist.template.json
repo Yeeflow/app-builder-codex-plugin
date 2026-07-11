@@ -1,0 +1,38 @@
+{
+  "type": "querydata",
+  "name": "Query multiple data and save to Sub list",
+  "attrs": {
+    "querydata_list": {
+      "AppID": "{{APP_ID}}",
+      "ListSetID": "{{LIST_SET_ID}}",
+      "ListID": "{{SOURCE_LIST_ID}}",
+      "ListType": 1
+    },
+    "querydata_filters": [
+      {
+        "key": "{{FILTER_UUID}}",
+        "pre": "and",
+        "left": "{{SOURCE_FILTER_FIELD}}",
+        "op": "0",
+        "right": "{{LITERAL_VALUE}}",
+        "showCus": true
+      }
+    ],
+    "querydata_sorts": [
+      {
+        "SortName": "{{SOURCE_SORT_FIELD}}",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_fieldmap": {
+      "{{SOURCE_FIELD_NAME}}": "{{SUBLIST_ROW_FIELD_ID}}"
+    },
+    "querydata_fields": null,
+    "querydata_type": "multiple",
+    "querydata_listname": "{{SUBLIST_VARIABLE_ID}}",
+    "querydata_vartype": "list",
+    "querydata_listname_parent": "__variables_",
+    "querydata_totalcount": "{{COUNT_VARIABLE_ID}}",
+    "querydata_totalparent": "__variables_"
+  }
+}

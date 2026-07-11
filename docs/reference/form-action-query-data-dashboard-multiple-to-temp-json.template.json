@@ -1,0 +1,35 @@
+{
+  "type": "querydata",
+  "name": "Load paged records to temp JSON",
+  "attrs": {
+    "querydata_list": {
+      "AppID": 41,
+      "ListSetID": "<current-list-set-id>",
+      "ListID": "<current-source-list-id>",
+      "ListType": 1
+    },
+    "querydata_filters": [],
+    "querydata_sorts": [
+      {
+        "SortName": "<date-field>",
+        "SortByDesc": true
+      }
+    ],
+    "querydata_type": "multiple",
+    "querydata_fieldmap": null,
+    "querydata_listname": "<declared-temp-json-id>",
+    "querydata_vartype": "text",
+    "querydata_listname_parent": "__temp_",
+    "querydata_fields": [
+      {
+        "FieldName": "Title",
+        "Type": "input",
+        "DisplayName": "Name"
+      }
+    ],
+    "querydata_totalcount": "<declared-count-temp-id>",
+    "querydata_totalparent": "__temp_",
+    "querydata_pagesize": 5,
+    "querydata_pageindex": 2
+  }
+}

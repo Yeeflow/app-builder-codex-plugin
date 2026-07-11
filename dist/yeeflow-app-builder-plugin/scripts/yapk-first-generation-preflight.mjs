@@ -112,6 +112,20 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
     resolvedPackage,
     ...(plan ? ["--plan", plan] : []),
   ]));
+  gates.push(runGate("form-action-query-data-custom-forms", [
+    "scripts/validate-form-action-query-data-custom-forms.mjs",
+    "--package",
+    resolvedPackage,
+    "--strict-generated",
+    ...(plan ? ["--plan", plan] : []),
+  ]));
+  gates.push(runGate("form-action-query-data-dashboards", [
+    "scripts/validate-form-action-query-data-dashboards.mjs",
+    "--package",
+    resolvedPackage,
+    "--strict-generated",
+    ...(plan ? ["--plan", plan] : []),
+  ]));
   gates.push(runGate("approval-form-layouts-v1.1", [
     "scripts/validate-approval-form-layout-template.mjs",
     "--package",

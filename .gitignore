@@ -106,6 +106,8 @@ yeeflow-data-list-generator/
 !docs/reference/public-form-fields-1col.template.json
 !docs/reference/document-library-native-field-runtime-metadata.normalized.json
 !docs/reference/service-portal-yapk-example.normalized.json
+!docs/reference/form-action-query-data-*.template.json
+!docs/reference/dashboard-query-data-*.template.json
 !yeeflow-expression-operators.normalized.json
 !dashboard-dataset-presentation-golden-references.json
 !collection-control-card-with-multiselect-toolbar.template.json
