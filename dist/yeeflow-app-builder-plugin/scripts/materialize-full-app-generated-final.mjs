@@ -22,11 +22,17 @@ import {
   parseWorkflowSorts,
 } from "./lib/workflow-query-data-utils.mjs";
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
+import workflowGraphReferenceUtils from "./lib/approval-workflow-graph-reference-utils.cjs";
 
 const {
   buildWorkflowExpressionButton,
   serializeWorkflowVariableJson,
 } = workflowAssigneeExpressionUtils;
+const {
+  canonicalGraphRef,
+  graphRefId: canonicalGraphRefId,
+  normalizeApprovalWorkflowGraphReferences,
+} = workflowGraphReferenceUtils;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
@@ -7371,13 +7377,11 @@ function approvalWorkflowIds(defId, formKey) {
 }
 
 function flowRef(resourceid) {
-  return { id: resourceid, resourceid };
+  return canonicalGraphRef(resourceid);
 }
 
 function refId(ref) {
-  if (!ref) return "";
-  if (typeof ref === "string") return ref;
-  return String(ref.resourceid || ref.resourceId || ref.id || "");
+  return canonicalGraphRefId(ref);
 }
 
 function workflowLayoutForSteps(workflowSteps) {
@@ -7635,7 +7639,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     outcomes: "Approved; Rejected",
     generatedByPolicy: "single-node-fallback",
   }];
-  const childshapes = buildApprovalWorkflowShapes({
+  const childshapes = normalizeApprovalWorkflowGraphReferences(buildApprovalWorkflowShapes({
     defId,
     formKey,
     rootListSetId,
@@ -7646,7 +7650,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
     rejectEndId,
     workflowSteps,
     dataListMetas,
-  });
+  }));
   const variables = buildApprovalVariables(approvalFieldSpecs);
   addApprovalWorkflowActionVariables(variables, childshapes);
   return {

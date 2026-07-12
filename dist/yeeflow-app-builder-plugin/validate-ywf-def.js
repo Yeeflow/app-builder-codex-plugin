@@ -21,6 +21,10 @@ const {
   effectiveQueryDataType,
   isCountOnlyIntent,
 } = require("./scripts/lib/form-action-query-data-utils.cjs");
+const {
+  graphRefId,
+  inspectCanonicalGraphRef,
+} = require("./scripts/lib/approval-workflow-graph-reference-utils.cjs");
 
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
 const NUMERIC_OPS = new Set(["n.>", "n.>=", "n.<", "n.<=", "n.=", "n.!=", ">", ">=", "<", "<="]);
@@ -170,9 +174,7 @@ function shapeId(shape) {
 }
 
 function refId(ref) {
-  if (!ref) return undefined;
-  if (typeof ref === "string") return ref;
-  return ref.resourceid || ref.resourceId || ref.id;
+  return graphRefId(ref) || undefined;
 }
 
 function addIssue(list, code, message, path, detail) {
@@ -1690,12 +1692,32 @@ function validateDecodedDef(def, options = {}) {
         });
       }
       const explicitSource = refId(shape.source);
+      const sourceIdentity = inspectCanonicalGraphRef(shape.source);
+      if (!sourceIdentity.valid) {
+        addIssue(errors, "SEQUENCE_SOURCE_REF_INCOMPLETE", `SequenceFlow ${id} source must include matching id and resourceid; resourceId is not a valid substitute`, `${p}.source`, sourceIdentity);
+      }
       if (!explicitSource || !nodeById.has(explicitSource)) {
         addIssue(errors, "SEQUENCE_EXPLICIT_SOURCE_MISSING", `SequenceFlow ${id} source.resourceid must reference an existing non-SequenceFlow node`, `${p}.source`);
       }
       const target = refId(shape.target);
+      const targetIdentity = inspectCanonicalGraphRef(shape.target);
+      if (!targetIdentity.valid) {
+        addIssue(errors, "SEQUENCE_TARGET_REF_INCOMPLETE", `SequenceFlow ${id} target must include matching id and resourceid; resourceId is not a valid substitute`, `${p}.target`, targetIdentity);
+      }
       if (!target || !nodeById.has(target)) {
         addIssue(errors, "SEQUENCE_TARGET_MISSING", `SequenceFlow ${id} target.resourceid must reference an existing non-SequenceFlow node`, `${p}.target`);
+      }
+      const flowIncoming = asArray(shape.incoming);
+      const flowOutgoing = asArray(shape.outgoing);
+      if (flowIncoming.length !== 1 || !inspectCanonicalGraphRef(flowIncoming[0]).valid) {
+        addIssue(errors, "SEQUENCE_INCOMING_REF_INCOMPLETE", `SequenceFlow ${id} incoming must contain one canonical source-node reference with matching id and resourceid`, `${p}.incoming`, { incoming: flowIncoming });
+      } else if (explicitSource && refId(flowIncoming[0]) !== explicitSource) {
+        addIssue(errors, "SEQUENCE_INCOMING_SOURCE_MISMATCH", `SequenceFlow ${id} incoming node reference must match source`, `${p}.incoming`, { source: explicitSource, incoming: refId(flowIncoming[0]) });
+      }
+      if (flowOutgoing.length !== 1 || !inspectCanonicalGraphRef(flowOutgoing[0]).valid) {
+        addIssue(errors, "SEQUENCE_OUTGOING_REF_INCOMPLETE", `SequenceFlow ${id} outgoing must contain one canonical target-node reference with matching id and resourceid`, `${p}.outgoing`, { outgoing: flowOutgoing });
+      } else if (target && refId(flowOutgoing[0]) !== target) {
+        addIssue(errors, "SEQUENCE_OUTGOING_TARGET_MISMATCH", `SequenceFlow ${id} outgoing node reference must match target`, `${p}.outgoing`, { target, outgoing: refId(flowOutgoing[0]) });
       }
       const inferredSource = sourceBySeqId.get(id);
       if (!inferredSource) {

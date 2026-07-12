@@ -1,0 +1,39 @@
+{
+  "fixtureId": "approval_workflow_sequenceflow_source_id_missing_v1",
+  "provenance": "Sanitized from a generated Approval workflow that rendered partial nodes, no connectors, and non-editable Designer state.",
+  "expectedError": "APPROVAL_WORKFLOW_SEQUENCEFLOW_SOURCE_ID_MISSING",
+  "sequenceFlow": {
+    "id": "flow-start-review",
+    "resourceid": "flow-start-review",
+    "stencil": {
+      "id": "SequenceFlow"
+    },
+    "source": {
+      "resourceid": "node-start",
+      "resourceId": "node-start"
+    },
+    "target": {
+      "id": "node-review",
+      "resourceid": "node-review"
+    },
+    "incoming": [
+      {
+        "id": "node-start",
+        "resourceid": "node-start"
+      }
+    ],
+    "outgoing": [
+      {
+        "id": "node-review",
+        "resourceid": "node-review"
+      }
+    ],
+    "properties": {
+      "name": "Submitted",
+      "documentation": "Submitted",
+      "linetype": "rounded",
+      "conditioninfo": []
+    },
+    "dockers": []
+  }
+}

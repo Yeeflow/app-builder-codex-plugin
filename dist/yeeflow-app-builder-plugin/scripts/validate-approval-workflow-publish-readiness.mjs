@@ -11,6 +11,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
 const { validateDecodedDef } = require(path.join(ROOT, "validate-ywf-def.js"));
 const { validateWorkflowAssigneeExpression } = require(path.join(ROOT, "scripts/lib/workflow-assignee-expression-utils.cjs"));
+const {
+  graphRefId,
+  inspectCanonicalGraphRef,
+} = require(path.join(ROOT, "scripts/lib/approval-workflow-graph-reference-utils.cjs"));
 const BROTLI_PREFIX = Buffer.from("::brotli::", "utf8");
 
 if (isMainModule()) {
@@ -451,6 +455,22 @@ function validateGraphRefs(def, context) {
     }
     if (stencilId(shape) === "SequenceFlow") {
       for (const endpoint of ["source", "target"]) {
+        const identity = inspectCanonicalGraphRef(shape[endpoint]);
+        if (!identity.id) {
+          context.findings.push(issue(`APPROVAL_WORKFLOW_SEQUENCEFLOW_${endpoint.toUpperCase()}_ID_MISSING`, `SequenceFlow ${endpoint} must include id; resourceId is not a valid substitute.`, {
+            source: context.source,
+            path: `$.childshapes[${shapeIndex}].${endpoint}.id`,
+            endpoint,
+            identity,
+          }));
+        } else if (!identity.resourceid || identity.id !== identity.resourceid) {
+          context.findings.push(issue(`APPROVAL_WORKFLOW_SEQUENCEFLOW_${endpoint.toUpperCase()}_IDENTITY_MISMATCH`, `SequenceFlow ${endpoint} must include matching id and resourceid.`, {
+            source: context.source,
+            path: `$.childshapes[${shapeIndex}].${endpoint}`,
+            endpoint,
+            identity,
+          }));
+        }
         const endpointId = refId(shape[endpoint]);
         if (!endpointId || !ids.has(endpointId)) {
           context.findings.push(issue("APPROVAL_WORKFLOW_SEQUENCE_ENDPOINT_INVALID", "SequenceFlow source and target must resolve to existing workflow node ids.", {
@@ -458,6 +478,26 @@ function validateGraphRefs(def, context) {
             path: `$.childshapes[${shapeIndex}].${endpoint}`,
             endpoint,
             endpointId: endpointId || null,
+          }));
+        }
+      }
+      const sourceId = refId(shape.source);
+      const targetId = refId(shape.target);
+      for (const [key, expectedId] of [["incoming", sourceId], ["outgoing", targetId]]) {
+        const refs = asArray(shape[key]);
+        const identity = inspectCanonicalGraphRef(refs[0]);
+        if (refs.length !== 1 || !identity.valid) {
+          context.findings.push(issue(`APPROVAL_WORKFLOW_SEQUENCEFLOW_${key.toUpperCase()}_REF_INVALID`, `SequenceFlow ${key} must contain exactly one canonical reference with matching id and resourceid.`, {
+            source: context.source,
+            path: `$.childshapes[${shapeIndex}].${key}`,
+            refs,
+          }));
+        } else if (expectedId && identity.id !== expectedId) {
+          context.findings.push(issue(`APPROVAL_WORKFLOW_SEQUENCEFLOW_${key.toUpperCase()}_ENDPOINT_MISMATCH`, `SequenceFlow ${key} must reference the same node as its ${key === "incoming" ? "source" : "target"}.`, {
+            source: context.source,
+            path: `$.childshapes[${shapeIndex}].${key}`,
+            expectedId,
+            actualId: identity.id,
           }));
         }
       }
@@ -554,9 +594,7 @@ function stencilId(shape) {
 }
 
 function refId(ref) {
-  if (!ref) return "";
-  if (typeof ref === "string") return ref;
-  return String(ref.resourceid || ref.resourceId || ref.id || "");
+  return graphRefId(ref);
 }
 
 function isRejectedFlow(flow) {
