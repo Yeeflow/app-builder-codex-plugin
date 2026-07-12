@@ -5,6 +5,14 @@ description: generate, inspect, validate, package, and improve yeeflow approval 
 
 # Yeeflow Approval Form Generator
 
+## Approval Workflow Set Variable
+
+Use `docs/standards/set-variable-golden-reference-standard.md`. Approval workflow Set Variable nodes use `SetVariableTask.properties.variablesetting[]` with exact declared workflow-variable IDs/types and expression-token-array values. One versus many assignments is represented only by array length. Approval Form page actions must use valid approval/page variables and must not target Data List `list_field` expressions.
+
+Approval page Form Actions must materialize from `Form Action Set Variable Planning` through the shared helper. Page Load uses `formAction.onLoad`, Requester/field changes use the source control's `control_event_rule`, and `otheraction` targets another action on the same page. Derived Department/Department Name controls are read-only; Dynamic Display `controlId` must equal its containing control ID.
+
+Approval Form page actions may set declared workflow/form variables and declared page temp variables. Bind page-load actions through `formAction.onLoad`, field-change actions through the source control's `attrs.control_event_rule`, and Start another action through an `otheraction` step whose `attrs.control_action` resolves on the same page. Derived Department/Department Name fields should be read-only. Dynamic Display rules driven by assigned temp variables must resolve declaration/producer/consumer IDs, and each rule `controlId` must equal its containing control ID.
+
 ## Workflow Designer Editability Contract
 
 Apply `docs/standards/approval-workflow-designer-editability-standard.md` to every standalone `.ywf` and Approval workflow embedded in `.yapk`. Every non-SequenceFlow workflow node must have numeric `position`, positive-area `bounds.upperLeft/lowerRight`, and `bounds.upperLeft` equal to `position`. Generate `graphposition` through the shared runtime-proven content-boundary contract: `x=minNodeX+90`, `y=minNodeY+45`, and `width/height` equal the node-content span with the standard small-workflow minimum. Do not treat saved graphposition as browser stage translation. Use the same CJS/ESM utility from full materialization and standalone wrapper generation; origin/span mismatch blocks signing.

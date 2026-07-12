@@ -5,6 +5,14 @@ description: generate, inspect, validate, package, debug, and improve small yeef
 
 # Yeeflow Application Generator
 
+## Set Variable Golden Reference
+
+For Dashboard/Data List/Approval Form Actions and Approval/Data List/Scheduled workflow Set Variable generation, follow `docs/standards/set-variable-golden-reference-standard.md`. Dashboard Form Actions may target declared page temp variables only. Data List Form Actions may target declared temp variables or real current-list fields. Workflow `SetVariableTask` uses `properties.variablesetting[]`; array length represents one versus multiple assignments and there is no single/multi toggle. Never generate an empty placeholder assignment. Preserve page-load/control/Collection action bindings, condition token arrays, boolean `continue`, variable declarations, and Dynamic Display consumers. Runtime mutation remains separate proof.
+
+In Approval Form actions, preserve `otheraction` and `control_event_rule` chains. In Data List Workflow, Set Variable may read a current-list field on the RHS but may not write it; use current-list `ContentList` mappings for field updates. Validate Dynamic Display rule host IDs instead of cloning sibling `controlId` values.
+
+Plan-driven Form Action Set Variable generation must use the shared `Form Action Set Variable Planning` contract and shared materializer for Approval pages, custom Data List forms, and Dashboards. Do not hand-build a separate host-specific action shape. Full-app Data List/Scheduled Workflow envelopes remain blocked until their WorkflowType 1/3 materializers and registrations are implemented; never silently omit them or claim the export-backed node schema equals full resource generation.
+
 ## Full-App Generation Entrypoint Boundary
 
 For plugin-only clean-room generation, inspect `docs/reference/full-app-generation-entrypoints.json` with `scripts/inspect-full-app-generation-entrypoints.mjs` before claiming that the plugin has no full-app generation path. Full application generation is a first-class callable Codex skill entrypoint through `yeeflow-application-builder` and `yeeflow-application-generator`, and generated-final package artifact materialization is exposed through `scripts/materialize-full-app-generated-final.mjs`. When the registry and planning gates pass and business defaults are `user-default-approved-for-generation`, continue into generated-final `.yapk` materialization instead of stopping after planning. Do not treat `scripts/yeeflow-application-delivery-workflow.mjs`, `scripts/yeeflow-package-api-automation.mjs`, `generate-*-runtime-proof.mjs`, or `tools/generators/generate-vendor-onboarding-yapk-schema-v2.mjs` as generic Functional Spec + App Plan to full-app YAPK generators. If API-issued IDs are unavailable, report the ID-source blocker rather than a missing-generator blocker.

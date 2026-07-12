@@ -24,6 +24,7 @@ import {
 } from "./lib/workflow-query-data-utils.mjs";
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
 import workflowGraphReferenceUtils from "./lib/approval-workflow-graph-reference-utils.cjs";
+import setVariableContractUtils from "./lib/set-variable-contract-utils.cjs";
 
 const {
   buildWorkflowExpressionButton,
@@ -34,6 +35,7 @@ const {
   graphRefId: canonicalGraphRefId,
   normalizeApprovalWorkflowGraphReferences,
 } = workflowGraphReferenceUtils;
+const { buildWorkflowVariableSetting } = setVariableContractUtils;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_ICON = JSON.stringify({ b: "#E6F0FF", i: "fa-solid fa-laptop", c: "#0065FF" });
@@ -643,7 +645,8 @@ function collectPlannedChildResourceRecords(planText) {
     if (resourceTypeColumn === -1 && documentLibraryNameColumn === -1 && dataListNameColumn === -1) continue;
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
-      const cells = splitTableLine(lines[rowIndex]);
+      const rawCells = splitRawTableLine(lines[rowIndex]);
+      const cells = rawCells.map((cell) => cleanResourceName(cell));
       const name = cleanResourceName(cells[nameColumn !== -1 ? nameColumn : documentLibraryNameColumn !== -1 ? documentLibraryNameColumn : dataListNameColumn]);
       const headerHint = documentLibraryNameColumn !== -1 && (nameColumn === -1 || nameColumn === documentLibraryNameColumn)
         ? "Document Library"
@@ -775,6 +778,7 @@ function analyzeAppPlanResourceDemand(planText) {
   const dashboardDataTableRecords = collectDashboardDataTableRecords(planText);
   const dashboardPageLayoutTemplateRecords = collectDashboardPageLayoutTemplateRecords(planText);
   const reverseRelatedRecords = collectReverseRelatedPlanRows(planText);
+  const formActionSetVariableRecords = collectFormActionSetVariableRecords(planText);
   const explicitDashboardNames = resources.dashboards || [];
   const dashboardNamesFromTemplates = [
     ...dashboardPageLayoutTemplateRecords,
@@ -814,6 +818,7 @@ function analyzeAppPlanResourceDemand(planText) {
     approvalFormFieldSpecs: collectApprovalFormFieldSpecs(planText),
     approvalWorkflowNodeSpecs: collectApprovalWorkflowNodeSpecs(planText),
     workflowQueryDataConfigs: collectWorkflowQueryDataConfigs(planText),
+    formActionSetVariableRecords,
     dashboardPageLayoutTemplateRecords,
     dashboardFilterRecords,
     dashboardSummaryMetricRecords,
@@ -823,6 +828,184 @@ function analyzeAppPlanResourceDemand(planText) {
     evidence,
     hasMaterialResources: Object.values(counts).some((count) => count > 0),
   };
+}
+
+function collectFormActionSetVariableRecords(planText) {
+  const records = [];
+  for (const table of parseMarkdownTables(planText)) {
+    const headers = table.headers.map((header) => normKey(header));
+    const column = (names) => findHeaderIndex(headers, names);
+    const hostResourceColumn = column(["host resource"]);
+    const hostPageColumn = column(["host form page", "host form", "host page"]);
+    const hostTypeColumn = column(["host type"]);
+    const actionColumn = column(["action name"]);
+    const stepOrderColumn = column(["step order"]);
+    const targetKindColumn = column(["target kind"]);
+    const targetIdColumn = column(["target id"]);
+    const rhsColumn = column(["rhs expression tokens", "value expression tokens"]);
+    if ([hostResourceColumn, hostPageColumn, hostTypeColumn, actionColumn, stepOrderColumn, targetKindColumn, targetIdColumn, rhsColumn].some((index) => index === -1)) continue;
+    const stepNameColumn = column(["step name"]);
+    const triggerColumn = column(["trigger"]);
+    const boundControlColumn = column(["bound control field", "bound control", "bound field"]);
+    const targetTypeColumn = column(["target value type", "value type"]);
+    const conditionColumn = column(["condition tokens", "condition"]);
+    const continueColumn = column(["continue"]);
+    const nextActionColumn = column(["start another action target", "next action target"]);
+    const consumerColumn = column(["result consumer use", "consumer"]);
+    const cell = (row, index) => index === -1 ? "" : row[table.headers[index]];
+    const structuredCell = (row, index) => index === -1 ? "" : row.__raw?.[index] ?? cell(row, index);
+    for (const row of table.rows) {
+      const hostResource = cleanResourceName(cell(row, hostResourceColumn));
+      const hostPage = cleanResourceName(cell(row, hostPageColumn));
+      const hostType = cleanResourceName(cell(row, hostTypeColumn));
+      const actionName = cleanResourceName(cell(row, actionColumn));
+      if (!hostResource || !hostPage || !actionName || [hostResource, hostPage, actionName].some(isPlanningPlaceholder)) continue;
+      records.push({
+        hostResource,
+        hostPage,
+        hostType,
+        actionName,
+        stepOrder: Number(cleanResourceName(cell(row, stepOrderColumn))) || 1,
+        stepName: cleanResourceName(cell(row, stepNameColumn)),
+        trigger: cleanResourceName(cell(row, triggerColumn)) || "None",
+        boundControl: cleanResourceName(cell(row, boundControlColumn)),
+        targetKind: cleanResourceName(cell(row, targetKindColumn)),
+        targetId: cleanResourceName(cell(row, targetIdColumn)),
+        targetValueType: cleanResourceName(cell(row, targetTypeColumn)) || "text",
+        rhsTokens: cleanStructuredPlanCell(structuredCell(row, rhsColumn)),
+        conditionTokens: cleanStructuredPlanCell(structuredCell(row, conditionColumn)),
+        continueNext: /^true|yes$/i.test(cleanResourceName(cell(row, continueColumn))),
+        nextAction: cleanResourceName(cell(row, nextActionColumn)),
+        consumer: cleanResourceName(cell(row, consumerColumn)),
+      });
+    }
+  }
+  return records;
+}
+
+export function materializePlannedFormActionSetVariables(resource, { records = [], hostResource = "", hostPage = "", hostType = "" } = {}) {
+  if (!resource || typeof resource !== "object") return resource;
+  const selected = records.filter((record) => normKey(record.hostResource) === normKey(hostResource)
+    && normKey(record.hostPage) === normKey(hostPage)
+    && (!hostType || !record.hostType || normKey(record.hostType) === normKey(hostType)));
+  if (!selected.length) return resource;
+  resource.actions = Array.isArray(resource.actions) ? resource.actions : [];
+  resource.formAction = resource.formAction && typeof resource.formAction === "object" && !Array.isArray(resource.formAction) ? resource.formAction : {};
+  resource.tempVars = Array.isArray(resource.tempVars) ? resource.tempVars : [];
+  const actionNames = unique(selected.map((record) => record.actionName));
+  const actionIdByName = new Map(actionNames.map((name) => [normKey(name), deterministicUuid(`${hostResource}:${hostPage}:form-action:${name}`)]));
+  resource.actions = resource.actions.filter((action) => !actionNames.some((name) => normKey(action?.name) === normKey(name)));
+  for (const actionName of actionNames) {
+    const actionRecords = selected.filter((record) => normKey(record.actionName) === normKey(actionName));
+    const groupedSteps = new Map();
+    for (const record of actionRecords) {
+      if (!groupedSteps.has(record.stepOrder)) groupedSteps.set(record.stepOrder, []);
+      groupedSteps.get(record.stepOrder).push(record);
+      if (/temp/i.test(record.targetKind) && record.targetId && !isPlanningPlaceholder(record.targetId)) ensurePlannedTempVariable(resource, record);
+    }
+    const steps = [];
+    for (const [, rows] of [...groupedSteps.entries()].sort((left, right) => left[0] - right[0])) {
+      const assignments = rows.map(buildPlannedFormActionAssignment).filter(Boolean);
+      const plannedAssignments = rows.filter((row) => row.targetId && !isPlanningPlaceholder(row.targetId));
+      if (assignments.length !== plannedAssignments.length) {
+        throw new Error(`FORM_ACTION_SETVAR_PLAN_ASSIGNMENT_INVALID: ${hostResource} / ${hostPage} / ${actionName} step ${rows[0].stepOrder}`);
+      }
+      if (assignments.length) {
+        const step = assignments.length === 1
+          ? { type: "setvar", name: rows[0].stepName || "Set variable", attrs: { setvar_var: assignments[0].var, setvar_val: assignments[0].value } }
+          : { type: "setvar", name: rows[0].stepName || "Set multiple variables", attrs: { setvar_multi: true, setvar_array: assignments } };
+        const condition = parseExpressionTokenArray(rows[0].conditionTokens);
+        if (condition.length) step.condition = condition;
+        if (rows[0].continueNext) step.continue = true;
+        steps.push(step);
+      }
+      const nextAction = rows.map((row) => row.nextAction).find((name) => name && !isPlanningPlaceholder(name));
+      if (nextAction) {
+        const targetActionId = actionIdByName.get(normKey(nextAction));
+        if (!targetActionId) throw new Error(`FORM_ACTION_SETVAR_CHAIN_TARGET_UNRESOLVED: ${hostResource} / ${hostPage} / ${actionName} -> ${nextAction}`);
+        steps.push({ type: "otheraction", attrs: { control_action: targetActionId } });
+      }
+    }
+    const action = { id: actionIdByName.get(normKey(actionName)), name: actionName, steps };
+    resource.actions.push(action);
+    bindPlannedFormActionTrigger(resource, action, actionRecords[0]);
+  }
+  return resource;
+}
+
+function buildPlannedFormActionAssignment(record) {
+  if (!record.targetId || isPlanningPlaceholder(record.targetId)) return null;
+  const value = parseExpressionTokenArray(record.rhsTokens);
+  if (!value.length) return null;
+  const targetKind = normKey(record.targetKind);
+  const targetId = /temp/.test(targetKind) ? plannedTempVariableId(record.targetId) : record.targetId;
+  const exprType = /current list field|list field/.test(targetKind) ? "list_field" : "variable";
+  return {
+    var: {
+      exprType,
+      valueType: record.targetValueType || "text",
+      id: targetId,
+      ...(exprType === "list_field" ? { prop: targetId } : {}),
+      type: "expr",
+      name: record.targetId,
+    },
+    value,
+  };
+}
+
+function parseExpressionTokenArray(value) {
+  if (!value || isPlanningPlaceholder(value)) return [];
+  try {
+    const parsed = JSON.parse(cleanStructuredPlanCell(value));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function plannedTempVariableId(value) {
+  const id = cleanResourceName(value);
+  return /^__temp_/.test(id) ? id : `__temp_${id}`;
+}
+
+function ensurePlannedTempVariable(resource, record) {
+  const id = plannedTempVariableId(record.targetId);
+  if (resource.tempVars.some((variable) => cleanResourceName(variable?.id) === id)) return;
+  resource.tempVars.push({
+    idx: deterministicUuid(`${resource.id || resource.title}:temp:${id}`),
+    id,
+    name: id.replace(/^__temp_/, ""),
+    type: record.targetValueType || "text",
+  });
+}
+
+function bindPlannedFormActionTrigger(resource, action, record) {
+  const trigger = normKey(record.trigger);
+  if (/page load/.test(trigger)) {
+    resource.formAction.onLoad = action.id;
+    return;
+  }
+  if (!record.boundControl || isPlanningPlaceholder(record.boundControl)) return;
+  const control = findPlannedActionControl(resource, record.boundControl);
+  if (!control) throw new Error(`FORM_ACTION_SETVAR_BOUND_CONTROL_UNRESOLVED: ${record.hostResource} / ${record.hostPage} / ${record.actionName} -> ${record.boundControl}`);
+  control.attrs = control.attrs && typeof control.attrs === "object" ? control.attrs : {};
+  if (/field change|value change|change/.test(trigger)) control.attrs.control_event_rule = action.id;
+  else if (/button|container|click|collection action/.test(trigger)) control.attrs.control_action = action.id;
+}
+
+function findPlannedActionControl(resource, identity) {
+  const wanted = normKey(identity);
+  return [resource, ...findDescendants(resource, () => true)].find((control) => [
+    control?.id,
+    control?.nv_label,
+    control?.nav_label,
+    control?.name,
+    control?.title,
+    control?.label,
+    control?.binding,
+    control?.fieldName,
+    control?.field,
+  ].some((value) => normKey(value) === wanted));
 }
 
 function collectDashboardPageLayoutTemplateRecords(planText) {
@@ -1292,6 +1475,8 @@ function collectApprovalFormFieldSpecs(planText) {
     const keyColumn = findHeaderIndex(normalizedHeaders, ["field name", "field id / variable id", "variable id", "field key", "internal id field key"]);
     const fieldTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow variable type", "exact yeeflow field type", "field type", "variable type", "type"]);
     const controlTypeColumn = findHeaderIndex(normalizedHeaders, ["exact yeeflow control type", "control type", "control"]);
+    const readOnlyColumn = findHeaderIndex(normalizedHeaders, ["read only", "readonly"]);
+    const dynamicDisplayColumn = findHeaderIndex(normalizedHeaders, ["dynamic display", "dynamic display rules"]);
     const subListFieldsColumn = findHeaderIndex(normalizedHeaders, ["sub list row fields", "sublist row fields", "sub list columns", "sublist columns", "row fields"]);
     const subListSummariesColumn = findHeaderIndex(normalizedHeaders, ["sub list summaries", "sublist summaries", "sub list summary", "sublist summary", "summary fields"]);
     if (displayColumn === -1) continue;
@@ -1309,6 +1494,8 @@ function collectApprovalFormFieldSpecs(planText) {
         fieldName: cleanResourceName(cells[keyColumn]) || inferFieldKey(displayName, cleanResourceName(cells[fieldTypeColumn]) || "Text", list.length),
         fieldType: cleanResourceName(cells[fieldTypeColumn]) || "Text",
         controlType: cleanResourceName(cells[controlTypeColumn]),
+        readOnly: readOnlyColumn !== -1 && /^(?:yes|true|read.?only)$/i.test(cleanResourceName(cells[readOnlyColumn])),
+        dynamicDisplay: dynamicDisplayColumn === -1 ? "" : cleanStructuredPlanCell(cells[dynamicDisplayColumn]),
         listFields: subListFieldsColumn === -1 ? [] : parseSubListRowFields(cells[subListFieldsColumn]),
         listSummaries: subListSummariesColumn === -1 ? [] : parseSubListSummaries(cells[subListSummariesColumn]),
       });
@@ -1430,9 +1617,11 @@ function collectApprovalWorkflowNodeSpecs(planText) {
     const queryPageSizeColumn = findHeaderIndex(normalizedHeaders, ["query page size", "page size"]);
     const queryPageNumberColumn = findHeaderIndex(normalizedHeaders, ["query page number", "page number"]);
     const queryConsumerColumn = findHeaderIndex(normalizedHeaders, ["downstream consumer use", "downstream consumer", "result consumer use"]);
+    const setVariableAssignmentsColumn = findHeaderIndex(normalizedHeaders, ["set variable assignments", "variable assignments", "assignments", "target value assignments"]);
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
-      const cells = splitTableLine(lines[rowIndex]);
+      const rawCells = splitRawTableLine(lines[rowIndex]);
+      const cells = rawCells.map((cell) => cleanResourceName(cell));
       const nodeName = cleanResourceName(cells[nameColumn]);
       const nodeType = cleanResourceName(cells[typeColumn]);
       if (!nodeName || isNonResourceName(nodeName) || !nodeType) {
@@ -1474,6 +1663,7 @@ function collectApprovalWorkflowNodeSpecs(planText) {
         queryPageSize: queryPageSizeColumn === -1 ? "" : cleanResourceName(cells[queryPageSizeColumn]),
         queryPageNumber: queryPageNumberColumn === -1 ? "" : cleanResourceName(cells[queryPageNumberColumn]),
         queryDownstreamUse: queryConsumerColumn === -1 ? "" : cleanResourceName(cells[queryConsumerColumn]),
+        setVariableAssignments: setVariableAssignmentsColumn === -1 ? "" : cleanStructuredPlanCell(rawCells[setVariableAssignmentsColumn]),
       });
       rowIndex += 1;
     }
@@ -2179,6 +2369,8 @@ function uniqueApprovalFieldSpecs(fields) {
       fieldName,
       fieldType: cleanResourceName(field?.fieldType) || "Text",
       controlType: cleanResourceName(field?.controlType) || inferControlType(field?.fieldType || ""),
+      readOnly: field?.readOnly === true,
+      dynamicDisplay: cleanStructuredPlanCell(field?.dynamicDisplay),
       listRefId: cleanResourceName(field?.listRefId || field?.complexTypeId),
       listFields: Array.isArray(field?.listFields)
         ? field.listFields.map((rowField) => ({ ...rowField }))
@@ -2244,6 +2436,7 @@ function uniqueApprovalWorkflowNodes(nodes) {
       queryPageSize: cleanResourceName(node?.queryPageSize),
       queryPageNumber: cleanResourceName(node?.queryPageNumber),
       queryDownstreamUse: cleanResourceName(node?.queryDownstreamUse),
+      setVariableAssignments: cleanStructuredPlanCell(node?.setVariableAssignments),
     });
   }
   return normalized;
@@ -2827,6 +3020,12 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   removeEmptySectionTitleAreas(resource);
   removeEmptyBusinessSections(resource);
   if (templateKind === "workbench") normalizeWorkbenchMainQueueColumns(resource);
+  materializePlannedFormActionSetVariables(resource, {
+    records: planDemand.formActionSetVariableRecords,
+    hostResource: listName,
+    hostPage: formName,
+    hostType: "Data List Form",
+  });
   return resource;
 }
 
@@ -3772,9 +3971,11 @@ function parseMarkdownTables(section) {
     const rows = [];
     let rowIndex = index + 2;
     while (rowIndex < lines.length && isTableLine(lines[rowIndex])) {
-      const cells = splitTableLine(lines[rowIndex]);
+      const rawCells = splitRawTableLine(lines[rowIndex]);
+      const cells = rawCells.map((cell) => cleanResourceName(cell));
       const row = {};
       headers.forEach((header, cellIndex) => { row[header] = cells[cellIndex] || ""; });
+      Object.defineProperty(row, "__raw", { value: rawCells, enumerable: false });
       rows.push(row);
       rowIndex += 1;
     }
@@ -3782,6 +3983,10 @@ function parseMarkdownTables(section) {
     index = rowIndex;
   }
   return tables;
+}
+
+function splitRawTableLine(line) {
+  return String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
 }
 
 function isTableLine(line) {
@@ -3806,6 +4011,10 @@ function unique(values) {
 
 function cleanResourceName(value) {
   return cleanPlanningLabel(value);
+}
+
+function cleanStructuredPlanCell(value) {
+  return String(value == null ? "" : value).trim().replace(/^`([\s\S]*)`$/, "$1").trim();
 }
 
 function isNonResourceName(value) {
@@ -4053,6 +4262,7 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
         approvalFieldSpecs,
         approvalWorkflowNodes,
         dataListMetas: Array.from(listMetaByName.values()),
+        formActionSetVariableRecords: planDemand.formActionSetVariableRecords,
       })),
       Status: 1,
       DeployedDefID: defId,
@@ -4111,6 +4321,12 @@ function buildResourceGraphPackage({ appTitle, rootListId, planDemand, ids, icon
       summaryId: deterministicUuid(`${appTitle}:${name}:${stringId(ids[`decoded.Pages[${index}].LayoutID`])}:summary:0`),
       filterId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_filter`,
       collectionId: `${stringId(ids[`decoded.Pages[${index}].LayoutID`])}_collection`,
+    });
+    materializePlannedFormActionSetVariables(dashboardResource, {
+      records: planDemand.formActionSetVariableRecords,
+      hostResource: name,
+      hostPage: name,
+      hostType: "Dashboard",
     });
     const dashboardResourceJson = JSON.stringify(dashboardResource);
     return {
@@ -7896,7 +8112,7 @@ function workflowRejectedVertices(sourcePosition, rejectPosition) {
   ];
 }
 
-function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [] }) {
+function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approvalFieldSpecs = {}, approvalWorkflowNodes = [], dataListMetas = [], formActionSetVariableRecords = [] }) {
   const {
     submissionPageId,
     taskPageId,
@@ -7927,6 +8143,20 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
   }));
   const variables = buildApprovalVariables(approvalFieldSpecs);
   addApprovalWorkflowActionVariables(variables, childshapes);
+  const submissionFormDef = approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || []);
+  const taskFormDef = approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs));
+  materializePlannedFormActionSetVariables(submissionFormDef, {
+    records: formActionSetVariableRecords,
+    hostResource: name,
+    hostPage: "Submission form",
+    hostType: "Approval",
+  });
+  materializePlannedFormActionSetVariables(taskFormDef, {
+    records: formActionSetVariableRecords,
+    hostResource: name,
+    hostPage: "Task form",
+    hostType: "Approval",
+  });
   return {
     id: defId,
     key: formKey,
@@ -7958,7 +8188,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
         pagetype: 1,
         name: "Submission form",
         title: "Submission form",
-        formdef: approvalFormDef(submissionPageId, name, "submission", approvalFieldSpecs.submission || []),
+        formdef: submissionFormDef,
       },
       {
         id: taskPageId,
@@ -7971,7 +8201,7 @@ function buildApprovalDefResource({ name, formKey, defId, rootListSetId, approva
         pagetype: 1,
         name: "Task form",
         title: "Task form",
-        formdef: approvalFormDef(taskPageId, name, "task", approvalTaskFieldSpecs(approvalFieldSpecs)),
+        formdef: taskFormDef,
       },
     ],
     childshapes,
@@ -8232,19 +8462,14 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     return base;
   }
   if (stencil === "SetVariableTask") {
+    const settings = buildPlannedWorkflowSetVariableAssignments(step, index);
     base.properties = {
       ...base.properties,
       formtype: "current",
-      variablesetting: [
-        {
-          idx: workflowVariableIdFromName(`${step.nodeName || `Workflow variable ${index + 1}`} Result`),
-          id: workflowVariableIdFromName(`${step.nodeName || `Workflow variable ${index + 1}`} Result`),
-          name: `${step.nodeName || `Workflow variable ${index + 1}`} Result`,
-          type: "text",
-          editable: true,
-          value: [{ type: "str", value: "" }],
-        },
-      ],
+      data: null,
+      formids: "",
+      variablesetting: settings,
+      applicantuser: null,
     };
     return base;
   }
@@ -8282,6 +8507,29 @@ function buildApprovalWorkflowStepNode({ step, index, id, taskPageId, rootListSe
     usertaskassignment: workflowTaskAssigneesForStep(step),
   };
   return base;
+}
+
+export function buildPlannedWorkflowSetVariableAssignments(step, index) {
+  const raw = cleanStructuredPlanCell(step?.setVariableAssignments);
+  if (!raw) return [];
+  return raw.split(/\s*;;\s*/).map((entry, assignmentIndex) => {
+    const parts = entry.split(/\s*::\s*/);
+    if (parts.length < 4) return null;
+    const [id, type, name, ...valueParts] = parts;
+    let value = [];
+    try {
+      value = JSON.parse(valueParts.join("::"));
+    } catch {
+      value = [];
+    }
+    return buildWorkflowVariableSetting({
+      id: cleanResourceName(id),
+      idx: cleanResourceName(id),
+      name: cleanResourceName(name) || cleanResourceName(id) || `Set variable ${index + 1}.${assignmentIndex + 1}`,
+      type: cleanResourceName(type) || "text",
+      value,
+    });
+  }).filter((setting) => setting?.id && setting.value.length);
 }
 
 function workflowAssignmentTaskType(step) {
@@ -8680,12 +8928,14 @@ function buildApprovalFormFieldControl({ field, index, formName, role, columns }
       },
     },
   };
-  if (role === "task") {
+  if (role === "task" || field.readOnly === true) {
     control.readonly = true;
     control.readOnly = true;
     control.attrs.readonly = true;
     control.attrs.readOnly = true;
   }
+  const dynamicDisplayRules = parsePlannedDynamicDisplayRules(field.dynamicDisplay, control.id);
+  if (dynamicDisplayRules.length) control.attrs.control_display = dynamicDisplayRules;
   if (type === "radio" || type === "select") {
     control.attrs.displayStyle = "dropdown";
     control.attrs.choices = inferChoiceValues(field);
@@ -8693,6 +8943,17 @@ function buildApprovalFormFieldControl({ field, index, formName, role, columns }
   }
   if (fullRow) control.attrs.common.grid = { position: [null, { cSpan: columns }, { cSpan: Math.min(columns, 2) }, { cSpan: 1 }] };
   return control;
+}
+
+function parsePlannedDynamicDisplayRules(value, controlId) {
+  if (!value || isPlanningPlaceholder(value)) return [];
+  try {
+    const parsed = JSON.parse(cleanStructuredPlanCell(value));
+    const rules = Array.isArray(parsed) ? parsed : [];
+    return rules.map((rule) => ({ ...rule, controlId }));
+  } catch {
+    return [];
+  }
 }
 
 function normalizeApprovalControlType(field) {

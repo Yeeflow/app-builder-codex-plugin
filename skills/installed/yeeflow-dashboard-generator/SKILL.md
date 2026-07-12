@@ -5,6 +5,12 @@ description: generate, inspect, validate, package, debug, and improve Yeeflow da
 
 # Yeeflow Dashboard Generator
 
+## Dashboard Set Variable
+
+Dashboard Set Variable actions must materialize from `Form Action Set Variable Planning` through the shared page-action helper. Targets are declared Dashboard temp variables only; Page Load uses `formAction.onLoad`, while button/container/Collection triggers use resolvable `attrs.control_action` bindings.
+
+Use `docs/standards/set-variable-golden-reference-standard.md`. Dashboard `setvar` Form Action steps may target declared `tempVars` only, through single `setvar_var/setvar_val` or multi `setvar_array[]` shapes. Bind page-load actions through `formAction.onLoad`; bind button, Container, or Collection actions through resolvable action IDs. Do not emit undeclared, blank, workflow, or Data List field targets.
+
 ## UI Generation Hard-Gate Skill
 
 Phase 3B adds workflow-level enforcement. Final reports for high-quality UI work must include contract, scope, runtime evidence, and structure-comparison artifact paths as applicable. Run `scripts/inspect-ui-closed-loop-workflow-enforcement.mjs` before claiming high-quality UI or design fidelity. Generation from design/mockup requires a UI contract. UI upgrades require a scope manifest. Runtime UI quality claims require runtime evidence. Design fidelity claims require structure comparison. Dynamic KPI proof requires before/after mutation evidence. Install/sign/upgrade success is not visual proof.
