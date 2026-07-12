@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.54`
+- Version: `0.9.55`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.54` hardens Sub List field presentation and resource-scoped variable identity. Approval and Data List Sub Lists now preserve business column titles and export-backed Summary bindings, Approval Request Title reuses built-in `requestTitle`, and Approval/Data List/Dashboard variable namespaces reject literal or canonical ID collisions before signing.
+Current release `0.9.55` fixes Approval Workflow Designer initial viewport placement and non-Report upgrade Form Report omission. Generated workflows open with nodes inside the visible canvas, offscreen initial extents fail before signing, and unchanged installed Form Reports are omitted from non-Report upgrade payloads unless report changes are explicitly in scope.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.54
+Version: 0.9.55
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.54
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.55
 ```
 
 ## What Is Included

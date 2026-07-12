@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.55
+
 - Normalize Approval workflow initial Designer viewport translations so generated nodes open inside the visible canvas, and reject entirely offscreen transformed node extents before signing.
 - Generalize installed `FormNewReports[]` omission from Dashboard-only upgrades to every non-Report upgrade, including Approval upgrades; allow only matching report-navigation payload cleanup and reject unchanged installed Form reports carried as duplicate-create candidates.
 

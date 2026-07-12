@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.55
+
 ## 0.9.54
 
 - Materialize non-empty business column titles on every Approval and Data List Sub List row control, preserving custom titles and blocking missing labels before signing.
