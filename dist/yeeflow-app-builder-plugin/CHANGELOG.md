@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.57
+
+- Add export-backed Set Variable golden references across Dashboard, Approval Form, Data List Form, Approval Workflow, Data List Workflow, and Scheduled Workflow surfaces.
+- Materialize App Plan Form Action Set Variable steps through one shared Approval/Data List/Dashboard builder, including page-load, field-change, click, multi-assignment, conditions, continue behavior, temp-variable declarations, and Start another action chains.
+- Enforce Approval Dynamic Display self-reference and declaration rules, exact workflow-variable assignment metadata, and the Data List Workflow boundary requiring Set Data List with Current list for current-record field writes.
+- Add source/dist planning, generated-final, and full-materializer regressions while preserving explicit WorkflowType 1/3 full-resource materialization blockers.
+
 ## 0.9.56
 
 - Correct the Approval workflow `graphposition` contract using fresh-tab runtime proof: derive origin from content minima plus `90px/45px`, preserve content-span dimensions, and reject both legacy negative origins and the obsolete viewport-translation formula across full-app and standalone `.ywf` generation.
