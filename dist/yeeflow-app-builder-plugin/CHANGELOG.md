@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.53
+
+- Normalize Approval workflow graph references to canonical matching `id` and lowercase `resourceid` across full-app materialization and standalone `.ywf` wrapper generation.
+- Reject malformed SequenceFlow source, target, incoming, and outgoing identities or endpoint mismatches before signing and publish-readiness claims.
+- Add a sanitized regression fixture from the Audit Stage Gate Designer incident where `source.resourceId` incorrectly substituted for a missing `source.id`.
+- Add source/dist and cache-artifact coverage for the shared graph-reference helper, standalone wrapper normalization, and focused Designer editability standards.
+
 ## 0.9.52
 
 - Normalize planning-only no-resource labels before ID allocation and full-app materialization, including punctuation variants such as `Not applicable.`.
