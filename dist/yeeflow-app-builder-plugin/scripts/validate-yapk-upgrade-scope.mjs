@@ -246,9 +246,12 @@ function validateApprovalDef(def, path, findings) {
   }
   const shapes = asArray(def.childshapes);
   if (!shapes.length) findings.push(finding("error", "UPGRADE_APPROVAL_WORKFLOW_GRAPH_MISSING", "Approval DefResource must include workflow childshapes.", { path: `${path}.childshapes` }));
+  const flowById = new Map(shapes
+    .filter((shape) => scalar(shape?.stencil?.id).toLowerCase() === "sequenceflow")
+    .map((shape) => [scalar(shape.id || shape.resourceid || shape.resourceId), shape]));
   for (const [index, shape] of shapes.entries()) {
     const stencil = scalar(shape?.stencil?.id || shape?.type || shape?.Type);
-    const isTask = /task/i.test(stencil);
+    const isTask = isHumanApprovalTaskStencil(stencil);
     if (!isObject(shape?.bounds) && !isObject(shape?.position) && !Array.isArray(shape?.dockers)) {
       findings.push(finding("error", "UPGRADE_APPROVAL_GRAPH_POSITION_MISSING", "Workflow graph shapes must include positions/bounds/dockers.", { path: `${path}.childshapes[${index}]` }));
     }
@@ -256,8 +259,9 @@ function validateApprovalDef(def, path, findings) {
       const props = shape.properties || {};
       const assignee = props.usertaskassignment || props.assignment || props.assignee || props.assignees;
       if (!assignee || (Array.isArray(assignee) && assignee.length === 0)) findings.push(finding("error", "UPGRADE_APPROVAL_TASK_ASSIGNEE_MISSING", "Approval task nodes must include assignee configuration.", { path: `${path}.childshapes[${index}].properties` }));
-      const outgoing = asArray(shape.outgoing).map((item) => scalar(item.resourceId || item.ResourceId || item.id || item.name || item.title || item.label));
-      const routeText = stableJson([shape.outgoing, props.outcomes, props.routes, props.actions]).toLowerCase();
+      const outgoing = asArray(shape.outgoing).map((item) => scalar(item.resourceid || item.resourceId || item.ResourceId || item.id || item.name || item.title || item.label));
+      const resolvedFlows = outgoing.map((id) => flowById.get(id)).filter(Boolean);
+      const routeText = stableJson([shape.outgoing, resolvedFlows, props.outcomes, props.routes, props.actions]).toLowerCase();
       if (!/approved|approve/.test(routeText) || !/rejected|reject/.test(routeText)) {
         findings.push(finding("error", "UPGRADE_APPROVAL_TASK_ROUTES_AMBIGUOUS", "Approval task nodes must expose explicit Approved and Rejected outgoing paths.", { path: `${path}.childshapes[${index}].outgoing`, outgoing }));
       }
@@ -268,6 +272,10 @@ function validateApprovalDef(def, path, findings) {
   if (!/workflow.*history|history.*workflow|workflowpanel|workflow panel|control panel/.test(text)) {
     findings.push(finding("error", "UPGRADE_APPROVAL_WORKFLOW_PANEL_HISTORY_MISSING", "Approval DefResource must include workflow panel/history metadata."));
   }
+}
+
+function isHumanApprovalTaskStencil(stencil) {
+  return new Set(["MultiAssignmentTask", "CandidateTask"]).has(scalar(stencil));
 }
 
 function readPackageLike(file) {
@@ -320,8 +328,8 @@ function listMap(decoded) {
 function hasControlNamed(children, name) {
   let found = false;
   walkControls(children, (control) => {
-    const label = scalar(control.id || control.name || control.label || control.type || control.Type);
-    if (label === name) found = true;
+    const labels = [control.id, control.name, control.label, control.nv_label, control.nav_label, control.type, control.Type].map(scalar);
+    if (labels.includes(name)) found = true;
   });
   return found;
 }

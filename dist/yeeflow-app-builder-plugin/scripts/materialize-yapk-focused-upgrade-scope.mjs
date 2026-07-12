@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "node:fs";
+import crypto from "node:crypto";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { asArray, encodeYapkResourceOfficial, isObject, quoteLargeJsonIntegers, readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
@@ -25,14 +26,17 @@ export function materializeFocusedUpgradeScope({ previousPackage, candidatePacka
   }
 
   const outputPath = path.resolve(out);
+  const originalPackageId = String(candidate.wrapper?.PackageId || "");
+  const packageIdRegenerated = Boolean(candidate.wrapper && (!originalPackageId || /^\d{12,}$/.test(originalPackageId)));
   const output = candidate.wrapper
-    ? { ...candidate.wrapper, Resource: encodeYapkResourceOfficial(decoded), Sign: "" }
+    ? { ...candidate.wrapper, PackageId: packageIdRegenerated ? crypto.randomUUID() : originalPackageId, Resource: encodeYapkResourceOfficial(decoded), Sign: "" }
     : decoded;
   fs.writeFileSync(outputPath, `${JSON.stringify(output, null, 2)}\n`);
   return {
     status: "pass",
     output: outputPath,
     reportsInScope,
+    packageIdRegenerated,
     omittedUnchangedFormReports: omitted,
     proofBoundary: "This materialization omits byte-equivalent installed Form reports from a non-Report upgrade payload and matching navigation payload items. It does not prove live upgrade success or installed report preservation.",
   };

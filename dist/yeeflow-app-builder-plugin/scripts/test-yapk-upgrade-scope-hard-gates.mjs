@@ -101,7 +101,7 @@ function wrapper(decoded, overrides = {}) {
   };
 }
 
-function approvalDef({ uuid = true, duplicateControls = false, graphPositions = true, assignee = true, routes = true } = {}) {
+function approvalDef({ uuid = true, duplicateControls = false, graphPositions = true, assignee = true, routes = true, nestedMainContent = false, setVariableTask = false, flowResolvedRoutes = false } = {}) {
   const pageId = uuid ? "11111111-1111-4111-8111-111111111111" : "12345";
   const contentId = "Content";
   const def = {
@@ -112,14 +112,17 @@ function approvalDef({ uuid = true, duplicateControls = false, graphPositions = 
       id: pageId,
       type: 1,
       formdef: {
-        children: [
-          { id: "Main", name: "Main", type: "container", children: [] },
-          { id: contentId, name: "Content", type: "container", children: [] },
-        ],
+        children: nestedMainContent
+          ? [{ id: "main-uuid", nv_label: "Main", type: "container", children: [{ id: "content-uuid", nv_label: "Content", type: "container", children: [] }] }]
+          : [
+            { id: "Main", name: "Main", type: "container", children: [] },
+            { id: contentId, name: "Content", type: "container", children: [] },
+          ],
       },
     }],
     childshapes: [{
       resourceId: "task-1",
+      id: "task-1",
       stencil: { id: "MultiAssignmentTask" },
       ...(graphPositions ? { bounds: { lowerRight: { x: 1, y: 1 }, upperLeft: { x: 0, y: 0 } } } : {}),
       properties: {
@@ -129,8 +132,13 @@ function approvalDef({ uuid = true, duplicateControls = false, graphPositions = 
         ...(assignee ? { usertaskassignment: [{ type: "user", value: "reviewer" }] } : {}),
         ...(routes ? { outcomes: ["Approved", "Rejected"] } : {}),
       },
-      outgoing: routes ? [{ resourceId: "approved", label: "Approved" }, { resourceId: "rejected", label: "Rejected" }] : [],
-    }],
+      outgoing: routes ? [{ resourceid: "approved", ...(flowResolvedRoutes ? {} : { label: "Approved" }) }, { resourceid: "rejected", ...(flowResolvedRoutes ? {} : { label: "Rejected" }) }] : [],
+    },
+    ...(setVariableTask ? [{ id: "set-variable", resourceid: "set-variable", stencil: { id: "SetVariableTask" }, bounds: { lowerRight: { x: 1, y: 1 }, upperLeft: { x: 0, y: 0 } }, properties: { variablesetting: [{ id: "Status", idx: "Status", name: "Status", type: "text", editable: true, value: [{ type: "str", value: "Ready" }] }] }, incoming: [], outgoing: [] }] : []),
+    ...(flowResolvedRoutes ? [
+      { id: "approved", resourceid: "approved", stencil: { id: "SequenceFlow" }, dockers: [], properties: { name: "Approved" }, source: { id: "task-1", resourceid: "task-1" }, target: { id: "end", resourceid: "end" } },
+      { id: "rejected", resourceid: "rejected", stencil: { id: "SequenceFlow" }, dockers: [], properties: { name: "Rejected" }, source: { id: "task-1", resourceid: "task-1" }, target: { id: "reject", resourceid: "reject" } },
+    ] : [])],
   };
   return Buffer.concat([
     Buffer.from("::brotli::"),
@@ -251,13 +259,20 @@ try {
   cases.push("pass: focused upgrade materializer omits unchanged installed Form report and matching navigation item");
 
   const previousApprovalWrapperFile = writeJson(tempDir, "previous-approval-with-report.yapk", wrapper(previousApprovalWithReport));
-  const focusedCandidateWrapperFile = writeJson(tempDir, "approval-upgrade-focused-candidate.yapk", wrapper(approvalUpgradeCarriesReport));
+  const focusedCandidateWrapperFile = writeJson(tempDir, "approval-upgrade-focused-candidate.yapk", wrapper(approvalUpgradeCarriesReport, { PackageId: id(999) }));
   const focusedOutputWrapperFile = path.join(tempDir, "approval-upgrade-focused-output.yapk");
   expectPass("focused upgrade materializer rewrites YAPK and clears stale signature", "scripts/materialize-yapk-focused-upgrade-scope.mjs", ["--previous-package", previousApprovalWrapperFile, "--candidate-package", focusedCandidateWrapperFile, "--scope", approvalScopeFile, "--out", focusedOutputWrapperFile]);
   const focusedWrapper = JSON.parse(fs.readFileSync(focusedOutputWrapperFile, "utf8"));
   assert.equal(focusedWrapper.Sign, "");
+  assert.match(focusedWrapper.PackageId, /^[0-9a-f-]{36}$/i);
   expectPass("materialized YAPK focused upgrade passes report-scope validation", "scripts/validate-yapk-upgrade-report-scope.mjs", ["--previous-package", previousApprovalWrapperFile, "--new-package", focusedOutputWrapperFile, "--scope", approvalScopeFile]);
   cases.push("pass: focused YAPK output clears stale signature before re-signing");
+
+  const approvalWithSystemTask = clone(previous);
+  approvalWithSystemTask.Forms = [{ Key: "approval-key", Title: "Runtime Approval", DefResource: approvalDef({ nestedMainContent: true, setVariableTask: true, flowResolvedRoutes: true }) }];
+  const approvalSystemTaskScope = writeJson(tempDir, "approval-system-task-scope.json", scope({ upgradeType: "approval", targetResourceType: "approval-form", targetLists: [], allowedResourceTypes: ["approval"], allowedChanges: ["add SetVariableTask"], disallowedChanges: ["dashboard", "report"] }));
+  expectPass("approval upgrade accepts nested Main Content, flow-resolved routes, and SetVariableTask", "scripts/validate-yapk-upgrade-scope.mjs", ["--previous-package", previousFile, "--new-package", writeJson(tempDir, "approval-system-task.json", wrapper(approvalWithSystemTask)), "--scope", approvalSystemTaskScope]);
+  cases.push("pass: upgrade scope classifies SetVariableTask as a system action and resolves human-task routes through SequenceFlow");
 
   const changedReportCandidate = clone(approvalUpgradeCarriesReport);
   changedReportCandidate.FormNewReports[0].Settings = { Changed: true };
