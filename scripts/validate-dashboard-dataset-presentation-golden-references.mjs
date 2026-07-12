@@ -1651,8 +1651,8 @@ function validateResponsiveCardOperations(entry, wrapper, page, findings) {
   const hasDeleteButton = operationButtons.some((button) => /delete|del|remove/i.test(`${button?.label || ""} ${button?.id || ""} ${button?.attrs?.operation || ""}`));
   if (hasDeleteButton) {
     const actionText = JSON.stringify(collectionActions);
-    const tempVarText = JSON.stringify(page.resource?.tempVars || []);
-    if (!tempVarText.includes("var_isDeleteConfirmed")) {
+    const deleteConfirmationTempVars = asArray(page.resource?.tempVars).filter((item) => /(?:^|_)isDeleteConfirmed$/i.test(String(item?.id || item?.name || "")));
+    if (!deleteConfirmationTempVars.length) {
       findings.push(error("DASH_DATASET_RESPONSIVE_CARD_DELETE_CONFIRMATION_TEMPVAR_MISSING", "Responsive card Delete item operation requires the template delete-confirmation temp variable.", { page: page.title, path: entry.pointer }));
     }
     if (!/confirm/.test(actionText) || !/setdatalist/.test(actionText) || !/ListDataID/.test(actionText) || !/__ctx_coll/.test(actionText)) {
@@ -1742,9 +1742,8 @@ function validateCardMultiselectPageDependencies(page, entry, findings) {
       findings.push(error(code, "collection_control_card_with_multiselect_toolbar requires page-level dependencies from the source template.", { page: page.title, path: entry.pointer, dependency: key }));
     }
   }
-  const pageText = JSON.stringify(page.resource || {});
   for (const requiredToken of ["var_SelectedItems", "var_SelectedItemsAmount"]) {
-    if (!pageText.includes(requiredToken)) {
+    if (!hasScopedTemplateTempVariable(page.resource, requiredToken)) {
       findings.push(error("DASH_DATASET_CARD_MULTISELECT_SELECTED_VARIABLE_MISSING", "Card multiselect template requires selected item variables from the source template.", { page: page.title, path: entry.pointer, requiredToken }));
     }
   }
@@ -1983,12 +1982,20 @@ function validateGridMultiselectPageDependencies(page, entry, findings) {
       findings.push(error(code, "collection_control_grid_table_with_multiselect requires page-level dependencies from the source template.", { page: page.title, path: entry.pointer, dependency: key }));
     }
   }
-  const pageText = JSON.stringify(page.resource || {});
   for (const requiredToken of ["var_SelectedItems", "var_SelectedItemsAmount"]) {
-    if (!pageText.includes(requiredToken)) {
+    if (!hasScopedTemplateTempVariable(page.resource, requiredToken)) {
       findings.push(error("DASH_DATASET_GRID_MULTISELECT_SELECTED_VARIABLE_MISSING", "Grid-table multiselect template requires selected item variables from the source template.", { page: page.title, path: entry.pointer, requiredToken }));
     }
   }
+}
+
+function hasScopedTemplateTempVariable(resource, requiredToken) {
+  const canonical = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const required = canonical(requiredToken);
+  return asArray(resource?.tempVars).some((item) => {
+    const id = canonical(item?.id || item?.name);
+    return id === required || id.endsWith(required.replace(/^var/, ""));
+  });
 }
 
 function validateKpiTemplateMaterialization(page, findings) {

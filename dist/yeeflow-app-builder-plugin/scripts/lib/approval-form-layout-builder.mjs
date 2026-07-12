@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { cleanPlanningLabel, isPlanningPlaceholder } from "./planning-placeholder-utils.mjs";
+import { resolveSchemaAuthoritativeFormControlType } from "./form-control-type-authority.mjs";
 
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -186,6 +187,8 @@ function buildApprovalFormFieldControl({ field, index, formName, role, columns }
     binding: field.fieldName,
     fieldName: field.fieldName,
     approvalFieldMaterializedFromPlan: true,
+    approvalPlannedFieldType: field.fieldType,
+    approvalPlannedControlType: field.controlType,
     attrs: {
       common: {
         margin: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
@@ -252,19 +255,7 @@ function materializeApprovalSubListControl(control, field, role) {
 }
 
 function normalizeApprovalControlType(field) {
-  const raw = normKey(`${field?.controlType || ""} ${field?.fieldType || ""} ${field?.displayName || ""}`);
-  if (/sub\s*list|detail\s*list|line\s*items?/.test(raw)) return "list";
-  if (/rich\s*text|html/.test(raw)) return "richtext";
-  if (/multi(?:ple)?\s*line|long\s*text|paragraph|purpose|justification|description|notes?/.test(raw)) return "textarea";
-  if (/user|identity|people|person|traveler|requester|approver|manager/.test(raw)) return "identity-picker";
-  if (/image|photo|picture/.test(raw)) return "image-upload";
-  if (/file|attachment|document/.test(raw)) return "file-upload";
-  if (/date|datetime|time/.test(raw)) return "datepicker";
-  if (/currency|cost|amount|budget|price|fee/.test(raw)) return "currency";
-  if (/decimal|number|integer|quantity|count|hours?/.test(raw)) return "input_number";
-  if (/bit|boolean|yes\/no|switch/.test(raw)) return "switch";
-  if (/choice|select|dropdown|radio|status|category|type|priority/.test(raw)) return "radio";
-  return "input";
+  return resolveSchemaAuthoritativeFormControlType(field);
 }
 
 function isFullRowApprovalField(field, controlType) {

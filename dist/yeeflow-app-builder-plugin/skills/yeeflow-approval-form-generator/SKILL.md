@@ -425,6 +425,8 @@ The root wrappers are `form_grid_fields_2col_wrapper` and `form_grid_fields_3col
 
 The App Plan must include an Approval Form Fields Layout Template Selection table for every generated field group before package generation. Run `scripts/validate-approval-form-fields-template.mjs --package <package.yapk> --plan <yeeflow-app-plan.md>` before signing readiness.
 
+Approval field control types are schema-authoritative. Resolve the explicit App Plan control type first, then the exact field/variable schema type, and otherwise use a schema-safe default. Never infer a control type from a display label or variable ID: a Text variable named `Workflow Proof Status`, `Category Notes`, or `Priority Comment` remains an `input`/text control. `radio` and `select` require a choice-like schema plus real business options. Standalone `.ywf` generation and full `.yapk` materialization must share `scripts/lib/form-control-type-authority.mjs`; do not hand-build a separate name-based mapper. Treat `TEXT_VARIABLE_MATERIALIZED_AS_CHOICE_CONTROL`, `CHOICE_CONTROL_OPTIONS_MISSING`, and `CONTROL_TYPE_VARIABLE_TYPE_MISMATCH` as signing blockers.
+
 Approval form `Submission Form Fields` and `Task Form Fields` tables are mandatory generation input, not summaries. Do not cap, truncate, or silently drop planned fields when a table is long; every planned submission and task field must appear in `Forms[].DefResource.pageurls[].formdef` unless the App Plan explicitly marks that field unsupported, deferred, or omitted for the specific form page.
 
 Number fields:

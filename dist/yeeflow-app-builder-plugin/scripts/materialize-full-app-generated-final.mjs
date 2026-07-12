@@ -16,6 +16,7 @@ import {
 } from "./lib/approval-workflow-designer-shape-utils.mjs";
 import { encodeYapkResourceOfficial } from "./lib/yapk-decode-utils.mjs";
 import { cleanPlanningLabel, isPlanningPlaceholder } from "./lib/planning-placeholder-utils.mjs";
+import { resolveSchemaAuthoritativeFormControlType } from "./lib/form-control-type-authority.mjs";
 import {
   buildWorkflowQueryDataProperties,
   normalizeWorkflowQueryDataMode,
@@ -3018,6 +3019,8 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
   ensureDataListSubListSummaryTempVars(resource);
   removeAllByIdentity(resource, "Operations");
   removeAllByIdentity(resource, "kpi_metrics_wrapper");
+  removeAllByIdentity(resource, "kpi_cards_wrapper");
+  removeAllByIdentity(resource, "kpi_cards_kpi_row");
   if (templateKind === "view" || templateKind === "workbench") {
     appendReverseRelatedCollectionSections(resource, {
       planDemand,
@@ -3039,6 +3042,7 @@ function materializeDataListFormResource({ templateKind, templateId, listId, lis
     hostPage: formName,
     hostType: "Data List Form",
   });
+  reconcilePageTempVariableReferences(resource);
   return resource;
 }
 
@@ -4669,6 +4673,7 @@ function buildMaterialDashboardResource({ name, layoutId, pageLayoutTemplateId =
   });
   enforceCollectionTemplateStyleContracts(resource);
   normalizeAndPruneDashboardTempVars(resource);
+  reconcilePageTempVariableReferences(resource);
   return resource;
 }
 
@@ -6207,6 +6212,44 @@ function enforceSchemaBoundCollectionTemplate(root, { listMeta }) {
   const allowedFields = new Set([...fieldMap.keys(), "listdataid", "id", "created", "createdby", "modified", "modifiedby", "owner"]);
   pruneInvalidProgressControls(root, { fieldMap, allowedFields });
   pruneGridTableColumnsBySchema(root, { fieldMap, allowedFields });
+  remapOrRemoveInvalidCollectionContextBindings(root, { listMeta, allowedFields });
+}
+
+function remapOrRemoveInvalidCollectionContextBindings(root, { listMeta, allowedFields }) {
+  const fields = fieldsForDynamicControls(listMeta);
+  const primaryField = fields.find((field) => normKey(field.fieldName) === "title") || fields[0] || {
+    fieldName: "Title",
+    displayName: "Title",
+    fieldType: "Text",
+  };
+  const conditionalKeys = new Set(["control display", "condition", "conditions", "formulas", "wheres", "sortingfilter"]);
+
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+    for (const key of Object.keys(value)) {
+      const normalizedKey = normKey(key);
+      if (conditionalKeys.has(normalizedKey) && hasInvalidCollectionFieldReference(value[key], allowedFields)) {
+        delete value[key];
+        continue;
+      }
+      visit(value[key]);
+    }
+    const context = String(value.ctx || value.context || "").trim();
+    if (context !== "__ctx_coll" && !/Collection item:/i.test(String(value.name || ""))) return;
+    const fieldName = String(value.id || value.field || value.FieldName || value.fieldName || value.prop || "").trim();
+    if (!fieldName || allowedFields.has(normKey(fieldName))) return;
+    value.id = primaryField.fieldName;
+    if (Object.hasOwn(value, "field")) value.field = primaryField.fieldName;
+    if (Object.hasOwn(value, "FieldName")) value.FieldName = primaryField.fieldName;
+    if (Object.hasOwn(value, "fieldName")) value.fieldName = primaryField.fieldName;
+    if (Object.hasOwn(value, "prop")) value.prop = primaryField.fieldName;
+    value.name = `Collection item:${primaryField.displayName || primaryField.fieldName}`;
+  };
+  visit(root);
 }
 
 function pruneInvalidProgressControls(root, { fieldMap, allowedFields }) {
@@ -6592,6 +6635,44 @@ function normalizeAndPruneDashboardTempVars(resource) {
     const unprefixed = id.replace(/^__temp_/, "");
     return bodyText.includes(id) || bodyText.includes(`__temp_${unprefixed}`);
   });
+}
+
+function reconcilePageTempVariableReferences(resource) {
+  const declarations = (resource.tempVars || []).filter((item) => String(item?.id || "").trim());
+  const canonical = (value) => String(value || "").replace(/^__temp_/, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const declarationByCanonicalId = new Map(declarations.map((item) => [canonical(item.id), item]));
+  const findScopedDeclaration = (reference) => {
+    const referenceKey = canonical(reference);
+    if (declarationByCanonicalId.has(referenceKey)) return declarationByCanonicalId.get(referenceKey);
+    const matches = declarations.filter((item) => canonical(item.id).endsWith(referenceKey));
+    return matches.length === 1 ? matches[0] : null;
+  };
+  const containsUnresolvableTempReference = (value) => {
+    const text = JSON.stringify(value || {});
+    return [...text.matchAll(/__temp_([A-Za-z0-9_-]+)/g)].some((match) => !findScopedDeclaration(match[1]));
+  };
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+    for (const key of Object.keys(value)) {
+      if (normKey(key) === "control display" && containsUnresolvableTempReference(value[key])) {
+        delete value[key];
+        continue;
+      }
+      visit(value[key]);
+    }
+    if (String(value.exprType || "") !== "variable") return;
+    const rawId = String(value.id || "");
+    if (!rawId.startsWith("__temp_")) return;
+    const declaration = findScopedDeclaration(rawId);
+    if (!declaration) return;
+    value.id = `__temp_${declaration.id}`;
+    value.name = declaration.name || declaration.id;
+  };
+  visit(resource);
 }
 
 function inferDashboardTempVarType(id) {
@@ -8928,6 +9009,8 @@ function buildApprovalFormFieldControl({ field, index, formName, role, columns }
     binding: field.fieldName,
     fieldName: field.fieldName,
     approvalFieldMaterializedFromPlan: true,
+    approvalPlannedFieldType: field.fieldType,
+    approvalPlannedControlType: field.controlType,
     attrs: {
       common: {
         margin: [null, { top: "--sp--s0", right: "--sp--s0", bottom: "--sp--s0", left: "--sp--s0" }],
@@ -8970,19 +9053,7 @@ function parsePlannedDynamicDisplayRules(value, controlId) {
 }
 
 function normalizeApprovalControlType(field) {
-  const raw = normKey(`${field?.controlType || ""} ${field?.fieldType || ""} ${field?.displayName || ""}`);
-  if (/sub\s*list|detail\s*list|line\s*items?/.test(raw)) return "list";
-  if (/rich\s*text|html/.test(raw)) return "richtext";
-  if (/multi(?:ple)?\s*line|long\s*text|paragraph|purpose|justification|description|notes?/.test(raw)) return "textarea";
-  if (/user|identity|people|person|traveler|requester|approver|manager/.test(raw)) return "identity-picker";
-  if (/image|photo|picture/.test(raw)) return "image-upload";
-  if (/file|attachment|document/.test(raw)) return "file-upload";
-  if (/date|datetime|time/.test(raw)) return "datepicker";
-  if (/currency|cost|amount|budget|price|fee/.test(raw)) return "currency";
-  if (/decimal|number|integer|quantity|count|hours?/.test(raw)) return "input_number";
-  if (/bit|boolean|yes\/no|switch/.test(raw)) return "switch";
-  if (/choice|select|dropdown|radio|status|category|type|priority/.test(raw)) return "radio";
-  return "input";
+  return resolveSchemaAuthoritativeFormControlType(field);
 }
 
 function approvalVariableType(field) {
@@ -9135,7 +9206,7 @@ function inferControlType(fieldType) {
 
 function inferControlTypeFromFieldPlan({ displayName, fieldType, choiceValues }) {
   if (String(choiceValues || "").trim()) return "select";
-  return inferControlType(fieldType || displayName || "");
+  return inferControlType(fieldType || "");
 }
 
 function inferFieldTypeFromControlPlan({ displayName, controlType }) {

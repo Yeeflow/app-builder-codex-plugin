@@ -5,6 +5,12 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
 import { asArray, isObject, parseJsonMaybe, quoteLargeJsonIntegers, readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
+import {
+  isChoiceControlType,
+  isChoiceSchemaType,
+  isTextSchemaType,
+  resolveSchemaAuthoritativeFormControlType,
+} from "./lib/form-control-type-authority.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY_PATH = path.join(ROOT, "docs/reference/approval-form-field-layout-templates.json");
@@ -204,6 +210,7 @@ function validateResource(rawResource, context) {
   }
   for (const wrapper of wrappers) validateWrapper(wrapper, context);
   for (const entry of fieldControls) {
+    validateGeneratedControlTypeContract(entry, context);
     if (!isInsideAny(entry.node, wrappers)) {
       context.findings.push(error("APPROVAL_FORM_FIELDS_CONTROL_OUTSIDE_WRAPPER", "Approval form field controls must not be placed outside the approved field-grid wrapper.", { source: context.source, path: entry.pointer, type: entry.node?.type, identities: identityCandidates(entry.node) }));
     }
@@ -215,6 +222,48 @@ function validateResource(rawResource, context) {
       }
     }
   }
+}
+
+function validateGeneratedControlTypeContract(entry, context) {
+  const control = entry.node;
+  if (control?.approvalFieldMaterializedFromPlan !== true) return;
+  const actualType = String(control.type || "");
+  const schemaType = String(control.approvalPlannedFieldType || control?.attrs?.data?.variableType || "");
+  const plannedControlType = String(control.approvalPlannedControlType || "");
+  const detail = {
+    source: context.source,
+    path: entry.pointer,
+    field: control.fieldName || control.binding || control.label || control.name || "",
+    schemaType,
+    plannedControlType,
+    actualControlType: actualType,
+  };
+
+  if (isTextSchemaType(schemaType) && isChoiceControlType(actualType)) {
+    context.findings.push(error("TEXT_VARIABLE_MATERIALIZED_AS_CHOICE_CONTROL", "A generated Text field or variable must not become a Radio/Select control because its display name contains Status, Category, Type, or Priority.", detail));
+  }
+  if (isChoiceControlType(actualType) && !choiceValues(control).length) {
+    context.findings.push(error("CHOICE_CONTROL_OPTIONS_MISSING", "A generated Radio/Select control must contain real business choices from the App Plan or schema.", detail));
+  }
+  if (plannedControlType) {
+    const expectedType = resolveSchemaAuthoritativeFormControlType({ controlType: plannedControlType, fieldType: schemaType });
+    if (expectedType !== actualType) {
+      context.findings.push(error("CONTROL_TYPE_VARIABLE_TYPE_MISMATCH", "Generated field control type must match the explicit App Plan control type and variable schema.", { ...detail, expectedControlType: expectedType }));
+    }
+  }
+  if (isChoiceSchemaType(schemaType) && !isChoiceControlType(actualType)) {
+    context.findings.push(error("CONTROL_TYPE_VARIABLE_TYPE_MISMATCH", "Generated Choice fields must use a supported choice control.", { ...detail, expectedControlType: "radio or select" }));
+  }
+}
+
+function choiceValues(control) {
+  const candidates = [
+    control?.attrs?.choices,
+    control?.attrs?.options,
+    control?.attrs?.data?.choices,
+    control?.attrs?.Rules?.choices,
+  ];
+  return candidates.find((value) => Array.isArray(value) && value.length) || [];
 }
 
 function validateWrapper(wrapper, context) {

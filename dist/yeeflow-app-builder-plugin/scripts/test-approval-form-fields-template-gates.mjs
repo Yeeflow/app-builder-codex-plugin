@@ -7,6 +7,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { buildApprovalFormLayoutDef } from "./lib/approval-form-layout-builder.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPT = path.join(ROOT, "scripts/validate-approval-form-fields-template.mjs");
@@ -94,6 +95,67 @@ try {
   driftedLoanNumber.attrs.data = { field: "LoanNumber", fieldName: "LoanNumber", displayName: "Request Number" };
   firstWrapper(driftedLoanNumberResource).children.push(driftedLoanNumber);
   expectCode("Package with only technical LoanNumber binding but drifted visible label fails", ["--package", writePackage("package-loan-number-label-drift.yapk", decodedPackage(driftedLoanNumberResource)), "--plan", writeText("plan-loan-number-label-drift.md", appPlan({ extraSubmissionField: "Loan Number" }))], "APPROVAL_FORM_FIELDS_PLANNED_FIELD_NOT_MATERIALIZED");
+
+  const textStatusLayout = buildApprovalFormLayoutDef({
+    rootDir: ROOT,
+    id: "text-status-submission",
+    title: "Text Status Proof",
+    role: "submission",
+    fields: [{ displayName: "Workflow Proof Status", fieldName: "WorkflowProofStatus", fieldType: "Text", controlType: "input" }],
+  });
+  assert.equal(findByBinding(textStatusLayout, "WorkflowProofStatus")?.type, "input", "Text variables ending in Status must remain input controls");
+  results.push({ name: "shared builder keeps Text Status field as input", status: "pass" });
+
+  const choiceStatusLayout = buildApprovalFormLayoutDef({
+    rootDir: ROOT,
+    id: "choice-status-submission",
+    title: "Choice Status Proof",
+    role: "submission",
+    fields: [{ displayName: "Approval Status", fieldName: "ApprovalStatus", fieldType: "Choice", controlType: "radio", choiceValues: "Draft;Approved" }],
+  });
+  const choiceStatusControl = findByBinding(choiceStatusLayout, "ApprovalStatus");
+  assert.equal(choiceStatusControl?.type, "radio", "Explicit Choice fields may use radio controls");
+  assert.deepEqual(choiceStatusControl?.attrs?.choices, ["Draft", "Approved"], "Choice controls must preserve planned options");
+  results.push({ name: "shared builder preserves explicit Choice Status radio", status: "pass" });
+
+  const badTextChoice = approvalFormResource();
+  Object.assign(firstWrapper(badTextChoice).children[0], {
+    type: "radio",
+    approvalFieldMaterializedFromPlan: true,
+    approvalPlannedFieldType: "Text",
+    approvalPlannedControlType: "input",
+    binding: "WorkflowProofStatus",
+    fieldName: "WorkflowProofStatus",
+  });
+  firstWrapper(badTextChoice).children[0].attrs.data = { variableType: "Text" };
+  firstWrapper(badTextChoice).children[0].attrs.choices = ["Draft", "Completed"];
+  expectCode("generated Text Status variable cannot materialize as radio", ["--resource", writeJson("text-status-as-radio.json", badTextChoice), "--surface", "approval-form"], "TEXT_VARIABLE_MATERIALIZED_AS_CHOICE_CONTROL");
+  expectCode("generated control must match explicit App Plan control type", ["--resource", writeJson("text-status-control-mismatch.json", badTextChoice), "--surface", "approval-form"], "CONTROL_TYPE_VARIABLE_TYPE_MISMATCH");
+
+  const choiceWithoutOptions = approvalFormResource();
+  Object.assign(firstWrapper(choiceWithoutOptions).children[0], {
+    type: "radio",
+    approvalFieldMaterializedFromPlan: true,
+    approvalPlannedFieldType: "Choice",
+    approvalPlannedControlType: "radio",
+    binding: "ApprovalStatus",
+    fieldName: "ApprovalStatus",
+  });
+  choiceWithoutOptions.children ||= [];
+  firstWrapper(choiceWithoutOptions).children[0].attrs.data = { variableType: "Choice" };
+  expectCode("generated Choice radio without options fails", ["--resource", writeJson("choice-without-options.json", choiceWithoutOptions), "--surface", "approval-form"], "CHOICE_CONTROL_OPTIONS_MISSING");
+
+  const choiceAsInput = approvalFormResource();
+  Object.assign(firstWrapper(choiceAsInput).children[0], {
+    type: "input",
+    approvalFieldMaterializedFromPlan: true,
+    approvalPlannedFieldType: "Choice",
+    approvalPlannedControlType: "input",
+    binding: "ApprovalStatus",
+    fieldName: "ApprovalStatus",
+  });
+  firstWrapper(choiceAsInput).children[0].attrs.data = { variableType: "Choice" };
+  expectCode("generated Choice schema cannot be forced to input", ["--resource", writeJson("choice-as-input.json", choiceAsInput), "--surface", "approval-form"], "CONTROL_TYPE_VARIABLE_TYPE_MISMATCH");
 
   console.log(JSON.stringify({ status: "pass", results }, null, 2));
 } finally {
@@ -222,6 +284,16 @@ function find(node, identity) {
   if ([node.id, node.name, node.label, node.nv_label].filter(Boolean).map(String).includes(identity)) return node;
   for (const child of node.children || []) {
     const found = find(child, identity);
+    if (found) return found;
+  }
+  return null;
+}
+
+function findByBinding(node, binding) {
+  if (!node || typeof node !== "object") return null;
+  if (String(node.binding || node.fieldName || "") === binding) return node;
+  for (const child of node.children || []) {
+    const found = findByBinding(child, binding);
     if (found) return found;
   }
   return null;

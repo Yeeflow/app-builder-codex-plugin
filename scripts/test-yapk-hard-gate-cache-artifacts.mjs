@@ -10,6 +10,7 @@ const ROOT_MODE = pluginRootMode(ROOT);
 
 const hardGateScripts = [
   "scripts/lib/plugin-root-layout.mjs",
+  "scripts/lib/form-control-type-authority.mjs",
   "scripts/validate-yapk-id-provenance.mjs",
   "scripts/validate-yapk-navigation-runtime-metadata.mjs",
   "scripts/validate-yapk-live-install-readiness.mjs",
@@ -98,10 +99,14 @@ const hardGateScripts = [
   "scripts/test-sublist-summary-binding-gates.mjs",
   "scripts/test-approval-form-layout-template-gates.mjs",
   "scripts/test-approval-form-fields-template-gates.mjs",
+  "docs/standards/form-control-type-schema-authority-standard.md",
+  "docs/training/text-status-control-type-focused-training-report.md",
   "scripts/test-approval-sublist-column-title-gates.mjs",
   "scripts/validate-page-scope-template-dependencies.mjs",
   "docs/standards/dashboard-temp-variable-dependency-standard.md",
   "docs/training/dashboard-temp-variable-template-residue-focused-training-report.md",
+  "docs/standards/dashboard-collection-schema-dependency-closure-standard.md",
+  "docs/training/dashboard-collection-schema-dependency-closure-focused-training-report.md",
   "scripts/test-page-scope-template-dependency-gates.mjs",
   "scripts/test-approval-workflow-publish-readiness-gates.mjs",
   "scripts/test-workflow-layout-golden-reference-gates.mjs",
