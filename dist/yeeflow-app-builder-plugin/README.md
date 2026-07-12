@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.55`
+- Version: `0.9.56`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.55` fixes Approval Workflow Designer initial viewport placement and non-Report upgrade Form Report omission. Generated workflows open with nodes inside the visible canvas, offscreen initial extents fail before signing, and unchanged installed Form Reports are omitted from non-Report upgrade payloads unless report changes are explicitly in scope.
+Current release `0.9.56` corrects Approval Workflow `graphposition` from fresh-tab runtime proof and hardens Dashboard temporary-variable dependencies. Standalone and packaged workflows share the content-boundary contract, while generated Dashboards emit only complete, scoped, consumed `tempVars` declarations.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.55
+Version: 0.9.56
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.55
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.56
 ```
 
 ## What Is Included

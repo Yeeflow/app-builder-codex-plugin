@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.56
+
 - Correct the Approval workflow `graphposition` contract using fresh-tab runtime proof: derive origin from content minima plus `90px/45px`, preserve content-span dimensions, and reject both legacy negative origins and the obsolete viewport-translation formula across full-app and standalone `.ywf` generation.
 - Normalize Dashboard template temp variables into complete, scoped `id/name/type/idx` declarations, remove unused template residue, and reject name-only or undeclared temp-variable references before standalone `.ydp` or packaged handoff.
 
