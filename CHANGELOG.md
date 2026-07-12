@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.58
+
+- Classify Approval workflow human tasks by exact stencil so `SetVariableTask` no longer receives false assignee or task-page requirements while real `MultiAssignmentTask` / `CandidateTask` nodes remain protected.
+- Normalize Form Action Set Variable Host Type aliases across App Plan validation and shared Approval/Data List/Dashboard materialization; unsupported or contradictory host values now fail instead of silently dropping planned actions.
+- Add focused-upgrade scope materialization that omits only byte-equivalent installed Form reports and matching navigation payload items, clears stale signatures, and preserves changed reports for scope rejection.
+- Add source/dist regressions and real-candidate preflight proof while keeping Workflow SetVariableTask execution as a separate runtime-proof boundary.
+
 ## 0.9.57
 
 - Add export-backed Set Variable golden references across Dashboard, Approval Form, Data List Form, Approval Workflow, Data List Workflow, and Scheduled Workflow surfaces.
