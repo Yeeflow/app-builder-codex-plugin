@@ -10,10 +10,10 @@ This repository is the clean successor to `Yeeflow/yeeflow-codex-plugins`. It pr
 - Marketplace ID: `yeeflow`
 - Plugin: Yeeflow App Builder
 - Plugin ID: `yeeflow-app-builder`
-- Version: `0.9.52`
+- Version: `0.9.53`
 - Active dist path: `dist/yeeflow-app-builder-plugin`
 
-Current release `0.9.52` prevents planning-only no-resource labels such as `Not applicable.`, `Not planned`, `N/A`, and `None` from becoming generated Pages, reports, workflows, child resources, or navigation identities. A new generated-final hard gate blocks this failure class before signing.
+Current release `0.9.53` canonicalizes Approval Workflow Designer graph references across full-app and standalone `.ywf` generation. SequenceFlow source, target, incoming, and outgoing endpoints must use matching `id` and lowercase `resourceid`; malformed `resourceId` substitutions and endpoint mismatches now fail before signing or publish-readiness claims.
 
 ## Install In Codex App
 
@@ -30,13 +30,13 @@ Expected installed identity:
 ```text
 Marketplace: Yeeflow
 Plugin: Yeeflow App Builder
-Version: 0.9.52
+Version: 0.9.53
 ```
 
 Verify metadata from a checkout:
 
 ```sh
-node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.52
+node scripts/inspect-codex-plugin-cache-metadata.mjs --root . --expect-version 0.9.53
 ```
 
 ## What Is Included
