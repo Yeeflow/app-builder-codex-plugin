@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { cleanPlanningLabel, isPlanningPlaceholder } from "./planning-placeholder-utils.mjs";
 
 const UUID_CONTROL_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -494,13 +495,13 @@ function inferControlType(fieldType) {
 }
 
 function cleanResourceName(value) {
-  return String(value || "").replace(/`/g, "").replace(/\*\*/g, "").trim();
+  return cleanPlanningLabel(value);
 }
 
 function isNonResourceName(value) {
   const text = cleanResourceName(value);
-  if (!text) return true;
-  if (/^(not applicable|not planned|n\/a|none|no|deferred|status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
+  if (isPlanningPlaceholder(text)) return true;
+  if (/^(status|resource type|notes?|owner|used by|actions?|fields?)$/i.test(text)) return true;
   if (/^no\s+(?:form\s+)?reports?\b/i.test(text)) return true;
   if (/^no custom\b/i.test(text)) return true;
   if (/^(dashboard|dashboard page|dashboard page name|page|page name|list name|form name|group|item|section|metric name|filter name)$/i.test(text)) return true;

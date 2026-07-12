@@ -71,6 +71,12 @@ export function runYapkFirstGenerationPreflight(packagePath, options = {}) {
   gates.push(runGate("navigation-runtime-metadata", ["scripts/validate-yapk-navigation-runtime-metadata.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
   gates.push(runGate("live-install-readiness", ["scripts/validate-yapk-live-install-readiness.mjs", "--package", resolvedPackage, "--id-provenance", idProvenance]));
   gates.push(runGate("generated-yapk-export-shape-materialization", ["scripts/validate-generated-yapk-export-shape.mjs", "--package", resolvedPackage]));
+  gates.push(runGate("planning-placeholder-materialization", [
+    "scripts/validate-planning-placeholder-materialization.mjs",
+    "--package",
+    resolvedPackage,
+    ...(plan ? ["--plan", plan] : []),
+  ]));
   gates.push(runGate("dashboard-grid-table-collections", ["scripts/validate-dashboard-grid-table-collections.mjs", "--package", resolvedPackage]));
   gates.push(runGate("dashboard-dataset-presentation-golden-references", [
     "scripts/validate-dashboard-dataset-presentation-golden-references.mjs",

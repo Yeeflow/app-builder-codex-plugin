@@ -5,6 +5,8 @@ description: Standardize Yeeflow package validation before import or runtime tes
 
 # Yeeflow Package Validator
 
+Planning-placeholder materialization is a signing-readiness hard gate. Run `scripts/validate-planning-placeholder-materialization.mjs --package <generated-final.yapk> --plan <yeeflow-app-plan.md>` directly or through `yapk-first-generation-preflight.mjs`. Planning-only values such as `Not applicable.` (including trailing punctuation), `Not planned`, `N/A`, `None`, `No Dashboard required`, and `Dashboard not required` must never appear as Pages, reports, workflows, child resources, navigation groups/items/targets, provenance entries, or visible resource identities. Fail with `PLANNING_PLACEHOLDER_MATERIALIZED_AS_RESOURCE`. Whole-label matching must preserve legitimate business names such as `Not Applicable Cases`.
+
 ## Approval Workflow Designer Editability
 
 Approval workflow validation must enforce `docs/standards/approval-workflow-designer-editability-standard.md`, not only graph connectivity. In generated-final mode, fail non-SequenceFlow nodes without positive-area `bounds`, bounds/position mismatches, undeclared or type-incompatible QueryData result/count variables, empty QueryData result fields, empty ContentList add/edit mappings, edit/remove actions without target-record conditions, and Update/Edit actions emitted as add. These checks apply equally to standalone `.ywf` and Approval workflows inside `.yapk`. Import acceptance or a visible canvas does not prove that nodes can be selected, edited, extended, saved, or published.
