@@ -65,11 +65,53 @@ try {
   firstWrapper(badSubListStyle).children[2].attrs.header.ty = [null, "h5-medium"];
   expectCode("Sub list locked template style drift fails", ["--resource", writeJson("bad-sublist-style.json", badSubListStyle), "--surface", "data-list-form"], "DATA_LIST_FORM_SUBLIST_TEMPLATE_STYLE_DRIFT");
 
+  const missingSubListColumnLabel = dataListFormResource();
+  delete firstWrapper(missingSubListColumnLabel).children[2].attrs["list-fields"][1].control.label;
+  expectCode("Sub list column without control label fails", ["--resource", writeJson("missing-sublist-column-label.json", missingSubListColumnLabel), "--surface", "data-list-form"], "DATA_LIST_FORM_SUBLIST_COLUMN_CONTROL_LABEL_MISSING");
+
+  const badSubListColumnBinding = dataListFormResource();
+  firstWrapper(badSubListColumnBinding).children[2].attrs["list-fields"][1].control.binding = "TemplateResidueField";
+  expectCode("Sub list column with stale binding fails", ["--resource", writeJson("bad-sublist-column-binding.json", badSubListColumnBinding), "--surface", "data-list-form"], "DATA_LIST_FORM_SUBLIST_COLUMN_BINDING_MISMATCH");
+
+  const badSubListRowSchema = dataListFormResource();
+  firstWrapper(badSubListRowSchema).children[2].attrs["list-variables"].reverse();
+  expectCode("Sub list list-fields and list-variables order mismatch fails", ["--resource", writeJson("bad-sublist-row-schema.json", badSubListRowSchema), "--surface", "data-list-form"], "DATA_LIST_FORM_SUBLIST_ROW_SCHEMA_MISMATCH");
+
+  const badSubListSummaryPrefix = dataListFormResource();
+  firstWrapper(badSubListSummaryPrefix).children[2].attrs["list-fields-summary"] = [{
+    id: "4fd19ddc-1a8f-4ab4-9d8b-14be20202b52",
+    field: "field_Name",
+    type: "total",
+    display: true,
+    binding: { prefix: "__variables_", value: "InvalidTarget" },
+  }];
+  expectCode("Data List Sub list Summary rejects Approval variable prefix", ["--resource", writeJson("bad-sublist-summary-prefix.json", badSubListSummaryPrefix), "--surface", "data-list-form"], "DATA_LIST_FORM_SUBLIST_SUMMARY_BINDING_PREFIX_INVALID");
+
+  const missingSubListSummaryField = dataListFormResource();
+  firstWrapper(missingSubListSummaryField).children[2].attrs["list-fields-summary"] = [{
+    id: "87695df2-c30d-4d8d-b704-d4a2c792d0e7",
+    field: "MissingRowField",
+    type: "total",
+    display: true,
+    binding: null,
+  }];
+  expectCode("Data List Sub list Summary source must exist", ["--resource", writeJson("missing-sublist-summary-field.json", missingSubListSummaryField), "--surface", "data-list-form"], "DATA_LIST_FORM_SUBLIST_SUMMARY_SOURCE_FIELD_MISSING");
+
   const badMobile = dataListFormResource();
   firstWrapper(badMobile).attrs.columns["3"].list = [{ value: 1, unit: "fr" }, { value: 1, unit: "fr" }];
   expectCode("mobile grid columns above one fails", ["--resource", writeJson("bad-mobile.json", badMobile), "--surface", "data-list-form"], "DATA_LIST_FORM_FIELDS_GRID_MOBILE_COLUMNS_INVALID");
 
   expectPass("package with form field-grid passes", ["--package", writePackage("valid-package.yapk", decodedPackage(validForm))]);
+  const rulesMismatchPackage = decodedPackage(validForm);
+  rulesMismatchPackage.Childs[0].Fields.push({
+    FieldID: "sublist-field-id",
+    FieldName: "LineItems",
+    DisplayName: "Line Items",
+    FieldType: "Text",
+    Type: "list",
+    Rules: JSON.stringify({ "list-variables": [{ id: "DifferentField", name: "Different Field", type: "text", editable: true }] }),
+  });
+  expectCode("package Sub list form schema must match field Rules", ["--package", writePackage("rules-mismatch-package.yapk", rulesMismatchPackage)], "DATA_LIST_FORM_SUBLIST_FIELD_RULES_SCHEMA_MISMATCH");
   expectCode("App Plan missing field layout selection fails", ["--plan", writeText("plan-missing-field-layout.md", appPlan({ omitFieldSelection: true }))], "DATA_LIST_FORM_FIELDS_APP_PLAN_SELECTION_TABLE_MISSING");
   expectCode("App Plan tablet columns above PC fails", ["--plan", writeText("plan-bad-tablet.md", appPlan({ pc: 2, tablet: 3, mobile: 1 }))], "DATA_LIST_FORM_FIELDS_APP_PLAN_TABLET_COLUMNS_INVALID");
   expectPass("App Plan field layout selection passes", ["--plan", writeText("plan-valid.md", appPlan())]);
@@ -177,11 +219,41 @@ function subListControl({ label, span }) {
   control.name = label;
   control.title = label;
   control.binding = "LineItems";
+  control.fieldID = "sublist-field-id";
   control.nv_label = fieldNavLabel(label);
   control.dataListFormControlTemplateId = SUBLIST_TEMPLATE_ID;
   control.derivedFromDataListFormControlTemplate = SUBLIST_TEMPLATE_ID;
   control.attrs.common.grid = { position: span };
+  control.attrs["list-variables"] = campaignRowFields().map(({ id, idx, name, type, editable }) => ({ id, idx, name, type, editable }));
+  control.attrs["list-fields"] = campaignRowFields().map((field, index) => ({
+    id: field.id,
+    idx: field.idx,
+    name: field.name,
+    type: field.type,
+    editable: field.editable,
+    control: {
+      id: `campaign-column-${index + 1}`,
+      label: field.label,
+      binding: field.id,
+      type: field.controlType,
+      attrs: {
+        list_field: true,
+        list_field_binding: "LineItems",
+        list_control_id: control.id,
+      },
+      displayLabel: [null, true],
+    },
+  }));
+  delete control.attrs["list-fields-summary"];
   return control;
+}
+
+function campaignRowFields() {
+  return [
+    { idx: "469a3e93-d699-49b6-9f44-5f35d9f6dca3", id: "field_Name", name: "field_Name", label: "Name", type: "text", controlType: "input", editable: true },
+    { idx: "1702f6f1-d376-475d-bbe8-ad8c14b2d406", id: "field_Description", name: "field_Description", label: "Description", type: "text", controlType: "input", editable: true },
+    { idx: "c7c8ad68-82b1-42e3-a389-a21dffe2c993", id: "field_User", name: "field_User", label: "Owner", type: "user", controlType: "identity-picker", editable: true },
+  ];
 }
 
 function fieldNavLabel(label) {

@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildApprovalFormLayoutDef } from "./lib/approval-form-layout-builder.mjs";
+import { buildApprovalFormLayoutDef, ensureApprovalSubListColumnTitles } from "./lib/approval-form-layout-builder.mjs";
 import { approvalWorkflowNodeSize } from "./lib/approval-workflow-designer-shape-utils.mjs";
 import { validateApprovalFormLayoutTemplate } from "./validate-approval-form-layout-template.mjs";
 import workflowAssigneeExpressionUtils from "./lib/workflow-assignee-expression-utils.cjs";
@@ -39,8 +39,27 @@ const cases = [];
 
 expectPass("valid export-shaped approval form workflow");
 expectStandaloneYwfApprovalLayoutPass();
+expectApprovalSubListColumnTitlesPass();
+expectApprovalSubListCustomColumnTitlePreserved();
+expectCode("Sub List column without control label fails", (def) => {
+  addApprovalSubListFixture(def);
+  delete approvalSubListControls(def)[0].attrs["list-fields"][0].control.label;
+}, "APPROVAL_SUBLIST_COLUMN_CONTROL_LABEL_MISSING");
+expectCode("Sub List column without label_var fails", (def) => {
+  addApprovalSubListFixture(def);
+  delete approvalSubListControls(def)[0].attrs["list-fields"][0].control.label_var;
+}, "APPROVAL_SUBLIST_COLUMN_CONTROL_LABEL_VAR_MISSING");
+expectCode("canonically duplicate Approval variable id fails", (def) => {
+  def.variables.basic.push({ id: "Request Title", idx: "Request Title", name: "Request Title", type: "text" });
+}, "DUPLICATE_VARIABLE_ID_CANONICAL");
+expectCode("Approval basic and temp variable ids share one resource namespace", (def) => {
+  def.variables.tempVars = [{ id: "Request Title", idx: "Request Title" }];
+}, "DUPLICATE_VARIABLE_ID_CANONICAL");
+expectCode("Approval basic and filter variable ids share one resource namespace", (def) => {
+  def.variables.filter = [{ id: "Request-Title", idx: "Request-Title" }];
+}, "DUPLICATE_VARIABLE_ID_CANONICAL");
 expectCode("object binding fails", (def) => {
-  firstValueControl(def).binding = { value: "RequestTitle" };
+  firstValueControl(def).binding = { value: "requestTitle" };
 }, "CONTROL_BINDING_NOT_STRING");
 expectCode("legacy date control fails", (def) => {
   firstValueControl(def).type = "date";
@@ -98,7 +117,7 @@ expectCode("Query Data workflow count target must be numeric", (def) => {
     mode: QUERY_DATA_MODES.MULTIPLE_COUNT_ONLY,
     name: "Query count only",
     source: querySource(),
-    countTarget: { id: "RequestTitle", parent: "__variables_" },
+    countTarget: { id: "requestTitle", parent: "__variables_" },
   });
   addQueryDataFixture(def, [step]);
 }, "FORM_ACTION_QUERYDATA_COUNT_TARGET_NOT_NUMBER");
@@ -165,6 +184,118 @@ function expectStandaloneYwfApprovalLayoutPass() {
   cases.push({ case: "pass: standalone .ywf approval pages use Approval Form Layouts v1.1", status: "pass" });
 }
 
+function expectApprovalSubListColumnTitlesPass() {
+  const def = validDef();
+  addApprovalSubListFixture(def);
+  const controls = approvalSubListControls(def);
+  assert.equal(controls.length, 2, "Submission and Task forms should both materialize the Itinerary Sub List");
+  for (const control of controls) {
+    assert.equal(control.attrs["list-fields"].length, 7, "each Itinerary Sub List should materialize 7 visible columns");
+    for (const field of control.attrs["list-fields"]) {
+      assert.equal(typeof field.control.label, "string", `${field.id} should include a string control.label`);
+      assert.ok(field.control.label.trim(), `${field.id} should include a non-empty control.label`);
+      assert.equal(field.control.label_var, null, `${field.id} should use label_var=null for its fixed column title`);
+    }
+  }
+  const report = validateDecodedDef(def, { mode: "final" });
+  assert.notEqual(report.status, "fail", `7/7 Submission and Task Sub List column titles should not fail\n${JSON.stringify(report, null, 2)}`);
+  assert.equal(report.errors.length, 0, `7/7 Submission and Task Sub List column titles should have no errors\n${JSON.stringify(report, null, 2)}`);
+  cases.push({ case: "pass: Approval Sub List 7/7 column titles on Submission and Task forms", status: "pass" });
+}
+
+function expectApprovalSubListCustomColumnTitlePreserved() {
+  const resource = buildApprovalFormLayoutDef({
+    rootDir: ROOT,
+    id: IDS.requestPage,
+    title: "Business Travel Request Approval",
+    role: "submission",
+    fields: [itinerarySubListField()],
+  });
+  const listControl = findControls(resource, (control) => control.type === "list")[0];
+  listControl.attrs["list-fields"][0].control.label = "Custom Itinerary Date";
+  ensureApprovalSubListColumnTitles(resource);
+  assert.equal(listControl.attrs["list-fields"][0].control.label, "Custom Itinerary Date", "normalizer must preserve an existing custom business column title");
+  cases.push({ case: "pass: existing custom Approval Sub List column title is preserved", status: "pass" });
+}
+
+function addApprovalSubListFixture(def) {
+  const fields = [
+    { displayName: "Request Title", fieldName: "RequestTitle", fieldType: "Text", controlType: "input" },
+    itinerarySubListField(),
+  ];
+  def.pageurls[0].formdef = buildApprovalFormLayoutDef({
+    rootDir: ROOT,
+    id: IDS.requestPage,
+    title: "Business Travel Request Approval",
+    role: "submission",
+    fields,
+  });
+  def.pageurls[1].formdef = buildApprovalFormLayoutDef({
+    rootDir: ROOT,
+    id: IDS.taskPage,
+    title: "Business Travel Request Approval",
+    role: "task",
+    fields,
+  });
+  def.variables.basic.push({
+    id: "Travel Itinerary",
+    idx: "Travel Itinerary",
+    name: "Travel Itinerary",
+    type: "list",
+    value: "TravelItineraryListRef",
+  });
+  def.variables.listref.push({
+    id: "TravelItineraryListRef",
+    idx: "TravelItineraryListRef",
+    name: "Travel Itinerary",
+    fields: itinerarySubListField().listFields.map((field) => ({
+      id: field.id,
+      idx: field.id,
+      name: field.displayName,
+      type: field.fieldType,
+      editable: true,
+    })),
+  });
+}
+
+function itinerarySubListField() {
+  return {
+    displayName: "Itinerary lines",
+    fieldName: "Travel Itinerary",
+    fieldType: "Sub list",
+    controlType: "list",
+    listRefId: "TravelItineraryListRef",
+    listFields: [
+      { id: "ItineraryDate", displayName: "Date", columnTitle: "Itinerary Date", fieldType: "date", controlType: "datepicker" },
+      { id: "FromLocation", displayName: "From", columnTitle: "From Location", fieldType: "text", controlType: "input" },
+      { id: "ToLocation", displayName: "To", columnTitle: "To Location", fieldType: "text", controlType: "input" },
+      { id: "TransportMode", displayName: "Transport Mode", fieldType: "text", controlType: "input" },
+      { id: "Nights", displayName: "Nights", fieldType: "number", controlType: "input_number" },
+      { id: "AccommodationNeeded", displayName: "Accommodation Needed", fieldType: "boolean", controlType: "switch" },
+      { id: "ItineraryNotes", displayName: "Notes", fieldType: "text", controlType: "input" },
+    ],
+  };
+}
+
+function approvalSubListControls(def) {
+  return def.pageurls.flatMap((page) => findControls(page.formdef, (control) => control.type === "list" && control.binding === "Travel Itinerary"));
+}
+
+function findControls(root, predicate) {
+  const controls = [];
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+    if (value.type && predicate(value)) controls.push(value);
+    Object.values(value).forEach(visit);
+  };
+  visit(root);
+  return controls;
+}
+
 function expectCode(label, mutate, expectedCode) {
   const def = validDef();
   mutate(def);
@@ -224,7 +355,7 @@ function querySteps() {
       source: querySource(),
       filters: queryFilters(),
       sorts: querySorts(),
-      fieldMap: { Title: "RequestTitle" },
+      fieldMap: { Title: "requestTitle" },
     }),
     buildFormActionQueryDataStep({
       mode: QUERY_DATA_MODES.SINGLE_TO_TEMP_VARIABLES,
@@ -296,7 +427,7 @@ function validDef() {
     graphposition: { x: 0, y: 0, width: 1100, height: 700 },
     flowPage: [],
     variables: {
-      basic: [{ id: "RequestTitle", name: "Request Title", type: "text" }],
+      basic: [{ id: "requestTitle", idx: "requestTitle", name: "requestTitle", title: "Request Title", type: "text" }],
       listref: [],
       filter: [],
     },
@@ -346,7 +477,7 @@ function formdef(title, pagetype) {
               id: uuidFromLabel(`${title} request title`),
               type: "input",
               label: "Request Title",
-              binding: "RequestTitle",
+              binding: "requestTitle",
               attrs: {
                 common: { positioning: { widthtype: [null, "3"], width: [null, 960], widthu: [null, "px"] } },
               },

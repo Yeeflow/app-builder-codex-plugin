@@ -381,6 +381,8 @@ function validateDecodedDef(def, options = {}) {
   function validateVariables() {
     const ids = new Set();
     const idxs = new Set();
+    const canonicalIds = new Map();
+    const canonicalIdxs = new Map();
     basicVars.forEach((variable, index) => {
       const p = `$.variables.basic[${index}]`;
       if (!variable || typeof variable.id !== "string") {
@@ -389,12 +391,72 @@ function validateDecodedDef(def, options = {}) {
       }
       if (ids.has(variable.id)) addIssue(errors, "DUPLICATE_VARIABLE_ID", `Duplicate variables.basic id: ${variable.id}`, p);
       ids.add(variable.id);
+      const canonicalId = canonicalVariableIdentity(variable.id);
+      if (canonicalId && canonicalIds.has(canonicalId) && canonicalIds.get(canonicalId) !== variable.id) {
+        addIssue(errors, "DUPLICATE_VARIABLE_ID_CANONICAL", `Variable id ${variable.id} conflicts with ${canonicalIds.get(canonicalId)} after Yeeflow canonical normalization`, `${p}.id`, {
+          canonicalId,
+          firstId: canonicalIds.get(canonicalId),
+          duplicateId: variable.id,
+        });
+      } else if (canonicalId) canonicalIds.set(canonicalId, variable.id);
       variableById.set(variable.id, variable);
       if (variable.idx) {
         if (idxs.has(variable.idx)) addIssue(errors, "DUPLICATE_VARIABLE_IDX", `Duplicate variables.basic idx: ${variable.idx}`, p);
         idxs.add(variable.idx);
+        const canonicalIdx = canonicalVariableIdentity(variable.idx);
+        if (canonicalIdx && canonicalIdxs.has(canonicalIdx) && canonicalIdxs.get(canonicalIdx) !== variable.idx) {
+          addIssue(errors, "DUPLICATE_VARIABLE_IDX_CANONICAL", `Variable idx ${variable.idx} conflicts with ${canonicalIdxs.get(canonicalIdx)} after Yeeflow canonical normalization`, `${p}.idx`, {
+            canonicalIdx,
+            firstIdx: canonicalIdxs.get(canonicalIdx),
+            duplicateIdx: variable.idx,
+          });
+        } else if (canonicalIdx) canonicalIdxs.set(canonicalIdx, variable.idx);
       }
     });
+
+    for (const [groupName, variables] of [
+      ["tempVars", asArray(def.variables && def.variables.tempVars)],
+      ["filter", asArray(def.variables && def.variables.filter)],
+    ]) {
+      variables.forEach((variable, index) => {
+        const p = `$.variables.${groupName}[${index}]`;
+        if (!variable || typeof variable.id !== "string" || !variable.id.trim()) {
+          addIssue(errors, "VARIABLE_MISSING_ID", `variables.${groupName} entry must have a string id`, p);
+          return;
+        }
+        if (ids.has(variable.id)) {
+          addIssue(errors, "DUPLICATE_VARIABLE_ID", `Variable id ${variable.id} is duplicated within this Approval Form`, `${p}.id`, { group: groupName });
+        }
+        const canonicalId = canonicalVariableIdentity(variable.id);
+        if (canonicalId && canonicalIds.has(canonicalId) && canonicalIds.get(canonicalId) !== variable.id) {
+          addIssue(errors, "DUPLICATE_VARIABLE_ID_CANONICAL", `Variable id ${variable.id} conflicts with ${canonicalIds.get(canonicalId)} after Yeeflow canonical normalization`, `${p}.id`, {
+            canonicalId,
+            firstId: canonicalIds.get(canonicalId),
+            duplicateId: variable.id,
+            group: groupName,
+          });
+        }
+        ids.add(variable.id);
+        if (canonicalId && !canonicalIds.has(canonicalId)) canonicalIds.set(canonicalId, variable.id);
+
+        if (variable.idx) {
+          if (idxs.has(variable.idx)) {
+            addIssue(errors, "DUPLICATE_VARIABLE_IDX", `Variable idx ${variable.idx} is duplicated within this Approval Form`, `${p}.idx`, { group: groupName });
+          }
+          const canonicalIdx = canonicalVariableIdentity(variable.idx);
+          if (canonicalIdx && canonicalIdxs.has(canonicalIdx) && canonicalIdxs.get(canonicalIdx) !== variable.idx) {
+            addIssue(errors, "DUPLICATE_VARIABLE_IDX_CANONICAL", `Variable idx ${variable.idx} conflicts with ${canonicalIdxs.get(canonicalIdx)} after Yeeflow canonical normalization`, `${p}.idx`, {
+              canonicalIdx,
+              firstIdx: canonicalIdxs.get(canonicalIdx),
+              duplicateIdx: variable.idx,
+              group: groupName,
+            });
+          }
+          idxs.add(variable.idx);
+          if (canonicalIdx && !canonicalIdxs.has(canonicalIdx)) canonicalIdxs.set(canonicalIdx, variable.idx);
+        }
+      });
+    }
 
     const listrefIds = new Set();
     listrefs.forEach((listref, index) => {
@@ -1363,6 +1425,25 @@ function validateDecodedDef(def, options = {}) {
     if (!Array.isArray(control.attrs["list-variables"])) {
       addIssue(errors, "LIST_CONTROL_MISSING_VARIABLES", "List control must have attrs[\"list-variables\"]", `${controlPath}.attrs`);
     }
+    control.attrs["list-fields"].forEach((field, fieldIndex) => {
+      const fieldPath = `${controlPath}.attrs["list-fields"][${fieldIndex}]`;
+      const nestedControl = field && field.control;
+      if (!nestedControl || typeof nestedControl !== "object") return;
+      const title = typeof nestedControl.label === "string" ? nestedControl.label.trim() : "";
+      const target = mode === "final" ? errors : warnings;
+      if (!title) {
+        addIssue(target, "APPROVAL_SUBLIST_COLUMN_CONTROL_LABEL_MISSING", "Every visible Sub List column control must include a non-empty control.label so Yeeflow can render the table header.", `${fieldPath}.control.label`, {
+          fieldId: field.id || null,
+          fieldName: field.name || null,
+        });
+      }
+      if (!Object.prototype.hasOwnProperty.call(nestedControl, "label_var")) {
+        addIssue(target, "APPROVAL_SUBLIST_COLUMN_CONTROL_LABEL_VAR_MISSING", "Every visible Sub List column control must include label_var; use null for a fixed business title.", `${fieldPath}.control.label_var`, {
+          fieldId: field.id || null,
+          fieldName: field.name || null,
+        });
+      }
+    });
     const expected = new Set(asArray(listref.fields).map((f) => f.id));
     const actual = new Set(control.attrs["list-fields"].map((f) => f && f.id).filter(Boolean));
     const listVariables = new Set(asArray(control.attrs["list-variables"]).map((f) => f && f.id).filter(Boolean));
@@ -1489,12 +1570,19 @@ function validateDecodedDef(def, options = {}) {
     const summaries = asArray(control.attrs && control.attrs["list-fields-summary"]);
     if (!summaries.length) return;
     const fields = new Map(asArray(listref.fields).map((field) => [field.id, field]));
+    const summaryIds = new Set();
     summaries.forEach((summaryEntry, summaryIndex) => {
       const p = `${controlPath}.attrs["list-fields-summary"][${summaryIndex}]`;
       if (!summaryEntry || typeof summaryEntry !== "object") {
         addIssue(errors, "LIST_SUMMARY_BAD_ENTRY", "List summary entry must be an object", p);
         return;
       }
+      if (!UUID_RE.test(String(summaryEntry.id || ""))) {
+        addIssue(errors, "LIST_SUMMARY_ID_INVALID", "List summary entries must use UUID ids", `${p}.id`);
+      } else if (summaryIds.has(summaryEntry.id)) {
+        addIssue(errors, "LIST_SUMMARY_ID_DUPLICATE", `Duplicate list summary id ${summaryEntry.id}`, `${p}.id`);
+      }
+      if (summaryEntry.id) summaryIds.add(summaryEntry.id);
       const sourceField = fields.get(summaryEntry.field);
       if (!sourceField) {
         addIssue(errors, "LIST_SUMMARY_UNKNOWN_FIELD", `List summary references missing row field ${summaryEntry.field}`, `${p}.field`);
@@ -1513,8 +1601,8 @@ function validateDecodedDef(def, options = {}) {
       if (summaryEntry.binding) {
         if (!Object.prototype.hasOwnProperty.call(summaryEntry.binding, "prefix")) {
           addIssue(errors, "LIST_SUMMARY_BINDING_PREFIX_MISSING", "List summary binding must contain literal key prefix", `${p}.binding`);
-        } else if (summaryEntry.binding.prefix !== "__variables_") {
-          addIssue(warnings, "LIST_SUMMARY_BINDING_PREFIX_UNEXPECTED", "List summary binding prefix should normally be __variables_", `${p}.binding.prefix`, {
+        } else if (!["__variables_", "__temp_"].includes(summaryEntry.binding.prefix)) {
+          addIssue(errors, "LIST_SUMMARY_BINDING_PREFIX_INVALID", "Approval Sub List summaries may bind only to Approval variables (__variables_) or page temporary variables (__temp_).", `${p}.binding.prefix`, {
             prefix: summaryEntry.binding.prefix,
           });
         }
@@ -1526,10 +1614,13 @@ function validateDecodedDef(def, options = {}) {
           }
         }
         const target = summaryEntry.binding.value;
-        const targetVar = variableById.get(target);
-        if (!targetVar) {
+        const isTempTarget = summaryEntry.binding.prefix === "__temp_";
+        const targetVar = isTempTarget ? null : variableById.get(target);
+        if (isTempTarget && !tempVarIds.has(target)) {
+          addIssue(errors, "LIST_SUMMARY_BINDING_UNKNOWN_TEMP_VARIABLE", `List summary binding target temporary variable ${target} does not exist`, `${p}.binding.value`);
+        } else if (!isTempTarget && !targetVar) {
           addIssue(errors, "LIST_SUMMARY_BINDING_UNKNOWN_VARIABLE", `List summary binding target variable ${target} does not exist`, `${p}.binding.value`);
-        } else if (isNumericField && targetVar.type !== "number") {
+        } else if (!isTempTarget && isNumericField && targetVar.type !== "number") {
           addIssue(errors, "LIST_SUMMARY_BINDING_TYPE_MISMATCH", `Numeric list summary ${summaryEntry.field} should bind to a number variable`, `${p}.binding.value`, {
             target,
             targetType: targetVar.type,
@@ -2305,6 +2396,10 @@ function validateDecodedDef(def, options = {}) {
       });
     }
   }
+}
+
+function canonicalVariableIdentity(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function main() {

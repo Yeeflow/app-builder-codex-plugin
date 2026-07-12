@@ -215,6 +215,8 @@ When an approved App Plan declares Dashboard Summary/KPI metrics or filters, gen
 
 Every generated Dashboard page is a single dependency scope. When cloning approved component templates into the selected page layout, rename template-owned `filterVars`, `tempVars`, `actions`, and `formAction` entries with a page/region namespace before merging them into the Dashboard resource, and rewrite all in-template `__filter_...`, `__temp_...`, and action references. Multiple Data Filter/Search controls on one Dashboard must not produce the same filter variable unless they are intentionally the same control instance.
 
+Within one Dashboard page resource, `filterVars[]` and `tempVars[]` share one variable-id namespace. IDs must be unique after removing `__filter_` / `__temp_`, lowercasing, and removing spaces and punctuation. Duplicate or canonically equivalent IDs within either array or across both arrays must fail with `PAGE_SCOPE_VARIABLE_ID_DUPLICATE` before export or signing.
+
 Search filter placeholder values are runtime input text, not style objects. Generated `search-filter.attrs.placeholder` must be a primitive string such as `"Search Vendor Requests"`. Object-shaped values such as `{ "value": "Search Vendor Requests" }` are forbidden because Yeeflow runtime renders them as `[object Object]`. Keep placeholder color/style metadata in supported edit/style properties instead of the runtime placeholder text field.
 
 ## Runtime Route

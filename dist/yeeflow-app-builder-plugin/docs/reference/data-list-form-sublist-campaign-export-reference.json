@@ -1,0 +1,54 @@
+{
+  "referenceId": "data_list_form_sublist_campaign_export_reference_v1",
+  "source": "Sanitized from Campaign.ydl / View Campaign",
+  "hostField": {
+    "FieldName": "Text3",
+    "DisplayName": "Event Items",
+    "FieldType": "Text",
+    "Type": "list",
+    "Rules": "{\"list-variables\":[{\"idx\":\"469a3e93-d699-49b6-9f44-5f35d9f6dca3\",\"id\":\"field_Name\",\"name\":\"field_Name\",\"type\":\"text\",\"editable\":true},{\"idx\":\"1702f6f1-d376-475d-bbe8-ad8c14b2d406\",\"id\":\"field_Description\",\"name\":\"field_Description\",\"type\":\"text\",\"editable\":true},{\"idx\":\"c7c8ad68-82b1-42e3-a389-a21dffe2c993\",\"id\":\"field_User\",\"name\":\"field_User\",\"type\":\"user\",\"editable\":true}]}"
+  },
+  "formControl": {
+    "type": "list",
+    "binding": "Text3",
+    "label": "Event Items",
+    "attrs": {
+      "list-fields": [
+        {
+          "id": "field_Name",
+          "control": {
+            "label": "field_Name",
+            "binding": "field_Name",
+            "type": "input",
+            "displayLabel": [null, true],
+            "attrs": { "list_field": true, "list_field_binding": "Text3" }
+          }
+        },
+        {
+          "id": "field_Description",
+          "control": {
+            "label": "field_Description",
+            "binding": "field_Description",
+            "type": "input",
+            "displayLabel": [null, true],
+            "attrs": { "list_field": true, "list_field_binding": "Text3" }
+          }
+        },
+        {
+          "id": "field_User",
+          "control": {
+            "label": "field_User",
+            "binding": "field_User",
+            "type": "identity-picker",
+            "displayLabel": [null, true],
+            "attrs": { "list_field": true, "list_field_binding": "Text3" }
+          }
+        }
+      ]
+    }
+  },
+  "differencesFromApprovalForm": {
+    "nestedControlLabelRequired": true,
+    "nestedControlLabelVarRequired": false
+  }
+}

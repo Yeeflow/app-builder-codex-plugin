@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.9.54
+
+- Materialize non-empty business column titles on every Approval and Data List Sub List row control, preserving custom titles and blocking missing labels before signing.
+- Add export-backed Sub List Summary generation for Approval workflow variables, Approval temporary variables, Data List fields, and Data List temporary variables with numeric-source and binding validation.
+- Reuse the built-in Approval `requestTitle` variable instead of creating canonically duplicate `Request Title` declarations, and enforce literal/canonical variable ID and `idx` uniqueness across Approval variable collections.
+- Enforce one canonical variable namespace across Data List custom-form and Dashboard `filterVars[]` / `tempVars[]`, with source/dist incident regressions and cache-artifact coverage.
+
 ## 0.9.53
 
 - Normalize Approval workflow graph references to canonical matching `id` and lowercase `resourceid` across full-app materialization and standalone `.ywf` wrapper generation.
