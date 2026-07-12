@@ -240,6 +240,33 @@ try {
   expectFail("approval upgrade carrying unchanged installed Form report fails", "scripts/validate-yapk-upgrade-report-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--new-package", writeJson(tempDir, "approval-upgrade-carries-installed-report.json", approvalUpgradeCarriesReport), "--scope", approvalScopeFile], "UPGRADE_UNCHANGED_INSTALLED_FORM_REPORT_INCLUDED");
   cases.push("fail: approval upgrade cannot carry unchanged installed Form report");
 
+  const focusedCandidateFile = writeJson(tempDir, "approval-upgrade-focused-candidate.json", approvalUpgradeCarriesReport);
+  const focusedOutputFile = path.join(tempDir, "approval-upgrade-focused-output.json");
+  const focusedMaterialization = expectPass("focused upgrade materializer omits unchanged installed Form report", "scripts/materialize-yapk-focused-upgrade-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--candidate-package", focusedCandidateFile, "--scope", approvalScopeFile, "--out", focusedOutputFile]);
+  assert.equal(focusedMaterialization.omittedUnchangedFormReports.length, 1);
+  const focusedOutput = JSON.parse(fs.readFileSync(focusedOutputFile, "utf8"));
+  assert.deepEqual(focusedOutput.FormNewReports, []);
+  assert.equal(JSON.stringify(JSON.parse(focusedOutput.ListSet.LayoutView)).includes("Business Travel Request Report"), false);
+  expectPass("materialized focused upgrade passes report-scope validation", "scripts/validate-yapk-upgrade-report-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--new-package", focusedOutputFile, "--scope", approvalScopeFile]);
+  cases.push("pass: focused upgrade materializer omits unchanged installed Form report and matching navigation item");
+
+  const previousApprovalWrapperFile = writeJson(tempDir, "previous-approval-with-report.yapk", wrapper(previousApprovalWithReport));
+  const focusedCandidateWrapperFile = writeJson(tempDir, "approval-upgrade-focused-candidate.yapk", wrapper(approvalUpgradeCarriesReport));
+  const focusedOutputWrapperFile = path.join(tempDir, "approval-upgrade-focused-output.yapk");
+  expectPass("focused upgrade materializer rewrites YAPK and clears stale signature", "scripts/materialize-yapk-focused-upgrade-scope.mjs", ["--previous-package", previousApprovalWrapperFile, "--candidate-package", focusedCandidateWrapperFile, "--scope", approvalScopeFile, "--out", focusedOutputWrapperFile]);
+  const focusedWrapper = JSON.parse(fs.readFileSync(focusedOutputWrapperFile, "utf8"));
+  assert.equal(focusedWrapper.Sign, "");
+  expectPass("materialized YAPK focused upgrade passes report-scope validation", "scripts/validate-yapk-upgrade-report-scope.mjs", ["--previous-package", previousApprovalWrapperFile, "--new-package", focusedOutputWrapperFile, "--scope", approvalScopeFile]);
+  cases.push("pass: focused YAPK output clears stale signature before re-signing");
+
+  const changedReportCandidate = clone(approvalUpgradeCarriesReport);
+  changedReportCandidate.FormNewReports[0].Settings = { Changed: true };
+  const changedReportOutputFile = path.join(tempDir, "approval-upgrade-changed-report-output.json");
+  const changedReportMaterialization = expectPass("focused upgrade materializer preserves changed report for scope rejection", "scripts/materialize-yapk-focused-upgrade-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--candidate-package", writeJson(tempDir, "approval-upgrade-changed-report-candidate.json", changedReportCandidate), "--scope", approvalScopeFile, "--out", changedReportOutputFile]);
+  assert.equal(changedReportMaterialization.omittedUnchangedFormReports.length, 0);
+  expectFail("changed Form report remains blocked outside report scope", "scripts/validate-yapk-upgrade-report-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--new-package", changedReportOutputFile, "--scope", approvalScopeFile], "UPGRADE_UNCHANGED_INSTALLED_FORM_REPORT_INCLUDED|UPGRADE_FORM_REPORT_OUT_OF_SCOPE");
+  cases.push("fail: focused upgrade materializer does not hide changed Form report");
+
   const approvalUpgradeUnrelatedNavigation = clone(approvalUpgradeOmitsReport);
   approvalUpgradeUnrelatedNavigation.ListSet.LayoutView = JSON.stringify({ sort: [{ Type: "classes", Title: "Changed Travel", list: [] }] });
   expectFail("report omission cannot hide unrelated navigation changes", "scripts/validate-yapk-upgrade-scope.mjs", ["--previous-package", previousApprovalWithReportFile, "--new-package", writeJson(tempDir, "approval-report-omission-unrelated-navigation.json", approvalUpgradeUnrelatedNavigation), "--scope", approvalScopeFile], "UPGRADE_NAVIGATION_MUTATION_OUTSIDE_SCOPE");

@@ -8,6 +8,25 @@ function text(value) {
   return String(value == null ? "" : value).trim();
 }
 
+const SET_VARIABLE_HOST_TYPE_ALIASES = new Map([
+  ["approval", "approval"],
+  ["approval form", "approval"],
+  ["approval submission", "approval"],
+  ["approval submission form", "approval"],
+  ["approval task form", "approval"],
+  ["task form", "approval"],
+  ["data list form", "data-list-form"],
+  ["custom data list form", "data-list-form"],
+  ["document library form", "data-list-form"],
+  ["dashboard", "dashboard"],
+  ["dashboard page", "dashboard"],
+]);
+
+function normalizeSetVariableHostType(value) {
+  const key = text(value).toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
+  return key ? SET_VARIABLE_HOST_TYPE_ALIASES.get(key) || null : "";
+}
+
 function formActionAssignments(step) {
   const attrs = step && step.attrs || {};
   return attrs.setvar_multi === true
@@ -87,6 +106,7 @@ function buildWorkflowVariableSetting({ id, name, type, value, idx, editable = t
 module.exports = {
   formActionAssignments,
   buildWorkflowVariableSetting,
+  normalizeSetVariableHostType,
   validateFormActionSetVariableStep,
   variableAliases,
 };

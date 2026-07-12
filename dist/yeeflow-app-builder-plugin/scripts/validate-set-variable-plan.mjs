@@ -3,6 +3,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import setVariableContractUtils from "./lib/set-variable-contract-utils.cjs";
+
+const { normalizeSetVariableHostType } = setVariableContractUtils;
 
 export function validateSetVariablePlan(text) {
   const findings = [];
@@ -47,9 +50,12 @@ export function validateSetVariablePlan(text) {
         const kind = values[targetKind] || "";
         const rhs = values[rhsTokens] || "";
         const chained = nextAction >= 0 ? values[nextAction] || "" : "";
+        const rawHostType = hostType >= 0 ? values[hostType] || "" : "";
+        const canonicalHostType = normalizeSetVariableHostType(rawHostType);
+        if (!missing(rawHostType) && !canonicalHostType) findings.push(problem("FORM_ACTION_SETVAR_HOST_TYPE_UNSUPPORTED", "Host Type must resolve to Approval, Data List Form, or Dashboard using the shared Set Variable host contract.", row + 1));
         if (!missing(kind) && !/^none$/i.test(kind) && missing(values[target])) findings.push(problem("SET_VARIABLE_PLAN_TARGET_MISSING", "Form Action Set variable assignment must name an exact target ID.", row + 1));
         if (!missing(kind) && !/^none$/i.test(kind) && !isJsonArray(rhs)) findings.push(problem("SET_VARIABLE_PLAN_RHS_EXPRESSION_INVALID", "RHS Expression Tokens must be a valid JSON token array.", row + 1));
-        if (/dashboard|approval/i.test(values[hostType] || "") && /current\s*(?:data\s*)?list\s*field|list\s*field/i.test(kind)) findings.push(problem("SET_VARIABLE_PLAN_LIST_FIELD_TARGET_UNSUPPORTED_HOST", "Dashboard and Approval Form Actions cannot target current Data List fields.", row + 1));
+        if (["dashboard", "approval"].includes(canonicalHostType) && /current\s*(?:data\s*)?list\s*field|list\s*field/i.test(kind)) findings.push(problem("SET_VARIABLE_PLAN_LIST_FIELD_TARGET_UNSUPPORTED_HOST", "Dashboard and Approval Form Actions cannot target current Data List fields.", row + 1));
         if (!missing(chained) && !actionNames.has(norm(chained))) findings.push(problem("SET_VARIABLE_PLAN_CHAIN_TARGET_UNRESOLVED", "Start Another Action Target must resolve to an Action Name in the same planning table.", row + 1));
       }
       if (nodeType >= 0 && /set\s*variable|setvariabletask/i.test(values[nodeType] || "")) {

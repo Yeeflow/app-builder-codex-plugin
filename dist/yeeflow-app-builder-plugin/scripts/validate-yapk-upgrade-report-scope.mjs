@@ -32,14 +32,15 @@ export function validateYapkUpgradeReportScope({ previousPackage, newPackage, sc
     || asArray(scopeManifest.allowedChanges).map((item) => String(item).toLowerCase()).some((item) => item.includes("report"));
   const previousReports = collectReports(previous.decoded);
   const nextReports = collectReports(next.decoded);
-  const previousFormReportKeys = new Set(previousReports.filter((item) => item.type === "FormNewReports").map(reportIdentity));
+  const previousFormReportsByIdentity = new Map(previousReports.filter((item) => item.type === "FormNewReports").map((item) => [reportIdentity(item), item]));
 
   if (!reportsInScope) {
     for (const report of nextReports.filter((item) => item.type === "FormNewReports")) {
-      const existing = previousFormReportKeys.has(reportIdentity(report));
-      findings.push(finding("error", existing ? "UPGRADE_UNCHANGED_INSTALLED_FORM_REPORT_INCLUDED" : "UPGRADE_FORM_REPORT_OUT_OF_SCOPE", existing
+      const previousReport = previousFormReportsByIdentity.get(reportIdentity(report));
+      const unchanged = previousReport && stableJson(previousReport.raw) === stableJson(report.raw);
+      findings.push(finding("error", unchanged ? "UPGRADE_UNCHANGED_INSTALLED_FORM_REPORT_INCLUDED" : "UPGRADE_FORM_REPORT_OUT_OF_SCOPE", unchanged
         ? "An installed unchanged Form report must be omitted from a non-Report upgrade payload; carrying it can be interpreted as duplicate report creation by Version Management."
-        : "A new Form report cannot be included unless report changes are explicitly declared in upgrade scope.", { report: reportKey(report) }));
+        : "A new or changed Form report cannot be included unless report changes are explicitly declared in upgrade scope.", { report: reportKey(report) }));
     }
   }
 
@@ -76,7 +77,7 @@ export function validateYapkUpgradeReportScope({ previousPackage, newPackage, sc
 function collectReports(decoded) {
   const out = [];
   for (const [type, items] of [["FormNewReports", decoded?.FormNewReports], ["DataReports", decoded?.DataReports]]) {
-    asArray(items).forEach((item, index) => out.push({ type, index, title: String(item?.Title || item?.Name || item?.ReportName || ""), id: String(item?.ID || item?.ReportID || item?.LayoutID || "") }));
+    asArray(items).forEach((item, index) => out.push({ type, index, title: String(item?.Title || item?.Name || item?.ReportName || ""), id: String(item?.ID || item?.ReportID || item?.LayoutID || ""), raw: item }));
   }
   return out;
 }
@@ -87,6 +88,12 @@ function reportKey(item) {
 
 function reportIdentity(item) {
   return String(item.id || item.reportId || item.ID || item.title || item.name || item.Title || "").trim().toLowerCase();
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  if (isObject(value)) return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(",")}}`;
+  return JSON.stringify(value);
 }
 
 function readPackageLike(file) {

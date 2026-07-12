@@ -77,6 +77,22 @@ assert.equal(plannedApprovalForm.actions.find((action) => action.name === "Set R
 assert.equal(plannedApprovalForm.actions.find((action) => action.name === "Page Load").steps[2].type, "otheraction");
 assert.ok(plannedApprovalForm.tempVars.some((variable) => variable.id === "__temp_var_IsAdmin"));
 
+const approvalAliasForm = { id: "alias-submission", children: [], actions: [], formAction: {}, tempVars: [] };
+materializePlannedFormActionSetVariables(approvalAliasForm, {
+  hostResource: "Alias Approval",
+  hostPage: "Submission form",
+  hostType: "Approval",
+  records: [{ hostResource: "Alias Approval", hostPage: "Submission form", hostType: "Approval Submission", actionName: "Page Load", stepOrder: 1, stepName: "Set context", trigger: "Page Load", targetKind: "Temp variable", targetId: "var_Context", targetValueType: "text", rhsTokens: '[{"type":"str","value":"ready"}]' }],
+});
+assert.equal(approvalAliasForm.actions.length, 1);
+assert.equal(approvalAliasForm.formAction.onLoad, approvalAliasForm.actions[0].id);
+assert.throws(() => materializePlannedFormActionSetVariables({ children: [], actions: [], formAction: {}, tempVars: [] }, {
+  hostResource: "Mismatched Host",
+  hostPage: "Submission form",
+  hostType: "Approval",
+  records: [{ hostResource: "Mismatched Host", hostPage: "Submission form", hostType: "Dashboard", actionName: "Page Load", stepOrder: 1, trigger: "Page Load", targetKind: "Temp variable", targetId: "var_Context", targetValueType: "text", rhsTokens: '[{"type":"str","value":"ready"}]' }],
+}), /FORM_ACTION_SETVAR_HOST_TYPE_MISMATCH/);
+
 const listFieldControl = { id: "travel-type-control", binding: "Text1", attrs: {} };
 const plannedDataListForm = { id: "allowance-form", children: [listFieldControl], actions: [], formAction: {}, tempVars: [] };
 materializePlannedFormActionSetVariables(plannedDataListForm, {
@@ -188,6 +204,16 @@ for (const code of ["SET_VARIABLE_PLAN_RHS_EXPRESSION_INVALID", "SET_VARIABLE_PL
   assert.ok(invalidDetailedReport.findings.some((finding) => finding.code === code), `Expected ${code}`);
 }
 
+const unsupportedHostPlan = invalidDetailedPlan.replace("| Dashboard | Dashboard | Dashboard |", "| Page | Page | Portal | ");
+assert.ok(validateSetVariablePlan(unsupportedHostPlan).findings.some((finding) => finding.code === "FORM_ACTION_SETVAR_HOST_TYPE_UNSUPPORTED"));
+
+const approvalAliasPlan = invalidDetailedPlan
+  .replace("| Dashboard | Dashboard | Dashboard |", "| Travel Approval | Submission form | Approval Form |")
+  .replace("| Current list field | Decimal1 |", "| Temp variable | var_Status |")
+  .replace("not-json", '[{"type":"str","value":"Ready"}]')
+  .replace("Missing action", "None");
+assert.equal(validateSetVariablePlan(approvalAliasPlan).findings.some((finding) => finding.code === "FORM_ACTION_SETVAR_HOST_TYPE_UNSUPPORTED"), false);
+
 const validWorkflow = [{ id: "set-1", resourceid: "set-1", stencil: { id: "SetVariableTask" }, properties: { formtype: "current", data: null, variablesetting: [setting] } }];
 assert.equal(validateWorkflowActionShapes(validWorkflow, { strict: true }).issues.filter((item) => item.level === "error").length, 0);
 const dataListWorkflowSetVariable = [{
@@ -225,7 +251,7 @@ for (const code of [
   "DATALIST_WORKFLOW_CURRENT_LIST_FIELD_UNRESOLVED",
 ]) assert.match(packageValidator, new RegExp(code));
 
-console.log(JSON.stringify({ status: "pass", cases: 44, proof: "export-proven-validator-backed" }, null, 2));
+console.log(JSON.stringify({ status: "pass", cases: 48, proof: "export-proven-validator-backed" }, null, 2));
 
 function expectCode(step, code, options) {
   assert.ok(validateFormActionSetVariableStep(step, options).some((finding) => finding.code === code), `Expected ${code}`);

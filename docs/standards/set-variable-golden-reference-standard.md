@@ -70,6 +70,16 @@ VariableId :: variableType :: Business Name :: JSON expression token array ;; ne
 
 Never materialize an empty placeholder assignment when the plan omits exact assignments. Emit an empty `variablesetting[]` and fail validation so the plan can be corrected.
 
+Form Action Host Type is a shared planning/materialization contract, not free text. Normalize these aliases before matching records:
+
+- `Approval`, `Approval Form`, `Approval Submission`, `Approval Submission Form`, `Approval Task Form`, and `Task Form` -> `approval`.
+- `Data List Form`, `Custom Data List Form`, and `Document Library Form` -> `data-list-form`.
+- `Dashboard` and `Dashboard Page` -> `dashboard`.
+
+Unknown Host Type values fail with `FORM_ACTION_SETVAR_HOST_TYPE_UNSUPPORTED`. When the same Host Resource and Host Page resolve to a different canonical host than the shared builder call, fail with `FORM_ACTION_SETVAR_HOST_TYPE_MISMATCH`; never silently skip a planned Set Variable action.
+
+`SetVariableTask` is a system workflow action. It must carry valid `variablesetting[]`, but it must not be given fake assignee or task-page metadata. Approval assignee and `taskurl` gates apply only to human task stencils such as `MultiAssignmentTask` and `CandidateTask`.
+
 Full-app Data List Workflow and Scheduled Workflow resource envelopes remain explicitly blocked by their existing materializer-not-implemented gates. Their Set Variable schema is export-proven and validator-backed, but the generator must not claim those workflow resources were materialized until the host workflow envelope/registration implementation is complete.
 
 ## Generated-Final Hard Gates
@@ -92,4 +102,6 @@ Full-app Data List Workflow and Scheduled Workflow resource envelopes remain exp
 - `SET_VARIABLE_PLAN_RHS_EXPRESSION_INVALID`
 - `SET_VARIABLE_PLAN_LIST_FIELD_TARGET_UNSUPPORTED_HOST`
 - `SET_VARIABLE_PLAN_CHAIN_TARGET_UNRESOLVED`
+- `FORM_ACTION_SETVAR_HOST_TYPE_UNSUPPORTED`
+- `FORM_ACTION_SETVAR_HOST_TYPE_MISMATCH`
 - existing Workflow Set Variable assignment, expression-array, declaration, and type gates

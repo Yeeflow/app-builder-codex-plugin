@@ -15,7 +15,7 @@ const DASHBOARD_ID = "2068704921732997204";
 const SUMMARY_ID = "43c38762-5133-430f-af09-faeec1be3bc0";
 const TENANT_ID = "1900000000000101";
 
-function defResource({ positions = true, assignee = true } = {}) {
+function defResource({ positions = true, assignee = true, setVariableTask = false } = {}) {
   const pageRequest = "page-request";
   const pageTask = "page-task";
   const def = {
@@ -65,6 +65,12 @@ function defResource({ positions = true, assignee = true } = {}) {
       }),
       shape("end-approved", "EndNoneEvent", { incoming: [{ resourceid: "flow-task-approved" }], positions }),
       shape("end-rejected", "EndRejectEvent", { incoming: [{ resourceid: "flow-task-rejected" }], positions }),
+      ...(setVariableTask ? [shape("set-variable", "SetVariableTask", {
+        incoming: [],
+        outgoing: [],
+        positions,
+        properties: { variablesetting: [{ idx: "Status", id: "Status", name: "Status", type: "text", editable: true, value: [{ type: "str", value: "Ready" }] }] },
+      })] : []),
       flow("flow-start-task", "start", "task", positions),
       flow("flow-task-approved", "task", "end-approved", positions, "Approved"),
       flow("flow-task-rejected", "task", "end-rejected", positions, "Rejected"),
@@ -234,6 +240,9 @@ const cases = [];
 try {
   expectPass("export-style approval DefResource passes", runValidator(writePackage(tempDir, "valid", decoded())));
   cases.push({ case: "pass: export-style approval DefResource and visual-safe dashboard", status: "pass" });
+
+  expectPass("SetVariableTask does not require assignee or task URL", runValidator(writePackage(tempDir, "set-variable-task", decoded({ approval: { setVariableTask: true } }))));
+  cases.push({ case: "pass: SetVariableTask is not classified as a human approval task", status: "pass" });
 
   expectCode("minimal approval DefResource fails", runValidator(writePackage(tempDir, "minimal-defresource", decoded({ decoded: { Forms: [{ Key: FORM_KEY, Name: "Asset Loan Request", DefResource: Buffer.from("{}").toString("base64") }] } }))), "APPROVAL_DEFRESOURCE_PREFIX_MISSING");
   cases.push({ case: "fail: minimal approval DefResource", status: "pass" });
