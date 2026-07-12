@@ -12,6 +12,10 @@ import { readDecodedYapk } from "./lib/yapk-decode-utils.mjs";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MATERIALIZER = path.join(ROOT, "scripts/materialize-full-app-generated-final.mjs");
 const VALIDATOR = path.join(ROOT, "scripts/validate-approval-workflow-publish-readiness.mjs");
+const WRAPPER_BUILDER = fs.existsSync(path.join(ROOT, "build-ywf-wrapper.js"))
+  ? path.join(ROOT, "build-ywf-wrapper.js")
+  : path.join(ROOT, "scripts/build-ywf-wrapper.js");
+const SOURCE_ID_MISSING_FIXTURE = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/reference/approval-workflow-sequenceflow-endpoint-id-missing.invalid.fixture"), "utf8"));
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "approval-workflow-publish-"));
 const cases = [];
 
@@ -21,6 +25,13 @@ try {
   cases.push({ case: "pass: materialized package workflow is publish-ready", status: "pass" });
 
   const materializedDef = decodeFirstApprovalDef(packagePath);
+  for (const flow of materializedDef.childshapes.filter((shape) => shape?.stencil?.id === "SequenceFlow")) {
+    for (const ref of [flow.source, flow.target, ...(flow.incoming || []), ...(flow.outgoing || [])]) {
+      assert.deepEqual(Object.keys(ref).sort(), ["id", "resourceid"], "materializer must emit canonical graph references without resourceId aliases");
+      assert.equal(ref.id, ref.resourceid, "materialized graph reference id and resourceid must match");
+    }
+  }
+  cases.push({ case: "pass: materializer emits canonical id + resourceid graph references", status: "pass" });
   const materializedTaskNames = materializedDef.childshapes
     .filter((shape) => shape?.stencil?.id === "MultiAssignmentTask")
     .map((shape) => shape?.properties?.name);
@@ -63,6 +74,51 @@ try {
   cases.push({ case: "pass: package without Approval workflows is not blocked", status: "pass" });
 
   const validDef = decodeFirstApprovalDef(packagePath);
+  expectCode("SequenceFlow source missing id fails with the real incident code", mutateResource(validDef, (def) => {
+    const flow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow");
+    flow.source = structuredClone(SOURCE_ID_MISSING_FIXTURE.sequenceFlow.source);
+  }), SOURCE_ID_MISSING_FIXTURE.expectedError);
+  cases.push({ case: "fail: sanitized real incident SequenceFlow source has resourceid/resourceId but no id", status: "pass" });
+
+  const malformedDef = structuredClone(validDef);
+  malformedDef.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow").source = structuredClone(SOURCE_ID_MISSING_FIXTURE.sequenceFlow.source);
+  const malformedDefPath = path.join(tempDir, "wrapper-malformed-source-def.json");
+  fs.writeFileSync(malformedDefPath, `${JSON.stringify(malformedDef, null, 2)}\n`);
+  const normalizedWrapperPath = path.join(tempDir, "wrapper-normalized-source.ywf");
+  const wrapperResult = spawnSync(process.execPath, [
+    WRAPPER_BUILDER,
+    malformedDefPath,
+    normalizedWrapperPath,
+    "--flow-name", malformedDef.name,
+    "--flow-key", malformedDef.defkey,
+    "--workflow-type", String(malformedDef.workflowType),
+  ], { cwd: ROOT, encoding: "utf8" });
+  assert.equal(wrapperResult.status, 0, `standalone wrapper builder must normalize malformed graph references\nstdout=${wrapperResult.stdout}\nstderr=${wrapperResult.stderr}`);
+  const normalizedWrapper = JSON.parse(fs.readFileSync(normalizedWrapperPath, "utf8"));
+  const normalizedDef = JSON.parse(Buffer.from(normalizedWrapper.Def, "base64").toString("utf8"));
+  const normalizedSource = normalizedDef.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow").source;
+  assert.deepEqual(Object.keys(normalizedSource).sort(), ["id", "resourceid"]);
+  assert.equal(normalizedSource.id, normalizedSource.resourceid);
+  cases.push({ case: "pass: standalone YWF wrapper builder repairs the sanitized source-id incident shape", status: "pass" });
+
+  expectCode("SequenceFlow target id/resourceid mismatch fails", mutateResource(validDef, (def) => {
+    const flow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow");
+    flow.target.resourceid = "different-target-id";
+  }), "APPROVAL_WORKFLOW_SEQUENCEFLOW_TARGET_IDENTITY_MISMATCH");
+  cases.push({ case: "fail: SequenceFlow target id and resourceid differ", status: "pass" });
+
+  expectCode("SequenceFlow incoming must match source", mutateResource(validDef, (def) => {
+    const flow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow");
+    flow.incoming = [{ id: flow.target.id, resourceid: flow.target.id }];
+  }), "APPROVAL_WORKFLOW_SEQUENCEFLOW_INCOMING_ENDPOINT_MISMATCH");
+  cases.push({ case: "fail: SequenceFlow incoming node does not match source", status: "pass" });
+
+  expectCode("SequenceFlow outgoing must match target", mutateResource(validDef, (def) => {
+    const flow = def.childshapes.find((shape) => shape?.stencil?.id === "SequenceFlow");
+    flow.outgoing = [{ id: flow.source.id, resourceid: flow.source.id }];
+  }), "APPROVAL_WORKFLOW_SEQUENCEFLOW_OUTGOING_ENDPOINT_MISMATCH");
+  cases.push({ case: "fail: SequenceFlow outgoing node does not match target", status: "pass" });
+
   expectCode("missing flowPage fails", mutateResource(validDef, (def) => {
     delete def.flowPage;
   }), "APPROVAL_WORKFLOW_FLOWPAGE_MISSING");

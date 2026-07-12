@@ -11,6 +11,8 @@ Planning placeholders are absence decisions, never resource names. Before alloca
 
 When a full application includes Approval workflows, use the same shared workflow graph generation path as standalone `.ywf` output and apply `docs/standards/approval-workflow-designer-editability-standard.md`. Do not materialize position-only nodes, undeclared QueryData outputs, empty ContentList field mappings, or Update/Edit actions with add semantics. The generated-final package is not signing-ready until `scripts/validate-approval-workflow-publish-readiness.mjs` passes for every embedded Approval DefResource.
 
+Before encoding any standalone or packaged Approval workflow, normalize every graph reference to canonical matching `id` + lowercase `resourceid`. This applies to SequenceFlow source/target/incoming/outgoing and each node incoming/outgoing reference. Do not preserve or generate camel-case `resourceId` aliases, and never treat a graph reconstructed indirectly from neighboring refs as Designer-ready.
+
 ## Functional Specification And App Plan Stage Gates
 
 This skill is the top-level application-building controller. For every new application build, Stage 1 is a standardized Functional Specification from the user's input with `docs/standards/functional-specification-standard-template.md`, and Stage 2 is a standardized Yeeflow App Plan from the reviewed Functional Specification with `docs/standards/app-plan-standard-template.md`.

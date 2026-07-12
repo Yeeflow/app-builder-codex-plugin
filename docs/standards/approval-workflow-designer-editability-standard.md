@@ -26,6 +26,32 @@ Default export-observed sizes used by the shared builder are:
 
 Missing bounds are a Designer hit-testing defect: the canvas may render, while nodes cannot be selected or configured and adjacent nodes cannot be added reliably.
 
+## SequenceFlow Reference Shape
+
+Every graph reference must use the canonical export shape:
+
+```json
+{ "id": "<shape-id>", "resourceid": "<shape-id>" }
+```
+
+For each `SequenceFlow`:
+
+- `source` and `target` must each contain matching `id` and `resourceid`;
+- `incoming[0]` must be the same canonical node reference as `source`;
+- `outgoing[0]` must be the same canonical node reference as `target`;
+- the source node must include the flow in its canonical `outgoing[]`;
+- the target node must include the flow in its canonical `incoming[]`;
+- camel-case `resourceId` is not a substitute for a missing `id` or lowercase `resourceid`.
+
+The shared generator must pass all graph shapes through
+`normalizeApprovalWorkflowGraphReferences()` before DefResource encoding. A graph that can be
+reconstructed indirectly from node `outgoing[]` is still broken when the SequenceFlow source
+endpoint itself is not canonical; Designer may render only some nodes, omit connectors, and make
+the canvas non-editable.
+
+The standalone `build-ywf-wrapper.js` entrypoint must run the same normalizer before Base64
+encoding. Standalone wrapper generation is not allowed to preserve malformed input references.
+
 ## Query Data Outputs
 
 A `QueryData` node that writes results to workflow variables must declare those variables in `DefResource.variables.basic` before publish:
@@ -70,6 +96,14 @@ Generated-final blockers include:
 - `APPROVAL_WORKFLOW_NODE_BOUNDS_MISSING`
 - `APPROVAL_WORKFLOW_NODE_BOUNDS_POSITION_MISMATCH`
 - `APPROVAL_WORKFLOW_GRAPHPOSITION_BOUNDS_INCOMPLETE`
+- `APPROVAL_WORKFLOW_SEQUENCEFLOW_SOURCE_ID_MISSING`
+- `APPROVAL_WORKFLOW_SEQUENCEFLOW_SOURCE_IDENTITY_MISMATCH`
+- `APPROVAL_WORKFLOW_SEQUENCEFLOW_TARGET_ID_MISSING`
+- `APPROVAL_WORKFLOW_SEQUENCEFLOW_TARGET_IDENTITY_MISMATCH`
+- `APPROVAL_WORKFLOW_SEQUENCEFLOW_INCOMING_REF_INVALID`
+- `APPROVAL_WORKFLOW_SEQUENCEFLOW_OUTGOING_REF_INVALID`
+- `APPROVAL_WORKFLOW_SEQUENCEFLOW_INCOMING_ENDPOINT_MISMATCH`
+- `APPROVAL_WORKFLOW_SEQUENCEFLOW_OUTGOING_ENDPOINT_MISMATCH`
 - `QUERYDATA_RESULT_VARIABLE_NOT_FOUND`
 - `QUERYDATA_COUNT_VARIABLE_NOT_FOUND`
 - `QUERYDATA_RESULT_FIELDS_EMPTY`

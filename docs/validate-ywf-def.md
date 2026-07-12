@@ -73,6 +73,8 @@ Workflow designer layout readiness includes:
 - Every node `incoming`/`outgoing` SequenceFlow reference includes matching `id` and `resourceid`.
 - Every `SequenceFlow` has `id === resourceid`.
 - Every `SequenceFlow` has explicit `source` and `target` references to existing non-SequenceFlow nodes.
+- Every `SequenceFlow.source`, `target`, `incoming[0]`, and `outgoing[0]` uses canonical matching `id` + lowercase `resourceid`; camel-case `resourceId` cannot replace either field.
+- Every `SequenceFlow.incoming[0]` matches its source node and every `SequenceFlow.outgoing[0]` matches its target node.
 - Every `SequenceFlow.source` matches the source inferred from node `outgoing`.
 - Every `SequenceFlow.target` node includes the flow in its `incoming`.
 - Workflow Condition editor variable rows with `left.type = 1` and `left.value.exprType = "variable"` resolve the selected workflow variable, use the correct Condition editor `group`, use the matching operator family (`s.`, `n.`, `b.`, `dt.`, or general null checks), and use either `right.type = 0` for compatible direct literal values or `right.type = 2` for non-empty Expression editor token arrays.

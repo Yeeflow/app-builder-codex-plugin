@@ -4,6 +4,20 @@ const fs = require("fs");
 const path = require("path");
 const util = require("util");
 
+function loadGraphReferenceUtils() {
+  const candidates = [
+    path.resolve(__dirname, "scripts/lib/approval-workflow-graph-reference-utils.cjs"),
+    path.resolve(__dirname, "lib/approval-workflow-graph-reference-utils.cjs"),
+    path.resolve(__dirname, "../../../scripts/lib/approval-workflow-graph-reference-utils.cjs"),
+    path.resolve(__dirname, "../../../../scripts/lib/approval-workflow-graph-reference-utils.cjs"),
+  ];
+  const modulePath = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!modulePath) throw new Error("approval-workflow-graph-reference-utils.cjs is missing from the plugin payload");
+  return require(modulePath);
+}
+
+const { normalizeApprovalWorkflowGraphReferences } = loadGraphReferenceUtils();
+
 const PLACEHOLDER_RE = /^__.*REQUIRED.*__$/;
 
 function usage(exitCode = 1) {
@@ -153,8 +167,13 @@ function main() {
     printReport(report, 1);
   }
 
-  const def = readJson(args.inputDef, "decoded Def", report.errors);
+  const sourceDef = readJson(args.inputDef, "decoded Def", report.errors);
   if (report.errors.length) printReport(report, 1);
+  const def = {
+    ...sourceDef,
+    childshapes: normalizeApprovalWorkflowGraphReferences(sourceDef.childshapes),
+  };
+  report.roundTrip.graphReferencesNormalized = JSON.stringify(def.childshapes) !== JSON.stringify(sourceDef.childshapes);
 
   validateBeforeWrite(def, args, report);
   if (report.errors.length) printReport(report, 1);
